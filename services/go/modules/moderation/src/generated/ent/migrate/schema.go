@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -301,6 +302,141 @@ var (
 			},
 		},
 	}
+	// LegalReportsColumns holds the columns for the "legal_reports" table.
+	LegalReportsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "incident_id", Type: field.TypeUUID},
+		{Name: "live_id", Type: field.TypeString, Size: 128},
+		{Name: "host_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "category", Type: field.TypeString, Size: 40},
+		{Name: "provider", Type: field.TypeString, Size: 60, Default: ""},
+		{Name: "match_reference", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "evidence_key", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending_legal_review", "submitted", "closed"}, Default: "pending_legal_review"},
+		{Name: "external_reference", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "submitted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// LegalReportsTable holds the schema information for the "legal_reports" table.
+	LegalReportsTable = &schema.Table{
+		Name:       "legal_reports",
+		Columns:    LegalReportsColumns,
+		PrimaryKey: []*schema.Column{LegalReportsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "legalreport_incident_id",
+				Unique:  true,
+				Columns: []*schema.Column{LegalReportsColumns[2]},
+			},
+			{
+				Name:    "legalreport_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LegalReportsColumns[9], LegalReportsColumns[1]},
+			},
+		},
+	}
+	// LiveSafetyIncidentsColumns holds the columns for the "live_safety_incidents" table.
+	LiveSafetyIncidentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "live_id", Type: field.TypeString, Size: 128},
+		{Name: "host_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "closed"}, Default: "open"},
+		{Name: "priority", Type: field.TypeEnum, Enums: []string{"low", "normal", "high", "urgent"}, Default: "normal"},
+		{Name: "sla_due_at", Type: field.TypeTime},
+		{Name: "hold_active", Type: field.TypeBool, Default: false},
+		{Name: "hold_category", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "hold_reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "hold_source", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "hold_started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "top_category", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "top_confidence", Type: field.TypeFloat64, Default: 0},
+		{Name: "warning_count", Type: field.TypeInt, Default: 0},
+		{Name: "last_warned_at", Type: field.TypeTime, Nullable: true},
+		{Name: "report_count", Type: field.TypeInt, Default: 0},
+		{Name: "last_reported_at", Type: field.TypeTime, Nullable: true},
+		{Name: "sampling_boost_until", Type: field.TypeTime, Nullable: true},
+		{Name: "hash_match", Type: field.TypeBool, Default: false},
+		{Name: "appealed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "appeal_message", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "live_ended_at", Type: field.TypeTime, Nullable: true},
+		{Name: "resolution", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "decision", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// LiveSafetyIncidentsTable holds the schema information for the "live_safety_incidents" table.
+	LiveSafetyIncidentsTable = &schema.Table{
+		Name:       "live_safety_incidents",
+		Columns:    LiveSafetyIncidentsColumns,
+		PrimaryKey: []*schema.Column{LiveSafetyIncidentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "livesafetyincident_open_live_id",
+				Unique:  true,
+				Columns: []*schema.Column{LiveSafetyIncidentsColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'open'",
+				},
+			},
+			{
+				Name:    "livesafetyincident_status_priority_sla_due_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSafetyIncidentsColumns[4], LiveSafetyIncidentsColumns[5], LiveSafetyIncidentsColumns[6]},
+			},
+			{
+				Name:    "livesafetyincident_host_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSafetyIncidentsColumns[3], LiveSafetyIncidentsColumns[1]},
+			},
+		},
+	}
+	// LiveSafetySignalsColumns holds the columns for the "live_safety_signals" table.
+	LiveSafetySignalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "incident_id", Type: field.TypeUUID},
+		{Name: "live_id", Type: field.TypeString, Size: 128},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"frame", "transcript", "report"}},
+		{Name: "source_key", Type: field.TypeString, Size: 160},
+		{Name: "frame_ref", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "captured_at", Type: field.TypeTime, Nullable: true},
+		{Name: "labels", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "categories", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "confidence", Type: field.TypeFloat64, Default: 0},
+		{Name: "suggested_action", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "model_version", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "action_taken", Type: field.TypeString, Size: 20, Default: "none"},
+		{Name: "transcript_snippet", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "reason", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "details", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "reporter_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "offset_seconds", Type: field.TypeFloat64, Nullable: true},
+		{Name: "hash_match", Type: field.TypeBool, Default: false},
+	}
+	// LiveSafetySignalsTable holds the schema information for the "live_safety_signals" table.
+	LiveSafetySignalsTable = &schema.Table{
+		Name:       "live_safety_signals",
+		Columns:    LiveSafetySignalsColumns,
+		PrimaryKey: []*schema.Column{LiveSafetySignalsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "livesafetysignal_source_key",
+				Unique:  true,
+				Columns: []*schema.Column{LiveSafetySignalsColumns[5]},
+			},
+			{
+				Name:    "livesafetysignal_incident_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSafetySignalsColumns[2], LiveSafetySignalsColumns[1]},
+			},
+			{
+				Name:    "livesafetysignal_live_id_kind_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSafetySignalsColumns[3], LiveSafetySignalsColumns[4], LiveSafetySignalsColumns[1]},
+			},
+		},
+	}
 	// OutboxEventsColumns holds the columns for the "outbox_events" table.
 	OutboxEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -414,6 +550,9 @@ var (
 		CounterNoticesTable,
 		EvidenceRetentionSettingsTable,
 		IPClaimsTable,
+		LegalReportsTable,
+		LiveSafetyIncidentsTable,
+		LiveSafetySignalsTable,
 		OutboxEventsTable,
 		StrikesTable,
 		SuspensionCasesTable,

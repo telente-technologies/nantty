@@ -92,6 +92,42 @@ func (f IpClaimFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IpClaimMutation", m)
 }
 
+// The LegalReportFunc type is an adapter to allow the use of ordinary
+// function as LegalReport mutator.
+type LegalReportFunc func(context.Context, *ent.LegalReportMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LegalReportFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LegalReportMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LegalReportMutation", m)
+}
+
+// The LiveSafetyIncidentFunc type is an adapter to allow the use of ordinary
+// function as LiveSafetyIncident mutator.
+type LiveSafetyIncidentFunc func(context.Context, *ent.LiveSafetyIncidentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveSafetyIncidentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveSafetyIncidentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveSafetyIncidentMutation", m)
+}
+
+// The LiveSafetySignalFunc type is an adapter to allow the use of ordinary
+// function as LiveSafetySignal mutator.
+type LiveSafetySignalFunc func(context.Context, *ent.LiveSafetySignalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveSafetySignalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveSafetySignalMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveSafetySignalMutation", m)
+}
+
 // The OutboxEventFunc type is an adapter to allow the use of ordinary
 // function as OutboxEvent mutator.
 type OutboxEventFunc func(context.Context, *ent.OutboxEventMutation) (ent.Value, error)

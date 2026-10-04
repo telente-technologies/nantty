@@ -18,6 +18,9 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/counternotice"
 	"zudomart/modules/moderation/src/generated/ent/evidenceretentionsetting"
 	"zudomart/modules/moderation/src/generated/ent/ipclaim"
+	"zudomart/modules/moderation/src/generated/ent/legalreport"
+	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
+	"zudomart/modules/moderation/src/generated/ent/livesafetysignal"
 	"zudomart/modules/moderation/src/generated/ent/outboxevent"
 	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/generated/ent/suspensioncase"
@@ -49,6 +52,12 @@ type Client struct {
 	EvidenceRetentionSetting *EvidenceRetentionSettingClient
 	// IpClaim is the client for interacting with the IpClaim builders.
 	IpClaim *IpClaimClient
+	// LegalReport is the client for interacting with the LegalReport builders.
+	LegalReport *LegalReportClient
+	// LiveSafetyIncident is the client for interacting with the LiveSafetyIncident builders.
+	LiveSafetyIncident *LiveSafetyIncidentClient
+	// LiveSafetySignal is the client for interacting with the LiveSafetySignal builders.
+	LiveSafetySignal *LiveSafetySignalClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
 	// Strike is the client for interacting with the Strike builders.
@@ -73,6 +82,9 @@ func (c *Client) init() {
 	c.CounterNotice = NewCounterNoticeClient(c.config)
 	c.EvidenceRetentionSetting = NewEvidenceRetentionSettingClient(c.config)
 	c.IpClaim = NewIpClaimClient(c.config)
+	c.LegalReport = NewLegalReportClient(c.config)
+	c.LiveSafetyIncident = NewLiveSafetyIncidentClient(c.config)
+	c.LiveSafetySignal = NewLiveSafetySignalClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.Strike = NewStrikeClient(c.config)
 	c.SuspensionCase = NewSuspensionCaseClient(c.config)
@@ -175,6 +187,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		CounterNotice:            NewCounterNoticeClient(cfg),
 		EvidenceRetentionSetting: NewEvidenceRetentionSettingClient(cfg),
 		IpClaim:                  NewIpClaimClient(cfg),
+		LegalReport:              NewLegalReportClient(cfg),
+		LiveSafetyIncident:       NewLiveSafetyIncidentClient(cfg),
+		LiveSafetySignal:         NewLiveSafetySignalClient(cfg),
 		OutboxEvent:              NewOutboxEventClient(cfg),
 		Strike:                   NewStrikeClient(cfg),
 		SuspensionCase:           NewSuspensionCaseClient(cfg),
@@ -204,6 +219,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		CounterNotice:            NewCounterNoticeClient(cfg),
 		EvidenceRetentionSetting: NewEvidenceRetentionSettingClient(cfg),
 		IpClaim:                  NewIpClaimClient(cfg),
+		LegalReport:              NewLegalReportClient(cfg),
+		LiveSafetyIncident:       NewLiveSafetyIncidentClient(cfg),
+		LiveSafetySignal:         NewLiveSafetySignalClient(cfg),
 		OutboxEvent:              NewOutboxEventClient(cfg),
 		Strike:                   NewStrikeClient(cfg),
 		SuspensionCase:           NewSuspensionCaseClient(cfg),
@@ -237,8 +255,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.ChatReport, c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
-		c.CounterNotice, c.EvidenceRetentionSetting, c.IpClaim, c.OutboxEvent,
-		c.Strike, c.SuspensionCase,
+		c.CounterNotice, c.EvidenceRetentionSetting, c.IpClaim, c.LegalReport,
+		c.LiveSafetyIncident, c.LiveSafetySignal, c.OutboxEvent, c.Strike,
+		c.SuspensionCase,
 	} {
 		n.Use(hooks...)
 	}
@@ -249,8 +268,9 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.ChatReport, c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
-		c.CounterNotice, c.EvidenceRetentionSetting, c.IpClaim, c.OutboxEvent,
-		c.Strike, c.SuspensionCase,
+		c.CounterNotice, c.EvidenceRetentionSetting, c.IpClaim, c.LegalReport,
+		c.LiveSafetyIncident, c.LiveSafetySignal, c.OutboxEvent, c.Strike,
+		c.SuspensionCase,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -273,6 +293,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.EvidenceRetentionSetting.mutate(ctx, m)
 	case *IpClaimMutation:
 		return c.IpClaim.mutate(ctx, m)
+	case *LegalReportMutation:
+		return c.LegalReport.mutate(ctx, m)
+	case *LiveSafetyIncidentMutation:
+		return c.LiveSafetyIncident.mutate(ctx, m)
+	case *LiveSafetySignalMutation:
+		return c.LiveSafetySignal.mutate(ctx, m)
 	case *OutboxEventMutation:
 		return c.OutboxEvent.mutate(ctx, m)
 	case *StrikeMutation:
@@ -1215,6 +1241,405 @@ func (c *IpClaimClient) mutate(ctx context.Context, m *IpClaimMutation) (Value, 
 	}
 }
 
+// LegalReportClient is a client for the LegalReport schema.
+type LegalReportClient struct {
+	config
+}
+
+// NewLegalReportClient returns a client for the LegalReport from the given config.
+func NewLegalReportClient(c config) *LegalReportClient {
+	return &LegalReportClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `legalreport.Hooks(f(g(h())))`.
+func (c *LegalReportClient) Use(hooks ...Hook) {
+	c.hooks.LegalReport = append(c.hooks.LegalReport, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `legalreport.Intercept(f(g(h())))`.
+func (c *LegalReportClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LegalReport = append(c.inters.LegalReport, interceptors...)
+}
+
+// Create returns a builder for creating a LegalReport entity.
+func (c *LegalReportClient) Create() *LegalReportCreate {
+	mutation := newLegalReportMutation(c.config, OpCreate)
+	return &LegalReportCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LegalReport entities.
+func (c *LegalReportClient) CreateBulk(builders ...*LegalReportCreate) *LegalReportCreateBulk {
+	return &LegalReportCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LegalReportClient) MapCreateBulk(slice any, setFunc func(*LegalReportCreate, int)) *LegalReportCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LegalReportCreateBulk{err: fmt.Errorf("calling to LegalReportClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LegalReportCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LegalReportCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LegalReport.
+func (c *LegalReportClient) Update() *LegalReportUpdate {
+	mutation := newLegalReportMutation(c.config, OpUpdate)
+	return &LegalReportUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LegalReportClient) UpdateOne(_m *LegalReport) *LegalReportUpdateOne {
+	mutation := newLegalReportMutation(c.config, OpUpdateOne, withLegalReport(_m))
+	return &LegalReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LegalReportClient) UpdateOneID(id uuid.UUID) *LegalReportUpdateOne {
+	mutation := newLegalReportMutation(c.config, OpUpdateOne, withLegalReportID(id))
+	return &LegalReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LegalReport.
+func (c *LegalReportClient) Delete() *LegalReportDelete {
+	mutation := newLegalReportMutation(c.config, OpDelete)
+	return &LegalReportDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LegalReportClient) DeleteOne(_m *LegalReport) *LegalReportDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LegalReportClient) DeleteOneID(id uuid.UUID) *LegalReportDeleteOne {
+	builder := c.Delete().Where(legalreport.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LegalReportDeleteOne{builder}
+}
+
+// Query returns a query builder for LegalReport.
+func (c *LegalReportClient) Query() *LegalReportQuery {
+	return &LegalReportQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLegalReport},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LegalReport entity by its id.
+func (c *LegalReportClient) Get(ctx context.Context, id uuid.UUID) (*LegalReport, error) {
+	return c.Query().Where(legalreport.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LegalReportClient) GetX(ctx context.Context, id uuid.UUID) *LegalReport {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LegalReportClient) Hooks() []Hook {
+	return c.hooks.LegalReport
+}
+
+// Interceptors returns the client interceptors.
+func (c *LegalReportClient) Interceptors() []Interceptor {
+	return c.inters.LegalReport
+}
+
+func (c *LegalReportClient) mutate(ctx context.Context, m *LegalReportMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LegalReportCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LegalReportUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LegalReportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LegalReportDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LegalReport mutation op: %q", m.Op())
+	}
+}
+
+// LiveSafetyIncidentClient is a client for the LiveSafetyIncident schema.
+type LiveSafetyIncidentClient struct {
+	config
+}
+
+// NewLiveSafetyIncidentClient returns a client for the LiveSafetyIncident from the given config.
+func NewLiveSafetyIncidentClient(c config) *LiveSafetyIncidentClient {
+	return &LiveSafetyIncidentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `livesafetyincident.Hooks(f(g(h())))`.
+func (c *LiveSafetyIncidentClient) Use(hooks ...Hook) {
+	c.hooks.LiveSafetyIncident = append(c.hooks.LiveSafetyIncident, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `livesafetyincident.Intercept(f(g(h())))`.
+func (c *LiveSafetyIncidentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveSafetyIncident = append(c.inters.LiveSafetyIncident, interceptors...)
+}
+
+// Create returns a builder for creating a LiveSafetyIncident entity.
+func (c *LiveSafetyIncidentClient) Create() *LiveSafetyIncidentCreate {
+	mutation := newLiveSafetyIncidentMutation(c.config, OpCreate)
+	return &LiveSafetyIncidentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveSafetyIncident entities.
+func (c *LiveSafetyIncidentClient) CreateBulk(builders ...*LiveSafetyIncidentCreate) *LiveSafetyIncidentCreateBulk {
+	return &LiveSafetyIncidentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveSafetyIncidentClient) MapCreateBulk(slice any, setFunc func(*LiveSafetyIncidentCreate, int)) *LiveSafetyIncidentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveSafetyIncidentCreateBulk{err: fmt.Errorf("calling to LiveSafetyIncidentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveSafetyIncidentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveSafetyIncidentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveSafetyIncident.
+func (c *LiveSafetyIncidentClient) Update() *LiveSafetyIncidentUpdate {
+	mutation := newLiveSafetyIncidentMutation(c.config, OpUpdate)
+	return &LiveSafetyIncidentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveSafetyIncidentClient) UpdateOne(_m *LiveSafetyIncident) *LiveSafetyIncidentUpdateOne {
+	mutation := newLiveSafetyIncidentMutation(c.config, OpUpdateOne, withLiveSafetyIncident(_m))
+	return &LiveSafetyIncidentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveSafetyIncidentClient) UpdateOneID(id uuid.UUID) *LiveSafetyIncidentUpdateOne {
+	mutation := newLiveSafetyIncidentMutation(c.config, OpUpdateOne, withLiveSafetyIncidentID(id))
+	return &LiveSafetyIncidentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveSafetyIncident.
+func (c *LiveSafetyIncidentClient) Delete() *LiveSafetyIncidentDelete {
+	mutation := newLiveSafetyIncidentMutation(c.config, OpDelete)
+	return &LiveSafetyIncidentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveSafetyIncidentClient) DeleteOne(_m *LiveSafetyIncident) *LiveSafetyIncidentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveSafetyIncidentClient) DeleteOneID(id uuid.UUID) *LiveSafetyIncidentDeleteOne {
+	builder := c.Delete().Where(livesafetyincident.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveSafetyIncidentDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveSafetyIncident.
+func (c *LiveSafetyIncidentClient) Query() *LiveSafetyIncidentQuery {
+	return &LiveSafetyIncidentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveSafetyIncident},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveSafetyIncident entity by its id.
+func (c *LiveSafetyIncidentClient) Get(ctx context.Context, id uuid.UUID) (*LiveSafetyIncident, error) {
+	return c.Query().Where(livesafetyincident.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveSafetyIncidentClient) GetX(ctx context.Context, id uuid.UUID) *LiveSafetyIncident {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveSafetyIncidentClient) Hooks() []Hook {
+	return c.hooks.LiveSafetyIncident
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveSafetyIncidentClient) Interceptors() []Interceptor {
+	return c.inters.LiveSafetyIncident
+}
+
+func (c *LiveSafetyIncidentClient) mutate(ctx context.Context, m *LiveSafetyIncidentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveSafetyIncidentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveSafetyIncidentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveSafetyIncidentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveSafetyIncidentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveSafetyIncident mutation op: %q", m.Op())
+	}
+}
+
+// LiveSafetySignalClient is a client for the LiveSafetySignal schema.
+type LiveSafetySignalClient struct {
+	config
+}
+
+// NewLiveSafetySignalClient returns a client for the LiveSafetySignal from the given config.
+func NewLiveSafetySignalClient(c config) *LiveSafetySignalClient {
+	return &LiveSafetySignalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `livesafetysignal.Hooks(f(g(h())))`.
+func (c *LiveSafetySignalClient) Use(hooks ...Hook) {
+	c.hooks.LiveSafetySignal = append(c.hooks.LiveSafetySignal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `livesafetysignal.Intercept(f(g(h())))`.
+func (c *LiveSafetySignalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveSafetySignal = append(c.inters.LiveSafetySignal, interceptors...)
+}
+
+// Create returns a builder for creating a LiveSafetySignal entity.
+func (c *LiveSafetySignalClient) Create() *LiveSafetySignalCreate {
+	mutation := newLiveSafetySignalMutation(c.config, OpCreate)
+	return &LiveSafetySignalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveSafetySignal entities.
+func (c *LiveSafetySignalClient) CreateBulk(builders ...*LiveSafetySignalCreate) *LiveSafetySignalCreateBulk {
+	return &LiveSafetySignalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveSafetySignalClient) MapCreateBulk(slice any, setFunc func(*LiveSafetySignalCreate, int)) *LiveSafetySignalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveSafetySignalCreateBulk{err: fmt.Errorf("calling to LiveSafetySignalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveSafetySignalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveSafetySignalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveSafetySignal.
+func (c *LiveSafetySignalClient) Update() *LiveSafetySignalUpdate {
+	mutation := newLiveSafetySignalMutation(c.config, OpUpdate)
+	return &LiveSafetySignalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveSafetySignalClient) UpdateOne(_m *LiveSafetySignal) *LiveSafetySignalUpdateOne {
+	mutation := newLiveSafetySignalMutation(c.config, OpUpdateOne, withLiveSafetySignal(_m))
+	return &LiveSafetySignalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveSafetySignalClient) UpdateOneID(id uuid.UUID) *LiveSafetySignalUpdateOne {
+	mutation := newLiveSafetySignalMutation(c.config, OpUpdateOne, withLiveSafetySignalID(id))
+	return &LiveSafetySignalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveSafetySignal.
+func (c *LiveSafetySignalClient) Delete() *LiveSafetySignalDelete {
+	mutation := newLiveSafetySignalMutation(c.config, OpDelete)
+	return &LiveSafetySignalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveSafetySignalClient) DeleteOne(_m *LiveSafetySignal) *LiveSafetySignalDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveSafetySignalClient) DeleteOneID(id uuid.UUID) *LiveSafetySignalDeleteOne {
+	builder := c.Delete().Where(livesafetysignal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveSafetySignalDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveSafetySignal.
+func (c *LiveSafetySignalClient) Query() *LiveSafetySignalQuery {
+	return &LiveSafetySignalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveSafetySignal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveSafetySignal entity by its id.
+func (c *LiveSafetySignalClient) Get(ctx context.Context, id uuid.UUID) (*LiveSafetySignal, error) {
+	return c.Query().Where(livesafetysignal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveSafetySignalClient) GetX(ctx context.Context, id uuid.UUID) *LiveSafetySignal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveSafetySignalClient) Hooks() []Hook {
+	return c.hooks.LiveSafetySignal
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveSafetySignalClient) Interceptors() []Interceptor {
+	return c.inters.LiveSafetySignal
+}
+
+func (c *LiveSafetySignalClient) mutate(ctx context.Context, m *LiveSafetySignalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveSafetySignalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveSafetySignalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveSafetySignalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveSafetySignalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveSafetySignal mutation op: %q", m.Op())
+	}
+}
+
 // OutboxEventClient is a client for the OutboxEvent schema.
 type OutboxEventClient struct {
 	config
@@ -1618,13 +2043,13 @@ func (c *SuspensionCaseClient) mutate(ctx context.Context, m *SuspensionCaseMuta
 type (
 	hooks struct {
 		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim, CounterNotice,
-		EvidenceRetentionSetting, IpClaim, OutboxEvent, Strike,
-		SuspensionCase []ent.Hook
+		EvidenceRetentionSetting, IpClaim, LegalReport, LiveSafetyIncident,
+		LiveSafetySignal, OutboxEvent, Strike, SuspensionCase []ent.Hook
 	}
 	inters struct {
 		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim, CounterNotice,
-		EvidenceRetentionSetting, IpClaim, OutboxEvent, Strike,
-		SuspensionCase []ent.Interceptor
+		EvidenceRetentionSetting, IpClaim, LegalReport, LiveSafetyIncident,
+		LiveSafetySignal, OutboxEvent, Strike, SuspensionCase []ent.Interceptor
 	}
 )
 

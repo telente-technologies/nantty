@@ -15,6 +15,9 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/counternotice"
 	"zudomart/modules/moderation/src/generated/ent/evidenceretentionsetting"
 	"zudomart/modules/moderation/src/generated/ent/ipclaim"
+	"zudomart/modules/moderation/src/generated/ent/legalreport"
+	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
+	"zudomart/modules/moderation/src/generated/ent/livesafetysignal"
 	"zudomart/modules/moderation/src/generated/ent/outboxevent"
 	"zudomart/modules/moderation/src/generated/ent/predicate"
 	"zudomart/modules/moderation/src/generated/ent/strike"
@@ -41,6 +44,9 @@ const (
 	TypeCounterNotice            = "CounterNotice"
 	TypeEvidenceRetentionSetting = "EvidenceRetentionSetting"
 	TypeIpClaim                  = "IpClaim"
+	TypeLegalReport              = "LegalReport"
+	TypeLiveSafetyIncident       = "LiveSafetyIncident"
+	TypeLiveSafetySignal         = "LiveSafetySignal"
 	TypeOutboxEvent              = "OutboxEvent"
 	TypeStrike                   = "Strike"
 	TypeSuspensionCase           = "SuspensionCase"
@@ -8469,6 +8475,4330 @@ func (m *IpClaimMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *IpClaimMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown IpClaim edge %s", name)
+}
+
+// LegalReportMutation represents an operation that mutates the LegalReport nodes in the graph.
+type LegalReportMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	created_at         *time.Time
+	incident_id        *uuid.UUID
+	live_id            *string
+	host_id            *uuid.UUID
+	category           *string
+	provider           *string
+	match_reference    *string
+	evidence_key       *string
+	status             *legalreport.Status
+	external_reference *string
+	submitted_at       *time.Time
+	updated_at         *time.Time
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*LegalReport, error)
+	predicates         []predicate.LegalReport
+}
+
+var _ ent.Mutation = (*LegalReportMutation)(nil)
+
+// legalreportOption allows management of the mutation configuration using functional options.
+type legalreportOption func(*LegalReportMutation)
+
+// newLegalReportMutation creates new mutation for the LegalReport entity.
+func newLegalReportMutation(c config, op Op, opts ...legalreportOption) *LegalReportMutation {
+	m := &LegalReportMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLegalReport,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLegalReportID sets the ID field of the mutation.
+func withLegalReportID(id uuid.UUID) legalreportOption {
+	return func(m *LegalReportMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LegalReport
+		)
+		m.oldValue = func(ctx context.Context) (*LegalReport, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LegalReport.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLegalReport sets the old LegalReport of the mutation.
+func withLegalReport(node *LegalReport) legalreportOption {
+	return func(m *LegalReportMutation) {
+		m.oldValue = func(context.Context) (*LegalReport, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LegalReportMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LegalReportMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LegalReport entities.
+func (m *LegalReportMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LegalReportMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LegalReportMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LegalReport.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LegalReportMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LegalReportMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LegalReportMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetIncidentID sets the "incident_id" field.
+func (m *LegalReportMutation) SetIncidentID(u uuid.UUID) {
+	m.incident_id = &u
+}
+
+// IncidentID returns the value of the "incident_id" field in the mutation.
+func (m *LegalReportMutation) IncidentID() (r uuid.UUID, exists bool) {
+	v := m.incident_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIncidentID returns the old "incident_id" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldIncidentID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIncidentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIncidentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIncidentID: %w", err)
+	}
+	return oldValue.IncidentID, nil
+}
+
+// ResetIncidentID resets all changes to the "incident_id" field.
+func (m *LegalReportMutation) ResetIncidentID() {
+	m.incident_id = nil
+}
+
+// SetLiveID sets the "live_id" field.
+func (m *LegalReportMutation) SetLiveID(s string) {
+	m.live_id = &s
+}
+
+// LiveID returns the value of the "live_id" field in the mutation.
+func (m *LegalReportMutation) LiveID() (r string, exists bool) {
+	v := m.live_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveID returns the old "live_id" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldLiveID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveID: %w", err)
+	}
+	return oldValue.LiveID, nil
+}
+
+// ResetLiveID resets all changes to the "live_id" field.
+func (m *LegalReportMutation) ResetLiveID() {
+	m.live_id = nil
+}
+
+// SetHostID sets the "host_id" field.
+func (m *LegalReportMutation) SetHostID(u uuid.UUID) {
+	m.host_id = &u
+}
+
+// HostID returns the value of the "host_id" field in the mutation.
+func (m *LegalReportMutation) HostID() (r uuid.UUID, exists bool) {
+	v := m.host_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHostID returns the old "host_id" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldHostID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHostID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHostID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHostID: %w", err)
+	}
+	return oldValue.HostID, nil
+}
+
+// ClearHostID clears the value of the "host_id" field.
+func (m *LegalReportMutation) ClearHostID() {
+	m.host_id = nil
+	m.clearedFields[legalreport.FieldHostID] = struct{}{}
+}
+
+// HostIDCleared returns if the "host_id" field was cleared in this mutation.
+func (m *LegalReportMutation) HostIDCleared() bool {
+	_, ok := m.clearedFields[legalreport.FieldHostID]
+	return ok
+}
+
+// ResetHostID resets all changes to the "host_id" field.
+func (m *LegalReportMutation) ResetHostID() {
+	m.host_id = nil
+	delete(m.clearedFields, legalreport.FieldHostID)
+}
+
+// SetCategory sets the "category" field.
+func (m *LegalReportMutation) SetCategory(s string) {
+	m.category = &s
+}
+
+// Category returns the value of the "category" field in the mutation.
+func (m *LegalReportMutation) Category() (r string, exists bool) {
+	v := m.category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategory returns the old "category" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategory: %w", err)
+	}
+	return oldValue.Category, nil
+}
+
+// ResetCategory resets all changes to the "category" field.
+func (m *LegalReportMutation) ResetCategory() {
+	m.category = nil
+}
+
+// SetProvider sets the "provider" field.
+func (m *LegalReportMutation) SetProvider(s string) {
+	m.provider = &s
+}
+
+// Provider returns the value of the "provider" field in the mutation.
+func (m *LegalReportMutation) Provider() (r string, exists bool) {
+	v := m.provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProvider returns the old "provider" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldProvider(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProvider: %w", err)
+	}
+	return oldValue.Provider, nil
+}
+
+// ResetProvider resets all changes to the "provider" field.
+func (m *LegalReportMutation) ResetProvider() {
+	m.provider = nil
+}
+
+// SetMatchReference sets the "match_reference" field.
+func (m *LegalReportMutation) SetMatchReference(s string) {
+	m.match_reference = &s
+}
+
+// MatchReference returns the value of the "match_reference" field in the mutation.
+func (m *LegalReportMutation) MatchReference() (r string, exists bool) {
+	v := m.match_reference
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMatchReference returns the old "match_reference" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldMatchReference(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMatchReference is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMatchReference requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMatchReference: %w", err)
+	}
+	return oldValue.MatchReference, nil
+}
+
+// ResetMatchReference resets all changes to the "match_reference" field.
+func (m *LegalReportMutation) ResetMatchReference() {
+	m.match_reference = nil
+}
+
+// SetEvidenceKey sets the "evidence_key" field.
+func (m *LegalReportMutation) SetEvidenceKey(s string) {
+	m.evidence_key = &s
+}
+
+// EvidenceKey returns the value of the "evidence_key" field in the mutation.
+func (m *LegalReportMutation) EvidenceKey() (r string, exists bool) {
+	v := m.evidence_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvidenceKey returns the old "evidence_key" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldEvidenceKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvidenceKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvidenceKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvidenceKey: %w", err)
+	}
+	return oldValue.EvidenceKey, nil
+}
+
+// ResetEvidenceKey resets all changes to the "evidence_key" field.
+func (m *LegalReportMutation) ResetEvidenceKey() {
+	m.evidence_key = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *LegalReportMutation) SetStatus(l legalreport.Status) {
+	m.status = &l
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *LegalReportMutation) Status() (r legalreport.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldStatus(ctx context.Context) (v legalreport.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *LegalReportMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetExternalReference sets the "external_reference" field.
+func (m *LegalReportMutation) SetExternalReference(s string) {
+	m.external_reference = &s
+}
+
+// ExternalReference returns the value of the "external_reference" field in the mutation.
+func (m *LegalReportMutation) ExternalReference() (r string, exists bool) {
+	v := m.external_reference
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExternalReference returns the old "external_reference" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldExternalReference(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExternalReference is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExternalReference requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExternalReference: %w", err)
+	}
+	return oldValue.ExternalReference, nil
+}
+
+// ResetExternalReference resets all changes to the "external_reference" field.
+func (m *LegalReportMutation) ResetExternalReference() {
+	m.external_reference = nil
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (m *LegalReportMutation) SetSubmittedAt(t time.Time) {
+	m.submitted_at = &t
+}
+
+// SubmittedAt returns the value of the "submitted_at" field in the mutation.
+func (m *LegalReportMutation) SubmittedAt() (r time.Time, exists bool) {
+	v := m.submitted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubmittedAt returns the old "submitted_at" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldSubmittedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubmittedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubmittedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubmittedAt: %w", err)
+	}
+	return oldValue.SubmittedAt, nil
+}
+
+// ClearSubmittedAt clears the value of the "submitted_at" field.
+func (m *LegalReportMutation) ClearSubmittedAt() {
+	m.submitted_at = nil
+	m.clearedFields[legalreport.FieldSubmittedAt] = struct{}{}
+}
+
+// SubmittedAtCleared returns if the "submitted_at" field was cleared in this mutation.
+func (m *LegalReportMutation) SubmittedAtCleared() bool {
+	_, ok := m.clearedFields[legalreport.FieldSubmittedAt]
+	return ok
+}
+
+// ResetSubmittedAt resets all changes to the "submitted_at" field.
+func (m *LegalReportMutation) ResetSubmittedAt() {
+	m.submitted_at = nil
+	delete(m.clearedFields, legalreport.FieldSubmittedAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *LegalReportMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *LegalReportMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the LegalReport entity.
+// If the LegalReport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LegalReportMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *LegalReportMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the LegalReportMutation builder.
+func (m *LegalReportMutation) Where(ps ...predicate.LegalReport) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LegalReportMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LegalReportMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LegalReport, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LegalReportMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LegalReportMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LegalReport).
+func (m *LegalReportMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LegalReportMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, legalreport.FieldCreatedAt)
+	}
+	if m.incident_id != nil {
+		fields = append(fields, legalreport.FieldIncidentID)
+	}
+	if m.live_id != nil {
+		fields = append(fields, legalreport.FieldLiveID)
+	}
+	if m.host_id != nil {
+		fields = append(fields, legalreport.FieldHostID)
+	}
+	if m.category != nil {
+		fields = append(fields, legalreport.FieldCategory)
+	}
+	if m.provider != nil {
+		fields = append(fields, legalreport.FieldProvider)
+	}
+	if m.match_reference != nil {
+		fields = append(fields, legalreport.FieldMatchReference)
+	}
+	if m.evidence_key != nil {
+		fields = append(fields, legalreport.FieldEvidenceKey)
+	}
+	if m.status != nil {
+		fields = append(fields, legalreport.FieldStatus)
+	}
+	if m.external_reference != nil {
+		fields = append(fields, legalreport.FieldExternalReference)
+	}
+	if m.submitted_at != nil {
+		fields = append(fields, legalreport.FieldSubmittedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, legalreport.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LegalReportMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case legalreport.FieldCreatedAt:
+		return m.CreatedAt()
+	case legalreport.FieldIncidentID:
+		return m.IncidentID()
+	case legalreport.FieldLiveID:
+		return m.LiveID()
+	case legalreport.FieldHostID:
+		return m.HostID()
+	case legalreport.FieldCategory:
+		return m.Category()
+	case legalreport.FieldProvider:
+		return m.Provider()
+	case legalreport.FieldMatchReference:
+		return m.MatchReference()
+	case legalreport.FieldEvidenceKey:
+		return m.EvidenceKey()
+	case legalreport.FieldStatus:
+		return m.Status()
+	case legalreport.FieldExternalReference:
+		return m.ExternalReference()
+	case legalreport.FieldSubmittedAt:
+		return m.SubmittedAt()
+	case legalreport.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LegalReportMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case legalreport.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case legalreport.FieldIncidentID:
+		return m.OldIncidentID(ctx)
+	case legalreport.FieldLiveID:
+		return m.OldLiveID(ctx)
+	case legalreport.FieldHostID:
+		return m.OldHostID(ctx)
+	case legalreport.FieldCategory:
+		return m.OldCategory(ctx)
+	case legalreport.FieldProvider:
+		return m.OldProvider(ctx)
+	case legalreport.FieldMatchReference:
+		return m.OldMatchReference(ctx)
+	case legalreport.FieldEvidenceKey:
+		return m.OldEvidenceKey(ctx)
+	case legalreport.FieldStatus:
+		return m.OldStatus(ctx)
+	case legalreport.FieldExternalReference:
+		return m.OldExternalReference(ctx)
+	case legalreport.FieldSubmittedAt:
+		return m.OldSubmittedAt(ctx)
+	case legalreport.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown LegalReport field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LegalReportMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case legalreport.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case legalreport.FieldIncidentID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIncidentID(v)
+		return nil
+	case legalreport.FieldLiveID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveID(v)
+		return nil
+	case legalreport.FieldHostID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHostID(v)
+		return nil
+	case legalreport.FieldCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategory(v)
+		return nil
+	case legalreport.FieldProvider:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProvider(v)
+		return nil
+	case legalreport.FieldMatchReference:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMatchReference(v)
+		return nil
+	case legalreport.FieldEvidenceKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvidenceKey(v)
+		return nil
+	case legalreport.FieldStatus:
+		v, ok := value.(legalreport.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case legalreport.FieldExternalReference:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExternalReference(v)
+		return nil
+	case legalreport.FieldSubmittedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubmittedAt(v)
+		return nil
+	case legalreport.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LegalReport field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LegalReportMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LegalReportMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LegalReportMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown LegalReport numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LegalReportMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(legalreport.FieldHostID) {
+		fields = append(fields, legalreport.FieldHostID)
+	}
+	if m.FieldCleared(legalreport.FieldSubmittedAt) {
+		fields = append(fields, legalreport.FieldSubmittedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LegalReportMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LegalReportMutation) ClearField(name string) error {
+	switch name {
+	case legalreport.FieldHostID:
+		m.ClearHostID()
+		return nil
+	case legalreport.FieldSubmittedAt:
+		m.ClearSubmittedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LegalReport nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LegalReportMutation) ResetField(name string) error {
+	switch name {
+	case legalreport.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case legalreport.FieldIncidentID:
+		m.ResetIncidentID()
+		return nil
+	case legalreport.FieldLiveID:
+		m.ResetLiveID()
+		return nil
+	case legalreport.FieldHostID:
+		m.ResetHostID()
+		return nil
+	case legalreport.FieldCategory:
+		m.ResetCategory()
+		return nil
+	case legalreport.FieldProvider:
+		m.ResetProvider()
+		return nil
+	case legalreport.FieldMatchReference:
+		m.ResetMatchReference()
+		return nil
+	case legalreport.FieldEvidenceKey:
+		m.ResetEvidenceKey()
+		return nil
+	case legalreport.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case legalreport.FieldExternalReference:
+		m.ResetExternalReference()
+		return nil
+	case legalreport.FieldSubmittedAt:
+		m.ResetSubmittedAt()
+		return nil
+	case legalreport.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LegalReport field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LegalReportMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LegalReportMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LegalReportMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LegalReportMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LegalReportMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LegalReportMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LegalReportMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LegalReport unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LegalReportMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LegalReport edge %s", name)
+}
+
+// LiveSafetyIncidentMutation represents an operation that mutates the LiveSafetyIncident nodes in the graph.
+type LiveSafetyIncidentMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *uuid.UUID
+	created_at           *time.Time
+	live_id              *string
+	host_id              *uuid.UUID
+	status               *livesafetyincident.Status
+	priority             *livesafetyincident.Priority
+	sla_due_at           *time.Time
+	hold_active          *bool
+	hold_category        *string
+	hold_reason          *string
+	hold_source          *string
+	hold_started_at      *time.Time
+	top_category         *string
+	top_confidence       *float64
+	addtop_confidence    *float64
+	warning_count        *int
+	addwarning_count     *int
+	last_warned_at       *time.Time
+	report_count         *int
+	addreport_count      *int
+	last_reported_at     *time.Time
+	sampling_boost_until *time.Time
+	hash_match           *bool
+	appealed_at          *time.Time
+	appeal_message       *string
+	live_ended_at        *time.Time
+	resolution           *string
+	decision             *[]byte
+	updated_at           *time.Time
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*LiveSafetyIncident, error)
+	predicates           []predicate.LiveSafetyIncident
+}
+
+var _ ent.Mutation = (*LiveSafetyIncidentMutation)(nil)
+
+// livesafetyincidentOption allows management of the mutation configuration using functional options.
+type livesafetyincidentOption func(*LiveSafetyIncidentMutation)
+
+// newLiveSafetyIncidentMutation creates new mutation for the LiveSafetyIncident entity.
+func newLiveSafetyIncidentMutation(c config, op Op, opts ...livesafetyincidentOption) *LiveSafetyIncidentMutation {
+	m := &LiveSafetyIncidentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLiveSafetyIncident,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLiveSafetyIncidentID sets the ID field of the mutation.
+func withLiveSafetyIncidentID(id uuid.UUID) livesafetyincidentOption {
+	return func(m *LiveSafetyIncidentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LiveSafetyIncident
+		)
+		m.oldValue = func(ctx context.Context) (*LiveSafetyIncident, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LiveSafetyIncident.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLiveSafetyIncident sets the old LiveSafetyIncident of the mutation.
+func withLiveSafetyIncident(node *LiveSafetyIncident) livesafetyincidentOption {
+	return func(m *LiveSafetyIncidentMutation) {
+		m.oldValue = func(context.Context) (*LiveSafetyIncident, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LiveSafetyIncidentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LiveSafetyIncidentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LiveSafetyIncident entities.
+func (m *LiveSafetyIncidentMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LiveSafetyIncidentMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LiveSafetyIncidentMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LiveSafetyIncident.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LiveSafetyIncidentMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LiveSafetyIncidentMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LiveSafetyIncidentMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetLiveID sets the "live_id" field.
+func (m *LiveSafetyIncidentMutation) SetLiveID(s string) {
+	m.live_id = &s
+}
+
+// LiveID returns the value of the "live_id" field in the mutation.
+func (m *LiveSafetyIncidentMutation) LiveID() (r string, exists bool) {
+	v := m.live_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveID returns the old "live_id" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldLiveID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveID: %w", err)
+	}
+	return oldValue.LiveID, nil
+}
+
+// ResetLiveID resets all changes to the "live_id" field.
+func (m *LiveSafetyIncidentMutation) ResetLiveID() {
+	m.live_id = nil
+}
+
+// SetHostID sets the "host_id" field.
+func (m *LiveSafetyIncidentMutation) SetHostID(u uuid.UUID) {
+	m.host_id = &u
+}
+
+// HostID returns the value of the "host_id" field in the mutation.
+func (m *LiveSafetyIncidentMutation) HostID() (r uuid.UUID, exists bool) {
+	v := m.host_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHostID returns the old "host_id" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldHostID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHostID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHostID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHostID: %w", err)
+	}
+	return oldValue.HostID, nil
+}
+
+// ClearHostID clears the value of the "host_id" field.
+func (m *LiveSafetyIncidentMutation) ClearHostID() {
+	m.host_id = nil
+	m.clearedFields[livesafetyincident.FieldHostID] = struct{}{}
+}
+
+// HostIDCleared returns if the "host_id" field was cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) HostIDCleared() bool {
+	_, ok := m.clearedFields[livesafetyincident.FieldHostID]
+	return ok
+}
+
+// ResetHostID resets all changes to the "host_id" field.
+func (m *LiveSafetyIncidentMutation) ResetHostID() {
+	m.host_id = nil
+	delete(m.clearedFields, livesafetyincident.FieldHostID)
+}
+
+// SetStatus sets the "status" field.
+func (m *LiveSafetyIncidentMutation) SetStatus(l livesafetyincident.Status) {
+	m.status = &l
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *LiveSafetyIncidentMutation) Status() (r livesafetyincident.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldStatus(ctx context.Context) (v livesafetyincident.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *LiveSafetyIncidentMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetPriority sets the "priority" field.
+func (m *LiveSafetyIncidentMutation) SetPriority(l livesafetyincident.Priority) {
+	m.priority = &l
+}
+
+// Priority returns the value of the "priority" field in the mutation.
+func (m *LiveSafetyIncidentMutation) Priority() (r livesafetyincident.Priority, exists bool) {
+	v := m.priority
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPriority returns the old "priority" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldPriority(ctx context.Context) (v livesafetyincident.Priority, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPriority is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPriority requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPriority: %w", err)
+	}
+	return oldValue.Priority, nil
+}
+
+// ResetPriority resets all changes to the "priority" field.
+func (m *LiveSafetyIncidentMutation) ResetPriority() {
+	m.priority = nil
+}
+
+// SetSLADueAt sets the "sla_due_at" field.
+func (m *LiveSafetyIncidentMutation) SetSLADueAt(t time.Time) {
+	m.sla_due_at = &t
+}
+
+// SLADueAt returns the value of the "sla_due_at" field in the mutation.
+func (m *LiveSafetyIncidentMutation) SLADueAt() (r time.Time, exists bool) {
+	v := m.sla_due_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSLADueAt returns the old "sla_due_at" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldSLADueAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSLADueAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSLADueAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSLADueAt: %w", err)
+	}
+	return oldValue.SLADueAt, nil
+}
+
+// ResetSLADueAt resets all changes to the "sla_due_at" field.
+func (m *LiveSafetyIncidentMutation) ResetSLADueAt() {
+	m.sla_due_at = nil
+}
+
+// SetHoldActive sets the "hold_active" field.
+func (m *LiveSafetyIncidentMutation) SetHoldActive(b bool) {
+	m.hold_active = &b
+}
+
+// HoldActive returns the value of the "hold_active" field in the mutation.
+func (m *LiveSafetyIncidentMutation) HoldActive() (r bool, exists bool) {
+	v := m.hold_active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHoldActive returns the old "hold_active" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldHoldActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHoldActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHoldActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHoldActive: %w", err)
+	}
+	return oldValue.HoldActive, nil
+}
+
+// ResetHoldActive resets all changes to the "hold_active" field.
+func (m *LiveSafetyIncidentMutation) ResetHoldActive() {
+	m.hold_active = nil
+}
+
+// SetHoldCategory sets the "hold_category" field.
+func (m *LiveSafetyIncidentMutation) SetHoldCategory(s string) {
+	m.hold_category = &s
+}
+
+// HoldCategory returns the value of the "hold_category" field in the mutation.
+func (m *LiveSafetyIncidentMutation) HoldCategory() (r string, exists bool) {
+	v := m.hold_category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHoldCategory returns the old "hold_category" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldHoldCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHoldCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHoldCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHoldCategory: %w", err)
+	}
+	return oldValue.HoldCategory, nil
+}
+
+// ResetHoldCategory resets all changes to the "hold_category" field.
+func (m *LiveSafetyIncidentMutation) ResetHoldCategory() {
+	m.hold_category = nil
+}
+
+// SetHoldReason sets the "hold_reason" field.
+func (m *LiveSafetyIncidentMutation) SetHoldReason(s string) {
+	m.hold_reason = &s
+}
+
+// HoldReason returns the value of the "hold_reason" field in the mutation.
+func (m *LiveSafetyIncidentMutation) HoldReason() (r string, exists bool) {
+	v := m.hold_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHoldReason returns the old "hold_reason" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldHoldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHoldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHoldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHoldReason: %w", err)
+	}
+	return oldValue.HoldReason, nil
+}
+
+// ResetHoldReason resets all changes to the "hold_reason" field.
+func (m *LiveSafetyIncidentMutation) ResetHoldReason() {
+	m.hold_reason = nil
+}
+
+// SetHoldSource sets the "hold_source" field.
+func (m *LiveSafetyIncidentMutation) SetHoldSource(s string) {
+	m.hold_source = &s
+}
+
+// HoldSource returns the value of the "hold_source" field in the mutation.
+func (m *LiveSafetyIncidentMutation) HoldSource() (r string, exists bool) {
+	v := m.hold_source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHoldSource returns the old "hold_source" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldHoldSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHoldSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHoldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHoldSource: %w", err)
+	}
+	return oldValue.HoldSource, nil
+}
+
+// ResetHoldSource resets all changes to the "hold_source" field.
+func (m *LiveSafetyIncidentMutation) ResetHoldSource() {
+	m.hold_source = nil
+}
+
+// SetHoldStartedAt sets the "hold_started_at" field.
+func (m *LiveSafetyIncidentMutation) SetHoldStartedAt(t time.Time) {
+	m.hold_started_at = &t
+}
+
+// HoldStartedAt returns the value of the "hold_started_at" field in the mutation.
+func (m *LiveSafetyIncidentMutation) HoldStartedAt() (r time.Time, exists bool) {
+	v := m.hold_started_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHoldStartedAt returns the old "hold_started_at" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldHoldStartedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHoldStartedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHoldStartedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHoldStartedAt: %w", err)
+	}
+	return oldValue.HoldStartedAt, nil
+}
+
+// ClearHoldStartedAt clears the value of the "hold_started_at" field.
+func (m *LiveSafetyIncidentMutation) ClearHoldStartedAt() {
+	m.hold_started_at = nil
+	m.clearedFields[livesafetyincident.FieldHoldStartedAt] = struct{}{}
+}
+
+// HoldStartedAtCleared returns if the "hold_started_at" field was cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) HoldStartedAtCleared() bool {
+	_, ok := m.clearedFields[livesafetyincident.FieldHoldStartedAt]
+	return ok
+}
+
+// ResetHoldStartedAt resets all changes to the "hold_started_at" field.
+func (m *LiveSafetyIncidentMutation) ResetHoldStartedAt() {
+	m.hold_started_at = nil
+	delete(m.clearedFields, livesafetyincident.FieldHoldStartedAt)
+}
+
+// SetTopCategory sets the "top_category" field.
+func (m *LiveSafetyIncidentMutation) SetTopCategory(s string) {
+	m.top_category = &s
+}
+
+// TopCategory returns the value of the "top_category" field in the mutation.
+func (m *LiveSafetyIncidentMutation) TopCategory() (r string, exists bool) {
+	v := m.top_category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTopCategory returns the old "top_category" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldTopCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTopCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTopCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTopCategory: %w", err)
+	}
+	return oldValue.TopCategory, nil
+}
+
+// ResetTopCategory resets all changes to the "top_category" field.
+func (m *LiveSafetyIncidentMutation) ResetTopCategory() {
+	m.top_category = nil
+}
+
+// SetTopConfidence sets the "top_confidence" field.
+func (m *LiveSafetyIncidentMutation) SetTopConfidence(f float64) {
+	m.top_confidence = &f
+	m.addtop_confidence = nil
+}
+
+// TopConfidence returns the value of the "top_confidence" field in the mutation.
+func (m *LiveSafetyIncidentMutation) TopConfidence() (r float64, exists bool) {
+	v := m.top_confidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTopConfidence returns the old "top_confidence" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldTopConfidence(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTopConfidence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTopConfidence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTopConfidence: %w", err)
+	}
+	return oldValue.TopConfidence, nil
+}
+
+// AddTopConfidence adds f to the "top_confidence" field.
+func (m *LiveSafetyIncidentMutation) AddTopConfidence(f float64) {
+	if m.addtop_confidence != nil {
+		*m.addtop_confidence += f
+	} else {
+		m.addtop_confidence = &f
+	}
+}
+
+// AddedTopConfidence returns the value that was added to the "top_confidence" field in this mutation.
+func (m *LiveSafetyIncidentMutation) AddedTopConfidence() (r float64, exists bool) {
+	v := m.addtop_confidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTopConfidence resets all changes to the "top_confidence" field.
+func (m *LiveSafetyIncidentMutation) ResetTopConfidence() {
+	m.top_confidence = nil
+	m.addtop_confidence = nil
+}
+
+// SetWarningCount sets the "warning_count" field.
+func (m *LiveSafetyIncidentMutation) SetWarningCount(i int) {
+	m.warning_count = &i
+	m.addwarning_count = nil
+}
+
+// WarningCount returns the value of the "warning_count" field in the mutation.
+func (m *LiveSafetyIncidentMutation) WarningCount() (r int, exists bool) {
+	v := m.warning_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWarningCount returns the old "warning_count" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldWarningCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWarningCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWarningCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWarningCount: %w", err)
+	}
+	return oldValue.WarningCount, nil
+}
+
+// AddWarningCount adds i to the "warning_count" field.
+func (m *LiveSafetyIncidentMutation) AddWarningCount(i int) {
+	if m.addwarning_count != nil {
+		*m.addwarning_count += i
+	} else {
+		m.addwarning_count = &i
+	}
+}
+
+// AddedWarningCount returns the value that was added to the "warning_count" field in this mutation.
+func (m *LiveSafetyIncidentMutation) AddedWarningCount() (r int, exists bool) {
+	v := m.addwarning_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetWarningCount resets all changes to the "warning_count" field.
+func (m *LiveSafetyIncidentMutation) ResetWarningCount() {
+	m.warning_count = nil
+	m.addwarning_count = nil
+}
+
+// SetLastWarnedAt sets the "last_warned_at" field.
+func (m *LiveSafetyIncidentMutation) SetLastWarnedAt(t time.Time) {
+	m.last_warned_at = &t
+}
+
+// LastWarnedAt returns the value of the "last_warned_at" field in the mutation.
+func (m *LiveSafetyIncidentMutation) LastWarnedAt() (r time.Time, exists bool) {
+	v := m.last_warned_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastWarnedAt returns the old "last_warned_at" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldLastWarnedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastWarnedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastWarnedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastWarnedAt: %w", err)
+	}
+	return oldValue.LastWarnedAt, nil
+}
+
+// ClearLastWarnedAt clears the value of the "last_warned_at" field.
+func (m *LiveSafetyIncidentMutation) ClearLastWarnedAt() {
+	m.last_warned_at = nil
+	m.clearedFields[livesafetyincident.FieldLastWarnedAt] = struct{}{}
+}
+
+// LastWarnedAtCleared returns if the "last_warned_at" field was cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) LastWarnedAtCleared() bool {
+	_, ok := m.clearedFields[livesafetyincident.FieldLastWarnedAt]
+	return ok
+}
+
+// ResetLastWarnedAt resets all changes to the "last_warned_at" field.
+func (m *LiveSafetyIncidentMutation) ResetLastWarnedAt() {
+	m.last_warned_at = nil
+	delete(m.clearedFields, livesafetyincident.FieldLastWarnedAt)
+}
+
+// SetReportCount sets the "report_count" field.
+func (m *LiveSafetyIncidentMutation) SetReportCount(i int) {
+	m.report_count = &i
+	m.addreport_count = nil
+}
+
+// ReportCount returns the value of the "report_count" field in the mutation.
+func (m *LiveSafetyIncidentMutation) ReportCount() (r int, exists bool) {
+	v := m.report_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReportCount returns the old "report_count" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldReportCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReportCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReportCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReportCount: %w", err)
+	}
+	return oldValue.ReportCount, nil
+}
+
+// AddReportCount adds i to the "report_count" field.
+func (m *LiveSafetyIncidentMutation) AddReportCount(i int) {
+	if m.addreport_count != nil {
+		*m.addreport_count += i
+	} else {
+		m.addreport_count = &i
+	}
+}
+
+// AddedReportCount returns the value that was added to the "report_count" field in this mutation.
+func (m *LiveSafetyIncidentMutation) AddedReportCount() (r int, exists bool) {
+	v := m.addreport_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetReportCount resets all changes to the "report_count" field.
+func (m *LiveSafetyIncidentMutation) ResetReportCount() {
+	m.report_count = nil
+	m.addreport_count = nil
+}
+
+// SetLastReportedAt sets the "last_reported_at" field.
+func (m *LiveSafetyIncidentMutation) SetLastReportedAt(t time.Time) {
+	m.last_reported_at = &t
+}
+
+// LastReportedAt returns the value of the "last_reported_at" field in the mutation.
+func (m *LiveSafetyIncidentMutation) LastReportedAt() (r time.Time, exists bool) {
+	v := m.last_reported_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastReportedAt returns the old "last_reported_at" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldLastReportedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastReportedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastReportedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastReportedAt: %w", err)
+	}
+	return oldValue.LastReportedAt, nil
+}
+
+// ClearLastReportedAt clears the value of the "last_reported_at" field.
+func (m *LiveSafetyIncidentMutation) ClearLastReportedAt() {
+	m.last_reported_at = nil
+	m.clearedFields[livesafetyincident.FieldLastReportedAt] = struct{}{}
+}
+
+// LastReportedAtCleared returns if the "last_reported_at" field was cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) LastReportedAtCleared() bool {
+	_, ok := m.clearedFields[livesafetyincident.FieldLastReportedAt]
+	return ok
+}
+
+// ResetLastReportedAt resets all changes to the "last_reported_at" field.
+func (m *LiveSafetyIncidentMutation) ResetLastReportedAt() {
+	m.last_reported_at = nil
+	delete(m.clearedFields, livesafetyincident.FieldLastReportedAt)
+}
+
+// SetSamplingBoostUntil sets the "sampling_boost_until" field.
+func (m *LiveSafetyIncidentMutation) SetSamplingBoostUntil(t time.Time) {
+	m.sampling_boost_until = &t
+}
+
+// SamplingBoostUntil returns the value of the "sampling_boost_until" field in the mutation.
+func (m *LiveSafetyIncidentMutation) SamplingBoostUntil() (r time.Time, exists bool) {
+	v := m.sampling_boost_until
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSamplingBoostUntil returns the old "sampling_boost_until" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldSamplingBoostUntil(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSamplingBoostUntil is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSamplingBoostUntil requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSamplingBoostUntil: %w", err)
+	}
+	return oldValue.SamplingBoostUntil, nil
+}
+
+// ClearSamplingBoostUntil clears the value of the "sampling_boost_until" field.
+func (m *LiveSafetyIncidentMutation) ClearSamplingBoostUntil() {
+	m.sampling_boost_until = nil
+	m.clearedFields[livesafetyincident.FieldSamplingBoostUntil] = struct{}{}
+}
+
+// SamplingBoostUntilCleared returns if the "sampling_boost_until" field was cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) SamplingBoostUntilCleared() bool {
+	_, ok := m.clearedFields[livesafetyincident.FieldSamplingBoostUntil]
+	return ok
+}
+
+// ResetSamplingBoostUntil resets all changes to the "sampling_boost_until" field.
+func (m *LiveSafetyIncidentMutation) ResetSamplingBoostUntil() {
+	m.sampling_boost_until = nil
+	delete(m.clearedFields, livesafetyincident.FieldSamplingBoostUntil)
+}
+
+// SetHashMatch sets the "hash_match" field.
+func (m *LiveSafetyIncidentMutation) SetHashMatch(b bool) {
+	m.hash_match = &b
+}
+
+// HashMatch returns the value of the "hash_match" field in the mutation.
+func (m *LiveSafetyIncidentMutation) HashMatch() (r bool, exists bool) {
+	v := m.hash_match
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHashMatch returns the old "hash_match" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldHashMatch(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHashMatch is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHashMatch requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHashMatch: %w", err)
+	}
+	return oldValue.HashMatch, nil
+}
+
+// ResetHashMatch resets all changes to the "hash_match" field.
+func (m *LiveSafetyIncidentMutation) ResetHashMatch() {
+	m.hash_match = nil
+}
+
+// SetAppealedAt sets the "appealed_at" field.
+func (m *LiveSafetyIncidentMutation) SetAppealedAt(t time.Time) {
+	m.appealed_at = &t
+}
+
+// AppealedAt returns the value of the "appealed_at" field in the mutation.
+func (m *LiveSafetyIncidentMutation) AppealedAt() (r time.Time, exists bool) {
+	v := m.appealed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppealedAt returns the old "appealed_at" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldAppealedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppealedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppealedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppealedAt: %w", err)
+	}
+	return oldValue.AppealedAt, nil
+}
+
+// ClearAppealedAt clears the value of the "appealed_at" field.
+func (m *LiveSafetyIncidentMutation) ClearAppealedAt() {
+	m.appealed_at = nil
+	m.clearedFields[livesafetyincident.FieldAppealedAt] = struct{}{}
+}
+
+// AppealedAtCleared returns if the "appealed_at" field was cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) AppealedAtCleared() bool {
+	_, ok := m.clearedFields[livesafetyincident.FieldAppealedAt]
+	return ok
+}
+
+// ResetAppealedAt resets all changes to the "appealed_at" field.
+func (m *LiveSafetyIncidentMutation) ResetAppealedAt() {
+	m.appealed_at = nil
+	delete(m.clearedFields, livesafetyincident.FieldAppealedAt)
+}
+
+// SetAppealMessage sets the "appeal_message" field.
+func (m *LiveSafetyIncidentMutation) SetAppealMessage(s string) {
+	m.appeal_message = &s
+}
+
+// AppealMessage returns the value of the "appeal_message" field in the mutation.
+func (m *LiveSafetyIncidentMutation) AppealMessage() (r string, exists bool) {
+	v := m.appeal_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppealMessage returns the old "appeal_message" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldAppealMessage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppealMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppealMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppealMessage: %w", err)
+	}
+	return oldValue.AppealMessage, nil
+}
+
+// ResetAppealMessage resets all changes to the "appeal_message" field.
+func (m *LiveSafetyIncidentMutation) ResetAppealMessage() {
+	m.appeal_message = nil
+}
+
+// SetLiveEndedAt sets the "live_ended_at" field.
+func (m *LiveSafetyIncidentMutation) SetLiveEndedAt(t time.Time) {
+	m.live_ended_at = &t
+}
+
+// LiveEndedAt returns the value of the "live_ended_at" field in the mutation.
+func (m *LiveSafetyIncidentMutation) LiveEndedAt() (r time.Time, exists bool) {
+	v := m.live_ended_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveEndedAt returns the old "live_ended_at" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldLiveEndedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveEndedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveEndedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveEndedAt: %w", err)
+	}
+	return oldValue.LiveEndedAt, nil
+}
+
+// ClearLiveEndedAt clears the value of the "live_ended_at" field.
+func (m *LiveSafetyIncidentMutation) ClearLiveEndedAt() {
+	m.live_ended_at = nil
+	m.clearedFields[livesafetyincident.FieldLiveEndedAt] = struct{}{}
+}
+
+// LiveEndedAtCleared returns if the "live_ended_at" field was cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) LiveEndedAtCleared() bool {
+	_, ok := m.clearedFields[livesafetyincident.FieldLiveEndedAt]
+	return ok
+}
+
+// ResetLiveEndedAt resets all changes to the "live_ended_at" field.
+func (m *LiveSafetyIncidentMutation) ResetLiveEndedAt() {
+	m.live_ended_at = nil
+	delete(m.clearedFields, livesafetyincident.FieldLiveEndedAt)
+}
+
+// SetResolution sets the "resolution" field.
+func (m *LiveSafetyIncidentMutation) SetResolution(s string) {
+	m.resolution = &s
+}
+
+// Resolution returns the value of the "resolution" field in the mutation.
+func (m *LiveSafetyIncidentMutation) Resolution() (r string, exists bool) {
+	v := m.resolution
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResolution returns the old "resolution" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldResolution(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResolution is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResolution requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResolution: %w", err)
+	}
+	return oldValue.Resolution, nil
+}
+
+// ResetResolution resets all changes to the "resolution" field.
+func (m *LiveSafetyIncidentMutation) ResetResolution() {
+	m.resolution = nil
+}
+
+// SetDecision sets the "decision" field.
+func (m *LiveSafetyIncidentMutation) SetDecision(b []byte) {
+	m.decision = &b
+}
+
+// Decision returns the value of the "decision" field in the mutation.
+func (m *LiveSafetyIncidentMutation) Decision() (r []byte, exists bool) {
+	v := m.decision
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDecision returns the old "decision" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldDecision(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDecision is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDecision requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDecision: %w", err)
+	}
+	return oldValue.Decision, nil
+}
+
+// ClearDecision clears the value of the "decision" field.
+func (m *LiveSafetyIncidentMutation) ClearDecision() {
+	m.decision = nil
+	m.clearedFields[livesafetyincident.FieldDecision] = struct{}{}
+}
+
+// DecisionCleared returns if the "decision" field was cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) DecisionCleared() bool {
+	_, ok := m.clearedFields[livesafetyincident.FieldDecision]
+	return ok
+}
+
+// ResetDecision resets all changes to the "decision" field.
+func (m *LiveSafetyIncidentMutation) ResetDecision() {
+	m.decision = nil
+	delete(m.clearedFields, livesafetyincident.FieldDecision)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *LiveSafetyIncidentMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *LiveSafetyIncidentMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the LiveSafetyIncident entity.
+// If the LiveSafetyIncident object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetyIncidentMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *LiveSafetyIncidentMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the LiveSafetyIncidentMutation builder.
+func (m *LiveSafetyIncidentMutation) Where(ps ...predicate.LiveSafetyIncident) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LiveSafetyIncidentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LiveSafetyIncidentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LiveSafetyIncident, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LiveSafetyIncidentMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LiveSafetyIncidentMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LiveSafetyIncident).
+func (m *LiveSafetyIncidentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LiveSafetyIncidentMutation) Fields() []string {
+	fields := make([]string, 0, 25)
+	if m.created_at != nil {
+		fields = append(fields, livesafetyincident.FieldCreatedAt)
+	}
+	if m.live_id != nil {
+		fields = append(fields, livesafetyincident.FieldLiveID)
+	}
+	if m.host_id != nil {
+		fields = append(fields, livesafetyincident.FieldHostID)
+	}
+	if m.status != nil {
+		fields = append(fields, livesafetyincident.FieldStatus)
+	}
+	if m.priority != nil {
+		fields = append(fields, livesafetyincident.FieldPriority)
+	}
+	if m.sla_due_at != nil {
+		fields = append(fields, livesafetyincident.FieldSLADueAt)
+	}
+	if m.hold_active != nil {
+		fields = append(fields, livesafetyincident.FieldHoldActive)
+	}
+	if m.hold_category != nil {
+		fields = append(fields, livesafetyincident.FieldHoldCategory)
+	}
+	if m.hold_reason != nil {
+		fields = append(fields, livesafetyincident.FieldHoldReason)
+	}
+	if m.hold_source != nil {
+		fields = append(fields, livesafetyincident.FieldHoldSource)
+	}
+	if m.hold_started_at != nil {
+		fields = append(fields, livesafetyincident.FieldHoldStartedAt)
+	}
+	if m.top_category != nil {
+		fields = append(fields, livesafetyincident.FieldTopCategory)
+	}
+	if m.top_confidence != nil {
+		fields = append(fields, livesafetyincident.FieldTopConfidence)
+	}
+	if m.warning_count != nil {
+		fields = append(fields, livesafetyincident.FieldWarningCount)
+	}
+	if m.last_warned_at != nil {
+		fields = append(fields, livesafetyincident.FieldLastWarnedAt)
+	}
+	if m.report_count != nil {
+		fields = append(fields, livesafetyincident.FieldReportCount)
+	}
+	if m.last_reported_at != nil {
+		fields = append(fields, livesafetyincident.FieldLastReportedAt)
+	}
+	if m.sampling_boost_until != nil {
+		fields = append(fields, livesafetyincident.FieldSamplingBoostUntil)
+	}
+	if m.hash_match != nil {
+		fields = append(fields, livesafetyincident.FieldHashMatch)
+	}
+	if m.appealed_at != nil {
+		fields = append(fields, livesafetyincident.FieldAppealedAt)
+	}
+	if m.appeal_message != nil {
+		fields = append(fields, livesafetyincident.FieldAppealMessage)
+	}
+	if m.live_ended_at != nil {
+		fields = append(fields, livesafetyincident.FieldLiveEndedAt)
+	}
+	if m.resolution != nil {
+		fields = append(fields, livesafetyincident.FieldResolution)
+	}
+	if m.decision != nil {
+		fields = append(fields, livesafetyincident.FieldDecision)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, livesafetyincident.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LiveSafetyIncidentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case livesafetyincident.FieldCreatedAt:
+		return m.CreatedAt()
+	case livesafetyincident.FieldLiveID:
+		return m.LiveID()
+	case livesafetyincident.FieldHostID:
+		return m.HostID()
+	case livesafetyincident.FieldStatus:
+		return m.Status()
+	case livesafetyincident.FieldPriority:
+		return m.Priority()
+	case livesafetyincident.FieldSLADueAt:
+		return m.SLADueAt()
+	case livesafetyincident.FieldHoldActive:
+		return m.HoldActive()
+	case livesafetyincident.FieldHoldCategory:
+		return m.HoldCategory()
+	case livesafetyincident.FieldHoldReason:
+		return m.HoldReason()
+	case livesafetyincident.FieldHoldSource:
+		return m.HoldSource()
+	case livesafetyincident.FieldHoldStartedAt:
+		return m.HoldStartedAt()
+	case livesafetyincident.FieldTopCategory:
+		return m.TopCategory()
+	case livesafetyincident.FieldTopConfidence:
+		return m.TopConfidence()
+	case livesafetyincident.FieldWarningCount:
+		return m.WarningCount()
+	case livesafetyincident.FieldLastWarnedAt:
+		return m.LastWarnedAt()
+	case livesafetyincident.FieldReportCount:
+		return m.ReportCount()
+	case livesafetyincident.FieldLastReportedAt:
+		return m.LastReportedAt()
+	case livesafetyincident.FieldSamplingBoostUntil:
+		return m.SamplingBoostUntil()
+	case livesafetyincident.FieldHashMatch:
+		return m.HashMatch()
+	case livesafetyincident.FieldAppealedAt:
+		return m.AppealedAt()
+	case livesafetyincident.FieldAppealMessage:
+		return m.AppealMessage()
+	case livesafetyincident.FieldLiveEndedAt:
+		return m.LiveEndedAt()
+	case livesafetyincident.FieldResolution:
+		return m.Resolution()
+	case livesafetyincident.FieldDecision:
+		return m.Decision()
+	case livesafetyincident.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LiveSafetyIncidentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case livesafetyincident.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case livesafetyincident.FieldLiveID:
+		return m.OldLiveID(ctx)
+	case livesafetyincident.FieldHostID:
+		return m.OldHostID(ctx)
+	case livesafetyincident.FieldStatus:
+		return m.OldStatus(ctx)
+	case livesafetyincident.FieldPriority:
+		return m.OldPriority(ctx)
+	case livesafetyincident.FieldSLADueAt:
+		return m.OldSLADueAt(ctx)
+	case livesafetyincident.FieldHoldActive:
+		return m.OldHoldActive(ctx)
+	case livesafetyincident.FieldHoldCategory:
+		return m.OldHoldCategory(ctx)
+	case livesafetyincident.FieldHoldReason:
+		return m.OldHoldReason(ctx)
+	case livesafetyincident.FieldHoldSource:
+		return m.OldHoldSource(ctx)
+	case livesafetyincident.FieldHoldStartedAt:
+		return m.OldHoldStartedAt(ctx)
+	case livesafetyincident.FieldTopCategory:
+		return m.OldTopCategory(ctx)
+	case livesafetyincident.FieldTopConfidence:
+		return m.OldTopConfidence(ctx)
+	case livesafetyincident.FieldWarningCount:
+		return m.OldWarningCount(ctx)
+	case livesafetyincident.FieldLastWarnedAt:
+		return m.OldLastWarnedAt(ctx)
+	case livesafetyincident.FieldReportCount:
+		return m.OldReportCount(ctx)
+	case livesafetyincident.FieldLastReportedAt:
+		return m.OldLastReportedAt(ctx)
+	case livesafetyincident.FieldSamplingBoostUntil:
+		return m.OldSamplingBoostUntil(ctx)
+	case livesafetyincident.FieldHashMatch:
+		return m.OldHashMatch(ctx)
+	case livesafetyincident.FieldAppealedAt:
+		return m.OldAppealedAt(ctx)
+	case livesafetyincident.FieldAppealMessage:
+		return m.OldAppealMessage(ctx)
+	case livesafetyincident.FieldLiveEndedAt:
+		return m.OldLiveEndedAt(ctx)
+	case livesafetyincident.FieldResolution:
+		return m.OldResolution(ctx)
+	case livesafetyincident.FieldDecision:
+		return m.OldDecision(ctx)
+	case livesafetyincident.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown LiveSafetyIncident field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveSafetyIncidentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case livesafetyincident.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case livesafetyincident.FieldLiveID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveID(v)
+		return nil
+	case livesafetyincident.FieldHostID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHostID(v)
+		return nil
+	case livesafetyincident.FieldStatus:
+		v, ok := value.(livesafetyincident.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case livesafetyincident.FieldPriority:
+		v, ok := value.(livesafetyincident.Priority)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPriority(v)
+		return nil
+	case livesafetyincident.FieldSLADueAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSLADueAt(v)
+		return nil
+	case livesafetyincident.FieldHoldActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHoldActive(v)
+		return nil
+	case livesafetyincident.FieldHoldCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHoldCategory(v)
+		return nil
+	case livesafetyincident.FieldHoldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHoldReason(v)
+		return nil
+	case livesafetyincident.FieldHoldSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHoldSource(v)
+		return nil
+	case livesafetyincident.FieldHoldStartedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHoldStartedAt(v)
+		return nil
+	case livesafetyincident.FieldTopCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTopCategory(v)
+		return nil
+	case livesafetyincident.FieldTopConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTopConfidence(v)
+		return nil
+	case livesafetyincident.FieldWarningCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWarningCount(v)
+		return nil
+	case livesafetyincident.FieldLastWarnedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastWarnedAt(v)
+		return nil
+	case livesafetyincident.FieldReportCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReportCount(v)
+		return nil
+	case livesafetyincident.FieldLastReportedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastReportedAt(v)
+		return nil
+	case livesafetyincident.FieldSamplingBoostUntil:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSamplingBoostUntil(v)
+		return nil
+	case livesafetyincident.FieldHashMatch:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHashMatch(v)
+		return nil
+	case livesafetyincident.FieldAppealedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppealedAt(v)
+		return nil
+	case livesafetyincident.FieldAppealMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppealMessage(v)
+		return nil
+	case livesafetyincident.FieldLiveEndedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveEndedAt(v)
+		return nil
+	case livesafetyincident.FieldResolution:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResolution(v)
+		return nil
+	case livesafetyincident.FieldDecision:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDecision(v)
+		return nil
+	case livesafetyincident.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveSafetyIncident field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LiveSafetyIncidentMutation) AddedFields() []string {
+	var fields []string
+	if m.addtop_confidence != nil {
+		fields = append(fields, livesafetyincident.FieldTopConfidence)
+	}
+	if m.addwarning_count != nil {
+		fields = append(fields, livesafetyincident.FieldWarningCount)
+	}
+	if m.addreport_count != nil {
+		fields = append(fields, livesafetyincident.FieldReportCount)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LiveSafetyIncidentMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case livesafetyincident.FieldTopConfidence:
+		return m.AddedTopConfidence()
+	case livesafetyincident.FieldWarningCount:
+		return m.AddedWarningCount()
+	case livesafetyincident.FieldReportCount:
+		return m.AddedReportCount()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveSafetyIncidentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case livesafetyincident.FieldTopConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTopConfidence(v)
+		return nil
+	case livesafetyincident.FieldWarningCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWarningCount(v)
+		return nil
+	case livesafetyincident.FieldReportCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddReportCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveSafetyIncident numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LiveSafetyIncidentMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(livesafetyincident.FieldHostID) {
+		fields = append(fields, livesafetyincident.FieldHostID)
+	}
+	if m.FieldCleared(livesafetyincident.FieldHoldStartedAt) {
+		fields = append(fields, livesafetyincident.FieldHoldStartedAt)
+	}
+	if m.FieldCleared(livesafetyincident.FieldLastWarnedAt) {
+		fields = append(fields, livesafetyincident.FieldLastWarnedAt)
+	}
+	if m.FieldCleared(livesafetyincident.FieldLastReportedAt) {
+		fields = append(fields, livesafetyincident.FieldLastReportedAt)
+	}
+	if m.FieldCleared(livesafetyincident.FieldSamplingBoostUntil) {
+		fields = append(fields, livesafetyincident.FieldSamplingBoostUntil)
+	}
+	if m.FieldCleared(livesafetyincident.FieldAppealedAt) {
+		fields = append(fields, livesafetyincident.FieldAppealedAt)
+	}
+	if m.FieldCleared(livesafetyincident.FieldLiveEndedAt) {
+		fields = append(fields, livesafetyincident.FieldLiveEndedAt)
+	}
+	if m.FieldCleared(livesafetyincident.FieldDecision) {
+		fields = append(fields, livesafetyincident.FieldDecision)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LiveSafetyIncidentMutation) ClearField(name string) error {
+	switch name {
+	case livesafetyincident.FieldHostID:
+		m.ClearHostID()
+		return nil
+	case livesafetyincident.FieldHoldStartedAt:
+		m.ClearHoldStartedAt()
+		return nil
+	case livesafetyincident.FieldLastWarnedAt:
+		m.ClearLastWarnedAt()
+		return nil
+	case livesafetyincident.FieldLastReportedAt:
+		m.ClearLastReportedAt()
+		return nil
+	case livesafetyincident.FieldSamplingBoostUntil:
+		m.ClearSamplingBoostUntil()
+		return nil
+	case livesafetyincident.FieldAppealedAt:
+		m.ClearAppealedAt()
+		return nil
+	case livesafetyincident.FieldLiveEndedAt:
+		m.ClearLiveEndedAt()
+		return nil
+	case livesafetyincident.FieldDecision:
+		m.ClearDecision()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveSafetyIncident nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LiveSafetyIncidentMutation) ResetField(name string) error {
+	switch name {
+	case livesafetyincident.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case livesafetyincident.FieldLiveID:
+		m.ResetLiveID()
+		return nil
+	case livesafetyincident.FieldHostID:
+		m.ResetHostID()
+		return nil
+	case livesafetyincident.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case livesafetyincident.FieldPriority:
+		m.ResetPriority()
+		return nil
+	case livesafetyincident.FieldSLADueAt:
+		m.ResetSLADueAt()
+		return nil
+	case livesafetyincident.FieldHoldActive:
+		m.ResetHoldActive()
+		return nil
+	case livesafetyincident.FieldHoldCategory:
+		m.ResetHoldCategory()
+		return nil
+	case livesafetyincident.FieldHoldReason:
+		m.ResetHoldReason()
+		return nil
+	case livesafetyincident.FieldHoldSource:
+		m.ResetHoldSource()
+		return nil
+	case livesafetyincident.FieldHoldStartedAt:
+		m.ResetHoldStartedAt()
+		return nil
+	case livesafetyincident.FieldTopCategory:
+		m.ResetTopCategory()
+		return nil
+	case livesafetyincident.FieldTopConfidence:
+		m.ResetTopConfidence()
+		return nil
+	case livesafetyincident.FieldWarningCount:
+		m.ResetWarningCount()
+		return nil
+	case livesafetyincident.FieldLastWarnedAt:
+		m.ResetLastWarnedAt()
+		return nil
+	case livesafetyincident.FieldReportCount:
+		m.ResetReportCount()
+		return nil
+	case livesafetyincident.FieldLastReportedAt:
+		m.ResetLastReportedAt()
+		return nil
+	case livesafetyincident.FieldSamplingBoostUntil:
+		m.ResetSamplingBoostUntil()
+		return nil
+	case livesafetyincident.FieldHashMatch:
+		m.ResetHashMatch()
+		return nil
+	case livesafetyincident.FieldAppealedAt:
+		m.ResetAppealedAt()
+		return nil
+	case livesafetyincident.FieldAppealMessage:
+		m.ResetAppealMessage()
+		return nil
+	case livesafetyincident.FieldLiveEndedAt:
+		m.ResetLiveEndedAt()
+		return nil
+	case livesafetyincident.FieldResolution:
+		m.ResetResolution()
+		return nil
+	case livesafetyincident.FieldDecision:
+		m.ResetDecision()
+		return nil
+	case livesafetyincident.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveSafetyIncident field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LiveSafetyIncidentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LiveSafetyIncidentMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LiveSafetyIncidentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LiveSafetyIncidentMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LiveSafetyIncidentMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LiveSafetyIncidentMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LiveSafetyIncident unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LiveSafetyIncidentMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LiveSafetyIncident edge %s", name)
+}
+
+// LiveSafetySignalMutation represents an operation that mutates the LiveSafetySignal nodes in the graph.
+type LiveSafetySignalMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	created_at         *time.Time
+	incident_id        *uuid.UUID
+	live_id            *string
+	kind               *livesafetysignal.Kind
+	source_key         *string
+	frame_ref          *string
+	captured_at        *time.Time
+	labels             *[]byte
+	categories         *[]byte
+	confidence         *float64
+	addconfidence      *float64
+	suggested_action   *string
+	model_version      *string
+	action_taken       *string
+	transcript_snippet *string
+	reason             *string
+	details            *string
+	reporter_id        *uuid.UUID
+	offset_seconds     *float64
+	addoffset_seconds  *float64
+	hash_match         *bool
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*LiveSafetySignal, error)
+	predicates         []predicate.LiveSafetySignal
+}
+
+var _ ent.Mutation = (*LiveSafetySignalMutation)(nil)
+
+// livesafetysignalOption allows management of the mutation configuration using functional options.
+type livesafetysignalOption func(*LiveSafetySignalMutation)
+
+// newLiveSafetySignalMutation creates new mutation for the LiveSafetySignal entity.
+func newLiveSafetySignalMutation(c config, op Op, opts ...livesafetysignalOption) *LiveSafetySignalMutation {
+	m := &LiveSafetySignalMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLiveSafetySignal,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLiveSafetySignalID sets the ID field of the mutation.
+func withLiveSafetySignalID(id uuid.UUID) livesafetysignalOption {
+	return func(m *LiveSafetySignalMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *LiveSafetySignal
+		)
+		m.oldValue = func(ctx context.Context) (*LiveSafetySignal, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().LiveSafetySignal.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLiveSafetySignal sets the old LiveSafetySignal of the mutation.
+func withLiveSafetySignal(node *LiveSafetySignal) livesafetysignalOption {
+	return func(m *LiveSafetySignalMutation) {
+		m.oldValue = func(context.Context) (*LiveSafetySignal, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LiveSafetySignalMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LiveSafetySignalMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of LiveSafetySignal entities.
+func (m *LiveSafetySignalMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LiveSafetySignalMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LiveSafetySignalMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().LiveSafetySignal.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LiveSafetySignalMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LiveSafetySignalMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LiveSafetySignalMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetIncidentID sets the "incident_id" field.
+func (m *LiveSafetySignalMutation) SetIncidentID(u uuid.UUID) {
+	m.incident_id = &u
+}
+
+// IncidentID returns the value of the "incident_id" field in the mutation.
+func (m *LiveSafetySignalMutation) IncidentID() (r uuid.UUID, exists bool) {
+	v := m.incident_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIncidentID returns the old "incident_id" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldIncidentID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIncidentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIncidentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIncidentID: %w", err)
+	}
+	return oldValue.IncidentID, nil
+}
+
+// ResetIncidentID resets all changes to the "incident_id" field.
+func (m *LiveSafetySignalMutation) ResetIncidentID() {
+	m.incident_id = nil
+}
+
+// SetLiveID sets the "live_id" field.
+func (m *LiveSafetySignalMutation) SetLiveID(s string) {
+	m.live_id = &s
+}
+
+// LiveID returns the value of the "live_id" field in the mutation.
+func (m *LiveSafetySignalMutation) LiveID() (r string, exists bool) {
+	v := m.live_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLiveID returns the old "live_id" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldLiveID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLiveID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLiveID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLiveID: %w", err)
+	}
+	return oldValue.LiveID, nil
+}
+
+// ResetLiveID resets all changes to the "live_id" field.
+func (m *LiveSafetySignalMutation) ResetLiveID() {
+	m.live_id = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *LiveSafetySignalMutation) SetKind(l livesafetysignal.Kind) {
+	m.kind = &l
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *LiveSafetySignalMutation) Kind() (r livesafetysignal.Kind, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldKind(ctx context.Context) (v livesafetysignal.Kind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *LiveSafetySignalMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetSourceKey sets the "source_key" field.
+func (m *LiveSafetySignalMutation) SetSourceKey(s string) {
+	m.source_key = &s
+}
+
+// SourceKey returns the value of the "source_key" field in the mutation.
+func (m *LiveSafetySignalMutation) SourceKey() (r string, exists bool) {
+	v := m.source_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceKey returns the old "source_key" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldSourceKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceKey: %w", err)
+	}
+	return oldValue.SourceKey, nil
+}
+
+// ResetSourceKey resets all changes to the "source_key" field.
+func (m *LiveSafetySignalMutation) ResetSourceKey() {
+	m.source_key = nil
+}
+
+// SetFrameRef sets the "frame_ref" field.
+func (m *LiveSafetySignalMutation) SetFrameRef(s string) {
+	m.frame_ref = &s
+}
+
+// FrameRef returns the value of the "frame_ref" field in the mutation.
+func (m *LiveSafetySignalMutation) FrameRef() (r string, exists bool) {
+	v := m.frame_ref
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFrameRef returns the old "frame_ref" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldFrameRef(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFrameRef is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFrameRef requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFrameRef: %w", err)
+	}
+	return oldValue.FrameRef, nil
+}
+
+// ResetFrameRef resets all changes to the "frame_ref" field.
+func (m *LiveSafetySignalMutation) ResetFrameRef() {
+	m.frame_ref = nil
+}
+
+// SetCapturedAt sets the "captured_at" field.
+func (m *LiveSafetySignalMutation) SetCapturedAt(t time.Time) {
+	m.captured_at = &t
+}
+
+// CapturedAt returns the value of the "captured_at" field in the mutation.
+func (m *LiveSafetySignalMutation) CapturedAt() (r time.Time, exists bool) {
+	v := m.captured_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCapturedAt returns the old "captured_at" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldCapturedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCapturedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCapturedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCapturedAt: %w", err)
+	}
+	return oldValue.CapturedAt, nil
+}
+
+// ClearCapturedAt clears the value of the "captured_at" field.
+func (m *LiveSafetySignalMutation) ClearCapturedAt() {
+	m.captured_at = nil
+	m.clearedFields[livesafetysignal.FieldCapturedAt] = struct{}{}
+}
+
+// CapturedAtCleared returns if the "captured_at" field was cleared in this mutation.
+func (m *LiveSafetySignalMutation) CapturedAtCleared() bool {
+	_, ok := m.clearedFields[livesafetysignal.FieldCapturedAt]
+	return ok
+}
+
+// ResetCapturedAt resets all changes to the "captured_at" field.
+func (m *LiveSafetySignalMutation) ResetCapturedAt() {
+	m.captured_at = nil
+	delete(m.clearedFields, livesafetysignal.FieldCapturedAt)
+}
+
+// SetLabels sets the "labels" field.
+func (m *LiveSafetySignalMutation) SetLabels(b []byte) {
+	m.labels = &b
+}
+
+// Labels returns the value of the "labels" field in the mutation.
+func (m *LiveSafetySignalMutation) Labels() (r []byte, exists bool) {
+	v := m.labels
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLabels returns the old "labels" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldLabels(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLabels is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLabels requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLabels: %w", err)
+	}
+	return oldValue.Labels, nil
+}
+
+// ClearLabels clears the value of the "labels" field.
+func (m *LiveSafetySignalMutation) ClearLabels() {
+	m.labels = nil
+	m.clearedFields[livesafetysignal.FieldLabels] = struct{}{}
+}
+
+// LabelsCleared returns if the "labels" field was cleared in this mutation.
+func (m *LiveSafetySignalMutation) LabelsCleared() bool {
+	_, ok := m.clearedFields[livesafetysignal.FieldLabels]
+	return ok
+}
+
+// ResetLabels resets all changes to the "labels" field.
+func (m *LiveSafetySignalMutation) ResetLabels() {
+	m.labels = nil
+	delete(m.clearedFields, livesafetysignal.FieldLabels)
+}
+
+// SetCategories sets the "categories" field.
+func (m *LiveSafetySignalMutation) SetCategories(b []byte) {
+	m.categories = &b
+}
+
+// Categories returns the value of the "categories" field in the mutation.
+func (m *LiveSafetySignalMutation) Categories() (r []byte, exists bool) {
+	v := m.categories
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategories returns the old "categories" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldCategories(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategories is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategories requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategories: %w", err)
+	}
+	return oldValue.Categories, nil
+}
+
+// ClearCategories clears the value of the "categories" field.
+func (m *LiveSafetySignalMutation) ClearCategories() {
+	m.categories = nil
+	m.clearedFields[livesafetysignal.FieldCategories] = struct{}{}
+}
+
+// CategoriesCleared returns if the "categories" field was cleared in this mutation.
+func (m *LiveSafetySignalMutation) CategoriesCleared() bool {
+	_, ok := m.clearedFields[livesafetysignal.FieldCategories]
+	return ok
+}
+
+// ResetCategories resets all changes to the "categories" field.
+func (m *LiveSafetySignalMutation) ResetCategories() {
+	m.categories = nil
+	delete(m.clearedFields, livesafetysignal.FieldCategories)
+}
+
+// SetConfidence sets the "confidence" field.
+func (m *LiveSafetySignalMutation) SetConfidence(f float64) {
+	m.confidence = &f
+	m.addconfidence = nil
+}
+
+// Confidence returns the value of the "confidence" field in the mutation.
+func (m *LiveSafetySignalMutation) Confidence() (r float64, exists bool) {
+	v := m.confidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConfidence returns the old "confidence" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldConfidence(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConfidence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConfidence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConfidence: %w", err)
+	}
+	return oldValue.Confidence, nil
+}
+
+// AddConfidence adds f to the "confidence" field.
+func (m *LiveSafetySignalMutation) AddConfidence(f float64) {
+	if m.addconfidence != nil {
+		*m.addconfidence += f
+	} else {
+		m.addconfidence = &f
+	}
+}
+
+// AddedConfidence returns the value that was added to the "confidence" field in this mutation.
+func (m *LiveSafetySignalMutation) AddedConfidence() (r float64, exists bool) {
+	v := m.addconfidence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetConfidence resets all changes to the "confidence" field.
+func (m *LiveSafetySignalMutation) ResetConfidence() {
+	m.confidence = nil
+	m.addconfidence = nil
+}
+
+// SetSuggestedAction sets the "suggested_action" field.
+func (m *LiveSafetySignalMutation) SetSuggestedAction(s string) {
+	m.suggested_action = &s
+}
+
+// SuggestedAction returns the value of the "suggested_action" field in the mutation.
+func (m *LiveSafetySignalMutation) SuggestedAction() (r string, exists bool) {
+	v := m.suggested_action
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSuggestedAction returns the old "suggested_action" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldSuggestedAction(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSuggestedAction is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSuggestedAction requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSuggestedAction: %w", err)
+	}
+	return oldValue.SuggestedAction, nil
+}
+
+// ResetSuggestedAction resets all changes to the "suggested_action" field.
+func (m *LiveSafetySignalMutation) ResetSuggestedAction() {
+	m.suggested_action = nil
+}
+
+// SetModelVersion sets the "model_version" field.
+func (m *LiveSafetySignalMutation) SetModelVersion(s string) {
+	m.model_version = &s
+}
+
+// ModelVersion returns the value of the "model_version" field in the mutation.
+func (m *LiveSafetySignalMutation) ModelVersion() (r string, exists bool) {
+	v := m.model_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModelVersion returns the old "model_version" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldModelVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModelVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModelVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModelVersion: %w", err)
+	}
+	return oldValue.ModelVersion, nil
+}
+
+// ResetModelVersion resets all changes to the "model_version" field.
+func (m *LiveSafetySignalMutation) ResetModelVersion() {
+	m.model_version = nil
+}
+
+// SetActionTaken sets the "action_taken" field.
+func (m *LiveSafetySignalMutation) SetActionTaken(s string) {
+	m.action_taken = &s
+}
+
+// ActionTaken returns the value of the "action_taken" field in the mutation.
+func (m *LiveSafetySignalMutation) ActionTaken() (r string, exists bool) {
+	v := m.action_taken
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActionTaken returns the old "action_taken" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldActionTaken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActionTaken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActionTaken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActionTaken: %w", err)
+	}
+	return oldValue.ActionTaken, nil
+}
+
+// ResetActionTaken resets all changes to the "action_taken" field.
+func (m *LiveSafetySignalMutation) ResetActionTaken() {
+	m.action_taken = nil
+}
+
+// SetTranscriptSnippet sets the "transcript_snippet" field.
+func (m *LiveSafetySignalMutation) SetTranscriptSnippet(s string) {
+	m.transcript_snippet = &s
+}
+
+// TranscriptSnippet returns the value of the "transcript_snippet" field in the mutation.
+func (m *LiveSafetySignalMutation) TranscriptSnippet() (r string, exists bool) {
+	v := m.transcript_snippet
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTranscriptSnippet returns the old "transcript_snippet" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldTranscriptSnippet(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTranscriptSnippet is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTranscriptSnippet requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTranscriptSnippet: %w", err)
+	}
+	return oldValue.TranscriptSnippet, nil
+}
+
+// ResetTranscriptSnippet resets all changes to the "transcript_snippet" field.
+func (m *LiveSafetySignalMutation) ResetTranscriptSnippet() {
+	m.transcript_snippet = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *LiveSafetySignalMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *LiveSafetySignalMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *LiveSafetySignalMutation) ResetReason() {
+	m.reason = nil
+}
+
+// SetDetails sets the "details" field.
+func (m *LiveSafetySignalMutation) SetDetails(s string) {
+	m.details = &s
+}
+
+// Details returns the value of the "details" field in the mutation.
+func (m *LiveSafetySignalMutation) Details() (r string, exists bool) {
+	v := m.details
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDetails returns the old "details" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldDetails(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDetails is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDetails requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDetails: %w", err)
+	}
+	return oldValue.Details, nil
+}
+
+// ResetDetails resets all changes to the "details" field.
+func (m *LiveSafetySignalMutation) ResetDetails() {
+	m.details = nil
+}
+
+// SetReporterID sets the "reporter_id" field.
+func (m *LiveSafetySignalMutation) SetReporterID(u uuid.UUID) {
+	m.reporter_id = &u
+}
+
+// ReporterID returns the value of the "reporter_id" field in the mutation.
+func (m *LiveSafetySignalMutation) ReporterID() (r uuid.UUID, exists bool) {
+	v := m.reporter_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReporterID returns the old "reporter_id" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldReporterID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReporterID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReporterID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReporterID: %w", err)
+	}
+	return oldValue.ReporterID, nil
+}
+
+// ClearReporterID clears the value of the "reporter_id" field.
+func (m *LiveSafetySignalMutation) ClearReporterID() {
+	m.reporter_id = nil
+	m.clearedFields[livesafetysignal.FieldReporterID] = struct{}{}
+}
+
+// ReporterIDCleared returns if the "reporter_id" field was cleared in this mutation.
+func (m *LiveSafetySignalMutation) ReporterIDCleared() bool {
+	_, ok := m.clearedFields[livesafetysignal.FieldReporterID]
+	return ok
+}
+
+// ResetReporterID resets all changes to the "reporter_id" field.
+func (m *LiveSafetySignalMutation) ResetReporterID() {
+	m.reporter_id = nil
+	delete(m.clearedFields, livesafetysignal.FieldReporterID)
+}
+
+// SetOffsetSeconds sets the "offset_seconds" field.
+func (m *LiveSafetySignalMutation) SetOffsetSeconds(f float64) {
+	m.offset_seconds = &f
+	m.addoffset_seconds = nil
+}
+
+// OffsetSeconds returns the value of the "offset_seconds" field in the mutation.
+func (m *LiveSafetySignalMutation) OffsetSeconds() (r float64, exists bool) {
+	v := m.offset_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOffsetSeconds returns the old "offset_seconds" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldOffsetSeconds(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOffsetSeconds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOffsetSeconds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOffsetSeconds: %w", err)
+	}
+	return oldValue.OffsetSeconds, nil
+}
+
+// AddOffsetSeconds adds f to the "offset_seconds" field.
+func (m *LiveSafetySignalMutation) AddOffsetSeconds(f float64) {
+	if m.addoffset_seconds != nil {
+		*m.addoffset_seconds += f
+	} else {
+		m.addoffset_seconds = &f
+	}
+}
+
+// AddedOffsetSeconds returns the value that was added to the "offset_seconds" field in this mutation.
+func (m *LiveSafetySignalMutation) AddedOffsetSeconds() (r float64, exists bool) {
+	v := m.addoffset_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOffsetSeconds clears the value of the "offset_seconds" field.
+func (m *LiveSafetySignalMutation) ClearOffsetSeconds() {
+	m.offset_seconds = nil
+	m.addoffset_seconds = nil
+	m.clearedFields[livesafetysignal.FieldOffsetSeconds] = struct{}{}
+}
+
+// OffsetSecondsCleared returns if the "offset_seconds" field was cleared in this mutation.
+func (m *LiveSafetySignalMutation) OffsetSecondsCleared() bool {
+	_, ok := m.clearedFields[livesafetysignal.FieldOffsetSeconds]
+	return ok
+}
+
+// ResetOffsetSeconds resets all changes to the "offset_seconds" field.
+func (m *LiveSafetySignalMutation) ResetOffsetSeconds() {
+	m.offset_seconds = nil
+	m.addoffset_seconds = nil
+	delete(m.clearedFields, livesafetysignal.FieldOffsetSeconds)
+}
+
+// SetHashMatch sets the "hash_match" field.
+func (m *LiveSafetySignalMutation) SetHashMatch(b bool) {
+	m.hash_match = &b
+}
+
+// HashMatch returns the value of the "hash_match" field in the mutation.
+func (m *LiveSafetySignalMutation) HashMatch() (r bool, exists bool) {
+	v := m.hash_match
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHashMatch returns the old "hash_match" field's value of the LiveSafetySignal entity.
+// If the LiveSafetySignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveSafetySignalMutation) OldHashMatch(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHashMatch is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHashMatch requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHashMatch: %w", err)
+	}
+	return oldValue.HashMatch, nil
+}
+
+// ResetHashMatch resets all changes to the "hash_match" field.
+func (m *LiveSafetySignalMutation) ResetHashMatch() {
+	m.hash_match = nil
+}
+
+// Where appends a list predicates to the LiveSafetySignalMutation builder.
+func (m *LiveSafetySignalMutation) Where(ps ...predicate.LiveSafetySignal) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LiveSafetySignalMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LiveSafetySignalMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.LiveSafetySignal, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LiveSafetySignalMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LiveSafetySignalMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (LiveSafetySignal).
+func (m *LiveSafetySignalMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LiveSafetySignalMutation) Fields() []string {
+	fields := make([]string, 0, 19)
+	if m.created_at != nil {
+		fields = append(fields, livesafetysignal.FieldCreatedAt)
+	}
+	if m.incident_id != nil {
+		fields = append(fields, livesafetysignal.FieldIncidentID)
+	}
+	if m.live_id != nil {
+		fields = append(fields, livesafetysignal.FieldLiveID)
+	}
+	if m.kind != nil {
+		fields = append(fields, livesafetysignal.FieldKind)
+	}
+	if m.source_key != nil {
+		fields = append(fields, livesafetysignal.FieldSourceKey)
+	}
+	if m.frame_ref != nil {
+		fields = append(fields, livesafetysignal.FieldFrameRef)
+	}
+	if m.captured_at != nil {
+		fields = append(fields, livesafetysignal.FieldCapturedAt)
+	}
+	if m.labels != nil {
+		fields = append(fields, livesafetysignal.FieldLabels)
+	}
+	if m.categories != nil {
+		fields = append(fields, livesafetysignal.FieldCategories)
+	}
+	if m.confidence != nil {
+		fields = append(fields, livesafetysignal.FieldConfidence)
+	}
+	if m.suggested_action != nil {
+		fields = append(fields, livesafetysignal.FieldSuggestedAction)
+	}
+	if m.model_version != nil {
+		fields = append(fields, livesafetysignal.FieldModelVersion)
+	}
+	if m.action_taken != nil {
+		fields = append(fields, livesafetysignal.FieldActionTaken)
+	}
+	if m.transcript_snippet != nil {
+		fields = append(fields, livesafetysignal.FieldTranscriptSnippet)
+	}
+	if m.reason != nil {
+		fields = append(fields, livesafetysignal.FieldReason)
+	}
+	if m.details != nil {
+		fields = append(fields, livesafetysignal.FieldDetails)
+	}
+	if m.reporter_id != nil {
+		fields = append(fields, livesafetysignal.FieldReporterID)
+	}
+	if m.offset_seconds != nil {
+		fields = append(fields, livesafetysignal.FieldOffsetSeconds)
+	}
+	if m.hash_match != nil {
+		fields = append(fields, livesafetysignal.FieldHashMatch)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LiveSafetySignalMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case livesafetysignal.FieldCreatedAt:
+		return m.CreatedAt()
+	case livesafetysignal.FieldIncidentID:
+		return m.IncidentID()
+	case livesafetysignal.FieldLiveID:
+		return m.LiveID()
+	case livesafetysignal.FieldKind:
+		return m.Kind()
+	case livesafetysignal.FieldSourceKey:
+		return m.SourceKey()
+	case livesafetysignal.FieldFrameRef:
+		return m.FrameRef()
+	case livesafetysignal.FieldCapturedAt:
+		return m.CapturedAt()
+	case livesafetysignal.FieldLabels:
+		return m.Labels()
+	case livesafetysignal.FieldCategories:
+		return m.Categories()
+	case livesafetysignal.FieldConfidence:
+		return m.Confidence()
+	case livesafetysignal.FieldSuggestedAction:
+		return m.SuggestedAction()
+	case livesafetysignal.FieldModelVersion:
+		return m.ModelVersion()
+	case livesafetysignal.FieldActionTaken:
+		return m.ActionTaken()
+	case livesafetysignal.FieldTranscriptSnippet:
+		return m.TranscriptSnippet()
+	case livesafetysignal.FieldReason:
+		return m.Reason()
+	case livesafetysignal.FieldDetails:
+		return m.Details()
+	case livesafetysignal.FieldReporterID:
+		return m.ReporterID()
+	case livesafetysignal.FieldOffsetSeconds:
+		return m.OffsetSeconds()
+	case livesafetysignal.FieldHashMatch:
+		return m.HashMatch()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LiveSafetySignalMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case livesafetysignal.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case livesafetysignal.FieldIncidentID:
+		return m.OldIncidentID(ctx)
+	case livesafetysignal.FieldLiveID:
+		return m.OldLiveID(ctx)
+	case livesafetysignal.FieldKind:
+		return m.OldKind(ctx)
+	case livesafetysignal.FieldSourceKey:
+		return m.OldSourceKey(ctx)
+	case livesafetysignal.FieldFrameRef:
+		return m.OldFrameRef(ctx)
+	case livesafetysignal.FieldCapturedAt:
+		return m.OldCapturedAt(ctx)
+	case livesafetysignal.FieldLabels:
+		return m.OldLabels(ctx)
+	case livesafetysignal.FieldCategories:
+		return m.OldCategories(ctx)
+	case livesafetysignal.FieldConfidence:
+		return m.OldConfidence(ctx)
+	case livesafetysignal.FieldSuggestedAction:
+		return m.OldSuggestedAction(ctx)
+	case livesafetysignal.FieldModelVersion:
+		return m.OldModelVersion(ctx)
+	case livesafetysignal.FieldActionTaken:
+		return m.OldActionTaken(ctx)
+	case livesafetysignal.FieldTranscriptSnippet:
+		return m.OldTranscriptSnippet(ctx)
+	case livesafetysignal.FieldReason:
+		return m.OldReason(ctx)
+	case livesafetysignal.FieldDetails:
+		return m.OldDetails(ctx)
+	case livesafetysignal.FieldReporterID:
+		return m.OldReporterID(ctx)
+	case livesafetysignal.FieldOffsetSeconds:
+		return m.OldOffsetSeconds(ctx)
+	case livesafetysignal.FieldHashMatch:
+		return m.OldHashMatch(ctx)
+	}
+	return nil, fmt.Errorf("unknown LiveSafetySignal field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveSafetySignalMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case livesafetysignal.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case livesafetysignal.FieldIncidentID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIncidentID(v)
+		return nil
+	case livesafetysignal.FieldLiveID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLiveID(v)
+		return nil
+	case livesafetysignal.FieldKind:
+		v, ok := value.(livesafetysignal.Kind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case livesafetysignal.FieldSourceKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceKey(v)
+		return nil
+	case livesafetysignal.FieldFrameRef:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFrameRef(v)
+		return nil
+	case livesafetysignal.FieldCapturedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCapturedAt(v)
+		return nil
+	case livesafetysignal.FieldLabels:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLabels(v)
+		return nil
+	case livesafetysignal.FieldCategories:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategories(v)
+		return nil
+	case livesafetysignal.FieldConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConfidence(v)
+		return nil
+	case livesafetysignal.FieldSuggestedAction:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSuggestedAction(v)
+		return nil
+	case livesafetysignal.FieldModelVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModelVersion(v)
+		return nil
+	case livesafetysignal.FieldActionTaken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActionTaken(v)
+		return nil
+	case livesafetysignal.FieldTranscriptSnippet:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTranscriptSnippet(v)
+		return nil
+	case livesafetysignal.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case livesafetysignal.FieldDetails:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDetails(v)
+		return nil
+	case livesafetysignal.FieldReporterID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReporterID(v)
+		return nil
+	case livesafetysignal.FieldOffsetSeconds:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOffsetSeconds(v)
+		return nil
+	case livesafetysignal.FieldHashMatch:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHashMatch(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveSafetySignal field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LiveSafetySignalMutation) AddedFields() []string {
+	var fields []string
+	if m.addconfidence != nil {
+		fields = append(fields, livesafetysignal.FieldConfidence)
+	}
+	if m.addoffset_seconds != nil {
+		fields = append(fields, livesafetysignal.FieldOffsetSeconds)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LiveSafetySignalMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case livesafetysignal.FieldConfidence:
+		return m.AddedConfidence()
+	case livesafetysignal.FieldOffsetSeconds:
+		return m.AddedOffsetSeconds()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LiveSafetySignalMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case livesafetysignal.FieldConfidence:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddConfidence(v)
+		return nil
+	case livesafetysignal.FieldOffsetSeconds:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOffsetSeconds(v)
+		return nil
+	}
+	return fmt.Errorf("unknown LiveSafetySignal numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LiveSafetySignalMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(livesafetysignal.FieldCapturedAt) {
+		fields = append(fields, livesafetysignal.FieldCapturedAt)
+	}
+	if m.FieldCleared(livesafetysignal.FieldLabels) {
+		fields = append(fields, livesafetysignal.FieldLabels)
+	}
+	if m.FieldCleared(livesafetysignal.FieldCategories) {
+		fields = append(fields, livesafetysignal.FieldCategories)
+	}
+	if m.FieldCleared(livesafetysignal.FieldReporterID) {
+		fields = append(fields, livesafetysignal.FieldReporterID)
+	}
+	if m.FieldCleared(livesafetysignal.FieldOffsetSeconds) {
+		fields = append(fields, livesafetysignal.FieldOffsetSeconds)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LiveSafetySignalMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LiveSafetySignalMutation) ClearField(name string) error {
+	switch name {
+	case livesafetysignal.FieldCapturedAt:
+		m.ClearCapturedAt()
+		return nil
+	case livesafetysignal.FieldLabels:
+		m.ClearLabels()
+		return nil
+	case livesafetysignal.FieldCategories:
+		m.ClearCategories()
+		return nil
+	case livesafetysignal.FieldReporterID:
+		m.ClearReporterID()
+		return nil
+	case livesafetysignal.FieldOffsetSeconds:
+		m.ClearOffsetSeconds()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveSafetySignal nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LiveSafetySignalMutation) ResetField(name string) error {
+	switch name {
+	case livesafetysignal.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case livesafetysignal.FieldIncidentID:
+		m.ResetIncidentID()
+		return nil
+	case livesafetysignal.FieldLiveID:
+		m.ResetLiveID()
+		return nil
+	case livesafetysignal.FieldKind:
+		m.ResetKind()
+		return nil
+	case livesafetysignal.FieldSourceKey:
+		m.ResetSourceKey()
+		return nil
+	case livesafetysignal.FieldFrameRef:
+		m.ResetFrameRef()
+		return nil
+	case livesafetysignal.FieldCapturedAt:
+		m.ResetCapturedAt()
+		return nil
+	case livesafetysignal.FieldLabels:
+		m.ResetLabels()
+		return nil
+	case livesafetysignal.FieldCategories:
+		m.ResetCategories()
+		return nil
+	case livesafetysignal.FieldConfidence:
+		m.ResetConfidence()
+		return nil
+	case livesafetysignal.FieldSuggestedAction:
+		m.ResetSuggestedAction()
+		return nil
+	case livesafetysignal.FieldModelVersion:
+		m.ResetModelVersion()
+		return nil
+	case livesafetysignal.FieldActionTaken:
+		m.ResetActionTaken()
+		return nil
+	case livesafetysignal.FieldTranscriptSnippet:
+		m.ResetTranscriptSnippet()
+		return nil
+	case livesafetysignal.FieldReason:
+		m.ResetReason()
+		return nil
+	case livesafetysignal.FieldDetails:
+		m.ResetDetails()
+		return nil
+	case livesafetysignal.FieldReporterID:
+		m.ResetReporterID()
+		return nil
+	case livesafetysignal.FieldOffsetSeconds:
+		m.ResetOffsetSeconds()
+		return nil
+	case livesafetysignal.FieldHashMatch:
+		m.ResetHashMatch()
+		return nil
+	}
+	return fmt.Errorf("unknown LiveSafetySignal field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LiveSafetySignalMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LiveSafetySignalMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *LiveSafetySignalMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *LiveSafetySignalMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *LiveSafetySignalMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *LiveSafetySignalMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *LiveSafetySignalMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown LiveSafetySignal unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *LiveSafetySignalMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown LiveSafetySignal edge %s", name)
 }
 
 // OutboxEventMutation represents an operation that mutates the OutboxEvent nodes in the graph.
