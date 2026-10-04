@@ -143,7 +143,7 @@ describe("commerce journey: seller onboarding → product → cart → checkout 
     const bank = await callApi("PUT", "/api/v1/payments/payout-onboarding/me/bank", { token: seller.accessToken, body: { bankCode: "058", bankName: "Guaranty Trust Bank", accountNumber: "0123456789", resolvedAccountName: resolved.body.accountName ?? "Temitope Adeyemi" } });
     expect([200, 201], describeResponse(bank)).toContain(bank.status);
     const wallet = await waitFor(async () => {
-      const response = await callApi("GET", "/api/v1/wallets/me", { token: seller.accessToken });
+      const response = await callApi("GET", "/api/v1/wallets/me", { token: seller.accessToken, headers: { "x-client-region": "NG" } });
       return response.status === 200 && /"amountMinor":[1-9]/.test(JSON.stringify(response.body)) ? response : undefined;
     }, 30_000, 1000);
     expect(wallet, "seller wallet never showed the released funds").toBeDefined();

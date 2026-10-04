@@ -2,7 +2,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { createSuperadmin, registerUser, stepUpStaff, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
-import { payCheckoutThroughFakePaystack } from "../src/fakePaystack.util.js";
+import { onboardPayoutAccount, psql } from "../src/commerceFixtures.util.js";
+import { payCheckoutThroughFakePaystack, readFakePaystackState, settleTransferThroughFakePaystack } from "../src/fakePaystack.util.js";
 import { connectRealtimeClient, type RealtimeClient } from "../src/realtimeClient.util.js";
 
 async function refreshAccessToken(actor: UserActor): Promise<UserActor> {
@@ -154,6 +155,65 @@ describe("live journey: creator approval → live start → coins → gift with 
       return /settled|ended|completed/i.test(JSON.stringify(stage.body)) ? stage : undefined;
     }, 15_000, 500);
     expect(settled, "battle never settled").toBeDefined();
+  });
+
+  it("buys coins on the web in USD through the provider fake", async () => {
+    const usdPack = `smoke-usd-pack-${uniqueSuffix()}`;
+    const pack = await callApi("PUT", `/api/v1/admin/coins/price-table/${usdPack}`, { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { name: "Smoke USD 50", clientPlatform: "web", coins: 50, bonusCoins: 0, prices: { NGN: 50_000, USD: 500 }, active: true, sortOrder: 2 } });
+    expect([200, 201], describeResponse(pack)).toContain(pack.status);
+    const usdBuyer = await registerUser("usdbuyer");
+    const before = 0;
+    const purchase = await callApi("POST", "/api/v1/coins/purchases", { token: usdBuyer.accessToken, headers: { "x-client-region": "US", "cloudfront-viewer-country": "US" }, body: { packageId: usdPack } });
+    expect([200, 201], describeResponse(purchase)).toContain(purchase.status);
+    const reference = purchase.body.reference ?? purchase.body.purchase?.reference;
+    expect(JSON.stringify(purchase.body), "web purchase outside Nigeria is priced in USD").toMatch(/USD/);
+    await payCheckoutThroughFakePaystack(reference);
+    const credited = await waitFor(async () => {
+      const balance = await callApi("GET", "/api/v1/coins/balance", { token: usdBuyer.accessToken });
+      return balance.body?.coins >= before + 50 ? balance : undefined;
+    }, 15_000, 500);
+    expect(credited, "USD purchase never credited the coins").toBeDefined();
+    expect(psql(`select currency, amount_minor from payments.payment_intents where reference = '${reference}'`)[0]).toEqual(["USD", "500"]);
+  });
+
+  it("pays a creator out: converts gift earnings, withdraws and settles the transfer", { timeout: 240_000 }, async () => {
+    const ngn = { "x-client-region": "NG" };
+    const moreGifts = await callApi("POST", `/api/v1/lives/${liveId}/gifts`, { token: viewer.accessToken, body: { giftId, quantity: 9, receiverUserId: host.accountId } });
+    expect([200, 201], describeResponse(moreGifts)).toContain(moreGifts.status);
+    const balance = await callApi("GET", "/api/v1/coins/balance", { token: host.accessToken });
+    const earned: number = balance.body?.earnedCoins ?? balance.body?.earned ?? 0;
+    expect(earned, describeResponse(balance)).toBeGreaterThan(0);
+    const converted = await callApi("POST", "/api/v1/creators/earnings/convert", { token: host.accessToken, headers: ngn, body: { coins: earned, currency: "NGN" } });
+    expect([200, 201], describeResponse(converted)).toContain(converted.status);
+    const account = await callApi("POST", "/api/v1/wallets/me/payout-accounts", { token: host.accessToken, headers: ngn, body: { bankCode: "058", accountNumber: "0123456789", countryCode: "NG" } });
+    expect([200, 201], describeResponse(account)).toContain(account.status);
+    await onboardPayoutAccount(host);
+    const wallet = await waitFor(async () => {
+      await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: {} });
+      const response = await callApi("GET", "/api/v1/wallets/me", { token: host.accessToken, headers: ngn });
+      return (response.body.available?.amountMinor ?? 0) > 0 ? response : undefined;
+    }, 90_000, 2000);
+    const amountMinor: number = wallet?.body.available?.amountMinor ?? 0;
+    expect(amountMinor, wallet === undefined ? "creator funds never became withdrawable" : describeResponse(wallet)).toBeGreaterThan(0);
+    const requested = (await waitFor(async () => {
+      const response = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: host.accessToken, headers: ngn, body: { payoutAccountId: account.body.id ?? account.body.payoutAccount?.id, amount: { amountMinor, currency: "NGN" } } });
+      return response.body?.code === "PAYOUT_ACCOUNT_NOT_VERIFIED" ? undefined : response;
+    }, 60_000, 2000))!;
+    expect([200, 201, 202], describeResponse(requested)).toContain(requested.status);
+    const withdrawalId: string = requested.body.id ?? requested.body.withdrawal?.id;
+    if (/review|pending/i.test(JSON.stringify(requested.body))) {
+      const review = await callApi("POST", `/api/v1/admin/withdrawals/${withdrawalId}/review`, { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { decision: "approve", reason: "Smoke approval" } });
+      expect([200, 201, 204], describeResponse(review)).toContain(review.status);
+    }
+    await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: {} });
+    const transfer = await waitFor(async () => Object.values((await readFakePaystackState()).transfers).find((candidate) => candidate.Status !== "success" && candidate.AmountMinor === requested.body.netAmount?.amountMinor), 60_000, 1000);
+    expect(transfer, "no creator payout transfer reached the provider").toBeDefined();
+    await settleTransferThroughFakePaystack(transfer!.Reference);
+    const completed = await waitFor(async () => {
+      const response = await callApi("GET", "/api/v1/wallets/me/withdrawals", { token: host.accessToken, headers: ngn });
+      return /completed|paid|success/i.test(JSON.stringify(response.body)) ? response : undefined;
+    }, 30_000, 1000);
+    expect(completed, "creator withdrawal never completed").toBeDefined();
   });
 
   it("ends both live sessions", async () => {
