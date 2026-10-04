@@ -8,6 +8,7 @@ type Registry struct {
 	inventory InventoryStock
 	rewards   StoreRewardsLookup
 	purchases PurchaseVerifier
+	shipping  StoreShippingCountries
 }
 
 var Default = &Registry{}
@@ -70,4 +71,19 @@ func (registry *Registry) PurchaseVerifier() (PurchaseVerifier, error) {
 		return nil, ErrPortNotRegistered
 	}
 	return registry.purchases, nil
+}
+
+func (registry *Registry) RegisterStoreShippingCountries(port StoreShippingCountries) {
+	registry.mutex.Lock()
+	registry.shipping = port
+	registry.mutex.Unlock()
+}
+
+func (registry *Registry) StoreShippingCountries() (StoreShippingCountries, error) {
+	registry.mutex.RLock()
+	defer registry.mutex.RUnlock()
+	if registry.shipping == nil {
+		return nil, ErrPortNotRegistered
+	}
+	return registry.shipping, nil
 }

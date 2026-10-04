@@ -81,6 +81,11 @@ type StoreAccess struct {
 	Permissions    []string
 	Currency       money.CurrencyCode
 	CountryCode    string
+	StoreStatus    string
+}
+
+func (access StoreAccess) CanSell() bool {
+	return access.StoreStatus == "" || access.StoreStatus == "active"
 }
 
 func (access StoreAccess) Allows(permission string) bool {
@@ -99,6 +104,7 @@ type CatalogReader interface {
 	DetachSupplierFromProducts(ctx context.Context, storeId, supplierId uuid.UUID) error
 	CountActiveProductsBySupplier(ctx context.Context, storeId uuid.UUID, supplierIds []uuid.UUID) (map[uuid.UUID]int, error)
 	ResolveProductsForCheckout(ctx context.Context, variantIds []uuid.UUID) (map[uuid.UUID]ProductSnapshot, error)
+	ResolveProductsForCheckoutInCountry(ctx context.Context, variantIds []uuid.UUID, countryCode string) (map[uuid.UUID]ProductSnapshot, error)
 	DescribeVariants(ctx context.Context, storeId uuid.UUID, variantIds []uuid.UUID) (map[uuid.UUID]VariantDescription, error)
 	DescribeStores(ctx context.Context, storeIds []uuid.UUID) (map[uuid.UUID]StoreSnapshot, error)
 	FindStoreAccessForAccount(ctx context.Context, accountId uuid.UUID, requestedStoreId *uuid.UUID) (StoreAccess, bool, error)
@@ -182,4 +188,8 @@ type StoreRewardsLookup interface {
 type PurchaseVerifier interface {
 	FindReceivedPurchaseOfProduct(ctx context.Context, accountId, productId uuid.UUID) (orderNumber string, found bool, err error)
 	FindReceivedPurchaseFromStore(ctx context.Context, accountId, storeId uuid.UUID) (orderNumber string, found bool, err error)
+}
+
+type StoreShippingCountries interface {
+	SetStoreShippingCountries(ctx context.Context, storeId uuid.UUID, countryCodes []string) error
 }
