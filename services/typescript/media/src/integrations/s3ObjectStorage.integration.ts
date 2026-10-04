@@ -29,6 +29,8 @@ function createClient(config: MediaConfig["storage"], endpoint: string | undefin
     region: config.region,
     ...(endpoint === undefined ? {} : { endpoint }),
     forcePathStyle: config.forcePathStyle,
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
     ...(config.accessKeyId === undefined || config.secretAccessKey === undefined ? {} : { credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey } }),
   });
 }
