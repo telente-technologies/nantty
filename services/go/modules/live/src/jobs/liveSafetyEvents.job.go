@@ -68,6 +68,9 @@ func HandleLiveDomainEvent(deployed *container.Container) platformevents.Message
 		if IsLiveSafetyEvent(envelope.Type) {
 			return safety(ctx, body)
 		}
+		if envelope.Type == "accountHealth.changed" {
+			return services.NewLiveService(deployed).HandleAccountHealthChangedMessage(ctx, body)
+		}
 		return visibility(ctx, body)
 	}
 }
