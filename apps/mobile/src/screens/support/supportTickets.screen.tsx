@@ -33,12 +33,13 @@ export function SupportTicketsScreen({ navigation }: MainScreenProps<"SupportTic
         renderItem={({ item }) => (
           <Pressable accessibilityRole="button" accessibilityLabel={item.subject} onPress={() => navigation.navigate("SupportTicketDetail", { ticketId: item.id })} style={styles.row}>
             <View style={styles.rowTop}>
-              <Text size={14} weight={500} lineHeight={16.8} numberOfLines={1} style={styles.flex}>{item.subject}</Text>
+              <Text size={14} weight={(item.unreadCount ?? 0) > 0 ? 600 : 500} lineHeight={16.8} numberOfLines={1} style={styles.flex}>{item.subject}</Text>
+              {(item.unreadCount ?? 0) > 0 ? <View style={styles.badge} accessibilityLabel={`${item.unreadCount} unread replies`}><Text size={11} weight={600} color={colors.white}>{item.unreadCount}</Text></View> : null}
               <StatusPill label={TICKET_STATUS_APPEARANCE[item.status].label} tone={TICKET_STATUS_APPEARANCE[item.status].tone} />
             </View>
             <Text size={13} lineHeight={16.9} color={colors.textMuted} numberOfLines={1}>{item.lastMessagePreview}</Text>
             {item.linkedReference ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>{item.linkedReference.label}</Text> : null}
-            <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Updated {formatFriendlyDate(item.updatedAt)}</Text>
+            <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{item.reference ? `${item.reference} · ` : ""}Updated {formatFriendlyDate(item.updatedAt)}</Text>
           </Pressable>
         )}
         ListEmptyComponent={tickets.isLoading ? <ListSkeleton rows={3} /> : tickets.isError ? <ErrorState message="Couldn't load your requests." onRetry={() => tickets.refetch()} /> : <Text align="center" color={colors.textSubtle}>No support requests yet.</Text>}
@@ -54,4 +55,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   separator: { height: 8 },
   row: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, gap: 4 },
   rowTop: { flexDirection: "row", alignItems: "center", gap: 8 },
+  badge: { minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 6, alignItems: "center", justifyContent: "center", backgroundColor: colors.error },
 }));

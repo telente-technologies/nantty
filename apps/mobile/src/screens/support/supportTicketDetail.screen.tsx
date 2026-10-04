@@ -1,11 +1,13 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 import { formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
 import { PaperPlaneTilt24Icon } from "@/components/icons";
 import { SupportRecordingNotice } from "@/components/support/supportRecordingNotice";
+import { TicketRatingCard } from "@/components/support/ticketRatingCard";
+import { supportUnreadQueryKey } from "@/hooks/useSupportUnread.hook";
 import { TICKET_STATUS_APPEARANCE } from "@/components/settings/supportAppearance.util";
 import { Header } from "@/components/ui/header";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
@@ -25,6 +27,15 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
   const styles = useStyles();
   const { ticketId } = route.params;
   const ticket = useQuery({ queryKey: ["support", "tickets", ticketId], queryFn: () => supportService.fetchSupportTicket(ticketId), refetchInterval: LIVE_CHAT_POLL_MS });
+  const queryClient = useQueryClient();
+  const unreadCount = ticket.data?.unreadCount ?? 0;
+  useEffect(() => {
+    if (unreadCount === 0) return;
+    void supportService.markSupportTicketRead(ticketId).then(() => {
+      void queryClient.invalidateQueries({ queryKey: supportUnreadQueryKey });
+      void queryClient.invalidateQueries({ queryKey: ["support", "tickets"], exact: true });
+    }).catch(() => undefined);
+  }, [unreadCount, ticketId, queryClient]);
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<ScrollView>(null);
   const isComposing = useRef(false);
@@ -48,7 +59,7 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
     );
   }
   const details = ticket.data;
-  const closed = details.status === "closed";
+  const closed = details.canReply === false || details.status === "closed";
   return (
     <Screen>
       <Header title="Support" />
@@ -69,6 +80,9 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
               <Text size={11} lineHeight={14} color={colors.textSubtle}>{formatFriendlyDateTime(message.createdAt)}</Text>
             </View>
           ))}
+          {details.canRate ? <TicketRatingCard ticketId={ticketId} onRated={() => ticket.refetch()} /> : null}
+          {details.satisfactionScore ? <Text size={12} lineHeight={16.8} color={colors.textSubtle}>You rated this {details.satisfactionScore} out of 5. Thank you.</Text> : null}
+          {closed ? <Text size={12} lineHeight={16.8} color={colors.textSubtle}>This request is closed. Contact support again if you still need help.</Text> : null}
           {details.agentTyping ? <Text size={12} lineHeight={16.8} color={colors.textSubtle} accessibilityLiveRegion="polite">Zudomart Support is typing…</Text> : null}
         </ScrollView>
         {closed ? null : (
