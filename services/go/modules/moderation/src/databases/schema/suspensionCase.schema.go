@@ -19,7 +19,7 @@ func (SuspensionCase) Mixin() []ent.Mixin {
 func (SuspensionCase) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
-		field.Enum("source").Values("python_suggestion", "user_reports").Immutable(),
+		field.Enum("source").Values("python_suggestion", "user_reports", "copyright_strikes").Immutable(),
 		field.Enum("status").Values("pending", "escalated", "suspended", "dismissed").Default("pending"),
 		field.Int("risk_score").Min(0).Max(100).Immutable(),
 		field.Strings("top_signals").Default([]string{}).Immutable(),

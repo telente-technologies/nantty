@@ -30,6 +30,10 @@ func (Strike) Fields() []ent.Field {
 		field.Time("expires_at").Optional().Nillable(),
 		field.Time("revoked_at").Optional().Nillable(),
 		field.String("revoked_reason").MaxLen(500).Default(""),
+		field.Enum("appeal_status").Values("none", "pending", "upheld", "overturned").Default("none"),
+		field.String("appeal_message").MaxLen(2000).Default(""),
+		field.Time("appealed_at").Optional().Nillable(),
+		field.Time("expiry_announced_at").Optional().Nillable(),
 	}
 }
 
@@ -38,5 +42,7 @@ func (Strike) Indexes() []ent.Index {
 		index.Fields("account_id", "reference_key").Unique(),
 		index.Fields("account_id", "revoked_at", "expires_at"),
 		index.Fields("reference_type", "reference_id"),
+		index.Fields("expiry_announced_at", "expires_at"),
+		index.Fields("appeal_status", "appealed_at"),
 	}
 }
