@@ -5,23 +5,23 @@ import "testing"
 func TestAdFloorPerTargetedRegionInTheBillingCurrency(t *testing.T) {
 	table := DefaultAdRegionPricing()
 	nigeria, err := FloorsForTargetedRegions(table, []string{"NG"}, "NGN", DefaultUsdRatesE8)
-	if err != nil || nigeria.CpmFloorMinor != 50_000 || nigeria.MinimumDailyBudgetMinor != 100_000 {
+	if err != nil || nigeria.CpmFloorMinor != 40_000 || nigeria.MinimumDailyBudgetMinor != 100_000 {
 		t.Fatalf("NG in NGN %+v %v", nigeria, err)
 	}
 	ukInNaira, err := FloorsForTargetedRegions(table, []string{"GB"}, "NGN", DefaultUsdRatesE8)
-	if err != nil || ukInNaira.CpmFloorMinor != 392_406 {
+	if err != nil || ukInNaira.CpmFloorMinor != 490_507 {
 		t.Fatalf("GB floor billed in NGN %+v %v", ukInNaira, err)
 	}
 	nigeriaInDollars, err := FloorsForTargetedRegions(table, []string{"NG"}, "USD", DefaultUsdRatesE8)
-	if err != nil || nigeriaInDollars.CpmFloorMinor != 33 {
+	if err != nil || nigeriaInDollars.CpmFloorMinor != 26 {
 		t.Fatalf("NG floor billed in USD %+v %v", nigeriaInDollars, err)
 	}
 	mixed, err := FloorsForTargetedRegions(table, RegionsForCountries([]string{"NG", "KE", "US"}), "USD", DefaultUsdRatesE8)
-	if err != nil || mixed.CpmFloorMinor != 250 || mixed.Region != "MULTI" {
+	if err != nil || mixed.CpmFloorMinor != 350 || mixed.Region != "MULTI" {
 		t.Fatalf("multi-region takes the strictest floor %+v %v", mixed, err)
 	}
 	untargeted, _ := FloorsForTargetedRegions(table, nil, "USD", DefaultUsdRatesE8)
-	if untargeted.CpmFloorMinor != 250 {
+	if untargeted.CpmFloorMinor != 350 {
 		t.Fatalf("no targeting uses the US fallback %+v", untargeted)
 	}
 	if _, err := FloorsForTargetedRegions(table, []string{"NG"}, "JPY", DefaultUsdRatesE8); err == nil {

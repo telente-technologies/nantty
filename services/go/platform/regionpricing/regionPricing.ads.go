@@ -6,22 +6,29 @@ import (
 )
 
 type AdRegionPricing struct {
-	Region                  string `json:"region"`
-	Currency                string `json:"currency"`
-	CpmFloorMinor           int64  `json:"cpmFloorMinor"`
-	CpcFloorMinor           int64  `json:"cpcFloorMinor"`
-	MinimumDailyBudgetMinor int64  `json:"minimumDailyBudgetMinor"`
-	BoostMinimumDailyMinor  int64  `json:"boostMinimumDailyMinor"`
+	Region                    string `json:"region"`
+	Currency                  string `json:"currency"`
+	CpmFloorMinor             int64  `json:"cpmFloorMinor"`
+	CpcFloorMinor             int64  `json:"cpcFloorMinor"`
+	MinimumDailyBudgetMinor   int64  `json:"minimumDailyBudgetMinor"`
+	BoostMinimumDailyMinor    int64  `json:"boostMinimumDailyMinor"`
+	SuggestedCpmMinor         int64  `json:"suggestedCpmMinor"`
+	SuggestedCpcMinor         int64  `json:"suggestedCpcMinor"`
+	SuggestedCpvMinor         int64  `json:"suggestedCpvMinor"`
+	SuggestedDailyBudgetMinor int64  `json:"suggestedDailyBudgetMinor"`
 }
 
+// Research defaults (docs/pricing.md §5): floors sit just under the cheapest incumbent's low end, suggested bids at
+// roughly 70–80% of Meta's typical price, minimum daily budget ≈ 700 impressions at the suggested CPM, and the
+// suggested daily budget five times that.
 var defaultAdRegionPricing = []AdRegionPricing{
-	{RegionNigeria, "NGN", 50_000, 3_000, 100_000, 100_000},
-	{RegionGhana, "GHS", 600, 40, 1_500, 1_500},
-	{RegionKenya, "KES", 6_000, 400, 15_000, 15_000},
-	{RegionSouthAfrica, "ZAR", 1_500, 120, 4_000, 4_000},
-	{RegionUnitedKingdom, "GBP", 200, 15, 300, 300},
-	{RegionEurozone, "EUR", 200, 15, 300, 300},
-	{RegionUnitedStates, "USD", 250, 20, 300, 300},
+	{RegionNigeria, "NGN", 40_000, 2_500, 100_000, 100_000, 150_000, 6_000, 500, 500_000},
+	{RegionGhana, "GHS", 600, 40, 1_500, 1_500, 1_800, 100, 6, 7_500},
+	{RegionKenya, "KES", 8_000, 500, 15_000, 15_000, 17_000, 1_200, 60, 75_000},
+	{RegionSouthAfrica, "ZAR", 2_800, 150, 4_000, 4_000, 5_000, 400, 20, 20_000},
+	{RegionUnitedKingdom, "GBP", 250, 30, 500, 500, 600, 55, 2, 2_500},
+	{RegionEurozone, "EUR", 300, 30, 500, 500, 650, 60, 2, 2_500},
+	{RegionUnitedStates, "USD", 350, 35, 500, 500, 800, 65, 3, 2_500},
 }
 
 func DefaultAdRegionPricing() []AdRegionPricing {
@@ -60,6 +67,15 @@ func ConvertMinorUnits(amountMinor int64, fromCurrency, toCurrency string, rates
 	return convert(amountMinor, fromCurrency, toCurrency, ratesE8, false)
 }
 
+func ConvertMinorUnitsRoundingUp(amountMinor int64, fromCurrency, toCurrency string, ratesE8 map[string]int64) (int64, error) {
+	return convert(amountMinor, fromCurrency, toCurrency, ratesE8, true)
+}
+
+// InBillingCurrency expresses one region's row in another currency, rounding up so nothing undercuts the local value.
+func (row AdRegionPricing) InBillingCurrency(billingCurrency string, ratesE8 map[string]int64) (AdRegionPricing, error) {
+	return FloorsForTargetedRegions([]AdRegionPricing{row}, []string{row.Region}, billingCurrency, ratesE8)
+}
+
 func FindAdRegionPricing(table []AdRegionPricing, region string) AdRegionPricing {
 	for _, row := range table {
 		if row.Region == region {
@@ -83,8 +99,10 @@ func FloorsForTargetedRegions(table []AdRegionPricing, regions []string, billing
 	strictest := AdRegionPricing{Region: regions[0], Currency: billingCurrency}
 	for _, region := range regions {
 		row := FindAdRegionPricing(table, region)
-		values := []*int64{&strictest.CpmFloorMinor, &strictest.CpcFloorMinor, &strictest.MinimumDailyBudgetMinor, &strictest.BoostMinimumDailyMinor}
-		for index, local := range []int64{row.CpmFloorMinor, row.CpcFloorMinor, row.MinimumDailyBudgetMinor, row.BoostMinimumDailyMinor} {
+		values := []*int64{&strictest.CpmFloorMinor, &strictest.CpcFloorMinor, &strictest.MinimumDailyBudgetMinor, &strictest.BoostMinimumDailyMinor,
+			&strictest.SuggestedCpmMinor, &strictest.SuggestedCpcMinor, &strictest.SuggestedCpvMinor, &strictest.SuggestedDailyBudgetMinor}
+		for index, local := range []int64{row.CpmFloorMinor, row.CpcFloorMinor, row.MinimumDailyBudgetMinor, row.BoostMinimumDailyMinor,
+			row.SuggestedCpmMinor, row.SuggestedCpcMinor, row.SuggestedCpvMinor, row.SuggestedDailyBudgetMinor} {
 			converted, err := convert(local, row.Currency, billingCurrency, ratesE8, true)
 			if err != nil {
 				return AdRegionPricing{}, err
