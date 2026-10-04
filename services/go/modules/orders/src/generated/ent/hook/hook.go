@@ -104,6 +104,18 @@ func (f IdempotentRequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IdempotentRequestMutation", m)
 }
 
+// The InvoiceCounterFunc type is an adapter to allow the use of ordinary
+// function as InvoiceCounter mutator.
+type InvoiceCounterFunc func(context.Context, *ent.InvoiceCounterMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f InvoiceCounterFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.InvoiceCounterMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InvoiceCounterMutation", m)
+}
+
 // The OrderEventFunc type is an adapter to allow the use of ordinary
 // function as OrderEvent mutator.
 type OrderEventFunc func(context.Context, *ent.OrderEventMutation) (ent.Value, error)
@@ -330,6 +342,18 @@ func (f StoreRewardSettingsFunc) Mutate(ctx context.Context, m ent.Mutation) (en
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreRewardSettingsMutation", m)
+}
+
+// The StoreSuccessStatFunc type is an adapter to allow the use of ordinary
+// function as StoreSuccessStat mutator.
+type StoreSuccessStatFunc func(context.Context, *ent.StoreSuccessStatMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StoreSuccessStatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StoreSuccessStatMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreSuccessStatMutation", m)
 }
 
 // Condition is a hook condition function.

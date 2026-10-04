@@ -239,6 +239,17 @@ var (
 			},
 		},
 	}
+	// InvoiceCountersColumns holds the columns for the "invoice_counters" table.
+	InvoiceCountersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "last_number", Type: field.TypeInt, Default: 0},
+	}
+	// InvoiceCountersTable holds the schema information for the "invoice_counters" table.
+	InvoiceCountersTable = &schema.Table{
+		Name:       "invoice_counters",
+		Columns:    InvoiceCountersColumns,
+		PrimaryKey: []*schema.Column{InvoiceCountersColumns[0]},
+	}
 	// OrderEventsColumns holds the columns for the "order_events" table.
 	OrderEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -278,6 +289,7 @@ var (
 		{Name: "status", Type: field.TypeString, Default: "pending"},
 		{Name: "previous_status", Type: field.TypeString, Default: ""},
 		{Name: "payment_status", Type: field.TypeString, Default: "pending"},
+		{Name: "payment_mode", Type: field.TypeString, Size: 10, Default: "escrow"},
 		{Name: "delivery_status", Type: field.TypeString, Default: "pending"},
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "subtotal_minor", Type: field.TypeInt64},
@@ -365,9 +377,14 @@ var (
 				Columns: []*schema.Column{OrderGroupsColumns[2]},
 			},
 			{
+				Name:    "ordergroup_created",
+				Unique:  false,
+				Columns: []*schema.Column{OrderGroupsColumns[1]},
+			},
+			{
 				Name:    "ordergroup_delivered_release",
 				Unique:  false,
-				Columns: []*schema.Column{OrderGroupsColumns[37]},
+				Columns: []*schema.Column{OrderGroupsColumns[38]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "status = 'delivered'",
 				},
@@ -908,6 +925,28 @@ var (
 			},
 		},
 	}
+	// StoreSuccessStatsColumns holds the columns for the "store_success_stats" table.
+	StoreSuccessStatsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "settled_orders", Type: field.TypeInt, Default: 0},
+		{Name: "successful_orders", Type: field.TypeInt, Default: 0},
+		{Name: "computed_at", Type: field.TypeTime},
+	}
+	// StoreSuccessStatsTable holds the schema information for the "store_success_stats" table.
+	StoreSuccessStatsTable = &schema.Table{
+		Name:       "store_success_stats",
+		Columns:    StoreSuccessStatsColumns,
+		PrimaryKey: []*schema.Column{StoreSuccessStatsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "storesuccessstat_store_id",
+				Unique:  true,
+				Columns: []*schema.Column{StoreSuccessStatsColumns[2]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CampaignRedemptionsTable,
@@ -918,6 +957,7 @@ var (
 		FlashSalesTable,
 		FlashSaleItemsTable,
 		IdempotentRequestsTable,
+		InvoiceCountersTable,
 		OrderEventsTable,
 		OrderGroupsTable,
 		OrderItemsTable,
@@ -937,6 +977,7 @@ var (
 		ShippingZonesTable,
 		StoreCreditEntriesTable,
 		StoreRewardSettingsTable,
+		StoreSuccessStatsTable,
 	}
 )
 

@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/flashsale"
 	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
+	"zudomart/modules/orders/src/generated/ent/invoicecounter"
 	"zudomart/modules/orders/src/generated/ent/orderevent"
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
 	"zudomart/modules/orders/src/generated/ent/orderitem"
@@ -35,6 +36,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/shippingzone"
 	"zudomart/modules/orders/src/generated/ent/storecreditentry"
 	"zudomart/modules/orders/src/generated/ent/storerewardsettings"
+	"zudomart/modules/orders/src/generated/ent/storesuccessstat"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -107,6 +109,7 @@ func checkColumn(t, c string) error {
 			flashsale.Table:           flashsale.ValidColumn,
 			flashsaleitem.Table:       flashsaleitem.ValidColumn,
 			idempotentrequest.Table:   idempotentrequest.ValidColumn,
+			invoicecounter.Table:      invoicecounter.ValidColumn,
 			orderevent.Table:          orderevent.ValidColumn,
 			ordergroup.Table:          ordergroup.ValidColumn,
 			orderitem.Table:           orderitem.ValidColumn,
@@ -126,6 +129,7 @@ func checkColumn(t, c string) error {
 			shippingzone.Table:        shippingzone.ValidColumn,
 			storecreditentry.Table:    storecreditentry.ValidColumn,
 			storerewardsettings.Table: storerewardsettings.ValidColumn,
+			storesuccessstat.Table:    storesuccessstat.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

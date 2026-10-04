@@ -19,6 +19,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/flashsale"
 	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
+	"zudomart/modules/orders/src/generated/ent/invoicecounter"
 	"zudomart/modules/orders/src/generated/ent/orderevent"
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
 	"zudomart/modules/orders/src/generated/ent/orderitem"
@@ -38,6 +39,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/shippingzone"
 	"zudomart/modules/orders/src/generated/ent/storecreditentry"
 	"zudomart/modules/orders/src/generated/ent/storerewardsettings"
+	"zudomart/modules/orders/src/generated/ent/storesuccessstat"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -68,6 +70,8 @@ type Client struct {
 	FlashSaleItem *FlashSaleItemClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
+	// InvoiceCounter is the client for interacting with the InvoiceCounter builders.
+	InvoiceCounter *InvoiceCounterClient
 	// OrderEvent is the client for interacting with the OrderEvent builders.
 	OrderEvent *OrderEventClient
 	// OrderGroup is the client for interacting with the OrderGroup builders.
@@ -106,6 +110,8 @@ type Client struct {
 	StoreCreditEntry *StoreCreditEntryClient
 	// StoreRewardSettings is the client for interacting with the StoreRewardSettings builders.
 	StoreRewardSettings *StoreRewardSettingsClient
+	// StoreSuccessStat is the client for interacting with the StoreSuccessStat builders.
+	StoreSuccessStat *StoreSuccessStatClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -125,6 +131,7 @@ func (c *Client) init() {
 	c.FlashSale = NewFlashSaleClient(c.config)
 	c.FlashSaleItem = NewFlashSaleItemClient(c.config)
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
+	c.InvoiceCounter = NewInvoiceCounterClient(c.config)
 	c.OrderEvent = NewOrderEventClient(c.config)
 	c.OrderGroup = NewOrderGroupClient(c.config)
 	c.OrderItem = NewOrderItemClient(c.config)
@@ -144,6 +151,7 @@ func (c *Client) init() {
 	c.ShippingZone = NewShippingZoneClient(c.config)
 	c.StoreCreditEntry = NewStoreCreditEntryClient(c.config)
 	c.StoreRewardSettings = NewStoreRewardSettingsClient(c.config)
+	c.StoreSuccessStat = NewStoreSuccessStatClient(c.config)
 }
 
 type (
@@ -244,6 +252,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		FlashSale:           NewFlashSaleClient(cfg),
 		FlashSaleItem:       NewFlashSaleItemClient(cfg),
 		IdempotentRequest:   NewIdempotentRequestClient(cfg),
+		InvoiceCounter:      NewInvoiceCounterClient(cfg),
 		OrderEvent:          NewOrderEventClient(cfg),
 		OrderGroup:          NewOrderGroupClient(cfg),
 		OrderItem:           NewOrderItemClient(cfg),
@@ -263,6 +272,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ShippingZone:        NewShippingZoneClient(cfg),
 		StoreCreditEntry:    NewStoreCreditEntryClient(cfg),
 		StoreRewardSettings: NewStoreRewardSettingsClient(cfg),
+		StoreSuccessStat:    NewStoreSuccessStatClient(cfg),
 	}, nil
 }
 
@@ -290,6 +300,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		FlashSale:           NewFlashSaleClient(cfg),
 		FlashSaleItem:       NewFlashSaleItemClient(cfg),
 		IdempotentRequest:   NewIdempotentRequestClient(cfg),
+		InvoiceCounter:      NewInvoiceCounterClient(cfg),
 		OrderEvent:          NewOrderEventClient(cfg),
 		OrderGroup:          NewOrderGroupClient(cfg),
 		OrderItem:           NewOrderItemClient(cfg),
@@ -309,6 +320,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ShippingZone:        NewShippingZoneClient(cfg),
 		StoreCreditEntry:    NewStoreCreditEntryClient(cfg),
 		StoreRewardSettings: NewStoreRewardSettingsClient(cfg),
+		StoreSuccessStat:    NewStoreSuccessStatClient(cfg),
 	}, nil
 }
 
@@ -339,12 +351,13 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.CampaignRedemption, c.Cart, c.CartItem, c.Checkout, c.CustomerNote,
-		c.FlashSale, c.FlashSaleItem, c.IdempotentRequest, c.OrderEvent, c.OrderGroup,
-		c.OrderItem, c.OrderNote, c.OutboxEvent, c.ProcessedEvent, c.ProductBundle,
-		c.ProductBundleItem, c.Promotion, c.PromotionRedemption, c.ReportExportJob,
-		c.ReturnRequest, c.ShippingCalculation, c.ShippingDestination,
-		c.ShippingProfile, c.ShippingRule, c.ShippingZone, c.StoreCreditEntry,
-		c.StoreRewardSettings,
+		c.FlashSale, c.FlashSaleItem, c.IdempotentRequest, c.InvoiceCounter,
+		c.OrderEvent, c.OrderGroup, c.OrderItem, c.OrderNote, c.OutboxEvent,
+		c.ProcessedEvent, c.ProductBundle, c.ProductBundleItem, c.Promotion,
+		c.PromotionRedemption, c.ReportExportJob, c.ReturnRequest,
+		c.ShippingCalculation, c.ShippingDestination, c.ShippingProfile,
+		c.ShippingRule, c.ShippingZone, c.StoreCreditEntry, c.StoreRewardSettings,
+		c.StoreSuccessStat,
 	} {
 		n.Use(hooks...)
 	}
@@ -355,12 +368,13 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.CampaignRedemption, c.Cart, c.CartItem, c.Checkout, c.CustomerNote,
-		c.FlashSale, c.FlashSaleItem, c.IdempotentRequest, c.OrderEvent, c.OrderGroup,
-		c.OrderItem, c.OrderNote, c.OutboxEvent, c.ProcessedEvent, c.ProductBundle,
-		c.ProductBundleItem, c.Promotion, c.PromotionRedemption, c.ReportExportJob,
-		c.ReturnRequest, c.ShippingCalculation, c.ShippingDestination,
-		c.ShippingProfile, c.ShippingRule, c.ShippingZone, c.StoreCreditEntry,
-		c.StoreRewardSettings,
+		c.FlashSale, c.FlashSaleItem, c.IdempotentRequest, c.InvoiceCounter,
+		c.OrderEvent, c.OrderGroup, c.OrderItem, c.OrderNote, c.OutboxEvent,
+		c.ProcessedEvent, c.ProductBundle, c.ProductBundleItem, c.Promotion,
+		c.PromotionRedemption, c.ReportExportJob, c.ReturnRequest,
+		c.ShippingCalculation, c.ShippingDestination, c.ShippingProfile,
+		c.ShippingRule, c.ShippingZone, c.StoreCreditEntry, c.StoreRewardSettings,
+		c.StoreSuccessStat,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -385,6 +399,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.FlashSaleItem.mutate(ctx, m)
 	case *IdempotentRequestMutation:
 		return c.IdempotentRequest.mutate(ctx, m)
+	case *InvoiceCounterMutation:
+		return c.InvoiceCounter.mutate(ctx, m)
 	case *OrderEventMutation:
 		return c.OrderEvent.mutate(ctx, m)
 	case *OrderGroupMutation:
@@ -423,6 +439,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.StoreCreditEntry.mutate(ctx, m)
 	case *StoreRewardSettingsMutation:
 		return c.StoreRewardSettings.mutate(ctx, m)
+	case *StoreSuccessStatMutation:
+		return c.StoreSuccessStat.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -1489,6 +1507,139 @@ func (c *IdempotentRequestClient) mutate(ctx context.Context, m *IdempotentReque
 		return (&IdempotentRequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown IdempotentRequest mutation op: %q", m.Op())
+	}
+}
+
+// InvoiceCounterClient is a client for the InvoiceCounter schema.
+type InvoiceCounterClient struct {
+	config
+}
+
+// NewInvoiceCounterClient returns a client for the InvoiceCounter from the given config.
+func NewInvoiceCounterClient(c config) *InvoiceCounterClient {
+	return &InvoiceCounterClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `invoicecounter.Hooks(f(g(h())))`.
+func (c *InvoiceCounterClient) Use(hooks ...Hook) {
+	c.hooks.InvoiceCounter = append(c.hooks.InvoiceCounter, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `invoicecounter.Intercept(f(g(h())))`.
+func (c *InvoiceCounterClient) Intercept(interceptors ...Interceptor) {
+	c.inters.InvoiceCounter = append(c.inters.InvoiceCounter, interceptors...)
+}
+
+// Create returns a builder for creating a InvoiceCounter entity.
+func (c *InvoiceCounterClient) Create() *InvoiceCounterCreate {
+	mutation := newInvoiceCounterMutation(c.config, OpCreate)
+	return &InvoiceCounterCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of InvoiceCounter entities.
+func (c *InvoiceCounterClient) CreateBulk(builders ...*InvoiceCounterCreate) *InvoiceCounterCreateBulk {
+	return &InvoiceCounterCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *InvoiceCounterClient) MapCreateBulk(slice any, setFunc func(*InvoiceCounterCreate, int)) *InvoiceCounterCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &InvoiceCounterCreateBulk{err: fmt.Errorf("calling to InvoiceCounterClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*InvoiceCounterCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &InvoiceCounterCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for InvoiceCounter.
+func (c *InvoiceCounterClient) Update() *InvoiceCounterUpdate {
+	mutation := newInvoiceCounterMutation(c.config, OpUpdate)
+	return &InvoiceCounterUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InvoiceCounterClient) UpdateOne(_m *InvoiceCounter) *InvoiceCounterUpdateOne {
+	mutation := newInvoiceCounterMutation(c.config, OpUpdateOne, withInvoiceCounter(_m))
+	return &InvoiceCounterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InvoiceCounterClient) UpdateOneID(id uuid.UUID) *InvoiceCounterUpdateOne {
+	mutation := newInvoiceCounterMutation(c.config, OpUpdateOne, withInvoiceCounterID(id))
+	return &InvoiceCounterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for InvoiceCounter.
+func (c *InvoiceCounterClient) Delete() *InvoiceCounterDelete {
+	mutation := newInvoiceCounterMutation(c.config, OpDelete)
+	return &InvoiceCounterDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *InvoiceCounterClient) DeleteOne(_m *InvoiceCounter) *InvoiceCounterDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *InvoiceCounterClient) DeleteOneID(id uuid.UUID) *InvoiceCounterDeleteOne {
+	builder := c.Delete().Where(invoicecounter.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InvoiceCounterDeleteOne{builder}
+}
+
+// Query returns a query builder for InvoiceCounter.
+func (c *InvoiceCounterClient) Query() *InvoiceCounterQuery {
+	return &InvoiceCounterQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeInvoiceCounter},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a InvoiceCounter entity by its id.
+func (c *InvoiceCounterClient) Get(ctx context.Context, id uuid.UUID) (*InvoiceCounter, error) {
+	return c.Query().Where(invoicecounter.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InvoiceCounterClient) GetX(ctx context.Context, id uuid.UUID) *InvoiceCounter {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *InvoiceCounterClient) Hooks() []Hook {
+	return c.hooks.InvoiceCounter
+}
+
+// Interceptors returns the client interceptors.
+func (c *InvoiceCounterClient) Interceptors() []Interceptor {
+	return c.inters.InvoiceCounter
+}
+
+func (c *InvoiceCounterClient) mutate(ctx context.Context, m *InvoiceCounterMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&InvoiceCounterCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&InvoiceCounterUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&InvoiceCounterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&InvoiceCounterDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown InvoiceCounter mutation op: %q", m.Op())
 	}
 }
 
@@ -4019,23 +4170,158 @@ func (c *StoreRewardSettingsClient) mutate(ctx context.Context, m *StoreRewardSe
 	}
 }
 
+// StoreSuccessStatClient is a client for the StoreSuccessStat schema.
+type StoreSuccessStatClient struct {
+	config
+}
+
+// NewStoreSuccessStatClient returns a client for the StoreSuccessStat from the given config.
+func NewStoreSuccessStatClient(c config) *StoreSuccessStatClient {
+	return &StoreSuccessStatClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `storesuccessstat.Hooks(f(g(h())))`.
+func (c *StoreSuccessStatClient) Use(hooks ...Hook) {
+	c.hooks.StoreSuccessStat = append(c.hooks.StoreSuccessStat, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `storesuccessstat.Intercept(f(g(h())))`.
+func (c *StoreSuccessStatClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StoreSuccessStat = append(c.inters.StoreSuccessStat, interceptors...)
+}
+
+// Create returns a builder for creating a StoreSuccessStat entity.
+func (c *StoreSuccessStatClient) Create() *StoreSuccessStatCreate {
+	mutation := newStoreSuccessStatMutation(c.config, OpCreate)
+	return &StoreSuccessStatCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StoreSuccessStat entities.
+func (c *StoreSuccessStatClient) CreateBulk(builders ...*StoreSuccessStatCreate) *StoreSuccessStatCreateBulk {
+	return &StoreSuccessStatCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StoreSuccessStatClient) MapCreateBulk(slice any, setFunc func(*StoreSuccessStatCreate, int)) *StoreSuccessStatCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StoreSuccessStatCreateBulk{err: fmt.Errorf("calling to StoreSuccessStatClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StoreSuccessStatCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StoreSuccessStatCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StoreSuccessStat.
+func (c *StoreSuccessStatClient) Update() *StoreSuccessStatUpdate {
+	mutation := newStoreSuccessStatMutation(c.config, OpUpdate)
+	return &StoreSuccessStatUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StoreSuccessStatClient) UpdateOne(_m *StoreSuccessStat) *StoreSuccessStatUpdateOne {
+	mutation := newStoreSuccessStatMutation(c.config, OpUpdateOne, withStoreSuccessStat(_m))
+	return &StoreSuccessStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StoreSuccessStatClient) UpdateOneID(id uuid.UUID) *StoreSuccessStatUpdateOne {
+	mutation := newStoreSuccessStatMutation(c.config, OpUpdateOne, withStoreSuccessStatID(id))
+	return &StoreSuccessStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StoreSuccessStat.
+func (c *StoreSuccessStatClient) Delete() *StoreSuccessStatDelete {
+	mutation := newStoreSuccessStatMutation(c.config, OpDelete)
+	return &StoreSuccessStatDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StoreSuccessStatClient) DeleteOne(_m *StoreSuccessStat) *StoreSuccessStatDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StoreSuccessStatClient) DeleteOneID(id uuid.UUID) *StoreSuccessStatDeleteOne {
+	builder := c.Delete().Where(storesuccessstat.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StoreSuccessStatDeleteOne{builder}
+}
+
+// Query returns a query builder for StoreSuccessStat.
+func (c *StoreSuccessStatClient) Query() *StoreSuccessStatQuery {
+	return &StoreSuccessStatQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStoreSuccessStat},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StoreSuccessStat entity by its id.
+func (c *StoreSuccessStatClient) Get(ctx context.Context, id uuid.UUID) (*StoreSuccessStat, error) {
+	return c.Query().Where(storesuccessstat.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StoreSuccessStatClient) GetX(ctx context.Context, id uuid.UUID) *StoreSuccessStat {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StoreSuccessStatClient) Hooks() []Hook {
+	return c.hooks.StoreSuccessStat
+}
+
+// Interceptors returns the client interceptors.
+func (c *StoreSuccessStatClient) Interceptors() []Interceptor {
+	return c.inters.StoreSuccessStat
+}
+
+func (c *StoreSuccessStatClient) mutate(ctx context.Context, m *StoreSuccessStatMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StoreSuccessStatCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StoreSuccessStatUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StoreSuccessStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StoreSuccessStatDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StoreSuccessStat mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		CampaignRedemption, Cart, CartItem, Checkout, CustomerNote, FlashSale,
-		FlashSaleItem, IdempotentRequest, OrderEvent, OrderGroup, OrderItem, OrderNote,
-		OutboxEvent, ProcessedEvent, ProductBundle, ProductBundleItem, Promotion,
-		PromotionRedemption, ReportExportJob, ReturnRequest, ShippingCalculation,
-		ShippingDestination, ShippingProfile, ShippingRule, ShippingZone,
-		StoreCreditEntry, StoreRewardSettings []ent.Hook
+		FlashSaleItem, IdempotentRequest, InvoiceCounter, OrderEvent, OrderGroup,
+		OrderItem, OrderNote, OutboxEvent, ProcessedEvent, ProductBundle,
+		ProductBundleItem, Promotion, PromotionRedemption, ReportExportJob,
+		ReturnRequest, ShippingCalculation, ShippingDestination, ShippingProfile,
+		ShippingRule, ShippingZone, StoreCreditEntry, StoreRewardSettings,
+		StoreSuccessStat []ent.Hook
 	}
 	inters struct {
 		CampaignRedemption, Cart, CartItem, Checkout, CustomerNote, FlashSale,
-		FlashSaleItem, IdempotentRequest, OrderEvent, OrderGroup, OrderItem, OrderNote,
-		OutboxEvent, ProcessedEvent, ProductBundle, ProductBundleItem, Promotion,
-		PromotionRedemption, ReportExportJob, ReturnRequest, ShippingCalculation,
-		ShippingDestination, ShippingProfile, ShippingRule, ShippingZone,
-		StoreCreditEntry, StoreRewardSettings []ent.Interceptor
+		FlashSaleItem, IdempotentRequest, InvoiceCounter, OrderEvent, OrderGroup,
+		OrderItem, OrderNote, OutboxEvent, ProcessedEvent, ProductBundle,
+		ProductBundleItem, Promotion, PromotionRedemption, ReportExportJob,
+		ReturnRequest, ShippingCalculation, ShippingDestination, ShippingProfile,
+		ShippingRule, ShippingZone, StoreCreditEntry, StoreRewardSettings,
+		StoreSuccessStat []ent.Interceptor
 	}
 )
 
