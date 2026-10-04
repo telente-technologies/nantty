@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent"
 	_ "zudomart/modules/subscriptions/src/generated/ent/runtime"
 	"zudomart/modules/subscriptions/src/repositories"
+	"zudomart/platform/staffaudit"
 )
 
 type TrialSignalSource interface {
@@ -26,6 +27,7 @@ type Container struct {
 	Payments     *paymentservices.PaymentGateway
 	Identity     repositories.IdentityDirectory
 	TrialSignals TrialSignalSource
+	Audit        staffaudit.Recorder
 	Outbox       ledgerevents.OutboxTable
 	Idempotency  ledgerutils.SqlIdempotencyRecordStore
 	Now          func() time.Time
@@ -37,8 +39,12 @@ func NewSubscriptionsContainer(resources loaders.MoneyModuleResources, settings 
 	if identity == nil {
 		identity = repositories.SqlIdentityDirectory{Database: resources.Database, AuthSchema: settings.AccountDirectorySchema, UsersSchema: settings.UsersSchema}
 	}
+	var audit staffaudit.Recorder
+	if settings.AdminInternalUrl != "" {
+		audit = staffaudit.NewHttpRecorder(settings.AdminInternalUrl, settings.AdminInternalToken)
+	}
 	return &Container{
-		Resources: resources, Settings: settings, Payments: payments, Identity: identity,
+		Resources: resources, Settings: settings, Payments: payments, Identity: identity, Audit: audit,
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.subscriptions"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Now:         time.Now,

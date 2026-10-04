@@ -20,6 +20,9 @@ type SubscriptionsSettings struct {
 	UsersSchema            string
 	FingerprintKey         string
 	StoreProductPlans      map[string]StoreProductPlan
+	TrustedCountryHeader   string
+	AdminInternalUrl       string
+	AdminInternalToken     string
 }
 
 func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) SubscriptionsSettings {
@@ -31,6 +34,13 @@ func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.Environment
 		UsersSchema:            reader.ReadStringOrDefault("SUBSCRIPTIONS_USERS_SCHEMA", "users"),
 		FingerprintKey:         reader.ReadStringOrDefault("SAVED_CARD_FINGERPRINT_KEY", ""),
 		StoreProductPlans:      ParseStoreProductPlans(reader.ReadStringOrDefault("SUBSCRIPTIONS_STORE_PRODUCT_PLANS", "")),
+		TrustedCountryHeader:   reader.ReadStringOrDefault("PRICING_TRUSTED_COUNTRY_HEADER", "CloudFront-Viewer-Country"),
+		AdminInternalUrl:       reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
+		AdminInternalToken:     reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
+	}
+	if settings.Money.IsProduction() {
+		settings.AdminInternalUrl = reader.ReadRequiredString("ADMIN_INTERNAL_URL")
+		reader.RequireMinimumLength("ADMIN_INTERNAL_API_TOKEN", settings.AdminInternalToken, 32)
 	}
 	if settings.Money.IsProduction() && settings.FingerprintKey == "" {
 		reader.ReadRequiredString("SAVED_CARD_FINGERPRINT_KEY")
