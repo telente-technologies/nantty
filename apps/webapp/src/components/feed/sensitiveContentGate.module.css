@@ -1,0 +1,75 @@
+.cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: var(--space-2);
+  min-height: 220px;
+  padding: var(--space-6) var(--space-5);
+  overflow: hidden;
+  border-radius: var(--radius-large);
+  background: #1c1c1f;
+  color: #ffffff;
+  text-align: center;
+  isolation: isolate;
+}
+
+.preview {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  filter: blur(36px) saturate(0.8);
+  transform: scale(1.15);
+}
+
+.cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.iconBadge {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+
+.message {
+  max-width: 34ch;
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.view {
+  min-width: 96px;
+  min-height: 40px;
+  margin-top: var(--space-1);
+  padding-inline: var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: #ffffff;
+  color: #111111;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.view:hover {
+  background: #e9e9ec;
+}
+
+.view:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
