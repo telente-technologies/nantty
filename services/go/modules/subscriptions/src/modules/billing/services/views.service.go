@@ -60,6 +60,8 @@ type PlanView struct {
 	Discount       string         `json:"discountKind"`
 	TrialDays      int            `json:"trialDays"`
 	StoreProductId *string        `json:"storeProductId"`
+	BillingNote    string         `json:"billingNote,omitempty"`
+	CanBuyOnWeb    bool           `json:"canBuyOnWeb"`
 }
 
 func (billing Billing) ListPlans(ctx context.Context, ownerUserId string, resolution regionpricing.Resolution, planCodes []string) ([]PlanView, error) {
@@ -84,6 +86,10 @@ func (billing Billing) ListPlans(ctx context.Context, ownerUserId string, resolu
 				Id: code + "_" + interval + "ly", PlanCode: code, Tier: definition.Tier, Interval: interval, Channel: resolution.Channel, Region: price.Region,
 				Price: money(quote.AmountMinor, price.Currency), ListPrice: money(quote.ListAmountMinor, price.Currency), Discount: quote.DiscountKind,
 			}
+			if resolution.Channel == "web" {
+				view.CanBuyOnWeb = !price.NotChargeableOnWeb
+				view.BillingNote = webBillingNote(price)
+			}
 			if productId := price.StoreProductIdFor(resolution.Channel, interval); productId != "" {
 				view.StoreProductId = &productId
 			}
@@ -94,6 +100,16 @@ func (billing Billing) ListPlans(ctx context.Context, ownerUserId string, resolu
 		}
 	}
 	return views, nil
+}
+
+func webBillingNote(price regionpricing.PlanRegionalPrice) string {
+	switch {
+	case price.NotChargeableOnWeb:
+		return WebCurrencyNotEnabledMessage
+	case price.BilledInUsdFallback:
+		return regionpricing.UsdBillingNote
+	}
+	return ""
 }
 
 func (billing Billing) CreatorSubscriptionBands(ctx context.Context, resolution regionpricing.Resolution) map[string]any {
@@ -108,8 +124,13 @@ func (billing Billing) CreatorSubscriptionBands(ctx context.Context, resolution 
 	if matched, ok := regionpricing.FindRegion(region); ok {
 		currency = matched.Currency
 	}
+	billingNote := ""
 	if resolution.Channel == "web" && !billing.webCanCharge(currency) {
 		region, currency, bands = regionpricing.FallbackRegion.Code, regionpricing.FallbackRegion.Currency, document.CreatorSubscriptionBands[regionpricing.FallbackRegion.Code]
+		billingNote = regionpricing.UsdBillingNote
+		if !billing.webCanCharge(currency) {
+			billingNote = WebCurrencyNotEnabledMessage
+		}
 	}
 	items := make([]map[string]any, 0, len(bands))
 	for _, band := range bands {
@@ -119,7 +140,7 @@ func (billing Billing) CreatorSubscriptionBands(ctx context.Context, resolution 
 		}
 		items = append(items, map[string]any{"band": band.Band, "price": money(amount, currency)})
 	}
-	return map[string]any{"region": region, "channel": resolution.Channel, "creatorSharePercentOfNet": 80, "data": items}
+	return map[string]any{"region": region, "channel": resolution.Channel, "billingNote": billingNote, "creatorSharePercentOfNet": 80, "data": items}
 }
 
 func (billing Billing) BuildOffer(ctx context.Context, userId, profileId string) (map[string]any, error) {
@@ -148,14 +169,14 @@ func (billing Billing) BuildOffer(ctx context.Context, userId, profileId string)
 		activeTrial = map[string]any{
 			"planId": trial.PlanCode + "_" + trial.Interval.String() + "ly", "tier": constants.Plans[trial.PlanCode].Tier, "interval": trial.Interval.String(), "startedAt": trial.CreatedAt,
 			"endsAt": trial.TrialEndsAt, "daysLeft": daysUntil(trial.TrialEndsAt, billing.Container.Now()), "isCancelled": trial.CancelAtPeriodEnd, "cardSummary": trial.CardLabel,
-			"priceAfterTrial": money(trial.AmountMinor, trial.Currency), "verificationCharge": map[string]any{"amount": money(5000, trial.Currency), "status": "REFUNDED"},
+			"priceAfterTrial": money(trial.AmountMinor, trial.Currency), "verificationCharge": map[string]any{"amount": cardVerificationCharge(trial.Currency), "status": "REFUNDED"},
 		}
 	} else if !ent.IsNotFound(err) {
 		return nil, err
 	}
 	return map[string]any{
 		"profileName": profile.DisplayName, "trialLength": map[bool]string{true: "MONTH_1", false: "DAYS_7"}[trialRules.TrialDays >= 30], "trialDays": trialRules.TrialDays,
-		"yearlyDiscountPercent": pricing.Pricing.YearlyDiscountBps / 100, "verificationCharge": money(5000, "NGN"), "isEligible": len(reasons) == 0, "ineligibleReasons": reasons,
+		"yearlyDiscountPercent": pricing.Pricing.YearlyDiscountBps / 100, "verificationCharge": cardVerificationCharge(currency), "isEligible": len(reasons) == 0, "ineligibleReasons": reasons,
 		"activeTrial": activeTrial, "bundle": map[string]any{"hasActiveBlue": hasBlue, "discountPercent": pricing.Pricing.BundleDiscountBps / 100, "maximumBusinesses": pricing.Pricing.BundleMaximumBusinesses},
 		"goldOnlyPlan": map[string]any{"monthly": money(goldMonthly.AmountMinor, currency), "yearly": money(goldYearly.AmountMinor, currency)},
 	}, nil
@@ -166,4 +187,9 @@ func daysUntil(at *time.Time, now time.Time) int {
 		return 0
 	}
 	return max(int(at.Sub(now).Hours()/24+0.999), 0)
+}
+
+func cardVerificationCharge(currency string) map[string]any {
+	amount, chargedIn := regionpricing.CardVerificationCharge(currency)
+	return money(amount, chargedIn)
 }
