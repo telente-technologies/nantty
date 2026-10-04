@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { isGuestBrowsablePage } from "@/config/guestBrowsing.config";
+import { resolveLegacyPublicPathRedirect } from "@/server/legacyRedirects.service";
 import { readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies } from "@/server/session.service";
 
 const publicPagePaths = new Set(["/welcome", "/login", "/signup", "/forgot-password", "/reset-password"]);
@@ -12,12 +13,15 @@ function redirectTo(request: NextRequest, pathname: string, searchParams?: Recor
   return NextResponse.redirect(targetUrl, 307);
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const requestedPathWithQuery = `${pathname}${search}`;
   const sessionId = readSessionIdFromCookies(request.cookies);
 
   if (staticAssetPattern.test(pathname)) return NextResponse.next();
+
+  const legacyRedirectPath = await resolveLegacyPublicPathRedirect(pathname);
+  if (legacyRedirectPath) return NextResponse.redirect(new URL(`${legacyRedirectPath}${search}`, request.nextUrl.origin), 308);
 
   if (publicPagePaths.has(pathname)) {
     if (sessionId && readCachedViewerFromCookies(request.cookies)) return redirectTo(request, "/", undefined);
