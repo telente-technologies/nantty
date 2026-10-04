@@ -3,6 +3,7 @@ import type { Logger } from "@zudojs/logger";
 
 import type { GatewayConfig } from "../configs/gateway.config.js";
 import { isChatReportSubmission, resolveUpstreamRouteForRequest, sensitiveGuestPathPrefixes, type UpstreamRoute } from "../routes/upstream.routes.js";
+import { shouldRefuseAnonymousMutation } from "../services/anonymousMutationGuard.service.js";
 import { doesRequestNeedPolicyGate, type PolicyGateSource } from "../services/policyAcceptanceGate.service.js";
 import { isInternalOnlyPath } from "../services/internalRouteGuard.service.js";
 import { InMemoryRateLimitStore, type RateLimitStore } from "../services/rateLimitStore.service.js";
@@ -42,6 +43,7 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     if (route === undefined) return json(404, { message: "Not found.", code: "NOT_FOUND" });
     const { principal, rejected } = await resolvePrincipalForRoute(route, request.getHeader("authorization"), options.verifier);
     if (rejected) return json(401, unauthorizedResponseBody);
+    if (principal === undefined && shouldRefuseAnonymousMutation(request.method, request.path, request.getHeader("authorization"))) return json(401, unauthorizedResponseBody);
     const requestUrl = new URL(request.url, "http://gateway.internal");
     if (principal !== undefined && options.policyGate !== undefined && doesRequestNeedPolicyGate(request.method, requestUrl.pathname)) {
       try {

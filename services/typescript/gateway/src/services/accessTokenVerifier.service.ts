@@ -4,6 +4,11 @@ export interface VerifiedPrincipal {
   readonly accountId: string;
   readonly sessionId: string;
   readonly roles: readonly string[];
+  readonly ageBracket?: "adult" | "minor" | "unknown";
+}
+
+export function readAgeBracketClaim(value: unknown): "adult" | "minor" | "unknown" {
+  return value === "adult" || value === "minor" ? value : "unknown";
 }
 
 export interface AccessTokenVerifierOptions {
@@ -30,7 +35,7 @@ export class AccessTokenVerifier {
       });
       if (typeof payload.sub !== "string" || typeof payload.sid !== "string") return undefined;
       const roles = Array.isArray(payload.roles) ? payload.roles.filter((role): role is string => typeof role === "string") : [];
-      return { accountId: payload.sub, sessionId: payload.sid, roles };
+      return { accountId: payload.sub, sessionId: payload.sid, roles, ageBracket: readAgeBracketClaim(payload["age"]) };
     } catch {
       return undefined;
     }

@@ -15,7 +15,7 @@ export interface GatewayConfig {
   readonly routeRateLimitsPerMinute?: Readonly<Partial<Record<RouteLimitName, number>>>;
 }
 
-export type UpstreamName = "identity" | "live" | "money" | "notifications" | "social" | "trust" | "commerce" | "media" | "search";
+export type UpstreamName = "identity" | "live" | "money" | "notifications" | "social" | "trust" | "commerce" | "media" | "search" | "ads";
 
 function readRequiredEnvironmentVariable(name: string, problems: string[]): string {
   const value = process.env[name]?.trim() ?? "";
@@ -62,7 +62,7 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
     maxRequestBodyBytes: Number(readEnvironmentVariableOrDefault("MAX_REQUEST_BODY_BYTES", String(1024 * 1024))),
     valkeyUrl: process.env["VALKEY_URL"]?.trim() || null,
     routeRateLimitsPerMinute: readRouteRateLimits(),
-    upstreams: { identity: readRequiredEnvironmentVariable("UPSTREAM_IDENTITY_URL", problems), live: readEnvironmentVariableOrDefault("UPSTREAM_LIVE_URL", "http://localhost:8102"), money: readEnvironmentVariableOrDefault("UPSTREAM_MONEY_URL", "http://localhost:8103"), notifications: readEnvironmentVariableOrDefault("UPSTREAM_NOTIFICATIONS_URL", "http://localhost:8104"), social: readEnvironmentVariableOrDefault("UPSTREAM_SOCIAL_URL", "http://localhost:8105"), trust: readEnvironmentVariableOrDefault("UPSTREAM_TRUST_URL", "http://localhost:8106"), commerce: readEnvironmentVariableOrDefault("UPSTREAM_COMMERCE_URL", "http://localhost:8107"), media: readEnvironmentVariableOrDefault("UPSTREAM_MEDIA_URL", "http://localhost:8108"), search: readEnvironmentVariableOrDefault("UPSTREAM_SEARCH_URL", "http://localhost:8109") },
+    upstreams: { identity: readRequiredEnvironmentVariable("UPSTREAM_IDENTITY_URL", problems), live: readEnvironmentVariableOrDefault("UPSTREAM_LIVE_URL", "http://localhost:8102"), money: readEnvironmentVariableOrDefault("UPSTREAM_MONEY_URL", "http://localhost:8103"), notifications: readEnvironmentVariableOrDefault("UPSTREAM_NOTIFICATIONS_URL", "http://localhost:8104"), social: readEnvironmentVariableOrDefault("UPSTREAM_SOCIAL_URL", "http://localhost:8105"), trust: readEnvironmentVariableOrDefault("UPSTREAM_TRUST_URL", "http://localhost:8106"), commerce: readEnvironmentVariableOrDefault("UPSTREAM_COMMERCE_URL", "http://localhost:8107"), media: readEnvironmentVariableOrDefault("UPSTREAM_MEDIA_URL", "http://localhost:8108"), search: readEnvironmentVariableOrDefault("UPSTREAM_SEARCH_URL", "http://localhost:8109"), ads: readEnvironmentVariableOrDefault("UPSTREAM_ADS_URL", "http://localhost:8110") },
   };
   if (config.corsOrigins.includes("*")) problems.push("CORS_ORIGINS must list exact origins, not *");
   if (process.env["NODE_ENV"] === "production" && config.valkeyUrl === null) problems.push("VALKEY_URL is required in production");

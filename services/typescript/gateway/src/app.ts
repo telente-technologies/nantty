@@ -45,7 +45,7 @@ export function createGatewayServer(options: GatewayServerOptions) {
       createSecurityHeadersMiddleware(),
       createStrictCorsMiddleware({
         allowedOrigins: options.config.corsOrigins,
-        allowHeaders: "Authorization, Content-Type, Idempotency-Key, X-Client-Region, X-Device-Id, X-Request-Id, X-Step-Up-Token, Traceparent, If-None-Match",
+        allowHeaders: "Authorization, Content-Type, Idempotency-Key, X-Client-Platform, X-Client-Region, X-Device-Id, X-Store-Storefront, X-Request-Id, X-Step-Up-Token, Traceparent, If-None-Match",
         exposeHeaders: "ETag, X-Request-Id, Traceparent, Retry-After, Idempotent-Replayed",
       }),
       createRequestSizeLimitMiddleware(maximumRequestBodyBytes),
