@@ -29,3 +29,19 @@
 .footer a:hover {
   text-decoration: underline;
 }
+
+.appPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.appPromptText {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}

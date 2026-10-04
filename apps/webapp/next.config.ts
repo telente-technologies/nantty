@@ -4,7 +4,8 @@ const isDevelopmentBuild = process.env.NODE_ENV === "development";
 
 const contentSecurityPolicyDirectives: Record<string, string[]> = {
   "default-src": ["'self'"],
-  "script-src": ["'self'", "'unsafe-inline'", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : [])],
+  "script-src": ["'self'", "'unsafe-inline'", "https://challenges.cloudflare.com", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : [])],
+  "frame-src": ["https://challenges.cloudflare.com"],
   "style-src": ["'self'", "'unsafe-inline'"],
   "img-src": ["'self'", "data:", "blob:", "https:", ...(isDevelopmentBuild ? ["http:"] : [])],
   "font-src": ["'self'"],
