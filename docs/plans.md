@@ -1793,3 +1793,44 @@ Ad type picker, carousel card editor (add, remove, reorder with Earlier/Later, p
 - **[BACKEND]** social/commerce internal lookups for `post|product|store|profile` destination ownership (an advertiser could target another account's product id today; same gap as before for single ads).
 - **[LATER]** malware feed (Safe Browsing or similar) behind `DestinationHostFlags`; video cards in the carousel autoplay; device Universal Links verification files for the click host.
 - Not run on a device or in a browser; unit tests and type checks only.
+
+
+## 45. Seller prices per country, region visibility and 30-day deletion grace **[DONE (go-catalog, go-orders, go-auth, go-users, search, social, seller, mobile, webapp)]**
+
+- **Prices by country:** optional per variant, per market currency (NGN, GHS, KES, ZAR, GBP, EUR, USD), every plan (`planFeatures.config` has no feature for it). Region comes from the existing order: profile country, proxy-resolved IP header, client hint. A market price is charged in its own currency; without one the default price shows with an "approx." local amount (currency module rates). Because one seller's order has one currency, a market price only applies when all of that seller's lines have one. Checkout re-prices server-side from the delivery address country. Bulk percent repricing leaves country prices untouched.
+- **Region visibility:** the catalog stores each store's deliverable countries (from active shipping zones and rules; none configured means its own country). Lists, store pages, related products, product detail (404-style), share cards ("Not available in your region") and search (`shippingRegions` facet) hide products from other regions; owners and staff see their own. Unknown viewer region hides nothing. Feed product cards are not built yet (post products are empty).
+- **Deletion grace:** 30 days (`USERS_DELETION_GRACE_DAYS`). Logging in again cancels the request and shows "Your account deletion has been cancelled". Financial-record retention is unchanged.
+- **Open:** per-product (not per-variant) editing of country prices; no IP-geolocation lookup inside goCommerce (relies on the edge header); help centre and legal copy have no deletion-period text yet.
+
+## 47. Birthday and Zudoversary celebrations **[DONE (go-identity users, notifications, email templates, mobile + webapp, mock)]**
+
+Owner rules: X-style birthday balloons, and a yearly "Zudoversary" on the join date. No birthday email. Anniversary email respects the "Milestones" notification preference. The date of birth is never exposed.
+
+### 47.1 Backend (go-identity, `users` module `celebrations`)
+
+- Pure logic `utils.ComputeCelebrationDay(birthday, joinedAt, timezone, now)`. The local date comes from the **account timezone** (IANA, default UTC until the client syncs the device timezone). The stored birthday is a calendar date and is never shifted by timezone; only "now" is converted. Leap-day birthdays and joins are celebrated on **Feb 28 in common years**. No birthday in the birth year; the first anniversary is one year after joining.
+- Tables (migration `20261004030000_add_celebrations`): `celebration_settings` (`timezone`, `birthday_balloons_visible` default true, `joined_at`) and `celebration_views` (account, kind `birthday|anniversary`, surface `app|profile|email`, `local_date`; unique, so recording is idempotent).
+- `GET /api/v1/users/me/celebrations` returns `timezone`, `timezoneConfigured`, `localDate`, `birthdayBalloonsVisible`, `birthday { today, age (self only), shown { app, profile } }`, `anniversary { today, years, shown, stats { followers, orders } }`. `POST /me/celebrations/seen { kind, surface }` (204, idempotent) is the server-side once-per-day memory. `PATCH /me/celebrations/settings { timezone?, birthdayBalloonsVisible? }`.
+- Profile views (`GET /users/{id}`, `/users/by-username/{u}`, `/users/me`) gain `birthdayToday` and `anniversaryToday`, computed in the **profile owner's** timezone. Visitors get `birthdayToday` only when the owner's balloons setting is on; the age and date of birth are never in a visitor response (own profile always sees their own).
+- Scheduler (hourly, timezone-aware, idempotent): backfills `joined_at` from the account directory, selects accounts whose join month-day is within two days of UTC today, confirms the local date in the account timezone, waits until **08:00 local**, then inserts the `email` view row and the outbox event in one transaction. The unique row means one `account.anniversaryReached` per account per local date.
+- Event `account.anniversaryReached` `{ accountId, years, localDate, timezone, joinedAt, stats? }` (schema in `services/contracts/events`, matched by the existing `account.*` notifications binding).
+
+### 47.2 Notifications and email
+
+- New preference category `milestones` (push and email on by default). `milestones.mapping.ts` maps the event to an in-app item and the `zudoversary` email.
+- New template `zudoversary` in `packages/emailTemplates` (`milestones.template.tsx`, category `milestones`, kind `transactional`, consent `transactionalOptOut`): hero, thank-you copy, optional "Your time on Zudomart" stats card (only non-zero figures), open-app button.
+
+### 47.3 Mobile and webapp
+
+- Message copy: "Happy 25th birthday, Ada! Wishing you an amazing year ahead from all of us at Zudomart." and "Happy 2nd Zudoversary! Thanks for being part of Zudomart for 2 years." plus a stats card.
+- Once per day per surface: local memory (AsyncStorage on mobile, localStorage on web, keyed by account, kind, surface, local date) plus the server `shown` flags. Birthday wins over the anniversary on a surface.
+- Surfaces: first open of the app (overlay, `CelebrationHost`) and first view of the own profile (balloons over the header plus a message note). Visitors see balloons over the header without a message or age, and a "Zudoversary" pill.
+- Vector balloons only (SVG, theme tokens, no emojis). Mobile uses Reanimated; web uses CSS keyframes. Balloons are buttons ("Pop balloon") and pop on tap. Reduced motion shows a static confetti illustration instead.
+- Accessibility: the message is announced (`announceForAccessibility` on mobile, a polite live region on web); the dialog is an alert dialog.
+- Settings: "Birthday balloons" switch (Privacy & Data on mobile, Settings > Privacy on web). Clients send the device timezone once when none is set.
+
+### 47.4 Open items
+
+- **[BACKEND]** posts and lives counts in the anniversary stats come from social and live; the card shows followers and orders from `profile_signals` plus the client's own post count.
+- **[LATER]** a Milestones row in the notification preference screens (the category exists in the API, the mobile and webapp preference lists were not extended); a timezone picker in settings (today the device timezone is synced once).
+- Go integration tests need the local Postgres (`pnpm backend:up`) and were compiled but skipped here; unit tests, vitest, jest and tsc were run.

@@ -6,6 +6,38 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
+## Seller prices per country, region-based product visibility, 30-day deletion grace (4 Oct) — Go, search and social tests; tsc per app
+
+Design: [plans.md §45](./plans.md).
+
+| Area | Change |
+| --- | --- |
+| services/go (catalog) | Variant `regionalPrices` (jsonb) and store `shippingCountryCodes` (migration `20261004090000`); buyer lists, store pages, related products, product detail (404 `PRODUCT_NOT_AVAILABLE_IN_REGION`), share cards (`not_in_region`) and search sources filter by the viewer country; sellers and store members still see their own products; `priceIsRegional` and `approxPrice` on product views; tests |
+| services/go (orders) | Cart and checkout price lines for the delivery country (regional price in its own currency; non-shipping sellers become unavailable); shipping rule saves and deletes sync the store's deliverable countries to the catalog and reindex its products |
+| services/go (platform) | `viewerregion` (profile, proxy-resolved IP header, client hint; FX reader over the currency schema) captured for every request; `commerceports` regional resolve and shipping-countries ports |
+| services/go (auth, users) | `USERS_DELETION_GRACE_DAYS` default 30; a password or social login during the grace cancels the deletion and returns `notice: "Your account deletion has been cancelled"`; tests |
+| services/typescript (search, social) | `shippingRegions` on product documents (migration) and a region filter in search; share cards carry `not_in_region` |
+| apps/seller | "Prices by country" section in the product editor (all plans), validation, mocks, contract test |
+| apps/mobile, apps/webapp | "approx." prices, "Not available in your region" product state, 30-day delete-account copy, login notice toast |
+| packages/emailTemplates | `accountDeletionScheduled` says the account is permanently deleted in 30 days, log in to cancel |
+
+---
+
+## Birthday and Zudoversary celebrations (4 Oct) — go test (users utils), notifications vitest, emailTemplates vitest, mobile jest, webapp unit tests, tsc per app
+
+Design: [plans.md §47](./plans.md).
+
+| Area | Change |
+| --- | --- |
+| services/go (users) | `celebrations` module: `GET /users/me/celebrations`, `POST /users/me/celebrations/seen`, `PATCH /users/me/celebrations/settings`; `birthdayToday` and `anniversaryToday` on profile views (age and date of birth never exposed to others); hourly timezone-aware anniversary scheduler (08:00 local, idempotent) emitting `account.anniversaryReached`; migration `20261004030000_add_celebrations`; unit tests for timezone edges (UTC midnight vs Lagos, London, Los Angeles), leap days and the first-year rule; integration tests (skipped without Postgres) for once-per-day, self-only age, privacy opt-out and a single email event |
+| services/contracts | `account.anniversaryReached` schema, asyncapi message, notifications consumer row |
+| services/typescript/notifications | `milestones` preference category, `milestones.mapping.ts`, fixture |
+| packages/emailTemplates | `zudoversary` template (category `milestones`, transactional) with tests |
+| apps/mobile | Reanimated balloons (tap to pop), static confetti under reduced motion, app-open overlay, own-profile and visitor profile layers, Zudoversary pill, Birthday balloons switch, mock routes, jest tests |
+| apps/webapp | CSS/SVG balloons, reduced-motion confetti, app-open dialog, profile layers, privacy switch, mock routes, unit tests |
+
+---
+
 ## Link previews, /username links, guest view-only, product SEO, create gating (4 Oct) — tests and tsc per app/service; one `next dev` curl check
 
 Design: [plans.md §41](./plans.md).

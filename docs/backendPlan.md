@@ -1191,3 +1191,6 @@ Built in `services/typescript/social` (port 8105, Prisma schema `social`): follo
 - **goIdentity**: reserved usernames include every top-level web app route (kept in sync by `apps/webapp/src/contracts/reservedRoutes.test.ts`).
 - **go-catalog**: create, publish and duplicate product need an `active` store (`403 STORE_NOT_APPROVED`). **go-live**: hosting already needs the `creator` role; now unit-tested.
 - **Open**: `GET /api/v1/sitemap/{products|stores|profiles}?page=` for the web app sitemap; optional-auth public profile by id in goIdentity.
+
+- **go-catalog / go-orders (regional prices, region visibility):** `product_variants.regional_prices` and `stores.shipping_country_codes`; orders pushes deliverable countries through `commerceports.StoreShippingCountries` after rule saves and the catalog re-emits `product.updated`; `ResolveProductsForCheckoutInCountry` re-prices and marks non-shipping sellers unpurchasable; buyer region via `platform/viewerregion` (`TRUSTED_COUNTRY_HEADER`, default `CloudFront-Viewer-Country`). Search documents carry `shipping_regions`; the share-card endpoint takes `viewerId` and optional `country`.
+- **goIdentity:** account deletion grace is 30 days (`USERS_DELETION_GRACE_DAYS`); `identityports.DeletionGraceCanceller` lets auth cancel a pending request on password or social login and return `notice`.
