@@ -16,7 +16,7 @@ export default async function DemoHostedCheckoutPage({ searchParams }: { readonl
     <>
       <PageHeader eyebrow="Demo only" title="Payment partner page" description="With the real backend this is the Paystack payment window. No money moves in demo mode." />
       <Callout tone="info">Reference {safeReference || "missing"}</Callout>
-      {safeReference.startsWith("TRL_") || safeReference.startsWith("GLD_") ? <Callout tone="caution" title="Saving a card">We make a small ₦50 charge to check the card and refund it automatically. Your account email is used for receipts, so we never ask for one here.</Callout> : null}
+      {safeReference.startsWith("TRL_") || safeReference.startsWith("GLD_") ? <Callout tone="caution" title="Saving a card">We make a small charge to check the card and refund it automatically. Your account email is used for receipts, so we never ask for one here.</Callout> : null}
       <Panel title="Approve the demo payment">
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <ButtonLink variant="primary" href={`/billing-checkout/callback?reference=${safeReference}`}>

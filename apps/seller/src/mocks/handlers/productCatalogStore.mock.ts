@@ -108,6 +108,7 @@ export function buildMockProductFromRequest(request: ProductUpsertRequest, exist
       price: { amountMinor: variantRequest.priceMinor, currency },
       compareAtPrice: variantRequest.compareAtPriceMinor === null ? null : { amountMinor: variantRequest.compareAtPriceMinor, currency },
       costPrice: variantRequest.costPriceMinor === null ? null : { amountMinor: variantRequest.costPriceMinor, currency },
+      regionalPrices: (variantRequest.regionalPrices ?? []).filter((price) => price.currency !== currency),
       lowStockThreshold: variantRequest.lowStockThreshold,
       reorderPoint: variantRequest.reorderPoint ?? existingVariant?.reorderPoint ?? variantRequest.lowStockThreshold,
       reorderQuantity: variantRequest.reorderQuantity ?? existingVariant?.reorderQuantity ?? Math.max(10, variantRequest.lowStockThreshold * 4),

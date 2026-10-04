@@ -10,6 +10,7 @@ import { convertDraftToUpsertRequest, convertProductToDraft, createEmptyProductD
 import { ProductImagesSection } from "@/components/catalog/productImagesSection";
 import { ProductOptionsSection } from "@/components/catalog/productOptionsSection";
 import { describeProductPublicationState } from "@/components/catalog/productPresentation.util";
+import { ProductRegionalPricesSection } from "@/components/catalog/productRegionalPricesSection";
 import { ProductPublishingSection } from "@/components/catalog/productPublishingSection";
 import { ProductSupplierSection } from "@/components/catalog/productSupplierSection";
 import { ProductVariantsTable } from "@/components/catalog/productVariantsTable";
@@ -142,6 +143,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
           <ProductBasicsSection draft={draft} fieldErrors={fieldErrors} onDraftChange={updateDraft} />
           <ProductOptionsSection options={draft.options} fieldErrors={fieldErrors} onOptionsChange={updateOptions} />
           <ProductVariantsTable variants={draft.variants} options={draft.options} fieldErrors={fieldErrors} isNewProduct={isNewProduct} onVariantChange={updateVariant} />
+          <ProductRegionalPricesSection variants={draft.variants} options={draft.options} fieldErrors={fieldErrors} onVariantChange={updateVariant} />
           <ProductAttributesSection attributes={draft.attributes} fieldErrors={fieldErrors} onAttributesChange={(attributes) => updateDraft({ attributes })} />
         </div>
         <div className={styles.sideColumn}>

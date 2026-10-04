@@ -1,7 +1,7 @@
 import type { ProductBrandRelationship } from "@/types/brand.type";
 import type { Product, ProductImage, ProductStatus, ProductVisibility, StockLevel } from "@/types/catalog.type";
 import type { CurrencyCode } from "@/types/money.type";
-import type { ProductUpsertRequest, ProductVariantUpsertRequest } from "@/types/productRequests.type";
+import type { ProductUpsertRequest, ProductVariantUpsertRequest, RegionalPriceRequest } from "@/types/productRequests.type";
 import type { ValidationIssue } from "@/utils/formValidation.util";
 import { convertMajorInputToMinorUnits, convertMinorUnitsToMajorInputText } from "@/utils/money.util";
 import { buildVariantTitleFromOptionValues } from "@/utils/productValidation.util";
@@ -21,6 +21,7 @@ export interface VariantDraft {
   readonly priceText: string;
   readonly compareAtText: string;
   readonly costText: string;
+  readonly regionalPriceTextByCurrency: Record<string, string>;
   readonly lowStockThresholdText: string;
   readonly openingStockTextByLocationId: Record<string, string>;
   readonly stock: StockLevel[];
@@ -88,7 +89,7 @@ export function splitOptionValuesText(valuesText: string): string[] {
 function createEmptyVariantDraft(optionValues: Record<string, string>, template: VariantDraft | undefined): VariantDraft {
   return {
     key: createDraftKey(), id: null, optionValues, sku: "", barcode: "",
-    priceText: template?.priceText ?? "", compareAtText: template?.compareAtText ?? "", costText: template?.costText ?? "",
+    priceText: template?.priceText ?? "", compareAtText: template?.compareAtText ?? "", costText: template?.costText ?? "", regionalPriceTextByCurrency: { ...(template?.regionalPriceTextByCurrency ?? {}) },
     lowStockThresholdText: template?.lowStockThresholdText ?? "5", openingStockTextByLocationId: {}, stock: [],
     reorderPoint: template?.reorderPoint ?? null, reorderQuantity: template?.reorderQuantity ?? null,
   };
@@ -121,6 +122,7 @@ export function convertProductToDraft(product: Product): ProductDraft {
       priceText: toText(variant.price.amountMinor, variant.price.currency),
       compareAtText: toText(variant.compareAtPrice?.amountMinor, variant.compareAtPrice?.currency),
       costText: toText(variant.costPrice?.amountMinor, variant.costPrice?.currency),
+      regionalPriceTextByCurrency: Object.fromEntries((variant.regionalPrices ?? []).map((price) => [price.currency, convertMinorUnitsToMajorInputText(price.priceMinor, price.currency)])),
       lowStockThresholdText: String(variant.lowStockThreshold), openingStockTextByLocationId: {}, stock: variant.stock,
       reorderPoint: variant.reorderPoint, reorderQuantity: variant.reorderQuantity,
     })),
@@ -156,6 +158,17 @@ function parseOptionalMoney(text: string, currency: CurrencyCode, label: string,
   return amountMinor;
 }
 
+function parseRegionalPrices(variant: VariantDraft, storeCurrency: CurrencyCode, index: number, issues: ValidationIssue[]): RegionalPriceRequest[] {
+  const prices: RegionalPriceRequest[] = [];
+  for (const [marketCurrency, text] of Object.entries(variant.regionalPriceTextByCurrency)) {
+    if (text.trim() === "" || marketCurrency === storeCurrency) continue;
+    const priceMinor = convertMajorInputToMinorUnits(text, marketCurrency as CurrencyCode);
+    if (priceMinor === null || priceMinor < 1) issues.push({ path: `variants.${index}.regionalPrices.${marketCurrency}`, message: `Variant ${index + 1}: the ${marketCurrency} price must be a number above zero.` });
+    else prices.push({ currency: marketCurrency as CurrencyCode, priceMinor });
+  }
+  return prices;
+}
+
 export function convertDraftToUpsertRequest(draft: ProductDraft, currency: CurrencyCode, isNewProduct: boolean): { request: ProductUpsertRequest; parseIssues: ValidationIssue[] } {
   const parseIssues: ValidationIssue[] = [];
   const variants: ProductVariantUpsertRequest[] = draft.variants.map((variant, index) => {
@@ -171,6 +184,7 @@ export function convertDraftToUpsertRequest(draft: ProductDraft, currency: Curre
       priceMinor: priceMinor ?? -1,
       compareAtPriceMinor: parseOptionalMoney(variant.compareAtText, currency, `${label} compare-at price`, `variants.${index}.compareAtPriceMinor`, parseIssues),
       costPriceMinor: parseOptionalMoney(variant.costText, currency, `${label} cost price`, `variants.${index}.costPriceMinor`, parseIssues),
+      regionalPrices: parseRegionalPrices(variant, currency, index, parseIssues),
       lowStockThreshold: Number.isFinite(threshold) ? threshold : -1,
       ...(variant.reorderPoint !== null ? { reorderPoint: variant.reorderPoint } : {}),
       ...(variant.reorderQuantity !== null ? { reorderQuantity: variant.reorderQuantity } : {}),
