@@ -4,7 +4,10 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
+import { OfficialStoreBadges } from "@zudomart/web-kit";
+
 import { useSession } from "@/components/providers/sessionProvider";
+import { storeLinks } from "@/config/brandContact.config";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
 import { Dialog } from "@/components/ui/dialog";
@@ -81,6 +84,10 @@ export function AuthPromptModal() {
           More sign-in options
         </Link>
       </p>
+      <div className={styles.appPrompt}>
+        <p className={styles.appPromptText}>Shop, sell and go live on the Zudomart app.</p>
+        <OfficialStoreBadges links={storeLinks} align="center" />
+      </div>
     </Dialog>
   );
 }
