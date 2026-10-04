@@ -67,6 +67,15 @@ class OnlineFeatureKeyspace:
     def trending_actor_claim_key(self, item_kind: str, item_id: str, actor_id: str, hour_bucket: str) -> str:
         return f"{self.prefix}:trendclaim:{item_kind}:{item_id}:{actor_id}:{hour_bucket}"
 
+    def trending_cluster_claim_key(self, item_kind: str, item_id: str, cluster_key: str, hour_bucket: str) -> str:
+        return f"{self.prefix}:trendcluster:{item_kind}:{item_id}:{cluster_key}:{hour_bucket}"
+
+    def trending_integrity_key(self, item_kind: str, item_id: str, day_bucket: str) -> str:
+        return f"{self.prefix}:trendintegrity:{item_kind}:{item_id}:{day_bucket}"
+
+    def actor_velocity_key(self, actor_id: str, hour_bucket: str) -> str:
+        return f"{self.prefix}:actorvelocity:{actor_id}:{hour_bucket}"
+
     def clip_topic_popularity_base_key(self, topic: str) -> str:
         return f"{self.prefix}:pop:clip:topic:{topic}"
 
@@ -84,6 +93,9 @@ class OnlineFeatureKeyspace:
 
     def experiment_counter_key(self, experiment_key: str, variant_name: str) -> str:
         return f"{self.prefix}:exp:{experiment_key}:{variant_name}"
+
+    def media_post_link_key(self, media_id: str) -> str:
+        return f"{self.prefix}:media_post:{media_id}"
 
     def consent_key(self, user_id: str) -> str:
         return f"{self.prefix}:consent:{user_id}"

@@ -94,13 +94,9 @@ class OnlineFeatureStore:
     ) -> ViewerOnlineFeatures:
         read_unix_time_seconds = now.timestamp()
         unique_item_ids = list(dict.fromkeys(item_ids))
-        if not await self.is_personalization_allowed(viewer_user_id):
-            item_rows = await self.feature_backend.read_hash_fields(
-                [self.keyspace.item_statistics_key(item_id) for item_id in unique_item_ids]
-            )
-            return ViewerOnlineFeatures(item_statistics_by_item=dict(zip(unique_item_ids, item_rows, strict=True)))
         seen_keys = [self.keyspace.recently_seen_items_key(viewer_user_id)] if include_recently_seen_items else []
-        topic_affinity, account_affinity, item_rows, seen_rows = await asyncio.gather(
+        personalization_allowed, topic_affinity, account_affinity, item_rows, seen_rows = await asyncio.gather(
+            self.is_personalization_allowed(viewer_user_id),
             self.read_decayed_member_scores(
                 self.keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, viewer_user_id),
                 topic_ids,
@@ -118,6 +114,8 @@ class OnlineFeatureStore:
             ),
             self.feature_backend.read_sorted_set_highest_members(seen_keys, SEEN_ITEMS_READ_LIMIT),
         )
+        if not personalization_allowed:
+            return ViewerOnlineFeatures(item_statistics_by_item=dict(zip(unique_item_ids, item_rows, strict=True)))
         seen_item_ids = frozenset(member for rows in seen_rows for member, _score in rows)
         return ViewerOnlineFeatures(
             topic_affinity_by_topic=topic_affinity,

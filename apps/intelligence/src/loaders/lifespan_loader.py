@@ -12,6 +12,7 @@ from src.modules.domain_events.repositories.sqs_domain_event_queue_repository im
     SqsDomainEventQueuePoller,
     build_sqs_client,
 )
+from src.modules.live_safety.live_safety_module import start_live_safety_consumers
 
 lifespan_logger = logging.getLogger("intelligence.application")
 
@@ -41,6 +42,9 @@ def build_application_lifespan(
                     settings.rabbitmq_prefetch,
                 )
                 background_jobs.append(asyncio.create_task(amqp_consumer.run_consume_loop()))
+                background_jobs += start_live_safety_consumers(
+                    settings, container.rabbitmq_channels, container.live_safety_scoring_service
+                )
             elif settings.event_bus == "sqs" and settings.domain_events_queue_url:
                 poller = SqsDomainEventQueuePoller(
                     build_sqs_client(settings),
