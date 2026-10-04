@@ -18,3 +18,4 @@ export { SignOut24Icon } from "./signOut24";
 export { Hand24Icon } from "./hand24";
 export { Hourglass24Icon } from "./hourglass24";
 export { BookmarkActionIcon, GiftActionIcon, LikeActionIcon, ReplyActionIcon, RepostActionIcon, SendActionIcon, ShareActionIcon, ViewsActionIcon } from "./feedActionIcons";
+export { PersonTag24Icon } from "./personTag24";

@@ -30,6 +30,7 @@ import { LikeBurst } from "@/components/clips/likeBurst";
 import { saveTargetForPost } from "@/types";
 import { webAppLinks } from "@/config/webAppLinks.config";
 import { PostLinkCard } from "./postLinkCard";
+import { TaggedPeopleLine } from "@/components/taggedPeople/taggedPeopleLine";
 
 const DOUBLE_TAP_WINDOW_MS = 280;
 
@@ -207,6 +208,7 @@ export function PostCard(props: PostCardProps) {
         ) : null}
       </Pressable>
       </SensitiveContentGate>
+      <TaggedPeopleLine post={post} />
 
       <PostActionRow
         post={post}

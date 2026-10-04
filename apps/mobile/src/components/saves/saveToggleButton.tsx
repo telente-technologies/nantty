@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Animated, Pressable, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
+import { Animated, Pressable, type StyleProp, type ViewStyle } from "react-native";
 
 import { BookmarkActionIcon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
@@ -7,7 +7,8 @@ import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.h
 import { useSaveToggle } from "@/hooks/useSaveToggle.hook";
 import { useTheme } from "@/theme";
 import type { SaveTarget } from "@/types";
-import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
+import { formatCompactCount } from "@/utils/formatCount.util";
+import { clipRailStyles } from "@/components/clips/clipRail.constant";
 
 const SAVED_ITEM_NOUN: Record<SaveTarget["type"], string> = { post: "post", video: "video", clip: "clip", product: "product" };
 
@@ -40,23 +41,18 @@ export function SaveToggleButton({ target, savedAccordingToServer, foregroundCol
       accessibilityRole="button"
       accessibilityLabel={isSaved ? `Remove ${noun} from saved` : `Save ${noun}`}
       accessibilityState={{ selected: isSaved }}
-      hitSlop={{ top: 11, bottom: 11, left: 8, right: 8 }}
+      hitSlop={saveCount !== undefined ? { top: 11, bottom: 11 } : { top: 11, bottom: 11, left: 8, right: 8 }}
       onPress={toggleWithFeedback}
-      style={[saveCount !== undefined ? styles.withCount : null, style]}
+      style={[saveCount !== undefined ? clipRailStyles.item : null, style]}
     >
       <Animated.View style={{ transform: [{ scale: popScale }] }}>
         <BookmarkActionIcon size={saveCount !== undefined ? 26 : 22} color={isSaved ? savedInk : foregroundColor} filled={isSaved} />
       </Animated.View>
       {saveCount !== undefined ? (
-        <Text size={13} lineHeight={16.9} color={foregroundColor} style={foregroundColor ? styles.readableOnVideo : undefined}>
-          {formatCountWithThousandsSuffix(Math.max(saveCount + savedDelta, 0))}
+        <Text size={13} lineHeight={16.9} color={foregroundColor} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={[clipRailStyles.count, foregroundColor ? clipRailStyles.readableOnVideo : null]}>
+          {formatCompactCount(Math.max(saveCount + savedDelta, 0))}
         </Text>
       ) : null}
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  withCount: { width: 32, gap: 4, alignItems: "center" },
-  readableOnVideo: { textShadowColor: "rgba(0,0,0,0.45)", textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
-});

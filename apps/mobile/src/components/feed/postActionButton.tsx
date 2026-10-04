@@ -4,7 +4,7 @@ import { Animated, Pressable, StyleSheet, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { useTheme } from "@/theme";
-import { formatCompactCount } from "@/utils/formatDate.util";
+import { formatCompactCount } from "@/utils/formatCount.util";
 
 export type PostActionTone = "reply" | "repost" | "like" | "bookmark" | "neutral";
 
@@ -66,7 +66,7 @@ export function PostActionButton({ label, tone, renderIcon, count, active = fals
               <Animated.View style={{ transform: [{ scale: popScale }] }}>{renderIcon(ink)}</Animated.View>
             </View>
             {visibleCount ? (
-              <Text size={13} weight={500} lineHeight={16} color={ink} style={styles.count}>
+              <Text size={13} weight={500} lineHeight={16} color={ink} numberOfLines={1} style={styles.count}>
                 {visibleCount}
               </Text>
             ) : null}
@@ -80,5 +80,5 @@ export function PostActionButton({ label, tone, renderIcon, count, active = fals
 const styles = StyleSheet.create({
   button: { minHeight: 44, minWidth: 44, flexDirection: "row", alignItems: "center" },
   halo: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", marginLeft: -8 },
-  count: { marginLeft: -3, fontVariant: ["tabular-nums"] },
+  count: { marginLeft: -3, minWidth: 18, flexShrink: 0, fontVariant: ["tabular-nums"] },
 });
