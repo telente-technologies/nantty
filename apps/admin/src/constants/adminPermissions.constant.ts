@@ -50,6 +50,7 @@ export const adminPermissionGroups = [
       { key: "chat-reports:review", label: "Review chat reports and the messages reporters submit" },
       { key: "chat-reports:legal", label: "Escalate chat reports to legal and change evidence retention" },
       { key: "copyright:review", label: "Decide copyright claims and counter-notices" },
+      { key: "security:cases", label: "Work security cases (probing and suspected bots) and clear flags" },
     ],
   },
   {
@@ -93,6 +94,7 @@ export const adminPermissionGroups = [
       { key: "support:assign", label: "Assign tickets and manage macros" },
       { key: "support:chat", label: "Answer live chats" },
       { key: "support:email", label: "Email a user or segment" },
+      { key: "support:helpContent", label: "Edit Help Centre categories and topics" },
     ],
   },
   {

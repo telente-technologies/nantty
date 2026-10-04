@@ -25,7 +25,7 @@ import { SlaTimer } from "./slaTimer";
 import styles from "./ticketsWorkspace.module.css";
 
 function readNextSlaTimer(ticket: SupportTicketSummary) {
-  if (ticket.status === "SOLVED" || ticket.status === "CLOSED") return <span className={styles.muted}>Stopped</span>;
+  if (ticket.status === "RESOLVED" || ticket.status === "CLOSED") return <span className={styles.muted}>Stopped</span>;
   return ticket.firstRespondedAt ? <SlaTimer label="Resolve" dueAt={ticket.resolutionDueAt} metAt={null} /> : <SlaTimer label="Reply" dueAt={ticket.firstResponseDueAt} metAt={null} />;
 }
 
@@ -37,7 +37,7 @@ const columns: DataTableColumn<SupportTicketSummary>[] = [
       <span className={styles.subjectCell}>
         <strong>{ticket.subject}</strong>
         <span className={styles.muted}>
-          <code>{ticket.id}</code> · {ticket.lastMessagePreview}
+          <code>{ticket.reference}</code>{ticket.channel === "CHAT" ? " · Live chat" : ""} · {ticket.lastMessagePreview}
         </span>
       </span>
     ),
@@ -56,7 +56,7 @@ export function TicketsWorkspace() {
   const searchParams = useSearchParams();
   const { can } = useAdminPermissions();
   const [assignee, setAssignee] = useState<SupportAssigneeFilter>((searchParams.get("assignee") as SupportAssigneeFilter | null) ?? "all");
-  const [status, setStatus] = useState(searchParams.get("status") ?? "OPEN");
+  const [status, setStatus] = useState(searchParams.get("status") ?? "OPEN,AWAITING_SUPPORT,AWAITING_USER");
   const [priority, setPriority] = useState("");
   const [category, setCategory] = useState("");
   const [searchText, setSearchText] = useState("");
