@@ -3,6 +3,8 @@ import type { CreateUploadSessionRequest, Media, MediaAsset, NewPostInput, Post 
 
 import { getSignedInMockUser } from "./fixtures.mock";
 import { appendMockClip, findMockClipsByIds } from "./clips.mock";
+import { buildClipMediaFromInput, validatePostLocation } from "./clipCreate.mock";
+import { recordTagNotifications, sanitizeTaggedUserIds } from "./postTags.mock";
 import { findCommentAnywhere, registerMockVideoReply } from "./comments.mock";
 import { currentSoundForClip, findMutableSoundState } from "./soundCatalog.mock";
 import { notifyMentionedUsers, sanitizeMentionsForWrite, userIdsWhoBlockedTheAuthor } from "./mentionRules.mock";
@@ -155,15 +157,16 @@ export const mediaMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/posts", ({ body }) => {
     const input = body as NewPostInput;
     if (input.mediaIds.length > 10) throw new ApiError(422, "A post can have up to 10 photos or videos", "TOO_MANY_MEDIA");
-    const media = input.mediaIds.map((mediaId) => {
+    const uploadedMedia = input.mediaIds.map((mediaId) => {
       const asset = currentMediaAsset(mediaId);
       if (!asset) throw new ApiError(422, "One of the uploads could not be found", "MEDIA_NOT_FOUND");
       if (asset.type === "audio" || asset.type === "document") throw new ApiError(422, "Audio can't be posted on its own", "UNSUPPORTED_POST_MEDIA");
       return convertMediaAssetToPostMedia({ ...asset, type: asset.type });
     });
-    if (input.kind === "clip" && (media.length !== 1 || media[0]?.type !== "video")) {
-      throw new ApiError(422, "A clip needs exactly one video.", "CLIP_NEEDS_ONE_VIDEO");
-    }
+    if (input.slideshow && input.kind !== "clip") throw new ApiError(422, "Only clips can be photo slideshows.", "SLIDESHOW_NEEDS_CLIP");
+    const media = input.kind === "clip" ? buildClipMediaFromInput(input, uploadedMedia, nextMockId("render")) : uploadedMedia;
+    validatePostLocation(input);
+    const taggedUserIds = sanitizeTaggedUserIds(getSignedInMockUser().id, input.taggedUserIds);
     const videoReplyTarget = input.replyToComment;
     if (videoReplyTarget) {
       if (input.kind !== "clip") throw new ApiError(422, "A video reply must be a clip.", "VIDEO_REPLY_NEEDS_CLIP");
@@ -189,7 +192,7 @@ export const mediaMocks: MockRoute[] = [
       author: getSignedInMockUser(),
       createdAt: new Date().toISOString(),
       text: input.text,
-      media,
+      media: [...media],
       likes: 0,
       comments: 0,
       reposts: 0,
@@ -202,11 +205,13 @@ export const mediaMocks: MockRoute[] = [
       products: [],
       sponsored: null,
       isAiGenerated: input.isAiGenerated === true,
+      ...(input.location ? { location: input.location } : {}),
       ...(sanitizedMentions.mentions.length ? { mentions: sanitizedMentions.mentions } : {}),
       ...(videoReplyTarget ? { replyToComment: videoReplyTarget } : {}),
       ...(videoReplyTarget && input.stickerLayout ? { stickerLayout: input.stickerLayout } : {}),
     };
     notifyMentionedUsers(post.author, sanitizedMentions, "post");
+    if (taggedUserIds.length > 0) recordTagNotifications(post.author, post.id, post.kind, taggedUserIds);
     if (videoReplyTarget) {
       registerMockVideoReply(videoReplyTarget.commentId, { clipId: post.id, thumbnailUrl: media[0]?.posterUrl ?? null, createdAt: post.createdAt });
       recordVideoReplyNotification(post.author, videoReplyTarget.commenterUserId);

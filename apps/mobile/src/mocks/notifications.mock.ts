@@ -2,6 +2,7 @@ import type { CategorizedNotification } from "@/types/commerce.type";
 
 import { getSignedInMockUser, isoDateHoursAgo, signedInUserIsTheDemoSeller } from "./fixtures.mock";
 import { listMentionNotificationsFor } from "./mentionNotifications.mock";
+import { listTagNotificationsFor } from "./postTags.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { userSummaryById } from "./userDirectory.mock";
 
@@ -27,7 +28,7 @@ const sellerNotifications: CategorizedNotification[] = [
 let readNotificationIds = new Set<string>();
 
 const listSignedInNotifications = () =>
-  [...(signedInUserIsTheDemoSeller() ? sellerNotifications : []), ...buyerNotifications, ...listMentionNotificationsFor(getSignedInMockUser().id)]
+  [...(signedInUserIsTheDemoSeller() ? sellerNotifications : []), ...buyerNotifications, ...listMentionNotificationsFor(getSignedInMockUser().id), ...listTagNotificationsFor(getSignedInMockUser().id)]
     .map((notification) => ({ ...notification, read: notification.read || readNotificationIds.has(notification.id) }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 

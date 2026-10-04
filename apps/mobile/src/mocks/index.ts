@@ -3,6 +3,7 @@ import { ApiError } from "@/errors/api.error";
 import { accountHealthMocks } from "./accountHealth.mock";
 import { accountStatusMocks } from "./accountStatus.mock";
 import { celebrationsMocks } from "./celebrations.mock";
+import { identityVerificationMocks } from "./identityVerification.mock";
 import { notificationPreferencesMocks } from "./notificationPreferences.mock";
 import { businessDocumentsMocks } from "./businessDocuments.mock";
 import { checkmarkSuggestionMocks } from "./checkmarkSuggestions.mock";
@@ -42,6 +43,7 @@ import { mediaMocks } from "./media.mock";
 import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
+import { taggedUsersMocks } from "./taggedUsers.mock";
 import { postAudienceMocks } from "./postAudience.mock";
 import { placesMocks } from "./places.mock";
 import { postTagsMocks } from "./postTags.mock";
@@ -87,6 +89,7 @@ const routes: MockRoute[] = [
   ...postAudienceMocks,
   ...placesMocks,
   ...postTagsMocks,
+  ...taggedUsersMocks,
   ...postsMocks,
   ...productsMocks,
   ...storeRewardsMocks,
@@ -97,6 +100,7 @@ const routes: MockRoute[] = [
   ...banksMocks,
   ...creatorSubscriptionsMocks,
   ...creatorProgramMocks,
+  ...identityVerificationMocks,
   ...verificationMocks,
   ...boostsMocks,
   ...brandsMocks,
