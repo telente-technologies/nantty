@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"time"
 
@@ -191,4 +192,21 @@ func (service AccountEnforcementService) CreateAccountOnBehalf(ctx context.Conte
 func revokeAllActiveSessionsInTransaction(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, now time.Time) error {
 	_, err := tx.Session.Update().Where(session.AccountID(accountId), session.RevokedAtIsNil()).SetRevokedAt(now).SetRevokedReason(session.RevokedReasonRevokeAll).Save(ctx)
 	return err
+}
+
+func (service AccountEnforcementService) SetAccountRole(ctx context.Context, accountId uuid.UUID, role string, granted bool) error {
+	return service.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		found, err := tx.Account.Query().Where(account.ID(accountId)).ForUpdate().Only(ctx)
+		if err != nil {
+			return err
+		}
+		if slices.Contains(found.Roles, role) == granted {
+			return nil
+		}
+		roles := slices.DeleteFunc(slices.Clone(found.Roles), func(existing string) bool { return existing == role })
+		if granted {
+			roles = append(roles, role)
+		}
+		return tx.Account.UpdateOneID(accountId).SetRoles(roles).Exec(ctx)
+	})
 }

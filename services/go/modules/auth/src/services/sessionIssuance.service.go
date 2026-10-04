@@ -60,9 +60,10 @@ func CreateRefreshTokenInTransaction(ctx context.Context, application *container
 
 func SignAccessTokenAndBuildIssuedTokens(application *container.Container, account *ent.Account, sessionId uuid.UUID, refreshToken string) (types.IssuedTokens, error) {
 	accessToken, err := application.TokenIssuer.SignAccessTokenWithActiveKey(signingkeys.AccessTokenClaims{
-		AccountId: account.ID.String(),
-		SessionId: sessionId.String(),
-		Roles:     rolesForAccessToken(account),
+		AccountId:  account.ID.String(),
+		SessionId:  sessionId.String(),
+		Roles:      rolesForAccessToken(account),
+		AgeBracket: utils.AgeBracketFromBirthday(account.Birthday, application.Now()),
 	})
 	if err != nil {
 		return types.IssuedTokens{}, err
