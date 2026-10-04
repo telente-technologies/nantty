@@ -202,3 +202,11 @@ export const GiftActionIcon = createIcon(() => (
     <path d="M12 9.2C10.7 5.9 7 5 7 7.3c0 1.3 1.8 1.9 5 1.9ZM12 9.2c1.3-3.3 5-4.2 5-1.9 0 1.3-1.8 1.9-5 1.9Z" />
   </>
 ));
+
+export const PersonTagIcon = createIcon(() => (
+  <>
+    <circle cx="10" cy="7.5" r="3.75" />
+    <path d="M3.25 20c.6-3.7 3.3-6 6.75-6 1.2 0 2.3.28 3.25.8" />
+    <path d="M15.5 15.25h3.6l2.15 2.4-2.15 2.4h-3.6a.9.9 0 0 1-.9-.9v-3a.9.9 0 0 1 .9-.9Z" />
+  </>
+));
