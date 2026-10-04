@@ -9,8 +9,10 @@ import {
   findCatalogSeedByProductId,
   productSummaryByKey,
 } from "./productCatalog.mock";
+import { buildRichSponsoredPosts } from "./richAds.mock";
 import { buildFriendsLikedFromFollowedUsers, isFollowingUser } from "./socialGraph.mock";
 import { userSummaryById } from "./userDirectory.mock";
+import { lookupLinkPreview } from "./chatLinkPreviewLookup.mock";
 
 type EngagementNumbers = readonly [likes: number, comments: number, reposts: number, views: number];
 
@@ -23,12 +25,15 @@ interface PostSeed {
   readonly productKeys?: readonly CatalogProductKey[];
   readonly engagement: EngagementNumbers;
   readonly likedByFriends?: readonly DirectoryUserKey[];
+  readonly linkUrl?: string;
 }
 
 const MAXIMUM_IMAGES_PER_POST = 10;
 
 const POST_SEEDS: readonly PostSeed[] = [
   { id: "post_1", authorKey: "u_1", hoursAgo: 6, productKeys: ["f1", "f2", "f3", "f5"], engagement: [2840, 312, 96, 48_200], text: "New drop! 🧵 The Owambe Edit is live — wrap dresses, Adire sets and senator kaftans for the men. Every order is paid into escrow, so you only release payment when it fits. Tap the bag to shop 👇" },
+  { id: "post_31", authorKey: "u_7", hoursAgo: 15, engagement: [356, 47, 33, 8_900], linkUrl: "https://punchng.com/2026/10/naira-steady-as-fx-reforms-bite/", text: "Interesting read on where the naira is heading this quarter https://punchng.com/2026/10/naira-steady-as-fx-reforms-bite/" },
+  { id: "post_32", authorKey: "u_10", hoursAgo: 18, engagement: [212, 19, 8, 4_100], text: "This dress is everything for December 😍 https://app.zudomart.com/p/ankara-wrap-midi-dress-pr_f1" },
   { id: "post_2", authorKey: "u_7", hoursAgo: 3, engagement: [412, 58, 21, 6_300], text: "Finally shipped the feature I've been debugging for 3 days. The bug? A missing await. I'm going to go and lie down." },
   { id: "post_3", authorKey: "u_10", hoursAgo: 9, photoKey: "jollofRice", engagement: [1930, 406, 88, 31_000], likedByFriends: ["u_7", "u_12", "u_15"], text: "Rating Lagos jollof spots, part 7 🍛 This one in Surulere had that proper party-rice smokiness. 8.5/10. Where should I go next?" },
   { id: "post_4", authorKey: "u_2", hoursAgo: 12, productKeys: ["g6", "g1"], engagement: [1210, 143, 40, 22_700], text: "Your commute is about to get quieter 🎧 Over-ear ANC headphones are back in stock, and the earbuds are 25% off today only. Original, sealed, 1-year warranty." },
@@ -92,10 +97,12 @@ function buildPostFromSeed(seed: PostSeed, sponsored = false): Post {
     views,
     liked: false,
     bookmarked: false,
+    saveCount: 0,
     isFollowingAuthor: isFollowingUser(seed.authorKey),
     friendsLiked: seed.likedByFriends ? buildFriendsLikedFromFollowedUsers(seed.likedByFriends, seed.likedByFriends.length + (likes % 17)) : null,
     products: (seed.productKeys ?? []).map((key) => productSummaryByKey(key)),
     sponsored: sponsored && firstProductSeed ? buildSponsoredPlacementForSeed(firstProductSeed) : null,
+    linkPreview: seed.linkUrl ? lookupLinkPreview(seed.linkUrl) : null,
   };
 }
 
@@ -132,6 +139,7 @@ for (const seed of RESHARE_SEEDS) {
     views,
     liked: false,
     bookmarked: false,
+    saveCount: 0,
     isFollowingAuthor: isFollowingUser(seed.authorKey),
     friendsLiked: null,
     products: [],
@@ -140,7 +148,8 @@ for (const seed of RESHARE_SEEDS) {
   });
 }
 
-export const sponsoredFeedPosts: readonly Post[] = SPONSORED_POST_SEEDS.map((seed) => buildPostFromSeed(seed, true));
+const singleSponsoredFeedPosts: readonly Post[] = SPONSORED_POST_SEEDS.map((seed) => buildPostFromSeed(seed, true));
+export const sponsoredFeedPosts: readonly Post[] = [...singleSponsoredFeedPosts, ...buildRichSponsoredPosts(singleSponsoredFeedPosts)];
 
 export const listPostsByAuthor = (authorId: string) => [...mockPostsState.values()].filter((post) => post.author.id === authorId);
 

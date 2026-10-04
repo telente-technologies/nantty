@@ -3,6 +3,7 @@ import type { Page, Post } from "@/types";
 import { clipVideoSeeds } from "./clipsVideoCatalog.mock";
 import { isAuthorContentVisibleToSignedInViewer } from "./socialGraph.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
+import { isWithheldFromViewerWithoutAge } from "./postAudience.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { withViewerSavedState } from "./savedEntries.mock";
 import { SUSPENDED_USER_IDS } from "./userDirectory.mock";
@@ -40,7 +41,7 @@ const pageOfPostsWithSponsoredSlot = (
 
 export const feedMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/feeds/for-you", ({ query, isGuest }) =>
-    pageOfPostsWithSponsoredSlot(query.get("cursor"), undefined, isGuest ? byMostPopularFirst : byNewestFirst),
+    pageOfPostsWithSponsoredSlot(query.get("cursor"), isGuest ? (post) => !isWithheldFromViewerWithoutAge(post) : undefined, isGuest ? byMostPopularFirst : byNewestFirst),
   ),
   createMockRoute("GET", "/api/v1/feeds/following", ({ query }) => pageOfPostsWithSponsoredSlot(query.get("cursor"), (p) => p.isFollowingAuthor)),
   createMockRoute("GET", "/api/v1/feeds/suggested-clips", listSuggestedClipsWithPosterThumbnails),
