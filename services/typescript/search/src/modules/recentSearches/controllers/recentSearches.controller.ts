@@ -23,7 +23,7 @@ export function createRecentSearchesController(store: RecentSearchStore) {
     }
   };
   return {
-    list: guarded(async (_context, viewerId) => json(200, { data: await store.list(viewerId, recentListLimit) })),
+    list: guarded(async (_context, viewerId) => json(200, { data: await store.list(viewerId, recentListLimit), nextCursor: null })),
     record: guarded(async (context, viewerId) => {
       const body = recordBodySchema.safeParse(parseJsonBody(context.request.body));
       if (!body.success) throw badRequest("VALIDATION_FAILED", "q is required.");

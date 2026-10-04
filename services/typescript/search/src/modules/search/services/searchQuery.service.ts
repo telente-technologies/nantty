@@ -15,6 +15,7 @@ export interface SearchInput {
   readonly cursor: string | undefined;
   readonly limit: number;
   readonly region: string | undefined;
+  readonly viewerIsAdult?: boolean;
 }
 
 export interface LegacyGroupedResults {
@@ -39,11 +40,11 @@ export interface SearchQueryService {
 const toItem = (hit: SearchHit): Record<string, unknown> => ({ ...hit.summary, type: hit.kind });
 
 export function createSearchQueryService(queryStore: SearchQueryStore, indexStore: Pick<SearchIndexStore, "hasConsent">, reranker: SearchReranker): SearchQueryService {
-  const fetchHits = (viewerId: string | undefined, query: string, kinds: readonly SearchKind[], limit: number, region: string | undefined, cursor?: string) =>
-    queryStore.search({ viewerId, normalizedQuery: normalizeSearchText(query), kinds, limit, region, cursor: decodeSearchCursor(cursor) });
+  const fetchHits = (viewerId: string | undefined, query: string, kinds: readonly SearchKind[], limit: number, region: string | undefined, cursor?: string, viewerIsAdult = false) =>
+    queryStore.search({ viewerId, normalizedQuery: normalizeSearchText(query), kinds, limit, region, cursor: decodeSearchCursor(cursor), viewerIsAdult });
   return {
     async search(input) {
-      const page = await fetchHits(input.viewerId, input.query, kindsByScope[input.scope], input.limit, input.region, input.cursor);
+      const page = await fetchHits(input.viewerId, input.query, kindsByScope[input.scope], input.limit, input.region, input.cursor, input.viewerIsAdult === true);
       let hits = [...page.hits];
       if (input.cursor === undefined && input.viewerId !== undefined && hits.length > 1 && (await indexStore.hasConsent(input.viewerId, "personalization"))) {
         const order = await reranker.rerank(input.viewerId, buildRerankCandidates(hits), hits.length);

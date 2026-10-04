@@ -3,7 +3,7 @@ import type { Schema } from "@zudojs/schema";
 
 import { errorToResponse, json, validationFailed } from "../../../utils/http.util.js";
 import { clampPageSize } from "../../../utils/cursor.util.js";
-import { findClientRegion, findViewerId } from "../../../middlewares/principal.middleware.js";
+import { findClientRegion, findViewerId, isViewerVerifiedAdult } from "../../../middlewares/principal.middleware.js";
 import type { SearchQueryService } from "../services/searchQuery.service.js";
 import { searchQuerySchema, suggestQuerySchema } from "../validators/search.validator.js";
 
@@ -23,7 +23,7 @@ export function createSearchController(service: SearchQueryService) {
       const region = findClientRegion(context);
       try {
         if (scope === "all") return json(200, await service.searchGrouped(viewerId, q, region));
-        return json(200, await service.search({ viewerId, query: q, scope, cursor, limit: clampPageSize(limit), region }));
+        return json(200, await service.search({ viewerId, query: q, scope, cursor, limit: clampPageSize(limit), region, viewerIsAdult: isViewerVerifiedAdult(context) }));
       } catch (error) {
         return errorToResponse(error) ?? json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
       }

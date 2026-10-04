@@ -11,7 +11,7 @@ export function createSearchQueryPostgresRepository(prisma: PrismaClient): Searc
       if (tokens.length === 0) return { hits: [], hasMore: false };
       const needle = stripLeadingMarkers(request.normalizedQuery);
       const rows = await searchRows(prisma, {
-        needle, tsQuery: buildPrefixTsQuery(tokens), kinds: request.kinds, viewerId: request.viewerId ?? null, region: request.region ?? null,
+        needle, tsQuery: buildPrefixTsQuery(tokens), kinds: request.kinds, viewerId: request.viewerId ?? null, viewerIsAdult: request.viewerIsAdult === true, region: request.region ?? null,
         likePattern: `${escapeLikePattern(needle)}%`, cursor: request.cursor, limit: request.limit + 1,
       });
       const hits: SearchHit[] = rows.map((row) => ({ kind: row.kind, entityId: row.entity_id, score: Number(row.score), summary: row.summary, popularity: Number(row.popularity), createdAt: new Date(row.created_at).toISOString(), ownerAccountId: row.owner_account_id }));

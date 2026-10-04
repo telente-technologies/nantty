@@ -19,6 +19,7 @@ export interface SearchRowsInput {
   readonly tsQuery: string;
   readonly kinds: readonly SearchKind[];
   readonly viewerId: string | null;
+  readonly viewerIsAdult: boolean;
   readonly region: string | null;
   readonly likePattern: string;
   readonly cursor: SearchCursor | undefined;
@@ -31,14 +32,14 @@ export async function upsertDocumentRow(prisma: PrismaClient, document: SearchDo
   const rows = await prisma.$queryRaw<{ written: number; previous_tags: string[] }[]>(Prisma.sql`
     with previous as (select tags from documents where kind = ${document.kind} and entity_id = ${document.entityId}),
     written as (
-      insert into documents (kind, entity_id, doc_key, owner_account_id, title, title_normalized, subtitle, body, tags_text, tags, summary, visibility, available, popularity, region, version, deleted_at, created_at, updated_at, tsv)
+      insert into documents (kind, entity_id, doc_key, owner_account_id, title, title_normalized, subtitle, body, tags_text, tags, summary, visibility, available, restricted_for_minors, shipping_regions, popularity, region, version, deleted_at, created_at, updated_at, tsv)
       values (${document.kind}, ${document.entityId}, ${docKey}, ${document.ownerAccountId}, ${document.title}, ${titleNormalized}, ${document.subtitle}, ${document.body}, ${tagsText}, ${[...document.tags]}::text[],
-        ${JSON.stringify(document.summary)}::jsonb, ${document.visibility}, ${document.available}, ${document.popularity}::float8, ${document.region}, ${BigInt(document.version)}::bigint, null, ${new Date(document.createdAt)}::timestamp, now(),
+        ${JSON.stringify(document.summary)}::jsonb, ${document.visibility}, ${document.available}, ${document.restrictedForMinors === true}::boolean, ${[...(document.shippingRegions ?? [])]}::text[], ${document.popularity}::float8, ${document.region}, ${BigInt(document.version)}::bigint, null, ${new Date(document.createdAt)}::timestamp, now(),
         setweight(to_tsvector('simple', ${document.title}::text), 'A') || setweight(to_tsvector('simple', ${tagsText}::text), 'B') || setweight(to_tsvector('simple', coalesce(${document.subtitle}::text, '')), 'B') || setweight(to_tsvector('simple', ${document.body}::text), 'C'))
       on conflict (kind, entity_id) do update set
         owner_account_id = excluded.owner_account_id, title = excluded.title, title_normalized = excluded.title_normalized, subtitle = excluded.subtitle,
         body = excluded.body, tags_text = excluded.tags_text, tags = excluded.tags, summary = excluded.summary, visibility = excluded.visibility,
-        available = excluded.available, popularity = excluded.popularity, region = excluded.region, version = excluded.version, deleted_at = null, updated_at = now(), tsv = excluded.tsv
+        available = excluded.available, restricted_for_minors = excluded.restricted_for_minors, shipping_regions = excluded.shipping_regions, popularity = excluded.popularity, region = excluded.region, version = excluded.version, deleted_at = null, updated_at = now(), tsv = excluded.tsv
       where documents.version <= excluded.version
       returning 1
     )
@@ -51,14 +52,16 @@ export async function countPublicHashtagPosts(prisma: PrismaClient, tag: string)
   const rows = await prisma.$queryRaw<{ total: number }[]>(Prisma.sql`
     select count(*)::int as total from documents d
     left join account_states s on s.account_id = d.owner_account_id
-    where d.kind in ('post', 'clip') and d.available and d.visibility = 'public' and ${tag} = any(d.tags)
+    where d.kind in ('post', 'clip') and d.available and not d.restricted_for_minors and d.visibility = 'public' and ${tag} = any(d.tags)
       and (s.account_id is null or (s.status = 'active' and not s.is_private))`);
   return rows[0]?.total ?? 0;
 }
 
-function visibilityFilter(viewerId: string | null): Prisma.Sql {
+function visibilityFilter(viewerId: string | null, viewerIsAdult: boolean, region: string | null): Prisma.Sql {
   return Prisma.sql`
     d.available and d.visibility <> 'hidden'
+    and (${viewerIsAdult}::boolean or not d.restricted_for_minors or d.owner_account_id = ${viewerId}::text)
+    and (${region}::text is null or coalesce(cardinality(d.shipping_regions), 0) = 0 or ${region}::text = any(d.shipping_regions) or d.owner_account_id = ${viewerId}::text)
     and (s.account_id is null or s.status = 'active')
     and (d.owner_account_id is null or ${viewerId}::text is null or d.owner_account_id = ${viewerId}::text or not exists (
       select 1 from blocks b where (b.blocker_id = ${viewerId}::text and b.blocked_id = d.owner_account_id) or (b.blocker_id = d.owner_account_id and b.blocked_id = ${viewerId}::text)))
@@ -93,7 +96,7 @@ export function searchRows(prisma: PrismaClient, input: SearchRowsInput): Promis
         left join account_states s on s.account_id = d.owner_account_id
         where d.kind = any(${[...input.kinds]}::text[])
           and (d.tsv @@ query.tsq or d.title_normalized % ${input.needle} or d.title_normalized like ${input.likePattern})
-          and ${visibilityFilter(input.viewerId)}
+          and ${visibilityFilter(input.viewerId, input.viewerIsAdult, input.region)}
       ) ranked
       where ${cursorScore}::float8 is null or score < ${cursorScore}::float8 or (score = ${cursorScore}::float8 and doc_key > ${cursorKey}::text)
       order by score desc, doc_key asc
