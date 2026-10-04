@@ -83,7 +83,15 @@ func StartWalletModuleWithSettings(ctx context.Context, settings configs.WalletS
 	payments.RegisterTransferOutcomeHandler(paymentconstants.PurposeCreatorEarnings, module.Payouts.Creators)
 	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeAdBalanceTopUp, module.AdBalances)
 	sellerbalances.RegisterSellerReservePolicy(module.Reserves.PolicyFor)
-	adBalances := module.AdBalances
+	adBalances, holds := module.AdBalances, module.Payouts.Holds
+	loaders.RegisterMoneyDomainEventHandler("accountHealth.changed", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var change payoutservices.AccountHealthChange
+		if err := loaders.DecodeEventData(envelope, &change); err != nil {
+			return err
+		}
+		change.OccurredAt = envelope.OccurredAt
+		return holds.ApplyAccountHealthChange(ctx, change)
+	})
 	loaders.RegisterMoneyDomainEventHandler("adSpend.batched", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
 		var batch adbalancedtos.SpendBatchRequestDto
 		if err := loaders.DecodeEventData(envelope, &batch); err != nil {

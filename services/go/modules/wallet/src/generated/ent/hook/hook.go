@@ -92,6 +92,18 @@ func (f IdempotentRequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IdempotentRequestMutation", m)
 }
 
+// The MonetisationHoldFunc type is an adapter to allow the use of ordinary
+// function as MonetisationHold mutator.
+type MonetisationHoldFunc func(context.Context, *ent.MonetisationHoldMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MonetisationHoldFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.MonetisationHoldMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MonetisationHoldMutation", m)
+}
+
 // The OutboxEventFunc type is an adapter to allow the use of ordinary
 // function as OutboxEvent mutator.
 type OutboxEventFunc func(context.Context, *ent.OutboxEventMutation) (ent.Value, error)

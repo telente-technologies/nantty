@@ -18,6 +18,7 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
 	"zudomart/modules/wallet/src/generated/ent/cointransfer"
 	"zudomart/modules/wallet/src/generated/ent/idempotentrequest"
+	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
 	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
@@ -52,6 +53,8 @@ type Client struct {
 	CoinTransfer *CoinTransferClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
+	// MonetisationHold is the client for interacting with the MonetisationHold builders.
+	MonetisationHold *MonetisationHoldClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
 	// PayoutAccount is the client for interacting with the PayoutAccount builders.
@@ -80,6 +83,7 @@ func (c *Client) init() {
 	c.CoinPurchase = NewCoinPurchaseClient(c.config)
 	c.CoinTransfer = NewCoinTransferClient(c.config)
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
+	c.MonetisationHold = NewMonetisationHoldClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.PayoutAccount = NewPayoutAccountClient(c.config)
 	c.SellerReserveFlag = NewSellerReserveFlagClient(c.config)
@@ -186,6 +190,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		CoinPurchase:      NewCoinPurchaseClient(cfg),
 		CoinTransfer:      NewCoinTransferClient(cfg),
 		IdempotentRequest: NewIdempotentRequestClient(cfg),
+		MonetisationHold:  NewMonetisationHoldClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		PayoutAccount:     NewPayoutAccountClient(cfg),
 		SellerReserveFlag: NewSellerReserveFlagClient(cfg),
@@ -217,6 +222,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		CoinPurchase:      NewCoinPurchaseClient(cfg),
 		CoinTransfer:      NewCoinTransferClient(cfg),
 		IdempotentRequest: NewIdempotentRequestClient(cfg),
+		MonetisationHold:  NewMonetisationHoldClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		PayoutAccount:     NewPayoutAccountClient(cfg),
 		SellerReserveFlag: NewSellerReserveFlagClient(cfg),
@@ -252,8 +258,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion, c.CoinPackage,
-		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.OutboxEvent,
-		c.PayoutAccount, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
+		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.MonetisationHold,
+		c.OutboxEvent, c.PayoutAccount, c.SellerReserveFlag, c.WalletRiskFlag,
+		c.Withdrawal,
 	} {
 		n.Use(hooks...)
 	}
@@ -264,8 +271,9 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion, c.CoinPackage,
-		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.OutboxEvent,
-		c.PayoutAccount, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
+		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.MonetisationHold,
+		c.OutboxEvent, c.PayoutAccount, c.SellerReserveFlag, c.WalletRiskFlag,
+		c.Withdrawal,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -288,6 +296,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CoinTransfer.mutate(ctx, m)
 	case *IdempotentRequestMutation:
 		return c.IdempotentRequest.mutate(ctx, m)
+	case *MonetisationHoldMutation:
+		return c.MonetisationHold.mutate(ctx, m)
 	case *OutboxEventMutation:
 		return c.OutboxEvent.mutate(ctx, m)
 	case *PayoutAccountMutation:
@@ -1234,6 +1244,139 @@ func (c *IdempotentRequestClient) mutate(ctx context.Context, m *IdempotentReque
 	}
 }
 
+// MonetisationHoldClient is a client for the MonetisationHold schema.
+type MonetisationHoldClient struct {
+	config
+}
+
+// NewMonetisationHoldClient returns a client for the MonetisationHold from the given config.
+func NewMonetisationHoldClient(c config) *MonetisationHoldClient {
+	return &MonetisationHoldClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `monetisationhold.Hooks(f(g(h())))`.
+func (c *MonetisationHoldClient) Use(hooks ...Hook) {
+	c.hooks.MonetisationHold = append(c.hooks.MonetisationHold, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `monetisationhold.Intercept(f(g(h())))`.
+func (c *MonetisationHoldClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MonetisationHold = append(c.inters.MonetisationHold, interceptors...)
+}
+
+// Create returns a builder for creating a MonetisationHold entity.
+func (c *MonetisationHoldClient) Create() *MonetisationHoldCreate {
+	mutation := newMonetisationHoldMutation(c.config, OpCreate)
+	return &MonetisationHoldCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MonetisationHold entities.
+func (c *MonetisationHoldClient) CreateBulk(builders ...*MonetisationHoldCreate) *MonetisationHoldCreateBulk {
+	return &MonetisationHoldCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MonetisationHoldClient) MapCreateBulk(slice any, setFunc func(*MonetisationHoldCreate, int)) *MonetisationHoldCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MonetisationHoldCreateBulk{err: fmt.Errorf("calling to MonetisationHoldClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MonetisationHoldCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MonetisationHoldCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MonetisationHold.
+func (c *MonetisationHoldClient) Update() *MonetisationHoldUpdate {
+	mutation := newMonetisationHoldMutation(c.config, OpUpdate)
+	return &MonetisationHoldUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MonetisationHoldClient) UpdateOne(_m *MonetisationHold) *MonetisationHoldUpdateOne {
+	mutation := newMonetisationHoldMutation(c.config, OpUpdateOne, withMonetisationHold(_m))
+	return &MonetisationHoldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MonetisationHoldClient) UpdateOneID(id string) *MonetisationHoldUpdateOne {
+	mutation := newMonetisationHoldMutation(c.config, OpUpdateOne, withMonetisationHoldID(id))
+	return &MonetisationHoldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MonetisationHold.
+func (c *MonetisationHoldClient) Delete() *MonetisationHoldDelete {
+	mutation := newMonetisationHoldMutation(c.config, OpDelete)
+	return &MonetisationHoldDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MonetisationHoldClient) DeleteOne(_m *MonetisationHold) *MonetisationHoldDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MonetisationHoldClient) DeleteOneID(id string) *MonetisationHoldDeleteOne {
+	builder := c.Delete().Where(monetisationhold.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MonetisationHoldDeleteOne{builder}
+}
+
+// Query returns a query builder for MonetisationHold.
+func (c *MonetisationHoldClient) Query() *MonetisationHoldQuery {
+	return &MonetisationHoldQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMonetisationHold},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MonetisationHold entity by its id.
+func (c *MonetisationHoldClient) Get(ctx context.Context, id string) (*MonetisationHold, error) {
+	return c.Query().Where(monetisationhold.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MonetisationHoldClient) GetX(ctx context.Context, id string) *MonetisationHold {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MonetisationHoldClient) Hooks() []Hook {
+	return c.hooks.MonetisationHold
+}
+
+// Interceptors returns the client interceptors.
+func (c *MonetisationHoldClient) Interceptors() []Interceptor {
+	return c.inters.MonetisationHold
+}
+
+func (c *MonetisationHoldClient) mutate(ctx context.Context, m *MonetisationHoldMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MonetisationHoldCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MonetisationHoldUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MonetisationHoldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MonetisationHoldDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown MonetisationHold mutation op: %q", m.Op())
+	}
+}
+
 // OutboxEventClient is a client for the OutboxEvent schema.
 type OutboxEventClient struct {
 	config
@@ -1903,13 +2046,13 @@ func (c *WithdrawalClient) mutate(ctx context.Context, m *WithdrawalMutation) (V
 type (
 	hooks struct {
 		AdBalanceTopUp, AdSpendDebit, CoinConversion, CoinPackage, CoinPurchase,
-		CoinTransfer, IdempotentRequest, OutboxEvent, PayoutAccount, SellerReserveFlag,
-		WalletRiskFlag, Withdrawal []ent.Hook
+		CoinTransfer, IdempotentRequest, MonetisationHold, OutboxEvent, PayoutAccount,
+		SellerReserveFlag, WalletRiskFlag, Withdrawal []ent.Hook
 	}
 	inters struct {
 		AdBalanceTopUp, AdSpendDebit, CoinConversion, CoinPackage, CoinPurchase,
-		CoinTransfer, IdempotentRequest, OutboxEvent, PayoutAccount, SellerReserveFlag,
-		WalletRiskFlag, Withdrawal []ent.Interceptor
+		CoinTransfer, IdempotentRequest, MonetisationHold, OutboxEvent, PayoutAccount,
+		SellerReserveFlag, WalletRiskFlag, Withdrawal []ent.Interceptor
 	}
 )
 

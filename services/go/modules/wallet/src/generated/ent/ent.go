@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
 	"zudomart/modules/wallet/src/generated/ent/cointransfer"
 	"zudomart/modules/wallet/src/generated/ent/idempotentrequest"
+	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
 	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
@@ -91,6 +92,7 @@ func checkColumn(t, c string) error {
 			coinpurchase.Table:      coinpurchase.ValidColumn,
 			cointransfer.Table:      cointransfer.ValidColumn,
 			idempotentrequest.Table: idempotentrequest.ValidColumn,
+			monetisationhold.Table:  monetisationhold.ValidColumn,
 			outboxevent.Table:       outboxevent.ValidColumn,
 			payoutaccount.Table:     payoutaccount.ValidColumn,
 			sellerreserveflag.Table: sellerreserveflag.ValidColumn,
