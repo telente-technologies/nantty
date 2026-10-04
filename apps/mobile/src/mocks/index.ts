@@ -1,6 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 
 import { accountStatusMocks } from "./accountStatus.mock";
+import { celebrationsMocks } from "./celebrations.mock";
 import { businessDocumentsMocks } from "./businessDocuments.mock";
 import { checkmarkSuggestionMocks } from "./checkmarkSuggestions.mock";
 import { helpCenterMocks } from "./helpCenter.mock";
@@ -21,6 +22,7 @@ import { groupsMocks } from "./groups.mock";
 import { clipsMocks } from "./clips.mock";
 import { coinsMocks } from "./coins.mock";
 import { commentsMocks } from "./comments.mock";
+import { postThreadMocks } from "./postThread.mock";
 import { soundsMocks } from "./sounds.mock";
 import { creatorProgramMocks } from "./creatorProgram.mock";
 import { creatorsMocks } from "./creators.mock";
@@ -37,6 +39,7 @@ import { mediaMocks } from "./media.mock";
 import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
+import { postAudienceMocks } from "./postAudience.mock";
 import { productsMocks } from "./products.mock";
 import { storeRewardsMocks } from "./storeRewards.mock";
 import { savesMocks } from "./saves.mock";
@@ -57,11 +60,13 @@ import { walletMocks } from "./wallet.mock";
 import { payoutOnboardingMocks } from "./payoutOnboarding.mock";
 import { chatReportsMocks } from "./chatReports.mock";
 import { reportsMocks } from "./reports.mock";
+import { liveSafetyMocks } from "./liveSafety.mock";
 
 const routes: MockRoute[] = [
   ...localeMocks,
   ...usernameMocks,
   ...accountStatusMocks,
+  ...celebrationsMocks,
   ...businessDocumentsMocks,
   ...checkmarkSuggestionMocks,
   ...helpCenterMocks,
@@ -71,6 +76,7 @@ const routes: MockRoute[] = [
   ...followGraphMocks,
   ...usersMocks,
   ...feedMocks,
+  ...postAudienceMocks,
   ...postsMocks,
   ...productsMocks,
   ...storeRewardsMocks,
@@ -93,10 +99,12 @@ const routes: MockRoute[] = [
   ...chatContentMocks,
   ...clipsMocks,
   ...commentsMocks,
+  ...postThreadMocks,
   ...soundsMocks,
   ...mediaMocks,
   ...adEventsMocks,
   ...reportsMocks,
+  ...liveSafetyMocks,
   ...chatReportsMocks,
   ...coinsMocks,
   ...notificationsMocks,

@@ -7,6 +7,7 @@ import { buildMockUserSummary, getSignedInMockUser } from "./fixtures.mock";
 import { productImageUrlsForProduct } from "./mockImages.mock";
 import { productSummaryByKey } from "./productCatalog.mock";
 import { findDirectoryUserById, summariseUser, userSummaryById, type DirectoryUserId } from "./userDirectory.mock";
+import { readMockLiveSafety } from "./liveSafety.mock";
 import { createMockRoute, mockPage, type MockRoute } from "./registry.mock";
 
 const viewer = (i: number) => buildMockUserSummary(70 + i);
@@ -87,7 +88,7 @@ export const liveMocks: MockRoute[] = [
       })),
     ),
   ),
-  createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => hostedLives.get(params.liveId!) ?? buildLiveSession(params.liveId!)),
+  createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => ({ ...(hostedLives.get(params.liveId!) ?? buildLiveSession(params.liveId!)), safety: readMockLiveSafety(params.liveId!, false) })),
   createMockRoute("POST", "/api/v1/lives", ({ body }) => {
     const monetization = body as Partial<LiveMonetizationInput>;
     if (monetization.liveAdSettings?.allowAds && !monetization.acceptedLiveAdTermsVersion) throw new ApiError(422, "Accept the live-ad terms to allow ads", "LIVE_AD_TERMS_REQUIRED");
