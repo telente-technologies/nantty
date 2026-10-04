@@ -1,30 +1,19 @@
 package controllers
 
 import (
-	"crypto/subtle"
 	"net/http"
-	"strings"
+
+	"github.com/google/uuid"
 
 	"zudomart/modules/catalog/src/container"
 	getsharecard "zudomart/modules/catalog/src/modules/shareCards/queries/getShareCard"
 	"zudomart/modules/catalog/src/utils"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/viewerregion"
 )
 
 type ShareCardsController struct {
 	Container *container.Container
-}
-
-func (controller ShareCardsController) RequireInternalToken(next http.HandlerFunc) http.Handler {
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		expected := controller.Container.Settings.InternalApiToken
-		presented := strings.TrimPrefix(request.Header.Get("Authorization"), "Bearer ")
-		if expected == "" || subtle.ConstantTimeCompare([]byte(presented), []byte(expected)) != 1 {
-			httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
-			return
-		}
-		next(writer, request)
-	})
 }
 
 func (controller ShareCardsController) GetShareCard(writer http.ResponseWriter, request *http.Request) {
@@ -38,10 +27,17 @@ func (controller ShareCardsController) GetShareCard(writer http.ResponseWriter, 
 		responder.Error(writer, request, err)
 		return
 	}
-	card, err := (getsharecard.Handler{Container: controller.Container}).Execute(request.Context(), getsharecard.Query{Kind: kind, Id: identifier})
+	card, err := (getsharecard.Handler{Container: controller.Container}).Execute(request.Context(), getsharecard.Query{Kind: kind, Id: identifier, Country: viewerregion.NormalizeCountryCode(request.URL.Query().Get("country")), Viewer: viewerOfQuery(request)})
 	if err != nil {
 		responder.Error(writer, request, err)
 		return
 	}
 	httpserver.WriteJsonResponse(writer, http.StatusOK, card)
+}
+
+func viewerOfQuery(request *http.Request) *uuid.UUID {
+	if parsed, err := uuid.Parse(request.URL.Query().Get("viewer")); err == nil {
+		return &parsed
+	}
+	return nil
 }

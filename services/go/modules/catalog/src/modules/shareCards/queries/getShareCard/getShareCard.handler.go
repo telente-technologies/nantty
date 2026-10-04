@@ -6,6 +6,7 @@ import (
 	"zudomart/modules/catalog/src/container"
 	"zudomart/modules/catalog/src/enums"
 	"zudomart/modules/catalog/src/generated/ent"
+	"zudomart/modules/catalog/src/integrations"
 	"zudomart/modules/catalog/src/services"
 	"zudomart/platform/money"
 )
@@ -22,10 +23,13 @@ type ShareCard struct {
 	InStock      *bool        `json:"inStock,omitempty"`
 	StoreName    *string      `json:"storeName,omitempty"`
 	Verified     *bool        `json:"verified,omitempty"`
+	SaveCount    *int         `json:"saveCount,omitempty"`
 	Availability string       `json:"availability"`
 }
 
 var unavailable = ShareCard{Availability: "unavailable"}
+
+var notInRegion = ShareCard{Title: "Not available in your region", Availability: "not_in_region"}
 
 func (handler Handler) Execute(ctx context.Context, query Query) (ShareCard, error) {
 	if query.Kind == "store" {
@@ -36,7 +40,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (ShareCard, err
 
 func (handler Handler) storeCard(ctx context.Context, query Query) (ShareCard, error) {
 	row, err := handler.Container.Client.Store.Get(ctx, query.Id)
-	if ent.IsNotFound(err) || (err == nil && row.Status != enums.StoreActive) {
+	if ent.IsNotFound(err) || (err == nil && (row.Status != enums.StoreActive || !enums.IsShownToBuyers(row.ModerationVisibility))) {
 		return unavailable, nil
 	}
 	if err != nil {
@@ -55,19 +59,23 @@ func (handler Handler) productCard(ctx context.Context, query Query) (ShareCard,
 		return ShareCard{}, err
 	}
 	store, err := handler.Container.Client.Store.Get(ctx, row.StoreID)
-	if err != nil || store.Status != enums.StoreActive || row.Status != enums.ProductActive || !row.PublishedOnline {
+	if err != nil || store.Status != enums.StoreActive || row.Status != enums.ProductActive || !row.PublishedOnline || !enums.IsShownToBuyers(row.ModerationVisibility) || !enums.IsShownToBuyers(store.ModerationVisibility) {
 		return unavailable, nil
 	}
 	if row.Visibility == enums.VisibilityStoreOnly {
 		return ShareCard{Availability: "private"}, nil
+	}
+	if !services.StoreVisibleInRegion(ctx, handler.Container, store, query.Country, query.Viewer) {
+		return notInRegion, nil
 	}
 	summaries, err := services.LoadProductSummaries(ctx, handler.Container, []*ent.Product{row}, nil)
 	if err != nil {
 		return ShareCard{}, err
 	}
 	inStock, verified := summaries[0].Stock > 0, store.Verified
+	saveCount := integrations.NewSocialSaveCounts(handler.Container.Settings.SocialInternalUrl, handler.Container.Settings.SocialInternalToken).ProductSaveCount(ctx, row.ID)
 	return ShareCard{
 		Title: row.Name, Subtitle: store.Name, ImageUrl: summaries[0].ImageUrl, Price: &summaries[0].Price, InStock: &inStock,
-		StoreName: &store.Name, Verified: &verified, Availability: "available",
+		StoreName: &store.Name, Verified: &verified, SaveCount: &saveCount, Availability: "available",
 	}, nil
 }
