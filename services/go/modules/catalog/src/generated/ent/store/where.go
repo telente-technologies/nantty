@@ -130,6 +130,11 @@ func RatingCount(v int) predicate.Store {
 	return predicate.Store(sql.FieldEQ(FieldRatingCount, v))
 }
 
+// ModerationVisibility applies equality check predicate on the "moderation_visibility" field. It's identical to ModerationVisibilityEQ.
+func ModerationVisibility(v string) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldModerationVisibility, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Store {
 	return predicate.Store(sql.FieldEQ(FieldUpdatedAt, v))
@@ -948,6 +953,81 @@ func RatingCountLT(v int) predicate.Store {
 // RatingCountLTE applies the LTE predicate on the "rating_count" field.
 func RatingCountLTE(v int) predicate.Store {
 	return predicate.Store(sql.FieldLTE(FieldRatingCount, v))
+}
+
+// ModerationVisibilityEQ applies the EQ predicate on the "moderation_visibility" field.
+func ModerationVisibilityEQ(v string) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityNEQ applies the NEQ predicate on the "moderation_visibility" field.
+func ModerationVisibilityNEQ(v string) predicate.Store {
+	return predicate.Store(sql.FieldNEQ(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityIn applies the In predicate on the "moderation_visibility" field.
+func ModerationVisibilityIn(vs ...string) predicate.Store {
+	return predicate.Store(sql.FieldIn(FieldModerationVisibility, vs...))
+}
+
+// ModerationVisibilityNotIn applies the NotIn predicate on the "moderation_visibility" field.
+func ModerationVisibilityNotIn(vs ...string) predicate.Store {
+	return predicate.Store(sql.FieldNotIn(FieldModerationVisibility, vs...))
+}
+
+// ModerationVisibilityGT applies the GT predicate on the "moderation_visibility" field.
+func ModerationVisibilityGT(v string) predicate.Store {
+	return predicate.Store(sql.FieldGT(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityGTE applies the GTE predicate on the "moderation_visibility" field.
+func ModerationVisibilityGTE(v string) predicate.Store {
+	return predicate.Store(sql.FieldGTE(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityLT applies the LT predicate on the "moderation_visibility" field.
+func ModerationVisibilityLT(v string) predicate.Store {
+	return predicate.Store(sql.FieldLT(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityLTE applies the LTE predicate on the "moderation_visibility" field.
+func ModerationVisibilityLTE(v string) predicate.Store {
+	return predicate.Store(sql.FieldLTE(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityContains applies the Contains predicate on the "moderation_visibility" field.
+func ModerationVisibilityContains(v string) predicate.Store {
+	return predicate.Store(sql.FieldContains(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityHasPrefix applies the HasPrefix predicate on the "moderation_visibility" field.
+func ModerationVisibilityHasPrefix(v string) predicate.Store {
+	return predicate.Store(sql.FieldHasPrefix(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityHasSuffix applies the HasSuffix predicate on the "moderation_visibility" field.
+func ModerationVisibilityHasSuffix(v string) predicate.Store {
+	return predicate.Store(sql.FieldHasSuffix(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityEqualFold applies the EqualFold predicate on the "moderation_visibility" field.
+func ModerationVisibilityEqualFold(v string) predicate.Store {
+	return predicate.Store(sql.FieldEqualFold(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityContainsFold applies the ContainsFold predicate on the "moderation_visibility" field.
+func ModerationVisibilityContainsFold(v string) predicate.Store {
+	return predicate.Store(sql.FieldContainsFold(FieldModerationVisibility, v))
+}
+
+// ShippingCountryCodesIsNil applies the IsNil predicate on the "shipping_country_codes" field.
+func ShippingCountryCodesIsNil() predicate.Store {
+	return predicate.Store(sql.FieldIsNull(FieldShippingCountryCodes))
+}
+
+// ShippingCountryCodesNotNil applies the NotNil predicate on the "shipping_country_codes" field.
+func ShippingCountryCodesNotNil() predicate.Store {
+	return predicate.Store(sql.FieldNotNull(FieldShippingCountryCodes))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

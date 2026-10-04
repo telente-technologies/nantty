@@ -44,6 +44,10 @@ const (
 	FieldRatingSum = "rating_sum"
 	// FieldRatingCount holds the string denoting the rating_count field in the database.
 	FieldRatingCount = "rating_count"
+	// FieldModerationVisibility holds the string denoting the moderation_visibility field in the database.
+	FieldModerationVisibility = "moderation_visibility"
+	// FieldShippingCountryCodes holds the string denoting the shipping_country_codes field in the database.
+	FieldShippingCountryCodes = "shipping_country_codes"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the store in the database.
@@ -68,6 +72,8 @@ var Columns = []string{
 	FieldVerified,
 	FieldRatingSum,
 	FieldRatingCount,
+	FieldModerationVisibility,
+	FieldShippingCountryCodes,
 	FieldUpdatedAt,
 }
 
@@ -112,6 +118,8 @@ var (
 	DefaultRatingSum int64
 	// DefaultRatingCount holds the default value on creation for the "rating_count" field.
 	DefaultRatingCount int
+	// DefaultModerationVisibility holds the default value on creation for the "moderation_visibility" field.
+	DefaultModerationVisibility string
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -201,6 +209,11 @@ func ByRatingSum(opts ...sql.OrderTermOption) OrderOption {
 // ByRatingCount orders the results by the rating_count field.
 func ByRatingCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRatingCount, opts...).ToFunc()
+}
+
+// ByModerationVisibility orders the results by the moderation_visibility field.
+func ByModerationVisibility(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldModerationVisibility, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

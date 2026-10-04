@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -222,6 +223,38 @@ func (_u *StoreUpdate) AddRatingCount(v int) *StoreUpdate {
 	return _u
 }
 
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (_u *StoreUpdate) SetModerationVisibility(v string) *StoreUpdate {
+	_u.mutation.SetModerationVisibility(v)
+	return _u
+}
+
+// SetNillableModerationVisibility sets the "moderation_visibility" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableModerationVisibility(v *string) *StoreUpdate {
+	if v != nil {
+		_u.SetModerationVisibility(*v)
+	}
+	return _u
+}
+
+// SetShippingCountryCodes sets the "shipping_country_codes" field.
+func (_u *StoreUpdate) SetShippingCountryCodes(v []string) *StoreUpdate {
+	_u.mutation.SetShippingCountryCodes(v)
+	return _u
+}
+
+// AppendShippingCountryCodes appends value to the "shipping_country_codes" field.
+func (_u *StoreUpdate) AppendShippingCountryCodes(v []string) *StoreUpdate {
+	_u.mutation.AppendShippingCountryCodes(v)
+	return _u
+}
+
+// ClearShippingCountryCodes clears the value of the "shipping_country_codes" field.
+func (_u *StoreUpdate) ClearShippingCountryCodes() *StoreUpdate {
+	_u.mutation.ClearShippingCountryCodes()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *StoreUpdate) SetUpdatedAt(v time.Time) *StoreUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -373,6 +406,20 @@ func (_u *StoreUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedRatingCount(); ok {
 		_spec.AddField(store.FieldRatingCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ModerationVisibility(); ok {
+		_spec.SetField(store.FieldModerationVisibility, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ShippingCountryCodes(); ok {
+		_spec.SetField(store.FieldShippingCountryCodes, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedShippingCountryCodes(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, store.FieldShippingCountryCodes, value)
+		})
+	}
+	if _u.mutation.ShippingCountryCodesCleared() {
+		_spec.ClearField(store.FieldShippingCountryCodes, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(store.FieldUpdatedAt, field.TypeTime, value)
@@ -591,6 +638,38 @@ func (_u *StoreUpdateOne) AddRatingCount(v int) *StoreUpdateOne {
 	return _u
 }
 
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (_u *StoreUpdateOne) SetModerationVisibility(v string) *StoreUpdateOne {
+	_u.mutation.SetModerationVisibility(v)
+	return _u
+}
+
+// SetNillableModerationVisibility sets the "moderation_visibility" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableModerationVisibility(v *string) *StoreUpdateOne {
+	if v != nil {
+		_u.SetModerationVisibility(*v)
+	}
+	return _u
+}
+
+// SetShippingCountryCodes sets the "shipping_country_codes" field.
+func (_u *StoreUpdateOne) SetShippingCountryCodes(v []string) *StoreUpdateOne {
+	_u.mutation.SetShippingCountryCodes(v)
+	return _u
+}
+
+// AppendShippingCountryCodes appends value to the "shipping_country_codes" field.
+func (_u *StoreUpdateOne) AppendShippingCountryCodes(v []string) *StoreUpdateOne {
+	_u.mutation.AppendShippingCountryCodes(v)
+	return _u
+}
+
+// ClearShippingCountryCodes clears the value of the "shipping_country_codes" field.
+func (_u *StoreUpdateOne) ClearShippingCountryCodes() *StoreUpdateOne {
+	_u.mutation.ClearShippingCountryCodes()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *StoreUpdateOne) SetUpdatedAt(v time.Time) *StoreUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -772,6 +851,20 @@ func (_u *StoreUpdateOne) sqlSave(ctx context.Context) (_node *Store, err error)
 	}
 	if value, ok := _u.mutation.AddedRatingCount(); ok {
 		_spec.AddField(store.FieldRatingCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ModerationVisibility(); ok {
+		_spec.SetField(store.FieldModerationVisibility, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ShippingCountryCodes(); ok {
+		_spec.SetField(store.FieldShippingCountryCodes, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedShippingCountryCodes(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, store.FieldShippingCountryCodes, value)
+		})
+	}
+	if _u.mutation.ShippingCountryCodesCleared() {
+		_spec.ClearField(store.FieldShippingCountryCodes, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(store.FieldUpdatedAt, field.TypeTime, value)

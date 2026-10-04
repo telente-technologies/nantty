@@ -186,6 +186,26 @@ func (_c *StoreCreate) SetNillableRatingCount(v *int) *StoreCreate {
 	return _c
 }
 
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (_c *StoreCreate) SetModerationVisibility(v string) *StoreCreate {
+	_c.mutation.SetModerationVisibility(v)
+	return _c
+}
+
+// SetNillableModerationVisibility sets the "moderation_visibility" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableModerationVisibility(v *string) *StoreCreate {
+	if v != nil {
+		_c.SetModerationVisibility(*v)
+	}
+	return _c
+}
+
+// SetShippingCountryCodes sets the "shipping_country_codes" field.
+func (_c *StoreCreate) SetShippingCountryCodes(v []string) *StoreCreate {
+	_c.mutation.SetShippingCountryCodes(v)
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *StoreCreate) SetUpdatedAt(v time.Time) *StoreCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -277,6 +297,10 @@ func (_c *StoreCreate) defaults() {
 		v := store.DefaultRatingCount
 		_c.mutation.SetRatingCount(v)
 	}
+	if _, ok := _c.mutation.ModerationVisibility(); !ok {
+		v := store.DefaultModerationVisibility
+		_c.mutation.SetModerationVisibility(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := store.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -367,6 +391,9 @@ func (_c *StoreCreate) check() error {
 	}
 	if _, ok := _c.mutation.RatingCount(); !ok {
 		return &ValidationError{Name: "rating_count", err: errors.New(`ent: missing required field "Store.rating_count"`)}
+	}
+	if _, ok := _c.mutation.ModerationVisibility(); !ok {
+		return &ValidationError{Name: "moderation_visibility", err: errors.New(`ent: missing required field "Store.moderation_visibility"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Store.updated_at"`)}
@@ -466,6 +493,14 @@ func (_c *StoreCreate) createSpec() (*Store, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.RatingCount(); ok {
 		_spec.SetField(store.FieldRatingCount, field.TypeInt, value)
 		_node.RatingCount = value
+	}
+	if value, ok := _c.mutation.ModerationVisibility(); ok {
+		_spec.SetField(store.FieldModerationVisibility, field.TypeString, value)
+		_node.ModerationVisibility = value
+	}
+	if value, ok := _c.mutation.ShippingCountryCodes(); ok {
+		_spec.SetField(store.FieldShippingCountryCodes, field.TypeJSON, value)
+		_node.ShippingCountryCodes = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(store.FieldUpdatedAt, field.TypeTime, value)
@@ -688,6 +723,36 @@ func (u *StoreUpsert) UpdateRatingCount() *StoreUpsert {
 // AddRatingCount adds v to the "rating_count" field.
 func (u *StoreUpsert) AddRatingCount(v int) *StoreUpsert {
 	u.Add(store.FieldRatingCount, v)
+	return u
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (u *StoreUpsert) SetModerationVisibility(v string) *StoreUpsert {
+	u.Set(store.FieldModerationVisibility, v)
+	return u
+}
+
+// UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateModerationVisibility() *StoreUpsert {
+	u.SetExcluded(store.FieldModerationVisibility)
+	return u
+}
+
+// SetShippingCountryCodes sets the "shipping_country_codes" field.
+func (u *StoreUpsert) SetShippingCountryCodes(v []string) *StoreUpsert {
+	u.Set(store.FieldShippingCountryCodes, v)
+	return u
+}
+
+// UpdateShippingCountryCodes sets the "shipping_country_codes" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateShippingCountryCodes() *StoreUpsert {
+	u.SetExcluded(store.FieldShippingCountryCodes)
+	return u
+}
+
+// ClearShippingCountryCodes clears the value of the "shipping_country_codes" field.
+func (u *StoreUpsert) ClearShippingCountryCodes() *StoreUpsert {
+	u.SetNull(store.FieldShippingCountryCodes)
 	return u
 }
 
@@ -953,6 +1018,41 @@ func (u *StoreUpsertOne) AddRatingCount(v int) *StoreUpsertOne {
 func (u *StoreUpsertOne) UpdateRatingCount() *StoreUpsertOne {
 	return u.Update(func(s *StoreUpsert) {
 		s.UpdateRatingCount()
+	})
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (u *StoreUpsertOne) SetModerationVisibility(v string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetModerationVisibility(v)
+	})
+}
+
+// UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateModerationVisibility() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateModerationVisibility()
+	})
+}
+
+// SetShippingCountryCodes sets the "shipping_country_codes" field.
+func (u *StoreUpsertOne) SetShippingCountryCodes(v []string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetShippingCountryCodes(v)
+	})
+}
+
+// UpdateShippingCountryCodes sets the "shipping_country_codes" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateShippingCountryCodes() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateShippingCountryCodes()
+	})
+}
+
+// ClearShippingCountryCodes clears the value of the "shipping_country_codes" field.
+func (u *StoreUpsertOne) ClearShippingCountryCodes() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearShippingCountryCodes()
 	})
 }
 
@@ -1387,6 +1487,41 @@ func (u *StoreUpsertBulk) AddRatingCount(v int) *StoreUpsertBulk {
 func (u *StoreUpsertBulk) UpdateRatingCount() *StoreUpsertBulk {
 	return u.Update(func(s *StoreUpsert) {
 		s.UpdateRatingCount()
+	})
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (u *StoreUpsertBulk) SetModerationVisibility(v string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetModerationVisibility(v)
+	})
+}
+
+// UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateModerationVisibility() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateModerationVisibility()
+	})
+}
+
+// SetShippingCountryCodes sets the "shipping_country_codes" field.
+func (u *StoreUpsertBulk) SetShippingCountryCodes(v []string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetShippingCountryCodes(v)
+	})
+}
+
+// UpdateShippingCountryCodes sets the "shipping_country_codes" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateShippingCountryCodes() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateShippingCountryCodes()
+	})
+}
+
+// ClearShippingCountryCodes clears the value of the "shipping_country_codes" field.
+func (u *StoreUpsertBulk) ClearShippingCountryCodes() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearShippingCountryCodes()
 	})
 }
 

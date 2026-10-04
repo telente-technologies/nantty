@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -48,6 +49,10 @@ type Store struct {
 	RatingSum int64 `json:"rating_sum,omitempty"`
 	// RatingCount holds the value of the "rating_count" field.
 	RatingCount int `json:"rating_count,omitempty"`
+	// ModerationVisibility holds the value of the "moderation_visibility" field.
+	ModerationVisibility string `json:"moderation_visibility,omitempty"`
+	// ShippingCountryCodes holds the value of the "shipping_country_codes" field.
+	ShippingCountryCodes []string `json:"shipping_country_codes,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -58,11 +63,13 @@ func (*Store) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case store.FieldShippingCountryCodes:
+			values[i] = new([]byte)
 		case store.FieldVerified:
 			values[i] = new(sql.NullBool)
 		case store.FieldRatingSum, store.FieldRatingCount:
 			values[i] = new(sql.NullInt64)
-		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus:
+		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus, store.FieldModerationVisibility:
 			values[i] = new(sql.NullString)
 		case store.FieldCreatedAt, store.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -181,6 +188,20 @@ func (_m *Store) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RatingCount = int(value.Int64)
 			}
+		case store.FieldModerationVisibility:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field moderation_visibility", values[i])
+			} else if value.Valid {
+				_m.ModerationVisibility = value.String
+			}
+		case store.FieldShippingCountryCodes:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field shipping_country_codes", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ShippingCountryCodes); err != nil {
+					return fmt.Errorf("unmarshal field shipping_country_codes: %w", err)
+				}
+			}
 		case store.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -271,6 +292,12 @@ func (_m *Store) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("rating_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RatingCount))
+	builder.WriteString(", ")
+	builder.WriteString("moderation_visibility=")
+	builder.WriteString(_m.ModerationVisibility)
+	builder.WriteString(", ")
+	builder.WriteString("shipping_country_codes=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ShippingCountryCodes))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
