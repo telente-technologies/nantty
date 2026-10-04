@@ -13,5 +13,5 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, command Query) (types.LiveSessionView, error) {
-	return services.NewLiveService(handler.Container).GetLiveSession(ctx, command.LiveId)
+	return services.NewLiveService(handler.Container).GetLiveSession(ctx, command.LiveId, command.Viewer)
 }

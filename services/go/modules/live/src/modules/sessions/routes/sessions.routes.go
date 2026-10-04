@@ -14,6 +14,7 @@ func MountSessionsRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("POST /api/v1/lives", authenticated(controller.CreateLiveSession))
 	mux.Handle("GET /api/v1/lives/suggested", authenticated(controller.ListSuggestedLives))
 	mux.Handle("GET /api/v1/lives/{liveId}", authenticated(controller.GetLiveSession))
+	mux.Handle("GET /api/v1/lives/{liveId}/safety", authenticated(controller.GetLiveSafety))
 	mux.Handle("POST /api/v1/lives/{liveId}/start", authenticated(controller.StartLiveSession))
 	mux.Handle("POST /api/v1/lives/{liveId}/end", authenticated(controller.EndLiveSession))
 	mux.Handle("POST /api/v1/lives/{liveId}/join", authenticated(controller.JoinLive))

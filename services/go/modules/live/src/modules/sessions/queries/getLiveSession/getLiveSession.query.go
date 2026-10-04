@@ -6,4 +6,5 @@ import (
 
 type Query struct {
 	LiveId uuid.UUID
+	Viewer uuid.UUID
 }
