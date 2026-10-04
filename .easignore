@@ -22,9 +22,9 @@ google-services.json
 GoogleService-Info.plist
 AGENTS.md
 CLAUDE.md
-apps/intelligence/**/__pycache__/
+services/python/intelligence/**/__pycache__/
 
-apps/intelligence/
+services/python/intelligence/
 apps/api/src/generated/
 apps/mobile/design/
 apps/web/public/
