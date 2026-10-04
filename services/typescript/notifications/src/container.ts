@@ -6,6 +6,7 @@ import { createPrismaClient, type PrismaClient } from "./databases/prisma.databa
 import { IdentityHttpDirectory } from "./integrations/identityDirectory.integration.js";
 import { ExpoPushSender, LoggingPushSender } from "./integrations/expoPush.integration.js";
 import { SocialHttpDigestSource } from "./integrations/digestSource.integration.js";
+import { LoggingEmailSender } from "./integrations/loggingEmail.integration.js";
 import { SesEmailSender } from "./integrations/sesEmail.integration.js";
 import { RabbitMqMessageBroker } from "./integrations/rabbitMqBroker.integration.js";
 import { RabbitMqConnection } from "./integrations/rabbitMqConnection.integration.js";
@@ -73,7 +74,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const jobQueue: JobQueue = overrides.jobQueue ?? broker;
   const sesFeedbackReader = overrides.sesFeedbackReader !== undefined ? overrides.sesFeedbackReader : config.queues.sesFeedback === "" ? null : new SqsQueueClient(config.aws.region, config.aws.endpoint);
   const identity: IdentityDirectory = overrides.identity ?? new IdentityHttpDirectory(config.identity.baseUrl, config.identity.internalToken);
-  const emailSender: EmailSender = overrides.emailSender ?? new SesEmailSender({ region: config.aws.region, endpoint: config.aws.endpoint, fromAddress: config.email.fromAddress, configurationSet: config.email.configurationSet });
+  const emailSender: EmailSender = overrides.emailSender ?? (config.emailProvider === "log" ? new LoggingEmailSender(logger) : new SesEmailSender({ region: config.aws.region, endpoint: config.aws.endpoint, fromAddress: config.email.fromAddress, configurationSet: config.email.configurationSet }));
   const pushSender: PushSender = overrides.pushSender ?? (config.pushProvider === "expo" ? new ExpoPushSender() : new LoggingPushSender(logger));
   const brand = readEmailBrandFromEnvironment(process.env);
   const acceptUrl = `${config.webBaseUrl}/settings/legal/accept`;

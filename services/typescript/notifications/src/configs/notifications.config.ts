@@ -19,6 +19,7 @@ export interface NotificationsConfig {
   readonly policyNotice: { readonly batchSize: number; readonly ratePerSecond: number; readonly autoSend: boolean };
   readonly digestSource: { readonly baseUrl: string; readonly internalToken: string } | null;
   readonly pushProvider: "expo" | "log";
+  readonly emailProvider?: "ses" | "log";
 }
 
 function readRequired(name: string, problems: string[]): string {
@@ -63,7 +64,9 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
     },
     digestSource: process.env["SOCIAL_INTERNAL_URL"]?.trim() ? { baseUrl: process.env["SOCIAL_INTERNAL_URL"].trim(), internalToken: process.env["SOCIAL_INTERNAL_TOKEN"]?.trim() ?? "" } : null,
     pushProvider: readOrDefault("PUSH_PROVIDER", "log") === "expo" ? "expo" : "log",
+    emailProvider: readOrDefault("EMAIL_PROVIDER", "ses") === "log" ? "log" : "ses",
   };
+  if (config.emailProvider === "log" && process.env["NODE_ENV"] === "production") problems.push("EMAIL_PROVIDER=log is for local development only");
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
   if (config.unsubscribeSigningSecret.length > 0 && config.unsubscribeSigningSecret.length < 32) problems.push("UNSUBSCRIBE_SIGNING_SECRET must be at least 32 characters");
   if (!(config.policyNotice.batchSize > 0) || !(config.policyNotice.ratePerSecond > 0)) problems.push("POLICY_NOTICE_BATCH_SIZE and POLICY_NOTICE_RATE_PER_SECOND must be positive");

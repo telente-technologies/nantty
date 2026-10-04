@@ -17,9 +17,20 @@ export function createRoutes(container: Container): readonly RouteDefinition[] {
   return [...createInboxRoutes(container), ...createUnsubscribeRoutes(container), ...createBulkCampaignRoutes(container)];
 }
 
-export function createRequestHandler(routes: readonly RouteDefinition[], logger: Logger) {
+async function checkDatabaseReadiness(container: Container | undefined) {
+  if (container === undefined) return json(200, { status: "ready" });
+  try {
+    await container.prisma.notification.count({ take: 1 });
+    return json(200, { status: "ready" });
+  } catch {
+    return json(503, { status: "unavailable" });
+  }
+}
+
+export function createRequestHandler(routes: readonly RouteDefinition[], logger: Logger, container?: Container) {
   return async (request: HttpRequestContext) => {
     if (request.path === "/healthz") return json(200, { status: "up", service: "notifications" });
+    if (request.path === "/readyz") return checkDatabaseReadiness(container);
     const match = matchRoute(routes, request.method, request.path);
     if (match === undefined) return json(404, { message: "Not found.", code: "NOT_FOUND" });
     try {
@@ -34,7 +45,7 @@ export function createRequestHandler(routes: readonly RouteDefinition[], logger:
 export function createNotificationsApp(config: NotificationsConfig, options: { readonly logger?: Logger; readonly overrides?: ContainerOverrides } = {}) {
   const logger = options.logger ?? createLogger({ name: "notifications" });
   const container = createContainer(config, logger, options.overrides);
-  const handleRequest = createRequestHandler(createRoutes(container), logger);
+  const handleRequest = createRequestHandler(createRoutes(container), logger, container);
   const pipeline = new HttpMiddlewarePipeline({
     middlewares: [async (context) => {
       const response = (await handleRequest(context.request)).clone();
