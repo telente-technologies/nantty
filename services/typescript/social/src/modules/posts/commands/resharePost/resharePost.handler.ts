@@ -13,12 +13,14 @@ export function createResharePostHandler(context: HandlerContext): Handler<Resha
     const target = await loadPostVisibleToViewer(context, actorId, postId);
     if (target.kind === "story") throw unprocessable("STORY_CANNOT_BE_RESHARED", "Stories can't be reshared.");
     if (target.visibility === "subscribers" && target.authorId !== actorId) throw unprocessable("SUBSCRIBER_POST_CANNOT_BE_RESHARED", "Subscriber-only posts can't be reshared.");
-    const originalId = target.resharedFromId ?? target.id;
+    const isQuote = text.trim() !== "";
+    const originalId = target.isQuote ? target.id : (target.resharedFromId ?? target.id);
     const now = context.clock.now();
     const created = await context.database.transaction(async (transaction) => {
-      const post = await postRepository.create(transaction, { authorId: actorId, kind: "post", text, audience: "everyone", visibility: "public", resharedFromId: originalId, createdAt: now });
+      const post = await postRepository.create(transaction, { authorId: actorId, kind: "post", text, audience: "everyone", visibility: "public", resharedFromId: originalId, isQuote, createdAt: now });
       await postRepository.incrementCounter(transaction, originalId, "repostCount", 1);
-      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postReshared, subject: post.id, occurredAt: now, data: { postId: post.id, originalPostId: originalId, authorId: actorId, originalAuthorId: target.authorId } }]);
+      if (isQuote) await postRepository.incrementCounter(transaction, originalId, "quoteCount", 1);
+      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postReshared, subject: post.id, occurredAt: now, data: { postId: post.id, originalPostId: originalId, authorId: actorId, originalAuthorId: target.authorId, isQuote } }]);
       return post;
     });
     const [view] = await buildPostViews(context, actorId, [created]);

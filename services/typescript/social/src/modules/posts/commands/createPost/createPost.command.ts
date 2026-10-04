@@ -26,4 +26,6 @@ export interface CreatePostCommand {
   readonly mentions: readonly MentionEntity[] | undefined;
   readonly replyToComment: ReplyToComment | undefined;
   readonly stickerLayout: StickerLayout | undefined;
+  readonly replyPolicy?: "everyone" | "following" | "followers" | "mentioned" | "off" | undefined;
+  readonly sensitiveLabels?: readonly string[] | undefined;
 }

@@ -13,6 +13,7 @@ export function createDeletePostHandler(context: HandlerContext): Handler<Delete
     const now = context.clock.now();
     await context.database.transaction(async (transaction) => {
       await postRepository.softDelete(transaction, postId, now);
+      if (post.isQuote && post.resharedFromId !== null) await postRepository.incrementCounter(transaction, post.resharedFromId, "quoteCount", -1);
       await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postDeleted, subject: postId, occurredAt: now, data: { postId, authorId: actorId, kind: post.kind } }]);
     });
   };
