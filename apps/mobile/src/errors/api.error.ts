@@ -3,6 +3,7 @@ export class ApiError extends Error {
     readonly status: number,
     message: string,
     readonly code?: string,
+    readonly suggestions?: readonly string[],
   ) {
     super(message);
   }

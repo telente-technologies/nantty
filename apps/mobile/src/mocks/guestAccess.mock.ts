@@ -40,6 +40,7 @@ const publicRoutePatterns: ReadonlySet<string> = new Set([
   "GET /api/v1/media/:mediaId",
   "GET /api/v1/posts/:postId",
   "GET /api/v1/posts/:postId/comments",
+  "GET /api/v1/posts/:postId/tagged-users",
   "GET /api/v1/posts/:postId/thread",
   "GET /api/v1/products",
   "GET /api/v1/products/featured",
