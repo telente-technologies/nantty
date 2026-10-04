@@ -1,0 +1,89 @@
+.muted {
+  color: var(--ink-muted);
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 320px;
+  padding: 16px;
+  overflow: auto;
+  line-height: 1.6;
+  background: var(--surface-card);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+}
+
+.preview h2,
+.preview h3,
+.preview h4 {
+  margin: 8px 0 0;
+}
+
+.preview ul,
+.preview ol {
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+.preview table {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.preview th,
+.preview td {
+  padding: 6px 8px;
+  text-align: start;
+  border: 1px solid var(--divider);
+}
+
+.editorGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.titleCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.relatedList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.sourceLabel {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+
+.settingsCard {
+  margin-bottom: 16px;
+}
+
+@media (width < 960px) {
+  .editorGrid {
+    grid-template-columns: 1fr;
+  }
+}
