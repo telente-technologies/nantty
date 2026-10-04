@@ -1,0 +1,21 @@
+.link {
+  color: var(--color-brand);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  border-radius: var(--radius-sm);
+}
+
+.link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.inverse {
+  color: inherit;
+  text-decoration: underline;
+}
