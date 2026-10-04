@@ -13,5 +13,9 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) (types.LiveSessionView, error) {
-	return services.NewLiveService(handler.Container).CreateLiveSession(ctx, command.Actor, command.Input)
+	live := services.NewLiveService(handler.Container)
+	if err := live.EnsureHostCanGoLive(ctx, command.Actor.UserId.String()); err != nil {
+		return types.LiveSessionView{}, err
+	}
+	return live.CreateLiveSession(ctx, command.Actor, command.Input)
 }
