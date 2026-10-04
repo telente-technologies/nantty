@@ -20,7 +20,7 @@ var allowedTransitions = map[string][]string{
 
 var transitionsBySellerOrBuyer = map[string][]string{
 	enums.ActorSeller: {enums.StatusProcessing, enums.StatusReady, enums.StatusShipped, enums.StatusDelivered, enums.StatusCancelled, enums.StatusRefunded},
-	enums.ActorBuyer:  {enums.StatusCancelled},
+	enums.ActorBuyer:  {enums.StatusCancelled, enums.StatusCompleted, enums.StatusDisputed},
 }
 
 func CanTransition(from, to string) bool { return slices.Contains(allowedTransitions[from], to) }

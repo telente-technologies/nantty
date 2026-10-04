@@ -12,14 +12,14 @@ func groupMoney(group *ent.OrderGroup, amountMinor int64) money.Money {
 	return money.Money{AmountMinor: amountMinor, Currency: money.CurrencyCode(group.Currency)}
 }
 
-func buyerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, store commerceports.StoreSnapshot, buyer usersdirectory.ProfileName) types.OrderView {
+func buyerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, store commerceports.StoreSnapshot, buyer usersdirectory.ProfileName, successRate *float64) types.OrderView {
 	view := types.OrderView{
-		Id: group.ID.String(), Reference: group.Reference, Status: BuyerStatusFor(group.Status), FulfilmentStatus: group.Status, PaymentStatus: group.PaymentStatus,
+		Id: group.ID.String(), Reference: group.Reference, Status: BuyerStatusFor(group.Status), FulfilmentStatus: group.Status, PaymentStatus: group.PaymentStatus, PaymentMode: group.PaymentMode,
 		Items: make([]types.CartItemView, 0, len(items)), Subtotal: groupMoney(group, group.SubtotalMinor), Discount: groupMoney(group, group.DiscountMinor), StoreCredit: groupMoney(group, group.StoreCreditMinor),
 		Shipping: groupMoney(group, group.ShippingMinor), Total: groupMoney(group, group.TotalMinor), CheckoutId: group.CheckoutID.String(),
 		CreatedAt: group.CreatedAt, EscrowReleaseAt: group.EscrowReleaseAt, DeliveredAt: group.DeliveredAt,
 		Buyer: types.UserSummaryView{Id: group.BuyerAccountID.String(), Name: group.BuyerName, Username: group.BuyerUsername, Verified: buyer.Verified},
-		Store: types.StoreSummaryView{Id: group.StoreID.String(), Name: store.Name, Rating: store.RatingAverage, RatingCount: store.RatingCount, ReviewCount: store.RatingCount},
+		Store: types.StoreSummaryView{Id: group.StoreID.String(), Name: store.Name, Verified: store.Verified, SuccessRate: successRate, Rating: store.RatingAverage, RatingCount: store.RatingCount, ReviewCount: store.RatingCount},
 	}
 	if buyer.AvatarUrl != "" {
 		view.Buyer.AvatarUrl = &buyer.AvatarUrl

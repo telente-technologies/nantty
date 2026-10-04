@@ -56,10 +56,11 @@ func BuyerOrderViews(ctx context.Context, deployed *container.Container, groups 
 	if err != nil {
 		return nil, err
 	}
+	rates, _ := StoreSuccessRates(ctx, deployed, UniqueIdentifiers(groups, func(group *ent.OrderGroup) uuid.UUID { return group.StoreID }))
 	profiles, _ := deployed.Users.PersonalProfilesByAccount(ctx, UniqueIdentifiers(groups, func(group *ent.OrderGroup) uuid.UUID { return group.BuyerAccountID }))
 	views := make([]types.OrderView, 0, len(groups))
 	for _, group := range groups {
-		views = append(views, buyerOrderView(group, items[group.ID], stores[group.StoreID], profiles[group.BuyerAccountID]))
+		views = append(views, buyerOrderView(group, items[group.ID], stores[group.StoreID], profiles[group.BuyerAccountID], successRateOf(rates, group.StoreID)))
 	}
 	return views, nil
 }
@@ -75,4 +76,11 @@ func UniqueIdentifiers[Row any](rows []Row, identifierOf func(Row) uuid.UUID) []
 		}
 	}
 	return identifiers
+}
+
+func successRateOf(rates map[uuid.UUID]float64, storeId uuid.UUID) *float64 {
+	if rate, found := rates[storeId]; found {
+		return &rate
+	}
+	return nil
 }
