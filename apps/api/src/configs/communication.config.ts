@@ -1,7 +1,7 @@
 import type { ConfigManager } from "@zudojs/config";
 import { ConfigurationError } from "@zudojs/errors";
 
-export const DEFAULT_SUPPORT_NOTIFICATION_EMAILS = ["oyinlola.tech@icloud.com", "oluwayemioyinlola2@icloud.com"] as const;
+export const DEFAULT_SUPPORT_NOTIFICATION_EMAILS = ["support@zudomart.com"] as const;
 const EMAIL_ADDRESS_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 function readSetting(config: ConfigManager, key: string): string {
@@ -26,7 +26,6 @@ function readSupportNotificationEmails(config: ConfigManager): readonly string[]
   const recipients = configured.length > 0 ? configured : [...DEFAULT_SUPPORT_NOTIFICATION_EMAILS];
   for (const recipient of recipients) {
     if (!EMAIL_ADDRESS_PATTERN.test(recipient)) throw new ConfigurationError(`SUPPORT_NOTIFICATION_EMAILS has an invalid address: "${recipient}".`);
-    if (recipient.endsWith("@zudomart.com")) throw new ConfigurationError("SUPPORT_NOTIFICATION_EMAILS must not use @zudomart.com addresses.");
   }
   return recipients;
 }

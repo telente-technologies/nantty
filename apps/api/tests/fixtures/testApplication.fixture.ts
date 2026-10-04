@@ -105,7 +105,7 @@ export function createTestSettings(overrides: Partial<AppSettings> = {}): AppSet
       maximumAffiliateCommissionBps: 5_000,
     },
     communication: {
-      supportNotificationEmails: ["oyinlola.tech@icloud.com", "oluwayemioyinlola2@icloud.com"],
+      supportNotificationEmails: ["support@zudomart.com"],
       realtimeTicketTtlSeconds: 30,
       realtimeMaxConnectionsPerUser: 3,
       realtimeMaxBufferedBytes: 64 * 1024,
