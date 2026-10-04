@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/live.safetyReleased.v1.json",
+  "title": "live.safetyReleased (go-trust, moderator Keep live)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "hostId",
+    "incidentId",
+    "releasedAt"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string"
+    },
+    "hostId": {
+      "type": "string"
+    },
+    "incidentId": {
+      "type": "string"
+    },
+    "releasedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

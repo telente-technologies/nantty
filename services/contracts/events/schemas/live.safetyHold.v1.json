@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/live.safetyHold.v1.json",
+  "title": "live.safetyHold (go-trust; go-live pauses the stream for viewers)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "hostId",
+    "incidentId",
+    "category",
+    "reason",
+    "source",
+    "confidence",
+    "heldAt",
+    "appealable"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string"
+    },
+    "hostId": {
+      "type": "string"
+    },
+    "incidentId": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Host-facing explanation; never shown to viewers"
+    },
+    "source": {
+      "enum": [
+        "automated",
+        "moderator"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "heldAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "appealable": {
+      "type": "boolean"
+    }
+  }
+}

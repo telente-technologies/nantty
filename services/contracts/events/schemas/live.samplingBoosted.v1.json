@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/live.samplingBoosted.v1.json",
+  "title": "live.samplingBoosted (go-trust; go-live samples frames faster until boostUntil)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "incidentId",
+    "boostUntil",
+    "reason"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string"
+    },
+    "incidentId": {
+      "type": "string"
+    },
+    "boostUntil": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason": {
+      "enum": [
+        "user_report",
+        "report_surge",
+        "classifier_review",
+        "classifier_warn",
+        "classifier_hold"
+      ]
+    }
+  }
+}

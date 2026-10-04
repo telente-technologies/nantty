@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/live.safetyWarning.v1.json",
+  "title": "live.safetyWarning (go-trust; on-screen warning for the host)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "hostId",
+    "incidentId",
+    "category",
+    "message",
+    "warnedAt"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string"
+    },
+    "hostId": {
+      "type": "string"
+    },
+    "incidentId": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "warnedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
