@@ -16,6 +16,7 @@ export type EmailCategory =
   | "creator"
   | "checkmarks"
   | "social"
+  | "milestones"
   | "trust"
   | "privacy"
   | "support"

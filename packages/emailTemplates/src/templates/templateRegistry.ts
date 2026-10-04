@@ -5,6 +5,7 @@ import * as creator from "./creator.template";
 import type { EmailTemplateDefinition } from "./defineTemplate";
 import * as escrow from "./escrow.template";
 import * as marketing from "./marketing.template";
+import * as milestones from "./milestones.template";
 import * as payments from "./payments.template";
 import * as privacy from "./privacy.template";
 import * as sellerAccount from "./sellerAccount.template";
@@ -30,6 +31,7 @@ export const emailTemplates = {
   ...pickTemplates(creator),
   ...pickTemplates(checkmarks),
   ...pickTemplates(social),
+  ...pickTemplates(milestones),
   ...pickTemplates(trust),
   ...pickTemplates(privacy),
   ...pickTemplates(support),

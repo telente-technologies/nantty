@@ -8,6 +8,18 @@ import (
 	"zudomart/modules/orders/src/generated/ent"
 )
 
+// The CampaignRedemptionFunc type is an adapter to allow the use of ordinary
+// function as CampaignRedemption mutator.
+type CampaignRedemptionFunc func(context.Context, *ent.CampaignRedemptionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CampaignRedemptionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CampaignRedemptionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CampaignRedemptionMutation", m)
+}
+
 // The CartFunc type is an adapter to allow the use of ordinary
 // function as Cart mutator.
 type CartFunc func(context.Context, *ent.CartMutation) (ent.Value, error)
@@ -54,6 +66,30 @@ func (f CustomerNoteFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CustomerNoteMutation", m)
+}
+
+// The FlashSaleFunc type is an adapter to allow the use of ordinary
+// function as FlashSale mutator.
+type FlashSaleFunc func(context.Context, *ent.FlashSaleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FlashSaleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FlashSaleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FlashSaleMutation", m)
+}
+
+// The FlashSaleItemFunc type is an adapter to allow the use of ordinary
+// function as FlashSaleItem mutator.
+type FlashSaleItemFunc func(context.Context, *ent.FlashSaleItemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FlashSaleItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FlashSaleItemMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FlashSaleItemMutation", m)
 }
 
 // The IdempotentRequestFunc type is an adapter to allow the use of ordinary
@@ -138,6 +174,30 @@ func (f ProcessedEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProcessedEventMutation", m)
+}
+
+// The ProductBundleFunc type is an adapter to allow the use of ordinary
+// function as ProductBundle mutator.
+type ProductBundleFunc func(context.Context, *ent.ProductBundleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProductBundleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProductBundleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProductBundleMutation", m)
+}
+
+// The ProductBundleItemFunc type is an adapter to allow the use of ordinary
+// function as ProductBundleItem mutator.
+type ProductBundleItemFunc func(context.Context, *ent.ProductBundleItemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProductBundleItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProductBundleItemMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProductBundleItemMutation", m)
 }
 
 // The PromotionFunc type is an adapter to allow the use of ordinary

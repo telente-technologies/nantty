@@ -8,10 +8,13 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/orders/src/generated/ent/campaignredemption"
 	"zudomart/modules/orders/src/generated/ent/cart"
 	"zudomart/modules/orders/src/generated/ent/cartitem"
 	"zudomart/modules/orders/src/generated/ent/checkout"
 	"zudomart/modules/orders/src/generated/ent/customernote"
+	"zudomart/modules/orders/src/generated/ent/flashsale"
+	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
 	"zudomart/modules/orders/src/generated/ent/orderevent"
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
@@ -19,6 +22,8 @@ import (
 	"zudomart/modules/orders/src/generated/ent/ordernote"
 	"zudomart/modules/orders/src/generated/ent/outboxevent"
 	"zudomart/modules/orders/src/generated/ent/processedevent"
+	"zudomart/modules/orders/src/generated/ent/productbundle"
+	"zudomart/modules/orders/src/generated/ent/productbundleitem"
 	"zudomart/modules/orders/src/generated/ent/promotion"
 	"zudomart/modules/orders/src/generated/ent/promotionredemption"
 	"zudomart/modules/orders/src/generated/ent/reportexportjob"
@@ -94,10 +99,13 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			campaignredemption.Table:  campaignredemption.ValidColumn,
 			cart.Table:                cart.ValidColumn,
 			cartitem.Table:            cartitem.ValidColumn,
 			checkout.Table:            checkout.ValidColumn,
 			customernote.Table:        customernote.ValidColumn,
+			flashsale.Table:           flashsale.ValidColumn,
+			flashsaleitem.Table:       flashsaleitem.ValidColumn,
 			idempotentrequest.Table:   idempotentrequest.ValidColumn,
 			orderevent.Table:          orderevent.ValidColumn,
 			ordergroup.Table:          ordergroup.ValidColumn,
@@ -105,6 +113,8 @@ func checkColumn(t, c string) error {
 			ordernote.Table:           ordernote.ValidColumn,
 			outboxevent.Table:         outboxevent.ValidColumn,
 			processedevent.Table:      processedevent.ValidColumn,
+			productbundle.Table:       productbundle.ValidColumn,
+			productbundleitem.Table:   productbundleitem.ValidColumn,
 			promotion.Table:           promotion.ValidColumn,
 			promotionredemption.Table: promotionredemption.ValidColumn,
 			reportexportjob.Table:     reportexportjob.ValidColumn,

@@ -9,6 +9,42 @@ import (
 )
 
 var (
+	// CampaignRedemptionsColumns holds the columns for the "campaign_redemptions" table.
+	CampaignRedemptionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "order_group_id", Type: field.TypeUUID},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "buyer_account_id", Type: field.TypeUUID},
+		{Name: "campaign_kind", Type: field.TypeString},
+		{Name: "campaign_id", Type: field.TypeUUID},
+		{Name: "units", Type: field.TypeInt},
+		{Name: "discount_minor", Type: field.TypeInt64},
+		{Name: "revenue_minor", Type: field.TypeInt64},
+	}
+	// CampaignRedemptionsTable holds the schema information for the "campaign_redemptions" table.
+	CampaignRedemptionsTable = &schema.Table{
+		Name:       "campaign_redemptions",
+		Columns:    CampaignRedemptionsColumns,
+		PrimaryKey: []*schema.Column{CampaignRedemptionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "campaignredemption_order_group_id_campaign_kind_campaign_id",
+				Unique:  true,
+				Columns: []*schema.Column{CampaignRedemptionsColumns[2], CampaignRedemptionsColumns[5], CampaignRedemptionsColumns[6]},
+			},
+			{
+				Name:    "campaignredemption_campaign_id",
+				Unique:  false,
+				Columns: []*schema.Column{CampaignRedemptionsColumns[6]},
+			},
+			{
+				Name:    "campaignredemption_store_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CampaignRedemptionsColumns[3], CampaignRedemptionsColumns[1]},
+			},
+		},
+	}
 	// CartsColumns holds the columns for the "carts" table.
 	CartsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -114,6 +150,70 @@ var (
 				Name:    "customernote_store_id_buyer_account_id_id",
 				Unique:  false,
 				Columns: []*schema.Column{CustomerNotesColumns[2], CustomerNotesColumns[3], CustomerNotesColumns[0]},
+			},
+		},
+	}
+	// FlashSalesColumns holds the columns for the "flash_sales" table.
+	FlashSalesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 80},
+		{Name: "starts_at", Type: field.TypeTime},
+		{Name: "ends_at", Type: field.TypeTime},
+		{Name: "paused", Type: field.TypeBool, Default: false},
+		{Name: "ended_at", Type: field.TypeTime, Nullable: true},
+		{Name: "reach", Type: field.TypeInt, Default: 0},
+		{Name: "revenue_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// FlashSalesTable holds the schema information for the "flash_sales" table.
+	FlashSalesTable = &schema.Table{
+		Name:       "flash_sales",
+		Columns:    FlashSalesColumns,
+		PrimaryKey: []*schema.Column{FlashSalesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "flashsale_store_id_starts_at",
+				Unique:  false,
+				Columns: []*schema.Column{FlashSalesColumns[2], FlashSalesColumns[4]},
+			},
+			{
+				Name:    "flashsale_store_id_ends_at",
+				Unique:  false,
+				Columns: []*schema.Column{FlashSalesColumns[2], FlashSalesColumns[5]},
+			},
+		},
+	}
+	// FlashSaleItemsColumns holds the columns for the "flash_sale_items" table.
+	FlashSaleItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "flash_sale_id", Type: field.TypeUUID},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "product_id", Type: field.TypeUUID},
+		{Name: "position", Type: field.TypeInt},
+		{Name: "sale_price_minor", Type: field.TypeInt64},
+		{Name: "original_price_minor", Type: field.TypeInt64},
+		{Name: "stock_cap", Type: field.TypeInt, Nullable: true},
+		{Name: "sold_count", Type: field.TypeInt, Default: 0},
+	}
+	// FlashSaleItemsTable holds the schema information for the "flash_sale_items" table.
+	FlashSaleItemsTable = &schema.Table{
+		Name:       "flash_sale_items",
+		Columns:    FlashSaleItemsColumns,
+		PrimaryKey: []*schema.Column{FlashSaleItemsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "flashsaleitem_flash_sale_id_product_id",
+				Unique:  true,
+				Columns: []*schema.Column{FlashSaleItemsColumns[2], FlashSaleItemsColumns[4]},
+			},
+			{
+				Name:    "flashsaleitem_store_id_product_id",
+				Unique:  false,
+				Columns: []*schema.Column{FlashSaleItemsColumns[3], FlashSaleItemsColumns[4]},
 			},
 		},
 	}
@@ -380,6 +480,60 @@ var (
 				Name:    "processedevent_envelope_id",
 				Unique:  true,
 				Columns: []*schema.Column{ProcessedEventsColumns[2]},
+			},
+		},
+	}
+	// ProductBundlesColumns holds the columns for the "product_bundles" table.
+	ProductBundlesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 80},
+		{Name: "description", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "bundle_price_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "status", Type: field.TypeString, Default: "draft"},
+		{Name: "sold_count", Type: field.TypeInt, Default: 0},
+		{Name: "revenue_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ProductBundlesTable holds the schema information for the "product_bundles" table.
+	ProductBundlesTable = &schema.Table{
+		Name:       "product_bundles",
+		Columns:    ProductBundlesColumns,
+		PrimaryKey: []*schema.Column{ProductBundlesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "productbundle_store_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{ProductBundlesColumns[2], ProductBundlesColumns[7]},
+			},
+		},
+	}
+	// ProductBundleItemsColumns holds the columns for the "product_bundle_items" table.
+	ProductBundleItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "bundle_id", Type: field.TypeUUID},
+		{Name: "product_id", Type: field.TypeUUID},
+		{Name: "position", Type: field.TypeInt},
+		{Name: "quantity", Type: field.TypeInt},
+	}
+	// ProductBundleItemsTable holds the schema information for the "product_bundle_items" table.
+	ProductBundleItemsTable = &schema.Table{
+		Name:       "product_bundle_items",
+		Columns:    ProductBundleItemsColumns,
+		PrimaryKey: []*schema.Column{ProductBundleItemsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "productbundleitem_bundle_id_product_id",
+				Unique:  true,
+				Columns: []*schema.Column{ProductBundleItemsColumns[2], ProductBundleItemsColumns[3]},
+			},
+			{
+				Name:    "productbundleitem_product_id",
+				Unique:  false,
+				Columns: []*schema.Column{ProductBundleItemsColumns[3]},
 			},
 		},
 	}
@@ -756,10 +910,13 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CampaignRedemptionsTable,
 		CartsTable,
 		CartItemsTable,
 		CheckoutsTable,
 		CustomerNotesTable,
+		FlashSalesTable,
+		FlashSaleItemsTable,
 		IdempotentRequestsTable,
 		OrderEventsTable,
 		OrderGroupsTable,
@@ -767,6 +924,8 @@ var (
 		OrderNotesTable,
 		OutboxEventsTable,
 		ProcessedEventsTable,
+		ProductBundlesTable,
+		ProductBundleItemsTable,
 		PromotionsTable,
 		PromotionRedemptionsTable,
 		ReportExportJobsTable,

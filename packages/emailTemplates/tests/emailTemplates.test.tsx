@@ -69,3 +69,26 @@ describe("money and snapshots", () => {
     expect(`${rendered.subject}\n\n${rendered.text.replace(/© \d{4}/, "© YEAR")}`).toMatchSnapshot();
   });
 });
+
+describe("zudoversary", () => {
+  it("uses ordinals, the milestones category and the transactional kind", async () => {
+    const entry = catalogue.find((item) => item.key === "zudoversary");
+    expect(entry?.category).toBe("milestones");
+    expect(entry?.kind).toBe("transactional");
+    const sample = readEmailTemplate("zudoversary").sample;
+    for (const [years, label] of [[1, "1st"], [2, "2nd"], [3, "3rd"], [4, "4th"], [11, "11th"], [12, "12th"], [21, "21st"]] as const) {
+      const rendered = await renderEmail("zudoversary", { ...sample, years });
+      expect(rendered.subject).toBe(`Happy ${label} Zudoversary, Ada`);
+    }
+  });
+
+  it("shows only the stats that are available", async () => {
+    const withStats = await renderEmail("zudoversary", { firstName: "Ada", years: 2, stats: { followers: 1260, orders: 0 } });
+    expect(withStats.text).toContain("Followers gained");
+    expect(withStats.text).toContain("1,260");
+    expect(withStats.text).not.toContain("Orders completed");
+    const withoutStats = await renderEmail("zudoversary", { firstName: "Ada", years: 1 });
+    expect(withoutStats.text).not.toContain("Your time on Zudomart");
+    expect(withoutStats.text).toContain("thanks for being part of Zudomart for 1 year");
+  });
+});
