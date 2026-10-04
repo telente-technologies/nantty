@@ -24,6 +24,8 @@ type Container struct {
 	Users          integrations.UsersService
 	Audit          integrations.AuditService
 	Targets        integrations.TargetResolver
+	EvidenceVault  integrations.EvidenceVault
+	FramePreviews  integrations.FramePreviewSigner
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {

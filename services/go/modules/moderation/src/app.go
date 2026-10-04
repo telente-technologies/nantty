@@ -21,6 +21,7 @@ import (
 	"zudomart/modules/moderation/src/modules/contentReports"
 	"zudomart/modules/moderation/src/modules/copyrightClaims"
 	"zudomart/modules/moderation/src/modules/ipClaims"
+	livesafety "zudomart/modules/moderation/src/modules/liveSafety"
 	"zudomart/modules/moderation/src/modules/strikes"
 	"zudomart/modules/moderation/src/modules/suspensionCases"
 	platformevents "zudomart/platform/events"
@@ -42,6 +43,12 @@ type Overrides struct {
 	Users          integrations.UsersService
 	Audit          integrations.AuditService
 	Targets        integrations.TargetResolver
+	LiveSafety     LiveSafetyStorage
+}
+
+type LiveSafetyStorage interface {
+	integrations.EvidenceVault
+	integrations.FramePreviewSigner
 }
 
 func NewModerationModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
@@ -86,6 +93,10 @@ func StartModerationModuleWithSettings(ctx context.Context, settings configs.Mod
 	if moderationContainer.Targets == nil {
 		moderationContainer.Targets = integrations.NewHttpTargetResolver(settings.TargetSources)
 	}
+	if err := resolveLiveSafetyStorage(ctx, settings, overrides, moderationContainer); err != nil {
+		_ = database.Close()
+		return nil, err
+	}
 	if dependencies.Health != nil {
 		dependencies.Health.AddReadinessCheck("moderation-postgres", postgres.ReadinessCheckForDatabase(database))
 	}
@@ -123,6 +134,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	contentreports.Mount(mux, module.container)
 	copyrightclaims.Mount(mux, module.container)
 	ipclaims.Mount(mux, module.container)
+	livesafety.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
@@ -174,5 +186,28 @@ func (module *Module) consumeContentSignals(ctx context.Context) {
 		module.container.Logger.WarnContext(ctx, "content report and score consumers disabled: no message broker configured", slog.Any("error", err))
 		return
 	}
+	go livesafety.RunConsumerUntilContextDone(ctx, module.container, queues)
 	contentreports.RunConsumersUntilContextDone(ctx, module.container, queues)
+}
+
+func resolveLiveSafetyStorage(ctx context.Context, settings configs.ModerationSettings, overrides Overrides, target *container.Container) error {
+	if overrides.LiveSafety != nil {
+		target.EvidenceVault, target.FramePreviews = overrides.LiveSafety, overrides.LiveSafety
+		return nil
+	}
+	liveSafety := settings.LiveSafety
+	if liveSafety.FramesBucket == "" {
+		target.Logger.Warn("LIVE_SAFETY_FRAMES_S3_BUCKET is not set: live incident frames have no previews and evidence cannot be preserved")
+		target.EvidenceVault, target.FramePreviews = integrations.UnconfiguredLiveSafetyStorage{}, integrations.UnconfiguredLiveSafetyStorage{}
+		return nil
+	}
+	storage, err := integrations.NewS3LiveSafetyStorage(ctx, integrations.LiveSafetyStorageOptions{
+		FramesBucket: liveSafety.FramesBucket, Region: liveSafety.FramesRegion, Endpoint: liveSafety.FramesEndpoint,
+		EvidenceBucket: liveSafety.EvidenceBucket, EvidenceKmsKeyId: liveSafety.EvidenceKmsKeyId, EvidencePrefix: liveSafety.EvidencePrefix,
+	})
+	if err != nil {
+		return err
+	}
+	target.EvidenceVault, target.FramePreviews = storage, storage
+	return nil
 }
