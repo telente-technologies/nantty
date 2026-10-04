@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/wallet/src/integrations"
 	"zudomart/modules/wallet/src/interfaces"
 	"zudomart/modules/wallet/src/utils"
+	"zudomart/platform/staffaudit"
 )
 
 type Container struct {
@@ -29,6 +30,7 @@ type Container struct {
 	Encryptor    utils.FieldEncryptor
 	Currency     interfaces.ViewerCurrencyResolver
 	Settlement   interfaces.SellerSettlementAdapter
+	Audit        staffaudit.Recorder
 	Now          func() time.Time
 	schemaConfig ent.SchemaConfig
 }
@@ -39,15 +41,23 @@ func NewWalletContainer(resources loaders.MoneyModuleResources, settings configs
 		return nil, err
 	}
 	schema := settings.Money.DatabaseSchema
+	var audit staffaudit.Recorder
+	if settings.AdminInternalUrl != "" {
+		audit = staffaudit.NewHttpRecorder(settings.AdminInternalUrl, settings.AdminInternalToken)
+	}
 	return &Container{
+		Audit:     audit,
 		Resources: resources, Settings: settings, Payments: payments, Encryptor: encryptor,
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
 		Sellers:     sellerbalances.NewSellerBalancesInSchema(settings.Money.LedgerSchema),
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.wallet"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
-		Currency:    utils.RegionHeaderCurrencyResolver{DefaultCurrency: settings.DefaultCurrency},
-		Settlement:  selectSellerSettlementAdapter(settings.SellerSettlementAdapter, payments),
-		Now:         time.Now,
+		Currency: utils.RegionHeaderCurrencyResolver{
+			DefaultCurrency: settings.DefaultCurrency, TrustedCountryHeader: settings.TrustedCountryHeader, AccessVerifier: resources.AccessVerifier,
+			ProfileCountry: utils.ProfileCountryFromUsersSchema(resources.Database, settings.UsersSchema),
+		},
+		Settlement: selectSellerSettlementAdapter(settings.SellerSettlementAdapter, payments),
+		Now:        time.Now,
 		schemaConfig: ent.SchemaConfig{
 			CoinConversion: schema, CoinPackage: schema, CoinPurchase: schema, CoinTransfer: schema, IdempotentRequest: schema,
 			AdBalanceTopUp: schema, AdSpendDebit: schema, OutboxEvent: schema, PayoutAccount: schema, SellerReserveFlag: schema, WalletRiskFlag: schema, Withdrawal: schema,

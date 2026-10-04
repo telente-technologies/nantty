@@ -7,6 +7,8 @@ import (
 	ledgerutils "zudomart/modules/ledger/src/utils"
 	"zudomart/modules/wallet/src/modules/coins/dtos"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/staffaudit"
+	"zudomart/platform/staffauth"
 )
 
 var coinPackIdPattern = regexp.MustCompile(`^[a-z0-9-]{2,60}$`)
@@ -17,7 +19,7 @@ func (controller CoinsController) ListCoinPriceTable(writer http.ResponseWriter,
 		controller.fail(writer, request, err)
 		return
 	}
-	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": rows})
+	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": rows, "nextCursor": nil})
 }
 
 func (controller CoinsController) UpsertCoinPriceRow(writer http.ResponseWriter, request *http.Request) {
@@ -39,6 +41,13 @@ func (controller CoinsController) UpsertCoinPriceRow(writer http.ResponseWriter,
 		return
 	}
 	body.Id = packageId
+	if audit := controller.Application.Container.Audit; audit != nil {
+		staff, _ := staffauth.StaffFromContext(request.Context())
+		if err := staffaudit.RecordStaffChange(request, audit, staff, "pricing.coin_pack.update", "coin_pack", packageId, nil, body); err != nil {
+			controller.fail(writer, request, httpserver.NewApiError(http.StatusServiceUnavailable, "AUDIT_UNAVAILABLE", "The change couldn't be audited, so it wasn't saved. Try again."))
+			return
+		}
+	}
 	row, err := controller.Application.Catalog.UpsertCoinPriceRow(request.Context(), body)
 	if err != nil {
 		controller.fail(writer, request, err)

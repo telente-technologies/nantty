@@ -37,12 +37,13 @@ func clientPlatform(request *http.Request) string {
 
 func (controller CoinsController) ListCoinPackages(writer http.ResponseWriter, request *http.Request) {
 	packages, err := listcoinpackages.Handler{Application: controller.Application}.Execute(request.Context(), listcoinpackages.Query{
-		ClientPlatform: clientPlatform(request), Currency: controller.Application.Container.Currency.ResolveViewerCurrency(request),
+		ClientPlatform: clientPlatform(request), Currency: controller.Application.Container.Currency.ResolvePricingRegion(request).Currency,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
 	}
+	writer.Header().Set("Vary", "Authorization, X-Client-Platform, X-Store-Storefront, X-Client-Region")
 	httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(packages, ""))
 }
 
@@ -99,7 +100,7 @@ func (controller CoinsController) StartCoinPurchase(writer http.ResponseWriter, 
 	}
 	started, replayed, err := startcoinpurchase.Handler{Application: controller.Application}.Execute(request.Context(), startcoinpurchase.Command{
 		UserId: principal, ClientPlatform: clientPlatform(request), PackageId: body.PackageId, Provider: provider,
-		Currency: controller.Application.Container.Currency.ResolveViewerCurrency(request), ReturnTo: body.ReturnTo, IdempotencyKey: key,
+		Currency: controller.Application.Container.Currency.ResolvePricingRegion(request).Currency, ReturnTo: body.ReturnTo, IdempotencyKey: key,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)

@@ -28,6 +28,10 @@ type WalletSettings struct {
 	CreatorTransferMinimum       map[string]int64
 	CoinNetValueMinorByCurrency  map[string]int64
 	CoinChannelFeeBps            map[string]int64
+	UsersSchema                  string
+	TrustedCountryHeader         string
+	AdminInternalUrl             string
+	AdminInternalToken           string
 }
 
 const defaultCoinCashValues = "NGN:1000,GHS:10,KES:100,ZAR:15,GBP:1,EUR:1,USD:1"
@@ -51,6 +55,10 @@ func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		AdPrepaidRefundsEnabled:      reader.ReadStringOrDefault("ADS_PREPAID_REFUNDS_ENABLED", "false") == "true",
 		SellerReserveHoldDays:        reader.ReadIntegerOrDefault("WALLET_SELLER_RESERVE_HOLD_DAYS", 90),
 		CoinChannelFeeBps:            ParseChannelFees(reader.ReadStringOrDefault("COIN_CHANNEL_FEE_BPS", "web:300,ios:3000,android:1500")),
+		UsersSchema:                  reader.ReadStringOrDefault("WALLET_USERS_SCHEMA", "users"),
+		TrustedCountryHeader:         reader.ReadStringOrDefault("PRICING_TRUSTED_COUNTRY_HEADER", "CloudFront-Viewer-Country"),
+		AdminInternalUrl:             reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
+		AdminInternalToken:           reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
 	}
 	if settings.CoinTransferFeeBps < 0 || settings.CoinTransferFeeBps >= 10_000 {
 		reader.ReadRequiredString("COIN_TRANSFER_FEE_BPS_BETWEEN_0_AND_9999")
