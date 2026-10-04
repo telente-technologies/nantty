@@ -12,7 +12,7 @@ export function TrialOfferNotice({ offer }: { readonly offer: BillingOffer }) {
   }
   return (
     <Callout tone="success" title={`Try Pro or Business free for ${offer.trialDays === 7 ? "7 days" : "1 month"}`}>
-      You save a card on our payment partner&apos;s secure page. We make a small {formatMoneyForDisplay(offer.verificationCharge)} charge to check the card and refund it automatically. You are only charged when the trial ends, and we remind you 3 days and 1 day before. Receipts and reminders go to your account email, {offer.accountEmail}, which you can change in Account settings.
+      You save a card on our payment partner&apos;s secure page. {formatMoneyForDisplay(offer.verificationCharge)} charged to verify your card — refunded immediately. You are only charged when the trial ends, and we remind you 3 days and 1 day before. Receipts and reminders go to your account email, {offer.accountEmail}, which you can change in Account settings.
     </Callout>
   );
 }
