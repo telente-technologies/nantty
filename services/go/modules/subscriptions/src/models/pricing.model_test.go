@@ -17,6 +17,7 @@ func TestBundleAndYearlyDiscountsNeverStackAndTheBiggerWins(t *testing.T) {
 		{"bundle beats a smaller yearly discount", PricingRules{YearlyDiscountBps: 1000, BundleDiscountBps: 1500, BundleMaximumBusinesses: 3}, PricingInput{MonthlyAmountMinor: 300_000, Interval: "year", BundleEligiblePlan: true, HasActiveBlue: true}, 3_060_000, "bundle"},
 		{"fourth business loses the bundle", rules, PricingInput{MonthlyAmountMinor: 500_000, Interval: "month", BundleEligiblePlan: true, HasActiveBlue: true, BundledBusinessCount: 3}, 500_000, "none"},
 		{"black never gets the bundle", rules, PricingInput{MonthlyAmountMinor: 5_000_000, Interval: "month", BundleEligiblePlan: false, HasActiveBlue: true}, 5_000_000, "none"},
+		{"an explicit regional yearly price is charged as is", rules, PricingInput{MonthlyAmountMinor: 599, YearlyAmountMinor: 5_799, Interval: "year"}, 5_799, "yearly"},
 		{"black yearly still gets the yearly discount", rules, PricingInput{MonthlyAmountMinor: 5_000_000, Interval: "year"}, 48_000_000, "yearly"},
 	}
 	for _, testCase := range cases {

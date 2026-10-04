@@ -26,6 +26,7 @@ type AccountSignals struct {
 type IdentityDirectory interface {
 	FindProfile(ctx context.Context, profileId string) (BillingProfile, bool, error)
 	ReadAccountSignals(ctx context.Context, accountId string) (AccountSignals, bool, error)
+	FindAccountCountry(ctx context.Context, accountId string) (string, error)
 }
 
 type SqlIdentityDirectory struct {
@@ -55,9 +56,24 @@ func (directory SqlIdentityDirectory) ReadAccountSignals(ctx context.Context, ac
 	return signals, err == nil, err
 }
 
+func (directory SqlIdentityDirectory) FindAccountCountry(ctx context.Context, accountId string) (string, error) {
+	query := "SELECT COALESCE(country_code, '') FROM " + pgx.Identifier{directory.UsersSchema, "profiles"}.Sanitize() + " WHERE account_id::text = $1 AND kind = 'personal' LIMIT 1"
+	var country string
+	err := directory.Database.QueryRowContext(ctx, query, accountId).Scan(&country)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", nil
+	}
+	return country, err
+}
+
 type StaticIdentityDirectory struct {
-	Profiles map[string]BillingProfile
-	Accounts map[string]AccountSignals
+	Profiles  map[string]BillingProfile
+	Accounts  map[string]AccountSignals
+	Countries map[string]string
+}
+
+func (directory StaticIdentityDirectory) FindAccountCountry(_ context.Context, accountId string) (string, error) {
+	return directory.Countries[accountId], nil
 }
 
 func (directory StaticIdentityDirectory) FindProfile(_ context.Context, profileId string) (BillingProfile, bool, error) {

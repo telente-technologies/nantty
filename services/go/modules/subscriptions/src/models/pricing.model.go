@@ -15,6 +15,7 @@ type PriceQuote struct {
 
 type PricingInput struct {
 	MonthlyAmountMinor   int64
+	YearlyAmountMinor    int64
 	Interval             string
 	BundleEligiblePlan   bool
 	HasActiveBlue        bool
@@ -41,6 +42,9 @@ func QuotePlanPrice(rules PricingRules, input PricingInput) PriceQuote {
 	yearlyBps := int64(0)
 	if input.Interval == "year" {
 		yearlyBps = rules.YearlyDiscountBps
+		if input.YearlyAmountMinor > 0 && input.YearlyAmountMinor < listAmount {
+			yearlyBps = (listAmount - input.YearlyAmountMinor) * 10_000 / listAmount
+		}
 	}
 	switch {
 	case yearlyBps > 0 && yearlyBps >= bundleBps:
@@ -49,5 +53,8 @@ func QuotePlanPrice(rules PricingRules, input PricingInput) PriceQuote {
 		quote.DiscountKind, quote.DiscountBps = "bundle", bundleBps
 	}
 	quote.AmountMinor = discounted(listAmount, quote.DiscountBps)
+	if quote.DiscountKind == "yearly" && input.YearlyAmountMinor > 0 && input.YearlyAmountMinor < listAmount {
+		quote.AmountMinor = input.YearlyAmountMinor
+	}
 	return quote
 }
