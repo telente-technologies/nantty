@@ -83,6 +83,8 @@ func (handler Handler) enforce(ctx context.Context, command Command, report *ent
 		request.Action, request.DurationDays, request.ReasonCode = "suspend", &days, services.SuspensionReasonCodeFor(report.Reason)
 	case "BAN_USER":
 		request.Action, request.DurationDays = "ban", command.DurationDays
+	case "WARN_USER":
+		request.Action, request.CaseId = "warn", report.ID.String()
 	default:
 		return nil
 	}
