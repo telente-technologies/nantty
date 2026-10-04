@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
-import { CommentsPanel } from "@/components/feed/commentsPanel";
+import { ConversationPanel } from "@/components/feed/thread/conversationPanel";
 import { PostCard } from "@/components/feed/postCard";
 import { PostCardSkeleton } from "@/components/feed/postCardSkeleton";
 import { RetryButton } from "@/components/ui/controls";
@@ -32,7 +32,7 @@ export default function PostDetailPage({ params }: { readonly params: Promise<{ 
         <>
           <h1 className="visuallyHidden">Post by {postQuery.data.author.name}</h1>
           <PostCard post={postQuery.data} priority />
-          <CommentsPanel postId={postId} totalComments={postQuery.data.comments} />
+          <ConversationPanel post={postQuery.data} />
         </>
       )}
     </div>
