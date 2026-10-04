@@ -1,9 +1,15 @@
 package dtos
 
 type CheckoutRequest struct {
-	AddressId      string             `json:"addressId"`
-	UseStoreCredit *bool              `json:"useStoreCredit"`
-	PromoCodes     []PromoCodeRequest `json:"promoCodes"`
+	AddressId      string              `json:"addressId"`
+	UseStoreCredit *bool               `json:"useStoreCredit"`
+	PromoCodes     []PromoCodeRequest  `json:"promoCodes"`
+	PaymentModes   []PaymentModeChoice `json:"paymentModes"`
+}
+
+type PaymentModeChoice struct {
+	StoreId string `json:"storeId"`
+	Mode    string `json:"paymentMode"`
 }
 
 type CancelOrderRequest struct {

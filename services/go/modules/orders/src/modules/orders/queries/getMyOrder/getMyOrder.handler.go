@@ -24,5 +24,11 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.OrderVie
 		return types.OrderView{}, err
 	}
 	views, err := services.BuyerOrderViews(ctx, handler.Container, []*ent.OrderGroup{group})
-	return views[0], err
+	if err != nil {
+		return types.OrderView{}, err
+	}
+	if len(views) == 0 {
+		return types.OrderView{}, ordererrors.OrderNotFound
+	}
+	return views[0], nil
 }
