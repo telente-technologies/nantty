@@ -6,17 +6,15 @@ import type { DashboardEntitlement, VerificationPlan } from "@/types/platformCon
 
 import { EditableTextList } from "../shared/configurationFields";
 import { DashboardEntitlementsEditor } from "./dashboardEntitlementsEditor";
-import { PlanPriceTable } from "./planPriceTable";
 import styles from "./plansEditor.module.css";
 
 interface PlanEditorCardProps {
   readonly plan: VerificationPlan;
-  readonly supportedCurrencies: readonly string[];
   readonly canWrite: boolean;
   readonly onChange: (updater: (plan: VerificationPlan) => VerificationPlan) => void;
 }
 
-export function PlanEditorCard({ plan, supportedCurrencies, canWrite, onChange }: PlanEditorCardProps) {
+export function PlanEditorCard({ plan, canWrite, onChange }: PlanEditorCardProps) {
   const isOfficial = plan.color === "BLACK";
   return (
     <Card
@@ -50,7 +48,9 @@ export function PlanEditorCard({ plan, supportedCurrencies, canWrite, onChange }
         </div>
         {plan.isPurchasable ? (
           <div className={styles.planColumn}>
-            <PlanPriceTable planName={plan.displayName} prices={plan.prices} supportedCurrencies={supportedCurrencies} canWrite={canWrite} onChange={(prices) => onChange((current) => ({ ...current, prices }))} />
+            <p className={styles.planNote}>
+              Prices for every region, web and app store are set in <a href="/config/pricing">Regional pricing</a>.
+            </p>
           </div>
         ) : null}
       </div>

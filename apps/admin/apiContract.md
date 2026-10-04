@@ -840,22 +840,43 @@ Validation: `URL` targets must be `https://` on `zudomart.com` or a subdomain; `
 
 ## Support tickets
 
-View and reply: `support:tickets` (listing and reading also allowed with `support:assign`). Assigning to someone else: `support:assign`; agents with only `support:tickets` may assign to themselves. SLA targets by priority — first response: URGENT 1h, HIGH 4h, NORMAL 8h, LOW 24h; resolution: URGENT 8h, HIGH 24h, NORMAL 48h, LOW 72h. `isSlaBreached` is true for OPEN/PENDING tickets past either due time (first response only while unanswered).
+View and reply: `support:tickets` (listing and reading also allowed with `support:assign`). Assigning to someone else: `support:assign`; agents with only `support:tickets` may assign to themselves. SLA targets by priority — first response: URGENT 1h, HIGH 4h, NORMAL 8h, LOW 24h; resolution: URGENT 8h, HIGH 24h, NORMAL 48h, LOW 72h. `isSlaBreached` is true for OPEN, AWAITING_USER and AWAITING_SUPPORT tickets past either due time (first response only while unanswered). Served by `services/typescript/support` (Help Centre, plans.md §44).
 
-`SupportTicketSummary`: `{ id, subject, category: "ORDERS"|"PAYMENTS"|"ACCOUNT"|"VERIFICATION"|"SAFETY"|"ADS", priority: "LOW"|"NORMAL"|"HIGH"|"URGENT", status: "OPEN"|"PENDING"|"SOLVED"|"CLOSED", requester: PlatformUserSummary, assignee: { id, name, email }|null, linkedOrderId, linkedDisputeId, createdAt, updatedAt, firstResponseDueAt, firstRespondedAt, resolutionDueAt, solvedAt, lastMessagePreview, messageCount, isSlaBreached }`.
-`SupportMessage`: `{ id, authorKind: "CUSTOMER"|"AGENT"|"INTERNAL_NOTE", authorName, body, createdAt }`. Internal notes are never sent to the customer.
-`SupportTicketDetail`: `{ ticket, messages: SupportMessage[], history: AuditLogEntry[] }`.
+`SupportTicketSummary`: `{ id, reference ("SUP-10421"), subject, category: "ORDER"|"PAYMENT"|"ACCOUNT"|"SELLER"|"VERIFICATION"|"CREATOR"|"LIVE"|"ADS"|"SAFETY"|"OTHER", priority: "LOW"|"NORMAL"|"HIGH"|"URGENT", status: "OPEN"|"AWAITING_USER"|"AWAITING_SUPPORT"|"RESOLVED"|"CLOSED", channel: "FORM"|"CHAT", requester: PlatformUserSummary, assignee: { id, name, email }|null, linkedReference: { kind: "order"|"payment"|"live"|"report"|"dispute", id, label }|null, linkedOrderId, linkedDisputeId, createdAt, updatedAt, firstResponseDueAt, firstRespondedAt, resolutionDueAt, resolvedAt, closedAt, satisfactionScore (1–5)|null, satisfactionComment, autoFaqStatus: "NONE"|"QUEUED"|"PUBLISHED"|"APPENDED"|"PENDING_REVIEW"|"SKIPPED", lastMessagePreview, messageCount, isSlaBreached }`. Resolving a ticket that has a staff answer queues it for the auto-FAQ (plans.md §44.1); resolved tickets close automatically after 7 days and a customer reply within 7 days reopens them as AWAITING_SUPPORT.
+`SupportMessage`: `{ id, authorKind: "CUSTOMER"|"AGENT"|"INTERNAL_NOTE"|"SYSTEM", authorName, body, attachmentUrls, createdAt }`. Internal notes are never sent to the customer.
+`SupportTicketDetail`: `{ ticket, messages: SupportMessage[], history: AuditLogEntry[], isRecorded: true, isEndToEndEncrypted: false }`.
 
 | Method | Path | Body / query | Response | Audit action |
 |---|---|---|---|---|
-| GET | `/api/v1/admin/support/tickets` | query `status?`, `priority?`, `category?`, `assignee=me|unassigned|all`, `search?` (ticket/order/dispute ID or subject), `page`, `pageSize` | `PagedList<SupportTicketSummary>` sorted: breached first, then priority, then resolution due | — |
+| GET | `/api/v1/admin/support/tickets` | query `status?` (one status or a comma list, e.g. `OPEN,AWAITING_SUPPORT,AWAITING_USER`), `priority?`, `category?`, `assignee=me|unassigned|all`, `search?` (ticket/order/dispute ID or subject), `page`, `pageSize` | `PagedList<SupportTicketSummary>` sorted: breached first, then priority, then resolution due | — |
 | GET | `/api/v1/admin/support/tickets/{ticketId}` | — | `SupportTicketDetail` | — |
-| POST | `/api/v1/admin/support/tickets/{ticketId}/replies` | `{ body (2–5000), isInternalNote: boolean, statusAfterReply?: status }` (default PENDING for customer replies, unchanged for notes). Sets `firstRespondedAt` on the first customer-visible reply; auto-assigns an unassigned ticket to the replier; notifies the customer in-app and by email. | `201 SupportTicketDetail` | `support.reply_sent` / `support.internal_note_added` |
+| POST | `/api/v1/admin/support/tickets/{ticketId}/replies` | `{ body (2–5000), isInternalNote: boolean, statusAfterReply?: status }` (default AWAITING_USER for customer replies, unchanged for notes). A customer-visible reply emits `ticket.replied`, which emails, pushes and notifies the customer; `RESOLVED` also emits `ticket.resolved`. Sets `firstRespondedAt` on the first customer-visible reply; auto-assigns an unassigned ticket to the replier; notifies the customer in-app and by email. | `201 SupportTicketDetail` | `support.reply_sent` / `support.internal_note_added` |
 | POST | `/api/v1/admin/support/tickets/{ticketId}/status` | `{ status, reason? }` | `SupportTicketDetail` | `support.status_changed` |
 | POST | `/api/v1/admin/support/tickets/{ticketId}/assign` | `{ assigneeId: string|null, reason? }` | `SupportTicketDetail` | `support.ticket_assigned` / `support.ticket_unassigned` |
-| GET | `/api/v1/admin/support/agents` | — | `{ items: { id, name, email }[] }` active admins with `support:tickets` or SUPERADMIN | — |
+| GET | `/api/v1/admin/support/agents` | — | `{ items: { id, name, email }[] }` staff with `support:tickets` or `support:chat` seen by the support service in the last 90 days (`email` may be empty) | — |
 
 Errors: `400 VALIDATION_FAILED`, `403 FORBIDDEN` (assigning someone else without `support:assign`), `404 NOT_FOUND`, `409 TICKET_CLOSED` (customer reply on a closed ticket), `409 NO_CHANGE`.
+
+## Help centre content
+
+Read: `support:helpContent`, `support:tickets` or `support:assign`. Write: `support:helpContent` (new permission, in the Support department template). Markdown containing scripts, frames, `javascript:` or inline event handlers is rejected with `400 UNSAFE_MARKDOWN`.
+
+`HelpCategory`: `{ id, slug, title, description, iconName, position, topicCount (published) }`.
+`HelpTopic`: `{ id, slug, title, summary, categoryId, categorySlug, categoryTitle, tags[], bodyMarkdown, locale, status: "DRAFT"|"PENDING_REVIEW"|"PUBLISHED"|"UNPUBLISHED"|"MERGED", origin: "EDITORIAL"|"SEED"|"RESOLVED_QUESTION", fromResolvedQuestion, sourceLabel, sourceTicketId, mergedIntoTopicId, editedByStaff, version, helpfulCount, notHelpfulCount, relatedQuestions, updatedByName, publishedAt, createdAt, updatedAt }`.
+
+| Method | Path | Body / query | Response |
+|---|---|---|---|
+| GET | `/api/v1/admin/help/categories` | — | `{ items: HelpCategory[] }` |
+| POST / PUT | `/api/v1/admin/help/categories` / `…/{categoryId}` | `{ slug, title, description?, iconName?, position? }` | `HelpCategory`; `409 SLUG_TAKEN` |
+| DELETE | `/api/v1/admin/help/categories/{categoryId}` | — | `204`; `409 CATEGORY_NOT_EMPTY` |
+| GET | `/api/v1/admin/help/topics` | `status?`, `origin?`, `categoryId?`, `search?`, `page`, `pageSize` | `PagedList<HelpTopic>` |
+| GET | `/api/v1/admin/help/topics/{topicId}` | — | `{ topic, versions: { version, title, summary, bodyMarkdown, tags, editedByName, changeNote, createdAt }[], relatedTopicIds }` |
+| POST / PUT | `/api/v1/admin/help/topics` / `…/{topicId}` | `{ categoryId, slug?, title (5–140), summary?, bodyMarkdown (20–40000), tags?, relatedTopicIds? (≤8), status?: "DRAFT"|"PUBLISHED", changeNote? }` | `HelpTopic`; a content change adds a version; `409 SLUG_TAKEN` |
+| DELETE | `/api/v1/admin/help/topics/{topicId}` | — | `204` |
+| POST | `/api/v1/admin/help/topics/{topicId}/publish` · `/unpublish` | — | `HelpTopic`; `409 NO_CHANGE`, `409 TOPIC_MERGED` |
+| POST | `/api/v1/admin/help/topics/{topicId}/merge` | `{ targetTopicId }` | target `HelpTopic` (source appended as "Related question", source becomes MERGED and redirects) |
+| GET | `/api/v1/admin/help/auto-topics` | `page`, `pageSize` | `PagedList<{ id, ticketId, ticketRef, action: "CREATED"|"APPENDED"|"PENDING_REVIEW"|"SKIPPED", similarity, writer, note, createdAt, topic: HelpTopic|null }>` |
+| GET / PUT | `/api/v1/admin/help/settings` | `{ autoFaqRequiresReview: boolean }` (default false = publish automatically) | same |
 
 ## Support macros
 
@@ -890,6 +911,20 @@ Permission: `users:moderate`. **Every write needs step-up** (`X-Admin-Step-Up`) 
 | POST | `/api/v1/admin/suspensions/accounts/{caseId}/appeal/decide` | `{ outcome: "UPHELD"|"OVERTURNED", reason }` | `{ outcome }`; OVERTURNED reinstates | `suspension.appeal_upheld` / `suspension.appeal_overturned` |
 
 Errors: `403 STEP_UP_REQUIRED`, `409 CASE_ALREADY_DECIDED`, `409 NOT_SUSPENDED`, `409 NO_PENDING_APPEAL`.
+
+## Security cases (access probing and suspected bots)
+
+Served by go-trust. Read needs `security:cases`; every decision needs `security:cases` **and** step-up, plus the action's own permission (`keep_restricted` → `users:restrict`, `suspend` → `users:suspend`, `ban` → `users:ban`, `delete` → `users:delete`). Automation only flags, challenges (Cloudflare Turnstile) and, after repeated failures, suspends temporarily with an appeal. It never bans or deletes: those are staff decisions here.
+
+`SecurityCaseSummary`: `{ id, accountId, account: PlatformUserSummary, trigger: "access_probing"|"suspected_bot", status: "open"|"cleared"|"kept_restricted"|"suspended"|"banned"|"deleted", severity: "low"|"medium"|"high", violationCount, failedChallengeCount, passedChallengeCount, autoSuspended, openedAt, lastActivityAt, decidedAt, decision }`. `SecurityCaseDetail` adds `state { challengeRequired, suspectedBot, botScore, botReasons[], headlessReported, attestationVerdict, autoSuspendedAt }`, `timeline[{ id, kind, at, deviceId, ipPrefix, source, detail }]` (route templates and counts only, never payloads), `challengeHistory[]`, `linkedDevices[]`, `linkedIpPrefixes[]` (/24 or /48), `previousCases`, `automationNote`.
+
+| Method | Path | Body / query | Response | Audit action |
+|---|---|---|---|---|
+| GET | `/api/v1/admin/security/cases` | `status=open|decided|all`, `trigger?`, `severity?`, `cursor?` | `{ data: SecurityCaseSummary[], nextCursor }`, auto-suspended first | — |
+| GET | `/api/v1/admin/security/cases/{caseId}` | — | `SecurityCaseDetail` | — |
+| POST | `/api/v1/admin/security/cases/{caseId}/decide` | `{ action: "clear"|"keep_restricted"|"suspend"|"ban"|"delete", reason (5–1000), durationDays?, features?, confirmUsername (delete only) }` | `SecurityCaseDetail` | `securityCase.<action>` |
+
+Errors: `403 STEP_UP_REQUIRED`, `403 FORBIDDEN` (missing the action's permission), `409 CASE_ALREADY_DECIDED`, `409 PENDING_WITHDRAWALS` (delete with money still owed).
 
 ## Accounts and lifetime checkmarks
 
