@@ -15,6 +15,7 @@ import (
 	userserrors "zudomart/modules/users/src/errors"
 	"zudomart/modules/users/src/modules/checkmarks/routes"
 	"zudomart/modules/users/src/modules/checkmarks/services"
+	identityverification "zudomart/modules/users/src/modules/identityVerification"
 	usersservices "zudomart/modules/users/src/services"
 
 	"github.com/google/uuid"
@@ -68,6 +69,9 @@ func ConsumeEntitlementEventsUntilContextDone(ctx context.Context, c *container.
 	handler := services.HandleEntitlementEventMessage(func(ctx context.Context, eventType string, data json.RawMessage) error {
 		if eventType == services.AccountRegisteredEventType {
 			return ensurePersonalProfileForRegisteredAccount(ctx, c, data)
+		}
+		if identityverification.HandlesIdentityEvent(eventType) {
+			return identityverification.HandleIdentityEvent(ctx, c, eventType, data)
 		}
 		var command applyentitlement.Command
 		if err := json.Unmarshal(data, &command); err != nil {

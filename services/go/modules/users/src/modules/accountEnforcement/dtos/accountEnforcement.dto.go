@@ -47,15 +47,16 @@ type AppealDecisionRequest struct {
 }
 
 type InternalActionRequest struct {
-	Action       string   `json:"action"`
-	UserId       string   `json:"userId"`
-	Actor        Actor    `json:"actor"`
-	Reason       string   `json:"reason"`
-	Features     []string `json:"features"`
-	DurationDays *int     `json:"durationDays"`
-	ReasonCode   string   `json:"reasonCode"`
-	Source       string   `json:"source"`
-	CaseId       string   `json:"caseId"`
+	Action          string   `json:"action"`
+	UserId          string   `json:"userId"`
+	Actor           Actor    `json:"actor"`
+	Reason          string   `json:"reason"`
+	Features        []string `json:"features"`
+	DurationDays    *int     `json:"durationDays"`
+	ReasonCode      string   `json:"reasonCode"`
+	Source          string   `json:"source"`
+	CaseId          string   `json:"caseId"`
+	ConfirmUsername string   `json:"confirmUsername"`
 }
 
 type Actor struct {

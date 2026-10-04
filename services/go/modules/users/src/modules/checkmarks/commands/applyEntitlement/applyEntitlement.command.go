@@ -11,5 +11,6 @@ type Command struct {
 	Checkmark      string     `json:"checkmark"`
 	SellerPlan     string     `json:"sellerPlan"`
 	Status         string     `json:"status"`
+	Channel        string     `json:"channel"`
 	ValidUntil     *time.Time `json:"validUntil"`
 }

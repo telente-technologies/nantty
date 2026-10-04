@@ -8,6 +8,7 @@ import (
 
 	usersErrors "zudomart/modules/users/src/errors"
 	banuser "zudomart/modules/users/src/modules/accountEnforcement/commands/banUser"
+	deleteuser "zudomart/modules/users/src/modules/accountEnforcement/commands/deleteUser"
 	restrictuser "zudomart/modules/users/src/modules/accountEnforcement/commands/restrictUser"
 	suspenduser "zudomart/modules/users/src/modules/accountEnforcement/commands/suspendUser"
 	warnuser "zudomart/modules/users/src/modules/accountEnforcement/commands/warnUser"
@@ -42,10 +43,12 @@ func (controller AccountEnforcementController) InternalAction(writer http.Respon
 		result, err = controller.internalSuspend(request, body, actor)
 	case "ban":
 		result, err = banuser.Handler{Container: controller.Container}.Execute(request.Context(), banuser.Command{Actor: actor, TargetId: body.UserId, DurationDays: body.DurationDays, Reason: body.Reason})
+	case "delete":
+		result, err = deleteuser.Handler{Container: controller.Container}.Execute(request.Context(), deleteuser.Command{Actor: actor, TargetId: body.UserId, ConfirmUsername: body.ConfirmUsername, Reason: body.Reason})
 	case "warn":
 		result, err = warnuser.Handler{Container: controller.Container}.Execute(request.Context(), warnuser.Command{Actor: actor, TargetId: body.UserId, Reason: body.Reason, Source: body.Source, CaseId: body.CaseId})
 	default:
-		err = usersErrors.ValidationFailedFor("action", "must be warn, restrict, suspend or ban")
+		err = usersErrors.ValidationFailedFor("action", "must be warn, restrict, suspend, ban or delete")
 	}
 	controller.respond(writer, request, http.StatusOK, result, err)
 }

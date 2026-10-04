@@ -17,7 +17,7 @@ import (
 
 const DeletionCountdown = 120 * 24 * time.Hour
 
-var ReasonCodes = map[string]bool{"FRAUD": true, "SCAM": true, "COUNTERFEIT": true, "HARASSMENT": true, "IMPERSONATION": true, "SPAM_NETWORK": true, "OTHER": true}
+var ReasonCodes = map[string]bool{"FRAUD": true, "SCAM": true, "COUNTERFEIT": true, "HARASSMENT": true, "IMPERSONATION": true, "SPAM_NETWORK": true, "SECURITY": true, "OTHER": true}
 
 type Handler struct {
 	Container *container.Container
