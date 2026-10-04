@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AppearanceSection } from "@/components/settings/appearanceSection";
+import { NotificationPreferencesSection } from "@/components/settings/notificationPreferencesSection";
 import styles from "@/components/settings/settingsHome.module.css";
 import { BookmarkIcon, ChevronRightIcon, LockIcon, MailIcon, MapPinIcon, OrdersIcon, UserIcon } from "@/components/ui/icons";
 
@@ -22,6 +23,7 @@ export default function SettingsPage() {
     <div className={styles.page}>
       <h1 className={styles.title}>Settings</h1>
       <AppearanceSection />
+      <NotificationPreferencesSection />
       <nav className={styles.card} aria-label="More settings">
         <ul className={styles.linkList}>
           {settingsLinks.map((link) => (
