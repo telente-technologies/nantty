@@ -126,6 +126,11 @@ func upsertVariant(ctx context.Context, tx *ent.Tx, write ProductWrite, product 
 		update := existing.Update().SetTitle(title).SetOptionValues(request.OptionValues).SetSize(size).SetColor(color).SetSku(request.Sku).SetSkuKey(strings.ToLower(request.Sku)).
 			SetPriceMinor(request.PriceMinor).SetNillableCompareAtPriceMinor(request.CompareAtPriceMinor).SetNillableCostPriceMinor(request.CostPriceMinor).
 			SetNillableBarcode(request.Barcode).SetLowStockThreshold(request.LowStockThreshold).SetReorderPoint(reorderPoint).SetReorderQuantity(reorderQuantity).SetPosition(position)
+		if prices := regionalPricesOf(request, product.Currency); len(prices) > 0 {
+			update.SetRegionalPrices(prices)
+		} else {
+			update.ClearRegionalPrices()
+		}
 		if request.CompareAtPriceMinor == nil {
 			update.ClearCompareAtPriceMinor()
 		}
@@ -141,7 +146,8 @@ func upsertVariant(ctx context.Context, tx *ent.Tx, write ProductWrite, product 
 	saved, err := tx.ProductVariant.Create().SetProductID(product.ID).SetStoreID(write.Store.StoreId).SetTitle(title).SetOptionValues(request.OptionValues).
 		SetSize(size).SetColor(color).SetSku(request.Sku).SetSkuKey(strings.ToLower(request.Sku)).SetPriceMinor(request.PriceMinor).
 		SetNillableCompareAtPriceMinor(request.CompareAtPriceMinor).SetNillableCostPriceMinor(request.CostPriceMinor).SetNillableBarcode(request.Barcode).
-		SetLowStockThreshold(request.LowStockThreshold).SetReorderPoint(reorderPoint).SetReorderQuantity(reorderQuantity).SetPosition(position).Save(ctx)
+		SetLowStockThreshold(request.LowStockThreshold).SetReorderPoint(reorderPoint).SetReorderQuantity(reorderQuantity).SetPosition(position).
+		SetRegionalPrices(regionalPricesOf(request, product.Currency)).Save(ctx)
 	if err != nil {
 		return provisionedVariant{}, err
 	}

@@ -128,7 +128,10 @@ func sellerVariantView(variant *ent.ProductVariant, currency money.CurrencyCode,
 	view := types.SellerVariantView{
 		Id: variant.ID.String(), ProductId: variant.ProductID.String(), Title: variant.Title, OptionValues: variant.OptionValues, Sku: variant.Sku,
 		Barcode: variant.Barcode, Price: money.Money{AmountMinor: variant.PriceMinor, Currency: currency}, LowStockThreshold: variant.LowStockThreshold,
-		ReorderPoint: variant.ReorderPoint, ReorderQuantity: variant.ReorderQuantity, Stock: []types.SellerStockView{},
+		ReorderPoint: variant.ReorderPoint, ReorderQuantity: variant.ReorderQuantity, Stock: []types.SellerStockView{}, RegionalPrices: []types.SellerRegionalPriceView{},
+	}
+	for _, price := range variant.RegionalPrices {
+		view.RegionalPrices = append(view.RegionalPrices, types.SellerRegionalPriceView{Currency: price.Currency, PriceMinor: price.PriceMinor, CompareAtPriceMinor: price.CompareAtPriceMinor})
 	}
 	if view.OptionValues == nil {
 		view.OptionValues = map[string]string{}

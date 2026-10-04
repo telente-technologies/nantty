@@ -13,7 +13,6 @@ import (
 	"zudomart/modules/catalog/src/generated/ent/productvariant"
 	"zudomart/modules/catalog/src/types"
 	"zudomart/platform/commerceports"
-	"zudomart/platform/money"
 )
 
 func LoadProductSummaries(ctx context.Context, deployed *container.Container, products []*ent.Product, viewer *uuid.UUID) ([]types.ProductSummaryView, error) {
@@ -45,10 +44,20 @@ func LoadProductSummaries(ctx context.Context, deployed *container.Container, pr
 	if err != nil {
 		return nil, err
 	}
+	variantRows, err := deployed.Client.ProductVariant.Query().Where(productvariant.ProductIDIn(productIds...)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	variantsByProduct := map[uuid.UUID][]*ent.ProductVariant{}
+	for _, variant := range variantRows {
+		variantsByProduct[variant.ProductID] = append(variantsByProduct[variant.ProductID], variant)
+	}
+	pricing := LoadDisplayPricing(ctx, deployed, ViewerCountry(ctx, deployed, viewer))
 	views := make([]types.ProductSummaryView, 0, len(products))
 	for _, product := range products {
+		displayed := pricing.ForProduct(product, variantsByProduct[product.ID])
 		view := types.ProductSummaryView{
-			Id: product.ID.String(), Name: product.Name, Price: money.Money{AmountMinor: product.MinPriceMinor, Currency: money.CurrencyCode(product.Currency)},
+			Id: product.ID.String(), Name: product.Name, Price: displayed.Price, PriceIsRegional: displayed.IsRegional, ApproxPrice: displayed.Approx,
 			Liked: liked[product.ID], Stock: stock[product.ID], StoreId: product.StoreID.String(),
 		}
 		if url, found := firstImage[product.ID]; found {
