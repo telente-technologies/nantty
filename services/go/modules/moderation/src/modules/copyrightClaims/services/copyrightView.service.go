@@ -45,6 +45,23 @@ type Summary struct {
 	Status                     string                   `json:"status"`
 	FiledAt                    string                   `json:"filedAt"`
 	TopAudioMatchConfidencePct *int                     `json:"topAudioMatchConfidencePercent"`
+	ClaimScope                 string                   `json:"claimScope"`
+	Remedy                     string                   `json:"remedy"`
+	RemedyState                string                   `json:"remedyState"`
+	TakedownDeadlineAt         *string                  `json:"takedownDeadlineAt"`
+}
+
+type ClaimEvidenceView struct {
+	OriginalWorkUrl     *string           `json:"originalWorkUrl"`
+	OriginalWorkMediaId *string           `json:"originalWorkMediaId"`
+	ProofUrls           []string          `json:"proofUrls"`
+	ProofMediaIds       []string          `json:"proofMediaIds"`
+	Segments            []json.RawMessage `json:"segments"`
+	AccuracyDeclared    bool              `json:"accuracyDeclared"`
+	SignatureName       string            `json:"signatureName"`
+	SignedAt            *string           `json:"signedAt"`
+	ClaimantPhone       *string           `json:"claimantPhone"`
+	ClaimantAddress     *string           `json:"claimantAddress"`
 }
 
 type CounterNoticeView struct {
@@ -63,6 +80,7 @@ type Detail struct {
 	ClaimedUrls              []string            `json:"claimedUrls"`
 	AudioMatches             []json.RawMessage   `json:"audioMatches"`
 	CounterNotices           []CounterNoticeView `json:"counterNotices"`
+	Evidence                 ClaimEvidenceView   `json:"evidence"`
 	RepeatInfringerThreshold int                 `json:"repeatInfringerThreshold"`
 	IsRepeatInfringer        bool                `json:"isRepeatInfringer"`
 	Decision                 json.RawMessage     `json:"decision"`
@@ -107,6 +125,7 @@ func BuildSummaries(ctx context.Context, c *container.Container, rows []*ent.Cop
 			Id: row.ID.String(), Claimant: Claimant{Name: row.ClaimantName, Organization: optional(row.ClaimantOrganization), Email: row.ClaimantEmail, RepresentativeOf: optional(row.Represents)},
 			WorkTitle: row.WorkTitle, WorkType: strings.ToUpper(string(row.WorkType)), Target: target, TargetFlag: strings.ToUpper(string(row.TargetFlag)), Status: strings.ToUpper(string(row.Status)),
 			FiledAt: row.CreatedAt.UTC().Format(time.RFC3339), TopAudioMatchConfidencePct: row.TopAudioMatchPercent,
+			ClaimScope: strings.ToUpper(string(row.ClaimScope)), Remedy: strings.ToUpper(string(row.Remedy)), RemedyState: strings.ToUpper(string(row.RemedyState)), TakedownDeadlineAt: formatTime(row.TakedownDeadlineAt),
 		}
 		if row.InfringerID != nil {
 			summary.Infringer = users[row.InfringerID.String()]
@@ -118,7 +137,26 @@ func BuildSummaries(ctx context.Context, c *container.Container, rows []*ent.Cop
 }
 
 func visibilityFor(row *ent.CopyrightClaim) string {
-	return map[string]string{"visible": "VISIBLE", "limited": "RESTRICTED", "taken_down": "REMOVED"}[string(row.TargetFlag)]
+	return map[string]string{"visible": "VISIBLE", "limited": "RESTRICTED", "taken_down": "REMOVED", "muted": "VISIBLE", "warned": "VISIBLE"}[string(row.TargetFlag)]
+}
+
+func formatTime(moment *time.Time) *string {
+	if moment == nil {
+		return nil
+	}
+	formatted := moment.UTC().Format(time.RFC3339)
+	return &formatted
+}
+
+func buildEvidence(row *ent.CopyrightClaim) ClaimEvidenceView {
+	evidence := ClaimEvidenceView{
+		OriginalWorkUrl: optional(row.OriginalWorkURL), OriginalWorkMediaId: optional(row.OriginalWorkMediaID), ProofUrls: row.ProofUrls, ProofMediaIds: row.ProofMediaIds, Segments: []json.RawMessage{},
+		AccuracyDeclared: row.AccuracyDeclared, SignatureName: row.SignatureName, SignedAt: formatTime(row.SignedAt), ClaimantPhone: optional(row.ClaimantPhone), ClaimantAddress: optional(row.ClaimantAddress),
+	}
+	if row.InfringingSegments != nil {
+		_ = json.Unmarshal(row.InfringingSegments, &evidence.Segments)
+	}
+	return evidence
 }
 
 func BuildDetail(ctx context.Context, c *container.Container, row *ent.CopyrightClaim) (Detail, error) {
@@ -127,7 +165,7 @@ func BuildDetail(ctx context.Context, c *container.Container, row *ent.Copyright
 		return Detail{}, err
 	}
 	detail := Detail{Summary: summaries[0], RightsBasis: row.RightsBasis, SwornStatement: row.SwornStatement, ClaimedUrls: row.ClaimedUrls, AudioMatches: []json.RawMessage{}, CounterNotices: []CounterNoticeView{},
-		RepeatInfringerThreshold: strikeservices.RepeatInfringerThreshold, IsRepeatInfringer: strikeservices.IsRepeatInfringer(summaries[0].InfringerStrikeCount), Decision: row.Decision}
+		RepeatInfringerThreshold: strikeservices.RepeatInfringerThreshold, IsRepeatInfringer: strikeservices.IsRepeatInfringer(summaries[0].InfringerStrikeCount), Decision: row.Decision, Evidence: buildEvidence(row)}
 	if row.AudioMatches != nil {
 		_ = json.Unmarshal(row.AudioMatches, &detail.AudioMatches)
 	}
