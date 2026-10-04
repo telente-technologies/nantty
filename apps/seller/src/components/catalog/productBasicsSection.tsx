@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import type { ProductDraft } from "@/components/catalog/productEditorDraft.util";
 import { SelectField, TextAreaField, TextField, ToggleSwitch } from "@/components/ui/formFields";
 import { Panel } from "@/components/ui/panel";
@@ -26,7 +28,7 @@ export function ProductBasicsSection({ draft, fieldErrors, onDraftChange }: Prod
           value={draft.categoryId}
           onChange={(event) => onDraftChange({ categoryId: event.target.value })}
           errorMessage={fieldErrors.categoryId}
-          hint={<a href="/products/categories">Manage categories</a>}
+          hint={<Link href="/products/categories">Manage categories</Link>}
           options={[{ value: "", label: "No category" }, ...(categoriesQuery.data?.data ?? []).map((category) => ({ value: category.id, label: category.name }))]}
         />
         <TextAreaField className={styles.fullRow} label="Description" value={draft.description} maxLength={5000} rows={5} onChange={(event) => onDraftChange({ description: event.target.value })} errorMessage={fieldErrors.description} hint="Shown on the product page in the Zudomart app." />

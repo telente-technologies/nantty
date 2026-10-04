@@ -122,7 +122,7 @@ Permission: products:manage
 Body: ProductUpsertRequest — name 2–120; description ≤ 5000; categoryId one of the store's or null; status draft|active|archived; taxable/trackInventory/publishedOnline booleans; tags ≤ 20 × ≤ 30 chars (lower-cased, deduped by server); options ≤ 3 (name 1–30, 1–30 unique values of 1–40 chars); imageMediaIds ≤ 10 (media must be `ready` and owned by the store, or already on the product); variants 1–100: optionValues must pick exactly one value per option and combinations must be unique, sku /^[A-Za-z0-9._-]{1,64}$/ unique per store (case-insensitive), barcode null or 8–14 digits (13 digits must pass the EAN-13 check digit) unique per store, priceMinor ≥ 0, compareAtPriceMinor null or > priceMinor, costPriceMinor null or ≥ 0, lowStockThreshold 0–100000, openingStock [{locationId, quantity 0–1e6}] (create only; locations must belong to the store), reorderPoint?/reorderQuantity? 0–1e6 (default: lowStockThreshold and max(10, 4 × lowStockThreshold)); plus visibility? (default public), publishAt? (ISO, status must be draft, ≤ 12 months ahead), attributes?, videos? [{url, title}], supplierId?.
 Server rules: variant title is derived from option values ("Default" when no options); publishedOnline is forced false unless status is active; stock starts at openingStock per location (0 elsewhere).
 Response 201: Product
-Errors: 400 VALIDATION_FAILED (issues[] with paths like `variants.2.sku`, `attributes.1.value`, `videos.0.url`, `publishAt`), 409 PRODUCT_LIMIT_REACHED, 422 MEDIA_NOT_READY
+Errors: 400 VALIDATION_FAILED (issues[] with paths like `variants.2.sku`, `attributes.1.value`, `videos.0.url`, `publishAt`), 409 PRODUCT_LIMIT_REACHED, 422 MEDIA_NOT_READY, 403 STORE_NOT_APPROVED (the store is suspended or not active; also returned by publish and duplicate)
 
 ### GET /api/v1/seller/products/:productId
 Permission: catalog:view
@@ -147,7 +147,7 @@ Response 200: Product
 Permission: products:manage
 Body: {}
 Rules: publish requires status active and at least one image. Listings share the same stock as every location.
-Response 200: Product. Errors: 409 PRODUCT_NOT_ACTIVE, 409 PRODUCT_NEEDS_IMAGE
+Response 200: Product. Errors: 409 PRODUCT_NOT_ACTIVE, 409 PRODUCT_NEEDS_IMAGE, 403 STORE_NOT_APPROVED (publish only)
 
 ### GET /api/v1/seller/products/usage
 Permission: catalog:view

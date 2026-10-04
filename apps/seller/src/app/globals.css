@@ -128,6 +128,11 @@ img {
   max-width: 100%;
 }
 
+img[src] {
+  outline: 1px solid var(--media-frame);
+  outline-offset: -1px;
+}
+
 button,
 input,
 select,

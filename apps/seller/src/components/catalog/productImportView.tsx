@@ -49,7 +49,7 @@ export function ProductImportView() {
     if (!file) return;
     if (!file.name.toLowerCase().endsWith(".csv") && file.type !== "text/csv") return setFileError("Choose a .csv file.");
     if (file.size > maximumCsvBytes) return setFileError("CSV files must be 2 MB or smaller. Split larger catalogs into several files.");
-    const parsedRows = parseCsvText((await file.text()).replace(/^﻿/, ""));
+    const parsedRows = parseCsvText((await file.text()).replace(/^\uFEFF/, ""));
     const [headerRow, ...rows] = parsedRows;
     if (!headerRow || rows.length === 0) return setFileError("The file needs a header row and at least one product row.");
     if (rows.length > maximumRows) return setFileError(`Import up to ${maximumRows} rows at a time.`);
