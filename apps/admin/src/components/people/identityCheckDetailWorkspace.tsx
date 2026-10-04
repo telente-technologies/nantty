@@ -27,8 +27,17 @@ function describeDecision(detail: IdentityCaseDetail, decision: IdentityCaseDeci
   if (decision === "approve") {
     return [`@${detail.profile.handle} gets the ${item.color} checkmark immediately and is notified.`, ...(item.status !== "under_review" ? ["This is a manual pass: the Smile ID result is not complete yet."] : [])];
   }
-  const refund = item.refundMethod === "plan_continues" ? "Their plan continues; only the checkmark is withheld." : item.refundMethod === "apple_request" ? "The subscription is cancelled and the user is told to request the refund from Apple." : "The payment is refunded automatically in full.";
-  return ["The user is told the verification was not approved, with your reason, and can try again in 30 days.", refund];
+  return describeRejectionConsequences(item);
+}
+
+function describeRejectionConsequences(item: IdentityCaseDetail["case"]): string[] {
+  const reapply = "The user is told the verification was not approved, with your reason, and can try again in 30 days.";
+  if (item.refundScope === "checkmark_share") {
+    const share = item.refundMethod === "card" ? "Only the checkmark's share of this period's payment is refunded to their card (the standalone checkmark price for their region, capped at what they paid)." : "Only the checkmark's share is refunded: Google Play if it supports partial refunds, otherwise flagged for a manual store refund.";
+    return [reapply, "Their plan stays active with all its features; only the checkmark is withheld.", share];
+  }
+  const refund = item.refundMethod === "apple_request" ? "The subscription is cancelled and the user is told to request the refund from Apple." : "The payment is refunded automatically in full.";
+  return [reapply, refund];
 }
 
 export function IdentityCheckDetailWorkspace({ caseId }: { readonly caseId: string }) {

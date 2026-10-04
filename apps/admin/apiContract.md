@@ -525,7 +525,7 @@ PayoutRequest { id, user: PlatformUserSummary, amount: Money, providerFee: Money
 PayoutDestination { kind: "BANK_ACCOUNT"|"MOBILE_MONEY", institutionName, accountMasked (last 4 only), accountName, addedAt }
 FraudAssessment { score: 0-100, riskLevel: "LOW"|"MEDIUM"|"HIGH", reasons: string[], modelVersion, evaluatedAt }
 ```
-`fraud` comes from the intelligence service (apps/intelligence) at request time; the provider fee is the payment provider's pass-through fee (the user receives `netAmount`). Full account numbers are never returned.
+`fraud` comes from the intelligence service (services/python/intelligence) at request time; the provider fee is the payment provider's pass-through fee (the user receives `netAmount`). Full account numbers are never returned.
 
 ### GET /api/v1/admin/payouts/:payoutId
 Permission: `payouts:approve`. Response: `PayoutRequest & { recentPayouts: { id, amount, status, requestedAt }[], history: AuditLogEntry[] }`.
@@ -1104,3 +1104,16 @@ Permissions: `chat-reports:review` (queue, detail, dismiss, remove group), `chat
 | POST | `/admin/chat-reports/:reportId/actions` | `{ action: DISMISS \| WARN_USER \| RESTRICT_USER \| SUSPEND_USER \| BAN_USER \| REMOVE_GROUP \| ESCALATE_LEGAL, reason, durationDays? }`. Per-action permission, step-up for BAN_USER, REMOVE_GROUP and ESCALATE_LEGAL. 409 `REPORT_ALREADY_DECIDED`, `NO_REPORTED_USER`, `NOT_A_GROUP_REPORT`. Audited on the report and the user. Reporter is notified "We took action" or "No violation found" (not on escalation) |
 | GET | `/admin/chat-reports/retention` | `{ retentionDays, legalHoldDays, label: "LEGAL REVIEW" }` |
 | PUT | `/admin/chat-reports/retention` | `{ retentionDays (30 to 730), reason }`, `chat-reports:legal` and step-up, audited |
+
+## Identity checks (Smile ID)
+
+Paid Blue and Gold checkmarks verified with Smile ID. Served by go-identity. Permission `verification:review`; decisions need step-up.
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| GET | `/admin/verification-cases?status=under_review` | `status`: `under_review` (default), `awaiting_capture`, `awaiting_consent`, `approved`, `rejected`. Returns `{ data: IdentityCaseListItem[] }` oldest first |
+| GET | `/admin/verification-cases/{caseId}` | `{ case, profile, health, eligibility }` |
+| POST | `/admin/verification-cases/{caseId}/approve` | `{ reason }`, step-up. Grants the checkmark (also a manual pass before a result). Audited `identityVerification.approved` |
+| POST | `/admin/verification-cases/{caseId}/reject` | `{ reason }`, step-up. Starts the automatic refund for `blue` / `gold_only`. Audited `identityVerification.rejected` |
+
+`case` fields: `status`, `refundStatus` (`not_applicable`, `requested`, `refunded`, `not_charged`, `failed`, `manual_store_refund`), `refundMethod`, `checks { liveness, document, faceMatch, databaseLookup, faceMatchConfidence, nameMatchScore }`, `trustScore`, `eligibleAtPayment`, `decisionReasons[]`, `fraudSignals[]`, `documentType`, `documentCountry`, `smileReference`, `smileResultCode`, dates. No images are served; reviewers open the Smile ID job in the Smile ID portal.
