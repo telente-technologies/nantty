@@ -10,6 +10,7 @@ import (
 	"sync"
 	"zudomart/modules/catalog/src/generated/ent/brand"
 	"zudomart/modules/catalog/src/generated/ent/category"
+	"zudomart/modules/catalog/src/generated/ent/featuredproduct"
 	"zudomart/modules/catalog/src/generated/ent/idempotentrequest"
 	"zudomart/modules/catalog/src/generated/ent/outboxevent"
 	"zudomart/modules/catalog/src/generated/ent/product"
@@ -19,6 +20,7 @@ import (
 	"zudomart/modules/catalog/src/generated/ent/review"
 	"zudomart/modules/catalog/src/generated/ent/store"
 	"zudomart/modules/catalog/src/generated/ent/storemember"
+	"zudomart/modules/catalog/src/generated/ent/storevisitor"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -85,6 +87,7 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			brand.Table:             brand.ValidColumn,
 			category.Table:          category.ValidColumn,
+			featuredproduct.Table:   featuredproduct.ValidColumn,
 			idempotentrequest.Table: idempotentrequest.ValidColumn,
 			outboxevent.Table:       outboxevent.ValidColumn,
 			product.Table:           product.ValidColumn,
@@ -94,6 +97,7 @@ func checkColumn(t, c string) error {
 			review.Table:            review.ValidColumn,
 			store.Table:             store.ValidColumn,
 			storemember.Table:       storemember.ValidColumn,
+			storevisitor.Table:      storevisitor.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

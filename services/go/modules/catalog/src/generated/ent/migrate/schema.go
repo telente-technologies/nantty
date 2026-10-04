@@ -77,6 +77,41 @@ var (
 			},
 		},
 	}
+	// FeaturedProductsColumns holds the columns for the "featured_products" table.
+	FeaturedProductsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "product_id", Type: field.TypeUUID},
+		{Name: "placement", Type: field.TypeString, Size: 20},
+		{Name: "position", Type: field.TypeInt},
+		{Name: "featured_since", Type: field.TypeTime},
+		{Name: "view_count", Type: field.TypeInt, Default: 0},
+		{Name: "click_count", Type: field.TypeInt, Default: 0},
+	}
+	// FeaturedProductsTable holds the schema information for the "featured_products" table.
+	FeaturedProductsTable = &schema.Table{
+		Name:       "featured_products",
+		Columns:    FeaturedProductsColumns,
+		PrimaryKey: []*schema.Column{FeaturedProductsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "featuredproduct_store_id_product_id",
+				Unique:  true,
+				Columns: []*schema.Column{FeaturedProductsColumns[2], FeaturedProductsColumns[3]},
+			},
+			{
+				Name:    "featuredproduct_store_id_position",
+				Unique:  false,
+				Columns: []*schema.Column{FeaturedProductsColumns[2], FeaturedProductsColumns[5]},
+			},
+			{
+				Name:    "featuredproduct_placement_store_id",
+				Unique:  false,
+				Columns: []*schema.Column{FeaturedProductsColumns[4], FeaturedProductsColumns[2]},
+			},
+		},
+	}
 	// IdempotentRequestsColumns holds the columns for the "idempotent_requests" table.
 	IdempotentRequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -149,6 +184,7 @@ var (
 		{Name: "rating_count", Type: field.TypeInt, Default: 0},
 		{Name: "like_count", Type: field.TypeInt, Default: 0},
 		{Name: "units_sold", Type: field.TypeInt, Default: 0},
+		{Name: "moderation_visibility", Type: field.TypeString, Default: "visible"},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// ProductsTable holds the schema information for the "products" table.
@@ -172,12 +208,12 @@ var (
 			{
 				Name:    "product_store_status_updated",
 				Unique:  false,
-				Columns: []*schema.Column{ProductsColumns[2], ProductsColumns[8], ProductsColumns[26], ProductsColumns[0]},
+				Columns: []*schema.Column{ProductsColumns[2], ProductsColumns[8], ProductsColumns[27], ProductsColumns[0]},
 				Annotation: &entsql.IndexAnnotation{
 					DescColumns: map[string]bool{
 						ProductsColumns[0].Name: true,
 
-						ProductsColumns[26].Name: true,
+						ProductsColumns[27].Name: true,
 					},
 				},
 			},
@@ -302,6 +338,7 @@ var (
 		{Name: "price_minor", Type: field.TypeInt64},
 		{Name: "compare_at_price_minor", Type: field.TypeInt64, Nullable: true},
 		{Name: "cost_price_minor", Type: field.TypeInt64, Nullable: true},
+		{Name: "regional_prices", Type: field.TypeJSON, Nullable: true},
 		{Name: "low_stock_threshold", Type: field.TypeInt, Default: 5},
 		{Name: "reorder_point", Type: field.TypeInt, Default: 5},
 		{Name: "reorder_quantity", Type: field.TypeInt, Default: 10},
@@ -330,7 +367,7 @@ var (
 			{
 				Name:    "productvariant_product_id_position",
 				Unique:  false,
-				Columns: []*schema.Column{ProductVariantsColumns[2], ProductVariantsColumns[17]},
+				Columns: []*schema.Column{ProductVariantsColumns[2], ProductVariantsColumns[18]},
 			},
 		},
 	}
@@ -420,6 +457,8 @@ var (
 		{Name: "verified", Type: field.TypeBool, Default: false},
 		{Name: "rating_sum", Type: field.TypeInt64, Default: 0},
 		{Name: "rating_count", Type: field.TypeInt, Default: 0},
+		{Name: "moderation_visibility", Type: field.TypeString, Default: "visible"},
+		{Name: "shipping_country_codes", Type: field.TypeJSON, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// StoresTable holds the schema information for the "stores" table.
@@ -474,10 +513,43 @@ var (
 			},
 		},
 	}
+	// StoreVisitorsColumns holds the columns for the "store_visitors" table.
+	StoreVisitorsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "visit_count", Type: field.TypeInt, Default: 1},
+		{Name: "last_visited_at", Type: field.TypeTime},
+	}
+	// StoreVisitorsTable holds the schema information for the "store_visitors" table.
+	StoreVisitorsTable = &schema.Table{
+		Name:       "store_visitors",
+		Columns:    StoreVisitorsColumns,
+		PrimaryKey: []*schema.Column{StoreVisitorsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "storevisitor_store_id_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{StoreVisitorsColumns[2], StoreVisitorsColumns[3]},
+			},
+			{
+				Name:    "storevisitor_store_id_last_visited_at",
+				Unique:  false,
+				Columns: []*schema.Column{StoreVisitorsColumns[2], StoreVisitorsColumns[5]},
+			},
+			{
+				Name:    "storevisitor_account_id",
+				Unique:  false,
+				Columns: []*schema.Column{StoreVisitorsColumns[3]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BrandsTable,
 		CategoriesTable,
+		FeaturedProductsTable,
 		IdempotentRequestsTable,
 		OutboxEventsTable,
 		ProductsTable,
@@ -487,6 +559,7 @@ var (
 		ReviewsTable,
 		StoresTable,
 		StoreMembersTable,
+		StoreVisitorsTable,
 	}
 )
 

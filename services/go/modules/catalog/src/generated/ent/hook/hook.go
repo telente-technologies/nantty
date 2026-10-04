@@ -32,6 +32,18 @@ func (f CategoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CategoryMutation", m)
 }
 
+// The FeaturedProductFunc type is an adapter to allow the use of ordinary
+// function as FeaturedProduct mutator.
+type FeaturedProductFunc func(context.Context, *ent.FeaturedProductMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FeaturedProductFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FeaturedProductMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FeaturedProductMutation", m)
+}
+
 // The IdempotentRequestFunc type is an adapter to allow the use of ordinary
 // function as IdempotentRequest mutator.
 type IdempotentRequestFunc func(context.Context, *ent.IdempotentRequestMutation) (ent.Value, error)
@@ -138,6 +150,18 @@ func (f StoreMemberFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreMemberMutation", m)
+}
+
+// The StoreVisitorFunc type is an adapter to allow the use of ordinary
+// function as StoreVisitor mutator.
+type StoreVisitorFunc func(context.Context, *ent.StoreVisitorMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StoreVisitorFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StoreVisitorMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreVisitorMutation", m)
 }
 
 // Condition is a hook condition function.

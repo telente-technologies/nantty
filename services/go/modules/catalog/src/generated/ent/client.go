@@ -13,6 +13,7 @@ import (
 
 	"zudomart/modules/catalog/src/generated/ent/brand"
 	"zudomart/modules/catalog/src/generated/ent/category"
+	"zudomart/modules/catalog/src/generated/ent/featuredproduct"
 	"zudomart/modules/catalog/src/generated/ent/idempotentrequest"
 	"zudomart/modules/catalog/src/generated/ent/outboxevent"
 	"zudomart/modules/catalog/src/generated/ent/product"
@@ -22,6 +23,7 @@ import (
 	"zudomart/modules/catalog/src/generated/ent/review"
 	"zudomart/modules/catalog/src/generated/ent/store"
 	"zudomart/modules/catalog/src/generated/ent/storemember"
+	"zudomart/modules/catalog/src/generated/ent/storevisitor"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -40,6 +42,8 @@ type Client struct {
 	Brand *BrandClient
 	// Category is the client for interacting with the Category builders.
 	Category *CategoryClient
+	// FeaturedProduct is the client for interacting with the FeaturedProduct builders.
+	FeaturedProduct *FeaturedProductClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
@@ -58,6 +62,8 @@ type Client struct {
 	Store *StoreClient
 	// StoreMember is the client for interacting with the StoreMember builders.
 	StoreMember *StoreMemberClient
+	// StoreVisitor is the client for interacting with the StoreVisitor builders.
+	StoreVisitor *StoreVisitorClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -71,6 +77,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Brand = NewBrandClient(c.config)
 	c.Category = NewCategoryClient(c.config)
+	c.FeaturedProduct = NewFeaturedProductClient(c.config)
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.Product = NewProductClient(c.config)
@@ -80,6 +87,7 @@ func (c *Client) init() {
 	c.Review = NewReviewClient(c.config)
 	c.Store = NewStoreClient(c.config)
 	c.StoreMember = NewStoreMemberClient(c.config)
+	c.StoreVisitor = NewStoreVisitorClient(c.config)
 }
 
 type (
@@ -174,6 +182,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:            cfg,
 		Brand:             NewBrandClient(cfg),
 		Category:          NewCategoryClient(cfg),
+		FeaturedProduct:   NewFeaturedProductClient(cfg),
 		IdempotentRequest: NewIdempotentRequestClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		Product:           NewProductClient(cfg),
@@ -183,6 +192,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Review:            NewReviewClient(cfg),
 		Store:             NewStoreClient(cfg),
 		StoreMember:       NewStoreMemberClient(cfg),
+		StoreVisitor:      NewStoreVisitorClient(cfg),
 	}, nil
 }
 
@@ -204,6 +214,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:            cfg,
 		Brand:             NewBrandClient(cfg),
 		Category:          NewCategoryClient(cfg),
+		FeaturedProduct:   NewFeaturedProductClient(cfg),
 		IdempotentRequest: NewIdempotentRequestClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		Product:           NewProductClient(cfg),
@@ -213,6 +224,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Review:            NewReviewClient(cfg),
 		Store:             NewStoreClient(cfg),
 		StoreMember:       NewStoreMemberClient(cfg),
+		StoreVisitor:      NewStoreVisitorClient(cfg),
 	}, nil
 }
 
@@ -242,9 +254,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Brand, c.Category, c.IdempotentRequest, c.OutboxEvent, c.Product,
-		c.ProductMedia, c.ProductReaction, c.ProductVariant, c.Review, c.Store,
-		c.StoreMember,
+		c.Brand, c.Category, c.FeaturedProduct, c.IdempotentRequest, c.OutboxEvent,
+		c.Product, c.ProductMedia, c.ProductReaction, c.ProductVariant, c.Review,
+		c.Store, c.StoreMember, c.StoreVisitor,
 	} {
 		n.Use(hooks...)
 	}
@@ -254,9 +266,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Brand, c.Category, c.IdempotentRequest, c.OutboxEvent, c.Product,
-		c.ProductMedia, c.ProductReaction, c.ProductVariant, c.Review, c.Store,
-		c.StoreMember,
+		c.Brand, c.Category, c.FeaturedProduct, c.IdempotentRequest, c.OutboxEvent,
+		c.Product, c.ProductMedia, c.ProductReaction, c.ProductVariant, c.Review,
+		c.Store, c.StoreMember, c.StoreVisitor,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -269,6 +281,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Brand.mutate(ctx, m)
 	case *CategoryMutation:
 		return c.Category.mutate(ctx, m)
+	case *FeaturedProductMutation:
+		return c.FeaturedProduct.mutate(ctx, m)
 	case *IdempotentRequestMutation:
 		return c.IdempotentRequest.mutate(ctx, m)
 	case *OutboxEventMutation:
@@ -287,6 +301,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Store.mutate(ctx, m)
 	case *StoreMemberMutation:
 		return c.StoreMember.mutate(ctx, m)
+	case *StoreVisitorMutation:
+		return c.StoreVisitor.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -555,6 +571,139 @@ func (c *CategoryClient) mutate(ctx context.Context, m *CategoryMutation) (Value
 		return (&CategoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Category mutation op: %q", m.Op())
+	}
+}
+
+// FeaturedProductClient is a client for the FeaturedProduct schema.
+type FeaturedProductClient struct {
+	config
+}
+
+// NewFeaturedProductClient returns a client for the FeaturedProduct from the given config.
+func NewFeaturedProductClient(c config) *FeaturedProductClient {
+	return &FeaturedProductClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `featuredproduct.Hooks(f(g(h())))`.
+func (c *FeaturedProductClient) Use(hooks ...Hook) {
+	c.hooks.FeaturedProduct = append(c.hooks.FeaturedProduct, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `featuredproduct.Intercept(f(g(h())))`.
+func (c *FeaturedProductClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FeaturedProduct = append(c.inters.FeaturedProduct, interceptors...)
+}
+
+// Create returns a builder for creating a FeaturedProduct entity.
+func (c *FeaturedProductClient) Create() *FeaturedProductCreate {
+	mutation := newFeaturedProductMutation(c.config, OpCreate)
+	return &FeaturedProductCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FeaturedProduct entities.
+func (c *FeaturedProductClient) CreateBulk(builders ...*FeaturedProductCreate) *FeaturedProductCreateBulk {
+	return &FeaturedProductCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FeaturedProductClient) MapCreateBulk(slice any, setFunc func(*FeaturedProductCreate, int)) *FeaturedProductCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FeaturedProductCreateBulk{err: fmt.Errorf("calling to FeaturedProductClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FeaturedProductCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FeaturedProductCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FeaturedProduct.
+func (c *FeaturedProductClient) Update() *FeaturedProductUpdate {
+	mutation := newFeaturedProductMutation(c.config, OpUpdate)
+	return &FeaturedProductUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FeaturedProductClient) UpdateOne(_m *FeaturedProduct) *FeaturedProductUpdateOne {
+	mutation := newFeaturedProductMutation(c.config, OpUpdateOne, withFeaturedProduct(_m))
+	return &FeaturedProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FeaturedProductClient) UpdateOneID(id uuid.UUID) *FeaturedProductUpdateOne {
+	mutation := newFeaturedProductMutation(c.config, OpUpdateOne, withFeaturedProductID(id))
+	return &FeaturedProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FeaturedProduct.
+func (c *FeaturedProductClient) Delete() *FeaturedProductDelete {
+	mutation := newFeaturedProductMutation(c.config, OpDelete)
+	return &FeaturedProductDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FeaturedProductClient) DeleteOne(_m *FeaturedProduct) *FeaturedProductDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FeaturedProductClient) DeleteOneID(id uuid.UUID) *FeaturedProductDeleteOne {
+	builder := c.Delete().Where(featuredproduct.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FeaturedProductDeleteOne{builder}
+}
+
+// Query returns a query builder for FeaturedProduct.
+func (c *FeaturedProductClient) Query() *FeaturedProductQuery {
+	return &FeaturedProductQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFeaturedProduct},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FeaturedProduct entity by its id.
+func (c *FeaturedProductClient) Get(ctx context.Context, id uuid.UUID) (*FeaturedProduct, error) {
+	return c.Query().Where(featuredproduct.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FeaturedProductClient) GetX(ctx context.Context, id uuid.UUID) *FeaturedProduct {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *FeaturedProductClient) Hooks() []Hook {
+	return c.hooks.FeaturedProduct
+}
+
+// Interceptors returns the client interceptors.
+func (c *FeaturedProductClient) Interceptors() []Interceptor {
+	return c.inters.FeaturedProduct
+}
+
+func (c *FeaturedProductClient) mutate(ctx context.Context, m *FeaturedProductMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FeaturedProductCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FeaturedProductUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FeaturedProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FeaturedProductDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FeaturedProduct mutation op: %q", m.Op())
 	}
 }
 
@@ -1755,15 +1904,150 @@ func (c *StoreMemberClient) mutate(ctx context.Context, m *StoreMemberMutation) 
 	}
 }
 
+// StoreVisitorClient is a client for the StoreVisitor schema.
+type StoreVisitorClient struct {
+	config
+}
+
+// NewStoreVisitorClient returns a client for the StoreVisitor from the given config.
+func NewStoreVisitorClient(c config) *StoreVisitorClient {
+	return &StoreVisitorClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `storevisitor.Hooks(f(g(h())))`.
+func (c *StoreVisitorClient) Use(hooks ...Hook) {
+	c.hooks.StoreVisitor = append(c.hooks.StoreVisitor, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `storevisitor.Intercept(f(g(h())))`.
+func (c *StoreVisitorClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StoreVisitor = append(c.inters.StoreVisitor, interceptors...)
+}
+
+// Create returns a builder for creating a StoreVisitor entity.
+func (c *StoreVisitorClient) Create() *StoreVisitorCreate {
+	mutation := newStoreVisitorMutation(c.config, OpCreate)
+	return &StoreVisitorCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StoreVisitor entities.
+func (c *StoreVisitorClient) CreateBulk(builders ...*StoreVisitorCreate) *StoreVisitorCreateBulk {
+	return &StoreVisitorCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StoreVisitorClient) MapCreateBulk(slice any, setFunc func(*StoreVisitorCreate, int)) *StoreVisitorCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StoreVisitorCreateBulk{err: fmt.Errorf("calling to StoreVisitorClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StoreVisitorCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StoreVisitorCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StoreVisitor.
+func (c *StoreVisitorClient) Update() *StoreVisitorUpdate {
+	mutation := newStoreVisitorMutation(c.config, OpUpdate)
+	return &StoreVisitorUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StoreVisitorClient) UpdateOne(_m *StoreVisitor) *StoreVisitorUpdateOne {
+	mutation := newStoreVisitorMutation(c.config, OpUpdateOne, withStoreVisitor(_m))
+	return &StoreVisitorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StoreVisitorClient) UpdateOneID(id uuid.UUID) *StoreVisitorUpdateOne {
+	mutation := newStoreVisitorMutation(c.config, OpUpdateOne, withStoreVisitorID(id))
+	return &StoreVisitorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StoreVisitor.
+func (c *StoreVisitorClient) Delete() *StoreVisitorDelete {
+	mutation := newStoreVisitorMutation(c.config, OpDelete)
+	return &StoreVisitorDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StoreVisitorClient) DeleteOne(_m *StoreVisitor) *StoreVisitorDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StoreVisitorClient) DeleteOneID(id uuid.UUID) *StoreVisitorDeleteOne {
+	builder := c.Delete().Where(storevisitor.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StoreVisitorDeleteOne{builder}
+}
+
+// Query returns a query builder for StoreVisitor.
+func (c *StoreVisitorClient) Query() *StoreVisitorQuery {
+	return &StoreVisitorQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStoreVisitor},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StoreVisitor entity by its id.
+func (c *StoreVisitorClient) Get(ctx context.Context, id uuid.UUID) (*StoreVisitor, error) {
+	return c.Query().Where(storevisitor.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StoreVisitorClient) GetX(ctx context.Context, id uuid.UUID) *StoreVisitor {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StoreVisitorClient) Hooks() []Hook {
+	return c.hooks.StoreVisitor
+}
+
+// Interceptors returns the client interceptors.
+func (c *StoreVisitorClient) Interceptors() []Interceptor {
+	return c.inters.StoreVisitor
+}
+
+func (c *StoreVisitorClient) mutate(ctx context.Context, m *StoreVisitorMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StoreVisitorCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StoreVisitorUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StoreVisitorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StoreVisitorDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StoreVisitor mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Brand, Category, IdempotentRequest, OutboxEvent, Product, ProductMedia,
-		ProductReaction, ProductVariant, Review, Store, StoreMember []ent.Hook
+		Brand, Category, FeaturedProduct, IdempotentRequest, OutboxEvent, Product,
+		ProductMedia, ProductReaction, ProductVariant, Review, Store, StoreMember,
+		StoreVisitor []ent.Hook
 	}
 	inters struct {
-		Brand, Category, IdempotentRequest, OutboxEvent, Product, ProductMedia,
-		ProductReaction, ProductVariant, Review, Store, StoreMember []ent.Interceptor
+		Brand, Category, FeaturedProduct, IdempotentRequest, OutboxEvent, Product,
+		ProductMedia, ProductReaction, ProductVariant, Review, Store, StoreMember,
+		StoreVisitor []ent.Interceptor
 	}
 )
 
