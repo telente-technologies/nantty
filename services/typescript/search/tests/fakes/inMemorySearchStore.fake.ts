@@ -44,7 +44,7 @@ export class InMemorySearchStore implements SearchIndexStore, SearchQueryStore, 
   }
 
   public async refreshHashtag(tag: string, version: number): Promise<void> {
-    const total = [...this.documents.values()].filter((document) => (document.kind === "post" || document.kind === "clip") && document.available && document.visibility === "public" && document.tags.includes(tag) && this.isOpenAccount(document.ownerAccountId)).length;
+    const total = [...this.documents.values()].filter((document) => (document.kind === "post" || document.kind === "clip") && document.available && document.restrictedForMinors !== true && document.visibility === "public" && document.tags.includes(tag) && this.isOpenAccount(document.ownerAccountId)).length;
     this.documents.set(`hashtag:${tag}`, { kind: "hashtag", entityId: tag, ownerAccountId: null, title: `#${tag}`, subtitle: null, body: "", tags: [], summary: { id: tag, tag, postCount: total }, visibility: "public", available: total > 0, popularity: total, region: null, version, createdAt: new Date(0).toISOString(), normalizedTitle: tag, tombstoned: false });
   }
 
@@ -93,7 +93,7 @@ export class InMemorySearchStore implements SearchIndexStore, SearchQueryStore, 
     const tokens = extractQueryTokens(request.normalizedQuery);
     if (tokens.length === 0) return { hits: [], hasMore: false };
     const scored = [...this.documents.values()]
-      .filter((document) => request.kinds.includes(document.kind) && this.isVisible(document, request.viewerId))
+      .filter((document) => request.kinds.includes(document.kind) && this.isVisible(document, request.viewerId) && (request.viewerIsAdult === true || document.restrictedForMinors !== true || document.ownerAccountId === request.viewerId) && (request.region === undefined || (document.shippingRegions ?? []).length === 0 || (document.shippingRegions ?? []).includes(request.region) || document.ownerAccountId === request.viewerId))
       .flatMap((document) => {
         const score = this.score(document, needle, tokens);
         return score === null ? [] : [{ document, score: Math.round(score * 1e6) / 1e6 }];
