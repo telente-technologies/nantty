@@ -9,6 +9,7 @@ import { isRetryableApiFailure, sendRequestToWebappServer } from "@/services/cli
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { CelebrationHost } from "@/components/celebrations/celebrationHost";
 import { AuthPromptModal } from "@/components/auth/authPromptModal";
+import { HumanVerificationDialog } from "@/components/security/humanVerificationDialog";
 import { ConfirmDialogHost } from "@/components/ui/confirmDialog";
 import { ToastViewport } from "@/components/ui/toast";
 
@@ -59,6 +60,7 @@ export function AppProviders({ viewer, csrfToken, themePreference, children }: A
           <Suspense fallback={null}>
             <AuthPromptModal />
           </Suspense>
+          <HumanVerificationDialog />
         </SessionProvider>
       </QueryClientProvider>
     </ThemeProvider>
