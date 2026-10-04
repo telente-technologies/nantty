@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/liveSafety.paused.v1.json",
+  "title": "liveSafety.paused (go-live; realtime fans out to live:{liveId}, carries no reason)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "state",
+    "message",
+    "at"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "paused",
+        "live"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/liveAudio.segmentCaptured.v1.json",
+  "title": "LiveAudioSegmentCaptured (job on jobs-live-audio; go-live sends when LIVE_SAFETY_AUDIO_ENABLED, intelligence consumes)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "type",
+    "payload"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "type": {
+      "const": "liveAudio.segmentCaptured"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "segmentId",
+        "liveId",
+        "hostId",
+        "bucket",
+        "segmentRef",
+        "capturedAt"
+      ],
+      "properties": {
+        "segmentId": {
+          "type": "string"
+        },
+        "liveId": {
+          "type": "string"
+        },
+        "hostId": {
+          "type": "string"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "segmentRef": {
+          "type": "string"
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

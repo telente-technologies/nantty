@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/liveSafety.hostNotice.v1.json",
+  "title": "liveSafety.hostNotice (go-live; realtime delivers to user:{hostId} only)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "liveId",
+    "hostId",
+    "kind",
+    "message",
+    "appealable",
+    "at"
+  ],
+  "properties": {
+    "liveId": {
+      "type": "string"
+    },
+    "hostId": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "hold",
+        "released",
+        "warning",
+        "ended"
+      ]
+    },
+    "category": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "incidentId": {
+      "type": "string"
+    },
+    "appealable": {
+      "type": "boolean"
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
