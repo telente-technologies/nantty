@@ -1,7 +1,8 @@
 "use client";
 
-import { BookmarkFilledIcon, BookmarkIcon } from "@/components/ui/icons";
+import { BookmarkActionIcon, BookmarkFilledActionIcon } from "@/components/ui/icons";
 import type { SaveTargetType } from "@/types";
+import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
 import styles from "./saveToggleButton.module.css";
 import { useSaveToggle } from "./useSaveToggle.hook";
@@ -12,10 +13,10 @@ interface SaveToggleButtonProps {
   readonly initiallySaved: boolean;
   readonly appearance?: "inline" | "overlay" | "pill";
   readonly iconSize?: number;
-  readonly showLabel?: boolean;
+  readonly saveCount?: number;
 }
 
-export function SaveToggleButton({ targetType, targetId, initiallySaved, appearance = "inline", iconSize = 19, showLabel = false }: SaveToggleButtonProps) {
+export function SaveToggleButton({ targetType, targetId, initiallySaved, appearance = "inline", iconSize = 19, saveCount }: SaveToggleButtonProps) {
   const { isSaved, toggleSaved } = useSaveToggle(targetType, targetId, initiallySaved);
   const accessibleLabel = isSaved ? `Remove ${targetType} from saved` : `Save ${targetType}`;
   return (
@@ -23,12 +24,12 @@ export function SaveToggleButton({ targetType, targetId, initiallySaved, appeara
       type="button"
       className={[styles.button, styles[appearance], isSaved ? styles.saved : ""].join(" ")}
       aria-pressed={isSaved}
-      aria-label={showLabel ? undefined : accessibleLabel}
+      aria-label={accessibleLabel}
       title={accessibleLabel}
       onClick={toggleSaved}
     >
-      {isSaved ? <BookmarkFilledIcon size={iconSize} /> : <BookmarkIcon size={iconSize} />}
-      {showLabel ? <span>{isSaved ? "Saved" : "Save"}</span> : null}
+      {isSaved ? <BookmarkFilledActionIcon size={iconSize} /> : <BookmarkActionIcon size={iconSize} />}
+      {saveCount !== undefined ? <span>{formatCountWithThousandsSuffix(Math.max(saveCount + (isSaved === initiallySaved ? 0 : isSaved ? 1 : -1), 0))}</span> : null}
     </button>
   );
 }

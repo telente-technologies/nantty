@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ShareIcon } from "@/components/ui/icons";
@@ -15,14 +15,15 @@ interface ShareToChatButtonProps {
   readonly label?: string;
   readonly iconSize?: number;
   readonly iconOnly?: boolean;
+  readonly icon?: ReactNode;
 }
 
-export function ShareToChatButton({ kind, referenceId, className, label = "Share", iconSize = 18, iconOnly = false }: ShareToChatButtonProps) {
+export function ShareToChatButton({ kind, referenceId, className, label = "Share", iconSize = 18, iconOnly = false, icon }: ShareToChatButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <button type="button" className={className} aria-label={iconOnly ? "Send in chat" : undefined} onClick={() => requireAuthThen(() => setIsOpen(true), "Sign in to send this in a chat.")}>
-        <ShareIcon size={iconSize} />
+        {icon ?? <ShareIcon size={iconSize} />}
         {iconOnly ? null : <span>{label}</span>}
       </button>
       <ShareToChatDialog isOpen={isOpen} onClose={() => setIsOpen(false)} kind={kind} referenceId={referenceId} />

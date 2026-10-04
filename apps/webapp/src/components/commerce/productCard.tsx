@@ -5,12 +5,13 @@ import Link from "next/link";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { MediaImage } from "@/components/ui/media";
 import type { ProductSummary } from "@/types";
+import { buildProductPath } from "@/utils/seoPaths.util";
 
 import styles from "./productCard.module.css";
 
 export function ProductCard({ product }: { readonly product: ProductSummary }) {
   return (
-    <Link href={`/product/${product.id}`} className={styles.card}>
+    <Link href={buildProductPath(product)} className={styles.card}>
       <span className={styles.media}>
         <MediaImage src={product.imageUrl} alt={product.name} sizes="(max-width: 640px) 50vw, 240px" />
         {!product.imageUrl ? <span className={styles.mediaFallback} aria-hidden="true" /> : null}

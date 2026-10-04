@@ -6,6 +6,7 @@ import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { MoreIcon } from "@/components/ui/icons";
 import { showToast } from "@/components/ui/toast";
 import type { ReportTargetType, ShareReferenceKind } from "@/services/webActions.service";
+import { buildAbsoluteSiteUrl } from "@/utils/seoPaths.util";
 
 import styles from "./contentActionsMenu.module.css";
 import { ReportDialog } from "./reportDialog";
@@ -18,9 +19,10 @@ interface ContentActionsMenuProps {
   readonly canonicalPath: string;
   readonly isOwnContent?: boolean;
   readonly triggerClassName?: string;
+  readonly onReport?: () => void;
 }
 
-export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName }: ContentActionsMenuProps) {
+export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName, onReport }: ContentActionsMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState<"share" | "report" | null>(null);
   const menuId = useId();
@@ -49,7 +51,7 @@ export function ContentActionsMenu({ shareKind, reportTargetType, targetId, cano
 
   async function copyLinkToClipboard() {
     try {
-      await navigator.clipboard.writeText(new URL(canonicalPath, window.location.origin).toString());
+      await navigator.clipboard.writeText(buildAbsoluteSiteUrl(canonicalPath));
       showToast({ text: "Link copied" });
     } catch {
       showToast({ text: "Couldn't copy the link", tone: "error" });
@@ -72,7 +74,7 @@ export function ContentActionsMenu({ shareKind, reportTargetType, targetId, cano
             Copy link
           </button>
           {isOwnContent ? null : (
-            <button type="button" className={[styles.item, styles.itemDanger].join(" ")} onClick={() => chooseAction(() => requireAuthThen(() => setOpenDialog("report"), "Sign in to report content."))}>
+            <button type="button" className={[styles.item, styles.itemDanger].join(" ")} onClick={() => chooseAction(() => requireAuthThen(onReport ?? (() => setOpenDialog("report")), "Sign in to report content."))}>
               Report
             </button>
           )}

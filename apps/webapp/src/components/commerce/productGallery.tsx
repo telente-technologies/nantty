@@ -30,7 +30,7 @@ export function ProductGallery({ images, name, priority }: { readonly images: re
               className={[styles.thumbnail, index === activeIndex ? styles.thumbnailActive : ""].filter(Boolean).join(" ")}
               onClick={() => setActiveIndex(index)}
             >
-              <MediaImage src={image} alt={`View ${index + 1}`} sizes="80px" />
+              <MediaImage src={image} alt={`${name}, photo ${index + 1}`} sizes="80px" />
             </button>
           ))}
         </div>
