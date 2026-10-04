@@ -9,4 +9,5 @@ export function registerInternalRoutes(router: HttpRouter, controller: ReturnTyp
   router.post("/internal/v1/media/:mediaId/signed-url", controller.signedUrl);
   router.post("/internal/v1/media/:mediaId/review", controller.review);
   router.post("/internal/v1/media/:mediaId/complete", controller.complete);
+  router.post("/internal/v1/media/:mediaId/audio-fingerprint", controller.audioFingerprint);
 }
