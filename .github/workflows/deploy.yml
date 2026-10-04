@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches: [main]
-    paths: ["services/**", "apps/api/**", "apps/intelligence/**", "pnpm-lock.yaml", ".github/workflows/deploy.yml", ".github/scripts/**"]
+    paths: ["services/**", "apps/api/**", "services/python/intelligence/**", "pnpm-lock.yaml", ".github/workflows/deploy.yml", ".github/scripts/**"]
   workflow_dispatch:
 
 permissions:
@@ -36,7 +36,7 @@ jobs:
           - { service: notifications, context: ., file: services/typescript/notifications/Dockerfile }
           - { service: media, context: ., file: services/typescript/media/Dockerfile }
           - { service: realtime, context: services/elixir/realtime, file: services/elixir/realtime/Dockerfile }
-          - { service: intelligence, context: apps/intelligence, file: apps/intelligence/Dockerfile }
+          - { service: intelligence, context: services/python/intelligence, file: services/python/intelligence/Dockerfile }
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: docker/setup-buildx-action@v3

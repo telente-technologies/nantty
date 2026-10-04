@@ -2,10 +2,10 @@ name: Backend
 
 on:
   pull_request:
-    paths: ["services/**", "apps/api/**", "apps/intelligence/**", "infra/local/**", "docs/architecture/microservicesPlan.json", ".github/workflows/backend.yml"]
+    paths: ["services/**", "apps/api/**", "services/python/intelligence/**", "infra/local/**", "docs/architecture/microservicesPlan.json", ".github/workflows/backend.yml"]
   push:
     branches: [main]
-    paths: ["services/**", "apps/api/**", "apps/intelligence/**", "infra/local/**"]
+    paths: ["services/**", "apps/api/**", "services/python/intelligence/**", "infra/local/**"]
 
 permissions:
   contents: read
@@ -45,7 +45,7 @@ jobs:
             elixir:
               - "services/elixir/**"
             python:
-              - "apps/intelligence/**"
+              - "services/python/intelligence/**"
             migrations:
               - "services/go/modules/*/src/migrations/**"
 
@@ -234,13 +234,13 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/intelligence
+        working-directory: services/python/intelligence
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-          cache-dependency-glob: apps/intelligence/uv.lock
+          cache-dependency-glob: services/python/intelligence/uv.lock
       - run: uv sync --frozen
       - run: uv run ruff check .
       - run: uv run ruff format --check .
