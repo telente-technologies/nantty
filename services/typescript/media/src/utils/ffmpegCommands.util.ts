@@ -52,6 +52,13 @@ export function buildAudioArgs(input: string, output: string): string[] {
   return [...inputArgs(input), "-vn", "-map_metadata", "-1", ...audioEncoding(64), "-ar", "44100", "-movflags", "+faststart", "-y", output];
 }
 
+export function buildSilentSoundtrackArgs(input: string, output: string): string[] {
+  return [
+    ...inputArgs(input), "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100", "-map", "0:v:0", "-map", "1:a:0", "-map_metadata", "-1", "-map_chapters", "-1",
+    "-c:v", "copy", ...audioEncoding(64), "-shortest", "-movflags", "+faststart", "-y", output,
+  ];
+}
+
 export function buildMasterPlaylist(entries: readonly { readonly width: number; readonly height: number; readonly bandwidthKbps: number; readonly uri: string }[]): string {
   const lines = ["#EXTM3U", "#EXT-X-VERSION:3", "#EXT-X-INDEPENDENT-SEGMENTS"];
   for (const entry of entries) lines.push(`#EXT-X-STREAM-INF:BANDWIDTH=${entry.bandwidthKbps * 1000},RESOLUTION=${entry.width}x${entry.height},CODECS="avc1.4d401f,mp4a.40.2"`, entry.uri);
