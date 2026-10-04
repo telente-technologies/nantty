@@ -47,6 +47,9 @@ export const navigationGroups: readonly NavigationGroup[] = [
       { label: "Live incidents", href: "/moderation/live-incidents", icon: "videoCamera24", requirement: "moderation:reports", goShortcutKey: "i" },
       { label: "Chat reports", href: "/moderation/chat-reports", icon: "chatCircle24", requirement: "chat-reports:review" },
       { label: "Suspensions", href: "/moderation/suspensions", icon: "shield24", requirement: "users:suspend" },
+      { label: "Security cases", href: "/moderation/security", icon: "shield24", requirement: "security:cases" },
+      { label: "Manipulation flags", href: "/moderation/manipulation", icon: "warning20", requirement: "users:suspend" },
+      { label: "Trends & headlines", href: "/moderation/trends", icon: "tag24", requirement: "moderation:reports" },
       { label: "Appeals", href: "/moderation/appeals", icon: "refresh20", requirement: "moderation:appeals" },
       { label: "Copyright", href: "/moderation/copyright", icon: "speakerHigh24", requirement: "copyright:review", goShortcutKey: "c" },
       { label: "Trademark claims", href: "/ip-claims", icon: "tag24", requirement: "ip-claims:review", goShortcutKey: "t" },
@@ -75,10 +78,11 @@ export const navigationGroups: readonly NavigationGroup[] = [
   {
     title: "Configuration",
     items: [
-      { label: "Plans & prices", href: "/config/plans", icon: "viewProducts24", requirement: "config:read" },
+      { label: "Plans & perks", href: "/config/plans", icon: "viewProducts24", requirement: "config:read" },
       { label: "Regional pricing", href: "/config/pricing", icon: "creditCard24", requirement: "config:read" },
       { label: "Revenue rules", href: "/config/revenue", icon: "creditCard24", requirement: "config:read" },
       { label: "Platform rules", href: "/config/rules", icon: "slidersHorizontal24", requirement: "config:read" },
+      { label: "Feed ranking", href: "/config/ranking", icon: "slidersHorizontal24", requirement: "config:read" },
       { label: "Feature flags", href: "/config/flags", icon: "check16", requirement: "flags:manage" },
       { label: "Automation", href: "/config/automation", icon: "refresh20", requirement: "automation:manage" },
       { label: "Notification templates", href: "/config/templates", icon: "bell24", requirement: "templates:manage" },
@@ -96,6 +100,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
     items: [
       { label: "Tickets", href: "/support", icon: "headset24", requirement: "support:tickets", goShortcutKey: "s" },
       { label: "Live chat", href: "/support/chat", icon: "chatCircle24", requirement: "support:chat" },
+      { label: "Help centre", href: "/support/help", icon: "bookmarkSimple24", requirement: "support:helpContent" },
       { label: "Email", href: "/support/email", icon: "export24", requirement: "support:email" },
       { label: "Email templates", href: "/support/email-templates", icon: "bell24", requirement: "support:email" },
     ],
