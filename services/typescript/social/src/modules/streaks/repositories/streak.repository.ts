@@ -12,6 +12,7 @@ export const streakRepository = {
     }),
 
   recordSenderDay: async (db: Db, conversationId: string, accountId: string, localDay: string): Promise<void> => {
+    await db.chatStreak.createMany({ data: [{ conversationId }], skipDuplicates: true });
     await db.streakSenderDay.createMany({ data: [{ conversationId, accountId, localDay }], skipDuplicates: true });
   },
 
