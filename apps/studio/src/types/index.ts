@@ -119,3 +119,23 @@ export interface OverlayScene {
   readonly name: string;
   readonly layers: readonly OverlayLayer[];
 }
+
+export interface LiveSafetyState {
+  readonly state: "paused" | "warning";
+  readonly viewerMessage: string;
+  readonly heldAt: ISODate | null;
+  readonly hostReason?: string;
+  readonly category?: string;
+  readonly appealable: boolean;
+  readonly warningMessage?: string;
+  readonly warnedAt?: ISODate;
+}
+
+export interface StageGuest {
+  readonly slotId: ID;
+  readonly role: "host" | "guest";
+  readonly state: string;
+  readonly user: { readonly id: ID; readonly name: string; readonly username: string; readonly avatarUrl: string | null };
+}
+
+export type GuestReportReason = "child_safety" | "self_harm" | "violence" | "sexual_content" | "hate" | "harassment" | "scam" | "intellectual_property" | "other";
