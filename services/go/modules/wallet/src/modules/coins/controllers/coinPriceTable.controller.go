@@ -44,7 +44,12 @@ func (controller CoinsController) UpsertCoinPriceRow(writer http.ResponseWriter,
 	body.Id = packageId
 	reason := body.Reason
 	body.Reason = ""
-	if audit := controller.Application.Container.Audit; audit != nil {
+	audit := controller.Application.Container.Audit
+	if audit == nil && controller.Application.Container.Settings.Money.IsProduction() {
+		controller.fail(writer, request, httpserver.NewApiError(http.StatusServiceUnavailable, "AUDIT_UNAVAILABLE", "Price changes need the admin audit log, which isn't configured."))
+		return
+	}
+	if audit != nil {
 		staff, _ := staffauth.StaffFromContext(request.Context())
 		if err := staffaudit.RecordStaffChange(request, audit, staff, "pricing.coin_pack.update", "coin_pack", packageId, reason, nil, body); err != nil {
 			controller.fail(writer, request, httpserver.NewApiError(http.StatusServiceUnavailable, "AUDIT_UNAVAILABLE", "The change couldn't be audited, so it wasn't saved. Try again."))

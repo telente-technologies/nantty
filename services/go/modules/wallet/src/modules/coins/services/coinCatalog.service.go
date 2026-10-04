@@ -17,7 +17,10 @@ import (
 	"zudomart/platform/regionpricing"
 )
 
-var ErrCoinPackageNotFound = httpserver.NewApiError(http.StatusNotFound, "COIN_PACKAGE_NOT_FOUND", "Coin package was not found.")
+var (
+	ErrCoinPackageNotFound = httpserver.NewApiError(http.StatusNotFound, "COIN_PACKAGE_NOT_FOUND", "Coin package was not found.")
+	ErrWebCurrencyDisabled = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_CURRENCY_NOT_ENABLED", "Web checkout isn't available in your currency or in USD yet. Buy coins in the Zudomart app, or try again later.")
+)
 
 type CoinPackDefinition struct {
 	Id             string
@@ -107,7 +110,14 @@ func (catalog CoinCatalog) ListActiveCoinPackages(ctx context.Context, platform 
 		if err != nil {
 			continue
 		}
-		converted = append(converted, ConvertCoinPackage(pack, price))
+		dto := ConvertCoinPackage(pack, price)
+		if platform == coinpackage.ClientPlatformWeb && price.Currency != currency {
+			dto.BillingNote = regionpricing.UsdBillingNote
+		}
+		converted = append(converted, dto)
+	}
+	if len(converted) == 0 && len(packs) > 0 && platform == coinpackage.ClientPlatformWeb {
+		return nil, ErrWebCurrencyDisabled
 	}
 	return converted, nil
 }

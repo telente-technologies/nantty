@@ -17,6 +17,7 @@ type CoinPackageDto struct {
 	ClientPlatform  string   `json:"clientPlatform"`
 	StoreProductId  *string  `json:"storeProductId"`
 	Price           MoneyDto `json:"price"`
+	BillingNote     string   `json:"billingNote,omitempty"`
 }
 
 type CoinPackagePriceRowDto struct {

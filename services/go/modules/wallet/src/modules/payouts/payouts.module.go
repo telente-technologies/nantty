@@ -12,6 +12,7 @@ type Application struct {
 	Withdrawals services.Withdrawals
 	Overview    services.WalletOverview
 	Creators    services.CreatorEarningsTransfers
+	Holds       services.MonetisationHolds
 }
 
 func NewPayoutsApplication(container *container.Container) *Application {
@@ -21,6 +22,7 @@ func NewPayoutsApplication(container *container.Container) *Application {
 		Accounts:    services.PayoutAccounts{Container: container, Banks: banks},
 		Withdrawals: services.Withdrawals{Container: container},
 		Overview:    services.WalletOverview{Container: container},
-		Creators:    services.CreatorEarningsTransfers{Container: container},
+		Creators:    services.CreatorEarningsTransfers{Container: container, Holds: services.MonetisationHolds{Container: container}},
+		Holds:       services.MonetisationHolds{Container: container},
 	}
 }
