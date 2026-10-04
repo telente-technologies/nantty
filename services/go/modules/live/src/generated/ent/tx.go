@@ -50,6 +50,8 @@ type Tx struct {
 	LiveRestriction *LiveRestrictionClient
 	// LiveRoomSetting is the client for interacting with the LiveRoomSetting builders.
 	LiveRoomSetting *LiveRoomSettingClient
+	// LiveSafetyState is the client for interacting with the LiveSafetyState builders.
+	LiveSafetyState *LiveSafetyStateClient
 	// LiveSession is the client for interacting with the LiveSession builders.
 	LiveSession *LiveSessionClient
 	// LiveViewer is the client for interacting with the LiveViewer builders.
@@ -213,6 +215,7 @@ func (tx *Tx) init() {
 	tx.LiveRecording = NewLiveRecordingClient(tx.config)
 	tx.LiveRestriction = NewLiveRestrictionClient(tx.config)
 	tx.LiveRoomSetting = NewLiveRoomSettingClient(tx.config)
+	tx.LiveSafetyState = NewLiveSafetyStateClient(tx.config)
 	tx.LiveSession = NewLiveSessionClient(tx.config)
 	tx.LiveViewer = NewLiveViewerClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)

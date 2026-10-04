@@ -60,6 +60,9 @@ type LiveRestriction func(*sql.Selector)
 // LiveRoomSetting is the predicate function for liveroomsetting builders.
 type LiveRoomSetting func(*sql.Selector)
 
+// LiveSafetyState is the predicate function for livesafetystate builders.
+type LiveSafetyState func(*sql.Selector)
+
 // LiveSession is the predicate function for livesession builders.
 type LiveSession func(*sql.Selector)
 

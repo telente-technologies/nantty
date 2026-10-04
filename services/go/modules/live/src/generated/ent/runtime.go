@@ -23,6 +23,7 @@ import (
 	"zudomart/modules/live/src/generated/ent/liverecording"
 	"zudomart/modules/live/src/generated/ent/liverestriction"
 	"zudomart/modules/live/src/generated/ent/liveroomsetting"
+	"zudomart/modules/live/src/generated/ent/livesafetystate"
 	"zudomart/modules/live/src/generated/ent/livesession"
 	"zudomart/modules/live/src/generated/ent/liveviewer"
 	"zudomart/modules/live/src/generated/ent/outboxevent"
@@ -502,6 +503,83 @@ func init() {
 	liveroomsettingDescRecordEnabled := liveroomsettingFields[5].Descriptor()
 	// liveroomsetting.DefaultRecordEnabled holds the default value on creation for the record_enabled field.
 	liveroomsetting.DefaultRecordEnabled = liveroomsettingDescRecordEnabled.Default.(bool)
+	livesafetystateMixin := schema.LiveSafetyState{}.Mixin()
+	livesafetystateMixinFields0 := livesafetystateMixin[0].Fields()
+	_ = livesafetystateMixinFields0
+	livesafetystateFields := schema.LiveSafetyState{}.Fields()
+	_ = livesafetystateFields
+	// livesafetystateDescCreatedAt is the schema descriptor for created_at field.
+	livesafetystateDescCreatedAt := livesafetystateMixinFields0[1].Descriptor()
+	// livesafetystate.DefaultCreatedAt holds the default value on creation for the created_at field.
+	livesafetystate.DefaultCreatedAt = livesafetystateDescCreatedAt.Default.(func() time.Time)
+	// livesafetystateDescHoldActive is the schema descriptor for hold_active field.
+	livesafetystateDescHoldActive := livesafetystateFields[2].Descriptor()
+	// livesafetystate.DefaultHoldActive holds the default value on creation for the hold_active field.
+	livesafetystate.DefaultHoldActive = livesafetystateDescHoldActive.Default.(bool)
+	// livesafetystateDescHoldIncidentID is the schema descriptor for hold_incident_id field.
+	livesafetystateDescHoldIncidentID := livesafetystateFields[3].Descriptor()
+	// livesafetystate.DefaultHoldIncidentID holds the default value on creation for the hold_incident_id field.
+	livesafetystate.DefaultHoldIncidentID = livesafetystateDescHoldIncidentID.Default.(string)
+	// livesafetystate.HoldIncidentIDValidator is a validator for the "hold_incident_id" field. It is called by the builders before save.
+	livesafetystate.HoldIncidentIDValidator = livesafetystateDescHoldIncidentID.Validators[0].(func(string) error)
+	// livesafetystateDescHoldCategory is the schema descriptor for hold_category field.
+	livesafetystateDescHoldCategory := livesafetystateFields[4].Descriptor()
+	// livesafetystate.DefaultHoldCategory holds the default value on creation for the hold_category field.
+	livesafetystate.DefaultHoldCategory = livesafetystateDescHoldCategory.Default.(string)
+	// livesafetystate.HoldCategoryValidator is a validator for the "hold_category" field. It is called by the builders before save.
+	livesafetystate.HoldCategoryValidator = livesafetystateDescHoldCategory.Validators[0].(func(string) error)
+	// livesafetystateDescHoldReason is the schema descriptor for hold_reason field.
+	livesafetystateDescHoldReason := livesafetystateFields[5].Descriptor()
+	// livesafetystate.DefaultHoldReason holds the default value on creation for the hold_reason field.
+	livesafetystate.DefaultHoldReason = livesafetystateDescHoldReason.Default.(string)
+	// livesafetystate.HoldReasonValidator is a validator for the "hold_reason" field. It is called by the builders before save.
+	livesafetystate.HoldReasonValidator = livesafetystateDescHoldReason.Validators[0].(func(string) error)
+	// livesafetystateDescHoldSource is the schema descriptor for hold_source field.
+	livesafetystateDescHoldSource := livesafetystateFields[6].Descriptor()
+	// livesafetystate.DefaultHoldSource holds the default value on creation for the hold_source field.
+	livesafetystate.DefaultHoldSource = livesafetystateDescHoldSource.Default.(string)
+	// livesafetystate.HoldSourceValidator is a validator for the "hold_source" field. It is called by the builders before save.
+	livesafetystate.HoldSourceValidator = livesafetystateDescHoldSource.Validators[0].(func(string) error)
+	// livesafetystateDescWarningMessage is the schema descriptor for warning_message field.
+	livesafetystateDescWarningMessage := livesafetystateFields[8].Descriptor()
+	// livesafetystate.DefaultWarningMessage holds the default value on creation for the warning_message field.
+	livesafetystate.DefaultWarningMessage = livesafetystateDescWarningMessage.Default.(string)
+	// livesafetystate.WarningMessageValidator is a validator for the "warning_message" field. It is called by the builders before save.
+	livesafetystate.WarningMessageValidator = livesafetystateDescWarningMessage.Validators[0].(func(string) error)
+	// livesafetystateDescFrameEgressID is the schema descriptor for frame_egress_id field.
+	livesafetystateDescFrameEgressID := livesafetystateFields[11].Descriptor()
+	// livesafetystate.DefaultFrameEgressID holds the default value on creation for the frame_egress_id field.
+	livesafetystate.DefaultFrameEgressID = livesafetystateDescFrameEgressID.Default.(string)
+	// livesafetystate.FrameEgressIDValidator is a validator for the "frame_egress_id" field. It is called by the builders before save.
+	livesafetystate.FrameEgressIDValidator = livesafetystateDescFrameEgressID.Validators[0].(func(string) error)
+	// livesafetystateDescAudioEgressID is the schema descriptor for audio_egress_id field.
+	livesafetystateDescAudioEgressID := livesafetystateFields[12].Descriptor()
+	// livesafetystate.DefaultAudioEgressID holds the default value on creation for the audio_egress_id field.
+	livesafetystate.DefaultAudioEgressID = livesafetystateDescAudioEgressID.Default.(string)
+	// livesafetystate.AudioEgressIDValidator is a validator for the "audio_egress_id" field. It is called by the builders before save.
+	livesafetystate.AudioEgressIDValidator = livesafetystateDescAudioEgressID.Validators[0].(func(string) error)
+	// livesafetystateDescLastFrameKey is the schema descriptor for last_frame_key field.
+	livesafetystateDescLastFrameKey := livesafetystateFields[13].Descriptor()
+	// livesafetystate.DefaultLastFrameKey holds the default value on creation for the last_frame_key field.
+	livesafetystate.DefaultLastFrameKey = livesafetystateDescLastFrameKey.Default.(string)
+	// livesafetystate.LastFrameKeyValidator is a validator for the "last_frame_key" field. It is called by the builders before save.
+	livesafetystate.LastFrameKeyValidator = livesafetystateDescLastFrameKey.Validators[0].(func(string) error)
+	// livesafetystateDescLastAudioKey is the schema descriptor for last_audio_key field.
+	livesafetystateDescLastAudioKey := livesafetystateFields[15].Descriptor()
+	// livesafetystate.DefaultLastAudioKey holds the default value on creation for the last_audio_key field.
+	livesafetystate.DefaultLastAudioKey = livesafetystateDescLastAudioKey.Default.(string)
+	// livesafetystate.LastAudioKeyValidator is a validator for the "last_audio_key" field. It is called by the builders before save.
+	livesafetystate.LastAudioKeyValidator = livesafetystateDescLastAudioKey.Validators[0].(func(string) error)
+	// livesafetystateDescUpdatedAt is the schema descriptor for updated_at field.
+	livesafetystateDescUpdatedAt := livesafetystateFields[16].Descriptor()
+	// livesafetystate.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	livesafetystate.DefaultUpdatedAt = livesafetystateDescUpdatedAt.Default.(func() time.Time)
+	// livesafetystate.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	livesafetystate.UpdateDefaultUpdatedAt = livesafetystateDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// livesafetystateDescID is the schema descriptor for id field.
+	livesafetystateDescID := livesafetystateMixinFields0[0].Descriptor()
+	// livesafetystate.DefaultID holds the default value on creation for the id field.
+	livesafetystate.DefaultID = livesafetystateDescID.Default.(func() uuid.UUID)
 	livesessionMixin := schema.LiveSession{}.Mixin()
 	livesessionMixinFields0 := livesessionMixin[0].Fields()
 	_ = livesessionMixinFields0
@@ -571,8 +649,12 @@ func init() {
 	livesessionDescSponsorshipLine := livesessionFields[23].Descriptor()
 	// livesession.SponsorshipLineValidator is a validator for the "sponsorship_line" field. It is called by the builders before save.
 	livesession.SponsorshipLineValidator = livesessionDescSponsorshipLine.Validators[0].(func(string) error)
+	// livesessionDescModerationVisibility is the schema descriptor for moderation_visibility field.
+	livesessionDescModerationVisibility := livesessionFields[24].Descriptor()
+	// livesession.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
+	livesession.DefaultModerationVisibility = livesessionDescModerationVisibility.Default.(string)
 	// livesessionDescUpdatedAt is the schema descriptor for updated_at field.
-	livesessionDescUpdatedAt := livesessionFields[24].Descriptor()
+	livesessionDescUpdatedAt := livesessionFields[25].Descriptor()
 	// livesession.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	livesession.DefaultUpdatedAt = livesessionDescUpdatedAt.Default.(func() time.Time)
 	// livesession.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
