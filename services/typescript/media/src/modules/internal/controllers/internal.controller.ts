@@ -3,6 +3,7 @@ import type { RouteFactory } from "../../../utils/route.util.js";
 import type { CreatePrivateAccessUrlCommand } from "../commands/createPrivateAccessUrl/createPrivateAccessUrl.handler.js";
 import type { CreateUploadIntentCommand, UploadIntentView } from "../commands/createUploadIntent/createUploadIntent.handler.js";
 import type { ReviewHeldMediaCommand } from "../commands/reviewHeldMedia/reviewHeldMedia.handler.js";
+import type { AudioFingerprintView } from "../queries/getAudioFingerprint/getAudioFingerprint.handler.js";
 import type { InternalMediaView } from "../queries/getInternalMedia/getInternalMedia.handler.js";
 import type { CompletedUploadView, CompleteUploadSessionCommand } from "../../uploads/commands/completeUploadSession/completeUploadSession.command.js";
 import { deleteMediaBodySchema, internalCompleteBodySchema, internalMediaParamsSchema, privateAccessBodySchema, reviewBodySchema, uploadIntentBodySchema } from "../validators/internal.validator.js";
@@ -14,6 +15,7 @@ export interface InternalHandlers {
   readonly reviewHeldMedia: Handler<ReviewHeldMediaCommand, { readonly mediaId: string; readonly status: string }>;
   readonly completeUploadSession: Handler<CompleteUploadSessionCommand, CompletedUploadView>;
   readonly deleteMedia: Handler<{ readonly mediaIds: readonly string[]; readonly reason: string }, { readonly deleted: number }>;
+  readonly getAudioFingerprint: Handler<{ readonly mediaId: string }, AudioFingerprintView>;
 }
 
 export function createInternalController(route: RouteFactory, handlers: InternalHandlers) {
@@ -23,6 +25,7 @@ export function createInternalController(route: RouteFactory, handlers: Internal
     signedUrl: route({ authentication: "internal", params: internalMediaParamsSchema, body: privateAccessBodySchema }, ({ params, body }) => handlers.createPrivateAccessUrl({ mediaId: params.mediaId, actorId: body.actorId, reason: body.reason, variant: body.variant, download: body.download ?? false })),
     review: route({ authentication: "internal", params: internalMediaParamsSchema, body: reviewBodySchema }, ({ params, body }) => handlers.reviewHeldMedia({ mediaId: params.mediaId, decision: body.decision, reviewerId: body.reviewerId })),
     complete: route({ authentication: "internal", params: internalMediaParamsSchema, body: internalCompleteBodySchema }, ({ params, body }) => handlers.completeUploadSession({ ownerId: body.accountId, lookup: { mediaId: params.mediaId } })),
+    audioFingerprint: route({ authentication: "internal", params: internalMediaParamsSchema }, ({ params }) => handlers.getAudioFingerprint({ mediaId: params.mediaId })),
     deleteMany: route({ authentication: "internal", body: deleteMediaBodySchema }, ({ body }) => handlers.deleteMedia({ mediaIds: body.mediaIds, reason: body.reason })),
   };
 }

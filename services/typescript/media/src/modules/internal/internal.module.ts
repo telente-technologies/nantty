@@ -8,6 +8,7 @@ import { createCompleteUploadSessionHandler } from "../uploads/commands/complete
 import { createDeleteMediaHandler } from "./commands/deleteMedia/deleteMedia.handler.js";
 import { createReviewHeldMediaHandler } from "./commands/reviewHeldMedia/reviewHeldMedia.handler.js";
 import { createInternalController } from "./controllers/internal.controller.js";
+import { createGetAudioFingerprintHandler } from "./queries/getAudioFingerprint/getAudioFingerprint.handler.js";
 import { createGetInternalMediaHandler } from "./queries/getInternalMedia/getInternalMedia.handler.js";
 import { registerInternalRoutes } from "./routes/internal.routes.js";
 
@@ -19,5 +20,6 @@ export function mountInternalModule(router: HttpRouter, route: RouteFactory, con
     reviewHeldMedia: createReviewHeldMediaHandler(context),
     completeUploadSession: createCompleteUploadSessionHandler(context),
     deleteMedia: createDeleteMediaHandler(context),
+    getAudioFingerprint: createGetAudioFingerprintHandler(context),
   }));
 }

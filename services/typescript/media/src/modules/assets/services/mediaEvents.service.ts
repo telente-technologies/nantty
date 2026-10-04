@@ -27,6 +27,12 @@ export const mediaEvents = {
   held: (db: Db, asset: MediaAssetWithVariants, score: number | null, category: string | null, at: Date) =>
     appendDomainEventsToOutbox(db, [{ eventType: mediaEventTypes.held, subject: asset.id, occurredAt: at, data: { ...baseData(asset), score, category } }]),
 
+  audioMuted: (db: Db, asset: MediaAssetWithVariants, claimId: string | null, at: Date) =>
+    appendDomainEventsToOutbox(db, [{ eventType: mediaEventTypes.audioMuted, subject: asset.id, occurredAt: at, data: { ...baseData(asset), claimId, hlsKey: asset.hlsKey } }]),
+
+  audioRestored: (db: Db, asset: MediaAssetWithVariants, claimId: string | null, at: Date) =>
+    appendDomainEventsToOutbox(db, [{ eventType: mediaEventTypes.audioRestored, subject: asset.id, occurredAt: at, data: { ...baseData(asset), claimId, hlsKey: asset.hlsKey } }]),
+
   deleted: (db: Db, asset: { readonly id: string; readonly ownerId: string; readonly purpose: string }, reason: string, at: Date) =>
     appendDomainEventsToOutbox(db, [{ eventType: mediaEventTypes.deleted, subject: asset.id, occurredAt: at, data: { mediaId: asset.id, ownerId: asset.ownerId, purpose: asset.purpose, reason } }]),
 };
