@@ -7,6 +7,7 @@ import (
 
 	"zudomart/modules/users/src/container"
 	usersErrors "zudomart/modules/users/src/errors"
+	celebrationservices "zudomart/modules/users/src/modules/celebrations/services"
 	"zudomart/modules/users/src/services"
 	"zudomart/modules/users/src/types"
 )
@@ -31,5 +32,8 @@ func ViewPublicProfileOfAccount(ctx context.Context, application *container.Cont
 	if err != nil {
 		return types.UserView{}, err
 	}
-	return types.BuildUserView(row, summary, false), nil
+	view := types.BuildUserView(row, summary, false)
+	flags := celebrationservices.ComputePublicFlags(ctx, application, summary, false)
+	view.BirthdayToday, view.AnniversaryToday = flags.BirthdayToday, flags.AnniversaryToday
+	return view, nil
 }
