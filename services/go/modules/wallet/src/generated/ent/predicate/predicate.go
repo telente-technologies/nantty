@@ -27,6 +27,9 @@ type CoinTransfer func(*sql.Selector)
 // IdempotentRequest is the predicate function for idempotentrequest builders.
 type IdempotentRequest func(*sql.Selector)
 
+// MonetisationHold is the predicate function for monetisationhold builders.
+type MonetisationHold func(*sql.Selector)
+
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
 

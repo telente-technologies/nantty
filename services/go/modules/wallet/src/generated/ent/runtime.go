@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
 	"zudomart/modules/wallet/src/generated/ent/cointransfer"
 	"zudomart/modules/wallet/src/generated/ent/idempotentrequest"
+	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
 	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
@@ -565,6 +566,52 @@ func init() {
 	idempotentrequestDescID := idempotentrequestMixinFields0[0].Descriptor()
 	// idempotentrequest.DefaultID holds the default value on creation for the id field.
 	idempotentrequest.DefaultID = idempotentrequestDescID.Default.(func() uuid.UUID)
+	monetisationholdFields := schema.MonetisationHold{}.Fields()
+	_ = monetisationholdFields
+	// monetisationholdDescIsPaused is the schema descriptor for is_paused field.
+	monetisationholdDescIsPaused := monetisationholdFields[1].Descriptor()
+	// monetisationhold.DefaultIsPaused holds the default value on creation for the is_paused field.
+	monetisationhold.DefaultIsPaused = monetisationholdDescIsPaused.Default.(bool)
+	// monetisationholdDescAccountStatus is the schema descriptor for account_status field.
+	monetisationholdDescAccountStatus := monetisationholdFields[2].Descriptor()
+	// monetisationhold.DefaultAccountStatus holds the default value on creation for the account_status field.
+	monetisationhold.DefaultAccountStatus = monetisationholdDescAccountStatus.Default.(string)
+	// monetisationhold.AccountStatusValidator is a validator for the "account_status" field. It is called by the builders before save.
+	monetisationhold.AccountStatusValidator = monetisationholdDescAccountStatus.Validators[0].(func(string) error)
+	// monetisationholdDescRestrictions is the schema descriptor for restrictions field.
+	monetisationholdDescRestrictions := monetisationholdFields[3].Descriptor()
+	// monetisationhold.DefaultRestrictions holds the default value on creation for the restrictions field.
+	monetisationhold.DefaultRestrictions = monetisationholdDescRestrictions.Default.([]string)
+	// monetisationholdDescReason is the schema descriptor for reason field.
+	monetisationholdDescReason := monetisationholdFields[4].Descriptor()
+	// monetisationhold.DefaultReason holds the default value on creation for the reason field.
+	monetisationhold.DefaultReason = monetisationholdDescReason.Default.(string)
+	// monetisationhold.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	monetisationhold.ReasonValidator = monetisationholdDescReason.Validators[0].(func(string) error)
+	// monetisationholdDescUpdatedAt is the schema descriptor for updated_at field.
+	monetisationholdDescUpdatedAt := monetisationholdFields[6].Descriptor()
+	// monetisationhold.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	monetisationhold.DefaultUpdatedAt = monetisationholdDescUpdatedAt.Default.(func() time.Time)
+	// monetisationhold.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	monetisationhold.UpdateDefaultUpdatedAt = monetisationholdDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// monetisationholdDescID is the schema descriptor for id field.
+	monetisationholdDescID := monetisationholdFields[0].Descriptor()
+	// monetisationhold.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	monetisationhold.IDValidator = func() func(string) error {
+		validators := monetisationholdDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	outboxeventMixin := schema.OutboxEvent{}.Mixin()
 	outboxeventMixinFields0 := outboxeventMixin[0].Fields()
 	_ = outboxeventMixinFields0

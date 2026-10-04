@@ -28,6 +28,8 @@ type Tx struct {
 	CoinTransfer *CoinTransferClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
+	// MonetisationHold is the client for interacting with the MonetisationHold builders.
+	MonetisationHold *MonetisationHoldClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
 	// PayoutAccount is the client for interacting with the PayoutAccount builders.
@@ -176,6 +178,7 @@ func (tx *Tx) init() {
 	tx.CoinPurchase = NewCoinPurchaseClient(tx.config)
 	tx.CoinTransfer = NewCoinTransferClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
+	tx.MonetisationHold = NewMonetisationHoldClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.PayoutAccount = NewPayoutAccountClient(tx.config)
 	tx.SellerReserveFlag = NewSellerReserveFlagClient(tx.config)
