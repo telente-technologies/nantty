@@ -20,6 +20,10 @@ type CreativeField = "name" | "headline" | "primaryText";
 function buildCreativeInputFromAd(ad: Ad, changes: Pick<CreativeInput, "headline" | "primaryText" | "callToAction">): CreativeInput {
   const { creative } = ad;
   return {
+    type: creative.type ?? "single",
+    mediaClickable: creative.mediaClickable ?? false,
+    cards: (creative.cards ?? []).map((card) => ({ mediaId: card.media.id, headline: card.headline, description: card.description, callToAction: card.callToAction, destination: card.destination })),
+    app: creative.app ?? null,
     format: creative.format,
     source: creative.source,
     mediaIds: creative.source.type === "upload" ? creative.media.map((media) => media.id) : [],

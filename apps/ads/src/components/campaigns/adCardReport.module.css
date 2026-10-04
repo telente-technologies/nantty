@@ -1,0 +1,18 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+}
+
+.table th,
+.table td {
+  padding: 8px 6px;
+  text-align: right;
+  border-bottom: 1px solid var(--divider-soft);
+}
+
+.table th[scope="col"]:first-child,
+.table th[scope="row"] {
+  text-align: left;
+  font-weight: 600;
+}

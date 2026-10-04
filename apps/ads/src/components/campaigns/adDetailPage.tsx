@@ -11,12 +11,13 @@ import { SegmentedControl } from "@/components/ui/formFields";
 import { DeliveryStatusBadge } from "@/components/ui/statusBadge";
 import { Card, KeyValueList, PageHeader } from "@/components/ui/surfaces";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
-import { callToActionLabels, creativeFormatLabels, findObjectiveOption, placementLabels } from "@/constants/campaignOptions.constant";
+import { callToActionLabels, creativeFormatLabels, creativeTypeLabels, findObjectiveOption, placementLabels } from "@/constants/campaignOptions.constant";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { campaignsApi } from "@/services/campaignsApi.service";
 import type { AdPlacement } from "@/types/campaign.type";
 import { formatDateAndTime } from "@/utils/dateRange.util";
 
+import { AdCardReport } from "./adCardReport";
 import { AdAppealDialog } from "./adAppealDialog";
 import { AdCreativeEditPanel } from "./adCreativeEditPanel";
 import { AdReviewPanel } from "./adReviewPanel";
@@ -85,7 +86,11 @@ export function AdDetailPage({ adId }: { readonly adId: string }) {
           <Card title="Creative">
             <KeyValueList
               items={[
+                { label: "Ad type", value: creativeTypeLabels[ad.creative.type ?? "single"].label },
                 { label: "Format", value: creativeFormatLabels[ad.creative.format] },
+                ...(ad.creative.cards?.length ? [{ label: "Cards", value: String(ad.creative.cards.length) }] : []),
+                ...(ad.creative.app ? [{ label: "App", value: ad.creative.app.appName }] : []),
+                ...(ad.creative.mediaClickable ? [{ label: "Media link", value: "Tapping the media opens the link" }] : []),
                 { label: "Source", value: sourceTypeLabels[ad.creative.source.type] },
                 { label: "Headline", value: ad.creative.headline },
                 { label: "Button", value: callToActionLabels[ad.creative.callToAction] },
@@ -95,6 +100,7 @@ export function AdDetailPage({ adId }: { readonly adId: string }) {
             />
             {ad.creative.primaryText ? <p className={styles.mutedText}>{ad.creative.primaryText}</p> : null}
           </Card>
+          <AdCardReport ad={ad} />
         </div>
       </div>
       <AdAppealDialog ad={ad} isOpen={isAppealOpen} onClose={() => setIsAppealOpen(false)} onAppealed={() => adQuery.reload()} />
