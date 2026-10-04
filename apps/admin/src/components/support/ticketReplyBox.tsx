@@ -17,16 +17,16 @@ import styles from "./ticketDetailWorkspace.module.css";
 type ReplyMode = "reply" | "note";
 
 const statusAfterReplyOptions = [
-  { value: "PENDING", label: "Send and set pending (waiting on customer)" },
-  { value: "OPEN", label: "Send and keep open" },
-  { value: "SOLVED", label: "Send and mark solved" },
+  { value: "AWAITING_USER", label: "Send and wait for the customer" },
+  { value: "AWAITING_SUPPORT", label: "Send and keep it with support" },
+  { value: "RESOLVED", label: "Send and mark resolved" },
 ];
 
 export function TicketReplyBox({ ticket, onSent }: { readonly ticket: SupportTicketSummary; readonly onSent: (detail: SupportTicketDetail, message: string) => void }) {
   const { admin } = useAdminSession();
   const [mode, setMode] = useState<ReplyMode>("reply");
   const [body, setBody] = useState("");
-  const [statusAfterReply, setStatusAfterReply] = useState<SupportTicketStatus>("PENDING");
+  const [statusAfterReply, setStatusAfterReply] = useState<SupportTicketStatus>("AWAITING_USER");
   const macros = useAdminQuery((signal) => fetchSupportMacros(signal), "reply-macros");
   const replyMutation = useAdminMutation((input: { body: string; isInternalNote: boolean; statusAfterReply?: SupportTicketStatus }) => sendSupportTicketReply(ticket.id, input));
   const isClosed = ticket.status === "CLOSED";

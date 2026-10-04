@@ -40,7 +40,7 @@ export function TicketRequesterCard({ ticket }: { readonly ticket: SupportTicket
 }
 
 export function TicketFactsCard({ ticket }: { readonly ticket: SupportTicketSummary }) {
-  const isStopped = ticket.status === "SOLVED" || ticket.status === "CLOSED";
+  const isStopped = ticket.status === "RESOLVED" || ticket.status === "CLOSED";
   return (
     <Card title="Ticket">
       <KeyValueList
@@ -49,9 +49,12 @@ export function TicketFactsCard({ ticket }: { readonly ticket: SupportTicketSumm
           { label: "Category", value: humanizeConstantName(ticket.category) },
           { label: "Priority", value: humanizeConstantName(ticket.priority) },
           { label: "Opened", value: formatDateTime(ticket.createdAt) },
-          { label: "Solved", value: formatDateTime(ticket.solvedAt) },
+          { label: "Resolved", value: formatDateTime(ticket.resolvedAt) },
           { label: "First reply", value: <SlaTimer label="Reply" dueAt={ticket.firstResponseDueAt} metAt={ticket.firstRespondedAt} isStopped={isStopped} /> },
-          { label: "Resolution", value: <SlaTimer label="Resolve" dueAt={ticket.resolutionDueAt} metAt={ticket.solvedAt} isStopped={false} /> },
+          { label: "Resolution", value: <SlaTimer label="Resolve" dueAt={ticket.resolutionDueAt} metAt={ticket.resolvedAt} isStopped={false} /> },
+          { label: "Channel", value: ticket.channel === "CHAT" ? "Live chat" : "Ticket form" },
+          { label: "Rating", value: ticket.satisfactionScore === null ? "—" : `${ticket.satisfactionScore} of 5` },
+          { label: "Help topic", value: humanizeConstantName(ticket.autoFaqStatus) },
           { label: "Order", value: ticket.linkedOrderId ? <Link href={`/commerce/orders/${encodeURIComponent(ticket.linkedOrderId)}`}>{ticket.linkedOrderId}</Link> : "—", isMono: true },
           { label: "Dispute", value: ticket.linkedDisputeId ? <Link href={`/commerce/disputes/${encodeURIComponent(ticket.linkedDisputeId)}`}>{ticket.linkedDisputeId}</Link> : "—", isMono: true },
         ]}
@@ -101,8 +104,9 @@ export function TicketAssignmentCard({ ticket, onChanged }: { readonly ticket: S
 
 const statusOptions: { value: SupportTicketStatus; label: string }[] = [
   { value: "OPEN", label: "Open" },
-  { value: "PENDING", label: "Pending customer" },
-  { value: "SOLVED", label: "Solved" },
+  { value: "AWAITING_SUPPORT", label: "Waiting for support" },
+  { value: "AWAITING_USER", label: "Waiting for customer" },
+  { value: "RESOLVED", label: "Resolved (may become a help topic)" },
   { value: "CLOSED", label: "Closed (no more replies)" },
 ];
 

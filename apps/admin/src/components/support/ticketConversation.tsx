@@ -3,7 +3,7 @@ import { formatDateTime, formatRelativeTimeFromNow } from "@/utils/formatting.ut
 
 import styles from "./ticketConversation.module.css";
 
-const authorLabels: Record<SupportMessage["authorKind"], string> = { CUSTOMER: "Customer", AGENT: "Agent reply", INTERNAL_NOTE: "Internal note · not visible to customer" };
+const authorLabels: Record<SupportMessage["authorKind"], string> = { CUSTOMER: "Customer", AGENT: "Agent reply", INTERNAL_NOTE: "Internal note · not visible to customer", SYSTEM: "System" };
 
 export function TicketConversation({ messages }: { readonly messages: readonly SupportMessage[] }) {
   return (
