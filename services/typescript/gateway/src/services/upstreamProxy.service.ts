@@ -18,7 +18,7 @@ export interface ProxiedResponse {
   readonly body: Uint8Array;
 }
 
-const forwardedRequestHeaders = ["accept", "authorization", "content-type", "idempotency-key", "if-none-match", "user-agent", "x-client-region", "x-device-id", "x-step-up-token"];
+const forwardedRequestHeaders = ["accept", "authorization", "content-type", "idempotency-key", "if-none-match", "user-agent", "x-client-platform", "x-client-region", "x-device-id", "x-step-up-token", "x-store-storefront", "cloudfront-viewer-country"];
 const webhookSignatureHeaders = ["x-paystack-signature", "x-signature", "x-apple-signature", "x-goog-signature", "x-webhook-id", "x-webhook-timestamp"];
 const returnedResponseHeaders = ["cache-control", "content-type", "etag", "idempotent-replayed", "retry-after", "x-request-id"];
 
@@ -41,6 +41,7 @@ export function buildUpstreamRequestHeaders(request: ProxiedRequest): Record<str
     headers["x-forwarded-for"] = request.clientIp;
   }
   if (request.principal === undefined) headers["x-zudomart-viewer"] = "anonymous";
+  headers["x-zudomart-age-bracket"] = request.principal?.ageBracket ?? "unknown";
   if (request.principal !== undefined) {
     headers["x-zudomart-account-id"] = request.principal.accountId;
     headers["x-zudomart-session-id"] = request.principal.sessionId;
