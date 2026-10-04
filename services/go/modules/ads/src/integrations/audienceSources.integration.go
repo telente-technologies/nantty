@@ -11,7 +11,6 @@ import (
 	adserrors "zudomart/modules/ads/src/errors"
 )
 
-// UnavailableAudienceSource is used until social and commerce expose membership APIs; audiences that need them end up "failed".
 type UnavailableAudienceSource struct{}
 
 func (UnavailableAudienceSource) StoreCustomers(context.Context, string, int, int) ([]string, error) {
