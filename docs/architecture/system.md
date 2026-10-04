@@ -19,7 +19,7 @@ flowchart LR
   identity["go-identity :8101<br/>auth module"]:::existing
   otherGo["go-commerce, go-money,<br/>go-live, go-ads, go-trust<br/>routeless"]:::existing
   realtime["Phoenix realtime /ws"]:::existing
-  intel["apps/intelligence<br/>FastAPI, HMAC"]:::existing
+  intel["services/python/intelligence<br/>FastAPI, HMAC"]:::existing
   pg[("Postgres 17 + PostGIS<br/>schema per service")]:::existing
   valkey[("Valkey")]:::existing
   bus["RabbitMQ topic exchange<br/>zudomart.events"]:::existing
@@ -178,7 +178,7 @@ LiveKit is EXISTING only as a local compose container (`infra/local/docker-compo
 | Go | 6 deployables, platform libs | EXISTING (only auth routes) | `services/go/deployables/*`, `services/go/platform` |
 | TS services | social, feed, notifications, media, search, support, integrations, campaigns | PROPOSED (reference logic in `apps/api`) | `microservicesPlan.json` `typescript` |
 | Realtime | Phoenix raw WebSocket, AMQP consumer, topic authorizer | EXISTING | `services/elixir/realtime` |
-| Intelligence | FastAPI scoring, 12 modules, AMQP domain event consumer + trust advisory producer | EXISTING, no callers | `apps/intelligence` |
+| Intelligence | FastAPI scoring, 12 modules, AMQP domain event consumer + trust advisory producer | EXISTING, no callers | `services/python/intelligence` |
 | DB | Postgres 17 + PostGIS locally; 29 schemas and roles | EXISTING (local); Aurora PROPOSED | `infra/local/postgres/create-databases.sh` |
 | Cache | Valkey 9 locally | EXISTING (local); ElastiCache PROPOSED | compose |
 | Messaging | RabbitMQ 4 (RabbitMQ adopted, owner, 2026-10-03); Amazon MQ for RabbitMQ cluster in private subnets for AWS | EXISTING (local); Amazon MQ PROPOSED | `infra/local/rabbitmq/*` |

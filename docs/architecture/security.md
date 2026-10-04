@@ -79,7 +79,7 @@ sequenceDiagram
 | Social login | `POST /auth/google`, `/auth/apple`, ID-token verifier | EXISTING | `internal/socialidentity/identity_token.verifier.go` |
 | Admin MFA / step-up | Frontend: enrollment, WebAuthn options, step-up, keep-alive BFF routes (MOCK-ONLY). Backend: separate admin audience, TOTP + WebAuthn, 5-min step-up token PROPOSED. `staffauth` guard and staff TTL config EXISTING, no staff login route | MOCK-ONLY / PROPOSED | `apps/admin/src/app/bff/auth/{mfa,step-up,keep-alive}`, `platform/staffauth` |
 | Realtime auth | First frame `{type:"auth",accessToken}` within 10 s else close; browser tickets (60 s, `POST /realtime/tickets`) PROPOSED | EXISTING / PROPOSED | `client_socket.ex` |
-| Service-to-service | Python: HMAC-SHA256 + nonce (Redis, fail closed) + 300 s skew EXISTING. Go-to-Go and gateway-to-Go: plain `x-zudomart-*` headers, trust rests on network isolation. Recommendation below | EXISTING (Python) / gap | `apps/intelligence/apiContract.md` s2 |
+| Service-to-service | Python: HMAC-SHA256 + nonce (Redis, fail closed) + 300 s skew EXISTING. Go-to-Go and gateway-to-Go: plain `x-zudomart-*` headers, trust rests on network isolation. Recommendation below | EXISTING (Python) / gap | `services/python/intelligence/apiContract.md` s2 |
 
 ## 3. Authorization
 
