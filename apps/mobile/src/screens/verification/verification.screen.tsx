@@ -73,7 +73,7 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
             {(plans.data ?? []).filter((plan) => plan.color === "blue").map((plan) => (
               <VerificationPlanCard key={plan.id} plan={plan} current={subscription?.planId === plan.id} />
             ))}
-            <Button title="Get the blue badge" disabled={application?.status === "pending"} onPress={() => navigation.navigate("VerificationApply", { color: "blue" })} />
+            <Button title="Get the blue badge" disabled={application?.status === "pending"} onPress={() => navigation.navigate("IdentityVerification")} />
           </View>
         ) : null}
 
@@ -86,6 +86,7 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
             <Text size={13} lineHeight={17.5} color={colors.textMuted}>
               {goldPending ? "Gold after business verification" : "Your business profile is verified."}
             </Text>
+            {goldPending ? <Button title="Verify your identity" onPress={() => navigation.navigate("IdentityVerification")} /> : null}
             <Button variant="subtle" title={MANAGE_ON_THE_WEB_LABEL} onPress={() => webHandoffService.openManageBilling(actingProfileId)} />
           </View>
         ) : null}
