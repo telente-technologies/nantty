@@ -144,7 +144,7 @@ export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCoun
         icon={<ViewsActionIcon size={22} />}
         actions={[{ label: "Close", variant: "secondary", onClick: () => setViewsInfoOpen(false), isInitialFocus: true }]}
       >
-        <Link href="/help/views" className={styles.learnMore} onClick={() => setViewsInfoOpen(false)}>
+        <Link href="/help/posts-and-feed/views-and-analytics" className={styles.learnMore} onClick={() => setViewsInfoOpen(false)}>
           Learn more about views
         </Link>
       </Dialog>

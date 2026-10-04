@@ -9,6 +9,7 @@ import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { MentionText } from "@/components/mentions/mentionText";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { useSession } from "@/components/providers/sessionProvider";
+import { CopyrightCountdownBanner } from "@/components/copyright/copyrightCountdownBanner";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
@@ -87,6 +88,7 @@ export function PostCard({ post, priority = false, swipeable = false }: { readon
         />
       </header>
 
+      {viewer?.id === post.author.id ? <CopyrightCountdownBanner contentId={post.id} /> : null}
       <SensitiveContentGate postId={post.id} sensitive={post.sensitive} previewUrl={post.media[0]?.posterUrl ?? post.media[0]?.url ?? null}>
       {post.text ? (
         <p className={styles.text}>
