@@ -48,6 +48,7 @@ export type SearchDocumentMinAggregateOutputType = {
   tagsText: string | null
   visibility: string | null
   available: boolean | null
+  restrictedForMinors: boolean | null
   popularity: number | null
   region: string | null
   version: bigint | null
@@ -68,6 +69,7 @@ export type SearchDocumentMaxAggregateOutputType = {
   tagsText: string | null
   visibility: string | null
   available: boolean | null
+  restrictedForMinors: boolean | null
   popularity: number | null
   region: string | null
   version: bigint | null
@@ -90,6 +92,7 @@ export type SearchDocumentCountAggregateOutputType = {
   summary: number
   visibility: number
   available: number
+  restrictedForMinors: number
   popularity: number
   region: number
   version: number
@@ -122,6 +125,7 @@ export type SearchDocumentMinAggregateInputType = {
   tagsText?: true
   visibility?: true
   available?: true
+  restrictedForMinors?: true
   popularity?: true
   region?: true
   version?: true
@@ -142,6 +146,7 @@ export type SearchDocumentMaxAggregateInputType = {
   tagsText?: true
   visibility?: true
   available?: true
+  restrictedForMinors?: true
   popularity?: true
   region?: true
   version?: true
@@ -164,6 +169,7 @@ export type SearchDocumentCountAggregateInputType = {
   summary?: true
   visibility?: true
   available?: true
+  restrictedForMinors?: true
   popularity?: true
   region?: true
   version?: true
@@ -273,6 +279,7 @@ export type SearchDocumentGroupByOutputType = {
   summary: runtime.JsonValue
   visibility: string
   available: boolean
+  restrictedForMinors: boolean
   popularity: number
   region: string | null
   version: bigint
@@ -318,6 +325,7 @@ export type SearchDocumentWhereInput = {
   summary?: Prisma.JsonFilter<"SearchDocument">
   visibility?: Prisma.StringFilter<"SearchDocument"> | string
   available?: Prisma.BoolFilter<"SearchDocument"> | boolean
+  restrictedForMinors?: Prisma.BoolFilter<"SearchDocument"> | boolean
   popularity?: Prisma.FloatFilter<"SearchDocument"> | number
   region?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
   version?: Prisma.BigIntFilter<"SearchDocument"> | bigint | number
@@ -340,6 +348,7 @@ export type SearchDocumentOrderByWithRelationInput = {
   summary?: Prisma.SortOrder
   visibility?: Prisma.SortOrder
   available?: Prisma.SortOrder
+  restrictedForMinors?: Prisma.SortOrder
   popularity?: Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
@@ -366,6 +375,7 @@ export type SearchDocumentWhereUniqueInput = Prisma.AtLeast<{
   summary?: Prisma.JsonFilter<"SearchDocument">
   visibility?: Prisma.StringFilter<"SearchDocument"> | string
   available?: Prisma.BoolFilter<"SearchDocument"> | boolean
+  restrictedForMinors?: Prisma.BoolFilter<"SearchDocument"> | boolean
   popularity?: Prisma.FloatFilter<"SearchDocument"> | number
   region?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
   version?: Prisma.BigIntFilter<"SearchDocument"> | bigint | number
@@ -388,6 +398,7 @@ export type SearchDocumentOrderByWithAggregationInput = {
   summary?: Prisma.SortOrder
   visibility?: Prisma.SortOrder
   available?: Prisma.SortOrder
+  restrictedForMinors?: Prisma.SortOrder
   popularity?: Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
@@ -418,6 +429,7 @@ export type SearchDocumentScalarWhereWithAggregatesInput = {
   summary?: Prisma.JsonWithAggregatesFilter<"SearchDocument">
   visibility?: Prisma.StringWithAggregatesFilter<"SearchDocument"> | string
   available?: Prisma.BoolWithAggregatesFilter<"SearchDocument"> | boolean
+  restrictedForMinors?: Prisma.BoolWithAggregatesFilter<"SearchDocument"> | boolean
   popularity?: Prisma.FloatWithAggregatesFilter<"SearchDocument"> | number
   region?: Prisma.StringNullableWithAggregatesFilter<"SearchDocument"> | string | null
   version?: Prisma.BigIntWithAggregatesFilter<"SearchDocument"> | bigint | number
@@ -440,6 +452,7 @@ export type SearchDocumentCreateInput = {
   summary: Prisma.JsonNullValueInput | runtime.InputJsonValue
   visibility: string
   available: boolean
+  restrictedForMinors?: boolean
   popularity?: number
   region?: string | null
   version: bigint | number
@@ -462,6 +475,7 @@ export type SearchDocumentUncheckedCreateInput = {
   summary: Prisma.JsonNullValueInput | runtime.InputJsonValue
   visibility: string
   available: boolean
+  restrictedForMinors?: boolean
   popularity?: number
   region?: string | null
   version: bigint | number
@@ -484,6 +498,7 @@ export type SearchDocumentUpdateInput = {
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   visibility?: Prisma.StringFieldUpdateOperationsInput | string
   available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  restrictedForMinors?: Prisma.BoolFieldUpdateOperationsInput | boolean
   popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -506,6 +521,7 @@ export type SearchDocumentUncheckedUpdateInput = {
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   visibility?: Prisma.StringFieldUpdateOperationsInput | string
   available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  restrictedForMinors?: Prisma.BoolFieldUpdateOperationsInput | boolean
   popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -528,6 +544,7 @@ export type SearchDocumentCreateManyInput = {
   summary: Prisma.JsonNullValueInput | runtime.InputJsonValue
   visibility: string
   available: boolean
+  restrictedForMinors?: boolean
   popularity?: number
   region?: string | null
   version: bigint | number
@@ -550,6 +567,7 @@ export type SearchDocumentUpdateManyMutationInput = {
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   visibility?: Prisma.StringFieldUpdateOperationsInput | string
   available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  restrictedForMinors?: Prisma.BoolFieldUpdateOperationsInput | boolean
   popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -572,6 +590,7 @@ export type SearchDocumentUncheckedUpdateManyInput = {
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   visibility?: Prisma.StringFieldUpdateOperationsInput | string
   available?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  restrictedForMinors?: Prisma.BoolFieldUpdateOperationsInput | boolean
   popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -607,6 +626,7 @@ export type SearchDocumentCountOrderByAggregateInput = {
   summary?: Prisma.SortOrder
   visibility?: Prisma.SortOrder
   available?: Prisma.SortOrder
+  restrictedForMinors?: Prisma.SortOrder
   popularity?: Prisma.SortOrder
   region?: Prisma.SortOrder
   version?: Prisma.SortOrder
@@ -632,6 +652,7 @@ export type SearchDocumentMaxOrderByAggregateInput = {
   tagsText?: Prisma.SortOrder
   visibility?: Prisma.SortOrder
   available?: Prisma.SortOrder
+  restrictedForMinors?: Prisma.SortOrder
   popularity?: Prisma.SortOrder
   region?: Prisma.SortOrder
   version?: Prisma.SortOrder
@@ -652,6 +673,7 @@ export type SearchDocumentMinOrderByAggregateInput = {
   tagsText?: Prisma.SortOrder
   visibility?: Prisma.SortOrder
   available?: Prisma.SortOrder
+  restrictedForMinors?: Prisma.SortOrder
   popularity?: Prisma.SortOrder
   region?: Prisma.SortOrder
   version?: Prisma.SortOrder
@@ -726,6 +748,7 @@ export type SearchDocumentSelect<ExtArgs extends runtime.Types.Extensions.Intern
   summary?: boolean
   visibility?: boolean
   available?: boolean
+  restrictedForMinors?: boolean
   popularity?: boolean
   region?: boolean
   version?: boolean
@@ -748,6 +771,7 @@ export type SearchDocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   summary?: boolean
   visibility?: boolean
   available?: boolean
+  restrictedForMinors?: boolean
   popularity?: boolean
   region?: boolean
   version?: boolean
@@ -770,6 +794,7 @@ export type SearchDocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   summary?: boolean
   visibility?: boolean
   available?: boolean
+  restrictedForMinors?: boolean
   popularity?: boolean
   region?: boolean
   version?: boolean
@@ -792,6 +817,7 @@ export type SearchDocumentSelectScalar = {
   summary?: boolean
   visibility?: boolean
   available?: boolean
+  restrictedForMinors?: boolean
   popularity?: boolean
   region?: boolean
   version?: boolean
@@ -800,7 +826,7 @@ export type SearchDocumentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SearchDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"kind" | "entityId" | "docKey" | "ownerAccountId" | "title" | "titleNormalized" | "subtitle" | "body" | "tagsText" | "tags" | "summary" | "visibility" | "available" | "popularity" | "region" | "version" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["searchDocument"]>
+export type SearchDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"kind" | "entityId" | "docKey" | "ownerAccountId" | "title" | "titleNormalized" | "subtitle" | "body" | "tagsText" | "tags" | "summary" | "visibility" | "available" | "restrictedForMinors" | "popularity" | "region" | "version" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["searchDocument"]>
 
 export type $SearchDocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SearchDocument"
@@ -819,6 +845,7 @@ export type $SearchDocumentPayload<ExtArgs extends runtime.Types.Extensions.Inte
     summary: runtime.JsonValue
     visibility: string
     available: boolean
+    restrictedForMinors: boolean
     popularity: number
     region: string | null
     version: bigint
@@ -1261,6 +1288,7 @@ export interface SearchDocumentFieldRefs {
   readonly summary: Prisma.FieldRef<"SearchDocument", 'Json'>
   readonly visibility: Prisma.FieldRef<"SearchDocument", 'String'>
   readonly available: Prisma.FieldRef<"SearchDocument", 'Boolean'>
+  readonly restrictedForMinors: Prisma.FieldRef<"SearchDocument", 'Boolean'>
   readonly popularity: Prisma.FieldRef<"SearchDocument", 'Float'>
   readonly region: Prisma.FieldRef<"SearchDocument", 'String'>
   readonly version: Prisma.FieldRef<"SearchDocument", 'BigInt'>

@@ -994,6 +994,7 @@ export const SearchDocumentScalarFieldEnum = {
   summary: 'summary',
   visibility: 'visibility',
   available: 'available',
+  restrictedForMinors: 'restrictedForMinors',
   popularity: 'popularity',
   region: 'region',
   version: 'version',
