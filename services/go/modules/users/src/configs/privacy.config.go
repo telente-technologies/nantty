@@ -32,7 +32,7 @@ func ReadPrivacySettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		ExportDownloadLinkTtl:      reader.ReadDurationOrDefault("USERS_EXPORT_DOWNLOAD_LINK_TTL", 15*time.Minute),
 		ExportArchiveTtl:           reader.ReadDurationOrDefault("USERS_EXPORT_ARCHIVE_TTL", 72*time.Hour),
 		ExportWorkerPollInterval:   reader.ReadDurationOrDefault("USERS_EXPORT_WORKER_POLL_INTERVAL", 10*time.Second),
-		DeletionGraceDays:          reader.ReadIntegerOrDefault("USERS_DELETION_GRACE_DAYS", 14),
+		DeletionGraceDays:          reader.ReadIntegerOrDefault("USERS_DELETION_GRACE_DAYS", 30),
 		DeletionWorkerPollInterval: reader.ReadDurationOrDefault("USERS_DELETION_WORKER_POLL_INTERVAL", time.Minute),
 		InternalApiToken:           reader.ReadStringOrDefault("USERS_INTERNAL_API_TOKEN", ""),
 		MoneyInternalUrl:           reader.ReadStringOrDefault("USERS_MONEY_INTERNAL_URL", ""),

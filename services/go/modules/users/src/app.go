@@ -21,6 +21,7 @@ import (
 	actingprofiles "zudomart/modules/users/src/modules/actingProfiles"
 	businessdocuments "zudomart/modules/users/src/modules/businessDocuments"
 	businessprofiles "zudomart/modules/users/src/modules/businessProfiles"
+	"zudomart/modules/users/src/modules/celebrations"
 	"zudomart/modules/users/src/modules/checkmarks"
 	contactprivacy "zudomart/modules/users/src/modules/contactPrivacy"
 	creatorprogram "zudomart/modules/users/src/modules/creatorProgram"
@@ -29,6 +30,7 @@ import (
 	notificationdirectory "zudomart/modules/users/src/modules/notificationDirectory"
 	"zudomart/modules/users/src/modules/privacy"
 	"zudomart/modules/users/src/modules/profiles"
+	searchsources "zudomart/modules/users/src/modules/searchSources"
 	"zudomart/modules/users/src/modules/usernames"
 	"zudomart/modules/users/src/services"
 	platformevents "zudomart/platform/events"
@@ -86,6 +88,7 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 	}
 	identityports.Default.RegisterUsernameGuard(services.UsernameGuardService{Container: usersContainer})
 	identityports.Default.RegisterAccountCountryLookup(services.AccountCountryService{Container: usersContainer})
+	identityports.Default.RegisterDeletionGraceCanceller(services.DeletionGraceCancelService{Container: usersContainer})
 	dependencies.Health.AddReadinessCheck("users-postgres", postgres.ReadinessCheckForDatabase(database))
 	return &Module{container: usersContainer, publisher: publisher}, nil
 }
@@ -94,6 +97,7 @@ func (module *Module) Name() string { return "users" }
 
 func (module *Module) MountRoutes(mux *http.ServeMux) {
 	profiles.Mount(mux, module.container)
+	celebrations.Mount(mux, module.container)
 	usernames.Mount(mux, module.container)
 	actingprofiles.Mount(mux, module.container)
 	businessprofiles.Mount(mux, module.container)
@@ -105,12 +109,14 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	businessdocuments.Mount(mux, module.container)
 	legal.Mount(mux, module.container)
 	contactprivacy.Mount(mux, module.container)
+	searchsources.Mount(mux, module.container)
 	notificationdirectory.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	go func() { _ = privacy.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
 	go func() { _ = accountenforcement.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
+	go func() { _ = celebrations.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
 	go func() { _ = checkmarks.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
 	go checkmarks.ConsumeEntitlementEventsUntilContextDone(ctx, module.container, module.container.Settings.IsProduction())
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
