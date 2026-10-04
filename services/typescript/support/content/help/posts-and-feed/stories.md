@@ -2,7 +2,7 @@
 title: Stories
 summary: Stories are photos and short videos that disappear after 24 hours.
 tags: stories, 24 hours
-related: create-a-post, live-badge
+related: create-a-post, going-live
 ---
 
 - Tap **+** and choose **Story** to share a photo or video.
