@@ -27,6 +27,15 @@ type EvidenceRetentionSetting func(*sql.Selector)
 // IpClaim is the predicate function for ipclaim builders.
 type IpClaim func(*sql.Selector)
 
+// LegalReport is the predicate function for legalreport builders.
+type LegalReport func(*sql.Selector)
+
+// LiveSafetyIncident is the predicate function for livesafetyincident builders.
+type LiveSafetyIncident func(*sql.Selector)
+
+// LiveSafetySignal is the predicate function for livesafetysignal builders.
+type LiveSafetySignal func(*sql.Selector)
+
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
 

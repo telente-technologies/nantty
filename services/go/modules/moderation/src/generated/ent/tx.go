@@ -28,6 +28,12 @@ type Tx struct {
 	EvidenceRetentionSetting *EvidenceRetentionSettingClient
 	// IpClaim is the client for interacting with the IpClaim builders.
 	IpClaim *IpClaimClient
+	// LegalReport is the client for interacting with the LegalReport builders.
+	LegalReport *LegalReportClient
+	// LiveSafetyIncident is the client for interacting with the LiveSafetyIncident builders.
+	LiveSafetyIncident *LiveSafetyIncidentClient
+	// LiveSafetySignal is the client for interacting with the LiveSafetySignal builders.
+	LiveSafetySignal *LiveSafetySignalClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
 	// Strike is the client for interacting with the Strike builders.
@@ -172,6 +178,9 @@ func (tx *Tx) init() {
 	tx.CounterNotice = NewCounterNoticeClient(tx.config)
 	tx.EvidenceRetentionSetting = NewEvidenceRetentionSettingClient(tx.config)
 	tx.IpClaim = NewIpClaimClient(tx.config)
+	tx.LegalReport = NewLegalReportClient(tx.config)
+	tx.LiveSafetyIncident = NewLiveSafetyIncidentClient(tx.config)
+	tx.LiveSafetySignal = NewLiveSafetySignalClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.Strike = NewStrikeClient(tx.config)
 	tx.SuspensionCase = NewSuspensionCaseClient(tx.config)
