@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { LoginBrandPanelWithAdComposition } from "@/components/auth/loginBrandPanel";
 import { LoginForm } from "@/components/auth/loginForm";
 import { isMockBackendEnabled } from "@/config/adsEnvironment.config";
-import { buildContactMailtoLinkForBothAddresses, contactEmailDisplayText } from "@/constants/contact.constant";
+import { buildContactMailtoLink, contactEmailDisplayText } from "@/constants/contact.constant";
 
 import styles from "./loginPage.module.css";
 
@@ -24,7 +24,7 @@ export default function LoginPage() {
           </p>
         ) : null}
         <p className={styles.contact}>
-          Need help? <a href={buildContactMailtoLinkForBothAddresses("Zudomart Ads sign-in help")}>{contactEmailDisplayText}</a>
+          Need help? <a href={buildContactMailtoLink("Zudomart Ads sign-in help")}>{contactEmailDisplayText}</a>
         </p>
       </main>
     </div>
