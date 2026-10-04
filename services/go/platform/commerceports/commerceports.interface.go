@@ -185,6 +185,11 @@ type StoreRewardsLookup interface {
 	EarnBackBasisPointsByStore(ctx context.Context, storeIds []uuid.UUID) (map[uuid.UUID]int, error)
 }
 
+// StoreSuccessRates holds only stores with enough recent orders; rates are 0..1.
+type StoreSuccessRates interface {
+	SuccessRatesByStore(ctx context.Context, storeIds []uuid.UUID) (map[uuid.UUID]float64, error)
+}
+
 type PurchaseVerifier interface {
 	FindReceivedPurchaseOfProduct(ctx context.Context, accountId, productId uuid.UUID) (orderNumber string, found bool, err error)
 	FindReceivedPurchaseFromStore(ctx context.Context, accountId, storeId uuid.UUID) (orderNumber string, found bool, err error)

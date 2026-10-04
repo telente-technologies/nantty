@@ -8,6 +8,7 @@ type Registry struct {
 	inventory InventoryStock
 	rewards   StoreRewardsLookup
 	purchases PurchaseVerifier
+	success   StoreSuccessRates
 	shipping  StoreShippingCountries
 }
 
@@ -86,4 +87,19 @@ func (registry *Registry) StoreShippingCountries() (StoreShippingCountries, erro
 		return nil, ErrPortNotRegistered
 	}
 	return registry.shipping, nil
+}
+
+func (registry *Registry) RegisterStoreSuccessRates(port StoreSuccessRates) {
+	registry.mutex.Lock()
+	registry.success = port
+	registry.mutex.Unlock()
+}
+
+func (registry *Registry) StoreSuccessRates() (StoreSuccessRates, error) {
+	registry.mutex.RLock()
+	defer registry.mutex.RUnlock()
+	if registry.success == nil {
+		return nil, ErrPortNotRegistered
+	}
+	return registry.success, nil
 }
