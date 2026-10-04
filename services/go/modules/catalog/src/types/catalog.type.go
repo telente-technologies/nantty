@@ -9,13 +9,14 @@ import (
 )
 
 type StoreSummaryView struct {
-	Id                  string  `json:"id"`
-	Name                string  `json:"name"`
-	LogoUrl             *string `json:"logoUrl"`
-	Rating              float64 `json:"rating"`
-	RatingCount         int     `json:"ratingCount"`
-	ReviewCount         int     `json:"reviewCount"`
-	EarnBackBasisPoints *int    `json:"earnBackBasisPoints"`
+	Id                  string   `json:"id"`
+	Name                string   `json:"name"`
+	LogoUrl             *string  `json:"logoUrl"`
+	Rating              float64  `json:"rating"`
+	RatingCount         int      `json:"ratingCount"`
+	ReviewCount         int      `json:"reviewCount"`
+	EarnBackBasisPoints *int     `json:"earnBackBasisPoints"`
+	SuccessRate         *float64 `json:"successRate"`
 }
 
 type StoreDetailView struct {
