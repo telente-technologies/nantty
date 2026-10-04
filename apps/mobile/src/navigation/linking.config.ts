@@ -22,6 +22,7 @@ export const deepLinking: LinkingOptions<RootStackParamList> = {
       Cart: "cart",
       Saved: "saved",
       Settings: "settings",
+      AccountStatus: "settings/account-status",
       CreatePost: { path: "create/:mode?" },
       ProductForm: "seller/products/new",
       CreatorProgram: "creator",

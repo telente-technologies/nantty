@@ -24,6 +24,7 @@ import { SettingsScreen } from "@/screens/settings/settings.screen";
 import { SavedScreen } from "@/screens/profile/saved.screen";
 import { SettingsAccountScreen } from "@/screens/settings/settingsAccount.screen";
 import { SettingsSecurityScreen } from "@/screens/settings/settingsSecurity.screen";
+import { AccountStatusScreen } from "@/screens/settings/accountStatus.screen";
 import { SettingsNotificationsScreen } from "@/screens/settings/settingsNotifications.screen";
 import { SettingsAppPreferenceScreen } from "@/screens/settings/settingsAppPreference.screen";
 import { SettingsPaymentMethodsScreen } from "@/screens/settings/settingsPaymentMethods.screen";
@@ -81,6 +82,7 @@ import { SupportTicketDetailScreen } from "@/screens/support/supportTicketDetail
 import { MyReportsScreen } from "@/screens/support/myReports.screen";
 import { HelpCenterScreen } from "@/screens/support/helpCenter.screen";
 import { HelpArticleScreen } from "@/screens/support/helpArticle.screen";
+import { HelpCategoryScreen } from "@/screens/support/helpCategory.screen";
 import { BusinessDocumentsScreen } from "@/screens/seller/businessDocuments.screen";
 import { SettingsUsernameScreen } from "@/screens/settings/settingsUsername.screen";
 import { BrandProfileScreen } from "@/screens/brand/brandProfile.screen";
@@ -127,6 +129,7 @@ export function MainNavigator() {
       <Stack.Screen name="Connections" component={ConnectionsScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="SettingsAccount" component={SettingsAccountScreen} />
+      <Stack.Screen name="AccountStatus" component={AccountStatusScreen} />
       <Stack.Screen name="SettingsSecurity" component={SettingsSecurityScreen} />
       <Stack.Screen name="SettingsNotifications" component={SettingsNotificationsScreen} />
       <Stack.Screen name="SettingsAppPreference" component={SettingsAppPreferenceScreen} />
@@ -185,6 +188,7 @@ export function MainNavigator() {
       <Stack.Screen name="MyReports" component={MyReportsScreen} />
       <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
       <Stack.Screen name="HelpArticle" component={HelpArticleScreen} />
+      <Stack.Screen name="HelpCategory" component={HelpCategoryScreen} />
       <Stack.Screen name="BusinessDocuments" component={BusinessDocumentsScreen} />
       <Stack.Screen name="SettingsUsername" component={SettingsUsernameScreen} />
       <Stack.Screen name="BrandProfile" component={BrandProfileScreen} />

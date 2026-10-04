@@ -49,6 +49,7 @@ export type MainStackParamList = {
   Connections: { userId: string; tab?: "followers" | "following" | "shopped" | "suggested" | "blocked" };
   Settings: undefined;
   SettingsAccount: undefined;
+  AccountStatus: undefined;
   SettingsSecurity: undefined;
   SettingsNotifications: undefined;
   SettingsAppPreference: undefined;
@@ -104,7 +105,8 @@ export type MainStackParamList = {
   SupportTickets: undefined;
   NewSupportTicket: { category?: SupportTicketCategory; linkedReference?: SupportLinkedReference } | undefined;
   HelpCenter: undefined;
-  HelpArticle: { articleId: string };
+  HelpArticle: { topicSlug: string };
+  HelpCategory: { categorySlug: string; title?: string };
   BusinessDocuments: undefined;
   SupportTicketDetail: { ticketId: string };
   MyReports: undefined;
