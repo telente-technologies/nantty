@@ -94,6 +94,7 @@ model Message {
   mediaId          String?     @db.Uuid
   mediaType        String?
   mediaUrl         String?
+  mediaStatus      MediaProcessingStatus?
   mediaDurationSeconds Int?
   linkPreviewEnvelope  String?
   sharedContent    Json?
@@ -115,6 +116,7 @@ model Message {
   @@unique([conversationId, senderId, clientMessageId])
   @@index([conversationId, id])
   @@index([mediaExpiresAt, mediaPurgedAt])
+  @@index([mediaId])
   @@index([expiresAt])
   @@map("messages")
 }

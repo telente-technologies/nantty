@@ -29,6 +29,7 @@ model IdentityProfile {
 model IdentityPrivacySetting {
   accountId       String @id @map("account_id") @db.Uuid
   personalization Boolean
+  personalizedAds Boolean @map("personalized_ads")
   whoCanMentionMe String  @map("who_can_mention_me")
 
   @@map("privacy_settings")

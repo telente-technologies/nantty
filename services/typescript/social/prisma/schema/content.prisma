@@ -19,6 +19,34 @@ enum MediaKind {
   video
 }
 
+enum ModerationVisibility {
+  visible
+  restricted
+  hidden
+  removed
+}
+
+enum MediaProcessingStatus {
+  processing
+  ready
+  failed
+}
+
+enum ReplyPolicy {
+  everyone
+  following
+  followers
+  mentioned
+  off
+}
+
+enum SensitiveLabel {
+  nudity
+  graphic_violence
+  dangerous_acts
+  self_harm
+}
+
 model Post {
   id                 String         @id @default(uuid(7)) @db.Uuid
   authorId           String         @db.Uuid
@@ -34,12 +62,23 @@ model Post {
   replyToCommenterId String?        @db.Uuid
   stickerLayout      Json?
   mentions           Json           @default("[]")
+  linkPreview        Json?
   likeCount          Int            @default(0)
   commentCount       Int            @default(0)
   repostCount        Int            @default(0)
   shareCount         Int            @default(0)
   viewCount          Int            @default(0)
   profileVisitCount  Int            @default(0)
+  saveCount          Int            @default(0)
+  quoteCount         Int            @default(0)
+  isQuote            Boolean        @default(false)
+  replyPolicy        ReplyPolicy    @default(everyone)
+  sensitiveLabels           SensitiveLabel[] @default([])
+  authorSensitiveLabels     SensitiveLabel[] @default([])
+  moderationSensitiveLabels SensitiveLabel[] @default([])
+  advisorySensitiveLabels   SensitiveLabel[] @default([])
+  sensitiveLabelsReviewed   Boolean          @default(false)
+  moderationVisibility ModerationVisibility @default(visible)
   expiresAt          DateTime?
   deletedAt          DateTime?
   createdAt          DateTime       @default(now())
@@ -54,6 +93,7 @@ model Post {
   @@index([kind, id])
   @@index([kind, createdAt, likeCount])
   @@index([resharedFromId])
+  @@index([resharedFromId, isQuote, id])
   @@index([replyToCommentId])
   @@map("posts")
 }
@@ -71,6 +111,7 @@ model PostMedia {
   height          Int?
   durationSeconds Int?
   blurhash        String?
+  status          MediaProcessingStatus @default(ready)
 
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
@@ -112,6 +153,9 @@ model Comment {
   mentions         Json      @default("[]")
   likeCount        Int       @default(0)
   replyCount       Int       @default(0)
+  depth            Int       @default(0)
+  path             String    @default("")
+  moderationVisibility ModerationVisibility @default(visible)
   deletedAt        DateTime?
   createdAt        DateTime  @default(now())
 
@@ -120,6 +164,7 @@ model Comment {
 
   @@index([postId, parentCommentId, id])
   @@index([rootCommentId, id])
+  @@index([rootCommentId, path])
   @@index([authorId])
   @@map("comments")
 }
@@ -210,4 +255,12 @@ model SoundSave {
   @@id([soundId, userId])
   @@index([userId, createdAt])
   @@map("sound_saves")
+}
+
+model ContentPreference {
+  accountId                   String   @id @db.Uuid
+  showSensitiveWithoutWarning Boolean  @default(false)
+  updatedAt                   DateTime @default(now()) @updatedAt
+
+  @@map("content_preferences")
 }
