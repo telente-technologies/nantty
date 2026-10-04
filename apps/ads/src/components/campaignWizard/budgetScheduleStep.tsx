@@ -4,9 +4,10 @@ import { CheckboxField, SegmentedControl, SelectField, TextField } from "@/compo
 import { bidStrategyOptions } from "@/constants/campaignOptions.constant";
 import { useAdsQuery } from "@/hooks/useAdsQuery.hook";
 import { billingApi } from "@/services/billingApi.service";
+import { CampaignCostEstimatePanel } from "@/components/campaignWizard/campaignCostEstimatePanel";
 import { toolsApi } from "@/services/toolsApi.service";
 import type { BidStrategyType, BudgetType } from "@/types/campaign.type";
-import { formatMoneyForDisplay, readCurrencySymbol } from "@/utils/money.util";
+import { formatMoneyForDisplay, parseTypedMajorAmountToMoney, readCurrencySymbol } from "@/utils/money.util";
 
 import styles from "./wizardSteps.module.css";
 
@@ -37,6 +38,15 @@ export function BudgetScheduleStep({ state, dispatch, errors, currency, accountI
         <TextField label="Start" type="datetime-local" value={state.startAtLocal} onValueChange={(startAtLocal) => updateFields({ startAtLocal })} error={errors.startAt} />
         <TextField label={state.budgetType === "lifetime" ? "End" : "End (optional)"} type="datetime-local" value={state.endAtLocal} onValueChange={(endAtLocal) => updateFields({ endAtLocal })} error={errors.endAt} hint={state.budgetType === "daily" ? "Leave empty to run until you pause it." : undefined} />
       </div>
+      <CampaignCostEstimatePanel
+        countryCodes={targetedCountryCodes}
+        currency={currency}
+        budgetType={state.budgetType}
+        budgetAmountMinor={parseTypedMajorAmountToMoney(state.budgetAmountText, currency)?.amountMinor ?? null}
+        startAtLocal={state.startAtLocal}
+        endAtLocal={state.endAtLocal}
+        objective={state.objective}
+      />
       <fieldset className={styles.fieldset}>
         <legend className={styles.fieldLegend}>Bid strategy</legend>
         <div className={styles.bidGrid}>
