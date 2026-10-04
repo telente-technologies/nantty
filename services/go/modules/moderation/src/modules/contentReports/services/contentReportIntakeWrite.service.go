@@ -94,6 +94,9 @@ func decidedAt(report *ent.ContentReport) time.Time {
 
 func (intake Intake) applyClassifier(ctx context.Context, tx *ent.Tx, report *ent.ContentReport, update *ent.ContentReportUpdateOne, input IntakeInput, now time.Time) error {
 	update.SetClassifierScores(input.ClassifierScores).SetClassifierAction(contentreport.ClassifierAction(input.ClassifierAction))
+	if report.TargetType == contentreport.TargetTypeLive {
+		return nil
+	}
 	wanted := VisibilityForClassifierAction(input.ClassifierAction)
 	if VisibilityRank(wanted) <= VisibilityRank(string(report.Visibility)) {
 		return nil

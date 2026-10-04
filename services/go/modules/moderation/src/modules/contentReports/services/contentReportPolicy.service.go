@@ -7,11 +7,11 @@ import (
 
 var ContentTargetTypes = []string{"post", "comment", "clip", "live", "product", "store", "sound"}
 
-var contentReasons = []string{"spam", "scam", "harassment", "hate", "nudity", "violence", "counterfeit", "impersonation", "misinformation", "self_harm", "other"}
+var contentReasons = []string{"child_safety", "spam", "scam", "harassment", "hate", "nudity", "violence", "counterfeit", "impersonation", "misinformation", "self_harm", "other"}
 
 var reasonAliases = map[string]string{
 	"scam_or_fraud": "scam", "counterfeit_product": "counterfeit", "nudity_or_sexual_content": "nudity", "hate_or_harassment": "harassment",
-	"something_else": "other", "intellectual_property": "counterfeit", "prohibited_goods": "other", "personal_data": "other",
+	"something_else": "other", "intellectual_property": "counterfeit", "sexual_content": "nudity", "fraud": "scam", "violence_or_threats": "violence", "prohibited_goods": "other", "personal_data": "other",
 }
 
 const (
@@ -29,6 +29,8 @@ func NormalizeReason(raw string) (string, bool) {
 
 func PriorityForReason(reason string) string {
 	switch reason {
+	case "child_safety":
+		return "urgent"
 	case "self_harm", "violence":
 		return "high"
 	case "spam":
