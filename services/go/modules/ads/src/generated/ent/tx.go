@@ -30,6 +30,8 @@ type Tx struct {
 	AdBoost *AdBoostClient
 	// AdCampaign is the client for interacting with the AdCampaign builders.
 	AdCampaign *AdCampaignClient
+	// AdCardStatsDaily is the client for interacting with the AdCardStatsDaily builders.
+	AdCardStatsDaily *AdCardStatsDailyClient
 	// AdContentSignal is the client for interacting with the AdContentSignal builders.
 	AdContentSignal *AdContentSignalClient
 	// AdConversion is the client for interacting with the AdConversion builders.
@@ -199,6 +201,7 @@ func (tx *Tx) init() {
 	tx.AdAudienceMember = NewAdAudienceMemberClient(tx.config)
 	tx.AdBoost = NewAdBoostClient(tx.config)
 	tx.AdCampaign = NewAdCampaignClient(tx.config)
+	tx.AdCardStatsDaily = NewAdCardStatsDailyClient(tx.config)
 	tx.AdContentSignal = NewAdContentSignalClient(tx.config)
 	tx.AdConversion = NewAdConversionClient(tx.config)
 	tx.AdCreatorEarning = NewAdCreatorEarningClient(tx.config)

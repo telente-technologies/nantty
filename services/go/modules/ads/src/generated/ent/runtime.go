@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adactivityentry"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
+	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
@@ -409,6 +410,31 @@ func init() {
 	adcampaignDescID := adcampaignMixinFields0[0].Descriptor()
 	// adcampaign.DefaultID holds the default value on creation for the id field.
 	adcampaign.DefaultID = adcampaignDescID.Default.(func() uuid.UUID)
+	adcardstatsdailyMixin := schema.AdCardStatsDaily{}.Mixin()
+	adcardstatsdailyMixinFields0 := adcardstatsdailyMixin[0].Fields()
+	_ = adcardstatsdailyMixinFields0
+	adcardstatsdailyFields := schema.AdCardStatsDaily{}.Fields()
+	_ = adcardstatsdailyFields
+	// adcardstatsdailyDescCreatedAt is the schema descriptor for created_at field.
+	adcardstatsdailyDescCreatedAt := adcardstatsdailyMixinFields0[1].Descriptor()
+	// adcardstatsdaily.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adcardstatsdaily.DefaultCreatedAt = adcardstatsdailyDescCreatedAt.Default.(func() time.Time)
+	// adcardstatsdailyDescDay is the schema descriptor for day field.
+	adcardstatsdailyDescDay := adcardstatsdailyFields[0].Descriptor()
+	// adcardstatsdaily.DayValidator is a validator for the "day" field. It is called by the builders before save.
+	adcardstatsdaily.DayValidator = adcardstatsdailyDescDay.Validators[0].(func(string) error)
+	// adcardstatsdailyDescImpressions is the schema descriptor for impressions field.
+	adcardstatsdailyDescImpressions := adcardstatsdailyFields[4].Descriptor()
+	// adcardstatsdaily.DefaultImpressions holds the default value on creation for the impressions field.
+	adcardstatsdaily.DefaultImpressions = adcardstatsdailyDescImpressions.Default.(int64)
+	// adcardstatsdailyDescClicks is the schema descriptor for clicks field.
+	adcardstatsdailyDescClicks := adcardstatsdailyFields[5].Descriptor()
+	// adcardstatsdaily.DefaultClicks holds the default value on creation for the clicks field.
+	adcardstatsdaily.DefaultClicks = adcardstatsdailyDescClicks.Default.(int64)
+	// adcardstatsdailyDescID is the schema descriptor for id field.
+	adcardstatsdailyDescID := adcardstatsdailyMixinFields0[0].Descriptor()
+	// adcardstatsdaily.DefaultID holds the default value on creation for the id field.
+	adcardstatsdaily.DefaultID = adcardstatsdailyDescID.Default.(func() uuid.UUID)
 	adcontentsignalFields := schema.AdContentSignal{}.Fields()
 	_ = adcontentsignalFields
 	// adcontentsignalDescContentID is the schema descriptor for content_id field.

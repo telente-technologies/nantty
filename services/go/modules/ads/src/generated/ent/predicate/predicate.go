@@ -30,6 +30,9 @@ type AdBoost func(*sql.Selector)
 // AdCampaign is the predicate function for adcampaign builders.
 type AdCampaign func(*sql.Selector)
 
+// AdCardStatsDaily is the predicate function for adcardstatsdaily builders.
+type AdCardStatsDaily func(*sql.Selector)
+
 // AdContentSignal is the predicate function for adcontentsignal builders.
 type AdContentSignal func(*sql.Selector)
 
