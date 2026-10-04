@@ -8,6 +8,7 @@ import { followRepository } from "../../follows/repositories/follow.repository.j
 import type { PostView } from "../../posts/models/post.model.js";
 import type { PostRow } from "../../posts/repositories/post.repository.js";
 import { buildPostViews } from "../../posts/services/postView.service.js";
+import { isPostWithheldFromViewer, resolveCurrentViewerContentPolicy } from "../../posts/services/sensitiveContent.service.js";
 import { feedRepository } from "../repositories/feed.repository.js";
 
 export interface RankedFeedRequest {
@@ -30,18 +31,19 @@ export async function buildRankedFeedPage(context: HandlerContext, request: Rank
   const now = context.clock.now();
   const since = new Date(now.getTime() - popularFeedCandidateWindowDays * 86_400_000);
   const rows = await feedRepository.popularCandidates(db, request.kinds, since);
-  const [privateAuthors, hiddenAuthors, dismissed, followed] = await Promise.all([
+  const [policy, privateAuthors, hiddenAuthors, dismissed, followed] = await Promise.all([
+    resolveCurrentViewerContentPolicy(context, request.viewerId),
     context.directory.findPrivateAccountIds(rows.map((row) => row.authorId)),
     request.viewerId === undefined ? new Set<string>() : blockRepository.everyoneBlockedByOrBlocking(db, request.viewerId),
     request.viewerId === undefined || !request.personalized ? new Set<string>() : feedRepository.dismissedPostIds(db, request.viewerId),
     request.viewerId === undefined || !request.personalized ? new Set<string>() : followRepository.followedAccountIds(db, request.viewerId, [...new Set(rows.map((row) => row.authorId))]),
   ]);
-  const eligible = rows.filter((row) => !privateAuthors.has(row.authorId) && !hiddenAuthors.has(row.authorId) && !dismissed.has(row.id) && row.authorId !== request.viewerId);
+  const eligible = rows.filter((row) => !privateAuthors.has(row.authorId) && !hiddenAuthors.has(row.authorId) && !dismissed.has(row.id) && row.authorId !== request.viewerId && !isPostWithheldFromViewer(row, policy));
   const ranked = await context.ranker.rank(eligible.map((row) => toRankingCandidate(row, followed)), { viewerId: request.viewerId ?? null, personalized: request.personalized, now });
   const offset = decodeOffsetCursor(request.cursor);
   const window = ranked.slice(offset, offset + request.limit);
   const rowById = new Map(eligible.map((row) => [row.id, row]));
   const pageRows = window.flatMap((candidate) => rowById.get(candidate.postId) ?? []);
   const nextOffset = offset + request.limit;
-  return { data: await buildPostViews(context, request.viewerId, pageRows), nextCursor: nextOffset < ranked.length ? encodeOffsetCursor(nextOffset) : null };
+  return { data: await buildPostViews(context, request.viewerId, pageRows, policy), nextCursor: nextOffset < ranked.length ? encodeOffsetCursor(nextOffset) : null };
 }

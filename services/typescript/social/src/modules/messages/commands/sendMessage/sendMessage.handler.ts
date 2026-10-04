@@ -44,7 +44,7 @@ export function createSendMessageHandler(context: HandlerContext): Handler<SendM
           ...(command.idempotencyKey === undefined ? {} : { clientMessageId: command.idempotencyKey }),
           ...(validated.ciphertext === null ? {} : { ciphertext: validated.ciphertext }),
           ...(validated.deviceId === null ? {} : { deviceId: validated.deviceId }),
-          ...(validated.media === undefined ? {} : { mediaId: validated.media.mediaId, mediaUrl: validated.media.url ?? null, mediaDurationSeconds: validated.media.durationSeconds === undefined ? null : Math.round(validated.media.durationSeconds), mediaType: validated.mediaType }),
+          ...(validated.media === undefined ? {} : { mediaId: validated.media.mediaId, mediaUrl: validated.media.url ?? null, mediaStatus: validated.media.url === undefined || validated.media.url === null ? "processing" : "ready", mediaDurationSeconds: validated.media.durationSeconds === undefined ? null : Math.round(validated.media.durationSeconds), mediaType: validated.mediaType }),
           ...(validated.linkPreviewEnvelope === null ? {} : { linkPreviewEnvelope: validated.linkPreviewEnvelope }),
           ...(validated.sharedContent === null ? {} : { sharedContent: validated.sharedContent as unknown as Prisma.InputJsonValue }),
           ...(validated.location === null ? {} : { location: validated.location as unknown as Prisma.InputJsonValue }),

@@ -1,11 +1,12 @@
 import { popularFeedCandidateLimit } from "../../../constants/social.constant.js";
 import type { Db } from "../../../types/database.type.js";
 import { postWithMedia, type PostRow } from "../../posts/repositories/post.repository.js";
+import { shownToViewers } from "../../../constants/moderation.constant.js";
 
 export const feedRepository = {
   pageFollowing: (db: Db, authorIds: readonly string[], kinds: readonly ("post" | "clip")[], limit: number, cursor: string | undefined): Promise<PostRow[]> =>
     db.post.findMany({
-      where: { authorId: { in: [...authorIds] }, kind: { in: [...kinds] }, deletedAt: null },
+      where: { authorId: { in: [...authorIds] }, kind: { in: [...kinds] }, ...shownToViewers },
       orderBy: { id: "desc" },
       take: limit + 1,
       include: postWithMedia,
@@ -14,7 +15,7 @@ export const feedRepository = {
 
   popularCandidates: (db: Db, kinds: readonly ("post" | "clip")[], since: Date): Promise<PostRow[]> =>
     db.post.findMany({
-      where: { kind: { in: [...kinds] }, deletedAt: null, audience: "everyone", visibility: "public", createdAt: { gte: since } },
+      where: { kind: { in: [...kinds] }, deletedAt: null, moderationVisibility: "visible", audience: "everyone", visibility: "public", createdAt: { gte: since } },
       orderBy: [{ likeCount: "desc" }, { id: "desc" }],
       take: popularFeedCandidateLimit,
       include: postWithMedia,
