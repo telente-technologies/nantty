@@ -95,6 +95,7 @@ type SellerOrderView struct {
 	CreatedAt         time.Time             `json:"createdAt"`
 	DeliveredAt       *time.Time            `json:"deliveredAt"`
 	PaymentStatus     string                `json:"paymentStatus"`
+	PaymentMode       string                `json:"paymentMode"`
 	PaymentProvider   string                `json:"paymentProvider"`
 	PaymentReference  string                `json:"paymentReference"`
 	PaidAt            *time.Time            `json:"paidAt"`

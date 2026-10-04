@@ -31,6 +31,9 @@ func RunSweepsUntilContextDone(ctx context.Context, deployed *container.Containe
 	creditTicker := time.NewTicker(deployed.Settings.CreditExpirySweepPeriod)
 	defer checkoutTicker.Stop()
 	defer creditTicker.Stop()
+	rollupTicker := time.NewTicker(deployed.Settings.SuccessRateRollupPeriod)
+	defer rollupTicker.Stop()
+	refreshSuccessRates(ctx, deployed)
 	for {
 		select {
 		case <-ctx.Done():
@@ -39,10 +42,18 @@ func RunSweepsUntilContextDone(ctx context.Context, deployed *container.Containe
 			if _, err := ExpireOpenCheckouts(ctx, deployed, 50); err != nil && ctx.Err() == nil {
 				deployed.Logger.WarnContext(ctx, "checkout expiry sweep failed", slog.Any("error", err))
 			}
+		case <-rollupTicker.C:
+			refreshSuccessRates(ctx, deployed)
 		case <-creditTicker.C:
 			if err := services.RecordExpiredStoreCredit(ctx, deployed); err != nil && ctx.Err() == nil {
 				deployed.Logger.WarnContext(ctx, "store credit expiry sweep failed", slog.Any("error", err))
 			}
 		}
+	}
+}
+
+func refreshSuccessRates(ctx context.Context, deployed *container.Container) {
+	if err := services.RefreshStoreSuccessStats(ctx, deployed); err != nil && ctx.Err() == nil {
+		deployed.Logger.WarnContext(ctx, "store success rate rollup failed", slog.Any("error", err))
 	}
 }

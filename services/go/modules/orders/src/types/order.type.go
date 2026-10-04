@@ -15,12 +15,14 @@ type UserSummaryView struct {
 }
 
 type StoreSummaryView struct {
-	Id          string  `json:"id"`
-	Name        string  `json:"name"`
-	LogoUrl     *string `json:"logoUrl"`
-	Rating      float64 `json:"rating"`
-	RatingCount int     `json:"ratingCount"`
-	ReviewCount int     `json:"reviewCount"`
+	Id          string   `json:"id"`
+	Name        string   `json:"name"`
+	LogoUrl     *string  `json:"logoUrl"`
+	Verified    bool     `json:"verified"`
+	SuccessRate *float64 `json:"successRate"`
+	Rating      float64  `json:"rating"`
+	RatingCount int      `json:"ratingCount"`
+	ReviewCount int      `json:"reviewCount"`
 }
 
 type OrderView struct {
@@ -29,6 +31,7 @@ type OrderView struct {
 	Status           string           `json:"status"`
 	FulfilmentStatus string           `json:"fulfilmentStatus"`
 	PaymentStatus    string           `json:"paymentStatus"`
+	PaymentMode      string           `json:"paymentMode"`
 	Items            []CartItemView   `json:"items"`
 	Subtotal         money.Money      `json:"subtotal"`
 	Discount         money.Money      `json:"discount"`

@@ -11,6 +11,7 @@ import (
 
 	"zudomart/modules/users/src/configs"
 	"zudomart/modules/users/src/generated/ent"
+	"zudomart/modules/users/src/integrations"
 	"zudomart/platform/jwtauth"
 )
 
@@ -22,6 +23,17 @@ type Container struct {
 	AccessVerifier     *jwtauth.AccessTokenVerifier
 	PendingWithdrawals PendingWithdrawalChecker
 	ActivityCounts     ActivityCountSource
+	IdentityCapture    IdentityCaptureProvider
+	Eligibility        VerificationEligibilityAssessor
+}
+
+type IdentityCaptureProvider interface {
+	CreateWebToken(ctx context.Context, userId, jobId, product string) (string, error)
+	CreateSmileLink(ctx context.Context, request integrations.SmileLinkRequest) (string, error)
+}
+
+type VerificationEligibilityAssessor interface {
+	AssessVerificationEligibility(ctx context.Context, signals integrations.EligibilitySignals) (integrations.EligibilityAssessment, error)
 }
 
 type ActivityCountSource interface {

@@ -14,6 +14,7 @@ type OrderPayable struct {
 	SellerUserId   string
 	Amount         money.Money
 	ProductSummary string
+	PaymentMode    string
 	StoreVerified  bool
 }
 
