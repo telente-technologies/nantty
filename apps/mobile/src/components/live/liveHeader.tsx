@@ -19,6 +19,7 @@ export interface LiveHeaderProps {
   readonly onBack: () => void;
   readonly onToggleFollow: () => void;
   readonly onMore: () => void;
+  readonly onHostLongPress?: () => void;
 }
 
 function HostCounts({ followers, foreground }: { followers: number; foreground: LiveForeground }) {
@@ -70,6 +71,7 @@ export function LiveHeader(props: LiveHeaderProps) {
           accessibilityRole="button"
           accessibilityLabel={`${session.host.name}'s profile`}
           onPress={() => openUserProfile(session.host.id)}
+          onLongPress={props.onHostLongPress}
           style={[styles.host, { backgroundColor: foreground.chip, borderColor: foreground.chipBorder }]}
         >
           <Avatar uri={session.host.avatarUrl} size={32} />
