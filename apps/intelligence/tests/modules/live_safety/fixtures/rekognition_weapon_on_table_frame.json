@@ -1,0 +1,8 @@
+{
+  "ModerationLabels": [
+    {"Confidence": 88.3, "Name": "Violence", "ParentName": "", "TaxonomyLevel": 1},
+    {"Confidence": 88.3, "Name": "Weapons", "ParentName": "Violence", "TaxonomyLevel": 2}
+  ],
+  "ModerationModelVersion": "7.0",
+  "ContentTypes": []
+}

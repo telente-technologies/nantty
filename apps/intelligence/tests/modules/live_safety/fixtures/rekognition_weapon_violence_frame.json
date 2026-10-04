@@ -1,0 +1,10 @@
+{
+  "ModerationLabels": [
+    {"Confidence": 93.2, "Name": "Violence", "ParentName": "", "TaxonomyLevel": 1},
+    {"Confidence": 93.2, "Name": "Graphic Violence", "ParentName": "Violence", "TaxonomyLevel": 2},
+    {"Confidence": 92.9, "Name": "Weapon Violence", "ParentName": "Graphic Violence", "TaxonomyLevel": 3},
+    {"Confidence": 61.0, "Name": "Blood & Gore", "ParentName": "Graphic Violence", "TaxonomyLevel": 3}
+  ],
+  "ModerationModelVersion": "7.0",
+  "ContentTypes": []
+}
