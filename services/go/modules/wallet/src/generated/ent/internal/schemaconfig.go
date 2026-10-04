@@ -14,6 +14,7 @@ type SchemaConfig struct {
 	CoinPurchase      string // CoinPurchase table.
 	CoinTransfer      string // CoinTransfer table.
 	IdempotentRequest string // IdempotentRequest table.
+	MonetisationHold  string // MonetisationHold table.
 	OutboxEvent       string // OutboxEvent table.
 	PayoutAccount     string // PayoutAccount table.
 	SellerReserveFlag string // SellerReserveFlag table.

@@ -230,6 +230,22 @@ var (
 			},
 		},
 	}
+	// MonetisationHoldsColumns holds the columns for the "monetisation_holds" table.
+	MonetisationHoldsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 80},
+		{Name: "is_paused", Type: field.TypeBool, Default: false},
+		{Name: "account_status", Type: field.TypeString, Size: 40, Default: "GOOD_STANDING"},
+		{Name: "restrictions", Type: field.TypeJSON},
+		{Name: "reason", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "health_changed_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// MonetisationHoldsTable holds the schema information for the "monetisation_holds" table.
+	MonetisationHoldsTable = &schema.Table{
+		Name:       "monetisation_holds",
+		Columns:    MonetisationHoldsColumns,
+		PrimaryKey: []*schema.Column{MonetisationHoldsColumns[0]},
+	}
 	// OutboxEventsColumns holds the columns for the "outbox_events" table.
 	OutboxEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -412,6 +428,7 @@ var (
 		CoinPurchasesTable,
 		CoinTransfersTable,
 		IdempotentRequestsTable,
+		MonetisationHoldsTable,
 		OutboxEventsTable,
 		PayoutAccountsTable,
 		SellerReserveFlagsTable,
