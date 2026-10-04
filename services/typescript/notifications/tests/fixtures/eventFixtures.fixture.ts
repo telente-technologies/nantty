@@ -29,6 +29,8 @@ export interface EventFixture {
   readonly inAppRecipients: readonly string[];
 }
 
+const ticket = { ticketId: "7b9e2f3a-1111-4222-8333-123456789abc", reference: "SUP-10421", accountId: "u1", subject: "Refund has not arrived", category: "payment", channel: "form" };
+const copyrightRemedy = { claimId: "0192f0a1-7c3e-7000-8000-00000000c1a1", targetType: "clip", targetId: "clip-1", infringerId: "u1", workTitle: "Lagos Nights", reason: "Proof of ownership matches.", canSubmitCounterNotice: true };
 export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "order.placed": { data: { ...order, payBy: "2026-10-05T10:00:00.000Z", paymentUrl: "https://zudomart.com/pay/o1" }, templates: ["orderPlaced"], inAppRecipients: ["buyer1"] },
   "order.paid": { data: { ...order, buyerName: "Bisola", paymentMethod: "Card", paidAt: "2026-10-03T10:00:00.000Z", acceptBy: "2026-10-04T10:00:00.000Z", paymentMode: "escrow" }, templates: ["paymentConfirmed", "sellerNewOrder"], inAppRecipients: ["buyer1", "seller1"] },
@@ -81,6 +83,9 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "live.started": { data: { liveId: "l1", hostId: "h1", title: "Friday drop", category: "fashion", hostName: "Adaeze", hostHandle: "adaeze", notifyUserIds: ["u1", "u2"], emailUserIds: ["u2"] }, templates: ["liveStarted"], inAppRecipients: ["u1", "u2"] },
   "checkmark.suggested": { data: { ...mark, price: money(300000), reasons: ["Consistent sales"] }, templates: ["checkmarkSuggestion"], inAppRecipients: ["u1"] },
   "checkmark.applicationSubmitted": { data: { ...mark, applicationId: "A1" }, templates: ["checkmarkApplicationReceived"], inAppRecipients: ["u1"] },
+  "ticket.created": { data: { ...ticket, priority: "high", firstResponseHours: 4 }, templates: ["supportTicketReceived"], inAppRecipients: ["u1"] },
+  "ticket.replied": { data: { ...ticket, authorKind: "agent", agentName: "Ngozi", message: "The refund left us today.", repliedAt: "2026-10-04T10:00:00.000Z", status: "awaiting_user" }, templates: ["supportAgentReplied"], inAppRecipients: ["u1"] },
+  "ticket.resolved": { data: { ...ticket, resolution: "Refunds take up to 10 business days.", reopenDays: 7, resolvedAt: "2026-10-04T11:00:00.000Z" }, templates: ["supportTicketResolved"], inAppRecipients: ["u1"] },
   "checkmark.approved": { data: { ...mark, renewsAt: "2026-11-03T00:00:00.000Z" }, templates: ["checkmarkApproved"], inAppRecipients: ["u1"] },
   "checkmark.rejected": { data: { ...mark, reasons: ["Documents unclear"], reapplyFrom: "2026-11-03T00:00:00.000Z" }, templates: ["checkmarkRejected"], inAppRecipients: ["u1"] },
   "checkmark.revoked": { data: { ...mark, reason: "Impersonation", appealUrl: "https://zudomart.com/appeal" }, templates: ["checkmarkRevoked"], inAppRecipients: ["u1"] },
@@ -97,5 +102,16 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "planTrial.converted": { data: { ...plan, nextBillingAt: "2026-11-10T00:00:00.000Z", invoiceNumber: "INV-1" }, templates: ["planTrialConverted"], inAppRecipients: ["u1"] },
   "planInvoice.paymentFailed": { data: { ...plan, reason: "Card declined", retryAt: "2026-10-05T00:00:00.000Z", downgradeAt: "2026-10-12T00:00:00.000Z" }, templates: ["planPaymentFailed"], inAppRecipients: ["u1"] },
   "planInvoice.paid": { data: { ...plan, invoiceNumber: "INV-2", paidAt: "2026-10-03T00:00:00.000Z", periodStart: "2026-10-03T00:00:00.000Z", periodEnd: "2026-11-03T00:00:00.000Z", vat: money(37500) }, templates: ["planReceipt"], inAppRecipients: ["u1"] },
+  "verification.eligible": { data: { accountId: "u1", checkmark: "blue", accountName: "@amaka.styles", deepLink: "https://zudomart.com/settings/verification?step=pay" }, templates: ["verificationEligible"], inAppRecipients: ["u1"] },
+  "verification.underReview": { data: { accountId: "u1", checkmark: "gold", accountName: "Adire Studio", caseId: "c1", reviewWithinDays: 3 }, templates: ["verificationUnderReview"], inAppRecipients: ["u1"] },
+  "verification.approved": { data: { accountId: "u1", checkmark: "blue", accountName: "@amaka.styles", caseId: "c1", verifiedAt: "2026-10-04T10:00:00.000Z" }, templates: ["verificationApproved"], inAppRecipients: ["u1"] },
+  "verification.rejectedRefunded": { data: { accountId: "u1", checkmark: "blue", accountName: "@tobi", caseId: "c1", reasons: ["Name does not match"], refundMethod: "apple_request", reapplyFrom: "2026-11-03T00:00:00.000Z" }, templates: ["verificationRejectedRefunded"], inAppRecipients: ["u1"] },
   "cardVerification.refunded": { data: { accountId: "u1", amount: money(10000), cardLabel: "Visa ending 4242", reference: "REF-1" }, templates: ["cardVerificationRefunded"], inAppRecipients: ["u1"] },
+  "copyrightClaim.warningIssued": { data: { ...copyrightRemedy, deadlineAt: "2026-10-05T11:59:00.000Z", warningId: "0192f0a1-7c3e-7000-8000-00000000c1a2" }, templates: ["copyrightWarning"], inAppRecipients: ["u1"] },
+  "copyrightClaim.audioMuteOrdered": { data: copyrightRemedy, templates: ["audioMuted"], inAppRecipients: ["u1"] },
+  "copyrightClaim.contentTakenDown": { data: { ...copyrightRemedy, strikeId: "0192f0a1-7c3e-7000-8000-00000000c1a3" }, templates: ["contentTakenDown"], inAppRecipients: ["u1"] },
+  "copyrightClaim.counterNoticeReceived": { data: { claimId: copyrightRemedy.claimId, noticeId: "n1", infringerId: "u1", restoreEligibleAt: "2026-10-18T09:00:00.000Z", claimantUserId: "c1", claimantEmail: "owner@label.com", workTitle: "Lagos Nights" }, templates: ["counterNoticeReceived"], inAppRecipients: ["c1"] },
+  "copyrightClaim.restored": { data: { ...copyrightRemedy, remedy: "audio_muted" }, templates: ["contentRestored"], inAppRecipients: ["u1"] },
+  "strike.issued": { data: { strikeId: "s1", accountId: "u1", kind: "strike", policy: "Copyright infringement", source: "copyright", expiresAt: "2027-01-02T00:00:00.000Z", activeStrikeCount: 1, isRepeatInfringer: false }, templates: ["strikeIssued"], inAppRecipients: ["u1"] },
+  "strike.expired": { data: { strikeId: "s1", accountId: "u1", kind: "strike", policy: "Copyright infringement", source: "copyright", expiredAt: "2027-01-02T00:00:00.000Z", activeStrikeCount: 0 }, templates: ["strikeExpired"], inAppRecipients: ["u1"] },
 };
