@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -12,6 +12,8 @@ import { modalMotion } from "./modalChrome.constant";
 
 export function ToastHost() {
   const message = useToastStore((state) => state.message);
+  const action = useToastStore((state) => state.action);
+  const dismissToast = useToastStore((state) => state.dismissToast);
   const tone = useToastStore((state) => state.tone);
   const toastId = useToastStore((state) => state.toastId);
   const styles = useStyles();
@@ -21,8 +23,9 @@ export function ToastHost() {
   if (!message) return null;
   const ink = isDark ? "#0A0A14" : "#FFFFFF";
   const toneInk = tone === "success" ? (isDark ? "#067A55" : "#6EE7B7") : tone === "error" ? (isDark ? "#B91C1C" : "#FCA5A5") : ink;
+  const actionInk = isDark ? "#4F46E5" : "#A5B4FC";
   return (
-    <View pointerEvents="none" style={[styles.host, { bottom: insets.bottom + 72 }]} accessibilityLiveRegion="polite">
+    <View pointerEvents={action ? "box-none" : "none"} style={[styles.host, { bottom: insets.bottom + 72 }]} accessibilityLiveRegion="polite">
       <Animated.View
         key={toastId}
         entering={reduceMotion ? undefined : FadeInDown.duration(modalMotion.enterMs)}
@@ -35,6 +38,20 @@ export function ToastHost() {
         <Text size={14} lineHeight={19} weight={500} color={ink} style={styles.text} maxFontSizeMultiplier={1.6}>
           {message}
         </Text>
+        {action ? (
+          <Pressable
+            accessibilityRole="button"
+            hitSlop={10}
+            onPress={() => {
+              dismissToast();
+              action.onPress();
+            }}
+          >
+            <Text size={14} lineHeight={19} weight={700} color={actionInk}>
+              {action.label}
+            </Text>
+          </Pressable>
+        ) : null}
       </Animated.View>
     </View>
   );

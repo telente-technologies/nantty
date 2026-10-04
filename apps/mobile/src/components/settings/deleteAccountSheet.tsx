@@ -42,7 +42,7 @@ export function DeleteAccountSheet({ visible, onClose }: { visible: boolean; onC
       visible={visible}
       onClose={onClose}
       title="Delete my account"
-      subtitle="Scheduled with a grace period, so you can change your mind"
+      subtitle="Your account will be permanently deleted in 30 days. Log in any time before then to cancel."
       scrollable
       footerActions={[
         { label: "Delete my account", style: "destructive", disabled: confirmation.trim() !== CONFIRMATION_WORD, loading: requestDeletion.isPending, onPress: () => requestDeletion.mutate() },

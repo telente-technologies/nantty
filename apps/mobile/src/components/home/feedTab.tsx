@@ -5,7 +5,7 @@ import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "r
 
 import { GuestFeedBanner } from "@/components/auth/guestFeedBanner";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
-import { PostCard } from "@/components/feed/postCard";
+import { SwipeablePostCard } from "@/components/feed/swipeablePostCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -33,6 +33,7 @@ export function FeedTab() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [productsInOpenPost, setProductsInOpenPost] = useState<readonly ProductSummary[] | null>(null);
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
+  const [isSwipingPost, setIsSwipingPost] = useState(false);
   const { togglePostLike, followPostAuthor, sharePost } = usePostInteractions();
   const { addProductToCart } = useCartActions();
   const { offerSendInChat, sendInChatElement } = useShareToChat();
@@ -104,13 +105,16 @@ export function FeedTab() {
           />
         }
         stickyHeaderIndices={[0]}
+        scrollEnabled={!isSwipingPost}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) =>
           item.type === "suggestedClips" ? (
             <SuggestedClipsRow clips={suggestedClips.data ?? []} onPressClip={(clipId) => navigation.navigate("Tabs", { screen: "Clips", params: { startId: clipId } })} />
           ) : (
-            <PostCard
+            <SwipeablePostCard
               post={item.post}
+              onOpenComments={() => navigation.navigate("PostDetail", { postId: item.post.id })}
+              onSwipeActiveChange={setIsSwipingPost}
               onPressAuthor={() => navigation.navigate("UserProfile", { userId: item.post.author.id })}
               onToggleFollow={() => followPostAuthor(item.post)}
               onToggleLike={() => togglePostLike(item.post)}

@@ -1,8 +1,9 @@
+import { readProductIdFromSlug } from "@/config/webAppLinks.config";
 import type { SharedContentKind, SharedContentReference } from "@/types";
 
-const INTERNAL_HOSTS = ["zudomart.app", "www.zudomart.app", "zudomart.com", "www.zudomart.com"];
+const INTERNAL_HOSTS = ["zudomart.app", "www.zudomart.app", "zudomart.com", "www.zudomart.com", "app.zudomart.com"];
 const URL_PATTERN = /https?:\/\/[^\s<>"']+/gi;
-const INTERNAL_PATH_KINDS: Record<string, SharedContentKind> = { product: "product", products: "product", post: "post", posts: "post", p: "post", clip: "clip", clips: "clip", u: "profile", live: "live", lives: "live", store: "store", stores: "store" };
+const INTERNAL_PATH_KINDS: Record<string, SharedContentKind> = { product: "product", products: "product", post: "post", posts: "post", p: "product", clip: "clip", clips: "clip", u: "profile", live: "live", lives: "live", store: "store", stores: "store" };
 const KNOWN_SHORTENER_DOMAINS = ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd", "cutt.ly", "rb.gy", "shorturl.at"];
 const SUSPICIOUS_TOP_LEVEL_DOMAINS = [".zip", ".mov", ".top", ".click", ".xyz", ".gq", ".tk"];
 
@@ -21,9 +22,12 @@ export const findUrlsInText = (text: string): string[] => (text.match(URL_PATTER
 export const readInternalReferenceFromUrl = (rawUrl: string): SharedContentReference | null => {
   const url = parseUrl(rawUrl);
   if (!url || !INTERNAL_HOSTS.includes(url.hostname.toLowerCase())) return null;
-  const [pathKind, id] = url.pathname.split("/").filter(Boolean);
+  const segments = url.pathname.split("/").filter(Boolean);
+  const [pathKind, id] = segments;
+  if (segments.length === 1 && pathKind && /^@?[A-Za-z0-9._]{3,30}$/.test(pathKind) && !INTERNAL_PATH_KINDS[pathKind]) return { kind: "profile", id: pathKind.replace(/^@/, "") };
   const kind = pathKind ? INTERNAL_PATH_KINDS[pathKind] : undefined;
-  return kind && id ? { kind, id: decodeURIComponent(id) } : null;
+  if (!kind || !id) return null;
+  return { kind, id: pathKind === "p" ? readProductIdFromSlug(id) : decodeURIComponent(id) };
 };
 
 export const findFirstExternalUrl = (text: string): string | null =>
@@ -60,7 +64,7 @@ export const buildInternalRoute = (reference: SharedContentReference, profileUse
     case "live":
       return { name: "Live", params: { liveId: reference.id } } as const;
     case "profile":
-      return { name: "UserProfile", params: { userId: profileUserId ?? reference.id } } as const;
+      return profileUserId ? ({ name: "UserProfile", params: { userId: profileUserId } } as const) : ({ name: "UserProfileByUsername", params: { username: reference.id } } as const);
     default:
       return { name: "PostDetail", params: { postId: reference.id } } as const;
   }
