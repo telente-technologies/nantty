@@ -23,7 +23,15 @@ export function describeDocumentType(code: string): string {
   return labels[code] ?? code.replaceAll("_", " ").toLowerCase();
 }
 
-export function describeRefund(refundMethod: string, refundStatus: string): string {
+function describeCheckmarkShareRefund(refundStatus: string): string {
+  if (refundStatus === "refunded") return "Your plan stays active. We've refunded the checkmark's share to your card; banks usually show it within 5 to 10 working days.";
+  if (refundStatus === "manual_store_refund") return "Your plan stays active. We're arranging the checkmark's share of your payment with the store; request it from Apple at reportaproblem.apple.com if you paid there.";
+  if (refundStatus === "not_charged") return "Your plan stays active. Only the checkmark wasn't added, and you weren't charged for it.";
+  return "Your plan stays active. We're refunding the checkmark's share of your payment.";
+}
+
+export function describeRefund(refundMethod: string, refundStatus: string, refundScope = "full"): string {
+  if (refundScope === "checkmark_share") return describeCheckmarkShareRefund(refundStatus);
   if (refundMethod === "plan_continues") return "Your plan keeps working. Only the checkmark wasn't added, so there is nothing to refund.";
   if (refundStatus === "refunded") return "Your payment has been refunded in full.";
   if (refundStatus === "manual_store_refund" || refundMethod === "apple_request") return "Your subscription is cancelled. Apple handles App Store refunds: request yours at reportaproblem.apple.com.";
