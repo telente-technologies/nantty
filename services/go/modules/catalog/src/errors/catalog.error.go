@@ -16,6 +16,7 @@ var (
 	StoreAlreadyExists     = Api(http.StatusConflict, "STORE_ALREADY_EXISTS", "That business profile already has a store.")
 	BusinessProfileInvalid = Api(http.StatusUnprocessableEntity, "BUSINESS_PROFILE_INVALID", "Choose one of your active business profiles.")
 	StoreSlugTaken         = Api(http.StatusConflict, "STORE_SLUG_TAKEN", "That store link is already taken.")
+	ProductNotInRegion     = Api(http.StatusNotFound, "PRODUCT_NOT_AVAILABLE_IN_REGION", "This product is not available in your region.")
 	ProductNotFound        = Api(http.StatusNotFound, "PRODUCT_NOT_FOUND", "That product could not be found.")
 	VariantNotFound        = Api(http.StatusNotFound, "VARIANT_NOT_FOUND", "That variant could not be found.")
 	CategoryNotFound       = Api(http.StatusNotFound, "CATEGORY_NOT_FOUND", "That category could not be found.")

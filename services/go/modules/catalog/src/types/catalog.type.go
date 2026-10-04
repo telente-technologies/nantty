@@ -43,6 +43,9 @@ type ProductSummaryView struct {
 	Liked    bool        `json:"liked"`
 	Stock    int         `json:"stock"`
 	StoreId  string      `json:"storeId"`
+
+	PriceIsRegional bool         `json:"priceIsRegional"`
+	ApproxPrice     *money.Money `json:"approxPrice"`
 }
 
 type BrandTagView struct {
@@ -75,6 +78,9 @@ type BuyerVariantView struct {
 	Sku     string      `json:"sku"`
 	Price   money.Money `json:"price"`
 	InStock bool        `json:"inStock"`
+
+	PriceIsRegional bool         `json:"priceIsRegional"`
+	ApproxPrice     *money.Money `json:"approxPrice"`
 }
 
 type CategoryView struct {
@@ -102,20 +108,27 @@ type SellerStockView struct {
 	Reserved   int    `json:"reserved"`
 }
 
+type SellerRegionalPriceView struct {
+	Currency            string `json:"currency"`
+	PriceMinor          int64  `json:"priceMinor"`
+	CompareAtPriceMinor *int64 `json:"compareAtPriceMinor"`
+}
+
 type SellerVariantView struct {
-	Id                string            `json:"id"`
-	ProductId         string            `json:"productId"`
-	Title             string            `json:"title"`
-	OptionValues      map[string]string `json:"optionValues"`
-	Sku               string            `json:"sku"`
-	Barcode           *string           `json:"barcode"`
-	Price             money.Money       `json:"price"`
-	CompareAtPrice    *money.Money      `json:"compareAtPrice"`
-	CostPrice         *money.Money      `json:"costPrice"`
-	LowStockThreshold int               `json:"lowStockThreshold"`
-	ReorderPoint      int               `json:"reorderPoint"`
-	ReorderQuantity   int               `json:"reorderQuantity"`
-	Stock             []SellerStockView `json:"stock"`
+	Id                string                    `json:"id"`
+	ProductId         string                    `json:"productId"`
+	Title             string                    `json:"title"`
+	OptionValues      map[string]string         `json:"optionValues"`
+	Sku               string                    `json:"sku"`
+	Barcode           *string                   `json:"barcode"`
+	Price             money.Money               `json:"price"`
+	CompareAtPrice    *money.Money              `json:"compareAtPrice"`
+	CostPrice         *money.Money              `json:"costPrice"`
+	RegionalPrices    []SellerRegionalPriceView `json:"regionalPrices"`
+	LowStockThreshold int                       `json:"lowStockThreshold"`
+	ReorderPoint      int                       `json:"reorderPoint"`
+	ReorderQuantity   int                       `json:"reorderQuantity"`
+	Stock             []SellerStockView         `json:"stock"`
 }
 
 type SellerImageView struct {
