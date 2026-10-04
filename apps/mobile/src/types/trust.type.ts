@@ -38,14 +38,6 @@ export interface BusinessDocumentsState {
   readonly allApproved: boolean;
 }
 
-export interface HelpArticle {
-  readonly id: ID;
-  readonly title: string;
-  readonly topic: string;
-  readonly summary: string;
-  readonly body: string;
-}
-
 export type MarketingFrequency = "weekly" | "important_only" | "off";
 
 export interface MarketingPreferences {

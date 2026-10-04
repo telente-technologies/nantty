@@ -1,21 +1,27 @@
 import type { ID, ISODate } from "./models.type";
 
-export type SupportTicketCategory = "order" | "payment" | "account" | "seller" | "safety" | "other";
-export type SupportTicketStatus = "open" | "awaiting_you" | "resolved" | "closed";
+export type SupportTicketCategory = "order" | "payment" | "account" | "seller" | "verification" | "creator" | "live" | "ads" | "safety" | "other";
+export type SupportTicketStatus = "open" | "awaiting_you" | "awaiting_support" | "resolved" | "closed";
 
 export interface SupportLinkedReference {
-  readonly kind: "order" | "payment";
+  readonly kind: "order" | "payment" | "live" | "report" | "dispute";
   readonly id: ID;
   readonly label: string;
 }
 
 export interface SupportTicketSummary {
   readonly id: ID;
+  readonly reference?: string;
   readonly subject: string;
   readonly category: SupportTicketCategory;
   readonly status: SupportTicketStatus;
+  readonly channel?: "form" | "chat";
   readonly linkedReference: SupportLinkedReference | null;
   readonly lastMessagePreview: string;
+  readonly unreadCount?: number;
+  readonly satisfactionScore?: number | null;
+  readonly canRate?: boolean;
+  readonly canReply?: boolean;
   readonly createdAt: ISODate;
   readonly updatedAt: ISODate;
 }
@@ -40,6 +46,7 @@ export interface NewSupportTicketInput {
   readonly message: string;
   readonly attachmentUrls: readonly string[];
   readonly linkedReference: SupportLinkedReference | null;
+  readonly channel?: "form" | "chat";
 }
 
 export type ContentReportStatus = "received" | "reviewing" | "action_taken" | "no_violation";
