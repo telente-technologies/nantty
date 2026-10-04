@@ -1,5 +1,5 @@
 import type { LegalDocumentSection } from "@/components/legal/legalDocument";
-import { contactEmailDisplayText } from "@/lib/siteConfig.config";
+import { emailAddresses } from "@/lib/siteConfig.config";
 
 export const privacyPolicySections: readonly LegalDocumentSection[] = [
   {
@@ -58,6 +58,7 @@ export const privacyPolicySections: readonly LegalDocumentSection[] = [
       "Payment providers, currently Paystack and Flutterwave, who process payments and payouts.",
       "Sellers, who receive the details needed to fulfil your order, such as name, delivery address and phone number.",
       "Cloud hosting and infrastructure providers that store and process data for us.",
+      "Cloudflare, which runs the Turnstile human check. When you are asked to complete a check, Cloudflare receives technical signals from your browser or device (such as IP address, browser characteristics and how the check was completed) to decide whether you are a person. It does not use cookies to track you across sites, and we receive only a pass or fail result.",
       "Analytics providers, only if you have allowed analytics.",
       "Advertising partners and measurement providers, only if you have allowed advertising.",
       "Delivery and logistics partners where a seller uses them.",
@@ -86,6 +87,7 @@ export const privacyPolicySections: readonly LegalDocumentSection[] = [
     heading: "Security",
     paragraphs: [
       "We use technical and organizational measures designed to protect personal data, including encryption in transit, access controls, separation of duties for staff access and logging. No system is perfectly secure. If a personal data breach affects you we will tell you and the regulator as the law requires.",
+      "To protect accounts and data from unauthorised access and automated abuse, we keep security logs of requests that were refused (for example, attempts to open other people's orders, messages or payouts, or staff-only pages), recording the type of page, counts, the time, a device identifier and a shortened network address, never the content you sent. Accounts that show this pattern, or that behave like automated software, may be asked to complete a human check, sometimes on every sensitive action. Repeated failures can lead to a temporary suspension, which you can appeal. Automated systems never ban or delete accounts: a member of our team reviews the evidence first. Security logs are kept for up to 12 months, or longer while a case or appeal is open.",
     ],
   },
   {
@@ -109,7 +111,7 @@ export const privacyPolicySections: readonly LegalDocumentSection[] = [
   {
     id: "contact",
     heading: "Contact us",
-    paragraphs: [`To use your rights or ask a question, email ${contactEmailDisplayText}.`],
+    paragraphs: [`To use your rights or ask a question, email ${emailAddresses.privacy}. You can reach our Data Protection Officer at ${emailAddresses.dpo}.`],
   },
   {
     id: "updates",

@@ -1,3 +1,5 @@
+import { buildMailtoHref, buildStoreLinks, buildZudomartEmailAddresses } from "@zudomart/web-kit";
+
 export interface SiteNavigationLink {
   readonly label: string;
   readonly href: string;
@@ -40,10 +42,17 @@ export const businessAppLinks = {
   },
 } as const;
 
-const contactEmailRecipients = ["oyinlola.tech@icloud.com", "oluwayemioyinlola2@icloud.com"] as const;
+export const emailAddresses = buildZudomartEmailAddresses({
+  domain: process.env.NEXT_PUBLIC_MAIL_DOMAIN,
+  overrides: { support: process.env.NEXT_PUBLIC_SUPPORT_EMAIL, privacy: process.env.NEXT_PUBLIC_PRIVACY_EMAIL, legal: process.env.NEXT_PUBLIC_LEGAL_EMAIL },
+});
 
-export const contactMailtoHref = `mailto:${contactEmailRecipients.join(",")}`;
-export const contactEmailDisplayText = contactEmailRecipients.join(" and ");
+export const storeLinks = buildStoreLinks({ appStoreId: process.env.NEXT_PUBLIC_APP_STORE_ID, playPackage: process.env.NEXT_PUBLIC_PLAY_PACKAGE });
+
+const contactEmailRecipients = [emailAddresses.support] as const;
+
+export const contactMailtoHref = buildMailtoHref(emailAddresses.support);
+export const contactEmailDisplayText = emailAddresses.support;
 
 export const siteConfig = {
   name: "Zudomart",
