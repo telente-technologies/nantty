@@ -27,6 +27,7 @@ type Container struct {
 	EvidenceVault     integrations.EvidenceVault
 	FramePreviews     integrations.FramePreviewSigner
 	DeviceAttestation integrations.DeviceAttestationVerifier
+	AudioMatches      integrations.AudioMatchAdvisor
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {

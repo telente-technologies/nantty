@@ -113,6 +113,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	if err != nil {
 		return Result{}, err
 	}
+	go handler.requestAudioMatchAdvice(context.WithoutCancel(ctx), created)
 	return Result{ClaimId: created.ID.String(), Status: "received"}, nil
 }
 
@@ -122,4 +123,15 @@ func (handler Handler) findByKey(ctx context.Context, claimant uuid.UUID, key st
 		return nil, nil
 	}
 	return row, err
+}
+
+func (handler Handler) requestAudioMatchAdvice(ctx context.Context, claim *ent.CopyrightClaim) {
+	if claim.OriginalWorkMediaID == "" || len(services.TargetMediaIdsOf(claim)) == 0 {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	if err := services.RunAudioMatchAdvice(ctx, handler.Container, claim); err != nil {
+		handler.Container.Logger.InfoContext(ctx, "copyright audio match advice skipped", "claimId", claim.ID.String(), "reason", err.Error())
+	}
 }

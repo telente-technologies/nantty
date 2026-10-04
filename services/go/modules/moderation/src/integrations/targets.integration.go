@@ -16,6 +16,7 @@ type TargetPreview struct {
 	Title      *string  `json:"title"`
 	Text       *string  `json:"text"`
 	MediaUrls  []string `json:"mediaUrls"`
+	MediaIds   []string `json:"mediaIds,omitempty"`
 	SoundTitle *string  `json:"soundTitle"`
 	CreatedAt  string   `json:"createdAt"`
 }
