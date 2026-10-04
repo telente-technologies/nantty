@@ -189,6 +189,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "media" {
     filter { prefix = "incoming/" }
     expiration { days = 2 }
   }
+  rule {
+    id     = "expire-live-safety-captures"
+    status = "Enabled"
+    filter { prefix = "live-safety/" }
+    expiration { days = 1 }
+    noncurrent_version_expiration { noncurrent_days = 1 }
+  }
 }
 
 resource "aws_s3_bucket_logging" "media" {
