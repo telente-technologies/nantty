@@ -2,10 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import type { MouseEvent } from "react";
 
 import { useSession } from "@/components/providers/sessionProvider";
-import { requestConfirmation } from "@/components/ui/confirmDialog";
+import { confirmBeforeOpeningRiskyLink } from "@/components/links/textLink";
 import { ExternalLinkIcon } from "@/components/ui/icons";
 import { MediaImage } from "@/components/ui/media";
 import { postsService } from "@/services/posts.service";
@@ -14,29 +13,16 @@ import { storesService } from "@/services/stores.service";
 import type { Post } from "@/types";
 import type { InternalLinkReference, LinkPreview } from "@/types/linkPreview.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
-import { assessLinkRisk, findFirstExternalUrl, findFirstInternalReference, readDisplayDomain } from "@/utils/postLinks.util";
+import { findFirstExternalUrl, findFirstInternalReference, readDisplayDomain } from "@/utils/postLinks.util";
 import { buildPostPath, buildProductPath, buildProfilePath, buildStorePath } from "@/utils/seoPaths.util";
 
 import styles from "./postLinkCard.module.css";
 
 export function ExternalLinkPreviewCard({ preview }: { readonly preview: LinkPreview }) {
-  const risk = assessLinkRisk(preview.url);
   const domain = preview.domain || readDisplayDomain(preview.url);
 
-  async function confirmBeforeOpeningRiskyLink(event: MouseEvent<HTMLAnchorElement>) {
-    if (risk === "safe") return;
-    event.preventDefault();
-    const confirmed = await requestConfirmation({
-      title: risk === "shortened" ? "Shortened link" : "Suspicious link",
-      description: risk === "shortened" ? `This link hides its real destination (${domain}). Only open it if you trust the author.` : `${domain} looks unusual and may be unsafe. Never enter passwords or payment details.`,
-      confirmLabel: "Open anyway",
-      tone: "caution",
-    });
-    if (confirmed) window.open(preview.url, "_blank", "noopener,noreferrer");
-  }
-
   return (
-    <a href={preview.url} target="_blank" rel="noopener noreferrer nofollow ugc" className={styles.card} onClick={(event) => void confirmBeforeOpeningRiskyLink(event)} aria-label={`${preview.title}, opens ${domain} in a new tab`}>
+    <a href={preview.url} target="_blank" rel="noopener noreferrer nofollow ugc" className={styles.card} onClick={(event) => void confirmBeforeOpeningRiskyLink(event, preview.url)} aria-label={`${preview.title}, opens ${domain} in a new tab`}>
       {preview.imageUrl ? (
         <span className={styles.media}>
           <MediaImage src={preview.imageUrl} alt="" sizes="(max-width: 640px) 100vw, 560px" />
