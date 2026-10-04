@@ -15,8 +15,9 @@ type ExchangeRateReader interface {
 // defaults otherwise) and converts them into the advertiser's billing currency with the currency module's rates.
 // The creator revenue share is deliberately not part of it: it is one percentage for every region.
 type RegionalAdPricing struct {
-	Settings PlatformSettingReader
-	Rates    ExchangeRateReader
+	Settings   PlatformSettingReader
+	Rates      ExchangeRateReader
+	Population map[string]int64
 }
 
 func (pricing *RegionalAdPricing) Table(ctx context.Context) []regionpricing.AdRegionPricing {
@@ -88,4 +89,31 @@ func (pricing *RegionalAdPricing) ConvertForReporting(ctx context.Context, amoun
 		return types.Money{}, false
 	}
 	return types.Money{AmountMinor: converted, Currency: reportingCurrency}, true
+}
+
+func (pricing *RegionalAdPricing) regionWeights() map[string]int64 {
+	weights := map[string]int64{}
+	if pricing == nil {
+		return weights
+	}
+	for country, population := range pricing.Population {
+		region, _ := regionpricing.RegionForCountry(country)
+		weights[region.Code] += population
+	}
+	return weights
+}
+
+// Estimate splits a budget across the targeted regions by audience size (ADS_POPULATION_BY_COUNTRY) and returns
+// delivery and cost estimates per region in the billing currency.
+func (pricing *RegionalAdPricing) Estimate(ctx context.Context, request regionpricing.EstimateRequest) (regionpricing.CampaignEstimate, error) {
+	request.RegionWeights = pricing.regionWeights()
+	return regionpricing.EstimateCampaign(pricing.Table(ctx), request, pricing.rates(ctx))
+}
+
+func (pricing *RegionalAdPricing) BoostPackages(ctx context.Context, country, billingCurrency string) ([]regionpricing.BoostPackage, error) {
+	region, _ := regionpricing.RegionForCountry(country)
+	if country == "" {
+		region, _ = regionpricing.RegionForCurrency(billingCurrency)
+	}
+	return regionpricing.BoostPackages(pricing.Table(ctx), region.Code, billingCurrency, pricing.rates(ctx))
 }

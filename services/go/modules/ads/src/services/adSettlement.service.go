@@ -55,6 +55,9 @@ func (settlement AdSettlement) SettlePendingCharges(ctx context.Context) (int, e
 			totals.creatorImpressionsBy[row.CreatorUserID]++
 		}
 	}
+	if err := settlement.excludePausedCreators(ctx, byAccount); err != nil {
+		return 0, err
+	}
 	settled := 0
 	for accountId, totals := range byAccount {
 		if err := settlement.settleAccount(ctx, accountId, totals); err != nil {
@@ -160,6 +163,23 @@ func (settlement AdSettlement) postCreatorEarnings(ctx context.Context, tx *ent.
 		}); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (settlement AdSettlement) excludePausedCreators(ctx context.Context, byAccount map[uuid.UUID]*accountSettlementTotals) error {
+	creatorIds := []string{}
+	for _, totals := range byAccount {
+		for creatorId := range totals.creatorMicrosByUser {
+			creatorIds = append(creatorIds, creatorId)
+		}
+	}
+	paused, err := (CreatorMonetisationHolds{Client: settlement.Client, Now: settlement.Now}).PausedCreators(ctx, creatorIds)
+	if err != nil || len(paused) == 0 {
+		return err
+	}
+	for _, totals := range byAccount {
+		totals.creatorMicros, totals.platformMicros = ExcludePausedCreatorsFromTotals(totals.creatorMicros, totals.platformMicros, totals.creatorMicrosByUser, totals.creatorImpressionsBy, paused)
 	}
 	return nil
 }

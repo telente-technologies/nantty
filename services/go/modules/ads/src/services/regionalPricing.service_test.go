@@ -38,14 +38,14 @@ func TestAdFloorsFollowTheTargetedRegion(t *testing.T) {
 		cpm, cpc  int64
 		daily     int64
 	}{
-		{[]string{"NG"}, "NGN", 50_000, 3_000, 100_000},
+		{[]string{"NG"}, "NGN", 40_000, 2_500, 100_000},
 		{[]string{"GH"}, "GHS", 600, 40, 1_500},
-		{[]string{"KE"}, "KES", 6_000, 400, 15_000},
-		{[]string{"ZA"}, "ZAR", 1_500, 120, 4_000},
-		{[]string{"GB"}, "GBP", 200, 15, 300},
-		{[]string{"DE"}, "EUR", 200, 15, 300},
-		{[]string{"US"}, "USD", 250, 20, 300},
-		{[]string{"BR"}, "USD", 250, 20, 300},
+		{[]string{"KE"}, "KES", 8_000, 500, 15_000},
+		{[]string{"ZA"}, "ZAR", 2_800, 150, 4_000},
+		{[]string{"GB"}, "GBP", 250, 30, 500},
+		{[]string{"DE"}, "EUR", 300, 30, 500},
+		{[]string{"US"}, "USD", 350, 35, 500},
+		{[]string{"BR"}, "USD", 350, 35, 500},
 	}
 	for _, testCase := range cases {
 		floors := pricing.FloorsForAudience(ctx, audienceIn(testCase.countries...), testCase.currency)
@@ -54,7 +54,7 @@ func TestAdFloorsFollowTheTargetedRegion(t *testing.T) {
 		}
 	}
 	nigerianAdvertiserTargetingUk := pricing.FloorsForAudience(ctx, audienceIn("GB"), "NGN")
-	if nigerianAdvertiserTargetingUk.MinimumDailyBudgetMinor != 588_608 {
+	if nigerianAdvertiserTargetingUk.MinimumDailyBudgetMinor != 981_013 {
 		t.Fatalf("GB minimum billed in NGN %+v", nigerianAdvertiserTargetingUk)
 	}
 	if empty := pricing.FloorsForAudience(ctx, types.AudienceSpec{}, "KES"); empty.MinimumDailyBudgetMinor != 15_000 {
@@ -73,7 +73,7 @@ func TestAdminRegionalPricingAndLiveRatesOverrideTheDefaults(t *testing.T) {
 	if reserve, ok := pricing.ReservePerMilleMinor(ctx, "NG", "USD"); !ok || reserve != 50 {
 		t.Fatalf("NG reserve in USD %d %v", reserve, ok)
 	}
-	if reserve, ok := pricing.ReservePerMilleMinor(ctx, "JP", "USD"); !ok || reserve != 250 {
+	if reserve, ok := pricing.ReservePerMilleMinor(ctx, "JP", "USD"); !ok || reserve != 350 {
 		t.Fatalf("unknown viewer country uses the US floor %d", reserve)
 	}
 	if _, ok := pricing.ReservePerMilleMinor(ctx, "NG", "JPY"); ok {
