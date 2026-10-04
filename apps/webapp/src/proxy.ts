@@ -5,6 +5,7 @@ import { resolveLegacyPublicPathRedirect } from "@/server/legacyRedirects.servic
 import { readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies } from "@/server/session.service";
 
 const publicPagePaths = new Set(["/welcome", "/login", "/signup", "/forgot-password", "/reset-password"]);
+const sessionFreePagePaths = new Set(["/security-check"]);
 const staticAssetPattern = /\.(?:webp|png|jpe?g|gif|svg|ico|woff2?|txt|map|json|xml|webmanifest)$/i;
 
 function redirectTo(request: NextRequest, pathname: string, searchParams?: Record<string, string>): NextResponse {
@@ -18,7 +19,7 @@ export async function proxy(request: NextRequest) {
   const requestedPathWithQuery = `${pathname}${search}`;
   const sessionId = readSessionIdFromCookies(request.cookies);
 
-  if (staticAssetPattern.test(pathname)) return NextResponse.next();
+  if (staticAssetPattern.test(pathname) || sessionFreePagePaths.has(pathname)) return NextResponse.next();
 
   const legacyRedirectPath = await resolveLegacyPublicPathRedirect(pathname);
   if (legacyRedirectPath) return NextResponse.redirect(new URL(`${legacyRedirectPath}${search}`, request.nextUrl.origin), 308);
