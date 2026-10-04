@@ -25,6 +25,7 @@ type OrdersSettings struct {
 	CheckoutReservationTtl  time.Duration
 	CheckoutSweepPeriod     time.Duration
 	CreditExpirySweepPeriod time.Duration
+	SuccessRateRollupPeriod time.Duration
 	ReportExportSweepPeriod time.Duration
 	EventsQueueName         string
 	ShippingRuleLimit       int
@@ -55,6 +56,7 @@ func ReadOrdersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		CheckoutReservationTtl:  reader.ReadDurationOrDefault("ORDERS_CHECKOUT_RESERVATION_TTL", 30*time.Minute),
 		CheckoutSweepPeriod:     reader.ReadDurationOrDefault("ORDERS_CHECKOUT_SWEEP_INTERVAL", 30*time.Second),
 		CreditExpirySweepPeriod: reader.ReadDurationOrDefault("ORDERS_CREDIT_EXPIRY_SWEEP_INTERVAL", time.Hour),
+		SuccessRateRollupPeriod: reader.ReadDurationOrDefault("ORDERS_SUCCESS_RATE_ROLLUP_INTERVAL", 6*time.Hour),
 		ReportExportSweepPeriod: reader.ReadDurationOrDefault("ORDERS_REPORT_EXPORT_SWEEP_INTERVAL", 5*time.Second),
 		EventsQueueName:         reader.ReadStringOrDefault("ORDERS_EVENTS_QUEUE", ""),
 		ShippingRuleLimit:       50,

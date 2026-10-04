@@ -64,3 +64,14 @@ func (StoreCreditEntry) Indexes() []ent.Index {
 		index.Fields("expires_at").Annotations(entsql.IndexAnnotation{Where: "kind = 'earn' OR kind = 'restore'"}).StorageKey("storecredit_expiring"),
 	}
 }
+
+type InvoiceCounter struct {
+	ent.Schema
+}
+
+func (InvoiceCounter) Fields() []ent.Field {
+	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).Immutable(),
+		field.Int("last_number").Default(0),
+	}
+}

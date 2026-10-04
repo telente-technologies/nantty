@@ -105,6 +105,7 @@ func StartOrdersModuleWithSettings(ctx context.Context, settings configs.OrdersS
 	ports := integrations.CommerceOrders{Container: module.Container}
 	commerceports.Default.RegisterPurchaseVerifier(ports)
 	commerceports.Default.RegisterStoreRewardsLookup(ports)
+	commerceports.Default.RegisterStoreSuccessRates(ports)
 	dependencies.Health.AddReadinessCheck("orders-postgres", postgres.ReadinessCheckForDatabase(database))
 	return module, nil
 }

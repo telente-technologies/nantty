@@ -31,6 +31,7 @@ func (OrderGroup) Fields() []ent.Field {
 		field.String("status").Default("pending"),
 		field.String("previous_status").Default(""),
 		field.String("payment_status").Default("pending"),
+		field.String("payment_mode").Default("escrow").MaxLen(10).Immutable(),
 		field.String("delivery_status").Default("pending"),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
 		field.Int64("subtotal_minor").Immutable(),
@@ -73,6 +74,7 @@ func (OrderGroup) Indexes() []ent.Index {
 		index.Fields("store_id", "status", "id").Annotations(newest).StorageKey("ordergroup_store_status_newest"),
 		index.Fields("store_id", "buyer_account_id"),
 		index.Fields("checkout_id"),
+		index.Fields("created_at").StorageKey("ordergroup_created"),
 		index.Fields("escrow_release_at").Annotations(entsql.IndexAnnotation{Where: "status = 'delivered'"}).StorageKey("ordergroup_delivered_release"),
 	}
 }
