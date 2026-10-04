@@ -31,6 +31,7 @@ export interface ModerationTargetPreview {
   readonly title: string | null;
   readonly text: string | null;
   readonly mediaUrls: readonly string[];
+  readonly mediaIds?: readonly string[];
   readonly soundTitle: string | null;
   readonly createdAt: string;
 }

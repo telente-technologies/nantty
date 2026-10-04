@@ -16,7 +16,11 @@ export function createGetModerationTargetPreviewHandler(context: HandlerContext)
     if (targetType === "sound") {
       const sound = await db.sound.findUnique({ where: { id: targetId } });
       if (sound === null) throw missing();
-      return { ownerId: sound.ownerId, title: sound.title, text: null, mediaUrls: [sound.audioUrl, sound.coverUrl].flatMap((url) => (url === null ? [] : [url])), soundTitle: sound.title, createdAt: sound.createdAt.toISOString() };
+      const sourceMedia = sound.sourceClipId === null ? [] : await db.postMedia.findMany({ where: { postId: sound.sourceClipId, type: "video" }, select: { mediaId: true } });
+      return {
+        ownerId: sound.ownerId, title: sound.title, text: null, mediaUrls: [sound.audioUrl, sound.coverUrl].flatMap((url) => (url === null ? [] : [url])),
+        mediaIds: sourceMedia.map((media) => media.mediaId), soundTitle: sound.title, createdAt: sound.createdAt.toISOString(),
+      };
     }
     const post = await db.post.findUnique({ where: { id: targetId }, include: { media: { orderBy: { position: "asc" } } } });
     if (post === null) throw missing();
@@ -26,6 +30,7 @@ export function createGetModerationTargetPreviewHandler(context: HandlerContext)
       title: null,
       text: post.text,
       mediaUrls: post.media.flatMap((media) => [media.url, media.posterUrl].flatMap((url) => (url === null ? [] : [url]))),
+      mediaIds: post.media.filter((media) => media.type === "video").map((media) => media.mediaId),
       soundTitle: sound?.title ?? null,
       createdAt: post.createdAt.toISOString(),
     };
