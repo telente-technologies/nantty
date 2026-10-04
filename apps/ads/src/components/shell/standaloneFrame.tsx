@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { ZudomartWordmark } from "@zudomart/web-kit";
 import { UserMenu } from "@/components/shell/userMenu";
-import { buildContactMailtoLinkForBothAddresses, contactEmailDisplayText } from "@/constants/contact.constant";
+import { buildContactMailtoLink, contactEmailDisplayText } from "@/constants/contact.constant";
 
 import styles from "./standaloneFrame.module.css";
 
@@ -24,7 +24,7 @@ export function StandaloneFrame({ children, showUserMenu = true, width = "regula
       </main>
       <footer className={styles.footer}>
         <p>
-          Questions about Zudomart Ads? Email <a href={buildContactMailtoLinkForBothAddresses("Zudomart Ads")}>{contactEmailDisplayText}</a>
+          Questions about Zudomart Ads? Email <a href={buildContactMailtoLink("Zudomart Ads")}>{contactEmailDisplayText}</a>
         </p>
         <Link href="/policy">Advertising policies</Link>
       </footer>
