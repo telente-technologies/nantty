@@ -44,16 +44,21 @@ type DeviceSavedCard struct {
 }
 
 type CardSetupRequest struct {
-	UserId    string
-	ReturnTo  string
-	Purpose   string
-	SubjectId string
-	Metadata  map[string]string
+	UserId      string
+	ReturnTo    string
+	Purpose     string
+	SubjectId   string
+	Metadata    map[string]string
+	AmountMinor int64
+	Currency    string
 }
 
 func (gateway *PaymentGateway) StartSavedCardSetup(ctx context.Context, request CardSetupRequest) (StartedSavedCardSetup, error) {
 	setupId := uuid.Must(uuid.NewV7())
-	amount := gateway.Container.Settings.Paystack.CardVerificationAmount
+	amount, currency := gateway.Container.Settings.Paystack.CardVerificationAmount, "NGN"
+	if request.AmountMinor > 0 && request.Currency != "" {
+		amount, currency = request.AmountMinor, request.Currency
+	}
 	purpose := firstNonEmpty(request.Purpose, "device")
 	var intentId uuid.UUID
 	var reference string
@@ -63,7 +68,7 @@ func (gateway *PaymentGateway) StartSavedCardSetup(ctx context.Context, request 
 			metadata[key] = value
 		}
 		intent, err := gateway.CreatePendingPaymentIntentInTransaction(ctx, transaction, models.CreatePaymentIntentRequest{
-			Purpose: constants.PurposeCardVerification, OwnerUserId: request.UserId, SubjectId: setupId.String(), AmountMinor: amount, Currency: "NGN",
+			Purpose: constants.PurposeCardVerification, OwnerUserId: request.UserId, SubjectId: setupId.String(), AmountMinor: amount, Currency: currency,
 			ReturnTo: request.ReturnTo, Metadata: metadata,
 		})
 		if err != nil {
@@ -80,7 +85,7 @@ func (gateway *PaymentGateway) StartSavedCardSetup(ctx context.Context, request 
 	if err != nil {
 		return StartedSavedCardSetup{}, err
 	}
-	started := StartedSavedCardSetup{Reference: reference, VerificationCharge: models.MoneyView{AmountMinor: amount, Currency: "NGN"}}
+	started := StartedSavedCardSetup{Reference: reference, VerificationCharge: models.MoneyView{AmountMinor: amount, Currency: currency}}
 	if opened.CheckoutUrl != nil {
 		started.CheckoutUrl = *opened.CheckoutUrl
 	}

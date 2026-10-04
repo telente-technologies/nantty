@@ -40,7 +40,7 @@ func NewPaystackProvider(settings PaystackSettings) *PaystackProvider {
 		settings.RequestTimeout = 15 * time.Second
 	}
 	if len(settings.SupportedCurrencies) == 0 {
-		settings.SupportedCurrencies = []string{"NGN"}
+		settings.SupportedCurrencies = []string{"NGN", "USD"}
 	}
 	if len(settings.Channels) == 0 {
 		settings.Channels = []string{"card", "bank", "ussd", "bank_transfer"}

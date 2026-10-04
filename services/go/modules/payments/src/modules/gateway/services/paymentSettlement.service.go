@@ -60,6 +60,9 @@ func (gateway *PaymentGateway) verifyAndSettlePaymentIntent(ctx context.Context,
 	if duplicateRefund != nil {
 		_ = gateway.SendPendingRefundToProvider(ctx, duplicateRefund.RefundId)
 	}
+	if settled != nil && string(settled.Purpose) == constants.PurposeCardVerification && settled.Status == paymentintent.StatusSucceeded {
+		gateway.refundCardVerificationImmediately(ctx, settled.ID)
+	}
 	if mismatch {
 		return ConvertPaymentIntentToView(settled), ErrPaymentAmountMismatch
 	}
