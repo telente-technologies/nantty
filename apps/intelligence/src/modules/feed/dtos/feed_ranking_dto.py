@@ -2,7 +2,9 @@ from typing import Literal
 
 from pydantic import AwareDatetime, Field
 
+from src.constants.ranking_boost_caps_constant import AuthorRankingTier
 from src.dtos.common_dto import ContractModel, ExcludedItem, MoneyAmount, RankingResponseMetadata, ViewerContext
+from src.modules.feed.dtos.feed_fairness_dto import EngagementIntegritySignals, RankingBoostPolicy, RankingExplanation
 from src.validators.common_field_validator import (
     MAXIMUM_RANKING_CANDIDATES,
     MAXIMUM_TOPICS_PER_ITEM,
@@ -35,9 +37,18 @@ class FeedCandidate(ContractModel):
     like_count: NonNegativeCount = 0
     comment_count: NonNegativeCount = 0
     share_count: NonNegativeCount = 0
+    repost_count: NonNegativeCount = 0
+    save_count: NonNegativeCount = 0
     view_count: NonNegativeCount = 0
+    completion_rate: UnitInterval | None = None
     author_follower_count: NonNegativeCount = 0
     author_is_verified: bool = False
+    author_tier: AuthorRankingTier = "none"
+    author_is_official: bool = False
+    author_quality_prior: UnitInterval = 0.5
+    integrity: EngagementIntegritySignals | None = None
+    is_promoted: bool = False
+    age_restricted: bool = False
     country: CountryCode | None = None
     is_sensitive: bool = False
     is_reported: bool = False
@@ -64,6 +75,8 @@ class FeedRankingRequest(ContractModel):
     candidates: list[FeedCandidate] = Field(max_length=MAXIMUM_RANKING_CANDIDATES)
     limit: int = Field(default=30, ge=1, le=100)
     options: FeedRankingOptions = Field(default_factory=FeedRankingOptions)
+    boost_policy: RankingBoostPolicy = Field(default_factory=RankingBoostPolicy)
+    trending_topics: list[TopicSlug] = Field(default_factory=list, max_length=50)
     now: AwareDatetime | None = None
 
 
@@ -78,10 +91,15 @@ class RankedFeedItem(ContractModel):
     position: int
     score: float
     reasons: list[str]
+    explanations: list[RankingExplanation] = Field(default_factory=list)
+    boost_multiplier: float = 1.0
+    trusted_engagement_share: float = 1.0
     social_proof: SocialProofBanner | None = None
 
 
 class FeedRankingResponse(ContractModel):
     items: list[RankedFeedItem]
     excluded: list[ExcludedItem]
+    manipulated_item_ids: list[str] = Field(default_factory=list)
+    boost_policy_version: int = 0
     metadata: RankingResponseMetadata
