@@ -1,4 +1,5 @@
 import type { Comment, Conversation, ID, LiveSession, Media, Message, MessageReactionSummary, Post, UserSummary } from "./models.type";
+import type { LiveSafetyState } from "./liveSafety.type";
 
 export type ConversationFilter = "all" | "direct";
 export type ClipsFeedTab = "forYou" | "following";
@@ -131,14 +132,16 @@ export interface CompletedUpload {
   readonly status: "processing";
 }
 
-export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live";
-export type AdEventType = "impression" | "click";
+export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live" | "feedCommentThread";
+export type AdEventType = "impression" | "click" | "card_view";
 
 export interface AdEvent {
   readonly campaignId: ID;
   readonly placement: AdPlacement;
   readonly type: AdEventType;
   readonly itemId: ID;
+  readonly token?: string;
+  readonly cardIndex?: number;
 }
 
 export interface NewStoryInput {
@@ -174,6 +177,7 @@ export interface SentLiveGiftReceipt {
 }
 
 export interface LiveSessionDetails {
+  readonly safety?: LiveSafetyState | null;
   readonly coverUrl?: string | null;
   readonly playbackUrl?: string | null;
   readonly giftsEnabled?: boolean;
