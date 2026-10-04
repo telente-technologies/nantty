@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 import { storageKeys } from "@/constants/storageKeys.constant";
 import type { User } from "@/types";
+import { showToast } from "@/store/toast.store";
 import { secureStorage } from "@/utils/secureStorage.util";
 
 interface Tokens {
@@ -15,7 +16,7 @@ interface AuthState {
   readonly accessToken: string | null;
   readonly refreshToken: string | null;
   readonly restoreSavedSession: () => Promise<void>;
-  readonly saveSignedInSession: (session: Tokens & { user: User }) => Promise<void>;
+  readonly saveSignedInSession: (session: Tokens & { user: User; notice?: string | null }) => Promise<void>;
   readonly replaceSessionTokens: (tokens: Tokens) => Promise<void>;
   readonly updateSignedInUser: (user: User) => void;
   readonly clearSessionAndSignOut: () => Promise<void>;
@@ -33,12 +34,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     ]);
     set({ accessToken, refreshToken, status: accessToken ? "signedIn" : "signedOut" });
   },
-  saveSignedInSession: async ({ accessToken, refreshToken, user }) => {
+  saveSignedInSession: async ({ accessToken, refreshToken, user, notice }) => {
     await Promise.all([
       secureStorage.set(storageKeys.accessToken, accessToken),
       secureStorage.set(storageKeys.refreshToken, refreshToken),
     ]);
     set({ accessToken, refreshToken, user, status: "signedIn" });
+    if (notice) showToast(notice);
   },
   replaceSessionTokens: async ({ accessToken, refreshToken }) => {
     await Promise.all([
