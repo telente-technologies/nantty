@@ -20,7 +20,9 @@ import (
 	"zudomart/modules/catalog/src/migrations"
 	"zudomart/modules/catalog/src/modules/brands"
 	"zudomart/modules/catalog/src/modules/categories"
+	featuredproducts "zudomart/modules/catalog/src/modules/featuredProducts"
 	"zudomart/modules/catalog/src/modules/interactions"
+	internalsources "zudomart/modules/catalog/src/modules/internalSources"
 	"zudomart/modules/catalog/src/modules/products"
 	"zudomart/modules/catalog/src/modules/reviews"
 	"zudomart/modules/catalog/src/modules/sellerProducts"
@@ -35,6 +37,7 @@ import (
 	"zudomart/platform/sellerplans"
 	"zudomart/platform/servicemodule"
 	"zudomart/platform/usersdirectory"
+	"zudomart/platform/viewerregion"
 )
 
 type Collaborators struct {
@@ -45,6 +48,7 @@ type Collaborators struct {
 type Module struct {
 	Container *container.Container
 	publisher platformevents.DomainEventPublisher
+	bus       platformevents.MessageBusSelection
 	closers   []func() error
 }
 
@@ -78,13 +82,15 @@ func StartCatalogModuleWithSettings(ctx context.Context, settings configs.Catalo
 	if err != nil {
 		return nil, err
 	}
-	module := &Module{publisher: collaborators.Publisher, closers: []func() error{database.Close}}
+	module := &Module{publisher: collaborators.Publisher, closers: []func() error{database.Close},
+		bus: platformevents.MessageBusSelection{DeployableName: dependencies.DeployableName, Logger: logger, IsProduction: settings.IsProduction()}}
 	module.Container = &container.Container{
 		Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Database: database,
-		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Settings: settings, Logger: logger, Now: time.Now,
+		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Rates: &viewerregion.RateReader{Database: database, Schema: "currency"}, Settings: settings, Logger: logger, Now: time.Now,
 		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger),
 	}
 	commerceports.Default.RegisterCatalogReader(integrations.CommerceCatalog{Container: module.Container})
+	commerceports.Default.RegisterStoreShippingCountries(integrations.CommerceCatalog{Container: module.Container})
 	if err := services.SeedStarterTaxonomyWhenEmpty(ctx, module.Container); err != nil {
 		_ = database.Close()
 		return nil, err
@@ -118,10 +124,13 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	reviews.Mount(mux, module.Container)
 	interactions.Mount(mux, module.Container)
 	sharecards.Mount(mux, module.Container)
+	internalsources.Mount(mux, module.Container)
+	featuredproducts.Mount(mux, module.Container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	go jobs.RunScheduledPublishingUntilContextDone(ctx, module.Container)
+	go jobs.ConsumeCatalogEventsUntilContextDone(ctx, module.Container, module.bus)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.Container.Client, Now: time.Now},
 		Publisher: module.publisher,
