@@ -27,6 +27,7 @@ type UsersSettings struct {
 	SocialInternalToken         string
 	LiveInternalUrl             string
 	LiveInternalToken           string
+	Verification                IdentityVerificationSettings
 }
 
 func (settings UsersSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -52,6 +53,7 @@ func ReadUsersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		SocialInternalToken:         reader.ReadStringOrDefault("SOCIAL_INTERNAL_API_TOKEN", ""),
 		LiveInternalUrl:             reader.ReadStringOrDefault("USERS_LIVE_INTERNAL_URL", ""),
 		LiveInternalToken:           reader.ReadStringOrDefault("LIVE_INTERNAL_API_TOKEN", ""),
+		Verification:                ReadIdentityVerificationSettingsFromEnvironment(reader),
 	}
 	return settings
 }

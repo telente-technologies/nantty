@@ -26,6 +26,7 @@ import (
 	contactprivacy "zudomart/modules/users/src/modules/contactPrivacy"
 	creatorprogram "zudomart/modules/users/src/modules/creatorProgram"
 	creatorstatus "zudomart/modules/users/src/modules/creatorStatus"
+	identityverification "zudomart/modules/users/src/modules/identityVerification"
 	"zudomart/modules/users/src/modules/legal"
 	notificationdirectory "zudomart/modules/users/src/modules/notificationDirectory"
 	"zudomart/modules/users/src/modules/privacy"
@@ -89,6 +90,7 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 	if settings.SocialInternalUrl != "" || settings.LiveInternalUrl != "" {
 		usersContainer.ActivityCounts = integrations.NewHttpActivityCounts(settings.SocialInternalUrl, settings.SocialInternalToken, settings.LiveInternalUrl, settings.LiveInternalToken)
 	}
+	attachIdentityVerificationClients(usersContainer)
 	identityports.Default.RegisterUsernameGuard(services.UsernameGuardService{Container: usersContainer})
 	identityports.Default.RegisterAccountCountryLookup(services.AccountCountryService{Container: usersContainer})
 	identityports.Default.RegisterDeletionGraceCanceller(services.DeletionGraceCancelService{Container: usersContainer})
@@ -109,6 +111,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	accountenforcement.Mount(mux, module.container)
 	creatorprogram.Mount(mux, module.container)
 	checkmarks.Mount(mux, module.container)
+	identityverification.Mount(mux, module.container)
 	businessdocuments.Mount(mux, module.container)
 	legal.Mount(mux, module.container)
 	contactprivacy.Mount(mux, module.container)
@@ -121,6 +124,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	go func() { _ = accountenforcement.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
 	go func() { _ = celebrations.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
 	go func() { _ = checkmarks.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
+	go identityverification.RunEligibilityRecheckUntilContextDone(ctx, module.container)
 	go checkmarks.ConsumeEntitlementEventsUntilContextDone(ctx, module.container, module.container.Settings.IsProduction())
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},
@@ -148,3 +152,18 @@ func createDomainEventPublisher(ctx context.Context, settings configs.UsersSetti
 }
 
 func (module *Module) Container() *container.Container { return module.container }
+
+func attachIdentityVerificationClients(usersContainer *container.Container) {
+	settings := usersContainer.Settings.Verification
+	if settings.SmileIdConfigured() {
+		usersContainer.IdentityCapture = &integrations.SmileIdClient{
+			PartnerId: settings.SmileIdPartnerId, ApiKey: settings.SmileIdApiKey, BaseUrl: settings.SmileIdBaseUrl, CallbackUrl: settings.SmileIdCallbackUrl,
+			Http: &http.Client{Timeout: 15 * time.Second}, Now: time.Now,
+		}
+	}
+	if settings.IntelligenceUrl != "" && settings.IntelligenceSecret != "" {
+		usersContainer.Eligibility = &integrations.IntelligenceEligibilityClient{
+			BaseUrl: settings.IntelligenceUrl, Secret: settings.IntelligenceSecret, Http: &http.Client{Timeout: settings.IntelligenceTimeout}, Now: time.Now,
+		}
+	}
+}
