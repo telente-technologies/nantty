@@ -13,6 +13,9 @@ from src.events.event_envelope_dto import (
 )
 from src.interfaces.feature_backend_interface import FeatureBackendUnavailableError, FeatureWriteOperation
 from src.modules.events_ingestion.repositories.raw_event_parquet_repository import RawEventParquetSink
+from src.modules.events_ingestion.services.engagement_integrity_ingestion_service import (
+    adjust_trending_contributions_for_integrity,
+)
 from src.modules.events_ingestion.services.event_feature_update_service import plan_online_feature_updates_for_events
 from src.modules.trending.services.trending_contribution_service import (
     build_trending_actor_claim_key,
@@ -113,9 +116,17 @@ class EventIngestionService:
                 TRENDING_ACTOR_DEDUPLICATION_TTL_SECONDS,
             )
             operations: list[FeatureWriteOperation] = list(update_plan.write_operations)
-            for contribution, claimed in zip(update_plan.trending_contributions, trending_claims, strict=True):
-                if claimed:
-                    operations += build_trending_write_operations(contribution, keyspace)
+            claimed_contributions = [
+                contribution
+                for contribution, claimed in zip(update_plan.trending_contributions, trending_claims, strict=True)
+                if claimed
+            ]
+            adjusted_contributions, integrity_operations = await adjust_trending_contributions_for_integrity(
+                backend, keyspace, claimed_contributions
+            )
+            operations += integrity_operations
+            for contribution in adjusted_contributions:
+                operations += build_trending_write_operations(contribution, keyspace)
             await backend.apply_write_operations(operations)
         except FeatureBackendUnavailableError:
             ingestion_logger.warning("online_feature_update_failed", extra={"event_count": len(events)})
