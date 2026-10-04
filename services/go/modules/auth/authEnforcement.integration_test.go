@@ -187,3 +187,36 @@ func TestAdminCreatedAccountsMustChangeTheirPasswordAndOtpEventsCarryTheDestinat
 		}
 	}
 }
+
+type recordingDeletionCanceller struct {
+	pending   bool
+	cancelled []uuid.UUID
+}
+
+func (canceller *recordingDeletionCanceller) CancelPendingDeletionOnLogin(_ context.Context, accountId uuid.UUID) (bool, error) {
+	if !canceller.pending {
+		return false, nil
+	}
+	canceller.pending = false
+	canceller.cancelled = append(canceller.cancelled, accountId)
+	return true, nil
+}
+
+func TestLoggingInDuringTheDeletionGraceCancelsTheDeletionAndShowsANotice(t *testing.T) {
+	harness := startAuthModuleAgainstFreshSchema(t)
+	email := "grace.leaver@example.com"
+	registered := harness.registerAccountAndLogIn(email, "firstpass1")
+	accountId := uuid.MustParse(registered["user"].(map[string]any)["id"].(string))
+	canceller := &recordingDeletionCanceller{pending: true}
+	identityports.Default.RegisterDeletionGraceCanceller(canceller)
+	t.Cleanup(func() { identityports.Default.RegisterDeletionGraceCanceller(nil) })
+
+	login := harness.expect("POST", "/api/v1/auth/login", "", map[string]string{"identifier": email, "password": "firstpass1"}, http.StatusOK)
+	if login["notice"] != "Your account deletion has been cancelled" || len(canceller.cancelled) != 1 || canceller.cancelled[0] != accountId {
+		t.Fatalf("login inside the grace period must cancel the deletion and say so: %v", login)
+	}
+	again := harness.expect("POST", "/api/v1/auth/login", "", map[string]string{"identifier": email, "password": "firstpass1"}, http.StatusOK)
+	if again["notice"] != nil {
+		t.Fatalf("no notice when nothing was pending: %v", again)
+	}
+}
