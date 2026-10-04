@@ -21,6 +21,11 @@ type Container struct {
 	Now                func() time.Time
 	AccessVerifier     *jwtauth.AccessTokenVerifier
 	PendingWithdrawals PendingWithdrawalChecker
+	ActivityCounts     ActivityCountSource
+}
+
+type ActivityCountSource interface {
+	PostsAndLivesLastYear(ctx context.Context, accountId uuid.UUID) (posts *int, lives *int)
 }
 
 type PendingWithdrawalChecker interface {
