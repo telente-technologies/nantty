@@ -65,6 +65,8 @@ const (
 	FieldAcceptedLiveAdTermsAt = "accepted_live_ad_terms_at"
 	// FieldSponsorshipLine holds the string denoting the sponsorship_line field in the database.
 	FieldSponsorshipLine = "sponsorship_line"
+	// FieldModerationVisibility holds the string denoting the moderation_visibility field in the database.
+	FieldModerationVisibility = "moderation_visibility"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the livesession in the database.
@@ -99,6 +101,7 @@ var Columns = []string{
 	FieldAcceptedLiveAdTermsVersion,
 	FieldAcceptedLiveAdTermsAt,
 	FieldSponsorshipLine,
+	FieldModerationVisibility,
 	FieldUpdatedAt,
 }
 
@@ -139,6 +142,8 @@ var (
 	DefaultCreatorCoins int64
 	// SponsorshipLineValidator is a validator for the "sponsorship_line" field. It is called by the builders before save.
 	SponsorshipLineValidator func(string) error
+	// DefaultModerationVisibility holds the default value on creation for the "moderation_visibility" field.
+	DefaultModerationVisibility string
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -358,6 +363,11 @@ func ByAcceptedLiveAdTermsAt(opts ...sql.OrderTermOption) OrderOption {
 // BySponsorshipLine orders the results by the sponsorship_line field.
 func BySponsorshipLine(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSponsorshipLine, opts...).ToFunc()
+}
+
+// ByModerationVisibility orders the results by the moderation_visibility field.
+func ByModerationVisibility(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldModerationVisibility, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

@@ -224,6 +224,18 @@ func (f LiveRoomSettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveRoomSettingMutation", m)
 }
 
+// The LiveSafetyStateFunc type is an adapter to allow the use of ordinary
+// function as LiveSafetyState mutator.
+type LiveSafetyStateFunc func(context.Context, *ent.LiveSafetyStateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LiveSafetyStateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LiveSafetyStateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LiveSafetyStateMutation", m)
+}
+
 // The LiveSessionFunc type is an adapter to allow the use of ordinary
 // function as LiveSession mutator.
 type LiveSessionFunc func(context.Context, *ent.LiveSessionMutation) (ent.Value, error)

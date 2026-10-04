@@ -26,6 +26,7 @@ import (
 	"zudomart/modules/live/src/generated/ent/liverecording"
 	"zudomart/modules/live/src/generated/ent/liverestriction"
 	"zudomart/modules/live/src/generated/ent/liveroomsetting"
+	"zudomart/modules/live/src/generated/ent/livesafetystate"
 	"zudomart/modules/live/src/generated/ent/livesession"
 	"zudomart/modules/live/src/generated/ent/liveviewer"
 	"zudomart/modules/live/src/generated/ent/outboxevent"
@@ -115,6 +116,7 @@ func checkColumn(t, c string) error {
 			liverecording.Table:        liverecording.ValidColumn,
 			liverestriction.Table:      liverestriction.ValidColumn,
 			liveroomsetting.Table:      liveroomsetting.ValidColumn,
+			livesafetystate.Table:      livesafetystate.ValidColumn,
 			livesession.Table:          livesession.ValidColumn,
 			liveviewer.Table:           liveviewer.ValidColumn,
 			outboxevent.Table:          outboxevent.ValidColumn,

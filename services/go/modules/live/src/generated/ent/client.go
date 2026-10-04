@@ -29,6 +29,7 @@ import (
 	"zudomart/modules/live/src/generated/ent/liverecording"
 	"zudomart/modules/live/src/generated/ent/liverestriction"
 	"zudomart/modules/live/src/generated/ent/liveroomsetting"
+	"zudomart/modules/live/src/generated/ent/livesafetystate"
 	"zudomart/modules/live/src/generated/ent/livesession"
 	"zudomart/modules/live/src/generated/ent/liveviewer"
 	"zudomart/modules/live/src/generated/ent/outboxevent"
@@ -86,6 +87,8 @@ type Client struct {
 	LiveRestriction *LiveRestrictionClient
 	// LiveRoomSetting is the client for interacting with the LiveRoomSetting builders.
 	LiveRoomSetting *LiveRoomSettingClient
+	// LiveSafetyState is the client for interacting with the LiveSafetyState builders.
+	LiveSafetyState *LiveSafetyStateClient
 	// LiveSession is the client for interacting with the LiveSession builders.
 	LiveSession *LiveSessionClient
 	// LiveViewer is the client for interacting with the LiveViewer builders.
@@ -129,6 +132,7 @@ func (c *Client) init() {
 	c.LiveRecording = NewLiveRecordingClient(c.config)
 	c.LiveRestriction = NewLiveRestrictionClient(c.config)
 	c.LiveRoomSetting = NewLiveRoomSettingClient(c.config)
+	c.LiveSafetyState = NewLiveSafetyStateClient(c.config)
 	c.LiveSession = NewLiveSessionClient(c.config)
 	c.LiveViewer = NewLiveViewerClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
@@ -246,6 +250,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		LiveRecording:        NewLiveRecordingClient(cfg),
 		LiveRestriction:      NewLiveRestrictionClient(cfg),
 		LiveRoomSetting:      NewLiveRoomSettingClient(cfg),
+		LiveSafetyState:      NewLiveSafetyStateClient(cfg),
 		LiveSession:          NewLiveSessionClient(cfg),
 		LiveViewer:           NewLiveViewerClient(cfg),
 		OutboxEvent:          NewOutboxEventClient(cfg),
@@ -290,6 +295,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		LiveRecording:        NewLiveRecordingClient(cfg),
 		LiveRestriction:      NewLiveRestrictionClient(cfg),
 		LiveRoomSetting:      NewLiveRoomSettingClient(cfg),
+		LiveSafetyState:      NewLiveSafetyStateClient(cfg),
 		LiveSession:          NewLiveSessionClient(cfg),
 		LiveViewer:           NewLiveViewerClient(cfg),
 		OutboxEvent:          NewOutboxEventClient(cfg),
@@ -330,8 +336,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.GiftContribution, c.GiftGoal, c.GoalContribution, c.GuestSlot, c.JoinRequest,
 		c.LiveComment, c.LiveIngress, c.LiveLeaderboardEntry, c.LiveModerator,
 		c.LiveProduct, c.LiveRecording, c.LiveRestriction, c.LiveRoomSetting,
-		c.LiveSession, c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry,
-		c.PointsRule, c.ProcessedGift,
+		c.LiveSafetyState, c.LiveSession, c.LiveViewer, c.OutboxEvent, c.OverlayScene,
+		c.PointsEntry, c.PointsRule, c.ProcessedGift,
 	} {
 		n.Use(hooks...)
 	}
@@ -345,8 +351,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.GiftContribution, c.GiftGoal, c.GoalContribution, c.GuestSlot, c.JoinRequest,
 		c.LiveComment, c.LiveIngress, c.LiveLeaderboardEntry, c.LiveModerator,
 		c.LiveProduct, c.LiveRecording, c.LiveRestriction, c.LiveRoomSetting,
-		c.LiveSession, c.LiveViewer, c.OutboxEvent, c.OverlayScene, c.PointsEntry,
-		c.PointsRule, c.ProcessedGift,
+		c.LiveSafetyState, c.LiveSession, c.LiveViewer, c.OutboxEvent, c.OverlayScene,
+		c.PointsEntry, c.PointsRule, c.ProcessedGift,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -391,6 +397,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.LiveRestriction.mutate(ctx, m)
 	case *LiveRoomSettingMutation:
 		return c.LiveRoomSetting.mutate(ctx, m)
+	case *LiveSafetyStateMutation:
+		return c.LiveSafetyState.mutate(ctx, m)
 	case *LiveSessionMutation:
 		return c.LiveSession.mutate(ctx, m)
 	case *LiveViewerMutation:
@@ -2804,6 +2812,139 @@ func (c *LiveRoomSettingClient) mutate(ctx context.Context, m *LiveRoomSettingMu
 	}
 }
 
+// LiveSafetyStateClient is a client for the LiveSafetyState schema.
+type LiveSafetyStateClient struct {
+	config
+}
+
+// NewLiveSafetyStateClient returns a client for the LiveSafetyState from the given config.
+func NewLiveSafetyStateClient(c config) *LiveSafetyStateClient {
+	return &LiveSafetyStateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `livesafetystate.Hooks(f(g(h())))`.
+func (c *LiveSafetyStateClient) Use(hooks ...Hook) {
+	c.hooks.LiveSafetyState = append(c.hooks.LiveSafetyState, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `livesafetystate.Intercept(f(g(h())))`.
+func (c *LiveSafetyStateClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LiveSafetyState = append(c.inters.LiveSafetyState, interceptors...)
+}
+
+// Create returns a builder for creating a LiveSafetyState entity.
+func (c *LiveSafetyStateClient) Create() *LiveSafetyStateCreate {
+	mutation := newLiveSafetyStateMutation(c.config, OpCreate)
+	return &LiveSafetyStateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LiveSafetyState entities.
+func (c *LiveSafetyStateClient) CreateBulk(builders ...*LiveSafetyStateCreate) *LiveSafetyStateCreateBulk {
+	return &LiveSafetyStateCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LiveSafetyStateClient) MapCreateBulk(slice any, setFunc func(*LiveSafetyStateCreate, int)) *LiveSafetyStateCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LiveSafetyStateCreateBulk{err: fmt.Errorf("calling to LiveSafetyStateClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LiveSafetyStateCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LiveSafetyStateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LiveSafetyState.
+func (c *LiveSafetyStateClient) Update() *LiveSafetyStateUpdate {
+	mutation := newLiveSafetyStateMutation(c.config, OpUpdate)
+	return &LiveSafetyStateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LiveSafetyStateClient) UpdateOne(_m *LiveSafetyState) *LiveSafetyStateUpdateOne {
+	mutation := newLiveSafetyStateMutation(c.config, OpUpdateOne, withLiveSafetyState(_m))
+	return &LiveSafetyStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LiveSafetyStateClient) UpdateOneID(id uuid.UUID) *LiveSafetyStateUpdateOne {
+	mutation := newLiveSafetyStateMutation(c.config, OpUpdateOne, withLiveSafetyStateID(id))
+	return &LiveSafetyStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LiveSafetyState.
+func (c *LiveSafetyStateClient) Delete() *LiveSafetyStateDelete {
+	mutation := newLiveSafetyStateMutation(c.config, OpDelete)
+	return &LiveSafetyStateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LiveSafetyStateClient) DeleteOne(_m *LiveSafetyState) *LiveSafetyStateDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LiveSafetyStateClient) DeleteOneID(id uuid.UUID) *LiveSafetyStateDeleteOne {
+	builder := c.Delete().Where(livesafetystate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LiveSafetyStateDeleteOne{builder}
+}
+
+// Query returns a query builder for LiveSafetyState.
+func (c *LiveSafetyStateClient) Query() *LiveSafetyStateQuery {
+	return &LiveSafetyStateQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLiveSafetyState},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LiveSafetyState entity by its id.
+func (c *LiveSafetyStateClient) Get(ctx context.Context, id uuid.UUID) (*LiveSafetyState, error) {
+	return c.Query().Where(livesafetystate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LiveSafetyStateClient) GetX(ctx context.Context, id uuid.UUID) *LiveSafetyState {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LiveSafetyStateClient) Hooks() []Hook {
+	return c.hooks.LiveSafetyState
+}
+
+// Interceptors returns the client interceptors.
+func (c *LiveSafetyStateClient) Interceptors() []Interceptor {
+	return c.inters.LiveSafetyState
+}
+
+func (c *LiveSafetyStateClient) mutate(ctx context.Context, m *LiveSafetyStateMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LiveSafetyStateCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LiveSafetyStateUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LiveSafetyStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LiveSafetyStateDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LiveSafetyState mutation op: %q", m.Op())
+	}
+}
+
 // LiveSessionClient is a client for the LiveSession schema.
 type LiveSessionClient struct {
 	config
@@ -3741,15 +3882,16 @@ type (
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
 		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment, LiveIngress,
 		LiveLeaderboardEntry, LiveModerator, LiveProduct, LiveRecording,
-		LiveRestriction, LiveRoomSetting, LiveSession, LiveViewer, OutboxEvent,
-		OverlayScene, PointsEntry, PointsRule, ProcessedGift []ent.Hook
+		LiveRestriction, LiveRoomSetting, LiveSafetyState, LiveSession, LiveViewer,
+		OutboxEvent, OverlayScene, PointsEntry, PointsRule, ProcessedGift []ent.Hook
 	}
 	inters struct {
 		Battle, BattleGiftEvent, BattleParticipant, Gift, GiftCombo, GiftContribution,
 		GiftGoal, GoalContribution, GuestSlot, JoinRequest, LiveComment, LiveIngress,
 		LiveLeaderboardEntry, LiveModerator, LiveProduct, LiveRecording,
-		LiveRestriction, LiveRoomSetting, LiveSession, LiveViewer, OutboxEvent,
-		OverlayScene, PointsEntry, PointsRule, ProcessedGift []ent.Interceptor
+		LiveRestriction, LiveRoomSetting, LiveSafetyState, LiveSession, LiveViewer,
+		OutboxEvent, OverlayScene, PointsEntry, PointsRule,
+		ProcessedGift []ent.Interceptor
 	}
 )
 
