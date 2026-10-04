@@ -92,6 +92,10 @@ export interface RegionalAdPricingRow {
   readonly cpcFloorMinor: number;
   readonly minimumDailyBudgetMinor: number;
   readonly boostMinimumDailyMinor: number;
+  readonly suggestedCpmMinor: number;
+  readonly suggestedCpcMinor: number;
+  readonly suggestedCpvMinor: number;
+  readonly suggestedDailyBudgetMinor: number;
 }
 
 export interface RegionalAdPricing {
@@ -101,6 +105,64 @@ export interface RegionalAdPricing {
   readonly cpcFloor: Money;
   readonly minimumDailyBudget: Money;
   readonly boostMinimumDailyBudget: Money;
+  readonly suggestedCpm: Money;
+  readonly suggestedCpc: Money;
+  readonly suggestedCpv: Money;
+  readonly suggestedDailyBudget: Money;
   readonly creatorRevenueSharePercent: number;
   readonly regions: readonly RegionalAdPricingRow[];
+}
+
+export interface EstimateRange {
+  readonly low: number;
+  readonly high: number;
+}
+
+export interface RegionCostEstimate {
+  readonly region: string;
+  readonly localCurrency: string;
+  readonly budgetShareBps: number;
+  readonly dailyBudgetMinor: number;
+  readonly totalBudgetMinor: number;
+  readonly minimumDailyBudgetMinor: number;
+  readonly suggestedDailyBudgetMinor: number;
+  readonly suggestedCpmMinor: number;
+  readonly suggestedCpcMinor: number;
+  readonly impressions: EstimateRange;
+  readonly reach: EstimateRange;
+  readonly clicks: EstimateRange;
+  readonly videoViews: EstimateRange;
+  readonly results: EstimateRange;
+  readonly costPerResultMinor: EstimateRange;
+  readonly belowRegionMinimum: boolean;
+  readonly exchangeNote?: string;
+}
+
+export interface CampaignCostEstimate {
+  readonly billingCurrency: string;
+  readonly days: number;
+  readonly dailyBudgetMinor: number;
+  readonly totalCostMinor: number;
+  readonly minimumDailyBudgetMinor: number;
+  readonly suggestedDailyBudgetMinor: number;
+  readonly suggestedLifetimeBudgetMinor: number;
+  readonly resultKind: "reach" | "clicks" | "video_views" | "follows" | "messages";
+  readonly impressions: EstimateRange;
+  readonly reach: EstimateRange;
+  readonly clicks: EstimateRange;
+  readonly videoViews: EstimateRange;
+  readonly results: EstimateRange;
+  readonly costPerResultMinor: EstimateRange;
+  readonly belowMinimum: boolean;
+  readonly regions: readonly RegionCostEstimate[];
+}
+
+export interface CampaignCostEstimateRequest {
+  readonly countries: readonly string[];
+  readonly currency: string;
+  readonly budget: { readonly type: "daily" | "lifetime"; readonly amountMinor: number };
+  readonly startAt?: string;
+  readonly endAt?: string;
+  readonly days?: number;
+  readonly objective: string;
 }

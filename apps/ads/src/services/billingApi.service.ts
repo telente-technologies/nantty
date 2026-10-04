@@ -1,9 +1,10 @@
 import { buildAccountApiPath, sendAdsApiRequest } from "@/services/adsApiClient.service";
 import type { Page } from "@/types/api.type";
-import type { BillingOverview, BillingTransaction, FundingMode, Invoice, PaymentProvider, RegionalAdPricing, TopUp, TopUpCheckout } from "@/types/billing.type";
+import type { BillingOverview, BillingTransaction, CampaignCostEstimate, CampaignCostEstimateRequest, FundingMode, Invoice, PaymentProvider, RegionalAdPricing, TopUp, TopUpCheckout } from "@/types/billing.type";
 import type { Money } from "@/types/money.type";
 
 export const billingApi = {
+  estimateCampaignCost: (request: CampaignCostEstimateRequest) => sendAdsApiRequest<CampaignCostEstimate>("/ads/pricing/estimate", { method: "POST", body: request }),
   fetchRegionalPricing: (countryCodes: readonly string[], currency: string) => sendAdsApiRequest<RegionalAdPricing>("/ads/pricing", { query: { countries: countryCodes.join(","), currency } }),
   fetchBillingOverview: (accountId: string) => sendAdsApiRequest<BillingOverview>(buildAccountApiPath(accountId, "/billing")),
   startTopUpCheckout: (accountId: string, amount: Money, provider: PaymentProvider, idempotencyKey: string) =>
