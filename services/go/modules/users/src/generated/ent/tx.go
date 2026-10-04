@@ -32,6 +32,10 @@ type Tx struct {
 	BusinessCategory *BusinessCategoryClient
 	// BusinessDocument is the client for interacting with the BusinessDocument builders.
 	BusinessDocument *BusinessDocumentClient
+	// CelebrationSetting is the client for interacting with the CelebrationSetting builders.
+	CelebrationSetting *CelebrationSettingClient
+	// CelebrationView is the client for interacting with the CelebrationView builders.
+	CelebrationView *CelebrationViewClient
 	// CheckmarkGrant is the client for interacting with the CheckmarkGrant builders.
 	CheckmarkGrant *CheckmarkGrantClient
 	// CreatorApplication is the client for interacting with the CreatorApplication builders.
@@ -226,6 +230,8 @@ func (tx *Tx) init() {
 	tx.BlackApplication = NewBlackApplicationClient(tx.config)
 	tx.BusinessCategory = NewBusinessCategoryClient(tx.config)
 	tx.BusinessDocument = NewBusinessDocumentClient(tx.config)
+	tx.CelebrationSetting = NewCelebrationSettingClient(tx.config)
+	tx.CelebrationView = NewCelebrationViewClient(tx.config)
 	tx.CheckmarkGrant = NewCheckmarkGrantClient(tx.config)
 	tx.CreatorApplication = NewCreatorApplicationClient(tx.config)
 	tx.DataExportRequest = NewDataExportRequestClient(tx.config)
