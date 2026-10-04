@@ -1,0 +1,120 @@
+"use client";
+
+import { useState } from "react";
+
+import { RetryButton } from "@/components/ui/controls";
+import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
+import { UnderlineTabs } from "@/components/ui/underlineTabs";
+import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
+import type { Post } from "@/types";
+import type { ThreadReply, ThreadSort } from "@/types/postThread.type";
+import { formatCompactCount } from "@/utils/formatDate.util";
+
+import { usePostConversation } from "./postThread.hook";
+import { ReplySettingsControl } from "./replySettingsControl";
+import { useSession } from "@/components/providers/sessionProvider";
+import { SponsoredThreadItem } from "./sponsoredThreadItem";
+import { ThreadComposer } from "./threadComposer";
+import { ThreadReplyBranch } from "./threadReply";
+import styles from "./thread.module.css";
+
+const SORT_OPTIONS = [
+  { value: "top", label: "Top" },
+  { value: "latest", label: "Latest" },
+] as const;
+
+function ThreadSkeleton({ rows }: { readonly rows: number }) {
+  return (
+    <div aria-busy="true" aria-label="Loading replies">
+      {Array.from({ length: rows }, (_, index) => (
+        <div key={index} className={styles.skeletonRow}>
+          <Skeleton width={44} height={44} circle />
+          <div className={styles.skeletonBody}>
+            <Skeleton width="50%" height={14} />
+            <Skeleton width="92%" height={13} />
+            <Skeleton width={index % 2 === 0 ? "70%" : "40%"} height={13} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const formatFullTimestamp = (iso: string) => {
+  const date = new Date(iso);
+  return `${date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} · ${date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+};
+
+export function ConversationPanel({ post }: { readonly post: Post }) {
+  const [sort, setSort] = useState<ThreadSort>("top");
+  const [replyTarget, setReplyTarget] = useState<ThreadReply | null>(null);
+  const [focusedReply, setFocusedReply] = useState<ThreadReply | null>(null);
+  const { viewer } = useSession();
+  const isOwnPost = viewer?.id === post.author.id;
+  const { query, rows } = usePostConversation(post.id, sort);
+  const sentinelRef = useInfiniteScrollSentinel({
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
+    fetchNextPage: query.fetchNextPage,
+  });
+  const panelId = `conversation-${post.id}`;
+
+  return (
+    <section className={styles.panel} id="comments" aria-labelledby={`${panelId}-title`}>
+      <p className={styles.timestamp}>
+        <time dateTime={post.createdAt}>{formatFullTimestamp(post.createdAt)}</time>
+        {post.views > 0 ? (
+          <>
+            {" · "}
+            <strong>{formatCompactCount(post.views)}</strong> Views
+          </>
+        ) : null}
+      </p>
+      <h2 id={`${panelId}-title`} className="visuallyHidden">
+        Replies
+      </h2>
+      {isOwnPost ? <ReplySettingsControl post={post} /> : null}
+      <UnderlineTabs options={SORT_OPTIONS} value={sort} onChange={setSort} label="Sort replies" panelId={panelId} />
+      {focusedReply ? (
+        <div className={styles.focusBar}>
+          <strong>Thread</strong>
+          <button type="button" className={styles.textAction} onClick={() => setFocusedReply(null)}>
+            Back to all replies
+          </button>
+        </div>
+      ) : null}
+      <div id={panelId} role="tabpanel" className={styles.list}>
+        {focusedReply ? (
+          <div className={styles.conversation}>
+            <ThreadReplyBranch key={focusedReply.id} reply={{ ...focusedReply, inlineReplies: [] }} postId={post.id} hasParentAbove={false} showReplyingTo onReply={setReplyTarget} startExpanded onOpenThread={setFocusedReply} />
+          </div>
+        ) : query.isLoading ? (
+          <ThreadSkeleton rows={4} />
+        ) : query.isError ? (
+          <ErrorState title="Replies didn't load" description="Check your connection, then try again." action={<RetryButton onRetry={() => query.refetch()} />} />
+        ) : rows.length === 0 ? (
+          <EmptyState title="No replies yet" description="Be the first to reply to this post." />
+        ) : (
+          rows.map((row) =>
+            row.kind === "sponsored" ? (
+              <SponsoredThreadItem key={row.key} ad={row.ad} postId={post.id} />
+            ) : (
+              <div key={row.key} className={styles.conversation}>
+                <ThreadReplyBranch reply={row.reply} postId={post.id} hasParentAbove={false} showReplyingTo={false} onReply={setReplyTarget} onOpenThread={setFocusedReply} />
+              </div>
+            ),
+          )
+        )}
+        <div ref={sentinelRef} />
+        {query.isFetchingNextPage ? <ThreadSkeleton rows={1} /> : null}
+      </div>
+      <ThreadComposer
+        postId={post.id}
+        postAuthorUsername={post.author.username}
+        replyTarget={replyTarget}
+        onCancelReply={() => setReplyTarget(null)}
+        replyRestriction={post.viewerCanReply === false ? (post.replyRestriction ?? null) : null}
+      />
+    </section>
+  );
+}
