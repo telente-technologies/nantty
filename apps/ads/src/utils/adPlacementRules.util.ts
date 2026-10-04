@@ -1,6 +1,6 @@
 import { placementLabels } from "@/constants/campaignOptions.constant";
 import type { AdPlacement } from "@/types/campaign.type";
-import type { CreativeMedia, CreativeSourceType } from "@/types/creative.type";
+import type { CreativeMedia, CreativeSourceType, CreativeType } from "@/types/creative.type";
 
 export type PlacementFitStatus = "ready" | "adjusted" | "blocked";
 
@@ -15,6 +15,7 @@ export interface CreativeShape {
   readonly media: readonly CreativeMedia[];
   readonly hasProduct: boolean;
   readonly hasLiveStream: boolean;
+  readonly creativeType?: CreativeType;
 }
 
 export const feedVideoMinimumSecondsWhenVertical = 60;
@@ -67,7 +68,11 @@ function checkReelFit(shape: CreativeShape, firstMedia: CreativeMedia | undefine
 export function checkCreativeFitForPlacement(shape: CreativeShape, placement: AdPlacement): PlacementFit {
   const firstMedia = shape.media[0];
   let fit: Omit<PlacementFit, "placement">;
-  if (placement === "mart" || placement === "search") {
+  if (shape.creativeType === "carousel" && placement !== "feed") {
+    fit = { status: "blocked", message: "Carousels run in the feed and the comment thread only." };
+  } else if (shape.creativeType === "app_install" && (placement === "mart" || placement === "search" || placement === "live")) {
+    fit = { status: "blocked", message: "App install ads run in the feed, Reels and stories, not in product grids or live." };
+  } else if (placement === "mart" || placement === "search") {
     fit = shape.hasProduct ? { status: "ready", message: "Product tile marked Ad at a fixed grid slot." } : { status: "blocked", message: "Marketplace ads are product tiles. Promote a product." };
   } else if (placement === "live") {
     fit = shape.hasLiveStream ? { status: "ready", message: "Promoted in live discovery." } : { status: "blocked", message: "Live placements promote a live stream. Choose a live session." };
