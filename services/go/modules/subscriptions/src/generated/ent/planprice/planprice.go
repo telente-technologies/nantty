@@ -24,6 +24,18 @@ const (
 	FieldCurrency = "currency"
 	// FieldMonthlyAmountMinor holds the string denoting the monthly_amount_minor field in the database.
 	FieldMonthlyAmountMinor = "monthly_amount_minor"
+	// FieldYearlyAmountMinor holds the string denoting the yearly_amount_minor field in the database.
+	FieldYearlyAmountMinor = "yearly_amount_minor"
+	// FieldIosMonthlyAmountMinor holds the string denoting the ios_monthly_amount_minor field in the database.
+	FieldIosMonthlyAmountMinor = "ios_monthly_amount_minor"
+	// FieldIosYearlyAmountMinor holds the string denoting the ios_yearly_amount_minor field in the database.
+	FieldIosYearlyAmountMinor = "ios_yearly_amount_minor"
+	// FieldAndroidMonthlyAmountMinor holds the string denoting the android_monthly_amount_minor field in the database.
+	FieldAndroidMonthlyAmountMinor = "android_monthly_amount_minor"
+	// FieldAndroidYearlyAmountMinor holds the string denoting the android_yearly_amount_minor field in the database.
+	FieldAndroidYearlyAmountMinor = "android_yearly_amount_minor"
+	// FieldStoreProductIds holds the string denoting the store_product_ids field in the database.
+	FieldStoreProductIds = "store_product_ids"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
 	// FieldUpdatedByStaffID holds the string denoting the updated_by_staff_id field in the database.
@@ -42,6 +54,12 @@ var Columns = []string{
 	FieldCountryCode,
 	FieldCurrency,
 	FieldMonthlyAmountMinor,
+	FieldYearlyAmountMinor,
+	FieldIosMonthlyAmountMinor,
+	FieldIosYearlyAmountMinor,
+	FieldAndroidMonthlyAmountMinor,
+	FieldAndroidYearlyAmountMinor,
+	FieldStoreProductIds,
 	FieldActive,
 	FieldUpdatedByStaffID,
 	FieldUpdatedAt,
@@ -66,6 +84,18 @@ var (
 	CountryCodeValidator func(string) error
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	CurrencyValidator func(string) error
+	// DefaultYearlyAmountMinor holds the default value on creation for the "yearly_amount_minor" field.
+	DefaultYearlyAmountMinor int64
+	// DefaultIosMonthlyAmountMinor holds the default value on creation for the "ios_monthly_amount_minor" field.
+	DefaultIosMonthlyAmountMinor int64
+	// DefaultIosYearlyAmountMinor holds the default value on creation for the "ios_yearly_amount_minor" field.
+	DefaultIosYearlyAmountMinor int64
+	// DefaultAndroidMonthlyAmountMinor holds the default value on creation for the "android_monthly_amount_minor" field.
+	DefaultAndroidMonthlyAmountMinor int64
+	// DefaultAndroidYearlyAmountMinor holds the default value on creation for the "android_yearly_amount_minor" field.
+	DefaultAndroidYearlyAmountMinor int64
+	// DefaultStoreProductIds holds the default value on creation for the "store_product_ids" field.
+	DefaultStoreProductIds map[string]string
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
 	// DefaultUpdatedByStaffID holds the default value on creation for the "updated_by_staff_id" field.
@@ -111,6 +141,31 @@ func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 // ByMonthlyAmountMinor orders the results by the monthly_amount_minor field.
 func ByMonthlyAmountMinor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMonthlyAmountMinor, opts...).ToFunc()
+}
+
+// ByYearlyAmountMinor orders the results by the yearly_amount_minor field.
+func ByYearlyAmountMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldYearlyAmountMinor, opts...).ToFunc()
+}
+
+// ByIosMonthlyAmountMinor orders the results by the ios_monthly_amount_minor field.
+func ByIosMonthlyAmountMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIosMonthlyAmountMinor, opts...).ToFunc()
+}
+
+// ByIosYearlyAmountMinor orders the results by the ios_yearly_amount_minor field.
+func ByIosYearlyAmountMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIosYearlyAmountMinor, opts...).ToFunc()
+}
+
+// ByAndroidMonthlyAmountMinor orders the results by the android_monthly_amount_minor field.
+func ByAndroidMonthlyAmountMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAndroidMonthlyAmountMinor, opts...).ToFunc()
+}
+
+// ByAndroidYearlyAmountMinor orders the results by the android_yearly_amount_minor field.
+func ByAndroidYearlyAmountMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAndroidYearlyAmountMinor, opts...).ToFunc()
 }
 
 // ByActive orders the results by the active field.

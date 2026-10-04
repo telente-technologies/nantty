@@ -80,6 +80,31 @@ func MonthlyAmountMinor(v int64) predicate.PlanPrice {
 	return predicate.PlanPrice(sql.FieldEQ(FieldMonthlyAmountMinor, v))
 }
 
+// YearlyAmountMinor applies equality check predicate on the "yearly_amount_minor" field. It's identical to YearlyAmountMinorEQ.
+func YearlyAmountMinor(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldYearlyAmountMinor, v))
+}
+
+// IosMonthlyAmountMinor applies equality check predicate on the "ios_monthly_amount_minor" field. It's identical to IosMonthlyAmountMinorEQ.
+func IosMonthlyAmountMinor(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldIosMonthlyAmountMinor, v))
+}
+
+// IosYearlyAmountMinor applies equality check predicate on the "ios_yearly_amount_minor" field. It's identical to IosYearlyAmountMinorEQ.
+func IosYearlyAmountMinor(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldIosYearlyAmountMinor, v))
+}
+
+// AndroidMonthlyAmountMinor applies equality check predicate on the "android_monthly_amount_minor" field. It's identical to AndroidMonthlyAmountMinorEQ.
+func AndroidMonthlyAmountMinor(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldAndroidMonthlyAmountMinor, v))
+}
+
+// AndroidYearlyAmountMinor applies equality check predicate on the "android_yearly_amount_minor" field. It's identical to AndroidYearlyAmountMinorEQ.
+func AndroidYearlyAmountMinor(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldAndroidYearlyAmountMinor, v))
+}
+
 // Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
 func Active(v bool) predicate.PlanPrice {
 	return predicate.PlanPrice(sql.FieldEQ(FieldActive, v))
@@ -368,6 +393,206 @@ func MonthlyAmountMinorLT(v int64) predicate.PlanPrice {
 // MonthlyAmountMinorLTE applies the LTE predicate on the "monthly_amount_minor" field.
 func MonthlyAmountMinorLTE(v int64) predicate.PlanPrice {
 	return predicate.PlanPrice(sql.FieldLTE(FieldMonthlyAmountMinor, v))
+}
+
+// YearlyAmountMinorEQ applies the EQ predicate on the "yearly_amount_minor" field.
+func YearlyAmountMinorEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldYearlyAmountMinor, v))
+}
+
+// YearlyAmountMinorNEQ applies the NEQ predicate on the "yearly_amount_minor" field.
+func YearlyAmountMinorNEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNEQ(FieldYearlyAmountMinor, v))
+}
+
+// YearlyAmountMinorIn applies the In predicate on the "yearly_amount_minor" field.
+func YearlyAmountMinorIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldIn(FieldYearlyAmountMinor, vs...))
+}
+
+// YearlyAmountMinorNotIn applies the NotIn predicate on the "yearly_amount_minor" field.
+func YearlyAmountMinorNotIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNotIn(FieldYearlyAmountMinor, vs...))
+}
+
+// YearlyAmountMinorGT applies the GT predicate on the "yearly_amount_minor" field.
+func YearlyAmountMinorGT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGT(FieldYearlyAmountMinor, v))
+}
+
+// YearlyAmountMinorGTE applies the GTE predicate on the "yearly_amount_minor" field.
+func YearlyAmountMinorGTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGTE(FieldYearlyAmountMinor, v))
+}
+
+// YearlyAmountMinorLT applies the LT predicate on the "yearly_amount_minor" field.
+func YearlyAmountMinorLT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLT(FieldYearlyAmountMinor, v))
+}
+
+// YearlyAmountMinorLTE applies the LTE predicate on the "yearly_amount_minor" field.
+func YearlyAmountMinorLTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLTE(FieldYearlyAmountMinor, v))
+}
+
+// IosMonthlyAmountMinorEQ applies the EQ predicate on the "ios_monthly_amount_minor" field.
+func IosMonthlyAmountMinorEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldIosMonthlyAmountMinor, v))
+}
+
+// IosMonthlyAmountMinorNEQ applies the NEQ predicate on the "ios_monthly_amount_minor" field.
+func IosMonthlyAmountMinorNEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNEQ(FieldIosMonthlyAmountMinor, v))
+}
+
+// IosMonthlyAmountMinorIn applies the In predicate on the "ios_monthly_amount_minor" field.
+func IosMonthlyAmountMinorIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldIn(FieldIosMonthlyAmountMinor, vs...))
+}
+
+// IosMonthlyAmountMinorNotIn applies the NotIn predicate on the "ios_monthly_amount_minor" field.
+func IosMonthlyAmountMinorNotIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNotIn(FieldIosMonthlyAmountMinor, vs...))
+}
+
+// IosMonthlyAmountMinorGT applies the GT predicate on the "ios_monthly_amount_minor" field.
+func IosMonthlyAmountMinorGT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGT(FieldIosMonthlyAmountMinor, v))
+}
+
+// IosMonthlyAmountMinorGTE applies the GTE predicate on the "ios_monthly_amount_minor" field.
+func IosMonthlyAmountMinorGTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGTE(FieldIosMonthlyAmountMinor, v))
+}
+
+// IosMonthlyAmountMinorLT applies the LT predicate on the "ios_monthly_amount_minor" field.
+func IosMonthlyAmountMinorLT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLT(FieldIosMonthlyAmountMinor, v))
+}
+
+// IosMonthlyAmountMinorLTE applies the LTE predicate on the "ios_monthly_amount_minor" field.
+func IosMonthlyAmountMinorLTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLTE(FieldIosMonthlyAmountMinor, v))
+}
+
+// IosYearlyAmountMinorEQ applies the EQ predicate on the "ios_yearly_amount_minor" field.
+func IosYearlyAmountMinorEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldIosYearlyAmountMinor, v))
+}
+
+// IosYearlyAmountMinorNEQ applies the NEQ predicate on the "ios_yearly_amount_minor" field.
+func IosYearlyAmountMinorNEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNEQ(FieldIosYearlyAmountMinor, v))
+}
+
+// IosYearlyAmountMinorIn applies the In predicate on the "ios_yearly_amount_minor" field.
+func IosYearlyAmountMinorIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldIn(FieldIosYearlyAmountMinor, vs...))
+}
+
+// IosYearlyAmountMinorNotIn applies the NotIn predicate on the "ios_yearly_amount_minor" field.
+func IosYearlyAmountMinorNotIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNotIn(FieldIosYearlyAmountMinor, vs...))
+}
+
+// IosYearlyAmountMinorGT applies the GT predicate on the "ios_yearly_amount_minor" field.
+func IosYearlyAmountMinorGT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGT(FieldIosYearlyAmountMinor, v))
+}
+
+// IosYearlyAmountMinorGTE applies the GTE predicate on the "ios_yearly_amount_minor" field.
+func IosYearlyAmountMinorGTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGTE(FieldIosYearlyAmountMinor, v))
+}
+
+// IosYearlyAmountMinorLT applies the LT predicate on the "ios_yearly_amount_minor" field.
+func IosYearlyAmountMinorLT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLT(FieldIosYearlyAmountMinor, v))
+}
+
+// IosYearlyAmountMinorLTE applies the LTE predicate on the "ios_yearly_amount_minor" field.
+func IosYearlyAmountMinorLTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLTE(FieldIosYearlyAmountMinor, v))
+}
+
+// AndroidMonthlyAmountMinorEQ applies the EQ predicate on the "android_monthly_amount_minor" field.
+func AndroidMonthlyAmountMinorEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldAndroidMonthlyAmountMinor, v))
+}
+
+// AndroidMonthlyAmountMinorNEQ applies the NEQ predicate on the "android_monthly_amount_minor" field.
+func AndroidMonthlyAmountMinorNEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNEQ(FieldAndroidMonthlyAmountMinor, v))
+}
+
+// AndroidMonthlyAmountMinorIn applies the In predicate on the "android_monthly_amount_minor" field.
+func AndroidMonthlyAmountMinorIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldIn(FieldAndroidMonthlyAmountMinor, vs...))
+}
+
+// AndroidMonthlyAmountMinorNotIn applies the NotIn predicate on the "android_monthly_amount_minor" field.
+func AndroidMonthlyAmountMinorNotIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNotIn(FieldAndroidMonthlyAmountMinor, vs...))
+}
+
+// AndroidMonthlyAmountMinorGT applies the GT predicate on the "android_monthly_amount_minor" field.
+func AndroidMonthlyAmountMinorGT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGT(FieldAndroidMonthlyAmountMinor, v))
+}
+
+// AndroidMonthlyAmountMinorGTE applies the GTE predicate on the "android_monthly_amount_minor" field.
+func AndroidMonthlyAmountMinorGTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGTE(FieldAndroidMonthlyAmountMinor, v))
+}
+
+// AndroidMonthlyAmountMinorLT applies the LT predicate on the "android_monthly_amount_minor" field.
+func AndroidMonthlyAmountMinorLT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLT(FieldAndroidMonthlyAmountMinor, v))
+}
+
+// AndroidMonthlyAmountMinorLTE applies the LTE predicate on the "android_monthly_amount_minor" field.
+func AndroidMonthlyAmountMinorLTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLTE(FieldAndroidMonthlyAmountMinor, v))
+}
+
+// AndroidYearlyAmountMinorEQ applies the EQ predicate on the "android_yearly_amount_minor" field.
+func AndroidYearlyAmountMinorEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldEQ(FieldAndroidYearlyAmountMinor, v))
+}
+
+// AndroidYearlyAmountMinorNEQ applies the NEQ predicate on the "android_yearly_amount_minor" field.
+func AndroidYearlyAmountMinorNEQ(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNEQ(FieldAndroidYearlyAmountMinor, v))
+}
+
+// AndroidYearlyAmountMinorIn applies the In predicate on the "android_yearly_amount_minor" field.
+func AndroidYearlyAmountMinorIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldIn(FieldAndroidYearlyAmountMinor, vs...))
+}
+
+// AndroidYearlyAmountMinorNotIn applies the NotIn predicate on the "android_yearly_amount_minor" field.
+func AndroidYearlyAmountMinorNotIn(vs ...int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldNotIn(FieldAndroidYearlyAmountMinor, vs...))
+}
+
+// AndroidYearlyAmountMinorGT applies the GT predicate on the "android_yearly_amount_minor" field.
+func AndroidYearlyAmountMinorGT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGT(FieldAndroidYearlyAmountMinor, v))
+}
+
+// AndroidYearlyAmountMinorGTE applies the GTE predicate on the "android_yearly_amount_minor" field.
+func AndroidYearlyAmountMinorGTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldGTE(FieldAndroidYearlyAmountMinor, v))
+}
+
+// AndroidYearlyAmountMinorLT applies the LT predicate on the "android_yearly_amount_minor" field.
+func AndroidYearlyAmountMinorLT(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLT(FieldAndroidYearlyAmountMinor, v))
+}
+
+// AndroidYearlyAmountMinorLTE applies the LTE predicate on the "android_yearly_amount_minor" field.
+func AndroidYearlyAmountMinorLTE(v int64) predicate.PlanPrice {
+	return predicate.PlanPrice(sql.FieldLTE(FieldAndroidYearlyAmountMinor, v))
 }
 
 // ActiveEQ applies the EQ predicate on the "active" field.

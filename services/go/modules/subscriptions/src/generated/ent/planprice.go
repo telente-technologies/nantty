@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -28,6 +29,18 @@ type PlanPrice struct {
 	Currency string `json:"currency,omitempty"`
 	// MonthlyAmountMinor holds the value of the "monthly_amount_minor" field.
 	MonthlyAmountMinor int64 `json:"monthly_amount_minor,omitempty"`
+	// YearlyAmountMinor holds the value of the "yearly_amount_minor" field.
+	YearlyAmountMinor int64 `json:"yearly_amount_minor,omitempty"`
+	// IosMonthlyAmountMinor holds the value of the "ios_monthly_amount_minor" field.
+	IosMonthlyAmountMinor int64 `json:"ios_monthly_amount_minor,omitempty"`
+	// IosYearlyAmountMinor holds the value of the "ios_yearly_amount_minor" field.
+	IosYearlyAmountMinor int64 `json:"ios_yearly_amount_minor,omitempty"`
+	// AndroidMonthlyAmountMinor holds the value of the "android_monthly_amount_minor" field.
+	AndroidMonthlyAmountMinor int64 `json:"android_monthly_amount_minor,omitempty"`
+	// AndroidYearlyAmountMinor holds the value of the "android_yearly_amount_minor" field.
+	AndroidYearlyAmountMinor int64 `json:"android_yearly_amount_minor,omitempty"`
+	// StoreProductIds holds the value of the "store_product_ids" field.
+	StoreProductIds map[string]string `json:"store_product_ids,omitempty"`
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
 	// UpdatedByStaffID holds the value of the "updated_by_staff_id" field.
@@ -42,9 +55,11 @@ func (*PlanPrice) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case planprice.FieldStoreProductIds:
+			values[i] = new([]byte)
 		case planprice.FieldActive:
 			values[i] = new(sql.NullBool)
-		case planprice.FieldMonthlyAmountMinor:
+		case planprice.FieldMonthlyAmountMinor, planprice.FieldYearlyAmountMinor, planprice.FieldIosMonthlyAmountMinor, planprice.FieldIosYearlyAmountMinor, planprice.FieldAndroidMonthlyAmountMinor, planprice.FieldAndroidYearlyAmountMinor:
 			values[i] = new(sql.NullInt64)
 		case planprice.FieldPlanCode, planprice.FieldCountryCode, planprice.FieldCurrency, planprice.FieldUpdatedByStaffID:
 			values[i] = new(sql.NullString)
@@ -102,6 +117,44 @@ func (_m *PlanPrice) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field monthly_amount_minor", values[i])
 			} else if value.Valid {
 				_m.MonthlyAmountMinor = value.Int64
+			}
+		case planprice.FieldYearlyAmountMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field yearly_amount_minor", values[i])
+			} else if value.Valid {
+				_m.YearlyAmountMinor = value.Int64
+			}
+		case planprice.FieldIosMonthlyAmountMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field ios_monthly_amount_minor", values[i])
+			} else if value.Valid {
+				_m.IosMonthlyAmountMinor = value.Int64
+			}
+		case planprice.FieldIosYearlyAmountMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field ios_yearly_amount_minor", values[i])
+			} else if value.Valid {
+				_m.IosYearlyAmountMinor = value.Int64
+			}
+		case planprice.FieldAndroidMonthlyAmountMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field android_monthly_amount_minor", values[i])
+			} else if value.Valid {
+				_m.AndroidMonthlyAmountMinor = value.Int64
+			}
+		case planprice.FieldAndroidYearlyAmountMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field android_yearly_amount_minor", values[i])
+			} else if value.Valid {
+				_m.AndroidYearlyAmountMinor = value.Int64
+			}
+		case planprice.FieldStoreProductIds:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field store_product_ids", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.StoreProductIds); err != nil {
+					return fmt.Errorf("unmarshal field store_product_ids: %w", err)
+				}
 			}
 		case planprice.FieldActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -171,6 +224,24 @@ func (_m *PlanPrice) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("monthly_amount_minor=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MonthlyAmountMinor))
+	builder.WriteString(", ")
+	builder.WriteString("yearly_amount_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.YearlyAmountMinor))
+	builder.WriteString(", ")
+	builder.WriteString("ios_monthly_amount_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IosMonthlyAmountMinor))
+	builder.WriteString(", ")
+	builder.WriteString("ios_yearly_amount_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IosYearlyAmountMinor))
+	builder.WriteString(", ")
+	builder.WriteString("android_monthly_amount_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AndroidMonthlyAmountMinor))
+	builder.WriteString(", ")
+	builder.WriteString("android_yearly_amount_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AndroidYearlyAmountMinor))
+	builder.WriteString(", ")
+	builder.WriteString("store_product_ids=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StoreProductIds))
 	builder.WriteString(", ")
 	builder.WriteString("active=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Active))

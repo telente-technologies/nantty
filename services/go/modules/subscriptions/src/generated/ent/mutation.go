@@ -1473,22 +1473,33 @@ func (m *OutboxEventMutation) ResetEdge(name string) error {
 // PlanPriceMutation represents an operation that mutates the PlanPrice nodes in the graph.
 type PlanPriceMutation struct {
 	config
-	op                      Op
-	typ                     string
-	id                      *uuid.UUID
-	created_at              *time.Time
-	plan_code               *string
-	country_code            *string
-	currency                *string
-	monthly_amount_minor    *int64
-	addmonthly_amount_minor *int64
-	active                  *bool
-	updated_by_staff_id     *string
-	updated_at              *time.Time
-	clearedFields           map[string]struct{}
-	done                    bool
-	oldValue                func(context.Context) (*PlanPrice, error)
-	predicates              []predicate.PlanPrice
+	op                              Op
+	typ                             string
+	id                              *uuid.UUID
+	created_at                      *time.Time
+	plan_code                       *string
+	country_code                    *string
+	currency                        *string
+	monthly_amount_minor            *int64
+	addmonthly_amount_minor         *int64
+	yearly_amount_minor             *int64
+	addyearly_amount_minor          *int64
+	ios_monthly_amount_minor        *int64
+	addios_monthly_amount_minor     *int64
+	ios_yearly_amount_minor         *int64
+	addios_yearly_amount_minor      *int64
+	android_monthly_amount_minor    *int64
+	addandroid_monthly_amount_minor *int64
+	android_yearly_amount_minor     *int64
+	addandroid_yearly_amount_minor  *int64
+	store_product_ids               *map[string]string
+	active                          *bool
+	updated_by_staff_id             *string
+	updated_at                      *time.Time
+	clearedFields                   map[string]struct{}
+	done                            bool
+	oldValue                        func(context.Context) (*PlanPrice, error)
+	predicates                      []predicate.PlanPrice
 }
 
 var _ ent.Mutation = (*PlanPriceMutation)(nil)
@@ -1795,6 +1806,322 @@ func (m *PlanPriceMutation) ResetMonthlyAmountMinor() {
 	m.addmonthly_amount_minor = nil
 }
 
+// SetYearlyAmountMinor sets the "yearly_amount_minor" field.
+func (m *PlanPriceMutation) SetYearlyAmountMinor(i int64) {
+	m.yearly_amount_minor = &i
+	m.addyearly_amount_minor = nil
+}
+
+// YearlyAmountMinor returns the value of the "yearly_amount_minor" field in the mutation.
+func (m *PlanPriceMutation) YearlyAmountMinor() (r int64, exists bool) {
+	v := m.yearly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYearlyAmountMinor returns the old "yearly_amount_minor" field's value of the PlanPrice entity.
+// If the PlanPrice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlanPriceMutation) OldYearlyAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYearlyAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYearlyAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYearlyAmountMinor: %w", err)
+	}
+	return oldValue.YearlyAmountMinor, nil
+}
+
+// AddYearlyAmountMinor adds i to the "yearly_amount_minor" field.
+func (m *PlanPriceMutation) AddYearlyAmountMinor(i int64) {
+	if m.addyearly_amount_minor != nil {
+		*m.addyearly_amount_minor += i
+	} else {
+		m.addyearly_amount_minor = &i
+	}
+}
+
+// AddedYearlyAmountMinor returns the value that was added to the "yearly_amount_minor" field in this mutation.
+func (m *PlanPriceMutation) AddedYearlyAmountMinor() (r int64, exists bool) {
+	v := m.addyearly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetYearlyAmountMinor resets all changes to the "yearly_amount_minor" field.
+func (m *PlanPriceMutation) ResetYearlyAmountMinor() {
+	m.yearly_amount_minor = nil
+	m.addyearly_amount_minor = nil
+}
+
+// SetIosMonthlyAmountMinor sets the "ios_monthly_amount_minor" field.
+func (m *PlanPriceMutation) SetIosMonthlyAmountMinor(i int64) {
+	m.ios_monthly_amount_minor = &i
+	m.addios_monthly_amount_minor = nil
+}
+
+// IosMonthlyAmountMinor returns the value of the "ios_monthly_amount_minor" field in the mutation.
+func (m *PlanPriceMutation) IosMonthlyAmountMinor() (r int64, exists bool) {
+	v := m.ios_monthly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIosMonthlyAmountMinor returns the old "ios_monthly_amount_minor" field's value of the PlanPrice entity.
+// If the PlanPrice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlanPriceMutation) OldIosMonthlyAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIosMonthlyAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIosMonthlyAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIosMonthlyAmountMinor: %w", err)
+	}
+	return oldValue.IosMonthlyAmountMinor, nil
+}
+
+// AddIosMonthlyAmountMinor adds i to the "ios_monthly_amount_minor" field.
+func (m *PlanPriceMutation) AddIosMonthlyAmountMinor(i int64) {
+	if m.addios_monthly_amount_minor != nil {
+		*m.addios_monthly_amount_minor += i
+	} else {
+		m.addios_monthly_amount_minor = &i
+	}
+}
+
+// AddedIosMonthlyAmountMinor returns the value that was added to the "ios_monthly_amount_minor" field in this mutation.
+func (m *PlanPriceMutation) AddedIosMonthlyAmountMinor() (r int64, exists bool) {
+	v := m.addios_monthly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetIosMonthlyAmountMinor resets all changes to the "ios_monthly_amount_minor" field.
+func (m *PlanPriceMutation) ResetIosMonthlyAmountMinor() {
+	m.ios_monthly_amount_minor = nil
+	m.addios_monthly_amount_minor = nil
+}
+
+// SetIosYearlyAmountMinor sets the "ios_yearly_amount_minor" field.
+func (m *PlanPriceMutation) SetIosYearlyAmountMinor(i int64) {
+	m.ios_yearly_amount_minor = &i
+	m.addios_yearly_amount_minor = nil
+}
+
+// IosYearlyAmountMinor returns the value of the "ios_yearly_amount_minor" field in the mutation.
+func (m *PlanPriceMutation) IosYearlyAmountMinor() (r int64, exists bool) {
+	v := m.ios_yearly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIosYearlyAmountMinor returns the old "ios_yearly_amount_minor" field's value of the PlanPrice entity.
+// If the PlanPrice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlanPriceMutation) OldIosYearlyAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIosYearlyAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIosYearlyAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIosYearlyAmountMinor: %w", err)
+	}
+	return oldValue.IosYearlyAmountMinor, nil
+}
+
+// AddIosYearlyAmountMinor adds i to the "ios_yearly_amount_minor" field.
+func (m *PlanPriceMutation) AddIosYearlyAmountMinor(i int64) {
+	if m.addios_yearly_amount_minor != nil {
+		*m.addios_yearly_amount_minor += i
+	} else {
+		m.addios_yearly_amount_minor = &i
+	}
+}
+
+// AddedIosYearlyAmountMinor returns the value that was added to the "ios_yearly_amount_minor" field in this mutation.
+func (m *PlanPriceMutation) AddedIosYearlyAmountMinor() (r int64, exists bool) {
+	v := m.addios_yearly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetIosYearlyAmountMinor resets all changes to the "ios_yearly_amount_minor" field.
+func (m *PlanPriceMutation) ResetIosYearlyAmountMinor() {
+	m.ios_yearly_amount_minor = nil
+	m.addios_yearly_amount_minor = nil
+}
+
+// SetAndroidMonthlyAmountMinor sets the "android_monthly_amount_minor" field.
+func (m *PlanPriceMutation) SetAndroidMonthlyAmountMinor(i int64) {
+	m.android_monthly_amount_minor = &i
+	m.addandroid_monthly_amount_minor = nil
+}
+
+// AndroidMonthlyAmountMinor returns the value of the "android_monthly_amount_minor" field in the mutation.
+func (m *PlanPriceMutation) AndroidMonthlyAmountMinor() (r int64, exists bool) {
+	v := m.android_monthly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAndroidMonthlyAmountMinor returns the old "android_monthly_amount_minor" field's value of the PlanPrice entity.
+// If the PlanPrice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlanPriceMutation) OldAndroidMonthlyAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAndroidMonthlyAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAndroidMonthlyAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAndroidMonthlyAmountMinor: %w", err)
+	}
+	return oldValue.AndroidMonthlyAmountMinor, nil
+}
+
+// AddAndroidMonthlyAmountMinor adds i to the "android_monthly_amount_minor" field.
+func (m *PlanPriceMutation) AddAndroidMonthlyAmountMinor(i int64) {
+	if m.addandroid_monthly_amount_minor != nil {
+		*m.addandroid_monthly_amount_minor += i
+	} else {
+		m.addandroid_monthly_amount_minor = &i
+	}
+}
+
+// AddedAndroidMonthlyAmountMinor returns the value that was added to the "android_monthly_amount_minor" field in this mutation.
+func (m *PlanPriceMutation) AddedAndroidMonthlyAmountMinor() (r int64, exists bool) {
+	v := m.addandroid_monthly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAndroidMonthlyAmountMinor resets all changes to the "android_monthly_amount_minor" field.
+func (m *PlanPriceMutation) ResetAndroidMonthlyAmountMinor() {
+	m.android_monthly_amount_minor = nil
+	m.addandroid_monthly_amount_minor = nil
+}
+
+// SetAndroidYearlyAmountMinor sets the "android_yearly_amount_minor" field.
+func (m *PlanPriceMutation) SetAndroidYearlyAmountMinor(i int64) {
+	m.android_yearly_amount_minor = &i
+	m.addandroid_yearly_amount_minor = nil
+}
+
+// AndroidYearlyAmountMinor returns the value of the "android_yearly_amount_minor" field in the mutation.
+func (m *PlanPriceMutation) AndroidYearlyAmountMinor() (r int64, exists bool) {
+	v := m.android_yearly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAndroidYearlyAmountMinor returns the old "android_yearly_amount_minor" field's value of the PlanPrice entity.
+// If the PlanPrice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlanPriceMutation) OldAndroidYearlyAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAndroidYearlyAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAndroidYearlyAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAndroidYearlyAmountMinor: %w", err)
+	}
+	return oldValue.AndroidYearlyAmountMinor, nil
+}
+
+// AddAndroidYearlyAmountMinor adds i to the "android_yearly_amount_minor" field.
+func (m *PlanPriceMutation) AddAndroidYearlyAmountMinor(i int64) {
+	if m.addandroid_yearly_amount_minor != nil {
+		*m.addandroid_yearly_amount_minor += i
+	} else {
+		m.addandroid_yearly_amount_minor = &i
+	}
+}
+
+// AddedAndroidYearlyAmountMinor returns the value that was added to the "android_yearly_amount_minor" field in this mutation.
+func (m *PlanPriceMutation) AddedAndroidYearlyAmountMinor() (r int64, exists bool) {
+	v := m.addandroid_yearly_amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAndroidYearlyAmountMinor resets all changes to the "android_yearly_amount_minor" field.
+func (m *PlanPriceMutation) ResetAndroidYearlyAmountMinor() {
+	m.android_yearly_amount_minor = nil
+	m.addandroid_yearly_amount_minor = nil
+}
+
+// SetStoreProductIds sets the "store_product_ids" field.
+func (m *PlanPriceMutation) SetStoreProductIds(value map[string]string) {
+	m.store_product_ids = &value
+}
+
+// StoreProductIds returns the value of the "store_product_ids" field in the mutation.
+func (m *PlanPriceMutation) StoreProductIds() (r map[string]string, exists bool) {
+	v := m.store_product_ids
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreProductIds returns the old "store_product_ids" field's value of the PlanPrice entity.
+// If the PlanPrice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlanPriceMutation) OldStoreProductIds(ctx context.Context) (v map[string]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreProductIds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreProductIds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreProductIds: %w", err)
+	}
+	return oldValue.StoreProductIds, nil
+}
+
+// ResetStoreProductIds resets all changes to the "store_product_ids" field.
+func (m *PlanPriceMutation) ResetStoreProductIds() {
+	m.store_product_ids = nil
+}
+
 // SetActive sets the "active" field.
 func (m *PlanPriceMutation) SetActive(b bool) {
 	m.active = &b
@@ -1937,7 +2264,7 @@ func (m *PlanPriceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PlanPriceMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 14)
 	if m.created_at != nil {
 		fields = append(fields, planprice.FieldCreatedAt)
 	}
@@ -1952,6 +2279,24 @@ func (m *PlanPriceMutation) Fields() []string {
 	}
 	if m.monthly_amount_minor != nil {
 		fields = append(fields, planprice.FieldMonthlyAmountMinor)
+	}
+	if m.yearly_amount_minor != nil {
+		fields = append(fields, planprice.FieldYearlyAmountMinor)
+	}
+	if m.ios_monthly_amount_minor != nil {
+		fields = append(fields, planprice.FieldIosMonthlyAmountMinor)
+	}
+	if m.ios_yearly_amount_minor != nil {
+		fields = append(fields, planprice.FieldIosYearlyAmountMinor)
+	}
+	if m.android_monthly_amount_minor != nil {
+		fields = append(fields, planprice.FieldAndroidMonthlyAmountMinor)
+	}
+	if m.android_yearly_amount_minor != nil {
+		fields = append(fields, planprice.FieldAndroidYearlyAmountMinor)
+	}
+	if m.store_product_ids != nil {
+		fields = append(fields, planprice.FieldStoreProductIds)
 	}
 	if m.active != nil {
 		fields = append(fields, planprice.FieldActive)
@@ -1980,6 +2325,18 @@ func (m *PlanPriceMutation) Field(name string) (ent.Value, bool) {
 		return m.Currency()
 	case planprice.FieldMonthlyAmountMinor:
 		return m.MonthlyAmountMinor()
+	case planprice.FieldYearlyAmountMinor:
+		return m.YearlyAmountMinor()
+	case planprice.FieldIosMonthlyAmountMinor:
+		return m.IosMonthlyAmountMinor()
+	case planprice.FieldIosYearlyAmountMinor:
+		return m.IosYearlyAmountMinor()
+	case planprice.FieldAndroidMonthlyAmountMinor:
+		return m.AndroidMonthlyAmountMinor()
+	case planprice.FieldAndroidYearlyAmountMinor:
+		return m.AndroidYearlyAmountMinor()
+	case planprice.FieldStoreProductIds:
+		return m.StoreProductIds()
 	case planprice.FieldActive:
 		return m.Active()
 	case planprice.FieldUpdatedByStaffID:
@@ -2005,6 +2362,18 @@ func (m *PlanPriceMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldCurrency(ctx)
 	case planprice.FieldMonthlyAmountMinor:
 		return m.OldMonthlyAmountMinor(ctx)
+	case planprice.FieldYearlyAmountMinor:
+		return m.OldYearlyAmountMinor(ctx)
+	case planprice.FieldIosMonthlyAmountMinor:
+		return m.OldIosMonthlyAmountMinor(ctx)
+	case planprice.FieldIosYearlyAmountMinor:
+		return m.OldIosYearlyAmountMinor(ctx)
+	case planprice.FieldAndroidMonthlyAmountMinor:
+		return m.OldAndroidMonthlyAmountMinor(ctx)
+	case planprice.FieldAndroidYearlyAmountMinor:
+		return m.OldAndroidYearlyAmountMinor(ctx)
+	case planprice.FieldStoreProductIds:
+		return m.OldStoreProductIds(ctx)
 	case planprice.FieldActive:
 		return m.OldActive(ctx)
 	case planprice.FieldUpdatedByStaffID:
@@ -2055,6 +2424,48 @@ func (m *PlanPriceMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMonthlyAmountMinor(v)
 		return nil
+	case planprice.FieldYearlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYearlyAmountMinor(v)
+		return nil
+	case planprice.FieldIosMonthlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIosMonthlyAmountMinor(v)
+		return nil
+	case planprice.FieldIosYearlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIosYearlyAmountMinor(v)
+		return nil
+	case planprice.FieldAndroidMonthlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAndroidMonthlyAmountMinor(v)
+		return nil
+	case planprice.FieldAndroidYearlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAndroidYearlyAmountMinor(v)
+		return nil
+	case planprice.FieldStoreProductIds:
+		v, ok := value.(map[string]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreProductIds(v)
+		return nil
 	case planprice.FieldActive:
 		v, ok := value.(bool)
 		if !ok {
@@ -2087,6 +2498,21 @@ func (m *PlanPriceMutation) AddedFields() []string {
 	if m.addmonthly_amount_minor != nil {
 		fields = append(fields, planprice.FieldMonthlyAmountMinor)
 	}
+	if m.addyearly_amount_minor != nil {
+		fields = append(fields, planprice.FieldYearlyAmountMinor)
+	}
+	if m.addios_monthly_amount_minor != nil {
+		fields = append(fields, planprice.FieldIosMonthlyAmountMinor)
+	}
+	if m.addios_yearly_amount_minor != nil {
+		fields = append(fields, planprice.FieldIosYearlyAmountMinor)
+	}
+	if m.addandroid_monthly_amount_minor != nil {
+		fields = append(fields, planprice.FieldAndroidMonthlyAmountMinor)
+	}
+	if m.addandroid_yearly_amount_minor != nil {
+		fields = append(fields, planprice.FieldAndroidYearlyAmountMinor)
+	}
 	return fields
 }
 
@@ -2097,6 +2523,16 @@ func (m *PlanPriceMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case planprice.FieldMonthlyAmountMinor:
 		return m.AddedMonthlyAmountMinor()
+	case planprice.FieldYearlyAmountMinor:
+		return m.AddedYearlyAmountMinor()
+	case planprice.FieldIosMonthlyAmountMinor:
+		return m.AddedIosMonthlyAmountMinor()
+	case planprice.FieldIosYearlyAmountMinor:
+		return m.AddedIosYearlyAmountMinor()
+	case planprice.FieldAndroidMonthlyAmountMinor:
+		return m.AddedAndroidMonthlyAmountMinor()
+	case planprice.FieldAndroidYearlyAmountMinor:
+		return m.AddedAndroidYearlyAmountMinor()
 	}
 	return nil, false
 }
@@ -2112,6 +2548,41 @@ func (m *PlanPriceMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddMonthlyAmountMinor(v)
+		return nil
+	case planprice.FieldYearlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYearlyAmountMinor(v)
+		return nil
+	case planprice.FieldIosMonthlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddIosMonthlyAmountMinor(v)
+		return nil
+	case planprice.FieldIosYearlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddIosYearlyAmountMinor(v)
+		return nil
+	case planprice.FieldAndroidMonthlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAndroidMonthlyAmountMinor(v)
+		return nil
+	case planprice.FieldAndroidYearlyAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAndroidYearlyAmountMinor(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PlanPrice numeric field %s", name)
@@ -2154,6 +2625,24 @@ func (m *PlanPriceMutation) ResetField(name string) error {
 		return nil
 	case planprice.FieldMonthlyAmountMinor:
 		m.ResetMonthlyAmountMinor()
+		return nil
+	case planprice.FieldYearlyAmountMinor:
+		m.ResetYearlyAmountMinor()
+		return nil
+	case planprice.FieldIosMonthlyAmountMinor:
+		m.ResetIosMonthlyAmountMinor()
+		return nil
+	case planprice.FieldIosYearlyAmountMinor:
+		m.ResetIosYearlyAmountMinor()
+		return nil
+	case planprice.FieldAndroidMonthlyAmountMinor:
+		m.ResetAndroidMonthlyAmountMinor()
+		return nil
+	case planprice.FieldAndroidYearlyAmountMinor:
+		m.ResetAndroidYearlyAmountMinor()
+		return nil
+	case planprice.FieldStoreProductIds:
+		m.ResetStoreProductIds()
 		return nil
 	case planprice.FieldActive:
 		m.ResetActive()
