@@ -342,6 +342,20 @@ func (_c *LiveSessionCreate) SetNillableSponsorshipLine(v *string) *LiveSessionC
 	return _c
 }
 
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (_c *LiveSessionCreate) SetModerationVisibility(v string) *LiveSessionCreate {
+	_c.mutation.SetModerationVisibility(v)
+	return _c
+}
+
+// SetNillableModerationVisibility sets the "moderation_visibility" field if the given value is not nil.
+func (_c *LiveSessionCreate) SetNillableModerationVisibility(v *string) *LiveSessionCreate {
+	if v != nil {
+		_c.SetModerationVisibility(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *LiveSessionCreate) SetUpdatedAt(v time.Time) *LiveSessionCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -453,6 +467,10 @@ func (_c *LiveSessionCreate) defaults() {
 		v := livesession.DefaultCreatorCoins
 		_c.mutation.SetCreatorCoins(v)
 	}
+	if _, ok := _c.mutation.ModerationVisibility(); !ok {
+		v := livesession.DefaultModerationVisibility
+		_c.mutation.SetModerationVisibility(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := livesession.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -544,6 +562,9 @@ func (_c *LiveSessionCreate) check() error {
 		if err := livesession.SponsorshipLineValidator(v); err != nil {
 			return &ValidationError{Name: "sponsorship_line", err: fmt.Errorf(`ent: validator failed for field "LiveSession.sponsorship_line": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.ModerationVisibility(); !ok {
+		return &ValidationError{Name: "moderation_visibility", err: errors.New(`ent: missing required field "LiveSession.moderation_visibility"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "LiveSession.updated_at"`)}
@@ -683,6 +704,10 @@ func (_c *LiveSessionCreate) createSpec() (*LiveSession, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SponsorshipLine(); ok {
 		_spec.SetField(livesession.FieldSponsorshipLine, field.TypeString, value)
 		_node.SponsorshipLine = &value
+	}
+	if value, ok := _c.mutation.ModerationVisibility(); ok {
+		_spec.SetField(livesession.FieldModerationVisibility, field.TypeString, value)
+		_node.ModerationVisibility = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(livesession.FieldUpdatedAt, field.TypeTime, value)
@@ -1091,6 +1116,18 @@ func (u *LiveSessionUpsert) UpdateSponsorshipLine() *LiveSessionUpsert {
 // ClearSponsorshipLine clears the value of the "sponsorship_line" field.
 func (u *LiveSessionUpsert) ClearSponsorshipLine() *LiveSessionUpsert {
 	u.SetNull(livesession.FieldSponsorshipLine)
+	return u
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (u *LiveSessionUpsert) SetModerationVisibility(v string) *LiveSessionUpsert {
+	u.Set(livesession.FieldModerationVisibility, v)
+	return u
+}
+
+// UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
+func (u *LiveSessionUpsert) UpdateModerationVisibility() *LiveSessionUpsert {
+	u.SetExcluded(livesession.FieldModerationVisibility)
 	return u
 }
 
@@ -1573,6 +1610,20 @@ func (u *LiveSessionUpsertOne) UpdateSponsorshipLine() *LiveSessionUpsertOne {
 func (u *LiveSessionUpsertOne) ClearSponsorshipLine() *LiveSessionUpsertOne {
 	return u.Update(func(s *LiveSessionUpsert) {
 		s.ClearSponsorshipLine()
+	})
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (u *LiveSessionUpsertOne) SetModerationVisibility(v string) *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.SetModerationVisibility(v)
+	})
+}
+
+// UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
+func (u *LiveSessionUpsertOne) UpdateModerationVisibility() *LiveSessionUpsertOne {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.UpdateModerationVisibility()
 	})
 }
 
@@ -2224,6 +2275,20 @@ func (u *LiveSessionUpsertBulk) UpdateSponsorshipLine() *LiveSessionUpsertBulk {
 func (u *LiveSessionUpsertBulk) ClearSponsorshipLine() *LiveSessionUpsertBulk {
 	return u.Update(func(s *LiveSessionUpsert) {
 		s.ClearSponsorshipLine()
+	})
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (u *LiveSessionUpsertBulk) SetModerationVisibility(v string) *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.SetModerationVisibility(v)
+	})
+}
+
+// UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
+func (u *LiveSessionUpsertBulk) UpdateModerationVisibility() *LiveSessionUpsertBulk {
+	return u.Update(func(s *LiveSessionUpsert) {
+		s.UpdateModerationVisibility()
 	})
 }
 

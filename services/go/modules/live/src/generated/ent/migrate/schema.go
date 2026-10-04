@@ -537,6 +537,46 @@ var (
 		Columns:    LiveRoomSettingsColumns,
 		PrimaryKey: []*schema.Column{LiveRoomSettingsColumns[0]},
 	}
+	// LiveSafetyStatesColumns holds the columns for the "live_safety_states" table.
+	LiveSafetyStatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "live_id", Type: field.TypeUUID},
+		{Name: "host_id", Type: field.TypeUUID},
+		{Name: "hold_active", Type: field.TypeBool, Default: false},
+		{Name: "hold_incident_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "hold_category", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "hold_reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "hold_source", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "hold_started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "warning_message", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "warned_at", Type: field.TypeTime, Nullable: true},
+		{Name: "sampling_boost_until", Type: field.TypeTime, Nullable: true},
+		{Name: "frame_egress_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "audio_egress_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "last_frame_key", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "last_frame_enqueued_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_audio_key", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// LiveSafetyStatesTable holds the schema information for the "live_safety_states" table.
+	LiveSafetyStatesTable = &schema.Table{
+		Name:       "live_safety_states",
+		Columns:    LiveSafetyStatesColumns,
+		PrimaryKey: []*schema.Column{LiveSafetyStatesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "livesafetystate_live_id",
+				Unique:  true,
+				Columns: []*schema.Column{LiveSafetyStatesColumns[2]},
+			},
+			{
+				Name:    "livesafetystate_hold_active",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSafetyStatesColumns[4]},
+			},
+		},
+	}
 	// LiveSessionsColumns holds the columns for the "live_sessions" table.
 	LiveSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -565,6 +605,7 @@ var (
 		{Name: "accepted_live_ad_terms_version", Type: field.TypeString, Nullable: true},
 		{Name: "accepted_live_ad_terms_at", Type: field.TypeTime, Nullable: true},
 		{Name: "sponsorship_line", Type: field.TypeString, Nullable: true, Size: 200},
+		{Name: "moderation_visibility", Type: field.TypeString, Default: "visible"},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// LiveSessionsTable holds the schema information for the "live_sessions" table.
@@ -773,6 +814,7 @@ var (
 		LiveRecordingsTable,
 		LiveRestrictionsTable,
 		LiveRoomSettingsTable,
+		LiveSafetyStatesTable,
 		LiveSessionsTable,
 		LiveViewersTable,
 		OutboxEventsTable,

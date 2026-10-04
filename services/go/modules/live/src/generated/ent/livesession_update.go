@@ -424,6 +424,20 @@ func (_u *LiveSessionUpdate) ClearSponsorshipLine() *LiveSessionUpdate {
 	return _u
 }
 
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (_u *LiveSessionUpdate) SetModerationVisibility(v string) *LiveSessionUpdate {
+	_u.mutation.SetModerationVisibility(v)
+	return _u
+}
+
+// SetNillableModerationVisibility sets the "moderation_visibility" field if the given value is not nil.
+func (_u *LiveSessionUpdate) SetNillableModerationVisibility(v *string) *LiveSessionUpdate {
+	if v != nil {
+		_u.SetModerationVisibility(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *LiveSessionUpdate) SetUpdatedAt(v time.Time) *LiveSessionUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -628,6 +642,9 @@ func (_u *LiveSessionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if _u.mutation.SponsorshipLineCleared() {
 		_spec.ClearField(livesession.FieldSponsorshipLine, field.TypeString)
+	}
+	if value, ok := _u.mutation.ModerationVisibility(); ok {
+		_spec.SetField(livesession.FieldModerationVisibility, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(livesession.FieldUpdatedAt, field.TypeTime, value)
@@ -1047,6 +1064,20 @@ func (_u *LiveSessionUpdateOne) ClearSponsorshipLine() *LiveSessionUpdateOne {
 	return _u
 }
 
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (_u *LiveSessionUpdateOne) SetModerationVisibility(v string) *LiveSessionUpdateOne {
+	_u.mutation.SetModerationVisibility(v)
+	return _u
+}
+
+// SetNillableModerationVisibility sets the "moderation_visibility" field if the given value is not nil.
+func (_u *LiveSessionUpdateOne) SetNillableModerationVisibility(v *string) *LiveSessionUpdateOne {
+	if v != nil {
+		_u.SetModerationVisibility(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *LiveSessionUpdateOne) SetUpdatedAt(v time.Time) *LiveSessionUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -1281,6 +1312,9 @@ func (_u *LiveSessionUpdateOne) sqlSave(ctx context.Context) (_node *LiveSession
 	}
 	if _u.mutation.SponsorshipLineCleared() {
 		_spec.ClearField(livesession.FieldSponsorshipLine, field.TypeString)
+	}
+	if value, ok := _u.mutation.ModerationVisibility(); ok {
+		_spec.SetField(livesession.FieldModerationVisibility, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(livesession.FieldUpdatedAt, field.TypeTime, value)

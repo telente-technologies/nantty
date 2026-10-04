@@ -160,6 +160,11 @@ func SponsorshipLine(v string) predicate.LiveSession {
 	return predicate.LiveSession(sql.FieldEQ(FieldSponsorshipLine, v))
 }
 
+// ModerationVisibility applies equality check predicate on the "moderation_visibility" field. It's identical to ModerationVisibilityEQ.
+func ModerationVisibility(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldEQ(FieldModerationVisibility, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.LiveSession {
 	return predicate.LiveSession(sql.FieldEQ(FieldUpdatedAt, v))
@@ -1253,6 +1258,71 @@ func SponsorshipLineEqualFold(v string) predicate.LiveSession {
 // SponsorshipLineContainsFold applies the ContainsFold predicate on the "sponsorship_line" field.
 func SponsorshipLineContainsFold(v string) predicate.LiveSession {
 	return predicate.LiveSession(sql.FieldContainsFold(FieldSponsorshipLine, v))
+}
+
+// ModerationVisibilityEQ applies the EQ predicate on the "moderation_visibility" field.
+func ModerationVisibilityEQ(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldEQ(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityNEQ applies the NEQ predicate on the "moderation_visibility" field.
+func ModerationVisibilityNEQ(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldNEQ(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityIn applies the In predicate on the "moderation_visibility" field.
+func ModerationVisibilityIn(vs ...string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldIn(FieldModerationVisibility, vs...))
+}
+
+// ModerationVisibilityNotIn applies the NotIn predicate on the "moderation_visibility" field.
+func ModerationVisibilityNotIn(vs ...string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldNotIn(FieldModerationVisibility, vs...))
+}
+
+// ModerationVisibilityGT applies the GT predicate on the "moderation_visibility" field.
+func ModerationVisibilityGT(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldGT(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityGTE applies the GTE predicate on the "moderation_visibility" field.
+func ModerationVisibilityGTE(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldGTE(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityLT applies the LT predicate on the "moderation_visibility" field.
+func ModerationVisibilityLT(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldLT(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityLTE applies the LTE predicate on the "moderation_visibility" field.
+func ModerationVisibilityLTE(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldLTE(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityContains applies the Contains predicate on the "moderation_visibility" field.
+func ModerationVisibilityContains(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldContains(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityHasPrefix applies the HasPrefix predicate on the "moderation_visibility" field.
+func ModerationVisibilityHasPrefix(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldHasPrefix(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityHasSuffix applies the HasSuffix predicate on the "moderation_visibility" field.
+func ModerationVisibilityHasSuffix(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldHasSuffix(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityEqualFold applies the EqualFold predicate on the "moderation_visibility" field.
+func ModerationVisibilityEqualFold(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldEqualFold(FieldModerationVisibility, v))
+}
+
+// ModerationVisibilityContainsFold applies the ContainsFold predicate on the "moderation_visibility" field.
+func ModerationVisibilityContainsFold(v string) predicate.LiveSession {
+	return predicate.LiveSession(sql.FieldContainsFold(FieldModerationVisibility, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
