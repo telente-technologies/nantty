@@ -6,6 +6,7 @@ import { findPrincipal, requirePrincipal } from "../middlewares/principal.middle
 import type { Principal } from "../types/principal.type.js";
 import { empty, errorToResponse, json, parseJsonBody, validationFailed } from "./http.util.js";
 import type { IdempotencyGuard } from "../middlewares/idempotency.middleware.js";
+import { runWithViewerAgeBracket } from "./viewerAgeContext.util.js";
 
 type Parsed<S> = S extends Schema<unknown> ? Infer<S> : undefined;
 
@@ -54,10 +55,10 @@ export function createRouteFactory(idempotency: IdempotencyGuard): RouteFactory 
       if (!body.ok) return body.response;
       const key = context.request.getHeader("idempotency-key")?.trim();
       if (key !== undefined && key !== "" && !/^[A-Za-z0-9_-]{8,128}$/.test(key)) throw badRequest("INVALID_IDEMPOTENCY_KEY", "Idempotency-Key must be 8 to 128 characters of letters, digits, - or _.");
-      const execute = async () => {
+      const execute = () => runWithViewerAgeBracket(principal?.ageBracket ?? "unknown", async () => {
         const result = await handler({ principal, params: params.data, query: query.data, body: body.data, idempotencyKey: key === "" ? undefined : key } as never);
         return { status: definition.successStatus ?? (result === undefined ? 204 : 200), body: result };
-      };
+      });
       const outcome = principal !== undefined && key !== undefined && key !== "" && context.request.method !== "GET"
         ? await idempotency.run(principal.accountId, key, context.request.path, execute)
         : { ...(await execute()), replayed: false };
