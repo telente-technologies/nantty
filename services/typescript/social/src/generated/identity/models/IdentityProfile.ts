@@ -35,6 +35,7 @@ export type IdentityProfileMinAggregateOutputType = {
   verified: boolean | null
   status: string | null
   creatorStatus: string | null
+  countryCode: string | null
 }
 
 export type IdentityProfileMaxAggregateOutputType = {
@@ -48,6 +49,7 @@ export type IdentityProfileMaxAggregateOutputType = {
   verified: boolean | null
   status: string | null
   creatorStatus: string | null
+  countryCode: string | null
 }
 
 export type IdentityProfileCountAggregateOutputType = {
@@ -61,6 +63,7 @@ export type IdentityProfileCountAggregateOutputType = {
   verified: number
   status: number
   creatorStatus: number
+  countryCode: number
   _all: number
 }
 
@@ -76,6 +79,7 @@ export type IdentityProfileMinAggregateInputType = {
   verified?: true
   status?: true
   creatorStatus?: true
+  countryCode?: true
 }
 
 export type IdentityProfileMaxAggregateInputType = {
@@ -89,6 +93,7 @@ export type IdentityProfileMaxAggregateInputType = {
   verified?: true
   status?: true
   creatorStatus?: true
+  countryCode?: true
 }
 
 export type IdentityProfileCountAggregateInputType = {
@@ -102,6 +107,7 @@ export type IdentityProfileCountAggregateInputType = {
   verified?: true
   status?: true
   creatorStatus?: true
+  countryCode?: true
   _all?: true
 }
 
@@ -188,6 +194,7 @@ export type IdentityProfileGroupByOutputType = {
   verified: boolean
   status: string
   creatorStatus: string
+  countryCode: string | null
   _count: IdentityProfileCountAggregateOutputType | null
   _min: IdentityProfileMinAggregateOutputType | null
   _max: IdentityProfileMaxAggregateOutputType | null
@@ -222,6 +229,7 @@ export type IdentityProfileWhereInput = {
   verified?: Prisma.BoolFilter<"IdentityProfile"> | boolean
   status?: Prisma.StringFilter<"IdentityProfile"> | string
   creatorStatus?: Prisma.StringFilter<"IdentityProfile"> | string
+  countryCode?: Prisma.StringNullableFilter<"IdentityProfile"> | string | null
 }
 
 export type IdentityProfileOrderByWithRelationInput = {
@@ -235,6 +243,7 @@ export type IdentityProfileOrderByWithRelationInput = {
   verified?: Prisma.SortOrder
   status?: Prisma.SortOrder
   creatorStatus?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type IdentityProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -251,6 +260,7 @@ export type IdentityProfileWhereUniqueInput = Prisma.AtLeast<{
   verified?: Prisma.BoolFilter<"IdentityProfile"> | boolean
   status?: Prisma.StringFilter<"IdentityProfile"> | string
   creatorStatus?: Prisma.StringFilter<"IdentityProfile"> | string
+  countryCode?: Prisma.StringNullableFilter<"IdentityProfile"> | string | null
 }, "id">
 
 export type IdentityProfileOrderByWithAggregationInput = {
@@ -264,6 +274,7 @@ export type IdentityProfileOrderByWithAggregationInput = {
   verified?: Prisma.SortOrder
   status?: Prisma.SortOrder
   creatorStatus?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.IdentityProfileCountOrderByAggregateInput
   _max?: Prisma.IdentityProfileMaxOrderByAggregateInput
   _min?: Prisma.IdentityProfileMinOrderByAggregateInput
@@ -283,6 +294,7 @@ export type IdentityProfileScalarWhereWithAggregatesInput = {
   verified?: Prisma.BoolWithAggregatesFilter<"IdentityProfile"> | boolean
   status?: Prisma.StringWithAggregatesFilter<"IdentityProfile"> | string
   creatorStatus?: Prisma.StringWithAggregatesFilter<"IdentityProfile"> | string
+  countryCode?: Prisma.StringNullableWithAggregatesFilter<"IdentityProfile"> | string | null
 }
 
 export type IdentityProfileCreateInput = {
@@ -296,6 +308,7 @@ export type IdentityProfileCreateInput = {
   verified: boolean
   status: string
   creatorStatus: string
+  countryCode?: string | null
 }
 
 export type IdentityProfileUncheckedCreateInput = {
@@ -309,6 +322,7 @@ export type IdentityProfileUncheckedCreateInput = {
   verified: boolean
   status: string
   creatorStatus: string
+  countryCode?: string | null
 }
 
 export type IdentityProfileUpdateInput = {
@@ -322,6 +336,7 @@ export type IdentityProfileUpdateInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   creatorStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type IdentityProfileUncheckedUpdateInput = {
@@ -335,6 +350,7 @@ export type IdentityProfileUncheckedUpdateInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   creatorStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type IdentityProfileCreateManyInput = {
@@ -348,6 +364,7 @@ export type IdentityProfileCreateManyInput = {
   verified: boolean
   status: string
   creatorStatus: string
+  countryCode?: string | null
 }
 
 export type IdentityProfileUpdateManyMutationInput = {
@@ -361,6 +378,7 @@ export type IdentityProfileUpdateManyMutationInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   creatorStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type IdentityProfileUncheckedUpdateManyInput = {
@@ -374,6 +392,7 @@ export type IdentityProfileUncheckedUpdateManyInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   creatorStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type IdentityProfileCountOrderByAggregateInput = {
@@ -387,6 +406,7 @@ export type IdentityProfileCountOrderByAggregateInput = {
   verified?: Prisma.SortOrder
   status?: Prisma.SortOrder
   creatorStatus?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrder
 }
 
 export type IdentityProfileMaxOrderByAggregateInput = {
@@ -400,6 +420,7 @@ export type IdentityProfileMaxOrderByAggregateInput = {
   verified?: Prisma.SortOrder
   status?: Prisma.SortOrder
   creatorStatus?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrder
 }
 
 export type IdentityProfileMinOrderByAggregateInput = {
@@ -413,6 +434,7 @@ export type IdentityProfileMinOrderByAggregateInput = {
   verified?: Prisma.SortOrder
   status?: Prisma.SortOrder
   creatorStatus?: Prisma.SortOrder
+  countryCode?: Prisma.SortOrder
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -440,6 +462,7 @@ export type IdentityProfileSelect<ExtArgs extends runtime.Types.Extensions.Inter
   verified?: boolean
   status?: boolean
   creatorStatus?: boolean
+  countryCode?: boolean
 }, ExtArgs["result"]["identityProfile"]>
 
 export type IdentityProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -453,6 +476,7 @@ export type IdentityProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   verified?: boolean
   status?: boolean
   creatorStatus?: boolean
+  countryCode?: boolean
 }, ExtArgs["result"]["identityProfile"]>
 
 export type IdentityProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -466,6 +490,7 @@ export type IdentityProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   verified?: boolean
   status?: boolean
   creatorStatus?: boolean
+  countryCode?: boolean
 }, ExtArgs["result"]["identityProfile"]>
 
 export type IdentityProfileSelectScalar = {
@@ -479,9 +504,10 @@ export type IdentityProfileSelectScalar = {
   verified?: boolean
   status?: boolean
   creatorStatus?: boolean
+  countryCode?: boolean
 }
 
-export type IdentityProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "kind" | "handle" | "displayName" | "avatarUrl" | "isPrivate" | "verified" | "status" | "creatorStatus", ExtArgs["result"]["identityProfile"]>
+export type IdentityProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "kind" | "handle" | "displayName" | "avatarUrl" | "isPrivate" | "verified" | "status" | "creatorStatus" | "countryCode", ExtArgs["result"]["identityProfile"]>
 
 export type $IdentityProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "IdentityProfile"
@@ -497,6 +523,7 @@ export type $IdentityProfilePayload<ExtArgs extends runtime.Types.Extensions.Int
     verified: boolean
     status: string
     creatorStatus: string
+    countryCode: string | null
   }, ExtArgs["result"]["identityProfile"]>
   composites: {}
 }
@@ -930,6 +957,7 @@ export interface IdentityProfileFieldRefs {
   readonly verified: Prisma.FieldRef<"IdentityProfile", 'Boolean'>
   readonly status: Prisma.FieldRef<"IdentityProfile", 'String'>
   readonly creatorStatus: Prisma.FieldRef<"IdentityProfile", 'String'>
+  readonly countryCode: Prisma.FieldRef<"IdentityProfile", 'String'>
 }
     
 
