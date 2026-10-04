@@ -15,17 +15,18 @@ import (
 )
 
 type Container struct {
-	Client         *ent.Client
-	Settings       configs.ModerationSettings
-	Logger         *slog.Logger
-	Now            func() time.Time
-	AccessVerifier *jwtauth.AccessTokenVerifier
-	StaffVerifiers middlewares.StaffTokenVerifiers
-	Users          integrations.UsersService
-	Audit          integrations.AuditService
-	Targets        integrations.TargetResolver
-	EvidenceVault  integrations.EvidenceVault
-	FramePreviews  integrations.FramePreviewSigner
+	Client            *ent.Client
+	Settings          configs.ModerationSettings
+	Logger            *slog.Logger
+	Now               func() time.Time
+	AccessVerifier    *jwtauth.AccessTokenVerifier
+	StaffVerifiers    middlewares.StaffTokenVerifiers
+	Users             integrations.UsersService
+	Audit             integrations.AuditService
+	Targets           integrations.TargetResolver
+	EvidenceVault     integrations.EvidenceVault
+	FramePreviews     integrations.FramePreviewSigner
+	DeviceAttestation integrations.DeviceAttestationVerifier
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {

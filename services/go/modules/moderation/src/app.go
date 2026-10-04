@@ -17,6 +17,8 @@ import (
 	"zudomart/modules/moderation/src/integrations"
 	"zudomart/modules/moderation/src/middlewares"
 	"zudomart/modules/moderation/src/migrations"
+	accesssecurity "zudomart/modules/moderation/src/modules/accessSecurity"
+	accounthealth "zudomart/modules/moderation/src/modules/accountHealth"
 	"zudomart/modules/moderation/src/modules/chatReports"
 	"zudomart/modules/moderation/src/modules/contentReports"
 	"zudomart/modules/moderation/src/modules/copyrightClaims"
@@ -93,6 +95,7 @@ func StartModerationModuleWithSettings(ctx context.Context, settings configs.Mod
 	if moderationContainer.Targets == nil {
 		moderationContainer.Targets = integrations.NewHttpTargetResolver(settings.TargetSources)
 	}
+	moderationContainer.DeviceAttestation = integrations.ProviderDeviceAttestationVerifier{}
 	if err := resolveLiveSafetyStorage(ctx, settings, overrides, moderationContainer); err != nil {
 		_ = database.Close()
 		return nil, err
@@ -135,12 +138,17 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	copyrightclaims.Mount(mux, module.container)
 	ipclaims.Mount(mux, module.container)
 	livesafety.Mount(mux, module.container)
+	accesssecurity.Mount(mux, module.container)
+	accounthealth.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	go chatreports.RunBackgroundWorkersUntilContextDone(ctx, module.container)
 	go module.consumeAdvisorySuggestions(ctx)
 	go copyrightclaims.RunRestoreWorkerUntilContextDone(ctx, module.container)
+	go accesssecurity.RunRetentionUntilContextDone(ctx, module.container)
+	go copyrightclaims.RunTakedownDeadlineWorkerUntilContextDone(ctx, module.container)
+	go accounthealth.RunStrikeExpiryWorkerUntilContextDone(ctx, module.container)
 	go module.consumeContentSignals(ctx)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},
@@ -187,6 +195,7 @@ func (module *Module) consumeContentSignals(ctx context.Context) {
 		return
 	}
 	go livesafety.RunConsumerUntilContextDone(ctx, module.container, queues)
+	go accesssecurity.RunConsumersUntilContextDone(ctx, module.container, queues)
 	contentreports.RunConsumersUntilContextDone(ctx, module.container, queues)
 }
 
