@@ -24,4 +24,18 @@ describe("identity verification notifications", () => {
       expect(intent?.email?.(makeRecipient({ accountId: "u1" })).props).toMatchObject({ refundMethod });
     }
   });
+
+  it("says the plan stays active and how much was refunded for the checkmark", () => {
+    const data = { accountId: "u1", checkmark: "gold", accountName: "Adire", caseId: "c1", reasons: ["Name mismatch"], refundMethod: "plan_share_card", refundAmount: { amountMinor: 300000, currency: "NGN" }, reapplyFrom: "2026-11-03T00:00:00.000Z" };
+    const [intent] = verificationRejectedRefunded(makeEvent("verification.rejectedRefunded", data), new EventDataReader(data), context);
+    expect(intent?.push?.body).toContain("Your plan stays active");
+    expect(intent?.push?.body).toContain("for the checkmark");
+    expect(intent?.email?.(makeRecipient({ accountId: "u1" })).props).toMatchObject({ refundMethod: "plan_share_card", refundAmount: { amountMinor: 300000, currency: "NGN" } });
+  });
+
+  it("falls back to the card wording for an unknown refund method", () => {
+    const data = { accountId: "u1", checkmark: "blue", accountName: "@a", reasons: [], refundMethod: "weird", reapplyFrom: "2026-11-03T00:00:00.000Z" };
+    const [intent] = verificationRejectedRefunded(makeEvent("verification.rejectedRefunded", data), new EventDataReader(data), context);
+    expect(intent?.email?.(makeRecipient({ accountId: "u1" })).props).toMatchObject({ refundMethod: "card" });
+  });
 });
