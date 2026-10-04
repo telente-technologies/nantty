@@ -22,6 +22,6 @@ google-services.json
 GoogleService-Info.plist
 AGENTS.md
 CLAUDE.md
-apps/intelligence/**/__pycache__/
+services/python/intelligence/**/__pycache__/
 
 *.tsbuildinfo
