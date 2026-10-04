@@ -54,7 +54,9 @@ export const ModelName = {
   IdentityProfile: 'IdentityProfile',
   IdentityPrivacySetting: 'IdentityPrivacySetting',
   IdentityAccountSuspension: 'IdentityAccountSuspension',
-  IdentityAccount: 'IdentityAccount'
+  IdentityAccount: 'IdentityAccount',
+  IdentityProfileCheckmark: 'IdentityProfileCheckmark',
+  IdentityAdminCreatedAccount: 'IdentityAdminCreatedAccount'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -83,7 +85,8 @@ export const IdentityProfileScalarFieldEnum = {
   isPrivate: 'isPrivate',
   verified: 'verified',
   status: 'status',
-  creatorStatus: 'creatorStatus'
+  creatorStatus: 'creatorStatus',
+  countryCode: 'countryCode'
 } as const
 
 export type IdentityProfileScalarFieldEnum = (typeof IdentityProfileScalarFieldEnum)[keyof typeof IdentityProfileScalarFieldEnum]
@@ -114,6 +117,23 @@ export const IdentityAccountScalarFieldEnum = {
 } as const
 
 export type IdentityAccountScalarFieldEnum = (typeof IdentityAccountScalarFieldEnum)[keyof typeof IdentityAccountScalarFieldEnum]
+
+
+export const IdentityProfileCheckmarkScalarFieldEnum = {
+  profileId: 'profileId',
+  accountId: 'accountId',
+  color: 'color',
+  status: 'status'
+} as const
+
+export type IdentityProfileCheckmarkScalarFieldEnum = (typeof IdentityProfileCheckmarkScalarFieldEnum)[keyof typeof IdentityProfileCheckmarkScalarFieldEnum]
+
+
+export const IdentityAdminCreatedAccountScalarFieldEnum = {
+  accountId: 'accountId'
+} as const
+
+export type IdentityAdminCreatedAccountScalarFieldEnum = (typeof IdentityAdminCreatedAccountScalarFieldEnum)[keyof typeof IdentityAdminCreatedAccountScalarFieldEnum]
 
 
 export const SortOrder = {

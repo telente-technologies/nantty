@@ -37,3 +37,13 @@ export type IdentityAccountSuspension = Prisma.IdentityAccountSuspensionModel
  * 
  */
 export type IdentityAccount = Prisma.IdentityAccountModel
+/**
+ * Model IdentityProfileCheckmark
+ * 
+ */
+export type IdentityProfileCheckmark = Prisma.IdentityProfileCheckmarkModel
+/**
+ * Model IdentityAdminCreatedAccount
+ * 
+ */
+export type IdentityAdminCreatedAccount = Prisma.IdentityAdminCreatedAccountModel
