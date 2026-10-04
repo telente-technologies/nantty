@@ -24,15 +24,16 @@ type StaffActor struct {
 }
 
 type EnforcementRequest struct {
-	Action       string     `json:"action"`
-	UserId       string     `json:"userId"`
-	Actor        StaffActor `json:"actor"`
-	Reason       string     `json:"reason"`
-	Features     []string   `json:"features,omitempty"`
-	DurationDays *int       `json:"durationDays,omitempty"`
-	ReasonCode   string     `json:"reasonCode,omitempty"`
-	Source       string     `json:"source,omitempty"`
-	CaseId       string     `json:"caseId,omitempty"`
+	Action          string     `json:"action"`
+	UserId          string     `json:"userId"`
+	Actor           StaffActor `json:"actor"`
+	Reason          string     `json:"reason"`
+	Features        []string   `json:"features,omitempty"`
+	DurationDays    *int       `json:"durationDays,omitempty"`
+	ReasonCode      string     `json:"reasonCode,omitempty"`
+	Source          string     `json:"source,omitempty"`
+	CaseId          string     `json:"caseId,omitempty"`
+	ConfirmUsername string     `json:"confirmUsername,omitempty"`
 }
 
 type UserSummary = map[string]any
