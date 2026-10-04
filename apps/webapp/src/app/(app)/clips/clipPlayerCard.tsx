@@ -10,7 +10,8 @@ import { postsService } from "@/services/posts.service";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { Avatar, MediaImage } from "@/components/ui/media";
-import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
+import { formatCompactCount } from "@/utils/formatCount.util";
+import { ClipTaggedPill } from "@/components/taggedPeople/clipTaggedPill";
 import type { Clip } from "@/types";
 
 import styles from "./page.module.css";
@@ -25,6 +26,7 @@ export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readon
   const [isPausedByViewer, setIsPausedByViewer] = useState(false);
   const [isLiked, setIsLiked] = useState(clip.liked);
   const [likeCount, setLikeCount] = useState(clip.likes);
+  const [isTaggedOpen, setIsTaggedOpen] = useState(false);
   const toggleLike = () =>
     requireAuthThen(() => {
       const likeNow = !isLiked;
@@ -41,9 +43,9 @@ export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readon
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (isActive && !isPausedByViewer) void video.play().catch(() => setIsPausedByViewer(true));
+    if (isActive && !isPausedByViewer && !isTaggedOpen) void video.play().catch(() => setIsPausedByViewer(true));
     else video.pause();
-  }, [isActive, isPausedByViewer]);
+  }, [isActive, isPausedByViewer, isTaggedOpen]);
 
   useEffect(() => {
     if (!isActive) setIsPausedByViewer(false);
@@ -77,6 +79,7 @@ export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readon
             <Avatar name={clip.author.name} src={clip.author.avatarUrl} size="sm" />
             <span>{clip.author.name}</span>
           </Link>
+          <ClipTaggedPill post={clip} isOpen={isTaggedOpen} onOpenChange={setIsTaggedOpen} />
           <p className={styles.clipCaption}>{clip.text}</p>
           <p className={styles.clipSound}><IconLabel name="musicNotes24" size={14}>{clip.sound.title}</IconLabel></p>
           {clip.products[0] ? (
@@ -91,21 +94,21 @@ export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readon
           <button type="button" className={styles.actionCircle} aria-pressed={isLiked} aria-label={`Like, ${likeCount} likes`} onClick={toggleLike}>
             {isLiked ? <LikeFilledActionIcon size={24} /> : <LikeActionIcon size={24} />}
           </button>
-          {formatCountWithThousandsSuffix(likeCount)}
+          <span className={styles.actionCount}>{formatCompactCount(likeCount)}</span>
         </span>
         <span className={styles.actionItem}>
           <Link href={`/post/${clip.id}#comments`} className={styles.actionCircle} aria-label={`Comments, ${clip.comments}`}>
             <ReplyActionIcon size={24} />
           </Link>
-          {formatCountWithThousandsSuffix(clip.comments)}
+          <span className={styles.actionCount}>{formatCompactCount(clip.comments)}</span>
         </span>
         <span className={styles.actionItem}>
           <SaveToggleButton targetType="clip" targetId={clip.id} initiallySaved={clip.bookmarked} appearance="overlay" iconSize={24} />
-          {formatCountWithThousandsSuffix(clip.saveCount ?? 0)}
+          <span className={styles.actionCount}>{formatCompactCount(clip.saveCount ?? 0)}</span>
         </span>
         <span className={styles.actionItem}>
           <ShareToChatButton kind="clip" referenceId={clip.id} className={styles.actionCircle} icon={<SendActionIcon size={24} />} iconOnly />
-          {formatCountWithThousandsSuffix(clip.reposts)}
+          <span className={styles.actionCount}>{formatCompactCount(clip.shares)}</span>
         </span>
         <span className={styles.actionItem}>
           <ContentActionsMenu shareKind={null} reportTargetType="clip" targetId={clip.id} soundId={clip.sound?.id ?? null} canonicalPath={`/clips?start=${clip.id}`} triggerClassName={styles.actionCircle} />
