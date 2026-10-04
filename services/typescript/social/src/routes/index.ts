@@ -6,6 +6,7 @@ import { mountCommentsModule } from "../modules/comments/comments.module.js";
 import { mountContentPreferencesModule } from "../modules/contentPreferences/contentPreferences.module.js";
 import { mountConversationsModule } from "../modules/conversations/conversations.module.js";
 import { mountDigestsModule } from "../modules/digests/digests.module.js";
+import { mountExploreModule } from "../modules/explore/explore.module.js";
 import { mountFeedsModule } from "../modules/feeds/feeds.module.js";
 import { mountInternalSourcesModule } from "../modules/internalSources/internalSources.module.js";
 import { mountFollowsModule } from "../modules/follows/follows.module.js";
@@ -35,6 +36,7 @@ export function registerRoutes(router: HttpRouter, route: RouteFactory, context:
   mountSearchModule(router, route, context);
   mountSoundsModule(router, route, context);
   mountFeedsModule(router, route, context);
+  mountExploreModule(router, route, context);
   mountConversationsModule(router, route, context);
   mountMessagesModule(router, route, context);
   mountChatSettingsModule(router, route, context);
