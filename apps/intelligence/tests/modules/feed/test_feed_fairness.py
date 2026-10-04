@@ -104,11 +104,16 @@ def test_coordinated_and_low_trust_engagement_is_discounted_and_flagged() -> Non
         EngagementIntegritySignals(engager_count=40, purchased_engagement_suspected=True)
     )
     small = assess_engagement_integrity(EngagementIntegritySignals(engager_count=3, clustered_engager_share=1.0))
-    assert clean.trusted_engagement_share == 1.0 and not clean.manipulated
-    assert ring.trusted_engagement_share < 0.2 and ring.manipulated
-    assert "coordinated_cluster" in ring.reasons and "engagement_burst" in ring.reasons
-    assert pod.manipulated and "reciprocal_pod" in pod.reasons
-    assert purchased.manipulated and purchased.trusted_engagement_share <= 0.2
+    assert clean.trusted_engagement_share == 1.0
+    assert not clean.manipulated
+    assert ring.trusted_engagement_share < 0.2
+    assert ring.manipulated
+    assert "coordinated_cluster" in ring.reasons
+    assert "engagement_burst" in ring.reasons
+    assert pod.manipulated
+    assert "reciprocal_pod" in pod.reasons
+    assert purchased.manipulated
+    assert purchased.trusted_engagement_share <= 0.2
     assert not small.manipulated
 
 
