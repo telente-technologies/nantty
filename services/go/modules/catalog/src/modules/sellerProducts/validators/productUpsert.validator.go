@@ -203,6 +203,7 @@ func validateMoneyAndStock(path string, variant dtos.VariantRequest, collected *
 	if variant.CostPriceMinor != nil && *variant.CostPriceMinor < 0 {
 		collected.Add(path+".costPriceMinor", "must be zero or more")
 	}
+	validateRegionalPrices(path, variant.RegionalPrices, collected)
 	collected.CheckRange(path+".lowStockThreshold", variant.LowStockThreshold, 0, 100000)
 	if variant.ReorderPoint != nil {
 		collected.CheckRange(path+".reorderPoint", *variant.ReorderPoint, 0, 1_000_000)

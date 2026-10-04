@@ -53,6 +53,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Sell
 			OptionValues: variant.OptionValues, Sku: sku, PriceMinor: variant.Price.AmountMinor, LowStockThreshold: variant.LowStockThreshold,
 			ReorderPoint: &variant.ReorderPoint, ReorderQuantity: &variant.ReorderQuantity,
 		}
+		for _, price := range variant.RegionalPrices {
+			line.RegionalPrices = append(line.RegionalPrices, dtos.RegionalPriceRequest{Currency: price.Currency, PriceMinor: price.PriceMinor, CompareAtPriceMinor: price.CompareAtPriceMinor})
+		}
 		if variant.CompareAtPrice != nil {
 			line.CompareAtPriceMinor = &variant.CompareAtPrice.AmountMinor
 		}

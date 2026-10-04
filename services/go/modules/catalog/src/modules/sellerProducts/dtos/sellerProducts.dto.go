@@ -12,18 +12,25 @@ type OpeningStockRequest struct {
 	Quantity   int    `json:"quantity"`
 }
 
+type RegionalPriceRequest struct {
+	Currency            string `json:"currency"`
+	PriceMinor          int64  `json:"priceMinor"`
+	CompareAtPriceMinor *int64 `json:"compareAtPriceMinor"`
+}
+
 type VariantRequest struct {
-	Id                  *string               `json:"id"`
-	OptionValues        map[string]string     `json:"optionValues"`
-	Sku                 string                `json:"sku"`
-	Barcode             *string               `json:"barcode"`
-	PriceMinor          int64                 `json:"priceMinor"`
-	CompareAtPriceMinor *int64                `json:"compareAtPriceMinor"`
-	CostPriceMinor      *int64                `json:"costPriceMinor"`
-	LowStockThreshold   int                   `json:"lowStockThreshold"`
-	ReorderPoint        *int                  `json:"reorderPoint"`
-	ReorderQuantity     *int                  `json:"reorderQuantity"`
-	OpeningStock        []OpeningStockRequest `json:"openingStock"`
+	Id                  *string                `json:"id"`
+	OptionValues        map[string]string      `json:"optionValues"`
+	Sku                 string                 `json:"sku"`
+	Barcode             *string                `json:"barcode"`
+	PriceMinor          int64                  `json:"priceMinor"`
+	CompareAtPriceMinor *int64                 `json:"compareAtPriceMinor"`
+	CostPriceMinor      *int64                 `json:"costPriceMinor"`
+	RegionalPrices      []RegionalPriceRequest `json:"regionalPrices"`
+	LowStockThreshold   int                    `json:"lowStockThreshold"`
+	ReorderPoint        *int                   `json:"reorderPoint"`
+	ReorderQuantity     *int                   `json:"reorderQuantity"`
+	OpeningStock        []OpeningStockRequest  `json:"openingStock"`
 }
 
 type AttributeRequest struct {
