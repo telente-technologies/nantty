@@ -13,9 +13,10 @@ import { SoundPickerSheet } from "./soundPickerSheet";
 export interface SoundPickerRowProps {
   readonly selectedSoundId: ID | null;
   readonly onChangeSelectedSoundId: (soundId: ID | null) => void;
+  readonly hasOwnAudio?: boolean;
 }
 
-export function SoundPickerRow({ selectedSoundId, onChangeSelectedSoundId }: SoundPickerRowProps) {
+export function SoundPickerRow({ selectedSoundId, onChangeSelectedSoundId, hasOwnAudio = true }: SoundPickerRowProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -25,7 +26,7 @@ export function SoundPickerRow({ selectedSoundId, onChangeSelectedSoundId }: Sou
     enabled: !!selectedSoundId,
   });
   const label = !selectedSoundId
-    ? "Original sound"
+    ? hasOwnAudio ? "Original sound" : "Add sound"
     : selectedSound.data
       ? describeClipSoundForDisplay(selectedSound.data)
       : "Loading sound…";
@@ -54,6 +55,7 @@ export function SoundPickerRow({ selectedSoundId, onChangeSelectedSoundId }: Sou
       <SoundPickerSheet
         visible={isPickerOpen}
         selectedSoundId={selectedSoundId}
+        hasOwnAudio={hasOwnAudio}
         onSelectSound={(sound) => {
           onChangeSelectedSoundId(sound?.id ?? null);
           setIsPickerOpen(false);

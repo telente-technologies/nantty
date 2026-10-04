@@ -17,11 +17,12 @@ export interface SoundPickerSheetProps {
   readonly selectedSoundId: string | null;
   readonly onSelectSound: (sound: ClipSound | null) => void;
   readonly onClose: () => void;
+  readonly hasOwnAudio?: boolean;
 }
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export function SoundPickerSheet({ visible, selectedSoundId, onSelectSound, onClose }: SoundPickerSheetProps) {
+export function SoundPickerSheet({ visible, selectedSoundId, onSelectSound, onClose, hasOwnAudio = true }: SoundPickerSheetProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const [tab, setTab] = useState<SoundListTab>("trending");
@@ -76,8 +77,8 @@ export function SoundPickerSheet({ visible, selectedSoundId, onSelectSound, onCl
           </View>
         )}
         <SoundOptionRow
-          title="Original sound"
-          subtitle="Use the audio from your own video"
+          title={hasOwnAudio ? "Original sound" : "No sound"}
+          subtitle={hasOwnAudio ? "Use the audio from your own video" : "Your photo clip plays silently"}
           isSelected={selectedSoundId === null}
           disabledReason={null}
           onPress={() => onSelectSound(null)}
