@@ -7,6 +7,7 @@ import (
 	"zudomart/modules/catalog/src/enums"
 	catalogerrors "zudomart/modules/catalog/src/errors"
 	"zudomart/modules/catalog/src/generated/ent"
+	"zudomart/modules/catalog/src/generated/ent/predicate"
 	"zudomart/modules/catalog/src/generated/ent/product"
 	"zudomart/modules/catalog/src/services"
 	"zudomart/modules/catalog/src/types"
@@ -18,14 +19,15 @@ type Handler struct {
 
 func (handler Handler) Execute(ctx context.Context, query Query) (types.StoreDetailView, error) {
 	row, err := handler.Container.Client.Store.Get(ctx, query.StoreId)
-	if ent.IsNotFound(err) || (err == nil && row.Status != enums.StoreActive) {
+	if ent.IsNotFound(err) || (err == nil && (row.Status != enums.StoreActive || !enums.IsShownToBuyers(row.ModerationVisibility))) {
 		return types.StoreDetailView{}, catalogerrors.StoreNotFound
 	}
 	if err != nil {
 		return types.StoreDetailView{}, err
 	}
-	count, err := handler.Container.Client.Product.Query().Where(product.StoreID(row.ID), product.Status(enums.ProductActive), product.PublishedOnline(true),
-		product.Visibility(enums.VisibilityPublic)).Count(ctx)
+	conditions := services.WithRegionCondition([]predicate.Product{product.StoreID(row.ID), product.Status(enums.ProductActive), product.PublishedOnline(true),
+		product.Visibility(enums.VisibilityPublic), product.ModerationVisibilityIn(enums.ModerationVisible, enums.ModerationRestricted)}, services.ViewerCountry(ctx, handler.Container, query.Viewer), query.Viewer)
+	count, err := handler.Container.Client.Product.Query().Where(conditions...).Count(ctx)
 	if err != nil {
 		return types.StoreDetailView{}, err
 	}

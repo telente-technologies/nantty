@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/catalog/src/modules/stores/validators"
 	"zudomart/modules/catalog/src/utils"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/jwtauth"
 )
 
 type StoresController struct {
@@ -44,13 +45,21 @@ func (controller StoresController) CreateStore(writer http.ResponseWriter, reque
 	controller.respond(writer, request, http.StatusCreated, result, err)
 }
 
+func optionalViewer(request *http.Request) *uuid.UUID {
+	if _, found := jwtauth.PrincipalFromContext(request.Context()); !found {
+		return nil
+	}
+	identifier := middlewares.AccountIdFrom(request.Context())
+	return &identifier
+}
+
 func (controller StoresController) GetStore(writer http.ResponseWriter, request *http.Request) {
 	storeId, err := utils.PathIdentifier(request, "storeId")
 	if err != nil {
 		controller.responder().Error(writer, request, err)
 		return
 	}
-	view, err := (getstoredetail.Handler{Container: controller.Container}).Execute(request.Context(), getstoredetail.Query{StoreId: storeId})
+	view, err := (getstoredetail.Handler{Container: controller.Container}).Execute(request.Context(), getstoredetail.Query{StoreId: storeId, Viewer: optionalViewer(request)})
 	controller.respond(writer, request, http.StatusOK, view, err)
 }
 
