@@ -33,7 +33,12 @@ func LoadDisputeForViewer(ctx context.Context, application *escrows.Application,
 		return dtos.DisputeDto{}, err
 	}
 	role := "support"
-	if !query.AsStaff {
+	if query.StoreId != "" {
+		if held.StoreID != query.StoreId {
+			return dtos.DisputeDto{}, services.ErrDisputeNotFound
+		}
+		role = "seller"
+	} else if !query.AsStaff {
 		participantRole, isParticipant := services.ParticipantRole(held, query.ViewerUserId)
 		if !isParticipant {
 			return dtos.DisputeDto{}, services.ErrDisputeNotFound

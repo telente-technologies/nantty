@@ -19,7 +19,9 @@ type Handler struct {
 func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.CursorPage[dtos.DisputeDto], error) {
 	client := handler.Application.Container.Client(handler.Application.Container.Resources.Database)
 	request := client.Dispute.Query()
-	if !query.AsStaff {
+	if query.StoreId != "" {
+		request.Where(dispute.HasEscrowWith(escrow.StoreID(query.StoreId)))
+	} else if !query.AsStaff {
 		request.Where(dispute.HasEscrowWith(escrow.Or(escrow.BuyerUserID(query.ViewerUserId), escrow.SellerUserID(query.ViewerUserId))))
 	}
 	if query.Status != "" {
@@ -44,7 +46,9 @@ func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.Cur
 			return httpserver.CursorPage[dtos.DisputeDto]{}, err
 		}
 		role := "support"
-		if !query.AsStaff {
+		if query.StoreId != "" {
+			role = "seller"
+		} else if !query.AsStaff {
 			role, _ = services.ParticipantRole(held, query.ViewerUserId)
 		}
 		view, err := services.LoadDisputeView(ctx, client, row, held, role)
