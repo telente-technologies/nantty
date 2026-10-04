@@ -96,3 +96,18 @@ func (collector *IssueCollector) Result() error {
 	}
 	return httpserver.NewValidationFailedError(collector.Issues)
 }
+
+func ReadOptionalPrincipalUserId(request *http.Request, verifier *jwtauth.AccessTokenVerifier) string {
+	if principal, found := jwtauth.PrincipalFromContext(request.Context()); found {
+		return principal.UserId
+	}
+	rawToken := jwtauth.ExtractBearerTokenFromAuthorizationHeader(request)
+	if rawToken == "" || verifier == nil {
+		return ""
+	}
+	principal, err := verifier.VerifyAccessTokenAndExtractPrincipal(request.Context(), rawToken)
+	if err != nil {
+		return ""
+	}
+	return principal.UserId
+}
