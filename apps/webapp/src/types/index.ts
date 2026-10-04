@@ -13,3 +13,4 @@ export * from "./liveSafety.type";
 export * from "./linkPreview.type";
 export * from "./postAudience.type";
 export * from "./accountHealth.type";
+export * from "./taggedUser.type";

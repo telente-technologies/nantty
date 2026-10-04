@@ -151,6 +151,8 @@ export interface Post {
   readonly viewerCanReply?: boolean;
   readonly replyRestriction?: import("./postAudience.type").ReplyRestriction | null;
   readonly sensitive?: import("./postAudience.type").SensitiveContent | null;
+  readonly taggedUsers?: readonly import("./taggedUser.type").TaggedUser[];
+  readonly taggedUsersCount?: number;
 }
 
 export interface PostAnalyticsDaily {
