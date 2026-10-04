@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/accountHealth.changed.v1.json",
+  "title": "AccountHealthChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "status",
+    "restrictions",
+    "canMonetise",
+    "canGoLive",
+    "activeStrikeCount",
+    "copyrightStrikesInWindow",
+    "reason"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "enum": [
+        "GOOD_STANDING",
+        "AT_RISK",
+        "RESTRICTED"
+      ]
+    },
+    "restrictions": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "MONETISATION",
+          "GOING_LIVE"
+        ]
+      }
+    },
+    "canMonetise": {
+      "type": "boolean"
+    },
+    "canGoLive": {
+      "type": "boolean"
+    },
+    "activeStrikeCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "copyrightStrikesInWindow": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

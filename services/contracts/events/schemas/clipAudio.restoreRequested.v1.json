@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/clipAudio.restoreRequested.v1.json",
+  "title": "ClipAudioRestoreRequested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claimId",
+    "soundId",
+    "targetType",
+    "targetId",
+    "mediaIds"
+  ],
+  "properties": {
+    "claimId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "soundId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "targetType": {
+      "type": "string"
+    },
+    "targetId": {
+      "type": "string"
+    },
+    "mediaIds": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  }
+}
