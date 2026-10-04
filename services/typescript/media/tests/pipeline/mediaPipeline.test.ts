@@ -8,6 +8,7 @@ import type { MediaTranscoder } from "../../src/interfaces/mediaProcessors.inter
 import { createHarness, finalAttempt, firstAttempt, unavailableTranscoder } from "../fakes/pipelineHarness.js";
 
 const jpegWithGps = () => sharp({ create: { width: 1400, height: 900, channels: 3, background: "#3366cc" } }).jpeg().withExif({ IFD0: { Copyright: "secret-owner" }, IFD3: { GPSLatitudeRef: "N", GPSLongitudeRef: "E" } }).toBuffer();
+const smallJpeg = () => sharp({ create: { width: 480, height: 320, channels: 3, background: "#3366cc" } }).jpeg().toBuffer();
 const minimalPdf = (pages: number) => Buffer.from(`%PDF-1.4\n1 0 obj << /Type /Pages /Count ${pages} >> endobj\n%%EOF`);
 
 describe("image pipeline", () => {
@@ -47,7 +48,7 @@ describe("image pipeline", () => {
 
   it("keeps chat media private with an expiry and publishes nothing to the public bucket", async () => {
     const harness = createHarness();
-    const id = harness.seedUpload({ purpose: "chat", mimeType: "image/jpeg", bytes: await jpegWithGps(), isPrivate: true });
+    const id = harness.seedUpload({ purpose: "chat", mimeType: "image/jpeg", bytes: await smallJpeg(), isPrivate: true });
     await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
     expect(harness.storage.keysIn(harness.context.config.storage.publicBucket)).toHaveLength(0);
     expect(harness.storage.keysIn(harness.context.config.storage.privateBucket).length).toBeGreaterThan(0);
@@ -77,7 +78,7 @@ describe("rejections", () => {
 
   it("rejects size and checksum mismatches", async () => {
     const harness = createHarness();
-    const bytes = await jpegWithGps();
+    const bytes = await smallJpeg();
     const sized = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes });
     harness.db.assets.get(sized)!["sizeBytes"] = BigInt(bytes.byteLength + 1);
     const summed = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes, sha256: "0".repeat(64) });
@@ -99,7 +100,7 @@ describe("rejections", () => {
 
   it("quarantines infected files reported by the malware scan hook", async () => {
     const harness = createHarness({ scanner: { scanFile: async () => ({ verdict: "infected", signature: "Eicar-Test-Signature" }) } });
-    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await jpegWithGps() });
+    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
     expect(harness.db.assets.get(id)).toMatchObject({ status: "rejected", rejectionReason: "MALWARE_DETECTED", scanResult: "Eicar-Test-Signature" });
     expect(harness.storage.keysIn(harness.context.config.storage.publicBucket)).toHaveLength(0);
@@ -107,7 +108,7 @@ describe("rejections", () => {
 
   it("fails closed when the scanner itself errors until the final attempt", async () => {
     const harness = createHarness({ scanner: { scanFile: async () => { throw new Error("clamd down"); } } });
-    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await jpegWithGps() });
+    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await expect(runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false })).rejects.toThrow("clamd down");
     expect(harness.db.assets.get(id)?.["status"]).toBe("processing");
     await runMediaPipeline(harness.context, id, { attempt: finalAttempt, moderationApproved: false });
@@ -120,14 +121,14 @@ describe("moderation gate", () => {
 
   it("allows low scores", async () => {
     const harness = withScore(0.1);
-    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await jpegWithGps() });
+    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
     expect(harness.db.assets.get(id)).toMatchObject({ status: "ready", moderationScore: 0.1, moderationDecision: "allow" });
   });
 
   it("holds borderline scores for review without publishing derivatives, then publishes once approved", async () => {
     const harness = withScore(0.6);
-    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await jpegWithGps() });
+    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
     expect(harness.db.assets.get(id)).toMatchObject({ status: "held", moderationDecision: "hold" });
     expect(harness.db.eventTypes()).toEqual(["media.held"]);
@@ -140,19 +141,19 @@ describe("moderation gate", () => {
 
   it("rejects very high scores", async () => {
     const harness = withScore(0.99);
-    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await jpegWithGps() });
+    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
     expect(harness.db.assets.get(id)).toMatchObject({ status: "rejected", rejectionReason: "MODERATION_REJECTED" });
   });
 
   it("degrades according to the configured fail mode when the classifier is down", async () => {
     const open = withScore(new Error("python down"));
-    const openId = open.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await jpegWithGps() });
+    const openId = open.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await runMediaPipeline(open.context, openId, { attempt: firstAttempt, moderationApproved: false });
     expect(open.db.assets.get(openId)?.["status"]).toBe("ready");
     const base = open.context.config.moderation;
     const closed = createHarness({ moderation: { classify: async () => { throw new Error("down"); } }, config: { moderation: { ...base, failMode: "hold" } } });
-    const closedId = closed.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await jpegWithGps() });
+    const closedId = closed.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await runMediaPipeline(closed.context, closedId, { attempt: firstAttempt, moderationApproved: false });
     expect(closed.db.assets.get(closedId)?.["status"]).toBe("held");
   });
@@ -160,7 +161,7 @@ describe("moderation gate", () => {
   it("skips moderation for private purposes", async () => {
     let calls = 0;
     const harness = createHarness({ moderation: { classify: async () => { calls += 1; return { score: 1, topCategory: null }; } } });
-    const id = harness.seedUpload({ purpose: "chat", mimeType: "image/jpeg", bytes: await jpegWithGps(), isPrivate: true });
+    const id = harness.seedUpload({ purpose: "chat", mimeType: "image/jpeg", bytes: await smallJpeg(), isPrivate: true });
     await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
     expect(calls).toBe(0);
     expect(harness.db.assets.get(id)?.["status"]).toBe("ready");

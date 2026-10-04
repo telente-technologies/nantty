@@ -1,3 +1,4 @@
+import { createHash, createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 import { parseClamAvResponse } from "../../src/integrations/clamAvTcpScanner.integration.js";
@@ -24,7 +25,7 @@ describe("moderation policy", () => {
 });
 
 describe("python moderation client", () => {
-  it("posts frames to /v1/moderation/classify with the internal token and clamps the score", async () => {
+  it("posts frames to /v1/moderation/classify signed with the shared secret and clamps the score", async () => {
     const calls: { url: string; init: RequestInit }[] = [];
     const fetchFn = (async (url: string, init: RequestInit) => {
       calls.push({ url, init });
@@ -34,7 +35,10 @@ describe("python moderation client", () => {
     const result = await client.classify({ mediaId: "m1", ownerId: "o1", purpose: "post", kind: "image", frames: [Buffer.from("frame")] });
     expect(result).toEqual({ score: 1, topCategory: "violence" });
     expect(calls[0]?.url).toBe("http://intelligence.test/v1/moderation/classify");
-    expect((calls[0]?.init.headers as Record<string, string>)["x-internal-token"]).toBe("secret");
+    const headers = calls[0]?.init.headers as Record<string, string>;
+    const canonical = ["v1", "POST", "/v1/moderation/classify", headers["x-zudo-timestamp"], headers["x-zudo-nonce"], createHash("sha256").update(calls[0]?.init.body as string).digest("hex")].join("\n");
+    expect(headers["x-zudo-signature"]).toBe(`v1=${createHmac("sha256", "secret").update(canonical).digest("hex")}`);
+    expect(headers["x-internal-token"]).toBeUndefined();
     const sent = JSON.parse(calls[0]?.init.body as string) as { contentId: string; media: { frames: { mimeType: string }[] } };
     expect(sent.contentId).toBe("m1");
     expect(sent.media.frames[0]?.mimeType).toBe("image/jpeg");
