@@ -17,13 +17,7 @@ export interface VersionedRecord<Content> {
   readonly content: Content;
 }
 
-export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules" | "checkmark-suggestions" | "creator-thresholds" | "trial-rules" | "checkmark-pricing" | "regional-pricing";
-
-export interface PlanPrice {
-  readonly currency: string;
-  readonly monthly: Money | null;
-  readonly yearly: Money | null;
-}
+export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules" | "checkmark-suggestions" | "creator-thresholds" | "trial-rules" | "checkmark-pricing" | "regional-pricing" | "feed.ranking";
 
 export interface DashboardEntitlement {
   readonly key: string;
@@ -40,7 +34,6 @@ export interface VerificationPlan {
   readonly isPurchasable: boolean;
   readonly perks: readonly string[];
   readonly dashboardEntitlements: readonly DashboardEntitlement[];
-  readonly prices: readonly PlanPrice[];
 }
 
 export interface PlansConfiguration {
@@ -126,9 +119,6 @@ export interface TrialRules {
 export interface CheckmarkPricingRules {
   readonly bundleDiscountPercent: number;
   readonly bundleMaximumBusinesses: number;
-  readonly blueMonthlyPrice: Money;
-  readonly goldOnlyMonthlyPrice: Money;
-  readonly blackMonthlyPrice: Money;
   readonly blackGraceDays: number;
 }
 
@@ -142,4 +132,5 @@ export interface ConfigurationDocumentContentByKey {
   readonly "trial-rules": TrialRules;
   readonly "checkmark-pricing": CheckmarkPricingRules;
   readonly "regional-pricing": RegionalPricingDocument;
+  readonly "feed.ranking": import("./ranking.type").FeedRankingPolicy;
 }
