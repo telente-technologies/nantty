@@ -23,6 +23,7 @@ import { requireAuthThen } from "@/utils/requireAuth.util";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { trackProductInteraction } from "@/services/productInteractions.service";
 import { productsService } from "@/services/products.service";
+import { ApiError } from "@/services/apiClient.service";
 import { storesService } from "@/services/stores.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
@@ -91,7 +92,11 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
       <Screen>
         {header}
         {product.isError ? (
-          <ErrorState message="Couldn't load this product." onRetry={() => product.refetch()} />
+          product.error instanceof ApiError && product.error.code === "PRODUCT_NOT_AVAILABLE_IN_REGION" ? (
+            <ErrorState message="Not available in your region" />
+          ) : (
+            <ErrorState message="Couldn't load this product." onRetry={() => product.refetch()} />
+          )
         ) : (
           <ListSkeleton />
         )}
