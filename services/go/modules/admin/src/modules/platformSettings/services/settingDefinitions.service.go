@@ -17,10 +17,11 @@ const (
 )
 
 type SettingDefinition struct {
-	Validate        func(raw json.RawMessage) (json.RawMessage, error)
-	DefaultValue    any
-	Public          bool
-	WritePermission string
+	Validate              func(raw json.RawMessage) (json.RawMessage, error)
+	DefaultValue          any
+	Public                bool
+	WritePermission       string
+	ExtraWritePermissions []string
 }
 
 var PlatformSettingDefinitions = map[string]SettingDefinition{
@@ -36,8 +37,10 @@ var PlatformSettingDefinitions = map[string]SettingDefinition{
 		{MinimumMonthlyGiftCoins: 500000, CreatorShareBps: 6000},
 		{MinimumMonthlyGiftCoins: 5000000, CreatorShareBps: maximumCreatorShareBps},
 	}}},
-	EscrowPolicyKey:    {Validate: validateEscrowPolicy, WritePermission: "config:revenue", DefaultValue: EscrowPolicy{AutoReleaseDays: 3, SellerCreditHoldHours: 24, SellerReserveBps: 0}},
-	RegionalPricingKey: {Validate: validateRegionalPricing, Public: true, WritePermission: "config:revenue", DefaultValue: regionpricing.DefaultSettingDocument()},
+	FeedRankingKey:        {Validate: validateFeedRankingPolicy, WritePermission: "config:rules", DefaultValue: DefaultFeedRankingPolicy},
+	TrendingModerationKey: {Validate: validateTrendingModeration, WritePermission: "content:review", ExtraWritePermissions: []string{"moderation:reports"}, DefaultValue: TrendingModeration{Removals: []TrendRemoval{}}},
+	EscrowPolicyKey:       {Validate: validateEscrowPolicy, WritePermission: "config:revenue", DefaultValue: EscrowPolicy{AutoReleaseDays: 3, SellerCreditHoldHours: 24, SellerReserveBps: 0}},
+	RegionalPricingKey:    {Validate: validateRegionalPricing, Public: true, WritePermission: "config:revenue", DefaultValue: regionpricing.DefaultSettingDocument()},
 }
 
 type CreatorRequirements struct {
