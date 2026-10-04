@@ -46,6 +46,10 @@ export interface AdRegionPricing {
   readonly cpcFloorMinor: number;
   readonly minimumDailyBudgetMinor: number;
   readonly boostMinimumDailyMinor: number;
+  readonly suggestedCpmMinor: number;
+  readonly suggestedCpcMinor: number;
+  readonly suggestedCpvMinor: number;
+  readonly suggestedDailyBudgetMinor: number;
 }
 
 export interface CreatorSubscriptionBand {
