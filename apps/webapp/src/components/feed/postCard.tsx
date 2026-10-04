@@ -1,26 +1,36 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { AnalyticsIcon, ChatIcon, HeartIcon, ShareIcon, TagIcon } from "@/components/ui/icons";
+import { LikeFilledActionIcon, ReplyActionIcon, TagIcon } from "@/components/ui/icons";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { MentionText } from "@/components/mentions/mentionText";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
-import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { useSession } from "@/components/providers/sessionProvider";
 import { Avatar, MediaImage } from "@/components/ui/media";
-import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
+import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postsService } from "@/services/posts.service";
 import type { Post } from "@/types";
 
 import styles from "./postCard.module.css";
+import swipeStyles from "./postSwipe.module.css";
+import { usePostSwipe } from "./postSwipe.hook";
+import { PostActions } from "./postActions";
+import { SponsoredAdBody, SponsoredMediaLink } from "./sponsoredAd";
 import { hasVideoMedia, isLandscapeVideoPost, PostMedia } from "./postCardMedia";
 import { AppIcon } from "@/components/ui/appIcon";
+import { buildProductPath, buildProfilePath } from "@/utils/seoPaths.util";
+import { PostLinkCard } from "./postLinkCard";
+import { SensitiveContentGate } from "./sensitiveContentGate";
+import { ViewQuotesLink } from "./viewQuotesLink";
 
-export function PostCard({ post, priority = false }: { readonly post: Post; readonly priority?: boolean }) {
+export function PostCard({ post, priority = false, swipeable = false }: { readonly post: Post; readonly priority?: boolean; readonly swipeable?: boolean }) {
+  const router = useRouter();
+  const [likePopSignal, setLikePopSignal] = useState(0);
   const queryClient = useQueryClient();
   const { viewer } = useSession();
   const [optimisticLikes, setOptimisticLikes] = useState(post.likes);
@@ -39,10 +49,22 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
     },
   });
 
-  return (
-    <article className={styles.card}>
+  const toggleLike = () => requireAuthThen(() => likeMutation.mutate(optimisticLiked), "Sign in to like posts.");
+  const swipe = usePostSwipe({
+    enabled: swipeable && !post.sponsored,
+    isLiked: optimisticLiked,
+    onLike: () =>
+      requireAuthThen(() => {
+        setLikePopSignal((signal) => signal + 1);
+        likeMutation.mutate(false);
+      }, "Sign in to like posts."),
+    onOpenComments: () => router.push(`/post/${post.id}#comments`),
+  });
+
+  const card = (
+    <article className={[styles.card, swipe.isActive ? swipeStyles.card : ""].filter(Boolean).join(" ")}>
       <header className={styles.header}>
-        <Link href={`/user/${post.author.id}`} className={styles.author}>
+        <Link href={buildProfilePath(post.author.username)} className={styles.author}>
           <Avatar name={post.author.name} src={post.author.avatarUrl} size="md" />
           <span className={styles.authorText}>
             <span className={styles.authorName}>
@@ -52,6 +74,7 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
             <span className={styles.authorMeta}>@{post.author.username}</span>
           </span>
         </Link>
+        {post.sponsored ? <span className={styles.sponsored}>{post.sponsored.label}</span> : null}
         <Link href={`/post/${post.id}`} className={styles.timestamp}>
           <time dateTime={post.createdAt}>{formatTimeSincePosted(post.createdAt)}</time>
         </Link>
@@ -64,12 +87,20 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
         />
       </header>
 
+      <SensitiveContentGate postId={post.id} sensitive={post.sensitive} previewUrl={post.media[0]?.posterUrl ?? post.media[0]?.url ?? null}>
       {post.text ? (
         <p className={styles.text}>
           <MentionText text={post.text} mentions={post.mentions} />
         </p>
       ) : null}
-      <PostMedia media={post.media} priority={priority} watchHref={isLandscapeVideoPost(post) ? `/watch/${post.id}` : null} />
+      <PostLinkCard post={post} />
+      {post.sponsored?.adType === "carousel" ? null : (
+        <SponsoredMediaLink post={post}>
+          <PostMedia media={post.media} priority={priority} watchHref={isLandscapeVideoPost(post) && !post.sponsored ? `/watch/${post.id}` : null} />
+        </SponsoredMediaLink>
+      )}
+      <SponsoredAdBody post={post} />
+      </SensitiveContentGate>
 
       {post.products.length > 0 ? (
         <div className={styles.productStrip}>
@@ -77,7 +108,7 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
             <TagIcon size={14} /> Tagged
           </span>
           {post.products.slice(0, 4).map((product) => (
-            <Link key={product.id} href={`/product/${product.id}`} className={styles.productChip}>
+            <Link key={product.id} href={buildProductPath(product)} className={styles.productChip}>
               <span className={styles.productChipThumb}>
                 <MediaImage src={product.imageUrl} alt="" sizes="48px" />
               </span>
@@ -89,39 +120,34 @@ export function PostCard({ post, priority = false }: { readonly post: Post; read
       ) : null}
 
       <footer className={styles.footer}>
-        <button
-          type="button"
-          className={[styles.action, optimisticLiked ? styles.actionActive : ""].filter(Boolean).join(" ")}
-          aria-pressed={optimisticLiked}
-          onClick={() => requireAuthThen(() => likeMutation.mutate(optimisticLiked), "Sign in to like posts.")}
-        >
-          <HeartIcon size={19} />
-          {formatCountWithThousandsSuffix(optimisticLikes)}
-        </button>
-        <Link href={`/post/${post.id}#comments`} className={styles.action} aria-label={`${post.comments} comments`}>
-          <ChatIcon size={18} />
-          {formatCountWithThousandsSuffix(post.comments)}
-        </Link>
-        <span className={styles.action}>
-          <ShareIcon size={18} />
-          {formatCountWithThousandsSuffix(post.reposts)}
-        </span>
-        <SaveToggleButton targetType={hasVideoMedia(post) ? "video" : "post"} targetId={post.id} initiallySaved={post.bookmarked} iconSize={18} />
-        {post.sponsored ? <span className={styles.sponsored}>{post.sponsored.label}</span> : null}
-        {viewer?.id === post.author.id ? (
-          <Link className={styles.actionViews} href={`/analytics/post/${post.id}`} aria-label="Open post analytics">
-            <AnalyticsIcon size={16} />
-            {formatCountWithThousandsSuffix(post.views)}
-            <span className={styles.viewsWord}> impressions</span>
-          </Link>
-        ) : (
-          <span className={styles.actionViews}>
-            <AnalyticsIcon size={16} />
-            {formatCountWithThousandsSuffix(post.views)}
-            <span className={styles.viewsWord}> impressions</span>
-          </span>
-        )}
+        <PostActions
+          post={post}
+          saveTargetType={hasVideoMedia(post) ? "video" : "post"}
+          isOwnPost={viewer?.id === post.author.id}
+          isLiked={optimisticLiked}
+          likeCount={optimisticLikes}
+          onToggleLike={toggleLike}
+          likePopSignal={likePopSignal}
+        />
+        <ViewQuotesLink post={post} />
       </footer>
     </article>
+  );
+
+  if (!swipe.isActive) return card;
+  return (
+    <div ref={swipe.frameRef} className={swipeStyles.frame} {...swipe.frameHandlers}>
+      <div className={swipeStyles.hints} aria-hidden="true">
+        <span className={[swipeStyles.hint, swipeStyles.likeHint].join(" ")}>
+          <LikeFilledActionIcon size={26} />
+          {optimisticLiked ? "Liked" : "Like"}
+        </span>
+        <span className={[swipeStyles.hint, swipeStyles.replyHint].join(" ")}>
+          <ReplyActionIcon size={26} />
+          Reply
+        </span>
+      </div>
+      {card}
+    </div>
   );
 }

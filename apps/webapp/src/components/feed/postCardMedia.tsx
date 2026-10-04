@@ -18,7 +18,7 @@ export function PostMedia({ media, priority, watchHref }: { readonly media: read
   if (visible.length > 1) {
     return (
       <div className={styles.mediaFrame}>
-        <div className={styles.mediaScroller} onScroll={(event) => setImageIndex(Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth))}>
+        <div className={styles.mediaScroller} data-swipe-ignore onScroll={(event) => setImageIndex(Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth))}>
           {visible.map((entry, index) => (
             <div className={styles.mediaSlide} key={`${entry.id ?? index}`}>
               <MediaImage src={entry.type === "image" ? entry.url : (entry.posterUrl ?? entry.url)} alt="" sizes="(max-width: 768px) 100vw, 640px" priority={priority && index === 0} />
