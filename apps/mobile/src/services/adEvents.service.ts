@@ -87,10 +87,16 @@ export const adEventsService = {
     const impressionKey = `${sponsored.campaignId}:${placement}:${itemId}`;
     if (impressionKeysRecordedThisSession.has(impressionKey)) return;
     impressionKeysRecordedThisSession.add(impressionKey);
-    queueAdEventForBatchedDelivery({ campaignId: sponsored.campaignId, placement, type: "impression", itemId });
+    queueAdEventForBatchedDelivery({ campaignId: sponsored.campaignId, placement, type: "impression", itemId, token: sponsored.impressionToken });
   },
-  recordSponsoredClick: (sponsored: SponsoredPlacement, placement: AdPlacement, itemId: ID) =>
-    queueAdEventForBatchedDelivery({ campaignId: sponsored.campaignId, placement, type: "click", itemId }),
+  recordSponsoredClick: (sponsored: SponsoredPlacement, placement: AdPlacement, itemId: ID, cardIndex?: number) =>
+    queueAdEventForBatchedDelivery({ campaignId: sponsored.campaignId, placement, type: "click", itemId, token: sponsored.impressionToken, cardIndex }),
+  recordSponsoredCardViewOncePerSession: (sponsored: SponsoredPlacement, placement: AdPlacement, itemId: ID, cardIndex: number) => {
+    const viewKey = `${sponsored.campaignId}:${placement}:${itemId}:card:${cardIndex}`;
+    if (impressionKeysRecordedThisSession.has(viewKey)) return;
+    impressionKeysRecordedThisSession.add(viewKey);
+    queueAdEventForBatchedDelivery({ campaignId: sponsored.campaignId, placement, type: "card_view", itemId, token: sponsored.impressionToken, cardIndex });
+  },
   flushPendingAdEventsNow: () => sendPendingAdEventsInBatchesWhileOnline(),
 };
 

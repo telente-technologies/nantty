@@ -6,6 +6,8 @@ import { usePendingAuthIntentStore } from "@/store/pendingAuthIntent.store";
 
 import { ApiError } from "@/errors/api.error";
 import type { Page } from "@/types";
+import { isBackgroundCallSkippedForGuests } from "@/config/guestAccess.config";
+import { readStoreBillingRequestHeaders } from "./storeBilling.service";
 
 export { ApiError };
 
@@ -81,6 +83,7 @@ export function getAuthorizedRequestHeaders(includeAuthorization = true): Record
   const headers: Record<string, string> = {};
   const deviceRegionCode = useLocaleStore.getState().deviceRegionCode;
   if (deviceRegionCode) headers["X-Client-Region"] = deviceRegionCode;
+  Object.assign(headers, readStoreBillingRequestHeaders());
   const token = useAuthStore.getState().accessToken;
   if (includeAuthorization && token) headers.Authorization = `Bearer ${token}`;
   return headers;
@@ -94,6 +97,7 @@ export function refreshSessionAfterUnauthorizedResponse(): Promise<boolean> {
 }
 
 async function sendRequestWithTokenRefresh<T>(method: Method, path: string, options?: RequestOptions): Promise<T> {
+  if (!useAuthStore.getState().accessToken && isBackgroundCallSkippedForGuests(method, path)) return undefined as T;
   try {
     return await sendHttpRequest<T>(method, path, options);
   } catch (error) {
