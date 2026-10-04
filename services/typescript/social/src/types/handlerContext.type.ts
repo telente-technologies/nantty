@@ -1,4 +1,7 @@
 import type { SocialDatabase } from "../databases/prisma.database.js";
+import type { AuthorRankingDirectory } from "../interfaces/authorRanking.interface.js";
+import type { IntelligenceExploreClient } from "../interfaces/intelligenceExplore.interface.js";
+import type { RankingSettingsSource } from "../interfaces/rankingSettings.interface.js";
 import type { Clock } from "../interfaces/clock.interface.js";
 import type { FeedRanker } from "../interfaces/feedRanker.interface.js";
 import type { LinkUnfurler } from "../interfaces/linkUnfurler.interface.js";
@@ -18,6 +21,9 @@ export interface HandlerContext {
   readonly shareCards?: ShareCardResolver;
   readonly media?: MediaDescriptorResolver;
   readonly linkPreviews?: LinkUnfurler;
+  readonly authorRanking?: AuthorRankingDirectory;
+  readonly rankingSettings?: RankingSettingsSource;
+  readonly intelligenceExplore?: IntelligenceExploreClient;
 }
 
 export type Handler<TInput, TResult> = (input: TInput) => Promise<TResult>;
