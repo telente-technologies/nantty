@@ -2,6 +2,7 @@ import { ApiError } from "@/errors/api.error";
 
 import { accountStatusMocks } from "./accountStatus.mock";
 import { celebrationsMocks } from "./celebrations.mock";
+import { notificationPreferencesMocks } from "./notificationPreferences.mock";
 import { businessDocumentsMocks } from "./businessDocuments.mock";
 import { checkmarkSuggestionMocks } from "./checkmarkSuggestions.mock";
 import { helpCenterMocks } from "./helpCenter.mock";
@@ -67,6 +68,7 @@ const routes: MockRoute[] = [
   ...usernameMocks,
   ...accountStatusMocks,
   ...celebrationsMocks,
+  ...notificationPreferencesMocks,
   ...businessDocumentsMocks,
   ...checkmarkSuggestionMocks,
   ...helpCenterMocks,
