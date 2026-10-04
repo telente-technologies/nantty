@@ -18,6 +18,7 @@ import type { GatewayConfig } from "./configs/gateway.config.js";
 import { createUpstreamDispatchHandler } from "./handlers/upstreamDispatch.handler.js";
 import { IdentityPolicyGateSource, type PolicyGateSource } from "./services/policyAcceptanceGate.service.js";
 import { AccessTokenVerifier } from "./services/accessTokenVerifier.service.js";
+import { buildSecurityServices, type SecurityServiceOverrides } from "./services/security/securityServices.service.js";
 
 export interface GatewayServerOptions {
   readonly config: GatewayConfig;
@@ -25,12 +26,12 @@ export interface GatewayServerOptions {
   readonly logger?: Logger;
   readonly policyGate?: PolicyGateSource;
   readonly rateLimitStore?: RateLimitStore;
+  readonly security?: SecurityServiceOverrides;
 }
 
-function buildRateLimitStore(config: GatewayConfig, logger: Logger): RateLimitStore {
+function buildRateLimitStore(connection: ValkeyConnection | undefined, logger: Logger): RateLimitStore {
   const memory = new InMemoryRateLimitStore();
-  if (config.valkeyUrl === undefined || config.valkeyUrl === null) return memory;
-  const connection = new ValkeyConnection(new URL(config.valkeyUrl));
+  if (connection === undefined) return memory;
   return new ValkeyRateLimitStore(connection, memory, (error) => logger.warn("valkey rate limit unavailable; using in-memory counters", { error: error instanceof Error ? error.message : String(error) }));
 }
 
@@ -38,7 +39,9 @@ export function createGatewayServer(options: GatewayServerOptions) {
   const logger = options.logger ?? createLogger({ name: "gateway" });
   const policyGate = options.policyGate ?? (options.config.policyGate === null ? undefined : new IdentityPolicyGateSource(options.config.upstreams.identity, options.config.policyGate.internalToken));
   const verifier = options.verifier ?? new AccessTokenVerifier(options.config.accessToken);
-  const rateLimitStore = options.rateLimitStore ?? buildRateLimitStore(options.config, logger);
+  const connection = options.config.valkeyUrl === undefined || options.config.valkeyUrl === null ? undefined : new ValkeyConnection(new URL(options.config.valkeyUrl));
+  const rateLimitStore = options.rateLimitStore ?? buildRateLimitStore(connection, logger);
+  const security = buildSecurityServices(options.config.security, options.config.upstreams.trust, logger, connection, options.security);
   const maximumRequestBodyBytes = options.config.maxRequestBodyBytes ?? 1024 * 1024;
   const pipeline = new HttpMiddlewarePipeline({
     middlewares: [
@@ -50,7 +53,7 @@ export function createGatewayServer(options: GatewayServerOptions) {
       }),
       createRequestSizeLimitMiddleware(maximumRequestBodyBytes),
       createGlobalRateLimitMiddleware(rateLimitStore, options.config.rateLimitMaxPerMinute),
-      createUpstreamDispatchHandler({ config: options.config, verifier, logger, rateLimitStore, ...(policyGate === undefined ? {} : { policyGate }) }),
+      createUpstreamDispatchHandler({ config: options.config, verifier, logger, rateLimitStore, security, ...(policyGate === undefined ? {} : { policyGate }) }),
     ],
   });
   return createHttpServer({
