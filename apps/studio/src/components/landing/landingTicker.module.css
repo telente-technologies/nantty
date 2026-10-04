@@ -1,0 +1,66 @@
+.ticker {
+  position: relative;
+  z-index: 4;
+  overflow: hidden;
+  padding-block: 18px;
+  background: var(--deep-surface);
+  color: var(--deep-ink);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  animation: slide 52s linear infinite;
+}
+
+.ticker:hover .track {
+  animation-play-state: paused;
+}
+
+.list {
+  display: flex;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 28px;
+  padding-right: 28px;
+  font-family: var(--landing-mono);
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.item::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--yellow-500);
+}
+
+@keyframes slide {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    width: auto;
+    padding-inline: var(--landing-gutter);
+    animation: none;
+  }
+
+  .list {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .list[aria-hidden="true"] {
+    display: none;
+  }
+}
