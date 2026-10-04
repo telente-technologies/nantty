@@ -100,6 +100,7 @@ export type MainStackParamList = {
   MySubscriptions: undefined;
   Verification: undefined;
   VerificationApply: { color: "blue" };
+  IdentityVerification: { step?: "pay" } | undefined;
   PromotePost: { postId: string };
   BoostStatus: { boostId: string };
   SupportTickets: undefined;

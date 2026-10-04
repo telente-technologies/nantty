@@ -23,6 +23,7 @@ export const deepLinking: LinkingOptions<RootStackParamList> = {
       Saved: "saved",
       Settings: "settings",
       AccountStatus: "settings/account-status",
+      IdentityVerification: "settings/verification",
       CreatePost: { path: "create/:mode?" },
       ProductForm: "seller/products/new",
       CreatorProgram: "creator",
