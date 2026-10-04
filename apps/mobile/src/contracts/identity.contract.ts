@@ -27,6 +27,7 @@ export const identityContracts: readonly EndpointContract[] = [
   { domain: "users", method: "GET", path: "/api/v1/locale/countries", schema: c.page(countryOption) },
   { domain: "auth", method: "GET", path: "/api/v1/auth/username-available?username=zudo.new", schema: c.object({ available: c.boolean(), reason: usernameReason, message: c.string() }, ["reason", "message"]) },
   { domain: "auth", method: "GET", path: "/api/v1/auth/username-available?username=admin", schema: c.object({ available: c.boolean(), reason: usernameReason, message: c.string() }, ["message"]) },
+  { domain: "auth", method: "GET", path: "/api/v1/auth/username-available?username=taken", schema: c.object({ available: c.boolean(), reason: usernameReason, message: c.string(), suggestions: c.array(c.string()) }) },
   { domain: "users", method: "GET", path: "/api/v1/geo/countries", schema: c.page(geoCountry) },
   { domain: "users", method: "GET", path: "/api/v1/geo/countries/ng/regions", schema: c.page(geoArea) },
   { domain: "live", method: "GET", path: "/api/v1/lives/suggested", schema: c.page(c.object({ id: c.string(), host: userSummary, title: c.string(), coverUrl: c.nullable(c.string()) })) },

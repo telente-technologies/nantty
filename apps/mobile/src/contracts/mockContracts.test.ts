@@ -22,6 +22,18 @@ describe("mock responses match the client contracts", () => {
   });
 });
 
+describe("taken usernames carry suggestions", () => {
+  it("returns up to three valid suggestions from the availability check and the register conflict", async () => {
+    const availability = await resolveMockApiRequest<{ available: boolean; suggestions: string[] }>("GET", "/api/v1/auth/username-available?username=taken");
+    expect(availability.available).toBe(false);
+    expect(availability.suggestions).toHaveLength(3);
+    expect(availability.suggestions).not.toContain("taken");
+    const failure = await resolveMockApiRequest("POST", "/api/v1/auth/register", { username: "taken", email: "a@b.co" }).catch((error: unknown) => error);
+    expect(failure).toMatchObject({ status: 409, code: "USERNAME_TAKEN" });
+    expect((failure as ApiError).suggestions).toHaveLength(3);
+  });
+});
+
 describe("list envelope handling", () => {
   it("keeps nextCursor for page envelopes and unwraps single resources", () => {
     expect(unwrapApiPayload({ data: [1], nextCursor: "c2" })).toEqual({ data: [1], nextCursor: "c2" });
