@@ -1,4 +1,5 @@
 import { buildInitialPlansConfiguration } from "@/mocks/seed/configurationPlans.mock";
+import { buildInitialRegionalPricingDocument } from "@/mocks/seed/regionalPricing.mock";
 import { buildInitialCheckmarkPricing, buildInitialCheckmarkSuggestionRules, buildInitialCreatorThresholds, buildInitialTrialRules } from "@/mocks/seed/configurationTrustRules.mock";
 import type { ConfigurationDocumentContentByKey, CreatorEligibilityRules, RevenueRulesConfiguration, UsernameRules } from "@/types/platformConfiguration.type";
 
@@ -39,5 +40,6 @@ export function buildInitialConfigurationDocuments(): { id: keyof ConfigurationD
     { id: "creator-thresholds", content: buildInitialCreatorThresholds(), changeReason: "Proposed Creator Program auto-approve and review thresholds." },
     { id: "trial-rules", content: buildInitialTrialRules(), changeReason: "Launch trial rules." },
     { id: "checkmark-pricing", content: buildInitialCheckmarkPricing(), changeReason: "Owner pricing: bundle 15%, Gold-only NGN 3,000, Black NGN 50,000." },
+    { id: "regional-pricing", content: buildInitialRegionalPricingDocument(), changeReason: "Regional ad floors and creator subscription bands from docs/pricing.md (4 Oct 2026)." },
   ];
 }

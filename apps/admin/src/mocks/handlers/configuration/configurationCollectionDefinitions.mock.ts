@@ -12,12 +12,13 @@ import type { ConfigurationDocumentContentByKey, CreatorEligibilityRules, PlansC
 import { validateCheckmarkPricing, validateCheckmarkSuggestionRules, validateCreatorThresholds, validateTrialRules } from "./configurationTrustRulesValidation.mock";
 import { validateCreatorEligibilityRules, validatePlansConfiguration, validateRevenueRules, validateUsernameRules } from "./configurationDocumentValidation.mock";
 import { configurationRecordIdPattern, validateAutomationRuleContent, validateExperimentContent, validateFeatureFlagContent, validateNotificationTemplateContent } from "./configurationEntityValidation.mock";
+import { validateRegionalPricingDocument } from "./regionalPricingValidation.mock";
 import type { VersionedCollectionDefinition } from "./versionedCollections.mock";
 
 type AnyDocumentContent = ConfigurationDocumentContentByKey[keyof ConfigurationDocumentContentByKey];
 
-const writePermissionByDocumentKey: Record<string, AdminPermission> = { plans: "config:plans", revenue: "config:revenue", "creator-eligibility": "config:rules", "username-rules": "config:rules", "checkmark-suggestions": "config:rules", "creator-thresholds": "config:rules", "trial-rules": "config:rules", "checkmark-pricing": "config:plans" };
-const documentLabels: Record<string, string> = { plans: "Plans & prices", revenue: "Revenue rules", "creator-eligibility": "Creator eligibility rules", "username-rules": "Username rules", "checkmark-suggestions": "Checkmark suggestion thresholds", "creator-thresholds": "Creator Program thresholds", "trial-rules": "Trial rules", "checkmark-pricing": "Checkmark pricing" };
+const writePermissionByDocumentKey: Record<string, AdminPermission> = { plans: "config:plans", revenue: "config:revenue", "creator-eligibility": "config:rules", "username-rules": "config:rules", "checkmark-suggestions": "config:rules", "creator-thresholds": "config:rules", "trial-rules": "config:rules", "checkmark-pricing": "config:plans", "regional-pricing": "config:revenue" };
+const documentLabels: Record<string, string> = { plans: "Plans & prices", revenue: "Revenue rules", "creator-eligibility": "Creator eligibility rules", "username-rules": "Username rules", "checkmark-suggestions": "Checkmark suggestion thresholds", "creator-thresholds": "Creator Program thresholds", "trial-rules": "Trial rules", "checkmark-pricing": "Checkmark pricing", "regional-pricing": "Regional ad floors and creator bands" };
 
 export const configurationDocumentsDefinition: VersionedCollectionDefinition<AnyDocumentContent> = {
   storeName: "documents",
@@ -37,6 +38,7 @@ export const configurationDocumentsDefinition: VersionedCollectionDefinition<Any
     if (recordId === "creator-thresholds") return validateCreatorThresholds(rawContent);
     if (recordId === "trial-rules") return validateTrialRules(rawContent);
     if (recordId === "checkmark-pricing") return validateCheckmarkPricing(rawContent);
+    if (recordId === "regional-pricing") return validateRegionalPricingDocument(rawContent);
     failNotFound("Configuration document");
   },
   isValidNewRecordId: () => false,
