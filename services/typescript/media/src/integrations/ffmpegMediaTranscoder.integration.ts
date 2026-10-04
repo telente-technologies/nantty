@@ -5,7 +5,9 @@ import { promisify } from "node:util";
 
 import type { MediaConfig } from "../configs/media.config.js";
 import { MediaRejectedError, ProcessorUnavailableError } from "../errors/media.error.js";
-import type { MediaTranscoder, ProcessedFile, ProcessedMedia, ProcessingInput } from "../interfaces/mediaProcessors.interface.js";
+import type { AudioMuteInput, MediaTranscoder, ProcessedFile, ProcessedMedia, ProcessingInput } from "../interfaces/mediaProcessors.interface.js";
+import { muteVideoAudioWithFfmpeg } from "./ffmpegAudioMuter.integration.js";
+import { createFpcalcAudioFingerprinter } from "./fpcalcAudioFingerprinter.integration.js";
 import { buildAudioArgs, buildFrameArgs, buildHlsArgs, buildMasterPlaylist, buildMp4Args, buildProbeArgs, parseProbeOutput, selectRenditions } from "../utils/ffmpegCommands.util.js";
 
 const execFileAsync = promisify(execFile);
@@ -42,9 +44,11 @@ export function createFfmpegMediaTranscoder(options: { readonly config: MediaCon
     if (!(await isAvailable())) throw new ProcessorUnavailableError("ffmpeg is not available on this worker.");
   };
   const ffmpeg = (args: readonly string[]) => run(config.ffmpegPath, args, config.timeoutMs);
+  const computeAudioFingerprint = createFpcalcAudioFingerprinter(run, config);
 
   return {
     isAvailable,
+    computeAudioFingerprint,
     async processVideo(input: ProcessingInput): Promise<ProcessedMedia> {
       await requireAvailable();
       const probe = parseProbeOutput(await run(config.ffprobePath, buildProbeArgs(input.inputPath), 60_000));
@@ -89,6 +93,10 @@ export function createFfmpegMediaTranscoder(options: { readonly config: MediaCon
       await ffmpeg(buildAudioArgs(input.inputPath, outputPath));
       const file: ProcessedFile = { name: "audio.m4a", contentType: "audio/mp4", format: "m4a", width: 0, height: 0, bitrateKbps: 64, isVariant: true, source: { path: outputPath }, sizeBytes: (await stat(outputPath)).size };
       return { width: 0, height: 0, durationSeconds: probe.durationSeconds, files: [file], moderationFrames: [] };
+    },
+    async muteVideoAudio(input: AudioMuteInput): Promise<ProcessedMedia> {
+      await requireAvailable();
+      return muteVideoAudioWithFfmpeg(run, config, input);
     },
   };
 }
