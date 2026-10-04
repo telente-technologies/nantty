@@ -16,12 +16,18 @@ import { createIdempotencyGuard } from "./middlewares/idempotency.middleware.js"
 import { createIdentityDirectory } from "./integrations/identityDirectory.integration.js";
 import { deterministicFeedRanker } from "./integrations/deterministicFeedRanker.integration.js";
 import { createHttpShareCardResolver } from "./integrations/httpShareCardResolver.integration.js";
+import { createHttpLinkPreviewImageStore } from "./integrations/httpLinkPreviewImageStore.integration.js";
+import { createSafeHttpFetcher } from "./integrations/safeHttpFetcher.integration.js";
+import { createLinkUnfurler } from "./modules/linkPreviews/services/linkUnfurler.service.js";
+import { createHttpMediaDescriptorResolver } from "./integrations/httpMediaDescriptorResolver.integration.js";
 import { createHttpPremiumEntitlements, noPremiumEntitlements } from "./integrations/premiumEntitlements.integration.js";
 import { createRabbitMqDomainEventPublisher } from "./integrations/rabbitMqDomainEventPublisher.integration.js";
 import { createSnsDomainEventPublisher, noopDomainEventPublisher } from "./integrations/snsDomainEventPublisher.integration.js";
 import type { DomainEventPublisher } from "./interfaces/domainEventPublisher.interface.js";
 import { systemClock } from "./interfaces/clock.interface.js";
 import { startChatMediaExpiryJob } from "./jobs/scheduler.job.js";
+import { startContentEventConsumer } from "./jobs/contentEvents.job.js";
+import { createRabbitMqMessageConsumerFactory } from "./integrations/rabbitMqMessageConsumerFactory.integration.js";
 import { startOutboxRelay } from "./jobs/outboxRelay.job.js";
 import { registerRoutes } from "./routes/index.js";
 import type { HandlerContext } from "./types/handlerContext.type.js";
@@ -38,7 +44,7 @@ export interface SocialApp {
 export function createSocialApp(config: SocialConfig, internalToken: string, logger: Logger = createLogger({ name: "social" })): SocialApp {
   const database: SocialDatabase = createSocialDatabase(config.databaseUrl);
   const identityClient = createIdentityReadClient(config.identityReadDatabaseUrl);
-  const context: HandlerContext = { database, directory: createIdentityDirectory(identityClient, logger), clock: systemClock, premium: config.moneyInternal === undefined ? noPremiumEntitlements : createHttpPremiumEntitlements(config.moneyInternal), ranker: deterministicFeedRanker, shareCards: createHttpShareCardResolver({ commerce: config.commerceInternal, live: config.liveInternal }) };
+  const context: HandlerContext = { database, directory: createIdentityDirectory(identityClient, logger), clock: systemClock, premium: config.moneyInternal === undefined ? noPremiumEntitlements : createHttpPremiumEntitlements(config.moneyInternal), ranker: deterministicFeedRanker, shareCards: createHttpShareCardResolver({ commerce: config.commerceInternal, live: config.liveInternal }), ...(config.mediaInternal === undefined ? {} : { media: createHttpMediaDescriptorResolver(config.mediaInternal) }), ...(config.linkPreviewsEnabled ? { linkPreviews: createLinkUnfurler({ db: database.client, fetcher: createSafeHttpFetcher(), clock: systemClock, imageStore: config.mediaInternal === undefined ? undefined : createHttpLinkPreviewImageStore(config.mediaInternal, config.linkPreviewMediaOwnerId) }) } : {}) };
   const router = createRouter({
     onError: (error) => errorToResponse(error),
     notFoundHandler: () => json(404, { message: "Not found.", code: "NOT_FOUND" }),
@@ -67,6 +73,11 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
         stoppers.push(startOutboxRelay({ database, publisher, clock: systemClock, logger, intervalMs: config.outboxPollIntervalMs }));
         stoppers.push(() => void (publisher as { close?: () => Promise<void> }).close?.());
         stoppers.push(startChatMediaExpiryJob(context, logger, config.mediaExpiryIntervalMs));
+        if (config.messageBus === "rabbitmq" && config.rabbitMqUrl !== "") {
+          const consumers = createRabbitMqMessageConsumerFactory(config.rabbitMqUrl, config.rabbitMqPrefetch, logger);
+          const stopConsumer = startContentEventConsumer(context, consumers, config.domainEventsQueue, config.mediaPublicBaseUrl, logger);
+          stoppers.push(() => void stopConsumer().finally(() => consumers.close()));
+        }
       }
       return server.address?.port ?? config.port;
     },

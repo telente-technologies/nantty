@@ -12,3 +12,7 @@ export const maximumGroupMembers = 256;
 export const accountIdHeaderName = "x-zudomart-account-id";
 export const popularFeedCandidateWindowDays = 14;
 export const popularFeedCandidateLimit = 300;
+export const ageBracketHeaderName = "x-zudomart-age-bracket";
+export const maximumVisibleThreadDepth = 3;
+export const maximumThreadLoadSize = 200;
+export const advisorySensitiveLabelThreshold = 0.8;

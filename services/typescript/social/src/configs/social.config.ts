@@ -11,8 +11,14 @@ export interface SocialConfig {
   readonly outboxPollIntervalMs: number;
   readonly mediaExpiryIntervalMs: number;
   readonly jobsEnabled: boolean;
+  readonly domainEventsQueue: string;
+  readonly rabbitMqPrefetch: number;
+  readonly mediaPublicBaseUrl: string;
   readonly commerceInternal: { readonly baseUrl: string; readonly internalToken: string } | undefined;
   readonly liveInternal: { readonly baseUrl: string; readonly internalToken: string } | undefined;
+  readonly mediaInternal?: { readonly baseUrl: string; readonly internalToken: string } | undefined;
+  readonly linkPreviewsEnabled: boolean;
+  readonly linkPreviewMediaOwnerId: string;
   readonly moneyInternal: { readonly baseUrl: string; readonly internalToken: string } | undefined;
 }
 
@@ -48,9 +54,15 @@ export function loadSocialConfigFromEnvironment(): SocialConfig {
     outboxPollIntervalMs: Number(readOrDefault("OUTBOX_POLL_INTERVAL_MS", "500")),
     mediaExpiryIntervalMs: Number(readOrDefault("MEDIA_EXPIRY_INTERVAL_MS", String(60 * 60 * 1000))),
     jobsEnabled: readOrDefault("JOBS_ENABLED", "true") === "true",
+    domainEventsQueue: readOrDefault("SOCIAL_DOMAIN_EVENTS_QUEUE", "social-domain-events"),
+    rabbitMqPrefetch: Number(readOrDefault("RABBITMQ_PREFETCH", "20")),
+    mediaPublicBaseUrl: readOrDefault("MEDIA_PUBLIC_BASE_URL", ""),
     commerceInternal: readInternalSource("COMMERCE_INTERNAL"),
     liveInternal: readInternalSource("LIVE_INTERNAL"),
+    linkPreviewsEnabled: readOrDefault("LINK_PREVIEWS_ENABLED", "true") === "true",
+    linkPreviewMediaOwnerId: readOrDefault("LINK_PREVIEW_MEDIA_OWNER_ID", "00000000-0000-7000-8000-00000000c0de"),
     moneyInternal: readInternalSource("MONEY_INTERNAL"),
+    mediaInternal: readInternalSource("MEDIA_INTERNAL"),
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
   if (problems.length > 0) throw new Error(`Invalid social configuration: ${problems.join("; ")}`);
