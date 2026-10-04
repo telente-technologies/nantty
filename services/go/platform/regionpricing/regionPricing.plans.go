@@ -13,7 +13,11 @@ type PlanRegionalPrice struct {
 	AndroidMonthlyMinor int64             `json:"androidMonthlyMinor"`
 	AndroidYearlyMinor  int64             `json:"androidYearlyMinor"`
 	StoreProductIds     map[string]string `json:"storeProductIds"`
+	BilledInUsdFallback bool              `json:"-"`
+	NotChargeableOnWeb  bool              `json:"-"`
 }
+
+const UsdBillingNote = "Billed in USD"
 
 type monthlyPair struct{ web, app int64 }
 

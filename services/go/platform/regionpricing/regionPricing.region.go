@@ -77,3 +77,21 @@ func IsSupportedCurrency(currency string) bool {
 	_, found := RegionForCurrency(currency)
 	return found
 }
+
+type WebBilling struct {
+	Currency     string
+	UsdFallback  bool
+	NotAvailable bool
+}
+
+// DecideWebBilling picks the currency a web buyer pays in: the region's own currency when the provider can charge it,
+// otherwise USD (the US price), otherwise nothing can be charged yet and checkout must be refused.
+func DecideWebBilling(regionCurrency string, providerCanCharge func(string) bool) WebBilling {
+	switch {
+	case providerCanCharge(regionCurrency):
+		return WebBilling{Currency: regionCurrency}
+	case providerCanCharge(FallbackRegion.Currency):
+		return WebBilling{Currency: FallbackRegion.Currency, UsdFallback: regionCurrency != FallbackRegion.Currency}
+	}
+	return WebBilling{Currency: regionCurrency, NotAvailable: true}
+}

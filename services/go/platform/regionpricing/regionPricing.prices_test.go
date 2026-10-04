@@ -52,7 +52,7 @@ func TestPriceLookupPerCountry(t *testing.T) {
 
 func TestRoundToPricePoint(t *testing.T) {
 	cases := map[string][2]int64{
-		"NGN": {2_399_950, 2_400_000}, "KES": {57_601, 58_000}, "GHS": {28_801, 28_900}, "ZAR": {57_590, 57_599}, "GBP": {5_750, 5_799}, "USD": {599, 599},
+		"NGN": {2_399_950, 2_400_000}, "KES": {57_601, 58_000}, "GHS": {28_801, 28_900}, "ZAR": {57_590, 57_599}, "GBP": {5_750, 5_799}, "USD": {599, 599}, "EUR": {119, 119},
 	}
 	for currency, pair := range cases {
 		if got := RoundToPricePoint(pair[0], currency); got != pair[1] {
@@ -84,7 +84,7 @@ func TestSettingDocumentFallsBackToDefaultsAndRejectsBadRows(t *testing.T) {
 	}
 	raw, _ := json.Marshal(SettingDocument{Ads: []AdRegionPricing{{Region: "KE", Currency: "KES", CpmFloorMinor: 9_000, CpcFloorMinor: 500, MinimumDailyBudgetMinor: 20_000, BoostMinimumDailyMinor: 20_000}}})
 	document := ParseSettingDocument(raw, true)
-	if FindAdRegionPricing(document.Ads, "KE").CpmFloorMinor != 9_000 || FindAdRegionPricing(document.Ads, "NG").CpmFloorMinor != 50_000 {
+	if FindAdRegionPricing(document.Ads, "KE").CpmFloorMinor != 9_000 || FindAdRegionPricing(document.Ads, "NG").CpmFloorMinor != 40_000 || FindAdRegionPricing(document.Ads, "KE").SuggestedCpmMinor != 17_000 {
 		t.Fatalf("merge failed %+v", document.Ads)
 	}
 	bad, _ := json.Marshal(SettingDocument{Ads: []AdRegionPricing{{Region: "KE", Currency: "USD", CpmFloorMinor: 1, CpcFloorMinor: 1, MinimumDailyBudgetMinor: 1, BoostMinimumDailyMinor: 1}}})
