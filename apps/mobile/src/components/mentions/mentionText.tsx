@@ -7,8 +7,10 @@ import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { showToast } from "@/store/toast.store";
 import type { MentionEntity, MentionTargetsByUserId } from "@/types/mention.type";
+import { containsLink, splitTextByUrls } from "@/utils/linkify.util";
 import { isAllMention } from "@/utils/mentions.util";
 import { splitTextByTags } from "@/utils/usernameTags.util";
+import { inAppBrowserColorsFromTheme, openLinkFromText } from "@/components/links/openLink.util";
 
 import { useMentionTargets } from "./mentionTargets.hook";
 
@@ -35,8 +37,29 @@ export function MentionText({ text, mentions, mentionColor, ...textProps }: Ment
   const openUserByUsername = useOpenUserByUsername();
   const targets = useMentionTargets(mentions);
   const segments = useMemo(() => splitTextByTags(text, mentions), [text, mentions]);
-  if (!text.includes("@")) return <Text {...textProps}>{text}</Text>;
+  if (!text.includes("@") && !containsLink(text)) return <Text {...textProps}>{text}</Text>;
   const highlightColor = mentionColor ?? colors.primary;
+  const linkColor = mentionColor ?? colors.link;
+  const browserColors = inAppBrowserColorsFromTheme(colors);
+
+  const renderPlainText = (plain: string, keyPrefix: string) =>
+    splitTextByUrls(plain).map((piece, pieceIndex) => {
+      const href = piece.href;
+      if (!href) return piece.text;
+      return (
+        <Text
+          key={`${keyPrefix}_url_${pieceIndex}`}
+          {...textProps}
+          color={linkColor}
+          underline={mentionColor !== undefined}
+          accessibilityRole="link"
+          accessibilityHint="Opens the link"
+          onPress={() => openLinkFromText(href, browserColors)}
+        >
+          {piece.text}
+        </Text>
+      );
+    });
 
   const openMention = (mention: MentionEntity) => {
     if (isAllMention(mention)) return;
@@ -55,7 +78,7 @@ export function MentionText({ text, mentions, mentionColor, ...textProps }: Ment
             </Text>
           );
         }
-        if (!segment.entity) return segment.text;
+        if (!segment.entity) return renderPlainText(segment.text, `plain_${index}`);
         const description = describeSegment(segment.text, segment.entity, targets);
         if (description.kind === "plain") return segment.text;
         const mention = segment.entity;
