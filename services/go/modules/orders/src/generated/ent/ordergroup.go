@@ -44,6 +44,8 @@ type OrderGroup struct {
 	PreviousStatus string `json:"previous_status,omitempty"`
 	// PaymentStatus holds the value of the "payment_status" field.
 	PaymentStatus string `json:"payment_status,omitempty"`
+	// PaymentMode holds the value of the "payment_mode" field.
+	PaymentMode string `json:"payment_mode,omitempty"`
 	// DeliveryStatus holds the value of the "delivery_status" field.
 	DeliveryStatus string `json:"delivery_status,omitempty"`
 	// Currency holds the value of the "currency" field.
@@ -118,7 +120,7 @@ func (*OrderGroup) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case ordergroup.FieldSubtotalMinor, ordergroup.FieldDiscountMinor, ordergroup.FieldStoreCreditMinor, ordergroup.FieldShippingMinor, ordergroup.FieldTotalMinor, ordergroup.FieldRefundedMinor, ordergroup.FieldDeliveryAttempts, ordergroup.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case ordergroup.FieldReference, ordergroup.FieldInvoiceNumber, ordergroup.FieldBuyerName, ordergroup.FieldBuyerUsername, ordergroup.FieldStatus, ordergroup.FieldPreviousStatus, ordergroup.FieldPaymentStatus, ordergroup.FieldDeliveryStatus, ordergroup.FieldCurrency, ordergroup.FieldCourierName, ordergroup.FieldTrackingNumber, ordergroup.FieldTrackingURL, ordergroup.FieldRiderName, ordergroup.FieldRiderPhone, ordergroup.FieldLastAttemptNote, ordergroup.FieldCancelReason:
+		case ordergroup.FieldReference, ordergroup.FieldInvoiceNumber, ordergroup.FieldBuyerName, ordergroup.FieldBuyerUsername, ordergroup.FieldStatus, ordergroup.FieldPreviousStatus, ordergroup.FieldPaymentStatus, ordergroup.FieldPaymentMode, ordergroup.FieldDeliveryStatus, ordergroup.FieldCurrency, ordergroup.FieldCourierName, ordergroup.FieldTrackingNumber, ordergroup.FieldTrackingURL, ordergroup.FieldRiderName, ordergroup.FieldRiderPhone, ordergroup.FieldLastAttemptNote, ordergroup.FieldCancelReason:
 			values[i] = new(sql.NullString)
 		case ordergroup.FieldCreatedAt, ordergroup.FieldEstimatedDeliveryAt, ordergroup.FieldPaidAt, ordergroup.FieldShippedAt, ordergroup.FieldDeliveredAt, ordergroup.FieldCompletedAt, ordergroup.FieldEscrowReleaseAt, ordergroup.FieldRefundRequestedAt, ordergroup.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -216,6 +218,12 @@ func (_m *OrderGroup) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field payment_status", values[i])
 			} else if value.Valid {
 				_m.PaymentStatus = value.String
+			}
+		case ordergroup.FieldPaymentMode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field payment_mode", values[i])
+			} else if value.Valid {
+				_m.PaymentMode = value.String
 			}
 		case ordergroup.FieldDeliveryStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -480,6 +488,9 @@ func (_m *OrderGroup) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("payment_status=")
 	builder.WriteString(_m.PaymentStatus)
+	builder.WriteString(", ")
+	builder.WriteString("payment_mode=")
+	builder.WriteString(_m.PaymentMode)
 	builder.WriteString(", ")
 	builder.WriteString("delivery_status=")
 	builder.WriteString(_m.DeliveryStatus)
