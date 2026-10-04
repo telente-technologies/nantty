@@ -61,7 +61,7 @@ export function registerReportMockHandlers(): void {
     const header = [query.breakdown, ...columns.map((key) => `${metricDefinitions.find((definition) => definition.key === key)?.label ?? key}${metricDefinitions.find((definition) => definition.key === key)?.format === "money" ? ` (${account.currency})` : ""}`)];
     const lines = [header, ...report.rows.map((row) => [row.label, ...columns.map((key) => formatMetricForCsv(row.metrics[key]))]), ["Total", ...columns.map((key) => formatMetricForCsv(report.totals[key]))]];
     const csv = lines.map((cells) => cells.map(escapeCsvCell).join(",")).join("\r\n");
-    return respondWithDownload(`zudomart-ads-${account.id}-${query.breakdown}-${query.from}-to-${query.to}.csv`, `﻿${csv}`, "text/csv; charset=utf-8");
+    return respondWithDownload(`zudomart-ads-${account.id}-${query.breakdown}-${query.from}-to-${query.to}.csv`, `\uFEFF${csv}`, "text/csv; charset=utf-8");
   });
 
   registerMockRoute("GET", "/ads/accounts/:accountId/reports/scheduled", (request) => {

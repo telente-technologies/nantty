@@ -12,7 +12,19 @@ export function resolveCreativeFromInput(input: CreativeInput, account: MockAdAc
     avatarUrl: account.business?.logoUrl ?? null,
     verifiedBusiness: account.kind === "business" && Boolean(account.business?.goldVerified),
   };
+  const cards = input.cards.map((card) => ({
+    media: database.media.get(card.mediaId)?.media ?? { id: card.mediaId, kind: "image" as const, url: "", posterUrl: null, width: 1, height: 1, durationSeconds: null },
+    headline: card.headline,
+    description: card.description,
+    callToAction: card.callToAction,
+    destination: card.destination,
+  }));
+  const iconUrl = input.app?.iconMediaId ? database.media.get(input.app.iconMediaId)?.media.url : undefined;
   return {
+    type: input.type,
+    mediaClickable: input.mediaClickable,
+    cards,
+    app: input.app ? { ...input.app, ...(iconUrl ? { iconUrl } : {}) } : null,
     format: input.format,
     source: input.source,
     media: uploadedMedia.length > 0 ? uploadedMedia : source?.media ?? [],

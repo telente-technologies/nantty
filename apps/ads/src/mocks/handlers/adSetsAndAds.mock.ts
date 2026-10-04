@@ -75,6 +75,17 @@ export function registerAdSetAndAdMockHandlers(): void {
     return respondWithJson(200, presentAd(findRecordInAccount(readMockDatabase().ads, account.id, request.params.adId, "ad"), readRange(request)));
   });
 
+  registerMockRoute("GET", "/ads/accounts/:accountId/ads/:adId/cards/report", (request) => {
+    const { account } = requireAccountAccess(request, "reports:view");
+    const ad = findRecordInAccount(readMockDatabase().ads, account.id, request.params.adId, "ad");
+    const items = (ad.creative.cards ?? []).map((card, cardIndex) => {
+      const impressions = Math.max(0, Math.round(presentAd(ad, readRange(request)).delivery.impressions * (0.9 - cardIndex * 0.08)));
+      const clicks = Math.round(impressions * Math.max(0.004, 0.03 - cardIndex * 0.003));
+      return { cardIndex, headline: card.headline, imageUrl: card.media.url, impressions, clicks, ctr: impressions > 0 ? clicks / impressions : 0 };
+    });
+    return respondWithJson(200, { items });
+  });
+
   registerMockRoute("POST", "/ads/accounts/:accountId/ads", (request) => {
     const { account } = requireAccountAccess(request, "campaigns:manage");
     const body = readJsonObjectBody(request);

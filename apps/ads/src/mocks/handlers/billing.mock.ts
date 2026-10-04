@@ -53,7 +53,36 @@ function readSafeReturnPath(value: unknown, accountId: string): string {
   return typeof value === "string" && value.startsWith(`/accounts/${accountId}/`) && !value.includes("//") ? value : fallback;
 }
 
+const regionalAdPricingRows = [
+  { region: "NG", currency: "NGN", cpmFloorMinor: 50_000, cpcFloorMinor: 3_000, minimumDailyBudgetMinor: 100_000, boostMinimumDailyMinor: 100_000 },
+  { region: "GH", currency: "GHS", cpmFloorMinor: 600, cpcFloorMinor: 40, minimumDailyBudgetMinor: 1_500, boostMinimumDailyMinor: 1_500 },
+  { region: "KE", currency: "KES", cpmFloorMinor: 6_000, cpcFloorMinor: 400, minimumDailyBudgetMinor: 15_000, boostMinimumDailyMinor: 15_000 },
+  { region: "ZA", currency: "ZAR", cpmFloorMinor: 1_500, cpcFloorMinor: 120, minimumDailyBudgetMinor: 4_000, boostMinimumDailyMinor: 4_000 },
+  { region: "GB", currency: "GBP", cpmFloorMinor: 200, cpcFloorMinor: 15, minimumDailyBudgetMinor: 300, boostMinimumDailyMinor: 300 },
+  { region: "EU", currency: "EUR", cpmFloorMinor: 200, cpcFloorMinor: 15, minimumDailyBudgetMinor: 300, boostMinimumDailyMinor: 300 },
+  { region: "US", currency: "USD", cpmFloorMinor: 250, cpcFloorMinor: 20, minimumDailyBudgetMinor: 300, boostMinimumDailyMinor: 300 },
+];
+const unitsPerDollar: Record<string, number> = { USD: 1, NGN: 1550, GHS: 15.5, KES: 129, ZAR: 18.2, GBP: 0.79, EUR: 0.92 };
+const eurozoneCountryCodes = new Set(["AT", "BE", "HR", "CY", "EE", "FI", "FR", "DE", "GR", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PT", "SK", "SI", "ES"]);
+
+function presentRegionalAdPricing(countryCodes: readonly string[], currency: string) {
+  const regions = [...new Set(countryCodes.map((code) => (eurozoneCountryCodes.has(code) ? "EU" : regionalAdPricingRows.some((row) => row.region === code) ? code : "US")))];
+  const targeted = regionalAdPricingRows.filter((row) => (regions.length > 0 ? regions.includes(row.region) : row.currency === currency));
+  const strictest = (pick: (row: (typeof regionalAdPricingRows)[number]) => number) =>
+    Math.max(...targeted.map((row) => Math.ceil((pick(row) * (unitsPerDollar[currency] ?? 1)) / (unitsPerDollar[row.currency] ?? 1))));
+  return {
+    billingCurrency: currency, targetedRegions: regions, creatorRevenueSharePercent: 40, regions: regionalAdPricingRows,
+    cpmFloor: money(strictest((row) => row.cpmFloorMinor), currency), cpcFloor: money(strictest((row) => row.cpcFloorMinor), currency),
+    minimumDailyBudget: money(strictest((row) => row.minimumDailyBudgetMinor), currency), boostMinimumDailyBudget: money(strictest((row) => row.boostMinimumDailyMinor), currency),
+  };
+}
+
 export function registerBillingMockHandlers(): void {
+  registerMockRoute("GET", "/ads/pricing", (request) => {
+    const countryCodes = (request.query.get("countries") ?? "").split(",").map((code) => code.trim().toUpperCase()).filter((code) => /^[A-Z]{2}$/.test(code));
+    const currency = (request.query.get("currency") ?? "USD").toUpperCase();
+    return respondWithJson(200, presentRegionalAdPricing(countryCodes, unitsPerDollar[currency] ? currency : "USD"));
+  });
   registerMockRoute("GET", "/ads/accounts/:accountId/billing", (request) => respondWithJson(200, presentBillingOverview(requireAccountAccess(request, "billing:view").account)));
 
   registerMockRoute("POST", "/ads/accounts/:accountId/billing/top-ups", (request) => {
