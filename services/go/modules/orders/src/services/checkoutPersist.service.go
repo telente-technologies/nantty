@@ -88,6 +88,9 @@ func persistOrderGroup(ctx context.Context, deployed *container.Container, tx *e
 	if err := redeemPromotion(ctx, tx, group, planned); err != nil {
 		return nil, err
 	}
+	if err := redeemCampaigns(ctx, tx, group, planned.Campaigns); err != nil {
+		return nil, err
+	}
 	for _, line := range planned.Group.Lines {
 		if err := createOrderItem(ctx, tx, group, line); err != nil {
 			return nil, err

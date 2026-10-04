@@ -39,7 +39,7 @@ func LoadCartContents(ctx context.Context, client *ent.Client, accountId uuid.UU
 	return CartContents{Cart: row, Items: items}, err
 }
 
-func PriceCartItems(ctx context.Context, deployed *container.Container, items []*ent.CartItem) ([]PricedCartLine, map[uuid.UUID]bool, error) {
+func PriceCartItems(ctx context.Context, deployed *container.Container, items []*ent.CartItem, country string) ([]PricedCartLine, map[uuid.UUID]bool, error) {
 	catalog, err := deployed.Catalog()
 	if err != nil {
 		return nil, nil, err
@@ -48,7 +48,7 @@ func PriceCartItems(ctx context.Context, deployed *container.Container, items []
 	for _, item := range items {
 		variantIds = append(variantIds, item.VariantID)
 	}
-	snapshots, err := catalog.ResolveProductsForCheckout(ctx, variantIds)
+	snapshots, err := catalog.ResolveProductsForCheckoutInCountry(ctx, variantIds, country)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -74,7 +74,7 @@ func BuildCartView(ctx context.Context, deployed *container.Container, accountId
 	if err != nil || len(contents.Items) == 0 {
 		return view, err
 	}
-	lines, unavailable, err := PriceCartItems(ctx, deployed, contents.Items)
+	lines, unavailable, err := PriceCartItems(ctx, deployed, contents.Items, BuyerCountry(ctx, deployed, accountId, address))
 	if err != nil {
 		return view, err
 	}

@@ -22,6 +22,7 @@ type PlannedGroup struct {
 	CreditMinor   int64
 	DiscountMinor int64
 	Promotion     *PromotionRule
+	Campaigns     CampaignPlan
 	TotalMinor    int64
 }
 
@@ -66,7 +67,7 @@ func BuildCheckoutPlan(ctx context.Context, deployed *container.Container, buyer
 	if len(contents.Items) == 0 {
 		return plan, ordererrors.CartEmpty
 	}
-	lines, unavailable, err := PriceCartItems(ctx, deployed, contents.Items)
+	lines, unavailable, err := PriceCartItems(ctx, deployed, contents.Items, address.CountryCode)
 	if err != nil {
 		return plan, err
 	}
@@ -107,11 +108,17 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 		if err != nil {
 			return *plan, err
 		}
+		campaigns, err := PlanGroupCampaigns(ctx, deployed, group)
+		if err != nil {
+			return *plan, err
+		}
+		campaigns.DiscountMinor = min(campaigns.DiscountMinor, group.SubtotalMinor-discount)
+		discount += campaigns.DiscountMinor
 		credit := int64(0)
 		if useCredit {
 			credit = RedeemableCreditMinor(loaded.credits[group.StoreId].BalanceMinor, group.SubtotalMinor-discount)
 		}
-		planned := PlannedGroup{GroupId: uuid.New(), Group: group, Store: store, Shipping: result, CreditMinor: credit, DiscountMinor: discount, Promotion: chosen,
+		planned := PlannedGroup{GroupId: uuid.New(), Group: group, Store: store, Shipping: result, CreditMinor: credit, DiscountMinor: discount, Promotion: chosen, Campaigns: campaigns,
 			TotalMinor: group.SubtotalMinor - discount - credit + result.FeeMinor}
 		plan.Groups = append(plan.Groups, planned)
 		plan.TotalMinor += planned.TotalMinor
