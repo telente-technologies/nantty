@@ -29,6 +29,11 @@ func (service *LiveService) StartLiveSession(ctx context.Context, actor types.Ac
 	if err != nil {
 		return types.LiveSessionView{}, err
 	}
+	if preview.State != livesession.StateLive {
+		if err := service.EnsureHostCanGoLive(ctx, preview.HostID.String()); err != nil {
+			return types.LiveSessionView{}, err
+		}
+	}
 	audience := service.resolveLiveStartedAudience(ctx, preview.HostID, string(preview.Visibility))
 	err = service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		session, err := service.lockLiveSession(ctx, tx, liveId)
