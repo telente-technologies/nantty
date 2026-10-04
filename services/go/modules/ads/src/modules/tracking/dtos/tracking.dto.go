@@ -10,6 +10,7 @@ type AdEventDto struct {
 	CampaignId     string `json:"campaignId"`
 	Placement      string `json:"placement"`
 	ItemId         string `json:"itemId"`
+	CardIndex      *int   `json:"cardIndex"`
 }
 
 type RecordAdEventsRequest struct {
