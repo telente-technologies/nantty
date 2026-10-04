@@ -46,6 +46,7 @@ export function createSearchEventHandlers(store: SearchIndexStore, reindexer: Do
     "category.updated": (envelope) => reindexer.reindexCategory(readRequiredString(envelope, "categoryId"), version(envelope)),
     "sound.updated": (envelope) => reindexer.reindexSound(readRequiredString(envelope, "soundId"), version(envelope)),
     "post.created": (envelope) => reindexer.reindexPost(readRequiredString(envelope, "postId"), version(envelope)),
+    "post.updated": (envelope) => reindexer.reindexPost(readRequiredString(envelope, "postId"), version(envelope)),
     "post.deleted": (envelope) => {
       const kind = readOptionalString(envelope, "kind");
       const kinds = kind === "post" || kind === "clip" ? [kind] as const : (["post", "clip"] as const);

@@ -26,14 +26,15 @@ export function buildUserDocument(source: UserSource, version: number): SearchDo
 }
 
 export function buildStoreDocument(source: StoreSource, version: number): SearchDocument {
+  const categoryNames = source.categoryNames ?? [];
   return {
     kind: "store",
     entityId: source.storeId,
     ownerAccountId: source.ownerAccountId,
     title: source.name,
     subtitle: source.handle,
-    body: [source.description, ...source.categoryNames].join(" "),
-    tags: source.categoryNames.map(normalizeSearchText),
+    body: [source.description, ...categoryNames].join(" "),
+    tags: categoryNames.map(normalizeSearchText),
     summary: { id: source.storeId, name: source.name, logoUrl: source.logoUrl, rating: source.rating, ratingCount: source.ratingCount, reviewCount: source.reviewCount, verification: source.verification },
     visibility: "public",
     available: source.active,
@@ -74,13 +75,14 @@ export function buildProductDocument(source: ProductSource, version: number): Se
     ownerAccountId: source.ownerAccountId,
     title: source.name,
     subtitle: source.brandName,
-    body: [source.description, ...source.categoryPath].join(" "),
-    tags: source.tags.map(normalizeSearchText),
+    body: [source.description, ...(source.categoryPath ?? [])].join(" "),
+    tags: (source.tags ?? []).map(normalizeSearchText),
     summary: { id: source.productId, name: source.name, price: { amountMinor: source.priceAmountMinor, currency: source.currency }, imageUrl: source.imageUrl, stock: source.stock, storeId: source.storeId },
     visibility: "public",
     available: isProductListable(source),
     popularity: source.purchaseCount,
     region: source.countryCode,
+    shippingRegions: source.shippingRegions ?? [],
     version,
     createdAt: source.createdAt,
   };

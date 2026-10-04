@@ -3,6 +3,11 @@ import type { DocumentVisibility, SearchDocument } from "../../../types/searchDo
 import { normalizeHashtag } from "../../../utils/queryNormalizer.util.js";
 
 const maximumHashtagsPerDocument = 30;
+const labelsRestrictedForMinors = ["nudity", "dangerous_acts"];
+
+export function isRestrictedForMinors(source: Pick<PostSource, "sensitiveLabels">): boolean {
+  return (source.sensitiveLabels ?? []).some((label) => labelsRestrictedForMinors.includes(label));
+}
 
 export function extractHashtags(caption: string, declared: readonly string[]): string[] {
   const fromCaption = [...caption.matchAll(/#([\p{L}\p{N}_]{1,64})/gu)].map((match) => match[1] ?? "");
@@ -30,6 +35,7 @@ export function buildPostDocument(source: PostSource, version: number): SearchDo
     summary: { id: source.postId, authorId: source.authorId, kind: source.kind, caption: source.caption, thumbnailUrl: source.thumbnailUrl, likes: source.likeCount, views: source.viewCount, hashtags: tags },
     visibility,
     available: visibility !== "hidden",
+    restrictedForMinors: isRestrictedForMinors(source),
     popularity: source.likeCount + source.viewCount / 10,
     region: null,
     version,
