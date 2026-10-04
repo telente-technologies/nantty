@@ -6,6 +6,106 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
+## Link previews, /username links, guest view-only, product SEO, create gating (4 Oct) — tests and tsc per app/service; one `next dev` curl check
+
+Design: [plans.md §41](./plans.md).
+
+| Area | Change |
+| --- | --- |
+| services/typescript/social | `linkPreviews` module: unfurl on post create and on demand, `GET /link-previews/resolve`, SSRF guard (IPv4/IPv6 private ranges, pinned socket, re-validated redirects, caps), OG/Twitter/oEmbed parser, `link_preview_cache` + `posts.linkPreview` (Prisma migration), image proxied through media; SSRF and unfurler tests |
+| services/typescript/media | Internal intents accept `post`; `POST /internal/v1/media/:mediaId/complete` (owner-checked); test |
+| services/typescript/gateway | Anonymous non-GET refused with 401 except auth/consent/unsubscribe/webhooks; `link-previews` route; test hitting every mutating route anonymously |
+| services/go | Reserved usernames cover all web app routes (+ test); go-catalog `SellingStoreMember` (`STORE_NOT_APPROVED`) on create/publish/duplicate (+ test); go-live creator gate test |
+| apps/webapp | SSR `/p/<slug>-<id>` (metadata, JSON-LD Product/Offer/AggregateRating/Breadcrumb/Organization), SSR `/store/<id>` (new) and `/<username>` (ProfilePage), 308s for `/product`, `/u`, `/user` in `proxy.ts`, `sitemap.xml` index + paginated sitemaps, `robots.txt`, link preview cards (external + internal), share links on `NEXT_PUBLIC_SITE_URL`, clip like button, creator gating, Buy now/Add to cart fix, reserved-route sync test, mocks |
+| apps/mobile | `webAppLinks` share links (`app.zudomart.com/<username>`, `/p/<slug>-<id>`), deep linking config + `UserProfileByUsername`, feed link cards (in-app browser, risky-domain sheet, rich internal cards), create pill Product/Live gating + `RoleGateScreen`, guest telemetry skipped, guest gaps fixed, live-ended share, mocks, tests |
+| apps/web | `Organization` + `WebSite` JSON-LD |
+| apps/seller | Contract: `403 STORE_NOT_APPROVED` |
+---
+
+## Views help, quotes, reply controls, deep threads, sensitive content (4 Oct) — social, search, gateway vitest; go-auth `go test`; mobile jest; webapp unit and contract tests; tsc per app
+
+Design and contract: [plans.md §42](./plans.md).
+
+| Area | Change |
+| --- | --- |
+| services/typescript/social | Reply policies enforced on every comment and reply, subscriber-only posts limited to approved creators, quotes (`isQuote`, `quoteCount`, `GET /posts/:id/quotes` with privacy filtering), threads of any depth (`depth` + materialised `path`, `GET /posts/:id/thread`, nested `GET /comments/:id/thread`, one-query subtree delete), sensitive labels from poster, moderation and advisory scores, age-gated reads (feeds, profiles, threads, quotes, direct links), content preferences, migration with backfill |
+| services/typescript/search, gateway, go auth/moderation | Search drops `restricted_for_minors` posts for non-adults; gateway forwards the token's age bracket and routes content preferences; access tokens carry an `age` claim (never the birthday); `content.visibilityChanged` can carry `labels`; RabbitMQ binds `content.sensitivityAdvised` to social |
+| apps/mobile | Centred Views dialog with "Learn more" to the new About views help article, "View quotes" with a quotes screen, composer "Who can reply", Subscribers only and Mark as sensitive, "Edit reply settings" on own posts, locked composer note when replies are restricted, indented threads with "View thread" drill-in, sensitive-content interstitial remembered per post, Settings → Privacy → Content preferences, mocks |
+| apps/webapp | Centred Views dialog with `/help/views`, "View quotes" and `/post/:id/quotes`, reply settings control and restricted composer, indented threads with focus drill-in, sensitive-content interstitial, content preferences in Privacy & Data, mocks |
+
+---
+
+## Rich ad formats (4 Oct) — go-ads `go test`; tsc per app; mobile jest; ads and webapp contract tests
+
+Design and contract: [plans.md §43](./plans.md) and `apps/ads/apiContract.md`.
+
+| Area | Change |
+| --- | --- |
+| services/go/modules/ads | Creative `type` (single, carousel 2-10 cards, app_install with iOS/Android/web store links and deep links, promoted_post), new CTAs and `app_store` destination, UTM builder, https and store-URL validation, review-time destination checks (blocked domains, shorteners, raw IPs), signed click tokens plus `GET /api/v1/ads/r/{token}` redirect that only resolves the creative's own destination, `card_view` events and `ad_card_stats_dailies` with `GET .../ads/{adId}/cards/report`, review payload with cards and app. Tests: no open redirect, platform link selection, carousel validation |
+| apps/ads | Ad type picker, carousel card editor with reordering, app-install fields with store URL validation, UTM builder, media-click option, previews for feed, comment thread, reels and mart, per-card results on the ad page, mock backend and review scanner updated |
+| apps/mobile | Carousel, app-install row and tappable media in dedicated sponsored components, in-app browser for external links, deep link or store for installs, in-app navigation for internal targets, signed-token impression, click and card-view events, "Promoted" label, ad posts excluded from the swipe-to-like gesture, comment-thread ads support all formats, mocks added |
+| apps/webapp | `sponsoredAd` components (carousel with `data-swipe-ignore`, app install, media link), feed ad posts excluded from swipe, thread ads support all formats, ad events carry tokens, mocks added |
+
+---
+
+## Studio landing redesign (4 Oct) — `apps/studio` tsc and `next build` clean
+
+| Area | Change |
+| --- | --- |
+| apps/studio | Public landing (`/`) rebuilt as a sibling of the Dashboard, Ads and zudomart.com landings: same floating deep-blue header pill with yellow Sign in and full-screen mobile menu, mono ticker band, 20 px cards, FAQ accordion, brand-blue CTA panel and deep-blue footer with giant wordmark and theme switcher. New sections: hero with an HTML/CSS live battle stage (LIVE badge, blue vs yellow score bar, gift combo toasts, gift goal, phone live, example earnings card), "Go live your way" tabs (phone, OBS/WHIP with a real control room screenshot, up to 10 on stage), live features bento (gifts, battles, overlays, moderation, ZudoPoints, replays, analytics, Blue checkmark), earnings band (gifts, 80% of fan subscriptions, ad revenue share, ₦50 payout fee), creator categories carousel, three-step Creator Program flow, FAQ and final CTA. Copy principles and references in [design/studioLandingReferences.md](./design/studioLandingReferences.md) |
+| apps/studio/public | 11 Unsplash photos of African creators as WebP (44–177 KB) in `public/photos/`, credited in `apps/studio/mediaCredits.json`; Studio control room (dark and light) and overlay editor screenshots in `public/screens/`; unused `viewerLiveScreen.webp` removed |
+
+---
+
+## Live-stream safety (4 Oct) — Go, Python and TS unit tests; tsc per app
+
+Design, thresholds, cost per stream-hour and legal notes: [architecture/liveSafety.md](./architecture/liveSafety.md).
+
+| Area | Change |
+| --- | --- |
+| apps/mobile | Live viewer menu and a long-press on the host chip open a live report sheet (child safety, self-harm and violence marked urgent, self-harm support resources, optional details, auto-attached moment and frame reference, 60 s cooldown, guests through `requireAuthThen`); "Report @host" files an account report. Viewers get a blurred "This live is paused while we review it" overlay; the host gets a banner with the reason and an appeal sheet. Realtime `live.safety.*` events refresh state; mocks use `live_safety_paused` |
+| apps/webapp | `/live/[id]`: live report dialog with the same reasons and context, blur overlay for viewers while paused, host banner with appeal |
+| apps/studio | Control room shows the safety hold or warning with the reason and an appeal form, and a "Guests on stage" card where the host can report a guest |
+| apps/admin | New Trust & safety page "Live incidents" (`/moderation/live-incidents`): urgent and paused first, latest and flagged frames with labels and confidence, transcript snippets, viewer reports, host appeal; Keep live, Keep paused, End live, End + suspend (step-up), all audited; mock handlers and queue counter |
+| go-live | `live_safety_states` table; frame sampler (LiveKit egress image outputs to S3, newest frame every 5 s, 2 s when boosted) enqueues `liveFrame.captured`; optional audio segments (`liveAudio.segmentCaptured`); consumes `live.safetyHold/Released/Warning`, `live.samplingBoosted`, `live.moderatorEnded`; holds mute publishers and revoke `canPublish`; `GET /api/v1/lives/{id}/safety` and `safety` on the session view |
+| go-trust | `liveSafety` module: incidents, signals and legal reports tables; policy (severe + 0.90 hold, 0.70 warn, 5 reports in 3 min surge, repeat-offender threshold), report hook with live context, `intelligence-trust-live-safety` consumer, admin endpoints, host appeal `POST /api/v1/live-safety/{liveId}/appeal`, strikes on moderator decisions, S3 evidence vault and frame previews; classifier content scores no longer change live visibility |
+| intelligence | `live_safety` module: `RekognitionImageModerationModel` (DetectModerationLabels, MinConfidence, label to category mapping), transcript scorer, Transcribe batch transcriber, CSAM hash-match hook (disabled by default), score publisher and job consumers; NoSignal stays the default without AWS credentials; recorded fixtures in tests |
+| social, gateway, realtime | Social accepts `targetType: live`, `scam`, `intellectual_property` and `liveContext`; urgent priority for live child safety, self-harm and violence. Gateway routes `/api/v1/live-safety` and `/api/v1/admin/live-incidents` to trust. Realtime routes `liveSafety.paused/resumed` to `live:<id>` and `liveSafety.hostNotice` to `user:<hostId>` |
+| Contracts and infra | 11 JSON schemas and AsyncAPI channels; RabbitMQ topology and definitions regenerated; env examples; Terraform least-privilege IAM for Rekognition, Transcribe, capture prefixes and evidence writes, prefix-scoped `s3:ListBucket` via statement conditions, 1-day lifecycle on `live-safety/` |
+
+## Feed views for everyone (4 Oct) — verified with tsc per app
+
+| App | Change |
+| --- | --- |
+| apps/mobile | Every feed post shows the Views (analytics) icon with a compact count; owner taps open `PostAnalytics`, everyone else gets a "Views" Dialog. `PostAnalytics` type, mock and screen extended (engagements, rate, saves, shares, clicks, new follows, video, audience). Clips unchanged. |
+| apps/webapp | Same in `postActions.tsx` (non-owner button opens a sheet Dialog) and `/analytics/post/[postId]`. Plans section 11 rule updated. |
+
+## Feed swipe & X-style comments (4 Oct) — verified with tsc per app
+
+| App | Change |
+| --- | --- |
+| apps/mobile | `SwipeablePostCard` (`components/feed/swipeablePostCard.tsx`, PanResponder + Reanimated; gesture-handler is not installed) on the home feed: swipe right likes with haptic and heart pop, left opens post detail, threshold 28% or fling, pink/blue hints, reduced-motion fade, no swipe from multi-item media pagers, screen-reader actions. Post detail rebuilt as an X-style conversation (`components/feed/thread/*`): connector lines, Show replies, Top/Latest, Author badge, Promoted items from ads decide (`feedCommentThread`), sticky "Post your reply" composer, skeleton/empty/error states. New `postThread.service.ts`, `types/postThread.type.ts`, `mocks/postThread.mock.ts`. Single-image pagers no longer scroll. Clips comments unchanged. See plans section 40. |
+| apps/webapp | Touch-only swipe on home feed cards (`postSwipe.hook.ts`, pointer events, `(pointer: coarse)`); desktop keeps buttons. Post page uses the new `ConversationPanel` with the same thread, ads and sticky composer; watch page keeps `CommentsPanel`. Matching service, types and mocks. |
+
+## Feed action icons, X-style (4 Oct) — verified with tsc per app
+
+These icons intentionally depart from the original Figma by owner request: X/Twitter is the reference, Instagram is a secondary reference. The glyphs are original drawings in that visual language; no X or Instagram paths or assets are used.
+
+| App | Change |
+| --- | --- |
+| apps/mobile | New outline set at 1.8px on a 24px grid in `components/icons/custom/feedActionIcons.tsx` (reply, repost, like/filled, views, bookmark/filled, share, send, gift). `PostActionRow` and `PostActionButton` in `components/feed` replace the post card's counters on the feed and post detail: one row spaced edge to edge, counts beside each icon including saves (compact 1.2K, hidden at 0), 44px targets, a tinted press halo (reply/bookmark brand blue, repost green, like pink), filled active states with a pop that respects reduced motion. Views stay owner-only. The clip rail uses the same set (send for share, gift for tips) in its vertical layout. Unused `BrandLine24`, `Heart24Alt` and `Bookmark24` icons and their SVGs are removed. |
+| apps/webapp | The same glyphs in `components/ui/icons.tsx`. New `PostActions` (`components/feed/postActions.tsx`) on post cards in the feed, post detail and profile tabs: hover/focus halo, tinted counts, pop on toggle, repost via `postsService.repostPost`, share opens send-in-chat. `SaveToggleButton` and the clip rail use the new icons. Unused `bookmarkSimpleFill24` is removed. |
+
+## go-money follow-ups (4 Oct) — Go tests with Postgres
+
+| Area | Change |
+| --- | --- |
+| Checkout | one Paystack transaction per checkout with a dynamic split for direct groups; escrow groups held per group; per-group partial refunds; direct settlements reconciled per group |
+| Ads | `ads_money.proto` generated with buf (Go, TS, Python); wallet serves `AdsMoneyService` on the money gRPC server; go-ads calls it (`ADS_MONEY_GRPC_ADDRESS`, `ADS_MONEY_INTERNAL_TOKEN`) with the internal HTTP endpoints as fallback (`ADS_MONEY_HTTP_URL`) |
+| Identity | goIdentity consumes `entitlement.granted|revoked|graceStarted` (`USERS_ENTITLEMENT_EVENTS_QUEUE`): Blue/Gold/Black checkmarks (Gold only after KYB), seller plan + trial state and Premium on `profile_signals` |
+| Trials | `auth.accounts.phone_hash` readable by money; one trial per phone enforced |
+| Payout onboarding | the ID-document step is never required on Paystack |
+
 ## go-money on Paystack (3 Oct) — Go tests with Postgres
 
 | Area | Change |
@@ -1244,3 +1344,20 @@ Plan: [docs/plans.md §30](../../docs/plans.md). Verified with `tsc --noEmit` an
 | `apps/seller`: `components/payouts/*`, `mocks/handlers/payoutOnboarding.mock.ts`, `types/payoutOnboarding.type.ts`, `utils/payoutName.util.ts` | **New.** Full flow in Settings, Payouts; popup verification with return signal; banner on Wallet overview and Withdraw. |
 | `apps/seller`: `components/wallet/withdrawView.tsx` | Locked until verified, "Finish payout setup", fee from the fees endpoint plus arrival estimate. |
 | `apps/studio`: `components/payouts/*`, `app/(studio)/earnings/*`, `services/payoutOnboarding.service.ts`, `mocks/payoutOnboarding.mock.ts`, `components/shell/studioShell.*`, `lives/page.tsx` | **New.** Earnings page with the flow and payout fee, header link, Lives banner. |
+
+## apps/mobile and apps/webapp
+
+### Bookmark shows a count, not a "Saved" label (4 Oct) — types checked only
+
+| File | Change |
+| --- | --- |
+| `apps/mobile`: `components/saves/saveToggleButton.tsx`, `components/clips/clipActionRail.tsx`, `clipPage.tsx`, `feed/postCard.tsx`, `product/productPriceBlock.tsx`, `screens/product/productDetail.screen.tsx` | "Saved"/"Save" label removed; filled bookmark plus optimistic compact `saveCount` under the icon. |
+| `apps/mobile`: `hooks/useSaveToggle.hook.ts`, `store/toast.store.ts`, `components/ui/toastHost.tsx` | "Added to Saved" toast with a "View" action opening the Saved screen. |
+| `apps/webapp`: `components/saves/*`, `clips/clipPlayerCard.tsx`, `feed/postCard.tsx`, watch and product pages | Same count behaviour; toast "Added to Saved" with "View" to `/saved`. |
+| `types/models.type.ts` (both apps), mocks | Optional `saveCount`. Backend gap noted in `docs/plans.md` §39. |
+
+### Email footer (4 Oct)
+
+| File | Change |
+| --- | --- |
+| `packages/emailTemplates/src/{config/emailBrand.config.ts,emailTypes.ts,layout/emailFooter.layout.tsx}` | Removed the Instagram / X / TikTok / YouTube links from every email footer (owner: Zudomart is itself a social app). Footers keep the app store badges, help, notification settings and support contacts. |

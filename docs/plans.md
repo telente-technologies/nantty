@@ -442,8 +442,12 @@ Requirement: *"on both mobile and webapp there should be an icon under all posts
 ### 11.1 Rules
 
 - **The counter is public.** Every post shows its impression count with a **bar-chart / analytics glyph** (never an eye).
-- **The analytics screen is owner-only.** It is reached by pressing the impressions counter **only when you own the post**; everyone else's counter is inert text.
+- **The analytics screen is owner-only.** It is reached by pressing the impressions counter **only when you own the post**.
+- **Rule change, 4 Oct 2026:** the earlier "owner-only impressions" rule is superseded. Every feed post shows the analytics glyph with the views count (`post.views`, public, compact, hidden at 0) in the X-style action row. The owner's tap opens the full analytics screen; anyone else (or a guest) gets a small "Views" dialog ("Times this post was seen. Learn more") with a Close button and no private metrics. Reels/clips unchanged.
 - Data comes from `GET /api/v1/posts/:postId/analytics`, which returns `403 NOT_POST_OWNER` for anyone but the author — the UI never has to guess.
+
+- Full analytics screen (mobile `PostAnalytics`, webapp `/analytics/post/[postId]`) now adds engagements, engagement rate, saves, shares, link and profile clicks, new follows, video views and watch time (video posts only) and an audience split; still "Only you can see these numbers".
+- **Backend gap [LATER]:** `services/typescript/social` `getPostAnalytics` stays owner-only (`403 NOT_POST_OWNER`) but returns only impressions, uniqueViewers, reach, likes, comments, reposts, shares, saves, profileVisits and `daily`. It still needs `linkClicks`, `profileClicks`, `newFollows`, `engagements`, `engagementRate`, `video` and `audience`. Public post responses do not yet expose the view count (`post.viewCount` exists on the Post row); it must be added to the public post/feed DTO as `views`.
 
 ### 11.2 Shipped **[DONE]**
 
@@ -1604,3 +1608,188 @@ ID ending `0000` leads to `actionNeeded`; ID starting `99` leaves account creati
 - **[LATER]** push and in-app notices, reminder cadence, admin view of onboarding states.
 - Mobile Withdraw only checks verification client-side in mock mode.
 - Not tested on a device or in a browser; types checked only.
+
+## 39. Save counts (backend note)
+
+- **[BACKEND]** `services/typescript/social` does not return `saveCount` on posts, clips, videos or products. Clients read optional `saveCount` and default it to 0; the server should return it and keep it in step with save and unsave.
+
+## 40. Feed swipe & X-style comments **[DONE (mobile + webapp, mock)]**
+
+> 4 Oct. Home feed post cards take a horizontal swipe; post detail becomes an X-style conversation with promoted replies. Reels/clips comments are unchanged (`components/clips/**` untouched, `/posts/:id/comments` mock unchanged).
+
+### 40.1 Swipe on feed cards
+
+- Right: like (optimistic, light haptic, the heart pops in the action row). Already liked: nothing happens and the hint reads "Liked". Guests get the sign-in prompt (`requireAuthThen`).
+- Left: open the post detail (read-only for guests).
+- Activation 18px horizontal while vertical stays under 12px (2:1 dominance), so vertical scrolling is never taken. Commit at 28% of the card width or a fling over 0.8 px/ms past 48px. Drag capped at 45%. Hints (pink heart left, blue reply right) follow the finger, then the card springs back. Reduced motion: the card stays still, the hint fades in as a pill and fades out.
+- Touches that start on a multi-item `MediaPager` (or the web carousel, `data-swipe-ignore`) never start a swipe. Single-image pagers no longer scroll or bounce, so the swipe works on the image and the lightbox tap still opens.
+- Mobile uses `PanResponder` + Reanimated: `react-native-gesture-handler` is **not** installed in `apps/mobile` (adding it needs a new dev build plus `GestureHandlerRootView`). Swap `SwipeablePostCard` to `Gesture.Pan().activeOffsetX([-18, 18]).failOffsetY([-12, 12])` once it is added. The feed list disables scrolling during an active swipe.
+- Screen readers: the card body exposes "Like post" and "Open comments" accessibility actions.
+- Webapp: `(pointer: coarse)` only, pointer events with `touch-action: pan-y`, click suppression after a swipe; desktop keeps the buttons.
+
+### 40.2 Conversation view
+
+Post shown full at the top with the action row and counts, a full timestamp and views line, Top/Latest tabs, then replies rendered like posts (avatar, name, @handle, time, mentions, media, reply/like with counts). Connector lines link a parent to its first visible child; further siblings show "Replying to @x". "Show N replies" expands a branch through the thread-replies endpoint. The post owner's replies carry an "Author" badge. Sticky "Post your reply" composer (mobile: keyboard-aware via `KeyboardSpacer`, mention autocomplete; guests see "Sign in to reply"). Skeleton, empty and error states; infinite scroll on `{ data, nextCursor }`.
+
+### 40.3 Social thread endpoints (needed in `services/typescript/social`)
+
+| Route | Query | Response |
+| --- | --- | --- |
+| `GET /api/v1/posts/:postId/thread` | `sort=top\|latest`, `cursor` | `Page<ThreadReply>` of top-level replies |
+| `GET /api/v1/comments/:commentId/thread` | `cursor` | `Page<ThreadReply>` of direct replies |
+
+`ThreadReply` = `Comment` + `media?: Media[]`, `isPostAuthor`, `connector { depth, hasParentAbove, hasChildBelow, isLastInChain }`, `inlineReplies: ThreadReply[]` (at most one preferred child per level, two levels deep, preferring the post author's reply). `replyCount` counts direct replies. Top sort: likes plus a reply weight; Latest: newest first. Public reads for guests (viewer flags cleared). Writes reuse `POST /api/v1/posts/:postId/comments`.
+
+### 40.4 go-ads placement `feedCommentThread`
+
+- New slot kind `feedCommentThread` mapped to placement `feed` in `placementRules.service.go`; formats `feed_post` and `product`. Clients call `POST /api/v1/ads/decide` with `slot { kind: "feedCommentThread", contentId: postId, slotIndex, slotsSinceLastAd, neighbourContentIds }` and get `{ ad: DecidedAd | null, declinedReason }` with `label: "Promoted"`.
+- Frequency caps enforced server-side: never before the first 3 top-level replies, then at most 1 per 8 replies, at most one decision per `slotIndex` per session; decline with `frequencyCap`.
+- Viewers who opted out of personalised ads get contextual ads only (post topics, never audience or behavioural targeting); decline with `contextualOnly` when nothing contextual fits. Premium ad-free viewers get no ad. Guests get none (decide is authenticated).
+- Impressions (50% visible for 1 s) and clicks go to `/api/v1/ads/events` with placement `feedCommentThread` (added to `AdPlacement` in both apps).
+
+### 40.5 Open items
+
+- **[BACKEND]** the go-ads slot kind above. The two thread routes are built in social (§42.4).
+- **[LATER]** add `react-native-gesture-handler` and port the swipe.
+- Not tested on a device or in a browser; types checked only.
+
+## 42. Views help, quotes, reply controls, deep threads and sensitive content **[DONE (social + search + gateway + go-auth, mobile + webapp, mock)]**
+
+> 4 Oct. Owner rules: centred Views dialog with a help article, "View quotes", X-style reply controls and creator subscriber-only posts, threads of any depth, and a sensitive-content interstitial with an under-18 age gate. Reels/clips UI unchanged; every backend rule also applies to clips.
+
+### 42.1 Views dialog
+
+- Non-owners tapping the views icon get the centred `Dialog` (mobile `components/ui/dialog`, webapp `layout="centered"`), not a sheet. "Learn more" opens the **About views** article: mobile `HelpArticle { articleId: "ha_views" }` (added to the help centre data, paragraphs with headings), webapp `/help/views` (static page, guest browsable, canonical URL). Content: what a view is, what counts (every appearance, repeats, guests, promotions, partial video), what doesn't (author's own views, automated traffic, moderated posts), who sees what (totals for everyone, analytics for the author) and privacy (anonymous totals, view data is never sold, personalisation switch).
+
+### 42.2 Quotes
+
+- A quote is a repost with text (`posts.isQuote`); quoting a quote points at that quote, a plain repost of a repost points at the original. `posts.quoteCount` (backfilled) goes up on quote, down when the quote is deleted; `repostCount` still counts every repost.
+- `GET /api/v1/posts/:postId/quotes?cursor&limit` returns `Page<PostView>` newest first (index `posts(resharedFromId, isQuote, id)`). Privacy: the original must be visible to the viewer; quotes from private authors the viewer doesn't follow, blocked either way, followers-only quotes of non-followed authors and age-withheld quotes are dropped (`selectQuotesVisibleToViewer`); the cursor comes from the raw page so pages never repeat.
+- UI: "View quotes (N)" under the action row when `quotes > 0`; mobile `PostQuotes` screen, webapp `/post/:id/quotes`, both infinite scroll. A quote whose original is withheld shows "This post isn't available" (`resharedFromUnavailable`).
+
+### 42.3 Reply controls and subscriber-only posts
+
+- `posts.replyPolicy`: `everyone | following` (people the author follows) `| followers | mentioned | off`. Set in the composer ("Who can reply", mobile) and changed later with `PATCH /api/v1/posts/:postId/reply-settings { replyPolicy }` (author only; mobile post menu "Edit reply settings", webapp "Who can reply: … Change" above the conversation).
+- `POST /posts/:postId/comments` (any depth) is refused with `403` and a clear code/message: `REPLIES_OFF`, `AUTHOR_FOLLOWS_ONLY`, `FOLLOWERS_ONLY`, `MENTIONED_ONLY`, `SUBSCRIBERS_ONLY` (`decideReplyPermission`). The author can always reply. Every `PostView` carries `replyPolicy`, `viewerCanReply` and `replyRestriction { reason, message }`; composers show a locked "Who can reply?" note instead of the input.
+- `visibility: subscribers` needs an approved creator (`403 CREATOR_ONLY`). Non-subscribers get the existing locked preview with Subscribe; comments, replies and threads of such posts answer `403 SUBSCRIBERS_ONLY`.
+
+### 42.4 Threads of any depth
+
+- `comments` gains `depth` and a materialised `path` (ancestor ids joined by `/`, top level `""`), plus `rootCommentId` and `parentCommentId`; index `comments(rootCommentId, path)`; existing rows backfilled in the migration. No raw SQL: a subtree is one Prisma query on `rootCommentId` + `path startsWith` + `depth <= n`; deleting a reply removes its subtree with one query.
+- `GET /api/v1/posts/:postId/thread?sort=top|latest&cursor` (top-level page, one preferred reply chain two levels deep, author's reply first) and `GET /api/v1/comments/:commentId/thread?cursor` (direct replies with nested `inlineReplies` up to 3 levels below the focus, plus `focus`, `ancestors`, `maximumVisibleDepth`). Each reply has `connector`, `isPostAuthor`, `hasMoreReplies` and `continuesInThread`.
+- UI: nested replies indent with connector rails for 3 levels; deeper replies flatten with "Replying to @user"; "Show more replies" loads in place and "View thread" drills in (mobile `CommentThread` screen, webapp focus mode with "Back to all replies").
+
+### 42.5 Sensitive content and the age gate
+
+- Labels: `nudity` (adult content only where policy allows), `graphic_violence`, `dangerous_acts`, `self_harm`. Sources stored apart: poster (composer "Mark as sensitive" or `PATCH /posts/:postId/sensitivity`), moderation (`labels` on go-trust `content.visibilityChanged`) and Python advisory scores (`content.sensitivityAdvised { targetType, targetId, scores[{label, score}] }`, only scores >= 0.8). Effective `sensitiveLabels` = poster ∪ moderation ∪ advisory; once moderation reviews, its labels replace the advisory ones (Python never decides alone and can only add warnings). Changes emit `post.updated`; sensitive posts can't be promoted.
+- Age bracket: go-auth adds an `age` claim (`adult | minor | unknown`, computed from the birthday at token issue, the date never leaves goIdentity); the gateway forwards only the verified claim as `x-zudomart-age-bracket` (client copies are dropped). Guests and accounts without a birthday are `unknown`.
+- Under-18 and unknown viewers never receive `nudity` or `dangerous_acts`: filtered in feeds before ranking, profiles, threads, quotes, saves, sound pages and embedded originals (`buildPostViews` defaults to the strictest policy), direct links answer `404 POST_NOT_AVAILABLE`, and search drops `restricted_for_minors` documents unless the viewer is a verified adult. Under-18 authors can't post those categories (`403 SENSITIVE_LABEL_NOT_ALLOWED`).
+- Adults see a blurred "Sensitive content: This post may contain …" interstitial with a View button; the choice is remembered per post on the device. `GET/PUT /api/v1/me/content-preferences { showSensitiveWithoutWarning }` (adults only; others get the explanation) backs Settings → Privacy → Content preferences on both apps.
+
+### 42.6 Tests and open items
+
+- Tests: social `tests/posts/{replyPolicy,quoteVisibility,ageGate}.test.ts`, `tests/comments/commentThread.test.ts`, `tests/contentEvents/sensitiveLabelEvents.test.ts`; search `ageRestrictedSearch.test.ts`; gateway `ageBracketForwarding.test.ts`; go-auth `ageBracket.util_test.go`; mobile `utils/__tests__/sensitiveContent.util.test.ts`; webapp `utils/sensitiveContent.util.test.ts` (`npm run test:units`).
+- **[BACKEND]** intelligence has no publisher for `content.sensitivityAdvised` yet (the media classifier must emit it); go-trust moderation tools need a way to set `labels`.
+- **[LATER]** mobile UI to edit a post's sensitivity after publishing (endpoint exists); webapp has no composer, so reply and sensitivity controls at publish time are mobile only.
+- Not run on a device or in a browser; types and unit tests only.
+
+## 41. Link previews, /username links, guest view-only, product SEO, create menu gating **[DONE (social + media + gateway + go + webapp + mobile, mock UI)]**
+
+> 4 Oct. Owner requirements batch plus a follow-up audit.
+
+### 41.1 Link previews in feed posts
+
+- **Server unfurl** (`services/typescript/social`, module `linkPreviews`): when a text post has no media, `createPost` unfurls the first external URL (waits at most 1.5 s, then finishes in the background) and stores `posts.linkPreview` (`{ url, domain, title, description, siteName, imageUrl, imageMediaId }`). Older posts: `POST /api/v1/posts/:postId/link-preview` (auth) fills it on demand. Chat senders: `GET /api/v1/link-previews/resolve?url=` (auth). Results are cached per normalised URL (tracking params stripped, params sorted) in `link_preview_cache` (24 h ready, 1 h failed); concurrent unfurls of one URL are deduplicated.
+- **SSRF guard** (`utils/ssrfGuard.util.ts`, `integrations/safeHttpFetcher.integration.ts`): http/https only, ports 80/443, no credentials, internal hostnames (`localhost`, `*.local`, `*.internal`, metadata names, bare or numeric hosts) refused; every DNS answer must be public (IPv4 private, CGNAT, loopback, link-local/metadata, multicast, reserved; IPv6 loopback, ULA incl. `fd00:ec2::254`, link-local, site-local, multicast, documentation, IPv4-mapped/NAT64/6to4 checked against the embedded IPv4); the socket is pinned to the validated address (no DNS rebinding); redirects are manual (max 3) and every hop is re-validated; 5 s budget, HTML capped at 512 KB, images 5 MB (jpeg/png/webp/avif only), oEmbed JSON 64 KB; user agent `ZudomartBot/1.0`. Parser reads Open Graph, Twitter Card, `<title>`/description and oEmbed discovery.
+- **No hotlinking**: the image is downloaded through the guard and uploaded to ts-media via a `post`-purpose internal intent, presigned PUT and the new `POST /internal/v1/media/:mediaId/complete` (owner-checked), so it is scanned, moderated and served from the CDN; without media the card has no image. Owner account: `LINK_PREVIEW_MEDIA_OWNER_ID`.
+- **Internal links** (`app.zudomart.com`, `zudomart.com`) are never unfurled: clients render the existing rich cards (mobile `SharedContentCardView` when signed in, a light tappable card for guests; webapp product/store cards from public reads).
+- **Frontends**: card under the text (image 1.91:1, site/domain, title, two-line description), themed for light and dark. Mobile opens external links in the in-app browser (`expo-web-browser`, page sheet); shortened or suspicious domains get the chat warning sheet first. Webapp opens a new tab (`noopener noreferrer nofollow ugc`) with a confirmation dialog for risky domains. Mocks: post_31 (external) and post_32 (internal product) in both apps, `POST /posts/:id/link-preview` mock.
+- Tests: `social/tests/linkPreviews/*` (SSRF guard incl. IPv6, rebinding, redirect hops; parser; cache; no-hotlink), `media/tests/pipeline/internalLinkPreviewIngest.test.ts`.
+
+### 41.2 Profile share links `https://app.zudomart.com/<username>`
+
+- Every share/copy link uses the web app domain and no `@`: mobile `config/webAppLinks.config.ts` (profile, product `/p/<slug>-<id>`, store, post, clip, live) replaces the old `zudomart.com/@…`, `/products/…`, `/posts/…`, `/clips/…`, `/lives/…` links; webapp copy-link uses `NEXT_PUBLIC_SITE_URL`. No QR code exists in either app yet (nothing to update).
+- Webapp: SSR `/(app)/[username]` with metadata (title, description, canonical, OG `profile`, Twitter) and `ProfilePage` + breadcrumb JSON-LD; `/u/<username>` and `/user/<id>` answer 308 to it from `proxy.ts`. Profile links in the feed, threads, mentions, explore and the right rail point straight at `/<username>`.
+- Reserved names: `config/reservedRoutes.config.ts` lists every top-level route; goIdentity `webRouteTerms` (exact, confusable-skeleton match) now covers all of them plus `_next`, `sitemap(s)`, `robots`, legal pages, `bff`, `api`, …. `src/contracts/reservedRoutes.test.ts` fails if a new webapp route is missing from either list.
+- Mobile deep links: `navigation/linking.config.ts` (prefixes `zudomart://`, the web app URL, `zudomart.com`): `/`, `/clips`, `/p/<slug>-<id>` (+`/product/:id`), `/store/:id`, `/post/:id`, `/live/:id`, `/user/:id`, `/:username` → new `UserProfileByUsername` resolver screen, plus explore, cart, orders, saved, settings, `create/:mode`, creator. Chat link parsing understands `/username` and `/p/` slugs (it used to open `/u/<name>` as a user id).
+
+### 41.3 Guests are view-only
+
+- Gateway: any non-GET without a valid access token gets 401 before reaching a service, except auth (`otp`, `password/reset`, `google`, `apple`, `login`, `refresh`, `register`), staff auth bootstrap, `PUT /consents`, email unsubscribe, `POST /mentions/resolve` (a read), webhooks; staff routes still pass with a bearer token for the owning service to verify. `tests/anonymousMutations.handler.test.ts` sends every mutating route in the table anonymously (900+ cases) and asserts nothing reaches an upstream.
+- Mobile: background telemetry (`lives/:id/join|leave|engagement`, `stories/:id/seen`, `posts/:id/share|impressions|profile-visits|link-preview`, ad events, product interactions, preferences) is skipped for guests in the API client instead of popping a sign-in sheet; the mock guest allowlist now matches the gateway (only reads + `mentions/resolve`). Fixed gaps: hide / not interested and the follow button on shared cards now prompt sign-in. Already gated (verified): like, double tap, swipe like, comment/reply, repost, save, share to chat, follow, message, gift (single and battle), live comment, report, subscribe, add to cart, buy, coins, create.
+- Webapp: every guest-reachable action goes through `requireAuthThen` (verified: post actions, swipe like, comments, thread replies, saves, share to chat, report, follow, message, subscribe, gifts, live chat, store follow, add to cart, buy); the BFF already refuses anonymous mutations. Clip like is now a real button (it was a static count) and comments link to the thread.
+
+### 41.4 Product SEO (webapp)
+
+- `/p/<slug>-<id>` server-renders the product (React Query seeded with the SSR data, refetched for viewer flags): `generateMetadata` (title with price, description, canonical, `en-NG` + `x-default` hreflang placeholders, OG/Twitter with up to 4 images, `product:price:*` and availability), JSON-LD `Product` + `Offer` (price in major units, availability, seller) + `AggregateRating` + `BreadcrumbList` + `Organization`, `<` escaped. Old `/product/<id>` → 308 from `proxy.ts`; a stale slug redirects in-page to the canonical slug. Gallery thumbnails got descriptive alt text; the main image is `priority` (LCP).
+- New SSR store page `/store/<id>` (it was linked from products and explore but missing): metadata, `Store` + breadcrumb JSON-LD, follow (sign-in gated), share, product grid.
+- `sitemap.xml` is an index of `/sitemaps/static.xml` and paginated `products-N`, `stores-N`, `profiles-N` files (500 per file in mocks) with hreflang alternates; `robots.txt` allows public pages and blocks private ones. Guests can open product, store and profile pages. Marketing site (`apps/web`) gained `Organization` + `WebSite` JSON-LD (it already had sitemap, robots and OG).
+- Verified with one `next dev` run: curl of `/p/ankara-wrap-midi-dress-pr_f1` (3 JSON-LD blocks parse; canonical, OG, Twitter, price tags present), `/store/s_ada`, `/adaeze.styles`, all sitemaps parse as XML, `/product/pr_f1`, `/u/…`, `/user/u_1` → 308.
+
+### 41.5 Create (+) menu gating
+
+- Mobile create pill shows Story / Post / Clip to everyone, Product only when `isSeller`, Live only when the personal profile's creator status is approved (`useCreateMenuAccess`). Deep links and direct routes (`create/product`, `create/live`, `ProductForm`) show a friendly `RoleGateScreen` ("Become a seller" → seller application, "Join the Creator Program"). The `product` mode param used to fall through to the live setup panel.
+- Webapp has no composer; "Go live from the app" shows only to creators (others get "Join the Creator Program"), and `/creator` shows a join screen instead of an error for non-creators.
+- Backend: go-catalog `SellingStoreMember` refuses create, publish and duplicate unless the store is `active` (`STORE_NOT_APPROVED`); non-members were already refused. go-live already refuses hosts without the `creator` role (`CREATOR_PROGRAM_REQUIRED`, now unit-tested).
+
+### 41.6 Audit: fixed
+
+- Webapp product page: "Add to cart" navigated to the cart and "Buy now" did not; now Add stays with a confirmation and Buy goes to checkout. Breadcrumb includes Mart.
+- Webapp: missing store route, clip like/comment were inert, `/creator` dead end, profile share path was `/user/<id>`.
+- Mobile: share links pointed at non-existent `zudomart.com` paths; no deep link handling at all; `/u/<name>` chat links opened a user id; live-ended "More options" did nothing (now shares the live).
+
+### 41.7 Open items
+
+- **[BACKEND]** `GET /api/v1/sitemap/{products|stores|profiles}?page=` (`{ entries: [{ id, name, updatedAt }], totalPages }`) is mock-only; build it in go-catalog (products, stores) and goIdentity (public profiles).
+- **[BACKEND]** goIdentity `GET /api/v1/users/{userId}` requires a token while both apps let guests open profiles by id; `/user/<id>` redirects therefore 404 for guests on the real backend. Make it optional-auth (public fields only) or keep clients on `/users/by-username`.
+- **[BACKEND]** product SSR prices use `x-client-region: NG`; per-visitor currency comes from the client refetch.
+- **[DEVICE]** universal links need `apple-app-site-association` / `assetlinks.json` on the web app domain and associated domains in `app.json`.
+- Mobile product detail starts "Follow shop" as not following (no follow state in the product payload); the webapp guest `notFound()` on SSR pages is a soft 404 (streamed 200 with `noindex`) because `(app)/loading.tsx` streams.
+- Not run on a device; webapp checked with curl only.
+
+## 43. Rich ad formats **[DONE (go-ads, Ads Manager, mobile + webapp, mock)]**
+
+Owner brief: people promote ads with CTA buttons (download an app, several pictures, click the image to reach the link or the post).
+
+### 43.1 Formats (go-ads creative schema)
+
+`Creative.type`: `single` (default for old creatives), `carousel`, `app_install`, `promoted_post`. `format` still means where it is shaped to run (`feed_post`, `clip`, ...). Stored in the existing `creative` JSON column, so no table change for creatives.
+
+- **single**: one image or video; `mediaClickable` makes the media itself open the destination.
+- **carousel**: `cards[]` of 2-10 (`mediaId`, headline <=40, description <=90, `callToAction`, own `destination`); feed only; the ad-level headline still applies. Resolved cards carry the media URL.
+- **app_install**: `app { appName, iconMediaId, rating? (1-5), iosStoreUrl, androidStoreUrl, webFallbackUrl, iosDeepLink, androidDeepLink }`, destination type `app_store`. App Store links must be `https://apps.apple.com|itunes.apple.com/.../app/...`, Google Play `https://play.google.com/store/apps/details?id=...`; deep links are custom schemes only (no http, javascript, data, file, intent). At least one store link; one store link needs a web fallback.
+- **promoted_post**: source `post` or `clip`, destination must be `post` with the same id; the click opens the post.
+- CTAs: `shop_now learn_more install download sign_up book_now contact_us watch_more` (plus the older `visit_store send_message follow order_now`).
+- Destinations: `url` (https only, no credentials, optional `utm {source,medium,campaign,content,term}`; missing source/medium default to `zudomart`/`paid`, existing query params are never overwritten), internal `post|product|store|profile|messages`, and `app_store`.
+
+### 43.2 Review
+
+`RunAutomatedPolicyChecks` now scans card headlines, descriptions and the app name, and runs `RunDestinationChecks` on every external URL (ad, cards, app web fallback): blocked domains from `ADS_BLOCKED_DOMAINS` (CRITICAL, auto-reject like other critical flags), link shorteners, raw IPs and punycode hosts (HIGH). The review queue payload (`AdForReview.creative`) adds `type`, `cards[]` (image, headline, description, CTA, landing URL with UTM applied) and `app`.
+
+### 43.3 Click tracking
+
+- `POST /api/v1/ads/decide` returns `clickLinks { media?, cta?, cards? }`: signed redirect URLs `GET /api/v1/ads/r/{token}` (`ADS_PUBLIC_URL` base). The click token (`c1.<kid>.<payload>.<sig>`, HMAC with the ad token keys, separate version so it cannot be used as an impression token) carries the impression token, ad id, viewer id and card index.
+- The redirect verifies the click token and the embedded impression token, loads the ad, derives the target **only** from the creative's stored destination (`ResolveClickTarget`; `platform` query or User-Agent picks the store link), logs the click through the normal event pipeline (fraud policy, daily stats), then `302` with `Cache-Control: no-store` and `Referrer-Policy: no-referrer`. Any bad, forged, expired or mismatched token is a `404` with no `Location`; no request parameter ever supplies the target (no open redirect).
+- Internal and deep-link opens cannot use the redirect, so clients post a `click` event (with `token` and `cardIndex`) to `/api/v1/ads/events`.
+- Events accept `cardIndex`; new event type `card_view` (once per impression and card) feeds per-card stats.
+
+### 43.4 Reporting per card
+
+Table `ad_card_stats_dailies` (migration `20261004090000_add_ad_card_stats`) keyed by day, ad and card index. `GET /api/v1/ads/accounts/{accountId}/ads/{adId}/cards/report?from&to` (`reports:view`) returns `{ items: [{ cardIndex, headline, imageUrl, impressions, clicks, ctr }] }`; the Ads Manager ad page shows it for carousels.
+
+### 43.5 Ads Manager
+
+Ad type picker, carousel card editor (add, remove, reorder with Earlier/Later, per-card media, headline, description, button, link), app-install fields with store URL validation, UTM builder with a live resulting link, media-click toggle, and previews in Feed, Comments (`feedCommentThread`), Reels (clips between items) and Mart tiles. Placement fit rules block carousels outside the feed/comments and app installs in product grids and live. The review status panel and mock review scanner cover the new fields.
+
+### 43.6 Rendering (mobile + webapp)
+
+- Dedicated ad components only: mobile `sponsoredCarousel`, `sponsoredAppInstall`, `sponsoredMedia`, `sponsoredContent`, `thread/sponsoredThreadItem`; webapp `feed/sponsoredAd`. Label is "Promoted" for rich ads.
+- Carousel swipes horizontally. Mobile: ad posts do not get the swipe-to-like pan responder at all (`SwipeablePostCard` skips `panHandlers` when `post.sponsored`). Webapp: ad posts disable `usePostSwipe` and the carousel carries `data-swipe-ignore`.
+- Taps (`resolveAdTapAction`, unit tested on both apps): internal destinations navigate in app; external https links open the signed redirect in the in-app browser (mobile) or a new tab (web); installs try the platform deep link first (mobile), else the iOS/Android/web store link; non-https and unknown targets do nothing.
+- Impression and click events carry the impression token; carousel cards log `card_view` once per session.
+
+### 43.7 Open items
+
+- **[BACKEND]** social/commerce internal lookups for `post|product|store|profile` destination ownership (an advertiser could target another account's product id today; same gap as before for single ads).
+- **[LATER]** malware feed (Safe Browsing or similar) behind `DestinationHostFlags`; video cards in the carousel autoplay; device Universal Links verification files for the click host.
+- Not run on a device or in a browser; unit tests and type checks only.
