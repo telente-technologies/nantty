@@ -7,8 +7,8 @@ async function deliverSignedWebhook(signed: { readonly body: string; readonly si
   if (delivered.status !== 200) throw new Error(`webhook delivery: ${describeResponse(delivered)}`);
 }
 
-export async function payCheckoutThroughFakePaystack(reference: string): Promise<void> {
-  const response = await fetch(`${fakePaystackUrl}/__smoke/charges/${encodeURIComponent(reference)}/complete`, { method: "POST" });
+export async function payCheckoutThroughFakePaystack(reference: string, feeMinor = 0): Promise<void> {
+  const response = await fetch(`${fakePaystackUrl}/__smoke/charges/${encodeURIComponent(reference)}/complete?fee=${feeMinor}`, { method: "POST" });
   if (response.status !== 200) throw new Error(`fake Paystack charge ${response.status}: ${await response.text()}`);
   await deliverSignedWebhook((await response.json()) as { body: string; signature: string });
 }
