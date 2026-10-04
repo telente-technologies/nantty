@@ -8,6 +8,7 @@
     "start": "next start --port 3500",
     "typecheck": "tsc --noEmit",
     "test:contracts": "tsx --test src/contracts/*.test.ts",
+    "test:units": "tsx --test src/utils/*.test.ts",
     "lint": "eslint -c ../../packages/eslintConfig/next.config.mjs src"
   },
   "dependencies": {
