@@ -15,6 +15,7 @@ import { useTheme } from "@/theme";
 
 import { AuthNavigator } from "./auth.navigator";
 import { MainNavigator } from "./main.navigator";
+import { deepLinking } from "./linking.config";
 import { rootNavigationRef } from "./navigationRef";
 
 function useNavigationThemeFollowingAppTheme(): NavigationTheme {
@@ -47,7 +48,7 @@ export function RootNavigator() {
     );
   }
   return (
-    <NavigationContainer ref={rootNavigationRef} theme={navigationTheme}>
+    <NavigationContainer ref={rootNavigationRef} theme={navigationTheme} linking={canShowMainApp ? deepLinking : undefined}>
       {canShowMainApp ? <MainNavigator /> : <AuthNavigator />}
       <GuestAuthReplayCoordinator />
       <GuestAuthSheet />

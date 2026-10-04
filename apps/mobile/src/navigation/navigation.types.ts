@@ -44,6 +44,7 @@ export type MainStackParamList = {
   OrderDetail: { orderId: string };
   OpenDispute: { orderId: string };
   UserProfile: { userId: string };
+  UserProfileByUsername: { username: string };
   EditProfile: undefined;
   Connections: { userId: string; tab?: "followers" | "following" | "shopped" | "suggested" | "blocked" };
   Settings: undefined;
@@ -81,6 +82,9 @@ export type MainStackParamList = {
   CreatePost: { mode?: "story" | "post" | "clip" | "product" | "live"; soundId?: string; videoReply?: VideoReplyTarget } | undefined;
   PostDetail: { postId: string };
   PostAnalytics: { postId: string };
+  PostQuotes: { postId: string };
+  CommentThread: { commentId: string; postId: string };
+  ContentPreferences: undefined;
   Live: { liveId: string; host?: boolean };
   LiveEnded: { liveId: string };
   Story: { userId: string };
