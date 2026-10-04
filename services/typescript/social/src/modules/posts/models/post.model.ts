@@ -4,6 +4,12 @@ import type { MentionEntity } from "../../mentions/models/mention.model.js";
 import type { LinkPreviewView } from "../../linkPreviews/models/linkPreview.model.js";
 import type { ReplyRestrictionReason } from "../services/replyPolicy.service.js";
 import type { SensitiveContentView } from "../services/sensitiveContent.service.js";
+import type { RankingExplanation } from "../../../interfaces/feedRanker.interface.js";
+
+export interface FeedRankingDisclosure {
+  readonly explanations: readonly RankingExplanation[];
+  readonly boostMultiplier: number;
+}
 
 export interface MediaView {
   readonly id: string;
@@ -67,6 +73,7 @@ export interface PostView {
   readonly linkPreview: LinkPreviewView | null;
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: StickerLayout;
+  readonly ranking?: FeedRankingDisclosure;
 }
 
 export interface StoryView {
