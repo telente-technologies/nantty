@@ -1954,10 +1954,32 @@ Unchanged 10-business-day restore with court-action hold. Restoring an audio cla
 
 New schemas: `copyrightClaim.audioMuteOrdered`, `.warningIssued`, `.contentTakenDown`, `.contentRemovedVoluntarily`, `strike.expired`, `strike.appealed`, `strike.appealDecided`, `accountHealth.changed`, `clipAudio.muteRequested`, `clipAudio.restoreRequested`, `media.audioMuted`, `media.audioRestored`; extended `copyrightClaim.received/decided/counterNoticeReceived/restored`, `post.deleted`, `sound.updated`. Topology: trust consumes `post.deleted`; social consumes the audio mute and restore; media consumes `clipAudio.*`; notifications consume the copyright and strike events. Email templates (branded layout): `copyrightWarning`, `audioMuted`, `contentTakenDown`, `strikeIssued`, `strikeExpired`, `counterNoticeReceived`, `contentRestored`.
 
-### 49.7 Open items
+### 49.7 Monetisation pause, published help and audio match advice
 
-- **[LATER]** Counsel review of all legal wording, then move the help draft `services/typescript/support/content/drafts/copyright-and-account-status.md` into `content/help/safety-and-reporting/` (the apps already link to that slug).
-- **[LATER]** Creator program, ads revenue share and live consumers of `accountHealth.changed` (go-users only enforces `GOING_LIVE` today; there is no `MONETISATION` restriction feature yet).
-- **[LATER]** Automatic fingerprint matching on `copyrightClaim.received` in intelligence (the internal audio-matches endpoint already accepts results).
+- `accountHealth.changed` is consumed by go-money (wallet `monetisation_holds`: the creator earnings sweep skips paused creators, so gift, coin and subscription earnings stay pending in `earningsPayable` until monetisation returns), go-ads (`ad_creator_monetisation_holds`: a paused creator's share of each spend batch goes to the platform and they are left out of the premium pool; queue `ads-domain-events`) and go-live (`live_host_restrictions`: creating or starting a live returns 403 `LIVE_RESTRICTED`). Out-of-order events are ignored by `occurredAt`.
+- The help article is published at `content/help/safety-and-reporting/copyright-and-account-status.md` (also in the web and mobile help mocks).
+- Audio match advice: media exposes `POST /internal/v1/media/{id}/audio-fingerprint` (Chromaprint via `fpcalc` when installed, otherwise unavailable); intelligence `POST /v1/audio/copyright-matches` aligns fingerprints and returns advisory scores; go-trust requests it when a claim with an uploaded original arrives and from "Run audio match" in the console, and stores it as audio match hints.
+
+### 49.8 Open items
+
+- **[LATER]** Counsel review of all legal wording (claim declarations, counter-notice declaration, help article, emails).
 - **[LATER]** A restore only unmutes clips currently using the sound; clips muted by a different claim on the same sound are not tracked separately.
-- **[LATER]** Webapp claim form takes links only (mobile also supports uploads).
+- **[LATER]** Webapp claim form takes links only (mobile also supports uploads); audio match needs an uploaded original.
+
+## 50. Username suggestions on a taken username **[DONE (go-identity, gateway, mobile + webapp, mock UI)]**
+
+### 50.1 Behaviour
+
+- `GET /auth/username-available?username=&name=` and the register `409 USERNAME_TAKEN` body carry `suggestions: string[]` (3 items). Returned for `taken` and `recently_used`; absent when available, invalid, reserved or withheld.
+- Candidates come from the requested name and the display name or email local part: underscore or digit suffixes, the year, a dotted suffix and a short variant. All follow the username rules and skip reserved terms.
+- One batched check per request: `account.UsernameIn` in auth, plus `FindBlockedUsernames` on the username guard port (users: handle `IN`, active holds `IN` including the 120-day quarantine, reserved rules). No per-candidate queries, no reservation hold.
+- Rate limit: gateway class `usernameCheck`, 30 per minute per IP (`RATE_LIMIT_USERNAMECHECK_PER_MINUTE`).
+
+### 50.2 Clients
+
+Mobile and webapp sign-up username steps debounce the check, show "That username is taken" with chips; tapping a chip fills the field and re-checks; a register 409 race shows the returned chips the same way.
+
+### 50.3 Open items
+
+- **[LATER]** Suggestions on the brand and business handle forms (mobile hook already returns them).
+- **[LATER]** Send the display name on sign-up so suggestions can use it (the sign-up draft has no name yet).
