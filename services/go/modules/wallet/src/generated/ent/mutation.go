@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/coinpurchase"
 	"zudomart/modules/wallet/src/generated/ent/cointransfer"
 	"zudomart/modules/wallet/src/generated/ent/idempotentrequest"
+	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
 	"zudomart/modules/wallet/src/generated/ent/predicate"
@@ -43,6 +44,7 @@ const (
 	TypeCoinPurchase      = "CoinPurchase"
 	TypeCoinTransfer      = "CoinTransfer"
 	TypeIdempotentRequest = "IdempotentRequest"
+	TypeMonetisationHold  = "MonetisationHold"
 	TypeOutboxEvent       = "OutboxEvent"
 	TypePayoutAccount     = "PayoutAccount"
 	TypeSellerReserveFlag = "SellerReserveFlag"
@@ -6394,6 +6396,624 @@ func (m *IdempotentRequestMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *IdempotentRequestMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown IdempotentRequest edge %s", name)
+}
+
+// MonetisationHoldMutation represents an operation that mutates the MonetisationHold nodes in the graph.
+type MonetisationHoldMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *string
+	is_paused          *bool
+	account_status     *string
+	restrictions       *[]string
+	appendrestrictions []string
+	reason             *string
+	health_changed_at  *time.Time
+	updated_at         *time.Time
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*MonetisationHold, error)
+	predicates         []predicate.MonetisationHold
+}
+
+var _ ent.Mutation = (*MonetisationHoldMutation)(nil)
+
+// monetisationholdOption allows management of the mutation configuration using functional options.
+type monetisationholdOption func(*MonetisationHoldMutation)
+
+// newMonetisationHoldMutation creates new mutation for the MonetisationHold entity.
+func newMonetisationHoldMutation(c config, op Op, opts ...monetisationholdOption) *MonetisationHoldMutation {
+	m := &MonetisationHoldMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMonetisationHold,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMonetisationHoldID sets the ID field of the mutation.
+func withMonetisationHoldID(id string) monetisationholdOption {
+	return func(m *MonetisationHoldMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *MonetisationHold
+		)
+		m.oldValue = func(ctx context.Context) (*MonetisationHold, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().MonetisationHold.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMonetisationHold sets the old MonetisationHold of the mutation.
+func withMonetisationHold(node *MonetisationHold) monetisationholdOption {
+	return func(m *MonetisationHoldMutation) {
+		m.oldValue = func(context.Context) (*MonetisationHold, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MonetisationHoldMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MonetisationHoldMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of MonetisationHold entities.
+func (m *MonetisationHoldMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *MonetisationHoldMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *MonetisationHoldMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().MonetisationHold.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetIsPaused sets the "is_paused" field.
+func (m *MonetisationHoldMutation) SetIsPaused(b bool) {
+	m.is_paused = &b
+}
+
+// IsPaused returns the value of the "is_paused" field in the mutation.
+func (m *MonetisationHoldMutation) IsPaused() (r bool, exists bool) {
+	v := m.is_paused
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsPaused returns the old "is_paused" field's value of the MonetisationHold entity.
+// If the MonetisationHold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MonetisationHoldMutation) OldIsPaused(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsPaused is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsPaused requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsPaused: %w", err)
+	}
+	return oldValue.IsPaused, nil
+}
+
+// ResetIsPaused resets all changes to the "is_paused" field.
+func (m *MonetisationHoldMutation) ResetIsPaused() {
+	m.is_paused = nil
+}
+
+// SetAccountStatus sets the "account_status" field.
+func (m *MonetisationHoldMutation) SetAccountStatus(s string) {
+	m.account_status = &s
+}
+
+// AccountStatus returns the value of the "account_status" field in the mutation.
+func (m *MonetisationHoldMutation) AccountStatus() (r string, exists bool) {
+	v := m.account_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountStatus returns the old "account_status" field's value of the MonetisationHold entity.
+// If the MonetisationHold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MonetisationHoldMutation) OldAccountStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountStatus: %w", err)
+	}
+	return oldValue.AccountStatus, nil
+}
+
+// ResetAccountStatus resets all changes to the "account_status" field.
+func (m *MonetisationHoldMutation) ResetAccountStatus() {
+	m.account_status = nil
+}
+
+// SetRestrictions sets the "restrictions" field.
+func (m *MonetisationHoldMutation) SetRestrictions(s []string) {
+	m.restrictions = &s
+	m.appendrestrictions = nil
+}
+
+// Restrictions returns the value of the "restrictions" field in the mutation.
+func (m *MonetisationHoldMutation) Restrictions() (r []string, exists bool) {
+	v := m.restrictions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRestrictions returns the old "restrictions" field's value of the MonetisationHold entity.
+// If the MonetisationHold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MonetisationHoldMutation) OldRestrictions(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRestrictions is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRestrictions requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRestrictions: %w", err)
+	}
+	return oldValue.Restrictions, nil
+}
+
+// AppendRestrictions adds s to the "restrictions" field.
+func (m *MonetisationHoldMutation) AppendRestrictions(s []string) {
+	m.appendrestrictions = append(m.appendrestrictions, s...)
+}
+
+// AppendedRestrictions returns the list of values that were appended to the "restrictions" field in this mutation.
+func (m *MonetisationHoldMutation) AppendedRestrictions() ([]string, bool) {
+	if len(m.appendrestrictions) == 0 {
+		return nil, false
+	}
+	return m.appendrestrictions, true
+}
+
+// ResetRestrictions resets all changes to the "restrictions" field.
+func (m *MonetisationHoldMutation) ResetRestrictions() {
+	m.restrictions = nil
+	m.appendrestrictions = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *MonetisationHoldMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *MonetisationHoldMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the MonetisationHold entity.
+// If the MonetisationHold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MonetisationHoldMutation) OldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *MonetisationHoldMutation) ResetReason() {
+	m.reason = nil
+}
+
+// SetHealthChangedAt sets the "health_changed_at" field.
+func (m *MonetisationHoldMutation) SetHealthChangedAt(t time.Time) {
+	m.health_changed_at = &t
+}
+
+// HealthChangedAt returns the value of the "health_changed_at" field in the mutation.
+func (m *MonetisationHoldMutation) HealthChangedAt() (r time.Time, exists bool) {
+	v := m.health_changed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHealthChangedAt returns the old "health_changed_at" field's value of the MonetisationHold entity.
+// If the MonetisationHold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MonetisationHoldMutation) OldHealthChangedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHealthChangedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHealthChangedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHealthChangedAt: %w", err)
+	}
+	return oldValue.HealthChangedAt, nil
+}
+
+// ResetHealthChangedAt resets all changes to the "health_changed_at" field.
+func (m *MonetisationHoldMutation) ResetHealthChangedAt() {
+	m.health_changed_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *MonetisationHoldMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *MonetisationHoldMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the MonetisationHold entity.
+// If the MonetisationHold object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MonetisationHoldMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *MonetisationHoldMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the MonetisationHoldMutation builder.
+func (m *MonetisationHoldMutation) Where(ps ...predicate.MonetisationHold) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the MonetisationHoldMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *MonetisationHoldMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.MonetisationHold, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *MonetisationHoldMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *MonetisationHoldMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (MonetisationHold).
+func (m *MonetisationHoldMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *MonetisationHoldMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.is_paused != nil {
+		fields = append(fields, monetisationhold.FieldIsPaused)
+	}
+	if m.account_status != nil {
+		fields = append(fields, monetisationhold.FieldAccountStatus)
+	}
+	if m.restrictions != nil {
+		fields = append(fields, monetisationhold.FieldRestrictions)
+	}
+	if m.reason != nil {
+		fields = append(fields, monetisationhold.FieldReason)
+	}
+	if m.health_changed_at != nil {
+		fields = append(fields, monetisationhold.FieldHealthChangedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, monetisationhold.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *MonetisationHoldMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case monetisationhold.FieldIsPaused:
+		return m.IsPaused()
+	case monetisationhold.FieldAccountStatus:
+		return m.AccountStatus()
+	case monetisationhold.FieldRestrictions:
+		return m.Restrictions()
+	case monetisationhold.FieldReason:
+		return m.Reason()
+	case monetisationhold.FieldHealthChangedAt:
+		return m.HealthChangedAt()
+	case monetisationhold.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *MonetisationHoldMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case monetisationhold.FieldIsPaused:
+		return m.OldIsPaused(ctx)
+	case monetisationhold.FieldAccountStatus:
+		return m.OldAccountStatus(ctx)
+	case monetisationhold.FieldRestrictions:
+		return m.OldRestrictions(ctx)
+	case monetisationhold.FieldReason:
+		return m.OldReason(ctx)
+	case monetisationhold.FieldHealthChangedAt:
+		return m.OldHealthChangedAt(ctx)
+	case monetisationhold.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown MonetisationHold field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MonetisationHoldMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case monetisationhold.FieldIsPaused:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsPaused(v)
+		return nil
+	case monetisationhold.FieldAccountStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountStatus(v)
+		return nil
+	case monetisationhold.FieldRestrictions:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRestrictions(v)
+		return nil
+	case monetisationhold.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case monetisationhold.FieldHealthChangedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHealthChangedAt(v)
+		return nil
+	case monetisationhold.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MonetisationHold field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *MonetisationHoldMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *MonetisationHoldMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MonetisationHoldMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown MonetisationHold numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *MonetisationHoldMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *MonetisationHoldMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MonetisationHoldMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown MonetisationHold nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *MonetisationHoldMutation) ResetField(name string) error {
+	switch name {
+	case monetisationhold.FieldIsPaused:
+		m.ResetIsPaused()
+		return nil
+	case monetisationhold.FieldAccountStatus:
+		m.ResetAccountStatus()
+		return nil
+	case monetisationhold.FieldRestrictions:
+		m.ResetRestrictions()
+		return nil
+	case monetisationhold.FieldReason:
+		m.ResetReason()
+		return nil
+	case monetisationhold.FieldHealthChangedAt:
+		m.ResetHealthChangedAt()
+		return nil
+	case monetisationhold.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown MonetisationHold field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *MonetisationHoldMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *MonetisationHoldMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *MonetisationHoldMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *MonetisationHoldMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *MonetisationHoldMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *MonetisationHoldMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *MonetisationHoldMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown MonetisationHold unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *MonetisationHoldMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown MonetisationHold edge %s", name)
 }
 
 // OutboxEventMutation represents an operation that mutates the OutboxEvent nodes in the graph.
