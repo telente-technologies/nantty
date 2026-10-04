@@ -1,0 +1,89 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.banner {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+  border-radius: var(--radius-large);
+  background: linear-gradient(120deg, var(--color-brand-solid) 0%, var(--color-inverse) 100%);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.identity {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.logoWrap {
+  margin-top: -52px;
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--surface-app);
+}
+
+.nameBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--text-2xl);
+  overflow-wrap: anywhere;
+}
+
+.handle {
+  color: var(--ink-muted);
+  font-weight: 650;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.bio {
+  max-width: 62ch;
+  color: var(--ink-strong);
+  line-height: 1.6;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.stats strong {
+  color: var(--ink-strong);
+  font-size: var(--text-md);
+  margin-right: 4px;
+}
+
+.sectionTitle {
+  font-size: var(--text-lg);
+  font-weight: 800;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+}

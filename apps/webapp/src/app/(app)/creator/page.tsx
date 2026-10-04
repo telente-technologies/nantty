@@ -7,7 +7,10 @@ import { RetryButton } from "@/components/ui/controls";
 import { ErrorState, Spinner } from "@/components/ui/feedback";
 import { AnalyticsIcon } from "@/components/ui/icons";
 import { creatorProgramService } from "@/services/creatorProgram.service";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
+import { readErrorMessageForDisplay, WebappRequestError } from "@/services/clientApi.service";
+import { useSession } from "@/components/providers/sessionProvider";
+import { EmptyState } from "@/components/ui/feedback";
+import { CreatorIcon } from "@/components/ui/icons";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { CreatorDashboardPeriod } from "@/types/creator.type";
@@ -23,12 +26,25 @@ const PERIODS: readonly { readonly key: CreatorDashboardPeriod; readonly label: 
 
 export default function CreatorDashboardPage() {
   const [period, setPeriod] = useState<CreatorDashboardPeriod>("month");
+  const { viewer } = useSession();
+  const isKnownNonCreator = viewer?.isCreator === false;
   const dashboard = useQuery({
     queryKey: ["creator-dashboard", period],
     queryFn: () => creatorProgramService.fetchCreatorDashboard(period),
+    enabled: !isKnownNonCreator,
     retry: false,
   });
+  const isNotInCreatorProgram = isKnownNonCreator || (dashboard.error instanceof WebappRequestError && (dashboard.error.status === 403 || dashboard.error.code === "CREATOR_PROGRAM_REQUIRED"));
 
+  if (isNotInCreatorProgram) {
+    return (
+      <EmptyState
+        icon={<CreatorIcon size={28} />}
+        title="Join the Creator Program"
+        description="Approved creators can go live, earn from gifts and subscriptions, and see their analytics here. Apply in the Zudomart app: Profile, then Creator Program."
+      />
+    );
+  }
   if (dashboard.isLoading) return <Spinner label="Loading your dashboard" />;
   if (dashboard.isError || !dashboard.data) {
     return (
