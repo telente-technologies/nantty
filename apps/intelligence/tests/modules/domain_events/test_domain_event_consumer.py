@@ -217,3 +217,56 @@ async def test_contract_envelope_shape_and_deletion_request_stops_personalizatio
     assert (await consumer.process_message_body(json.dumps(envelope))).status == "processed"
     assert await read_topic_affinity(feature_backend, application_container, "user_5") == 0
     assert not await application_container.feature_store.is_personalization_allowed("user_5")
+
+
+async def test_contract_post_created_and_media_processed_reach_content_scoring(
+    application_container: ApplicationContainer, reference_now: datetime
+) -> None:
+    consumer = application_container.domain_event_consumer_service
+    post_created = json.dumps(
+        {
+            "id": "evt_contract_post",
+            "type": "post.created",
+            "source": "social",
+            "subject": "post_9",
+            "schemaVersion": 1,
+            "occurredAt": reference_now.isoformat(),
+            "data": {
+                "postId": "post_9",
+                "authorId": "author_9",
+                "kind": "post",
+                "audience": "everyone",
+                "visibility": "public",
+                "isAiGenerated": False,
+                "text": "hello",
+                "mediaIds": ["media_9"],
+            },
+        }
+    )
+    media_processed = json.dumps(
+        {
+            "id": "evt_contract_media",
+            "type": "media.processed",
+            "source": "media",
+            "subject": "media_9",
+            "schemaVersion": 1,
+            "occurredAt": reference_now.isoformat(),
+            "data": {
+                "mediaId": "media_9",
+                "ownerId": "author_9",
+                "purpose": "post",
+                "kind": "image",
+                "status": "ready",
+                "isPrivate": False,
+                "width": 1,
+                "height": 1,
+                "variants": [],
+            },
+        }
+    )
+    assert (await consumer.process_message_body(post_created)).status == "processed"
+    assert (await consumer.process_message_body(media_processed)).status == "processed"
+    links = await application_container.feature_backend.read_sorted_set_highest_members(
+        [application_container.feature_store.keyspace.media_post_link_key("media_9")], 1
+    )
+    assert links[0][0][0] == "post_9|author_9|post"
