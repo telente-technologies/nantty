@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, type AccessibilityActionEvent, type AccessibilityActionInfo } from "react-native";
 
 import { MentionText } from "@/components/mentions/mentionText";
-import { Analytics24Icon, BrandLine24Icon, DotsThreeVertical24Icon, Group1256Icon, Heart24AltIcon, HeartFill72Icon, Refresh24Icon, Share24Icon } from "@/components/icons";
+import { DotsThreeVertical24Icon, Group1256Icon, ReplyActionIcon } from "@/components/icons";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
@@ -13,17 +13,23 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useAuthStore } from "@/store/auth.store";
 import type { AdPlacement, Post } from "@/types";
-import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
+import { formatTimeSincePosted } from "@/utils/formatDate.util";
 
 import { useIsFeedItemVisibleForAutoplay } from "./feedVisibility.hook";
 import { CommentStickerOverlay } from "@/components/clips/videoReply/commentStickerOverlay";
 import { MediaPager } from "./mediaPager";
+import { PostActionRow } from "./postActionRow";
+import { ReplySettingsSheet } from "./replySettingsSheet";
+import { SensitiveContentGate } from "./sensitiveContentGate";
+import { ViewQuotesLink } from "./viewQuotesLink";
 import { ResharedPostBlock } from "./resharedPostBlock";
 import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
 import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
+import { SponsoredMedia } from "./sponsoredMedia";
 import { LikeBurst } from "@/components/clips/likeBurst";
-import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { saveTargetForPost } from "@/types";
+import { webAppLinks } from "@/config/webAppLinks.config";
+import { PostLinkCard } from "./postLinkCard";
 
 const DOUBLE_TAP_WINDOW_MS = 280;
 
@@ -41,6 +47,10 @@ export interface PostCardProps {
   readonly onPress?: () => void;
   readonly onPressOriginalPost?: () => void;
   readonly adPlacement?: AdPlacement;
+  readonly likePopKey?: number;
+  readonly onMediaPagerTouchStart?: () => void;
+  readonly accessibilityActions?: readonly AccessibilityActionInfo[];
+  readonly onAccessibilityAction?: (event: AccessibilityActionEvent) => void;
 }
 
 export function PostCard(props: PostCardProps) {
@@ -56,6 +66,7 @@ export function PostCard(props: PostCardProps) {
   const isOwnPost = post.author.id === signedInUserId;
   const isMediaLockedForViewer = isContentLockedForViewer(post);
   const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
+  const [replySettingsPost, setReplySettingsPost] = useState<Post | null>(null);
   const [hasOpenedOptionsSheet, setHasOpenedOptionsSheet] = useState(false);
   const openMoreOptions =
     props.onPressMore ??
@@ -134,12 +145,15 @@ export function PostCard(props: PostCardProps) {
         </View>
       </View>
 
+      <SensitiveContentGate postId={post.id} sensitive={post.sensitive} blurredPreviewUrl={post.media[0]?.posterUrl ?? post.media[0]?.url ?? null}>
       <Pressable
         onPress={handleBodyPress}
         disabled={!props.onPress && !props.onToggleLike}
         accessibilityRole="button"
         accessibilityLabel={props.onPress ? "Open post" : "Like post by double tap"}
         accessibilityHint="Double tap to like"
+        accessibilityActions={props.accessibilityActions}
+        onAccessibilityAction={props.onAccessibilityAction}
       >
         {post.isAiGenerated ? (
           <View style={styles.body}>
@@ -166,69 +180,59 @@ export function PostCard(props: PostCardProps) {
               blurredPreviewUrl={post.media[0]?.posterUrl ?? post.media[0]?.url ?? null}
             />
           </View>
-        ) : hasMedia || post.products.length > 0 ? (
-          <MediaPager
-            media={post.media}
-            overlay={post.replyToComment ? <CommentStickerOverlay clip={post} /> : undefined}
-            isVisibleOnScreen={isVisibleForAutoplay}
-            onPressViewProducts={post.products.length > 0 ? props.onPressViewProducts : undefined}
-            saveTarget={saveTargetForPost(post)}
-            savedAccordingToServer={post.bookmarked}
-          />
+        ) : hasMedia || post.products.length > 0 || post.sponsored?.adType === "carousel" ? (
+          <SponsoredMedia sponsored={post.sponsored} placement={props.adPlacement ?? "feed"} itemId={post.id}>
+            <View onTouchStart={props.onMediaPagerTouchStart}>
+              <MediaPager
+                media={post.media}
+                overlay={post.replyToComment ? <CommentStickerOverlay clip={post} /> : undefined}
+                isVisibleOnScreen={isVisibleForAutoplay}
+                onPressViewProducts={post.products.length > 0 ? props.onPressViewProducts : undefined}
+                saveTarget={saveTargetForPost(post)}
+                savedAccordingToServer={post.bookmarked}
+              />
+            </View>
+          </SponsoredMedia>
         ) : null}
+        {!hasMedia && !isMediaLockedForViewer && post.products.length === 0 && !post.sponsored && !post.resharedFrom ? <PostLinkCard post={post} /> : null}
         {post.sponsored ? (
           <View style={styles.sponsoredCallToAction}>
             <SponsoredCallToAction sponsored={post.sponsored} placement={props.adPlacement ?? "feed"} itemId={post.id} />
           </View>
         ) : null}
+        {post.resharedFromUnavailable ? (
+          <View style={[styles.body, styles.unavailableQuote]}>
+            <Text size={13} lineHeight={18} color={colors.textMuted}>This post isn't available.</Text>
+          </View>
+        ) : null}
       </Pressable>
+      </SensitiveContentGate>
 
-      <View style={styles.interactions}>
-        <View style={styles.counters}>
-          <Counter label="Like" count={post.likes} onPress={props.onToggleLike}>
-            {post.liked ? <HeartFill72Icon size={22} /> : <Heart24AltIcon size={22} />}
-          </Counter>
-          <Counter label="Comments" count={post.comments} onPress={props.onPressComments}>
-            <BrandLine24Icon size={22} />
-          </Counter>
-          <Counter label="Repost" count={post.reposts} onPress={props.onRepost}>
-            <Refresh24Icon size={22} />
-          </Counter>
-          <Counter label="Impressions" count={post.views} onPress={isOwnPost ? props.onPressAnalytics : undefined}>
-            <Analytics24Icon size={22} />
-          </Counter>
-        </View>
-        <View style={styles.trailingActions}>
-          <SaveToggleButton target={saveTargetForPost(post)} savedAccordingToServer={post.bookmarked} />
-          <Pressable accessibilityRole="button" accessibilityLabel="Share" hitSlop={{ top: 11, bottom: 11, left: 4, right: 4 }} onPress={props.onShare}>
-            <Share24Icon size={22} />
-          </Pressable>
-        </View>
-      </View>
+      <PostActionRow
+        post={post}
+        isOwnPost={isOwnPost}
+        onToggleLike={props.onToggleLike}
+        onPressComments={props.onPressComments}
+        onRepost={props.onRepost}
+        onShare={props.onShare}
+        onPressAnalytics={props.onPressAnalytics}
+        likePopKey={props.likePopKey}
+      />
+      <ViewQuotesLink post={post} />
       <LikeBurst burstKey={likeBurstKey} />
       {hasOpenedOptionsSheet ? (
         <ContentOptionsSheet
           target={
             isOptionsSheetOpen
-              ? { targetType: "post", targetId: post.id, authorId: post.author.id, shareUrl: `https://zudomart.com/posts/${post.id}` }
+              ? { targetType: "post", targetId: post.id, authorId: post.author.id, shareUrl: webAppLinks.post(post.id) }
               : null
           }
           onClose={() => setIsOptionsSheetOpen(false)}
+          additionalActions={isOwnPost ? [{ label: "Edit reply settings", icon: <ReplyActionIcon size={20} />, onPress: () => setReplySettingsPost(post) }] : undefined}
         />
       ) : null}
+      {isOwnPost ? <ReplySettingsSheet post={replySettingsPost} onClose={() => setReplySettingsPost(null)} /> : null}
     </View>
-  );
-}
-
-function Counter({ label, count, onPress, children }: { label: string; count: number; onPress?: () => void; children: React.ReactNode }) {
-  const styles = useStyles();
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${label}, ${count}`} hitSlop={{ top: 11, bottom: 11, left: 4, right: 4 }} onPress={onPress} style={styles.counter}>
-      {children}
-      <Text size={14} weight={500} lineHeight={16.8}>
-        {formatCountWithThousandsSuffix(count)}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -251,9 +255,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   follow: { height: 25, paddingHorizontal: 16, borderRadius: 4, backgroundColor: colors.primarySolid, justifyContent: "center" },
   body: { paddingHorizontal: 16, paddingVertical: 8 },
   sponsoredCallToAction: { paddingHorizontal: 16, paddingTop: 8 },
-  interactions: { paddingHorizontal: 16, marginTop: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
-  counters: { flexDirection: "row", alignItems: "center", gap: 16, flexShrink: 1 },
-  trailingActions: { flexDirection: "row", alignItems: "center", gap: 16 },
   lockedMedia: { height: 335, overflow: "hidden" },
-  counter: { flexDirection: "row", alignItems: "center", gap: 4 },
+  unavailableQuote: { marginHorizontal: 16, borderWidth: 1, borderColor: colors.divider, borderRadius: 12 },
 }));

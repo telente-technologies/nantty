@@ -77,6 +77,8 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
         data={pages}
         horizontal
         pagingEnabled
+        scrollEnabled={pages.length > 1}
+        bounces={pages.length > 1}
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
         disableIntervalMomentum
