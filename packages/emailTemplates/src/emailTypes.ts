@@ -107,6 +107,14 @@ export interface EmailBrandConfig {
   readonly playStoreUrl: string;
   readonly appStoreBadgeUrl: string | null;
   readonly playStoreBadgeUrl: string | null;
+  readonly mailboxDomain: string;
+  readonly sendingDomain: string;
+  readonly senderName: string;
+}
+
+export interface EmailSenderIdentity {
+  readonly from: string;
+  readonly replyTo: string;
 }
 
 export interface EmailLinks {

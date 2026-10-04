@@ -1,4 +1,4 @@
-import { Body, Container, Head, Html, Preview, Section } from "react-email";
+import { Body, Head, Html, Preview, Section } from "react-email";
 
 import { EmailBlockList } from "../blocks/emailBlockList.block";
 import type { EmailBlock, EmailContext, EmailKind } from "../emailTypes";
@@ -7,8 +7,8 @@ import { EmailFooter } from "./emailFooter.layout";
 import { BrandStrip, EmailHeader } from "./emailHeader.layout";
 
 const responsiveCss =
-  "@media only screen and (max-width:620px){.zm-outer{padding:16px 10px!important}.zm-pad{padding:26px 20px 10px!important}.zm-stack{display:block!important;width:100%!important;padding-left:0!important;padding-right:0!important}}" +
-  "a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important}u+#body a{color:inherit;text-decoration:none}";
+  "@media only screen and (max-width:620px){.zm-outer{padding:12px 8px 24px!important}.zm-head{padding:22px 22px 0!important}.zm-pad{padding:24px 22px 8px!important}.zm-foot{padding:24px 22px 8px!important}.zm-h1{font-size:24px!important;line-height:31px!important}.zm-stack{display:block!important;width:100%!important;padding-left:0!important;padding-right:0!important}.zm-full{width:100%!important}.zm-full a{display:block!important}.zm-hide-sm{display:none!important}.zm-tight{padding-left:14px!important;padding-right:14px!important}.zm-gap{padding-left:12px!important}.zm-num{font-size:30px!important;line-height:36px!important}}" +
+  "a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important}u+#body a{color:inherit;text-decoration:none}#MessageViewBody a{color:inherit;text-decoration:none}";
 
 export interface EmailDocumentProps {
   readonly context: EmailContext;
@@ -28,10 +28,12 @@ export function EmailDocument({ context, kind, subject, preheader, blocks, refer
     <Html lang={context.locale} dir="ltr">
       <Head>
         <title>{subject}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="x-apple-disable-message-reformatting" />
         <meta name="color-scheme" content={colorScheme} />
         <meta name="supported-color-schemes" content={colorScheme} />
         <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" />
         <style>{css}</style>
       </Head>
       <Preview useTitleTag={false}>{preheader}</Preview>
@@ -39,10 +41,12 @@ export function EmailDocument({ context, kind, subject, preheader, blocks, refer
           <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} className="zm-page" style={{ backgroundColor: palette.page }}>
             <tbody>
               <tr>
-                <td align="center" className="zm-outer" style={{ padding: "28px 16px" }}>
-                  <Container style={{ width: "100%", maxWidth: 600, margin: "0 auto" }}>
-                    <EmailHeader reference={reference} />
-                    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} className="zm-card" style={{ backgroundColor: palette.card, border: `1px solid ${palette.line}`, borderRadius: 16, borderCollapse: "separate" }}>
+                <td align="center" className="zm-outer" style={{ padding: "32px 16px 40px" }}>
+                  <table role="presentation" width={600} align="center" cellPadding={0} cellSpacing={0} border={0} style={{ width: "100%", maxWidth: 600, margin: "0 auto" }}>
+                    <tbody>
+                      <tr>
+                        <td>
+                    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} className="zm-card" style={{ backgroundColor: palette.card, border: `1px solid ${palette.line}`, borderRadius: 20, borderCollapse: "separate" }}>
                       <tbody>
                         <tr>
                           <td>
@@ -50,7 +54,12 @@ export function EmailDocument({ context, kind, subject, preheader, blocks, refer
                           </td>
                         </tr>
                         <tr>
-                          <td className="zm-pad" style={{ padding: "34px 36px 14px" }}>
+                          <td className="zm-head" style={{ padding: "28px 40px 0" }}>
+                            <EmailHeader reference={reference} />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="zm-pad" style={{ padding: "32px 40px 16px" }}>
                             <Section>
                               <EmailBlockList blocks={blocks} />
                             </Section>
@@ -59,7 +68,10 @@ export function EmailDocument({ context, kind, subject, preheader, blocks, refer
                       </tbody>
                     </table>
                     <EmailFooter kind={kind} reason={reason} />
-                  </Container>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
               </tr>
             </tbody>
