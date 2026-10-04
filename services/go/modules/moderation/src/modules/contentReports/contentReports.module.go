@@ -5,12 +5,15 @@ import (
 	"log/slog"
 	"net/http"
 	"sync"
+	accesssecurity "zudomart/modules/moderation/src/modules/accessSecurity"
 
 	"zudomart/modules/moderation/src/container"
 	submitcontentreport "zudomart/modules/moderation/src/modules/contentReports/commands/submitContentReport"
 	"zudomart/modules/moderation/src/modules/contentReports/jobs"
 	"zudomart/modules/moderation/src/modules/contentReports/routes"
+	copyrightjobs "zudomart/modules/moderation/src/modules/copyrightClaims/jobs"
 	livesafety "zudomart/modules/moderation/src/modules/liveSafety"
+	suspensionjobs "zudomart/modules/moderation/src/modules/suspensionCases/jobs"
 	platformevents "zudomart/platform/events"
 )
 
@@ -51,9 +54,19 @@ func RunConsumersUntilContextDone(ctx context.Context, c *container.Container, q
 }
 
 func ReportCreatedHandler(c *container.Container) platformevents.MessageHandler {
-	reportCreated, liveEnded := jobs.HandleReportCreatedMessage(c, SubmitHandler(c)), livesafety.LiveEndedHandler(c)
+	reportCreated, liveEnded, accessViolation := jobs.HandleReportCreatedMessage(c, SubmitHandler(c)), livesafety.LiveEndedHandler(c), accesssecurity.AccessViolationEnvelopeHandler(c)
+	postDeleted, verificationFraud := copyrightjobs.HandlePostDeletedMessage(c), suspensionjobs.VerificationFraudEnvelopeHandler(c)
 	return func(ctx context.Context, body []byte) error {
 		if err := reportCreated(ctx, body); err != nil {
+			return err
+		}
+		if err := accessViolation(ctx, body); err != nil {
+			return err
+		}
+		if err := postDeleted(ctx, body); err != nil {
+			return err
+		}
+		if err := verificationFraud(ctx, body); err != nil {
 			return err
 		}
 		return liveEnded(ctx, body)
