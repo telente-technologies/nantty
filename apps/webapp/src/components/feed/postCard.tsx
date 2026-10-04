@@ -28,6 +28,7 @@ import { buildProductPath, buildProfilePath } from "@/utils/seoPaths.util";
 import { PostLinkCard } from "./postLinkCard";
 import { SensitiveContentGate } from "./sensitiveContentGate";
 import { ViewQuotesLink } from "./viewQuotesLink";
+import { TaggedPeopleLine } from "@/components/taggedPeople/taggedPeopleLine";
 
 export function PostCard({ post, priority = false, swipeable = false }: { readonly post: Post; readonly priority?: boolean; readonly swipeable?: boolean }) {
   const router = useRouter();
@@ -103,6 +104,7 @@ export function PostCard({ post, priority = false, swipeable = false }: { readon
       )}
       <SponsoredAdBody post={post} />
       </SensitiveContentGate>
+      <TaggedPeopleLine post={post} />
 
       {post.products.length > 0 ? (
         <div className={styles.productStrip}>

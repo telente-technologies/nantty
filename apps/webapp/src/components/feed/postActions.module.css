@@ -59,6 +59,8 @@
 .count {
   margin-left: -3px;
   padding-right: 8px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .action:hover,
