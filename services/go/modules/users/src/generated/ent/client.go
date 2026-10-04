@@ -20,6 +20,8 @@ import (
 	"zudomart/modules/users/src/generated/ent/blackapplication"
 	"zudomart/modules/users/src/generated/ent/businesscategory"
 	"zudomart/modules/users/src/generated/ent/businessdocument"
+	"zudomart/modules/users/src/generated/ent/celebrationsetting"
+	"zudomart/modules/users/src/generated/ent/celebrationview"
 	"zudomart/modules/users/src/generated/ent/checkmarkgrant"
 	"zudomart/modules/users/src/generated/ent/creatorapplication"
 	"zudomart/modules/users/src/generated/ent/dataexportrequest"
@@ -80,6 +82,10 @@ type Client struct {
 	BusinessCategory *BusinessCategoryClient
 	// BusinessDocument is the client for interacting with the BusinessDocument builders.
 	BusinessDocument *BusinessDocumentClient
+	// CelebrationSetting is the client for interacting with the CelebrationSetting builders.
+	CelebrationSetting *CelebrationSettingClient
+	// CelebrationView is the client for interacting with the CelebrationView builders.
+	CelebrationView *CelebrationViewClient
 	// CheckmarkGrant is the client for interacting with the CheckmarkGrant builders.
 	CheckmarkGrant *CheckmarkGrantClient
 	// CreatorApplication is the client for interacting with the CreatorApplication builders.
@@ -154,6 +160,8 @@ func (c *Client) init() {
 	c.BlackApplication = NewBlackApplicationClient(c.config)
 	c.BusinessCategory = NewBusinessCategoryClient(c.config)
 	c.BusinessDocument = NewBusinessDocumentClient(c.config)
+	c.CelebrationSetting = NewCelebrationSettingClient(c.config)
+	c.CelebrationView = NewCelebrationViewClient(c.config)
 	c.CheckmarkGrant = NewCheckmarkGrantClient(c.config)
 	c.CreatorApplication = NewCreatorApplicationClient(c.config)
 	c.DataExportRequest = NewDataExportRequestClient(c.config)
@@ -282,6 +290,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		BlackApplication:        NewBlackApplicationClient(cfg),
 		BusinessCategory:        NewBusinessCategoryClient(cfg),
 		BusinessDocument:        NewBusinessDocumentClient(cfg),
+		CelebrationSetting:      NewCelebrationSettingClient(cfg),
+		CelebrationView:         NewCelebrationViewClient(cfg),
 		CheckmarkGrant:          NewCheckmarkGrantClient(cfg),
 		CreatorApplication:      NewCreatorApplicationClient(cfg),
 		DataExportRequest:       NewDataExportRequestClient(cfg),
@@ -337,6 +347,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		BlackApplication:        NewBlackApplicationClient(cfg),
 		BusinessCategory:        NewBusinessCategoryClient(cfg),
 		BusinessDocument:        NewBusinessDocumentClient(cfg),
+		CelebrationSetting:      NewCelebrationSettingClient(cfg),
+		CelebrationView:         NewCelebrationViewClient(cfg),
 		CheckmarkGrant:          NewCheckmarkGrantClient(cfg),
 		CreatorApplication:      NewCreatorApplicationClient(cfg),
 		DataExportRequest:       NewDataExportRequestClient(cfg),
@@ -395,13 +407,14 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AccountBan, c.AccountRemoval, c.AccountRestriction, c.AccountSuspension,
 		c.ActingProfile, c.AdminCreatedAccount, c.BlackApplication, c.BusinessCategory,
-		c.BusinessDocument, c.CheckmarkGrant, c.CreatorApplication,
-		c.DataExportRequest, c.DeletionRequest, c.GeoAdminArea, c.GeoCity,
-		c.GeoCountry, c.GeoRegion, c.LegalDocument, c.LegalNotice, c.LegalNoticeDraft,
-		c.LegalVersion, c.OutboxEvent, c.PolicyVersion, c.PrivacySetting, c.Profile,
-		c.ProfileCheckmark, c.ProfileSignal, c.ReservedUsernameRule, c.RetentionPolicy,
-		c.ShippingAddress, c.SuggestionDismissal, c.TermsAcceptance, c.UserConsent,
-		c.UsernameChange, c.UsernameHold, c.VerificationApplication,
+		c.BusinessDocument, c.CelebrationSetting, c.CelebrationView, c.CheckmarkGrant,
+		c.CreatorApplication, c.DataExportRequest, c.DeletionRequest, c.GeoAdminArea,
+		c.GeoCity, c.GeoCountry, c.GeoRegion, c.LegalDocument, c.LegalNotice,
+		c.LegalNoticeDraft, c.LegalVersion, c.OutboxEvent, c.PolicyVersion,
+		c.PrivacySetting, c.Profile, c.ProfileCheckmark, c.ProfileSignal,
+		c.ReservedUsernameRule, c.RetentionPolicy, c.ShippingAddress,
+		c.SuggestionDismissal, c.TermsAcceptance, c.UserConsent, c.UsernameChange,
+		c.UsernameHold, c.VerificationApplication,
 	} {
 		n.Use(hooks...)
 	}
@@ -413,13 +426,14 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AccountBan, c.AccountRemoval, c.AccountRestriction, c.AccountSuspension,
 		c.ActingProfile, c.AdminCreatedAccount, c.BlackApplication, c.BusinessCategory,
-		c.BusinessDocument, c.CheckmarkGrant, c.CreatorApplication,
-		c.DataExportRequest, c.DeletionRequest, c.GeoAdminArea, c.GeoCity,
-		c.GeoCountry, c.GeoRegion, c.LegalDocument, c.LegalNotice, c.LegalNoticeDraft,
-		c.LegalVersion, c.OutboxEvent, c.PolicyVersion, c.PrivacySetting, c.Profile,
-		c.ProfileCheckmark, c.ProfileSignal, c.ReservedUsernameRule, c.RetentionPolicy,
-		c.ShippingAddress, c.SuggestionDismissal, c.TermsAcceptance, c.UserConsent,
-		c.UsernameChange, c.UsernameHold, c.VerificationApplication,
+		c.BusinessDocument, c.CelebrationSetting, c.CelebrationView, c.CheckmarkGrant,
+		c.CreatorApplication, c.DataExportRequest, c.DeletionRequest, c.GeoAdminArea,
+		c.GeoCity, c.GeoCountry, c.GeoRegion, c.LegalDocument, c.LegalNotice,
+		c.LegalNoticeDraft, c.LegalVersion, c.OutboxEvent, c.PolicyVersion,
+		c.PrivacySetting, c.Profile, c.ProfileCheckmark, c.ProfileSignal,
+		c.ReservedUsernameRule, c.RetentionPolicy, c.ShippingAddress,
+		c.SuggestionDismissal, c.TermsAcceptance, c.UserConsent, c.UsernameChange,
+		c.UsernameHold, c.VerificationApplication,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -446,6 +460,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.BusinessCategory.mutate(ctx, m)
 	case *BusinessDocumentMutation:
 		return c.BusinessDocument.mutate(ctx, m)
+	case *CelebrationSettingMutation:
+		return c.CelebrationSetting.mutate(ctx, m)
+	case *CelebrationViewMutation:
+		return c.CelebrationView.mutate(ctx, m)
 	case *CheckmarkGrantMutation:
 		return c.CheckmarkGrant.mutate(ctx, m)
 	case *CreatorApplicationMutation:
@@ -1715,6 +1733,272 @@ func (c *BusinessDocumentClient) mutate(ctx context.Context, m *BusinessDocument
 		return (&BusinessDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown BusinessDocument mutation op: %q", m.Op())
+	}
+}
+
+// CelebrationSettingClient is a client for the CelebrationSetting schema.
+type CelebrationSettingClient struct {
+	config
+}
+
+// NewCelebrationSettingClient returns a client for the CelebrationSetting from the given config.
+func NewCelebrationSettingClient(c config) *CelebrationSettingClient {
+	return &CelebrationSettingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `celebrationsetting.Hooks(f(g(h())))`.
+func (c *CelebrationSettingClient) Use(hooks ...Hook) {
+	c.hooks.CelebrationSetting = append(c.hooks.CelebrationSetting, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `celebrationsetting.Intercept(f(g(h())))`.
+func (c *CelebrationSettingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CelebrationSetting = append(c.inters.CelebrationSetting, interceptors...)
+}
+
+// Create returns a builder for creating a CelebrationSetting entity.
+func (c *CelebrationSettingClient) Create() *CelebrationSettingCreate {
+	mutation := newCelebrationSettingMutation(c.config, OpCreate)
+	return &CelebrationSettingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CelebrationSetting entities.
+func (c *CelebrationSettingClient) CreateBulk(builders ...*CelebrationSettingCreate) *CelebrationSettingCreateBulk {
+	return &CelebrationSettingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CelebrationSettingClient) MapCreateBulk(slice any, setFunc func(*CelebrationSettingCreate, int)) *CelebrationSettingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CelebrationSettingCreateBulk{err: fmt.Errorf("calling to CelebrationSettingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CelebrationSettingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CelebrationSettingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CelebrationSetting.
+func (c *CelebrationSettingClient) Update() *CelebrationSettingUpdate {
+	mutation := newCelebrationSettingMutation(c.config, OpUpdate)
+	return &CelebrationSettingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CelebrationSettingClient) UpdateOne(_m *CelebrationSetting) *CelebrationSettingUpdateOne {
+	mutation := newCelebrationSettingMutation(c.config, OpUpdateOne, withCelebrationSetting(_m))
+	return &CelebrationSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CelebrationSettingClient) UpdateOneID(id int) *CelebrationSettingUpdateOne {
+	mutation := newCelebrationSettingMutation(c.config, OpUpdateOne, withCelebrationSettingID(id))
+	return &CelebrationSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CelebrationSetting.
+func (c *CelebrationSettingClient) Delete() *CelebrationSettingDelete {
+	mutation := newCelebrationSettingMutation(c.config, OpDelete)
+	return &CelebrationSettingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CelebrationSettingClient) DeleteOne(_m *CelebrationSetting) *CelebrationSettingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CelebrationSettingClient) DeleteOneID(id int) *CelebrationSettingDeleteOne {
+	builder := c.Delete().Where(celebrationsetting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CelebrationSettingDeleteOne{builder}
+}
+
+// Query returns a query builder for CelebrationSetting.
+func (c *CelebrationSettingClient) Query() *CelebrationSettingQuery {
+	return &CelebrationSettingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCelebrationSetting},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CelebrationSetting entity by its id.
+func (c *CelebrationSettingClient) Get(ctx context.Context, id int) (*CelebrationSetting, error) {
+	return c.Query().Where(celebrationsetting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CelebrationSettingClient) GetX(ctx context.Context, id int) *CelebrationSetting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CelebrationSettingClient) Hooks() []Hook {
+	return c.hooks.CelebrationSetting
+}
+
+// Interceptors returns the client interceptors.
+func (c *CelebrationSettingClient) Interceptors() []Interceptor {
+	return c.inters.CelebrationSetting
+}
+
+func (c *CelebrationSettingClient) mutate(ctx context.Context, m *CelebrationSettingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CelebrationSettingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CelebrationSettingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CelebrationSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CelebrationSettingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CelebrationSetting mutation op: %q", m.Op())
+	}
+}
+
+// CelebrationViewClient is a client for the CelebrationView schema.
+type CelebrationViewClient struct {
+	config
+}
+
+// NewCelebrationViewClient returns a client for the CelebrationView from the given config.
+func NewCelebrationViewClient(c config) *CelebrationViewClient {
+	return &CelebrationViewClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `celebrationview.Hooks(f(g(h())))`.
+func (c *CelebrationViewClient) Use(hooks ...Hook) {
+	c.hooks.CelebrationView = append(c.hooks.CelebrationView, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `celebrationview.Intercept(f(g(h())))`.
+func (c *CelebrationViewClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CelebrationView = append(c.inters.CelebrationView, interceptors...)
+}
+
+// Create returns a builder for creating a CelebrationView entity.
+func (c *CelebrationViewClient) Create() *CelebrationViewCreate {
+	mutation := newCelebrationViewMutation(c.config, OpCreate)
+	return &CelebrationViewCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CelebrationView entities.
+func (c *CelebrationViewClient) CreateBulk(builders ...*CelebrationViewCreate) *CelebrationViewCreateBulk {
+	return &CelebrationViewCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CelebrationViewClient) MapCreateBulk(slice any, setFunc func(*CelebrationViewCreate, int)) *CelebrationViewCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CelebrationViewCreateBulk{err: fmt.Errorf("calling to CelebrationViewClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CelebrationViewCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CelebrationViewCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CelebrationView.
+func (c *CelebrationViewClient) Update() *CelebrationViewUpdate {
+	mutation := newCelebrationViewMutation(c.config, OpUpdate)
+	return &CelebrationViewUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CelebrationViewClient) UpdateOne(_m *CelebrationView) *CelebrationViewUpdateOne {
+	mutation := newCelebrationViewMutation(c.config, OpUpdateOne, withCelebrationView(_m))
+	return &CelebrationViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CelebrationViewClient) UpdateOneID(id int) *CelebrationViewUpdateOne {
+	mutation := newCelebrationViewMutation(c.config, OpUpdateOne, withCelebrationViewID(id))
+	return &CelebrationViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CelebrationView.
+func (c *CelebrationViewClient) Delete() *CelebrationViewDelete {
+	mutation := newCelebrationViewMutation(c.config, OpDelete)
+	return &CelebrationViewDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CelebrationViewClient) DeleteOne(_m *CelebrationView) *CelebrationViewDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CelebrationViewClient) DeleteOneID(id int) *CelebrationViewDeleteOne {
+	builder := c.Delete().Where(celebrationview.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CelebrationViewDeleteOne{builder}
+}
+
+// Query returns a query builder for CelebrationView.
+func (c *CelebrationViewClient) Query() *CelebrationViewQuery {
+	return &CelebrationViewQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCelebrationView},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CelebrationView entity by its id.
+func (c *CelebrationViewClient) Get(ctx context.Context, id int) (*CelebrationView, error) {
+	return c.Query().Where(celebrationview.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CelebrationViewClient) GetX(ctx context.Context, id int) *CelebrationView {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CelebrationViewClient) Hooks() []Hook {
+	return c.hooks.CelebrationView
+}
+
+// Interceptors returns the client interceptors.
+func (c *CelebrationViewClient) Interceptors() []Interceptor {
+	return c.inters.CelebrationView
+}
+
+func (c *CelebrationViewClient) mutate(ctx context.Context, m *CelebrationViewMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CelebrationViewCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CelebrationViewUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CelebrationViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CelebrationViewDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CelebrationView mutation op: %q", m.Op())
 	}
 }
 
@@ -5330,23 +5614,24 @@ type (
 	hooks struct {
 		AccountBan, AccountRemoval, AccountRestriction, AccountSuspension,
 		ActingProfile, AdminCreatedAccount, BlackApplication, BusinessCategory,
-		BusinessDocument, CheckmarkGrant, CreatorApplication, DataExportRequest,
-		DeletionRequest, GeoAdminArea, GeoCity, GeoCountry, GeoRegion, LegalDocument,
-		LegalNotice, LegalNoticeDraft, LegalVersion, OutboxEvent, PolicyVersion,
-		PrivacySetting, Profile, ProfileCheckmark, ProfileSignal, ReservedUsernameRule,
-		RetentionPolicy, ShippingAddress, SuggestionDismissal, TermsAcceptance,
-		UserConsent, UsernameChange, UsernameHold, VerificationApplication []ent.Hook
+		BusinessDocument, CelebrationSetting, CelebrationView, CheckmarkGrant,
+		CreatorApplication, DataExportRequest, DeletionRequest, GeoAdminArea, GeoCity,
+		GeoCountry, GeoRegion, LegalDocument, LegalNotice, LegalNoticeDraft,
+		LegalVersion, OutboxEvent, PolicyVersion, PrivacySetting, Profile,
+		ProfileCheckmark, ProfileSignal, ReservedUsernameRule, RetentionPolicy,
+		ShippingAddress, SuggestionDismissal, TermsAcceptance, UserConsent,
+		UsernameChange, UsernameHold, VerificationApplication []ent.Hook
 	}
 	inters struct {
 		AccountBan, AccountRemoval, AccountRestriction, AccountSuspension,
 		ActingProfile, AdminCreatedAccount, BlackApplication, BusinessCategory,
-		BusinessDocument, CheckmarkGrant, CreatorApplication, DataExportRequest,
-		DeletionRequest, GeoAdminArea, GeoCity, GeoCountry, GeoRegion, LegalDocument,
-		LegalNotice, LegalNoticeDraft, LegalVersion, OutboxEvent, PolicyVersion,
-		PrivacySetting, Profile, ProfileCheckmark, ProfileSignal, ReservedUsernameRule,
-		RetentionPolicy, ShippingAddress, SuggestionDismissal, TermsAcceptance,
-		UserConsent, UsernameChange, UsernameHold,
-		VerificationApplication []ent.Interceptor
+		BusinessDocument, CelebrationSetting, CelebrationView, CheckmarkGrant,
+		CreatorApplication, DataExportRequest, DeletionRequest, GeoAdminArea, GeoCity,
+		GeoCountry, GeoRegion, LegalDocument, LegalNotice, LegalNoticeDraft,
+		LegalVersion, OutboxEvent, PolicyVersion, PrivacySetting, Profile,
+		ProfileCheckmark, ProfileSignal, ReservedUsernameRule, RetentionPolicy,
+		ShippingAddress, SuggestionDismissal, TermsAcceptance, UserConsent,
+		UsernameChange, UsernameHold, VerificationApplication []ent.Interceptor
 	}
 )
 

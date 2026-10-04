@@ -17,6 +17,8 @@ import (
 	"zudomart/modules/users/src/generated/ent/blackapplication"
 	"zudomart/modules/users/src/generated/ent/businesscategory"
 	"zudomart/modules/users/src/generated/ent/businessdocument"
+	"zudomart/modules/users/src/generated/ent/celebrationsetting"
+	"zudomart/modules/users/src/generated/ent/celebrationview"
 	"zudomart/modules/users/src/generated/ent/checkmarkgrant"
 	"zudomart/modules/users/src/generated/ent/creatorapplication"
 	"zudomart/modules/users/src/generated/ent/dataexportrequest"
@@ -117,6 +119,8 @@ func checkColumn(t, c string) error {
 			blackapplication.Table:        blackapplication.ValidColumn,
 			businesscategory.Table:        businesscategory.ValidColumn,
 			businessdocument.Table:        businessdocument.ValidColumn,
+			celebrationsetting.Table:      celebrationsetting.ValidColumn,
+			celebrationview.Table:         celebrationview.ValidColumn,
 			checkmarkgrant.Table:          checkmarkgrant.ValidColumn,
 			creatorapplication.Table:      creatorapplication.ValidColumn,
 			dataexportrequest.Table:       dataexportrequest.ValidColumn,
