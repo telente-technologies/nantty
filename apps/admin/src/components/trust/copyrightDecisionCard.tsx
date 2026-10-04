@@ -36,13 +36,14 @@ export function CopyrightDecisionCard({ claim, onClaimUpdated }: { readonly clai
   const mutation = useAdminMutation((input: { decision: CopyrightClaimDecision; reason: string }) => decideCopyrightClaim(claim.id, input.decision, input.reason));
   const isDecidable = claim.status === "PENDING" || claim.status === "NEEDS_INFO";
   const isRepeatInfringer = claim.infringerStrikeCount >= claim.repeatInfringerThreshold;
+  const upholdLabel = claim.target.type === "LIVE" ? "Uphold claim and take down" : claim.claimScope === "AUDIO" ? "Uphold: mute the audio" : "Uphold: send takedown warning";
 
   async function confirmDecision(reason: string) {
     if (!pendingDecision) return;
     const updated = await mutation.run({ decision: pendingDecision, reason });
     if (!updated) return;
     onClaimUpdated(updated);
-    showToast(pendingDecision === "uphold" ? `Claim upheld. @${updated.infringer.username} now has ${updated.infringerStrikeCount} strike${updated.infringerStrikeCount === 1 ? "" : "s"}.` : pendingDecision === "reject" ? "Claim rejected." : "Request sent to the claimant.");
+    showToast(pendingDecision === "uphold" ? (updated.remedy === "AUDIO_MUTED" ? "Claim upheld. The audio is being muted." : updated.remedy === "TAKEDOWN_WARNING" ? `Claim upheld. @${updated.infringer.username} was warned to remove it.` : `Claim upheld. @${updated.infringer.username} now has ${updated.infringerStrikeCount} strike${updated.infringerStrikeCount === 1 ? "" : "s"}.`) : pendingDecision === "reject" ? "Claim rejected." : "Request sent to the claimant.");
     setPendingDecision(null);
   }
 
@@ -64,7 +65,7 @@ export function CopyrightDecisionCard({ claim, onClaimUpdated }: { readonly clai
           {isDecidable ? (
             <>
               {claim.infringerStrikeCount + 1 >= claim.repeatInfringerThreshold ? <NoticeBanner tone="caution">Upholding gives @{claim.infringer.username} strike {claim.infringerStrikeCount + 1} of {claim.repeatInfringerThreshold}.</NoticeBanner> : null}
-              <Button variant="danger" onClick={() => setPendingDecision("uphold")}>Uphold claim and take down</Button>
+              <Button variant="danger" onClick={() => setPendingDecision("uphold")}>{upholdLabel}</Button>
               <Button variant="secondary" onClick={() => setPendingDecision("reject")}>Reject claim</Button>
               {claim.status === "PENDING" ? <Button variant="ghost" onClick={() => setPendingDecision("request-info")}>Ask claimant for more info</Button> : null}
             </>

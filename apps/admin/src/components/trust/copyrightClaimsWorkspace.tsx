@@ -18,6 +18,7 @@ import { fetchCopyrightClaims, type CopyrightClaimFilters } from "@/services/tru
 import type { CopyrightClaimSummary } from "@/types/copyright.type";
 import { formatRelativeTimeFromNow, humanizeConstantName } from "@/utils/formatting.util";
 
+import { CopyrightPolicyCard } from "./copyrightPolicyCard";
 import { ModeratedTargetTableCell } from "./moderatedTargetPreview";
 import styles from "./trustShared.module.css";
 
@@ -49,6 +50,7 @@ export function CopyrightClaimsWorkspace() {
   return (
     <>
       <PageHeader area="Trust & safety" title="Copyright claims" description="Takedown requests from rights holders, counter-notices from creators, and audio fingerprint matches from the intelligence service." />
+      <CopyrightPolicyCard />
       <SegmentedTabs label="Claim status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, page: 1 })); }} />
       <Toolbar>
         <div className={styles.filters}>
