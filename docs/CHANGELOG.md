@@ -6,6 +6,19 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
+## Create flow redesign, photo clips, tagging and tappable links (4 Oct) — mobile jest + tsc, webapp tsx --test + tsc
+
+Design: [plans.md §51](./plans.md). Backend not built yet; mocks only.
+
+| Area | Change |
+| --- | --- |
+| mobile composer | No keyboard on open; tap outside, swipe down or Done closes it. Feed posts: caption, media and mentions only (sound picker removed); a final Post settings step holds Tag people, Add location and the advanced options |
+| mobile clips | New clip flow: record or pick a video, or make a photo clip (up to 10 photos), then preview (full screen, trim, reorder, per-photo duration, transition), then caption and sound, then post settings. Photo clips are rendered server-side (`slideshow` payload) |
+| mobile tagging, location | People search with chips (cap 20, blockers hidden, people with tagging off can't be selected), `taggedUserIds`; text-only place search, never automatic |
+| mobile links | URLs in posts, comments, bios, messages and live chat are coloured (`colors.link`) and tappable; Zudomart links open in the app, others open in the in-app browser after the suspicious-link warning; preview cards share the same path |
+| webapp links | Same linkify in `MentionText`; external links open in a new tab with `rel="noopener noreferrer nofollow ugc"` and the risky-link confirm |
+| mocks | `POST /posts` validates slideshow, trim, location and tags; new `/places/search` and `/tags/candidates`; `postTag` notifications |
+
 ## Username suggestions when a username is taken (4 Oct) — go test platform/usernames + auth, gateway vitest + tsc, mobile jest + tsc, webapp tsx --test + tsc
 
 Design: [plans.md §50](./plans.md). The auth Postgres integration test needs `pnpm backend:up` and was skipped locally.

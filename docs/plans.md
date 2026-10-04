@@ -1983,3 +1983,57 @@ Mobile and webapp sign-up username steps debounce the check, show "That username
 
 - **[LATER]** Suggestions on the brand and business handle forms (mobile hook already returns them).
 - **[LATER]** Send the display name on sign-up so suggestions can use it (the sign-up draft has no name yet).
+
+## 51. Create flow redesign, photo clips, tagging and tappable links **[DONE (mobile + webapp, mock UI; backend pending)]**
+
+Owner rules (Instagram-like). Mobile is the only app with a composer; the webapp got link handling only.
+
+### 51.1 Keyboard
+
+Opening the composer never pops the keyboard (no `autoFocus`). It opens when the caption is tapped and closes on tap outside, swipe down (`keyboardDismissMode` interactive on iOS, on-drag on Android) or the "Done" accessory (in the post toolbar, or a bar above the keyboard on the clip caption step). `KeyboardSpacer` keeps the toolbar above the keyboard.
+
+### 51.2 Feed post composer
+
+Compose step: caption with mentions and hashtags, photos and videos, audience chip. No sound picker (sounds are clip-only; a video reply still has one). Next opens **Post settings**: summary, Tag people, Add location, then **Advanced settings** (Who can reply, Subscribers only for approved creators, Mark as sensitive, AI generated). Who can reply stays editable after posting.
+
+### 51.3 Clip composer (`components/create/clip/`)
+
+1. **Media**: record a video, choose a video, or make a photo clip from up to 10 photos.
+2. **Preview**: large preview with play/pause and a full-screen view. Video: basic trim (start and end steppers, 1 s steps, the existing 180 s cap). Photos: reorder (move earlier or later), per-photo duration 1 to 10 s (default 3 s), remove, transition None, Fade or Slide. Shows the length against 3:00.
+3. **Caption and sound**: caption with mentions, then the sound picker: the clip's own audio or a library sound. Photo clips have no audio of their own, so the empty choice reads "No sound".
+4. **Post settings**: the same step as feed posts (tags, location, advanced).
+
+### 51.4 Photo clip render: server-side
+
+Chosen: the media service renders the slideshow with ffmpeg into one normal clip video. The player stays unchanged and every surface (feed, clips, share, downloads, moderation, copyright audio matching) keeps seeing a single video. A client-composed manifest would need a new player and moderation path. Contract (`POST /api/v1/posts`):
+
+```
+{ kind: "clip", text, mentions, audience, mediaIds,
+  media: [{ mediaId, type: "image" | "video", trim?: { startMs, endMs } }],
+  slideshow?: { durationsMs: number[], transition: "none" | "crossfade" | "slide" },
+  soundId?, location?: { placeId, name, area? }, taggedUserIds?: string[],
+  replyPolicy, visibility, sensitiveLabels?, isAiGenerated? }
+```
+
+`media` gives the order and trims; `mediaIds` is kept for older clients. A slideshow needs 1 to 10 images, one duration (1,000 to 10,000 ms) per image and a total of 180 s or less. The response has one `video` media item with `status: processing` and `posterUrl` set to the first photo; it becomes `ready` when the render finishes. Trimmed videos also come back as `processing`. Backend work is listed in backendPlan.md under "Create flow".
+
+### 51.5 Tag people
+
+People search (`GET /api/v1/tags/candidates?q=`), removable chips, a cap of 20. People who blocked the author are left out of results; people who turned tagging off are listed but can't be selected ("Doesn't allow tags"). Tags apply to the whole post or clip, not to positions in a photo. The payload is `taggedUserIds`. Tagged people get a `postTag` notification and can remove themselves. How tags are shown on posts and clips is a separate piece of work.
+
+### 51.6 Location
+
+Optional and never automatic: a text place search (`GET /api/v1/places/search?q=`, at least 2 characters). The device location is never read. Stored on the post as `location { placeId, name, area }`.
+
+### 51.7 Links in posts, comments, bios and messages
+
+`MentionText` (mobile and webapp) now renders mentions and URLs together. Every `https://` and `www.` URL is tappable and coloured whether or not a preview card exists: mobile `colors.link` (light #2043F5, dark #8FA1FA, at least 4.5:1 on surfaces in both themes); webapp `--color-brand`. Links in your own chat bubbles are underlined in the bubble's text colour.
+- Mobile: Zudomart links (`zudomart.com`, `app.zudomart.com`, `zudomart.app`) open in the app. Other links open in the in-app browser (`expo-web-browser`, full screen, themed toolbar, share menu). It has the system "Open in Safari" or "Open in Chrome" control. Shortened and suspicious links show the warning dialog first. Preview cards (feed and chat) use the same path, so chat previews now open in the app instead of going straight to the external browser.
+- Webapp: Zudomart links navigate in the same tab. External links open in a new tab with `rel="noopener noreferrer nofollow ugc"`, and risky ones show the confirm dialog first.
+
+### 51.8 Open items
+
+- **[NEXT]** Backend: slideshow and trim render jobs, `places` search, tag candidates and tag storage (see backendPlan.md).
+- **[LATER]** Show the location on post cards and clips (only stored for now).
+- **[LATER]** Seek the video preview to the trim start; a drag handle trim bar (needs gesture-handler).
+- **[LATER]** A webapp composer (none exists today).
