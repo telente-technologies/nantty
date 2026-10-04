@@ -1,7 +1,8 @@
+import type { Money } from "../emailTypes";
 import { consentRules, defineEmailTemplate } from "./defineTemplate";
 
 type Checkmark = "Blue" | "Gold";
-type RefundMethod = "card" | "google_play" | "apple_request" | "plan_continues";
+type RefundMethod = "card" | "google_play" | "apple_request" | "plan_continues" | "plan_share_card" | "plan_share_store";
 
 const base = { category: "checkmarks", kind: "transactional", audience: "Checkmark applicant", consent: consentRules.always } as const;
 const hubUrl = (c: { readonly url: (path: string) => string }) => c.url("/settings/verification");
@@ -12,11 +13,20 @@ interface MarkProps {
   readonly accountName: string;
 }
 
-const refundSentence: Record<RefundMethod, string> = {
+const refundSentence: Record<Exclude<RefundMethod, "plan_share_card" | "plan_share_store">, string> = {
   card: "We have refunded the full amount to the card you paid with. Banks usually show it within 5 to 10 working days.",
   google_play: "Google Play is refunding the full amount to your Play payment method and the subscription has been cancelled.",
   apple_request: "Your subscription has been cancelled. Apple handles refunds for App Store purchases, so request yours at reportaproblem.apple.com and choose this subscription. Our support team can help if Apple declines.",
   plan_continues: "Your plan keeps working as before; only the checkmark was not added, so there is nothing to refund.",
+};
+
+const keepsPlan = (method: RefundMethod) => method === "plan_continues" || method === "plan_share_card" || method === "plan_share_store";
+
+const shareSentence = (method: "plan_share_card" | "plan_share_store", amount: string | undefined): string => {
+  const sum = amount ? `${amount} for the checkmark` : "the checkmark's share of your payment";
+  return method === "plan_share_card"
+    ? `Your plan stays active; we've refunded ${sum} to the card you paid with. Banks usually show it within 5 to 10 working days.`
+    : `Your plan stays active. You paid through an app store, so we're arranging ${sum} with the store. If you paid with Apple, request it at reportaproblem.apple.com and choose this subscription; our support team can help.`;
 };
 
 export const verificationEligible = defineEmailTemplate<MarkProps & { readonly payUrl: string }>({
@@ -63,15 +73,15 @@ export const verificationApproved = defineEmailTemplate<MarkProps & { readonly v
   sample: { firstName: "Amaka", checkmark: "Blue", accountName: "@amaka.styles", verifiedAt: "2026-10-04T10:00:00.000Z" },
 });
 
-export const verificationRejectedRefunded = defineEmailTemplate<MarkProps & { readonly reasons: readonly string[]; readonly refundMethod: RefundMethod; readonly reapplyFrom: string }>({
+export const verificationRejectedRefunded = defineEmailTemplate<MarkProps & { readonly reasons: readonly string[]; readonly refundMethod: RefundMethod; readonly refundAmount?: Money; readonly reapplyFrom: string }>({
   ...base, key: "verificationRejectedRefunded", name: "Verification not approved and refunded", trigger: "verification.rejectedRefunded",
-  subject: (p) => (p.refundMethod === "plan_continues" ? `We couldn't verify ${p.accountName}` : `We couldn't verify ${p.accountName}. Your refund is on its way`),
+  subject: (p) => (p.refundMethod === "plan_continues" ? `We couldn't verify ${p.accountName}` : keepsPlan(p.refundMethod) ? `We couldn't verify ${p.accountName}. Your plan stays active` : `We couldn't verify ${p.accountName}. Your refund is on its way`),
   preheader: (p, c) => `You can try again from ${c.date(p.reapplyFrom)}.`,
   blocks: (p, c) => [
     { type: "hero", eyebrow: `${p.checkmark} checkmark`, title: "We couldn't approve your verification", tone: "danger" },
     { type: "paragraph", text: `Hi ${p.firstName}, our trust team reviewed the identity check for ${p.accountName} and could not approve the ${p.checkmark} checkmark.` },
     { type: "list", title: "Why", items: p.reasons },
-    { type: "callout", tone: p.refundMethod === "apple_request" ? "warn" : "success", title: "Your money", text: refundSentence[p.refundMethod] },
+    { type: "callout", tone: p.refundMethod === "apple_request" ? "warn" : "success", title: "Your money", text: p.refundMethod === "plan_share_card" || p.refundMethod === "plan_share_store" ? shareSentence(p.refundMethod, p.refundAmount ? c.money(p.refundAmount) : undefined) : refundSentence[p.refundMethod] },
     { type: "paragraph", text: `You can try again from ${c.date(p.reapplyFrom)}. Use a clear, unexpired photo ID that matches the name on your profile.` },
     { type: "button", label: "Open verification", href: hubUrl(c) },
   ],

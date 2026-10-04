@@ -46,28 +46,28 @@ export function EmailDocument({ context, kind, subject, preheader, blocks, refer
                     <tbody>
                       <tr>
                         <td>
-                    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} className="zm-card" style={{ backgroundColor: palette.card, border: `1px solid ${palette.line}`, borderRadius: 20, borderCollapse: "separate" }}>
-                      <tbody>
-                        <tr>
-                          <td>
-                            <BrandStrip />
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="zm-head" style={{ padding: "28px 40px 0" }}>
-                            <EmailHeader reference={reference} />
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="zm-pad" style={{ padding: "32px 40px 16px" }}>
-                            <Section>
-                              <EmailBlockList blocks={blocks} />
-                            </Section>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <EmailFooter kind={kind} reason={reason} />
+                        <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} className="zm-card" style={{ backgroundColor: palette.card, border: `1px solid ${palette.line}`, borderRadius: 20, borderCollapse: "separate" }}>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <BrandStrip />
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="zm-head" style={{ padding: "28px 40px 0" }}>
+                                <EmailHeader reference={reference} />
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="zm-pad" style={{ padding: "32px 40px 16px" }}>
+                                <Section>
+                                  <EmailBlockList blocks={blocks} />
+                                </Section>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <EmailFooter kind={kind} reason={reason} />
                         </td>
                       </tr>
                     </tbody>

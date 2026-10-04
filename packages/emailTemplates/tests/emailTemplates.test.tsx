@@ -122,3 +122,28 @@ describe("senders and brand", () => {
     expect(rendered.html).not.toContain("<img alt=\"Download on the App Store\"");
   });
 });
+
+describe("verification rejection when the plan keeps running", () => {
+  const sample = readEmailTemplate("verificationRejectedRefunded").sample;
+
+  it("tells the person the plan stays active and how much was refunded for the checkmark", async () => {
+    const rendered = await renderEmail("verificationRejectedRefunded", { ...sample, checkmark: "Gold", refundMethod: "plan_share_card", refundAmount: { amountMinor: 300000, currency: "NGN" } });
+    expect(rendered.subject).toContain("Your plan stays active");
+    expect(rendered.text).toContain("Your plan stays active; we've refunded");
+    expect(rendered.text).toContain("₦3,000");
+    expect(rendered.text).toContain("for the checkmark");
+    expect(rendered.text).not.toContain("full amount");
+  });
+
+  it("explains the store route without promising a card refund", async () => {
+    const rendered = await renderEmail("verificationRejectedRefunded", { ...sample, refundMethod: "plan_share_store", refundAmount: { amountMinor: 250000, currency: "NGN" } });
+    expect(rendered.text).toContain("app store");
+    expect(rendered.text).toContain("reportaproblem.apple.com");
+    expect(rendered.text).not.toContain("to the card you paid with");
+  });
+
+  it("keeps the full-refund wording for standalone checkmarks", async () => {
+    const rendered = await renderEmail("verificationRejectedRefunded", sample);
+    expect(rendered.text).toContain("refunded the full amount");
+  });
+});
