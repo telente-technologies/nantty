@@ -26,7 +26,7 @@ export const authService = {
     api.post<{ expiresIn: number }>("/api/v1/auth/otp/send", { destination, purpose }, { auth: false }),
   verifyOneTimeCode: (destination: string, code: string, purpose: "signup" | "reset" | "login") =>
     api.post<{ otpToken: string }>("/api/v1/auth/otp/verify", { destination, code, purpose }, { auth: false }),
-  checkIfUsernameIsAvailable: (username: string) => api.get<{ available: boolean; message?: string }>("/api/v1/auth/username-available", { username }),
+  checkIfUsernameIsAvailable: (username: string) => api.get<{ available: boolean; message?: string; suggestions?: readonly string[] }>("/api/v1/auth/username-available", { username }),
   resetPasswordWithVerifiedCode: (otpToken: string, password: string) =>
     api.post<void>("/api/v1/auth/password/reset", { otpToken, password }, { auth: false }),
   logOutCurrentSession: (refreshToken: string | null) => api.post<void>("/api/v1/auth/logout", { refreshToken }),

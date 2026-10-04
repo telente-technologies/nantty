@@ -1,5 +1,5 @@
 import { runNowOrQueueWhenOffline } from "@/store/offline.store";
-import type { Page, Post, PostAnalytics, ReplyPolicy, SensitiveLabel } from "@/types";
+import type { Page, Post, PostAnalytics, ReplyPolicy, SensitiveLabel, TaggedUser } from "@/types";
 
 import { api } from "./apiClient.service";
 import type { LinkPreview } from "@/types";
@@ -18,6 +18,7 @@ export const postsService = {
   },
   repostPost: (postId: string, text?: string) => api.post<Post>(`/api/v1/posts/${postId}/repost`, text ? { text } : {}),
   fetchPostQuotes: (postId: string, cursor?: string) => api.get<Page<Post>>(`/api/v1/posts/${postId}/quotes`, { cursor }),
+  fetchPostTaggedUsers: (postId: string, cursor?: string) => api.get<Page<TaggedUser>>(`/api/v1/posts/${encodeURIComponent(postId)}/tagged-users`, { cursor }),
   updateReplySettings: (postId: string, replyPolicy: ReplyPolicy) => api.patch<Post>(`/api/v1/posts/${postId}/reply-settings`, { replyPolicy }),
   updatePostSensitivity: (postId: string, sensitiveLabels: readonly SensitiveLabel[]) => api.patch<Post>(`/api/v1/posts/${postId}/sensitivity`, { sensitiveLabels }),
   fetchPostAnalytics: (postId: string) => api.get<PostAnalytics>(`/api/v1/posts/${postId}/analytics`),
