@@ -50,7 +50,7 @@ func (service *LiveService) presentLiveSession(ctx context.Context, session *ent
 	}, nil
 }
 
-func (service *LiveService) GetLiveSession(ctx context.Context, liveId uuid.UUID) (types.LiveSessionView, error) {
+func (service *LiveService) GetLiveSession(ctx context.Context, liveId uuid.UUID, viewer uuid.UUID) (types.LiveSessionView, error) {
 	session, err := service.Client.LiveSession.Get(ctx, liveId)
 	if ent.IsNotFound(err) {
 		return types.LiveSessionView{}, liveerrors.LiveNotFound
@@ -58,5 +58,20 @@ func (service *LiveService) GetLiveSession(ctx context.Context, liveId uuid.UUID
 	if err != nil {
 		return types.LiveSessionView{}, err
 	}
-	return service.presentLiveSession(ctx, session)
+	view, err := service.presentLiveSession(ctx, session)
+	if err == nil && session.State != "ended" {
+		view.Safety = service.LiveSafetyViewFor(ctx, session, viewer)
+	}
+	return view, err
+}
+
+func (service *LiveService) GetLiveSafety(ctx context.Context, liveId uuid.UUID, viewer uuid.UUID) (*types.LiveSafetyView, error) {
+	session, err := service.Client.LiveSession.Get(ctx, liveId)
+	if ent.IsNotFound(err) {
+		return nil, liveerrors.LiveNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return service.LiveSafetyViewFor(ctx, session, viewer), nil
 }

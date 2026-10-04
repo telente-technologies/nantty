@@ -135,6 +135,8 @@ func (service *LiveService) chargeGift(ctx context.Context, actor types.Actor, s
 		return interfaces.ChargedGift{}, service.buildInsufficientCoinsError(ctx, actor.UserId)
 	case errors.Is(err, interfaces.ErrCannotGiftSelf):
 		return interfaces.ChargedGift{}, liveerrors.CannotGiftSelf
+	case errors.Is(err, interfaces.ErrRecipientCannotReceiveGifts):
+		return interfaces.ChargedGift{}, liveerrors.Api(409, "RECIPIENT_CANNOT_RECEIVE_GIFTS", "Neither the recipient nor the host can receive gifts yet.")
 	case errors.Is(err, interfaces.ErrIdempotencyKeyReused):
 		return interfaces.ChargedGift{}, liveerrors.Unprocessable("IDEMPOTENCY_KEY_REUSED", "This Idempotency-Key was used with a different request.")
 	}
