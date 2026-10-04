@@ -10,3 +10,8 @@ export const newCommentBodySchema = schema.object({
   parentCommentId: schema.string().uuid().optional(),
   mentions: mentionEntitiesSchema.optional(),
 });
+export const conversationQuerySchema = schema.object({
+  sort: schema.enum(["top", "latest"]).optional(),
+  cursor: schema.string().max(200).optional(),
+  limit: schema.coerce.number().int().min(1).max(50).optional(),
+});

@@ -44,6 +44,7 @@ export async function buildCommentViews(context: HandlerContext, viewerId: strin
       likes: row.likeCount,
       liked: liked.has(row.id),
       replyCount: row.replyCount,
+      depth: row.depth,
       ...(parentAuthor === undefined ? {} : { replyingTo: { userId: parentAuthor.id, username: parentAuthor.username } }),
       mentions: row.mentions as unknown as MentionEntity[],
       videoReplies: videoRepliesByComment.get(row.id) ?? [],
