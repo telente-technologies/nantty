@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
 	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
+	"zudomart/modules/moderation/src/generated/ent/copyrightpolicysetting"
 	"zudomart/modules/moderation/src/generated/ent/counternotice"
 	"zudomart/modules/moderation/src/generated/ent/evidenceretentionsetting"
 	"zudomart/modules/moderation/src/generated/ent/ipclaim"
@@ -19,6 +20,9 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
 	"zudomart/modules/moderation/src/generated/ent/livesafetysignal"
 	"zudomart/modules/moderation/src/generated/ent/outboxevent"
+	"zudomart/modules/moderation/src/generated/ent/securityaccountstate"
+	"zudomart/modules/moderation/src/generated/ent/securitycase"
+	"zudomart/modules/moderation/src/generated/ent/securityevent"
 	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/generated/ent/suspensioncase"
 
@@ -89,6 +93,7 @@ func checkColumn(t, c string) error {
 			contentreport.Table:            contentreport.ValidColumn,
 			contentreportentry.Table:       contentreportentry.ValidColumn,
 			copyrightclaim.Table:           copyrightclaim.ValidColumn,
+			copyrightpolicysetting.Table:   copyrightpolicysetting.ValidColumn,
 			counternotice.Table:            counternotice.ValidColumn,
 			evidenceretentionsetting.Table: evidenceretentionsetting.ValidColumn,
 			ipclaim.Table:                  ipclaim.ValidColumn,
@@ -96,6 +101,9 @@ func checkColumn(t, c string) error {
 			livesafetyincident.Table:       livesafetyincident.ValidColumn,
 			livesafetysignal.Table:         livesafetysignal.ValidColumn,
 			outboxevent.Table:              outboxevent.ValidColumn,
+			securityaccountstate.Table:     securityaccountstate.ValidColumn,
+			securitycase.Table:             securitycase.ValidColumn,
+			securityevent.Table:            securityevent.ValidColumn,
 			strike.Table:                   strike.ValidColumn,
 			suspensioncase.Table:           suspensioncase.ValidColumn,
 		})

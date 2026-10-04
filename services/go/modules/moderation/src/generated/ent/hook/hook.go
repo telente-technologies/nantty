@@ -56,6 +56,18 @@ func (f CopyrightClaimFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CopyrightClaimMutation", m)
 }
 
+// The CopyrightPolicySettingFunc type is an adapter to allow the use of ordinary
+// function as CopyrightPolicySetting mutator.
+type CopyrightPolicySettingFunc func(context.Context, *ent.CopyrightPolicySettingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CopyrightPolicySettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CopyrightPolicySettingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CopyrightPolicySettingMutation", m)
+}
+
 // The CounterNoticeFunc type is an adapter to allow the use of ordinary
 // function as CounterNotice mutator.
 type CounterNoticeFunc func(context.Context, *ent.CounterNoticeMutation) (ent.Value, error)
@@ -138,6 +150,42 @@ func (f OutboxEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OutboxEventMutation", m)
+}
+
+// The SecurityAccountStateFunc type is an adapter to allow the use of ordinary
+// function as SecurityAccountState mutator.
+type SecurityAccountStateFunc func(context.Context, *ent.SecurityAccountStateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SecurityAccountStateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SecurityAccountStateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SecurityAccountStateMutation", m)
+}
+
+// The SecurityCaseFunc type is an adapter to allow the use of ordinary
+// function as SecurityCase mutator.
+type SecurityCaseFunc func(context.Context, *ent.SecurityCaseMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SecurityCaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SecurityCaseMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SecurityCaseMutation", m)
+}
+
+// The SecurityEventFunc type is an adapter to allow the use of ordinary
+// function as SecurityEvent mutator.
+type SecurityEventFunc func(context.Context, *ent.SecurityEventMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SecurityEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SecurityEventMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SecurityEventMutation", m)
 }
 
 // The StrikeFunc type is an adapter to allow the use of ordinary

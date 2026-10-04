@@ -164,7 +164,7 @@ var (
 		{Name: "target_type", Type: field.TypeEnum, Enums: []string{"clip", "sound", "post", "live"}},
 		{Name: "target_id", Type: field.TypeString, Size: 128},
 		{Name: "infringer_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "target_flag", Type: field.TypeEnum, Enums: []string{"visible", "limited", "taken_down"}, Default: "visible"},
+		{Name: "target_flag", Type: field.TypeEnum, Enums: []string{"visible", "limited", "taken_down", "muted", "warned"}, Default: "visible"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "needs_info", "upheld", "rejected", "counter_notice", "restored"}, Default: "pending"},
 		{Name: "rights_basis", Type: field.TypeString, Size: 1000},
 		{Name: "sworn_statement", Type: field.TypeString, Size: 1000},
@@ -175,6 +175,21 @@ var (
 		{Name: "decision", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "strike_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "idempotency_key", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "claim_scope", Type: field.TypeEnum, Enums: []string{"audio", "video"}, Default: "video"},
+		{Name: "claimant_phone", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "claimant_address", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "original_work_url", Type: field.TypeString, Size: 2048, Default: ""},
+		{Name: "original_work_media_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "proof_urls", Type: field.TypeJSON},
+		{Name: "proof_media_ids", Type: field.TypeJSON},
+		{Name: "infringing_segments", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "accuracy_declared", Type: field.TypeBool, Default: false},
+		{Name: "signature_name", Type: field.TypeString, Size: 160, Default: ""},
+		{Name: "signed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "remedy", Type: field.TypeEnum, Enums: []string{"none", "audio_muted", "takedown_warning", "taken_down"}, Default: "none"},
+		{Name: "remedy_state", Type: field.TypeEnum, Enums: []string{"none", "muted", "awaiting_removal", "removed_voluntarily", "taken_down", "restored"}, Default: "none"},
+		{Name: "takedown_deadline_at", Type: field.TypeTime, Nullable: true},
+		{Name: "warning_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// CopyrightClaimsTable holds the schema information for the "copyright_claims" table.
 	CopyrightClaimsTable = &schema.Table{
@@ -202,7 +217,31 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{CopyrightClaimsColumns[9], CopyrightClaimsColumns[10]},
 			},
+			{
+				Name:    "copyrightclaim_remedy_state_takedown_deadline_at",
+				Unique:  false,
+				Columns: []*schema.Column{CopyrightClaimsColumns[35], CopyrightClaimsColumns[36]},
+			},
 		},
+	}
+	// CopyrightPolicySettingsColumns holds the columns for the "copyright_policy_settings" table.
+	CopyrightPolicySettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "takedown_deadline_hours", Type: field.TypeInt, Default: 48},
+		{Name: "strike_lifetime_days", Type: field.TypeInt, Default: 90},
+		{Name: "warning_lifetime_days", Type: field.TypeInt, Default: 180},
+		{Name: "strike_window_days", Type: field.TypeInt, Default: 90},
+		{Name: "restriction_threshold", Type: field.TypeInt, Default: 3},
+		{Name: "suspension_review_threshold", Type: field.TypeInt, Default: 3},
+		{Name: "restriction_days", Type: field.TypeInt, Default: 30},
+		{Name: "updated_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// CopyrightPolicySettingsTable holds the schema information for the "copyright_policy_settings" table.
+	CopyrightPolicySettingsTable = &schema.Table{
+		Name:       "copyright_policy_settings",
+		Columns:    CopyrightPolicySettingsColumns,
+		PrimaryKey: []*schema.Column{CopyrightPolicySettingsColumns[0]},
 	}
 	// CounterNoticesColumns holds the columns for the "counter_notices" table.
 	CounterNoticesColumns = []*schema.Column{
@@ -459,6 +498,117 @@ var (
 			},
 		},
 	}
+	// SecurityAccountStatesColumns holds the columns for the "security_account_states" table.
+	SecurityAccountStatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "challenge_required", Type: field.TypeBool, Default: false},
+		{Name: "challenge_reason", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "flagged_at", Type: field.TypeTime, Nullable: true},
+		{Name: "cleared_until", Type: field.TypeTime, Nullable: true},
+		{Name: "suspected_bot", Type: field.TypeBool, Default: false},
+		{Name: "bot_score", Type: field.TypeFloat64, Default: 0},
+		{Name: "bot_reasons", Type: field.TypeJSON},
+		{Name: "bot_marked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "headless_reported", Type: field.TypeBool, Default: false},
+		{Name: "attestation_verdict", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "auto_suspended_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SecurityAccountStatesTable holds the schema information for the "security_account_states" table.
+	SecurityAccountStatesTable = &schema.Table{
+		Name:       "security_account_states",
+		Columns:    SecurityAccountStatesColumns,
+		PrimaryKey: []*schema.Column{SecurityAccountStatesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "securityaccountstate_challenge_required",
+				Unique:  false,
+				Columns: []*schema.Column{SecurityAccountStatesColumns[1]},
+			},
+			{
+				Name:    "securityaccountstate_suspected_bot",
+				Unique:  false,
+				Columns: []*schema.Column{SecurityAccountStatesColumns[5]},
+			},
+		},
+	}
+	// SecurityCasesColumns holds the columns for the "security_cases" table.
+	SecurityCasesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "trigger", Type: field.TypeEnum, Enums: []string{"access_probing", "suspected_bot"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "cleared", "kept_restricted", "suspended", "banned", "deleted"}, Default: "open"},
+		{Name: "severity", Type: field.TypeEnum, Enums: []string{"low", "medium", "high"}, Default: "medium"},
+		{Name: "violation_count", Type: field.TypeInt, Default: 0},
+		{Name: "failed_challenge_count", Type: field.TypeInt, Default: 0},
+		{Name: "passed_challenge_count", Type: field.TypeInt, Default: 0},
+		{Name: "auto_suspended", Type: field.TypeBool, Default: false},
+		{Name: "last_activity_at", Type: field.TypeTime},
+		{Name: "decision", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "decided_at", Type: field.TypeTime, Nullable: true},
+	}
+	// SecurityCasesTable holds the schema information for the "security_cases" table.
+	SecurityCasesTable = &schema.Table{
+		Name:       "security_cases",
+		Columns:    SecurityCasesColumns,
+		PrimaryKey: []*schema.Column{SecurityCasesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "securitycase_open_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{SecurityCasesColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'open'",
+				},
+			},
+			{
+				Name:    "securitycase_status_severity_last_activity_at",
+				Unique:  false,
+				Columns: []*schema.Column{SecurityCasesColumns[4], SecurityCasesColumns[5], SecurityCasesColumns[10]},
+			},
+			{
+				Name:    "securitycase_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SecurityCasesColumns[2], SecurityCasesColumns[1]},
+			},
+		},
+	}
+	// SecurityEventsColumns holds the columns for the "security_events" table.
+	SecurityEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"access_violation", "challenge_required", "challenge_passed", "challenge_failed", "bot_score_recorded", "bot_marked", "bot_cleared", "client_signals", "auto_suspended", "case_opened", "case_decided"}},
+		{Name: "device_id", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "ip_prefix", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "source", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "external_reference", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "detail", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+	}
+	// SecurityEventsTable holds the schema information for the "security_events" table.
+	SecurityEventsTable = &schema.Table{
+		Name:       "security_events",
+		Columns:    SecurityEventsColumns,
+		PrimaryKey: []*schema.Column{SecurityEventsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "securityevent_external_reference",
+				Unique:  true,
+				Columns: []*schema.Column{SecurityEventsColumns[7]},
+			},
+			{
+				Name:    "securityevent_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SecurityEventsColumns[2], SecurityEventsColumns[1]},
+			},
+			{
+				Name:    "securityevent_account_id_kind_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{SecurityEventsColumns[2], SecurityEventsColumns[3], SecurityEventsColumns[1]},
+			},
+		},
+	}
 	// StrikesColumns holds the columns for the "strikes" table.
 	StrikesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -476,6 +626,10 @@ var (
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
 		{Name: "revoked_reason", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "appeal_status", Type: field.TypeEnum, Enums: []string{"none", "pending", "upheld", "overturned"}, Default: "none"},
+		{Name: "appeal_message", Type: field.TypeString, Size: 2000, Default: ""},
+		{Name: "appealed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "expiry_announced_at", Type: field.TypeTime, Nullable: true},
 	}
 	// StrikesTable holds the schema information for the "strikes" table.
 	StrikesTable = &schema.Table{
@@ -498,6 +652,16 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{StrikesColumns[9], StrikesColumns[10]},
 			},
+			{
+				Name:    "strike_expiry_announced_at_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{StrikesColumns[18], StrikesColumns[12]},
+			},
+			{
+				Name:    "strike_appeal_status_appealed_at",
+				Unique:  false,
+				Columns: []*schema.Column{StrikesColumns[15], StrikesColumns[17]},
+			},
 		},
 	}
 	// SuspensionCasesColumns holds the columns for the "suspension_cases" table.
@@ -505,7 +669,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "account_id", Type: field.TypeUUID},
-		{Name: "source", Type: field.TypeEnum, Enums: []string{"python_suggestion", "user_reports"}},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"python_suggestion", "user_reports", "copyright_strikes"}},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "escalated", "suspended", "dismissed"}, Default: "pending"},
 		{Name: "risk_score", Type: field.TypeInt},
 		{Name: "top_signals", Type: field.TypeJSON},
@@ -547,6 +711,7 @@ var (
 		ContentReportsTable,
 		ContentReportEntriesTable,
 		CopyrightClaimsTable,
+		CopyrightPolicySettingsTable,
 		CounterNoticesTable,
 		EvidenceRetentionSettingsTable,
 		IPClaimsTable,
@@ -554,6 +719,9 @@ var (
 		LiveSafetyIncidentsTable,
 		LiveSafetySignalsTable,
 		OutboxEventsTable,
+		SecurityAccountStatesTable,
+		SecurityCasesTable,
+		SecurityEventsTable,
 		StrikesTable,
 		SuspensionCasesTable,
 	}

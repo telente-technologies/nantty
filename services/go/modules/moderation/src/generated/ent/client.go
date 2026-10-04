@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
 	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
+	"zudomart/modules/moderation/src/generated/ent/copyrightpolicysetting"
 	"zudomart/modules/moderation/src/generated/ent/counternotice"
 	"zudomart/modules/moderation/src/generated/ent/evidenceretentionsetting"
 	"zudomart/modules/moderation/src/generated/ent/ipclaim"
@@ -22,6 +23,9 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/livesafetyincident"
 	"zudomart/modules/moderation/src/generated/ent/livesafetysignal"
 	"zudomart/modules/moderation/src/generated/ent/outboxevent"
+	"zudomart/modules/moderation/src/generated/ent/securityaccountstate"
+	"zudomart/modules/moderation/src/generated/ent/securitycase"
+	"zudomart/modules/moderation/src/generated/ent/securityevent"
 	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/generated/ent/suspensioncase"
 
@@ -46,6 +50,8 @@ type Client struct {
 	ContentReportEntry *ContentReportEntryClient
 	// CopyrightClaim is the client for interacting with the CopyrightClaim builders.
 	CopyrightClaim *CopyrightClaimClient
+	// CopyrightPolicySetting is the client for interacting with the CopyrightPolicySetting builders.
+	CopyrightPolicySetting *CopyrightPolicySettingClient
 	// CounterNotice is the client for interacting with the CounterNotice builders.
 	CounterNotice *CounterNoticeClient
 	// EvidenceRetentionSetting is the client for interacting with the EvidenceRetentionSetting builders.
@@ -60,6 +66,12 @@ type Client struct {
 	LiveSafetySignal *LiveSafetySignalClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// SecurityAccountState is the client for interacting with the SecurityAccountState builders.
+	SecurityAccountState *SecurityAccountStateClient
+	// SecurityCase is the client for interacting with the SecurityCase builders.
+	SecurityCase *SecurityCaseClient
+	// SecurityEvent is the client for interacting with the SecurityEvent builders.
+	SecurityEvent *SecurityEventClient
 	// Strike is the client for interacting with the Strike builders.
 	Strike *StrikeClient
 	// SuspensionCase is the client for interacting with the SuspensionCase builders.
@@ -79,6 +91,7 @@ func (c *Client) init() {
 	c.ContentReport = NewContentReportClient(c.config)
 	c.ContentReportEntry = NewContentReportEntryClient(c.config)
 	c.CopyrightClaim = NewCopyrightClaimClient(c.config)
+	c.CopyrightPolicySetting = NewCopyrightPolicySettingClient(c.config)
 	c.CounterNotice = NewCounterNoticeClient(c.config)
 	c.EvidenceRetentionSetting = NewEvidenceRetentionSettingClient(c.config)
 	c.IpClaim = NewIpClaimClient(c.config)
@@ -86,6 +99,9 @@ func (c *Client) init() {
 	c.LiveSafetyIncident = NewLiveSafetyIncidentClient(c.config)
 	c.LiveSafetySignal = NewLiveSafetySignalClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
+	c.SecurityAccountState = NewSecurityAccountStateClient(c.config)
+	c.SecurityCase = NewSecurityCaseClient(c.config)
+	c.SecurityEvent = NewSecurityEventClient(c.config)
 	c.Strike = NewStrikeClient(c.config)
 	c.SuspensionCase = NewSuspensionCaseClient(c.config)
 }
@@ -184,6 +200,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ContentReport:            NewContentReportClient(cfg),
 		ContentReportEntry:       NewContentReportEntryClient(cfg),
 		CopyrightClaim:           NewCopyrightClaimClient(cfg),
+		CopyrightPolicySetting:   NewCopyrightPolicySettingClient(cfg),
 		CounterNotice:            NewCounterNoticeClient(cfg),
 		EvidenceRetentionSetting: NewEvidenceRetentionSettingClient(cfg),
 		IpClaim:                  NewIpClaimClient(cfg),
@@ -191,6 +208,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		LiveSafetyIncident:       NewLiveSafetyIncidentClient(cfg),
 		LiveSafetySignal:         NewLiveSafetySignalClient(cfg),
 		OutboxEvent:              NewOutboxEventClient(cfg),
+		SecurityAccountState:     NewSecurityAccountStateClient(cfg),
+		SecurityCase:             NewSecurityCaseClient(cfg),
+		SecurityEvent:            NewSecurityEventClient(cfg),
 		Strike:                   NewStrikeClient(cfg),
 		SuspensionCase:           NewSuspensionCaseClient(cfg),
 	}, nil
@@ -216,6 +236,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ContentReport:            NewContentReportClient(cfg),
 		ContentReportEntry:       NewContentReportEntryClient(cfg),
 		CopyrightClaim:           NewCopyrightClaimClient(cfg),
+		CopyrightPolicySetting:   NewCopyrightPolicySettingClient(cfg),
 		CounterNotice:            NewCounterNoticeClient(cfg),
 		EvidenceRetentionSetting: NewEvidenceRetentionSettingClient(cfg),
 		IpClaim:                  NewIpClaimClient(cfg),
@@ -223,6 +244,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		LiveSafetyIncident:       NewLiveSafetyIncidentClient(cfg),
 		LiveSafetySignal:         NewLiveSafetySignalClient(cfg),
 		OutboxEvent:              NewOutboxEventClient(cfg),
+		SecurityAccountState:     NewSecurityAccountStateClient(cfg),
+		SecurityCase:             NewSecurityCaseClient(cfg),
+		SecurityEvent:            NewSecurityEventClient(cfg),
 		Strike:                   NewStrikeClient(cfg),
 		SuspensionCase:           NewSuspensionCaseClient(cfg),
 	}, nil
@@ -255,9 +279,10 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.ChatReport, c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
-		c.CounterNotice, c.EvidenceRetentionSetting, c.IpClaim, c.LegalReport,
-		c.LiveSafetyIncident, c.LiveSafetySignal, c.OutboxEvent, c.Strike,
-		c.SuspensionCase,
+		c.CopyrightPolicySetting, c.CounterNotice, c.EvidenceRetentionSetting,
+		c.IpClaim, c.LegalReport, c.LiveSafetyIncident, c.LiveSafetySignal,
+		c.OutboxEvent, c.SecurityAccountState, c.SecurityCase, c.SecurityEvent,
+		c.Strike, c.SuspensionCase,
 	} {
 		n.Use(hooks...)
 	}
@@ -268,9 +293,10 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.ChatReport, c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
-		c.CounterNotice, c.EvidenceRetentionSetting, c.IpClaim, c.LegalReport,
-		c.LiveSafetyIncident, c.LiveSafetySignal, c.OutboxEvent, c.Strike,
-		c.SuspensionCase,
+		c.CopyrightPolicySetting, c.CounterNotice, c.EvidenceRetentionSetting,
+		c.IpClaim, c.LegalReport, c.LiveSafetyIncident, c.LiveSafetySignal,
+		c.OutboxEvent, c.SecurityAccountState, c.SecurityCase, c.SecurityEvent,
+		c.Strike, c.SuspensionCase,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -287,6 +313,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ContentReportEntry.mutate(ctx, m)
 	case *CopyrightClaimMutation:
 		return c.CopyrightClaim.mutate(ctx, m)
+	case *CopyrightPolicySettingMutation:
+		return c.CopyrightPolicySetting.mutate(ctx, m)
 	case *CounterNoticeMutation:
 		return c.CounterNotice.mutate(ctx, m)
 	case *EvidenceRetentionSettingMutation:
@@ -301,6 +329,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.LiveSafetySignal.mutate(ctx, m)
 	case *OutboxEventMutation:
 		return c.OutboxEvent.mutate(ctx, m)
+	case *SecurityAccountStateMutation:
+		return c.SecurityAccountState.mutate(ctx, m)
+	case *SecurityCaseMutation:
+		return c.SecurityCase.mutate(ctx, m)
+	case *SecurityEventMutation:
+		return c.SecurityEvent.mutate(ctx, m)
 	case *StrikeMutation:
 		return c.Strike.mutate(ctx, m)
 	case *SuspensionCaseMutation:
@@ -839,6 +873,139 @@ func (c *CopyrightClaimClient) mutate(ctx context.Context, m *CopyrightClaimMuta
 		return (&CopyrightClaimDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown CopyrightClaim mutation op: %q", m.Op())
+	}
+}
+
+// CopyrightPolicySettingClient is a client for the CopyrightPolicySetting schema.
+type CopyrightPolicySettingClient struct {
+	config
+}
+
+// NewCopyrightPolicySettingClient returns a client for the CopyrightPolicySetting from the given config.
+func NewCopyrightPolicySettingClient(c config) *CopyrightPolicySettingClient {
+	return &CopyrightPolicySettingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `copyrightpolicysetting.Hooks(f(g(h())))`.
+func (c *CopyrightPolicySettingClient) Use(hooks ...Hook) {
+	c.hooks.CopyrightPolicySetting = append(c.hooks.CopyrightPolicySetting, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `copyrightpolicysetting.Intercept(f(g(h())))`.
+func (c *CopyrightPolicySettingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CopyrightPolicySetting = append(c.inters.CopyrightPolicySetting, interceptors...)
+}
+
+// Create returns a builder for creating a CopyrightPolicySetting entity.
+func (c *CopyrightPolicySettingClient) Create() *CopyrightPolicySettingCreate {
+	mutation := newCopyrightPolicySettingMutation(c.config, OpCreate)
+	return &CopyrightPolicySettingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CopyrightPolicySetting entities.
+func (c *CopyrightPolicySettingClient) CreateBulk(builders ...*CopyrightPolicySettingCreate) *CopyrightPolicySettingCreateBulk {
+	return &CopyrightPolicySettingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CopyrightPolicySettingClient) MapCreateBulk(slice any, setFunc func(*CopyrightPolicySettingCreate, int)) *CopyrightPolicySettingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CopyrightPolicySettingCreateBulk{err: fmt.Errorf("calling to CopyrightPolicySettingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CopyrightPolicySettingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CopyrightPolicySettingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CopyrightPolicySetting.
+func (c *CopyrightPolicySettingClient) Update() *CopyrightPolicySettingUpdate {
+	mutation := newCopyrightPolicySettingMutation(c.config, OpUpdate)
+	return &CopyrightPolicySettingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CopyrightPolicySettingClient) UpdateOne(_m *CopyrightPolicySetting) *CopyrightPolicySettingUpdateOne {
+	mutation := newCopyrightPolicySettingMutation(c.config, OpUpdateOne, withCopyrightPolicySetting(_m))
+	return &CopyrightPolicySettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CopyrightPolicySettingClient) UpdateOneID(id int) *CopyrightPolicySettingUpdateOne {
+	mutation := newCopyrightPolicySettingMutation(c.config, OpUpdateOne, withCopyrightPolicySettingID(id))
+	return &CopyrightPolicySettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CopyrightPolicySetting.
+func (c *CopyrightPolicySettingClient) Delete() *CopyrightPolicySettingDelete {
+	mutation := newCopyrightPolicySettingMutation(c.config, OpDelete)
+	return &CopyrightPolicySettingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CopyrightPolicySettingClient) DeleteOne(_m *CopyrightPolicySetting) *CopyrightPolicySettingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CopyrightPolicySettingClient) DeleteOneID(id int) *CopyrightPolicySettingDeleteOne {
+	builder := c.Delete().Where(copyrightpolicysetting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CopyrightPolicySettingDeleteOne{builder}
+}
+
+// Query returns a query builder for CopyrightPolicySetting.
+func (c *CopyrightPolicySettingClient) Query() *CopyrightPolicySettingQuery {
+	return &CopyrightPolicySettingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCopyrightPolicySetting},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CopyrightPolicySetting entity by its id.
+func (c *CopyrightPolicySettingClient) Get(ctx context.Context, id int) (*CopyrightPolicySetting, error) {
+	return c.Query().Where(copyrightpolicysetting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CopyrightPolicySettingClient) GetX(ctx context.Context, id int) *CopyrightPolicySetting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CopyrightPolicySettingClient) Hooks() []Hook {
+	return c.hooks.CopyrightPolicySetting
+}
+
+// Interceptors returns the client interceptors.
+func (c *CopyrightPolicySettingClient) Interceptors() []Interceptor {
+	return c.inters.CopyrightPolicySetting
+}
+
+func (c *CopyrightPolicySettingClient) mutate(ctx context.Context, m *CopyrightPolicySettingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CopyrightPolicySettingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CopyrightPolicySettingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CopyrightPolicySettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CopyrightPolicySettingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CopyrightPolicySetting mutation op: %q", m.Op())
 	}
 }
 
@@ -1773,6 +1940,405 @@ func (c *OutboxEventClient) mutate(ctx context.Context, m *OutboxEventMutation) 
 	}
 }
 
+// SecurityAccountStateClient is a client for the SecurityAccountState schema.
+type SecurityAccountStateClient struct {
+	config
+}
+
+// NewSecurityAccountStateClient returns a client for the SecurityAccountState from the given config.
+func NewSecurityAccountStateClient(c config) *SecurityAccountStateClient {
+	return &SecurityAccountStateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `securityaccountstate.Hooks(f(g(h())))`.
+func (c *SecurityAccountStateClient) Use(hooks ...Hook) {
+	c.hooks.SecurityAccountState = append(c.hooks.SecurityAccountState, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `securityaccountstate.Intercept(f(g(h())))`.
+func (c *SecurityAccountStateClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SecurityAccountState = append(c.inters.SecurityAccountState, interceptors...)
+}
+
+// Create returns a builder for creating a SecurityAccountState entity.
+func (c *SecurityAccountStateClient) Create() *SecurityAccountStateCreate {
+	mutation := newSecurityAccountStateMutation(c.config, OpCreate)
+	return &SecurityAccountStateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SecurityAccountState entities.
+func (c *SecurityAccountStateClient) CreateBulk(builders ...*SecurityAccountStateCreate) *SecurityAccountStateCreateBulk {
+	return &SecurityAccountStateCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SecurityAccountStateClient) MapCreateBulk(slice any, setFunc func(*SecurityAccountStateCreate, int)) *SecurityAccountStateCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SecurityAccountStateCreateBulk{err: fmt.Errorf("calling to SecurityAccountStateClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SecurityAccountStateCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SecurityAccountStateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SecurityAccountState.
+func (c *SecurityAccountStateClient) Update() *SecurityAccountStateUpdate {
+	mutation := newSecurityAccountStateMutation(c.config, OpUpdate)
+	return &SecurityAccountStateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SecurityAccountStateClient) UpdateOne(_m *SecurityAccountState) *SecurityAccountStateUpdateOne {
+	mutation := newSecurityAccountStateMutation(c.config, OpUpdateOne, withSecurityAccountState(_m))
+	return &SecurityAccountStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SecurityAccountStateClient) UpdateOneID(id uuid.UUID) *SecurityAccountStateUpdateOne {
+	mutation := newSecurityAccountStateMutation(c.config, OpUpdateOne, withSecurityAccountStateID(id))
+	return &SecurityAccountStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SecurityAccountState.
+func (c *SecurityAccountStateClient) Delete() *SecurityAccountStateDelete {
+	mutation := newSecurityAccountStateMutation(c.config, OpDelete)
+	return &SecurityAccountStateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SecurityAccountStateClient) DeleteOne(_m *SecurityAccountState) *SecurityAccountStateDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SecurityAccountStateClient) DeleteOneID(id uuid.UUID) *SecurityAccountStateDeleteOne {
+	builder := c.Delete().Where(securityaccountstate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SecurityAccountStateDeleteOne{builder}
+}
+
+// Query returns a query builder for SecurityAccountState.
+func (c *SecurityAccountStateClient) Query() *SecurityAccountStateQuery {
+	return &SecurityAccountStateQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSecurityAccountState},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SecurityAccountState entity by its id.
+func (c *SecurityAccountStateClient) Get(ctx context.Context, id uuid.UUID) (*SecurityAccountState, error) {
+	return c.Query().Where(securityaccountstate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SecurityAccountStateClient) GetX(ctx context.Context, id uuid.UUID) *SecurityAccountState {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SecurityAccountStateClient) Hooks() []Hook {
+	return c.hooks.SecurityAccountState
+}
+
+// Interceptors returns the client interceptors.
+func (c *SecurityAccountStateClient) Interceptors() []Interceptor {
+	return c.inters.SecurityAccountState
+}
+
+func (c *SecurityAccountStateClient) mutate(ctx context.Context, m *SecurityAccountStateMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SecurityAccountStateCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SecurityAccountStateUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SecurityAccountStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SecurityAccountStateDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SecurityAccountState mutation op: %q", m.Op())
+	}
+}
+
+// SecurityCaseClient is a client for the SecurityCase schema.
+type SecurityCaseClient struct {
+	config
+}
+
+// NewSecurityCaseClient returns a client for the SecurityCase from the given config.
+func NewSecurityCaseClient(c config) *SecurityCaseClient {
+	return &SecurityCaseClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `securitycase.Hooks(f(g(h())))`.
+func (c *SecurityCaseClient) Use(hooks ...Hook) {
+	c.hooks.SecurityCase = append(c.hooks.SecurityCase, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `securitycase.Intercept(f(g(h())))`.
+func (c *SecurityCaseClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SecurityCase = append(c.inters.SecurityCase, interceptors...)
+}
+
+// Create returns a builder for creating a SecurityCase entity.
+func (c *SecurityCaseClient) Create() *SecurityCaseCreate {
+	mutation := newSecurityCaseMutation(c.config, OpCreate)
+	return &SecurityCaseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SecurityCase entities.
+func (c *SecurityCaseClient) CreateBulk(builders ...*SecurityCaseCreate) *SecurityCaseCreateBulk {
+	return &SecurityCaseCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SecurityCaseClient) MapCreateBulk(slice any, setFunc func(*SecurityCaseCreate, int)) *SecurityCaseCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SecurityCaseCreateBulk{err: fmt.Errorf("calling to SecurityCaseClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SecurityCaseCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SecurityCaseCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SecurityCase.
+func (c *SecurityCaseClient) Update() *SecurityCaseUpdate {
+	mutation := newSecurityCaseMutation(c.config, OpUpdate)
+	return &SecurityCaseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SecurityCaseClient) UpdateOne(_m *SecurityCase) *SecurityCaseUpdateOne {
+	mutation := newSecurityCaseMutation(c.config, OpUpdateOne, withSecurityCase(_m))
+	return &SecurityCaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SecurityCaseClient) UpdateOneID(id uuid.UUID) *SecurityCaseUpdateOne {
+	mutation := newSecurityCaseMutation(c.config, OpUpdateOne, withSecurityCaseID(id))
+	return &SecurityCaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SecurityCase.
+func (c *SecurityCaseClient) Delete() *SecurityCaseDelete {
+	mutation := newSecurityCaseMutation(c.config, OpDelete)
+	return &SecurityCaseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SecurityCaseClient) DeleteOne(_m *SecurityCase) *SecurityCaseDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SecurityCaseClient) DeleteOneID(id uuid.UUID) *SecurityCaseDeleteOne {
+	builder := c.Delete().Where(securitycase.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SecurityCaseDeleteOne{builder}
+}
+
+// Query returns a query builder for SecurityCase.
+func (c *SecurityCaseClient) Query() *SecurityCaseQuery {
+	return &SecurityCaseQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSecurityCase},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SecurityCase entity by its id.
+func (c *SecurityCaseClient) Get(ctx context.Context, id uuid.UUID) (*SecurityCase, error) {
+	return c.Query().Where(securitycase.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SecurityCaseClient) GetX(ctx context.Context, id uuid.UUID) *SecurityCase {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SecurityCaseClient) Hooks() []Hook {
+	return c.hooks.SecurityCase
+}
+
+// Interceptors returns the client interceptors.
+func (c *SecurityCaseClient) Interceptors() []Interceptor {
+	return c.inters.SecurityCase
+}
+
+func (c *SecurityCaseClient) mutate(ctx context.Context, m *SecurityCaseMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SecurityCaseCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SecurityCaseUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SecurityCaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SecurityCaseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SecurityCase mutation op: %q", m.Op())
+	}
+}
+
+// SecurityEventClient is a client for the SecurityEvent schema.
+type SecurityEventClient struct {
+	config
+}
+
+// NewSecurityEventClient returns a client for the SecurityEvent from the given config.
+func NewSecurityEventClient(c config) *SecurityEventClient {
+	return &SecurityEventClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `securityevent.Hooks(f(g(h())))`.
+func (c *SecurityEventClient) Use(hooks ...Hook) {
+	c.hooks.SecurityEvent = append(c.hooks.SecurityEvent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `securityevent.Intercept(f(g(h())))`.
+func (c *SecurityEventClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SecurityEvent = append(c.inters.SecurityEvent, interceptors...)
+}
+
+// Create returns a builder for creating a SecurityEvent entity.
+func (c *SecurityEventClient) Create() *SecurityEventCreate {
+	mutation := newSecurityEventMutation(c.config, OpCreate)
+	return &SecurityEventCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SecurityEvent entities.
+func (c *SecurityEventClient) CreateBulk(builders ...*SecurityEventCreate) *SecurityEventCreateBulk {
+	return &SecurityEventCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SecurityEventClient) MapCreateBulk(slice any, setFunc func(*SecurityEventCreate, int)) *SecurityEventCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SecurityEventCreateBulk{err: fmt.Errorf("calling to SecurityEventClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SecurityEventCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SecurityEventCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SecurityEvent.
+func (c *SecurityEventClient) Update() *SecurityEventUpdate {
+	mutation := newSecurityEventMutation(c.config, OpUpdate)
+	return &SecurityEventUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SecurityEventClient) UpdateOne(_m *SecurityEvent) *SecurityEventUpdateOne {
+	mutation := newSecurityEventMutation(c.config, OpUpdateOne, withSecurityEvent(_m))
+	return &SecurityEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SecurityEventClient) UpdateOneID(id uuid.UUID) *SecurityEventUpdateOne {
+	mutation := newSecurityEventMutation(c.config, OpUpdateOne, withSecurityEventID(id))
+	return &SecurityEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SecurityEvent.
+func (c *SecurityEventClient) Delete() *SecurityEventDelete {
+	mutation := newSecurityEventMutation(c.config, OpDelete)
+	return &SecurityEventDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SecurityEventClient) DeleteOne(_m *SecurityEvent) *SecurityEventDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SecurityEventClient) DeleteOneID(id uuid.UUID) *SecurityEventDeleteOne {
+	builder := c.Delete().Where(securityevent.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SecurityEventDeleteOne{builder}
+}
+
+// Query returns a query builder for SecurityEvent.
+func (c *SecurityEventClient) Query() *SecurityEventQuery {
+	return &SecurityEventQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSecurityEvent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SecurityEvent entity by its id.
+func (c *SecurityEventClient) Get(ctx context.Context, id uuid.UUID) (*SecurityEvent, error) {
+	return c.Query().Where(securityevent.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SecurityEventClient) GetX(ctx context.Context, id uuid.UUID) *SecurityEvent {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SecurityEventClient) Hooks() []Hook {
+	return c.hooks.SecurityEvent
+}
+
+// Interceptors returns the client interceptors.
+func (c *SecurityEventClient) Interceptors() []Interceptor {
+	return c.inters.SecurityEvent
+}
+
+func (c *SecurityEventClient) mutate(ctx context.Context, m *SecurityEventMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SecurityEventCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SecurityEventUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SecurityEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SecurityEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SecurityEvent mutation op: %q", m.Op())
+	}
+}
+
 // StrikeClient is a client for the Strike schema.
 type StrikeClient struct {
 	config
@@ -2042,14 +2608,18 @@ func (c *SuspensionCaseClient) mutate(ctx context.Context, m *SuspensionCaseMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim, CounterNotice,
-		EvidenceRetentionSetting, IpClaim, LegalReport, LiveSafetyIncident,
-		LiveSafetySignal, OutboxEvent, Strike, SuspensionCase []ent.Hook
+		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim,
+		CopyrightPolicySetting, CounterNotice, EvidenceRetentionSetting, IpClaim,
+		LegalReport, LiveSafetyIncident, LiveSafetySignal, OutboxEvent,
+		SecurityAccountState, SecurityCase, SecurityEvent, Strike,
+		SuspensionCase []ent.Hook
 	}
 	inters struct {
-		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim, CounterNotice,
-		EvidenceRetentionSetting, IpClaim, LegalReport, LiveSafetyIncident,
-		LiveSafetySignal, OutboxEvent, Strike, SuspensionCase []ent.Interceptor
+		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim,
+		CopyrightPolicySetting, CounterNotice, EvidenceRetentionSetting, IpClaim,
+		LegalReport, LiveSafetyIncident, LiveSafetySignal, OutboxEvent,
+		SecurityAccountState, SecurityCase, SecurityEvent, Strike,
+		SuspensionCase []ent.Interceptor
 	}
 )
 
