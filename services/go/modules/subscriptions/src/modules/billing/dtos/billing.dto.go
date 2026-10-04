@@ -18,7 +18,14 @@ type StoreReceiptRequestDto struct {
 }
 
 type PriceRowRequestDto struct {
-	Currency           string `json:"currency"`
-	MonthlyAmountMinor int64  `json:"monthlyAmountMinor"`
-	Active             bool   `json:"active"`
+	Currency                  string            `json:"currency"`
+	MonthlyAmountMinor        int64             `json:"monthlyAmountMinor"`
+	YearlyAmountMinor         int64             `json:"yearlyAmountMinor"`
+	IosMonthlyAmountMinor     int64             `json:"iosMonthlyAmountMinor"`
+	IosYearlyAmountMinor      int64             `json:"iosYearlyAmountMinor"`
+	AndroidMonthlyAmountMinor int64             `json:"androidMonthlyAmountMinor"`
+	AndroidYearlyAmountMinor  int64             `json:"androidYearlyAmountMinor"`
+	StoreProductIds           map[string]string `json:"storeProductIds"`
+	Active                    bool              `json:"active"`
+	Reason                    string            `json:"reason"`
 }

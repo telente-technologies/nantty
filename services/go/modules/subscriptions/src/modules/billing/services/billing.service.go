@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/subscriptions/src/loaders"
 	"zudomart/modules/subscriptions/src/models"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/regionpricing"
 )
 
 var (
@@ -49,26 +50,50 @@ func (billing Billing) ownerHasLiveBlue(ctx context.Context, client *ent.Client,
 }
 
 func (billing Billing) QuoteForOwner(ctx context.Context, executor *ent.Client, ownerUserId, planCode, countryCode, interval string) (models.PriceQuote, string, error) {
+	quote, price, err := billing.QuoteForOwnerOnChannel(ctx, executor, ownerUserId, planCode, countryCode, interval, "web")
+	return quote, price.Currency, err
+}
+
+func (billing Billing) QuoteForOwnerOnChannel(ctx context.Context, executor *ent.Client, ownerUserId, planCode, countryCode, interval, channel string) (models.PriceQuote, regionpricing.PlanRegionalPrice, error) {
 	definition, known := constants.Plans[planCode]
 	if !known {
-		return models.PriceQuote{}, "", ErrPlanNotFound
+		return models.PriceQuote{}, regionpricing.PlanRegionalPrice{}, ErrPlanNotFound
 	}
-	monthly, currency, err := billing.MonthlyPriceFor(ctx, executor, planCode, countryCode)
+	price, err := billing.RegionalPriceFor(ctx, executor, planCode, countryCode, channel)
 	if err != nil {
-		return models.PriceQuote{}, "", err
+		return models.PriceQuote{}, regionpricing.PlanRegionalPrice{}, err
+	}
+	monthly, yearly := price.AmountFor(channel, "month"), price.AmountFor(channel, "year")
+	if monthly <= 0 {
+		return models.PriceQuote{}, price, ErrPlanNotFound
+	}
+	if channel != "web" {
+		amount := price.AmountFor(channel, interval)
+		if amount <= 0 {
+			return models.PriceQuote{}, price, ErrPlanNotFound
+		}
+		list := amount
+		if interval == "year" {
+			list = monthly * 12
+		}
+		quote := models.PriceQuote{ListAmountMinor: list, AmountMinor: amount, DiscountKind: "none"}
+		if amount < list {
+			quote.DiscountKind, quote.DiscountBps = "yearly", (list-amount)*10_000/list
+		}
+		return quote, price, nil
 	}
 	_, pricing := billing.rules(ctx)
 	hasBlue, err := billing.ownerHasLiveBlue(ctx, executor, ownerUserId)
 	if err != nil {
-		return models.PriceQuote{}, "", err
+		return models.PriceQuote{}, price, err
 	}
 	bundled, err := executor.Subscription.Query().Where(subscription.OwnerUserID(ownerUserId), subscription.DiscountKindEQ(subscription.DiscountKindBundle), subscription.StatusIn(liveStatuses()...)).Count(ctx)
 	if err != nil {
-		return models.PriceQuote{}, "", err
+		return models.PriceQuote{}, price, err
 	}
 	return models.QuotePlanPrice(pricing.Pricing, models.PricingInput{
-		MonthlyAmountMinor: monthly, Interval: interval, BundleEligiblePlan: definition.BundleEligible, HasActiveBlue: hasBlue, BundledBusinessCount: bundled,
-	}), currency, nil
+		MonthlyAmountMinor: monthly, YearlyAmountMinor: yearly, Interval: interval, BundleEligiblePlan: definition.BundleEligible, HasActiveBlue: hasBlue, BundledBusinessCount: bundled,
+	}), price, nil
 }
 
 func PlanAllowedForProfile(planCode, profileType string) bool {

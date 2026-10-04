@@ -3,7 +3,6 @@ package controllers
 import (
 	"crypto/subtle"
 	"net/http"
-	"regexp"
 	"strings"
 
 	"github.com/google/uuid"
@@ -13,12 +12,6 @@ import (
 	"zudomart/modules/subscriptions/src/modules/billing/dtos"
 	"zudomart/modules/subscriptions/src/modules/billing/services"
 	"zudomart/platform/httpserver"
-	"zudomart/platform/staffauth"
-)
-
-var (
-	countryPattern  = regexp.MustCompile(`^[A-Z]{2}$`)
-	currencyPattern = regexp.MustCompile(`^[A-Z]{3}$`)
 )
 
 type BillingController struct {
@@ -71,6 +64,7 @@ func (controller BillingController) StartCheckout(writer http.ResponseWriter, re
 	view, err := controller.Billing.StartCheckout(request.Context(), services.CheckoutRequest{
 		UserId: principal.UserId, ProfileId: body.ProfileId, PlanCode: planCode, Interval: interval, WithTrial: body.WithTrial, ReturnTo: body.ReturnTo,
 		ClientPlatform: strings.ToLower(request.Header.Get("X-Client-Platform")), DeviceId: request.Header.Get("X-Device-Id"),
+		ViewerCountry: controller.resolveViewerRegion(request, principal.UserId).CountryCode,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)
@@ -126,23 +120,6 @@ func (controller BillingController) Offer(writer http.ResponseWriter, request *h
 	httpserver.WriteJsonResponse(writer, http.StatusOK, offer)
 }
 
-func (controller BillingController) ListPlans(writer http.ResponseWriter, request *http.Request) {
-	country := strings.ToUpper(request.URL.Query().Get("country"))
-	if !countryPattern.MatchString(country) {
-		country = controller.Billing.Container.Settings.DefaultCountry
-	}
-	codes := []string{constants.PlanBlueEssential, constants.PlanBlue, constants.PlanPremium, constants.PlanSellerPro, constants.PlanSellerBusiness, constants.PlanGoldOnly}
-	if strings.HasPrefix(request.URL.Path, "/api/v1/seller/") {
-		codes = []string{constants.PlanSellerPro, constants.PlanSellerBusiness}
-	}
-	plans, err := controller.Billing.ListPlans(request.Context(), "", country, codes)
-	if err != nil {
-		controller.fail(writer, request, err)
-		return
-	}
-	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": plans, "nextCursor": nil})
-}
-
 func (controller BillingController) RedeemStoreReceipt(writer http.ResponseWriter, request *http.Request) {
 	principal, err := ledgerutils.RequirePrincipal(request)
 	if err != nil {
@@ -185,39 +162,4 @@ func (controller BillingController) InternalEntitlements(writer http.ResponseWri
 	}
 	writer.Header().Set("Cache-Control", "private, max-age=60")
 	httpserver.WriteJsonResponse(writer, http.StatusOK, entitlements)
-}
-
-func (controller BillingController) ListPriceTable(writer http.ResponseWriter, request *http.Request) {
-	rows, err := controller.Billing.ListPriceTable(request.Context())
-	if err != nil {
-		controller.fail(writer, request, err)
-		return
-	}
-	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": rows, "nextCursor": nil})
-}
-
-func (controller BillingController) UpsertPrice(writer http.ResponseWriter, request *http.Request) {
-	staff, _ := staffauth.StaffFromContext(request.Context())
-	planCode, country := request.PathValue("planCode"), strings.ToUpper(request.PathValue("countryCode"))
-	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.PriceRowRequestDto) error {
-		collector := &ledgerutils.IssueCollector{}
-		if !countryPattern.MatchString(country) {
-			collector.Add("countryCode", "must be two letters")
-		}
-		if !currencyPattern.MatchString(body.Currency) {
-			collector.Add("currency", "must be an ISO 4217 code")
-		}
-		collector.RequireRange("monthlyAmountMinor", body.MonthlyAmountMinor, 1, 100_000_000_000)
-		return collector.Result()
-	})
-	if err != nil {
-		controller.fail(writer, request, err)
-		return
-	}
-	row, err := controller.Billing.UpsertPrice(request.Context(), staff.Id, services.PlanPriceRow{PlanCode: planCode, CountryCode: country, Currency: body.Currency, MonthlyAmountMinor: body.MonthlyAmountMinor, Active: body.Active})
-	if err != nil {
-		controller.fail(writer, request, err)
-		return
-	}
-	httpserver.WriteJsonResponse(writer, http.StatusOK, row)
 }
