@@ -55,7 +55,7 @@ function FeedSection({ feedMode, topicId, isGuest }: { readonly feedMode: FeedMo
   return (
     <div className={styles.feedList}>
       {posts.map((post, index) => (
-        <PostCard key={post.id} post={post} priority={index < 2} />
+        <PostCard key={post.id} post={post} priority={index < 2} swipeable />
       ))}
       <div ref={sentinelRef} />
       {feedQuery.isFetchingNextPage ? <Spinner label="Loading more posts" /> : null}

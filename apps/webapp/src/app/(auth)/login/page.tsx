@@ -7,6 +7,7 @@ import { Suspense, useState, type FormEvent } from "react";
 import { AppIcon } from "@/components/ui/appIcon";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
+import { showToast } from "@/components/ui/toast";
 import { WebappRequestError, sendRequestToWebappServer } from "@/services/clientApi.service";
 import type { User } from "@/types";
 import { readSafeRelativeRedirectPath } from "@/utils/safeRedirectPath.util";
@@ -30,7 +31,8 @@ function LoginForm() {
     if (!canSubmit) return;
     setBusy(true);
     try {
-      await sendRequestToWebappServer<{ user: User }>("/auth/login", { method: "POST", body: { identifier: identifier.trim(), password } });
+      const session = await sendRequestToWebappServer<{ user: User; notice?: string | null }>("/auth/login", { method: "POST", body: { identifier: identifier.trim(), password } });
+      if (session.notice) showToast({ text: session.notice });
       router.push(readSafeRelativeRedirectPath(searchParams.get("next"), "/"));
       router.refresh();
     } catch (error) {
