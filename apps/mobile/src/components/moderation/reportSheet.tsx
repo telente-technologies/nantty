@@ -24,6 +24,7 @@ import { CopyrightClaimForm } from "./copyrightClaimForm";
 export interface ReportTarget {
   readonly targetType: ReportTargetType;
   readonly targetId: ID;
+  readonly initialReason?: ReportReason;
 }
 
 export interface ReportSheetProps {
@@ -51,12 +52,12 @@ export function ReportSheet({ target, onClose }: ReportSheetProps) {
 
   useEffect(() => {
     if (!target) return;
-    setSelectedReason(null);
+    setSelectedReason(target.initialReason ?? null);
     setDetails("");
     setHasSubmittedCopyrightClaim(false);
     idempotencyKeyForThisReport.current = generateIdempotencyKey();
     submitReport.reset();
-  }, [target?.targetType, target?.targetId]);
+  }, [target?.targetType, target?.targetId, target?.initialReason]);
 
   const targetName = target ? describeReportTarget(target.targetType) : "content";
   const [hasSubmittedCopyrightClaim, setHasSubmittedCopyrightClaim] = useState(false);
