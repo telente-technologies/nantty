@@ -3,6 +3,8 @@ package restoreacceptedtakedowns
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	"zudomart/modules/moderation/src/container"
 	"zudomart/modules/moderation/src/events"
 	"zudomart/modules/moderation/src/generated/ent"
@@ -49,20 +51,30 @@ func (handler Handler) restoreOne(ctx context.Context, notice *ent.CounterNotice
 		if claim.InfringerID != nil {
 			infringer = claim.InfringerID.String()
 		}
-		if claim.StrikeID != nil {
-			if _, err := (strikeservices.Recorder{Now: handler.Container.Now}).Revoke(ctx, tx, *claim.StrikeID, "Counter-notice accepted and the restoration period passed"); err != nil {
+		recorder := strikeservices.Recorder{Now: handler.Container.Now}
+		for _, strikeId := range []*uuid.UUID{claim.StrikeID, claim.WarningID} {
+			if strikeId == nil {
+				continue
+			}
+			if _, err := recorder.Revoke(ctx, tx, *strikeId, "Counter-notice accepted and the restoration period passed"); err != nil {
 				return err
 			}
 		}
-		if err := tx.CopyrightClaim.UpdateOne(claim).SetStatus(copyrightclaim.StatusRestored).SetTargetFlag(copyrightclaim.TargetFlagVisible).Exec(ctx); err != nil {
+		if err := tx.CopyrightClaim.UpdateOne(claim).SetStatus(copyrightclaim.StatusRestored).SetTargetFlag(copyrightclaim.TargetFlagVisible).SetRemedyState(copyrightclaim.RemedyStateRestored).Exec(ctx); err != nil {
 			return err
 		}
 		if err := tx.CounterNotice.UpdateOne(notice).SetRestoredAt(moment).Exec(ctx); err != nil {
 			return err
 		}
-		if err := contentservices.PublishVisibilityChange(ctx, tx, string(claim.TargetType), claim.TargetID, infringer, "visible", "copyright", claim.ID.String(), "Counter-notice period passed", moment); err != nil {
-			return err
+		if NeedsVisibilityRestore(string(claim.Remedy), string(claim.RemedyState)) {
+			if err := contentservices.PublishVisibilityChange(ctx, tx, string(claim.TargetType), claim.TargetID, infringer, "visible", "copyright", claim.ID.String(), "Counter-notice period passed", moment); err != nil {
+				return err
+			}
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, claimevents.ClaimRestoredType, claim.ID.String(), moment, claimevents.ClaimRestoredData{ClaimId: claim.ID.String(), TargetType: string(claim.TargetType), TargetId: claim.TargetID, InfringerId: infringer})
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, claimevents.ClaimRestoredType, claim.ID.String(), moment, claimevents.ClaimRestoredData{ClaimId: claim.ID.String(), TargetType: string(claim.TargetType), TargetId: claim.TargetID, InfringerId: infringer, Remedy: string(claim.Remedy), WorkTitle: claim.WorkTitle})
 	})
+}
+
+func NeedsVisibilityRestore(remedy, remedyState string) bool {
+	return remedyState == "taken_down" || (remedy == "" || remedy == "none") || remedy == "taken_down"
 }

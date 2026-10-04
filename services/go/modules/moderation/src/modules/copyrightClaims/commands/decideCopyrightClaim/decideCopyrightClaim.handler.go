@@ -14,10 +14,9 @@ import (
 	"zudomart/modules/moderation/src/generated/ent"
 	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
 	"zudomart/modules/moderation/src/integrations"
-	contentservices "zudomart/modules/moderation/src/modules/contentReports/services"
+	healthservices "zudomart/modules/moderation/src/modules/accountHealth/services"
 	claimevents "zudomart/modules/moderation/src/modules/copyrightClaims/events"
 	"zudomart/modules/moderation/src/modules/copyrightClaims/services"
-	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
 	"zudomart/platform/httpserver"
 )
 
@@ -72,25 +71,21 @@ func (handler Handler) record(ctx context.Context, command Command, claim *ent.C
 	now := handler.Container.Now()
 	outcome := map[string]string{"uphold": "upheld", "reject": "rejected", "request_info": "needs_info"}[command.Action]
 	encoded, _ := json.Marshal(decision{Outcome: strings.ToUpper(outcome), Reason: reason, DecidedByName: command.Staff.Name, DecidedAt: now.UTC().Format(time.RFC3339)})
-	return handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+	settings, err := services.LoadPolicySettings(ctx, handler.Container.Client)
+	if err != nil {
+		return err
+	}
+	var remedy services.UpholdOutcome
+	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		update := tx.CopyrightClaim.UpdateOne(claim).SetStatus(copyrightclaim.Status(outcome)).SetDecision(encoded)
 		infringer := ""
 		if claim.InfringerID != nil {
 			infringer = claim.InfringerID.String()
 		}
 		if command.Action == "uphold" {
-			update.SetTargetFlag(copyrightclaim.TargetFlagTakenDown)
-			if err := contentservices.PublishVisibilityChange(ctx, tx, string(claim.TargetType), claim.TargetID, infringer, "removed", "copyright", claim.ID.String(), reason, now); err != nil {
-				return err
-			}
-			if claim.InfringerID != nil {
-				issued, _, err := (strikeservices.Recorder{Now: handler.Container.Now}).Issue(ctx, tx, strikeservices.IssueParams{
-					AccountId: *claim.InfringerID, Kind: "strike", Policy: "Copyright infringement", Reason: reason, Source: "copyright", IssuedById: command.Staff.Id, IssuedByName: command.Staff.Name, ReferenceType: "copyright_claim", ReferenceId: claim.ID.String(),
-				})
-				if err != nil {
-					return err
-				}
-				update.SetStrikeID(issued.ID)
+			var remedyErr error
+			if remedy, remedyErr = services.ApplyUpheldRemedy(ctx, tx, update, services.UpholdParams{Claim: claim, Reason: reason, StaffId: command.Staff.Id, StaffName: command.Staff.Name, Settings: settings, Now: handler.Container.Now}); remedyErr != nil {
+				return remedyErr
 			}
 		}
 		if err := update.Exec(ctx); err != nil {
@@ -100,16 +95,27 @@ func (handler Handler) record(ctx context.Context, command Command, claim *ent.C
 		if claim.ClaimantUserID != nil {
 			claimant = claim.ClaimantUserID.String()
 		}
-		if err := events.EnqueueOutboxEventInTransaction(ctx, tx, claimevents.ClaimDecidedType, claim.ID.String(), now, claimevents.ClaimDecidedData{
-			ClaimId: claim.ID.String(), Outcome: outcome, TargetType: string(claim.TargetType), TargetId: claim.TargetID, ClaimantId: claimant, ClaimantEmail: claim.ClaimantEmail, InfringerId: infringer, Reason: reason, CanCounter: command.Action == "uphold" && infringer != "",
-		}); err != nil {
+		decided := claimevents.ClaimDecidedData{
+			ClaimId: claim.ID.String(), Outcome: outcome, TargetType: string(claim.TargetType), TargetId: claim.TargetID, ClaimantId: claimant, ClaimantEmail: claim.ClaimantEmail, InfringerId: infringer, Reason: reason, CanCounter: command.Action == "uphold" && infringer != "", Remedy: remedy.Remedy,
+		}
+		if remedy.DeadlineAt != nil {
+			decided.DeadlineAt = remedy.DeadlineAt.UTC().Format(time.RFC3339)
+		}
+		if err := events.EnqueueOutboxEventInTransaction(ctx, tx, claimevents.ClaimDecidedType, claim.ID.String(), now, decided); err != nil {
 			return err
 		}
-		return handler.audit(ctx, command, claim, outcome, reason)
+		return handler.audit(ctx, command, claim, outcome, reason, remedy.Strike != nil)
 	})
+	if err != nil || remedy.Strike == nil {
+		return err
+	}
+	if enforceErr := healthservices.EnforceCopyrightStanding(ctx, handler.Container, remedy.Strike.AccountID, remedy.Strike.ID.String()); enforceErr != nil {
+		handler.Container.Logger.WarnContext(ctx, "copyright standing enforcement failed", "error", enforceErr.Error())
+	}
+	return nil
 }
 
-func (handler Handler) audit(ctx context.Context, command Command, claim *ent.CopyrightClaim, outcome, reason string) error {
+func (handler Handler) audit(ctx context.Context, command Command, claim *ent.CopyrightClaim, outcome, reason string, strikeIssued bool) error {
 	before, _ := json.Marshal(map[string]any{"status": claim.Status, "targetFlag": claim.TargetFlag})
 	after, _ := json.Marshal(map[string]any{"status": outcome})
 	action := map[string]string{"uphold": "copyright.upheld", "reject": "copyright.rejected", "request_info": "copyright.info_requested"}[command.Action]
@@ -117,7 +123,7 @@ func (handler Handler) audit(ctx context.Context, command Command, claim *ent.Co
 		ActorId: command.Staff.Id, ActorName: command.Staff.Name, ActorRole: command.Staff.Role, Action: action, SubjectType: "copyright_claim", SubjectId: claim.ID.String(), SubjectLabel: claim.WorkTitle,
 		Before: before, After: after, Reason: reason, IpAddress: command.IpAddress, RequestId: command.RequestId,
 	}
-	if err := handler.Container.Audit.Record(ctx, record); err != nil || command.Action != "uphold" || claim.InfringerID == nil {
+	if err := handler.Container.Audit.Record(ctx, record); err != nil || !strikeIssued {
 		return err
 	}
 	record.Action, record.SubjectType, record.SubjectId = "user.copyright_strike_added", "user", claim.InfringerID.String()
