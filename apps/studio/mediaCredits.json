@@ -1,0 +1,94 @@
+{
+  "license": "Unsplash License (https://unsplash.com/license): free to use, no permission needed; credited here as good practice. Each verified not Unsplash+ (premium: false, plus: false) and served from images.unsplash.com via the public download endpoint on 2026-10-04.",
+  "photos": [
+    {
+      "file": "public/photos/creatorMicPortrait.webp",
+      "unsplashId": "A1GOQjl4lfI",
+      "source": "https://unsplash.com/photos/a-woman-with-dreadlocks-holding-a-microphone-A1GOQjl4lfI",
+      "photographer": "Clout Africa",
+      "profile": "https://unsplash.com/@cloutafrica",
+      "description": "a woman with dreadlocks holding a microphone"
+    },
+    {
+      "file": "public/photos/gamingSquadTrophy.webp",
+      "unsplashId": "gj34ujcu4jo",
+      "source": "https://unsplash.com/photos/three-women-sitting-on-a-couch-playing-a-video-game-gj34ujcu4jo",
+      "photographer": "Emmanuel Yeboah Okine",
+      "profile": "https://unsplash.com/@emmanuel_okine",
+      "description": "three women sitting on a couch playing a video game"
+    },
+    {
+      "file": "public/photos/talkHostStudio.webp",
+      "unsplashId": "6BWFAPPWn-8",
+      "source": "https://unsplash.com/photos/a-man-wearing-headphones-standing-in-front-of-a-microphone-6BWFAPPWn-8",
+      "photographer": "Emmanuel Ikwuegbu",
+      "profile": "https://unsplash.com/@emmages",
+      "description": "a man wearing headphones standing in front of a microphone"
+    },
+    {
+      "file": "public/photos/musicConcertNeon.webp",
+      "unsplashId": "csyWoFmiWuo",
+      "source": "https://unsplash.com/photos/a-woman-in-a-black-leather-jacket-standing-in-front-of-a-neon-sign-csyWoFmiWuo",
+      "photographer": "Clout Africa",
+      "profile": "https://unsplash.com/@cloutafrica",
+      "description": "a woman in a black leather jacket standing in front of a neon sign"
+    },
+    {
+      "file": "public/photos/singerLiveMic.webp",
+      "unsplashId": "nlsLaOYD8qw",
+      "source": "https://unsplash.com/photos/a-man-with-dreadlocks-singing-into-a-microphone-nlsLaOYD8qw",
+      "photographer": "Michael Odida",
+      "profile": "https://unsplash.com/@o_gwel",
+      "description": "A man with dreadlocks singing into a microphone"
+    },
+    {
+      "file": "public/photos/deskStreamSetup.webp",
+      "unsplashId": "sEgodrJdMGw",
+      "source": "https://unsplash.com/photos/man-in-black-shirt-using-computer-sEgodrJdMGw",
+      "photographer": "Ralston Smith",
+      "profile": "https://unsplash.com/@rastanicreatives",
+      "description": "man in black shirt using computer"
+    },
+    {
+      "file": "public/photos/podcastDeskHost.webp",
+      "unsplashId": "Ix1mqt74_rs",
+      "source": "https://unsplash.com/photos/a-man-wearing-headphones-sitting-in-front-of-a-computer-Ix1mqt74_rs",
+      "photographer": "Oladimeji Ajegbile",
+      "profile": "https://unsplash.com/@hellodimeji",
+      "description": "a man wearing headphones sitting in front of a computer"
+    },
+    {
+      "file": "public/photos/classroomTeacher.webp",
+      "unsplashId": "VC6MGt9ZoBA",
+      "source": "https://unsplash.com/photos/a-woman-standing-in-front-of-a-group-of-children-VC6MGt9ZoBA",
+      "photographer": "Emmanuel Ikwuegbu",
+      "profile": "https://unsplash.com/@emmages",
+      "description": "a woman standing in front of a group of children"
+    },
+    {
+      "file": "public/photos/irlLagosStreet.webp",
+      "unsplashId": "F1VaY6wNn-I",
+      "source": "https://unsplash.com/photos/man-wearing-headphones-and-sunglasses-outdoors-F1VaY6wNn-I",
+      "photographer": "Ben Iwara",
+      "profile": "https://unsplash.com/@1hundredimages",
+      "description": "Man wearing headphones and sunglasses outdoors"
+    },
+    {
+      "file": "public/photos/videographerRig.webp",
+      "unsplashId": "ZpZ6Tpp4qg4",
+      "source": "https://unsplash.com/photos/a-man-standing-in-front-of-a-camera-ZpZ6Tpp4qg4",
+      "photographer": "Blessing Olarewaju",
+      "profile": "https://unsplash.com/@olarewajub",
+      "description": "a man standing in front of a camera"
+    },
+    {
+      "file": "public/photos/couchGamerControllers.webp",
+      "unsplashId": "TpqqfejI69U",
+      "source": "https://unsplash.com/photos/man-sitting-on-couch-holding-controllers-TpqqfejI69U",
+      "photographer": "Humphrey M",
+      "profile": "https://unsplash.com/@good_citizen",
+      "description": "man sitting on couch holding controllers"
+    }
+  ],
+  "screenshots": "public/screens/*.webp are screenshots of Studio and the Zudomart app rendered with their own mock data."
+}
