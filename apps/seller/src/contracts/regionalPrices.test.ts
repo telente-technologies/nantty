@@ -22,7 +22,7 @@ test("country prices are optional, converted to minor units and skip empty or st
 test("bad country prices are reported and unsupported or duplicate currencies are rejected", () => {
   assert.equal(convertDraftToUpsertRequest(draftWithPrices({ GHS: "0" }), "NGN", true).parseIssues.length, 1);
   const { request } = convertDraftToUpsertRequest(draftWithPrices({}), "NGN", true);
-  const broken = { ...request, variants: [{ ...request.variants[0]!, regionalPrices: [{ currency: "GHS", priceMinor: 100 }, { currency: "GHS", priceMinor: 200 }] }] };
+  const broken = { ...request, variants: [{ ...request.variants[0]!, regionalPrices: [{ currency: "GHS" as const, priceMinor: 100 }, { currency: "GHS" as const, priceMinor: 200 }] }] };
   assert.ok(validateProductUpsertRequest(broken, context).some((issue) => issue.path.includes("regionalPrices")));
   const unsupported = { ...request, variants: [{ ...request.variants[0]!, regionalPrices: [{ currency: "JPY" as never, priceMinor: 100 }] }] };
   assert.ok(validateProductUpsertRequest(unsupported, context).some((issue) => issue.path.includes("regionalPrices")));
