@@ -62,6 +62,7 @@ export interface StoreSummary {
   readonly ratingCount: number;
   readonly reviewCount: number;
   readonly verification?: Verification | null;
+  readonly successRate?: number | null;
   readonly earnBackBasisPoints?: number | null;
 }
 
@@ -283,7 +284,7 @@ export interface AuthSession {
   readonly notice?: string | null;
 }
 
-export type { CartItem, Cart, OrderStatus, Order, Address, WalletSummary, WalletTransaction, PayoutAccount, SellerDashboard } from "./orders.type";
+export type { CartItem, Cart, OrderStatus, PaymentMode, Order, Address, WalletSummary, WalletTransaction, PayoutAccount, SellerDashboard } from "./orders.type";
 
 export interface StoreCreditBalance {
   readonly storeId: ID;
