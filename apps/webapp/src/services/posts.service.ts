@@ -1,4 +1,4 @@
-import type { CommentWithReplies, Page, Post, PostAnalytics, ReplyPolicy } from "@/types";
+import type { CommentWithReplies, Page, Post, PostAnalytics, ReplyPolicy, TaggedUser } from "@/types";
 
 import { createIdempotencyKey, sendRequestToWebappServer } from "./clientApi.service";
 import type { LinkPreview } from "@/types/linkPreview.type";
@@ -13,6 +13,8 @@ export const postsService = {
   fetchCommentsPage: (postId: string, cursor: string | null) =>
     sendRequestToWebappServer<Page<CommentWithReplies>>(`/api/v1/posts/${postId}/comments`, { query: { cursor: cursor ?? undefined } }),
   fetchPostQuotes: (postId: string, cursor: string | null) => sendRequestToWebappServer<Page<Post>>(`/api/v1/posts/${postId}/quotes`, { query: { cursor: cursor ?? undefined } }),
+  fetchPostTaggedUsers: (postId: string, cursor: string | null) =>
+    sendRequestToWebappServer<Page<TaggedUser>>(`/api/v1/posts/${encodeURIComponent(postId)}/tagged-users`, { query: { cursor: cursor ?? undefined } }),
   updateReplySettings: (postId: string, replyPolicy: ReplyPolicy) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/reply-settings`, { method: "PATCH", body: { replyPolicy } }),
   recordPostShare: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/share`, { method: "POST" }),
 };
