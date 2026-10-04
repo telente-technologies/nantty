@@ -1,8 +1,10 @@
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
 import { Check16Icon } from "@/components/icons";
+import type { MainStackParamList } from "@/navigation/navigation.types";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -45,6 +47,11 @@ function describeReportError(error: unknown): string {
 }
 
 export function LiveReportSheet({ target, onClose }: LiveReportSheetProps) {
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+  const openLiveSafetyHelp = () => {
+    onClose();
+    navigation.navigate("HelpArticle", { topicSlug: "live-safety" });
+  };
   const { colors } = useTheme();
   const styles = useStyles();
   const [selectedReason, setSelectedReason] = useState<LiveReportReason | null>(null);
@@ -154,6 +161,7 @@ export function LiveReportSheet({ target, onClose }: LiveReportSheetProps) {
             </Text>
           ) : null}
           <Button title="Submit report" disabled={!selectedReason || isCoolingDown} loading={submitReport.isPending} onPress={() => submitReport.mutate()} />
+          <Text size={13} lineHeight={18} color={colors.primary} align="center" accessibilityRole="link" onPress={openLiveSafetyHelp}>How live safety works</Text>
         </ScrollView>
       )}
     </BottomSheet>
