@@ -53,7 +53,7 @@ resource "aws_route53_record" "dmarc" {
   name    = "_dmarc.${var.mail_domain}"
   type    = "TXT"
   ttl     = 600
-  records = ["v=DMARC1; p=quarantine; rua=mailto:${var.dmarc_report_address}; adkim=s; aspf=s"]
+  records = ["v=DMARC1; p=${var.dmarc_policy}; rua=mailto:${var.dmarc_report_address}; adkim=r; aspf=r; fo=1"]
 }
 
 resource "aws_sesv2_configuration_set" "this" {

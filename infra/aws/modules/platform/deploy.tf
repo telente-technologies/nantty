@@ -68,7 +68,7 @@ locals {
   service_specific_environment = {
     gateway       = merge(local.runtime_environment.gateway_only, { PORT = "8080", AUTH_JWKS_URL = "${local.internal_url["go-identity"]}/.well-known/jwks.json" })
     social        = { PORT = "8105" }
-    notifications = { PORT = "8104", SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Zudomart <no-reply@${var.mail_domain}>", IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
+    notifications = { PORT = "8104", SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Zudomart <noreply@${var.mail_domain}>", ZUDOMART_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
     media         = { PORT = "8108" }
     support       = { PORT = "8111" }
     realtime      = { PORT = "4000" }
