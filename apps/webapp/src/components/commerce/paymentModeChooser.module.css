@@ -1,0 +1,9 @@
+.list { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.group { display: flex; flex-direction: column; gap: var(--space-2); }
+.header { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.name { font-size: var(--text-sm); font-weight: 750; }
+.meta { color: var(--ink-faint); font-size: var(--text-xs); }
+.options { display: flex; flex-direction: column; gap: var(--space-2); }
+.option { display: flex; flex-direction: column; gap: 2px; padding: var(--space-3); border: 1px solid var(--divider); border-radius: var(--radius-md, 12px); background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.optionActive { border-color: var(--color-brand); background: var(--surface-brand-tint); }
+.optionTitle { font-size: var(--text-sm); font-weight: 650; }

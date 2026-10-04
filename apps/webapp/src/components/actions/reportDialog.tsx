@@ -8,6 +8,7 @@ import { ModalDialog } from "@/components/ui/modalDialog";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { reportsService, type ReportTargetType } from "@/services/webActions.service";
+import { CopyrightClaimDialog } from "@/components/copyright/copyrightClaimDialog";
 
 import styles from "./actionDialogs.module.css";
 
@@ -32,8 +33,12 @@ interface ReportDialogProps {
   readonly targetId: string;
 }
 
+const copyrightClaimTargets = new Set<ReportTargetType>(["post", "clip", "live"]);
+
 export function ReportDialog({ isOpen, onClose, targetType, targetId }: ReportDialogProps) {
   const [reason, setReason] = useState<string>("");
+  const [isClaimOpen, setIsClaimOpen] = useState(false);
+  const routesToCopyrightClaim = reason === "intellectual_property" && copyrightClaimTargets.has(targetType);
   const [details, setDetails] = useState("");
   const reportMutation = useMutation({
     mutationFn: () => reportsService.submitReport(targetType, targetId, reason, details.trim()),
@@ -44,6 +49,10 @@ export function ReportDialog({ isOpen, onClose, targetType, targetId }: ReportDi
       onClose();
     },
   });
+
+  if (isClaimOpen) {
+    return <CopyrightClaimDialog isOpen={isOpen} onClose={() => { setIsClaimOpen(false); setReason(""); onClose(); }} targetType={targetType as "post" | "clip" | "live"} targetId={targetId} />;
+  }
 
   return (
     <ModalDialog
@@ -56,9 +65,13 @@ export function ReportDialog({ isOpen, onClose, targetType, targetId }: ReportDi
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={() => reportMutation.mutate()} disabled={!reason} busy={reportMutation.isPending}>
-            Send report
-          </Button>
+          {routesToCopyrightClaim ? (
+            <Button onClick={() => setIsClaimOpen(true)}>Continue to copyright claim</Button>
+          ) : (
+            <Button onClick={() => reportMutation.mutate()} disabled={!reason} busy={reportMutation.isPending}>
+              Send report
+            </Button>
+          )}
         </>
       }
     >

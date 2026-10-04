@@ -9,6 +9,8 @@ import type { ReportTargetType, ShareReferenceKind } from "@/services/webActions
 import { buildAbsoluteSiteUrl } from "@/utils/seoPaths.util";
 
 import styles from "./contentActionsMenu.module.css";
+import { CopyrightClaimDialog } from "@/components/copyright/copyrightClaimDialog";
+
 import { ReportDialog } from "./reportDialog";
 import { ShareToChatDialog } from "./shareToChatDialog";
 
@@ -20,10 +22,16 @@ interface ContentActionsMenuProps {
   readonly isOwnContent?: boolean;
   readonly triggerClassName?: string;
   readonly onReport?: () => void;
+  readonly soundId?: string | null;
 }
 
-export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName, onReport }: ContentActionsMenuProps) {
+type CopyrightDialogTarget = { readonly targetType: "post" | "clip" | "live" | "sound"; readonly targetId: string };
+
+export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName, onReport, soundId }: ContentActionsMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [copyrightTarget, setCopyrightTarget] = useState<CopyrightDialogTarget | null>(null);
+  const canClaimCopyright = reportTargetType === "post" || reportTargetType === "clip" || reportTargetType === "live";
+  const openCopyrightClaim = (target: CopyrightDialogTarget) => requireAuthThen(() => setCopyrightTarget(target), "Sign in to file a copyright claim.");
   const [openDialog, setOpenDialog] = useState<"share" | "report" | null>(null);
   const menuId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -78,9 +86,20 @@ export function ContentActionsMenu({ shareKind, reportTargetType, targetId, cano
               Report
             </button>
           )}
+          {isOwnContent || !canClaimCopyright ? null : (
+            <button type="button" className={[styles.item, styles.itemDanger].join(" ")} onClick={() => chooseAction(() => openCopyrightClaim({ targetType: reportTargetType as "post" | "clip" | "live", targetId }))}>
+              Report copyright
+            </button>
+          )}
+          {isOwnContent || !soundId ? null : (
+            <button type="button" className={[styles.item, styles.itemDanger].join(" ")} onClick={() => chooseAction(() => openCopyrightClaim({ targetType: "sound", targetId: soundId }))}>
+              Report the sound for copyright
+            </button>
+          )}
         </div>
       ) : null}
       {shareKind ? <ShareToChatDialog isOpen={openDialog === "share"} onClose={() => setOpenDialog(null)} kind={shareKind} referenceId={targetId} /> : null}
+      {copyrightTarget ? <CopyrightClaimDialog isOpen onClose={() => setCopyrightTarget(null)} targetType={copyrightTarget.targetType} targetId={copyrightTarget.targetId} /> : null}
       <ReportDialog isOpen={openDialog === "report"} onClose={() => setOpenDialog(null)} targetType={reportTargetType} targetId={targetId} />
     </div>
   );
