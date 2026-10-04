@@ -26,6 +26,7 @@ type ModerationSettings struct {
 	ContentScoresQueue   string
 	TargetSources        map[string]InternalSource
 	LiveSafety           LiveSafetySettings
+	AccessSecurity       AccessSecuritySettings
 }
 
 type InternalSource struct {
@@ -55,6 +56,7 @@ func ReadModerationSettingsFromEnvironment(reader *platformconfig.EnvironmentRea
 	settings.ReportEventsQueue = reader.ReadStringOrDefault("MODERATION_REPORT_EVENTS_QUEUE", "trust-domain-events")
 	settings.ContentScoresQueue = reader.ReadStringOrDefault("INTELLIGENCE_TRUST_CONTENT_SCORES_QUEUE", "intelligence-trust-content-scores")
 	settings.LiveSafety = readLiveSafetySettings(reader)
+	settings.AccessSecurity = readAccessSecuritySettings(reader)
 	settings.TargetSources = map[string]InternalSource{}
 	for name, prefix := range map[string]string{"social": "MODERATION_SOCIAL_INTERNAL", "commerce": "MODERATION_COMMERCE_INTERNAL", "live": "MODERATION_LIVE_INTERNAL"} {
 		if baseUrl := reader.ReadStringOrDefault(prefix+"_URL", ""); baseUrl != "" {
