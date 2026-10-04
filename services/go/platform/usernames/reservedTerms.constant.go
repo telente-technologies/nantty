@@ -22,6 +22,16 @@ var exactTerms = []string{
 	"webmaster", "noreply", "owner", "founder", "ceo", "all",
 }
 
+var webRouteTerms = []string{
+	"analytics", "bff", "brand", "brands", "cart", "category", "categories", "chat", "chats", "checkout", "clip", "clips", "coins",
+	"collection", "collections", "creator", "creators", "feed", "forgot-password", "live", "lives", "me", "notifications", "order",
+	"orders", "post", "posts", "product", "products", "profile", "reset-password", "saved", "settings", "store-rewards", "stores",
+	"subscriptions", "user", "users", "verify-email", "watch", "welcome", "cookies", "guidelines", "community-guidelines",
+	"creator-terms", "faq", "sitemap", "sitemaps", "robots", "favicon", "manifest", "_next", "static", "assets", "images", "icons", "fonts", "public",
+	"embed", "oembed", "share", "invite", "download", "app", "apps", "reels", "videos", "video", "rankings", "wallet", "studio",
+	"rss", "logout", "register", "auth", "oauth", "callback", "new", "create", "edit", "trending", "discover", "tags", "hashtag",
+}
+
 var prefixTerms = []string{
 	"admin", "superadmin", "verify", "verified", "official", "support", "security", "moderator", "customercare", "helpdesk",
 	"government", "govt", "ministry", "federal", "presidency", "president", "governor", "senate", "senator", "police", "army", "navy",
@@ -42,8 +52,11 @@ var brandImpersonationAffixes = []string{
 }
 
 func SystemReservedRules() []ReservedRule {
-	rules := make([]ReservedRule, 0, len(exactTerms)+len(prefixTerms)+len(containsTerms)+len(wellKnownBrands))
+	rules := make([]ReservedRule, 0, len(exactTerms)+len(webRouteTerms)+len(prefixTerms)+len(containsTerms)+len(wellKnownBrands))
 	for _, term := range exactTerms {
+		rules = append(rules, ReservedRule{Term: term, Kind: MatchExact})
+	}
+	for _, term := range webRouteTerms {
 		rules = append(rules, ReservedRule{Term: term, Kind: MatchExact})
 	}
 	for _, term := range prefixTerms {

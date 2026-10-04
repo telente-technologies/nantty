@@ -65,3 +65,12 @@ func TestAllIsReservedForGroupMentions(t *testing.T) {
 		t.Error("names that merely start with all stay available")
 	}
 }
+
+func TestTopLevelWebRoutesCanNeverBeUsernames(t *testing.T) {
+	rules := SystemReservedRules()
+	for _, route := range []string{"settings", "saved", "live", "mart", "clips", "explore", "login", "signup", "welcome", "orders", "messages", "notifications", "creator", "analytics", "verifyemail", "verify.email", "terms", "privacy", "cookies", "api", "bff", "cart", "checkout", "watch", "post", "product", "store", "user", "me", "sitemap", "robots", "_next", "storerewards", "forgot_password"} {
+		if _, found := FindMatchingReservedRule(NormalizeRequestedUsername(route), rules); !found {
+			t.Errorf("%q is a web route and must be reserved", route)
+		}
+	}
+}
