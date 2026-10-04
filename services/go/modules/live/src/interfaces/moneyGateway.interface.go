@@ -7,11 +7,12 @@ import (
 )
 
 var (
-	ErrInsufficientCoins        = errors.New("insufficient coins")
-	ErrCannotGiftSelf           = errors.New("cannot gift self")
-	ErrIdempotencyKeyReused     = errors.New("idempotency key reused with a different request")
-	ErrBattleSettledDifferently = errors.New("battle already settled differently")
-	ErrMoneyRequestInvalid      = errors.New("money request invalid")
+	ErrInsufficientCoins           = errors.New("insufficient coins")
+	ErrCannotGiftSelf              = errors.New("cannot gift self")
+	ErrRecipientCannotReceiveGifts = errors.New("recipient cannot receive gifts")
+	ErrIdempotencyKeyReused        = errors.New("idempotency key reused with a different request")
+	ErrBattleSettledDifferently    = errors.New("battle already settled differently")
+	ErrMoneyRequestInvalid         = errors.New("money request invalid")
 )
 
 type ChargeGiftRequest struct {

@@ -73,6 +73,7 @@ type LiveSessionView struct {
 	AcceptedLiveAdTermsVersion *string         `json:"acceptedLiveAdTermsVersion"`
 	SponsorshipLine            *string         `json:"sponsorshipLine"`
 	TopSupporterUserId         *string         `json:"topSupporterUserId"`
+	Safety                     *LiveSafetyView `json:"safety"`
 }
 
 type SuggestedLiveView struct {
