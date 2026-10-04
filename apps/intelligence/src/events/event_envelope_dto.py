@@ -34,6 +34,8 @@ class EventContext(ContractModel):
     ranking_request_id: OpaqueIdentifier | None = None
     experiment_assignments: dict[str, str] = Field(default_factory=dict, max_length=20)
     device_class: Literal["android", "ios", "web", "other"] | None = None
+    actor_trust: Literal["new", "low", "normal"] | None = None
+    actor_cluster_key: OpaqueIdentifier | None = None
 
 
 class EventEnvelopeBase(ContractModel):

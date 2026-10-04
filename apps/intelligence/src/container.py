@@ -11,6 +11,21 @@ from src.modules.ads.services.ad_selection_service import AdSelectionService
 from src.modules.audio.services.audio_fingerprint_index_service import AudioFingerprintIndexService
 from src.modules.chat_spam.services.chat_spam_scoring_service import ChatSpamScoringService
 from src.modules.clips.services.clip_ranking_service import ClipRankingService
+from src.modules.content_scoring.repositories.content_score_queue_repository import (
+    AmqpContentScorePublisher,
+    ContentScorePublisher,
+    NullContentScorePublisher,
+)
+from src.modules.content_scoring.repositories.sensitivity_advisory_publisher_repository import (
+    AmqpSensitivityAdvisoryPublisher,
+    NullSensitivityAdvisoryPublisher,
+    SensitivityAdvisoryPublisher,
+)
+from src.modules.content_scoring.services.content_scoring_service import ContentScoringService
+from src.modules.content_scoring.services.image_moderation_interface_service import (
+    ImageModerationModelHolder,
+    ImageModerationService,
+)
 from src.modules.creator_eligibility.services.real_followers_estimation_service import (
     RealFollowersEstimationService,
 )
@@ -22,6 +37,8 @@ from src.modules.events_ingestion.services.event_ingestion_service import EventI
 from src.modules.experiments.services.experiment_service import ExperimentService
 from src.modules.extended_risk.services.extended_risk_scoring_service import ExtendedRiskScoringService
 from src.modules.feed.services.feed_ranking_service import FeedRankingService
+from src.modules.live_safety.live_safety_module import build_live_safety_scoring_service
+from src.modules.live_safety.services.live_safety_scoring_service import LiveSafetyScoringService
 from src.modules.model_registry.repositories.model_registry_repository import ModelRegistry
 from src.modules.model_registry.services.active_model_holder_service import ActiveModelHolder
 from src.modules.moderation.services.content_moderation_service import ContentModerationService
@@ -69,6 +86,10 @@ class ApplicationContainer:
     chat_spam_scoring_service: ChatSpamScoringService
     moderation_model_holder: ModerationModelHolder
     content_moderation_service: ContentModerationService
+    image_moderation_model_holder: ImageModerationModelHolder
+    image_moderation_service: ImageModerationService
+    content_scoring_service: ContentScoringService
+    live_safety_scoring_service: LiveSafetyScoringService
     real_followers_estimation_service: RealFollowersEstimationService
     extended_risk_scoring_service: ExtendedRiskScoringService
     ad_click_prediction_service: AdClickPredictionService
@@ -83,6 +104,22 @@ def build_feature_backend(settings: IntelligenceSettings) -> FeatureBackend:
     if settings.redis_url:
         return RedisFeatureBackend(settings.redis_url, settings.redis_socket_timeout_seconds)
     return InMemoryFeatureBackend()
+
+
+def build_content_score_publisher(
+    settings: IntelligenceSettings, channels: RabbitMqChannelProvider | None
+) -> ContentScorePublisher:
+    if settings.event_bus == "rabbitmq" and channels is not None:
+        return AmqpContentScorePublisher(channels, settings.trust_content_scores_queue)
+    return NullContentScorePublisher()
+
+
+def build_sensitivity_advisory_publisher(
+    settings: IntelligenceSettings, channels: RabbitMqChannelProvider | None
+) -> SensitivityAdvisoryPublisher:
+    if settings.event_bus == "rabbitmq" and channels is not None:
+        return AmqpSensitivityAdvisoryPublisher(channels)
+    return NullSensitivityAdvisoryPublisher()
 
 
 def build_trust_advisory_publisher(
@@ -115,6 +152,18 @@ def build_application_container(
         build_trust_advisory_publisher(settings, rabbitmq_channels), backend, feature_store.keyspace
     )
     moderation_model_holder = ModerationModelHolder()
+    content_moderation_service = ContentModerationService(moderation_model_holder)
+    image_moderation_model_holder = ImageModerationModelHolder()
+    image_moderation_service = ImageModerationService(image_moderation_model_holder)
+    content_scoring_service = ContentScoringService(
+        content_moderation_service,
+        image_moderation_service,
+        build_content_score_publisher(settings, rabbitmq_channels),
+        backend,
+        feature_store.keyspace,
+        build_sensitivity_advisory_publisher(settings, rabbitmq_channels),
+        settings.media_bucket,
+    )
     return ApplicationContainer(
         settings=settings,
         feature_backend=backend,
@@ -123,9 +172,12 @@ def build_application_container(
         feature_log_sink=feature_log_sink,
         event_ingestion_service=event_ingestion_service,
         domain_event_consumer_service=DomainEventConsumerService(
-            feature_store, event_ingestion_service, PersonalDataPurgeService(backend, feature_store.keyspace)
+            feature_store,
+            event_ingestion_service,
+            PersonalDataPurgeService(backend, feature_store.keyspace),
+            content_scoring_service,
         ),
-        feed_ranking_service=FeedRankingService(feature_store, model_holder, feature_log_sink),
+        feed_ranking_service=FeedRankingService(feature_store, model_holder, feature_log_sink, suggestion_service),
         clip_ranking_service=clip_ranking_service,
         ad_selection_service=AdSelectionService(feature_store, model_holder, feature_log_sink),
         product_recommendation_service=ProductRecommendationService(feature_store, model_holder),
@@ -139,7 +191,13 @@ def build_application_container(
         suspension_suggestion_service=suggestion_service,
         chat_spam_scoring_service=ChatSpamScoringService(feature_store, suggestion_service),
         moderation_model_holder=moderation_model_holder,
-        content_moderation_service=ContentModerationService(moderation_model_holder),
+        content_moderation_service=content_moderation_service,
+        image_moderation_model_holder=image_moderation_model_holder,
+        image_moderation_service=image_moderation_service,
+        content_scoring_service=content_scoring_service,
+        live_safety_scoring_service=build_live_safety_scoring_service(
+            settings, rabbitmq_channels, image_moderation_model_holder, content_moderation_service
+        ),
         real_followers_estimation_service=RealFollowersEstimationService(),
         extended_risk_scoring_service=ExtendedRiskScoringService(suggestion_service),
         ad_click_prediction_service=AdClickPredictionService(feature_store, model_holder),

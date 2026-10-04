@@ -45,6 +45,20 @@ class IntelligenceSettings(BaseSettings):
     rabbitmq_prefetch: int = Field(default=20, ge=1, le=1000)
     domain_events_queue: str = "intelligence-domain-events"
     trust_advisory_queue: str = "intelligence-trust-advisory"
+    trust_content_scores_queue: str = "intelligence-trust-content-scores"
+    media_bucket: str = ""
+    server_workers: int = Field(default=1, ge=1, le=32)
+    trust_live_safety_queue: str = "intelligence-trust-live-safety"
+    live_safety_frames_queue: str = "jobs-live-frames"
+    live_safety_audio_queue: str = "jobs-live-audio"
+    live_safety_prefetch: int = Field(default=10, ge=1, le=200)
+    live_safety_rekognition: Literal["auto", "enabled", "disabled"] = "auto"
+    live_safety_rekognition_min_confidence: float = Field(default=50.0, ge=0.0, le=100.0)
+    live_safety_aws_region: str = "us-east-1"
+    live_safety_transcribe_enabled: bool = False
+    live_safety_transcribe_output_bucket: str = ""
+    live_safety_transcribe_language_code: str = "en-US"
+    live_safety_csam_hash_matching_enabled: bool = False
 
     sqs_endpoint_url: str = ""
     sqs_region: str = "us-east-1"
