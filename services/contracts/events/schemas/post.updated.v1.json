@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/post.updated.v1.json",
+  "title": "PostUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "postId"
+  ],
+  "properties": {
+    "postId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "enum": [
+        "post",
+        "clip",
+        "story"
+      ]
+    },
+    "moderationVisibility": {
+      "enum": [
+        "visible",
+        "restricted",
+        "hidden",
+        "removed"
+      ]
+    },
+    "mediaId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "mediaStatus": {
+      "enum": [
+        "processing",
+        "ready",
+        "failed"
+      ]
+    }
+  }
+}

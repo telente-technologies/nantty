@@ -28,6 +28,14 @@
         "string",
         "null"
       ]
+    },
+    "moderationVisibility": {
+      "enum": [
+        "visible",
+        "restricted",
+        "hidden",
+        "removed"
+      ]
     }
   }
 }

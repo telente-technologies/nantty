@@ -10,6 +10,22 @@
   "properties": {
     "storeId": {
       "type": "string"
+    },
+    "moderationVisibility": {
+      "enum": [
+        "visible",
+        "restricted",
+        "hidden",
+        "removed"
+      ]
+    },
+    "featuredProductIds": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
     }
   }
 }

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/productBundle.saved.v1.json",
+  "title": "ProductBundleSaved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bundleId",
+    "storeId",
+    "status"
+  ],
+  "properties": {
+    "bundleId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "storeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "paused",
+        "draft"
+      ]
+    },
+    "productIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  }
+}

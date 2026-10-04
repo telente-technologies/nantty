@@ -10,6 +10,14 @@
   "properties": {
     "soundId": {
       "type": "string"
+    },
+    "moderationVisibility": {
+      "enum": [
+        "visible",
+        "restricted",
+        "hidden",
+        "removed"
+      ]
     }
   }
 }
