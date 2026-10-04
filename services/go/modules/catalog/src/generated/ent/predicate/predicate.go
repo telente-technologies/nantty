@@ -12,6 +12,9 @@ type Brand func(*sql.Selector)
 // Category is the predicate function for category builders.
 type Category func(*sql.Selector)
 
+// FeaturedProduct is the predicate function for featuredproduct builders.
+type FeaturedProduct func(*sql.Selector)
+
 // IdempotentRequest is the predicate function for idempotentrequest builders.
 type IdempotentRequest func(*sql.Selector)
 
@@ -38,3 +41,6 @@ type Store func(*sql.Selector)
 
 // StoreMember is the predicate function for storemember builders.
 type StoreMember func(*sql.Selector)
+
+// StoreVisitor is the predicate function for storevisitor builders.
+type StoreVisitor func(*sql.Selector)

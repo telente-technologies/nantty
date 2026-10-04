@@ -18,6 +18,8 @@ type Tx struct {
 	Brand *BrandClient
 	// Category is the client for interacting with the Category builders.
 	Category *CategoryClient
+	// FeaturedProduct is the client for interacting with the FeaturedProduct builders.
+	FeaturedProduct *FeaturedProductClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
@@ -36,6 +38,8 @@ type Tx struct {
 	Store *StoreClient
 	// StoreMember is the client for interacting with the StoreMember builders.
 	StoreMember *StoreMemberClient
+	// StoreVisitor is the client for interacting with the StoreVisitor builders.
+	StoreVisitor *StoreVisitorClient
 
 	// lazily loaded.
 	client     *Client
@@ -169,6 +173,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Brand = NewBrandClient(tx.config)
 	tx.Category = NewCategoryClient(tx.config)
+	tx.FeaturedProduct = NewFeaturedProductClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.Product = NewProductClient(tx.config)
@@ -178,6 +183,7 @@ func (tx *Tx) init() {
 	tx.Review = NewReviewClient(tx.config)
 	tx.Store = NewStoreClient(tx.config)
 	tx.StoreMember = NewStoreMemberClient(tx.config)
+	tx.StoreVisitor = NewStoreVisitorClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

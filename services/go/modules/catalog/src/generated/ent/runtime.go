@@ -7,6 +7,7 @@ import (
 	"zudomart/modules/catalog/src/databases/schema"
 	"zudomart/modules/catalog/src/generated/ent/brand"
 	"zudomart/modules/catalog/src/generated/ent/category"
+	"zudomart/modules/catalog/src/generated/ent/featuredproduct"
 	"zudomart/modules/catalog/src/generated/ent/idempotentrequest"
 	"zudomart/modules/catalog/src/generated/ent/outboxevent"
 	"zudomart/modules/catalog/src/generated/ent/product"
@@ -16,6 +17,7 @@ import (
 	"zudomart/modules/catalog/src/generated/ent/review"
 	"zudomart/modules/catalog/src/generated/ent/store"
 	"zudomart/modules/catalog/src/generated/ent/storemember"
+	"zudomart/modules/catalog/src/generated/ent/storevisitor"
 
 	"github.com/google/uuid"
 )
@@ -164,6 +166,49 @@ func init() {
 	categoryDescID := categoryMixinFields0[0].Descriptor()
 	// category.DefaultID holds the default value on creation for the id field.
 	category.DefaultID = categoryDescID.Default.(func() uuid.UUID)
+	featuredproductMixin := schema.FeaturedProduct{}.Mixin()
+	featuredproductMixinFields0 := featuredproductMixin[0].Fields()
+	_ = featuredproductMixinFields0
+	featuredproductFields := schema.FeaturedProduct{}.Fields()
+	_ = featuredproductFields
+	// featuredproductDescCreatedAt is the schema descriptor for created_at field.
+	featuredproductDescCreatedAt := featuredproductMixinFields0[1].Descriptor()
+	// featuredproduct.DefaultCreatedAt holds the default value on creation for the created_at field.
+	featuredproduct.DefaultCreatedAt = featuredproductDescCreatedAt.Default.(func() time.Time)
+	// featuredproductDescPlacement is the schema descriptor for placement field.
+	featuredproductDescPlacement := featuredproductFields[2].Descriptor()
+	// featuredproduct.PlacementValidator is a validator for the "placement" field. It is called by the builders before save.
+	featuredproduct.PlacementValidator = func() func(string) error {
+		validators := featuredproductDescPlacement.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(placement string) error {
+			for _, fn := range fns {
+				if err := fn(placement); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// featuredproductDescFeaturedSince is the schema descriptor for featured_since field.
+	featuredproductDescFeaturedSince := featuredproductFields[4].Descriptor()
+	// featuredproduct.DefaultFeaturedSince holds the default value on creation for the featured_since field.
+	featuredproduct.DefaultFeaturedSince = featuredproductDescFeaturedSince.Default.(func() time.Time)
+	// featuredproductDescViewCount is the schema descriptor for view_count field.
+	featuredproductDescViewCount := featuredproductFields[5].Descriptor()
+	// featuredproduct.DefaultViewCount holds the default value on creation for the view_count field.
+	featuredproduct.DefaultViewCount = featuredproductDescViewCount.Default.(int)
+	// featuredproductDescClickCount is the schema descriptor for click_count field.
+	featuredproductDescClickCount := featuredproductFields[6].Descriptor()
+	// featuredproduct.DefaultClickCount holds the default value on creation for the click_count field.
+	featuredproduct.DefaultClickCount = featuredproductDescClickCount.Default.(int)
+	// featuredproductDescID is the schema descriptor for id field.
+	featuredproductDescID := featuredproductMixinFields0[0].Descriptor()
+	// featuredproduct.DefaultID holds the default value on creation for the id field.
+	featuredproduct.DefaultID = featuredproductDescID.Default.(func() uuid.UUID)
 	idempotentrequestMixin := schema.IdempotentRequest{}.Mixin()
 	idempotentrequestMixinFields0 := idempotentrequestMixin[0].Fields()
 	_ = idempotentrequestMixinFields0
@@ -339,8 +384,12 @@ func init() {
 	productDescUnitsSold := productFields[23].Descriptor()
 	// product.DefaultUnitsSold holds the default value on creation for the units_sold field.
 	product.DefaultUnitsSold = productDescUnitsSold.Default.(int)
+	// productDescModerationVisibility is the schema descriptor for moderation_visibility field.
+	productDescModerationVisibility := productFields[24].Descriptor()
+	// product.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
+	product.DefaultModerationVisibility = productDescModerationVisibility.Default.(string)
 	// productDescUpdatedAt is the schema descriptor for updated_at field.
-	productDescUpdatedAt := productFields[24].Descriptor()
+	productDescUpdatedAt := productFields[25].Descriptor()
 	// product.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	product.DefaultUpdatedAt = productDescUpdatedAt.Default.(func() time.Time)
 	// product.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -503,23 +552,23 @@ func init() {
 	// productvariant.BarcodeValidator is a validator for the "barcode" field. It is called by the builders before save.
 	productvariant.BarcodeValidator = productvariantDescBarcode.Validators[0].(func(string) error)
 	// productvariantDescLowStockThreshold is the schema descriptor for low_stock_threshold field.
-	productvariantDescLowStockThreshold := productvariantFields[12].Descriptor()
+	productvariantDescLowStockThreshold := productvariantFields[13].Descriptor()
 	// productvariant.DefaultLowStockThreshold holds the default value on creation for the low_stock_threshold field.
 	productvariant.DefaultLowStockThreshold = productvariantDescLowStockThreshold.Default.(int)
 	// productvariantDescReorderPoint is the schema descriptor for reorder_point field.
-	productvariantDescReorderPoint := productvariantFields[13].Descriptor()
+	productvariantDescReorderPoint := productvariantFields[14].Descriptor()
 	// productvariant.DefaultReorderPoint holds the default value on creation for the reorder_point field.
 	productvariant.DefaultReorderPoint = productvariantDescReorderPoint.Default.(int)
 	// productvariantDescReorderQuantity is the schema descriptor for reorder_quantity field.
-	productvariantDescReorderQuantity := productvariantFields[14].Descriptor()
+	productvariantDescReorderQuantity := productvariantFields[15].Descriptor()
 	// productvariant.DefaultReorderQuantity holds the default value on creation for the reorder_quantity field.
 	productvariant.DefaultReorderQuantity = productvariantDescReorderQuantity.Default.(int)
 	// productvariantDescPosition is the schema descriptor for position field.
-	productvariantDescPosition := productvariantFields[15].Descriptor()
+	productvariantDescPosition := productvariantFields[16].Descriptor()
 	// productvariant.DefaultPosition holds the default value on creation for the position field.
 	productvariant.DefaultPosition = productvariantDescPosition.Default.(int)
 	// productvariantDescUpdatedAt is the schema descriptor for updated_at field.
-	productvariantDescUpdatedAt := productvariantFields[16].Descriptor()
+	productvariantDescUpdatedAt := productvariantFields[17].Descriptor()
 	// productvariant.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	productvariant.DefaultUpdatedAt = productvariantDescUpdatedAt.Default.(func() time.Time)
 	// productvariant.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -744,8 +793,12 @@ func init() {
 	storeDescRatingCount := storeFields[13].Descriptor()
 	// store.DefaultRatingCount holds the default value on creation for the rating_count field.
 	store.DefaultRatingCount = storeDescRatingCount.Default.(int)
+	// storeDescModerationVisibility is the schema descriptor for moderation_visibility field.
+	storeDescModerationVisibility := storeFields[14].Descriptor()
+	// store.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
+	store.DefaultModerationVisibility = storeDescModerationVisibility.Default.(string)
 	// storeDescUpdatedAt is the schema descriptor for updated_at field.
-	storeDescUpdatedAt := storeFields[14].Descriptor()
+	storeDescUpdatedAt := storeFields[16].Descriptor()
 	// store.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	store.DefaultUpdatedAt = storeDescUpdatedAt.Default.(func() time.Time)
 	// store.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -781,4 +834,25 @@ func init() {
 	storememberDescID := storememberMixinFields0[0].Descriptor()
 	// storemember.DefaultID holds the default value on creation for the id field.
 	storemember.DefaultID = storememberDescID.Default.(func() uuid.UUID)
+	storevisitorMixin := schema.StoreVisitor{}.Mixin()
+	storevisitorMixinFields0 := storevisitorMixin[0].Fields()
+	_ = storevisitorMixinFields0
+	storevisitorFields := schema.StoreVisitor{}.Fields()
+	_ = storevisitorFields
+	// storevisitorDescCreatedAt is the schema descriptor for created_at field.
+	storevisitorDescCreatedAt := storevisitorMixinFields0[1].Descriptor()
+	// storevisitor.DefaultCreatedAt holds the default value on creation for the created_at field.
+	storevisitor.DefaultCreatedAt = storevisitorDescCreatedAt.Default.(func() time.Time)
+	// storevisitorDescVisitCount is the schema descriptor for visit_count field.
+	storevisitorDescVisitCount := storevisitorFields[2].Descriptor()
+	// storevisitor.DefaultVisitCount holds the default value on creation for the visit_count field.
+	storevisitor.DefaultVisitCount = storevisitorDescVisitCount.Default.(int)
+	// storevisitorDescLastVisitedAt is the schema descriptor for last_visited_at field.
+	storevisitorDescLastVisitedAt := storevisitorFields[3].Descriptor()
+	// storevisitor.DefaultLastVisitedAt holds the default value on creation for the last_visited_at field.
+	storevisitor.DefaultLastVisitedAt = storevisitorDescLastVisitedAt.Default.(func() time.Time)
+	// storevisitorDescID is the schema descriptor for id field.
+	storevisitorDescID := storevisitorMixinFields0[0].Descriptor()
+	// storevisitor.DefaultID holds the default value on creation for the id field.
+	storevisitor.DefaultID = storevisitorDescID.Default.(func() uuid.UUID)
 }
