@@ -21,6 +21,7 @@ model IdentityProfile {
   verified       Boolean
   status         String
   creatorStatus  String  @map("creator_status")
+  countryCode    String? @map("country_code")
 
   @@map("profiles")
   @@schema("users")
@@ -51,4 +52,21 @@ model IdentityAccount {
 
   @@map("accounts")
   @@schema("auth")
+}
+
+model IdentityProfileCheckmark {
+  profileId String @id @map("profile_id") @db.Uuid
+  accountId String @map("account_id") @db.Uuid
+  color     String
+  status    String
+
+  @@map("profile_checkmarks")
+  @@schema("users")
+}
+
+model IdentityAdminCreatedAccount {
+  accountId String @id @map("account_id") @db.Uuid
+
+  @@map("admin_created_accounts")
+  @@schema("users")
 }
