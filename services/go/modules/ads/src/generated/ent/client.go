@@ -19,6 +19,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
+	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
@@ -64,6 +65,8 @@ type Client struct {
 	AdBoost *AdBoostClient
 	// AdCampaign is the client for interacting with the AdCampaign builders.
 	AdCampaign *AdCampaignClient
+	// AdCardStatsDaily is the client for interacting with the AdCardStatsDaily builders.
+	AdCardStatsDaily *AdCardStatsDailyClient
 	// AdContentSignal is the client for interacting with the AdContentSignal builders.
 	AdContentSignal *AdContentSignalClient
 	// AdConversion is the client for interacting with the AdConversion builders.
@@ -113,6 +116,7 @@ func (c *Client) init() {
 	c.AdAudienceMember = NewAdAudienceMemberClient(c.config)
 	c.AdBoost = NewAdBoostClient(c.config)
 	c.AdCampaign = NewAdCampaignClient(c.config)
+	c.AdCardStatsDaily = NewAdCardStatsDailyClient(c.config)
 	c.AdContentSignal = NewAdContentSignalClient(c.config)
 	c.AdConversion = NewAdConversionClient(c.config)
 	c.AdCreatorEarning = NewAdCreatorEarningClient(c.config)
@@ -228,6 +232,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AdAudienceMember:   NewAdAudienceMemberClient(cfg),
 		AdBoost:            NewAdBoostClient(cfg),
 		AdCampaign:         NewAdCampaignClient(cfg),
+		AdCardStatsDaily:   NewAdCardStatsDailyClient(cfg),
 		AdContentSignal:    NewAdContentSignalClient(cfg),
 		AdConversion:       NewAdConversionClient(cfg),
 		AdCreatorEarning:   NewAdCreatorEarningClient(cfg),
@@ -270,6 +275,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AdAudienceMember:   NewAdAudienceMemberClient(cfg),
 		AdBoost:            NewAdBoostClient(cfg),
 		AdCampaign:         NewAdCampaignClient(cfg),
+		AdCardStatsDaily:   NewAdCardStatsDailyClient(cfg),
 		AdContentSignal:    NewAdContentSignalClient(cfg),
 		AdConversion:       NewAdConversionClient(cfg),
 		AdCreatorEarning:   NewAdCreatorEarningClient(cfg),
@@ -315,11 +321,11 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
-		c.AdAudienceMember, c.AdBoost, c.AdCampaign, c.AdContentSignal, c.AdConversion,
-		c.AdCreatorEarning, c.AdCustomAudience, c.AdFrequencyPolicy,
-		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
-		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily,
-		c.OutboxEvent,
+		c.AdAudienceMember, c.AdBoost, c.AdCampaign, c.AdCardStatsDaily,
+		c.AdContentSignal, c.AdConversion, c.AdCreatorEarning, c.AdCustomAudience,
+		c.AdFrequencyPolicy, c.AdFundsTransaction, c.AdGroup, c.AdImpression,
+		c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily, c.AdScheduledReport,
+		c.AdSpendBatch, c.AdStatsDaily, c.OutboxEvent,
 	} {
 		n.Use(hooks...)
 	}
@@ -330,11 +336,11 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
-		c.AdAudienceMember, c.AdBoost, c.AdCampaign, c.AdContentSignal, c.AdConversion,
-		c.AdCreatorEarning, c.AdCustomAudience, c.AdFrequencyPolicy,
-		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
-		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily,
-		c.OutboxEvent,
+		c.AdAudienceMember, c.AdBoost, c.AdCampaign, c.AdCardStatsDaily,
+		c.AdContentSignal, c.AdConversion, c.AdCreatorEarning, c.AdCustomAudience,
+		c.AdFrequencyPolicy, c.AdFundsTransaction, c.AdGroup, c.AdImpression,
+		c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily, c.AdScheduledReport,
+		c.AdSpendBatch, c.AdStatsDaily, c.OutboxEvent,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -359,6 +365,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AdBoost.mutate(ctx, m)
 	case *AdCampaignMutation:
 		return c.AdCampaign.mutate(ctx, m)
+	case *AdCardStatsDailyMutation:
+		return c.AdCardStatsDaily.mutate(ctx, m)
 	case *AdContentSignalMutation:
 		return c.AdContentSignal.mutate(ctx, m)
 	case *AdConversionMutation:
@@ -1455,6 +1463,139 @@ func (c *AdCampaignClient) mutate(ctx context.Context, m *AdCampaignMutation) (V
 		return (&AdCampaignDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AdCampaign mutation op: %q", m.Op())
+	}
+}
+
+// AdCardStatsDailyClient is a client for the AdCardStatsDaily schema.
+type AdCardStatsDailyClient struct {
+	config
+}
+
+// NewAdCardStatsDailyClient returns a client for the AdCardStatsDaily from the given config.
+func NewAdCardStatsDailyClient(c config) *AdCardStatsDailyClient {
+	return &AdCardStatsDailyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adcardstatsdaily.Hooks(f(g(h())))`.
+func (c *AdCardStatsDailyClient) Use(hooks ...Hook) {
+	c.hooks.AdCardStatsDaily = append(c.hooks.AdCardStatsDaily, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adcardstatsdaily.Intercept(f(g(h())))`.
+func (c *AdCardStatsDailyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdCardStatsDaily = append(c.inters.AdCardStatsDaily, interceptors...)
+}
+
+// Create returns a builder for creating a AdCardStatsDaily entity.
+func (c *AdCardStatsDailyClient) Create() *AdCardStatsDailyCreate {
+	mutation := newAdCardStatsDailyMutation(c.config, OpCreate)
+	return &AdCardStatsDailyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdCardStatsDaily entities.
+func (c *AdCardStatsDailyClient) CreateBulk(builders ...*AdCardStatsDailyCreate) *AdCardStatsDailyCreateBulk {
+	return &AdCardStatsDailyCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdCardStatsDailyClient) MapCreateBulk(slice any, setFunc func(*AdCardStatsDailyCreate, int)) *AdCardStatsDailyCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdCardStatsDailyCreateBulk{err: fmt.Errorf("calling to AdCardStatsDailyClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdCardStatsDailyCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdCardStatsDailyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdCardStatsDaily.
+func (c *AdCardStatsDailyClient) Update() *AdCardStatsDailyUpdate {
+	mutation := newAdCardStatsDailyMutation(c.config, OpUpdate)
+	return &AdCardStatsDailyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdCardStatsDailyClient) UpdateOne(_m *AdCardStatsDaily) *AdCardStatsDailyUpdateOne {
+	mutation := newAdCardStatsDailyMutation(c.config, OpUpdateOne, withAdCardStatsDaily(_m))
+	return &AdCardStatsDailyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdCardStatsDailyClient) UpdateOneID(id uuid.UUID) *AdCardStatsDailyUpdateOne {
+	mutation := newAdCardStatsDailyMutation(c.config, OpUpdateOne, withAdCardStatsDailyID(id))
+	return &AdCardStatsDailyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdCardStatsDaily.
+func (c *AdCardStatsDailyClient) Delete() *AdCardStatsDailyDelete {
+	mutation := newAdCardStatsDailyMutation(c.config, OpDelete)
+	return &AdCardStatsDailyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdCardStatsDailyClient) DeleteOne(_m *AdCardStatsDaily) *AdCardStatsDailyDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdCardStatsDailyClient) DeleteOneID(id uuid.UUID) *AdCardStatsDailyDeleteOne {
+	builder := c.Delete().Where(adcardstatsdaily.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdCardStatsDailyDeleteOne{builder}
+}
+
+// Query returns a query builder for AdCardStatsDaily.
+func (c *AdCardStatsDailyClient) Query() *AdCardStatsDailyQuery {
+	return &AdCardStatsDailyQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdCardStatsDaily},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdCardStatsDaily entity by its id.
+func (c *AdCardStatsDailyClient) Get(ctx context.Context, id uuid.UUID) (*AdCardStatsDaily, error) {
+	return c.Query().Where(adcardstatsdaily.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdCardStatsDailyClient) GetX(ctx context.Context, id uuid.UUID) *AdCardStatsDaily {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdCardStatsDailyClient) Hooks() []Hook {
+	return c.hooks.AdCardStatsDaily
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdCardStatsDailyClient) Interceptors() []Interceptor {
+	return c.inters.AdCardStatsDaily
+}
+
+func (c *AdCardStatsDailyClient) mutate(ctx context.Context, m *AdCardStatsDailyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdCardStatsDailyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdCardStatsDailyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdCardStatsDailyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdCardStatsDailyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdCardStatsDaily mutation op: %q", m.Op())
 	}
 }
 
@@ -3457,17 +3598,19 @@ func (c *OutboxEventClient) mutate(ctx context.Context, m *OutboxEventMutation) 
 type (
 	hooks struct {
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
-		AdAudienceMember, AdBoost, AdCampaign, AdContentSignal, AdConversion,
-		AdCreatorEarning, AdCustomAudience, AdFrequencyPolicy, AdFundsTransaction,
-		AdGroup, AdImpression, AdMedia, AdPolicyCategory, AdPoolDaily,
-		AdScheduledReport, AdSpendBatch, AdStatsDaily, OutboxEvent []ent.Hook
+		AdAudienceMember, AdBoost, AdCampaign, AdCardStatsDaily, AdContentSignal,
+		AdConversion, AdCreatorEarning, AdCustomAudience, AdFrequencyPolicy,
+		AdFundsTransaction, AdGroup, AdImpression, AdMedia, AdPolicyCategory,
+		AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
+		OutboxEvent []ent.Hook
 	}
 	inters struct {
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
-		AdAudienceMember, AdBoost, AdCampaign, AdContentSignal, AdConversion,
-		AdCreatorEarning, AdCustomAudience, AdFrequencyPolicy, AdFundsTransaction,
-		AdGroup, AdImpression, AdMedia, AdPolicyCategory, AdPoolDaily,
-		AdScheduledReport, AdSpendBatch, AdStatsDaily, OutboxEvent []ent.Interceptor
+		AdAudienceMember, AdBoost, AdCampaign, AdCardStatsDaily, AdContentSignal,
+		AdConversion, AdCreatorEarning, AdCustomAudience, AdFrequencyPolicy,
+		AdFundsTransaction, AdGroup, AdImpression, AdMedia, AdPolicyCategory,
+		AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
+		OutboxEvent []ent.Interceptor
 	}
 )
 

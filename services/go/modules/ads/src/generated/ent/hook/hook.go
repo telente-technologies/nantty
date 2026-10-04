@@ -104,6 +104,18 @@ func (f AdCampaignFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdCampaignMutation", m)
 }
 
+// The AdCardStatsDailyFunc type is an adapter to allow the use of ordinary
+// function as AdCardStatsDaily mutator.
+type AdCardStatsDailyFunc func(context.Context, *ent.AdCardStatsDailyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdCardStatsDailyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdCardStatsDailyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdCardStatsDailyMutation", m)
+}
+
 // The AdContentSignalFunc type is an adapter to allow the use of ordinary
 // function as AdContentSignal mutator.
 type AdContentSignalFunc func(context.Context, *ent.AdContentSignalMutation) (ent.Value, error)

@@ -323,6 +323,35 @@ var (
 			},
 		},
 	}
+	// AdCardStatsDailiesColumns holds the columns for the "ad_card_stats_dailies" table.
+	AdCardStatsDailiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "day", Type: field.TypeString, Size: 10},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "ad_id", Type: field.TypeUUID},
+		{Name: "card_index", Type: field.TypeInt},
+		{Name: "impressions", Type: field.TypeInt64, Default: 0},
+		{Name: "clicks", Type: field.TypeInt64, Default: 0},
+	}
+	// AdCardStatsDailiesTable holds the schema information for the "ad_card_stats_dailies" table.
+	AdCardStatsDailiesTable = &schema.Table{
+		Name:       "ad_card_stats_dailies",
+		Columns:    AdCardStatsDailiesColumns,
+		PrimaryKey: []*schema.Column{AdCardStatsDailiesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adcardstatsdaily_day_ad_id_card_index",
+				Unique:  true,
+				Columns: []*schema.Column{AdCardStatsDailiesColumns[2], AdCardStatsDailiesColumns[4], AdCardStatsDailiesColumns[5]},
+			},
+			{
+				Name:    "adcardstatsdaily_ad_id_day",
+				Unique:  false,
+				Columns: []*schema.Column{AdCardStatsDailiesColumns[4], AdCardStatsDailiesColumns[2]},
+			},
+		},
+	}
 	// AdContentSignalsColumns holds the columns for the "ad_content_signals" table.
 	AdContentSignalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -845,6 +874,7 @@ var (
 		AdAudienceMembersTable,
 		AdBoostsTable,
 		AdCampaignsTable,
+		AdCardStatsDailiesTable,
 		AdContentSignalsTable,
 		AdConversionsTable,
 		AdCreatorEarningsTable,

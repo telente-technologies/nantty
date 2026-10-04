@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
+	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
@@ -103,6 +104,7 @@ func checkColumn(t, c string) error {
 			adaudiencemember.Table:   adaudiencemember.ValidColumn,
 			adboost.Table:            adboost.ValidColumn,
 			adcampaign.Table:         adcampaign.ValidColumn,
+			adcardstatsdaily.Table:   adcardstatsdaily.ValidColumn,
 			adcontentsignal.Table:    adcontentsignal.ValidColumn,
 			adconversion.Table:       adconversion.ValidColumn,
 			adcreatorearning.Table:   adcreatorearning.ValidColumn,
