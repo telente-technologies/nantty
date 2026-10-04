@@ -2,6 +2,7 @@ import type { Handler, HandlerContext } from "../../../../types/handlerContext.t
 import type { Page } from "../../../../types/pagination.type.js";
 import { buildPageFromOverfetchedRows } from "../../../../utils/cursor.util.js";
 import { loadPostVisibleToViewer } from "../../../posts/services/postAccess.service.js";
+import { assertViewerMayReadConversation } from "../../../posts/services/postSubscriberAccess.service.js";
 import type { CommentWithReplies } from "../../models/comment.model.js";
 import { commentRepository } from "../../repositories/comment.repository.js";
 import { buildCommentViews } from "../../services/commentView.service.js";
@@ -12,6 +13,7 @@ const previewRepliesPerComment = 2;
 export function createListPostCommentsHandler(context: HandlerContext): Handler<ListPostCommentsQuery, Page<CommentWithReplies>> {
   return async ({ viewerId, postId, cursor, limit }) => {
     const post = await loadPostVisibleToViewer(context, viewerId, postId);
+    await assertViewerMayReadConversation(context, viewerId, post);
     const db = context.database.client;
     const page = buildPageFromOverfetchedRows(await commentRepository.pageTopLevel(db, postId, limit, cursor), limit);
     const previews = await commentRepository.previewRepliesFor(db, page.data.map((row) => row.id), previewRepliesPerComment);

@@ -1,25 +1,26 @@
 import type { Prisma } from "../../../generated/prisma/client.js";
 import type { Db } from "../../../types/database.type.js";
+import { shownToViewers } from "../../../constants/moderation.constant.js";
 
 export type CommentRow = Prisma.CommentGetPayload<object>;
 
 export const commentRepository = {
   create: (db: Db, data: Prisma.CommentUncheckedCreateInput): Promise<CommentRow> => db.comment.create({ data }),
 
-  findById: (db: Db, id: string): Promise<CommentRow | null> => db.comment.findFirst({ where: { id, deletedAt: null } }),
+  findById: (db: Db, id: string): Promise<CommentRow | null> => db.comment.findFirst({ where: { id, ...shownToViewers } }),
 
-  findManyByIds: (db: Db, ids: readonly string[]): Promise<CommentRow[]> => db.comment.findMany({ where: { id: { in: [...ids] }, deletedAt: null } }),
+  findManyByIds: (db: Db, ids: readonly string[]): Promise<CommentRow[]> => db.comment.findMany({ where: { id: { in: [...ids] }, ...shownToViewers } }),
 
   softDeleteMany: (db: Db, ids: readonly string[], at: Date) => db.comment.updateMany({ where: { id: { in: [...ids] }, deletedAt: null }, data: { deletedAt: at } }),
 
   directChildIds: async (db: Db, parentIds: readonly string[]): Promise<string[]> =>
-    (await db.comment.findMany({ where: { parentCommentId: { in: [...parentIds] }, deletedAt: null }, select: { id: true } })).map((row) => row.id),
+    (await db.comment.findMany({ where: { parentCommentId: { in: [...parentIds] }, ...shownToViewers }, select: { id: true } })).map((row) => row.id),
 
   incrementReplies: (db: Db, id: string, by: number) => db.comment.update({ where: { id }, data: { replyCount: { increment: by } } }),
 
   pageTopLevel: (db: Db, postId: string, limit: number, cursor: string | undefined): Promise<CommentRow[]> =>
     db.comment.findMany({
-      where: { postId, parentCommentId: null, deletedAt: null },
+      where: { postId, parentCommentId: null, ...shownToViewers },
       orderBy: { id: "desc" },
       take: limit + 1,
       ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
@@ -27,7 +28,7 @@ export const commentRepository = {
 
   pageReplies: (db: Db, parentCommentId: string, limit: number, cursor: string | undefined): Promise<CommentRow[]> =>
     db.comment.findMany({
-      where: { parentCommentId, deletedAt: null },
+      where: { parentCommentId, ...shownToViewers },
       orderBy: { id: "asc" },
       take: limit + 1,
       ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
@@ -36,7 +37,7 @@ export const commentRepository = {
   previewRepliesFor: async (db: Db, parentIds: readonly string[], perParent: number): Promise<Map<string, CommentRow[]>> => {
     const grouped = new Map<string, CommentRow[]>();
     await Promise.all(parentIds.map(async (parentId) => {
-      grouped.set(parentId, await db.comment.findMany({ where: { parentCommentId: parentId, deletedAt: null }, orderBy: { id: "asc" }, take: perParent }));
+      grouped.set(parentId, await db.comment.findMany({ where: { parentCommentId: parentId, ...shownToViewers }, orderBy: { id: "asc" }, take: perParent }));
     }));
     return grouped;
   },
@@ -52,7 +53,7 @@ export const commentRepository = {
 
   videoRepliesFor: (db: Db, commentIds: readonly string[]) =>
     db.post.findMany({
-      where: { replyToCommentId: { in: [...commentIds] }, kind: "clip", deletedAt: null },
+      where: { replyToCommentId: { in: [...commentIds] }, kind: "clip", ...shownToViewers },
       select: { id: true, replyToCommentId: true, createdAt: true, media: { select: { posterUrl: true }, orderBy: { position: "asc" }, take: 1 } },
       orderBy: { id: "asc" },
     }),
