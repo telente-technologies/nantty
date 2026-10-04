@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountHealthCallout } from "@/components/dashboard/accountHealthCallout";
 import { BusinessDocumentsBanner } from "@/components/dashboard/businessDocumentsBanner";
 import { DashboardActivityFeedPanel, DashboardAlertsPanel, DashboardRecentOrdersPanel } from "@/components/dashboard/dashboardActivityPanels";
 import { DashboardInsightTiles } from "@/components/dashboard/dashboardInsightTiles";
@@ -60,6 +61,7 @@ export function DashboardView() {
         </div>
       </header>
       <BusinessDocumentsBanner />
+      <AccountHealthCallout />
       {summaryQuery.errorMessage && !summary ? (
         <Callout tone="error" title="The overview could not load" action={<Button size="small" onClick={summaryQuery.reload}>Try again</Button>}>
           {summaryQuery.errorMessage}

@@ -67,6 +67,23 @@
   filter: brightness(1.06);
 }
 
+.appPrompt {
+  margin: 22px 0 0;
+  color: var(--deep-ink-muted, inherit);
+  font-size: 0.9375rem;
+}
+
+.appPrompt a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.storeBadges {
+  margin: 4px 0 0 -10px;
+  color: var(--deep-ink);
+}
+
 .photoColumn {
   min-height: 280px;
 }

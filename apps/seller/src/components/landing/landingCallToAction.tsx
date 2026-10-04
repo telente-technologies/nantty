@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { OfficialStoreBadges } from "@zudomart/web-kit";
+
+import { storeLinks } from "@/config/siteMetadata.config";
 
 import styles from "./landingCallToAction.module.css";
 
@@ -15,10 +18,11 @@ export function LandingCallToAction({ getTheAppUrl }: { readonly getTheAppUrl: s
             <Link href="/login" className={styles.primaryAction}>
               Sign in with your Zudomart account
             </Link>
-            <a href={getTheAppUrl} className={styles.secondaryAction}>
-              Get the app
-            </a>
           </div>
+          <p className={styles.appPrompt}>
+            New to Zudomart? <a href={getTheAppUrl}>Get the app</a> to open your store.
+          </p>
+          <OfficialStoreBadges links={storeLinks} className={styles.storeBadges} />
         </div>
         <div className={styles.photoColumn}>
           <img src="/photos/shopCounterOwner.webp" alt="A Zudomart seller smiling in her provisions store" width={1400} height={933} loading="lazy" className={styles.photo} />

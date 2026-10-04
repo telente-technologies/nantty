@@ -53,6 +53,9 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
         <span className={styles.commandLabel}>Search or jump to…</span>
         <kbd className={styles.shortcut}>Ctrl K</kbd>
       </button>
+      <a href={`${process.env.NEXT_PUBLIC_WEBAPP_URL ?? "https://app.zudomart.com"}/help/selling`} className={styles.commandButton} target="_blank" rel="noopener noreferrer">
+        <span className={styles.commandLabel}>Help</span>
+      </a>
       <ThemeSwitcher iconOnly label="Colour theme" className={styles.themeSwitcher} />
       <div className={styles.account}>
         <span className={styles.avatar} aria-hidden="true">
