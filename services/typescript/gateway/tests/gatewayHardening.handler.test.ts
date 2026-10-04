@@ -27,7 +27,7 @@ function buildConfig(upstreamUrl: string): GatewayConfig {
     accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.zudomart.test", audience: "zudomart-api" },
     maxRequestBodyBytes: 2048,
     routeRateLimitsPerMinute: { login: 2, search: 3 },
-    upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl },
+    upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl, support: upstreamUrl },
   };
 }
 
@@ -96,6 +96,7 @@ describe("per-route rate limits", () => {
     expect(classifyRequestForRateLimit("POST", "/api/v1/auth/otp/send")).toBe("otp");
     expect(classifyRequestForRateLimit("POST", "/api/v1/auth/password/reset")).toBe("reset");
     expect(classifyRequestForRateLimit("POST", "/api/v1/auth/register")).toBe("signup");
+    expect(classifyRequestForRateLimit("GET", "/api/v1/auth/username-available?username=ada")).toBe("usernameCheck");
     expect(classifyRequestForRateLimit("POST", "/api/v1/reports")).toBe("report");
     expect(classifyRequestForRateLimit("POST", "/api/v1/media/uploads")).toBe("upload");
     expect(classifyRequestForRateLimit("GET", "/api/v1/search/people")).toBe("search");
