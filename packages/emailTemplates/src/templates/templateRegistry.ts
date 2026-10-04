@@ -1,9 +1,11 @@
 import * as auth from "./auth.template";
 import * as buyerOrders from "./buyerOrders.template";
 import * as checkmarks from "./checkmarks.template";
+import * as copyright from "./copyright.template";
 import * as creator from "./creator.template";
 import type { EmailTemplateDefinition } from "./defineTemplate";
 import * as escrow from "./escrow.template";
+import * as identityVerification from "./identityVerification.template";
 import * as marketing from "./marketing.template";
 import * as milestones from "./milestones.template";
 import * as payments from "./payments.template";
@@ -30,9 +32,11 @@ export const emailTemplates = {
   ...pickTemplates(storeRewards),
   ...pickTemplates(creator),
   ...pickTemplates(checkmarks),
+  ...pickTemplates(identityVerification),
   ...pickTemplates(social),
   ...pickTemplates(milestones),
   ...pickTemplates(trust),
+  ...pickTemplates(copyright),
   ...pickTemplates(privacy),
   ...pickTemplates(support),
   ...pickTemplates(marketing),
