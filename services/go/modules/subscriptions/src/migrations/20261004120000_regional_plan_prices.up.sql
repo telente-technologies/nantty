@@ -1,0 +1,2 @@
+-- modify "plan_prices" table
+ALTER TABLE "plan_prices" ADD COLUMN "yearly_amount_minor" bigint NOT NULL DEFAULT 0, ADD COLUMN "ios_monthly_amount_minor" bigint NOT NULL DEFAULT 0, ADD COLUMN "ios_yearly_amount_minor" bigint NOT NULL DEFAULT 0, ADD COLUMN "android_monthly_amount_minor" bigint NOT NULL DEFAULT 0, ADD COLUMN "android_yearly_amount_minor" bigint NOT NULL DEFAULT 0, ADD COLUMN "store_product_ids" jsonb NOT NULL DEFAULT '{}';
