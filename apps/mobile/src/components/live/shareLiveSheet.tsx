@@ -10,6 +10,7 @@ import { Text } from "@/components/ui/text";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { liveService } from "@/services/live.service";
 import { makeThemedStyles, useTheme } from "@/theme";
+import { webAppLinks } from "@/config/webAppLinks.config";
 
 export interface ShareLiveSheetProps {
   readonly liveId: string;
@@ -36,7 +37,7 @@ export function ShareLiveSheet({ liveId, visible, onClose, onShared }: ShareLive
     if (selectedUserIds.length > 0) {
       await liveService.shareLiveWithPeople(liveId, selectedUserIds).catch(() => undefined);
     } else {
-      await Share.share({ message: `https://zudomart.com/live/${liveId}` }).catch(() => undefined);
+      await Share.share({ message: webAppLinks.live(liveId) }).catch(() => undefined);
     }
     setSelectedUserIds([]);
     onShared?.();
