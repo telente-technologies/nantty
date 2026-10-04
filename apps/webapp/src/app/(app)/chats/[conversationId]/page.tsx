@@ -128,7 +128,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
             return (
               <div key={message.id} className={[styles.bubbleRow, mine ? styles.bubbleRowMine : ""].filter(Boolean).join(" ")}>
                 <div className={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs].join(" ")}>
-                  {message.text ? <p className={styles.bubbleText}><MentionText text={message.text} /></p> : null}
+                  {message.text ? <p className={styles.bubbleText}><MentionText text={message.text} inverseLinks={mine} /></p> : null}
                   {message.media?.url ? (
                     message.media.type === "image" ? (
                       <img src={message.media.url} alt="" className={styles.bubbleImage} loading="lazy" />
