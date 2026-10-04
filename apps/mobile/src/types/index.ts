@@ -1,4 +1,5 @@
 export * from "./account.type";
+export * from "./adCreative.type";
 export * from "./commerce.type";
 export * from "./liveGift.type";
 export * from "./models.type";
@@ -14,3 +15,5 @@ export * from "./mention.type";
 export * from "./policyUpdate.type";
 export * from "./storeRewards.type";
 export * from "./chatReport.type";
+export * from "./liveSafety.type";
+export * from "./postAudience.type";

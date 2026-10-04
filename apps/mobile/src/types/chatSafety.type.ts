@@ -25,6 +25,8 @@ export interface LinkPreview {
   readonly title: string;
   readonly description: string | null;
   readonly imageUrl: string | null;
+  readonly siteName?: string | null;
+  readonly imageMediaId?: string | null;
 }
 
 export type SharedContentKind = "post" | "clip" | "product" | "live" | "store" | "profile";

@@ -1,7 +1,9 @@
+import type { AdAppInstall, AdCard, AdClickLinks, AdCreativeType, AdDestination } from "./adCreative.type";
 import type { Money } from "./money.type";
 import type { Order } from "./cartOrder.type";
 import type { FollowState } from "./socialGraph.type";
 import type { MentionEntity } from "./mention.type";
+import type { ReplyPolicy, ReplyRestriction, SensitiveContent } from "./postAudience.type";
 
 export type ID = string;
 export type ISODate = string;
@@ -57,6 +59,8 @@ export interface User extends UserSummary {
   readonly followState?: FollowState;
   readonly isSeller?: boolean;
   readonly storeId?: ID | null;
+  readonly birthdayToday?: boolean;
+  readonly anniversaryToday?: boolean;
 }
 
 export interface Topic {
@@ -91,6 +95,7 @@ export interface ProductSummary {
 }
 
 export interface Product extends ProductSummary {
+  readonly saveCount?: number;
   readonly images: readonly string[];
   readonly title: string;
   readonly rating: number;
@@ -120,10 +125,17 @@ export interface Media {
 
 export interface SponsoredPlacement {
   readonly campaignId: ID;
-  readonly label: "Sponsored";
+  readonly label: "Sponsored" | "Promoted";
   readonly advertiserName: string;
   readonly ctaLabel?: string;
   readonly ctaUrl?: string;
+  readonly adType?: AdCreativeType;
+  readonly impressionToken?: string;
+  readonly clickLinks?: AdClickLinks;
+  readonly destination?: AdDestination;
+  readonly mediaClickable?: boolean;
+  readonly cards?: readonly AdCard[];
+  readonly app?: AdAppInstall;
 }
 
 export interface Post {
@@ -139,6 +151,7 @@ export interface Post {
   readonly views: number;
   readonly liked: boolean;
   readonly bookmarked: boolean;
+  readonly saveCount?: number;
   readonly isFollowingAuthor: boolean;
   readonly friendsLiked: { readonly count: number; readonly avatars: readonly (string | null)[] } | null;
   readonly products: readonly ProductSummary[];
@@ -146,10 +159,18 @@ export interface Post {
   readonly subscriberOnly?: boolean;
   readonly viewerHasAccess?: boolean;
   readonly resharedFrom?: Post | null;
+  readonly resharedFromUnavailable?: boolean;
+  readonly isQuote?: boolean;
+  readonly quotes?: number;
+  readonly replyPolicy?: ReplyPolicy;
+  readonly viewerCanReply?: boolean;
+  readonly replyRestriction?: ReplyRestriction | null;
+  readonly sensitive?: SensitiveContent | null;
   readonly isAiGenerated?: boolean;
   readonly mentions?: readonly MentionEntity[];
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: CommentStickerLayout;
+  readonly linkPreview?: import("./chatSafety.type").LinkPreview | null;
 }
 
 export interface PostAnalyticsDaily {
@@ -167,6 +188,15 @@ export interface PostAnalytics {
   readonly comments: number;
   readonly reposts: number;
   readonly profileVisits: number;
+  readonly saves: number;
+  readonly shares: number;
+  readonly linkClicks: number;
+  readonly profileClicks: number;
+  readonly newFollows: number;
+  readonly engagements: number;
+  readonly engagementRate: number;
+  readonly video: { readonly views: number; readonly watchTimeSeconds: number } | null;
+  readonly audience: readonly { readonly label: string; readonly share: number }[];
   readonly daily: readonly PostAnalyticsDaily[];
 }
 
@@ -279,6 +309,7 @@ export interface AuthSession {
   readonly accessToken: string;
   readonly refreshToken: string;
   readonly user: User;
+  readonly notice?: string | null;
 }
 
 export * from "./cartOrder.type";
