@@ -33,3 +33,13 @@ model SavedItem {
   @@index([userId, collectionId, id])
   @@map("saved_items")
 }
+
+model SaveCounter {
+  type      SavedItemType
+  targetId  String
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@id([type, targetId])
+  @@map("save_counters")
+}
