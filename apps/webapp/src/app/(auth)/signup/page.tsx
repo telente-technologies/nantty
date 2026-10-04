@@ -39,6 +39,7 @@ export default function SignUpPage() {
   const [birthdayText, setBirthdayText] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [conflictSuggestions, setConflictSuggestions] = useState<readonly string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -54,7 +55,7 @@ export default function SignUpPage() {
     return () => clearInterval(interval);
   }, [resendRestartKey]);
 
-  const { availabilityMessage, isAvailableMessage, isUsernameUsable } = useUsernameAvailability(username, step === "username" && !registered);
+  const { availabilityMessage, isAvailableMessage, isUsernameUsable, suggestions: liveSuggestions } = useUsernameAvailability(username, step === "username" && !registered);
 
   const canContinue = useMemo(() => {
     if (step === "contact") return isValidEmailAddress(email);
@@ -91,6 +92,7 @@ export default function SignUpPage() {
       setResendRestartKey((key) => key + 1);
       setStep("verify");
     } catch (caught) {
+      if (caught instanceof WebappRequestError && caught.code === "USERNAME_TAKEN") setConflictSuggestions(caught.suggestions ?? []);
       setError(caught instanceof WebappRequestError ? caught.message : "We couldn't send the code. Please try again.");
     } finally {
       setBusy(false);
@@ -130,6 +132,7 @@ export default function SignUpPage() {
       return;
     }
     setError(null);
+    setConflictSuggestions([]);
     setBusy(true);
     try {
       await sendRequestToWebappServer<{ user: User }>("/auth/register", {
@@ -265,7 +268,17 @@ export default function SignUpPage() {
         {step === "username" ? (
           <UsernameStepFields
             username={username}
-            onUsernameChange={setUsername}
+            onUsernameChange={(next) => {
+              setConflictSuggestions([]);
+              setError(null);
+              setUsername(next);
+            }}
+            suggestions={liveSuggestions.length > 0 ? liveSuggestions : conflictSuggestions}
+            onSuggestionSelect={(suggestion) => {
+              setConflictSuggestions([]);
+              setError(null);
+              setUsername(suggestion);
+            }}
             error={error}
             availabilityMessage={availabilityMessage}
             isAvailableMessage={isAvailableMessage}

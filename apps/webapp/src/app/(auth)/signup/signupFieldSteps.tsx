@@ -99,11 +99,13 @@ interface UsernameStepFieldsProps {
   readonly error: string | null;
   readonly availabilityMessage: string | null | undefined;
   readonly isAvailableMessage: boolean;
+  readonly suggestions: readonly string[];
+  readonly onSuggestionSelect: (username: string) => void;
   readonly busy: boolean;
   readonly canContinue: boolean;
 }
 
-export function UsernameStepFields({ username, onUsernameChange, error, availabilityMessage, isAvailableMessage, busy, canContinue }: UsernameStepFieldsProps) {
+export function UsernameStepFields({ username, onUsernameChange, error, availabilityMessage, isAvailableMessage, suggestions, onSuggestionSelect, busy, canContinue }: UsernameStepFieldsProps) {
   return (
     <>
       <TextField
@@ -116,9 +118,23 @@ export function UsernameStepFields({ username, onUsernameChange, error, availabi
         value={username}
         onChange={(event) => onUsernameChange(event.target.value.replace(/\s/g, ""))}
       />
-      <p className={!error && isAvailableMessage ? styles.successText : error || availabilityMessage ? styles.errorText : styles.mutedText}>
+      <p className={!error && isAvailableMessage ? styles.successText : error || availabilityMessage ? styles.errorText : styles.mutedText} aria-live="polite">
         {error ?? availabilityMessage ?? DEFAULT_USERNAME_HINT}
       </p>
+      {suggestions.length > 0 ? (
+        <div className={styles.suggestionGroup} role="group" aria-label="Suggested usernames">
+          <p className={styles.mutedText}>Try one of these, or type your own</p>
+          <ul className={styles.suggestionList}>
+            {suggestions.map((suggestion) => (
+              <li key={suggestion}>
+                <button type="button" className={styles.suggestionChip} onClick={() => onSuggestionSelect(suggestion)}>
+                  @{suggestion}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <Button type="submit" fullWidth size="lg" busy={busy} disabled={!canContinue}>
         Confirm
       </Button>

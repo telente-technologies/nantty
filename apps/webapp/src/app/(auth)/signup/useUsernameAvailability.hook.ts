@@ -39,7 +39,10 @@ export function useUsernameAvailability(username: string, isEnabled: boolean) {
             ? (USERNAME_UNAVAILABLE_MESSAGES[usernameQuery.data.reason] ?? "That username isn't available. Try another one.")
             : null;
 
+  const suggestions = isSettled && usernameQuery.data?.available === false ? (usernameQuery.data.suggestions ?? []) : [];
+
   return {
+    suggestions,
     availabilityMessage,
     isAvailableMessage: availabilityMessage === availableMessage,
     isUsernameUsable: isSettled && isValidUsername(username.trim()) && isAvailable === true,
