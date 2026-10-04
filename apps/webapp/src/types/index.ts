@@ -1,4 +1,5 @@
 export * from "./account.type";
+export * from "./adCreative.type";
 export * from "./geo.type";
 export * from "./privacy.type";
 export * from "./commerce.type";
@@ -8,3 +9,6 @@ export * from "./social.type";
 export * from "./saves.type";
 export * from "./mentions.type";
 export * from "./chatReport.type";
+export * from "./liveSafety.type";
+export * from "./linkPreview.type";
+export * from "./postAudience.type";

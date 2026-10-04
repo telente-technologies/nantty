@@ -1,3 +1,4 @@
+import type { AdAppInstall, AdCard, AdClickLinks, AdCreativeType, AdDestination } from "./adCreative.type";
 import type { Money } from "./money.type";
 
 export type ID = string;
@@ -69,6 +70,7 @@ export interface ProductSummary {
   readonly imageUrl: string | null;
   readonly liked?: boolean;
   readonly bookmarked?: boolean;
+  readonly saveCount?: number;
   readonly stock?: number;
   readonly sponsored?: SponsoredPlacement | null;
 }
@@ -103,10 +105,17 @@ export interface Media {
 
 export interface SponsoredPlacement {
   readonly campaignId: ID;
-  readonly label: "Sponsored";
+  readonly label: "Sponsored" | "Promoted";
   readonly advertiserName: string;
   readonly ctaLabel?: string;
   readonly ctaUrl?: string;
+  readonly adType?: AdCreativeType;
+  readonly impressionToken?: string;
+  readonly clickLinks?: AdClickLinks;
+  readonly destination?: AdDestination;
+  readonly mediaClickable?: boolean;
+  readonly cards?: readonly AdCard[];
+  readonly app?: AdAppInstall;
 }
 
 export interface Post {
@@ -122,6 +131,7 @@ export interface Post {
   readonly views: number;
   readonly liked: boolean;
   readonly bookmarked: boolean;
+  readonly saveCount?: number;
   readonly isFollowingAuthor: boolean;
   readonly friendsLiked: { readonly count: number; readonly avatars: readonly (string | null)[] } | null;
   readonly products: readonly ProductSummary[];
@@ -129,6 +139,13 @@ export interface Post {
   readonly subscriberOnly?: boolean;
   readonly viewerHasAccess?: boolean;
   readonly mentions?: readonly import("./mentions.type").MentionEntity[];
+  readonly linkPreview?: import("./linkPreview.type").LinkPreview | null;
+  readonly isQuote?: boolean;
+  readonly quotes?: number;
+  readonly replyPolicy?: import("./postAudience.type").ReplyPolicy;
+  readonly viewerCanReply?: boolean;
+  readonly replyRestriction?: import("./postAudience.type").ReplyRestriction | null;
+  readonly sensitive?: import("./postAudience.type").SensitiveContent | null;
 }
 
 export interface PostAnalyticsDaily {
@@ -146,6 +163,15 @@ export interface PostAnalytics {
   readonly comments: number;
   readonly reposts: number;
   readonly profileVisits: number;
+  readonly saves: number;
+  readonly shares: number;
+  readonly linkClicks: number;
+  readonly profileClicks: number;
+  readonly newFollows: number;
+  readonly engagements: number;
+  readonly engagementRate: number;
+  readonly video: { readonly views: number; readonly watchTimeSeconds: number } | null;
+  readonly audience: readonly { readonly label: string; readonly share: number }[];
   readonly daily: readonly PostAnalyticsDaily[];
 }
 
@@ -250,6 +276,7 @@ export interface AuthSession {
   readonly accessToken: string;
   readonly refreshToken: string;
   readonly user: User;
+  readonly notice?: string | null;
 }
 
 export type { CartItem, Cart, OrderStatus, Order, Address, WalletSummary, WalletTransaction, PayoutAccount, SellerDashboard } from "./orders.type";
