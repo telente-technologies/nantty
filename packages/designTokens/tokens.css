@@ -48,6 +48,7 @@
   --color-danger-text: #b91c1c;
   --color-overlay: rgb(10 10 20 / 0.5);
   --color-focus: #2043f5;
+  --media-frame: transparent;
 
   --chart-1: #2043f5;
   --chart-2: #f5e320;
@@ -136,6 +137,7 @@
   --color-danger-text: #fca5a5;
   --color-overlay: rgb(0 0 0 / 0.65);
   --color-focus: #8fa1fa;
+  --media-frame: rgb(255 255 255 / 0.1);
   --chart-1: #7b90f9;
   --chart-3: #34d399;
   --chart-4: #b5c1fc;
@@ -180,6 +182,7 @@
     --color-danger-text: #fca5a5;
     --color-overlay: rgb(0 0 0 / 0.65);
     --color-focus: #8fa1fa;
+    --media-frame: rgb(255 255 255 / 0.1);
     --chart-1: #7b90f9;
     --chart-3: #34d399;
     --chart-4: #b5c1fc;

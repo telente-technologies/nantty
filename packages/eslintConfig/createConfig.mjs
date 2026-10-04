@@ -18,6 +18,7 @@ export function createConfig({ react: withReact = false, next: withNext = false 
         "@typescript-eslint/no-require-imports": "warn",
         "@typescript-eslint/no-empty-object-type": "warn",
         "@typescript-eslint/ban-ts-comment": "warn",
+        "@typescript-eslint/no-namespace": ["error", { allowDeclarations: true }],
         "no-empty": "warn",
         "no-useless-escape": "warn",
         "no-control-regex": "warn",
