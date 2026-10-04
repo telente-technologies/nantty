@@ -1,3 +1,4 @@
+import { accountHealthMocks } from "./accountHealth.mock";
 import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
 import { banksMocks } from "./banks.mock";
@@ -34,6 +35,7 @@ import type { MockRoute } from "./registry.mock";
 import { sellerMocks } from "./seller.mock";
 import { settingsMocks } from "./settings.mock";
 import { storiesMocks } from "./stories.mock";
+import { helpCentreMocks } from "./helpCentre.mock";
 import { supportMocks } from "./support.mock";
 import { usernameMocks } from "./username.mock";
 import { usersMocks } from "./users.mock";
@@ -43,24 +45,28 @@ import { walletMocks } from "./wallet.mock";
 import { chatReportsMocks } from "./chatReports.mock";
 import { reportsMocks } from "./reports.mock";
 import { discoveryMocks } from "./discovery.mock";
+import { exploreMocks } from "./explore.mock";
 import { savesMocks } from "./saves.mock";
 import { webActionsMocks } from "./webActions.mock";
 import { mentionsMocks } from "./mentions.mock";
 import { videosMocks } from "./videos.mock";
 import { sitemapMocks } from "./sitemap.mock";
 import { linkPreviewsMocks } from "./linkPreviews.mock";
+import { securityMocks } from "./security.mock";
 
 export const routes: MockRoute[] = [
   ...localeMocks,
   ...usernameMocks,
   ...authMocks,
   ...discoveryMocks,
+  ...exploreMocks,
   ...savesMocks,
   ...webActionsMocks,
   ...mentionsMocks,
   ...videosMocks,
   ...sitemapMocks,
   ...linkPreviewsMocks,
+  ...securityMocks,
   ...usersMocks,
   ...feedMocks,
   ...postAudienceMocks,
@@ -76,6 +82,7 @@ export const routes: MockRoute[] = [
   ...verificationMocks,
   ...boostsMocks,
   ...brandsMocks,
+  ...helpCentreMocks,
   ...supportMocks,
   ...groupsMocks,
   ...chatsMocks,
@@ -85,6 +92,7 @@ export const routes: MockRoute[] = [
   ...soundsMocks,
   ...mediaMocks,
   ...adEventsMocks,
+  ...accountHealthMocks,
   ...reportsMocks,
   ...chatReportsMocks,
   ...coinsMocks,
