@@ -185,6 +185,62 @@ func (_c *StrikeCreate) SetNillableRevokedReason(v *string) *StrikeCreate {
 	return _c
 }
 
+// SetAppealStatus sets the "appeal_status" field.
+func (_c *StrikeCreate) SetAppealStatus(v strike.AppealStatus) *StrikeCreate {
+	_c.mutation.SetAppealStatus(v)
+	return _c
+}
+
+// SetNillableAppealStatus sets the "appeal_status" field if the given value is not nil.
+func (_c *StrikeCreate) SetNillableAppealStatus(v *strike.AppealStatus) *StrikeCreate {
+	if v != nil {
+		_c.SetAppealStatus(*v)
+	}
+	return _c
+}
+
+// SetAppealMessage sets the "appeal_message" field.
+func (_c *StrikeCreate) SetAppealMessage(v string) *StrikeCreate {
+	_c.mutation.SetAppealMessage(v)
+	return _c
+}
+
+// SetNillableAppealMessage sets the "appeal_message" field if the given value is not nil.
+func (_c *StrikeCreate) SetNillableAppealMessage(v *string) *StrikeCreate {
+	if v != nil {
+		_c.SetAppealMessage(*v)
+	}
+	return _c
+}
+
+// SetAppealedAt sets the "appealed_at" field.
+func (_c *StrikeCreate) SetAppealedAt(v time.Time) *StrikeCreate {
+	_c.mutation.SetAppealedAt(v)
+	return _c
+}
+
+// SetNillableAppealedAt sets the "appealed_at" field if the given value is not nil.
+func (_c *StrikeCreate) SetNillableAppealedAt(v *time.Time) *StrikeCreate {
+	if v != nil {
+		_c.SetAppealedAt(*v)
+	}
+	return _c
+}
+
+// SetExpiryAnnouncedAt sets the "expiry_announced_at" field.
+func (_c *StrikeCreate) SetExpiryAnnouncedAt(v time.Time) *StrikeCreate {
+	_c.mutation.SetExpiryAnnouncedAt(v)
+	return _c
+}
+
+// SetNillableExpiryAnnouncedAt sets the "expiry_announced_at" field if the given value is not nil.
+func (_c *StrikeCreate) SetNillableExpiryAnnouncedAt(v *time.Time) *StrikeCreate {
+	if v != nil {
+		_c.SetExpiryAnnouncedAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *StrikeCreate) SetID(v uuid.UUID) *StrikeCreate {
 	_c.mutation.SetID(v)
@@ -261,6 +317,14 @@ func (_c *StrikeCreate) defaults() {
 	if _, ok := _c.mutation.RevokedReason(); !ok {
 		v := strike.DefaultRevokedReason
 		_c.mutation.SetRevokedReason(v)
+	}
+	if _, ok := _c.mutation.AppealStatus(); !ok {
+		v := strike.DefaultAppealStatus
+		_c.mutation.SetAppealStatus(v)
+	}
+	if _, ok := _c.mutation.AppealMessage(); !ok {
+		v := strike.DefaultAppealMessage
+		_c.mutation.SetAppealMessage(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := strike.DefaultID()
@@ -353,6 +417,22 @@ func (_c *StrikeCreate) check() error {
 			return &ValidationError{Name: "revoked_reason", err: fmt.Errorf(`ent: validator failed for field "Strike.revoked_reason": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.AppealStatus(); !ok {
+		return &ValidationError{Name: "appeal_status", err: errors.New(`ent: missing required field "Strike.appeal_status"`)}
+	}
+	if v, ok := _c.mutation.AppealStatus(); ok {
+		if err := strike.AppealStatusValidator(v); err != nil {
+			return &ValidationError{Name: "appeal_status", err: fmt.Errorf(`ent: validator failed for field "Strike.appeal_status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.AppealMessage(); !ok {
+		return &ValidationError{Name: "appeal_message", err: errors.New(`ent: missing required field "Strike.appeal_message"`)}
+	}
+	if v, ok := _c.mutation.AppealMessage(); ok {
+		if err := strike.AppealMessageValidator(v); err != nil {
+			return &ValidationError{Name: "appeal_message", err: fmt.Errorf(`ent: validator failed for field "Strike.appeal_message": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -443,6 +523,22 @@ func (_c *StrikeCreate) createSpec() (*Strike, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.RevokedReason(); ok {
 		_spec.SetField(strike.FieldRevokedReason, field.TypeString, value)
 		_node.RevokedReason = value
+	}
+	if value, ok := _c.mutation.AppealStatus(); ok {
+		_spec.SetField(strike.FieldAppealStatus, field.TypeEnum, value)
+		_node.AppealStatus = value
+	}
+	if value, ok := _c.mutation.AppealMessage(); ok {
+		_spec.SetField(strike.FieldAppealMessage, field.TypeString, value)
+		_node.AppealMessage = value
+	}
+	if value, ok := _c.mutation.AppealedAt(); ok {
+		_spec.SetField(strike.FieldAppealedAt, field.TypeTime, value)
+		_node.AppealedAt = &value
+	}
+	if value, ok := _c.mutation.ExpiryAnnouncedAt(); ok {
+		_spec.SetField(strike.FieldExpiryAnnouncedAt, field.TypeTime, value)
+		_node.ExpiryAnnouncedAt = &value
 	}
 	return _node, _spec
 }

@@ -104,6 +104,7 @@ type Source string
 const (
 	SourcePythonSuggestion Source = "python_suggestion"
 	SourceUserReports      Source = "user_reports"
+	SourceCopyrightStrikes Source = "copyright_strikes"
 )
 
 func (s Source) String() string {
@@ -113,7 +114,7 @@ func (s Source) String() string {
 // SourceValidator is a validator for the "source" field enum values. It is called by the builders before save.
 func SourceValidator(s Source) error {
 	switch s {
-	case SourcePythonSuggestion, SourceUserReports:
+	case SourcePythonSuggestion, SourceUserReports, SourceCopyrightStrikes:
 		return nil
 	default:
 		return fmt.Errorf("suspensioncase: invalid enum value for source field: %q", s)

@@ -82,6 +82,74 @@ func (_u *StrikeUpdate) SetNillableRevokedReason(v *string) *StrikeUpdate {
 	return _u
 }
 
+// SetAppealStatus sets the "appeal_status" field.
+func (_u *StrikeUpdate) SetAppealStatus(v strike.AppealStatus) *StrikeUpdate {
+	_u.mutation.SetAppealStatus(v)
+	return _u
+}
+
+// SetNillableAppealStatus sets the "appeal_status" field if the given value is not nil.
+func (_u *StrikeUpdate) SetNillableAppealStatus(v *strike.AppealStatus) *StrikeUpdate {
+	if v != nil {
+		_u.SetAppealStatus(*v)
+	}
+	return _u
+}
+
+// SetAppealMessage sets the "appeal_message" field.
+func (_u *StrikeUpdate) SetAppealMessage(v string) *StrikeUpdate {
+	_u.mutation.SetAppealMessage(v)
+	return _u
+}
+
+// SetNillableAppealMessage sets the "appeal_message" field if the given value is not nil.
+func (_u *StrikeUpdate) SetNillableAppealMessage(v *string) *StrikeUpdate {
+	if v != nil {
+		_u.SetAppealMessage(*v)
+	}
+	return _u
+}
+
+// SetAppealedAt sets the "appealed_at" field.
+func (_u *StrikeUpdate) SetAppealedAt(v time.Time) *StrikeUpdate {
+	_u.mutation.SetAppealedAt(v)
+	return _u
+}
+
+// SetNillableAppealedAt sets the "appealed_at" field if the given value is not nil.
+func (_u *StrikeUpdate) SetNillableAppealedAt(v *time.Time) *StrikeUpdate {
+	if v != nil {
+		_u.SetAppealedAt(*v)
+	}
+	return _u
+}
+
+// ClearAppealedAt clears the value of the "appealed_at" field.
+func (_u *StrikeUpdate) ClearAppealedAt() *StrikeUpdate {
+	_u.mutation.ClearAppealedAt()
+	return _u
+}
+
+// SetExpiryAnnouncedAt sets the "expiry_announced_at" field.
+func (_u *StrikeUpdate) SetExpiryAnnouncedAt(v time.Time) *StrikeUpdate {
+	_u.mutation.SetExpiryAnnouncedAt(v)
+	return _u
+}
+
+// SetNillableExpiryAnnouncedAt sets the "expiry_announced_at" field if the given value is not nil.
+func (_u *StrikeUpdate) SetNillableExpiryAnnouncedAt(v *time.Time) *StrikeUpdate {
+	if v != nil {
+		_u.SetExpiryAnnouncedAt(*v)
+	}
+	return _u
+}
+
+// ClearExpiryAnnouncedAt clears the value of the "expiry_announced_at" field.
+func (_u *StrikeUpdate) ClearExpiryAnnouncedAt() *StrikeUpdate {
+	_u.mutation.ClearExpiryAnnouncedAt()
+	return _u
+}
+
 // Mutation returns the StrikeMutation object of the builder.
 func (_u *StrikeUpdate) Mutation() *StrikeMutation {
 	return _u.mutation
@@ -121,6 +189,16 @@ func (_u *StrikeUpdate) check() error {
 			return &ValidationError{Name: "revoked_reason", err: fmt.Errorf(`ent: validator failed for field "Strike.revoked_reason": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.AppealStatus(); ok {
+		if err := strike.AppealStatusValidator(v); err != nil {
+			return &ValidationError{Name: "appeal_status", err: fmt.Errorf(`ent: validator failed for field "Strike.appeal_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.AppealMessage(); ok {
+		if err := strike.AppealMessageValidator(v); err != nil {
+			return &ValidationError{Name: "appeal_message", err: fmt.Errorf(`ent: validator failed for field "Strike.appeal_message": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -153,6 +231,24 @@ func (_u *StrikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.RevokedReason(); ok {
 		_spec.SetField(strike.FieldRevokedReason, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AppealStatus(); ok {
+		_spec.SetField(strike.FieldAppealStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.AppealMessage(); ok {
+		_spec.SetField(strike.FieldAppealMessage, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AppealedAt(); ok {
+		_spec.SetField(strike.FieldAppealedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AppealedAtCleared() {
+		_spec.ClearField(strike.FieldAppealedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ExpiryAnnouncedAt(); ok {
+		_spec.SetField(strike.FieldExpiryAnnouncedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiryAnnouncedAtCleared() {
+		_spec.ClearField(strike.FieldExpiryAnnouncedAt, field.TypeTime)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -228,6 +324,74 @@ func (_u *StrikeUpdateOne) SetNillableRevokedReason(v *string) *StrikeUpdateOne 
 	return _u
 }
 
+// SetAppealStatus sets the "appeal_status" field.
+func (_u *StrikeUpdateOne) SetAppealStatus(v strike.AppealStatus) *StrikeUpdateOne {
+	_u.mutation.SetAppealStatus(v)
+	return _u
+}
+
+// SetNillableAppealStatus sets the "appeal_status" field if the given value is not nil.
+func (_u *StrikeUpdateOne) SetNillableAppealStatus(v *strike.AppealStatus) *StrikeUpdateOne {
+	if v != nil {
+		_u.SetAppealStatus(*v)
+	}
+	return _u
+}
+
+// SetAppealMessage sets the "appeal_message" field.
+func (_u *StrikeUpdateOne) SetAppealMessage(v string) *StrikeUpdateOne {
+	_u.mutation.SetAppealMessage(v)
+	return _u
+}
+
+// SetNillableAppealMessage sets the "appeal_message" field if the given value is not nil.
+func (_u *StrikeUpdateOne) SetNillableAppealMessage(v *string) *StrikeUpdateOne {
+	if v != nil {
+		_u.SetAppealMessage(*v)
+	}
+	return _u
+}
+
+// SetAppealedAt sets the "appealed_at" field.
+func (_u *StrikeUpdateOne) SetAppealedAt(v time.Time) *StrikeUpdateOne {
+	_u.mutation.SetAppealedAt(v)
+	return _u
+}
+
+// SetNillableAppealedAt sets the "appealed_at" field if the given value is not nil.
+func (_u *StrikeUpdateOne) SetNillableAppealedAt(v *time.Time) *StrikeUpdateOne {
+	if v != nil {
+		_u.SetAppealedAt(*v)
+	}
+	return _u
+}
+
+// ClearAppealedAt clears the value of the "appealed_at" field.
+func (_u *StrikeUpdateOne) ClearAppealedAt() *StrikeUpdateOne {
+	_u.mutation.ClearAppealedAt()
+	return _u
+}
+
+// SetExpiryAnnouncedAt sets the "expiry_announced_at" field.
+func (_u *StrikeUpdateOne) SetExpiryAnnouncedAt(v time.Time) *StrikeUpdateOne {
+	_u.mutation.SetExpiryAnnouncedAt(v)
+	return _u
+}
+
+// SetNillableExpiryAnnouncedAt sets the "expiry_announced_at" field if the given value is not nil.
+func (_u *StrikeUpdateOne) SetNillableExpiryAnnouncedAt(v *time.Time) *StrikeUpdateOne {
+	if v != nil {
+		_u.SetExpiryAnnouncedAt(*v)
+	}
+	return _u
+}
+
+// ClearExpiryAnnouncedAt clears the value of the "expiry_announced_at" field.
+func (_u *StrikeUpdateOne) ClearExpiryAnnouncedAt() *StrikeUpdateOne {
+	_u.mutation.ClearExpiryAnnouncedAt()
+	return _u
+}
+
 // Mutation returns the StrikeMutation object of the builder.
 func (_u *StrikeUpdateOne) Mutation() *StrikeMutation {
 	return _u.mutation
@@ -280,6 +444,16 @@ func (_u *StrikeUpdateOne) check() error {
 			return &ValidationError{Name: "revoked_reason", err: fmt.Errorf(`ent: validator failed for field "Strike.revoked_reason": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.AppealStatus(); ok {
+		if err := strike.AppealStatusValidator(v); err != nil {
+			return &ValidationError{Name: "appeal_status", err: fmt.Errorf(`ent: validator failed for field "Strike.appeal_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.AppealMessage(); ok {
+		if err := strike.AppealMessageValidator(v); err != nil {
+			return &ValidationError{Name: "appeal_message", err: fmt.Errorf(`ent: validator failed for field "Strike.appeal_message": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -329,6 +503,24 @@ func (_u *StrikeUpdateOne) sqlSave(ctx context.Context) (_node *Strike, err erro
 	}
 	if value, ok := _u.mutation.RevokedReason(); ok {
 		_spec.SetField(strike.FieldRevokedReason, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AppealStatus(); ok {
+		_spec.SetField(strike.FieldAppealStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.AppealMessage(); ok {
+		_spec.SetField(strike.FieldAppealMessage, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AppealedAt(); ok {
+		_spec.SetField(strike.FieldAppealedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AppealedAtCleared() {
+		_spec.ClearField(strike.FieldAppealedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ExpiryAnnouncedAt(); ok {
+		_spec.SetField(strike.FieldExpiryAnnouncedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiryAnnouncedAtCleared() {
+		_spec.ClearField(strike.FieldExpiryAnnouncedAt, field.TypeTime)
 	}
 	_node = &Strike{config: _u.config}
 	_spec.Assign = _node.assignValues
