@@ -22,7 +22,11 @@ export function buildDemoCopyrightClaims(): MockCopyrightClaimRecord[] {
         { matchedTrack: "Lagos Nights (Official Audio)", artist: "Ayo Kolade", confidencePercent: 97, source: "Zudomart audio fingerprint v3", segments: [{ targetStartSeconds: 0, targetEndSeconds: 28, referenceStartSeconds: 41 }] },
         { matchedTrack: "Lagos Nights (Remix)", artist: "Ayo Kolade ft. DJ Temi", confidencePercent: 62, source: "Zudomart audio fingerprint v3", segments: [{ targetStartSeconds: 4, targetEndSeconds: 12, referenceStartSeconds: 88 }] },
       ],
-      counterNotices: [], decision: null,
+      counterNotices: [], decision: null, claimScope: "AUDIO",
+      evidence: {
+        originalWorkUrl: "https://music.example/ayo-kolade/lagos-nights", originalWorkMediaId: null, proofUrls: ["https://coson.example/registry/COSON-2025-44712", "https://distributor.example/releases/lagos-nights"], proofMediaIds: [],
+        segments: [{ startSeconds: 0, endSeconds: 28 }], accuracyDeclared: true, signatureName: "Folake Adisa", signedAt: isoMinutesAgo(380), claimantPhone: "+234 801 000 0000", claimantAddress: null,
+      },
     },
     {
       id: "cpc_0002", infringerUserId: "usr_0001", status: "PENDING", targetFlag: "VISIBLE", filedAt: isoMinutesAgo(1300), workType: "IMAGE",
