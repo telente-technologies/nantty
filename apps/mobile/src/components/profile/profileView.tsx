@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
 
+import { ProfileCelebration } from "@/components/celebrations/profileCelebration";
 import { PostCard } from "@/components/feed/postCard";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -73,6 +74,7 @@ export function ProfileView(props: ProfileViewProps) {
             onPressFollowers={props.onPressFollowers}
             onPressFollowing={props.onPressFollowing}
           />
+          <ProfileCelebration profile={props.profile} variant={props.variant} />
           {props.headerAccessory}
           {props.isLocked ? null : <ProfileTabs tabs={props.tabs} activeTab={activeTab} onChangeTab={changeTabOrOpenStore} />}
         </View>
