@@ -107,6 +107,9 @@ func SaveShippingRule(ctx context.Context, deployed *container.Container, store 
 		savedRule = *ruleId
 		return updateRuleAndZone(ctx, tx, profile, *ruleId, input, destinations, input.Destinations != nil)
 	})
+	if err == nil {
+		SyncStoreShippingCountries(ctx, deployed, store.StoreId)
+	}
 	return savedRule, err
 }
 
@@ -191,7 +194,7 @@ func DeleteShippingRule(ctx context.Context, deployed *container.Container, stor
 	if err != nil {
 		return err
 	}
-	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		rule, err := tx.ShippingRule.Query().Where(shippingrule.ID(ruleId)).Only(ctx)
 		if ent.IsNotFound(err) {
 			return ordererrors.RuleNotFound
@@ -211,4 +214,8 @@ func DeleteShippingRule(ctx context.Context, deployed *container.Container, stor
 		}
 		return tx.ShippingZone.DeleteOneID(rule.ZoneID).Exec(ctx)
 	})
+	if err == nil {
+		SyncStoreShippingCountries(ctx, deployed, store.StoreId)
+	}
+	return err
 }
