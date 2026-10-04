@@ -23,10 +23,13 @@ import (
 	"zudomart/modules/orders/src/migrations"
 	"zudomart/modules/orders/src/modules/cart"
 	"zudomart/modules/orders/src/modules/customers"
+	internalsources "zudomart/modules/orders/src/modules/internalSources"
+	marketingcampaigns "zudomart/modules/orders/src/modules/marketingCampaigns"
 	"zudomart/modules/orders/src/modules/orders"
 	"zudomart/modules/orders/src/modules/promotions"
 	"zudomart/modules/orders/src/modules/reports"
 	"zudomart/modules/orders/src/modules/returns"
+	sellerdisputes "zudomart/modules/orders/src/modules/sellerDisputes"
 	"zudomart/modules/orders/src/modules/sellerOrders"
 	"zudomart/modules/orders/src/modules/shipping"
 	"zudomart/modules/orders/src/modules/storeRewards"
@@ -131,6 +134,9 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	customers.Mount(mux, module.Container)
 	reports.Mount(mux, module.Container)
 	promotions.Mount(mux, module.Container)
+	marketingcampaigns.Mount(mux, module.Container)
+	internalsources.Mount(mux, module.Container)
+	sellerdisputes.Mount(mux, module.Container)
 	returns.Mount(mux, module.Container)
 }
 

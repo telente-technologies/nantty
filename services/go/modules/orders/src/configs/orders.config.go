@@ -29,6 +29,9 @@ type OrdersSettings struct {
 	EventsQueueName         string
 	ShippingRuleLimit       int
 	AutoCompleteGrace       time.Duration
+	InternalApiToken        string
+	MoneyInternalUrl        string
+	MoneyInternalToken      string
 }
 
 func (settings OrdersSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -55,6 +58,9 @@ func ReadOrdersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		ReportExportSweepPeriod: reader.ReadDurationOrDefault("ORDERS_REPORT_EXPORT_SWEEP_INTERVAL", 5*time.Second),
 		EventsQueueName:         reader.ReadStringOrDefault("ORDERS_EVENTS_QUEUE", ""),
 		ShippingRuleLimit:       50,
+		InternalApiToken:        reader.ReadStringOrDefault("CATALOG_INTERNAL_API_TOKEN", ""),
+		MoneyInternalUrl:        reader.ReadStringOrDefault("ORDERS_MONEY_INTERNAL_URL", ""),
+		MoneyInternalToken:      reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""),
 	}
 	settings.AllowInMemoryMoneyFake = !settings.IsProduction()
 	if settings.IsProduction() {
