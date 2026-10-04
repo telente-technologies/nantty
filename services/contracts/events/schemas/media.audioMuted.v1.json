@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/media.audioMuted.v1.json",
+  "title": "MediaAudioMuted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mediaId",
+    "ownerId",
+    "purpose",
+    "kind",
+    "claimId"
+  ],
+  "properties": {
+    "mediaId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "ownerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "claimId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "hlsKey": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

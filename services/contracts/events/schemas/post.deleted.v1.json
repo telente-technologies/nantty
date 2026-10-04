@@ -16,6 +16,10 @@
         "post",
         "clip"
       ]
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
     }
   }
 }

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/security.accessViolationDetected.v1.json",
+  "title": "AccessViolationDetected",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "violationId",
+    "kind",
+    "routeTemplate",
+    "resourceType",
+    "windowCount",
+    "windowSeconds",
+    "threshold",
+    "source",
+    "detectedAt"
+  ],
+  "properties": {
+    "violationId": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "accountId": {
+      "type": "string",
+      "description": "Empty when only a device or network prefix is known"
+    },
+    "sessionId": {
+      "type": "string"
+    },
+    "deviceId": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "ipPrefix": {
+      "type": "string",
+      "description": "IPv4 /24 or IPv6 /48 only, never the full address"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "forbidden",
+        "privateNotFound",
+        "idEnumeration",
+        "internalPath",
+        "tamperedToken",
+        "idempotencyMismatch",
+        "adminRoute"
+      ]
+    },
+    "routeTemplate": {
+      "type": "string",
+      "pattern": "^/[^?#]*$",
+      "maxLength": 200,
+      "description": "Identifiers replaced with :id; never a query string or payload"
+    },
+    "resourceType": {
+      "type": "string"
+    },
+    "windowCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "windowSeconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "distinctResources": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "threshold": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "source": {
+      "type": "string"
+    },
+    "detectedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
