@@ -1,5 +1,6 @@
-h1:KkUH9T+1bvzvTXyhGLQXIVK7lCbICPgNA/UJz0hJUOA=
+h1:L9PTpq7nu93kGx2OswhucNAuLqJvonRerLamtH2GwUk=
 20261003163309_create_ads_tables.up.sql h1:oVHSIrJdBZzzZHW3MeXKNySIV+azpV6aODc0qt7oADA=
 20261003163400_grant_read_access_to_other_services.up.sql h1:Y8rxKkfNJiQzRN2eu/BlbLrFuOEgJgl33HoVc6cqHtM=
 20261003180000_drop_ad_monetization_policies.up.sql h1:gZIC/QFft70dcuHaVvM7rM4+/5ckZ8SjJjdOMOjTLzQ=
 20261003210754_add_audiences_reports_media.up.sql h1:DmrzLcE/33pkPSZq7OQxFlxbdwzsFheXcI/lPXrvsII=
+20261004090000_add_ad_card_stats.up.sql h1:uRrRnik3s4kTeTREghNKhMbeEyuZU2y/sD7772XfZHc=
