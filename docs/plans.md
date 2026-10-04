@@ -2029,6 +2029,7 @@ Optional and never automatic: a text place search (`GET /api/v1/places/search?q=
 
 `MentionText` (mobile and webapp) now renders mentions and URLs together. Every `https://` and `www.` URL is tappable and coloured whether or not a preview card exists: mobile `colors.link` (light #2043F5, dark #8FA1FA, at least 4.5:1 on surfaces in both themes); webapp `--color-brand`. Links in your own chat bubbles are underlined in the bubble's text colour.
 - Mobile: Zudomart links (`zudomart.com`, `app.zudomart.com`, `zudomart.app`) open in the app. Other links open in the in-app browser (`expo-web-browser`, full screen, themed toolbar, share menu). It has the system "Open in Safari" or "Open in Chrome" control. Shortened and suspicious links show the warning dialog first. Preview cards (feed and chat) use the same path, so chat previews now open in the app instead of going straight to the external browser.
+- Other mobile web links now use the same in-app browser: legal, guidelines, creator terms, seller dashboard and Ads Manager pages open directly (`openTrustedWebPage`). Brand websites and escrow tracking links show the risk check first (`openUserSuppliedWebLink`). `mailto:`, maps, ad deep links, document and export downloads stay on `Linking`.
 - Webapp: Zudomart links navigate in the same tab. External links open in a new tab with `rel="noopener noreferrer nofollow ugc"`, and risky ones show the confirm dialog first.
 
 ### 51.8 Open items
@@ -2037,3 +2038,73 @@ Optional and never automatic: a text place search (`GET /api/v1/places/search?q=
 - **[LATER]** Show the location on post cards and clips (only stored for now).
 - **[LATER]** Seek the video preview to the trim start; a drag handle trim bar (needs gesture-handler).
 - **[LATER]** A webapp composer (none exists today).
+
+## 52. Tagged people on posts and clips, and compact counts **[DONE (mobile + webapp, mock UI; backend pending)]**
+
+### 52.1 Feed posts
+
+A tag line under the media (person-and-tag glyph, "Ada and 3 others"). Tapping it opens a centred dialog (mobile `Dialog`, webapp centred `Dialog`) listing avatar, name, @username, checkmark and a Follow button. A row closes the dialog and opens the profile (`/username` on web). Guests can read the list; Follow goes through `requireAuthThen` (after the dialog closes). Screen readers hear "Tagged: Ada and 3 others".
+
+### 52.2 Clips
+
+A glass pill (`mediaGlass`) above the caption: up to 3 stacked mini avatars and "N people" (the name when one). It opens a bottom sheet with the same rows; the clip pauses while the sheet is open. The rest of the reel layout is unchanged.
+
+### 52.3 Data
+
+`Post.taggedUsers: { id, username, displayName, avatarUrl, checkmark, isFollowing? }[]` (preview of 3) and `taggedUsersCount`. Longer lists page through `GET /api/v1/posts/:postId/tagged-users` (`{ data, nextCursor }`). Backend in backendPlan.md under "Create flow".
+
+### 52.4 Counts
+
+One formatter, `utils/formatCount.util.ts` (`formatCompactCount`): 999, 1.2K, 12.3K, 123K, 1.2M, 2.5B; no decimal at 100K and above, never more than 5 characters. `formatCountWithThousandsSuffix` is now an alias, so every count reads the same. The clips rail uses a fixed 44 pt column, one-line tabular counts and the same width for every item; the feed action bar and the webapp rail and action bar no longer wrap counts.
+
+### 52.5 Open items
+
+- **[NEXT]** Backend: `taggedUsers` on `PostView` and the tagged-users endpoint.
+- **[LATER]** Let tagged people remove themselves from the list sheet.
+
+## 53. Checkmark verification journey with Smile ID **[DONE (go-identity, go-money, go-trust, intelligence, notifications, email templates, gateway, contracts, infra, admin + mobile + webapp + seller)]**
+
+Owner rules, 2026-10-04 (asked for as §50, which was already taken by username suggestions). Integration details, flows and data handling: [integrations/smileId.md](./integrations/smileId.md).
+
+### 53.1 Eligibility
+
+- Personal (creator or not) verifies for Blue, Business/Brand for Gold. Government keeps the Black vetting with maker-checker; the hub only points there.
+- go-identity asks Python `POST /v1/verification/eligibility` with the profile signals and the admin checkmark thresholds. Score 75+ with every hard threshold met is **Buy now**; otherwise **Request verification** queues the profile (`verification_eligibilities.state = requested`).
+- A worker (hourly; per profile at most every `VERIFICATION_ELIGIBILITY_RECHECK_EVERY`, default 24 h, or sooner when Python asks) re-scores queued profiles. The first time one qualifies it emits `verification.eligible` once: in-app, push and email "You can now apply for verification" with a deep link to `/settings/verification?step=pay` (mobile: `zudomart://settings/verification`).
+- Intelligence down: Go falls back to `request`, never `buy_now`.
+- go-money refuses web checkout for `blue` and `gold_only` (`409 VERIFICATION_NOT_ELIGIBLE`) unless the profile is eligible or already passed identity once (read-only grant on two users columns). Seller plans and Premium are not gated; their checkmark still needs the identity check.
+
+### 53.2 Pay first, then verify
+
+- `entitlement.granted` for a Blue/Gold plan no longer switches the badge on for a profile that never passed identity verification: it opens a `verification_cases` row (idempotent on the subscription id), recording whether the profile was eligible when it paid. Renewals and profiles verified before keep the old behaviour.
+- Consent then capture: `POST /verification/cases/{id}/capture` requires the current biometric consent version and a supported photo ID, then returns a Smile ID web token (webapp hosted web integration) or a single-use Smile Link (apps, opened with `expo-web-browser`).
+- The signed Smile ID callback (`POST /api/v1/webhooks/smile-id`, through the gateway) is verified, idempotent on our job id and on the case state, and never stores images, names or ID numbers (only check results, scores, ID type, country, dates and a keyed fingerprint of the ID number).
+
+### 53.3 Decision
+
+- Auto-approve only when liveness, document, face match all pass, the government lookup did not fail, name match is 0.88+ (fuzzy, Jaro-Winkler per token), trust 60+ and not blocked, the profile was eligible when it paid, the ID is not used on another account and (Gold) business documents are approved.
+- Anything else goes to the admin queue (`/verification/identity`): Smile ID result, scores, reasons, profile health, Approve / Reject with reason, both behind step-up and audited. Admins can also pass a case before the result arrives.
+- Spoof attempt, ID name mismatch, ID number not found and ID reused across accounts go to go-trust as advisory suspension cases (`verification.fraudSignalDetected`; nothing is enforced automatically).
+
+### 53.4 Reject means refund
+
+- Rejecting a `blue` or `gold_only` case emits `verificationCase.refundRequested`; go-money refunds the full Paystack charge and disables the subscription (web), revokes the Play subscription with a full refund (Google), or cancels and flags a manual refund for App Store purchases (Apple has no developer refund API). A running trial was never charged, so it is just cancelled. Outcomes come back as `verificationRefund.*` and update the case.
+- **Seller plans (Pro, Business) and Premium keep running on reject** (owner, 2026-10-04). Features stay active; only the checkmark is withheld, and only the checkmark's share of the current period's payment is refunded: the standalone checkmark price for the region, channel and interval (Blue for Premium, Gold-only for Pro/Business; `regionpricing.CheckmarkShareMinor`, read from the price book with the research defaults as fallback), capped at what the subscription paid. Web: a Paystack partial refund posted as a ledger entry first under the idempotency key `verification-share:{caseId}`; the Paystack subscription is not cancelled. Google Play: partial refund when the verifier supports it (none does today), otherwise flagged for manual review like Apple. A running trial charged nothing, so the plan just continues. A standalone Blue, Gold-only, Black or bundle tier keeps the full refund and cancellation above; in a Blue+Gold bundle each tier is its own subscription and case, so a failed tier refunds its own (capped) amount and the other tier stays.
+- Outcome events carry `refundScope` (`full` or `checkmark_share`) and `refundAmount`. For a keep-running plan the rejection email and push wait for the outcome, because only go-money knows the amount: "Your plan stays active; we've refunded ₦X for the checkmark" (card), or the store wording with the amount (Google/Apple). The admin queue and the user hub show the same scope.
+- Users can re-apply later (30 days after the rejection).
+- Emails: `verificationEligible`, `verificationUnderReview`, `verificationApproved`, `verificationRejectedRefunded` (branded layout, refund wording per channel, try again after 30 days).
+
+### 53.5 Trial card check
+
+- The trial card-verification charge (₦50 in Nigeria, regional amounts from `regionpricing.CardVerificationCharge`) is now refunded the moment the card is saved: the first refund call runs inline after settlement, transient failures retry after 5 s, 30 s and 2 min, and a definitive failure or exhausted retries log an `ALERT` and emit `cardVerification.refundFailed`. The five-minute sweep stays as a safety net.
+- Seller UI copy: "₦50 charged to verify your card — refunded immediately" (amount from the offer).
+
+### 53.6 Open items
+
+- **[OWNER]** Legal review of the consent text and retention under NDPA 2023 (biometrics are sensitive data); DPA with Smile ID.
+- **[NEXT]** Renewals must not charge for the checkmark until the profile is verified. Billing has no line item for this (a Paystack plan is one amount; store prices are fixed per product), so after a rejection the plan keeps renewing at its full price. Needs a checkmark-less price per seller plan and Premium, switched at the next renewal and restored on approval.
+- **[NEXT]** Refund the latest charge rather than `billing_reference` (the first charge) when a rejection lands after a renewal; Google Play partial refund once the Play API call exists.
+- **[NEXT]** Native IAP in the app (dev build). Until then "Buy now" in the app opens the web checkout.
+- **[NEXT]** Confirm Smile ID document `id_type` codes per country and the Google Play `fullRefund` revoke context against the live APIs.
+- **[LATER]** A dedicated `identity_verification` source on go-trust suspension cases (uses `python_suggestion` with model `smile_id_verification` for now, to avoid a moderation schema change).
+- **[LATER]** Name-change re-verification for identity-verified profiles.

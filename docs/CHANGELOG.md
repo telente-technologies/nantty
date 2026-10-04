@@ -6,6 +6,39 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
+## Checkmark verification with Smile ID (4 Oct) — go test (users, subscriptions, payments, moderation, regionpricing), pytest, vitest (notifications, gateway), tsc (admin, mobile, webapp, seller, notifications, gateway, email templates)
+
+Design: [plans.md §53](./plans.md) and [integrations/smileId.md](./integrations/smileId.md).
+
+| Area | Change |
+| --- | --- |
+| go-identity | New `identityVerification` module: eligibility (Python score, Buy now / Request, hourly recheck, one-time "You can now apply"), `verification_cases` opened by paid Blue/Gold entitlements, consent-gated Smile ID capture (web token or Smile Link), signed idempotent callback, auto-approve matrix, admin queue with step-up approve/reject, refund outcome tracking. Legacy applications no longer keep selfie or ID photo URLs |
+| go-money | Checkout gate for `blue` and `gold_only`; reject refund handler (Paystack full refund, Play revoke, Apple manual flag, trial cancel); entitlement events carry the channel; trial card check refunded immediately with retries and an alert; regional card-check amounts |
+| go-trust | Smile ID fraud signals become advisory suspension cases |
+| intelligence | `POST /v1/verification/eligibility` trust scoring |
+| notifications + email templates | `verificationEligible`, `verificationUnderReview`, `verificationApproved`, `verificationRejectedRefunded` |
+| gateway, contracts, infra | Smile ID webhook route, event schemas, RabbitMQ bindings, Terraform secrets and env |
+| intelligence | Moved `apps/intelligence` to `services/python/intelligence` (git mv; snake_case layout kept); CI, docs, Docker and ignore paths updated |
+| admin | Identity checks queue and case page under Verification |
+| mobile + webapp | Verification hub: eligibility, Buy now / Request, payment, consent, ID choice, capture, progress, under review / approved / rejected and refunded |
+| seller | Trial copy: "₦50 charged to verify your card — refunded immediately" |
+| go-money + go-identity | Rejection on a seller plan (Pro/Business) or Premium keeps the plan running and refunds only the checkmark share (standalone price per region, capped at the amount paid): Paystack partial refund with a ledger entry under `verification-share:{caseId}`, Google partial refund when supported else manual flag, Apple manual flag; standalone checkmarks still refunded in full. Outcome events carry `refundScope` and `refundAmount`; the rejection notice for these plans is sent once the outcome is known. Renewal without the checkmark line item is a documented follow-up |
+| notifications + email templates | `verificationRejectedRefunded` gains `plan_share_card` / `plan_share_store` and `refundAmount`: "Your plan stays active; we've refunded ₦X for the checkmark" |
+| admin + mobile + webapp | Identity case page and verification hub explain the checkmark-share refund (`refundScope`) |
+
+## Tagged people on posts and clips, compact counts (4 Oct) — mobile jest + tsc, webapp tsx --test + tsc
+
+Design: [plans.md §52](./plans.md). Mocks only.
+
+| Area | Change |
+| --- | --- |
+| mobile + webapp feed | Tag line under post media opens a centred list of tagged people (avatar, name, @username, checkmark, Follow via `requireAuthThen`); rows open the profile |
+| mobile + webapp clips | Glass pill with stacked avatars and "N people" above the caption opens the list in a bottom sheet over the paused clip |
+| counts | One `formatCompactCount` (1.2K, 123K, 1.2M) behind `formatCountWithThousandsSuffix`; clips rail counts are single-line, tabular and in a fixed 44 pt column; feed action counts no longer wrap. Formatter tests in both apps |
+| clips share count | `Clip.shares` added (types, mocks); the Share rail item shows shares instead of views, and mobile views get their own rail item. Webapp Share shows shares instead of reposts |
+| reserved usernames | `security-check` reserved in the webapp route list and go `platform/usernames` |
+| data | `Post.taggedUsers` and `taggedUsersCount`, `GET /api/v1/posts/:postId/tagged-users` mock (guest readable) |
+
 ## Create flow redesign, photo clips, tagging and tappable links (4 Oct) — mobile jest + tsc, webapp tsx --test + tsc
 
 Design: [plans.md §51](./plans.md). Backend not built yet; mocks only.
@@ -18,6 +51,8 @@ Design: [plans.md §51](./plans.md). Backend not built yet; mocks only.
 | mobile links | URLs in posts, comments, bios, messages and live chat are coloured (`colors.link`) and tappable; Zudomart links open in the app, others open in the in-app browser after the suspicious-link warning; preview cards share the same path |
 | webapp links | Same linkify in `MentionText`; external links open in a new tab with `rel="noopener noreferrer nofollow ugc"` and the risky-link confirm |
 | mocks | `POST /posts` validates slideshow, trim, location and tags; new `/places/search` and `/tags/candidates`; `postTag` notifications |
+
+---
 
 ## Username suggestions when a username is taken (4 Oct) — go test platform/usernames + auth, gateway vitest + tsc, mobile jest + tsc, webapp tsx --test + tsc
 

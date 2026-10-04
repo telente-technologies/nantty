@@ -81,7 +81,7 @@ gRPC contracts touching money data: `services/contracts/proto/zudomart/money/v1/
 | --- | --- | --- |
 | TypeScript gateway | None (no ORM dependency) | `services/typescript/gateway` |
 | Elixir realtime | None (no Ecto/Postgrex) | `services/elixir/realtime/mix.exs` |
-| Python intelligence | Redis client only | `apps/intelligence/pyproject.toml` |
+| Python intelligence | Redis client only | `services/python/intelligence/pyproject.toml` |
 | Valkey/Redis | Live HTTP idempotency (`live:idempotency` prefix); platform store `services/go/platform/idempotency/idempotency.store.go` | `services/go/modules/live/src/app.go` |
 | Legacy monolith (reference spec only, not deployed by the new stack) | Prisma, 124 models, 1 init migration, seeds | `apps/api/prisma/{schema/*.prisma,migrations,seeds,seed.ts}` |
 
