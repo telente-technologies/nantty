@@ -20,6 +20,8 @@ export interface SocialConfig {
   readonly linkPreviewsEnabled: boolean;
   readonly linkPreviewMediaOwnerId: string;
   readonly moneyInternal: { readonly baseUrl: string; readonly internalToken: string } | undefined;
+  readonly adminInternal?: { readonly baseUrl: string; readonly internalToken: string } | undefined;
+  readonly intelligence?: { readonly baseUrl: string; readonly sharedSecret: string; readonly feedRankTimeoutMs: number; readonly exploreTimeoutMs: number } | undefined;
 }
 
 function readRequired(name: string, problems: string[]): string {
@@ -36,6 +38,19 @@ function readOrDefault(name: string, fallback: string): string {
 function readInternalSource(prefix: string): { readonly baseUrl: string; readonly internalToken: string } | undefined {
   const baseUrl = process.env[`${prefix}_URL`]?.trim() ?? "";
   return baseUrl === "" ? undefined : { baseUrl, internalToken: process.env[`${prefix}_TOKEN`]?.trim() ?? "" };
+}
+
+function readAdminInternalSource(): SocialConfig["adminInternal"] {
+  const source = readInternalSource("ADMIN_INTERNAL");
+  return source === undefined ? undefined : { ...source, internalToken: source.internalToken || readOrDefault("ADMIN_INTERNAL_API_TOKEN", "") };
+}
+
+function readIntelligence(problems: string[]): SocialConfig["intelligence"] {
+  const baseUrl = readOrDefault("INTELLIGENCE_URL", "");
+  if (baseUrl === "") return undefined;
+  const sharedSecret = readOrDefault("INTELLIGENCE_SHARED_SECRET", "");
+  if (sharedSecret === "") problems.push("INTELLIGENCE_SHARED_SECRET is required when INTELLIGENCE_URL is set");
+  return { baseUrl, sharedSecret, feedRankTimeoutMs: Number(readOrDefault("FEED_RANK_TIMEOUT_MS", "250")), exploreTimeoutMs: Number(readOrDefault("EXPLORE_INTELLIGENCE_TIMEOUT_MS", "400")) };
 }
 
 export function loadSocialConfigFromEnvironment(): SocialConfig {
@@ -63,6 +78,8 @@ export function loadSocialConfigFromEnvironment(): SocialConfig {
     linkPreviewMediaOwnerId: readOrDefault("LINK_PREVIEW_MEDIA_OWNER_ID", "00000000-0000-7000-8000-00000000c0de"),
     moneyInternal: readInternalSource("MONEY_INTERNAL"),
     mediaInternal: readInternalSource("MEDIA_INTERNAL"),
+    adminInternal: readAdminInternalSource(),
+    intelligence: readIntelligence(problems),
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
   if (problems.length > 0) throw new Error(`Invalid social configuration: ${problems.join("; ")}`);

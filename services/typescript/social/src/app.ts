@@ -15,6 +15,11 @@ import { createIdentityReadClient } from "./databases/identityRead.database.js";
 import { createIdempotencyGuard } from "./middlewares/idempotency.middleware.js";
 import { createIdentityDirectory } from "./integrations/identityDirectory.integration.js";
 import { deterministicFeedRanker } from "./integrations/deterministicFeedRanker.integration.js";
+import { createAdminRankingSettingsSource, staticRankingSettings } from "./integrations/adminRankingSettings.integration.js";
+import { createIdentityAuthorRankingDirectory } from "./integrations/identityAuthorRanking.integration.js";
+import { createIntelligenceExploreClient } from "./integrations/intelligenceExplore.integration.js";
+import { createIntelligenceFeedRanker } from "./integrations/intelligenceFeedRanker.integration.js";
+import type { FeedRanker } from "./interfaces/feedRanker.interface.js";
 import { createHttpShareCardResolver } from "./integrations/httpShareCardResolver.integration.js";
 import { createHttpLinkPreviewImageStore } from "./integrations/httpLinkPreviewImageStore.integration.js";
 import { createSafeHttpFetcher } from "./integrations/safeHttpFetcher.integration.js";
@@ -44,7 +49,20 @@ export interface SocialApp {
 export function createSocialApp(config: SocialConfig, internalToken: string, logger: Logger = createLogger({ name: "social" })): SocialApp {
   const database: SocialDatabase = createSocialDatabase(config.databaseUrl);
   const identityClient = createIdentityReadClient(config.identityReadDatabaseUrl);
-  const context: HandlerContext = { database, directory: createIdentityDirectory(identityClient, logger), clock: systemClock, premium: config.moneyInternal === undefined ? noPremiumEntitlements : createHttpPremiumEntitlements(config.moneyInternal), ranker: deterministicFeedRanker, shareCards: createHttpShareCardResolver({ commerce: config.commerceInternal, live: config.liveInternal }), ...(config.mediaInternal === undefined ? {} : { media: createHttpMediaDescriptorResolver(config.mediaInternal) }), ...(config.linkPreviewsEnabled ? { linkPreviews: createLinkUnfurler({ db: database.client, fetcher: createSafeHttpFetcher(), clock: systemClock, imageStore: config.mediaInternal === undefined ? undefined : createHttpLinkPreviewImageStore(config.mediaInternal, config.linkPreviewMediaOwnerId) }) } : {}) };
+  const premium = config.moneyInternal === undefined ? noPremiumEntitlements : createHttpPremiumEntitlements(config.moneyInternal);
+  const context: HandlerContext = {
+    database,
+    directory: createIdentityDirectory(identityClient, logger),
+    clock: systemClock,
+    premium,
+    ranker: createFeedRanker(config, logger),
+    authorRanking: createIdentityAuthorRankingDirectory(identityClient, logger, config.moneyInternal === undefined ? undefined : premium),
+    rankingSettings: config.adminInternal === undefined ? staticRankingSettings : createAdminRankingSettingsSource(config.adminInternal),
+    ...(config.intelligence === undefined ? {} : { intelligenceExplore: createIntelligenceExploreClient({ baseUrl: config.intelligence.baseUrl, sharedSecret: config.intelligence.sharedSecret, timeoutMs: config.intelligence.exploreTimeoutMs }) }),
+    shareCards: createHttpShareCardResolver({ commerce: config.commerceInternal, live: config.liveInternal }),
+    ...(config.mediaInternal === undefined ? {} : { media: createHttpMediaDescriptorResolver(config.mediaInternal) }),
+    ...(config.linkPreviewsEnabled ? { linkPreviews: createLinkUnfurler({ db: database.client, fetcher: createSafeHttpFetcher(), clock: systemClock, imageStore: config.mediaInternal === undefined ? undefined : createHttpLinkPreviewImageStore(config.mediaInternal, config.linkPreviewMediaOwnerId) }) } : {}),
+  };
   const router = createRouter({
     onError: (error) => errorToResponse(error),
     notFoundHandler: () => json(404, { message: "Not found.", code: "NOT_FOUND" }),
@@ -88,6 +106,21 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
       await identityClient.$disconnect();
     },
   };
+}
+
+function createFeedRanker(config: SocialConfig, logger: Logger): FeedRanker {
+  if (config.intelligence === undefined) return deterministicFeedRanker;
+  let fallbackCount = 0;
+  return createIntelligenceFeedRanker({
+    baseUrl: config.intelligence.baseUrl,
+    sharedSecret: config.intelligence.sharedSecret,
+    timeoutMs: config.intelligence.feedRankTimeoutMs,
+    fallback: deterministicFeedRanker,
+    onFallback: (reason) => {
+      fallbackCount += 1;
+      if (fallbackCount % 100 === 1) logger.warn("feed ranking fell back to the deterministic ranker", { reason, fallbackCount });
+    },
+  });
 }
 
 function createDomainEventPublisher(config: SocialConfig, logger: Logger): DomainEventPublisher {
