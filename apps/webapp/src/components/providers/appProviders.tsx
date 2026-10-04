@@ -7,6 +7,7 @@ import { Suspense, useCallback, useState, type ReactNode } from "react";
 import { isRetryableApiFailure, sendRequestToWebappServer } from "@/services/clientApi.service";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
+import { CelebrationHost } from "@/components/celebrations/celebrationHost";
 import { AuthPromptModal } from "@/components/auth/authPromptModal";
 import { ConfirmDialogHost } from "@/components/ui/confirmDialog";
 import { ToastViewport } from "@/components/ui/toast";
@@ -54,6 +55,7 @@ export function AppProviders({ viewer, csrfToken, themePreference, children }: A
           <ConsentBannerHost />
           <ToastViewport />
           <ConfirmDialogHost />
+          <CelebrationHost />
           <Suspense fallback={null}>
             <AuthPromptModal />
           </Suspense>
