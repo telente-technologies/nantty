@@ -9,9 +9,11 @@ import { FriendsLikedAvatarStack } from "@/components/feed/friendsLikedAvatarSta
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { ClipSoundRow } from "@/components/sounds/clipSoundRow";
 import { openSoundScreen } from "@/components/sounds/soundNavigation.util";
+import { CopyrightCountdownBanner } from "@/components/accountHealth/copyrightCountdownBanner";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import type { MainStackParamList } from "@/navigation/navigation.types";
+import { useAuthStore } from "@/store/auth.store";
 import type { Clip } from "@/types";
 
 import { FollowPill } from "./followPill";
@@ -28,6 +30,7 @@ export interface ClipDetailsProps {
 
 export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, foregroundColor, isActive = true }: ClipDetailsProps) {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+  const isViewerTheAuthor = useAuthStore((state) => state.user?.id === clip.author.id);
   const readableTextStyle = foregroundColor ? styles.readableOnVideo : undefined;
   return (
     <View style={styles.root}>
@@ -73,6 +76,7 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
           This sound is unavailable while under copyright review
         </Text>
       ) : null}
+      {isViewerTheAuthor ? <CopyrightCountdownBanner contentId={clip.id} onOpenAccountStatus={() => navigation.navigate("AccountStatus")} /> : null}
       {clip.sponsored ? <SponsoredCallToAction sponsored={clip.sponsored} placement="clips" itemId={clip.id} /> : null}
     </View>
   );
