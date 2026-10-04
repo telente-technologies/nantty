@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	adminerrors "zudomart/modules/admin/src/errors"
+	"zudomart/platform/regionpricing"
 )
 
 func decodeStrictly[Value any](raw json.RawMessage, destination *Value) error {
@@ -109,6 +110,17 @@ func validateEscrowPolicy(raw json.RawMessage) (json.RawMessage, error) {
 		if check != nil {
 			return nil, check
 		}
+	}
+	return canonicalJson(value)
+}
+
+func validateRegionalPricing(raw json.RawMessage) (json.RawMessage, error) {
+	var value regionpricing.SettingDocument
+	if err := decodeStrictly(raw, &value); err != nil {
+		return nil, err
+	}
+	if err := regionpricing.ValidateSettingDocument(value); err != nil {
+		return nil, adminerrors.Unprocessable(err.Error())
 	}
 	return canonicalJson(value)
 }

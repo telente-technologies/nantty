@@ -3,6 +3,8 @@ package services
 import (
 	"encoding/json"
 	"regexp"
+
+	"zudomart/platform/regionpricing"
 )
 
 const (
@@ -10,6 +12,7 @@ const (
 	MonetizationPolicyKey  = "monetization.policy"
 	GiftShareTiersKey      = "gift.shareTiers"
 	EscrowPolicyKey        = "escrow.policy"
+	RegionalPricingKey     = regionpricing.SettingKey
 	maximumCreatorShareBps = 7000
 )
 
@@ -33,7 +36,8 @@ var PlatformSettingDefinitions = map[string]SettingDefinition{
 		{MinimumMonthlyGiftCoins: 500000, CreatorShareBps: 6000},
 		{MinimumMonthlyGiftCoins: 5000000, CreatorShareBps: maximumCreatorShareBps},
 	}}},
-	EscrowPolicyKey: {Validate: validateEscrowPolicy, WritePermission: "config:revenue", DefaultValue: EscrowPolicy{AutoReleaseDays: 3, SellerCreditHoldHours: 24, SellerReserveBps: 0}},
+	EscrowPolicyKey:    {Validate: validateEscrowPolicy, WritePermission: "config:revenue", DefaultValue: EscrowPolicy{AutoReleaseDays: 3, SellerCreditHoldHours: 24, SellerReserveBps: 0}},
+	RegionalPricingKey: {Validate: validateRegionalPricing, Public: true, WritePermission: "config:revenue", DefaultValue: regionpricing.DefaultSettingDocument()},
 }
 
 type CreatorRequirements struct {
