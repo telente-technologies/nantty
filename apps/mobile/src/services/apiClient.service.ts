@@ -8,6 +8,7 @@ import { ApiError } from "@/errors/api.error";
 import type { Page } from "@/types";
 import { isBackgroundCallSkippedForGuests } from "@/config/guestAccess.config";
 import { readStoreBillingRequestHeaders } from "./storeBilling.service";
+import { runHumanVerificationInAppBrowser } from "./humanVerification.service";
 
 export { ApiError };
 
@@ -70,8 +71,8 @@ async function sendHttpRequest<T>(method: Method, path: string, options: Request
     });
     const payload = response.status === 204 ? undefined : await response.json().catch(() => undefined);
     if (!response.ok) {
-      const error = (payload ?? {}) as { message?: string; code?: string };
-      throw new ApiError(response.status, error.message ?? "Something went wrong", error.code);
+      const error = (payload ?? {}) as { message?: string; code?: string; suggestions?: string[] };
+      throw new ApiError(response.status, error.message ?? "Something went wrong", error.code, error.suggestions);
     }
     return unwrapApiPayload<T>(payload);
   } finally {
@@ -96,10 +97,22 @@ export function refreshSessionAfterUnauthorizedResponse(): Promise<boolean> {
   return refreshing;
 }
 
+const submitHumanVerificationToken = (token: string) => sendHttpRequest<unknown>("POST", "/api/v1/security/human-verification", { body: { token } });
+
+async function sendRequestWithHumanVerification<T>(method: Method, path: string, options?: RequestOptions): Promise<T> {
+  try {
+    return await sendHttpRequest<T>(method, path, options);
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 428 || error.code !== "HUMAN_VERIFICATION_REQUIRED") throw error;
+    if (!(await runHumanVerificationInAppBrowser("security_check", submitHumanVerificationToken))) throw error;
+    return sendHttpRequest<T>(method, path, options);
+  }
+}
+
 async function sendRequestWithTokenRefresh<T>(method: Method, path: string, options?: RequestOptions): Promise<T> {
   if (!useAuthStore.getState().accessToken && isBackgroundCallSkippedForGuests(method, path)) return undefined as T;
   try {
-    return await sendHttpRequest<T>(method, path, options);
+    return await sendRequestWithHumanVerification<T>(method, path, options);
   } catch (error) {
     if (!(error instanceof ApiError) || error.status !== 401 || options?.auth === false) throw error;
     if (!useAuthStore.getState().accessToken) {
@@ -107,7 +120,7 @@ async function sendRequestWithTokenRefresh<T>(method: Method, path: string, opti
       throw error;
     }
     if (!(await refreshSessionAfterUnauthorizedResponse())) throw error;
-    return sendHttpRequest<T>(method, path, options);
+    return sendRequestWithHumanVerification<T>(method, path, options);
   }
 }
 
