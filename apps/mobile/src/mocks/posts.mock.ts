@@ -30,25 +30,47 @@ const buildDailyImpressions = (impressions: number): PostAnalyticsDaily[] => {
   }));
 };
 
-const buildPostAnalytics = (post: Post): PostAnalytics => ({
-  postId: post.id,
-  author: post.author,
-  postedAt: post.createdAt,
-  impressions: post.views,
-  uniqueViewers: Math.round(post.views * 0.68),
-  likes: post.likes,
-  comments: post.comments,
-  reposts: post.reposts,
-  profileVisits: Math.round(post.views * 0.042),
-  daily: buildDailyImpressions(post.views),
-});
+const buildPostAnalytics = (post: Post): PostAnalytics => {
+  const saves = post.saveCount ?? Math.round(post.likes * 0.15);
+  const shares = Math.round(post.reposts * 0.6);
+  const linkClicks = Math.round(post.views * 0.011);
+  const profileClicks = Math.round(post.views * 0.019);
+  const engagements = post.likes + post.comments + post.reposts + saves + shares + linkClicks + profileClicks;
+  const isVideo = post.media.some((item) => item.type === "video");
+  return {
+    postId: post.id,
+    author: post.author,
+    postedAt: post.createdAt,
+    impressions: post.views,
+    uniqueViewers: Math.round(post.views * 0.68),
+    likes: post.likes,
+    comments: post.comments,
+    reposts: post.reposts,
+    profileVisits: Math.round(post.views * 0.042),
+    saves,
+    shares,
+    linkClicks,
+    profileClicks,
+    newFollows: Math.round(post.views * 0.0025),
+    engagements,
+    engagementRate: post.views > 0 ? Math.round((engagements / post.views) * 1000) / 10 : 0,
+    video: isVideo ? { views: Math.round(post.views * 0.55), watchTimeSeconds: Math.round(post.views * 0.55 * 11) } : null,
+    audience: [
+      { label: "Followers", share: 38 },
+      { label: "Non-followers", share: 62 },
+    ],
+    daily: buildDailyImpressions(post.views),
+  };
+};
 
 export const postsMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/posts/:postId", ({ params }) => {
+  createMockRoute("GET", "/api/v1/posts/:postId", ({ params, isGuest }) => {
     const post = findPostIncludingSponsored(params.postId!);
     if (!post) throw new ApiError(404, "This post was removed");
+    if (isGuest && (post.sensitive?.labels ?? []).some((label) => label === "nudity" || label === "dangerous_acts")) throw new ApiError(404, "This post isn't available.", "POST_NOT_AVAILABLE");
     return withViewerSavedState(withCurrentProductPrices(post));
   }),
+  createMockRoute("POST", "/api/v1/posts/:postId/link-preview", ({ params }) => findPostIncludingSponsored(params.postId!)?.linkPreview ?? null),
   createMockRoute("POST", "/api/v1/posts/:postId/like", ({ params }) =>
     updateMockPost(params.postId!, (p) => ({ ...p, liked: true, likes: p.liked ? p.likes : p.likes + 1 })),
   ),
@@ -58,7 +80,6 @@ export const postsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/posts/:postId/repost", ({ params, body }) => {
     const original = findPostIncludingSponsored(params.postId!);
     if (!original) throw new ApiError(404, "This post was removed");
-    updateMockPost(params.postId!, (p) => ({ ...p, reposts: p.reposts + 1 }));
     const quoteText = typeof (body as { text?: unknown } | null)?.text === "string" ? (body as { text: string }).text.trim() : "";
     const reshare: Post = {
       id: `reshare_${original.id}_${mockPostsState.size}`,
@@ -73,12 +94,20 @@ export const postsMocks: MockRoute[] = [
       views: 0,
       liked: false,
       bookmarked: false,
+      saveCount: 0,
       isFollowingAuthor: false,
       friendsLiked: null,
       products: [],
       sponsored: null,
       resharedFrom: withCurrentProductPrices(original),
+      isQuote: quoteText !== "",
+      quotes: 0,
+      replyPolicy: "everyone",
+      viewerCanReply: true,
+      replyRestriction: null,
+      sensitive: null,
     };
+    updateMockPost(params.postId!, (p) => ({ ...p, reposts: p.reposts + 1, quotes: (p.quotes ?? 0) + (quoteText !== "" ? 1 : 0) }));
     mockPostsState.set(reshare.id, reshare);
     return reshare;
   }),
