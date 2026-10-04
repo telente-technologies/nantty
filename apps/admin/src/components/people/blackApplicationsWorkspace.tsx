@@ -14,6 +14,7 @@ import { KeyValueList, SectionHeading } from "@/components/ui/surfaces";
 import { LinkTabs, SegmentedTabs } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toastProvider";
 import { UserIdentity } from "@/components/ui/userIdentity";
+import { verificationViewTabs } from "@/constants/identityVerification.constant";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { decideBlackApplication, fetchBlackApplications, sendBlackReverificationReminder, updateBlackChecklistItem } from "@/services/safetyApi.service";
@@ -98,7 +99,7 @@ export function BlackApplicationsWorkspace() {
   return (
     <>
       <PageHeader area="People" title="Black applications" description="Government and official accounts. Never suggested or self-serve, always vetted by hand and approved by two admins." />
-      <LinkTabs label="Verification views" items={[{ href: "/verification", label: "Verification requests" }, { href: "/verification/business-documents", label: "Business documents" }, { href: "/verification/black", label: "Black applications" }]} />
+      <LinkTabs label="Verification views" items={verificationViewTabs} />
       <SegmentedTabs label="Application status" items={tabs} activeKey={status} onChange={setStatus} />
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Black applications" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} emptyMessage="No applications here." />

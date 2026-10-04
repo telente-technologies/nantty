@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { LinkTabs, SegmentedTabs } from "@/components/ui/tabs";
 import { UserIdentity } from "@/components/ui/userIdentity";
+import { verificationViewTabs } from "@/constants/identityVerification.constant";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { fetchBusinessDocumentSubmissions } from "@/services/safetyApi.service";
 import type { BusinessDocumentSubmission } from "@/types/businessDocuments.type";
@@ -42,7 +43,7 @@ export function BusinessDocumentsWorkspace() {
   return (
     <>
       <PageHeader area="People" title="Business documents" description="CAC certificates, IDs and proofs of address that sellers upload from their dashboard. Selling is never blocked while these wait." />
-      <LinkTabs label="Verification views" items={[{ href: "/verification", label: "Verification requests" }, { href: "/verification/business-documents", label: "Business documents" }, { href: "/verification/black", label: "Black applications" }]} />
+      <LinkTabs label="Verification views" items={verificationViewTabs} />
       <SegmentedTabs label="Document status" items={statusTabs} activeKey={status} onChange={(key) => { setStatus(key); setPage(1); }} />
       <Toolbar>
         <TextField label="Search" isLabelHidden type="search" placeholder="Search store, @username or ID" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
