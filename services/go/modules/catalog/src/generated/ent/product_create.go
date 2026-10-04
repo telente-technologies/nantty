@@ -319,6 +319,20 @@ func (_c *ProductCreate) SetNillableUnitsSold(v *int) *ProductCreate {
 	return _c
 }
 
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (_c *ProductCreate) SetModerationVisibility(v string) *ProductCreate {
+	_c.mutation.SetModerationVisibility(v)
+	return _c
+}
+
+// SetNillableModerationVisibility sets the "moderation_visibility" field if the given value is not nil.
+func (_c *ProductCreate) SetNillableModerationVisibility(v *string) *ProductCreate {
+	if v != nil {
+		_c.SetModerationVisibility(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *ProductCreate) SetUpdatedAt(v time.Time) *ProductCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -430,6 +444,10 @@ func (_c *ProductCreate) defaults() {
 		v := product.DefaultUnitsSold
 		_c.mutation.SetUnitsSold(v)
 	}
+	if _, ok := _c.mutation.ModerationVisibility(); !ok {
+		v := product.DefaultModerationVisibility
+		_c.mutation.SetModerationVisibility(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := product.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -501,6 +519,9 @@ func (_c *ProductCreate) check() error {
 	}
 	if _, ok := _c.mutation.UnitsSold(); !ok {
 		return &ValidationError{Name: "units_sold", err: errors.New(`ent: missing required field "Product.units_sold"`)}
+	}
+	if _, ok := _c.mutation.ModerationVisibility(); !ok {
+		return &ValidationError{Name: "moderation_visibility", err: errors.New(`ent: missing required field "Product.moderation_visibility"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Product.updated_at"`)}
@@ -640,6 +661,10 @@ func (_c *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UnitsSold(); ok {
 		_spec.SetField(product.FieldUnitsSold, field.TypeInt, value)
 		_node.UnitsSold = value
+	}
+	if value, ok := _c.mutation.ModerationVisibility(); ok {
+		_spec.SetField(product.FieldModerationVisibility, field.TypeString, value)
+		_node.ModerationVisibility = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
@@ -1048,6 +1073,18 @@ func (u *ProductUpsert) UpdateUnitsSold() *ProductUpsert {
 // AddUnitsSold adds v to the "units_sold" field.
 func (u *ProductUpsert) AddUnitsSold(v int) *ProductUpsert {
 	u.Add(product.FieldUnitsSold, v)
+	return u
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (u *ProductUpsert) SetModerationVisibility(v string) *ProductUpsert {
+	u.Set(product.FieldModerationVisibility, v)
+	return u
+}
+
+// UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
+func (u *ProductUpsert) UpdateModerationVisibility() *ProductUpsert {
+	u.SetExcluded(product.FieldModerationVisibility)
 	return u
 }
 
@@ -1530,6 +1567,20 @@ func (u *ProductUpsertOne) AddUnitsSold(v int) *ProductUpsertOne {
 func (u *ProductUpsertOne) UpdateUnitsSold() *ProductUpsertOne {
 	return u.Update(func(s *ProductUpsert) {
 		s.UpdateUnitsSold()
+	})
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (u *ProductUpsertOne) SetModerationVisibility(v string) *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetModerationVisibility(v)
+	})
+}
+
+// UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
+func (u *ProductUpsertOne) UpdateModerationVisibility() *ProductUpsertOne {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateModerationVisibility()
 	})
 }
 
@@ -2181,6 +2232,20 @@ func (u *ProductUpsertBulk) AddUnitsSold(v int) *ProductUpsertBulk {
 func (u *ProductUpsertBulk) UpdateUnitsSold() *ProductUpsertBulk {
 	return u.Update(func(s *ProductUpsert) {
 		s.UpdateUnitsSold()
+	})
+}
+
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (u *ProductUpsertBulk) SetModerationVisibility(v string) *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.SetModerationVisibility(v)
+	})
+}
+
+// UpdateModerationVisibility sets the "moderation_visibility" field to the value that was provided on create.
+func (u *ProductUpsertBulk) UpdateModerationVisibility() *ProductUpsertBulk {
+	return u.Update(func(s *ProductUpsert) {
+		s.UpdateModerationVisibility()
 	})
 }
 

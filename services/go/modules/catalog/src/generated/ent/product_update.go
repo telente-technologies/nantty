@@ -426,6 +426,20 @@ func (_u *ProductUpdate) AddUnitsSold(v int) *ProductUpdate {
 	return _u
 }
 
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (_u *ProductUpdate) SetModerationVisibility(v string) *ProductUpdate {
+	_u.mutation.SetModerationVisibility(v)
+	return _u
+}
+
+// SetNillableModerationVisibility sets the "moderation_visibility" field if the given value is not nil.
+func (_u *ProductUpdate) SetNillableModerationVisibility(v *string) *ProductUpdate {
+	if v != nil {
+		_u.SetModerationVisibility(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ProductUpdate) SetUpdatedAt(v time.Time) *ProductUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -630,6 +644,9 @@ func (_u *ProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedUnitsSold(); ok {
 		_spec.AddField(product.FieldUnitsSold, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ModerationVisibility(); ok {
+		_spec.SetField(product.FieldModerationVisibility, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
@@ -1049,6 +1066,20 @@ func (_u *ProductUpdateOne) AddUnitsSold(v int) *ProductUpdateOne {
 	return _u
 }
 
+// SetModerationVisibility sets the "moderation_visibility" field.
+func (_u *ProductUpdateOne) SetModerationVisibility(v string) *ProductUpdateOne {
+	_u.mutation.SetModerationVisibility(v)
+	return _u
+}
+
+// SetNillableModerationVisibility sets the "moderation_visibility" field if the given value is not nil.
+func (_u *ProductUpdateOne) SetNillableModerationVisibility(v *string) *ProductUpdateOne {
+	if v != nil {
+		_u.SetModerationVisibility(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ProductUpdateOne) SetUpdatedAt(v time.Time) *ProductUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -1283,6 +1314,9 @@ func (_u *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err er
 	}
 	if value, ok := _u.mutation.AddedUnitsSold(); ok {
 		_spec.AddField(product.FieldUnitsSold, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ModerationVisibility(); ok {
+		_spec.SetField(product.FieldModerationVisibility, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)

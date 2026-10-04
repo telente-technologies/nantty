@@ -70,6 +70,8 @@ type Product struct {
 	LikeCount int `json:"like_count,omitempty"`
 	// UnitsSold holds the value of the "units_sold" field.
 	UnitsSold int `json:"units_sold,omitempty"`
+	// ModerationVisibility holds the value of the "moderation_visibility" field.
+	ModerationVisibility string `json:"moderation_visibility,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -88,7 +90,7 @@ func (*Product) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case product.FieldMinPriceMinor, product.FieldRatingSum, product.FieldRatingCount, product.FieldLikeCount, product.FieldUnitsSold:
 			values[i] = new(sql.NullInt64)
-		case product.FieldName, product.FieldDescription, product.FieldBrandRelationship, product.FieldStatus, product.FieldVisibility, product.FieldCurrency:
+		case product.FieldName, product.FieldDescription, product.FieldBrandRelationship, product.FieldStatus, product.FieldVisibility, product.FieldCurrency, product.FieldModerationVisibility:
 			values[i] = new(sql.NullString)
 		case product.FieldCreatedAt, product.FieldPublishAt, product.FieldPublishedAt, product.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -279,6 +281,12 @@ func (_m *Product) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UnitsSold = int(value.Int64)
 			}
+		case product.FieldModerationVisibility:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field moderation_visibility", values[i])
+			} else if value.Valid {
+				_m.ModerationVisibility = value.String
+			}
 		case product.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -407,6 +415,9 @@ func (_m *Product) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("units_sold=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UnitsSold))
+	builder.WriteString(", ")
+	builder.WriteString("moderation_visibility=")
+	builder.WriteString(_m.ModerationVisibility)
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
