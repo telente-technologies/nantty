@@ -106,11 +106,11 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 	token := harness.Tokens.UserAccessToken(buyer)
 	packages := harness.Call(http.MethodGet, "/api/v1/coins/packages", "", "", nil, http.Header{"X-Client-Region": {"NG"}})
 	first := packages.Body["data"].([]any)[0].(map[string]any)
-	if first["id"] != "web-coins-1" || first["coins"].(float64) != 147 || first["price"].(map[string]any)["currency"] != "NGN" || first["price"].(map[string]any)["amountMinor"].(float64) != 150_000 {
+	if first["id"] != "web-coins-1" || first["coins"].(float64) != 100 || first["price"].(map[string]any)["currency"] != "NGN" || first["price"].(map[string]any)["amountMinor"].(float64) != 100_000 {
 		t.Fatalf("web packages: %v", packages.Body)
 	}
 	appPackages := harness.Call(http.MethodGet, "/api/v1/coins/packages", "", "", nil, http.Header{"X-Client-Platform": {"ios"}})
-	if iosPack := appPackages.Body["data"].([]any)[0].(map[string]any); iosPack["purchaseChannel"] != "store_iap" || iosPack["clientPlatform"] != "ios" || iosPack["coins"].(float64) != 69 {
+	if iosPack := appPackages.Body["data"].([]any)[0].(map[string]any); iosPack["purchaseChannel"] != "store_iap" || iosPack["clientPlatform"] != "ios" || iosPack["coins"].(float64) != 100 || iosPack["storeProductId"] != "com.zudomart.app.coins.tier1" {
 		t.Fatalf("app packages: %v", appPackages.Body)
 	}
 	if blocked := harness.Call(http.MethodPost, "/api/v1/coins/purchases", token, "app-web-key", map[string]any{"packageId": "web-coins-1"}, http.Header{"X-Client-Platform": {"android"}}); blocked.Status != http.StatusConflict {
@@ -118,13 +118,13 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 	}
 	harness.buyCoinsOnTheWeb(buyer, "web-coins-3")
 	verified := harness.Call(http.MethodPost, "/api/v1/coins/purchases/"+lastPurchaseReference(t, harness, buyer)+"/verify", token, "", nil)
-	if verified.Body["status"] != "succeeded" || verified.Body["balance"].(float64) != 1470 {
+	if verified.Body["status"] != "succeeded" || verified.Body["balance"].(float64) != 1030 {
 		t.Fatalf("verify: %v", verified.Body)
 	}
-	if balance := harness.Call(http.MethodGet, "/api/v1/coins/balance", token, "", nil); balance.Body["coins"].(float64) != 1470 || balance.Body["earnedCoins"].(float64) != 0 {
+	if balance := harness.Call(http.MethodGet, "/api/v1/coins/balance", token, "", nil); balance.Body["coins"].(float64) != 1030 || balance.Body["earnedCoins"].(float64) != 0 {
 		t.Fatalf("balance: %v", balance.Body)
 	}
-	if harness.balance(ledgermodels.CoinSalesRevenueAccount("NGN")) != 1_500_000 || harness.balance(ledgermodels.PaymentProcessingFeeExpenseAccount("NGN")) != 2_000 ||
+	if harness.balance(ledgermodels.CoinSalesRevenueAccount("NGN")) != 1_000_000 || harness.balance(ledgermodels.PaymentProcessingFeeExpenseAccount("NGN")) != 2_000 ||
 		harness.balance(ledgermodels.PlatformProviderBalanceAccount("paystack", "NGN")) != harness.Paystack.PlatformBalanceOf("NGN") {
 		t.Fatal("coin sale revenue, processing fee or platform balance not mirrored")
 	}
@@ -148,11 +148,11 @@ func TestCoinTransfersTakeTwentyFivePercentAndConcurrentTransfersNeverOverdraw(t
 	if quote := harness.Call(http.MethodGet, "/api/v1/coins/transfers/quote?coins=7", token, "", nil); quote.Body["feeCoins"].(float64) != 2 || quote.Body["netCoins"].(float64) != 5 {
 		t.Fatalf("quote: %v", quote.Body)
 	}
-	body := map[string]any{"recipientUserId": recipient, "coins": 87}
+	body := map[string]any{"recipientUserId": recipient, "coins": 40}
 	first := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", body)
 	replay := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", body)
-	reused := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", map[string]any{"recipientUserId": recipient, "coins": 88})
-	if first.Status != http.StatusCreated || first.Body["netCoins"].(float64) != 65 || replay.Body["transferId"] != first.Body["transferId"] || reused.Status != http.StatusConflict {
+	reused := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", map[string]any{"recipientUserId": recipient, "coins": 41})
+	if first.Status != http.StatusCreated || first.Body["netCoins"].(float64) != 30 || replay.Body["transferId"] != first.Body["transferId"] || reused.Status != http.StatusConflict {
 		t.Fatalf("transfer idempotency: %v / %v / %d", first.Body, replay.Body, reused.Status)
 	}
 	if self := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-self-1", map[string]any{"recipientUserId": sender, "coins": 1}); self.Status != http.StatusUnprocessableEntity {
@@ -179,7 +179,7 @@ func TestCoinTransfersTakeTwentyFivePercentAndConcurrentTransfersNeverOverdraw(t
 	if succeeded.Load() != 10 || refused.Load() != 10 || harness.balance(ledgermodels.UserSpendableCoinsAccount(sender)) != 0 {
 		t.Fatalf("succeeded=%d refused=%d balance=%d", succeeded.Load(), refused.Load(), harness.balance(ledgermodels.UserSpendableCoinsAccount(sender)))
 	}
-	if harness.balance(ledgermodels.UserSpendableCoinsAccount(recipient)) != 65+10*4 || harness.balance(ledgermodels.PlatformCoinTransferFeeRevenueAccount()) != 22+10*2 {
+	if harness.balance(ledgermodels.UserSpendableCoinsAccount(recipient)) != 30+10*4 || harness.balance(ledgermodels.PlatformCoinTransferFeeRevenueAccount()) != 10+10*2 {
 		t.Fatal("transfer split not booked as 75/25")
 	}
 	harness.AssertLedgerHealthy()
@@ -189,12 +189,12 @@ func TestInAppPurchaseBooksTheStoreFeeAndARefundClawsBackOrFlagsTheShortfall(t *
 	harness := startWalletHarness(t, true)
 	buyer := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(buyer)
-	receipt := map[string]any{"platform": "ios", "productId": "zudomart.ios.coins.tier3", "receipt": "valid-receipt", "transactionId": "apple-txn-1"}
+	receipt := map[string]any{"platform": "ios", "productId": "com.zudomart.app.coins.tier3", "receipt": "valid-receipt", "transactionId": "apple-txn-1"}
 	redeemed := harness.Call(http.MethodPost, "/api/v1/coins/iap/receipts", token, "iap-key-1", receipt)
-	if redeemed.Status != http.StatusCreated || redeemed.Body["balance"].(float64) != 699 {
+	if redeemed.Status != http.StatusCreated || redeemed.Body["balance"].(float64) != 1000 {
 		t.Fatalf("redeem: %d %s", redeemed.Status, redeemed.Raw)
 	}
-	if again := harness.Call(http.MethodPost, "/api/v1/coins/iap/receipts", token, "iap-key-2", receipt); again.Body["balance"].(float64) != 699 {
+	if again := harness.Call(http.MethodPost, "/api/v1/coins/iap/receipts", token, "iap-key-2", receipt); again.Body["balance"].(float64) != 1000 {
 		t.Fatalf("receipt redeemed twice: %v", again.Body)
 	}
 	if stolen := harness.Call(http.MethodPost, "/api/v1/coins/iap/receipts", harness.Tokens.UserAccessToken(uuid.NewString()), "iap-key-3", receipt); stolen.Status != http.StatusConflict {

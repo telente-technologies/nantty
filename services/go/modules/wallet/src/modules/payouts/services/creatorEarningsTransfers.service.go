@@ -15,6 +15,7 @@ import (
 
 type CreatorEarningsTransfers struct {
 	Container *container.Container
+	Holds     MonetisationHolds
 }
 
 type CreatorEarningsTransferReport struct {
@@ -38,6 +39,10 @@ func (transfers CreatorEarningsTransfers) TransferCreatorEarningsToConnectedAcco
 				continue
 			}
 			userId := strings.TrimSuffix(strings.TrimPrefix(balance.Code, "creator:"), ledgermodels.CreatorEarningsPayableAccountCodeSuffix())
+			if paused, err := transfers.Holds.IsMonetisationPaused(ctx, database, userId); err != nil || paused {
+				report.Skipped++
+				continue
+			}
 			if transfers.Container.Payments.RequirePayoutAccountVerified(ctx, userId) != nil {
 				report.Skipped++
 				continue
