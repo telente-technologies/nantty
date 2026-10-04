@@ -7,6 +7,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent"
 	"zudomart/modules/ads/src/generated/ent/ad"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
+	"zudomart/modules/ads/src/generated/ent/adgroup"
 	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
 	"zudomart/modules/ads/src/modules/campaigns/dtos"
 	"zudomart/modules/ads/src/modules/campaigns/services"
@@ -28,7 +29,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Campa
 	if err != nil {
 		return dtos.Campaign{}, err
 	}
-	merged, err := handler.mergeAndValidate(campaign, account.Currency, command.Patch)
+	merged, err := handler.mergeAndValidate(campaign, account.Currency, handler.campaignFloors(ctx, campaign, account.Currency), command.Patch)
 	if err != nil {
 		return dtos.Campaign{}, err
 	}
@@ -63,7 +64,16 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Campa
 	return presented[0], err
 }
 
-func (handler Handler) mergeAndValidate(campaign *ent.AdCampaign, currency string, patch dtos.CampaignPatch) (dtos.CampaignInput, error) {
+func (handler Handler) campaignFloors(ctx context.Context, campaign *ent.AdCampaign, currency string) validators.PricingFloors {
+	groups, _ := handler.Container.Client.AdGroup.Query().Where(adgroup.CampaignID(campaign.ID)).All(ctx)
+	countries := []string{}
+	for _, group := range groups {
+		countries = append(countries, adsservices.CountriesInAudience(group.Audience)...)
+	}
+	return handler.Container.Pricing.FloorsForCountries(ctx, countries, currency)
+}
+
+func (handler Handler) mergeAndValidate(campaign *ent.AdCampaign, currency string, floors validators.PricingFloors, patch dtos.CampaignPatch) (dtos.CampaignInput, error) {
 	merged := services.CampaignInputFromRow(campaign, currency)
 	if patch.Objective != nil && *patch.Objective != merged.Objective {
 		return merged, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "objective", Message: "The objective cannot be changed."}})
@@ -81,7 +91,7 @@ func (handler Handler) mergeAndValidate(campaign *ent.AdCampaign, currency strin
 		merged.Schedule = *patch.Schedule
 	}
 	issues := validators.NewIssues("")
-	validators.ValidateCampaignInput(merged, currency, issues, "campaign")
+	validators.ValidateCampaignInput(merged, currency, floors, issues, "campaign")
 	return merged, issues.Error()
 }
 

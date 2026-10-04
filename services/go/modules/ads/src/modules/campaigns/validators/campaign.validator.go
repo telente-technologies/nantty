@@ -2,7 +2,6 @@ package validators
 
 import (
 	"fmt"
-	"net/url"
 	"slices"
 	"strings"
 	"time"
@@ -11,20 +10,21 @@ import (
 	"zudomart/modules/ads/src/services"
 	"zudomart/modules/ads/src/types"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/regionpricing"
 )
 
 var (
 	objectives   = []string{"awareness", "traffic", "engagement", "messages", "sales", "followers", "store_promotion"}
 	budgetTypes  = []string{"daily", "lifetime"}
 	bidTypes     = []string{"auto", "max_cpc", "max_cpm", "target_cost"}
-	callsToAct   = []string{"shop_now", "learn_more", "visit_store", "send_message", "follow", "watch_more", "order_now", "sign_up"}
+	callsToAct   = []string{"shop_now", "learn_more", "visit_store", "send_message", "follow", "watch_more", "order_now", "sign_up", "install", "download", "book_now", "contact_us"}
 	formats      = []string{"feed_post", "clip", "product", "store", "story", "live"}
 	sourceTypes  = []string{"post", "clip", "product", "store", "live", "upload"}
-	destinations = []string{"post", "profile", "store", "product", "messages", "url"}
+	destinations = []string{"post", "profile", "store", "product", "messages", "url", "app_store"}
 	genders      = []string{"", "all", "female", "male"}
 )
 
-var MinimumDailyBudgetMinor = map[string]int64{"NGN": 100_000, "GHS": 1_000, "KES": 10_000, "ZAR": 2_000, "GBP": 100, "EUR": 100, "USD": 100}
+type PricingFloors = regionpricing.AdRegionPricing
 
 type Issues struct {
 	prefix string
@@ -81,7 +81,7 @@ func validateMoney(money types.Money, currency, path string, issues *Issues) {
 	}
 }
 
-func ValidateBudget(budget *types.Budget, currency string, schedule types.Schedule, issues *Issues, path string) {
+func ValidateBudget(budget *types.Budget, currency string, minimumDailyMinor int64, schedule types.Schedule, issues *Issues, path string) {
 	if budget == nil {
 		return
 	}
@@ -90,19 +90,15 @@ func ValidateBudget(budget *types.Budget, currency string, schedule types.Schedu
 		return
 	}
 	validateMoney(budget.Amount, currency, path+".amount", issues)
-	minimum, known := MinimumDailyBudgetMinor[currency]
-	if !known {
-		minimum = 100
-	}
-	if budget.Type == "daily" && budget.Amount.AmountMinor < minimum {
-		issues.Add(path+".amount", "The daily budget is below the minimum for this currency.")
+	if budget.Type == "daily" && budget.Amount.AmountMinor < minimumDailyMinor {
+		issues.Add(path+".amount", fmt.Sprintf("The daily budget is below the minimum of %s for the regions you target.", formatMinor(minimumDailyMinor, currency)))
 	}
 	if budget.Type == "lifetime" && schedule.EndAt == nil {
 		issues.Add(path+".type", "A lifetime budget needs an end date.")
 	}
 }
 
-func ValidateCampaignInput(input dtos.CampaignInput, currency string, issues *Issues, path string) {
+func ValidateCampaignInput(input dtos.CampaignInput, currency string, floors PricingFloors, issues *Issues, path string) {
 	if name := strings.TrimSpace(input.Name); name == "" || len(name) > 120 {
 		issues.Add(path+".name", "Name the campaign (up to 120 characters).")
 	}
@@ -113,7 +109,7 @@ func ValidateCampaignInput(input dtos.CampaignInput, currency string, issues *Is
 		issues.Add(path+".budgetLevel", "Choose where the budget is set.")
 	}
 	ParseSchedule(input.Schedule, issues, path+".schedule")
-	ValidateBudget(input.Budget, currency, input.Schedule, issues, path+".budget")
+	ValidateBudget(input.Budget, currency, floors.MinimumDailyBudgetMinor, input.Schedule, issues, path+".budget")
 	if input.BudgetLevel == "campaign" && input.Budget == nil {
 		issues.Add(path+".budget", "Set a campaign budget.")
 	}
@@ -125,19 +121,19 @@ func ValidateCampaignInput(input dtos.CampaignInput, currency string, issues *Is
 	}
 }
 
-func ValidateAdSetInput(input dtos.AdSetInput, budgetLevel, currency string, issues *Issues, path string) {
+func ValidateAdSetInput(input dtos.AdSetInput, budgetLevel, currency string, floors PricingFloors, issues *Issues, path string) {
 	if name := strings.TrimSpace(input.Name); name == "" || len(name) > 120 {
 		issues.Add(path+".name", "Name the ad set (up to 120 characters).")
 	}
 	ParseSchedule(input.Schedule, issues, path+".schedule")
-	ValidateBudget(input.Budget, currency, input.Schedule, issues, path+".budget")
+	ValidateBudget(input.Budget, currency, floors.MinimumDailyBudgetMinor, input.Schedule, issues, path+".budget")
 	if budgetLevel == "ad_set" && input.Budget == nil {
 		issues.Add(path+".budget", "Set an ad set budget.")
 	}
 	if budgetLevel == "campaign" && input.Budget != nil {
 		issues.Add(path+".budget", "Remove the ad set budget when the campaign has one.")
 	}
-	validateBid(input.BidStrategy, currency, issues, path+".bidStrategy")
+	validateBid(input.BidStrategy, currency, floors, issues, path+".bidStrategy")
 	if cap := input.FrequencyCap; cap != nil && (cap.Impressions < 1 || cap.Impressions > 20 || cap.PerDays < 1 || cap.PerDays > 30) {
 		issues.Add(path+".frequencyCap", "Use 1-20 impressions per 1-30 days.")
 	}
@@ -145,7 +141,7 @@ func ValidateAdSetInput(input dtos.AdSetInput, budgetLevel, currency string, iss
 	validatePlacements(input, issues, path)
 }
 
-func validateBid(bid types.BidStrategy, currency string, issues *Issues, path string) {
+func validateBid(bid types.BidStrategy, currency string, floors PricingFloors, issues *Issues, path string) {
 	if !slices.Contains(bidTypes, bid.Type) {
 		issues.Add(path+".type", "Choose a bid strategy.")
 		return
@@ -156,7 +152,17 @@ func validateBid(bid types.BidStrategy, currency string, issues *Issues, path st
 			return
 		}
 		validateMoney(*bid.Amount, currency, path+".amount", issues)
+		switch {
+		case bid.Type == "max_cpm" && bid.Amount.AmountMinor < floors.CpmFloorMinor:
+			issues.Add(path+".amount", fmt.Sprintf("Bid at least %s per 1,000 impressions for the regions you target.", formatMinor(floors.CpmFloorMinor, currency)))
+		case (bid.Type == "max_cpc" || bid.Type == "target_cost") && bid.Amount.AmountMinor < floors.CpcFloorMinor:
+			issues.Add(path+".amount", fmt.Sprintf("Bid at least %s per click for the regions you target.", formatMinor(floors.CpcFloorMinor, currency)))
+		}
 	}
+}
+
+func formatMinor(amountMinor int64, currency string) string {
+	return fmt.Sprintf("%s %d.%02d", currency, amountMinor/100, amountMinor%100)
 }
 
 func validateAudience(audience types.AudienceSpec, issues *Issues, path string) {
@@ -192,7 +198,7 @@ func ValidateCreativeInput(input types.CreativeInput, adSetPlacements []string, 
 	if !slices.Contains(formats, input.Format) {
 		issues.Add(path+".format", "Choose a creative format.")
 	}
-	if !slices.Contains(sourceTypes, input.Source.Type) || input.Source.Id == "" {
+	if !slices.Contains(sourceTypes, input.Source.Type) || (input.Source.Id == "" && input.Source.Type != "upload") {
 		issues.Add(path+".source", "Choose the content to promote.")
 	}
 	if headline := strings.TrimSpace(input.Headline); headline == "" || len(headline) > 60 {
@@ -204,26 +210,9 @@ func ValidateCreativeInput(input types.CreativeInput, adSetPlacements []string, 
 	if !slices.Contains(callsToAct, input.CallToAction) {
 		issues.Add(path+".callToAction", "Choose a button.")
 	}
-	validateDestination(input.Destination, issues, path+".destination")
+	validateCreativeType(input, issues, path)
 	if slices.Contains(formats, input.Format) && !CreativeFitsAnyPlacement(input.Format, adSetPlacements) {
 		issues.Add(path+".placements", "This creative cannot run in any of the selected placements.")
-	}
-}
-
-func validateDestination(destination types.CreativeDestination, issues *Issues, path string) {
-	if !slices.Contains(destinations, destination.Type) {
-		issues.Add(path+".type", "Choose where the button leads.")
-		return
-	}
-	if destination.Type == "url" {
-		parsed, err := url.Parse(deref(destination.Url))
-		if err != nil || parsed.Scheme != "https" || parsed.Host == "" || parsed.User != nil {
-			issues.Add(path+".url", "Use an https:// link without credentials.")
-		}
-		return
-	}
-	if slices.Contains([]string{"post", "store", "product"}, destination.Type) && deref(destination.TargetId) == "" {
-		issues.Add(path+".targetId", "Choose the destination.")
 	}
 }
 
@@ -245,10 +234,10 @@ func CreativeFitsAnyPlacement(format string, adSetPlacements []string) bool {
 	return slices.ContainsFunc(placementsByCreativeFormat[format], func(placement string) bool { return slices.Contains(adSetPlacements, placement) })
 }
 
-func ValidateBundle(submission dtos.CampaignDraftSubmission, currency string) error {
+func ValidateBundle(submission dtos.CampaignDraftSubmission, currency string, floors PricingFloors) error {
 	issues := NewIssues("")
-	ValidateCampaignInput(submission.Campaign, currency, issues, "campaign")
-	ValidateAdSetInput(submission.AdSet, submission.Campaign.BudgetLevel, currency, issues, "adSet")
+	ValidateCampaignInput(submission.Campaign, currency, floors, issues, "campaign")
+	ValidateAdSetInput(submission.AdSet, submission.Campaign.BudgetLevel, currency, floors, issues, "adSet")
 	if len(submission.Ads) < 1 || len(submission.Ads) > 6 {
 		issues.Add("ads", "Add 1-6 ads.")
 	}

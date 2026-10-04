@@ -2,7 +2,9 @@ package services
 
 import (
 	"strings"
+	"sync/atomic"
 
+	adsservices "zudomart/modules/ads/src/services"
 	"zudomart/modules/ads/src/types"
 )
 
@@ -23,9 +25,54 @@ var policyKeywordRules = []policyKeywordRule{
 	{"gambling", "Gambling", "MEDIUM", []string{"betting", "casino", "jackpot"}},
 }
 
-func RunAutomatedPolicyChecks(input types.CreativeInput) []types.AutoCheckFlag {
-	text := strings.ToLower(input.Headline + " " + input.PrimaryText)
+var blockedDestinationDomains atomic.Pointer[[]string]
+
+// ConfigureBlockedDomains sets the destination blocklist used by review-time checks.
+func ConfigureBlockedDomains(domains []string) { blockedDestinationDomains.Store(&domains) }
+
+func creativeText(input types.CreativeInput) string {
+	text := input.Headline + " " + input.PrimaryText
+	for _, card := range input.Cards {
+		text += " " + card.Headline + " " + card.Description
+	}
+	if input.App != nil {
+		text += " " + input.App.AppName
+	}
+	return strings.ToLower(text)
+}
+
+func destinationUrls(input types.CreativeInput) []string {
+	urls := []string{}
+	add := func(destination types.CreativeDestination) {
+		if destination.Url != nil {
+			urls = append(urls, *destination.Url)
+		}
+	}
+	add(input.Destination)
+	for _, card := range input.Cards {
+		add(card.Destination)
+	}
+	if input.App != nil {
+		urls = append(urls, input.App.WebFallbackUrl)
+	}
+	return urls
+}
+
+func RunDestinationChecks(input types.CreativeInput) []types.AutoCheckFlag {
+	var blocked []string
+	if loaded := blockedDestinationDomains.Load(); loaded != nil {
+		blocked = *loaded
+	}
 	flags := []types.AutoCheckFlag{}
+	for _, link := range destinationUrls(input) {
+		flags = append(flags, adsservices.DestinationHostFlags(link, blocked)...)
+	}
+	return flags
+}
+
+func RunAutomatedPolicyChecks(input types.CreativeInput) []types.AutoCheckFlag {
+	text := creativeText(input)
+	flags := RunDestinationChecks(input)
 	for _, rule := range policyKeywordRules {
 		for _, keyword := range rule.keywords {
 			if strings.Contains(text, keyword) {
