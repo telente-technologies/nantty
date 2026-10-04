@@ -27,10 +27,11 @@ type CheckoutRequest struct {
 	IdempotencyKey string
 	UseStoreCredit bool
 	PromoCodes     map[uuid.UUID]string
+	PaymentModes   map[uuid.UUID]string
 }
 
 func (request CheckoutRequest) Fingerprint() string {
-	return container.FingerprintOfRequest(request.AddressId, request.UseStoreCredit, request.PromoCodes)
+	return container.FingerprintOfRequest(request.AddressId, request.UseStoreCredit, request.PromoCodes, request.PaymentModes)
 }
 
 type CheckoutService struct {
@@ -48,6 +49,9 @@ func (service CheckoutService) Checkout(ctx context.Context, request CheckoutReq
 		return types.CheckoutResultView{}, err
 	}
 	plan, err := BuildCheckoutPlan(ctx, service.Container, request.BuyerId, request.AddressId, request.UseStoreCredit, request.PromoCodes)
+	if err == nil {
+		err = ResolvePaymentModes(&plan, request.PaymentModes)
+	}
 	if err != nil {
 		return types.CheckoutResultView{}, err
 	}
@@ -157,11 +161,20 @@ func (service CheckoutService) registerPayables(ctx context.Context, row *ent.Ch
 	if err != nil {
 		return err
 	}
+	storeIds := UniqueIdentifiers(groups, func(group *ent.OrderGroup) uuid.UUID { return group.StoreID })
+	catalog, err := service.Container.Catalog()
+	if err != nil {
+		return err
+	}
+	stores, err := catalog.DescribeStores(ctx, storeIds)
+	if err != nil {
+		return err
+	}
 	payables := make([]interfaces.OrderPayable, 0, len(groups))
 	for _, group := range groups {
 		payables = append(payables, interfaces.OrderPayable{
 			OrderId: group.ID.String(), OrderReference: group.Reference, StoreId: group.StoreID.String(), SellerUserId: group.SellerAccountID.String(),
-			Amount: money.Money{AmountMinor: group.TotalMinor, Currency: money.CurrencyCode(group.Currency)}, ProductSummary: summarizeItems(items[group.ID]),
+			Amount: money.Money{AmountMinor: group.TotalMinor, Currency: money.CurrencyCode(group.Currency)}, ProductSummary: summarizeItems(items[group.ID]), PaymentMode: group.PaymentMode, StoreVerified: stores[group.StoreID].Verified,
 		})
 	}
 	return service.Container.Money.RegisterCheckoutPayables(ctx, interfaces.RegisterPayablesRequest{CheckoutId: row.ID.String(), BuyerUserId: row.BuyerAccountID.String(), Orders: payables})

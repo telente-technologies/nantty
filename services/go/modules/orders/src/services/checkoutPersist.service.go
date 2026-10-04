@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"crypto/rand"
 	"fmt"
 	"strings"
@@ -13,6 +15,7 @@ import (
 	"zudomart/modules/orders/src/events"
 	"zudomart/modules/orders/src/generated/ent"
 	"zudomart/modules/orders/src/generated/ent/cartitem"
+	"zudomart/modules/orders/src/generated/ent/invoicecounter"
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
 	"zudomart/modules/orders/src/generated/ent/predicate"
 	"zudomart/modules/orders/src/generated/ent/promotion"
@@ -61,27 +64,37 @@ func persistCheckout(ctx context.Context, deployed *container.Container, tx *ent
 	return result, err
 }
 
-func nextInvoiceNumber(ctx context.Context, tx *ent.Tx, storeId uuid.UUID) (string, error) {
-	if _, err := tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "invoice:"+storeId.String()); err != nil {
-		return "", err
-	}
-	count, err := tx.OrderGroup.Query().Where(ordergroup.StoreID(storeId)).Count(ctx)
+// NextInvoiceNumber serialises invoice numbers per store with a locked counter row.
+func NextInvoiceNumber(ctx context.Context, tx *ent.Tx, storeId uuid.UUID) (string, error) {
+	existing, err := tx.OrderGroup.Query().Where(ordergroup.StoreID(storeId)).Count(ctx)
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("INV-%d", 10001+count), nil
+	err = tx.InvoiceCounter.Create().SetID(storeId).SetLastNumber(existing).OnConflictColumns(invoicecounter.FieldID).DoNothing().Exec(ctx)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return "", err
+	}
+	counter, err := tx.InvoiceCounter.Query().Where(invoicecounter.ID(storeId)).ForUpdate().Only(ctx)
+	if err != nil {
+		return "", err
+	}
+	next := counter.LastNumber + 1
+	if err := tx.InvoiceCounter.UpdateOne(counter).SetLastNumber(next).Exec(ctx); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("INV-%d", 10000+next), nil
 }
 
 func persistOrderGroup(ctx context.Context, deployed *container.Container, tx *ent.Tx, checkout *ent.Checkout, planned PlannedGroup, plan CheckoutPlan, request CheckoutRequest, buyer usersdirectory.ProfileName, stockReserved bool) (*ent.OrderGroup, error) {
 	now := deployed.Now()
-	invoice, err := nextInvoiceNumber(ctx, tx, planned.Group.StoreId)
+	invoice, err := NextInvoiceNumber(ctx, tx, planned.Group.StoreId)
 	if err != nil {
 		return nil, err
 	}
 	group, err := tx.OrderGroup.Create().SetID(planned.GroupId).SetCheckoutID(checkout.ID).SetReference(NewOrderReference()).SetInvoiceNumber(invoice).SetStoreID(planned.Group.StoreId).
 		SetSellerAccountID(planned.Store.OwnerAccountId).SetBuyerAccountID(request.BuyerId).SetBuyerName(buyer.Name).SetBuyerUsername(buyer.Handle).
 		SetCurrency(string(plan.Currency)).SetSubtotalMinor(planned.Group.SubtotalMinor).SetDiscountMinor(planned.DiscountMinor).SetNillablePromotionID(promotionIdOf(planned)).SetStoreCreditMinor(planned.CreditMinor).SetShippingMinor(planned.Shipping.FeeMinor).
-		SetTotalMinor(planned.TotalMinor).SetAddress(plan.Address).SetStockReserved(stockReserved).Save(ctx)
+		SetTotalMinor(planned.TotalMinor).SetAddress(plan.Address).SetPaymentMode(planned.PaymentMode).SetStockReserved(stockReserved).Save(ctx)
 	if err != nil {
 		return nil, err
 	}

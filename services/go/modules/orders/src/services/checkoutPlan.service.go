@@ -24,6 +24,7 @@ type PlannedGroup struct {
 	Promotion     *PromotionRule
 	Campaigns     CampaignPlan
 	TotalMinor    int64
+	PaymentMode   string
 }
 
 type CheckoutPlan struct {

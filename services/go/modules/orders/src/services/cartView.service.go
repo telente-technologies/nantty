@@ -97,6 +97,7 @@ type cartContext struct {
 	stores    map[uuid.UUID]commerceports.StoreSnapshot
 	profiles  map[uuid.UUID]*ShippingProfileRules
 	credits   map[uuid.UUID]CreditState
+	rates     map[uuid.UUID]float64
 	available map[uuid.UUID]int
 }
 
@@ -109,6 +110,7 @@ func loadCartContext(ctx context.Context, deployed *container.Container, account
 	if loaded.stores, err = catalog.DescribeStores(ctx, storeIds); err != nil {
 		return loaded, err
 	}
+	loaded.rates, _ = StoreSuccessRates(ctx, deployed, storeIds)
 	if address != nil {
 		if loaded.profiles, err = LoadShippingProfileRules(ctx, deployed, storeIds); err != nil {
 			return loaded, err

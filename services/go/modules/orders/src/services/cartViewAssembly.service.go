@@ -47,7 +47,7 @@ func assembleCartView(groups []SellerGroup, unavailable map[uuid.UUID]bool, load
 		quote, _ := QuoteForGroup(group, loaded.profiles[group.StoreId], address)
 		credit := RedeemableCreditMinor(loaded.credits[group.StoreId].BalanceMinor, group.SubtotalMinor)
 		groupView := types.CartSellerGroupView{
-			StoreId: group.StoreId.String(), StoreName: store.Name, Store: map[string]any{"id": group.StoreId.String(), "name": store.Name, "badge": store.Verified},
+			StoreId: group.StoreId.String(), StoreName: store.Name, Store: map[string]any{"id": group.StoreId.String(), "name": store.Name, "badge": store.Verified, "verified": store.Verified, "rating": store.RatingAverage, "ratingCount": store.RatingCount, "successRate": successRateOf(loaded.rates, group.StoreId)},
 			Items: []types.CartItemView{}, Subtotal: money.Money{AmountMinor: group.SubtotalMinor, Currency: currency}, Discounts: zero, Fees: zero, Taxes: zero,
 			StoreCredit: money.Money{AmountMinor: credit, Currency: currency}, Shipping: quote,
 		}
