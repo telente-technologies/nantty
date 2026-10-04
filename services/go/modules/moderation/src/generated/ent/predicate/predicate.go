@@ -18,6 +18,9 @@ type ContentReportEntry func(*sql.Selector)
 // CopyrightClaim is the predicate function for copyrightclaim builders.
 type CopyrightClaim func(*sql.Selector)
 
+// CopyrightPolicySetting is the predicate function for copyrightpolicysetting builders.
+type CopyrightPolicySetting func(*sql.Selector)
+
 // CounterNotice is the predicate function for counternotice builders.
 type CounterNotice func(*sql.Selector)
 
@@ -38,6 +41,15 @@ type LiveSafetySignal func(*sql.Selector)
 
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
+
+// SecurityAccountState is the predicate function for securityaccountstate builders.
+type SecurityAccountState func(*sql.Selector)
+
+// SecurityCase is the predicate function for securitycase builders.
+type SecurityCase func(*sql.Selector)
+
+// SecurityEvent is the predicate function for securityevent builders.
+type SecurityEvent func(*sql.Selector)
 
 // Strike is the predicate function for strike builders.
 type Strike func(*sql.Selector)

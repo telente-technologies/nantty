@@ -22,6 +22,8 @@ type Tx struct {
 	ContentReportEntry *ContentReportEntryClient
 	// CopyrightClaim is the client for interacting with the CopyrightClaim builders.
 	CopyrightClaim *CopyrightClaimClient
+	// CopyrightPolicySetting is the client for interacting with the CopyrightPolicySetting builders.
+	CopyrightPolicySetting *CopyrightPolicySettingClient
 	// CounterNotice is the client for interacting with the CounterNotice builders.
 	CounterNotice *CounterNoticeClient
 	// EvidenceRetentionSetting is the client for interacting with the EvidenceRetentionSetting builders.
@@ -36,6 +38,12 @@ type Tx struct {
 	LiveSafetySignal *LiveSafetySignalClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// SecurityAccountState is the client for interacting with the SecurityAccountState builders.
+	SecurityAccountState *SecurityAccountStateClient
+	// SecurityCase is the client for interacting with the SecurityCase builders.
+	SecurityCase *SecurityCaseClient
+	// SecurityEvent is the client for interacting with the SecurityEvent builders.
+	SecurityEvent *SecurityEventClient
 	// Strike is the client for interacting with the Strike builders.
 	Strike *StrikeClient
 	// SuspensionCase is the client for interacting with the SuspensionCase builders.
@@ -175,6 +183,7 @@ func (tx *Tx) init() {
 	tx.ContentReport = NewContentReportClient(tx.config)
 	tx.ContentReportEntry = NewContentReportEntryClient(tx.config)
 	tx.CopyrightClaim = NewCopyrightClaimClient(tx.config)
+	tx.CopyrightPolicySetting = NewCopyrightPolicySettingClient(tx.config)
 	tx.CounterNotice = NewCounterNoticeClient(tx.config)
 	tx.EvidenceRetentionSetting = NewEvidenceRetentionSettingClient(tx.config)
 	tx.IpClaim = NewIpClaimClient(tx.config)
@@ -182,6 +191,9 @@ func (tx *Tx) init() {
 	tx.LiveSafetyIncident = NewLiveSafetyIncidentClient(tx.config)
 	tx.LiveSafetySignal = NewLiveSafetySignalClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
+	tx.SecurityAccountState = NewSecurityAccountStateClient(tx.config)
+	tx.SecurityCase = NewSecurityCaseClient(tx.config)
+	tx.SecurityEvent = NewSecurityEventClient(tx.config)
 	tx.Strike = NewStrikeClient(tx.config)
 	tx.SuspensionCase = NewSuspensionCaseClient(tx.config)
 }
