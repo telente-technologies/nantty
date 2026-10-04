@@ -29,6 +29,8 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
+import { useMyAccountHealth } from "@/components/accountHealth/accountHealth.hook";
+import { describeAccountStanding } from "@/services/accountHealth.service";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
@@ -38,6 +40,8 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   const styles = useStyles();
   const { data: profile } = useMyProfileQuery();
   const creatorEntry = useCreatorEntry();
+  const { data: accountHealth } = useMyAccountHealth();
+  const accountStatusTrailing = accountHealth ? { text: describeAccountStanding(accountHealth.status) } : undefined;
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const clearSessionAndSignOut = useAuthStore((s) => s.clearSessionAndSignOut);
 
@@ -90,6 +94,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
 
       <SettingsGroup>
         <SettingsRow label="Account" icon={<UserCircle24Icon color={colors.text} />} onPress={() => navigation.navigate("SettingsAccount")} />
+        <SettingsRow label="Account status" icon={<SealCheck20Icon size={24} color={colors.text} />} trailing={accountStatusTrailing} onPress={() => navigation.navigate("AccountStatus")} />
         <SettingsRow label="Security & Password" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsSecurity")} />
         <SettingsRow label="Privacy" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsPrivacy")} />
         <SettingsRow label="Privacy & Data" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsPrivacyData")} />
