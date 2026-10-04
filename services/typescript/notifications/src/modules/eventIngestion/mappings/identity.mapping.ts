@@ -97,6 +97,14 @@ export const accountRestricted: EventMapping = (event, data) => [
   }),
 ];
 
+export const accountWarned: EventMapping = (event, data) => [
+  intentFor(event, data.text("accountId"), {
+    category: "trust",
+    inApp: { category: "system", title: "You received a warning", body: data.text("reason", "Something you shared went against our Community Guidelines.") },
+    push: { title: "Community Guidelines warning", body: "Open the app to see what happened." },
+  }),
+];
+
 export const accountSuspended: EventMapping = (event, data) => [
   intentFor(event, data.text("accountId"), {
     category: "trust",

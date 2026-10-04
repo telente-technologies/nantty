@@ -1,5 +1,6 @@
 import * as escrowMoney from "./escrowMoney.mapping.js";
 import * as identity from "./identity.mapping.js";
+import * as milestones from "./milestones.mapping.js";
 import type { EventMapping } from "./mappingHelpers.js";
 import * as orders from "./orders.mapping.js";
 import * as social from "./social.mapping.js";
@@ -31,12 +32,14 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "withdrawal.failed": escrowMoney.withdrawalStatusMapping("Withdrawal failed", "Your withdrawal could not be completed. Check your bank details."),
   "withdrawal.cancelled": escrowMoney.withdrawalStatusMapping("Withdrawal cancelled", "Your withdrawal was cancelled and the money is back in your wallet."),
   "account.registered": identity.accountRegistered,
+  "account.anniversaryReached": milestones.anniversaryReached,
   "otp.issued": identity.otpIssued,
   "account.passwordChanged": identity.passwordChanged,
   "session.revoked": identity.sessionRevoked,
   "session.refreshTokenReuseDetected": identity.refreshTokenReuseDetected,
   "signIn.newDeviceDetected": identity.newSignInDetected,
   "twoFactor.enabled": identity.twoFactorEnabled,
+  "account.warned": identity.accountWarned,
   "account.restricted": identity.accountRestricted,
   "account.suspended": identity.accountSuspended,
   "account.banned": identity.accountBanned,

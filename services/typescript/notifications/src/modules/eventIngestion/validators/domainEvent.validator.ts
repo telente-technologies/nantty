@@ -4,7 +4,7 @@ import type { DomainEventEnvelope } from "../../../types/domainEvent.type.js";
 
 const envelopeSchema = z.object({
   id: z.string().min(1).max(100),
-  type: z.string().regex(/^[a-z]+\.[A-Za-z]+$/),
+  type: z.string().regex(/^[a-z][A-Za-z]*\.[A-Za-z]+$/),
   source: z.string().default("unknown"),
   subject: z.string().default(""),
   schemaVersion: z.number().int().min(1).default(1),
