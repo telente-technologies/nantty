@@ -1,0 +1,51 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.center {
+  align-items: center;
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.center .list {
+  justify-content: center;
+}
+
+.slot {
+  display: block;
+  line-height: 0;
+  border-radius: 9px;
+}
+
+.link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.image {
+  display: block;
+  max-width: none;
+}
+
+.note {
+  margin: 0;
+  padding-inline-start: 10px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  opacity: 0.75;
+}
+
+.center .note {
+  padding-inline-start: 0;
+}

@@ -17,3 +17,8 @@ export type { ThemeSwitcherProps } from "./theme/themeSwitcher";
 export { ThemeInitScript } from "./theme/themeInitScript";
 export { isThemePreference, parseThemePreference, readHtmlThemeAttribute, themeColorByResolvedTheme, themeCookieName, themePreferenceLabels, themePreferences, themeViewport } from "./theme/themePreference.constant";
 export type { ResolvedTheme, ThemePreference } from "./theme/themePreference.constant";
+export { OfficialStoreBadges } from "./storeBadges/officialStoreBadges";
+export { buildStoreLinks, defaultPlayPackage } from "./storeBadges/storeLinks";
+export type { StoreLinkConfig, StoreLinks } from "./storeBadges/storeLinks";
+export { buildMailtoHref, buildZudomartEmailAddresses, zudomartMailboxDomain, zudomartMailboxNames, zudomartSendingDomain } from "./contact/zudomartEmailAddresses";
+export type { ZudomartEmailAddresses, ZudomartMailboxName } from "./contact/zudomartEmailAddresses";
