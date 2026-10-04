@@ -17,6 +17,15 @@ import type {
 } from "@/types/campaign.type";
 import type { ContentSource, Creative, CreativeInput, CreativeSourceType } from "@/types/creative.type";
 
+export interface CardReportRow {
+  readonly cardIndex: number;
+  readonly headline: string;
+  readonly imageUrl: string;
+  readonly impressions: number;
+  readonly clicks: number;
+  readonly ctr: number;
+}
+
 export interface CampaignListFilters {
   readonly status?: DeliveryStatus | "";
   readonly objective?: CampaignObjective | "";
@@ -53,6 +62,8 @@ export const campaignsApi = {
   fetchAd: (accountId: string, adId: string) => sendAdsApiRequest<Ad>(buildAccountApiPath(accountId, `/ads/${encodeURIComponent(adId)}`)),
   updateAd: (accountId: string, adId: string, changes: Partial<AdInput> & { status?: EditableStatus }) =>
     sendAdsApiRequest<Ad>(buildAccountApiPath(accountId, `/ads/${encodeURIComponent(adId)}`), { method: "PATCH", body: changes }),
+  fetchCardReport: (accountId: string, adId: string, range: { from?: string | null; to?: string | null } = {}) =>
+    sendAdsApiRequest<{ items: CardReportRow[] }>(buildAccountApiPath(accountId, `/ads/${encodeURIComponent(adId)}/cards/report`), { query: { from: range.from ?? undefined, to: range.to ?? undefined } }),
   appealRejectedAd: (accountId: string, adId: string, message: string) =>
     sendAdsApiRequest<Ad>(buildAccountApiPath(accountId, `/ads/${encodeURIComponent(adId)}/appeal`), { method: "POST", body: { message } }),
   listContentSources: (accountId: string, type: Exclude<CreativeSourceType, "upload">, search = "") =>

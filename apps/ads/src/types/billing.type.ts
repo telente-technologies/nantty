@@ -84,3 +84,23 @@ export interface Invoice {
   readonly status: InvoiceStatus;
   readonly issuedAt: string;
 }
+
+export interface RegionalAdPricingRow {
+  readonly region: string;
+  readonly currency: string;
+  readonly cpmFloorMinor: number;
+  readonly cpcFloorMinor: number;
+  readonly minimumDailyBudgetMinor: number;
+  readonly boostMinimumDailyMinor: number;
+}
+
+export interface RegionalAdPricing {
+  readonly billingCurrency: string;
+  readonly targetedRegions: readonly string[];
+  readonly cpmFloor: Money;
+  readonly cpcFloor: Money;
+  readonly minimumDailyBudget: Money;
+  readonly boostMinimumDailyBudget: Money;
+  readonly creatorRevenueSharePercent: number;
+  readonly regions: readonly RegionalAdPricingRow[];
+}

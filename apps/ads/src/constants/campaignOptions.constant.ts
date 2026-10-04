@@ -1,5 +1,5 @@
 import type { AdPlacement, BidStrategyType, CampaignObjective, DeliveryStatus } from "@/types/campaign.type";
-import type { CallToAction, CreativeFormat } from "@/types/creative.type";
+import type { CallToAction, CreativeType, CreativeFormat } from "@/types/creative.type";
 
 export interface ObjectiveOption {
   readonly objective: CampaignObjective;
@@ -60,6 +60,17 @@ export const callToActionLabels: Record<CallToAction, string> = {
   watch_more: "Watch more",
   order_now: "Order now",
   sign_up: "Sign up",
+  install: "Install",
+  download: "Download",
+  book_now: "Book now",
+  contact_us: "Contact us",
+};
+
+export const creativeTypeLabels: Record<CreativeType, { readonly label: string; readonly description: string }> = {
+  single: { label: "Single image or video", description: "One image or video. You can make the media itself tappable." },
+  carousel: { label: "Carousel", description: "2 to 10 swipeable cards, each with its own media, headline and link." },
+  app_install: { label: "App install", description: "Promote your app with App Store and Google Play links." },
+  promoted_post: { label: "Promoted post", description: "Boost an existing post. Tapping opens the post." },
 };
 
 export const creativeFormatLabels: Record<CreativeFormat, string> = {
