@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { Text } from "@/components/ui/text";
 import { usePostActionTint } from "@/components/feed/postActionButton";
-import { DotsThreeVertical24Icon, GiftActionIcon, LikeActionIcon, ReplyActionIcon, SendActionIcon } from "@/components/icons";
+import { DotsThreeVertical24Icon, GiftActionIcon, LikeActionIcon, ReplyActionIcon, SendActionIcon, ViewsActionIcon } from "@/components/icons";
 import type { SaveTarget } from "@/types";
 import { formatCompactCount } from "@/utils/formatCount.util";
 
@@ -17,6 +17,7 @@ export interface ClipActionRailProps {
   readonly likes: number;
   readonly comments: number;
   readonly shares: number;
+  readonly views: number;
   readonly onToggleLike: () => void;
   readonly onOpenComments: () => void;
   readonly onShare: () => void;
@@ -68,6 +69,12 @@ export function ClipActionRail(props: ClipActionRailProps) {
       {props.saveTarget ? (
         <SaveToggleButton target={props.saveTarget} savedAccordingToServer={props.savedAccordingToServer ?? false} foregroundColor={color} saveCount={props.saveCount ?? 0} />
       ) : null}
+      <View accessible accessibilityLabel={`Views, ${props.views}`} style={clipRailStyles.item}>
+        <ViewsActionIcon size={RAIL_ICON_SIZE} color={color} />
+        <Text size={13} lineHeight={16.9} color={color} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={[clipRailStyles.count, color ? clipRailStyles.readableOnVideo : null]}>
+          {formatCompactCount(props.views)}
+        </Text>
+      </View>
       {props.onTip ? (
         <Pressable accessibilityRole="button" accessibilityLabel="Tip this creator with coins" hitSlop={{ top: 11, bottom: 11 }} onPress={props.onTip} style={clipRailStyles.item}>
           <GiftActionIcon size={RAIL_ICON_SIZE} color={color} />

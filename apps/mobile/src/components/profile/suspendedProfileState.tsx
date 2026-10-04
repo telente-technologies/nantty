@@ -1,5 +1,6 @@
-import { Linking, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
+import { inAppBrowserColorsFromTheme, openTrustedWebPage } from "@/components/links/openLink.util";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { legalLinks } from "@/config/legalLinks.config";
@@ -19,7 +20,7 @@ export function SuspendedProfileState({ profile }: { profile: Pick<UserSummary, 
       <Text size={14} lineHeight={19.6} align="center" color={colors.textMuted}>
         This account broke our Community Guidelines, so its posts and profile are hidden.
       </Text>
-      <Text size={14} weight={500} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={() => Linking.openURL(legalLinks.communityGuidelines)}>
+      <Text size={14} weight={500} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={() => openTrustedWebPage(legalLinks.communityGuidelines, inAppBrowserColorsFromTheme(colors))}>
         Learn more
       </Text>
     </View>

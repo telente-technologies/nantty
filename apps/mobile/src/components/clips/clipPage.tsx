@@ -173,7 +173,8 @@ function ClipPageComponent(props: ClipPageProps) {
           liked={engagement.liked}
           likes={engagement.likes}
           comments={clip.comments}
-          shares={clip.views}
+          shares={clip.shares}
+          views={clip.views}
           onToggleLike={props.onToggleLike}
           onOpenComments={props.onOpenComments}
           onShare={props.onShare}
