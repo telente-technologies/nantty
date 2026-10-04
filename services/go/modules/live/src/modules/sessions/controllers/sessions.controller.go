@@ -17,6 +17,7 @@ import (
 	listliveproducts "zudomart/modules/live/src/modules/sessions/queries/listLiveProducts"
 	listsuggestedlives "zudomart/modules/live/src/modules/sessions/queries/listSuggestedLives"
 	"zudomart/modules/live/src/modules/sessions/validators"
+	"zudomart/modules/live/src/services"
 	"zudomart/modules/live/src/types"
 	"zudomart/modules/live/src/utils"
 	"zudomart/platform/httpserver"
@@ -69,7 +70,8 @@ func (controller SessionsController) GetLiveSession(writer http.ResponseWriter, 
 	liveId, err := utils.PathIdentifier(request, "liveId")
 	if err == nil {
 		var view types.LiveSessionView
-		if view, err = (getlivesession.Handler{Container: controller.Container}).Execute(request.Context(), getlivesession.Query{LiveId: liveId}); err == nil {
+		actor, _ := utils.ActorFrom(request)
+		if view, err = (getlivesession.Handler{Container: controller.Container}).Execute(request.Context(), getlivesession.Query{LiveId: liveId, Viewer: actor.UserId}); err == nil {
 			httpserver.WriteJsonResponse(writer, http.StatusOK, view)
 			return
 		}
@@ -213,4 +215,17 @@ func buildMonetization(adSettings *dtos.LiveAdSettingsRequest, termsVersion, spo
 		monetization.SponsorshipLine = *sponsorshipLine
 	}
 	return monetization
+}
+
+func (controller SessionsController) GetLiveSafety(writer http.ResponseWriter, request *http.Request) {
+	liveId, err := utils.PathIdentifier(request, "liveId")
+	if err == nil {
+		actor, _ := utils.ActorFrom(request)
+		var view *types.LiveSafetyView
+		if view, err = services.NewLiveService(controller.Container).GetLiveSafety(request.Context(), liveId, actor.UserId); err == nil {
+			httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"safety": view})
+			return
+		}
+	}
+	controller.responder().Error(writer, request, err)
 }

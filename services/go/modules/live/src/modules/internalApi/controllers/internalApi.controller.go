@@ -10,6 +10,7 @@ import (
 	decidetopicaccess "zudomart/modules/live/src/modules/internalApi/queries/decideTopicAccess"
 	getliveadeligibility "zudomart/modules/live/src/modules/internalApi/queries/getLiveAdEligibility"
 	getlivesharecard "zudomart/modules/live/src/modules/internalApi/queries/getLiveShareCard"
+	getmoderationtargetpreview "zudomart/modules/live/src/modules/internalApi/queries/getModerationTargetPreview"
 	"zudomart/modules/live/src/types"
 	"zudomart/modules/live/src/utils"
 	"zudomart/platform/httpserver"
@@ -77,4 +78,18 @@ func (controller InternalApiController) ApplyPresence(writer http.ResponseWriter
 		}
 	}
 	controller.responder().Error(writer, request, err)
+}
+
+func (controller InternalApiController) GetModerationTarget(writer http.ResponseWriter, request *http.Request) {
+	liveId, err := utils.PathIdentifier(request, "id")
+	if err != nil || request.PathValue("type") != "live" {
+		controller.responder().Error(writer, request, httpserver.ErrNotFound)
+		return
+	}
+	preview, err := (getmoderationtargetpreview.Handler{Container: controller.Container}).Execute(request.Context(), getmoderationtargetpreview.Query{LiveId: liveId})
+	if err != nil {
+		controller.responder().Error(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, preview)
 }
