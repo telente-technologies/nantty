@@ -31,6 +31,17 @@ export interface ProcessingInput {
   readonly maximumDurationSeconds?: number;
 }
 
+export interface AudioMuteInput {
+  readonly inputPath: string;
+  readonly workDirectory: string;
+}
+
+export interface AudioFingerprint {
+  readonly algorithm: "chromaprint";
+  readonly durationSeconds: number;
+  readonly fingerprint: readonly number[];
+}
+
 export interface ImageProcessor {
   processImage(input: ProcessingInput): Promise<ProcessedMedia>;
 }
@@ -39,4 +50,6 @@ export interface MediaTranscoder {
   isAvailable(): Promise<boolean>;
   processVideo(input: ProcessingInput): Promise<ProcessedMedia>;
   processAudio(input: ProcessingInput): Promise<ProcessedMedia>;
+  muteVideoAudio(input: AudioMuteInput): Promise<ProcessedMedia>;
+  computeAudioFingerprint(inputPath: string): Promise<AudioFingerprint | null>;
 }

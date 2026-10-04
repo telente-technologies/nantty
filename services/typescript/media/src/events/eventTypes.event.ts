@@ -4,4 +4,6 @@ export const mediaEventTypes = {
   rejected: "media.rejected",
   held: "media.held",
   deleted: "media.deleted",
+  audioMuted: "media.audioMuted",
+  audioRestored: "media.audioRestored",
 } as const;

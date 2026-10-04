@@ -33,7 +33,7 @@ export interface MediaConfig {
   readonly clamAv: { readonly host: string; readonly port: number } | undefined;
   readonly heifConvertPath: string;
   readonly allowProxiedChunks: boolean;
-  readonly ffmpeg: { readonly mode: "auto" | "required" | "disabled"; readonly ffmpegPath: string; readonly ffprobePath: string; readonly timeoutMs: number; readonly maximumHeight: number };
+  readonly ffmpeg: { readonly mode: "auto" | "required" | "disabled"; readonly ffmpegPath: string; readonly ffprobePath: string; readonly fpcalcPath: string; readonly timeoutMs: number; readonly maximumHeight: number };
   readonly moderation: { readonly baseUrl: string | undefined; readonly token: string; readonly failMode: "allow" | "hold"; readonly holdThreshold: number; readonly rejectThreshold: number; readonly timeoutMs: number };
 }
 
@@ -92,6 +92,7 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
       mode: ffmpegMode === "required" || ffmpegMode === "disabled" ? ffmpegMode : "auto",
       ffmpegPath: readOrDefault("FFMPEG_PATH", "ffmpeg"),
       ffprobePath: readOrDefault("FFPROBE_PATH", "ffprobe"),
+      fpcalcPath: readOrDefault("FPCALC_PATH", "fpcalc"),
       timeoutMs: Number(readOrDefault("FFMPEG_TIMEOUT_MS", String(10 * 60 * 1000))),
       maximumHeight: Number(readOrDefault("VIDEO_MAXIMUM_HEIGHT", "720")),
     },
