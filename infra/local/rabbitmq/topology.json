@@ -4,26 +4,26 @@
   "retryTiers": { "30s": 30000, "2m": 120000, "10m": 600000, "30m": 1800000 },
   "unroutedRetentionMs": 86400000,
   "services": {
-    "go-identity": { "publishesEvents": true },
-    "go-commerce": { "publishesEvents": true, "consumes": ["commerce-domain-events"] },
-    "go-live": { "publishesEvents": true },
+    "go-identity": { "publishesEvents": true, "consumes": ["identity-domain-events"] },
+    "go-commerce": { "publishesEvents": true, "consumes": ["commerce-domain-events", "catalog-domain-events"] },
+    "go-live": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["live-domain-events"] },
     "go-money": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["jobs-payouts", "money-domain-events"] },
     "go-ads": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["jobs-ads-reports"] },
-    "go-trust": { "publishesEvents": true, "consumes": ["intelligence-trust-advisory", "intelligence-trust-content-scores", "trust-domain-events"] },
+    "go-trust": { "publishesEvents": true, "consumes": ["intelligence-trust-advisory", "intelligence-trust-content-scores", "intelligence-trust-live-safety", "trust-domain-events"] },
     "search": { "consumes": ["search-domain-events"] },
-    "social": { "publishesEvents": true },
+    "social": { "publishesEvents": true, "consumes": ["social-domain-events"] },
     "media": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["media-domain-events", "jobs-media"] },
     "notifications": { "enqueuesJobs": true, "consumes": ["notifications-domain-events", "jobs-email"] },
     "realtime": { "consumes": ["realtime-domain-events"] },
-    "intelligence": { "enqueuesJobs": true, "consumes": ["intelligence-domain-events"] }
+    "intelligence": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["intelligence-domain-events", "jobs-live-frames", "jobs-live-audio"] }
   },
   "eventQueues": {
-    "trust-domain-events": ["report.created"],
+    "trust-domain-events": ["report.created", "live.ended"],
     "search-domain-events": [
       "profile.updated", "username.changed", "creatorProfile.created", "profileCheckmark.changed", "checkmark.approved", "checkmark.revoked",
       "accountStatus.changed", "account.suspended", "account.banned", "user.unbanned", "suspension.ended", "account.deactivated", "account.deletionExecuted",
       "profile.visibilityChanged", "product.created", "product.updated", "product.published", "product.unpublished", "product.archived", "store.created", "store.updated",
-      "brand.updated", "category.updated", "sound.updated", "post.created", "post.deleted", "block.created", "block.removed", "follow.created", "follow.removed",
+      "brand.updated", "category.updated", "sound.updated", "post.created", "post.deleted", "post.updated", "block.created", "block.removed", "follow.created", "follow.removed",
       "consent.granted", "consent.withdrawn"
     ],
     "money-domain-events": ["orderGroup.refundRequested", "creatorApplication.approved", "adSpend.batched"],
@@ -40,18 +40,23 @@
       "withdrawal.*"
     ],
     "media-domain-events": ["chatMedia.expired"],
+    "identity-domain-events": ["entitlement.granted", "entitlement.revoked", "entitlement.graceStarted", "account.registered"],
+    "catalog-domain-events": ["content.visibilityChanged"],
+    "live-domain-events": ["content.visibilityChanged", "live.safetyHold", "live.safetyReleased", "live.safetyWarning", "live.samplingBoosted", "live.moderatorEnded"],
+    "social-domain-events": ["content.visibilityChanged", "content.sensitivityAdvised", "media.processed", "media.rejected"],
     "realtime-domain-events": [
       "battle.*", "gift.sent", "goal.*", "guest.*", "leaderboard.updated", "live.*", "stage.updated",
+      "liveComment.*", "liveRoomSettings.updated", "liveViewer.*", "liveRecording.*", "overlayScene.*", "liveSafety.*",
       "message.created", "notification.created"
     ],
     "intelligence-domain-events": [
       "account.registered", "account.loggedIn", "account.deletionRequested", "account.deletionExecuted",
       "ad.impressionRecorded", "block.created", "consent.granted", "consent.withdrawn", "follow.created",
-      "gift.sent", "message.sent", "post.created", "product.viewed", "report.created"
+      "gift.sent", "media.processed", "message.sent", "post.created", "product.viewed", "report.created"
     ]
   },
   "jobQueues": [
     "jobs-email", "jobs-media", "jobs-reports", "jobs-payouts", "jobs-search-indexing", "jobs-ads-reports",
-    "intelligence-trust-advisory", "intelligence-trust-content-scores"
+    "intelligence-trust-advisory", "intelligence-trust-content-scores", "intelligence-trust-live-safety", "jobs-live-frames", "jobs-live-audio"
   ]
 }
