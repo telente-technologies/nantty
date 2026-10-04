@@ -27,6 +27,7 @@ import { postsMocks } from "./posts.mock";
 import { postAudienceMocks } from "./postAudience.mock";
 import { legalMocks } from "./legal.mock";
 import { celebrationsMocks } from "./celebrations.mock";
+import { notificationPreferencesMocks } from "./notificationPreferences.mock";
 import { privacyMocks } from "./privacy.mock";
 import { productsMocks } from "./products.mock";
 import type { MockRoute } from "./registry.mock";
@@ -96,6 +97,7 @@ export const routes: MockRoute[] = [
   ...settingsMocks,
   ...privacyMocks,
   ...celebrationsMocks,
+  ...notificationPreferencesMocks,
   ...legalMocks,
   ...storeRewardsMocks,
   ...walletMocks,
