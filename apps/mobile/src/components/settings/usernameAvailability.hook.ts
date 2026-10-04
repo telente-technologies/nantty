@@ -6,14 +6,14 @@ import type { UsernameUnavailableReason } from "@/types/account.type";
 import { isValidUsername } from "@/utils/validators.util";
 
 export const USERNAME_UNAVAILABLE_MESSAGES: Record<UsernameUnavailableReason, string> = {
-  taken: "That username is already taken.",
+  taken: "That username is taken",
   reserved: "That username is reserved for Zudomart and can't be used.",
   invalid: "Use 3–20 letters, numbers, underscores or full stops.",
   recently_used: "That username was used recently and isn't available yet.",
   withheld: "That username has been withheld under our policies.",
 };
 
-export function useUsernameAvailability(username: string, currentUsername?: string) {
+export function useUsernameAvailability(username: string, currentUsername?: string, displayName?: string) {
   const [debouncedUsername, setDebouncedUsername] = useState(username);
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedUsername(username.trim()), 350);
@@ -23,7 +23,7 @@ export function useUsernameAvailability(username: string, currentUsername?: stri
   const unchanged = !!currentUsername && debouncedUsername.toLowerCase() === currentUsername.toLowerCase();
   const availability = useQuery({
     queryKey: ["username-availability", debouncedUsername.toLowerCase()],
-    queryFn: () => usersService.checkUsernameAvailability(debouncedUsername),
+    queryFn: () => usersService.checkUsernameAvailability(debouncedUsername, displayName),
     enabled: formatIsValid && !unchanged,
     staleTime: 30_000,
   });
@@ -41,5 +41,6 @@ export function useUsernameAvailability(username: string, currentUsername?: stri
             : availability.data?.reason
               ? availability.data.message ?? USERNAME_UNAVAILABLE_MESSAGES[availability.data.reason]
               : null;
-  return { isAvailable: settled && formatIsValid && !unchanged && availability.data?.available === true, message, checking: !settled };
+  const suggestions = settled && availability.data?.available === false ? (availability.data.suggestions ?? []) : [];
+  return { isAvailable: settled && formatIsValid && !unchanged && availability.data?.available === true, message, checking: !settled, suggestions };
 }
