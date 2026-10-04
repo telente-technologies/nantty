@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/moderation/src/generated/ent/copyrightclaim"
 	claimevents "zudomart/modules/moderation/src/modules/copyrightClaims/events"
 	"zudomart/modules/moderation/src/modules/copyrightClaims/services"
+	"zudomart/modules/moderation/src/modules/copyrightClaims/validators"
 	"zudomart/platform/httpserver"
 )
 
@@ -58,6 +59,14 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 		return Result{}, invalid("contactEmail", "must be a valid email address")
 	case len(command.ClaimedUrls) > 20:
 		return Result{}, invalid("claimedUrls", "at most 20 urls")
+	case len(command.ClaimantPhone) > 40 || len(command.ClaimantAddress) > 500:
+		return Result{}, invalid("claimantAddress", "phone at most 40 and address at most 500 characters")
+	}
+	if err := validators.ValidateClaimEvidence(validators.ClaimEvidence{
+		TargetType: command.TargetType, ClaimScope: command.ClaimScope, ClaimantName: command.ClaimantName, OriginalWorkUrl: strings.TrimSpace(command.OriginalWorkUrl), OriginalWorkMediaId: command.OriginalWorkMediaId,
+		ProofUrls: command.ProofUrls, ProofMediaIds: command.ProofMediaIds, Segments: command.Segments, AccuracyDeclared: command.AccuracyDeclared, SignatureName: command.SignatureName,
+	}); err != nil {
+		return Result{}, err
 	}
 	recent, err := handler.Container.Client.CopyrightClaim.Query().Where(copyrightclaim.ClaimantUserID(claimant), copyrightclaim.CreatedAtGT(handler.Container.Now().Add(-time.Hour))).Count(ctx)
 	if err != nil {
@@ -70,12 +79,16 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	if resolveErr != nil {
 		handler.Container.Logger.WarnContext(ctx, "claim target could not be resolved", "error", resolveErr.Error())
 	}
+	encodedSegments, _ := json.Marshal(append([]validators.Segment{}, command.Segments...))
 	var created *ent.CopyrightClaim
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		now := handler.Container.Now()
-		create := tx.CopyrightClaim.Create().SetClaimantUserID(claimant).SetClaimantName(command.ClaimantName).SetClaimantOrganization(command.Organization).SetClaimantEmail(email).SetRepresents(command.RepresentativeOf).
+		create := tx.CopyrightClaim.Create().SetClaimantUserID(claimant).SetClaimantName(strings.TrimSpace(command.ClaimantName)).SetClaimantOrganization(command.Organization).SetClaimantEmail(email).SetRepresents(command.RepresentativeOf).
 			SetWorkTitle(description).SetWorkType(copyrightclaim.WorkType(services.WorkTypeFor(command.TargetType, command.WorkType))).SetTargetType(copyrightclaim.TargetType(command.TargetType)).SetTargetID(command.TargetId).
-			SetRightsBasis(statement).SetSwornStatement("Good-faith declaration accepted").SetClaimedUrls(append([]string{}, command.ClaimedUrls...)).SetCreatedAt(now)
+			SetRightsBasis(statement).SetSwornStatement("Good-faith and accuracy declarations accepted, signed electronically").SetClaimedUrls(append([]string{}, command.ClaimedUrls...)).SetCreatedAt(now).
+			SetClaimScope(copyrightclaim.ClaimScope(validators.ScopeFor(command.TargetType, command.ClaimScope))).SetClaimantPhone(strings.TrimSpace(command.ClaimantPhone)).SetClaimantAddress(strings.TrimSpace(command.ClaimantAddress)).
+			SetOriginalWorkURL(strings.TrimSpace(command.OriginalWorkUrl)).SetOriginalWorkMediaID(command.OriginalWorkMediaId).SetProofUrls(append([]string{}, command.ProofUrls...)).SetProofMediaIds(append([]string{}, command.ProofMediaIds...)).
+			SetInfringingSegments(encodedSegments).SetAccuracyDeclared(true).SetSignatureName(strings.TrimSpace(command.SignatureName)).SetSignedAt(now)
 		if command.IdempotencyKey != "" {
 			create.SetIdempotencyKey(command.IdempotencyKey)
 		}
@@ -90,7 +103,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 		if created, saveErr = create.Save(ctx); saveErr != nil {
 			return saveErr
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, claimevents.ClaimReceivedType, created.ID.String(), now, claimevents.ClaimReceivedData{ClaimId: created.ID.String(), TargetType: command.TargetType, TargetId: command.TargetId})
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, claimevents.ClaimReceivedType, created.ID.String(), now, claimevents.ClaimReceivedData{ClaimId: created.ID.String(), TargetType: command.TargetType, TargetId: command.TargetId, ClaimScope: string(created.ClaimScope)})
 	})
 	if ent.IsConstraintError(err) && command.IdempotencyKey != "" {
 		if existing, lookupErr := handler.findByKey(ctx, claimant, command.IdempotencyKey); lookupErr == nil && existing != nil {

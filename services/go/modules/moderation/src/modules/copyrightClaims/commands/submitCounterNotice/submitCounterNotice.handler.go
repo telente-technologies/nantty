@@ -57,7 +57,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	if err != nil {
 		return Result{}, err
 	}
-	if claim.Status != copyrightclaim.StatusUpheld {
+	if claim.Status != copyrightclaim.StatusUpheld || claim.RemedyState == copyrightclaim.RemedyStateRemovedVoluntarily {
 		return Result{}, httpserver.NewApiError(http.StatusConflict, "CLAIM_STATE_CONFLICT", "A counter-notice can only be sent against an upheld takedown.")
 	}
 	now := handler.Container.Now()
@@ -73,10 +73,18 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, claimevents.CounterNoticeReceivedType, claim.ID.String(), now, claimevents.CounterNoticeReceivedData{
 			ClaimId: claim.ID.String(), NoticeId: notice.ID.String(), InfringerId: submitter.String(), RestoreEligible: eligible.UTC().Format("2006-01-02T15:04:05Z07:00"),
+			ClaimantId: claimantOf(claim), ClaimantEmail: claim.ClaimantEmail, TargetType: string(claim.TargetType), TargetId: claim.TargetID, WorkTitle: claim.WorkTitle,
 		})
 	})
 	if err != nil {
 		return Result{}, err
 	}
 	return Result{NoticeId: notice.ID.String(), Status: "received", RestoreEligibleAt: eligible.UTC().Format("2006-01-02T15:04:05Z07:00")}, nil
+}
+
+func claimantOf(claim *ent.CopyrightClaim) string {
+	if claim.ClaimantUserID == nil {
+		return ""
+	}
+	return claim.ClaimantUserID.String()
 }

@@ -50,7 +50,8 @@ func (controller CopyrightClaimsController) Submit(writer http.ResponseWriter, r
 	result, err := submitcopyrightclaim.Handler{Container: controller.Container}.Execute(request.Context(), submitcopyrightclaim.Command{
 		ClaimantUserId: principal.UserId, IdempotencyKey: strings.TrimSpace(request.Header.Get("Idempotency-Key")), TargetType: body.TargetType, TargetId: body.TargetId, WorkDescription: body.WorkDescription,
 		OwnershipStatement: body.OwnershipStatement, ContactEmail: body.ContactEmail, GoodFaith: body.GoodFaith, ClaimantName: body.ClaimantName, Organization: body.Organization, RepresentativeOf: body.RepresentativeOf,
-		ClaimedUrls: body.ClaimedUrls, WorkType: body.WorkType,
+		ClaimedUrls: body.ClaimedUrls, WorkType: body.WorkType, ClaimScope: body.ClaimScope, ClaimantPhone: body.ClaimantPhone, ClaimantAddress: body.ClaimantAddress, OriginalWorkUrl: body.OriginalWorkUrl,
+		OriginalWorkMediaId: body.OriginalWorkMediaId, ProofUrls: body.ProofUrls, ProofMediaIds: body.ProofMediaIds, Segments: body.Segments, AccuracyDeclared: body.AccuracyDeclared, SignatureName: body.SignatureName,
 	})
 	if result.Replayed {
 		writer.Header().Set("Idempotent-Replayed", "true")
