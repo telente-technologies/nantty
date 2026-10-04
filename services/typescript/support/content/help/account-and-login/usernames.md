@@ -5,7 +5,7 @@ tags: username, handle, change username
 related: edit-your-profile, create-an-account
 ---
 
-Your username is your @handle and your profile link (app.zudomart.com/yourusername).
+Your username is your handle (shown with an @ in front) and your profile link (app.zudomart.com/yourusername).
 
 ## Rules
 
