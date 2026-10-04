@@ -20,6 +20,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
+	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
@@ -96,30 +97,31 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			ad.Table:                 ad.ValidColumn,
-			adaccount.Table:          adaccount.ValidColumn,
-			adaccountinvite.Table:    adaccountinvite.ValidColumn,
-			adaccountmember.Table:    adaccountmember.ValidColumn,
-			adactivityentry.Table:    adactivityentry.ValidColumn,
-			adaudiencemember.Table:   adaudiencemember.ValidColumn,
-			adboost.Table:            adboost.ValidColumn,
-			adcampaign.Table:         adcampaign.ValidColumn,
-			adcardstatsdaily.Table:   adcardstatsdaily.ValidColumn,
-			adcontentsignal.Table:    adcontentsignal.ValidColumn,
-			adconversion.Table:       adconversion.ValidColumn,
-			adcreatorearning.Table:   adcreatorearning.ValidColumn,
-			adcustomaudience.Table:   adcustomaudience.ValidColumn,
-			adfrequencypolicy.Table:  adfrequencypolicy.ValidColumn,
-			adfundstransaction.Table: adfundstransaction.ValidColumn,
-			adgroup.Table:            adgroup.ValidColumn,
-			adimpression.Table:       adimpression.ValidColumn,
-			admedia.Table:            admedia.ValidColumn,
-			adpolicycategory.Table:   adpolicycategory.ValidColumn,
-			adpooldaily.Table:        adpooldaily.ValidColumn,
-			adscheduledreport.Table:  adscheduledreport.ValidColumn,
-			adspendbatch.Table:       adspendbatch.ValidColumn,
-			adstatsdaily.Table:       adstatsdaily.ValidColumn,
-			outboxevent.Table:        outboxevent.ValidColumn,
+			ad.Table:                        ad.ValidColumn,
+			adaccount.Table:                 adaccount.ValidColumn,
+			adaccountinvite.Table:           adaccountinvite.ValidColumn,
+			adaccountmember.Table:           adaccountmember.ValidColumn,
+			adactivityentry.Table:           adactivityentry.ValidColumn,
+			adaudiencemember.Table:          adaudiencemember.ValidColumn,
+			adboost.Table:                   adboost.ValidColumn,
+			adcampaign.Table:                adcampaign.ValidColumn,
+			adcardstatsdaily.Table:          adcardstatsdaily.ValidColumn,
+			adcontentsignal.Table:           adcontentsignal.ValidColumn,
+			adconversion.Table:              adconversion.ValidColumn,
+			adcreatorearning.Table:          adcreatorearning.ValidColumn,
+			adcreatormonetisationhold.Table: adcreatormonetisationhold.ValidColumn,
+			adcustomaudience.Table:          adcustomaudience.ValidColumn,
+			adfrequencypolicy.Table:         adfrequencypolicy.ValidColumn,
+			adfundstransaction.Table:        adfundstransaction.ValidColumn,
+			adgroup.Table:                   adgroup.ValidColumn,
+			adimpression.Table:              adimpression.ValidColumn,
+			admedia.Table:                   admedia.ValidColumn,
+			adpolicycategory.Table:          adpolicycategory.ValidColumn,
+			adpooldaily.Table:               adpooldaily.ValidColumn,
+			adscheduledreport.Table:         adscheduledreport.ValidColumn,
+			adspendbatch.Table:              adspendbatch.ValidColumn,
+			adstatsdaily.Table:              adstatsdaily.ValidColumn,
+			outboxevent.Table:               outboxevent.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

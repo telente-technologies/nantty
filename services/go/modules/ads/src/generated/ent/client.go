@@ -23,6 +23,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
+	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
@@ -73,6 +74,8 @@ type Client struct {
 	AdConversion *AdConversionClient
 	// AdCreatorEarning is the client for interacting with the AdCreatorEarning builders.
 	AdCreatorEarning *AdCreatorEarningClient
+	// AdCreatorMonetisationHold is the client for interacting with the AdCreatorMonetisationHold builders.
+	AdCreatorMonetisationHold *AdCreatorMonetisationHoldClient
 	// AdCustomAudience is the client for interacting with the AdCustomAudience builders.
 	AdCustomAudience *AdCustomAudienceClient
 	// AdFrequencyPolicy is the client for interacting with the AdFrequencyPolicy builders.
@@ -120,6 +123,7 @@ func (c *Client) init() {
 	c.AdContentSignal = NewAdContentSignalClient(c.config)
 	c.AdConversion = NewAdConversionClient(c.config)
 	c.AdCreatorEarning = NewAdCreatorEarningClient(c.config)
+	c.AdCreatorMonetisationHold = NewAdCreatorMonetisationHoldClient(c.config)
 	c.AdCustomAudience = NewAdCustomAudienceClient(c.config)
 	c.AdFrequencyPolicy = NewAdFrequencyPolicyClient(c.config)
 	c.AdFundsTransaction = NewAdFundsTransactionClient(c.config)
@@ -222,32 +226,33 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                ctx,
-		config:             cfg,
-		Ad:                 NewAdClient(cfg),
-		AdAccount:          NewAdAccountClient(cfg),
-		AdAccountInvite:    NewAdAccountInviteClient(cfg),
-		AdAccountMember:    NewAdAccountMemberClient(cfg),
-		AdActivityEntry:    NewAdActivityEntryClient(cfg),
-		AdAudienceMember:   NewAdAudienceMemberClient(cfg),
-		AdBoost:            NewAdBoostClient(cfg),
-		AdCampaign:         NewAdCampaignClient(cfg),
-		AdCardStatsDaily:   NewAdCardStatsDailyClient(cfg),
-		AdContentSignal:    NewAdContentSignalClient(cfg),
-		AdConversion:       NewAdConversionClient(cfg),
-		AdCreatorEarning:   NewAdCreatorEarningClient(cfg),
-		AdCustomAudience:   NewAdCustomAudienceClient(cfg),
-		AdFrequencyPolicy:  NewAdFrequencyPolicyClient(cfg),
-		AdFundsTransaction: NewAdFundsTransactionClient(cfg),
-		AdGroup:            NewAdGroupClient(cfg),
-		AdImpression:       NewAdImpressionClient(cfg),
-		AdMedia:            NewAdMediaClient(cfg),
-		AdPolicyCategory:   NewAdPolicyCategoryClient(cfg),
-		AdPoolDaily:        NewAdPoolDailyClient(cfg),
-		AdScheduledReport:  NewAdScheduledReportClient(cfg),
-		AdSpendBatch:       NewAdSpendBatchClient(cfg),
-		AdStatsDaily:       NewAdStatsDailyClient(cfg),
-		OutboxEvent:        NewOutboxEventClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		Ad:                        NewAdClient(cfg),
+		AdAccount:                 NewAdAccountClient(cfg),
+		AdAccountInvite:           NewAdAccountInviteClient(cfg),
+		AdAccountMember:           NewAdAccountMemberClient(cfg),
+		AdActivityEntry:           NewAdActivityEntryClient(cfg),
+		AdAudienceMember:          NewAdAudienceMemberClient(cfg),
+		AdBoost:                   NewAdBoostClient(cfg),
+		AdCampaign:                NewAdCampaignClient(cfg),
+		AdCardStatsDaily:          NewAdCardStatsDailyClient(cfg),
+		AdContentSignal:           NewAdContentSignalClient(cfg),
+		AdConversion:              NewAdConversionClient(cfg),
+		AdCreatorEarning:          NewAdCreatorEarningClient(cfg),
+		AdCreatorMonetisationHold: NewAdCreatorMonetisationHoldClient(cfg),
+		AdCustomAudience:          NewAdCustomAudienceClient(cfg),
+		AdFrequencyPolicy:         NewAdFrequencyPolicyClient(cfg),
+		AdFundsTransaction:        NewAdFundsTransactionClient(cfg),
+		AdGroup:                   NewAdGroupClient(cfg),
+		AdImpression:              NewAdImpressionClient(cfg),
+		AdMedia:                   NewAdMediaClient(cfg),
+		AdPolicyCategory:          NewAdPolicyCategoryClient(cfg),
+		AdPoolDaily:               NewAdPoolDailyClient(cfg),
+		AdScheduledReport:         NewAdScheduledReportClient(cfg),
+		AdSpendBatch:              NewAdSpendBatchClient(cfg),
+		AdStatsDaily:              NewAdStatsDailyClient(cfg),
+		OutboxEvent:               NewOutboxEventClient(cfg),
 	}, nil
 }
 
@@ -265,32 +270,33 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                ctx,
-		config:             cfg,
-		Ad:                 NewAdClient(cfg),
-		AdAccount:          NewAdAccountClient(cfg),
-		AdAccountInvite:    NewAdAccountInviteClient(cfg),
-		AdAccountMember:    NewAdAccountMemberClient(cfg),
-		AdActivityEntry:    NewAdActivityEntryClient(cfg),
-		AdAudienceMember:   NewAdAudienceMemberClient(cfg),
-		AdBoost:            NewAdBoostClient(cfg),
-		AdCampaign:         NewAdCampaignClient(cfg),
-		AdCardStatsDaily:   NewAdCardStatsDailyClient(cfg),
-		AdContentSignal:    NewAdContentSignalClient(cfg),
-		AdConversion:       NewAdConversionClient(cfg),
-		AdCreatorEarning:   NewAdCreatorEarningClient(cfg),
-		AdCustomAudience:   NewAdCustomAudienceClient(cfg),
-		AdFrequencyPolicy:  NewAdFrequencyPolicyClient(cfg),
-		AdFundsTransaction: NewAdFundsTransactionClient(cfg),
-		AdGroup:            NewAdGroupClient(cfg),
-		AdImpression:       NewAdImpressionClient(cfg),
-		AdMedia:            NewAdMediaClient(cfg),
-		AdPolicyCategory:   NewAdPolicyCategoryClient(cfg),
-		AdPoolDaily:        NewAdPoolDailyClient(cfg),
-		AdScheduledReport:  NewAdScheduledReportClient(cfg),
-		AdSpendBatch:       NewAdSpendBatchClient(cfg),
-		AdStatsDaily:       NewAdStatsDailyClient(cfg),
-		OutboxEvent:        NewOutboxEventClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		Ad:                        NewAdClient(cfg),
+		AdAccount:                 NewAdAccountClient(cfg),
+		AdAccountInvite:           NewAdAccountInviteClient(cfg),
+		AdAccountMember:           NewAdAccountMemberClient(cfg),
+		AdActivityEntry:           NewAdActivityEntryClient(cfg),
+		AdAudienceMember:          NewAdAudienceMemberClient(cfg),
+		AdBoost:                   NewAdBoostClient(cfg),
+		AdCampaign:                NewAdCampaignClient(cfg),
+		AdCardStatsDaily:          NewAdCardStatsDailyClient(cfg),
+		AdContentSignal:           NewAdContentSignalClient(cfg),
+		AdConversion:              NewAdConversionClient(cfg),
+		AdCreatorEarning:          NewAdCreatorEarningClient(cfg),
+		AdCreatorMonetisationHold: NewAdCreatorMonetisationHoldClient(cfg),
+		AdCustomAudience:          NewAdCustomAudienceClient(cfg),
+		AdFrequencyPolicy:         NewAdFrequencyPolicyClient(cfg),
+		AdFundsTransaction:        NewAdFundsTransactionClient(cfg),
+		AdGroup:                   NewAdGroupClient(cfg),
+		AdImpression:              NewAdImpressionClient(cfg),
+		AdMedia:                   NewAdMediaClient(cfg),
+		AdPolicyCategory:          NewAdPolicyCategoryClient(cfg),
+		AdPoolDaily:               NewAdPoolDailyClient(cfg),
+		AdScheduledReport:         NewAdScheduledReportClient(cfg),
+		AdSpendBatch:              NewAdSpendBatchClient(cfg),
+		AdStatsDaily:              NewAdStatsDailyClient(cfg),
+		OutboxEvent:               NewOutboxEventClient(cfg),
 	}, nil
 }
 
@@ -322,10 +328,11 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
 		c.AdAudienceMember, c.AdBoost, c.AdCampaign, c.AdCardStatsDaily,
-		c.AdContentSignal, c.AdConversion, c.AdCreatorEarning, c.AdCustomAudience,
-		c.AdFrequencyPolicy, c.AdFundsTransaction, c.AdGroup, c.AdImpression,
-		c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily, c.AdScheduledReport,
-		c.AdSpendBatch, c.AdStatsDaily, c.OutboxEvent,
+		c.AdContentSignal, c.AdConversion, c.AdCreatorEarning,
+		c.AdCreatorMonetisationHold, c.AdCustomAudience, c.AdFrequencyPolicy,
+		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
+		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily,
+		c.OutboxEvent,
 	} {
 		n.Use(hooks...)
 	}
@@ -337,10 +344,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Ad, c.AdAccount, c.AdAccountInvite, c.AdAccountMember, c.AdActivityEntry,
 		c.AdAudienceMember, c.AdBoost, c.AdCampaign, c.AdCardStatsDaily,
-		c.AdContentSignal, c.AdConversion, c.AdCreatorEarning, c.AdCustomAudience,
-		c.AdFrequencyPolicy, c.AdFundsTransaction, c.AdGroup, c.AdImpression,
-		c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily, c.AdScheduledReport,
-		c.AdSpendBatch, c.AdStatsDaily, c.OutboxEvent,
+		c.AdContentSignal, c.AdConversion, c.AdCreatorEarning,
+		c.AdCreatorMonetisationHold, c.AdCustomAudience, c.AdFrequencyPolicy,
+		c.AdFundsTransaction, c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory,
+		c.AdPoolDaily, c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily,
+		c.OutboxEvent,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -373,6 +381,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AdConversion.mutate(ctx, m)
 	case *AdCreatorEarningMutation:
 		return c.AdCreatorEarning.mutate(ctx, m)
+	case *AdCreatorMonetisationHoldMutation:
+		return c.AdCreatorMonetisationHold.mutate(ctx, m)
 	case *AdCustomAudienceMutation:
 		return c.AdCustomAudience.mutate(ctx, m)
 	case *AdFrequencyPolicyMutation:
@@ -1998,6 +2008,139 @@ func (c *AdCreatorEarningClient) mutate(ctx context.Context, m *AdCreatorEarning
 	}
 }
 
+// AdCreatorMonetisationHoldClient is a client for the AdCreatorMonetisationHold schema.
+type AdCreatorMonetisationHoldClient struct {
+	config
+}
+
+// NewAdCreatorMonetisationHoldClient returns a client for the AdCreatorMonetisationHold from the given config.
+func NewAdCreatorMonetisationHoldClient(c config) *AdCreatorMonetisationHoldClient {
+	return &AdCreatorMonetisationHoldClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adcreatormonetisationhold.Hooks(f(g(h())))`.
+func (c *AdCreatorMonetisationHoldClient) Use(hooks ...Hook) {
+	c.hooks.AdCreatorMonetisationHold = append(c.hooks.AdCreatorMonetisationHold, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adcreatormonetisationhold.Intercept(f(g(h())))`.
+func (c *AdCreatorMonetisationHoldClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdCreatorMonetisationHold = append(c.inters.AdCreatorMonetisationHold, interceptors...)
+}
+
+// Create returns a builder for creating a AdCreatorMonetisationHold entity.
+func (c *AdCreatorMonetisationHoldClient) Create() *AdCreatorMonetisationHoldCreate {
+	mutation := newAdCreatorMonetisationHoldMutation(c.config, OpCreate)
+	return &AdCreatorMonetisationHoldCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdCreatorMonetisationHold entities.
+func (c *AdCreatorMonetisationHoldClient) CreateBulk(builders ...*AdCreatorMonetisationHoldCreate) *AdCreatorMonetisationHoldCreateBulk {
+	return &AdCreatorMonetisationHoldCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdCreatorMonetisationHoldClient) MapCreateBulk(slice any, setFunc func(*AdCreatorMonetisationHoldCreate, int)) *AdCreatorMonetisationHoldCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdCreatorMonetisationHoldCreateBulk{err: fmt.Errorf("calling to AdCreatorMonetisationHoldClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdCreatorMonetisationHoldCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdCreatorMonetisationHoldCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdCreatorMonetisationHold.
+func (c *AdCreatorMonetisationHoldClient) Update() *AdCreatorMonetisationHoldUpdate {
+	mutation := newAdCreatorMonetisationHoldMutation(c.config, OpUpdate)
+	return &AdCreatorMonetisationHoldUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdCreatorMonetisationHoldClient) UpdateOne(_m *AdCreatorMonetisationHold) *AdCreatorMonetisationHoldUpdateOne {
+	mutation := newAdCreatorMonetisationHoldMutation(c.config, OpUpdateOne, withAdCreatorMonetisationHold(_m))
+	return &AdCreatorMonetisationHoldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdCreatorMonetisationHoldClient) UpdateOneID(id string) *AdCreatorMonetisationHoldUpdateOne {
+	mutation := newAdCreatorMonetisationHoldMutation(c.config, OpUpdateOne, withAdCreatorMonetisationHoldID(id))
+	return &AdCreatorMonetisationHoldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdCreatorMonetisationHold.
+func (c *AdCreatorMonetisationHoldClient) Delete() *AdCreatorMonetisationHoldDelete {
+	mutation := newAdCreatorMonetisationHoldMutation(c.config, OpDelete)
+	return &AdCreatorMonetisationHoldDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdCreatorMonetisationHoldClient) DeleteOne(_m *AdCreatorMonetisationHold) *AdCreatorMonetisationHoldDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdCreatorMonetisationHoldClient) DeleteOneID(id string) *AdCreatorMonetisationHoldDeleteOne {
+	builder := c.Delete().Where(adcreatormonetisationhold.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdCreatorMonetisationHoldDeleteOne{builder}
+}
+
+// Query returns a query builder for AdCreatorMonetisationHold.
+func (c *AdCreatorMonetisationHoldClient) Query() *AdCreatorMonetisationHoldQuery {
+	return &AdCreatorMonetisationHoldQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdCreatorMonetisationHold},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdCreatorMonetisationHold entity by its id.
+func (c *AdCreatorMonetisationHoldClient) Get(ctx context.Context, id string) (*AdCreatorMonetisationHold, error) {
+	return c.Query().Where(adcreatormonetisationhold.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdCreatorMonetisationHoldClient) GetX(ctx context.Context, id string) *AdCreatorMonetisationHold {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdCreatorMonetisationHoldClient) Hooks() []Hook {
+	return c.hooks.AdCreatorMonetisationHold
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdCreatorMonetisationHoldClient) Interceptors() []Interceptor {
+	return c.inters.AdCreatorMonetisationHold
+}
+
+func (c *AdCreatorMonetisationHoldClient) mutate(ctx context.Context, m *AdCreatorMonetisationHoldMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdCreatorMonetisationHoldCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdCreatorMonetisationHoldUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdCreatorMonetisationHoldUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdCreatorMonetisationHoldDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdCreatorMonetisationHold mutation op: %q", m.Op())
+	}
+}
+
 // AdCustomAudienceClient is a client for the AdCustomAudience schema.
 type AdCustomAudienceClient struct {
 	config
@@ -3599,17 +3742,17 @@ type (
 	hooks struct {
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
 		AdAudienceMember, AdBoost, AdCampaign, AdCardStatsDaily, AdContentSignal,
-		AdConversion, AdCreatorEarning, AdCustomAudience, AdFrequencyPolicy,
-		AdFundsTransaction, AdGroup, AdImpression, AdMedia, AdPolicyCategory,
-		AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
+		AdConversion, AdCreatorEarning, AdCreatorMonetisationHold, AdCustomAudience,
+		AdFrequencyPolicy, AdFundsTransaction, AdGroup, AdImpression, AdMedia,
+		AdPolicyCategory, AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
 		OutboxEvent []ent.Hook
 	}
 	inters struct {
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
 		AdAudienceMember, AdBoost, AdCampaign, AdCardStatsDaily, AdContentSignal,
-		AdConversion, AdCreatorEarning, AdCustomAudience, AdFrequencyPolicy,
-		AdFundsTransaction, AdGroup, AdImpression, AdMedia, AdPolicyCategory,
-		AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
+		AdConversion, AdCreatorEarning, AdCreatorMonetisationHold, AdCustomAudience,
+		AdFrequencyPolicy, AdFundsTransaction, AdGroup, AdImpression, AdMedia,
+		AdPolicyCategory, AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
 		OutboxEvent []ent.Interceptor
 	}
 )

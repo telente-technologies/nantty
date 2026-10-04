@@ -152,6 +152,18 @@ func (f AdCreatorEarningFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdCreatorEarningMutation", m)
 }
 
+// The AdCreatorMonetisationHoldFunc type is an adapter to allow the use of ordinary
+// function as AdCreatorMonetisationHold mutator.
+type AdCreatorMonetisationHoldFunc func(context.Context, *ent.AdCreatorMonetisationHoldMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdCreatorMonetisationHoldFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdCreatorMonetisationHoldMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdCreatorMonetisationHoldMutation", m)
+}
+
 // The AdCustomAudienceFunc type is an adapter to allow the use of ordinary
 // function as AdCustomAudience mutator.
 type AdCustomAudienceFunc func(context.Context, *ent.AdCustomAudienceMutation) (ent.Value, error)

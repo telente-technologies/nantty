@@ -429,6 +429,19 @@ var (
 			},
 		},
 	}
+	// AdCreatorMonetisationHoldsColumns holds the columns for the "ad_creator_monetisation_holds" table.
+	AdCreatorMonetisationHoldsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 80},
+		{Name: "is_paused", Type: field.TypeBool, Default: false},
+		{Name: "health_changed_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdCreatorMonetisationHoldsTable holds the schema information for the "ad_creator_monetisation_holds" table.
+	AdCreatorMonetisationHoldsTable = &schema.Table{
+		Name:       "ad_creator_monetisation_holds",
+		Columns:    AdCreatorMonetisationHoldsColumns,
+		PrimaryKey: []*schema.Column{AdCreatorMonetisationHoldsColumns[0]},
+	}
 	// AdCustomAudiencesColumns holds the columns for the "ad_custom_audiences" table.
 	AdCustomAudiencesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -878,6 +891,7 @@ var (
 		AdContentSignalsTable,
 		AdConversionsTable,
 		AdCreatorEarningsTable,
+		AdCreatorMonetisationHoldsTable,
 		AdCustomAudiencesTable,
 		AdFrequencyPoliciesTable,
 		AdFundsTransactionsTable,
