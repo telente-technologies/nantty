@@ -74,7 +74,7 @@ func AssembleContainer(ctx context.Context, settings configs.AdsSettings, collab
 		Counters: counters, Frequency: services.FrequencyGuard{Store: counters}, Spend: spend,
 		Signer:     services.AdTokenSigner{ActiveKeyId: settings.AdTokenActiveKeyId, Keys: keys, TimeToLive: settings.AdTokenTimeToLive, Now: now},
 		Policies:   &services.PolicySource{Client: client, Now: now, Settings: platformSettings, ShareBps: settings.CreatorShareBps},
-		Pricing:    &services.RegionalAdPricing{Settings: platformSettings, Rates: integrations.NewCurrencyExchangeRates(database, settings.CurrencySchema, 5*time.Minute, logger)},
+		Pricing:    &services.RegionalAdPricing{Settings: platformSettings, Rates: integrations.NewCurrencyExchangeRates(database, settings.CurrencySchema, 5*time.Minute, logger), Population: settings.PopulationByCountry},
 		Candidates: &services.CandidateIndex{Client: client, Spend: spend, Now: now, Refresh: settings.CandidateRefresh},
 		Signals:    collaborators.Signals,
 		Users:      collaborators.Users,

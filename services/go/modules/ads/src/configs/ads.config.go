@@ -54,6 +54,7 @@ type AdsSettings struct {
 	AssetsBucket           string
 	S3Endpoint             string
 	ReportQueueName        string
+	DomainEventsQueueName  string
 	ContentSourcesUrl      string
 	ContentSourcesToken    string
 	CommerceInternalUrl    string
@@ -111,6 +112,7 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		AssetsBucket:           reader.ReadStringOrDefault("ADS_ASSETS_BUCKET", ""),
 		S3Endpoint:             reader.ReadStringOrDefault("ADS_S3_ENDPOINT_URL", ""),
 		ReportQueueName:        reader.ReadStringOrDefault("ADS_REPORT_QUEUE_NAME", ""),
+		DomainEventsQueueName:  reader.ReadStringOrDefault("ADS_DOMAIN_EVENTS_QUEUE", "ads-domain-events"),
 		ContentSourcesUrl:      reader.ReadStringOrDefault("SOCIAL_INTERNAL_URL", ""),
 		ContentSourcesToken:    reader.ReadStringOrDefault("SOCIAL_INTERNAL_TOKEN", ""),
 		CommerceInternalUrl:    reader.ReadStringOrDefault("COMMERCE_INTERNAL_URL", ""),
