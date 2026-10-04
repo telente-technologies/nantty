@@ -18,6 +18,7 @@ type DisputeMessageInput struct {
 	DisputeId      uuid.UUID
 	AuthorUserId   string
 	AsSupport      bool
+	StoreId        string
 	Text           string
 	AttachmentUrls []string
 }
@@ -47,7 +48,12 @@ func (service DisputeService) AddDisputeMessageInTransaction(ctx context.Context
 		return nil, err
 	}
 	role := "support"
-	if !input.AsSupport {
+	if input.StoreId != "" {
+		if held.StoreID != input.StoreId {
+			return nil, ErrDisputeNotFound
+		}
+		role = "seller"
+	} else if !input.AsSupport {
 		participantRole, isParticipant := ParticipantRole(held, input.AuthorUserId)
 		if !isParticipant {
 			return nil, ErrDisputeNotFound
