@@ -20,6 +20,7 @@ import (
 	accountenforcement "zudomart/modules/users/src/modules/accountEnforcement"
 	accountsettings "zudomart/modules/users/src/modules/accountSettings"
 	actingprofiles "zudomart/modules/users/src/modules/actingProfiles"
+	"zudomart/modules/users/src/modules/addresses"
 	businessdocuments "zudomart/modules/users/src/modules/businessDocuments"
 	businessprofiles "zudomart/modules/users/src/modules/businessProfiles"
 	"zudomart/modules/users/src/modules/celebrations"
@@ -88,6 +89,10 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 		return nil, err
 	}
 	if err := topics.SeedReferenceData(ctx, usersContainer); err != nil {
+		_ = database.Close()
+		return nil, err
+	}
+	if err := addresses.SealPlaintextPhones(ctx, usersContainer); err != nil {
 		_ = database.Close()
 		return nil, err
 	}

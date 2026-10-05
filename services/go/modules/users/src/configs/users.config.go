@@ -5,6 +5,7 @@ import (
 	"time"
 
 	platformconfig "zudomart/platform/config"
+	"zudomart/platform/usersdirectory"
 )
 
 type UsersSettings struct {
@@ -22,6 +23,7 @@ type UsersSettings struct {
 	MediaUploadSigningKey       []byte
 	MediaUploadIntentTimeToLive time.Duration
 	Privacy                     PrivacySettings
+	AddressPhoneKey             []byte
 	EntitlementEventsQueue      string
 	SocialInternalUrl           string
 	SocialInternalToken         string
@@ -55,6 +57,7 @@ func ReadUsersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		LiveInternalToken:           reader.ReadStringOrDefault("LIVE_INTERNAL_API_TOKEN", ""),
 		Verification:                ReadIdentityVerificationSettingsFromEnvironment(reader),
 	}
+	settings.AddressPhoneKey = readAddressPhoneKey(reader, settings.IsProduction())
 	return settings
 }
 
@@ -66,4 +69,16 @@ func readSigningKey(reader *platformconfig.EnvironmentReader, name string) []byt
 		return nil
 	}
 	return decoded
+}
+
+func readAddressPhoneKey(reader *platformconfig.EnvironmentReader, isProduction bool) []byte {
+	encoded := reader.ReadStringOrDefault(usersdirectory.AddressPhoneKeyVariable, "")
+	if isProduction {
+		encoded = reader.ReadRequiredString(usersdirectory.AddressPhoneKeyVariable)
+	}
+	key, err := usersdirectory.DecodeAddressPhoneKey(encoded)
+	if err != nil {
+		reader.ReadRequiredString(usersdirectory.AddressPhoneKeyVariable + "_AS_BASE64_OF_32_BYTES")
+	}
+	return key
 }
