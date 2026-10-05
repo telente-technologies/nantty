@@ -19,9 +19,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   min-height: 36px;
-  padding: 3px 4px;
+  padding: 3px var(--space-1);
   border: 1px solid var(--divider);
   border-radius: var(--radius-medium);
   background: var(--surface-card);
@@ -39,9 +39,9 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   height: 26px;
-  padding: 0 4px 0 9px;
+  padding: 0 var(--space-1) 0 9px;
   border-radius: var(--radius-pill);
   background: var(--blue-tint);
   color: var(--brand-ink);
@@ -92,7 +92,7 @@
   z-index: 30;
   max-height: 260px;
   overflow: auto;
-  padding: 4px;
+  padding: var(--space-1);
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);
   background: var(--color-elevated);
@@ -102,8 +102,8 @@
 .option {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  padding: 7px 8px;
+  gap: var(--space-3);
+  padding: 7px var(--space-2);
   border-radius: var(--radius-small);
   cursor: pointer;
 }
@@ -118,6 +118,6 @@
 }
 
 .message {
-  padding: 8px;
+  padding: var(--space-2);
   color: var(--ink-muted);
 }
