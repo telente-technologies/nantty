@@ -1,9 +1,11 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { AppState } from "react-native";
 
 import { productsService } from "@/services/products.service";
+
+import { orderMartHighlightsForSession } from "./martHighlightsOrder.util";
 
 export const MART_HIGHLIGHTS_STALE_MS = 5 * 60_000;
 
@@ -30,5 +32,7 @@ export function useMartHighlights() {
     return () => subscription.remove();
   }, [refreshIfStale]);
 
-  return { highlights: query.data?.data ?? [], isLoading: query.isLoading, isRefetching: query.isRefetching, refetch: query.refetch };
+  const highlights = useMemo(() => orderMartHighlightsForSession(query.data?.data ?? []), [query.data]);
+
+  return { highlights, isLoading: query.isLoading, isRefetching: query.isRefetching, refetch: query.refetch };
 }
