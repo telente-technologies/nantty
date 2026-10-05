@@ -12,6 +12,7 @@ type Registry struct {
 	settings    PlatformSettings
 	enforcement AccountEnforcement
 	sessions    StaffSessionChecker
+	network     StaffNetworkPolicy
 	history     AuditHistoryReader
 	currencies  CurrencyResolver
 	deletions   DeletionGraceCanceller
@@ -137,4 +138,14 @@ func (registry *Registry) RegisterDeletionGraceCanceller(port DeletionGraceCance
 
 func (registry *Registry) DeletionGraceCanceller() (DeletionGraceCanceller, error) {
 	return readPort(registry, func() DeletionGraceCanceller { return registry.deletions })
+}
+
+func (registry *Registry) RegisterStaffNetworkPolicy(port StaffNetworkPolicy) {
+	registry.mutex.Lock()
+	registry.network = port
+	registry.mutex.Unlock()
+}
+
+func (registry *Registry) StaffNetworkPolicy() (StaffNetworkPolicy, error) {
+	return readPort(registry, func() StaffNetworkPolicy { return registry.network })
 }

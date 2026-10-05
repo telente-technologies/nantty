@@ -25,7 +25,6 @@ type AccountSummary struct {
 	Birthday      *time.Time
 	Roles         []string
 	EmailVerified bool
-	PhoneVerified bool
 	Active        bool
 	Status        string
 	CreatedAt     time.Time
@@ -133,6 +132,10 @@ type CurrencyResolver interface {
 
 type StaffSessionChecker interface {
 	IsStaffSessionActive(ctx context.Context, staffId, sessionId string) (bool, error)
+}
+
+type StaffNetworkPolicy interface {
+	IsStaffAddressAllowed(ctx context.Context, staffId, address string) (bool, error)
 }
 
 type AuditHistoryReader interface {

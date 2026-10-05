@@ -78,14 +78,6 @@ func (directory *FakeAccountDirectory) CreateAccountOnBehalf(_ context.Context, 
 	return summary.ID, nil
 }
 
-func (directory *FakeAccountDirectory) SetPhoneVerified(accountId uuid.UUID) {
-	directory.mutex.Lock()
-	defer directory.mutex.Unlock()
-	summary := directory.accounts[accountId]
-	summary.PhoneVerified = true
-	directory.accounts[accountId] = summary
-}
-
 func (directory *FakeAccountDirectory) SetAccountRole(_ context.Context, accountId uuid.UUID, role string, granted bool) error {
 	directory.mutex.Lock()
 	defer directory.mutex.Unlock()
