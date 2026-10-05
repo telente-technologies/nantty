@@ -5,10 +5,12 @@ import { mountChatSettingsModule } from "../modules/chatSettings/chatSettings.mo
 import { mountCommentsModule } from "../modules/comments/comments.module.js";
 import { mountContentPreferencesModule } from "../modules/contentPreferences/contentPreferences.module.js";
 import { mountConversationsModule } from "../modules/conversations/conversations.module.js";
+import { mountDownloadsModule } from "../modules/downloads/downloads.module.js";
 import { mountDigestsModule } from "../modules/digests/digests.module.js";
 import { mountExploreModule } from "../modules/explore/explore.module.js";
 import { mountFeedsModule } from "../modules/feeds/feeds.module.js";
 import { mountInternalSourcesModule } from "../modules/internalSources/internalSources.module.js";
+import { mountStoreInboxModule } from "../modules/storeInbox/storeInbox.module.js";
 import { mountFollowsModule } from "../modules/follows/follows.module.js";
 import { mountLinkPreviewsModule } from "../modules/linkPreviews/linkPreviews.module.js";
 import { mountMentionsModule } from "../modules/mentions/mentions.module.js";
@@ -29,6 +31,7 @@ export function registerRoutes(router: HttpRouter, route: RouteFactory, context:
   mountFollowsModule(router, route, context);
   mountBlocksModule(router, route, context);
   mountPostsModule(router, route, context);
+  mountDownloadsModule(router, route, context);
   mountCommentsModule(router, route, context);
   mountLinkPreviewsModule(router, route, context);
   mountSavesModule(router, route, context);
@@ -37,6 +40,7 @@ export function registerRoutes(router: HttpRouter, route: RouteFactory, context:
   mountSoundsModule(router, route, context);
   mountFeedsModule(router, route, context);
   mountExploreModule(router, route, context);
+  mountStoreInboxModule(router, route, context, internalToken);
   mountConversationsModule(router, route, context);
   mountMessagesModule(router, route, context);
   mountChatSettingsModule(router, route, context);
