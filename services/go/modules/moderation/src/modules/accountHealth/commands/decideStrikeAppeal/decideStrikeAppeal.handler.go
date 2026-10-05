@@ -11,9 +11,11 @@ import (
 	"zudomart/modules/moderation/src/container"
 	"zudomart/modules/moderation/src/events"
 	"zudomart/modules/moderation/src/generated/ent"
+	"zudomart/modules/moderation/src/generated/ent/appeal"
 	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/integrations"
 	"zudomart/modules/moderation/src/modules/accountHealth/services"
+	decideappeal "zudomart/modules/moderation/src/modules/appeals/commands/decideAppeal"
 	strikeservices "zudomart/modules/moderation/src/modules/strikes/services"
 	"zudomart/platform/httpserver"
 )
@@ -45,6 +47,15 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	}
 	if row.AppealStatus != strike.AppealStatusPending {
 		return httpserver.NewApiError(http.StatusConflict, "APPEAL_NOT_PENDING", "This strike has no pending appeal.")
+	}
+	unified, err := handler.Container.Client.Appeal.Query().Where(appeal.StrikeID(row.ID), appeal.StatusEQ(appeal.StatusPending)).First(ctx)
+	if err != nil && !ent.IsNotFound(err) {
+		return err
+	}
+	if unified != nil {
+		return decideappeal.Handler{Container: handler.Container}.Execute(ctx, decideappeal.Command{
+			Staff: command.Staff, IpAddress: command.IpAddress, RequestId: command.RequestId, AppealId: unified.ID.String(), Outcome: map[string]string{"uphold": "UPHELD", "overturn": "OVERTURNED"}[command.Action], Reason: reason,
+		})
 	}
 	outcome := map[string]strike.AppealStatus{"uphold": strike.AppealStatusUpheld, "overturn": strike.AppealStatusOverturned}[command.Action]
 	now := handler.Container.Now()

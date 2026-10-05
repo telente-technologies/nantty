@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/moderation/src/generated/ent"
 	"zudomart/modules/moderation/src/generated/ent/strike"
 	"zudomart/modules/moderation/src/modules/accountHealth/services"
+	appealservices "zudomart/modules/moderation/src/modules/appeals/services"
 	"zudomart/platform/httpserver"
 )
 
@@ -47,6 +48,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	}
 	return handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		if err := tx.Strike.UpdateOne(row).SetAppealStatus(strike.AppealStatusPending).SetAppealMessage(message).SetAppealedAt(now).Exec(ctx); err != nil {
+			return err
+		}
+		if _, err := appealservices.OpenForStrike(ctx, tx, row, message, now); err != nil {
 			return err
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, StrikeAppealedType, row.ID.String(), now, map[string]string{"strikeId": row.ID.String(), "accountId": account.String(), "kind": string(row.Kind), "source": string(row.Source)})
