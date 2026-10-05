@@ -10,9 +10,11 @@ import {
 import { createLogger, type Logger } from "@zudojs/logger";
 
 import type { MediaConfig } from "./configs/media.config.js";
+import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
 import { mediaDomainEventsQueue, mediaJobQueueName } from "./constants/media.constant.js";
 import { createMediaDatabase, type MediaDatabase } from "./databases/prisma.database.js";
 import { createMediaUrlSigner } from "./integrations/cdnMediaUrlSigner.integration.js";
+import { createBrandedDownloadRenderer } from "./integrations/brandedDownloadRenderer.integration.js";
 import { createClamAvTcpScanner, skippedMalwareScanner } from "./integrations/clamAvTcpScanner.integration.js";
 import { createFfmpegMediaTranscoder } from "./integrations/ffmpegMediaTranscoder.integration.js";
 import { createHeicConverter } from "./integrations/heicConverter.integration.js";
@@ -57,6 +59,7 @@ export function createMediaApp(config: MediaConfig, logger: Logger = createLogge
     moderation: config.moderation.baseUrl === undefined ? undefined : createHttpModerationClient({ baseUrl: config.moderation.baseUrl, token: config.moderation.token, timeoutMs: config.moderation.timeoutMs }),
     images: createSharpImageProcessor({ convertHeic: createHeicConverter({ heifConvertPath: config.heifConvertPath, ffmpeg: config.ffmpeg }) }),
     transcoder: createFfmpegMediaTranscoder({ config: config.ffmpeg }),
+    branding: createBrandedDownloadRenderer({ config: config.ffmpeg }),
   };
   const router = createRouter({
     onError: (error) => errorToResponse(error),
@@ -72,7 +75,7 @@ export function createMediaApp(config: MediaConfig, logger: Logger = createLogge
       return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
     }
   };
-  const pipeline = new HttpMiddlewarePipeline({ middlewares: [dispatch] });
+  const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
   const server = createHttpServer({
     adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: config.allowProxiedChunks ? proxiedChunkLimitBytes : bodyAllowanceBytes, trustProxy: true }),
     handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),

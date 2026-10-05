@@ -12,7 +12,7 @@ RUN pnpm install --frozen-lockfile --filter @zudomart/media... && pnpm --filter 
 FROM node:24-alpine
 ENV NODE_ENV=production
 WORKDIR /app
-RUN apk add --no-cache ffmpeg libheif-tools
+RUN apk add --no-cache ffmpeg libheif-tools fontconfig font-dejavu
 ENV FFMPEG_MODE=required
 COPY --from=build /out /app
 USER node

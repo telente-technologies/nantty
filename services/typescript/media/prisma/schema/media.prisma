@@ -96,6 +96,7 @@ model MediaAsset {
   processedAt        DateTime?
   variants           MediaVariant[]
   accessLogs         MediaAccessLog[]
+  downloadVariants   MediaDownloadVariant[]
 
   @@index([ownerId, createdAt])
   @@index([status, updatedAt])
@@ -117,6 +118,37 @@ model MediaVariant {
 
   @@unique([assetId, key])
   @@map("media_variants")
+}
+
+enum DownloadVariantStatus {
+  pending
+  rendering
+  ready
+  failed
+}
+
+model MediaDownloadVariant {
+  id              String                @id @default(uuid(7)) @db.Uuid
+  assetId         String                @db.Uuid
+  cacheKey        String
+  watermarkHandle String
+  sourceKey       String
+  stripAudio      Boolean               @default(false)
+  status          DownloadVariantStatus @default(pending)
+  bucket          String?
+  key             String?
+  contentType     String?
+  sizeBytes       BigInt?
+  attempts        Int                   @default(0)
+  failureReason   String?
+  createdAt       DateTime              @default(now())
+  startedAt       DateTime?
+  readyAt         DateTime?
+  asset           MediaAsset            @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, cacheKey])
+  @@index([status, createdAt])
+  @@map("media_download_variants")
 }
 
 model MediaAccessLog {

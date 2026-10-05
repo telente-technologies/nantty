@@ -1,4 +1,7 @@
+import { readGatewayIdentitySecretsFromEnvironment } from "../middlewares/gatewayIdentity.middleware.js";
+
 export interface MediaConfig {
+  readonly gatewayIdentitySecrets?: readonly string[];
   readonly host: string;
   readonly port: number;
   readonly databaseUrl: string;
@@ -54,6 +57,7 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
   const clamAvHost = readOptional("CLAMAV_HOST");
   const ffmpegMode = readOrDefault("FFMPEG_MODE", "auto");
   const config: MediaConfig = {
+    gatewayIdentitySecrets: readGatewayIdentitySecretsFromEnvironment(problems),
     host: readOrDefault("HOST", "0.0.0.0"),
     port: Number(readOrDefault("PORT", "8108")),
     databaseUrl,
