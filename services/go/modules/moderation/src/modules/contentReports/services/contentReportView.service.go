@@ -81,6 +81,8 @@ type Detail struct {
 
 func format(moment time.Time) string { return moment.UTC().Format(time.RFC3339) }
 
+func BuildTarget(row *ent.ContentReport) TargetView { return buildTarget(row) }
+
 func buildTarget(row *ent.ContentReport) TargetView {
 	view := TargetView{Type: strings.ToUpper(string(row.TargetType)), Id: row.TargetID, MediaUrls: []string{}, Visibility: strings.ToUpper(string(row.Visibility)), CreatedAt: format(row.CreatedAt)}
 	var preview integrations.TargetPreview

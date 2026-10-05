@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,23 +14,31 @@ import (
 	"zudomart/modules/moderation/src/integrations"
 )
 
-func (intake Intake) resolvePreview(ctx context.Context, input IntakeInput) (*integrations.TargetPreview, []byte, *uuid.UUID) {
+func (intake Intake) resolvePreview(ctx context.Context, input IntakeInput) (*integrations.TargetPreview, []byte, *uuid.UUID, bool) {
 	var authorId *uuid.UUID
 	if parsed, err := uuid.Parse(input.AuthorHint); err == nil {
 		authorId = &parsed
 	}
 	preview, err := intake.Container.Targets.Resolve(ctx, input.TargetType, input.TargetId)
-	if err != nil {
+	missing := errors.Is(err, integrations.ErrTargetNotFound)
+	if err != nil && !missing {
 		intake.Container.Logger.WarnContext(ctx, "report target could not be resolved", "targetType", input.TargetType, "error", err.Error())
 	}
 	if preview == nil {
-		return nil, nil, authorId
+		return nil, nil, authorId, missing
 	}
 	if parsed, parseErr := uuid.Parse(preview.OwnerId); parseErr == nil {
 		authorId = &parsed
 	}
 	encoded, _ := json.Marshal(preview)
-	return preview, encoded, authorId
+	return preview, encoded, authorId, false
+}
+
+func IsUnreportable(input IntakeInput, authorId *uuid.UUID, missing bool) bool {
+	if input.Source != "user" || input.ReporterId == nil {
+		return false
+	}
+	return (authorId != nil && *authorId == *input.ReporterId) || (missing && input.TargetType != "live")
 }
 
 func (intake Intake) createReport(ctx context.Context, tx *ent.Tx, input IntakeInput, previewJson []byte, authorId *uuid.UUID, now time.Time) (*ent.ContentReport, error) {

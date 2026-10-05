@@ -59,7 +59,10 @@ func (intake Intake) Record(ctx context.Context, input IntakeInput) (IntakeResul
 			return IntakeResult{}, httpserver.NewApiError(http.StatusTooManyRequests, "REPORT_RATE_LIMITED", "You have sent a lot of reports. Try again in a little while.")
 		}
 	}
-	preview, previewJson, authorId := intake.resolvePreview(ctx, input)
+	preview, previewJson, authorId, missing := intake.resolvePreview(ctx, input)
+	if IsUnreportable(input, authorId, missing) {
+		return IntakeResult{Ignored: true}, nil
+	}
 	var result IntakeResult
 	err := intake.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		report, err := tx.ContentReport.Query().Where(contentreport.TargetTypeEQ(contentreport.TargetType(input.TargetType)), contentreport.TargetID(input.TargetId)).ForUpdate().Only(ctx)

@@ -44,7 +44,7 @@ func (controller SuspensionCasesController) Intake(writer http.ResponseWriter, r
 
 func (controller SuspensionCasesController) List(writer http.ResponseWriter, request *http.Request) {
 	query := request.URL.Query()
-	result, err := listsuspensioncases.Handler{Container: controller.Container}.Execute(request.Context(), query.Get("status"), query.Get("source"), query.Get("modelVersion"), query.Get("cursor"))
+	result, err := listsuspensioncases.Handler{Container: controller.Container}.Execute(request.Context(), query.Get("status"), query.Get("source"), query.Get("modelVersion"), query.Get("search"), query.Get("cursor"))
 	controller.respond(writer, request, http.StatusOK, result, err)
 }
 
