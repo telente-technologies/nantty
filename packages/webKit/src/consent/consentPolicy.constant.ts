@@ -1,4 +1,4 @@
-export const consentPolicyVersion = "0.1-draft";
+export const consentPolicyVersion = "1.0";
 export const consentCookieName = "zudomart_consent";
 export const consentCookieMaxAgeSeconds = 60 * 60 * 24 * 180;
 export const openCookieSettingsEventName = "zudomart:open-cookie-settings";
