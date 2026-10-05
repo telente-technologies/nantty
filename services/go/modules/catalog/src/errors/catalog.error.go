@@ -48,3 +48,17 @@ var (
 	CannotRemoveSelf    = Api(http.StatusForbidden, "CANNOT_REMOVE_SELF", "You cannot remove yourself from the team.")
 	TeamRequestNotFound = Api(http.StatusNotFound, "TEAM_REQUEST_NOT_FOUND", "That team request could not be found.")
 )
+
+var (
+	NotFound              = Api(http.StatusNotFound, "NOT_FOUND", "That item could not be found.")
+	SlugTaken             = Api(http.StatusConflict, "SLUG_TAKEN", "Another item already uses this slug.")
+	CannotMove            = Api(http.StatusConflict, "CANNOT_MOVE", "This item cannot move further in that direction.")
+	NoChange              = Api(http.StatusConflict, "NO_CHANGE", "Nothing changed.")
+	AlreadyDecided        = Api(http.StatusConflict, "ALREADY_DECIDED", "This application was already decided.")
+	ApplicationPending    = Api(http.StatusConflict, "APPLICATION_PENDING", "You already have an application waiting for review.")
+	AlreadySeller         = Api(http.StatusConflict, "ALREADY_SELLER", "Your seller application was already approved.")
+	InvalidOfficialStatus = Api(http.StatusConflict, "INVALID_OFFICIAL_STATUS_TRANSITION", "That change is not allowed from the brand's current Official Store status.")
+	BrandHandleTaken      = Api(http.StatusConflict, "HANDLE_TAKEN", "That brand handle is already taken.")
+	CannotFollowOwn       = Api(http.StatusConflict, "CANNOT_FOLLOW_OWN", "You cannot follow your own store or brand.")
+	ReviewNotYours        = Api(http.StatusNotFound, "REVIEW_NOT_FOUND", "That review could not be found.")
+)
