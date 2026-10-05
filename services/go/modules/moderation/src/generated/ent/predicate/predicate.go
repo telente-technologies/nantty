@@ -6,6 +6,21 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Appeal is the predicate function for appeal builders.
+type Appeal func(*sql.Selector)
+
+// AutomationEventOccurrence is the predicate function for automationeventoccurrence builders.
+type AutomationEventOccurrence func(*sql.Selector)
+
+// AutomationExecution is the predicate function for automationexecution builders.
+type AutomationExecution func(*sql.Selector)
+
+// AutomationRule is the predicate function for automationrule builders.
+type AutomationRule func(*sql.Selector)
+
+// AutomationRuleVersion is the predicate function for automationruleversion builders.
+type AutomationRuleVersion func(*sql.Selector)
+
 // ChatReport is the predicate function for chatreport builders.
 type ChatReport func(*sql.Selector)
 

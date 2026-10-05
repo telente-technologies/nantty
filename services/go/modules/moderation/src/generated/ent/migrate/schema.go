@@ -9,6 +9,179 @@ import (
 )
 
 var (
+	// AppealsColumns holds the columns for the "appeals" table.
+	AppealsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "source_key", Type: field.TypeString, Size: 200},
+		{Name: "decision_type", Type: field.TypeEnum, Enums: []string{"content_removed", "content_restricted", "strike", "suspension", "copyright_takedown"}},
+		{Name: "appellant_id", Type: field.TypeUUID},
+		{Name: "report_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "strike_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "target_type", Type: field.TypeString, Size: 40},
+		{Name: "target_id", Type: field.TypeString, Size: 128},
+		{Name: "target", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "original_decision", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "statement", Type: field.TypeString, Size: 2000},
+		{Name: "evidence_notes", Type: field.TypeJSON},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "upheld", "overturned"}, Default: "pending"},
+		{Name: "submitted_at", Type: field.TypeTime},
+		{Name: "sla_due_at", Type: field.TypeTime},
+		{Name: "decision", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+	}
+	// AppealsTable holds the schema information for the "appeals" table.
+	AppealsTable = &schema.Table{
+		Name:       "appeals",
+		Columns:    AppealsColumns,
+		PrimaryKey: []*schema.Column{AppealsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "appeal_source_key",
+				Unique:  true,
+				Columns: []*schema.Column{AppealsColumns[2]},
+			},
+			{
+				Name:    "appeal_status_sla_due_at",
+				Unique:  false,
+				Columns: []*schema.Column{AppealsColumns[13], AppealsColumns[15]},
+			},
+			{
+				Name:    "appeal_appellant_id",
+				Unique:  false,
+				Columns: []*schema.Column{AppealsColumns[4]},
+			},
+			{
+				Name:    "appeal_strike_id",
+				Unique:  false,
+				Columns: []*schema.Column{AppealsColumns[6]},
+			},
+		},
+	}
+	// AutomationEventOccurrencesColumns holds the columns for the "automation_event_occurrences" table.
+	AutomationEventOccurrencesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "event", Type: field.TypeString, Size: 80},
+		{Name: "subject_key", Type: field.TypeString, Size: 200},
+		{Name: "source_event_id", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "occurred_at", Type: field.TypeTime},
+	}
+	// AutomationEventOccurrencesTable holds the schema information for the "automation_event_occurrences" table.
+	AutomationEventOccurrencesTable = &schema.Table{
+		Name:       "automation_event_occurrences",
+		Columns:    AutomationEventOccurrencesColumns,
+		PrimaryKey: []*schema.Column{AutomationEventOccurrencesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "automationeventoccurrence_event_subject_key_occurred_at",
+				Unique:  false,
+				Columns: []*schema.Column{AutomationEventOccurrencesColumns[2], AutomationEventOccurrencesColumns[3], AutomationEventOccurrencesColumns[5]},
+			},
+			{
+				Name:    "automationeventoccurrence_occurred_at",
+				Unique:  false,
+				Columns: []*schema.Column{AutomationEventOccurrencesColumns[5]},
+			},
+			{
+				Name:    "automationeventoccurrence_source_event_id",
+				Unique:  true,
+				Columns: []*schema.Column{AutomationEventOccurrencesColumns[4]},
+			},
+		},
+	}
+	// AutomationExecutionsColumns holds the columns for the "automation_executions" table.
+	AutomationExecutionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "rule_id", Type: field.TypeString, Size: 64},
+		{Name: "rule_version", Type: field.TypeInt},
+		{Name: "rule_name", Type: field.TypeString, Size: 120},
+		{Name: "event", Type: field.TypeString, Size: 80},
+		{Name: "subject_key", Type: field.TypeString, Size: 200},
+		{Name: "subject_label", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"running", "succeeded", "skipped", "suppressed", "rate_limited", "failed"}},
+		{Name: "steps", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "input", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "actions_run", Type: field.TypeJSON},
+		{Name: "error", Type: field.TypeString, Nullable: true, Size: 1000},
+		{Name: "started_at", Type: field.TypeTime},
+		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
+	}
+	// AutomationExecutionsTable holds the schema information for the "automation_executions" table.
+	AutomationExecutionsTable = &schema.Table{
+		Name:       "automation_executions",
+		Columns:    AutomationExecutionsColumns,
+		PrimaryKey: []*schema.Column{AutomationExecutionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "automationexecution_rule_id_started_at",
+				Unique:  false,
+				Columns: []*schema.Column{AutomationExecutionsColumns[2], AutomationExecutionsColumns[13]},
+			},
+			{
+				Name:    "automationexecution_rule_id_subject_key_status_started_at",
+				Unique:  false,
+				Columns: []*schema.Column{AutomationExecutionsColumns[2], AutomationExecutionsColumns[6], AutomationExecutionsColumns[8], AutomationExecutionsColumns[13]},
+			},
+			{
+				Name:    "automationexecution_started_at",
+				Unique:  false,
+				Columns: []*schema.Column{AutomationExecutionsColumns[13]},
+			},
+		},
+	}
+	// AutomationRulesColumns holds the columns for the "automation_rules" table.
+	AutomationRulesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 64},
+		{Name: "version", Type: field.TypeInt},
+		{Name: "event", Type: field.TypeString, Size: 80},
+		{Name: "is_enabled", Type: field.TypeBool, Default: false},
+		{Name: "is_archived", Type: field.TypeBool, Default: false},
+		{Name: "content", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "change_reason", Type: field.TypeString, Size: 1000},
+		{Name: "updated_by_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "updated_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AutomationRulesTable holds the schema information for the "automation_rules" table.
+	AutomationRulesTable = &schema.Table{
+		Name:       "automation_rules",
+		Columns:    AutomationRulesColumns,
+		PrimaryKey: []*schema.Column{AutomationRulesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "automationrule_event_is_enabled_is_archived",
+				Unique:  false,
+				Columns: []*schema.Column{AutomationRulesColumns[2], AutomationRulesColumns[3], AutomationRulesColumns[4]},
+			},
+		},
+	}
+	// AutomationRuleVersionsColumns holds the columns for the "automation_rule_versions" table.
+	AutomationRuleVersionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "rule_id", Type: field.TypeString, Size: 64},
+		{Name: "version", Type: field.TypeInt},
+		{Name: "content", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "change_reason", Type: field.TypeString, Size: 1000},
+		{Name: "updated_by_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "updated_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "is_archived", Type: field.TypeBool, Default: false},
+	}
+	// AutomationRuleVersionsTable holds the schema information for the "automation_rule_versions" table.
+	AutomationRuleVersionsTable = &schema.Table{
+		Name:       "automation_rule_versions",
+		Columns:    AutomationRuleVersionsColumns,
+		PrimaryKey: []*schema.Column{AutomationRuleVersionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "automationruleversion_rule_id_version",
+				Unique:  true,
+				Columns: []*schema.Column{AutomationRuleVersionsColumns[2], AutomationRuleVersionsColumns[3]},
+			},
+		},
+	}
 	// ChatReportsColumns holds the columns for the "chat_reports" table.
 	ChatReportsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -87,7 +260,7 @@ var (
 		{Name: "last_reported_at", Type: field.TypeTime},
 		{Name: "sla_due_at", Type: field.TypeTime},
 		{Name: "visibility", Type: field.TypeEnum, Enums: []string{"visible", "hidden", "restricted", "removed"}, Default: "visible"},
-		{Name: "source", Type: field.TypeEnum, Enums: []string{"user", "classifier"}, Default: "user"},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"user", "classifier", "automation"}, Default: "user"},
 		{Name: "target_preview", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "classifier_scores", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "classifier_action", Type: field.TypeEnum, Enums: []string{"none", "allow", "reduce", "hold"}, Default: "none"},
@@ -124,7 +297,7 @@ var (
 		{Name: "reporter_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "reason", Type: field.TypeString, Size: 40},
 		{Name: "details", Type: field.TypeString, Size: 500, Default: ""},
-		{Name: "source", Type: field.TypeEnum, Enums: []string{"user", "classifier"}, Default: "user"},
+		{Name: "source", Type: field.TypeEnum, Enums: []string{"user", "classifier", "automation"}, Default: "user"},
 		{Name: "source_event_id", Type: field.TypeString, Nullable: true, Size: 128},
 	}
 	// ContentReportEntriesTable holds the schema information for the "content_report_entries" table.
@@ -707,6 +880,11 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AppealsTable,
+		AutomationEventOccurrencesTable,
+		AutomationExecutionsTable,
+		AutomationRulesTable,
+		AutomationRuleVersionsTable,
 		ChatReportsTable,
 		ContentReportsTable,
 		ContentReportEntriesTable,

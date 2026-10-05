@@ -8,6 +8,66 @@ import (
 	"zudomart/modules/moderation/src/generated/ent"
 )
 
+// The AppealFunc type is an adapter to allow the use of ordinary
+// function as Appeal mutator.
+type AppealFunc func(context.Context, *ent.AppealMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AppealFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AppealMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AppealMutation", m)
+}
+
+// The AutomationEventOccurrenceFunc type is an adapter to allow the use of ordinary
+// function as AutomationEventOccurrence mutator.
+type AutomationEventOccurrenceFunc func(context.Context, *ent.AutomationEventOccurrenceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AutomationEventOccurrenceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AutomationEventOccurrenceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AutomationEventOccurrenceMutation", m)
+}
+
+// The AutomationExecutionFunc type is an adapter to allow the use of ordinary
+// function as AutomationExecution mutator.
+type AutomationExecutionFunc func(context.Context, *ent.AutomationExecutionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AutomationExecutionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AutomationExecutionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AutomationExecutionMutation", m)
+}
+
+// The AutomationRuleFunc type is an adapter to allow the use of ordinary
+// function as AutomationRule mutator.
+type AutomationRuleFunc func(context.Context, *ent.AutomationRuleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AutomationRuleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AutomationRuleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AutomationRuleMutation", m)
+}
+
+// The AutomationRuleVersionFunc type is an adapter to allow the use of ordinary
+// function as AutomationRuleVersion mutator.
+type AutomationRuleVersionFunc func(context.Context, *ent.AutomationRuleVersionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AutomationRuleVersionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AutomationRuleVersionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AutomationRuleVersionMutation", m)
+}
+
 // The ChatReportFunc type is an adapter to allow the use of ordinary
 // function as ChatReport mutator.
 type ChatReportFunc func(context.Context, *ent.ChatReportMutation) (ent.Value, error)

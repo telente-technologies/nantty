@@ -3,6 +3,7 @@ package integrations
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -20,6 +21,8 @@ type TargetPreview struct {
 	SoundTitle *string  `json:"soundTitle"`
 	CreatedAt  string   `json:"createdAt"`
 }
+
+var ErrTargetNotFound = errors.New("moderation target not found")
 
 type TargetResolver interface {
 	Resolve(ctx context.Context, targetType, targetId string) (*TargetPreview, error)
@@ -54,7 +57,7 @@ func (resolver HttpTargetResolver) Resolve(ctx context.Context, targetType, targ
 	}
 	defer response.Body.Close()
 	if response.StatusCode == http.StatusNotFound || response.StatusCode == http.StatusGone {
-		return nil, nil
+		return nil, ErrTargetNotFound
 	}
 	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("target service answered %d", response.StatusCode)
