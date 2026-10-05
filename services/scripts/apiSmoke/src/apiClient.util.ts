@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
+import { appendFileSync } from "node:fs";
+import { request as httpRequest } from "node:http";
+import { request as httpsRequest } from "node:https";
 
 export const gatewayUrl = process.env["SMOKE_GATEWAY_URL"] ?? "http://localhost:8080";
+const latencyLog = process.env["SMOKE_LATENCY_LOG"];
 
 export interface ApiResponse<T = any> {
   readonly status: number;
@@ -18,6 +22,24 @@ export interface ApiRequestOptions {
   readonly baseUrl?: string;
 }
 
+function send(url: string, method: string, headers: Record<string, string>, body: string | undefined): Promise<{ status: number; text: string; headers: Headers }> {
+  return new Promise((resolve, reject) => {
+    const target = new URL(url);
+    const outgoing = (target.protocol === "https:" ? httpsRequest : httpRequest)(target, { method, headers }, (response) => {
+      const chunks: Buffer[] = [];
+      response.on("data", (chunk: Buffer) => chunks.push(chunk));
+      response.on("end", () => {
+        const responseHeaders = new Headers();
+        for (const [name, value] of Object.entries(response.headers)) if (value !== undefined) responseHeaders.set(name, Array.isArray(value) ? value.join(", ") : value);
+        resolve({ status: response.statusCode ?? 0, text: Buffer.concat(chunks).toString("utf8"), headers: responseHeaders });
+      });
+      response.on("error", reject);
+    });
+    outgoing.on("error", reject);
+    outgoing.end(body);
+  });
+}
+
 export async function callApi<T = any>(method: string, path: string, options: ApiRequestOptions = {}): Promise<ApiResponse<T>> {
   const headers: Record<string, string> = { accept: "application/json", "x-device-id": "api-smoke", ...options.headers };
   if (options.token !== undefined) headers["authorization"] = `Bearer ${options.token}`;
@@ -29,15 +51,17 @@ export async function callApi<T = any>(method: string, path: string, options: Ap
     headers["content-type"] ??= "application/json";
   }
   const started = performance.now();
-  const response = await fetch(`${options.baseUrl ?? gatewayUrl}${path}`, { method, headers, body, redirect: "manual" });
-  const text = await response.text();
+  const response = await send(`${options.baseUrl ?? gatewayUrl}${path}`, method, headers, body);
+  const text = response.text;
   let parsed: unknown = text;
   try {
     parsed = text === "" ? null : JSON.parse(text);
   } catch {
     parsed = text;
   }
-  return { status: response.status, body: parsed as T, headers: response.headers, durationMs: performance.now() - started };
+  const durationMs = performance.now() - started;
+  if (latencyLog !== undefined && latencyLog !== "") appendFileSync(latencyLog, `${JSON.stringify({ method, path: path.split("?")[0], status: response.status, durationMs })}\n`);
+  return { status: response.status, body: parsed as T, headers: response.headers, durationMs };
 }
 
 export function describeResponse(response: ApiResponse): string {

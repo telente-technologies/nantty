@@ -7,7 +7,7 @@ import { generateTimeBasedCode } from "./oneTimePassword.util.js";
 
 const repositoryRoot = resolve(import.meta.dirname, "../../../..");
 const identityLogPath = process.env["SMOKE_IDENTITY_LOG"] ?? "";
-const smokePassword = "Sm0ke-Test-Pass!2026";
+export const smokePassword = "Sm0ke-Test-Pass!2026";
 
 export interface UserActor {
   readonly accountId: string;
@@ -30,7 +30,7 @@ function decodeTokenSubject(accessToken: string): string {
   return payload.sub;
 }
 
-async function readOneTimeCodeFromIdentityLog(email: string, purpose: string): Promise<string> {
+export async function readOneTimeCodeFromIdentityLog(email: string, purpose: string): Promise<string> {
   if (identityLogPath === "") throw new Error("SMOKE_IDENTITY_LOG must point at the go-identity log (AUTH_OTP_DELIVERY=log)");
   const pattern = new RegExp(`one-time ${purpose} passcode for ${email.replace(/[.+]/g, "\\$&")} is (\\d{6})`, "g");
   const code = await waitFor(async () => {
