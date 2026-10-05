@@ -1,3 +1,5 @@
+import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
+import { conversationUpdatedEvent } from "../../../messages/services/chatRealtimeEvents.service.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { conversationRepository } from "../../repositories/conversation.repository.js";
 import { requireConversationMember } from "../../services/conversationAccess.service.js";
@@ -16,6 +18,7 @@ export function createMuteConversationHandler(context: HandlerContext): Handler<
     await requireConversationMember(context.database.client, conversationId, viewerId);
     const mute = resolveMuteUntil(duration, context.clock.now());
     await conversationRepository.updateMember(context.database.client, conversationId, viewerId, mute);
+    await appendDomainEventsToOutbox(context.database.client, [conversationUpdatedEvent(conversationId, { mutedUntil: mute.mutedUntil?.toISOString() ?? null, mutedAlways: mute.mutedAlways }, context.clock.now(), { accountId: viewerId })]);
     return { mutedUntil: mute.mutedAlways ? "always" : (mute.mutedUntil?.toISOString() ?? null) };
   };
 }
