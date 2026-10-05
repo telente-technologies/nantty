@@ -19,6 +19,7 @@ import (
 	platformevents "zudomart/platform/events"
 	"zudomart/platform/idempotency"
 	"zudomart/platform/jwtauth"
+	"zudomart/platform/staffaudit"
 	"zudomart/platform/staffauth"
 )
 
@@ -37,6 +38,10 @@ type Collaborators struct {
 	Content   interfaces.ContentSourceDirectory
 	Ownership interfaces.DestinationOwnership
 	Storage   interfaces.ObjectStorage
+	TopUps    interfaces.TopUpGateway
+	History   interfaces.AuditHistoryReader
+	Summaries interfaces.PlatformUserSummaries
+	Audit     staffaudit.Recorder
 	Jobs      platformevents.JobQueue
 	Access    *jwtauth.AccessTokenVerifier
 	Staff     *jwtauth.AccessTokenVerifier
@@ -86,6 +91,7 @@ func AssembleContainer(ctx context.Context, settings configs.AdsSettings, collab
 		deployed.Users = integrations.AuthSchemaUserDirectory{Database: database, Schema: "auth"}
 	}
 	completeCollaborators(deployed, collaborators, settings, database)
+	completeStaffAndMoneyCollaborators(deployed, collaborators, settings)
 	if err := completeStorageAndJobs(ctx, deployed, collaborators, settings); err != nil {
 		return nil, nil, err
 	}
