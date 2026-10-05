@@ -11,6 +11,12 @@ import (
 	"zudomart/modules/creators/src/configs"
 	"zudomart/modules/creators/src/container"
 	"zudomart/modules/creators/src/migrations"
+	affiliatecontrollers "zudomart/modules/creators/src/modules/affiliates/controllers"
+	affiliateroutes "zudomart/modules/creators/src/modules/affiliates/routes"
+	affiliateservices "zudomart/modules/creators/src/modules/affiliates/services"
+	moneycontrollers "zudomart/modules/creators/src/modules/creatorMoney/controllers"
+	moneyroutes "zudomart/modules/creators/src/modules/creatorMoney/routes"
+	moneyservices "zudomart/modules/creators/src/modules/creatorMoney/services"
 	programroutes "zudomart/modules/creators/src/modules/creatorProgram/routes"
 	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
 	"zudomart/modules/creators/src/modules/liveMoney/controllers"
@@ -22,9 +28,11 @@ import (
 )
 
 type Module struct {
-	Container *container.Container
-	Program   programservices.CreatorProgram
-	LiveMoney services.LiveMoney
+	Container  *container.Container
+	Program    programservices.CreatorProgram
+	LiveMoney  services.LiveMoney
+	Money      moneyservices.CreatorMoney
+	Affiliates affiliateservices.Affiliates
 }
 
 func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
@@ -46,6 +54,28 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		}
 		return module.Program.EnrollApprovedCreatorInDefaultTier(ctx, data.AccountId)
 	})
+	loaders.RegisterMoneyDomainEventHandler("creatorSubscription.paid", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var paid moneyservices.CreatorSubscriptionPaid
+		if err := loaders.DecodeEventData(envelope, &paid); err != nil {
+			return err
+		}
+		return module.Money.RecordSubscriptionEarning(ctx, paid, envelope.OccurredAt)
+	})
+	loaders.RegisterMoneyDomainEventHandler("adCreatorEarnings.posted", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var posted moneyservices.AdCreatorEarningsPosted
+		if err := loaders.DecodeEventData(envelope, &posted); err != nil {
+			return err
+		}
+		return module.Money.PostAdRevenueShare(ctx, posted, envelope.OccurredAt)
+	})
+	loaders.RegisterMoneyDomainEventHandler("orderGroup.completed", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var completed affiliateservices.OrderGroupCompleted
+		if err := loaders.DecodeEventData(envelope, &completed); err != nil {
+			return err
+		}
+		_, err := module.Affiliates.CreditCommissionsForRelease(ctx, completed.Sale())
+		return err
+	})
 	return module, nil
 }
 
@@ -60,7 +90,10 @@ func StartCreatorsModuleWithSettings(ctx context.Context, settings configs.Creat
 		_ = resources.Close()
 		return nil, err
 	}
-	return &Module{Container: creatorsContainer, Program: program, LiveMoney: services.LiveMoney{Container: creatorsContainer, Program: program}}, nil
+	return &Module{
+		Container: creatorsContainer, Program: program, LiveMoney: services.LiveMoney{Container: creatorsContainer, Program: program},
+		Money: moneyservices.CreatorMoney{Container: creatorsContainer, Program: program}, Affiliates: affiliateservices.Affiliates{Container: creatorsContainer, Program: program},
+	}, nil
 }
 
 func (module *Module) RegisterGrpcServices(server *grpc.Server) {
@@ -71,6 +104,8 @@ func (module *Module) Name() string { return "creators" }
 
 func (module *Module) MountRoutes(mux *http.ServeMux) {
 	programroutes.MountCreatorProgramRoutes(mux, module.Program)
+	moneyroutes.MountCreatorMoneyRoutes(mux, moneycontrollers.CreatorMoneyController{Money: module.Money})
+	affiliateroutes.MountAffiliatesRoutes(mux, affiliatecontrollers.AffiliatesController{Affiliates: module.Affiliates})
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
