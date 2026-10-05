@@ -6,9 +6,12 @@ import (
 	"time"
 	"zudomart/modules/catalog/src/databases/schema"
 	"zudomart/modules/catalog/src/generated/ent/brand"
+	"zudomart/modules/catalog/src/generated/ent/brandofficialrequest"
+	"zudomart/modules/catalog/src/generated/ent/catalogfollow"
 	"zudomart/modules/catalog/src/generated/ent/category"
 	"zudomart/modules/catalog/src/generated/ent/featuredproduct"
 	"zudomart/modules/catalog/src/generated/ent/idempotentrequest"
+	"zudomart/modules/catalog/src/generated/ent/martfeature"
 	"zudomart/modules/catalog/src/generated/ent/outboxevent"
 	"zudomart/modules/catalog/src/generated/ent/product"
 	"zudomart/modules/catalog/src/generated/ent/productdailyview"
@@ -17,6 +20,7 @@ import (
 	"zudomart/modules/catalog/src/generated/ent/productreaction"
 	"zudomart/modules/catalog/src/generated/ent/productvariant"
 	"zudomart/modules/catalog/src/generated/ent/review"
+	"zudomart/modules/catalog/src/generated/ent/sellerapplication"
 	"zudomart/modules/catalog/src/generated/ent/store"
 	"zudomart/modules/catalog/src/generated/ent/storeauditentry"
 	"zudomart/modules/catalog/src/generated/ent/storedailytraffic"
@@ -87,10 +91,128 @@ func init() {
 	brandDescActive := brandFields[5].Descriptor()
 	// brand.DefaultActive holds the default value on creation for the active field.
 	brand.DefaultActive = brandDescActive.Default.(bool)
+	// brandDescDescription is the schema descriptor for description field.
+	brandDescDescription := brandFields[7].Descriptor()
+	// brand.DefaultDescription holds the default value on creation for the description field.
+	brand.DefaultDescription = brandDescDescription.Default.(string)
+	// brand.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	brand.DescriptionValidator = brandDescDescription.Validators[0].(func(string) error)
+	// brandDescCoverURL is the schema descriptor for cover_url field.
+	brandDescCoverURL := brandFields[8].Descriptor()
+	// brand.CoverURLValidator is a validator for the "cover_url" field. It is called by the builders before save.
+	brand.CoverURLValidator = brandDescCoverURL.Validators[0].(func(string) error)
+	// brandDescWebsite is the schema descriptor for website field.
+	brandDescWebsite := brandFields[9].Descriptor()
+	// brand.WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
+	brand.WebsiteValidator = brandDescWebsite.Validators[0].(func(string) error)
+	// brandDescCategoryName is the schema descriptor for category_name field.
+	brandDescCategoryName := brandFields[11].Descriptor()
+	// brand.DefaultCategoryName holds the default value on creation for the category_name field.
+	brand.DefaultCategoryName = brandDescCategoryName.Default.(string)
+	// brand.CategoryNameValidator is a validator for the "category_name" field. It is called by the builders before save.
+	brand.CategoryNameValidator = brandDescCategoryName.Validators[0].(func(string) error)
+	// brandDescCountryCode is the schema descriptor for country_code field.
+	brandDescCountryCode := brandFields[12].Descriptor()
+	// brand.DefaultCountryCode holds the default value on creation for the country_code field.
+	brand.DefaultCountryCode = brandDescCountryCode.Default.(string)
+	// brand.CountryCodeValidator is a validator for the "country_code" field. It is called by the builders before save.
+	brand.CountryCodeValidator = brandDescCountryCode.Validators[0].(func(string) error)
+	// brandDescOfficialStatus is the schema descriptor for official_status field.
+	brandDescOfficialStatus := brandFields[13].Descriptor()
+	// brand.DefaultOfficialStatus holds the default value on creation for the official_status field.
+	brand.DefaultOfficialStatus = brandDescOfficialStatus.Default.(string)
+	// brand.OfficialStatusValidator is a validator for the "official_status" field. It is called by the builders before save.
+	brand.OfficialStatusValidator = brandDescOfficialStatus.Validators[0].(func(string) error)
+	// brandDescFollowerCount is the schema descriptor for follower_count field.
+	brandDescFollowerCount := brandFields[14].Descriptor()
+	// brand.DefaultFollowerCount holds the default value on creation for the follower_count field.
+	brand.DefaultFollowerCount = brandDescFollowerCount.Default.(int)
+	// brandDescUpdatedAt is the schema descriptor for updated_at field.
+	brandDescUpdatedAt := brandFields[15].Descriptor()
+	// brand.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	brand.DefaultUpdatedAt = brandDescUpdatedAt.Default.(func() time.Time)
+	// brand.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	brand.UpdateDefaultUpdatedAt = brandDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// brandDescID is the schema descriptor for id field.
 	brandDescID := brandMixinFields0[0].Descriptor()
 	// brand.DefaultID holds the default value on creation for the id field.
 	brand.DefaultID = brandDescID.Default.(func() uuid.UUID)
+	brandofficialrequestMixin := schema.BrandOfficialRequest{}.Mixin()
+	brandofficialrequestMixinFields0 := brandofficialrequestMixin[0].Fields()
+	_ = brandofficialrequestMixinFields0
+	brandofficialrequestFields := schema.BrandOfficialRequest{}.Fields()
+	_ = brandofficialrequestFields
+	// brandofficialrequestDescCreatedAt is the schema descriptor for created_at field.
+	brandofficialrequestDescCreatedAt := brandofficialrequestMixinFields0[1].Descriptor()
+	// brandofficialrequest.DefaultCreatedAt holds the default value on creation for the created_at field.
+	brandofficialrequest.DefaultCreatedAt = brandofficialrequestDescCreatedAt.Default.(func() time.Time)
+	// brandofficialrequestDescCacRegistrationNumber is the schema descriptor for cac_registration_number field.
+	brandofficialrequestDescCacRegistrationNumber := brandofficialrequestFields[3].Descriptor()
+	// brandofficialrequest.DefaultCacRegistrationNumber holds the default value on creation for the cac_registration_number field.
+	brandofficialrequest.DefaultCacRegistrationNumber = brandofficialrequestDescCacRegistrationNumber.Default.(string)
+	// brandofficialrequest.CacRegistrationNumberValidator is a validator for the "cac_registration_number" field. It is called by the builders before save.
+	brandofficialrequest.CacRegistrationNumberValidator = brandofficialrequestDescCacRegistrationNumber.Validators[0].(func(string) error)
+	// brandofficialrequestDescCacCompanyName is the schema descriptor for cac_company_name field.
+	brandofficialrequestDescCacCompanyName := brandofficialrequestFields[4].Descriptor()
+	// brandofficialrequest.DefaultCacCompanyName holds the default value on creation for the cac_company_name field.
+	brandofficialrequest.DefaultCacCompanyName = brandofficialrequestDescCacCompanyName.Default.(string)
+	// brandofficialrequest.CacCompanyNameValidator is a validator for the "cac_company_name" field. It is called by the builders before save.
+	brandofficialrequest.CacCompanyNameValidator = brandofficialrequestDescCacCompanyName.Validators[0].(func(string) error)
+	// brandofficialrequestDescContactEmail is the schema descriptor for contact_email field.
+	brandofficialrequestDescContactEmail := brandofficialrequestFields[5].Descriptor()
+	// brandofficialrequest.DefaultContactEmail holds the default value on creation for the contact_email field.
+	brandofficialrequest.DefaultContactEmail = brandofficialrequestDescContactEmail.Default.(string)
+	// brandofficialrequest.ContactEmailValidator is a validator for the "contact_email" field. It is called by the builders before save.
+	brandofficialrequest.ContactEmailValidator = brandofficialrequestDescContactEmail.Validators[0].(func(string) error)
+	// brandofficialrequestDescLastDecisionReason is the schema descriptor for last_decision_reason field.
+	brandofficialrequestDescLastDecisionReason := brandofficialrequestFields[7].Descriptor()
+	// brandofficialrequest.LastDecisionReasonValidator is a validator for the "last_decision_reason" field. It is called by the builders before save.
+	brandofficialrequest.LastDecisionReasonValidator = brandofficialrequestDescLastDecisionReason.Validators[0].(func(string) error)
+	// brandofficialrequestDescDecidedByName is the schema descriptor for decided_by_name field.
+	brandofficialrequestDescDecidedByName := brandofficialrequestFields[9].Descriptor()
+	// brandofficialrequest.DecidedByNameValidator is a validator for the "decided_by_name" field. It is called by the builders before save.
+	brandofficialrequest.DecidedByNameValidator = brandofficialrequestDescDecidedByName.Validators[0].(func(string) error)
+	// brandofficialrequestDescUpdatedAt is the schema descriptor for updated_at field.
+	brandofficialrequestDescUpdatedAt := brandofficialrequestFields[10].Descriptor()
+	// brandofficialrequest.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	brandofficialrequest.DefaultUpdatedAt = brandofficialrequestDescUpdatedAt.Default.(func() time.Time)
+	// brandofficialrequest.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	brandofficialrequest.UpdateDefaultUpdatedAt = brandofficialrequestDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// brandofficialrequestDescID is the schema descriptor for id field.
+	brandofficialrequestDescID := brandofficialrequestMixinFields0[0].Descriptor()
+	// brandofficialrequest.DefaultID holds the default value on creation for the id field.
+	brandofficialrequest.DefaultID = brandofficialrequestDescID.Default.(func() uuid.UUID)
+	catalogfollowMixin := schema.CatalogFollow{}.Mixin()
+	catalogfollowMixinFields0 := catalogfollowMixin[0].Fields()
+	_ = catalogfollowMixinFields0
+	catalogfollowFields := schema.CatalogFollow{}.Fields()
+	_ = catalogfollowFields
+	// catalogfollowDescCreatedAt is the schema descriptor for created_at field.
+	catalogfollowDescCreatedAt := catalogfollowMixinFields0[1].Descriptor()
+	// catalogfollow.DefaultCreatedAt holds the default value on creation for the created_at field.
+	catalogfollow.DefaultCreatedAt = catalogfollowDescCreatedAt.Default.(func() time.Time)
+	// catalogfollowDescTargetKind is the schema descriptor for target_kind field.
+	catalogfollowDescTargetKind := catalogfollowFields[0].Descriptor()
+	// catalogfollow.TargetKindValidator is a validator for the "target_kind" field. It is called by the builders before save.
+	catalogfollow.TargetKindValidator = func() func(string) error {
+		validators := catalogfollowDescTargetKind.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(target_kind string) error {
+			for _, fn := range fns {
+				if err := fn(target_kind); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// catalogfollowDescID is the schema descriptor for id field.
+	catalogfollowDescID := catalogfollowMixinFields0[0].Descriptor()
+	// catalogfollow.DefaultID holds the default value on creation for the id field.
+	catalogfollow.DefaultID = catalogfollowDescID.Default.(func() uuid.UUID)
 	categoryMixin := schema.Category{}.Mixin()
 	categoryMixinFields0 := categoryMixin[0].Fields()
 	_ = categoryMixinFields0
@@ -160,8 +282,12 @@ func init() {
 	categoryDescActive := categoryFields[9].Descriptor()
 	// category.DefaultActive holds the default value on creation for the active field.
 	category.DefaultActive = categoryDescActive.Default.(bool)
+	// categoryDescIconName is the schema descriptor for icon_name field.
+	categoryDescIconName := categoryFields[10].Descriptor()
+	// category.IconNameValidator is a validator for the "icon_name" field. It is called by the builders before save.
+	category.IconNameValidator = categoryDescIconName.Validators[0].(func(string) error)
 	// categoryDescUpdatedAt is the schema descriptor for updated_at field.
-	categoryDescUpdatedAt := categoryFields[10].Descriptor()
+	categoryDescUpdatedAt := categoryFields[11].Descriptor()
 	// category.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	category.DefaultUpdatedAt = categoryDescUpdatedAt.Default.(func() time.Time)
 	// category.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -280,6 +406,123 @@ func init() {
 	idempotentrequestDescID := idempotentrequestMixinFields0[0].Descriptor()
 	// idempotentrequest.DefaultID holds the default value on creation for the id field.
 	idempotentrequest.DefaultID = idempotentrequestDescID.Default.(func() uuid.UUID)
+	martfeatureMixin := schema.MartFeature{}.Mixin()
+	martfeatureMixinFields0 := martfeatureMixin[0].Fields()
+	_ = martfeatureMixinFields0
+	martfeatureFields := schema.MartFeature{}.Fields()
+	_ = martfeatureFields
+	// martfeatureDescCreatedAt is the schema descriptor for created_at field.
+	martfeatureDescCreatedAt := martfeatureMixinFields0[1].Descriptor()
+	// martfeature.DefaultCreatedAt holds the default value on creation for the created_at field.
+	martfeature.DefaultCreatedAt = martfeatureDescCreatedAt.Default.(func() time.Time)
+	// martfeatureDescTitle is the schema descriptor for title field.
+	martfeatureDescTitle := martfeatureFields[0].Descriptor()
+	// martfeature.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	martfeature.TitleValidator = func() func(string) error {
+		validators := martfeatureDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// martfeatureDescSubtitle is the schema descriptor for subtitle field.
+	martfeatureDescSubtitle := martfeatureFields[1].Descriptor()
+	// martfeature.SubtitleValidator is a validator for the "subtitle" field. It is called by the builders before save.
+	martfeature.SubtitleValidator = martfeatureDescSubtitle.Validators[0].(func(string) error)
+	// martfeatureDescKind is the schema descriptor for kind field.
+	martfeatureDescKind := martfeatureFields[2].Descriptor()
+	// martfeature.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	martfeature.KindValidator = func() func(string) error {
+		validators := martfeatureDescKind.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(kind string) error {
+			for _, fn := range fns {
+				if err := fn(kind); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// martfeatureDescImageID is the schema descriptor for image_id field.
+	martfeatureDescImageID := martfeatureFields[3].Descriptor()
+	// martfeature.ImageIDValidator is a validator for the "image_id" field. It is called by the builders before save.
+	martfeature.ImageIDValidator = func() func(string) error {
+		validators := martfeatureDescImageID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(image_id string) error {
+			for _, fn := range fns {
+				if err := fn(image_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// martfeatureDescTargetType is the schema descriptor for target_type field.
+	martfeatureDescTargetType := martfeatureFields[4].Descriptor()
+	// martfeature.TargetTypeValidator is a validator for the "target_type" field. It is called by the builders before save.
+	martfeature.TargetTypeValidator = func() func(string) error {
+		validators := martfeatureDescTargetType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(target_type string) error {
+			for _, fn := range fns {
+				if err := fn(target_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// martfeatureDescTargetValue is the schema descriptor for target_value field.
+	martfeatureDescTargetValue := martfeatureFields[5].Descriptor()
+	// martfeature.TargetValueValidator is a validator for the "target_value" field. It is called by the builders before save.
+	martfeature.TargetValueValidator = func() func(string) error {
+		validators := martfeatureDescTargetValue.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(target_value string) error {
+			for _, fn := range fns {
+				if err := fn(target_value); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// martfeatureDescIsPublished is the schema descriptor for is_published field.
+	martfeatureDescIsPublished := martfeatureFields[10].Descriptor()
+	// martfeature.DefaultIsPublished holds the default value on creation for the is_published field.
+	martfeature.DefaultIsPublished = martfeatureDescIsPublished.Default.(bool)
+	// martfeatureDescUpdatedAt is the schema descriptor for updated_at field.
+	martfeatureDescUpdatedAt := martfeatureFields[11].Descriptor()
+	// martfeature.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	martfeature.DefaultUpdatedAt = martfeatureDescUpdatedAt.Default.(func() time.Time)
+	// martfeature.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	martfeature.UpdateDefaultUpdatedAt = martfeatureDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// martfeatureDescID is the schema descriptor for id field.
+	martfeatureDescID := martfeatureMixinFields0[0].Descriptor()
+	// martfeature.DefaultID holds the default value on creation for the id field.
+	martfeature.DefaultID = martfeatureDescID.Default.(func() uuid.UUID)
 	outboxeventMixin := schema.OutboxEvent{}.Mixin()
 	outboxeventMixinFields0 := outboxeventMixin[0].Fields()
 	_ = outboxeventMixinFields0
@@ -778,6 +1021,195 @@ func init() {
 	reviewDescID := reviewMixinFields0[0].Descriptor()
 	// review.DefaultID holds the default value on creation for the id field.
 	review.DefaultID = reviewDescID.Default.(func() uuid.UUID)
+	sellerapplicationMixin := schema.SellerApplication{}.Mixin()
+	sellerapplicationMixinFields0 := sellerapplicationMixin[0].Fields()
+	_ = sellerapplicationMixinFields0
+	sellerapplicationFields := schema.SellerApplication{}.Fields()
+	_ = sellerapplicationFields
+	// sellerapplicationDescCreatedAt is the schema descriptor for created_at field.
+	sellerapplicationDescCreatedAt := sellerapplicationMixinFields0[1].Descriptor()
+	// sellerapplication.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sellerapplication.DefaultCreatedAt = sellerapplicationDescCreatedAt.Default.(func() time.Time)
+	// sellerapplicationDescStatus is the schema descriptor for status field.
+	sellerapplicationDescStatus := sellerapplicationFields[1].Descriptor()
+	// sellerapplication.DefaultStatus holds the default value on creation for the status field.
+	sellerapplication.DefaultStatus = sellerapplicationDescStatus.Default.(string)
+	// sellerapplication.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	sellerapplication.StatusValidator = sellerapplicationDescStatus.Validators[0].(func(string) error)
+	// sellerapplicationDescStoreName is the schema descriptor for store_name field.
+	sellerapplicationDescStoreName := sellerapplicationFields[2].Descriptor()
+	// sellerapplication.StoreNameValidator is a validator for the "store_name" field. It is called by the builders before save.
+	sellerapplication.StoreNameValidator = func() func(string) error {
+		validators := sellerapplicationDescStoreName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(store_name string) error {
+			for _, fn := range fns {
+				if err := fn(store_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerapplicationDescCategoryName is the schema descriptor for category_name field.
+	sellerapplicationDescCategoryName := sellerapplicationFields[4].Descriptor()
+	// sellerapplication.DefaultCategoryName holds the default value on creation for the category_name field.
+	sellerapplication.DefaultCategoryName = sellerapplicationDescCategoryName.Default.(string)
+	// sellerapplication.CategoryNameValidator is a validator for the "category_name" field. It is called by the builders before save.
+	sellerapplication.CategoryNameValidator = sellerapplicationDescCategoryName.Validators[0].(func(string) error)
+	// sellerapplicationDescDescription is the schema descriptor for description field.
+	sellerapplicationDescDescription := sellerapplicationFields[5].Descriptor()
+	// sellerapplication.DefaultDescription holds the default value on creation for the description field.
+	sellerapplication.DefaultDescription = sellerapplicationDescDescription.Default.(string)
+	// sellerapplication.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	sellerapplication.DescriptionValidator = sellerapplicationDescDescription.Validators[0].(func(string) error)
+	// sellerapplicationDescAddressLine is the schema descriptor for address_line field.
+	sellerapplicationDescAddressLine := sellerapplicationFields[7].Descriptor()
+	// sellerapplication.AddressLineValidator is a validator for the "address_line" field. It is called by the builders before save.
+	sellerapplication.AddressLineValidator = func() func(string) error {
+		validators := sellerapplicationDescAddressLine.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(address_line string) error {
+			for _, fn := range fns {
+				if err := fn(address_line); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerapplicationDescCity is the schema descriptor for city field.
+	sellerapplicationDescCity := sellerapplicationFields[8].Descriptor()
+	// sellerapplication.CityValidator is a validator for the "city" field. It is called by the builders before save.
+	sellerapplication.CityValidator = func() func(string) error {
+		validators := sellerapplicationDescCity.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(city string) error {
+			for _, fn := range fns {
+				if err := fn(city); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerapplicationDescState is the schema descriptor for state field.
+	sellerapplicationDescState := sellerapplicationFields[9].Descriptor()
+	// sellerapplication.StateValidator is a validator for the "state" field. It is called by the builders before save.
+	sellerapplication.StateValidator = func() func(string) error {
+		validators := sellerapplicationDescState.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(state string) error {
+			for _, fn := range fns {
+				if err := fn(state); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerapplicationDescIdentityDocumentType is the schema descriptor for identity_document_type field.
+	sellerapplicationDescIdentityDocumentType := sellerapplicationFields[10].Descriptor()
+	// sellerapplication.IdentityDocumentTypeValidator is a validator for the "identity_document_type" field. It is called by the builders before save.
+	sellerapplication.IdentityDocumentTypeValidator = func() func(string) error {
+		validators := sellerapplicationDescIdentityDocumentType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(identity_document_type string) error {
+			for _, fn := range fns {
+				if err := fn(identity_document_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerapplicationDescIdentityDocumentLast4 is the schema descriptor for identity_document_last4 field.
+	sellerapplicationDescIdentityDocumentLast4 := sellerapplicationFields[12].Descriptor()
+	// sellerapplication.IdentityDocumentLast4Validator is a validator for the "identity_document_last4" field. It is called by the builders before save.
+	sellerapplication.IdentityDocumentLast4Validator = sellerapplicationDescIdentityDocumentLast4.Validators[0].(func(string) error)
+	// sellerapplicationDescIdentityDocumentPhotoURL is the schema descriptor for identity_document_photo_url field.
+	sellerapplicationDescIdentityDocumentPhotoURL := sellerapplicationFields[13].Descriptor()
+	// sellerapplication.IdentityDocumentPhotoURLValidator is a validator for the "identity_document_photo_url" field. It is called by the builders before save.
+	sellerapplication.IdentityDocumentPhotoURLValidator = func() func(string) error {
+		validators := sellerapplicationDescIdentityDocumentPhotoURL.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(identity_document_photo_url string) error {
+			for _, fn := range fns {
+				if err := fn(identity_document_photo_url); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerapplicationDescPayoutBankCode is the schema descriptor for payout_bank_code field.
+	sellerapplicationDescPayoutBankCode := sellerapplicationFields[14].Descriptor()
+	// sellerapplication.PayoutBankCodeValidator is a validator for the "payout_bank_code" field. It is called by the builders before save.
+	sellerapplication.PayoutBankCodeValidator = func() func(string) error {
+		validators := sellerapplicationDescPayoutBankCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(payout_bank_code string) error {
+			for _, fn := range fns {
+				if err := fn(payout_bank_code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerapplicationDescPayoutBankName is the schema descriptor for payout_bank_name field.
+	sellerapplicationDescPayoutBankName := sellerapplicationFields[15].Descriptor()
+	// sellerapplication.DefaultPayoutBankName holds the default value on creation for the payout_bank_name field.
+	sellerapplication.DefaultPayoutBankName = sellerapplicationDescPayoutBankName.Default.(string)
+	// sellerapplication.PayoutBankNameValidator is a validator for the "payout_bank_name" field. It is called by the builders before save.
+	sellerapplication.PayoutBankNameValidator = sellerapplicationDescPayoutBankName.Validators[0].(func(string) error)
+	// sellerapplicationDescPayoutAccountLast4 is the schema descriptor for payout_account_last4 field.
+	sellerapplicationDescPayoutAccountLast4 := sellerapplicationFields[17].Descriptor()
+	// sellerapplication.PayoutAccountLast4Validator is a validator for the "payout_account_last4" field. It is called by the builders before save.
+	sellerapplication.PayoutAccountLast4Validator = sellerapplicationDescPayoutAccountLast4.Validators[0].(func(string) error)
+	// sellerapplicationDescReviewedByID is the schema descriptor for reviewed_by_id field.
+	sellerapplicationDescReviewedByID := sellerapplicationFields[19].Descriptor()
+	// sellerapplication.ReviewedByIDValidator is a validator for the "reviewed_by_id" field. It is called by the builders before save.
+	sellerapplication.ReviewedByIDValidator = sellerapplicationDescReviewedByID.Validators[0].(func(string) error)
+	// sellerapplicationDescReviewedByName is the schema descriptor for reviewed_by_name field.
+	sellerapplicationDescReviewedByName := sellerapplicationFields[20].Descriptor()
+	// sellerapplication.ReviewedByNameValidator is a validator for the "reviewed_by_name" field. It is called by the builders before save.
+	sellerapplication.ReviewedByNameValidator = sellerapplicationDescReviewedByName.Validators[0].(func(string) error)
+	// sellerapplicationDescDecisionReason is the schema descriptor for decision_reason field.
+	sellerapplicationDescDecisionReason := sellerapplicationFields[21].Descriptor()
+	// sellerapplication.DecisionReasonValidator is a validator for the "decision_reason" field. It is called by the builders before save.
+	sellerapplication.DecisionReasonValidator = sellerapplicationDescDecisionReason.Validators[0].(func(string) error)
+	// sellerapplicationDescUpdatedAt is the schema descriptor for updated_at field.
+	sellerapplicationDescUpdatedAt := sellerapplicationFields[22].Descriptor()
+	// sellerapplication.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	sellerapplication.DefaultUpdatedAt = sellerapplicationDescUpdatedAt.Default.(func() time.Time)
+	// sellerapplication.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	sellerapplication.UpdateDefaultUpdatedAt = sellerapplicationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// sellerapplicationDescID is the schema descriptor for id field.
+	sellerapplicationDescID := sellerapplicationMixinFields0[0].Descriptor()
+	// sellerapplication.DefaultID holds the default value on creation for the id field.
+	sellerapplication.DefaultID = sellerapplicationDescID.Default.(func() uuid.UUID)
 	storeMixin := schema.Store{}.Mixin()
 	storeMixinFields0 := storeMixin[0].Fields()
 	_ = storeMixinFields0
@@ -883,58 +1315,70 @@ func init() {
 	storeDescStatus := storeFields[10].Descriptor()
 	// store.DefaultStatus holds the default value on creation for the status field.
 	store.DefaultStatus = storeDescStatus.Default.(string)
+	// storeDescStatusReason is the schema descriptor for status_reason field.
+	storeDescStatusReason := storeFields[11].Descriptor()
+	// store.StatusReasonValidator is a validator for the "status_reason" field. It is called by the builders before save.
+	store.StatusReasonValidator = storeDescStatusReason.Validators[0].(func(string) error)
+	// storeDescHasOfficialBadge is the schema descriptor for has_official_badge field.
+	storeDescHasOfficialBadge := storeFields[14].Descriptor()
+	// store.DefaultHasOfficialBadge holds the default value on creation for the has_official_badge field.
+	store.DefaultHasOfficialBadge = storeDescHasOfficialBadge.Default.(bool)
+	// storeDescFollowerCount is the schema descriptor for follower_count field.
+	storeDescFollowerCount := storeFields[15].Descriptor()
+	// store.DefaultFollowerCount holds the default value on creation for the follower_count field.
+	store.DefaultFollowerCount = storeDescFollowerCount.Default.(int)
 	// storeDescVerified is the schema descriptor for verified field.
-	storeDescVerified := storeFields[11].Descriptor()
+	storeDescVerified := storeFields[16].Descriptor()
 	// store.DefaultVerified holds the default value on creation for the verified field.
 	store.DefaultVerified = storeDescVerified.Default.(bool)
 	// storeDescRatingSum is the schema descriptor for rating_sum field.
-	storeDescRatingSum := storeFields[12].Descriptor()
+	storeDescRatingSum := storeFields[17].Descriptor()
 	// store.DefaultRatingSum holds the default value on creation for the rating_sum field.
 	store.DefaultRatingSum = storeDescRatingSum.Default.(int64)
 	// storeDescRatingCount is the schema descriptor for rating_count field.
-	storeDescRatingCount := storeFields[13].Descriptor()
+	storeDescRatingCount := storeFields[18].Descriptor()
 	// store.DefaultRatingCount holds the default value on creation for the rating_count field.
 	store.DefaultRatingCount = storeDescRatingCount.Default.(int)
 	// storeDescModerationVisibility is the schema descriptor for moderation_visibility field.
-	storeDescModerationVisibility := storeFields[14].Descriptor()
+	storeDescModerationVisibility := storeFields[19].Descriptor()
 	// store.DefaultModerationVisibility holds the default value on creation for the moderation_visibility field.
 	store.DefaultModerationVisibility = storeDescModerationVisibility.Default.(string)
 	// storeDescLocale is the schema descriptor for locale field.
-	storeDescLocale := storeFields[16].Descriptor()
+	storeDescLocale := storeFields[21].Descriptor()
 	// store.DefaultLocale holds the default value on creation for the locale field.
 	store.DefaultLocale = storeDescLocale.Default.(string)
 	// store.LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
 	store.LocaleValidator = storeDescLocale.Validators[0].(func(string) error)
 	// storeDescContactPhone is the schema descriptor for contact_phone field.
-	storeDescContactPhone := storeFields[17].Descriptor()
+	storeDescContactPhone := storeFields[22].Descriptor()
 	// store.DefaultContactPhone holds the default value on creation for the contact_phone field.
 	store.DefaultContactPhone = storeDescContactPhone.Default.(string)
 	// store.ContactPhoneValidator is a validator for the "contact_phone" field. It is called by the builders before save.
 	store.ContactPhoneValidator = storeDescContactPhone.Validators[0].(func(string) error)
 	// storeDescContactEmail is the schema descriptor for contact_email field.
-	storeDescContactEmail := storeFields[18].Descriptor()
+	storeDescContactEmail := storeFields[23].Descriptor()
 	// store.DefaultContactEmail holds the default value on creation for the contact_email field.
 	store.DefaultContactEmail = storeDescContactEmail.Default.(string)
 	// store.ContactEmailValidator is a validator for the "contact_email" field. It is called by the builders before save.
 	store.ContactEmailValidator = storeDescContactEmail.Validators[0].(func(string) error)
 	// storeDescContactAddress is the schema descriptor for contact_address field.
-	storeDescContactAddress := storeFields[19].Descriptor()
+	storeDescContactAddress := storeFields[24].Descriptor()
 	// store.DefaultContactAddress holds the default value on creation for the contact_address field.
 	store.DefaultContactAddress = storeDescContactAddress.Default.(string)
 	// store.ContactAddressValidator is a validator for the "contact_address" field. It is called by the builders before save.
 	store.ContactAddressValidator = storeDescContactAddress.Validators[0].(func(string) error)
 	// storeDescPricesIncludeTax is the schema descriptor for prices_include_tax field.
-	storeDescPricesIncludeTax := storeFields[21].Descriptor()
+	storeDescPricesIncludeTax := storeFields[26].Descriptor()
 	// store.DefaultPricesIncludeTax holds the default value on creation for the prices_include_tax field.
 	store.DefaultPricesIncludeTax = storeDescPricesIncludeTax.Default.(bool)
 	// storeDescTagline is the schema descriptor for tagline field.
-	storeDescTagline := storeFields[24].Descriptor()
+	storeDescTagline := storeFields[29].Descriptor()
 	// store.DefaultTagline holds the default value on creation for the tagline field.
 	store.DefaultTagline = storeDescTagline.Default.(string)
 	// store.TaglineValidator is a validator for the "tagline" field. It is called by the builders before save.
 	store.TaglineValidator = storeDescTagline.Validators[0].(func(string) error)
 	// storeDescUpdatedAt is the schema descriptor for updated_at field.
-	storeDescUpdatedAt := storeFields[27].Descriptor()
+	storeDescUpdatedAt := storeFields[32].Descriptor()
 	// store.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	store.DefaultUpdatedAt = storeDescUpdatedAt.Default.(func() time.Time)
 	// store.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
