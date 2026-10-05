@@ -22,3 +22,7 @@ type IdentityDirectory interface {
 type PrivateMediaSigner interface {
 	SignedUrl(ctx context.Context, mediaId, actorId, reason string) (string, time.Time, error)
 }
+
+type StoreFollowStats interface {
+	StoreFollowStats(ctx context.Context, storeId uuid.UUID, viewer *uuid.UUID) (followers int, isFollowing bool)
+}
