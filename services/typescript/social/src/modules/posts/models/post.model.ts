@@ -38,6 +38,15 @@ export interface ReplyToComment {
   readonly commenterUserId: string;
 }
 
+export interface TaggedUserView {
+  readonly id: string;
+  readonly username: string;
+  readonly displayName: string;
+  readonly avatarUrl: string | null;
+  readonly checkmark: "blue" | "gold" | "black" | null;
+  readonly isFollowing?: boolean;
+}
+
 export interface PostView {
   readonly id: string;
   readonly kind: "post" | "clip";
@@ -65,12 +74,15 @@ export interface PostView {
   readonly quotes: number;
   readonly replyPolicy: "everyone" | "following" | "followers" | "mentioned" | "off";
   readonly viewerCanReply: boolean;
+  readonly viewerCanDownload: boolean;
   readonly replyRestriction: { readonly reason: ReplyRestrictionReason; readonly message: string } | null;
   readonly sensitive: SensitiveContentView | null;
   readonly isAiGenerated: boolean;
   readonly sound?: SoundView;
   readonly mentions: readonly MentionEntity[];
   readonly linkPreview: LinkPreviewView | null;
+  readonly taggedUsers: readonly TaggedUserView[];
+  readonly taggedUsersCount: number;
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: StickerLayout;
   readonly ranking?: FeedRankingDisclosure;

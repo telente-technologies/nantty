@@ -62,6 +62,7 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
         stickerLayout: body.stickerLayout,
         replyPolicy: body.replyPolicy,
         sensitiveLabels: body.sensitiveLabels,
+        taggedUserIds: body.taggedUserIds,
       })),
     getPost: route({ authentication: "optional", params: postIdParamsSchema }, ({ principal, params }) => handlers.getPost({ viewerId: principal?.accountId, postId: params.postId })),
     deletePost: route({ authentication: "required", params: postIdParamsSchema }, ({ principal, params }) => handlers.deletePost({ actorId: principal.accountId, postId: params.postId })),
