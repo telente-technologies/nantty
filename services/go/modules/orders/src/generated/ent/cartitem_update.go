@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // CartItemUpdate is the builder for updating CartItem entities.
@@ -46,6 +47,46 @@ func (_u *CartItemUpdate) SetNillableQuantity(v *int) *CartItemUpdate {
 // AddQuantity adds value to the "quantity" field.
 func (_u *CartItemUpdate) AddQuantity(v int) *CartItemUpdate {
 	_u.mutation.AddQuantity(v)
+	return _u
+}
+
+// SetAttributionSource sets the "attribution_source" field.
+func (_u *CartItemUpdate) SetAttributionSource(v string) *CartItemUpdate {
+	_u.mutation.SetAttributionSource(v)
+	return _u
+}
+
+// SetNillableAttributionSource sets the "attribution_source" field if the given value is not nil.
+func (_u *CartItemUpdate) SetNillableAttributionSource(v *string) *CartItemUpdate {
+	if v != nil {
+		_u.SetAttributionSource(*v)
+	}
+	return _u
+}
+
+// ClearAttributionSource clears the value of the "attribution_source" field.
+func (_u *CartItemUpdate) ClearAttributionSource() *CartItemUpdate {
+	_u.mutation.ClearAttributionSource()
+	return _u
+}
+
+// SetAttributionID sets the "attribution_id" field.
+func (_u *CartItemUpdate) SetAttributionID(v uuid.UUID) *CartItemUpdate {
+	_u.mutation.SetAttributionID(v)
+	return _u
+}
+
+// SetNillableAttributionID sets the "attribution_id" field if the given value is not nil.
+func (_u *CartItemUpdate) SetNillableAttributionID(v *uuid.UUID) *CartItemUpdate {
+	if v != nil {
+		_u.SetAttributionID(*v)
+	}
+	return _u
+}
+
+// ClearAttributionID clears the value of the "attribution_id" field.
+func (_u *CartItemUpdate) ClearAttributionID() *CartItemUpdate {
+	_u.mutation.ClearAttributionID()
 	return _u
 }
 
@@ -103,6 +144,11 @@ func (_u *CartItemUpdate) check() error {
 			return &ValidationError{Name: "quantity", err: fmt.Errorf(`ent: validator failed for field "CartItem.quantity": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.AttributionSource(); ok {
+		if err := cartitem.AttributionSourceValidator(v); err != nil {
+			return &ValidationError{Name: "attribution_source", err: fmt.Errorf(`ent: validator failed for field "CartItem.attribution_source": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -123,6 +169,18 @@ func (_u *CartItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedQuantity(); ok {
 		_spec.AddField(cartitem.FieldQuantity, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AttributionSource(); ok {
+		_spec.SetField(cartitem.FieldAttributionSource, field.TypeString, value)
+	}
+	if _u.mutation.AttributionSourceCleared() {
+		_spec.ClearField(cartitem.FieldAttributionSource, field.TypeString)
+	}
+	if value, ok := _u.mutation.AttributionID(); ok {
+		_spec.SetField(cartitem.FieldAttributionID, field.TypeUUID, value)
+	}
+	if _u.mutation.AttributionIDCleared() {
+		_spec.ClearField(cartitem.FieldAttributionID, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(cartitem.FieldUpdatedAt, field.TypeTime, value)
@@ -165,6 +223,46 @@ func (_u *CartItemUpdateOne) SetNillableQuantity(v *int) *CartItemUpdateOne {
 // AddQuantity adds value to the "quantity" field.
 func (_u *CartItemUpdateOne) AddQuantity(v int) *CartItemUpdateOne {
 	_u.mutation.AddQuantity(v)
+	return _u
+}
+
+// SetAttributionSource sets the "attribution_source" field.
+func (_u *CartItemUpdateOne) SetAttributionSource(v string) *CartItemUpdateOne {
+	_u.mutation.SetAttributionSource(v)
+	return _u
+}
+
+// SetNillableAttributionSource sets the "attribution_source" field if the given value is not nil.
+func (_u *CartItemUpdateOne) SetNillableAttributionSource(v *string) *CartItemUpdateOne {
+	if v != nil {
+		_u.SetAttributionSource(*v)
+	}
+	return _u
+}
+
+// ClearAttributionSource clears the value of the "attribution_source" field.
+func (_u *CartItemUpdateOne) ClearAttributionSource() *CartItemUpdateOne {
+	_u.mutation.ClearAttributionSource()
+	return _u
+}
+
+// SetAttributionID sets the "attribution_id" field.
+func (_u *CartItemUpdateOne) SetAttributionID(v uuid.UUID) *CartItemUpdateOne {
+	_u.mutation.SetAttributionID(v)
+	return _u
+}
+
+// SetNillableAttributionID sets the "attribution_id" field if the given value is not nil.
+func (_u *CartItemUpdateOne) SetNillableAttributionID(v *uuid.UUID) *CartItemUpdateOne {
+	if v != nil {
+		_u.SetAttributionID(*v)
+	}
+	return _u
+}
+
+// ClearAttributionID clears the value of the "attribution_id" field.
+func (_u *CartItemUpdateOne) ClearAttributionID() *CartItemUpdateOne {
+	_u.mutation.ClearAttributionID()
 	return _u
 }
 
@@ -235,6 +333,11 @@ func (_u *CartItemUpdateOne) check() error {
 			return &ValidationError{Name: "quantity", err: fmt.Errorf(`ent: validator failed for field "CartItem.quantity": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.AttributionSource(); ok {
+		if err := cartitem.AttributionSourceValidator(v); err != nil {
+			return &ValidationError{Name: "attribution_source", err: fmt.Errorf(`ent: validator failed for field "CartItem.attribution_source": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -272,6 +375,18 @@ func (_u *CartItemUpdateOne) sqlSave(ctx context.Context) (_node *CartItem, err 
 	}
 	if value, ok := _u.mutation.AddedQuantity(); ok {
 		_spec.AddField(cartitem.FieldQuantity, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AttributionSource(); ok {
+		_spec.SetField(cartitem.FieldAttributionSource, field.TypeString, value)
+	}
+	if _u.mutation.AttributionSourceCleared() {
+		_spec.ClearField(cartitem.FieldAttributionSource, field.TypeString)
+	}
+	if value, ok := _u.mutation.AttributionID(); ok {
+		_spec.SetField(cartitem.FieldAttributionID, field.TypeUUID, value)
+	}
+	if _u.mutation.AttributionIDCleared() {
+		_spec.ClearField(cartitem.FieldAttributionID, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(cartitem.FieldUpdatedAt, field.TypeTime, value)

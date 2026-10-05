@@ -68,6 +68,34 @@ func (_c *CartItemCreate) SetQuantity(v int) *CartItemCreate {
 	return _c
 }
 
+// SetAttributionSource sets the "attribution_source" field.
+func (_c *CartItemCreate) SetAttributionSource(v string) *CartItemCreate {
+	_c.mutation.SetAttributionSource(v)
+	return _c
+}
+
+// SetNillableAttributionSource sets the "attribution_source" field if the given value is not nil.
+func (_c *CartItemCreate) SetNillableAttributionSource(v *string) *CartItemCreate {
+	if v != nil {
+		_c.SetAttributionSource(*v)
+	}
+	return _c
+}
+
+// SetAttributionID sets the "attribution_id" field.
+func (_c *CartItemCreate) SetAttributionID(v uuid.UUID) *CartItemCreate {
+	_c.mutation.SetAttributionID(v)
+	return _c
+}
+
+// SetNillableAttributionID sets the "attribution_id" field if the given value is not nil.
+func (_c *CartItemCreate) SetNillableAttributionID(v *uuid.UUID) *CartItemCreate {
+	if v != nil {
+		_c.SetAttributionID(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *CartItemCreate) SetUpdatedAt(v time.Time) *CartItemCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -170,6 +198,11 @@ func (_c *CartItemCreate) check() error {
 			return &ValidationError{Name: "quantity", err: fmt.Errorf(`ent: validator failed for field "CartItem.quantity": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.AttributionSource(); ok {
+		if err := cartitem.AttributionSourceValidator(v); err != nil {
+			return &ValidationError{Name: "attribution_source", err: fmt.Errorf(`ent: validator failed for field "CartItem.attribution_source": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "CartItem.updated_at"`)}
 	}
@@ -232,6 +265,14 @@ func (_c *CartItemCreate) createSpec() (*CartItem, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Quantity(); ok {
 		_spec.SetField(cartitem.FieldQuantity, field.TypeInt, value)
 		_node.Quantity = value
+	}
+	if value, ok := _c.mutation.AttributionSource(); ok {
+		_spec.SetField(cartitem.FieldAttributionSource, field.TypeString, value)
+		_node.AttributionSource = &value
+	}
+	if value, ok := _c.mutation.AttributionID(); ok {
+		_spec.SetField(cartitem.FieldAttributionID, field.TypeUUID, value)
+		_node.AttributionID = &value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(cartitem.FieldUpdatedAt, field.TypeTime, value)
@@ -304,6 +345,42 @@ func (u *CartItemUpsert) UpdateQuantity() *CartItemUpsert {
 // AddQuantity adds v to the "quantity" field.
 func (u *CartItemUpsert) AddQuantity(v int) *CartItemUpsert {
 	u.Add(cartitem.FieldQuantity, v)
+	return u
+}
+
+// SetAttributionSource sets the "attribution_source" field.
+func (u *CartItemUpsert) SetAttributionSource(v string) *CartItemUpsert {
+	u.Set(cartitem.FieldAttributionSource, v)
+	return u
+}
+
+// UpdateAttributionSource sets the "attribution_source" field to the value that was provided on create.
+func (u *CartItemUpsert) UpdateAttributionSource() *CartItemUpsert {
+	u.SetExcluded(cartitem.FieldAttributionSource)
+	return u
+}
+
+// ClearAttributionSource clears the value of the "attribution_source" field.
+func (u *CartItemUpsert) ClearAttributionSource() *CartItemUpsert {
+	u.SetNull(cartitem.FieldAttributionSource)
+	return u
+}
+
+// SetAttributionID sets the "attribution_id" field.
+func (u *CartItemUpsert) SetAttributionID(v uuid.UUID) *CartItemUpsert {
+	u.Set(cartitem.FieldAttributionID, v)
+	return u
+}
+
+// UpdateAttributionID sets the "attribution_id" field to the value that was provided on create.
+func (u *CartItemUpsert) UpdateAttributionID() *CartItemUpsert {
+	u.SetExcluded(cartitem.FieldAttributionID)
+	return u
+}
+
+// ClearAttributionID clears the value of the "attribution_id" field.
+func (u *CartItemUpsert) ClearAttributionID() *CartItemUpsert {
+	u.SetNull(cartitem.FieldAttributionID)
 	return u
 }
 
@@ -400,6 +477,48 @@ func (u *CartItemUpsertOne) AddQuantity(v int) *CartItemUpsertOne {
 func (u *CartItemUpsertOne) UpdateQuantity() *CartItemUpsertOne {
 	return u.Update(func(s *CartItemUpsert) {
 		s.UpdateQuantity()
+	})
+}
+
+// SetAttributionSource sets the "attribution_source" field.
+func (u *CartItemUpsertOne) SetAttributionSource(v string) *CartItemUpsertOne {
+	return u.Update(func(s *CartItemUpsert) {
+		s.SetAttributionSource(v)
+	})
+}
+
+// UpdateAttributionSource sets the "attribution_source" field to the value that was provided on create.
+func (u *CartItemUpsertOne) UpdateAttributionSource() *CartItemUpsertOne {
+	return u.Update(func(s *CartItemUpsert) {
+		s.UpdateAttributionSource()
+	})
+}
+
+// ClearAttributionSource clears the value of the "attribution_source" field.
+func (u *CartItemUpsertOne) ClearAttributionSource() *CartItemUpsertOne {
+	return u.Update(func(s *CartItemUpsert) {
+		s.ClearAttributionSource()
+	})
+}
+
+// SetAttributionID sets the "attribution_id" field.
+func (u *CartItemUpsertOne) SetAttributionID(v uuid.UUID) *CartItemUpsertOne {
+	return u.Update(func(s *CartItemUpsert) {
+		s.SetAttributionID(v)
+	})
+}
+
+// UpdateAttributionID sets the "attribution_id" field to the value that was provided on create.
+func (u *CartItemUpsertOne) UpdateAttributionID() *CartItemUpsertOne {
+	return u.Update(func(s *CartItemUpsert) {
+		s.UpdateAttributionID()
+	})
+}
+
+// ClearAttributionID clears the value of the "attribution_id" field.
+func (u *CartItemUpsertOne) ClearAttributionID() *CartItemUpsertOne {
+	return u.Update(func(s *CartItemUpsert) {
+		s.ClearAttributionID()
 	})
 }
 
@@ -665,6 +784,48 @@ func (u *CartItemUpsertBulk) AddQuantity(v int) *CartItemUpsertBulk {
 func (u *CartItemUpsertBulk) UpdateQuantity() *CartItemUpsertBulk {
 	return u.Update(func(s *CartItemUpsert) {
 		s.UpdateQuantity()
+	})
+}
+
+// SetAttributionSource sets the "attribution_source" field.
+func (u *CartItemUpsertBulk) SetAttributionSource(v string) *CartItemUpsertBulk {
+	return u.Update(func(s *CartItemUpsert) {
+		s.SetAttributionSource(v)
+	})
+}
+
+// UpdateAttributionSource sets the "attribution_source" field to the value that was provided on create.
+func (u *CartItemUpsertBulk) UpdateAttributionSource() *CartItemUpsertBulk {
+	return u.Update(func(s *CartItemUpsert) {
+		s.UpdateAttributionSource()
+	})
+}
+
+// ClearAttributionSource clears the value of the "attribution_source" field.
+func (u *CartItemUpsertBulk) ClearAttributionSource() *CartItemUpsertBulk {
+	return u.Update(func(s *CartItemUpsert) {
+		s.ClearAttributionSource()
+	})
+}
+
+// SetAttributionID sets the "attribution_id" field.
+func (u *CartItemUpsertBulk) SetAttributionID(v uuid.UUID) *CartItemUpsertBulk {
+	return u.Update(func(s *CartItemUpsert) {
+		s.SetAttributionID(v)
+	})
+}
+
+// UpdateAttributionID sets the "attribution_id" field to the value that was provided on create.
+func (u *CartItemUpsertBulk) UpdateAttributionID() *CartItemUpsertBulk {
+	return u.Update(func(s *CartItemUpsert) {
+		s.UpdateAttributionID()
+	})
+}
+
+// ClearAttributionID clears the value of the "attribution_id" field.
+func (u *CartItemUpsertBulk) ClearAttributionID() *CartItemUpsertBulk {
+	return u.Update(func(s *CartItemUpsert) {
+		s.ClearAttributionID()
 	})
 }
 

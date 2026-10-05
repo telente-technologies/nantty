@@ -29,6 +29,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/productbundleitem"
 	"zudomart/modules/orders/src/generated/ent/promotion"
 	"zudomart/modules/orders/src/generated/ent/promotionredemption"
+	"zudomart/modules/orders/src/generated/ent/refundrecord"
 	"zudomart/modules/orders/src/generated/ent/reportexportjob"
 	"zudomart/modules/orders/src/generated/ent/returnrequest"
 	"zudomart/modules/orders/src/generated/ent/shippingcalculation"
@@ -125,6 +126,7 @@ func checkColumn(t, c string) error {
 			productbundleitem.Table:    productbundleitem.ValidColumn,
 			promotion.Table:            promotion.ValidColumn,
 			promotionredemption.Table:  promotionredemption.ValidColumn,
+			refundrecord.Table:         refundrecord.ValidColumn,
 			reportexportjob.Table:      reportexportjob.ValidColumn,
 			returnrequest.Table:        returnrequest.ValidColumn,
 			shippingcalculation.Table:  shippingcalculation.ValidColumn,

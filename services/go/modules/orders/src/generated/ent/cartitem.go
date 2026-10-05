@@ -30,6 +30,10 @@ type CartItem struct {
 	StoreID uuid.UUID `json:"store_id,omitempty"`
 	// Quantity holds the value of the "quantity" field.
 	Quantity int `json:"quantity,omitempty"`
+	// AttributionSource holds the value of the "attribution_source" field.
+	AttributionSource *string `json:"attribution_source,omitempty"`
+	// AttributionID holds the value of the "attribution_id" field.
+	AttributionID *uuid.UUID `json:"attribution_id,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -40,8 +44,12 @@ func (*CartItem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case cartitem.FieldAttributionID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case cartitem.FieldQuantity:
 			values[i] = new(sql.NullInt64)
+		case cartitem.FieldAttributionSource:
+			values[i] = new(sql.NullString)
 		case cartitem.FieldCreatedAt, cartitem.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case cartitem.FieldID, cartitem.FieldCartID, cartitem.FieldProductID, cartitem.FieldVariantID, cartitem.FieldStoreID:
@@ -103,6 +111,20 @@ func (_m *CartItem) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Quantity = int(value.Int64)
 			}
+		case cartitem.FieldAttributionSource:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field attribution_source", values[i])
+			} else if value.Valid {
+				_m.AttributionSource = new(string)
+				*_m.AttributionSource = value.String
+			}
+		case cartitem.FieldAttributionID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field attribution_id", values[i])
+			} else if value.Valid {
+				_m.AttributionID = new(uuid.UUID)
+				*_m.AttributionID = *value.S.(*uuid.UUID)
+			}
 		case cartitem.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -162,6 +184,16 @@ func (_m *CartItem) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("quantity=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Quantity))
+	builder.WriteString(", ")
+	if v := _m.AttributionSource; v != nil {
+		builder.WriteString("attribution_source=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.AttributionID; v != nil {
+		builder.WriteString("attribution_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
