@@ -7,7 +7,7 @@ import { requestAppleIdentityTokenWithNonce, type AppleFullName } from "./appleS
 import { requestGoogleIdTokenWithNonce } from "./googleSignIn.service";
 
 export interface RegisterInput {
-  readonly email?: string;
+  readonly email: string;
   readonly birthday: string;
   readonly password: string;
   readonly username?: string;
@@ -30,7 +30,7 @@ export const authService = {
   resetPasswordWithVerifiedCode: (otpToken: string, password: string) =>
     api.post<void>("/api/v1/auth/password/reset", { otpToken, password }, { auth: false }),
   logOutCurrentSession: (refreshToken: string | null) => api.post<void>("/api/v1/auth/logout", { refreshToken }),
-  fetchPersonalizationTopics: () => api.get<Topic[]>("/api/v1/topics"),
+  fetchPersonalizationTopics: () => api.getList<Topic>("/api/v1/topics"),
   saveSelectedTopics: (topicIds: readonly string[]) => api.put<void>("/api/v1/users/me/topics", { topicIds }),
   exchangeGoogleIdTokenForSession: (idToken: string, nonce: string) =>
     api.post<AuthSession>("/api/v1/auth/google", { idToken, nonce }, { auth: false }).catch(rethrowSocialSignInNotConfigured("google")),

@@ -5,7 +5,7 @@ import type { ActingProfile, BrandDetail, BrandProducts, BrandSummary, NewBrandI
 import { api } from "./apiClient.service";
 
 export const brandsService = {
-  searchBrands: (query: string) => api.get<BrandSummary[]>("/api/v1/brands", { q: query }),
+  searchBrands: (query: string) => api.getList<BrandSummary>("/api/v1/brands", { q: query }),
   fetchBrandById: (brandId: string) => api.get<BrandDetail>(`/api/v1/brands/${encodeURIComponent(brandId)}`),
   fetchBrandProducts: (brandId: string) => api.get<BrandProducts>(`/api/v1/brands/${encodeURIComponent(brandId)}/products`),
   followBrand: (brandId: string) => api.post<void>(`/api/v1/brands/${encodeURIComponent(brandId)}/follow`),
