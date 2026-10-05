@@ -24,7 +24,7 @@
 .scopeChip {
   flex: none;
   min-height: 36px;
-  padding-inline: 16px;
+  padding-inline: var(--space-4);
   border: 1px solid var(--divider);
   border-radius: var(--radius-pill);
   background: var(--surface-card);
@@ -104,7 +104,68 @@
 
 @media (min-width: 768px) {
   .productGrid {
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
     gap: var(--space-4);
   }
+}
+
+button.entityRow {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.recentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.recentRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.recentQuery {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-2) 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.textButton {
+  border: 0;
+  background: transparent;
+  color: var(--color-brand);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-muted);
+}
+
+.iconButton:hover {
+  background: var(--surface-hover);
+}
+
+.loadMore {
+  align-self: center;
 }

@@ -150,7 +150,7 @@
 .rowMetrics {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   font-size: var(--text-xs);
   color: var(--ink-muted);
 }

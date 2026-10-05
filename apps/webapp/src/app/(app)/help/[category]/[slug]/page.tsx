@@ -56,7 +56,7 @@ export default async function HelpTopicPage({ params }: HelpTopicPageProps) {
           </ul>
         </section>
       ) : null}
-      <p className={styles.notice}>Still need help? <Link href="/help/tickets/new">Contact support</Link> and we will reply in the app and by email.</p>
+      <p className={styles.notice}>Still need help? <Link href="/help/tickets/new">Contact support</Link> and we will reply in My support requests and by email.</p>
     </article>
   );
 }

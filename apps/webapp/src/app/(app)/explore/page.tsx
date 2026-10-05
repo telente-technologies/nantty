@@ -1,141 +1,99 @@
 "use client";
 
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-import { ProductCard } from "@/components/commerce/productCard";
-import { ExploreHome } from "@/components/explore/exploreHome";
 import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
-import { EmptyState, ErrorState } from "@/components/ui/feedback";
+import { ExploreHome } from "@/components/explore/exploreHome";
+import { useRecentSearches } from "@/components/search/recentSearches.hook";
+import { Button } from "@/components/ui/button";
 import { RetryButton } from "@/components/ui/controls";
-import { Avatar } from "@/components/ui/media";
-import { searchService, type SearchScope } from "@/services/search.service";
-import { useQuery } from "@tanstack/react-query";
+import { EmptyState, ErrorState } from "@/components/ui/feedback";
+import { AppIcon } from "@/components/ui/appIcon";
+import { searchService } from "@/services/search.service";
+import type { SearchResultType } from "@/types/search.type";
+import { buildExploreSearchHref, defaultSearchResultType, globalSearchContext, resolveSearchContext, searchResultTypesForScope } from "@/utils/searchScope.util";
 
 import styles from "./page.module.css";
-import { AppIcon, IconLabel } from "@/components/ui/appIcon";
-
-const scopeOptions: readonly { readonly value: SearchScope; readonly label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "products", label: "Products" },
-  { value: "stores", label: "Stores" },
-  { value: "brands", label: "Brands" },
-  { value: "people", label: "People" },
-];
+import { RecentSearchList } from "./recentSearchList";
+import { SearchResultSections } from "./searchResultSections";
 
 function ExploreResults() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("q")?.trim() ?? "";
-  const [scope, setScope] = useState<SearchScope>(scopeOptions[0]!.value);
+  const context = resolveSearchContext(searchParams.get("scope") ?? undefined, searchParams.get("scopeLabel") ?? undefined);
+  const tabs = searchResultTypesForScope(context.scope);
+  const requestedType = searchParams.get("type") as SearchResultType | null;
+  const type = requestedType && tabs.some((tab) => tab.type === requestedType) ? requestedType : defaultSearchResultType(context.scope);
+  const recents = useRecentSearches(context.scope);
+  const { recordSearch } = recents;
 
-  const resultsQuery = useQuery({
-    queryKey: ["search", query, scope],
-    queryFn: () => searchService.searchProductsStoresAndPeople(query, scope),
+  const resultsQuery = useInfiniteQuery({
+    queryKey: ["search", context.scope, type, query],
+    queryFn: ({ pageParam }) => searchService.searchWithinScope(query, context.scope, type, pageParam),
+    initialPageParam: null as string | null,
+    getNextPageParam: (page) => page.nextCursor,
     enabled: query.length > 0,
     retry: false,
   });
 
-  if (!query) return <ExploreHome />;
+  const searchFor = (nextQuery: string) => router.push(buildExploreSearchHref(nextQuery, context));
+
+  if (!query) {
+    return (
+      <>
+        <RecentSearchList entries={recents.entries} onSelect={searchFor} onRemove={recents.removeSearch} onClear={recents.clearSearches} />
+        {context.scope === "global" ? <ExploreHome /> : null}
+      </>
+    );
+  }
 
   if (resultsQuery.isLoading) return <ProductGridSkeleton gridClassName={styles.productGrid} />;
   if (resultsQuery.isError) return <ErrorState description="Search is unavailable right now." action={<RetryButton onRetry={() => resultsQuery.refetch()} />} />;
 
-  const results = resultsQuery.data;
-  const totalResults = (results?.products.length ?? 0) + (results?.stores.length ?? 0) + (results?.people.length ?? 0) + (results?.brands?.length ?? 0);
-
-  if (totalResults === 0) {
-    return <EmptyState icon={<AppIcon name="searchOff24" size={28} />} title={`No results for “${query}”`} description="Try a different spelling or browse categories from the home screen." />;
-  }
+  const items = resultsQuery.data?.pages.flatMap((page) => page.data) ?? [];
+  const scopeSuffix = context.scope === "global" ? "" : ` in ${context.label}`;
 
   return (
     <div className={styles.results}>
-      <div className={styles.scopeRow} role="tablist" aria-label="Search filters">
-        {scopeOptions.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            role="tab"
-            aria-selected={scope === option.value}
-            className={[styles.scopeChip, scope === option.value ? styles.scopeChipActive : ""].filter(Boolean).join(" ")}
-            onClick={() => setScope(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
-      {results?.products.length ? (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Products</h2>
-          <div className={styles.productGrid}>
-            {results.products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
+      {tabs.length > 0 ? (
+        <div className={styles.scopeRow} role="tablist" aria-label="Search filters">
+          {tabs.map((option) => (
+            <button
+              key={option.type}
+              type="button"
+              role="tab"
+              aria-selected={type === option.type}
+              className={[styles.scopeChip, type === option.type ? styles.scopeChipActive : ""].filter(Boolean).join(" ")}
+              onClick={() => router.replace(buildExploreSearchHref(query, context, option.type))}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       ) : null}
 
-      {results?.stores.length ? (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Stores</h2>
-          <ul className={styles.entityList}>
-            {results.stores.map((store) => (
-              <li key={store.id}>
-                <Link href={`/store/${store.id}`} className={styles.entityRow}>
-                  <Avatar name={store.name} src={store.logoUrl} size="md" />
-                  <span className={styles.entityText}>
-                    <span className={styles.entityName}>{store.name}</span>
-                    <span className={styles.entityMeta}><IconLabel name="star16" size={12}>{store.rating > 0 ? store.rating.toFixed(1) : "New"} · {store.reviewCount} reviews</IconLabel></span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      {items.length === 0 ? (
+        <EmptyState
+          icon={<AppIcon name="searchOff24" size={28} />}
+          title={`No results for “${query}”${scopeSuffix}`}
+          description="Try a different spelling or search everywhere."
+          action={context.scope === "global" ? undefined : <Button variant="secondary" onClick={() => router.push(buildExploreSearchHref(query, globalSearchContext))}>Search everywhere</Button>}
+        />
+      ) : (
+        <SearchResultSections items={items} onOpenResult={() => recordSearch(query)} onSearchHashtag={(tag) => searchFor(`#${tag}`)} />
+      )}
 
-      {results?.brands?.length ? (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Brands</h2>
-          <ul className={styles.entityList}>
-            {results.brands.map((brand) => (
-              <li key={brand.id}>
-                <Link href={`/store/${brand.id}`} className={styles.entityRow}>
-                  <Avatar name={brand.name} src={brand.logoUrl} size="md" />
-                  <span className={styles.entityText}>
-                    <span className={styles.entityName}>{brand.name}</span>
-                    <span className={styles.entityMeta}>@{brand.handle}</span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {results?.people.length ? (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>People</h2>
-          <ul className={styles.entityList}>
-            {results.people.map((person) => (
-              <li key={person.id}>
-                <Link href={`/${person.username}`} className={styles.entityRow}>
-                  <Avatar name={person.name} src={person.avatarUrl} size="md" />
-                  <span className={styles.entityText}>
-                    <span className={styles.entityName}>{person.name}</span>
-                    <span className={styles.entityMeta}>@{person.username}</span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+      {resultsQuery.hasNextPage ? (
+        <Button variant="secondary" className={styles.loadMore} busy={resultsQuery.isFetchingNextPage} onClick={() => void resultsQuery.fetchNextPage()}>
+          Show more
+        </Button>
       ) : null}
     </div>
   );
 }
-
 
 export default function ExplorePage() {
   return (

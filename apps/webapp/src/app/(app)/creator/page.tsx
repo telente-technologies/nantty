@@ -3,8 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 
+import { OfficialStoreBadges } from "@zudomart/web-kit";
+
+import { storeLinks } from "@/config/brandContact.config";
 import { RetryButton } from "@/components/ui/controls";
-import { ErrorState, Spinner } from "@/components/ui/feedback";
+import { ErrorState } from "@/components/ui/feedback";
 import { AnalyticsIcon } from "@/components/ui/icons";
 import { creatorProgramService } from "@/services/creatorProgram.service";
 import { readErrorMessageForDisplay, WebappRequestError } from "@/services/clientApi.service";
@@ -17,6 +20,7 @@ import type { CreatorDashboardPeriod } from "@/types/creator.type";
 import { useQuery } from "@tanstack/react-query";
 
 import styles from "./page.module.css";
+import { StatGridSkeleton } from "@/components/ui/pageSkeletons";
 
 const PERIODS: readonly { readonly key: CreatorDashboardPeriod; readonly label: string }[] = [
   { key: "week", label: "This week" },
@@ -42,10 +46,11 @@ export default function CreatorDashboardPage() {
         icon={<CreatorIcon size={28} />}
         title="Join the Creator Program"
         description="Approved creators can go live, earn from gifts and subscriptions, and see their analytics here. Apply in the Zudomart app: Profile, then Creator Program."
+        action={<OfficialStoreBadges links={storeLinks} align="center" />}
       />
     );
   }
-  if (dashboard.isLoading) return <Spinner label="Loading your dashboard" />;
+  if (dashboard.isLoading) return <StatGridSkeleton label="Loading your dashboard" />;
   if (dashboard.isError || !dashboard.data) {
     return (
       <ErrorState
