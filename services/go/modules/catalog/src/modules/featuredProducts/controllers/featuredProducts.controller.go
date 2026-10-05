@@ -8,6 +8,7 @@ import (
 	replacefeaturedproducts "zudomart/modules/catalog/src/modules/featuredProducts/commands/replaceFeaturedProducts"
 	"zudomart/modules/catalog/src/modules/featuredProducts/dtos"
 	listfeaturedproducts "zudomart/modules/catalog/src/modules/featuredProducts/queries/listFeaturedProducts"
+	listproductoptions "zudomart/modules/catalog/src/modules/featuredProducts/queries/listProductOptions"
 	"zudomart/modules/catalog/src/modules/featuredProducts/validators"
 	"zudomart/modules/catalog/src/utils"
 	"zudomart/platform/httpserver"
@@ -38,4 +39,17 @@ func (controller FeaturedProductsController) Replace(writer http.ResponseWriter,
 	}
 	page, err := (replacefeaturedproducts.Handler{Container: controller.Container}).Execute(request.Context(), replacefeaturedproducts.Command{Store: middlewares.StoreAccessFrom(request.Context()), Request: body})
 	controller.respond(writer, request, page, err)
+}
+
+func (controller FeaturedProductsController) ProductOptions(writer http.ResponseWriter, request *http.Request) {
+	text := request.URL.Query().Get("q")
+	if len(text) > 80 {
+		text = text[:80]
+	}
+	page, err := listproductoptions.Handler{Container: controller.Container}.Execute(request.Context(), listproductoptions.Query{Store: middlewares.StoreAccessFrom(request.Context()), Text: text})
+	if err != nil {
+		utils.Responder{Logger: controller.Container.Logger}.Error(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, page)
 }
