@@ -15,3 +15,8 @@ func (request UpdateSettingRequest) EffectiveValue() json.RawMessage {
 	}
 	return request.Content
 }
+
+type RestoreSettingRequest struct {
+	ExpectedVersion int    `json:"expectedVersion"`
+	Reason          string `json:"reason"`
+}

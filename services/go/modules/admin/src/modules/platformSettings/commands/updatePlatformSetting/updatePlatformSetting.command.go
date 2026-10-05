@@ -12,4 +12,5 @@ type Command struct {
 	Value           json.RawMessage
 	ExpectedVersion int
 	Reason          string
+	RestoreVersion  int
 }
