@@ -12,7 +12,6 @@ export const sendMessageBodySchema = schema.object({
   text: schema.string().max(1000).optional(),
   encryption: schema.object({ deviceId: schema.string().min(1).max(100), ciphertext: schema.string().min(1).max(70000), protocol: schema.string().max(40).optional() }).optional(),
   mediaId: schema.string().uuid().optional(),
-  mediaUrl: schema.optional(schema.nullable(schema.string().max(2000))),
   durationSeconds: schema.number().min(0).max(36000).optional(),
   linkPreview: schema.optional(schema.nullable(schema.string().max(8192))),
   sharedContent: referenceSchema.optional(),
@@ -22,7 +21,7 @@ export const sendMessageBodySchema = schema.object({
   }).optional(),
   document: schema.object({
     fileName: schema.string().min(1).max(300), mimeType: schema.string().min(1).max(120), sizeBytes: schema.number().int().min(1),
-    pageCount: schema.optional(schema.nullable(schema.number().int().min(0))), url: schema.optional(schema.nullable(schema.string().max(2000))),
+    pageCount: schema.optional(schema.nullable(schema.number().int().min(0))),
   }).optional(),
   poll: schema.object({ question: schema.string().min(1).max(300), allowMultipleAnswers: schema.boolean(), options: schema.array(schema.string().min(1).max(100)).min(2).max(6) }).optional(),
   mentions: mentionEntitiesSchema.optional(),

@@ -22,6 +22,7 @@ import { registerPostsRoutes } from "./routes/posts.routes.js";
 import { createUpdatePostSensitivityHandler } from "./commands/updatePostSensitivity/updatePostSensitivity.handler.js";
 import { createUpdateReplySettingsHandler } from "./commands/updateReplySettings/updateReplySettings.handler.js";
 import { createPostAudienceController } from "./controllers/postAudience.controller.js";
+import { createSetPostProductsHandler } from "./commands/setPostProducts/setPostProducts.handler.js";
 import { createListPostQuotesHandler } from "./queries/listPostQuotes/listPostQuotes.handler.js";
 import { createSetPostTagsHandler } from "./commands/setPostTags/setPostTags.handler.js";
 import { createRemoveOwnPostTagHandler } from "./commands/removeOwnPostTag/removeOwnPostTag.handler.js";
@@ -55,6 +56,7 @@ export function mountPostsModule(router: HttpRouter, route: RouteFactory, contex
     updateReplySettings: createUpdateReplySettingsHandler(context),
     updatePostSensitivity: createUpdatePostSensitivityHandler(context),
     listPostQuotes: createListPostQuotesHandler(context),
+    setPostProducts: createSetPostProductsHandler(context),
   }));
   registerPostTagsRoutes(router, createPostTagsController(route, {
     setPostTags: createSetPostTagsHandler(context),
