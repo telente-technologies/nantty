@@ -7,6 +7,8 @@ import (
 
 	"zudomart/modules/ads/src/container"
 	"zudomart/modules/ads/src/modules/reporting/delivery"
+	advanceexperiments "zudomart/modules/ads/src/modules/tools/commands/advanceExperiments"
+	evaluaterules "zudomart/modules/ads/src/modules/tools/commands/evaluateRules"
 	"zudomart/modules/ads/src/services"
 )
 
@@ -18,6 +20,11 @@ func RunBackgroundJobsUntilContextDone(ctx context.Context, deployed *container.
 		return err
 	})
 	go runEvery(ctx, deployed.Settings.SettlementInterval, deployed, "lifecycle sweep", func(ctx context.Context) error { return AdvanceFinishedItemsToCompleted(ctx, deployed) })
+	go runEvery(ctx, time.Minute, deployed, "automated rules", func(ctx context.Context) error {
+		_, err := (evaluaterules.Handler{Container: deployed}).Execute(ctx)
+		return err
+	})
+	go runEvery(ctx, time.Minute, deployed, "experiments", func(ctx context.Context) error { return (advanceexperiments.Handler{Container: deployed}).Execute(ctx) })
 	go runEvery(ctx, deployed.Settings.ReportSweepInterval, deployed, "scheduled reports", func(ctx context.Context) error { return delivery.EnqueueDueReports(ctx, deployed) })
 	if deployed.QueueConsumer != nil {
 		go func() {
@@ -25,9 +32,8 @@ func RunBackgroundJobsUntilContextDone(ctx context.Context, deployed *container.
 				deployed.Logger.Warn("scheduled report consumer stopped", slog.Any("error", err))
 			}
 		}()
-		holds := services.CreatorMonetisationHolds{Client: deployed.Client, Now: deployed.Now}
 		go func() {
-			if err := deployed.QueueConsumer.ConsumeQueueUntilContextDone(ctx, deployed.Settings.DomainEventsQueueName, holds.HandleAccountHealthMessage, deployed.Logger); err != nil {
+			if err := deployed.QueueConsumer.ConsumeQueueUntilContextDone(ctx, deployed.Settings.DomainEventsQueueName, HandleDomainEventMessage(deployed), deployed.Logger); err != nil {
 				deployed.Logger.Warn("ads domain event consumer stopped", slog.Any("error", err))
 			}
 		}()

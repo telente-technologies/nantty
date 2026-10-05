@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"zudomart/modules/ads/src/types"
@@ -98,4 +99,31 @@ type OwnershipQuery struct {
 
 type DestinationOwnership interface {
 	Owns(ctx context.Context, query OwnershipQuery) (bool, error)
+}
+
+type TopUpStartRequest struct {
+	BearerToken    string
+	IdempotencyKey string
+	AdAccountId    string
+	AmountMinor    int64
+	Currency       string
+	ReturnTo       string
+}
+
+type StartedTopUp struct {
+	TopUpId     string
+	Reference   string
+	CheckoutUrl string
+}
+
+type TopUpGateway interface {
+	StartTopUp(ctx context.Context, request TopUpStartRequest) (StartedTopUp, error)
+}
+
+type AuditHistoryReader interface {
+	ListHistory(ctx context.Context, subjectType, subjectId string) ([]json.RawMessage, error)
+}
+
+type PlatformUserSummaries interface {
+	LookupSummaries(ctx context.Context, ids []string) (map[string]json.RawMessage, error)
 }
