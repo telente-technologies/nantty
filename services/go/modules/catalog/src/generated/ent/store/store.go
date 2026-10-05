@@ -46,8 +46,6 @@ const (
 	FieldBrandID = "brand_id"
 	// FieldHasOfficialBadge holds the string denoting the has_official_badge field in the database.
 	FieldHasOfficialBadge = "has_official_badge"
-	// FieldFollowerCount holds the string denoting the follower_count field in the database.
-	FieldFollowerCount = "follower_count"
 	// FieldVerified holds the string denoting the verified field in the database.
 	FieldVerified = "verified"
 	// FieldRatingSum holds the string denoting the rating_sum field in the database.
@@ -105,7 +103,6 @@ var Columns = []string{
 	FieldStatusChangedAt,
 	FieldBrandID,
 	FieldHasOfficialBadge,
-	FieldFollowerCount,
 	FieldVerified,
 	FieldRatingSum,
 	FieldRatingCount,
@@ -164,8 +161,6 @@ var (
 	StatusReasonValidator func(string) error
 	// DefaultHasOfficialBadge holds the default value on creation for the "has_official_badge" field.
 	DefaultHasOfficialBadge bool
-	// DefaultFollowerCount holds the default value on creation for the "follower_count" field.
-	DefaultFollowerCount int
 	// DefaultVerified holds the default value on creation for the "verified" field.
 	DefaultVerified bool
 	// DefaultRatingSum holds the default value on creation for the "rating_sum" field.
@@ -290,11 +285,6 @@ func ByBrandID(opts ...sql.OrderTermOption) OrderOption {
 // ByHasOfficialBadge orders the results by the has_official_badge field.
 func ByHasOfficialBadge(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHasOfficialBadge, opts...).ToFunc()
-}
-
-// ByFollowerCount orders the results by the follower_count field.
-func ByFollowerCount(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFollowerCount, opts...).ToFunc()
 }
 
 // ByVerified orders the results by the verified field.

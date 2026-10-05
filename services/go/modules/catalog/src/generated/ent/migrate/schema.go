@@ -698,7 +698,6 @@ var (
 		{Name: "status_changed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "brand_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "has_official_badge", Type: field.TypeBool, Default: false},
-		{Name: "follower_count", Type: field.TypeInt, Default: 0},
 		{Name: "verified", Type: field.TypeBool, Default: false},
 		{Name: "rating_sum", Type: field.TypeInt64, Default: 0},
 		{Name: "rating_count", Type: field.TypeInt, Default: 0},

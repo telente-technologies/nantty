@@ -135,11 +135,6 @@ func HasOfficialBadge(v bool) predicate.Store {
 	return predicate.Store(sql.FieldEQ(FieldHasOfficialBadge, v))
 }
 
-// FollowerCount applies equality check predicate on the "follower_count" field. It's identical to FollowerCountEQ.
-func FollowerCount(v int) predicate.Store {
-	return predicate.Store(sql.FieldEQ(FieldFollowerCount, v))
-}
-
 // Verified applies equality check predicate on the "verified" field. It's identical to VerifiedEQ.
 func Verified(v bool) predicate.Store {
 	return predicate.Store(sql.FieldEQ(FieldVerified, v))
@@ -1103,46 +1098,6 @@ func HasOfficialBadgeEQ(v bool) predicate.Store {
 // HasOfficialBadgeNEQ applies the NEQ predicate on the "has_official_badge" field.
 func HasOfficialBadgeNEQ(v bool) predicate.Store {
 	return predicate.Store(sql.FieldNEQ(FieldHasOfficialBadge, v))
-}
-
-// FollowerCountEQ applies the EQ predicate on the "follower_count" field.
-func FollowerCountEQ(v int) predicate.Store {
-	return predicate.Store(sql.FieldEQ(FieldFollowerCount, v))
-}
-
-// FollowerCountNEQ applies the NEQ predicate on the "follower_count" field.
-func FollowerCountNEQ(v int) predicate.Store {
-	return predicate.Store(sql.FieldNEQ(FieldFollowerCount, v))
-}
-
-// FollowerCountIn applies the In predicate on the "follower_count" field.
-func FollowerCountIn(vs ...int) predicate.Store {
-	return predicate.Store(sql.FieldIn(FieldFollowerCount, vs...))
-}
-
-// FollowerCountNotIn applies the NotIn predicate on the "follower_count" field.
-func FollowerCountNotIn(vs ...int) predicate.Store {
-	return predicate.Store(sql.FieldNotIn(FieldFollowerCount, vs...))
-}
-
-// FollowerCountGT applies the GT predicate on the "follower_count" field.
-func FollowerCountGT(v int) predicate.Store {
-	return predicate.Store(sql.FieldGT(FieldFollowerCount, v))
-}
-
-// FollowerCountGTE applies the GTE predicate on the "follower_count" field.
-func FollowerCountGTE(v int) predicate.Store {
-	return predicate.Store(sql.FieldGTE(FieldFollowerCount, v))
-}
-
-// FollowerCountLT applies the LT predicate on the "follower_count" field.
-func FollowerCountLT(v int) predicate.Store {
-	return predicate.Store(sql.FieldLT(FieldFollowerCount, v))
-}
-
-// FollowerCountLTE applies the LTE predicate on the "follower_count" field.
-func FollowerCountLTE(v int) predicate.Store {
-	return predicate.Store(sql.FieldLTE(FieldFollowerCount, v))
 }
 
 // VerifiedEQ applies the EQ predicate on the "verified" field.
