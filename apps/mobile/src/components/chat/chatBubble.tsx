@@ -64,7 +64,7 @@ export function ChatBubble({
   const isShared = message.kind === "shared" && !!message.sharedContent;
   const externalUrl = message.kind === "text" || !message.kind ? findFirstExternalUrl(message.text) : null;
   const internalReference = isShared ? message.sharedContent!.reference : message.kind === "text" || !message.kind ? findFirstInternalReference(message.text) : null;
-  const hasBubble = !isShared || message.text.length > 0;
+  const hasBubble = !isShared || message.text.length > 0 || !!message.decryptionNotice;
   const isShort = !isRich && !isVoiceNote && !isPhoto && !isMediaExpired && message.text.length <= 24 && !message.text.includes("\n");
   const shouldShowSender = showSenderIdentity && !isMine && !!message.sender;
   return (
@@ -110,6 +110,10 @@ export function ChatBubble({
           ) : isMediaExpired ? (
             <Text size={13} lineHeight={16.9} color={isMine ? colors.white : colors.textMuted} accessibilityLabel="Media expired">
               Media expired
+            </Text>
+          ) : message.decryptionNotice ? (
+            <Text size={13} lineHeight={16.9} style={{ fontStyle: "italic" }} color={isMine ? colors.white : colors.textMuted}>
+              {message.decryptionNotice}
             </Text>
           ) : (
             <MentionText

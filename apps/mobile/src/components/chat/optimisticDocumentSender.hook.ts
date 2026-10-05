@@ -25,14 +25,15 @@ export function useOptimisticDocumentSender(conversationId: string | undefined, 
         markPendingMessageAsFailedLocally(pendingMessage.id);
         replaceCachedMessage(pendingMessage.id, { ...pendingMessage, deliveryStatus: "failed" });
       };
+      let mediaId: string;
       try {
-        await uploadDocumentWithProgress(pendingMessage.id, document.sizeBytes);
+        mediaId = await uploadDocumentWithProgress(pendingMessage.id, document);
       } catch {
         markFailed();
         return;
       }
       try {
-        const delivered = await messagesService.sendDocumentToConversation(pendingMessage.conversationId, document, generateIdempotencyKey());
+        const delivered = await messagesService.sendDocumentToConversation(pendingMessage.conversationId, document, mediaId, generateIdempotencyKey());
         replacePendingMessageWithDeliveredMessageLocally(pendingMessage.id, delivered);
         replaceCachedMessage(pendingMessage.id, { ...delivered, deliveryStatus: "sent" });
         queryClient.invalidateQueries({ queryKey: ["conversations"] });
