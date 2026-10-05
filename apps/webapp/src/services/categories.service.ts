@@ -1,7 +1,7 @@
 import type { Category } from "@/types";
 
-import { sendRequestToWebappServer } from "./clientApi.service";
+import { sendListRequestToWebappServer } from "./clientApi.service";
 
 export const categoriesService = {
-  fetchProductCategories: () => sendRequestToWebappServer<Category[]>("/api/v1/categories"),
+  fetchProductCategories: () => sendListRequestToWebappServer<Category>("/api/v1/categories"),
 };

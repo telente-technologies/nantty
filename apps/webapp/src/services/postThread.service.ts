@@ -15,9 +15,4 @@ export const postThreadService = {
       method: "POST",
       body: { slot: { kind: THREAD_AD_SLOT_KIND, contentId: postId, slotIndex, slotsSinceLastAd, neighbourContentIds: neighbourContentIds.slice(0, 10) }, sessionId: adSessionId },
     }),
-  recordThreadAdEvent: (adId: ID, postId: ID, type: "impression" | "click") =>
-    sendRequestToWebappServer<void>("/api/v1/ads/events", {
-      method: "POST",
-      body: { events: [{ campaignId: adId, placement: "feedCommentThread", type, itemId: postId, occurredAt: new Date().toISOString() }] },
-    }),
 };

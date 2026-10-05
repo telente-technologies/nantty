@@ -3,7 +3,7 @@ import type { Topic } from "@/types";
 import { sendRequestToWebappServer } from "./clientApi.service";
 
 export interface RegisterInput {
-  readonly email?: string;
+  readonly email: string;
   readonly birthday: string;
   readonly password: string;
   readonly username?: string;
