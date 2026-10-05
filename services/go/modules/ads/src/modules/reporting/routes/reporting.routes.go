@@ -18,4 +18,5 @@ func MountReportingRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("GET /api/v1/ads/accounts/{accountId}/reports/scheduled", authenticated(controller.ListScheduled))
 	mux.Handle("POST /api/v1/ads/accounts/{accountId}/reports/scheduled", authenticated(controller.CreateScheduled))
 	mux.Handle("DELETE /api/v1/ads/accounts/{accountId}/reports/scheduled/{scheduledReportId}", authenticated(controller.DeleteScheduled))
+	mux.Handle("GET /api/v1/internal/stores/{storeId}/campaign-report", middlewares.InternalToken(deployed)(controller.StoreCampaignReport))
 }
