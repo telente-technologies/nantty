@@ -28,7 +28,7 @@ export function InboxFolderMenu({ folder, topOffset, onSelect, titleSize = 21 }:
         <CaretDown24Icon size={16} color={colors.textMuted} />
       </Pressable>
       <FrameAwareModal visible={isOpen} transparent animationType="fade" onRequestClose={() => setIsOpen(false)}>
-        <Pressable accessibilityLabel="Close menu" style={styles.backdrop} onPress={() => setIsOpen(false)}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Close menu" style={styles.backdrop} onPress={() => setIsOpen(false)}>
           <View style={[styles.menu, { top: topOffset }]} accessibilityRole="menu">
             {(Object.keys(INBOX_FOLDER_LABELS) as InboxFolder[]).map((option) => (
               <Pressable

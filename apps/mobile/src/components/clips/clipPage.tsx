@@ -1,7 +1,7 @@
 import { memo, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
-import { Play24Icon } from "@/components/icons";
+import { BoxArrowDown24Icon, Play24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { ClipVideoPlayer, VideoPosterOnly, type VideoPlaybackProgress } from "@/components/media/clipVideoPlayer";
 import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
@@ -10,6 +10,10 @@ import { ViewFullScreenButton } from "@/components/media/viewFullScreenButton";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { TipSheet } from "@/components/coins/tipSheet";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
+import { canOfferDownloadForPost, findFirstDownloadableMedia } from "@/components/downloads/downloadablePostMedia.util";
+import { useScreenshotSharePrompt } from "@/hooks/useScreenshotSharePrompt.hook";
+import { useMediaDownloadStore } from "@/store/mediaDownload.store";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 import { colors } from "@/constants/colors.constant";
 import { useTheme } from "@/theme";
 import { useAuthStore } from "@/store/auth.store";
@@ -71,6 +75,9 @@ function ClipPageComponent(props: ClipPageProps) {
     setHasOpenedOptionsSheet(true);
     setIsOptionsSheetOpen(true);
   };
+  const startBrandedDownload = useMediaDownloadStore((state) => state.startBrandedDownload);
+  const downloadableVideo = canOfferDownloadForPost(clip) ? findFirstDownloadableMedia(clip) : undefined;
+  useScreenshotSharePrompt(clip, isActive);
   const lastTapAt = useRef(0);
   const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const video = clip.media.find((item) => item.type === "video") ?? clip.media[0];
@@ -210,6 +217,7 @@ function ClipPageComponent(props: ClipPageProps) {
               : null
           }
           onClose={() => setIsOptionsSheetOpen(false)}
+          additionalActions={downloadableVideo ? [{ label: "Download", icon: <BoxArrowDown24Icon size={20} />, onPress: () => requireAuthThen(() => startBrandedDownload(clip.id, downloadableVideo), null, "download") }] : undefined}
         />
       ) : null}
       <LandscapeVideoFullScreenModal

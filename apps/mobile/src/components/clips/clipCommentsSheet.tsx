@@ -59,7 +59,7 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, clip, highlightCommentI
     <FrameAwareModal visible={!!postId} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <CommentThreadContext.Provider value={commentThread}>
         <View style={[styles.root, { paddingTop: insets.top + SHEET_TOP_GAP }]}>
-          <Pressable accessibilityLabel="Close comments" style={styles.backdrop} onPress={onClose} />
+          <Pressable accessibilityRole="button" accessibilityLabel="Close comments" style={styles.backdrop} onPress={onClose} />
           <View style={styles.sheet} accessibilityViewIsModal>
             <View style={styles.handle} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" />
             <View style={styles.titleRow}>

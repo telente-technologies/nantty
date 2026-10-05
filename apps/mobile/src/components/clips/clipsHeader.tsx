@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { ArrowLeft24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import type { ClipsFeedTab } from "@/types";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 export interface ClipsHeaderProps {
   readonly tab: ClipsFeedTab;
@@ -24,7 +26,7 @@ export function ClipsHeader({ tab, onChangeTab, onBack, onSearch, showTabs = tru
           {(["forYou", "following"] as const).map((value) => (
             <Text
               key={value}
-              size={14}
+              size={typeScale.md}
               weight={tab === value ? 600 : 400}
               lineHeight={16.8}
               color={foregroundColor}
@@ -45,6 +47,6 @@ export function ClipsHeader({ tab, onChangeTab, onBack, onSearch, showTabs = tru
 }
 
 const styles = StyleSheet.create({
-  bar: { height: 48, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  tabs: { position: "absolute", left: 0, right: 0, flexDirection: "row", justifyContent: "center", gap: 13, zIndex: -1 },
+  bar: { height: 48, paddingHorizontal: spacing[4], flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  tabs: { position: "absolute", left: 0, right: 0, flexDirection: "row", justifyContent: "center", gap: spacing[3], zIndex: -1 },
 });
