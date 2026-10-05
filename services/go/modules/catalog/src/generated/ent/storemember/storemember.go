@@ -26,6 +26,14 @@ const (
 	FieldPermissions = "permissions"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldLocationIds holds the string denoting the location_ids field in the database.
+	FieldLocationIds = "location_ids"
+	// FieldInvitedByAccountID holds the string denoting the invited_by_account_id field in the database.
+	FieldInvitedByAccountID = "invited_by_account_id"
+	// FieldAcceptedAt holds the string denoting the accepted_at field in the database.
+	FieldAcceptedAt = "accepted_at"
+	// FieldLastActiveAt holds the string denoting the last_active_at field in the database.
+	FieldLastActiveAt = "last_active_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the storemember in the database.
@@ -41,6 +49,10 @@ var Columns = []string{
 	FieldRole,
 	FieldPermissions,
 	FieldStatus,
+	FieldLocationIds,
+	FieldInvitedByAccountID,
+	FieldAcceptedAt,
+	FieldLastActiveAt,
 	FieldUpdatedAt,
 }
 
@@ -100,6 +112,21 @@ func ByRole(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByInvitedByAccountID orders the results by the invited_by_account_id field.
+func ByInvitedByAccountID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInvitedByAccountID, opts...).ToFunc()
+}
+
+// ByAcceptedAt orders the results by the accepted_at field.
+func ByAcceptedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAcceptedAt, opts...).ToFunc()
+}
+
+// ByLastActiveAt orders the results by the last_active_at field.
+func ByLastActiveAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastActiveAt, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

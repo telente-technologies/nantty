@@ -80,6 +80,21 @@ func Status(v string) predicate.StoreMember {
 	return predicate.StoreMember(sql.FieldEQ(FieldStatus, v))
 }
 
+// InvitedByAccountID applies equality check predicate on the "invited_by_account_id" field. It's identical to InvitedByAccountIDEQ.
+func InvitedByAccountID(v uuid.UUID) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldEQ(FieldInvitedByAccountID, v))
+}
+
+// AcceptedAt applies equality check predicate on the "accepted_at" field. It's identical to AcceptedAtEQ.
+func AcceptedAt(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldEQ(FieldAcceptedAt, v))
+}
+
+// LastActiveAt applies equality check predicate on the "last_active_at" field. It's identical to LastActiveAtEQ.
+func LastActiveAt(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldEQ(FieldLastActiveAt, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.StoreMember {
 	return predicate.StoreMember(sql.FieldEQ(FieldUpdatedAt, v))
@@ -343,6 +358,166 @@ func StatusEqualFold(v string) predicate.StoreMember {
 // StatusContainsFold applies the ContainsFold predicate on the "status" field.
 func StatusContainsFold(v string) predicate.StoreMember {
 	return predicate.StoreMember(sql.FieldContainsFold(FieldStatus, v))
+}
+
+// LocationIdsIsNil applies the IsNil predicate on the "location_ids" field.
+func LocationIdsIsNil() predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldIsNull(FieldLocationIds))
+}
+
+// LocationIdsNotNil applies the NotNil predicate on the "location_ids" field.
+func LocationIdsNotNil() predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNotNull(FieldLocationIds))
+}
+
+// InvitedByAccountIDEQ applies the EQ predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDEQ(v uuid.UUID) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldEQ(FieldInvitedByAccountID, v))
+}
+
+// InvitedByAccountIDNEQ applies the NEQ predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDNEQ(v uuid.UUID) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNEQ(FieldInvitedByAccountID, v))
+}
+
+// InvitedByAccountIDIn applies the In predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDIn(vs ...uuid.UUID) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldIn(FieldInvitedByAccountID, vs...))
+}
+
+// InvitedByAccountIDNotIn applies the NotIn predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDNotIn(vs ...uuid.UUID) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNotIn(FieldInvitedByAccountID, vs...))
+}
+
+// InvitedByAccountIDGT applies the GT predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDGT(v uuid.UUID) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldGT(FieldInvitedByAccountID, v))
+}
+
+// InvitedByAccountIDGTE applies the GTE predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDGTE(v uuid.UUID) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldGTE(FieldInvitedByAccountID, v))
+}
+
+// InvitedByAccountIDLT applies the LT predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDLT(v uuid.UUID) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldLT(FieldInvitedByAccountID, v))
+}
+
+// InvitedByAccountIDLTE applies the LTE predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDLTE(v uuid.UUID) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldLTE(FieldInvitedByAccountID, v))
+}
+
+// InvitedByAccountIDIsNil applies the IsNil predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDIsNil() predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldIsNull(FieldInvitedByAccountID))
+}
+
+// InvitedByAccountIDNotNil applies the NotNil predicate on the "invited_by_account_id" field.
+func InvitedByAccountIDNotNil() predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNotNull(FieldInvitedByAccountID))
+}
+
+// AcceptedAtEQ applies the EQ predicate on the "accepted_at" field.
+func AcceptedAtEQ(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldEQ(FieldAcceptedAt, v))
+}
+
+// AcceptedAtNEQ applies the NEQ predicate on the "accepted_at" field.
+func AcceptedAtNEQ(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNEQ(FieldAcceptedAt, v))
+}
+
+// AcceptedAtIn applies the In predicate on the "accepted_at" field.
+func AcceptedAtIn(vs ...time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldIn(FieldAcceptedAt, vs...))
+}
+
+// AcceptedAtNotIn applies the NotIn predicate on the "accepted_at" field.
+func AcceptedAtNotIn(vs ...time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNotIn(FieldAcceptedAt, vs...))
+}
+
+// AcceptedAtGT applies the GT predicate on the "accepted_at" field.
+func AcceptedAtGT(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldGT(FieldAcceptedAt, v))
+}
+
+// AcceptedAtGTE applies the GTE predicate on the "accepted_at" field.
+func AcceptedAtGTE(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldGTE(FieldAcceptedAt, v))
+}
+
+// AcceptedAtLT applies the LT predicate on the "accepted_at" field.
+func AcceptedAtLT(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldLT(FieldAcceptedAt, v))
+}
+
+// AcceptedAtLTE applies the LTE predicate on the "accepted_at" field.
+func AcceptedAtLTE(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldLTE(FieldAcceptedAt, v))
+}
+
+// AcceptedAtIsNil applies the IsNil predicate on the "accepted_at" field.
+func AcceptedAtIsNil() predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldIsNull(FieldAcceptedAt))
+}
+
+// AcceptedAtNotNil applies the NotNil predicate on the "accepted_at" field.
+func AcceptedAtNotNil() predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNotNull(FieldAcceptedAt))
+}
+
+// LastActiveAtEQ applies the EQ predicate on the "last_active_at" field.
+func LastActiveAtEQ(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldEQ(FieldLastActiveAt, v))
+}
+
+// LastActiveAtNEQ applies the NEQ predicate on the "last_active_at" field.
+func LastActiveAtNEQ(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNEQ(FieldLastActiveAt, v))
+}
+
+// LastActiveAtIn applies the In predicate on the "last_active_at" field.
+func LastActiveAtIn(vs ...time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldIn(FieldLastActiveAt, vs...))
+}
+
+// LastActiveAtNotIn applies the NotIn predicate on the "last_active_at" field.
+func LastActiveAtNotIn(vs ...time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNotIn(FieldLastActiveAt, vs...))
+}
+
+// LastActiveAtGT applies the GT predicate on the "last_active_at" field.
+func LastActiveAtGT(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldGT(FieldLastActiveAt, v))
+}
+
+// LastActiveAtGTE applies the GTE predicate on the "last_active_at" field.
+func LastActiveAtGTE(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldGTE(FieldLastActiveAt, v))
+}
+
+// LastActiveAtLT applies the LT predicate on the "last_active_at" field.
+func LastActiveAtLT(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldLT(FieldLastActiveAt, v))
+}
+
+// LastActiveAtLTE applies the LTE predicate on the "last_active_at" field.
+func LastActiveAtLTE(v time.Time) predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldLTE(FieldLastActiveAt, v))
+}
+
+// LastActiveAtIsNil applies the IsNil predicate on the "last_active_at" field.
+func LastActiveAtIsNil() predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldIsNull(FieldLastActiveAt))
+}
+
+// LastActiveAtNotNil applies the NotNil predicate on the "last_active_at" field.
+func LastActiveAtNotNil() predicate.StoreMember {
+	return predicate.StoreMember(sql.FieldNotNull(FieldLastActiveAt))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

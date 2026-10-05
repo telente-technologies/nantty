@@ -108,3 +108,32 @@ func SellingStoreMember(deployed *container.Container, permission string) func(h
 		})
 	}
 }
+
+func StoreMemberWithOptionalKey(deployed *container.Container, permission string) func(http.HandlerFunc) http.Handler {
+	return func(handler http.HandlerFunc) http.Handler {
+		return OptionallyIdempotent(deployed)(func(writer http.ResponseWriter, request *http.Request) {
+			access, err := resolveStoreAccess(deployed, request, permission)
+			if err != nil {
+				httpserver.WriteErrorResponse(writer, request, deployed.Logger, err)
+				return
+			}
+			handler(writer, request.WithContext(context.WithValue(request.Context(), storeAccessContextKey{}, access)))
+		})
+	}
+}
+
+func StoreMemberFeatureWithOptionalKey(deployed *container.Container, permission, feature string) func(http.HandlerFunc) http.Handler {
+	return func(handler http.HandlerFunc) http.Handler {
+		return OptionallyIdempotent(deployed)(func(writer http.ResponseWriter, request *http.Request) {
+			access, err := resolveStoreAccess(deployed, request, permission)
+			if err != nil {
+				httpserver.WriteErrorResponse(writer, request, deployed.Logger, err)
+				return
+			}
+			if !sellerplans.Default.RequireFeature(writer, request, access.OwnerAccountId, feature) {
+				return
+			}
+			handler(writer, request.WithContext(context.WithValue(request.Context(), storeAccessContextKey{}, access)))
+		})
+	}
+}

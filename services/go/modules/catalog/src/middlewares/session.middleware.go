@@ -33,3 +33,9 @@ func requireIdempotencyKey(deployed *container.Container, handler http.HandlerFu
 		handler(writer, request)
 	})
 }
+
+func OptionallyIdempotent(deployed *container.Container) func(http.HandlerFunc) http.Handler {
+	return func(handler http.HandlerFunc) http.Handler {
+		return jwtauth.RequireVerifiedAccessToken(deployed.AccessVerifier)(idempotency.ReplayWhenIdempotencyKeyPresent(deployed.IdempotencyStore, idempotency.DefaultTimeToLive, deployed.Logger)(handler))
+	}
+}
