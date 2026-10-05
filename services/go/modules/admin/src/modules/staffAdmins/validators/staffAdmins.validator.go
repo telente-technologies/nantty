@@ -53,3 +53,10 @@ func ValidateUpdateStaffSettingsRequest(request dtos.UpdateStaffSettingsRequest)
 	requireReason(collector, request.Reason)
 	return collector.Result()
 }
+
+func ValidateUpdateAdminRequest(request dtos.UpdateAdminRequest) error {
+	collector := &validation.Collector{}
+	collector.RequireTrue("ipAllowList", request.IpAllowList != nil && len(*request.IpAllowList) <= 50, "must list at most 50 entries")
+	requireReason(collector, request.Reason)
+	return collector.Result()
+}

@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
 	"zudomart/modules/admin/src/generated/ent/staffrole"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
+	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
 	"zudomart/modules/admin/src/types"
 )
 
@@ -42,6 +43,9 @@ func BuildStaffViews(ctx context.Context, client *ent.Client, rows []*ent.StaffA
 			view.ApprovedByName = &approver
 		}
 		if view.LastLoginAt, err = lastLoginOf(ctx, client, row.ID); err != nil {
+			return nil, err
+		}
+		if view.PasskeyCount, err = client.StaffWebauthnCredential.Query().Where(staffwebauthncredential.StaffID(row.ID)).Count(ctx); err != nil {
 			return nil, err
 		}
 		if row.Status == staffaccount.StatusActive && row.LockedUntil != nil && row.LockedUntil.After(time.Now()) {

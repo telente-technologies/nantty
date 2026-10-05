@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -20,8 +21,17 @@ func (checker StaffSessionChecker) IsStaffSessionActive(ctx context.Context, sta
 	if staffErr != nil || sessionErr != nil {
 		return false, nil
 	}
-	return checker.Container.Client.StaffSession.Query().Where(
-		staffsession.ID(sessionUuid), staffsession.StaffID(staffUuid), staffsession.RevokedAtIsNil(), staffsession.ExpiresAtGT(checker.Container.Now()),
+	now := checker.Container.Now()
+	active, err := checker.Container.Client.StaffSession.Query().Where(
+		staffsession.ID(sessionUuid), staffsession.StaffID(staffUuid), staffsession.RevokedAtIsNil(), staffsession.ExpiresAtGT(now),
 		staffsession.HasStaffWith(staffaccount.StatusEQ(staffaccount.StatusActive)),
 	).Exist(ctx)
+	if err != nil || !active {
+		return active, err
+	}
+	_, err = checker.Container.Client.StaffSession.Update().
+		Where(staffsession.ID(sessionUuid), staffsession.LastUsedAtLT(now.Add(-lastSeenRefreshInterval))).SetLastUsedAt(now).Save(ctx)
+	return true, err
 }
+
+const lastSeenRefreshInterval = time.Minute

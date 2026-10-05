@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/admin/src/generated/ent"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
+	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
 	"zudomart/modules/admin/src/repositories"
 	"zudomart/modules/admin/src/types"
 	jsonencoding "zudomart/modules/admin/src/utils/jsonEncoding"
@@ -84,7 +85,10 @@ func planAccessUpdate(ctx context.Context, tx *ent.Tx, existing *ent.StaffAccoun
 	update := existing.Update()
 	switch action {
 	case AccessActionResetMfa:
-		return update.ClearTotpSecretEncrypted().ClearTotpConfirmedAt().SetTotpLastUsedStep(0), nil
+		if _, err := tx.StaffWebauthnCredential.Delete().Where(staffwebauthncredential.StaffID(existing.ID)).Exec(ctx); err != nil {
+			return nil, err
+		}
+		return update.ClearTotpSecretEncrypted().ClearTotpConfirmedAt().SetTotpLastUsedStep(0).SetRecoveryCodeHashes([]string{}), nil
 	case AccessActionEnable:
 		if existing.Status == staffaccount.StatusRevoked {
 			return nil, adminerrors.Conflict("ACCESS_REVOKED", "Revoked access cannot be restored.")
