@@ -1,13 +1,13 @@
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .cardList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px;
+  padding: var(--space-3);
   border: 1.5px solid var(--divider-soft);
   border-radius: var(--radius-medium);
   background: var(--surface-card);
@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .cardTitle {
@@ -41,7 +41,7 @@
 }
 
 .toolButton {
-  padding: 4px 10px;
+  padding: var(--space-1) 10px;
   border: 1.5px solid var(--divider-soft);
   border-radius: var(--radius-medium);
   background: var(--surface-card);
@@ -63,14 +63,14 @@
 
 .typeGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-2);
 }
 
 .typeOption {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 10px;
   text-align: left;
   border: 1.5px solid var(--divider-soft);
@@ -97,7 +97,7 @@
 .twoColumns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .muted {

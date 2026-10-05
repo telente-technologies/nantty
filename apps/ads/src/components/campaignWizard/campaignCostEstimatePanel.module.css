@@ -1,8 +1,8 @@
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   border: 1px solid var(--color-border, var(--divider));
   border-radius: 12px;
   background: var(--color-surface, transparent);
@@ -14,24 +14,24 @@
 }
 
 .muted {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-text-muted, var(--ink-muted));
 }
 
 .warning {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-warning, #a15c00);
 }
 
 .totals {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
   gap: 10px;
   margin: 0;
 }
 
 .totals dt {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--color-text-muted, var(--ink-muted));
 }
 
@@ -43,7 +43,7 @@
 .regionTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .regionTable th,

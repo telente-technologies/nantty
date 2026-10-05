@@ -6,7 +6,7 @@
 .layout {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr);
-  gap: 20px;
+  gap: var(--space-5);
   align-items: start;
 }
 
@@ -34,7 +34,7 @@
   align-items: flex-start;
   gap: 10px;
   width: 100%;
-  padding: 8px;
+  padding: var(--space-2);
   border: 0;
   border-radius: var(--radius-medium);
   background: transparent;
@@ -99,7 +99,7 @@
 .stepColumn {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   min-width: 0;
 }
 
@@ -108,7 +108,7 @@
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-large);
   box-shadow: var(--shadow-card);
-  padding: 20px;
+  padding: var(--space-5);
   outline: none;
 }
 
@@ -118,14 +118,14 @@
   z-index: 5;
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  padding: 12px 0;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
   background: linear-gradient(to top, var(--surface-app) 70%, transparent);
 }
 
 .actionBarEnd {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .estimateColumn {
