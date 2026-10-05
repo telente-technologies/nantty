@@ -1,4 +1,5 @@
 import { type Bytes, utf8Decode, utf8Encode } from "./bytes.util";
+import { type AttachmentPointer, sanitizeAttachmentPointer } from "./attachments";
 import { ChatCryptoError } from "./errors";
 
 export interface ChatLinkPreview {
@@ -18,16 +19,18 @@ export interface ChatPayload {
   readonly conversationId?: string;
   readonly storyId?: string;
   readonly linkPreview?: ChatLinkPreview | null;
+  readonly linkPreviewKey?: string;
   readonly sharedContent?: { readonly kind: string; readonly id: string } | null;
+  readonly attachment?: AttachmentPointer | null;
 }
 
-export type ChatPayloadInput = Omit<ChatPayload, "v" | "sentAt"> & { readonly sentAt?: string };
+export type ChatPayloadInput = Omit<ChatPayload, "v" | "sentAt" | "linkPreviewKey"> & { readonly sentAt?: string };
 
 const maximumTextLength = 4000;
 const isString = (value: unknown): value is string => typeof value === "string";
 const isOptionalString = (value: unknown) => value === undefined || value === null || isString(value);
 
-function sanitizeLinkPreview(value: unknown): ChatLinkPreview | null {
+export function sanitizeLinkPreview(value: unknown): ChatLinkPreview | null {
   if (value === null || value === undefined || typeof value !== "object") return null;
   const candidate = value as Record<string, unknown>;
   if (!isString(candidate.url) || !/^https?:\/\//i.test(candidate.url) || !isString(candidate.title) || !isString(candidate.domain)) return null;
@@ -61,7 +64,9 @@ export function decodePayload(bytes: Bytes): ChatPayload {
     v: 1, text: candidate.text.slice(0, maximumTextLength), sentAt: candidate.sentAt,
     ...(isString(candidate.conversationId) ? { conversationId: candidate.conversationId } : {}),
     ...(isString(candidate.storyId) ? { storyId: candidate.storyId } : {}),
+    ...(isString(candidate.linkPreviewKey) && candidate.linkPreviewKey.length === 44 ? { linkPreviewKey: candidate.linkPreviewKey } : {}),
     linkPreview: sanitizeLinkPreview(candidate.linkPreview),
     sharedContent: shared && isString(shared.kind) && isString(shared.id) ? { kind: shared.kind, id: shared.id } : null,
+    attachment: sanitizeAttachmentPointer(candidate.attachment),
   };
 }

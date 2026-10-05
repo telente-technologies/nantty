@@ -1,5 +1,5 @@
 import { decodeBase64 } from "./bytes.util";
-import type { DeviceAddress, DeviceKeyStatus, DeviceRegistrationRequest, KeyDirectory, PreKeyBundle, UserDeviceList, WireOneTimePreKey, WireSignedPreKey } from "./directory";
+import type { DeviceAddress, DeviceKeyStatus, DeviceRegistrationRequest, KeyDirectory, MailboxEntry, MailboxEntryInput, PreKeyBundle, UserDeviceList, WireOneTimePreKey, WireSignedPreKey } from "./directory";
 import { verifySignedPreKey } from "./keys";
 
 interface StoredDevice {
@@ -22,6 +22,8 @@ export function isValidSignedPreKey(identityKey: string, signedPreKey: WireSigne
 
 export class InMemoryKeyDirectory {
   private readonly devices = new Map<string, Map<string, StoredDevice>>();
+  private readonly mailboxes = new Map<string, MailboxEntry[]>();
+  private mailboxSequence = 0;
 
   public forUser(userId: string): KeyDirectory {
     return {
@@ -43,6 +45,9 @@ export class InMemoryKeyDirectory {
       removeDevice: async (deviceId) => {
         this.devices.get(userId)?.delete(deviceId);
       },
+      depositMailbox: async (senderDeviceId, conversationId, entries) => this.deposit(userId, senderDeviceId, conversationId, entries),
+      fetchMailbox: async (deviceId) => this.mailbox(userId, deviceId),
+      acknowledgeMailbox: async (deviceId, ids) => this.acknowledge(userId, deviceId, ids),
     };
   }
 
@@ -74,6 +79,24 @@ export class InMemoryKeyDirectory {
       const oneTimePreKey = device.oneTimePreKeys.shift() ?? null;
       return [{ userId, deviceId, registrationId: device.registrationId, identityKey: device.identityKey, signedPreKey: device.signedPreKey, oneTimePreKey }];
     });
+  }
+
+  public deposit(senderId: string, senderDeviceId: string, conversationId: string, entries: readonly MailboxEntryInput[]): void {
+    for (const entry of entries) {
+      const key = `${entry.userId}:${entry.deviceId}`;
+      const queued = this.mailboxes.get(key) ?? [];
+      queued.push({ id: `mb-${++this.mailboxSequence}`, conversationId, senderId, senderDeviceId, ciphertext: entry.ciphertext });
+      this.mailboxes.set(key, queued);
+    }
+  }
+
+  public mailbox(userId: string, deviceId: string): MailboxEntry[] {
+    return [...(this.mailboxes.get(`${userId}:${deviceId}`) ?? [])];
+  }
+
+  public acknowledge(userId: string, deviceId: string, ids: readonly string[]): void {
+    const key = `${userId}:${deviceId}`;
+    this.mailboxes.set(key, (this.mailboxes.get(key) ?? []).filter((entry) => !ids.includes(entry.id)));
   }
 
   private require(userId: string, deviceId: string): StoredDevice {
