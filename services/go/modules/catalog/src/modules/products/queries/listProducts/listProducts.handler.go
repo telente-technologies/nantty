@@ -2,19 +2,15 @@ package listproducts
 
 import (
 	"context"
-	"strconv"
-
-	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 
 	"zudomart/modules/catalog/src/container"
 	"zudomart/modules/catalog/src/enums"
 	"zudomart/modules/catalog/src/generated/ent"
+	"zudomart/modules/catalog/src/generated/ent/category"
 	"zudomart/modules/catalog/src/generated/ent/predicate"
 	"zudomart/modules/catalog/src/generated/ent/product"
 	"zudomart/modules/catalog/src/services"
 	"zudomart/modules/catalog/src/types"
-	"zudomart/modules/catalog/src/utils"
 	"zudomart/platform/httpserver"
 )
 
@@ -23,35 +19,25 @@ type Handler struct {
 }
 
 func PublicListingConditions() []predicate.Product {
-	return []predicate.Product{product.Status(enums.ProductActive), product.PublishedOnline(true), product.Visibility(enums.VisibilityPublic), product.ModerationVisibilityIn(enums.ModerationVisible, enums.ModerationRestricted)}
+	return []predicate.Product{product.Status(enums.ProductActive), product.PublishedOnline(true), product.Visibility(enums.VisibilityPublic),
+		product.ModerationVisibilityIn(enums.ModerationVisible, enums.ModerationRestricted), services.ListedStoreCondition()}
 }
 
 func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.CursorPage[types.ProductSummaryView], error) {
 	empty := httpserver.CursorPage[types.ProductSummaryView]{}
-	conditions := services.WithRegionCondition(PublicListingConditions(), services.ViewerCountry(ctx, handler.Container, query.Viewer), query.Viewer)
-	if query.CategoryId != nil {
-		conditions = append(conditions, product.CategoryID(*query.CategoryId))
+	conditions, err := handler.conditions(ctx, query)
+	if err != nil {
+		return empty, err
 	}
-	if query.StoreId != nil {
-		conditions = append(conditions, product.StoreID(*query.StoreId))
-	}
-	if query.Text != "" {
-		conditions = append(conditions, product.NameContainsFold(query.Text))
-	}
-	after, err := cursorCondition(query.Cursor, query.Featured)
+	sort := sortFor(query)
+	after, err := sort.after(query.Cursor)
 	if err != nil {
 		return empty, err
 	}
 	if after != nil {
 		conditions = append(conditions, after)
 	}
-	request := handler.Container.Client.Product.Query().Where(conditions...)
-	if query.Featured {
-		request = request.Order(ent.Desc(product.FieldUnitsSold), ent.Desc(product.FieldID))
-	} else {
-		request = request.Order(ent.Desc(product.FieldPublishedAt), ent.Desc(product.FieldID))
-	}
-	rows, err := request.Limit(query.Limit + 1).All(ctx)
+	rows, err := handler.Container.Client.Product.Query().Where(conditions...).Order(sort.order()...).Limit(query.Limit + 1).All(ctx)
 	if err != nil {
 		return empty, err
 	}
@@ -59,7 +45,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.Cur
 	nextCursor := ""
 	if len(rows) > query.Limit {
 		visible = rows[:query.Limit]
-		nextCursor = cursorOf(visible[len(visible)-1], query.Featured)
+		nextCursor = sort.cursorOf(visible[len(visible)-1])
 	}
 	views, err := services.LoadProductSummaries(ctx, handler.Container, visible, query.Viewer)
 	if err != nil {
@@ -68,32 +54,42 @@ func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.Cur
 	return httpserver.NewCursorPage(views, nextCursor), nil
 }
 
-func cursorOf(row *ent.Product, featured bool) string {
-	if featured {
-		return utils.EncodeCursor(strconv.Itoa(row.UnitsSold), row.ID.String())
+func (handler Handler) conditions(ctx context.Context, query Query) ([]predicate.Product, error) {
+	conditions := services.WithRegionCondition(PublicListingConditions(), services.ViewerCountry(ctx, handler.Container, query.Viewer), query.Viewer)
+	if query.CategoryId != nil {
+		conditions = append(conditions, product.CategoryID(*query.CategoryId))
 	}
-	return utils.EncodeCursor(strconv.FormatInt(row.PublishedAt.UnixMicro(), 10), row.ID.String())
-}
-
-func cursorCondition(raw string, featured bool) (predicate.Product, error) {
-	parts, err := utils.DecodeCursor(raw, 2)
-	if err != nil || parts == nil {
-		return nil, err
-	}
-	number, numberError := strconv.ParseInt(parts[0], 10, 64)
-	identifier, idError := uuid.Parse(parts[1])
-	if numberError != nil || idError != nil {
-		return nil, httpserver.NewApiError(400, "INVALID_CURSOR", "The cursor is not valid.")
-	}
-	return predicate.Product(func(selector *sql.Selector) {
-		idColumn := selector.C(product.FieldID)
-		if featured {
-			column := selector.C(product.FieldUnitsSold)
-			selector.Where(sql.Or(sql.LT(column, number), sql.And(sql.EQ(column, number), sql.LT(idColumn, identifier))))
-			return
+	if query.CategorySlug != "" {
+		matched, err := handler.Container.Client.Category.Query().Where(category.StoreIDIsNil(), category.Slug(query.CategorySlug)).Only(ctx)
+		if ent.IsNotFound(err) {
+			return nil, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "categorySlug", Message: "is not a known category"}})
 		}
-		column := selector.C(product.FieldPublishedAt)
-		moment := microsecondsToTime(number)
-		selector.Where(sql.Or(sql.LT(column, moment), sql.And(sql.EQ(column, moment), sql.LT(idColumn, identifier))))
-	}), nil
+		if err != nil {
+			return nil, err
+		}
+		children, err := handler.Container.Client.Category.Query().Where(category.ParentID(matched.ID)).IDs(ctx)
+		if err != nil {
+			return nil, err
+		}
+		conditions = append(conditions, product.CategoryIDIn(append(children, matched.ID)...))
+	}
+	if query.StoreId != nil {
+		conditions = append(conditions, product.StoreID(*query.StoreId))
+	}
+	if query.BrandId != nil {
+		conditions = append(conditions, product.BrandID(*query.BrandId))
+	}
+	if query.Text != "" {
+		conditions = append(conditions, product.NameContainsFold(query.Text))
+	}
+	if query.Currency != "" {
+		conditions = append(conditions, product.Currency(query.Currency))
+	}
+	if query.MinPrice != nil {
+		conditions = append(conditions, product.MinPriceMinorGTE(*query.MinPrice))
+	}
+	if query.MaxPrice != nil {
+		conditions = append(conditions, product.MinPriceMinorLTE(*query.MaxPrice))
+	}
+	return conditions, nil
 }

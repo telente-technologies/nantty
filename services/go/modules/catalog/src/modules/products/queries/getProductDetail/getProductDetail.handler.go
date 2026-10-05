@@ -32,7 +32,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.ProductD
 		return types.ProductDetailView{}, err
 	}
 	store, err := handler.Container.Client.Store.Get(ctx, row.StoreID)
-	if err != nil || store.Status != enums.StoreActive {
+	if err != nil || store.Status != enums.StoreActive || !enums.IsShownToBuyers(store.ModerationVisibility) {
 		return types.ProductDetailView{}, catalogerrors.ProductNotFound
 	}
 	country := services.ViewerCountry(ctx, handler.Container, query.Viewer)
