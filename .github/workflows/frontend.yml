@@ -86,7 +86,7 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: apps/${{ matrix.app }}/.next/cache
           key: next-${{ matrix.app }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
