@@ -1,6 +1,9 @@
 <div align="center">
 
-<img src="apps/mobile/assets/icon.png" alt="Zudomart logo" width="96" height="96" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/zudomartLockupOnDark.svg" />
+  <img src="docs/assets/brand/zudomartLockup.svg" alt="Zudomart: the Call and response symbol and the Polished brush wordmark" height="64" />
+</picture>
 
 # Zudomart
 
@@ -22,7 +25,7 @@ Nigeria first. One account to follow creators, watch clips and lives, buy from r
 <img alt="Paystack" src="https://img.shields.io/badge/Payments-Paystack-0BA4DB?style=flat-square&logo=paystack&logoColor=white" />
 <img alt="AWS" src="https://img.shields.io/badge/Cloud-AWS_(planned)-232F3E?style=flat-square&logo=amazonwebservices&logoColor=white" />
 <img alt="pnpm" src="https://img.shields.io/badge/pnpm-11-F69220?style=flat-square&logo=pnpm&logoColor=white" />
-<img alt="Status" src="https://img.shields.io/badge/status-pre--launch-2043F5?style=flat-square" />
+<img alt="Status" src="https://img.shields.io/badge/status-pre--launch-3A2BFF?style=flat-square" />
 
 <br /><br />
 
@@ -77,6 +80,9 @@ Zudomart is a social network and a marketplace in one app, built for African buy
 - Chat with Chats / Requests / Spam folders, server-enforced message-request settings, blocking, per-chat mute
 - End-to-end encryption **designed** on the Signal protocol (per-device keys); not built yet
 - Streaks: +1 per day when both people send, an hourglass before the day ends, monthly restores, 100-day milestones
+- Post composer and clip composer with tagged people (notified, removable by the tagged person) and bottom sheets for pickers and settings
+- Scoped search: search inside a profile, a chat, saved items or the Mart, not only globally
+- Branded downloads: saved clips carry the Zudomart badge and an animated end card with the Call and response symbol
 - Reports for posts, users, messages and conversations; chat evidence is submitted from the reporter's device with consent
 
 </td>
@@ -98,7 +104,7 @@ Zudomart is a social network and a marketplace in one app, built for African buy
 
 ### <img src="docs/assets/readme/icons/marketplace.svg" width="20" height="20" alt="" /> Marketplace
 
-- Mart home, categories, collections, brands and "Official Store" badges for verified brands
+- Mart home with sticky category tabs and rotating banners, categories, collections, brands and "Official Store" badges for verified brands
 - Cart grouped by seller; shipping is charged once per seller order group, never per item
 - Seller-run shipping: destinations by country, state and LGA, fees, free thresholds, recomputed on the server
 - Escrow by default, or direct payment for verified stores when the buyer chooses it
@@ -126,6 +132,7 @@ Zudomart is a social network and a marketplace in one app, built for African buy
 - Moderation queues, chat-report queue (child safety is urgent), copyright and IP claims, audio matching hints
 - Suspensions with appeals; Python may suggest, an admin always decides
 - Admin console with department roles, fine-grained permissions, MFA, step-up auth and a full audit trail
+- Verification: Blue, Gold and Black checkmarks with a clear review status; paid plans carry renewals and free trials, with reminders before a renewal
 - **Legal admin**: versioned Terms, Privacy, Cookie policy and Community guidelines, with re-acceptance for material changes
 
 </td>
@@ -254,7 +261,7 @@ Python returns scores (risk, moderation, ranking). Go and TypeScript make the de
 ```mermaid
 flowchart TB
   classDef go fill:#e7f5ff,stroke:#1971c2,color:#0b2a4a
-  classDef ts fill:#edf2ff,stroke:#3b5bdb,color:#10194d
+  classDef ts fill:#edf2ff,stroke:#3A2BFF,color:#10194d
   classDef ex fill:#f3f0ff,stroke:#6741d9,color:#2b1660
   classDef py fill:#fff9db,stroke:#e67700,color:#3d2c00
 
@@ -698,6 +705,8 @@ Zudomart is **designed for NDPA 2023 and GDPR (where applicable)**. It does not 
 | Cards | card numbers are only entered on Paystack's hosted page; a saved card is a provider token in the device keystore, confirmed with biometrics |
 | Privacy | versioned consents (never one boolean), server-enforced privacy settings, data export and account deletion with grace periods, per-category retention flagged for legal review |
 | Supply chain | pnpm with `minimumReleaseAge`, blocked exotic sub-dependencies, strict build scripts, frozen lockfile in CI |
+
+The latest audit, with findings and fixes, is in [security/audit/reports/FINAL_SECURITY_AUDIT.md](security/audit/reports/FINAL_SECURITY_AUDIT.md). Fixes include JWT verification inside every service, webhook replay protection, per-route rate limits and stricter upload checks.
 
 Report a vulnerability privately by email (see [SECURITY.md](SECURITY.md) and [Contact](#contact)), never in a public issue.
 
