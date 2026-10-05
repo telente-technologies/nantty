@@ -16,8 +16,9 @@ import (
 )
 
 type fakeTargets struct {
-	mutex  sync.Mutex
-	owners map[string]string
+	mutex   sync.Mutex
+	owners  map[string]string
+	missing map[string]bool
 }
 
 func (targets *fakeTargets) own(targetType, targetId, owner string) {
@@ -30,6 +31,9 @@ func (targets *fakeTargets) Resolve(_ context.Context, targetType, targetId stri
 	targets.mutex.Lock()
 	defer targets.mutex.Unlock()
 	owner, found := targets.owners[targetType+":"+targetId]
+	if targets.missing[targetType+":"+targetId] {
+		return nil, integrations.ErrTargetNotFound
+	}
 	if !found {
 		return nil, nil
 	}
