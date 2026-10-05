@@ -1,7 +1,7 @@
 import type { AuditLogEntry } from "@/types/audit.type";
 import type { PlatformUserSummary } from "@/types/platformUser.type";
 
-export type SuspensionCaseSource = "PYTHON_SUGGESTION" | "USER_REPORTS";
+export type SuspensionCaseSource = "PYTHON_SUGGESTION" | "USER_REPORTS" | "COPYRIGHT_STRIKES";
 export type SuspensionCaseStatus = "PENDING" | "ESCALATED" | "SUSPENDED" | "DISMISSED";
 export type SuspensionReasonCode = "FRAUD" | "SCAM" | "COUNTERFEIT" | "HARASSMENT" | "IMPERSONATION" | "SPAM_NETWORK" | "OTHER";
 export type SuspensionAppealStatus = "PENDING" | "UPHELD" | "OVERTURNED";
@@ -38,7 +38,7 @@ export interface SuspensionCaseSummary {
 export interface SuspensionDecision {
   readonly outcome: "SUSPENDED" | "DISMISSED" | "ESCALATED";
   readonly reasonCode: SuspensionReasonCode | null;
-  readonly note: string;
+  readonly reason: string;
   readonly decidedByName: string;
   readonly decidedAt: string;
 }

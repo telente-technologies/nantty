@@ -11,6 +11,15 @@ export interface ReservedUsernameEntry {
   readonly addedByName: string;
 }
 
+export type ReservedUsernameMatchKind = "exact" | "prefix" | "contains" | "brand";
+
+export interface ReservedUsernameRule {
+  readonly id: string;
+  readonly term: string;
+  readonly matchKind: ReservedUsernameMatchKind;
+  readonly createdAt?: string;
+}
+
 export interface ConfusableCollision {
   readonly entryId: string;
   readonly value: string;
