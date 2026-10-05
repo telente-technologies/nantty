@@ -22,6 +22,13 @@ interface AuthState {
   readonly clearSessionAndSignOut: () => Promise<void>;
 }
 
+const signOutHooks = new Set<() => Promise<void>>();
+
+export const registerSignOutHook = (hook: () => Promise<void>) => {
+  signOutHooks.add(hook);
+  return () => signOutHooks.delete(hook);
+};
+
 export const useAuthStore = create<AuthState>((set) => ({
   status: "loading",
   user: null,
@@ -51,6 +58,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   updateSignedInUser: (user) => set({ user }),
   clearSessionAndSignOut: async () => {
+    await Promise.all([...signOutHooks].map((hook) => hook().catch(() => undefined)));
     await Promise.all([secureStorage.remove(storageKeys.accessToken), secureStorage.remove(storageKeys.refreshToken)]);
     set({ accessToken: null, refreshToken: null, user: null, status: "signedOut" });
   },
