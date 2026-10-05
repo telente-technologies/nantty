@@ -13,6 +13,11 @@ export function createGetModerationTargetPreviewHandler(context: HandlerContext)
       if (comment === null) throw missing();
       return { ownerId: comment.authorId, title: null, text: comment.text, mediaUrls: [], soundTitle: null, createdAt: comment.createdAt.toISOString() };
     }
+    if (targetType === "message") {
+      const message = await db.message.findUnique({ where: { id: targetId }, select: { senderId: true, kind: true, createdAt: true } });
+      if (message === null) throw missing();
+      return { ownerId: message.senderId, title: `Chat ${message.kind} message`, text: null, mediaUrls: [], soundTitle: null, createdAt: message.createdAt.toISOString() };
+    }
     if (targetType === "sound") {
       const sound = await db.sound.findUnique({ where: { id: targetId } });
       if (sound === null) throw missing();
