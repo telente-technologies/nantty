@@ -156,6 +156,20 @@ func (_c *WithdrawalCreate) SetNillableReviewedAt(v *time.Time) *WithdrawalCreat
 	return _c
 }
 
+// SetReviewNote sets the "review_note" field.
+func (_c *WithdrawalCreate) SetReviewNote(v string) *WithdrawalCreate {
+	_c.mutation.SetReviewNote(v)
+	return _c
+}
+
+// SetNillableReviewNote sets the "review_note" field if the given value is not nil.
+func (_c *WithdrawalCreate) SetNillableReviewNote(v *string) *WithdrawalCreate {
+	if v != nil {
+		_c.SetReviewNote(*v)
+	}
+	return _c
+}
+
 // SetProcessedAt sets the "processed_at" field.
 func (_c *WithdrawalCreate) SetProcessedAt(v time.Time) *WithdrawalCreate {
 	_c.mutation.SetProcessedAt(v)
@@ -267,6 +281,10 @@ func (_c *WithdrawalCreate) defaults() {
 		v := withdrawal.DefaultReviewedByStaffID
 		_c.mutation.SetReviewedByStaffID(v)
 	}
+	if _, ok := _c.mutation.ReviewNote(); !ok {
+		v := withdrawal.DefaultReviewNote
+		_c.mutation.SetReviewNote(v)
+	}
 	if _, ok := _c.mutation.Version(); !ok {
 		v := withdrawal.DefaultVersion
 		_c.mutation.SetVersion(v)
@@ -360,6 +378,14 @@ func (_c *WithdrawalCreate) check() error {
 	if v, ok := _c.mutation.ReviewedByStaffID(); ok {
 		if err := withdrawal.ReviewedByStaffIDValidator(v); err != nil {
 			return &ValidationError{Name: "reviewed_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.reviewed_by_staff_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ReviewNote(); !ok {
+		return &ValidationError{Name: "review_note", err: errors.New(`ent: missing required field "Withdrawal.review_note"`)}
+	}
+	if v, ok := _c.mutation.ReviewNote(); ok {
+		if err := withdrawal.ReviewNoteValidator(v); err != nil {
+			return &ValidationError{Name: "review_note", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.review_note": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Version(); !ok {
@@ -460,6 +486,10 @@ func (_c *WithdrawalCreate) createSpec() (*Withdrawal, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ReviewedAt(); ok {
 		_spec.SetField(withdrawal.FieldReviewedAt, field.TypeTime, value)
 		_node.ReviewedAt = &value
+	}
+	if value, ok := _c.mutation.ReviewNote(); ok {
+		_spec.SetField(withdrawal.FieldReviewNote, field.TypeString, value)
+		_node.ReviewNote = value
 	}
 	if value, ok := _c.mutation.ProcessedAt(); ok {
 		_spec.SetField(withdrawal.FieldProcessedAt, field.TypeTime, value)
@@ -576,6 +606,18 @@ func (u *WithdrawalUpsert) UpdateReviewedAt() *WithdrawalUpsert {
 // ClearReviewedAt clears the value of the "reviewed_at" field.
 func (u *WithdrawalUpsert) ClearReviewedAt() *WithdrawalUpsert {
 	u.SetNull(withdrawal.FieldReviewedAt)
+	return u
+}
+
+// SetReviewNote sets the "review_note" field.
+func (u *WithdrawalUpsert) SetReviewNote(v string) *WithdrawalUpsert {
+	u.Set(withdrawal.FieldReviewNote, v)
+	return u
+}
+
+// UpdateReviewNote sets the "review_note" field to the value that was provided on create.
+func (u *WithdrawalUpsert) UpdateReviewNote() *WithdrawalUpsert {
+	u.SetExcluded(withdrawal.FieldReviewNote)
 	return u
 }
 
@@ -765,6 +807,20 @@ func (u *WithdrawalUpsertOne) UpdateReviewedAt() *WithdrawalUpsertOne {
 func (u *WithdrawalUpsertOne) ClearReviewedAt() *WithdrawalUpsertOne {
 	return u.Update(func(s *WithdrawalUpsert) {
 		s.ClearReviewedAt()
+	})
+}
+
+// SetReviewNote sets the "review_note" field.
+func (u *WithdrawalUpsertOne) SetReviewNote(v string) *WithdrawalUpsertOne {
+	return u.Update(func(s *WithdrawalUpsert) {
+		s.SetReviewNote(v)
+	})
+}
+
+// UpdateReviewNote sets the "review_note" field to the value that was provided on create.
+func (u *WithdrawalUpsertOne) UpdateReviewNote() *WithdrawalUpsertOne {
+	return u.Update(func(s *WithdrawalUpsert) {
+		s.UpdateReviewNote()
 	})
 }
 
@@ -1129,6 +1185,20 @@ func (u *WithdrawalUpsertBulk) UpdateReviewedAt() *WithdrawalUpsertBulk {
 func (u *WithdrawalUpsertBulk) ClearReviewedAt() *WithdrawalUpsertBulk {
 	return u.Update(func(s *WithdrawalUpsert) {
 		s.ClearReviewedAt()
+	})
+}
+
+// SetReviewNote sets the "review_note" field.
+func (u *WithdrawalUpsertBulk) SetReviewNote(v string) *WithdrawalUpsertBulk {
+	return u.Update(func(s *WithdrawalUpsert) {
+		s.SetReviewNote(v)
+	})
+}
+
+// UpdateReviewNote sets the "review_note" field to the value that was provided on create.
+func (u *WithdrawalUpsertBulk) UpdateReviewNote() *WithdrawalUpsertBulk {
+	return u.Update(func(s *WithdrawalUpsert) {
+		s.UpdateReviewNote()
 	})
 }
 

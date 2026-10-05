@@ -46,6 +46,8 @@ type Withdrawal struct {
 	ReviewedByStaffID string `json:"reviewed_by_staff_id,omitempty"`
 	// ReviewedAt holds the value of the "reviewed_at" field.
 	ReviewedAt *time.Time `json:"reviewed_at,omitempty"`
+	// ReviewNote holds the value of the "review_note" field.
+	ReviewNote string `json:"review_note,omitempty"`
 	// ProcessedAt holds the value of the "processed_at" field.
 	ProcessedAt *time.Time `json:"processed_at,omitempty"`
 	// Version holds the value of the "version" field.
@@ -62,7 +64,7 @@ func (*Withdrawal) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case withdrawal.FieldAmountMinor, withdrawal.FieldFeeMinor, withdrawal.FieldNetMinor, withdrawal.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case withdrawal.FieldUserID, withdrawal.FieldReference, withdrawal.FieldCurrency, withdrawal.FieldProvider, withdrawal.FieldDestinationLabel, withdrawal.FieldStatus, withdrawal.FieldFailureReason, withdrawal.FieldReviewedByStaffID:
+		case withdrawal.FieldUserID, withdrawal.FieldReference, withdrawal.FieldCurrency, withdrawal.FieldProvider, withdrawal.FieldDestinationLabel, withdrawal.FieldStatus, withdrawal.FieldFailureReason, withdrawal.FieldReviewedByStaffID, withdrawal.FieldReviewNote:
 			values[i] = new(sql.NullString)
 		case withdrawal.FieldCreatedAt, withdrawal.FieldReviewedAt, withdrawal.FieldProcessedAt, withdrawal.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -174,6 +176,12 @@ func (_m *Withdrawal) assignValues(columns []string, values []any) error {
 				_m.ReviewedAt = new(time.Time)
 				*_m.ReviewedAt = value.Time
 			}
+		case withdrawal.FieldReviewNote:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field review_note", values[i])
+			} else if value.Valid {
+				_m.ReviewNote = value.String
+			}
 		case withdrawal.FieldProcessedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field processed_at", values[i])
@@ -272,6 +280,9 @@ func (_m *Withdrawal) String() string {
 		builder.WriteString("reviewed_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("review_note=")
+	builder.WriteString(_m.ReviewNote)
 	builder.WriteString(", ")
 	if v := _m.ProcessedAt; v != nil {
 		builder.WriteString("processed_at=")

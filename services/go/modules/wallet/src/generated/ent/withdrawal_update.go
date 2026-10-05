@@ -91,6 +91,20 @@ func (_u *WithdrawalUpdate) ClearReviewedAt() *WithdrawalUpdate {
 	return _u
 }
 
+// SetReviewNote sets the "review_note" field.
+func (_u *WithdrawalUpdate) SetReviewNote(v string) *WithdrawalUpdate {
+	_u.mutation.SetReviewNote(v)
+	return _u
+}
+
+// SetNillableReviewNote sets the "review_note" field if the given value is not nil.
+func (_u *WithdrawalUpdate) SetNillableReviewNote(v *string) *WithdrawalUpdate {
+	if v != nil {
+		_u.SetReviewNote(*v)
+	}
+	return _u
+}
+
 // SetProcessedAt sets the "processed_at" field.
 func (_u *WithdrawalUpdate) SetProcessedAt(v time.Time) *WithdrawalUpdate {
 	_u.mutation.SetProcessedAt(v)
@@ -196,6 +210,11 @@ func (_u *WithdrawalUpdate) check() error {
 			return &ValidationError{Name: "reviewed_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.reviewed_by_staff_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReviewNote(); ok {
+		if err := withdrawal.ReviewNoteValidator(v); err != nil {
+			return &ValidationError{Name: "review_note", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.review_note": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -225,6 +244,9 @@ func (_u *WithdrawalUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if _u.mutation.ReviewedAtCleared() {
 		_spec.ClearField(withdrawal.FieldReviewedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReviewNote(); ok {
+		_spec.SetField(withdrawal.FieldReviewNote, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ProcessedAt(); ok {
 		_spec.SetField(withdrawal.FieldProcessedAt, field.TypeTime, value)
@@ -322,6 +344,20 @@ func (_u *WithdrawalUpdateOne) SetNillableReviewedAt(v *time.Time) *WithdrawalUp
 // ClearReviewedAt clears the value of the "reviewed_at" field.
 func (_u *WithdrawalUpdateOne) ClearReviewedAt() *WithdrawalUpdateOne {
 	_u.mutation.ClearReviewedAt()
+	return _u
+}
+
+// SetReviewNote sets the "review_note" field.
+func (_u *WithdrawalUpdateOne) SetReviewNote(v string) *WithdrawalUpdateOne {
+	_u.mutation.SetReviewNote(v)
+	return _u
+}
+
+// SetNillableReviewNote sets the "review_note" field if the given value is not nil.
+func (_u *WithdrawalUpdateOne) SetNillableReviewNote(v *string) *WithdrawalUpdateOne {
+	if v != nil {
+		_u.SetReviewNote(*v)
+	}
 	return _u
 }
 
@@ -443,6 +479,11 @@ func (_u *WithdrawalUpdateOne) check() error {
 			return &ValidationError{Name: "reviewed_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.reviewed_by_staff_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReviewNote(); ok {
+		if err := withdrawal.ReviewNoteValidator(v); err != nil {
+			return &ValidationError{Name: "review_note", err: fmt.Errorf(`ent: validator failed for field "Withdrawal.review_note": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -489,6 +530,9 @@ func (_u *WithdrawalUpdateOne) sqlSave(ctx context.Context) (_node *Withdrawal, 
 	}
 	if _u.mutation.ReviewedAtCleared() {
 		_spec.ClearField(withdrawal.FieldReviewedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReviewNote(); ok {
+		_spec.SetField(withdrawal.FieldReviewNote, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ProcessedAt(); ok {
 		_spec.SetField(withdrawal.FieldProcessedAt, field.TypeTime, value)
