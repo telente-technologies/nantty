@@ -1,6 +1,8 @@
 export type WhoCanMentionMe = "everyone" | "following" | "no_one";
 export type MentionTargetStatus = "active" | "suspended" | "deleted";
 
+export type CheckmarkColor = "blue" | "gold" | "black";
+
 export interface UserSummary {
   readonly id: string;
   readonly name: string;
@@ -19,5 +21,6 @@ export interface IdentityDirectory {
   findMentionTargetStatuses(accountIds: readonly string[]): Promise<ReadonlyMap<string, { readonly username: string | null; readonly status: MentionTargetStatus }>>;
   hasPersonalizationConsent(accountId: string): Promise<boolean>;
   findAccountsAllowingPersonalizedAds(accountIds: readonly string[]): Promise<ReadonlySet<string>>;
+  findCheckmarkColors(accountIds: readonly string[]): Promise<ReadonlyMap<string, CheckmarkColor>>;
   findAccountCreatedAt(accountId: string): Promise<Date | undefined>;
 }

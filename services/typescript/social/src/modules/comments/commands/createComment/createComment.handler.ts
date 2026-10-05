@@ -27,6 +27,7 @@ export function createCreateCommentHandler(context: HandlerContext): Handler<Cre
     const now = context.clock.now();
     const actor = await resolveEventActor(context.directory, command.authorId);
     const created = await context.database.transaction(async (transaction) => {
+      if (!(await postRepository.incrementCounterIfNotDeleted(transaction, post.id, "commentCount", 1))) throw notFound("POST_NOT_FOUND", "This post was deleted, so your comment wasn't posted.");
       const comment = await commentRepository.create(transaction, {
         postId: post.id,
         authorId: command.authorId,
@@ -37,7 +38,6 @@ export function createCreateCommentHandler(context: HandlerContext): Handler<Cre
         path: placement.path,
         ...(placement.parentCommentId === null ? {} : { parentCommentId: placement.parentCommentId, rootCommentId: placement.rootCommentId }),
       });
-      await postRepository.incrementCounter(transaction, post.id, "commentCount", 1);
       if (parent !== null) await commentRepository.incrementReplies(transaction, parent.id, 1);
       const events: DomainEventInput[] = [];
       const excerpt = buildExcerpt(command.text);
