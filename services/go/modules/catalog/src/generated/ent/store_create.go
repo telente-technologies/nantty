@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"zudomart/modules/catalog/src/databases/schema"
 	"zudomart/modules/catalog/src/generated/ent/store"
 
 	"entgo.io/ent/dialect"
@@ -206,6 +207,128 @@ func (_c *StoreCreate) SetShippingCountryCodes(v []string) *StoreCreate {
 	return _c
 }
 
+// SetLocale sets the "locale" field.
+func (_c *StoreCreate) SetLocale(v string) *StoreCreate {
+	_c.mutation.SetLocale(v)
+	return _c
+}
+
+// SetNillableLocale sets the "locale" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableLocale(v *string) *StoreCreate {
+	if v != nil {
+		_c.SetLocale(*v)
+	}
+	return _c
+}
+
+// SetContactPhone sets the "contact_phone" field.
+func (_c *StoreCreate) SetContactPhone(v string) *StoreCreate {
+	_c.mutation.SetContactPhone(v)
+	return _c
+}
+
+// SetNillableContactPhone sets the "contact_phone" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableContactPhone(v *string) *StoreCreate {
+	if v != nil {
+		_c.SetContactPhone(*v)
+	}
+	return _c
+}
+
+// SetContactEmail sets the "contact_email" field.
+func (_c *StoreCreate) SetContactEmail(v string) *StoreCreate {
+	_c.mutation.SetContactEmail(v)
+	return _c
+}
+
+// SetNillableContactEmail sets the "contact_email" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableContactEmail(v *string) *StoreCreate {
+	if v != nil {
+		_c.SetContactEmail(*v)
+	}
+	return _c
+}
+
+// SetContactAddress sets the "contact_address" field.
+func (_c *StoreCreate) SetContactAddress(v string) *StoreCreate {
+	_c.mutation.SetContactAddress(v)
+	return _c
+}
+
+// SetNillableContactAddress sets the "contact_address" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableContactAddress(v *string) *StoreCreate {
+	if v != nil {
+		_c.SetContactAddress(*v)
+	}
+	return _c
+}
+
+// SetTaxRates sets the "tax_rates" field.
+func (_c *StoreCreate) SetTaxRates(v []schema.StoreTaxRate) *StoreCreate {
+	_c.mutation.SetTaxRates(v)
+	return _c
+}
+
+// SetPricesIncludeTax sets the "prices_include_tax" field.
+func (_c *StoreCreate) SetPricesIncludeTax(v bool) *StoreCreate {
+	_c.mutation.SetPricesIncludeTax(v)
+	return _c
+}
+
+// SetNillablePricesIncludeTax sets the "prices_include_tax" field if the given value is not nil.
+func (_c *StoreCreate) SetNillablePricesIncludeTax(v *bool) *StoreCreate {
+	if v != nil {
+		_c.SetPricesIncludeTax(*v)
+	}
+	return _c
+}
+
+// SetPolicies sets the "policies" field.
+func (_c *StoreCreate) SetPolicies(v schema.StorePolicies) *StoreCreate {
+	_c.mutation.SetPolicies(v)
+	return _c
+}
+
+// SetNillablePolicies sets the "policies" field if the given value is not nil.
+func (_c *StoreCreate) SetNillablePolicies(v *schema.StorePolicies) *StoreCreate {
+	if v != nil {
+		_c.SetPolicies(*v)
+	}
+	return _c
+}
+
+// SetNotificationPreferences sets the "notification_preferences" field.
+func (_c *StoreCreate) SetNotificationPreferences(v map[string]bool) *StoreCreate {
+	_c.mutation.SetNotificationPreferences(v)
+	return _c
+}
+
+// SetTagline sets the "tagline" field.
+func (_c *StoreCreate) SetTagline(v string) *StoreCreate {
+	_c.mutation.SetTagline(v)
+	return _c
+}
+
+// SetNillableTagline sets the "tagline" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableTagline(v *string) *StoreCreate {
+	if v != nil {
+		_c.SetTagline(*v)
+	}
+	return _c
+}
+
+// SetOpeningHours sets the "opening_hours" field.
+func (_c *StoreCreate) SetOpeningHours(v []schema.StoreOpeningHours) *StoreCreate {
+	_c.mutation.SetOpeningHours(v)
+	return _c
+}
+
+// SetSocialLinks sets the "social_links" field.
+func (_c *StoreCreate) SetSocialLinks(v map[string]string) *StoreCreate {
+	_c.mutation.SetSocialLinks(v)
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *StoreCreate) SetUpdatedAt(v time.Time) *StoreCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -301,6 +424,30 @@ func (_c *StoreCreate) defaults() {
 		v := store.DefaultModerationVisibility
 		_c.mutation.SetModerationVisibility(v)
 	}
+	if _, ok := _c.mutation.Locale(); !ok {
+		v := store.DefaultLocale
+		_c.mutation.SetLocale(v)
+	}
+	if _, ok := _c.mutation.ContactPhone(); !ok {
+		v := store.DefaultContactPhone
+		_c.mutation.SetContactPhone(v)
+	}
+	if _, ok := _c.mutation.ContactEmail(); !ok {
+		v := store.DefaultContactEmail
+		_c.mutation.SetContactEmail(v)
+	}
+	if _, ok := _c.mutation.ContactAddress(); !ok {
+		v := store.DefaultContactAddress
+		_c.mutation.SetContactAddress(v)
+	}
+	if _, ok := _c.mutation.PricesIncludeTax(); !ok {
+		v := store.DefaultPricesIncludeTax
+		_c.mutation.SetPricesIncludeTax(v)
+	}
+	if _, ok := _c.mutation.Tagline(); !ok {
+		v := store.DefaultTagline
+		_c.mutation.SetTagline(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := store.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -394,6 +541,49 @@ func (_c *StoreCreate) check() error {
 	}
 	if _, ok := _c.mutation.ModerationVisibility(); !ok {
 		return &ValidationError{Name: "moderation_visibility", err: errors.New(`ent: missing required field "Store.moderation_visibility"`)}
+	}
+	if _, ok := _c.mutation.Locale(); !ok {
+		return &ValidationError{Name: "locale", err: errors.New(`ent: missing required field "Store.locale"`)}
+	}
+	if v, ok := _c.mutation.Locale(); ok {
+		if err := store.LocaleValidator(v); err != nil {
+			return &ValidationError{Name: "locale", err: fmt.Errorf(`ent: validator failed for field "Store.locale": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ContactPhone(); !ok {
+		return &ValidationError{Name: "contact_phone", err: errors.New(`ent: missing required field "Store.contact_phone"`)}
+	}
+	if v, ok := _c.mutation.ContactPhone(); ok {
+		if err := store.ContactPhoneValidator(v); err != nil {
+			return &ValidationError{Name: "contact_phone", err: fmt.Errorf(`ent: validator failed for field "Store.contact_phone": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ContactEmail(); !ok {
+		return &ValidationError{Name: "contact_email", err: errors.New(`ent: missing required field "Store.contact_email"`)}
+	}
+	if v, ok := _c.mutation.ContactEmail(); ok {
+		if err := store.ContactEmailValidator(v); err != nil {
+			return &ValidationError{Name: "contact_email", err: fmt.Errorf(`ent: validator failed for field "Store.contact_email": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ContactAddress(); !ok {
+		return &ValidationError{Name: "contact_address", err: errors.New(`ent: missing required field "Store.contact_address"`)}
+	}
+	if v, ok := _c.mutation.ContactAddress(); ok {
+		if err := store.ContactAddressValidator(v); err != nil {
+			return &ValidationError{Name: "contact_address", err: fmt.Errorf(`ent: validator failed for field "Store.contact_address": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PricesIncludeTax(); !ok {
+		return &ValidationError{Name: "prices_include_tax", err: errors.New(`ent: missing required field "Store.prices_include_tax"`)}
+	}
+	if _, ok := _c.mutation.Tagline(); !ok {
+		return &ValidationError{Name: "tagline", err: errors.New(`ent: missing required field "Store.tagline"`)}
+	}
+	if v, ok := _c.mutation.Tagline(); ok {
+		if err := store.TaglineValidator(v); err != nil {
+			return &ValidationError{Name: "tagline", err: fmt.Errorf(`ent: validator failed for field "Store.tagline": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Store.updated_at"`)}
@@ -501,6 +691,50 @@ func (_c *StoreCreate) createSpec() (*Store, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ShippingCountryCodes(); ok {
 		_spec.SetField(store.FieldShippingCountryCodes, field.TypeJSON, value)
 		_node.ShippingCountryCodes = value
+	}
+	if value, ok := _c.mutation.Locale(); ok {
+		_spec.SetField(store.FieldLocale, field.TypeString, value)
+		_node.Locale = value
+	}
+	if value, ok := _c.mutation.ContactPhone(); ok {
+		_spec.SetField(store.FieldContactPhone, field.TypeString, value)
+		_node.ContactPhone = value
+	}
+	if value, ok := _c.mutation.ContactEmail(); ok {
+		_spec.SetField(store.FieldContactEmail, field.TypeString, value)
+		_node.ContactEmail = value
+	}
+	if value, ok := _c.mutation.ContactAddress(); ok {
+		_spec.SetField(store.FieldContactAddress, field.TypeString, value)
+		_node.ContactAddress = value
+	}
+	if value, ok := _c.mutation.TaxRates(); ok {
+		_spec.SetField(store.FieldTaxRates, field.TypeJSON, value)
+		_node.TaxRates = value
+	}
+	if value, ok := _c.mutation.PricesIncludeTax(); ok {
+		_spec.SetField(store.FieldPricesIncludeTax, field.TypeBool, value)
+		_node.PricesIncludeTax = value
+	}
+	if value, ok := _c.mutation.Policies(); ok {
+		_spec.SetField(store.FieldPolicies, field.TypeJSON, value)
+		_node.Policies = value
+	}
+	if value, ok := _c.mutation.NotificationPreferences(); ok {
+		_spec.SetField(store.FieldNotificationPreferences, field.TypeJSON, value)
+		_node.NotificationPreferences = value
+	}
+	if value, ok := _c.mutation.Tagline(); ok {
+		_spec.SetField(store.FieldTagline, field.TypeString, value)
+		_node.Tagline = value
+	}
+	if value, ok := _c.mutation.OpeningHours(); ok {
+		_spec.SetField(store.FieldOpeningHours, field.TypeJSON, value)
+		_node.OpeningHours = value
+	}
+	if value, ok := _c.mutation.SocialLinks(); ok {
+		_spec.SetField(store.FieldSocialLinks, field.TypeJSON, value)
+		_node.SocialLinks = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(store.FieldUpdatedAt, field.TypeTime, value)
@@ -753,6 +987,168 @@ func (u *StoreUpsert) UpdateShippingCountryCodes() *StoreUpsert {
 // ClearShippingCountryCodes clears the value of the "shipping_country_codes" field.
 func (u *StoreUpsert) ClearShippingCountryCodes() *StoreUpsert {
 	u.SetNull(store.FieldShippingCountryCodes)
+	return u
+}
+
+// SetLocale sets the "locale" field.
+func (u *StoreUpsert) SetLocale(v string) *StoreUpsert {
+	u.Set(store.FieldLocale, v)
+	return u
+}
+
+// UpdateLocale sets the "locale" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateLocale() *StoreUpsert {
+	u.SetExcluded(store.FieldLocale)
+	return u
+}
+
+// SetContactPhone sets the "contact_phone" field.
+func (u *StoreUpsert) SetContactPhone(v string) *StoreUpsert {
+	u.Set(store.FieldContactPhone, v)
+	return u
+}
+
+// UpdateContactPhone sets the "contact_phone" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateContactPhone() *StoreUpsert {
+	u.SetExcluded(store.FieldContactPhone)
+	return u
+}
+
+// SetContactEmail sets the "contact_email" field.
+func (u *StoreUpsert) SetContactEmail(v string) *StoreUpsert {
+	u.Set(store.FieldContactEmail, v)
+	return u
+}
+
+// UpdateContactEmail sets the "contact_email" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateContactEmail() *StoreUpsert {
+	u.SetExcluded(store.FieldContactEmail)
+	return u
+}
+
+// SetContactAddress sets the "contact_address" field.
+func (u *StoreUpsert) SetContactAddress(v string) *StoreUpsert {
+	u.Set(store.FieldContactAddress, v)
+	return u
+}
+
+// UpdateContactAddress sets the "contact_address" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateContactAddress() *StoreUpsert {
+	u.SetExcluded(store.FieldContactAddress)
+	return u
+}
+
+// SetTaxRates sets the "tax_rates" field.
+func (u *StoreUpsert) SetTaxRates(v []schema.StoreTaxRate) *StoreUpsert {
+	u.Set(store.FieldTaxRates, v)
+	return u
+}
+
+// UpdateTaxRates sets the "tax_rates" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateTaxRates() *StoreUpsert {
+	u.SetExcluded(store.FieldTaxRates)
+	return u
+}
+
+// ClearTaxRates clears the value of the "tax_rates" field.
+func (u *StoreUpsert) ClearTaxRates() *StoreUpsert {
+	u.SetNull(store.FieldTaxRates)
+	return u
+}
+
+// SetPricesIncludeTax sets the "prices_include_tax" field.
+func (u *StoreUpsert) SetPricesIncludeTax(v bool) *StoreUpsert {
+	u.Set(store.FieldPricesIncludeTax, v)
+	return u
+}
+
+// UpdatePricesIncludeTax sets the "prices_include_tax" field to the value that was provided on create.
+func (u *StoreUpsert) UpdatePricesIncludeTax() *StoreUpsert {
+	u.SetExcluded(store.FieldPricesIncludeTax)
+	return u
+}
+
+// SetPolicies sets the "policies" field.
+func (u *StoreUpsert) SetPolicies(v schema.StorePolicies) *StoreUpsert {
+	u.Set(store.FieldPolicies, v)
+	return u
+}
+
+// UpdatePolicies sets the "policies" field to the value that was provided on create.
+func (u *StoreUpsert) UpdatePolicies() *StoreUpsert {
+	u.SetExcluded(store.FieldPolicies)
+	return u
+}
+
+// ClearPolicies clears the value of the "policies" field.
+func (u *StoreUpsert) ClearPolicies() *StoreUpsert {
+	u.SetNull(store.FieldPolicies)
+	return u
+}
+
+// SetNotificationPreferences sets the "notification_preferences" field.
+func (u *StoreUpsert) SetNotificationPreferences(v map[string]bool) *StoreUpsert {
+	u.Set(store.FieldNotificationPreferences, v)
+	return u
+}
+
+// UpdateNotificationPreferences sets the "notification_preferences" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateNotificationPreferences() *StoreUpsert {
+	u.SetExcluded(store.FieldNotificationPreferences)
+	return u
+}
+
+// ClearNotificationPreferences clears the value of the "notification_preferences" field.
+func (u *StoreUpsert) ClearNotificationPreferences() *StoreUpsert {
+	u.SetNull(store.FieldNotificationPreferences)
+	return u
+}
+
+// SetTagline sets the "tagline" field.
+func (u *StoreUpsert) SetTagline(v string) *StoreUpsert {
+	u.Set(store.FieldTagline, v)
+	return u
+}
+
+// UpdateTagline sets the "tagline" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateTagline() *StoreUpsert {
+	u.SetExcluded(store.FieldTagline)
+	return u
+}
+
+// SetOpeningHours sets the "opening_hours" field.
+func (u *StoreUpsert) SetOpeningHours(v []schema.StoreOpeningHours) *StoreUpsert {
+	u.Set(store.FieldOpeningHours, v)
+	return u
+}
+
+// UpdateOpeningHours sets the "opening_hours" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateOpeningHours() *StoreUpsert {
+	u.SetExcluded(store.FieldOpeningHours)
+	return u
+}
+
+// ClearOpeningHours clears the value of the "opening_hours" field.
+func (u *StoreUpsert) ClearOpeningHours() *StoreUpsert {
+	u.SetNull(store.FieldOpeningHours)
+	return u
+}
+
+// SetSocialLinks sets the "social_links" field.
+func (u *StoreUpsert) SetSocialLinks(v map[string]string) *StoreUpsert {
+	u.Set(store.FieldSocialLinks, v)
+	return u
+}
+
+// UpdateSocialLinks sets the "social_links" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateSocialLinks() *StoreUpsert {
+	u.SetExcluded(store.FieldSocialLinks)
+	return u
+}
+
+// ClearSocialLinks clears the value of the "social_links" field.
+func (u *StoreUpsert) ClearSocialLinks() *StoreUpsert {
+	u.SetNull(store.FieldSocialLinks)
 	return u
 }
 
@@ -1053,6 +1449,195 @@ func (u *StoreUpsertOne) UpdateShippingCountryCodes() *StoreUpsertOne {
 func (u *StoreUpsertOne) ClearShippingCountryCodes() *StoreUpsertOne {
 	return u.Update(func(s *StoreUpsert) {
 		s.ClearShippingCountryCodes()
+	})
+}
+
+// SetLocale sets the "locale" field.
+func (u *StoreUpsertOne) SetLocale(v string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetLocale(v)
+	})
+}
+
+// UpdateLocale sets the "locale" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateLocale() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateLocale()
+	})
+}
+
+// SetContactPhone sets the "contact_phone" field.
+func (u *StoreUpsertOne) SetContactPhone(v string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetContactPhone(v)
+	})
+}
+
+// UpdateContactPhone sets the "contact_phone" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateContactPhone() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateContactPhone()
+	})
+}
+
+// SetContactEmail sets the "contact_email" field.
+func (u *StoreUpsertOne) SetContactEmail(v string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetContactEmail(v)
+	})
+}
+
+// UpdateContactEmail sets the "contact_email" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateContactEmail() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateContactEmail()
+	})
+}
+
+// SetContactAddress sets the "contact_address" field.
+func (u *StoreUpsertOne) SetContactAddress(v string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetContactAddress(v)
+	})
+}
+
+// UpdateContactAddress sets the "contact_address" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateContactAddress() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateContactAddress()
+	})
+}
+
+// SetTaxRates sets the "tax_rates" field.
+func (u *StoreUpsertOne) SetTaxRates(v []schema.StoreTaxRate) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetTaxRates(v)
+	})
+}
+
+// UpdateTaxRates sets the "tax_rates" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateTaxRates() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateTaxRates()
+	})
+}
+
+// ClearTaxRates clears the value of the "tax_rates" field.
+func (u *StoreUpsertOne) ClearTaxRates() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearTaxRates()
+	})
+}
+
+// SetPricesIncludeTax sets the "prices_include_tax" field.
+func (u *StoreUpsertOne) SetPricesIncludeTax(v bool) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetPricesIncludeTax(v)
+	})
+}
+
+// UpdatePricesIncludeTax sets the "prices_include_tax" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdatePricesIncludeTax() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdatePricesIncludeTax()
+	})
+}
+
+// SetPolicies sets the "policies" field.
+func (u *StoreUpsertOne) SetPolicies(v schema.StorePolicies) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetPolicies(v)
+	})
+}
+
+// UpdatePolicies sets the "policies" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdatePolicies() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdatePolicies()
+	})
+}
+
+// ClearPolicies clears the value of the "policies" field.
+func (u *StoreUpsertOne) ClearPolicies() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearPolicies()
+	})
+}
+
+// SetNotificationPreferences sets the "notification_preferences" field.
+func (u *StoreUpsertOne) SetNotificationPreferences(v map[string]bool) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetNotificationPreferences(v)
+	})
+}
+
+// UpdateNotificationPreferences sets the "notification_preferences" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateNotificationPreferences() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateNotificationPreferences()
+	})
+}
+
+// ClearNotificationPreferences clears the value of the "notification_preferences" field.
+func (u *StoreUpsertOne) ClearNotificationPreferences() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearNotificationPreferences()
+	})
+}
+
+// SetTagline sets the "tagline" field.
+func (u *StoreUpsertOne) SetTagline(v string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetTagline(v)
+	})
+}
+
+// UpdateTagline sets the "tagline" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateTagline() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateTagline()
+	})
+}
+
+// SetOpeningHours sets the "opening_hours" field.
+func (u *StoreUpsertOne) SetOpeningHours(v []schema.StoreOpeningHours) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetOpeningHours(v)
+	})
+}
+
+// UpdateOpeningHours sets the "opening_hours" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateOpeningHours() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateOpeningHours()
+	})
+}
+
+// ClearOpeningHours clears the value of the "opening_hours" field.
+func (u *StoreUpsertOne) ClearOpeningHours() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearOpeningHours()
+	})
+}
+
+// SetSocialLinks sets the "social_links" field.
+func (u *StoreUpsertOne) SetSocialLinks(v map[string]string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetSocialLinks(v)
+	})
+}
+
+// UpdateSocialLinks sets the "social_links" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateSocialLinks() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateSocialLinks()
+	})
+}
+
+// ClearSocialLinks clears the value of the "social_links" field.
+func (u *StoreUpsertOne) ClearSocialLinks() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearSocialLinks()
 	})
 }
 
@@ -1522,6 +2107,195 @@ func (u *StoreUpsertBulk) UpdateShippingCountryCodes() *StoreUpsertBulk {
 func (u *StoreUpsertBulk) ClearShippingCountryCodes() *StoreUpsertBulk {
 	return u.Update(func(s *StoreUpsert) {
 		s.ClearShippingCountryCodes()
+	})
+}
+
+// SetLocale sets the "locale" field.
+func (u *StoreUpsertBulk) SetLocale(v string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetLocale(v)
+	})
+}
+
+// UpdateLocale sets the "locale" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateLocale() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateLocale()
+	})
+}
+
+// SetContactPhone sets the "contact_phone" field.
+func (u *StoreUpsertBulk) SetContactPhone(v string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetContactPhone(v)
+	})
+}
+
+// UpdateContactPhone sets the "contact_phone" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateContactPhone() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateContactPhone()
+	})
+}
+
+// SetContactEmail sets the "contact_email" field.
+func (u *StoreUpsertBulk) SetContactEmail(v string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetContactEmail(v)
+	})
+}
+
+// UpdateContactEmail sets the "contact_email" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateContactEmail() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateContactEmail()
+	})
+}
+
+// SetContactAddress sets the "contact_address" field.
+func (u *StoreUpsertBulk) SetContactAddress(v string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetContactAddress(v)
+	})
+}
+
+// UpdateContactAddress sets the "contact_address" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateContactAddress() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateContactAddress()
+	})
+}
+
+// SetTaxRates sets the "tax_rates" field.
+func (u *StoreUpsertBulk) SetTaxRates(v []schema.StoreTaxRate) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetTaxRates(v)
+	})
+}
+
+// UpdateTaxRates sets the "tax_rates" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateTaxRates() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateTaxRates()
+	})
+}
+
+// ClearTaxRates clears the value of the "tax_rates" field.
+func (u *StoreUpsertBulk) ClearTaxRates() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearTaxRates()
+	})
+}
+
+// SetPricesIncludeTax sets the "prices_include_tax" field.
+func (u *StoreUpsertBulk) SetPricesIncludeTax(v bool) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetPricesIncludeTax(v)
+	})
+}
+
+// UpdatePricesIncludeTax sets the "prices_include_tax" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdatePricesIncludeTax() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdatePricesIncludeTax()
+	})
+}
+
+// SetPolicies sets the "policies" field.
+func (u *StoreUpsertBulk) SetPolicies(v schema.StorePolicies) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetPolicies(v)
+	})
+}
+
+// UpdatePolicies sets the "policies" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdatePolicies() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdatePolicies()
+	})
+}
+
+// ClearPolicies clears the value of the "policies" field.
+func (u *StoreUpsertBulk) ClearPolicies() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearPolicies()
+	})
+}
+
+// SetNotificationPreferences sets the "notification_preferences" field.
+func (u *StoreUpsertBulk) SetNotificationPreferences(v map[string]bool) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetNotificationPreferences(v)
+	})
+}
+
+// UpdateNotificationPreferences sets the "notification_preferences" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateNotificationPreferences() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateNotificationPreferences()
+	})
+}
+
+// ClearNotificationPreferences clears the value of the "notification_preferences" field.
+func (u *StoreUpsertBulk) ClearNotificationPreferences() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearNotificationPreferences()
+	})
+}
+
+// SetTagline sets the "tagline" field.
+func (u *StoreUpsertBulk) SetTagline(v string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetTagline(v)
+	})
+}
+
+// UpdateTagline sets the "tagline" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateTagline() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateTagline()
+	})
+}
+
+// SetOpeningHours sets the "opening_hours" field.
+func (u *StoreUpsertBulk) SetOpeningHours(v []schema.StoreOpeningHours) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetOpeningHours(v)
+	})
+}
+
+// UpdateOpeningHours sets the "opening_hours" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateOpeningHours() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateOpeningHours()
+	})
+}
+
+// ClearOpeningHours clears the value of the "opening_hours" field.
+func (u *StoreUpsertBulk) ClearOpeningHours() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearOpeningHours()
+	})
+}
+
+// SetSocialLinks sets the "social_links" field.
+func (u *StoreUpsertBulk) SetSocialLinks(v map[string]string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetSocialLinks(v)
+	})
+}
+
+// UpdateSocialLinks sets the "social_links" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateSocialLinks() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateSocialLinks()
+	})
+}
+
+// ClearSocialLinks clears the value of the "social_links" field.
+func (u *StoreUpsertBulk) ClearSocialLinks() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearSocialLinks()
 	})
 }
 

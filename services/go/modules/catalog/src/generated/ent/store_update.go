@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"zudomart/modules/catalog/src/databases/schema"
 	"zudomart/modules/catalog/src/generated/ent/predicate"
 	"zudomart/modules/catalog/src/generated/ent/store"
 
@@ -255,6 +256,170 @@ func (_u *StoreUpdate) ClearShippingCountryCodes() *StoreUpdate {
 	return _u
 }
 
+// SetLocale sets the "locale" field.
+func (_u *StoreUpdate) SetLocale(v string) *StoreUpdate {
+	_u.mutation.SetLocale(v)
+	return _u
+}
+
+// SetNillableLocale sets the "locale" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableLocale(v *string) *StoreUpdate {
+	if v != nil {
+		_u.SetLocale(*v)
+	}
+	return _u
+}
+
+// SetContactPhone sets the "contact_phone" field.
+func (_u *StoreUpdate) SetContactPhone(v string) *StoreUpdate {
+	_u.mutation.SetContactPhone(v)
+	return _u
+}
+
+// SetNillableContactPhone sets the "contact_phone" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableContactPhone(v *string) *StoreUpdate {
+	if v != nil {
+		_u.SetContactPhone(*v)
+	}
+	return _u
+}
+
+// SetContactEmail sets the "contact_email" field.
+func (_u *StoreUpdate) SetContactEmail(v string) *StoreUpdate {
+	_u.mutation.SetContactEmail(v)
+	return _u
+}
+
+// SetNillableContactEmail sets the "contact_email" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableContactEmail(v *string) *StoreUpdate {
+	if v != nil {
+		_u.SetContactEmail(*v)
+	}
+	return _u
+}
+
+// SetContactAddress sets the "contact_address" field.
+func (_u *StoreUpdate) SetContactAddress(v string) *StoreUpdate {
+	_u.mutation.SetContactAddress(v)
+	return _u
+}
+
+// SetNillableContactAddress sets the "contact_address" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableContactAddress(v *string) *StoreUpdate {
+	if v != nil {
+		_u.SetContactAddress(*v)
+	}
+	return _u
+}
+
+// SetTaxRates sets the "tax_rates" field.
+func (_u *StoreUpdate) SetTaxRates(v []schema.StoreTaxRate) *StoreUpdate {
+	_u.mutation.SetTaxRates(v)
+	return _u
+}
+
+// AppendTaxRates appends value to the "tax_rates" field.
+func (_u *StoreUpdate) AppendTaxRates(v []schema.StoreTaxRate) *StoreUpdate {
+	_u.mutation.AppendTaxRates(v)
+	return _u
+}
+
+// ClearTaxRates clears the value of the "tax_rates" field.
+func (_u *StoreUpdate) ClearTaxRates() *StoreUpdate {
+	_u.mutation.ClearTaxRates()
+	return _u
+}
+
+// SetPricesIncludeTax sets the "prices_include_tax" field.
+func (_u *StoreUpdate) SetPricesIncludeTax(v bool) *StoreUpdate {
+	_u.mutation.SetPricesIncludeTax(v)
+	return _u
+}
+
+// SetNillablePricesIncludeTax sets the "prices_include_tax" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillablePricesIncludeTax(v *bool) *StoreUpdate {
+	if v != nil {
+		_u.SetPricesIncludeTax(*v)
+	}
+	return _u
+}
+
+// SetPolicies sets the "policies" field.
+func (_u *StoreUpdate) SetPolicies(v schema.StorePolicies) *StoreUpdate {
+	_u.mutation.SetPolicies(v)
+	return _u
+}
+
+// SetNillablePolicies sets the "policies" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillablePolicies(v *schema.StorePolicies) *StoreUpdate {
+	if v != nil {
+		_u.SetPolicies(*v)
+	}
+	return _u
+}
+
+// ClearPolicies clears the value of the "policies" field.
+func (_u *StoreUpdate) ClearPolicies() *StoreUpdate {
+	_u.mutation.ClearPolicies()
+	return _u
+}
+
+// SetNotificationPreferences sets the "notification_preferences" field.
+func (_u *StoreUpdate) SetNotificationPreferences(v map[string]bool) *StoreUpdate {
+	_u.mutation.SetNotificationPreferences(v)
+	return _u
+}
+
+// ClearNotificationPreferences clears the value of the "notification_preferences" field.
+func (_u *StoreUpdate) ClearNotificationPreferences() *StoreUpdate {
+	_u.mutation.ClearNotificationPreferences()
+	return _u
+}
+
+// SetTagline sets the "tagline" field.
+func (_u *StoreUpdate) SetTagline(v string) *StoreUpdate {
+	_u.mutation.SetTagline(v)
+	return _u
+}
+
+// SetNillableTagline sets the "tagline" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableTagline(v *string) *StoreUpdate {
+	if v != nil {
+		_u.SetTagline(*v)
+	}
+	return _u
+}
+
+// SetOpeningHours sets the "opening_hours" field.
+func (_u *StoreUpdate) SetOpeningHours(v []schema.StoreOpeningHours) *StoreUpdate {
+	_u.mutation.SetOpeningHours(v)
+	return _u
+}
+
+// AppendOpeningHours appends value to the "opening_hours" field.
+func (_u *StoreUpdate) AppendOpeningHours(v []schema.StoreOpeningHours) *StoreUpdate {
+	_u.mutation.AppendOpeningHours(v)
+	return _u
+}
+
+// ClearOpeningHours clears the value of the "opening_hours" field.
+func (_u *StoreUpdate) ClearOpeningHours() *StoreUpdate {
+	_u.mutation.ClearOpeningHours()
+	return _u
+}
+
+// SetSocialLinks sets the "social_links" field.
+func (_u *StoreUpdate) SetSocialLinks(v map[string]string) *StoreUpdate {
+	_u.mutation.SetSocialLinks(v)
+	return _u
+}
+
+// ClearSocialLinks clears the value of the "social_links" field.
+func (_u *StoreUpdate) ClearSocialLinks() *StoreUpdate {
+	_u.mutation.ClearSocialLinks()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *StoreUpdate) SetUpdatedAt(v time.Time) *StoreUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -344,6 +509,31 @@ func (_u *StoreUpdate) check() error {
 			return &ValidationError{Name: "timezone", err: fmt.Errorf(`ent: validator failed for field "Store.timezone": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Locale(); ok {
+		if err := store.LocaleValidator(v); err != nil {
+			return &ValidationError{Name: "locale", err: fmt.Errorf(`ent: validator failed for field "Store.locale": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ContactPhone(); ok {
+		if err := store.ContactPhoneValidator(v); err != nil {
+			return &ValidationError{Name: "contact_phone", err: fmt.Errorf(`ent: validator failed for field "Store.contact_phone": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ContactEmail(); ok {
+		if err := store.ContactEmailValidator(v); err != nil {
+			return &ValidationError{Name: "contact_email", err: fmt.Errorf(`ent: validator failed for field "Store.contact_email": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ContactAddress(); ok {
+		if err := store.ContactAddressValidator(v); err != nil {
+			return &ValidationError{Name: "contact_address", err: fmt.Errorf(`ent: validator failed for field "Store.contact_address": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Tagline(); ok {
+		if err := store.TaglineValidator(v); err != nil {
+			return &ValidationError{Name: "tagline", err: fmt.Errorf(`ent: validator failed for field "Store.tagline": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -420,6 +610,64 @@ func (_u *StoreUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.ShippingCountryCodesCleared() {
 		_spec.ClearField(store.FieldShippingCountryCodes, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Locale(); ok {
+		_spec.SetField(store.FieldLocale, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ContactPhone(); ok {
+		_spec.SetField(store.FieldContactPhone, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ContactEmail(); ok {
+		_spec.SetField(store.FieldContactEmail, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ContactAddress(); ok {
+		_spec.SetField(store.FieldContactAddress, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.TaxRates(); ok {
+		_spec.SetField(store.FieldTaxRates, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTaxRates(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, store.FieldTaxRates, value)
+		})
+	}
+	if _u.mutation.TaxRatesCleared() {
+		_spec.ClearField(store.FieldTaxRates, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.PricesIncludeTax(); ok {
+		_spec.SetField(store.FieldPricesIncludeTax, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Policies(); ok {
+		_spec.SetField(store.FieldPolicies, field.TypeJSON, value)
+	}
+	if _u.mutation.PoliciesCleared() {
+		_spec.ClearField(store.FieldPolicies, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.NotificationPreferences(); ok {
+		_spec.SetField(store.FieldNotificationPreferences, field.TypeJSON, value)
+	}
+	if _u.mutation.NotificationPreferencesCleared() {
+		_spec.ClearField(store.FieldNotificationPreferences, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Tagline(); ok {
+		_spec.SetField(store.FieldTagline, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OpeningHours(); ok {
+		_spec.SetField(store.FieldOpeningHours, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedOpeningHours(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, store.FieldOpeningHours, value)
+		})
+	}
+	if _u.mutation.OpeningHoursCleared() {
+		_spec.ClearField(store.FieldOpeningHours, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SocialLinks(); ok {
+		_spec.SetField(store.FieldSocialLinks, field.TypeJSON, value)
+	}
+	if _u.mutation.SocialLinksCleared() {
+		_spec.ClearField(store.FieldSocialLinks, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(store.FieldUpdatedAt, field.TypeTime, value)
@@ -670,6 +918,170 @@ func (_u *StoreUpdateOne) ClearShippingCountryCodes() *StoreUpdateOne {
 	return _u
 }
 
+// SetLocale sets the "locale" field.
+func (_u *StoreUpdateOne) SetLocale(v string) *StoreUpdateOne {
+	_u.mutation.SetLocale(v)
+	return _u
+}
+
+// SetNillableLocale sets the "locale" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableLocale(v *string) *StoreUpdateOne {
+	if v != nil {
+		_u.SetLocale(*v)
+	}
+	return _u
+}
+
+// SetContactPhone sets the "contact_phone" field.
+func (_u *StoreUpdateOne) SetContactPhone(v string) *StoreUpdateOne {
+	_u.mutation.SetContactPhone(v)
+	return _u
+}
+
+// SetNillableContactPhone sets the "contact_phone" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableContactPhone(v *string) *StoreUpdateOne {
+	if v != nil {
+		_u.SetContactPhone(*v)
+	}
+	return _u
+}
+
+// SetContactEmail sets the "contact_email" field.
+func (_u *StoreUpdateOne) SetContactEmail(v string) *StoreUpdateOne {
+	_u.mutation.SetContactEmail(v)
+	return _u
+}
+
+// SetNillableContactEmail sets the "contact_email" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableContactEmail(v *string) *StoreUpdateOne {
+	if v != nil {
+		_u.SetContactEmail(*v)
+	}
+	return _u
+}
+
+// SetContactAddress sets the "contact_address" field.
+func (_u *StoreUpdateOne) SetContactAddress(v string) *StoreUpdateOne {
+	_u.mutation.SetContactAddress(v)
+	return _u
+}
+
+// SetNillableContactAddress sets the "contact_address" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableContactAddress(v *string) *StoreUpdateOne {
+	if v != nil {
+		_u.SetContactAddress(*v)
+	}
+	return _u
+}
+
+// SetTaxRates sets the "tax_rates" field.
+func (_u *StoreUpdateOne) SetTaxRates(v []schema.StoreTaxRate) *StoreUpdateOne {
+	_u.mutation.SetTaxRates(v)
+	return _u
+}
+
+// AppendTaxRates appends value to the "tax_rates" field.
+func (_u *StoreUpdateOne) AppendTaxRates(v []schema.StoreTaxRate) *StoreUpdateOne {
+	_u.mutation.AppendTaxRates(v)
+	return _u
+}
+
+// ClearTaxRates clears the value of the "tax_rates" field.
+func (_u *StoreUpdateOne) ClearTaxRates() *StoreUpdateOne {
+	_u.mutation.ClearTaxRates()
+	return _u
+}
+
+// SetPricesIncludeTax sets the "prices_include_tax" field.
+func (_u *StoreUpdateOne) SetPricesIncludeTax(v bool) *StoreUpdateOne {
+	_u.mutation.SetPricesIncludeTax(v)
+	return _u
+}
+
+// SetNillablePricesIncludeTax sets the "prices_include_tax" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillablePricesIncludeTax(v *bool) *StoreUpdateOne {
+	if v != nil {
+		_u.SetPricesIncludeTax(*v)
+	}
+	return _u
+}
+
+// SetPolicies sets the "policies" field.
+func (_u *StoreUpdateOne) SetPolicies(v schema.StorePolicies) *StoreUpdateOne {
+	_u.mutation.SetPolicies(v)
+	return _u
+}
+
+// SetNillablePolicies sets the "policies" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillablePolicies(v *schema.StorePolicies) *StoreUpdateOne {
+	if v != nil {
+		_u.SetPolicies(*v)
+	}
+	return _u
+}
+
+// ClearPolicies clears the value of the "policies" field.
+func (_u *StoreUpdateOne) ClearPolicies() *StoreUpdateOne {
+	_u.mutation.ClearPolicies()
+	return _u
+}
+
+// SetNotificationPreferences sets the "notification_preferences" field.
+func (_u *StoreUpdateOne) SetNotificationPreferences(v map[string]bool) *StoreUpdateOne {
+	_u.mutation.SetNotificationPreferences(v)
+	return _u
+}
+
+// ClearNotificationPreferences clears the value of the "notification_preferences" field.
+func (_u *StoreUpdateOne) ClearNotificationPreferences() *StoreUpdateOne {
+	_u.mutation.ClearNotificationPreferences()
+	return _u
+}
+
+// SetTagline sets the "tagline" field.
+func (_u *StoreUpdateOne) SetTagline(v string) *StoreUpdateOne {
+	_u.mutation.SetTagline(v)
+	return _u
+}
+
+// SetNillableTagline sets the "tagline" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableTagline(v *string) *StoreUpdateOne {
+	if v != nil {
+		_u.SetTagline(*v)
+	}
+	return _u
+}
+
+// SetOpeningHours sets the "opening_hours" field.
+func (_u *StoreUpdateOne) SetOpeningHours(v []schema.StoreOpeningHours) *StoreUpdateOne {
+	_u.mutation.SetOpeningHours(v)
+	return _u
+}
+
+// AppendOpeningHours appends value to the "opening_hours" field.
+func (_u *StoreUpdateOne) AppendOpeningHours(v []schema.StoreOpeningHours) *StoreUpdateOne {
+	_u.mutation.AppendOpeningHours(v)
+	return _u
+}
+
+// ClearOpeningHours clears the value of the "opening_hours" field.
+func (_u *StoreUpdateOne) ClearOpeningHours() *StoreUpdateOne {
+	_u.mutation.ClearOpeningHours()
+	return _u
+}
+
+// SetSocialLinks sets the "social_links" field.
+func (_u *StoreUpdateOne) SetSocialLinks(v map[string]string) *StoreUpdateOne {
+	_u.mutation.SetSocialLinks(v)
+	return _u
+}
+
+// ClearSocialLinks clears the value of the "social_links" field.
+func (_u *StoreUpdateOne) ClearSocialLinks() *StoreUpdateOne {
+	_u.mutation.ClearSocialLinks()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *StoreUpdateOne) SetUpdatedAt(v time.Time) *StoreUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -772,6 +1184,31 @@ func (_u *StoreUpdateOne) check() error {
 			return &ValidationError{Name: "timezone", err: fmt.Errorf(`ent: validator failed for field "Store.timezone": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Locale(); ok {
+		if err := store.LocaleValidator(v); err != nil {
+			return &ValidationError{Name: "locale", err: fmt.Errorf(`ent: validator failed for field "Store.locale": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ContactPhone(); ok {
+		if err := store.ContactPhoneValidator(v); err != nil {
+			return &ValidationError{Name: "contact_phone", err: fmt.Errorf(`ent: validator failed for field "Store.contact_phone": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ContactEmail(); ok {
+		if err := store.ContactEmailValidator(v); err != nil {
+			return &ValidationError{Name: "contact_email", err: fmt.Errorf(`ent: validator failed for field "Store.contact_email": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ContactAddress(); ok {
+		if err := store.ContactAddressValidator(v); err != nil {
+			return &ValidationError{Name: "contact_address", err: fmt.Errorf(`ent: validator failed for field "Store.contact_address": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Tagline(); ok {
+		if err := store.TaglineValidator(v); err != nil {
+			return &ValidationError{Name: "tagline", err: fmt.Errorf(`ent: validator failed for field "Store.tagline": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -865,6 +1302,64 @@ func (_u *StoreUpdateOne) sqlSave(ctx context.Context) (_node *Store, err error)
 	}
 	if _u.mutation.ShippingCountryCodesCleared() {
 		_spec.ClearField(store.FieldShippingCountryCodes, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Locale(); ok {
+		_spec.SetField(store.FieldLocale, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ContactPhone(); ok {
+		_spec.SetField(store.FieldContactPhone, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ContactEmail(); ok {
+		_spec.SetField(store.FieldContactEmail, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ContactAddress(); ok {
+		_spec.SetField(store.FieldContactAddress, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.TaxRates(); ok {
+		_spec.SetField(store.FieldTaxRates, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedTaxRates(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, store.FieldTaxRates, value)
+		})
+	}
+	if _u.mutation.TaxRatesCleared() {
+		_spec.ClearField(store.FieldTaxRates, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.PricesIncludeTax(); ok {
+		_spec.SetField(store.FieldPricesIncludeTax, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Policies(); ok {
+		_spec.SetField(store.FieldPolicies, field.TypeJSON, value)
+	}
+	if _u.mutation.PoliciesCleared() {
+		_spec.ClearField(store.FieldPolicies, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.NotificationPreferences(); ok {
+		_spec.SetField(store.FieldNotificationPreferences, field.TypeJSON, value)
+	}
+	if _u.mutation.NotificationPreferencesCleared() {
+		_spec.ClearField(store.FieldNotificationPreferences, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Tagline(); ok {
+		_spec.SetField(store.FieldTagline, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OpeningHours(); ok {
+		_spec.SetField(store.FieldOpeningHours, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedOpeningHours(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, store.FieldOpeningHours, value)
+		})
+	}
+	if _u.mutation.OpeningHoursCleared() {
+		_spec.ClearField(store.FieldOpeningHours, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.SocialLinks(); ok {
+		_spec.SetField(store.FieldSocialLinks, field.TypeJSON, value)
+	}
+	if _u.mutation.SocialLinksCleared() {
+		_spec.ClearField(store.FieldSocialLinks, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(store.FieldUpdatedAt, field.TypeTime, value)

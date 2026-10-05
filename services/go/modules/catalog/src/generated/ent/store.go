@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"zudomart/modules/catalog/src/databases/schema"
 	"zudomart/modules/catalog/src/generated/ent/store"
 
 	"entgo.io/ent"
@@ -53,6 +54,28 @@ type Store struct {
 	ModerationVisibility string `json:"moderation_visibility,omitempty"`
 	// ShippingCountryCodes holds the value of the "shipping_country_codes" field.
 	ShippingCountryCodes []string `json:"shipping_country_codes,omitempty"`
+	// Locale holds the value of the "locale" field.
+	Locale string `json:"locale,omitempty"`
+	// ContactPhone holds the value of the "contact_phone" field.
+	ContactPhone string `json:"contact_phone,omitempty"`
+	// ContactEmail holds the value of the "contact_email" field.
+	ContactEmail string `json:"contact_email,omitempty"`
+	// ContactAddress holds the value of the "contact_address" field.
+	ContactAddress string `json:"contact_address,omitempty"`
+	// TaxRates holds the value of the "tax_rates" field.
+	TaxRates []schema.StoreTaxRate `json:"tax_rates,omitempty"`
+	// PricesIncludeTax holds the value of the "prices_include_tax" field.
+	PricesIncludeTax bool `json:"prices_include_tax,omitempty"`
+	// Policies holds the value of the "policies" field.
+	Policies schema.StorePolicies `json:"policies,omitempty"`
+	// NotificationPreferences holds the value of the "notification_preferences" field.
+	NotificationPreferences map[string]bool `json:"notification_preferences,omitempty"`
+	// Tagline holds the value of the "tagline" field.
+	Tagline string `json:"tagline,omitempty"`
+	// OpeningHours holds the value of the "opening_hours" field.
+	OpeningHours []schema.StoreOpeningHours `json:"opening_hours,omitempty"`
+	// SocialLinks holds the value of the "social_links" field.
+	SocialLinks map[string]string `json:"social_links,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -63,13 +86,13 @@ func (*Store) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case store.FieldShippingCountryCodes:
+		case store.FieldShippingCountryCodes, store.FieldTaxRates, store.FieldPolicies, store.FieldNotificationPreferences, store.FieldOpeningHours, store.FieldSocialLinks:
 			values[i] = new([]byte)
-		case store.FieldVerified:
+		case store.FieldVerified, store.FieldPricesIncludeTax:
 			values[i] = new(sql.NullBool)
 		case store.FieldRatingSum, store.FieldRatingCount:
 			values[i] = new(sql.NullInt64)
-		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus, store.FieldModerationVisibility:
+		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus, store.FieldModerationVisibility, store.FieldLocale, store.FieldContactPhone, store.FieldContactEmail, store.FieldContactAddress, store.FieldTagline:
 			values[i] = new(sql.NullString)
 		case store.FieldCreatedAt, store.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -202,6 +225,82 @@ func (_m *Store) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field shipping_country_codes: %w", err)
 				}
 			}
+		case store.FieldLocale:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field locale", values[i])
+			} else if value.Valid {
+				_m.Locale = value.String
+			}
+		case store.FieldContactPhone:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field contact_phone", values[i])
+			} else if value.Valid {
+				_m.ContactPhone = value.String
+			}
+		case store.FieldContactEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field contact_email", values[i])
+			} else if value.Valid {
+				_m.ContactEmail = value.String
+			}
+		case store.FieldContactAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field contact_address", values[i])
+			} else if value.Valid {
+				_m.ContactAddress = value.String
+			}
+		case store.FieldTaxRates:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field tax_rates", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.TaxRates); err != nil {
+					return fmt.Errorf("unmarshal field tax_rates: %w", err)
+				}
+			}
+		case store.FieldPricesIncludeTax:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field prices_include_tax", values[i])
+			} else if value.Valid {
+				_m.PricesIncludeTax = value.Bool
+			}
+		case store.FieldPolicies:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field policies", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Policies); err != nil {
+					return fmt.Errorf("unmarshal field policies: %w", err)
+				}
+			}
+		case store.FieldNotificationPreferences:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field notification_preferences", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.NotificationPreferences); err != nil {
+					return fmt.Errorf("unmarshal field notification_preferences: %w", err)
+				}
+			}
+		case store.FieldTagline:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field tagline", values[i])
+			} else if value.Valid {
+				_m.Tagline = value.String
+			}
+		case store.FieldOpeningHours:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field opening_hours", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.OpeningHours); err != nil {
+					return fmt.Errorf("unmarshal field opening_hours: %w", err)
+				}
+			}
+		case store.FieldSocialLinks:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field social_links", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.SocialLinks); err != nil {
+					return fmt.Errorf("unmarshal field social_links: %w", err)
+				}
+			}
 		case store.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -298,6 +397,39 @@ func (_m *Store) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("shipping_country_codes=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ShippingCountryCodes))
+	builder.WriteString(", ")
+	builder.WriteString("locale=")
+	builder.WriteString(_m.Locale)
+	builder.WriteString(", ")
+	builder.WriteString("contact_phone=")
+	builder.WriteString(_m.ContactPhone)
+	builder.WriteString(", ")
+	builder.WriteString("contact_email=")
+	builder.WriteString(_m.ContactEmail)
+	builder.WriteString(", ")
+	builder.WriteString("contact_address=")
+	builder.WriteString(_m.ContactAddress)
+	builder.WriteString(", ")
+	builder.WriteString("tax_rates=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TaxRates))
+	builder.WriteString(", ")
+	builder.WriteString("prices_include_tax=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PricesIncludeTax))
+	builder.WriteString(", ")
+	builder.WriteString("policies=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Policies))
+	builder.WriteString(", ")
+	builder.WriteString("notification_preferences=")
+	builder.WriteString(fmt.Sprintf("%v", _m.NotificationPreferences))
+	builder.WriteString(", ")
+	builder.WriteString("tagline=")
+	builder.WriteString(_m.Tagline)
+	builder.WriteString(", ")
+	builder.WriteString("opening_hours=")
+	builder.WriteString(fmt.Sprintf("%v", _m.OpeningHours))
+	builder.WriteString(", ")
+	builder.WriteString("social_links=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SocialLinks))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
