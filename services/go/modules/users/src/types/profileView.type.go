@@ -32,7 +32,6 @@ type UserView struct {
 	JoinedAt         string   `json:"joinedAt"`
 	CreatedAt        string   `json:"createdAt"`
 	Email            *string  `json:"email,omitempty"`
-	Phone            *string  `json:"phone,omitempty"`
 	Birthday         *string  `json:"birthday,omitempty"`
 	Roles            []string `json:"roles,omitempty"`
 	BirthdayToday    bool     `json:"birthdayToday"`

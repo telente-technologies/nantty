@@ -23,5 +23,10 @@ func ValidateAddReservedUsernameRuleRequest(request dtos.AddReservedUsernameRule
 	collector := &utils.IssueCollector{}
 	collector.RequireLength("term", request.Term, 2, 30)
 	collector.RequireOneOf("matchKind", request.MatchKind, []string{"exact", "prefix", "contains", "brand"})
+	if request.Category != "" {
+		collector.RequireOneOf("category", request.Category, []string{"BRAND", "GOVERNMENT", "SYSTEM", "OFFENSIVE", "PUBLIC_FIGURE"})
+	}
+	collector.RequireLength("note", request.Note, 0, 500)
+	collector.RequireLength("reason", request.Reason, 0, 500)
 	return collector.Result()
 }
