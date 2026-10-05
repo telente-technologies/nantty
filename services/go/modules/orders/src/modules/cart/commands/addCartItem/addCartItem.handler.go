@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent"
 	"zudomart/modules/orders/src/generated/ent/cart"
 	"zudomart/modules/orders/src/generated/ent/cartitem"
+	"zudomart/modules/orders/src/modules/cart/dtos"
 	"zudomart/modules/orders/src/services"
 	"zudomart/modules/orders/src/types"
 	"zudomart/platform/commerceports"
@@ -49,15 +50,29 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Cart
 		if err := handler.checkStock(ctx, snapshot, quantity); err != nil {
 			return err
 		}
+		source, attributionId := attributionOf(command.Request.Attribution)
 		if existing != nil {
-			return existing.Update().SetQuantity(quantity).Exec(ctx)
+			update := existing.Update().SetQuantity(quantity)
+			if existing.AttributionSource == nil && source != nil {
+				update.SetAttributionSource(*source).SetAttributionID(*attributionId)
+			}
+			return update.Exec(ctx)
 		}
-		return tx.CartItem.Create().SetCartID(cartId).SetProductID(snapshot.ProductId).SetVariantID(snapshot.VariantId).SetStoreID(snapshot.StoreId).SetQuantity(quantity).Exec(ctx)
+		return tx.CartItem.Create().SetCartID(cartId).SetProductID(snapshot.ProductId).SetVariantID(snapshot.VariantId).SetStoreID(snapshot.StoreId).SetQuantity(quantity).
+			SetNillableAttributionSource(source).SetNillableAttributionID(attributionId).Exec(ctx)
 	})
 	if err != nil {
 		return types.CartView{}, err
 	}
 	return services.BuildCartView(ctx, handler.Container, command.AccountId, nil)
+}
+
+func attributionOf(attribution *dtos.SaleAttribution) (*string, *uuid.UUID) {
+	if attribution == nil {
+		return nil, nil
+	}
+	identifier := uuid.MustParse(attribution.Id)
+	return &attribution.Source, &identifier
 }
 
 func ensureCart(ctx context.Context, tx *ent.Tx, accountId uuid.UUID) (uuid.UUID, error) {

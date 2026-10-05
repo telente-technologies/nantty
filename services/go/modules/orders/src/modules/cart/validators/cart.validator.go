@@ -1,7 +1,10 @@
 package validators
 
 import (
+	"slices"
+
 	"zudomart/modules/orders/src/modules/cart/dtos"
+	"zudomart/modules/orders/src/types"
 	"zudomart/modules/orders/src/utils"
 )
 
@@ -12,6 +15,12 @@ func ValidateAddCartItem(body dtos.AddCartItemRequest) error {
 		utils.ParseIdentifier("variantId", *body.VariantId, &collected)
 	}
 	collected.CheckRange("quantity", body.Quantity, 1, 99)
+	if body.Attribution != nil {
+		if !slices.Contains(types.SaleAttributionSources, body.Attribution.Source) {
+			collected.Add("attribution.source", "must be post, clip or live")
+		}
+		utils.ParseIdentifier("attribution.id", body.Attribution.Id, &collected)
+	}
 	return collected.AsError()
 }
 

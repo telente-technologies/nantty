@@ -3,12 +3,16 @@ package getreport
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	"zudomart/platform/commerceports"
 )
 
 type Query struct {
-	Store commerceports.StoreAccess
-	Kind  string
-	From  time.Time
-	To    time.Time
+	Store      commerceports.StoreAccess
+	ActorId    uuid.UUID
+	Kind       string
+	From       time.Time
+	To         time.Time
+	LocationId *uuid.UUID
 }

@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"github.com/google/uuid"
 	"net/http"
 	"slices"
 	"strconv"
 	"time"
-	"zudomart/platform/sellerplans"
+
+	"github.com/google/uuid"
 
 	"zudomart/modules/orders/src/container"
 	ordererrors "zudomart/modules/orders/src/errors"
@@ -18,7 +18,9 @@ import (
 	listreportexports "zudomart/modules/orders/src/modules/reports/queries/listReportExports"
 	"zudomart/modules/orders/src/services"
 	"zudomart/modules/orders/src/utils"
+	"zudomart/platform/commerceports"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/sellerplans"
 )
 
 type ReportsController struct {
@@ -65,11 +67,17 @@ func (controller ReportsController) GetReport(writer http.ResponseWriter, reques
 	}
 	query := request.URL.Query()
 	from, to, err := parseRange(query.Get("from"), query.Get("to"), controller.Container.Now())
+	var locationId *uuid.UUID
+	if err == nil {
+		locationId, err = readLocation(request, store)
+	}
 	if err != nil {
 		controller.respond(writer, request, 0, nil, err)
 		return
 	}
-	result, err := (getreport.Handler{Container: controller.Container}).Execute(request.Context(), getreport.Query{Store: store, Kind: kind, From: from, To: to})
+	result, err := (getreport.Handler{Container: controller.Container}).Execute(request.Context(), getreport.Query{
+		Store: store, ActorId: middlewares.AccountIdFrom(request.Context()), Kind: kind, From: from, To: to, LocationId: locationId,
+	})
 	if err != nil || query.Get("format") != "csv" {
 		controller.respond(writer, request, http.StatusOK, result, err)
 		return
@@ -145,6 +153,29 @@ func (controller ReportsController) DownloadExport(writer http.ResponseWriter, r
 }
 
 var freeReportKinds = []string{"sales-by-day", "sales-by-product", "sales-by-category", "sales-by-location", "tax", "inventory-valuation", "low-stock"}
+
+func readLocation(request *http.Request, store commerceports.StoreAccess) (*uuid.UUID, error) {
+	raw := request.URL.Query().Get("locationId")
+	if raw == "" || raw == "all" {
+		return nil, nil
+	}
+	locationId, err := utils.OptionalQueryIdentifier(request, "locationId")
+	if err != nil {
+		return nil, err
+	}
+	inventory, err := commerceports.Default.InventoryStock()
+	if err != nil {
+		return nil, err
+	}
+	owned, err := inventory.StoreOwnsLocations(request.Context(), store.StoreId, []uuid.UUID{*locationId})
+	if err != nil {
+		return nil, err
+	}
+	if !owned {
+		return nil, ordererrors.InvalidLocation
+	}
+	return locationId, nil
+}
 
 func (controller ReportsController) allowKind(writer http.ResponseWriter, request *http.Request, ownerAccountId uuid.UUID, kind string) bool {
 	if slices.Contains(freeReportKinds, kind) {
