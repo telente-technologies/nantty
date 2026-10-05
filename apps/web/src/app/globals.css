@@ -21,7 +21,7 @@
   --surface-tint-blue-disc: var(--blue-200);
   --ink-on-tint-blue: var(--blue-700);
   --surface-night: var(--blue-900);
-  --surface-night-glow: rgb(32 67 245 / 0.45);
+  --surface-night-glow: rgb(58 43 255 / 0.45);
   --surface-night-chip: rgb(255 255 255 / 0.08);
   --ink-on-night: #ffffff;
   --ink-on-night-muted: var(--blue-100);
@@ -38,20 +38,20 @@
   --surface-paper: var(--color-surface);
   --surface-glass: rgb(255 255 255 / 0.82);
   --surface-glass-strong: rgb(255 255 255 / 0.94);
-  --line-hairline: rgb(11 23 82 / 0.08);
+  --line-hairline: rgb(24 18 99 / 0.08);
   --surface-inverse: #0a0a14;
   --ink-on-inverse: #ffffff;
-  --shadow-lift: 0 30px 60px -24px rgb(11 23 82 / 0.4);
+  --shadow-lift: 0 30px 60px -24px rgb(24 18 99 / 0.4);
   --shadow-receipt: 0 40px 80px -30px rgb(0 0 0 / 0.55);
   --device-body: linear-gradient(145deg, #1d1f2b, #05060b 60%, #22242f);
   --device-edge: rgb(255 255 255 / 0.12);
-  --device-shadow: 0 2px 4px rgb(11 23 82 / 0.12), 0 30px 60px -24px rgb(11 23 82 / 0.45);
+  --device-shadow: 0 2px 4px rgb(24 18 99 / 0.12), 0 30px 60px -24px rgb(24 18 99 / 0.45);
   --live-pulse: rgb(239 68 68 / 0.6);
   --live-pulse-faded: rgb(239 68 68 / 0);
   --coin-inset: rgb(82 76 11 / 0.25);
-  --error-scene-backdrop: radial-gradient(120% 80% at 50% 110%, #4563f7 0%, rgb(69 99 247 / 0) 60%), linear-gradient(160deg, #10227a 0%, #1b39cc 55%, #2043f5 100%);
-  --error-scene-shade: linear-gradient(to bottom, rgb(11 23 82 / 0.1) 0%, rgb(11 23 82 / 0) 35%, rgb(11 23 82 / 0.78) 100%);
-  --error-scene-shade-compact: linear-gradient(to bottom, rgb(11 23 82 / 0.05) 0%, rgb(11 23 82 / 0.35) 40%, rgb(11 23 82 / 0.85) 100%);
+  --error-scene-backdrop: radial-gradient(120% 80% at 50% 110%, var(--blue-400) 0%, rgb(97 85 255 / 0) 60%), linear-gradient(160deg, var(--blue-800) 0%, var(--blue-600) 55%, var(--blue-500) 100%);
+  --error-scene-shade: linear-gradient(to bottom, rgb(24 18 99 / 0.1) 0%, rgb(24 18 99 / 0) 35%, rgb(24 18 99 / 0.78) 100%);
+  --error-scene-shade-compact: linear-gradient(to bottom, rgb(24 18 99 / 0.05) 0%, rgb(24 18 99 / 0.35) 40%, rgb(24 18 99 / 0.85) 100%);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --tracking-tight: -0.02em;
@@ -75,7 +75,7 @@
   --surface-tint-blue-disc: #26307a;
   --ink-on-tint-blue: var(--blue-100);
   --surface-night: #0f1641;
-  --surface-night-glow: rgb(69 99 247 / 0.3);
+  --surface-night-glow: rgb(97 85 255 / 0.3);
   --surface-brand-band: #1c31ad;
   --surface-brand-glow: #3650e6;
   --surface-sunshine-soft: #1e1c0d;
@@ -100,7 +100,7 @@
     --surface-tint-blue-disc: #26307a;
     --ink-on-tint-blue: var(--blue-100);
     --surface-night: #0f1641;
-    --surface-night-glow: rgb(69 99 247 / 0.3);
+    --surface-night-glow: rgb(97 85 255 / 0.3);
     --surface-brand-band: #1c31ad;
     --surface-brand-glow: #3650e6;
     --surface-sunshine-soft: #1e1c0d;
@@ -139,9 +139,9 @@
   --fill-brand-hover: var(--blue-600);
   --surface-tint-blue: var(--blue-50);
   --ink-on-tint-blue: var(--blue-700);
-  --line-hairline: rgb(11 23 82 / 0.08);
-  --shadow-lift: 0 30px 60px -24px rgb(11 23 82 / 0.4);
-  --shadow-float: 0 1px 2px rgb(11 23 82 / 0.06), 0 12px 32px -12px rgb(11 23 82 / 0.22);
+  --line-hairline: rgb(24 18 99 / 0.08);
+  --shadow-lift: 0 30px 60px -24px rgb(24 18 99 / 0.4);
+  --shadow-float: 0 1px 2px rgb(24 18 99 / 0.06), 0 12px 32px -12px rgb(24 18 99 / 0.22);
   --focus-ring: 0 0 0 3px var(--surface-sunshine), 0 0 0 5px #0a0a14;
   color: var(--ink-strong);
 }
@@ -159,6 +159,7 @@ html {
 }
 
 body {
+  overflow-wrap: break-word;
   margin: 0;
   overflow-x: clip;
   background: var(--surface-app);
@@ -168,7 +169,6 @@ body {
   line-height: 1.55;
   letter-spacing: var(--tracking-tight);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -217,9 +217,14 @@ textarea {
 }
 
 :focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-  border-radius: 6px;
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
 }
 
 ::selection {
@@ -251,7 +256,7 @@ textarea {
   left: 16px;
   top: -64px;
   z-index: 100;
-  padding: 12px 18px;
+  padding: var(--space-3) 18px;
   border-radius: var(--radius-pill);
   background: var(--fill-brand);
   color: var(--ink-on-fill);
@@ -266,8 +271,8 @@ textarea {
 .eyebrowLabel {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8125rem;
+  gap: var(--space-2);
+  font-size: var(--fs-13);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -280,20 +285,16 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
 main:focus {
   outline: none;
-  box-shadow: none;
 }

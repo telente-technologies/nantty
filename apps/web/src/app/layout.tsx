@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
 
-import { CookieConsentBanner, ThemeInitScript, themeViewport } from "@zudomart/web-kit";
+import { CookieConsentBanner, OfflineBanner, ThemeInitScript, themeViewport } from "@zudomart/web-kit";
 
 import { LaunchAnnouncementBar } from "@/components/layout/announcementBar";
 import { SiteFooterWithGiantWordmark } from "@/components/layout/siteFooter";
@@ -37,6 +37,8 @@ export const metadata: Metadata = {
     title: "Zudomart — Shop the sellers you already watch",
     description: siteConfig.description,
   },
+  manifest: "/manifest.webmanifest",
+  icons: { icon: [{ url: "/brand/favicon.ico", sizes: "48x48" }, { url: "/brand/icon.svg", type: "image/svg+xml" }], apple: "/brand/appleTouchIcon.png" },
   formatDetection: { telephone: false },
 };
 
@@ -63,6 +65,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <a href="#main-content" className="skipToContentLink">
           Skip to content
         </a>
+        <OfflineBanner message="You're offline. Some pages and images may not load until you reconnect." />
         <LaunchAnnouncementBar />
         <SiteHeaderWithFloatingNavigation />
         <main id="main-content" tabIndex={-1}>
