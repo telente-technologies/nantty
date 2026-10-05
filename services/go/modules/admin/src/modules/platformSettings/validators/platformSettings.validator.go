@@ -12,3 +12,10 @@ func ValidateUpdateSettingRequest(request dtos.UpdateSettingRequest) error {
 	collector.RequireLength("reason", request.Reason, 5, 500)
 	return collector.Result()
 }
+
+func ValidateRestoreSettingRequest(request dtos.RestoreSettingRequest) error {
+	collector := &validation.Collector{}
+	collector.RequireTrue("expectedVersion", request.ExpectedVersion > 0, "must be a positive integer")
+	collector.RequireLength("reason", request.Reason, 5, 500)
+	return collector.Result()
+}

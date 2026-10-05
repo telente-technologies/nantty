@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	consentCategories   = map[string]bool{"essential": true, "analytics": true, "personalization": true, "advertising": true}
+	consentCategories    = map[string]bool{"essential": true, "analytics": true, "personalization": true, "advertising": true}
 	consentSourcePattern = regexp.MustCompile(`^[a-z][a-z_]{1,39}$`)
 )
 

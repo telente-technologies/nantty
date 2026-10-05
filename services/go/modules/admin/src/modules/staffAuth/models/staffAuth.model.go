@@ -10,10 +10,10 @@ type LoginChallengeResult struct {
 }
 
 type StaffSessionResult struct {
-	AccessToken  string          `json:"accessToken"`
-	RefreshToken string          `json:"refreshToken"`
-	ExpiresIn    int             `json:"expiresIn"`
-	TokenType    string          `json:"tokenType"`
+	AccessToken   string          `json:"accessToken"`
+	RefreshToken  string          `json:"refreshToken"`
+	ExpiresIn     int             `json:"expiresIn"`
+	TokenType     string          `json:"tokenType"`
 	Staff         types.StaffView `json:"staff"`
 	RecoveryCodes []string        `json:"recoveryCodes,omitempty"`
 }
