@@ -10,14 +10,17 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adaccountinvite"
 	"zudomart/modules/ads/src/generated/ent/adaccountmember"
 	"zudomart/modules/ads/src/generated/ent/adactivityentry"
+	"zudomart/modules/ads/src/generated/ent/adautomatedrule"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
+	"zudomart/modules/ads/src/generated/ent/adconversionevent"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
+	"zudomart/modules/ads/src/generated/ent/adexperiment"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
@@ -28,6 +31,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adscheduledreport"
 	"zudomart/modules/ads/src/generated/ent/adspendbatch"
 	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
+	"zudomart/modules/ads/src/generated/ent/adtopup"
 	"zudomart/modules/ads/src/generated/ent/outboxevent"
 	"zudomart/modules/ads/src/types"
 
@@ -305,6 +309,51 @@ func init() {
 	adactivityentryDescID := adactivityentryMixinFields0[0].Descriptor()
 	// adactivityentry.DefaultID holds the default value on creation for the id field.
 	adactivityentry.DefaultID = adactivityentryDescID.Default.(func() uuid.UUID)
+	adautomatedruleMixin := schema.AdAutomatedRule{}.Mixin()
+	adautomatedruleMixinFields0 := adautomatedruleMixin[0].Fields()
+	_ = adautomatedruleMixinFields0
+	adautomatedruleFields := schema.AdAutomatedRule{}.Fields()
+	_ = adautomatedruleFields
+	// adautomatedruleDescCreatedAt is the schema descriptor for created_at field.
+	adautomatedruleDescCreatedAt := adautomatedruleMixinFields0[1].Descriptor()
+	// adautomatedrule.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adautomatedrule.DefaultCreatedAt = adautomatedruleDescCreatedAt.Default.(func() time.Time)
+	// adautomatedruleDescName is the schema descriptor for name field.
+	adautomatedruleDescName := adautomatedruleFields[1].Descriptor()
+	// adautomatedrule.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	adautomatedrule.NameValidator = func() func(string) error {
+		validators := adautomatedruleDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adautomatedruleDescCheckEveryMinutes is the schema descriptor for check_every_minutes field.
+	adautomatedruleDescCheckEveryMinutes := adautomatedruleFields[8].Descriptor()
+	// adautomatedrule.DefaultCheckEveryMinutes holds the default value on creation for the check_every_minutes field.
+	adautomatedrule.DefaultCheckEveryMinutes = adautomatedruleDescCheckEveryMinutes.Default.(int)
+	// adautomatedruleDescTriggerCount is the schema descriptor for trigger_count field.
+	adautomatedruleDescTriggerCount := adautomatedruleFields[11].Descriptor()
+	// adautomatedrule.DefaultTriggerCount holds the default value on creation for the trigger_count field.
+	adautomatedrule.DefaultTriggerCount = adautomatedruleDescTriggerCount.Default.(int)
+	// adautomatedruleDescUpdatedAt is the schema descriptor for updated_at field.
+	adautomatedruleDescUpdatedAt := adautomatedruleFields[14].Descriptor()
+	// adautomatedrule.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adautomatedrule.DefaultUpdatedAt = adautomatedruleDescUpdatedAt.Default.(func() time.Time)
+	// adautomatedrule.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adautomatedrule.UpdateDefaultUpdatedAt = adautomatedruleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adautomatedruleDescID is the schema descriptor for id field.
+	adautomatedruleDescID := adautomatedruleMixinFields0[0].Descriptor()
+	// adautomatedrule.DefaultID holds the default value on creation for the id field.
+	adautomatedrule.DefaultID = adautomatedruleDescID.Default.(func() uuid.UUID)
 	adboostMixin := schema.AdBoost{}.Mixin()
 	adboostMixinFields0 := adboostMixin[0].Fields()
 	_ = adboostMixinFields0
@@ -539,6 +588,75 @@ func init() {
 	adconversionDescID := adconversionMixinFields0[0].Descriptor()
 	// adconversion.DefaultID holds the default value on creation for the id field.
 	adconversion.DefaultID = adconversionDescID.Default.(func() uuid.UUID)
+	adconversioneventMixin := schema.AdConversionEvent{}.Mixin()
+	adconversioneventMixinFields0 := adconversioneventMixin[0].Fields()
+	_ = adconversioneventMixinFields0
+	adconversioneventFields := schema.AdConversionEvent{}.Fields()
+	_ = adconversioneventFields
+	// adconversioneventDescCreatedAt is the schema descriptor for created_at field.
+	adconversioneventDescCreatedAt := adconversioneventMixinFields0[1].Descriptor()
+	// adconversionevent.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adconversionevent.DefaultCreatedAt = adconversioneventDescCreatedAt.Default.(func() time.Time)
+	// adconversioneventDescName is the schema descriptor for name field.
+	adconversioneventDescName := adconversioneventFields[1].Descriptor()
+	// adconversionevent.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	adconversionevent.NameValidator = func() func(string) error {
+		validators := adconversioneventDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adconversioneventDescStoreID is the schema descriptor for store_id field.
+	adconversioneventDescStoreID := adconversioneventFields[3].Descriptor()
+	// adconversionevent.StoreIDValidator is a validator for the "store_id" field. It is called by the builders before save.
+	adconversionevent.StoreIDValidator = func() func(string) error {
+		validators := adconversioneventDescStoreID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(store_id string) error {
+			for _, fn := range fns {
+				if err := fn(store_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adconversioneventDescStoreName is the schema descriptor for store_name field.
+	adconversioneventDescStoreName := adconversioneventFields[4].Descriptor()
+	// adconversionevent.DefaultStoreName holds the default value on creation for the store_name field.
+	adconversionevent.DefaultStoreName = adconversioneventDescStoreName.Default.(string)
+	// adconversionevent.StoreNameValidator is a validator for the "store_name" field. It is called by the builders before save.
+	adconversionevent.StoreNameValidator = adconversioneventDescStoreName.Validators[0].(func(string) error)
+	// adconversioneventDescIsBuiltIn is the schema descriptor for is_built_in field.
+	adconversioneventDescIsBuiltIn := adconversioneventFields[5].Descriptor()
+	// adconversionevent.DefaultIsBuiltIn holds the default value on creation for the is_built_in field.
+	adconversionevent.DefaultIsBuiltIn = adconversioneventDescIsBuiltIn.Default.(bool)
+	// adconversioneventDescTracksValue is the schema descriptor for tracks_value field.
+	adconversioneventDescTracksValue := adconversioneventFields[7].Descriptor()
+	// adconversionevent.DefaultTracksValue holds the default value on creation for the tracks_value field.
+	adconversionevent.DefaultTracksValue = adconversioneventDescTracksValue.Default.(bool)
+	// adconversioneventDescUpdatedAt is the schema descriptor for updated_at field.
+	adconversioneventDescUpdatedAt := adconversioneventFields[8].Descriptor()
+	// adconversionevent.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adconversionevent.DefaultUpdatedAt = adconversioneventDescUpdatedAt.Default.(func() time.Time)
+	// adconversionevent.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adconversionevent.UpdateDefaultUpdatedAt = adconversioneventDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adconversioneventDescID is the schema descriptor for id field.
+	adconversioneventDescID := adconversioneventMixinFields0[0].Descriptor()
+	// adconversionevent.DefaultID holds the default value on creation for the id field.
+	adconversionevent.DefaultID = adconversioneventDescID.Default.(func() uuid.UUID)
 	adcreatorearningMixin := schema.AdCreatorEarning{}.Mixin()
 	adcreatorearningMixinFields0 := adcreatorearningMixin[0].Fields()
 	_ = adcreatorearningMixinFields0
@@ -679,6 +797,43 @@ func init() {
 	adcustomaudienceDescID := adcustomaudienceMixinFields0[0].Descriptor()
 	// adcustomaudience.DefaultID holds the default value on creation for the id field.
 	adcustomaudience.DefaultID = adcustomaudienceDescID.Default.(func() uuid.UUID)
+	adexperimentMixin := schema.AdExperiment{}.Mixin()
+	adexperimentMixinFields0 := adexperimentMixin[0].Fields()
+	_ = adexperimentMixinFields0
+	adexperimentFields := schema.AdExperiment{}.Fields()
+	_ = adexperimentFields
+	// adexperimentDescCreatedAt is the schema descriptor for created_at field.
+	adexperimentDescCreatedAt := adexperimentMixinFields0[1].Descriptor()
+	// adexperiment.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adexperiment.DefaultCreatedAt = adexperimentDescCreatedAt.Default.(func() time.Time)
+	// adexperimentDescName is the schema descriptor for name field.
+	adexperimentDescName := adexperimentFields[2].Descriptor()
+	// adexperiment.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	adexperiment.NameValidator = func() func(string) error {
+		validators := adexperimentDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adexperimentDescUpdatedAt is the schema descriptor for updated_at field.
+	adexperimentDescUpdatedAt := adexperimentFields[11].Descriptor()
+	// adexperiment.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adexperiment.DefaultUpdatedAt = adexperimentDescUpdatedAt.Default.(func() time.Time)
+	// adexperiment.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adexperiment.UpdateDefaultUpdatedAt = adexperimentDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adexperimentDescID is the schema descriptor for id field.
+	adexperimentDescID := adexperimentMixinFields0[0].Descriptor()
+	// adexperiment.DefaultID holds the default value on creation for the id field.
+	adexperiment.DefaultID = adexperimentDescID.Default.(func() uuid.UUID)
 	adfrequencypolicyMixin := schema.AdFrequencyPolicy{}.Mixin()
 	adfrequencypolicyMixinFields0 := adfrequencypolicyMixin[0].Fields()
 	_ = adfrequencypolicyMixinFields0
@@ -779,7 +934,7 @@ func init() {
 	// adgroup.ConversionEventIDValidator is a validator for the "conversion_event_id" field. It is called by the builders before save.
 	adgroup.ConversionEventIDValidator = adgroupDescConversionEventID.Validators[0].(func(string) error)
 	// adgroupDescUpdatedAt is the schema descriptor for updated_at field.
-	adgroupDescUpdatedAt := adgroupFields[16].Descriptor()
+	adgroupDescUpdatedAt := adgroupFields[17].Descriptor()
 	// adgroup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	adgroup.DefaultUpdatedAt = adgroupDescUpdatedAt.Default.(func() time.Time)
 	// adgroup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -1200,6 +1355,97 @@ func init() {
 	adstatsdailyDescID := adstatsdailyMixinFields0[0].Descriptor()
 	// adstatsdaily.DefaultID holds the default value on creation for the id field.
 	adstatsdaily.DefaultID = adstatsdailyDescID.Default.(func() uuid.UUID)
+	adtopupMixin := schema.AdTopUp{}.Mixin()
+	adtopupMixinFields0 := adtopupMixin[0].Fields()
+	_ = adtopupMixinFields0
+	adtopupFields := schema.AdTopUp{}.Fields()
+	_ = adtopupFields
+	// adtopupDescCreatedAt is the schema descriptor for created_at field.
+	adtopupDescCreatedAt := adtopupMixinFields0[1].Descriptor()
+	// adtopup.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adtopup.DefaultCreatedAt = adtopupDescCreatedAt.Default.(func() time.Time)
+	// adtopupDescMoneyTopUpID is the schema descriptor for money_top_up_id field.
+	adtopupDescMoneyTopUpID := adtopupFields[1].Descriptor()
+	// adtopup.MoneyTopUpIDValidator is a validator for the "money_top_up_id" field. It is called by the builders before save.
+	adtopup.MoneyTopUpIDValidator = func() func(string) error {
+		validators := adtopupDescMoneyTopUpID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(money_top_up_id string) error {
+			for _, fn := range fns {
+				if err := fn(money_top_up_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adtopupDescReference is the schema descriptor for reference field.
+	adtopupDescReference := adtopupFields[2].Descriptor()
+	// adtopup.ReferenceValidator is a validator for the "reference" field. It is called by the builders before save.
+	adtopup.ReferenceValidator = func() func(string) error {
+		validators := adtopupDescReference.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(reference string) error {
+			for _, fn := range fns {
+				if err := fn(reference); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adtopupDescCurrency is the schema descriptor for currency field.
+	adtopupDescCurrency := adtopupFields[4].Descriptor()
+	// adtopup.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	adtopup.CurrencyValidator = func() func(string) error {
+		validators := adtopupDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adtopupDescProvider is the schema descriptor for provider field.
+	adtopupDescProvider := adtopupFields[5].Descriptor()
+	// adtopup.DefaultProvider holds the default value on creation for the provider field.
+	adtopup.DefaultProvider = adtopupDescProvider.Default.(string)
+	// adtopup.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	adtopup.ProviderValidator = adtopupDescProvider.Validators[0].(func(string) error)
+	// adtopupDescFailureReason is the schema descriptor for failure_reason field.
+	adtopupDescFailureReason := adtopupFields[7].Descriptor()
+	// adtopup.DefaultFailureReason holds the default value on creation for the failure_reason field.
+	adtopup.DefaultFailureReason = adtopupDescFailureReason.Default.(string)
+	// adtopup.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
+	adtopup.FailureReasonValidator = adtopupDescFailureReason.Validators[0].(func(string) error)
+	// adtopupDescAuthorizationURL is the schema descriptor for authorization_url field.
+	adtopupDescAuthorizationURL := adtopupFields[8].Descriptor()
+	// adtopup.DefaultAuthorizationURL holds the default value on creation for the authorization_url field.
+	adtopup.DefaultAuthorizationURL = adtopupDescAuthorizationURL.Default.(string)
+	// adtopup.AuthorizationURLValidator is a validator for the "authorization_url" field. It is called by the builders before save.
+	adtopup.AuthorizationURLValidator = adtopupDescAuthorizationURL.Validators[0].(func(string) error)
+	// adtopupDescUpdatedAt is the schema descriptor for updated_at field.
+	adtopupDescUpdatedAt := adtopupFields[11].Descriptor()
+	// adtopup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adtopup.DefaultUpdatedAt = adtopupDescUpdatedAt.Default.(func() time.Time)
+	// adtopup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adtopup.UpdateDefaultUpdatedAt = adtopupDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adtopupDescID is the schema descriptor for id field.
+	adtopupDescID := adtopupMixinFields0[0].Descriptor()
+	// adtopup.DefaultID holds the default value on creation for the id field.
+	adtopup.DefaultID = adtopupDescID.Default.(func() uuid.UUID)
 	outboxeventMixin := schema.OutboxEvent{}.Mixin()
 	outboxeventMixinFields0 := outboxeventMixin[0].Fields()
 	_ = outboxeventMixinFields0

@@ -14,14 +14,17 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adaccountmember"
 	"zudomart/modules/ads/src/generated/ent/adactivityentry"
 	"zudomart/modules/ads/src/generated/ent/adaudiencemember"
+	"zudomart/modules/ads/src/generated/ent/adautomatedrule"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adcardstatsdaily"
 	"zudomart/modules/ads/src/generated/ent/adcontentsignal"
 	"zudomart/modules/ads/src/generated/ent/adconversion"
+	"zudomart/modules/ads/src/generated/ent/adconversionevent"
 	"zudomart/modules/ads/src/generated/ent/adcreatorearning"
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
+	"zudomart/modules/ads/src/generated/ent/adexperiment"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
@@ -32,6 +35,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adscheduledreport"
 	"zudomart/modules/ads/src/generated/ent/adspendbatch"
 	"zudomart/modules/ads/src/generated/ent/adstatsdaily"
+	"zudomart/modules/ads/src/generated/ent/adtopup"
 	"zudomart/modules/ads/src/generated/ent/outboxevent"
 
 	"entgo.io/ent"
@@ -103,14 +107,17 @@ func checkColumn(t, c string) error {
 			adaccountmember.Table:           adaccountmember.ValidColumn,
 			adactivityentry.Table:           adactivityentry.ValidColumn,
 			adaudiencemember.Table:          adaudiencemember.ValidColumn,
+			adautomatedrule.Table:           adautomatedrule.ValidColumn,
 			adboost.Table:                   adboost.ValidColumn,
 			adcampaign.Table:                adcampaign.ValidColumn,
 			adcardstatsdaily.Table:          adcardstatsdaily.ValidColumn,
 			adcontentsignal.Table:           adcontentsignal.ValidColumn,
 			adconversion.Table:              adconversion.ValidColumn,
+			adconversionevent.Table:         adconversionevent.ValidColumn,
 			adcreatorearning.Table:          adcreatorearning.ValidColumn,
 			adcreatormonetisationhold.Table: adcreatormonetisationhold.ValidColumn,
 			adcustomaudience.Table:          adcustomaudience.ValidColumn,
+			adexperiment.Table:              adexperiment.ValidColumn,
 			adfrequencypolicy.Table:         adfrequencypolicy.ValidColumn,
 			adfundstransaction.Table:        adfundstransaction.ValidColumn,
 			adgroup.Table:                   adgroup.ValidColumn,
@@ -121,6 +128,7 @@ func checkColumn(t, c string) error {
 			adscheduledreport.Table:         adscheduledreport.ValidColumn,
 			adspendbatch.Table:              adspendbatch.ValidColumn,
 			adstatsdaily.Table:              adstatsdaily.ValidColumn,
+			adtopup.Table:                   adtopup.ValidColumn,
 			outboxevent.Table:               outboxevent.ValidColumn,
 		})
 	})

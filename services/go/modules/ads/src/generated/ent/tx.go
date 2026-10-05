@@ -26,6 +26,8 @@ type Tx struct {
 	AdActivityEntry *AdActivityEntryClient
 	// AdAudienceMember is the client for interacting with the AdAudienceMember builders.
 	AdAudienceMember *AdAudienceMemberClient
+	// AdAutomatedRule is the client for interacting with the AdAutomatedRule builders.
+	AdAutomatedRule *AdAutomatedRuleClient
 	// AdBoost is the client for interacting with the AdBoost builders.
 	AdBoost *AdBoostClient
 	// AdCampaign is the client for interacting with the AdCampaign builders.
@@ -36,12 +38,16 @@ type Tx struct {
 	AdContentSignal *AdContentSignalClient
 	// AdConversion is the client for interacting with the AdConversion builders.
 	AdConversion *AdConversionClient
+	// AdConversionEvent is the client for interacting with the AdConversionEvent builders.
+	AdConversionEvent *AdConversionEventClient
 	// AdCreatorEarning is the client for interacting with the AdCreatorEarning builders.
 	AdCreatorEarning *AdCreatorEarningClient
 	// AdCreatorMonetisationHold is the client for interacting with the AdCreatorMonetisationHold builders.
 	AdCreatorMonetisationHold *AdCreatorMonetisationHoldClient
 	// AdCustomAudience is the client for interacting with the AdCustomAudience builders.
 	AdCustomAudience *AdCustomAudienceClient
+	// AdExperiment is the client for interacting with the AdExperiment builders.
+	AdExperiment *AdExperimentClient
 	// AdFrequencyPolicy is the client for interacting with the AdFrequencyPolicy builders.
 	AdFrequencyPolicy *AdFrequencyPolicyClient
 	// AdFundsTransaction is the client for interacting with the AdFundsTransaction builders.
@@ -62,6 +68,8 @@ type Tx struct {
 	AdSpendBatch *AdSpendBatchClient
 	// AdStatsDaily is the client for interacting with the AdStatsDaily builders.
 	AdStatsDaily *AdStatsDailyClient
+	// AdTopUp is the client for interacting with the AdTopUp builders.
+	AdTopUp *AdTopUpClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
 
@@ -201,14 +209,17 @@ func (tx *Tx) init() {
 	tx.AdAccountMember = NewAdAccountMemberClient(tx.config)
 	tx.AdActivityEntry = NewAdActivityEntryClient(tx.config)
 	tx.AdAudienceMember = NewAdAudienceMemberClient(tx.config)
+	tx.AdAutomatedRule = NewAdAutomatedRuleClient(tx.config)
 	tx.AdBoost = NewAdBoostClient(tx.config)
 	tx.AdCampaign = NewAdCampaignClient(tx.config)
 	tx.AdCardStatsDaily = NewAdCardStatsDailyClient(tx.config)
 	tx.AdContentSignal = NewAdContentSignalClient(tx.config)
 	tx.AdConversion = NewAdConversionClient(tx.config)
+	tx.AdConversionEvent = NewAdConversionEventClient(tx.config)
 	tx.AdCreatorEarning = NewAdCreatorEarningClient(tx.config)
 	tx.AdCreatorMonetisationHold = NewAdCreatorMonetisationHoldClient(tx.config)
 	tx.AdCustomAudience = NewAdCustomAudienceClient(tx.config)
+	tx.AdExperiment = NewAdExperimentClient(tx.config)
 	tx.AdFrequencyPolicy = NewAdFrequencyPolicyClient(tx.config)
 	tx.AdFundsTransaction = NewAdFundsTransactionClient(tx.config)
 	tx.AdGroup = NewAdGroupClient(tx.config)
@@ -219,6 +230,7 @@ func (tx *Tx) init() {
 	tx.AdScheduledReport = NewAdScheduledReportClient(tx.config)
 	tx.AdSpendBatch = NewAdSpendBatchClient(tx.config)
 	tx.AdStatsDaily = NewAdStatsDailyClient(tx.config)
+	tx.AdTopUp = NewAdTopUpClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 }
 
