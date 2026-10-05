@@ -1,7 +1,7 @@
 .legs {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .legs td {
@@ -14,7 +14,7 @@
   text-align: right;
   font-family: var(--font-mono);
   white-space: nowrap;
-  padding-left: 12px;
+  padding-left: var(--space-3);
 }
 
 .journal {
@@ -37,7 +37,7 @@
 .ledgerLayout {
   display: grid;
   grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
-  gap: 16px;
+  gap: var(--space-4);
   align-items: start;
 }
 
@@ -45,7 +45,7 @@
   width: 100%;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 2px 8px;
+  gap: 2px var(--space-2);
   padding: 9px 14px;
   border: none;
   border-bottom: 1px solid var(--divider-soft);

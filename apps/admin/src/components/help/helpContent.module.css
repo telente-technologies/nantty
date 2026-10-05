@@ -7,7 +7,7 @@
   flex-direction: column;
   gap: 10px;
   min-height: 320px;
-  padding: 16px;
+  padding: var(--space-4);
   overflow: auto;
   line-height: 1.6;
   background: var(--surface-card);
@@ -18,23 +18,23 @@
 .preview h2,
 .preview h3,
 .preview h4 {
-  margin: 8px 0 0;
+  margin: var(--space-2) 0 0;
 }
 
 .preview ul,
 .preview ol {
   margin: 0;
-  padding-inline-start: 20px;
+  padding-inline-start: var(--space-5);
 }
 
 .preview table {
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .preview th,
 .preview td {
-  padding: 6px 8px;
+  padding: 6px var(--space-2);
   text-align: start;
   border: 1px solid var(--divider);
 }
@@ -42,19 +42,19 @@
 .editorGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
 }
 
@@ -73,13 +73,13 @@
 }
 
 .sourceLabel {
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-style: italic;
   color: var(--ink-muted);
 }
 
 .settingsCard {
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }
 
 @media (width < 960px) {

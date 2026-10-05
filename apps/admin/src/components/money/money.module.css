@@ -16,7 +16,7 @@
 
 .muted {
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .stack {
@@ -42,9 +42,9 @@
 .items li {
   display: grid;
   grid-template-columns: 48px 1fr auto;
-  gap: 12px;
+  gap: var(--space-3);
   align-items: center;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   border-bottom: 1px solid var(--divider-soft);
 }
 
@@ -63,7 +63,7 @@
 .totals {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 4px 16px;
+  gap: var(--space-1) var(--space-4);
   margin: 10px 0 0;
   padding-top: 10px;
   border-top: 1px solid var(--divider);
@@ -86,7 +86,7 @@
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -97,7 +97,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .gallery img {
@@ -109,12 +109,12 @@
 }
 
 .gallery figcaption {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
 }
 
 .statement {
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border-radius: var(--radius-medium);
   background: var(--surface-sunken);
   white-space: pre-wrap;
@@ -126,7 +126,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ink-faint);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .messages {
@@ -135,12 +135,12 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .message {
   max-width: 85%;
-  padding: 8px 10px;
+  padding: var(--space-2) 10px;
   border-radius: var(--radius-medium);
   background: var(--surface-sunken);
 }
@@ -159,7 +159,7 @@
 .splitPreview {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .splitCell {
@@ -172,7 +172,7 @@
 }
 
 .splitCell strong {
-  font-size: 16px;
+  font-size: var(--fs-16);
   font-variant-numeric: tabular-nums;
 }
 
@@ -187,7 +187,7 @@
 
 .outcomeOption {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: flex-start;
   padding: 10px;
   border: 1px solid var(--divider);
@@ -208,7 +208,7 @@
 .meter {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-width: 110px;
 }
 
@@ -228,7 +228,7 @@
 
 .meterValue {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-weight: 600;
   width: 24px;
   text-align: right;
@@ -249,5 +249,5 @@
 }
 
 .spacedTop {
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }

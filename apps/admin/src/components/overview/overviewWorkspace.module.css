@@ -1,17 +1,17 @@
 .layout {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
   gap: 10px;
 }
 
 .generated {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-faint);
 }
 
@@ -25,8 +25,8 @@
   display: grid;
   grid-template-columns: 120px 200px 1fr auto;
   align-items: center;
-  gap: 12px;
-  padding: 9px 16px;
+  gap: var(--space-3);
+  padding: 9px var(--space-4);
   border-bottom: 1px solid var(--divider-soft);
 }
 
@@ -44,7 +44,7 @@
 
 .latency {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
 }
 
