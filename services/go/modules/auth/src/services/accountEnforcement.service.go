@@ -70,9 +70,6 @@ func (service AccountEnforcementService) blockIdentifiersInTransaction(ctx conte
 	if banned.Email != nil {
 		hashes[registrationblock.KindEmail] = append(hashes[registrationblock.KindEmail], HashBlockedIdentifier(pepper, "email", *banned.Email))
 	}
-	if banned.PhoneHash != nil {
-		hashes[registrationblock.KindPhone] = append(hashes[registrationblock.KindPhone], *banned.PhoneHash)
-	}
 	sessions, err := tx.Session.Query().Where(session.AccountID(banned.ID), session.DeviceHashNotNil()).All(ctx)
 	if err != nil {
 		return err
@@ -134,7 +131,7 @@ func (service AccountEnforcementService) ListActiveAccountSessions(ctx context.C
 func (service AccountEnforcementService) MarkAccountDeleted(ctx context.Context, accountId uuid.UUID, anonymizedUsername string) error {
 	return service.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		now := service.Container.Now()
-		if err := tx.Account.UpdateOneID(accountId).SetStatus(account.StatusDeleted).SetUsername(anonymizedUsername).SetName("").ClearEmail().ClearPasswordHash().ClearBirthday().ClearPhoneHash().ClearPhoneVerifiedAt().Exec(ctx); err != nil {
+		if err := tx.Account.UpdateOneID(accountId).SetStatus(account.StatusDeleted).SetUsername(anonymizedUsername).SetName("").ClearEmail().ClearPasswordHash().ClearBirthday().Exec(ctx); err != nil {
 			return err
 		}
 		if _, err := tx.SocialIdentity.Delete().Where(socialidentity.AccountID(accountId)).Exec(ctx); err != nil {

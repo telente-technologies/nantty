@@ -19,7 +19,6 @@ type CurrentUserResponse struct {
 	IsSeller           bool     `json:"isSeller"`
 	StoreId            *string  `json:"storeId"`
 	Email              *string  `json:"email"`
-	Phone              *string  `json:"phone"`
 	Birthday           *string  `json:"birthday"`
 	Roles              []string `json:"roles"`
 	EmailVerified      bool     `json:"emailVerified"`

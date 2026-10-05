@@ -34,7 +34,7 @@ func (application AccountDirectoryService) summarize(found *ent.Account, err err
 	}
 	return identityports.AccountSummary{
 		ID: found.ID, Username: found.Username, Name: found.Name, Email: found.Email, Birthday: found.Birthday, Roles: found.Roles,
-		EmailVerified: found.EmailVerifiedAt != nil, PhoneVerified: found.PhoneVerifiedAt != nil, Active: found.Status == account.StatusActive, Status: string(found.Status), CreatedAt: found.CreatedAt,
+		EmailVerified: found.EmailVerifiedAt != nil, Active: found.Status == account.StatusActive, Status: string(found.Status), CreatedAt: found.CreatedAt,
 	}, true, nil
 }
 
