@@ -63,7 +63,7 @@ export interface LegalNoticeProgress {
   readonly queuedAt: string;
   readonly queuedByName: string;
   readonly estimatedCompletionAt: string | null;
-  readonly provider: "AWS_SES_MOCK";
+  readonly provider: "AWS_SES";
 }
 
 export interface LegalNoticeDraft {

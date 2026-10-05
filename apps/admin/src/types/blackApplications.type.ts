@@ -13,8 +13,9 @@ export interface BlackChecklistItem {
 }
 
 export interface BlackApproval {
-  readonly adminName: string;
-  readonly approvedAt: string;
+  readonly adminId: string;
+  readonly name: string;
+  readonly at: string;
 }
 
 export interface BlackApplication {

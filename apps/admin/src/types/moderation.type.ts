@@ -1,7 +1,7 @@
 import type { AuditLogEntry } from "@/types/audit.type";
 import type { PlatformUserSummary } from "@/types/platformUser.type";
 
-export type ReportTargetType = "POST" | "COMMENT" | "CLIP" | "LIVE" | "USER" | "PRODUCT" | "MESSAGE";
+export type ReportTargetType = "POST" | "COMMENT" | "CLIP" | "LIVE" | "USER" | "PRODUCT" | "STORE" | "MESSAGE";
 export type ReportStatus = "OPEN" | "IN_REVIEW" | "RESOLVED" | "DISMISSED";
 export type ReportPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
 export type ReportReason = "SPAM" | "SCAM" | "HARASSMENT" | "HATE" | "NUDITY" | "VIOLENCE" | "COUNTERFEIT" | "IMPERSONATION" | "MISINFORMATION" | "SELF_HARM" | "OTHER";

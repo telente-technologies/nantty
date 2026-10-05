@@ -56,7 +56,7 @@ export interface EmailPreview {
   readonly includesUnsubscribeLink: boolean;
   readonly renderedSubject: string;
   readonly renderedBody: string;
-  readonly provider: "AWS_SES_MOCK";
+  readonly provider: "AWS_SES";
 }
 
 export interface EmailSendRecord {
@@ -68,5 +68,5 @@ export interface EmailSendRecord {
   readonly skippedNoMarketingConsent: number;
   readonly sentByName: string;
   readonly sentAt: string;
-  readonly provider: "AWS_SES_MOCK";
+  readonly provider: "AWS_SES";
 }

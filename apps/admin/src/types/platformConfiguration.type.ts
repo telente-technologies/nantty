@@ -57,7 +57,6 @@ export interface CreatorEligibilityRules {
   readonly minimumPostsInLast30Days: number;
   readonly maximumActiveStrikes: number;
   readonly minimumAccountAgeDays: number;
-  readonly requiresVerifiedPhone: boolean;
   readonly requiresIdentityVerification: boolean;
   readonly allowedCountries: readonly string[];
 }
@@ -82,7 +81,6 @@ export interface CheckmarkSuggestionRules {
 export interface CreatorAutoApproveRules {
   readonly minimumAccountAgeDays: number;
   readonly requiresVerifiedEmail: boolean;
-  readonly requiresVerifiedPhone: boolean;
   readonly minimumRealFollowers: number;
   readonly minimumOriginalPostsInLast60Days: number;
   readonly noViolationsInDays: number;
@@ -111,7 +109,6 @@ export interface TrialRules {
   readonly onePerPerson: boolean;
   readonly onePerCard: boolean;
   readonly onePerDevice: boolean;
-  readonly onePerPhone: boolean;
   readonly maximumRiskScore: number;
   readonly minimumCompletedOrders: number;
 }

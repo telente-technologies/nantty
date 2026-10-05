@@ -9,8 +9,8 @@ export interface EligibilityCheck {
   readonly key: string;
   readonly label: string;
   readonly isMet: boolean;
-  readonly actual: string;
-  readonly required: string;
+  readonly actual: string | number;
+  readonly required: string | number;
 }
 
 export interface ProgramApplication {
