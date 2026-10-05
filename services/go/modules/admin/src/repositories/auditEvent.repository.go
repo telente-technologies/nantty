@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/admin/src/generated/ent/staffrole"
 	"zudomart/modules/admin/src/types"
 	"zudomart/platform/identityports"
+	"zudomart/platform/staffauth"
 )
 
 func RecordAuditEventInTransaction(ctx context.Context, tx *ent.Tx, event identityports.AuditEvent) error {
@@ -21,6 +22,10 @@ func RecordAuditEventInTransaction(ctx context.Context, tx *ent.Tx, event identi
 		}
 		return value
 	}
+	if staff, found := staffauth.StaffFromContext(ctx); found && staff.SteppedUp && staff.Id == event.ActorId {
+		event.StepUpVerified = true
+	}
+	staffauth.MarkAuditRecorded(ctx)
 	actorName, departments := resolveActorNameAndDepartments(ctx, tx, event)
 	create := tx.AuditEvent.Create().
 		SetActorID(event.ActorId).SetActorRole(event.ActorRole).SetActorName(types.TruncateToLength(actorName, 120)).SetActorDepartments(departments).

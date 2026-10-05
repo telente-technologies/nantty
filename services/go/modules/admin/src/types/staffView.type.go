@@ -23,6 +23,7 @@ type StaffView struct {
 	ApprovedByName *string  `json:"approvedByName"`
 	RoleIds        []string `json:"roleIds"`
 	RoleNames      []string `json:"roleNames"`
+	IpAllowList    []string `json:"ipAllowList"`
 }
 
 func ConvertStaffToView(staff *ent.StaffAccount) StaffView {
@@ -34,9 +35,13 @@ func ConvertStaffToView(staff *ent.StaffAccount) StaffView {
 	if roleIds == nil {
 		roleIds = []string{}
 	}
+	ipAllowList := staff.IPAllowList
+	if ipAllowList == nil {
+		ipAllowList = []string{}
+	}
 	return StaffView{
 		Id: staff.ID.String(), Email: staff.Email, DisplayName: staff.DisplayName, Name: staff.DisplayName, Role: strings.ToUpper(string(staff.Role)), Permissions: permissions,
 		Status: strings.ToUpper(string(staff.Status)), MfaEnrolled: staff.TotpConfirmedAt != nil, CreatedAt: staff.CreatedAt.UTC().Format(time.RFC3339),
-		RoleIds: roleIds, RoleNames: []string{},
+		RoleIds: roleIds, RoleNames: []string{}, IpAllowList: ipAllowList,
 	}
 }

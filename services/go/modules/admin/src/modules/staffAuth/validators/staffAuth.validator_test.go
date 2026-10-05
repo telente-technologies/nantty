@@ -17,10 +17,27 @@ func TestChallengeCodeRequestValidation(t *testing.T) {
 		{"short code", dtos.ChallengeCodeRequest{ChallengeToken: token, Code: "12345"}, false},
 		{"letters", dtos.ChallengeCodeRequest{ChallengeToken: token, Code: "12345a"}, false},
 		{"short token", dtos.ChallengeCodeRequest{ChallengeToken: "abc", Code: "123456"}, false},
+		{"recovery code without method", dtos.ChallengeCodeRequest{ChallengeToken: token, Code: "ABCDE-12345"}, true},
+		{"explicit recovery method", dtos.ChallengeCodeRequest{ChallengeToken: token, Method: "recovery", Code: "abcde12345"}, true},
+		{"passkey response", dtos.ChallengeCodeRequest{ChallengeToken: token, Method: "webauthn", Credential: []byte(`{"id":"abc"}`)}, true},
+		{"passkey without response", dtos.ChallengeCodeRequest{ChallengeToken: token, Method: "webauthn"}, false},
+		{"unknown method", dtos.ChallengeCodeRequest{ChallengeToken: token, Method: "sms", Code: "123456"}, false},
 	}
 	for _, testCase := range cases {
 		if (ValidateChallengeCodeRequest(testCase.request) == nil) != testCase.valid {
 			t.Errorf("%s: unexpected result", testCase.name)
 		}
+	}
+}
+
+func TestStepUpAcceptsTotpOrPasskeyButNeverRecoveryCodes(t *testing.T) {
+	if ValidateStepUpRequest(dtos.StepUpRequest{Code: "123456"}) != nil {
+		t.Fatal("totp step-up is valid")
+	}
+	if ValidateStepUpRequest(dtos.StepUpRequest{Method: "webauthn", Credential: []byte(`{"id":"abc"}`)}) != nil {
+		t.Fatal("passkey step-up is valid")
+	}
+	if ValidateStepUpRequest(dtos.StepUpRequest{Code: "ABCDE-12345"}) == nil || ValidateStepUpRequest(dtos.StepUpRequest{Method: "recovery", Code: "ABCDE-12345"}) == nil {
+		t.Fatal("recovery codes cannot step up")
 	}
 }
