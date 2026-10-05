@@ -1,3 +1,5 @@
+import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
+import { activeMemberIds, messageUpdatedEvent } from "../../services/chatRealtimeEvents.service.js";
 import { notFound, unprocessable } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import type { MessagePollView } from "../../models/message.model.js";
@@ -19,7 +21,9 @@ export function createVoteOnPollHandler(context: HandlerContext): Handler<VoteOn
       if (!message.pollAllowMultiple) await messageRepository.removeVotesForMessage(transaction, messageId, viewerId);
       await messageRepository.addVote(transaction, optionId, messageId, viewerId);
     });
-    const poll = buildPollView(await loadMessageForMember(context, messageId, viewerId));
+    const updated = await loadMessageForMember(context, messageId, viewerId);
+    await appendDomainEventsToOutbox(context.database.client, [messageUpdatedEvent(updated, await activeMemberIds(context.database.client, updated.conversationId), context.clock.now())]);
+    const poll = buildPollView(updated);
     return poll as MessagePollView;
   };
 }

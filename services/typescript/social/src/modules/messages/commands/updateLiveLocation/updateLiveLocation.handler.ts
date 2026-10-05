@@ -1,3 +1,5 @@
+import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
+import { activeMemberIds, messageUpdatedEvent } from "../../services/chatRealtimeEvents.service.js";
 import { unprocessable } from "../../../../errors/social.error.js";
 import type { Prisma } from "../../../../generated/prisma/client.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
@@ -16,6 +18,7 @@ export function createUpdateLiveLocationHandler(context: HandlerContext): Handle
     const current = assertLiveLocationEditableBy(row, viewerId, now);
     await messageRepository.update(context.database.client, messageId, { location: { ...current, latitude, longitude, address: address ?? current.address, updatedAt: now.toISOString() } as unknown as Prisma.InputJsonValue });
     const updated = await loadMessageForMember(context, messageId, viewerId);
+    await appendDomainEventsToOutbox(context.database.client, [messageUpdatedEvent(updated, await activeMemberIds(context.database.client, updated.conversationId), now)]);
     return (await buildMessageViews(context, viewerId, [updated], { peerLastReadAt: null, isDirect: false }))[0] as MessageView;
   };
 }
