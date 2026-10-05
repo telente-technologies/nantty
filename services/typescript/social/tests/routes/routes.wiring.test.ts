@@ -10,6 +10,6 @@ describe("route wiring", () => {
   it("registers every module without conflicting routes", () => {
     const database = {} as SocialDatabase;
     const router = createRouter({});
-    expect(() => registerRoutes(router, createRouteFactory({ run: async (_a, _k, _p, execute) => ({ ...(await execute()), replayed: false }) }), {} as HandlerContext, database, "token")).not.toThrow();
+    expect(() => registerRoutes(router, createRouteFactory({ run: async (_request, execute) => ({ ...(await execute()), replayed: false }) }), {} as HandlerContext, database, "token")).not.toThrow();
   });
 });
