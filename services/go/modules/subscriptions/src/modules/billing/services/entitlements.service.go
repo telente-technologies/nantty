@@ -6,6 +6,7 @@ import (
 	"zudomart/modules/subscriptions/src/constants"
 	"zudomart/modules/subscriptions/src/generated/ent"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/loaders"
 )
 
 type ProfileEntitlement struct {
@@ -23,16 +24,17 @@ type TrialState struct {
 }
 
 type Entitlements struct {
-	UserId              string               `json:"userId"`
-	SellerPlan          string               `json:"sellerPlan"`
-	SellerPlanStatus    string               `json:"sellerPlanStatus"`
-	Premium             bool                 `json:"premium"`
-	Blue                bool                 `json:"blue"`
-	BlueEssential       bool                 `json:"blueEssential"`
-	Gold                []ProfileEntitlement `json:"gold"`
-	Black               []ProfileEntitlement `json:"black"`
-	Trial               *TrialState          `json:"trial"`
-	SubscribedToCreator bool                 `json:"subscribedToCreator"`
+	UserId                string                         `json:"userId"`
+	SellerPlan            string                         `json:"sellerPlan"`
+	SellerPlanStatus      string                         `json:"sellerPlanStatus"`
+	Premium               bool                           `json:"premium"`
+	Blue                  bool                           `json:"blue"`
+	BlueEssential         bool                           `json:"blueEssential"`
+	Gold                  []ProfileEntitlement           `json:"gold"`
+	Black                 []ProfileEntitlement           `json:"black"`
+	Trial                 *TrialState                    `json:"trial"`
+	SubscribedToCreator   bool                           `json:"subscribedToCreator"`
+	DashboardEntitlements []loaders.DashboardEntitlement `json:"dashboardEntitlements"`
 }
 
 func (billing Billing) ReadEntitlements(ctx context.Context, userId string) (Entitlements, error) {
@@ -64,6 +66,13 @@ func (billing Billing) ReadEntitlements(ctx context.Context, userId string) (Ent
 		}
 		if row.Status == subscription.StatusTrialing && result.Trial == nil {
 			result.Trial = &TrialState{ProfileId: row.ProfileID, Plan: row.PlanCode, TrialEndsAt: isoTime(row.TrialEndsAt), IsCancelled: row.CancelAtPeriodEnd}
+		}
+	}
+	result.DashboardEntitlements = []loaders.DashboardEntitlement{}
+	catalogue := loaders.ReadPlanCatalogue(ctx, billing.Container.Resources.Platform)
+	for code, definition := range constants.Plans {
+		if definition.SellerPlan != "" && definition.SellerPlan == result.SellerPlan && catalogue[code].DashboardEntitlements != nil {
+			result.DashboardEntitlements = catalogue[code].DashboardEntitlements
 		}
 	}
 	return result, nil

@@ -7,6 +7,8 @@ import (
 	"zudomart/modules/subscriptions/src/constants"
 	"zudomart/modules/subscriptions/src/generated/ent"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/loaders"
+	"zudomart/modules/subscriptions/src/models"
 	"zudomart/platform/regionpricing"
 )
 
@@ -49,29 +51,32 @@ func (billing Billing) ListMySubscriptions(ctx context.Context, userId string) (
 }
 
 type PlanView struct {
-	Id             string         `json:"id"`
-	PlanCode       string         `json:"planCode"`
-	Tier           string         `json:"tier"`
-	Interval       string         `json:"interval"`
-	Channel        string         `json:"channel"`
-	Region         string         `json:"region"`
-	Price          map[string]any `json:"price"`
-	ListPrice      map[string]any `json:"listPrice"`
-	Discount       string         `json:"discountKind"`
-	TrialDays      int            `json:"trialDays"`
-	StoreProductId *string        `json:"storeProductId"`
-	BillingNote    string         `json:"billingNote,omitempty"`
-	CanBuyOnWeb    bool           `json:"canBuyOnWeb"`
+	Id             string             `json:"id"`
+	PlanCode       string             `json:"planCode"`
+	Tier           string             `json:"tier"`
+	Interval       string             `json:"interval"`
+	Channel        string             `json:"channel"`
+	Region         string             `json:"region"`
+	Price          map[string]any     `json:"price"`
+	ListPrice      map[string]any     `json:"listPrice"`
+	Discount       string             `json:"discountKind"`
+	TrialDays      int                `json:"trialDays"`
+	StoreProductId *string            `json:"storeProductId"`
+	BillingNote    string             `json:"billingNote,omitempty"`
+	CanBuyOnWeb    bool               `json:"canBuyOnWeb"`
+	DisplayName    string             `json:"displayName"`
+	Perks          []loaders.PlanPerk `json:"perks"`
 }
 
 func (billing Billing) ListPlans(ctx context.Context, ownerUserId string, resolution regionpricing.Resolution, planCodes []string) ([]PlanView, error) {
 	client := billing.Container.Client(billing.Container.Resources.Database)
 	trialRules, _ := billing.rules(ctx)
+	catalogue := loaders.ReadPlanCatalogue(ctx, billing.Container.Resources.Platform)
 	country := firstNonEmpty(resolution.CountryCode, resolution.Region)
 	views := []PlanView{}
 	for _, code := range planCodes {
 		definition := constants.Plans[code]
-		if !definition.SelfServe || (resolution.Channel != "web" && !definition.InAppAllowed) {
+		if !definition.SelfServe || !catalogue[code].IsPurchasable || (resolution.Channel != "web" && !definition.InAppAllowed) {
 			continue
 		}
 		for _, interval := range []string{"month", "year"} {
@@ -85,6 +90,7 @@ func (billing Billing) ListPlans(ctx context.Context, ownerUserId string, resolu
 			view := PlanView{
 				Id: code + "_" + interval + "ly", PlanCode: code, Tier: definition.Tier, Interval: interval, Channel: resolution.Channel, Region: price.Region,
 				Price: money(quote.AmountMinor, price.Currency), ListPrice: money(quote.ListAmountMinor, price.Currency), Discount: quote.DiscountKind,
+				DisplayName: catalogue[code].DisplayName, Perks: catalogue[code].Perks,
 			}
 			if resolution.Channel == "web" {
 				view.CanBuyOnWeb = !price.NotChargeableOnWeb
@@ -170,15 +176,25 @@ func (billing Billing) BuildOffer(ctx context.Context, userId, profileId string)
 			"planId": trial.PlanCode + "_" + trial.Interval.String() + "ly", "tier": constants.Plans[trial.PlanCode].Tier, "interval": trial.Interval.String(), "startedAt": trial.CreatedAt,
 			"endsAt": trial.TrialEndsAt, "daysLeft": daysUntil(trial.TrialEndsAt, billing.Container.Now()), "isCancelled": trial.CancelAtPeriodEnd, "cardSummary": trial.CardLabel,
 			"priceAfterTrial": money(trial.AmountMinor, trial.Currency), "verificationCharge": map[string]any{"amount": cardVerificationCharge(trial.Currency), "status": "REFUNDED"},
+			"reminders": trialReminderViews(trial.TrialEndsAt),
 		}
 	} else if !ent.IsNotFound(err) {
+		return nil, err
+	}
+	goldOnlyActive, err := client.Subscription.Query().Where(subscription.ProfileID(profileId), subscription.PlanCode(constants.PlanGoldOnly), subscription.StatusIn(liveStatuses()...)).Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	account, _, err := billing.Container.Identity.ReadAccountSignals(ctx, userId)
+	if err != nil {
 		return nil, err
 	}
 	return map[string]any{
 		"profileName": profile.DisplayName, "trialLength": map[bool]string{true: "MONTH_1", false: "DAYS_7"}[trialRules.TrialDays >= 30], "trialDays": trialRules.TrialDays,
 		"yearlyDiscountPercent": pricing.Pricing.YearlyDiscountBps / 100, "verificationCharge": cardVerificationCharge(currency), "isEligible": len(reasons) == 0, "ineligibleReasons": reasons,
 		"activeTrial": activeTrial, "bundle": map[string]any{"hasActiveBlue": hasBlue, "discountPercent": pricing.Pricing.BundleDiscountBps / 100, "maximumBusinesses": pricing.Pricing.BundleMaximumBusinesses},
-		"goldOnlyPlan": map[string]any{"monthly": money(goldMonthly.AmountMinor, currency), "yearly": money(goldYearly.AmountMinor, currency)},
+		"goldOnlyPlan": map[string]any{"monthly": money(goldMonthly.AmountMinor, currency), "yearly": money(goldYearly.AmountMinor, currency), "isActive": goldOnlyActive},
+		"accountEmail": nullableText(account.Email),
 	}, nil
 }
 
@@ -192,4 +208,19 @@ func daysUntil(at *time.Time, now time.Time) int {
 func cardVerificationCharge(currency string) map[string]any {
 	amount, chargedIn := regionpricing.CardVerificationCharge(currency)
 	return money(amount, chargedIn)
+}
+
+func trialReminderViews(trialEndsAt *time.Time) []map[string]any {
+	if trialEndsAt == nil {
+		return []map[string]any{}
+	}
+	due := models.TrialReminderDueTimes(*trialEndsAt)
+	return []map[string]any{{"daysBefore": 3, "sendsAt": due[3].UTC()}, {"daysBefore": 1, "sendsAt": due[1].UTC()}}
+}
+
+func nullableText(value string) any {
+	if value == "" {
+		return nil
+	}
+	return value
 }

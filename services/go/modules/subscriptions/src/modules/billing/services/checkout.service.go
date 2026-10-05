@@ -21,6 +21,7 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
 	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
+	"zudomart/modules/subscriptions/src/loaders"
 	"zudomart/modules/subscriptions/src/models"
 	"zudomart/platform/httpserver"
 	"zudomart/platform/regionpricing"
@@ -64,7 +65,7 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 	if !known {
 		return CheckoutView{}, ErrPlanNotFound
 	}
-	if !definition.SelfServe {
+	if !definition.SelfServe || !loaders.ReadPlanCatalogue(ctx, billing.Container.Resources.Platform)[request.PlanCode].IsPurchasable {
 		return CheckoutView{}, ErrPlanNotSelfServe
 	}
 	profile, found, err := billing.Container.Identity.FindProfile(ctx, request.ProfileId)

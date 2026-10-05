@@ -19,7 +19,8 @@ import (
 )
 
 type RenewalPayments struct {
-	Billing Billing
+	Billing  Billing
+	Fallback paymentmodels.PaymentPurposeHandler
 }
 
 func (handler RenewalPayments) lockedRows(ctx context.Context, transaction *sql.Tx, periodId string) (*ent.Subscription, uuid.UUID, error) {
@@ -44,6 +45,9 @@ func (handler RenewalPayments) lockedRows(ctx context.Context, transaction *sql.
 
 func (handler RenewalPayments) HandleSucceededPayment(ctx context.Context, transaction *sql.Tx, payment paymentmodels.SettledPayment) error {
 	row, periodId, err := handler.lockedRows(ctx, transaction, payment.SubjectId)
+	if err == nil && row == nil && handler.Fallback != nil {
+		return handler.Fallback.HandleSucceededPayment(ctx, transaction, payment)
+	}
 	if err != nil || row == nil {
 		return err
 	}
@@ -52,6 +56,9 @@ func (handler RenewalPayments) HandleSucceededPayment(ctx context.Context, trans
 
 func (handler RenewalPayments) HandleFailedPayment(ctx context.Context, transaction *sql.Tx, payment paymentmodels.SettledPayment) error {
 	row, periodId, err := handler.lockedRows(ctx, transaction, payment.SubjectId)
+	if err == nil && row == nil && handler.Fallback != nil {
+		return handler.Fallback.HandleFailedPayment(ctx, transaction, payment)
+	}
 	if err != nil || row == nil {
 		return err
 	}
