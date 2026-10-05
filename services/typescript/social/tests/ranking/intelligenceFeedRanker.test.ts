@@ -62,4 +62,11 @@ describe("intelligence feed ranker", () => {
     expect(hasher.hashSearchQuery("  Ankara   DRESS ")).toBe(hasher.hashSearchQuery("ankara dress"));
     expect(hasher.hashSearchQuery("x")).toMatch(/^q_[0-9a-f]{40}$/);
   });
+
+  it("matches the Python identifier_hashing_service vectors exactly", () => {
+    expect(createIdentifierHasher(deriveIdentifierHashSecret("", "shared-secret")).hashUserId("0192f0a0-0000-7000-8000-00000000a001")).toBe("u_11baaae5819d1a17534ae804efc2685db359e6fe");
+    const explicit = createIdentifierHasher(deriveIdentifierHashSecret("explicit", "ignored"));
+    expect(explicit.hashUserId("abc")).toBe("u_c10937b3436a81539bd288e267afcd451fb1c8e1");
+    expect(explicit.hashUserId("u_c10937b3436a81539bd288e267afcd451fb1c8e1")).toBe("u_c10937b3436a81539bd288e267afcd451fb1c8e1");
+  });
 });

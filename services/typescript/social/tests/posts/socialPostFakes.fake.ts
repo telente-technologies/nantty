@@ -10,7 +10,7 @@ export function buildPostRow(overrides: Partial<PostRow>): PostRow {
     resharedFromId: null, replyToCommentId: null, replyToClipId: null, replyToCommenterId: null, stickerLayout: null, mentions: [], linkPreview: null,
     likeCount: 0, commentCount: 0, repostCount: 0, shareCount: 0, viewCount: 0, profileVisitCount: 0, saveCount: 0, quoteCount: 0, isQuote: false, replyPolicy: "everyone",
     sensitiveLabels: [], authorSensitiveLabels: [], moderationSensitiveLabels: [], advisorySensitiveLabels: [], sensitiveLabelsReviewed: false,
-    moderationVisibility: "visible", expiresAt: null, deletedAt: null, createdAt: new Date("2026-10-04T10:00:00Z"), media: [],
+    moderationVisibility: "visible", topics: [], productIds: [], clipEdit: null, location: null, expiresAt: null, deletedAt: null, createdAt: new Date("2026-10-04T10:00:00Z"), media: [],
     ...overrides,
   } as PostRow;
 }
