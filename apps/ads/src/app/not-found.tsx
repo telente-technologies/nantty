@@ -10,7 +10,7 @@ export default function NotFound() {
     <div className={styles.page}>
       <header className={styles.bar}>
         <Link href="/" aria-label="Zudomart Ads home" className={styles.wordmarkLink}>
-          <ZudomartWordmark productLabel="Ads" tone="onDark" />
+          <ZudomartWordmark productLabel="Ads" tone="onDark" withSymbol />
         </Link>
       </header>
       <main id="main-content" className={styles.main}>

@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { OfflineBanner, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AdsSessionProvider } from "@/components/session/adsSessionProvider";
@@ -22,7 +22,8 @@ export const metadata: Metadata = {
   description: "Create, run and measure Zudomart ads for your store, products, posts and clips.",
   applicationName: adsManagerProductName,
   robots: { index: false, follow: false },
-  icons: { icon: "/icons/appIcon.svg" },
+  manifest: "/manifest.webmanifest",
+  icons: { icon: [{ url: "/brand/favicon.ico", sizes: "48x48" }, { url: "/brand/icon.svg", type: "image/svg+xml" }], apple: "/brand/appleTouchIcon.png" },
   formatDetection: { telephone: false },
 };
 
@@ -45,6 +46,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <a href="#main-content" className="skipToContentLink">
           Skip to content
         </a>
+        <OfflineBanner />
         <AdsSessionProvider initialSessionView={sessionView} csrfToken={readCsrfTokenForCookies(cookieStore)}>
           <AppThemeProvider initialPreference={themePreference} isSignedIn={sessionView !== null}>
             <ToastProvider>{children}</ToastProvider>

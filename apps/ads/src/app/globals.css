@@ -38,8 +38,8 @@
   --media-scrim: rgb(0 0 0 / 0.55);
   --media-backdrop: #000000;
   --media-chip: rgb(255 255 255 / 0.92);
-  --landing-lift: 0 30px 60px -28px rgb(11 23 82 / 0.45);
-  --landing-lift-soft: 0 12px 32px -18px rgb(11 23 82 / 0.3);
+  --landing-lift: 0 30px 60px -28px rgb(24 18 99 / 0.45);
+  --landing-lift-soft: 0 12px 32px -18px rgb(24 18 99 / 0.3);
   --landing-stage-glow: var(--blue-400);
   --landing-stage: var(--blue-500);
   --landing-badge: var(--blue-900);
@@ -62,7 +62,7 @@
   --notice-bg: #262410;
   --notice-border: #4a4513;
   --notice-ink: #f3e88a;
-  --surface-rail: #0e1438;
+  --surface-rail: #110d3d;
   --surface-rail-raised: #172058;
   --media-chip: rgb(20 23 38 / 0.9);
   --landing-lift: 0 30px 60px -24px rgb(0 0 0 / 0.75);
@@ -81,7 +81,7 @@
     --notice-bg: #262410;
     --notice-border: #4a4513;
     --notice-ink: #f3e88a;
-    --surface-rail: #0e1438;
+    --surface-rail: #110d3d;
     --surface-rail-raised: #172058;
     --media-chip: rgb(20 23 38 / 0.9);
     --landing-lift: 0 30px 60px -24px rgb(0 0 0 / 0.75);
@@ -101,9 +101,11 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
 }
 
 body {
+  overflow-wrap: break-word;
   margin: 0;
   min-height: 100dvh;
   background: var(--surface-app);
@@ -185,9 +187,14 @@ svg {
 }
 
 :focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-  border-radius: var(--radius-small);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
 }
 
 .skipToContentLink {
@@ -195,7 +202,7 @@ svg {
   left: 12px;
   top: -48px;
   z-index: 100;
-  padding: 8px 14px;
+  padding: var(--space-2) 14px;
   background: var(--yellow-500);
   color: var(--blue-900);
   font-weight: 600;
@@ -227,6 +234,8 @@ svg {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
