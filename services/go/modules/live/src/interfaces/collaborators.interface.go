@@ -25,8 +25,18 @@ type MediaRoomController interface {
 	SetParticipantTracksMuted(ctx context.Context, room, identity string, audio, video *bool) error
 }
 
-type ProductPinPolicy interface {
-	CanPinProducts(ctx context.Context, hostId uuid.UUID, roles []string, productIds []uuid.UUID) error
+type StoreProduct struct {
+	Id         uuid.UUID
+	Title      string
+	PriceMinor int64
+	Currency   string
+	ImageUrl   *string
+	Status     string
+}
+
+type StoreCatalog interface {
+	IsStoreMember(ctx context.Context, storeId, userId uuid.UUID) (bool, error)
+	OwnedProducts(ctx context.Context, storeId uuid.UUID, productIds []uuid.UUID) (map[uuid.UUID]StoreProduct, error)
 }
 
 type IngressProtocol string
@@ -83,4 +93,5 @@ type SocialRelations interface {
 
 type SubscriberDirectory interface {
 	IsActiveSubscriber(ctx context.Context, subscriberId, creatorId uuid.UUID) (bool, error)
+	CountNewSubscribers(ctx context.Context, creatorId uuid.UUID, from, to time.Time) (int, error)
 }
