@@ -34,6 +34,7 @@ locals {
     go-live = {
       LIVE_MONEY_GRPC_ADDRESS             = local.grpc_address["go-money"]
       LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS = local.grpc_address["go-identity"]
+      LIVE_CATALOG_INTERNAL_URL           = local.internal_url["go-commerce"]
       LIVE_EVENTS_QUEUE                   = "live-domain-events"
     }
     go-ads = {
@@ -75,6 +76,11 @@ locals {
       SOCIAL_INTERNAL_URL        = local.internal_url["social"]
       INTELLIGENCE_URL           = local.internal_url["intelligence"]
       SEARCH_DOMAIN_EVENTS_QUEUE = "search-domain-events"
+    }
+    realtime = {
+      SOCIAL_INTERNAL_URL = local.internal_url["social"]
+      LIVE_INTERNAL_URL   = local.internal_url["go-live"]
+      REALTIME_QUEUE_NAME = "realtime-domain-events"
     }
     notifications = {
       SOCIAL_INTERNAL_URL = local.internal_url["social"]

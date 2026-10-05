@@ -23,7 +23,7 @@ locals {
     go-live = {
       port         = 8080, cpu = 1024, memory = 2048, health = "/healthz", database = true, rabbit = true, min = 2, max = 10
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["LIVE_INTERNAL_API_TOKEN", "LIVE_MONEY_GRPC_TOKEN", "LIVE_ACCOUNT_DIRECTORY_GRPC_TOKEN"]
+      secret_keys  = ["LIVE_INTERNAL_API_TOKEN", "LIVE_MONEY_GRPC_TOKEN", "LIVE_ACCOUNT_DIRECTORY_GRPC_TOKEN", "LIVE_CATALOG_INTERNAL_TOKEN"]
     }
     go-ads = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 6
@@ -63,7 +63,7 @@ locals {
     realtime = {
       port         = 4000, cpu = 1024, memory = 2048, health = "/healthz", database = false, rabbit = true, min = 2, max = 10
       public_rules = [{ priority = 20, path_patterns = ["/ws*"] }], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["SECRET_KEY_BASE"]
+      secret_keys  = ["SECRET_KEY_BASE", "SOCIAL_INTERNAL_TOKEN", "LIVE_INTERNAL_API_TOKEN"]
     }
     intelligence = {
       port         = 8090, cpu = 1024, memory = 4096, health = "/health/live", database = true, rabbit = true, min = 1, max = 6

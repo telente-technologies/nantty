@@ -3152,6 +3152,22 @@
       "arguments": {}
     },
     {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "escrow.refunded",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "escrow.partiallyRefunded",
+      "arguments": {}
+    },
+    {
       "source": "zudomart.dlx",
       "vhost": "zudomart",
       "destination": "ads-domain-events.dlq",
@@ -3213,6 +3229,14 @@
       "destination": "ads-domain-events",
       "destination_type": "queue",
       "routing_key": "adBalance.toppedUp",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "ads-domain-events",
+      "destination_type": "queue",
+      "routing_key": "adBalance.topUpFailed",
       "arguments": {}
     },
     {
@@ -3373,6 +3397,14 @@
       "destination": "notifications-domain-events",
       "destination_type": "queue",
       "routing_key": "account.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "adInvite.created",
       "arguments": {}
     },
     {
