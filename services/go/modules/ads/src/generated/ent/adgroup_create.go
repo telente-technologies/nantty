@@ -215,6 +215,20 @@ func (_c *AdGroupCreate) SetNillableConversionEventID(v *string) *AdGroupCreate 
 	return _c
 }
 
+// SetExperimentID sets the "experiment_id" field.
+func (_c *AdGroupCreate) SetExperimentID(v uuid.UUID) *AdGroupCreate {
+	_c.mutation.SetExperimentID(v)
+	return _c
+}
+
+// SetNillableExperimentID sets the "experiment_id" field if the given value is not nil.
+func (_c *AdGroupCreate) SetNillableExperimentID(v *uuid.UUID) *AdGroupCreate {
+	if v != nil {
+		_c.SetExperimentID(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *AdGroupCreate) SetUpdatedAt(v time.Time) *AdGroupCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -479,6 +493,10 @@ func (_c *AdGroupCreate) createSpec() (*AdGroup, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ConversionEventID(); ok {
 		_spec.SetField(adgroup.FieldConversionEventID, field.TypeString, value)
 		_node.ConversionEventID = value
+	}
+	if value, ok := _c.mutation.ExperimentID(); ok {
+		_spec.SetField(adgroup.FieldExperimentID, field.TypeUUID, value)
+		_node.ExperimentID = &value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(adgroup.FieldUpdatedAt, field.TypeTime, value)
@@ -761,6 +779,24 @@ func (u *AdGroupUpsert) SetConversionEventID(v string) *AdGroupUpsert {
 // UpdateConversionEventID sets the "conversion_event_id" field to the value that was provided on create.
 func (u *AdGroupUpsert) UpdateConversionEventID() *AdGroupUpsert {
 	u.SetExcluded(adgroup.FieldConversionEventID)
+	return u
+}
+
+// SetExperimentID sets the "experiment_id" field.
+func (u *AdGroupUpsert) SetExperimentID(v uuid.UUID) *AdGroupUpsert {
+	u.Set(adgroup.FieldExperimentID, v)
+	return u
+}
+
+// UpdateExperimentID sets the "experiment_id" field to the value that was provided on create.
+func (u *AdGroupUpsert) UpdateExperimentID() *AdGroupUpsert {
+	u.SetExcluded(adgroup.FieldExperimentID)
+	return u
+}
+
+// ClearExperimentID clears the value of the "experiment_id" field.
+func (u *AdGroupUpsert) ClearExperimentID() *AdGroupUpsert {
+	u.SetNull(adgroup.FieldExperimentID)
 	return u
 }
 
@@ -1096,6 +1132,27 @@ func (u *AdGroupUpsertOne) SetConversionEventID(v string) *AdGroupUpsertOne {
 func (u *AdGroupUpsertOne) UpdateConversionEventID() *AdGroupUpsertOne {
 	return u.Update(func(s *AdGroupUpsert) {
 		s.UpdateConversionEventID()
+	})
+}
+
+// SetExperimentID sets the "experiment_id" field.
+func (u *AdGroupUpsertOne) SetExperimentID(v uuid.UUID) *AdGroupUpsertOne {
+	return u.Update(func(s *AdGroupUpsert) {
+		s.SetExperimentID(v)
+	})
+}
+
+// UpdateExperimentID sets the "experiment_id" field to the value that was provided on create.
+func (u *AdGroupUpsertOne) UpdateExperimentID() *AdGroupUpsertOne {
+	return u.Update(func(s *AdGroupUpsert) {
+		s.UpdateExperimentID()
+	})
+}
+
+// ClearExperimentID clears the value of the "experiment_id" field.
+func (u *AdGroupUpsertOne) ClearExperimentID() *AdGroupUpsertOne {
+	return u.Update(func(s *AdGroupUpsert) {
+		s.ClearExperimentID()
 	})
 }
 
@@ -1600,6 +1657,27 @@ func (u *AdGroupUpsertBulk) SetConversionEventID(v string) *AdGroupUpsertBulk {
 func (u *AdGroupUpsertBulk) UpdateConversionEventID() *AdGroupUpsertBulk {
 	return u.Update(func(s *AdGroupUpsert) {
 		s.UpdateConversionEventID()
+	})
+}
+
+// SetExperimentID sets the "experiment_id" field.
+func (u *AdGroupUpsertBulk) SetExperimentID(v uuid.UUID) *AdGroupUpsertBulk {
+	return u.Update(func(s *AdGroupUpsert) {
+		s.SetExperimentID(v)
+	})
+}
+
+// UpdateExperimentID sets the "experiment_id" field to the value that was provided on create.
+func (u *AdGroupUpsertBulk) UpdateExperimentID() *AdGroupUpsertBulk {
+	return u.Update(func(s *AdGroupUpsert) {
+		s.UpdateExperimentID()
+	})
+}
+
+// ClearExperimentID clears the value of the "experiment_id" field.
+func (u *AdGroupUpsertBulk) ClearExperimentID() *AdGroupUpsertBulk {
+	return u.Update(func(s *AdGroupUpsert) {
+		s.ClearExperimentID()
 	})
 }
 

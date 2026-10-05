@@ -54,6 +54,8 @@ type AdGroup struct {
 	FrequencyCapPerDays *int `json:"frequency_cap_per_days,omitempty"`
 	// ConversionEventID holds the value of the "conversion_event_id" field.
 	ConversionEventID string `json:"conversion_event_id,omitempty"`
+	// ExperimentID holds the value of the "experiment_id" field.
+	ExperimentID *uuid.UUID `json:"experiment_id,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -64,6 +66,8 @@ func (*AdGroup) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case adgroup.FieldExperimentID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case adgroup.FieldAudience, adgroup.FieldPlacements:
 			values[i] = new([]byte)
 		case adgroup.FieldBudgetAmountMinor, adgroup.FieldBidAmountMinor, adgroup.FieldFrequencyCapImpressions, adgroup.FieldFrequencyCapPerDays:
@@ -207,6 +211,13 @@ func (_m *AdGroup) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ConversionEventID = value.String
 			}
+		case adgroup.FieldExperimentID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field experiment_id", values[i])
+			} else if value.Valid {
+				_m.ExperimentID = new(uuid.UUID)
+				*_m.ExperimentID = *value.S.(*uuid.UUID)
+			}
 		case adgroup.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -311,6 +322,11 @@ func (_m *AdGroup) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("conversion_event_id=")
 	builder.WriteString(_m.ConversionEventID)
+	builder.WriteString(", ")
+	if v := _m.ExperimentID; v != nil {
+		builder.WriteString("experiment_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

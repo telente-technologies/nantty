@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // AdGroupUpdate is the builder for updating AdGroup entities.
@@ -288,6 +289,26 @@ func (_u *AdGroupUpdate) SetNillableConversionEventID(v *string) *AdGroupUpdate 
 	return _u
 }
 
+// SetExperimentID sets the "experiment_id" field.
+func (_u *AdGroupUpdate) SetExperimentID(v uuid.UUID) *AdGroupUpdate {
+	_u.mutation.SetExperimentID(v)
+	return _u
+}
+
+// SetNillableExperimentID sets the "experiment_id" field if the given value is not nil.
+func (_u *AdGroupUpdate) SetNillableExperimentID(v *uuid.UUID) *AdGroupUpdate {
+	if v != nil {
+		_u.SetExperimentID(*v)
+	}
+	return _u
+}
+
+// ClearExperimentID clears the value of the "experiment_id" field.
+func (_u *AdGroupUpdate) ClearExperimentID() *AdGroupUpdate {
+	_u.mutation.ClearExperimentID()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *AdGroupUpdate) SetUpdatedAt(v time.Time) *AdGroupUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -458,6 +479,12 @@ func (_u *AdGroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.ConversionEventID(); ok {
 		_spec.SetField(adgroup.FieldConversionEventID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ExperimentID(); ok {
+		_spec.SetField(adgroup.FieldExperimentID, field.TypeUUID, value)
+	}
+	if _u.mutation.ExperimentIDCleared() {
+		_spec.ClearField(adgroup.FieldExperimentID, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(adgroup.FieldUpdatedAt, field.TypeTime, value)
@@ -740,6 +767,26 @@ func (_u *AdGroupUpdateOne) SetNillableConversionEventID(v *string) *AdGroupUpda
 	return _u
 }
 
+// SetExperimentID sets the "experiment_id" field.
+func (_u *AdGroupUpdateOne) SetExperimentID(v uuid.UUID) *AdGroupUpdateOne {
+	_u.mutation.SetExperimentID(v)
+	return _u
+}
+
+// SetNillableExperimentID sets the "experiment_id" field if the given value is not nil.
+func (_u *AdGroupUpdateOne) SetNillableExperimentID(v *uuid.UUID) *AdGroupUpdateOne {
+	if v != nil {
+		_u.SetExperimentID(*v)
+	}
+	return _u
+}
+
+// ClearExperimentID clears the value of the "experiment_id" field.
+func (_u *AdGroupUpdateOne) ClearExperimentID() *AdGroupUpdateOne {
+	_u.mutation.ClearExperimentID()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *AdGroupUpdateOne) SetUpdatedAt(v time.Time) *AdGroupUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -940,6 +987,12 @@ func (_u *AdGroupUpdateOne) sqlSave(ctx context.Context) (_node *AdGroup, err er
 	}
 	if value, ok := _u.mutation.ConversionEventID(); ok {
 		_spec.SetField(adgroup.FieldConversionEventID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ExperimentID(); ok {
+		_spec.SetField(adgroup.FieldExperimentID, field.TypeUUID, value)
+	}
+	if _u.mutation.ExperimentIDCleared() {
+		_spec.ClearField(adgroup.FieldExperimentID, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(adgroup.FieldUpdatedAt, field.TypeTime, value)
