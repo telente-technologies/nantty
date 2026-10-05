@@ -25,6 +25,7 @@ func MountAdAccountsRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("GET /api/v1/ads/accounts/{accountId}/invites", authenticated(controller.ListInvites))
 	mux.Handle("POST /api/v1/ads/accounts/{accountId}/invites", authenticated(controller.InviteMember))
 	mux.Handle("DELETE /api/v1/ads/accounts/{accountId}/invites/{inviteId}", authenticated(controller.RevokeInvite))
+	mux.Handle("GET /api/v1/ads/invites", authenticated(controller.ListMyInvites))
 	mux.Handle("GET /api/v1/ads/invites/{inviteId}", authenticated(controller.PreviewInvite))
 	mux.Handle("POST /api/v1/ads/invites/{inviteId}/accept", authenticated(controller.AcceptInvite))
 	mux.Handle("GET /api/v1/ads/accounts/{accountId}/activity", authenticated(controller.ListActivity))
