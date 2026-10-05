@@ -1,7 +1,7 @@
 .layout {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .editor {
@@ -13,8 +13,8 @@
 .step {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
+  gap: var(--space-2);
+  padding: var(--space-3);
   border-radius: var(--radius-medium);
   background: var(--surface-sunken);
   border-left: 3px solid var(--color-brand);
@@ -23,8 +23,8 @@
 .stepTitle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: var(--space-2);
+  font-size: var(--fs-12);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -67,15 +67,15 @@
 .dryRun {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
+  gap: var(--space-2);
+  padding: var(--space-3);
   border: 1px dashed var(--brand-line);
   border-radius: var(--radius-medium);
 }
 
 .payload {
   margin: 0;
-  padding: 8px 10px;
+  padding: var(--space-2) 10px;
   border-radius: var(--radius-small);
   background: var(--console-night);
   color: var(--console-night-text);
@@ -97,7 +97,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .outcomeRun {
@@ -111,6 +111,6 @@
 }
 
 .note {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
 }

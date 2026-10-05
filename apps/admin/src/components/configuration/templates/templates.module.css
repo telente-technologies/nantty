@@ -12,13 +12,13 @@
 }
 
 .variablesLabel {
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-weight: 600;
-  margin-right: 4px;
+  margin-right: var(--space-1);
 }
 
 .variableChip {
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border: 1px solid var(--brand-line);
   border-radius: var(--radius-pill);
   background: var(--color-brand-tint);
@@ -70,8 +70,8 @@
 .translate {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: end;
-  padding-top: 12px;
+  padding-top: var(--space-3);
   border-top: 1px solid var(--divider-soft);
 }

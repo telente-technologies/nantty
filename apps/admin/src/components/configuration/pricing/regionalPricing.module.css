@@ -5,14 +5,14 @@
 }
 
 .note {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--ink-muted);
 }
 
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
   align-items: end;
 }
 
@@ -29,7 +29,7 @@
 
 .priceTable th,
 .priceTable td {
-  padding: 4px 6px;
+  padding: var(--space-1) 6px;
   text-align: left;
   border-bottom: 1px solid var(--divider-soft);
 }
@@ -43,7 +43,7 @@
 
 .priceTable tbody th {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .tableScroller {
