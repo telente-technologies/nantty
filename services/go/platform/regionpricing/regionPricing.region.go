@@ -84,8 +84,6 @@ type WebBilling struct {
 	NotAvailable bool
 }
 
-// DecideWebBilling picks the currency a web buyer pays in: the region's own currency when the provider can charge it,
-// otherwise USD (the US price), otherwise nothing can be charged yet and checkout must be refused.
 func DecideWebBilling(regionCurrency string, providerCanCharge func(string) bool) WebBilling {
 	switch {
 	case providerCanCharge(regionCurrency):

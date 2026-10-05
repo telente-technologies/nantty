@@ -18,9 +18,6 @@ type AdRegionPricing struct {
 	SuggestedDailyBudgetMinor int64  `json:"suggestedDailyBudgetMinor"`
 }
 
-// Research defaults (docs/pricing.md §5): floors sit just under the cheapest incumbent's low end, suggested bids at
-// roughly 70–80% of Meta's typical price, minimum daily budget ≈ 700 impressions at the suggested CPM, and the
-// suggested daily budget five times that.
 var defaultAdRegionPricing = []AdRegionPricing{
 	{RegionNigeria, "NGN", 40_000, 2_500, 100_000, 100_000, 150_000, 6_000, 500, 500_000},
 	{RegionGhana, "GHS", 600, 40, 1_500, 1_500, 1_800, 100, 6, 7_500},
@@ -35,8 +32,6 @@ func DefaultAdRegionPricing() []AdRegionPricing {
 	return append([]AdRegionPricing(nil), defaultAdRegionPricing...)
 }
 
-// DefaultUsdRatesE8 mirrors the currency module's seed rates (units of the currency per 1 USD, scaled by 1e8);
-// callers prefer the live currency.exchange_rate_revisions values when they can read them.
 var DefaultUsdRatesE8 = map[string]int64{
 	"USD": 100_000_000, "NGN": 155_000_000_000, "GHS": 1_550_000_000, "KES": 12_900_000_000, "ZAR": 1_820_000_000, "GBP": 79_000_000, "EUR": 92_000_000,
 }
@@ -62,7 +57,6 @@ func convert(amountMinor int64, fromCurrency, toCurrency string, ratesE8 map[str
 	return quotient.Int64(), nil
 }
 
-// ConvertMinorUnits converts between currencies that share minor-unit precision (all seven supported ones use 2 digits), rounding down.
 func ConvertMinorUnits(amountMinor int64, fromCurrency, toCurrency string, ratesE8 map[string]int64) (int64, error) {
 	return convert(amountMinor, fromCurrency, toCurrency, ratesE8, false)
 }
@@ -71,7 +65,6 @@ func ConvertMinorUnitsRoundingUp(amountMinor int64, fromCurrency, toCurrency str
 	return convert(amountMinor, fromCurrency, toCurrency, ratesE8, true)
 }
 
-// InBillingCurrency expresses one region's row in another currency, rounding up so nothing undercuts the local value.
 func (row AdRegionPricing) InBillingCurrency(billingCurrency string, ratesE8 map[string]int64) (AdRegionPricing, error) {
 	return FloorsForTargetedRegions([]AdRegionPricing{row}, []string{row.Region}, billingCurrency, ratesE8)
 }
@@ -90,8 +83,6 @@ func FindAdRegionPricing(table []AdRegionPricing, region string) AdRegionPricing
 	return defaultAdRegionPricing[len(defaultAdRegionPricing)-1]
 }
 
-// FloorsForTargetedRegions returns the strictest floors across the targeted regions, expressed in the advertiser's billing
-// currency (rounded up so a converted floor never undercuts the local one). No targeted region means the US fallback.
 func FloorsForTargetedRegions(table []AdRegionPricing, regions []string, billingCurrency string, ratesE8 map[string]int64) (AdRegionPricing, error) {
 	if len(regions) == 0 {
 		regions = []string{FallbackRegion.Code}

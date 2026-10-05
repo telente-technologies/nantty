@@ -7,9 +7,6 @@ func roundUpToStep(amountMinor, stepMinor int64) int64 {
 	return (amountMinor/stepMinor + 1) * stepMinor
 }
 
-// RoundToPricePoint snaps an amount up to the price points shoppers expect in each currency:
-// naira in ₦100 (₦500 from ₦10,000), shillings in KES 10 (KES 50 from KES 1,000), cedis in whole units,
-// and rand, pounds, euros and dollars ending in .99 (in .x9 steps below 10 units).
 func RoundToPricePoint(amountMinor int64, currency string) int64 {
 	if amountMinor <= 0 {
 		return 0

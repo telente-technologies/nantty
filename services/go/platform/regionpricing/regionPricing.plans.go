@@ -23,8 +23,6 @@ type monthlyPair struct{ web, app int64 }
 
 var inAppPlans = map[string]bool{"blue_essential": true, "blue": true, "premium": true}
 
-// Monthly list prices per region from docs/pricing.md: web (Paystack) and app (Apple / Google, same price on both).
-// Seller and Gold plans and Black are web only, so their app price is zero.
 var defaultMonthlyPlanPrices = map[string]map[string]monthlyPair{
 	"blue_essential":  {"NG": {100_000, 120_000}, "GH": {1_200, 1_500}, "KE": {20_000, 25_000}, "ZA": {2_999, 3_499}, "GB": {249, 299}, "EU": {249, 299}, "US": {249, 299}},
 	"blue":            {"NG": {250_000, 290_000}, "GH": {3_000, 3_500}, "KE": {50_000, 60_000}, "ZA": {5_999, 6_999}, "GB": {599, 699}, "EU": {599, 699}, "US": {599, 699}},
@@ -82,7 +80,6 @@ func FindDefaultPlanPrice(planCode, region string) (PlanRegionalPrice, bool) {
 	return PlanRegionalPrice{}, false
 }
 
-// AmountFor returns the list price for a channel and interval; zero means the plan isn't sold that way.
 func (price PlanRegionalPrice) AmountFor(channel, interval string) int64 {
 	switch channel + "." + interval {
 	case "ios.month":

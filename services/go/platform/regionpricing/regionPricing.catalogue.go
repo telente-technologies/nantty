@@ -11,7 +11,6 @@ var DefaultCoinPackTiers = []CoinPackTier{
 	{"1", 100, 0, 1}, {"2", 500, 0, 2}, {"3", 1_000, 30, 3}, {"4", 2_500, 100, 4}, {"5", 5_000, 250, 5}, {"6", 10_000, 600, 6},
 }
 
-// Price of 100 coins per currency: web (Paystack, cheaper) and app (Apple / Google). Larger packs scale linearly and snap to price points.
 var hundredCoinPriceByCurrency = map[string]monthlyPair{
 	"NGN": {100_000, 120_000}, "GHS": {1_200, 1_500}, "KES": {13_000, 16_000}, "ZAR": {1_899, 2_299},
 	"GBP": {99, 119}, "EUR": {99, 119}, "USD": {99, 119},

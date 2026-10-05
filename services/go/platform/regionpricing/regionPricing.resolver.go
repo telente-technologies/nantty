@@ -47,8 +47,6 @@ func ChannelForClientPlatform(platform string) string {
 	return "web"
 }
 
-// The storefront only counts for app clients: in-app purchases are charged by the store at the storefront's price,
-// while a web caller could send any storefront header.
 func ResolvePricingRegion(signals Signals) Resolution {
 	channel := ChannelForClientPlatform(signals.ClientPlatform)
 	if channel != "web" {

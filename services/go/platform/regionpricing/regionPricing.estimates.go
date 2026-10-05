@@ -62,8 +62,6 @@ type CampaignEstimate struct {
 
 var ErrInvalidEstimate = errors.New("invalid estimate request")
 
-// Delivery assumptions behind every estimate (docs/pricing.md §5.3): the auction clears between 75% and 130% of
-// the suggested CPM, people see an ad 1.4–1.8 times, 0.6–1.4% click, 20–35% watch a video past three seconds.
 const (
 	cpmLowFactorBps    = 7_500
 	cpmHighFactorBps   = 13_000
@@ -164,8 +162,6 @@ func estimateRegion(row AdRegionPricing, dailyMinor int64, days int, kind, billi
 	}, nil
 }
 
-// EstimateCampaign splits the daily budget across the targeted regions by audience weight and estimates delivery per
-// region in the advertiser's billing currency. A lifetime budget is spread evenly over the days.
 func EstimateCampaign(table []AdRegionPricing, request EstimateRequest, ratesE8 map[string]int64) (CampaignEstimate, error) {
 	if request.Days < 1 || request.Days > 366 || request.BudgetMinor < 0 || (request.BudgetType != "daily" && request.BudgetType != "lifetime") || !IsSupportedCurrency(request.BillingCurrency) {
 		return CampaignEstimate{}, ErrInvalidEstimate
@@ -236,7 +232,6 @@ var boostPackageShapes = []struct {
 	label    string
 }{{1, 1, "1 day"}, {3, 3, "3 days"}, {7, 7, "1 week"}, {15, 7, "1 week, wider reach"}}
 
-// BoostPackages prices the four in-app boost packages for one region in the booster's currency, with reach estimates.
 func BoostPackages(table []AdRegionPricing, region, billingCurrency string, ratesE8 map[string]int64) ([]BoostPackage, error) {
 	row := FindAdRegionPricing(table, region)
 	billing, err := row.InBillingCurrency(billingCurrency, ratesE8)
