@@ -188,7 +188,12 @@ func (controller PayoutOnboardingController) CreateDocumentLink(writer http.Resp
 		controller.fail(writer, request, err)
 		return
 	}
-	controller.fail(writer, request, controller.Application.Gateway.CreatePayoutVerificationLink(request.Context(), principal.UserId))
+	link, err := controller.Application.Gateway.CreatePayoutVerificationLink(request.Context(), principal.UserId)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, dtos.DocumentLinkDto{Url: link.Url, ReturnUrl: link.ReturnUrl, ExpiresAt: link.ExpiresAt})
 }
 
 func (controller PayoutOnboardingController) GetPayoutFees(writer http.ResponseWriter, request *http.Request) {

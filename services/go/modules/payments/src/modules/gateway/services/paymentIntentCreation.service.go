@@ -20,6 +20,7 @@ import (
 	"zudomart/modules/payments/src/interfaces"
 	"zudomart/modules/payments/src/modules/gateway/models"
 	"zudomart/modules/payments/src/repositories"
+	"zudomart/modules/payments/src/utils"
 	"zudomart/platform/httpserver"
 )
 
@@ -192,11 +193,11 @@ func customerDisplayName(contact repositories.VerifiedAccountContact) string {
 
 func (gateway *PaymentGateway) buildCallbackUrl(returnTo, reference string) string {
 	allowed := gateway.Container.Settings.AllowedReturnUrls
-	base := "zudomart://payments/return"
+	base := constants.AppPaymentReturnUrl
 	if len(allowed) > 0 {
 		base = allowed[0]
 	}
-	if returnTo != "" && slices.Contains(allowed, returnTo) {
+	if returnTo != "" && gateway.IsAllowedReturnUrl(returnTo) {
 		base = returnTo
 	}
 	separator := "?"
@@ -207,7 +208,9 @@ func (gateway *PaymentGateway) buildCallbackUrl(returnTo, reference string) stri
 }
 
 func (gateway *PaymentGateway) IsAllowedReturnUrl(returnTo string) bool {
-	return returnTo == "" || slices.Contains(gateway.Container.Settings.AllowedReturnUrls, returnTo)
+	settings := gateway.Container.Settings
+	return returnTo == "" || returnTo == constants.AppPaymentReturnUrl || slices.Contains(settings.AllowedReturnUrls, returnTo) ||
+		utils.IsAdsAccountReturnUrl(returnTo, settings.AdsReturnOrigins)
 }
 
 func ConvertPaymentIntentToView(intent *ent.PaymentIntent) models.PaymentIntentView {

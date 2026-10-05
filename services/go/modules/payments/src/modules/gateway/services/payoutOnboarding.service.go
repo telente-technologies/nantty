@@ -61,6 +61,7 @@ func (gateway *PaymentGateway) ReadPayoutOnboardingState(ctx context.Context, us
 	inputs := models.PayoutOnboardingInputs{Role: role}
 	if onboarding != nil {
 		inputs.Role, inputs.CompletedSteps, inputs.RegisteredBusiness = firstNonEmpty(role, onboarding.Role), onboarding.CompletedSteps, onboarding.RegisteredBusiness
+		inputs.DocumentStatus = currentDocumentStatus(onboarding, gateway.Container.Now())
 	}
 	account, err := gateway.FindConnectedAccountRowForUser(ctx, executor, userId)
 	if err != nil && !errors.Is(err, ErrConnectedAccountMissing) {
@@ -228,14 +229,6 @@ func (gateway *PaymentGateway) RetryPayoutOnboarding(ctx context.Context, userId
 	_, err = client.ConnectedAccountJob.Update().Where(connectedaccountjob.UserID(userId), connectedaccountjob.StatusEQ(connectedaccountjob.StatusQueued), connectedaccountjob.NextAttemptAtGT(now.Add(time.Minute))).
 		SetNextAttemptAt(now).Save(ctx)
 	return err
-}
-
-func (gateway *PaymentGateway) CreatePayoutVerificationLink(ctx context.Context, userId string) error {
-	account, err := gateway.FindConnectedAccountRowForUser(ctx, gateway.Container.Resources.Database, userId)
-	if err != nil || models.MapPayoutAccountStatus(string(account.Status), string(account.VerificationStatus)) != "documentsRequired" {
-		return ErrDocumentLinkNotReady
-	}
-	return ErrDocumentLinkUnavailable
 }
 
 func (gateway *PaymentGateway) RequirePayoutAccountVerified(ctx context.Context, userId string) error {
