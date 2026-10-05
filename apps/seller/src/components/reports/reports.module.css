@@ -7,7 +7,7 @@
 .reportLink {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   height: 100%;
   padding: 14px;
   border: 1px solid var(--divider-soft);
@@ -27,7 +27,7 @@
 
 .reportLinkDescription {
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .filterSelect {
@@ -43,14 +43,14 @@
 }
 
 .backLink {
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-weight: 600;
 }
 
 .summaryTiles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 @media print {
@@ -66,14 +66,14 @@
 .reportLinkTitle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .exportActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .printOnly {
@@ -88,6 +88,6 @@
   .printOnly {
     display: block;
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--fs-12);
   }
 }

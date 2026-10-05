@@ -6,7 +6,7 @@ import { useCommerceCursorList } from "@/components/orders/commerceCursorList.ho
 import { ReviewCard } from "@/components/reviews/reviewCard";
 import { ReviewsSummaryPanel } from "@/components/reviews/reviewsSummaryPanel";
 import { Button } from "@/components/ui/button";
-import { Callout, EmptyState, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, EmptyState, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { FilterBar, SearchInput } from "@/components/ui/filterControls";
 import { SelectField } from "@/components/ui/formFields";
 import { SegmentedControl } from "@/components/ui/navigationTabs";
@@ -39,7 +39,7 @@ export function ReviewsView() {
     <PageStack>
       <PageHeader title="Reviews" description="What buyers say about your products and your store in the Zudomart app. Reply publicly, and report reviews that break the rules." />
       {summaryQuery.data ? <ReviewsSummaryPanel summary={summaryQuery.data} locale={locale} /> : summaryQuery.isLoading ? <LoadingBlock label="Loading your rating" /> : null}
-      {summaryQuery.errorMessage ? <Callout tone="error">{summaryQuery.errorMessage}</Callout> : null}
+      {summaryQuery.errorMessage ? <ErrorCallout message={summaryQuery.errorMessage} onRetry={summaryQuery.reload} /> : null}
       <SegmentedControl label="Review type" value={kindFilter} onValueChange={setKindFilter} options={[{ value: "all", label: "All reviews" }, { value: "product", label: "Products" }, { value: "store", label: "Store" }]} />
       <FilterBar>
         <SearchInput label="Search reviews" placeholder="Words, buyer, product or order" value={searchText} onValueChange={setSearchText} />

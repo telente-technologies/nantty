@@ -7,7 +7,7 @@ import { useState } from "react";
 import { PromotionEditorForm } from "@/components/promotions/promotionEditorForm";
 import { promotionStatusLabel, promotionStatusTone } from "@/components/promotions/promotionPresentation.util";
 import { Button } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { PageHeader, PageStack } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -30,7 +30,7 @@ export function PromotionEditorView({ promotionId }: { readonly promotionId: str
   const promotion = promotionQuery.data;
 
   if (!settings || (promotionId && promotionQuery.isLoading && !promotion)) return <LoadingBlock label="Loading promotion" />;
-  if (promotionId && !promotion) return <Callout tone="error">{promotionQuery.errorMessage ?? "This promotion could not be loaded."}</Callout>;
+  if (promotionId && !promotion) return <ErrorCallout message={promotionQuery.errorMessage ?? "This promotion could not be loaded."} onRetry={promotionQuery.reload} />;
 
   async function savePromotion(input: PromotionInput) {
     setIsSaving(true);

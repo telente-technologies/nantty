@@ -10,11 +10,11 @@
 
 .muted {
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .code {
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border: 1px dashed color-mix(in srgb, var(--color-brand) 60%, transparent);
   border-radius: 6px;
   background: var(--blue-tint);
@@ -26,7 +26,7 @@
 .editorGrid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
-  gap: 20px;
+  gap: var(--space-5);
   align-items: start;
 }
 
@@ -38,8 +38,8 @@
 
 .row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-3);
 }
 
 .pickerResults {
@@ -55,8 +55,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: var(--space-2);
+  padding: var(--space-2) 10px;
   border-bottom: 1px solid var(--divider-soft);
 }
 
@@ -73,23 +73,23 @@
 .chosenChip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 4px 4px 10px;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-1) var(--space-1) 10px;
   border-radius: var(--radius-pill);
   background: var(--blue-tint);
   color: var(--color-brand);
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .summaryLine {
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   border-bottom: 1px dashed var(--divider-soft);
 }
 
 .fieldError {
   color: var(--error-ink);
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-weight: 500;
 }
 
