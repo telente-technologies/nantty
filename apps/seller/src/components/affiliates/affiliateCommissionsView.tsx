@@ -5,7 +5,7 @@ import { useState } from "react";
 import { AffiliateCommissionLedgerPanel } from "@/components/affiliates/affiliateCommissionLedgerPanel";
 import { AffiliateProductCommissionEditor } from "@/components/affiliates/affiliateProductCommissionEditor";
 import { DataTable } from "@/components/ui/dataTable";
-import { Callout } from "@/components/ui/feedback";
+import { ErrorCallout } from "@/components/ui/feedback";
 import { SearchInput } from "@/components/ui/filterControls";
 import { Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -32,7 +32,7 @@ export function AffiliateCommissionsView() {
         actions={<SearchInput label="Search products" value={searchText} onValueChange={setSearchText} />}
         padded={false}
       >
-        {commissionsQuery.errorMessage ? <Callout tone="error">{commissionsQuery.errorMessage}</Callout> : null}
+        {commissionsQuery.errorMessage ? <ErrorCallout message={commissionsQuery.errorMessage} onRetry={commissionsQuery.reload} /> : null}
         <DataTable
           caption="Affiliate commission per product"
           rows={commissionsQuery.data?.data ?? null}

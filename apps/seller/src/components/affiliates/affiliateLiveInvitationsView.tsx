@@ -6,7 +6,7 @@ import { AffiliateCreatorIdentity } from "@/components/affiliates/affiliateCreat
 import { AffiliateLiveInvitationDialog } from "@/components/affiliates/affiliateLiveInvitationDialog";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
-import { Callout, EmptyState } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { StatusBadge, type StatusTone } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
@@ -47,7 +47,7 @@ export function AffiliateLiveInvitationsView() {
         actions={<Button variant="primary" iconName="videoCamera24" onClick={() => setIsInviteDialogOpen(true)}>Invite a creator</Button>}
         padded={false}
       >
-        {invitationsQuery.errorMessage ? <Callout tone="error">{invitationsQuery.errorMessage}</Callout> : null}
+        {invitationsQuery.errorMessage ? <ErrorCallout message={invitationsQuery.errorMessage} onRetry={invitationsQuery.reload} /> : null}
         <DataTable
           caption="Live selling invitations"
           rows={invitationsQuery.data?.data ?? null}

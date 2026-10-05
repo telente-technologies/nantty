@@ -5,7 +5,7 @@ import { useState } from "react";
 import { AffiliateCreatorIdentity } from "@/components/affiliates/affiliateCreatorIdentity";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
-import { Callout, EmptyState } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout } from "@/components/ui/feedback";
 import { DateRangeControl, FilterBar, type DateRangeValue } from "@/components/ui/filterControls";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { Panel } from "@/components/ui/panel";
@@ -62,7 +62,7 @@ export function AffiliateCreatorsView() {
           Export CSV
         </Button>
       </FilterBar>
-      {creatorsQuery.errorMessage ? <Callout tone="error">{creatorsQuery.errorMessage}</Callout> : null}
+      {creatorsQuery.errorMessage ? <ErrorCallout message={creatorsQuery.errorMessage} onRetry={creatorsQuery.reload} /> : null}
       <Panel padded={false}>
         <DataTable
           caption="Creators in your affiliate program"

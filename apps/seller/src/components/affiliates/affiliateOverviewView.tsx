@@ -4,7 +4,7 @@ import { AffiliateCreatorIdentity } from "@/components/affiliates/affiliateCreat
 import { AffiliateProgramSettingsForm } from "@/components/affiliates/affiliateProgramSettingsForm";
 import { ButtonLink } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
-import { Callout, EmptyState, LoadingBlock, StatTile } from "@/components/ui/feedback";
+import { Callout, EmptyState, ErrorCallout, LoadingBlock, StatTile } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
@@ -18,7 +18,7 @@ export function AffiliateOverviewView() {
   const overview = overviewQuery.data;
 
   if (overviewQuery.isLoading && !overview) return <LoadingBlock label="Loading your affiliate program" />;
-  if (!overview) return <Callout tone="error">{overviewQuery.errorMessage ?? "Could not load the affiliate program."}</Callout>;
+  if (!overview) return <ErrorCallout message={overviewQuery.errorMessage ?? "Could not load the affiliate program."} onRetry={overviewQuery.reload} />;
 
   return (
     <>

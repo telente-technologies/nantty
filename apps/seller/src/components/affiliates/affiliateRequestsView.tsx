@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { AffiliateCreatorIdentity } from "@/components/affiliates/affiliateCreatorIdentity";
 import { Button } from "@/components/ui/button";
-import { Callout, EmptyState, LoadingBlock } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { TextAreaField } from "@/components/ui/formFields";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { SegmentedControl } from "@/components/ui/navigationTabs";
@@ -57,7 +57,7 @@ export function AffiliateRequestsView() {
       <SegmentedControl label="Request status" value={statusFilter} onValueChange={setStatusFilter} options={statusOptions} />
       <Panel padded={false}>
         {requestsQuery.isLoading && !requestsQuery.data ? <LoadingBlock /> : null}
-        {requestsQuery.errorMessage ? <Callout tone="error">{requestsQuery.errorMessage}</Callout> : null}
+        {requestsQuery.errorMessage ? <ErrorCallout message={requestsQuery.errorMessage} onRetry={requestsQuery.reload} /> : null}
         {!requestsQuery.isLoading && requests.length === 0 ? <EmptyState iconName="videoCamera24" title={statusFilter === "pending" ? "No requests waiting" : "Nothing here"} description="Creators in the Creator Program can ask to sell your products. Their requests show up here." /> : null}
         <ul className={styles.requestList}>
           {requests.map((affiliateRequest) => (
