@@ -24,8 +24,6 @@ type RefundAttemptOutcome struct {
 	Err       error
 }
 
-// RunRefundAttemptsUntilSent makes the first attempt straight away and retries transient failures on the given
-// delays; a definitive rejection or running out of retries raises the alert.
 func RunRefundAttemptsUntilSent(ctx context.Context, attempt func(context.Context) RefundAttemptOutcome, delays []time.Duration, wait func(context.Context, time.Duration) bool, alert func(error)) bool {
 	outcome := attempt(ctx)
 	for index := 0; !outcome.Sent && outcome.Retryable && index < len(delays); index++ {
@@ -51,9 +49,6 @@ func WaitOrStop(ctx context.Context, delay time.Duration) bool {
 	}
 }
 
-// refundCardVerificationImmediately sends the verification refund the moment the card authorisation is captured
-// instead of waiting for the five-minute refund sweep. The first attempt runs inline; retries continue in the
-// background so the person's request is not held up.
 func (gateway *PaymentGateway) refundCardVerificationImmediately(ctx context.Context, intentId uuid.UUID) {
 	attempt := func(ctx context.Context) RefundAttemptOutcome {
 		return gateway.attemptCardVerificationRefund(ctx, intentId)

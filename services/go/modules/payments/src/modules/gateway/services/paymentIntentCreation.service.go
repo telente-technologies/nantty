@@ -66,6 +66,9 @@ func (gateway *PaymentGateway) CreatePendingPaymentIntentInTransaction(ctx conte
 		return models.PaymentIntentView{}, err
 	}
 	reference := prefix + strings.ReplaceAll(uuid.NewString(), "-", "")
+	if request.Reference != "" && strings.HasPrefix(request.Reference, prefix) {
+		reference = request.Reference
+	}
 	callbackUrl := gateway.buildCallbackUrl(request.ReturnTo, reference)
 	metadata := map[string]string{}
 	for key, value := range request.Metadata {

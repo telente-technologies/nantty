@@ -35,6 +35,16 @@ func (gateway *PaymentGateway) executeConnectedAccountStep(ctx context.Context, 
 		return nil, errors.New("the saved bank details could not be read")
 	}
 	bank.UserId = account.UserID
+	var linked bool
+	if err := databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		linked, err = gateway.claimSettlementAccountInTransaction(ctx, transaction, account, bank)
+		return err
+	}); err != nil {
+		return nil, err
+	}
+	if linked {
+		return nil, ErrBankAccountAlreadyLinked
+	}
 	switch job.Step {
 	case connectedaccountjob.StepCreateRecipient:
 		code, found, err := provider.FindTransferRecipient(ctx, bank)

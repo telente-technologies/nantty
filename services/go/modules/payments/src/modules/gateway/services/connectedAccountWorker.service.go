@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log/slog"
 	"net/http"
 	"time"
@@ -99,6 +100,14 @@ func (gateway *PaymentGateway) recordConnectedAccountJobOutcome(ctx context.Cont
 		}
 		failedAttempts := job.AttemptCount + 1
 		message := truncate(stepError.Error(), 500)
+		if errors.Is(stepError, ErrBankAccountAlreadyLinked) {
+			outcome = "failed"
+			message = duplicateBankAccountCode + ": " + ErrBankAccountAlreadyLinked.Message
+			if err := update.SetStatus(connectedaccountjob.StatusFailed).SetAttemptCount(failedAttempts).SetLastError(message).Exec(ctx); err != nil {
+				return err
+			}
+			return client.ConnectedAccount.Update().Where(connectedaccount.UserID(job.UserID)).SetLastError(message).Exec(ctx)
+		}
 		if delay, retry := models.NextConnectedAccountJobAttemptDelay(failedAttempts); retry {
 			outcome = "retried"
 			return update.SetStatus(connectedaccountjob.StatusQueued).SetAttemptCount(failedAttempts).SetNextAttemptAt(now.Add(delay)).SetLastError(message).Exec(ctx)
@@ -132,7 +141,8 @@ func (gateway *PaymentGateway) ReconcileStuckConnectedAccounts(ctx context.Conte
 	client := gateway.Container.Client(gateway.Container.Resources.Database)
 	now := gateway.Container.Now().UTC()
 	requeued, err := client.ConnectedAccountJob.Update().
-		Where(connectedaccountjob.StatusEQ(connectedaccountjob.StatusFailed), connectedaccountjob.UpdatedAtLT(now.Add(-olderThan))).
+		Where(connectedaccountjob.StatusEQ(connectedaccountjob.StatusFailed), connectedaccountjob.UpdatedAtLT(now.Add(-olderThan)),
+			connectedaccountjob.Not(connectedaccountjob.LastErrorHasPrefix(duplicateBankAccountCode))).
 		SetStatus(connectedaccountjob.StatusQueued).SetAttemptCount(0).SetNextAttemptAt(now).Save(ctx)
 	if err != nil {
 		return 0, err

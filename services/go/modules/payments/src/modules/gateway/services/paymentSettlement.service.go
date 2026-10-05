@@ -164,6 +164,11 @@ func (gateway *PaymentGateway) applyVerificationToIntent(ctx context.Context, tr
 	if err := gateway.recordProviderCustomerInTransaction(ctx, client, succeeded.OwnerUserID, succeeded.Provider, verification.ProviderCustomerId); err != nil {
 		return nil, false, err
 	}
+	if string(succeeded.Purpose) == constants.PurposeSubscriptionRenewal {
+		if settledPayment.BillingAuthorizationId, err = gateway.StoreBillingAuthorizationInTransaction(ctx, transaction, succeeded.OwnerUserID, succeeded.Provider, verification.ProviderCustomerId, settledPayment.Authorization); err != nil {
+			return nil, false, err
+		}
+	}
 	if err := handler.HandleSucceededPayment(ctx, transaction, settledPayment); err != nil {
 		return nil, false, err
 	}

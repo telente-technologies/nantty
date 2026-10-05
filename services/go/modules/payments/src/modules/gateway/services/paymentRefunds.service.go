@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -89,6 +90,11 @@ func (gateway *PaymentGateway) SendPendingRefundToProvider(ctx context.Context, 
 	if err != nil {
 		return err
 	}
+	if claimed.AttemptCount > 1 {
+		if handled, err := gateway.settleRefundSentEarlier(ctx, provider, claimed, intent); handled || err != nil {
+			return err
+		}
+	}
 	result, err := provider.RefundCharge(ctx, interfaces.RefundRequest{
 		ProviderChargeId: intent.ProviderTransactionID, ChargeReference: intent.Reference, RefundReference: claimed.Reference,
 		AmountMinor: claimed.AmountMinor, Currency: claimed.Currency, FullRefund: claimed.FullRefund, Reason: claimed.Reason,
@@ -109,6 +115,29 @@ func (gateway *PaymentGateway) SendPendingRefundToProvider(ctx context.Context, 
 	return gateway.recordRefundOutcome(ctx, claimed.ID, result)
 }
 
+func (gateway *PaymentGateway) settleRefundSentEarlier(ctx context.Context, provider interfaces.PaymentProvider, claimed *ent.PaymentRefund, intent *ent.PaymentIntent) (bool, error) {
+	lookup, supported := provider.(interfaces.RefundLookupProvider)
+	if !supported {
+		return true, gateway.recordRefundOutcome(ctx, claimed.ID, interfaces.RefundResult{Outcome: interfaces.OutcomePending, FailureReason: "outcome unknown and the provider cannot be asked; confirm it by hand"})
+	}
+	found, exists, err := lookup.FindRefundByReference(ctx, interfaces.RefundLookup{
+		ProviderChargeId: intent.ProviderTransactionID, ChargeReference: intent.Reference, RefundReference: claimed.Reference, SubmittedAfter: claimed.CreatedAt,
+	})
+	if err != nil {
+		return true, gateway.returnRefundToPendingQueue(ctx, claimed.ID, "provider call failed; could not confirm an earlier attempt")
+	}
+	if !exists {
+		return false, nil
+	}
+	if found.NeedsCustomerDetail {
+		if err := gateway.Container.Client(gateway.Container.Resources.Database).PaymentRefund.UpdateOneID(claimed.ID).SetProviderRefundID(found.ProviderRefundId).Exec(ctx); err != nil {
+			return true, err
+		}
+		return true, gateway.markRefundAwaitingBankDetails(ctx, claimed.ID, "the bank needs the buyer's account to return this payment")
+	}
+	return true, gateway.recordRefundOutcome(ctx, claimed.ID, found)
+}
+
 func (gateway *PaymentGateway) returnRefundToPendingQueue(ctx context.Context, refundId uuid.UUID, reason string) error {
 	return gateway.Container.Client(gateway.Container.Resources.Database).PaymentRefund.Update().
 		Where(paymentrefund.ID(refundId), paymentrefund.StatusEQ(paymentrefund.StatusProcessing)).
@@ -116,6 +145,10 @@ func (gateway *PaymentGateway) returnRefundToPendingQueue(ctx context.Context, r
 }
 
 func (gateway *PaymentGateway) RetryPendingRefunds(ctx context.Context, limit int) int {
+	_ = gateway.Container.Client(gateway.Container.Resources.Database).PaymentRefund.Update().
+		Where(paymentrefund.StatusEQ(paymentrefund.StatusProcessing), paymentrefund.FailureReasonHasPrefix("provider call failed"),
+			paymentrefund.UpdatedAtLT(gateway.Container.Now().Add(-10*time.Minute))).
+		SetStatus(paymentrefund.StatusPending).Exec(ctx)
 	pending, err := gateway.Container.Client(gateway.Container.Resources.Database).PaymentRefund.Query().
 		Where(paymentrefund.StatusEQ(paymentrefund.StatusPending)).Order(ent.Asc(paymentrefund.FieldCreatedAt)).Limit(limit).All(ctx)
 	if err != nil {
