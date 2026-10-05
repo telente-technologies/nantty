@@ -115,7 +115,7 @@ func TestAdminRefundIsSteppedUpIdempotentAndSettledByTheEscrowEvent(t *testing.T
 	access, stepUp, _ := harness.tokens.SignStaffTokensForTest(t, "admin", []string{"refunds:issue"})
 	body := map[string]any{"orderId": orderId.String(), "amount": map[string]any{"amountMinor": 100_000, "currency": "NGN"}, "reason": "One item arrived damaged"}
 	keyed := map[string]string{"Idempotency-Key": "refund-key-0001"}
-	if status, response, _ := harness.call("POST", "/api/v1/admin/refunds", body, bearer(access, nil)); status != http.StatusBadRequest || response["code"] != "IDEMPOTENCY_KEY_REQUIRED" {
+	if status, response, _ := harness.call("POST", "/api/v1/admin/refunds", body, bearer(access, map[string]string{staffauth.StepUpHeader: stepUp})); status != http.StatusBadRequest || response["code"] != "IDEMPOTENCY_KEY_REQUIRED" {
 		t.Fatalf("missing key: %d %v", status, response)
 	}
 	if status, response, _ := harness.call("POST", "/api/v1/admin/refunds", body, bearer(access, keyed)); status != http.StatusForbidden || response["code"] != "STEP_UP_REQUIRED" {

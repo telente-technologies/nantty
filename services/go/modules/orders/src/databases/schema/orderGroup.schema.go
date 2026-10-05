@@ -109,6 +109,7 @@ func (OrderItem) Fields() []ent.Field {
 		field.Bool("taxable").Default(true).Immutable(),
 		field.String("attribution_source").Optional().Nillable().MaxLen(10).Immutable(),
 		field.UUID("attribution_id", uuid.UUID{}).Optional().Nillable().Immutable(),
+		field.Int64("affiliate_commission_bps").Optional().Nillable().Immutable(),
 	}
 }
 
