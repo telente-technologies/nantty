@@ -35,8 +35,11 @@ type MediaTokenView struct {
 }
 
 type LiveProductView struct {
-	ProductId string `json:"productId"`
-	Pinned    bool   `json:"pinned"`
+	ProductId string     `json:"productId"`
+	Pinned    bool       `json:"pinned"`
+	Title     *string    `json:"title"`
+	Price     *MoneyView `json:"price"`
+	ImageUrl  *string    `json:"imageUrl"`
 }
 
 type HostSummary struct {

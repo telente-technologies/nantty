@@ -115,6 +115,7 @@ type StreamStatsView struct {
 	EstimatedEarnings *MoneyView               `json:"estimatedEarnings"`
 	TopSupporters     []LeaderboardEntryView   `json:"topSupporters"`
 	Battles           []StreamBattleResultView `json:"battles"`
+	NewSubscribers    int                      `json:"newSubscribers"`
 }
 
 type StreamBattleResultView struct {
