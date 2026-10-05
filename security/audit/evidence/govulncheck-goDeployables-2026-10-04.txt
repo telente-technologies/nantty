@@ -1,0 +1,16 @@
+=== Symbol Results ===
+
+Vulnerability #1: GO-2026-6443
+    Server panic via missing authority or Host headers in google.golang.org/grpc
+  More info: https://pkg.go.dev/vuln/GO-2026-6443
+  Module: google.golang.org/grpc
+    Found in: google.golang.org/grpc@v1.84.0
+    Fixed in: google.golang.org/grpc@v1.85.0-dev.0.20260825072537-93e31b48545e
+    Example traces found:
+      #1: goMoney/server.go:17:69: goMoney.main calls servicemodule.RunDeployableWithModulesUntilTerminationSignal, which eventually calls transport.http2Server.HandleStreams
+
+Your code is affected by 1 vulnerability from 1 module.
+This scan also found 1 vulnerability in packages you import and 1 vulnerability
+in modules you require, but your code doesn't appear to call these
+vulnerabilities.
+Use '-show verbose' for more details.

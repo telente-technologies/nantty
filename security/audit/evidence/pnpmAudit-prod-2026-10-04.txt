@@ -1,0 +1,7 @@
+pnpm audit --prod (root lockfile), 2026-10-04: {'info': 0, 'low': 0, 'moderate': 2, 'high': 4, 'critical': 0}
+- moderate uuid <11.1.1 patched >=11.1.1 | uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided | path: apps__mobile>expo>@expo/cli>@expo/config>@expo/config-plugins>xcode>uuid
+- high deepmerge-ts <8.0.0 patched >=8.0.0 | DeepmergeTS has stack exhaustion when merging recursive object graphs | path: apps__api>@prisma/client>prisma>@prisma/config>deepmerge-ts
+- high mysql2 <3.22.0 patched >=3.22.0 | MySQL2: Auth Plugin Downgrade to mysql_clear_password Leaks Plaintext Credentials | path: apps__api>@prisma/client>prisma>mysql2
+- moderate mysql2 <=3.23.0 patched >=3.23.1 | MySQL2: Unbounded zlib inflate in compressed MySQL protocol handler allows decompression-b | path: apps__api>@prisma/client>prisma>mysql2
+- high node-forge <=1.4.0 patched None | node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm ele | path: apps__mobile>expo>@expo/cli>@expo/code-signing-certificates>node-forge
+- high braces <=3.0.3 patched None | braces vulnerable to stack-exhaustion denial of service through deeply nested patterns | path: apps__mobile>@react-native-async-storage/async-storage>react-native>@react-native/community-cli-plugin>metro>metro-file-map>micromatch>braces

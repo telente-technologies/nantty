@@ -1,0 +1,12 @@
+SEC-0023 reproduction (negative control) - 2026-10-04, local only (127.0.0.1 Postgres :15432, Valkey :16379)
+Method: auth integration tests TestPreRevocationAccessTokensAreRejectedAfterLogoutRevokeOthersAndBan and
+TestPasswordChangeRejectsOtherSessionsAccessTokens run with the denylist hook disabled (pre-fix behaviour).
+
+Pre-fix (hook disabled):
+  POST /api/v1/auth/logout (token A)            -> 204
+  GET  /api/v1/auth/sessions (same token A)     -> 200, returned the account's session list   <-- revoked token still authorised
+  password change from session B, then GET /api/v1/auth/sessions with session C's token -> 200 <-- rotated-away token still authorised
+Post-fix (hook + sweeper enabled, Valkey denylist registered):
+  logout -> token A 401; revoke-others -> token C 401; ban -> token B 401; password change -> other session 401;
+  unrelated live sessions keep 200.
+Session ids, tokens and emails redacted; throwaway schema auth_test_<ns> dropped after the run.

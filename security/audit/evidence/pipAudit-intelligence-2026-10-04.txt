@@ -1,0 +1,1 @@
+pip-audit 2.10.1 on 'uv export --frozen --no-dev' (110 pinned runtime deps), 2026-10-04: No known vulnerabilities found
