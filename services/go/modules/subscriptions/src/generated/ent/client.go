@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
 	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
 
@@ -43,6 +44,8 @@ type Client struct {
 	ProviderPlan *ProviderPlanClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
+	// SubscriptionPeriod is the client for interacting with the SubscriptionPeriod builders.
+	SubscriptionPeriod *SubscriptionPeriodClient
 	// SubscriptionReminder is the client for interacting with the SubscriptionReminder builders.
 	SubscriptionReminder *SubscriptionReminderClient
 	// TrialClaim is the client for interacting with the TrialClaim builders.
@@ -63,6 +66,7 @@ func (c *Client) init() {
 	c.PlanPrice = NewPlanPriceClient(c.config)
 	c.ProviderPlan = NewProviderPlanClient(c.config)
 	c.Subscription = NewSubscriptionClient(c.config)
+	c.SubscriptionPeriod = NewSubscriptionPeriodClient(c.config)
 	c.SubscriptionReminder = NewSubscriptionReminderClient(c.config)
 	c.TrialClaim = NewTrialClaimClient(c.config)
 }
@@ -164,6 +168,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PlanPrice:            NewPlanPriceClient(cfg),
 		ProviderPlan:         NewProviderPlanClient(cfg),
 		Subscription:         NewSubscriptionClient(cfg),
+		SubscriptionPeriod:   NewSubscriptionPeriodClient(cfg),
 		SubscriptionReminder: NewSubscriptionReminderClient(cfg),
 		TrialClaim:           NewTrialClaimClient(cfg),
 	}, nil
@@ -190,6 +195,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PlanPrice:            NewPlanPriceClient(cfg),
 		ProviderPlan:         NewProviderPlanClient(cfg),
 		Subscription:         NewSubscriptionClient(cfg),
+		SubscriptionPeriod:   NewSubscriptionPeriodClient(cfg),
 		SubscriptionReminder: NewSubscriptionReminderClient(cfg),
 		TrialClaim:           NewTrialClaimClient(cfg),
 	}, nil
@@ -222,7 +228,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan, c.Subscription,
-		c.SubscriptionReminder, c.TrialClaim,
+		c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
 	} {
 		n.Use(hooks...)
 	}
@@ -233,7 +239,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan, c.Subscription,
-		c.SubscriptionReminder, c.TrialClaim,
+		c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -252,6 +258,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ProviderPlan.mutate(ctx, m)
 	case *SubscriptionMutation:
 		return c.Subscription.mutate(ctx, m)
+	case *SubscriptionPeriodMutation:
+		return c.SubscriptionPeriod.mutate(ctx, m)
 	case *SubscriptionReminderMutation:
 		return c.SubscriptionReminder.mutate(ctx, m)
 	case *TrialClaimMutation:
@@ -926,6 +934,139 @@ func (c *SubscriptionClient) mutate(ctx context.Context, m *SubscriptionMutation
 	}
 }
 
+// SubscriptionPeriodClient is a client for the SubscriptionPeriod schema.
+type SubscriptionPeriodClient struct {
+	config
+}
+
+// NewSubscriptionPeriodClient returns a client for the SubscriptionPeriod from the given config.
+func NewSubscriptionPeriodClient(c config) *SubscriptionPeriodClient {
+	return &SubscriptionPeriodClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subscriptionperiod.Hooks(f(g(h())))`.
+func (c *SubscriptionPeriodClient) Use(hooks ...Hook) {
+	c.hooks.SubscriptionPeriod = append(c.hooks.SubscriptionPeriod, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subscriptionperiod.Intercept(f(g(h())))`.
+func (c *SubscriptionPeriodClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubscriptionPeriod = append(c.inters.SubscriptionPeriod, interceptors...)
+}
+
+// Create returns a builder for creating a SubscriptionPeriod entity.
+func (c *SubscriptionPeriodClient) Create() *SubscriptionPeriodCreate {
+	mutation := newSubscriptionPeriodMutation(c.config, OpCreate)
+	return &SubscriptionPeriodCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubscriptionPeriod entities.
+func (c *SubscriptionPeriodClient) CreateBulk(builders ...*SubscriptionPeriodCreate) *SubscriptionPeriodCreateBulk {
+	return &SubscriptionPeriodCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubscriptionPeriodClient) MapCreateBulk(slice any, setFunc func(*SubscriptionPeriodCreate, int)) *SubscriptionPeriodCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubscriptionPeriodCreateBulk{err: fmt.Errorf("calling to SubscriptionPeriodClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubscriptionPeriodCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubscriptionPeriodCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubscriptionPeriod.
+func (c *SubscriptionPeriodClient) Update() *SubscriptionPeriodUpdate {
+	mutation := newSubscriptionPeriodMutation(c.config, OpUpdate)
+	return &SubscriptionPeriodUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubscriptionPeriodClient) UpdateOne(_m *SubscriptionPeriod) *SubscriptionPeriodUpdateOne {
+	mutation := newSubscriptionPeriodMutation(c.config, OpUpdateOne, withSubscriptionPeriod(_m))
+	return &SubscriptionPeriodUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubscriptionPeriodClient) UpdateOneID(id uuid.UUID) *SubscriptionPeriodUpdateOne {
+	mutation := newSubscriptionPeriodMutation(c.config, OpUpdateOne, withSubscriptionPeriodID(id))
+	return &SubscriptionPeriodUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubscriptionPeriod.
+func (c *SubscriptionPeriodClient) Delete() *SubscriptionPeriodDelete {
+	mutation := newSubscriptionPeriodMutation(c.config, OpDelete)
+	return &SubscriptionPeriodDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubscriptionPeriodClient) DeleteOne(_m *SubscriptionPeriod) *SubscriptionPeriodDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubscriptionPeriodClient) DeleteOneID(id uuid.UUID) *SubscriptionPeriodDeleteOne {
+	builder := c.Delete().Where(subscriptionperiod.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubscriptionPeriodDeleteOne{builder}
+}
+
+// Query returns a query builder for SubscriptionPeriod.
+func (c *SubscriptionPeriodClient) Query() *SubscriptionPeriodQuery {
+	return &SubscriptionPeriodQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubscriptionPeriod},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubscriptionPeriod entity by its id.
+func (c *SubscriptionPeriodClient) Get(ctx context.Context, id uuid.UUID) (*SubscriptionPeriod, error) {
+	return c.Query().Where(subscriptionperiod.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubscriptionPeriodClient) GetX(ctx context.Context, id uuid.UUID) *SubscriptionPeriod {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SubscriptionPeriodClient) Hooks() []Hook {
+	return c.hooks.SubscriptionPeriod
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubscriptionPeriodClient) Interceptors() []Interceptor {
+	return c.inters.SubscriptionPeriod
+}
+
+func (c *SubscriptionPeriodClient) mutate(ctx context.Context, m *SubscriptionPeriodMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubscriptionPeriodCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubscriptionPeriodUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubscriptionPeriodUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubscriptionPeriodDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubscriptionPeriod mutation op: %q", m.Op())
+	}
+}
+
 // SubscriptionReminderClient is a client for the SubscriptionReminder schema.
 type SubscriptionReminderClient struct {
 	config
@@ -1196,11 +1337,11 @@ func (c *TrialClaimClient) mutate(ctx context.Context, m *TrialClaimMutation) (V
 type (
 	hooks struct {
 		IdempotentRequest, OutboxEvent, PlanPrice, ProviderPlan, Subscription,
-		SubscriptionReminder, TrialClaim []ent.Hook
+		SubscriptionPeriod, SubscriptionReminder, TrialClaim []ent.Hook
 	}
 	inters struct {
 		IdempotentRequest, OutboxEvent, PlanPrice, ProviderPlan, Subscription,
-		SubscriptionReminder, TrialClaim []ent.Interceptor
+		SubscriptionPeriod, SubscriptionReminder, TrialClaim []ent.Interceptor
 	}
 )
 

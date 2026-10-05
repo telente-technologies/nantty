@@ -72,6 +72,38 @@ type Subscription struct {
 	ActivationPending bool `json:"activation_pending,omitempty"`
 	// LastError holds the value of the "last_error" field.
 	LastError string `json:"last_error,omitempty"`
+	// BillingAuthorizationID holds the value of the "billing_authorization_id" field.
+	BillingAuthorizationID string `json:"billing_authorization_id,omitempty"`
+	// BillingAnchorAt holds the value of the "billing_anchor_at" field.
+	BillingAnchorAt *time.Time `json:"billing_anchor_at,omitempty"`
+	// NextChargeAt holds the value of the "next_charge_at" field.
+	NextChargeAt *time.Time `json:"next_charge_at,omitempty"`
+	// DunningAttempts holds the value of the "dunning_attempts" field.
+	DunningAttempts int `json:"dunning_attempts,omitempty"`
+	// DunningDueAt holds the value of the "dunning_due_at" field.
+	DunningDueAt *time.Time `json:"dunning_due_at,omitempty"`
+	// CheckmarkIncluded holds the value of the "checkmark_included" field.
+	CheckmarkIncluded bool `json:"checkmark_included,omitempty"`
+	// CreditMinor holds the value of the "credit_minor" field.
+	CreditMinor int64 `json:"credit_minor,omitempty"`
+	// PendingPlanCode holds the value of the "pending_plan_code" field.
+	PendingPlanCode string `json:"pending_plan_code,omitempty"`
+	// PendingInterval holds the value of the "pending_interval" field.
+	PendingInterval string `json:"pending_interval,omitempty"`
+	// PeriodPriceMinor holds the value of the "period_price_minor" field.
+	PeriodPriceMinor int64 `json:"period_price_minor,omitempty"`
+	// PriceNoticeAmountMinor holds the value of the "price_notice_amount_minor" field.
+	PriceNoticeAmountMinor int64 `json:"price_notice_amount_minor,omitempty"`
+	// PriceEffectiveAt holds the value of the "price_effective_at" field.
+	PriceEffectiveAt *time.Time `json:"price_effective_at,omitempty"`
+	// CardExpiryMonth holds the value of the "card_expiry_month" field.
+	CardExpiryMonth int `json:"card_expiry_month,omitempty"`
+	// CardExpiryYear holds the value of the "card_expiry_year" field.
+	CardExpiryYear int `json:"card_expiry_year,omitempty"`
+	// CardExpiryNoticedAt holds the value of the "card_expiry_noticed_at" field.
+	CardExpiryNoticedAt *time.Time `json:"card_expiry_noticed_at,omitempty"`
+	// EndedReason holds the value of the "ended_reason" field.
+	EndedReason string `json:"ended_reason,omitempty"`
 	// Version holds the value of the "version" field.
 	Version int64 `json:"version,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -84,13 +116,13 @@ func (*Subscription) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case subscription.FieldWithTrial, subscription.FieldCancelAtPeriodEnd, subscription.FieldActivationPending:
+		case subscription.FieldWithTrial, subscription.FieldCancelAtPeriodEnd, subscription.FieldActivationPending, subscription.FieldCheckmarkIncluded:
 			values[i] = new(sql.NullBool)
-		case subscription.FieldListAmountMinor, subscription.FieldAmountMinor, subscription.FieldDiscountBps, subscription.FieldTrialDays, subscription.FieldVersion:
+		case subscription.FieldListAmountMinor, subscription.FieldAmountMinor, subscription.FieldDiscountBps, subscription.FieldTrialDays, subscription.FieldDunningAttempts, subscription.FieldCreditMinor, subscription.FieldPeriodPriceMinor, subscription.FieldPriceNoticeAmountMinor, subscription.FieldCardExpiryMonth, subscription.FieldCardExpiryYear, subscription.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case subscription.FieldProfileID, subscription.FieldProfileType, subscription.FieldOwnerUserID, subscription.FieldPlanCode, subscription.FieldInterval, subscription.FieldChannel, subscription.FieldStatus, subscription.FieldCurrency, subscription.FieldDiscountKind, subscription.FieldProviderPlanCode, subscription.FieldProviderCustomerID, subscription.FieldBillingReference, subscription.FieldStoreOriginalTransactionID, subscription.FieldCardLabel, subscription.FieldLastError:
+		case subscription.FieldProfileID, subscription.FieldProfileType, subscription.FieldOwnerUserID, subscription.FieldPlanCode, subscription.FieldInterval, subscription.FieldChannel, subscription.FieldStatus, subscription.FieldCurrency, subscription.FieldDiscountKind, subscription.FieldProviderPlanCode, subscription.FieldProviderCustomerID, subscription.FieldBillingReference, subscription.FieldStoreOriginalTransactionID, subscription.FieldCardLabel, subscription.FieldLastError, subscription.FieldBillingAuthorizationID, subscription.FieldPendingPlanCode, subscription.FieldPendingInterval, subscription.FieldEndedReason:
 			values[i] = new(sql.NullString)
-		case subscription.FieldCreatedAt, subscription.FieldTrialEndsAt, subscription.FieldCurrentPeriodEndsAt, subscription.FieldGraceEndsAt, subscription.FieldBundleLapsesAt, subscription.FieldUpdatedAt:
+		case subscription.FieldCreatedAt, subscription.FieldTrialEndsAt, subscription.FieldCurrentPeriodEndsAt, subscription.FieldGraceEndsAt, subscription.FieldBundleLapsesAt, subscription.FieldBillingAnchorAt, subscription.FieldNextChargeAt, subscription.FieldDunningDueAt, subscription.FieldPriceEffectiveAt, subscription.FieldCardExpiryNoticedAt, subscription.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case subscription.FieldID:
 			values[i] = new(uuid.UUID)
@@ -281,6 +313,107 @@ func (_m *Subscription) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.LastError = value.String
 			}
+		case subscription.FieldBillingAuthorizationID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field billing_authorization_id", values[i])
+			} else if value.Valid {
+				_m.BillingAuthorizationID = value.String
+			}
+		case subscription.FieldBillingAnchorAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field billing_anchor_at", values[i])
+			} else if value.Valid {
+				_m.BillingAnchorAt = new(time.Time)
+				*_m.BillingAnchorAt = value.Time
+			}
+		case subscription.FieldNextChargeAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field next_charge_at", values[i])
+			} else if value.Valid {
+				_m.NextChargeAt = new(time.Time)
+				*_m.NextChargeAt = value.Time
+			}
+		case subscription.FieldDunningAttempts:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field dunning_attempts", values[i])
+			} else if value.Valid {
+				_m.DunningAttempts = int(value.Int64)
+			}
+		case subscription.FieldDunningDueAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field dunning_due_at", values[i])
+			} else if value.Valid {
+				_m.DunningDueAt = new(time.Time)
+				*_m.DunningDueAt = value.Time
+			}
+		case subscription.FieldCheckmarkIncluded:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field checkmark_included", values[i])
+			} else if value.Valid {
+				_m.CheckmarkIncluded = value.Bool
+			}
+		case subscription.FieldCreditMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field credit_minor", values[i])
+			} else if value.Valid {
+				_m.CreditMinor = value.Int64
+			}
+		case subscription.FieldPendingPlanCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field pending_plan_code", values[i])
+			} else if value.Valid {
+				_m.PendingPlanCode = value.String
+			}
+		case subscription.FieldPendingInterval:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field pending_interval", values[i])
+			} else if value.Valid {
+				_m.PendingInterval = value.String
+			}
+		case subscription.FieldPeriodPriceMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field period_price_minor", values[i])
+			} else if value.Valid {
+				_m.PeriodPriceMinor = value.Int64
+			}
+		case subscription.FieldPriceNoticeAmountMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field price_notice_amount_minor", values[i])
+			} else if value.Valid {
+				_m.PriceNoticeAmountMinor = value.Int64
+			}
+		case subscription.FieldPriceEffectiveAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field price_effective_at", values[i])
+			} else if value.Valid {
+				_m.PriceEffectiveAt = new(time.Time)
+				*_m.PriceEffectiveAt = value.Time
+			}
+		case subscription.FieldCardExpiryMonth:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field card_expiry_month", values[i])
+			} else if value.Valid {
+				_m.CardExpiryMonth = int(value.Int64)
+			}
+		case subscription.FieldCardExpiryYear:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field card_expiry_year", values[i])
+			} else if value.Valid {
+				_m.CardExpiryYear = int(value.Int64)
+			}
+		case subscription.FieldCardExpiryNoticedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field card_expiry_noticed_at", values[i])
+			} else if value.Valid {
+				_m.CardExpiryNoticedAt = new(time.Time)
+				*_m.CardExpiryNoticedAt = value.Time
+			}
+		case subscription.FieldEndedReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ended_reason", values[i])
+			} else if value.Valid {
+				_m.EndedReason = value.String
+			}
 		case subscription.FieldVersion:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field version", values[i])
@@ -417,6 +550,64 @@ func (_m *Subscription) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_error=")
 	builder.WriteString(_m.LastError)
+	builder.WriteString(", ")
+	builder.WriteString("billing_authorization_id=")
+	builder.WriteString(_m.BillingAuthorizationID)
+	builder.WriteString(", ")
+	if v := _m.BillingAnchorAt; v != nil {
+		builder.WriteString("billing_anchor_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.NextChargeAt; v != nil {
+		builder.WriteString("next_charge_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("dunning_attempts=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DunningAttempts))
+	builder.WriteString(", ")
+	if v := _m.DunningDueAt; v != nil {
+		builder.WriteString("dunning_due_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("checkmark_included=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CheckmarkIncluded))
+	builder.WriteString(", ")
+	builder.WriteString("credit_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreditMinor))
+	builder.WriteString(", ")
+	builder.WriteString("pending_plan_code=")
+	builder.WriteString(_m.PendingPlanCode)
+	builder.WriteString(", ")
+	builder.WriteString("pending_interval=")
+	builder.WriteString(_m.PendingInterval)
+	builder.WriteString(", ")
+	builder.WriteString("period_price_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PeriodPriceMinor))
+	builder.WriteString(", ")
+	builder.WriteString("price_notice_amount_minor=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PriceNoticeAmountMinor))
+	builder.WriteString(", ")
+	if v := _m.PriceEffectiveAt; v != nil {
+		builder.WriteString("price_effective_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("card_expiry_month=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CardExpiryMonth))
+	builder.WriteString(", ")
+	builder.WriteString("card_expiry_year=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CardExpiryYear))
+	builder.WriteString(", ")
+	if v := _m.CardExpiryNoticedAt; v != nil {
+		builder.WriteString("card_expiry_noticed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("ended_reason=")
+	builder.WriteString(_m.EndedReason)
 	builder.WriteString(", ")
 	builder.WriteString("version=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Version))

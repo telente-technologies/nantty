@@ -330,6 +330,230 @@ func (_c *SubscriptionCreate) SetNillableLastError(v *string) *SubscriptionCreat
 	return _c
 }
 
+// SetBillingAuthorizationID sets the "billing_authorization_id" field.
+func (_c *SubscriptionCreate) SetBillingAuthorizationID(v string) *SubscriptionCreate {
+	_c.mutation.SetBillingAuthorizationID(v)
+	return _c
+}
+
+// SetNillableBillingAuthorizationID sets the "billing_authorization_id" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableBillingAuthorizationID(v *string) *SubscriptionCreate {
+	if v != nil {
+		_c.SetBillingAuthorizationID(*v)
+	}
+	return _c
+}
+
+// SetBillingAnchorAt sets the "billing_anchor_at" field.
+func (_c *SubscriptionCreate) SetBillingAnchorAt(v time.Time) *SubscriptionCreate {
+	_c.mutation.SetBillingAnchorAt(v)
+	return _c
+}
+
+// SetNillableBillingAnchorAt sets the "billing_anchor_at" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableBillingAnchorAt(v *time.Time) *SubscriptionCreate {
+	if v != nil {
+		_c.SetBillingAnchorAt(*v)
+	}
+	return _c
+}
+
+// SetNextChargeAt sets the "next_charge_at" field.
+func (_c *SubscriptionCreate) SetNextChargeAt(v time.Time) *SubscriptionCreate {
+	_c.mutation.SetNextChargeAt(v)
+	return _c
+}
+
+// SetNillableNextChargeAt sets the "next_charge_at" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableNextChargeAt(v *time.Time) *SubscriptionCreate {
+	if v != nil {
+		_c.SetNextChargeAt(*v)
+	}
+	return _c
+}
+
+// SetDunningAttempts sets the "dunning_attempts" field.
+func (_c *SubscriptionCreate) SetDunningAttempts(v int) *SubscriptionCreate {
+	_c.mutation.SetDunningAttempts(v)
+	return _c
+}
+
+// SetNillableDunningAttempts sets the "dunning_attempts" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableDunningAttempts(v *int) *SubscriptionCreate {
+	if v != nil {
+		_c.SetDunningAttempts(*v)
+	}
+	return _c
+}
+
+// SetDunningDueAt sets the "dunning_due_at" field.
+func (_c *SubscriptionCreate) SetDunningDueAt(v time.Time) *SubscriptionCreate {
+	_c.mutation.SetDunningDueAt(v)
+	return _c
+}
+
+// SetNillableDunningDueAt sets the "dunning_due_at" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableDunningDueAt(v *time.Time) *SubscriptionCreate {
+	if v != nil {
+		_c.SetDunningDueAt(*v)
+	}
+	return _c
+}
+
+// SetCheckmarkIncluded sets the "checkmark_included" field.
+func (_c *SubscriptionCreate) SetCheckmarkIncluded(v bool) *SubscriptionCreate {
+	_c.mutation.SetCheckmarkIncluded(v)
+	return _c
+}
+
+// SetNillableCheckmarkIncluded sets the "checkmark_included" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableCheckmarkIncluded(v *bool) *SubscriptionCreate {
+	if v != nil {
+		_c.SetCheckmarkIncluded(*v)
+	}
+	return _c
+}
+
+// SetCreditMinor sets the "credit_minor" field.
+func (_c *SubscriptionCreate) SetCreditMinor(v int64) *SubscriptionCreate {
+	_c.mutation.SetCreditMinor(v)
+	return _c
+}
+
+// SetNillableCreditMinor sets the "credit_minor" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableCreditMinor(v *int64) *SubscriptionCreate {
+	if v != nil {
+		_c.SetCreditMinor(*v)
+	}
+	return _c
+}
+
+// SetPendingPlanCode sets the "pending_plan_code" field.
+func (_c *SubscriptionCreate) SetPendingPlanCode(v string) *SubscriptionCreate {
+	_c.mutation.SetPendingPlanCode(v)
+	return _c
+}
+
+// SetNillablePendingPlanCode sets the "pending_plan_code" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillablePendingPlanCode(v *string) *SubscriptionCreate {
+	if v != nil {
+		_c.SetPendingPlanCode(*v)
+	}
+	return _c
+}
+
+// SetPendingInterval sets the "pending_interval" field.
+func (_c *SubscriptionCreate) SetPendingInterval(v string) *SubscriptionCreate {
+	_c.mutation.SetPendingInterval(v)
+	return _c
+}
+
+// SetNillablePendingInterval sets the "pending_interval" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillablePendingInterval(v *string) *SubscriptionCreate {
+	if v != nil {
+		_c.SetPendingInterval(*v)
+	}
+	return _c
+}
+
+// SetPeriodPriceMinor sets the "period_price_minor" field.
+func (_c *SubscriptionCreate) SetPeriodPriceMinor(v int64) *SubscriptionCreate {
+	_c.mutation.SetPeriodPriceMinor(v)
+	return _c
+}
+
+// SetNillablePeriodPriceMinor sets the "period_price_minor" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillablePeriodPriceMinor(v *int64) *SubscriptionCreate {
+	if v != nil {
+		_c.SetPeriodPriceMinor(*v)
+	}
+	return _c
+}
+
+// SetPriceNoticeAmountMinor sets the "price_notice_amount_minor" field.
+func (_c *SubscriptionCreate) SetPriceNoticeAmountMinor(v int64) *SubscriptionCreate {
+	_c.mutation.SetPriceNoticeAmountMinor(v)
+	return _c
+}
+
+// SetNillablePriceNoticeAmountMinor sets the "price_notice_amount_minor" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillablePriceNoticeAmountMinor(v *int64) *SubscriptionCreate {
+	if v != nil {
+		_c.SetPriceNoticeAmountMinor(*v)
+	}
+	return _c
+}
+
+// SetPriceEffectiveAt sets the "price_effective_at" field.
+func (_c *SubscriptionCreate) SetPriceEffectiveAt(v time.Time) *SubscriptionCreate {
+	_c.mutation.SetPriceEffectiveAt(v)
+	return _c
+}
+
+// SetNillablePriceEffectiveAt sets the "price_effective_at" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillablePriceEffectiveAt(v *time.Time) *SubscriptionCreate {
+	if v != nil {
+		_c.SetPriceEffectiveAt(*v)
+	}
+	return _c
+}
+
+// SetCardExpiryMonth sets the "card_expiry_month" field.
+func (_c *SubscriptionCreate) SetCardExpiryMonth(v int) *SubscriptionCreate {
+	_c.mutation.SetCardExpiryMonth(v)
+	return _c
+}
+
+// SetNillableCardExpiryMonth sets the "card_expiry_month" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableCardExpiryMonth(v *int) *SubscriptionCreate {
+	if v != nil {
+		_c.SetCardExpiryMonth(*v)
+	}
+	return _c
+}
+
+// SetCardExpiryYear sets the "card_expiry_year" field.
+func (_c *SubscriptionCreate) SetCardExpiryYear(v int) *SubscriptionCreate {
+	_c.mutation.SetCardExpiryYear(v)
+	return _c
+}
+
+// SetNillableCardExpiryYear sets the "card_expiry_year" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableCardExpiryYear(v *int) *SubscriptionCreate {
+	if v != nil {
+		_c.SetCardExpiryYear(*v)
+	}
+	return _c
+}
+
+// SetCardExpiryNoticedAt sets the "card_expiry_noticed_at" field.
+func (_c *SubscriptionCreate) SetCardExpiryNoticedAt(v time.Time) *SubscriptionCreate {
+	_c.mutation.SetCardExpiryNoticedAt(v)
+	return _c
+}
+
+// SetNillableCardExpiryNoticedAt sets the "card_expiry_noticed_at" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableCardExpiryNoticedAt(v *time.Time) *SubscriptionCreate {
+	if v != nil {
+		_c.SetCardExpiryNoticedAt(*v)
+	}
+	return _c
+}
+
+// SetEndedReason sets the "ended_reason" field.
+func (_c *SubscriptionCreate) SetEndedReason(v string) *SubscriptionCreate {
+	_c.mutation.SetEndedReason(v)
+	return _c
+}
+
+// SetNillableEndedReason sets the "ended_reason" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableEndedReason(v *string) *SubscriptionCreate {
+	if v != nil {
+		_c.SetEndedReason(*v)
+	}
+	return _c
+}
+
 // SetVersion sets the "version" field.
 func (_c *SubscriptionCreate) SetVersion(v int64) *SubscriptionCreate {
 	_c.mutation.SetVersion(v)
@@ -462,6 +686,50 @@ func (_c *SubscriptionCreate) defaults() {
 	if _, ok := _c.mutation.LastError(); !ok {
 		v := subscription.DefaultLastError
 		_c.mutation.SetLastError(v)
+	}
+	if _, ok := _c.mutation.BillingAuthorizationID(); !ok {
+		v := subscription.DefaultBillingAuthorizationID
+		_c.mutation.SetBillingAuthorizationID(v)
+	}
+	if _, ok := _c.mutation.DunningAttempts(); !ok {
+		v := subscription.DefaultDunningAttempts
+		_c.mutation.SetDunningAttempts(v)
+	}
+	if _, ok := _c.mutation.CheckmarkIncluded(); !ok {
+		v := subscription.DefaultCheckmarkIncluded
+		_c.mutation.SetCheckmarkIncluded(v)
+	}
+	if _, ok := _c.mutation.CreditMinor(); !ok {
+		v := subscription.DefaultCreditMinor
+		_c.mutation.SetCreditMinor(v)
+	}
+	if _, ok := _c.mutation.PendingPlanCode(); !ok {
+		v := subscription.DefaultPendingPlanCode
+		_c.mutation.SetPendingPlanCode(v)
+	}
+	if _, ok := _c.mutation.PendingInterval(); !ok {
+		v := subscription.DefaultPendingInterval
+		_c.mutation.SetPendingInterval(v)
+	}
+	if _, ok := _c.mutation.PeriodPriceMinor(); !ok {
+		v := subscription.DefaultPeriodPriceMinor
+		_c.mutation.SetPeriodPriceMinor(v)
+	}
+	if _, ok := _c.mutation.PriceNoticeAmountMinor(); !ok {
+		v := subscription.DefaultPriceNoticeAmountMinor
+		_c.mutation.SetPriceNoticeAmountMinor(v)
+	}
+	if _, ok := _c.mutation.CardExpiryMonth(); !ok {
+		v := subscription.DefaultCardExpiryMonth
+		_c.mutation.SetCardExpiryMonth(v)
+	}
+	if _, ok := _c.mutation.CardExpiryYear(); !ok {
+		v := subscription.DefaultCardExpiryYear
+		_c.mutation.SetCardExpiryYear(v)
+	}
+	if _, ok := _c.mutation.EndedReason(); !ok {
+		v := subscription.DefaultEndedReason
+		_c.mutation.SetEndedReason(v)
 	}
 	if _, ok := _c.mutation.Version(); !ok {
 		v := subscription.DefaultVersion
@@ -623,6 +891,59 @@ func (_c *SubscriptionCreate) check() error {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "Subscription.last_error": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.BillingAuthorizationID(); !ok {
+		return &ValidationError{Name: "billing_authorization_id", err: errors.New(`ent: missing required field "Subscription.billing_authorization_id"`)}
+	}
+	if v, ok := _c.mutation.BillingAuthorizationID(); ok {
+		if err := subscription.BillingAuthorizationIDValidator(v); err != nil {
+			return &ValidationError{Name: "billing_authorization_id", err: fmt.Errorf(`ent: validator failed for field "Subscription.billing_authorization_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DunningAttempts(); !ok {
+		return &ValidationError{Name: "dunning_attempts", err: errors.New(`ent: missing required field "Subscription.dunning_attempts"`)}
+	}
+	if _, ok := _c.mutation.CheckmarkIncluded(); !ok {
+		return &ValidationError{Name: "checkmark_included", err: errors.New(`ent: missing required field "Subscription.checkmark_included"`)}
+	}
+	if _, ok := _c.mutation.CreditMinor(); !ok {
+		return &ValidationError{Name: "credit_minor", err: errors.New(`ent: missing required field "Subscription.credit_minor"`)}
+	}
+	if _, ok := _c.mutation.PendingPlanCode(); !ok {
+		return &ValidationError{Name: "pending_plan_code", err: errors.New(`ent: missing required field "Subscription.pending_plan_code"`)}
+	}
+	if v, ok := _c.mutation.PendingPlanCode(); ok {
+		if err := subscription.PendingPlanCodeValidator(v); err != nil {
+			return &ValidationError{Name: "pending_plan_code", err: fmt.Errorf(`ent: validator failed for field "Subscription.pending_plan_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PendingInterval(); !ok {
+		return &ValidationError{Name: "pending_interval", err: errors.New(`ent: missing required field "Subscription.pending_interval"`)}
+	}
+	if v, ok := _c.mutation.PendingInterval(); ok {
+		if err := subscription.PendingIntervalValidator(v); err != nil {
+			return &ValidationError{Name: "pending_interval", err: fmt.Errorf(`ent: validator failed for field "Subscription.pending_interval": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PeriodPriceMinor(); !ok {
+		return &ValidationError{Name: "period_price_minor", err: errors.New(`ent: missing required field "Subscription.period_price_minor"`)}
+	}
+	if _, ok := _c.mutation.PriceNoticeAmountMinor(); !ok {
+		return &ValidationError{Name: "price_notice_amount_minor", err: errors.New(`ent: missing required field "Subscription.price_notice_amount_minor"`)}
+	}
+	if _, ok := _c.mutation.CardExpiryMonth(); !ok {
+		return &ValidationError{Name: "card_expiry_month", err: errors.New(`ent: missing required field "Subscription.card_expiry_month"`)}
+	}
+	if _, ok := _c.mutation.CardExpiryYear(); !ok {
+		return &ValidationError{Name: "card_expiry_year", err: errors.New(`ent: missing required field "Subscription.card_expiry_year"`)}
+	}
+	if _, ok := _c.mutation.EndedReason(); !ok {
+		return &ValidationError{Name: "ended_reason", err: errors.New(`ent: missing required field "Subscription.ended_reason"`)}
+	}
+	if v, ok := _c.mutation.EndedReason(); ok {
+		if err := subscription.EndedReasonValidator(v); err != nil {
+			return &ValidationError{Name: "ended_reason", err: fmt.Errorf(`ent: validator failed for field "Subscription.ended_reason": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Version(); !ok {
 		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "Subscription.version"`)}
 	}
@@ -774,6 +1095,70 @@ func (_c *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 		_spec.SetField(subscription.FieldLastError, field.TypeString, value)
 		_node.LastError = value
 	}
+	if value, ok := _c.mutation.BillingAuthorizationID(); ok {
+		_spec.SetField(subscription.FieldBillingAuthorizationID, field.TypeString, value)
+		_node.BillingAuthorizationID = value
+	}
+	if value, ok := _c.mutation.BillingAnchorAt(); ok {
+		_spec.SetField(subscription.FieldBillingAnchorAt, field.TypeTime, value)
+		_node.BillingAnchorAt = &value
+	}
+	if value, ok := _c.mutation.NextChargeAt(); ok {
+		_spec.SetField(subscription.FieldNextChargeAt, field.TypeTime, value)
+		_node.NextChargeAt = &value
+	}
+	if value, ok := _c.mutation.DunningAttempts(); ok {
+		_spec.SetField(subscription.FieldDunningAttempts, field.TypeInt, value)
+		_node.DunningAttempts = value
+	}
+	if value, ok := _c.mutation.DunningDueAt(); ok {
+		_spec.SetField(subscription.FieldDunningDueAt, field.TypeTime, value)
+		_node.DunningDueAt = &value
+	}
+	if value, ok := _c.mutation.CheckmarkIncluded(); ok {
+		_spec.SetField(subscription.FieldCheckmarkIncluded, field.TypeBool, value)
+		_node.CheckmarkIncluded = value
+	}
+	if value, ok := _c.mutation.CreditMinor(); ok {
+		_spec.SetField(subscription.FieldCreditMinor, field.TypeInt64, value)
+		_node.CreditMinor = value
+	}
+	if value, ok := _c.mutation.PendingPlanCode(); ok {
+		_spec.SetField(subscription.FieldPendingPlanCode, field.TypeString, value)
+		_node.PendingPlanCode = value
+	}
+	if value, ok := _c.mutation.PendingInterval(); ok {
+		_spec.SetField(subscription.FieldPendingInterval, field.TypeString, value)
+		_node.PendingInterval = value
+	}
+	if value, ok := _c.mutation.PeriodPriceMinor(); ok {
+		_spec.SetField(subscription.FieldPeriodPriceMinor, field.TypeInt64, value)
+		_node.PeriodPriceMinor = value
+	}
+	if value, ok := _c.mutation.PriceNoticeAmountMinor(); ok {
+		_spec.SetField(subscription.FieldPriceNoticeAmountMinor, field.TypeInt64, value)
+		_node.PriceNoticeAmountMinor = value
+	}
+	if value, ok := _c.mutation.PriceEffectiveAt(); ok {
+		_spec.SetField(subscription.FieldPriceEffectiveAt, field.TypeTime, value)
+		_node.PriceEffectiveAt = &value
+	}
+	if value, ok := _c.mutation.CardExpiryMonth(); ok {
+		_spec.SetField(subscription.FieldCardExpiryMonth, field.TypeInt, value)
+		_node.CardExpiryMonth = value
+	}
+	if value, ok := _c.mutation.CardExpiryYear(); ok {
+		_spec.SetField(subscription.FieldCardExpiryYear, field.TypeInt, value)
+		_node.CardExpiryYear = value
+	}
+	if value, ok := _c.mutation.CardExpiryNoticedAt(); ok {
+		_spec.SetField(subscription.FieldCardExpiryNoticedAt, field.TypeTime, value)
+		_node.CardExpiryNoticedAt = &value
+	}
+	if value, ok := _c.mutation.EndedReason(); ok {
+		_spec.SetField(subscription.FieldEndedReason, field.TypeString, value)
+		_node.EndedReason = value
+	}
 	if value, ok := _c.mutation.Version(); ok {
 		_spec.SetField(subscription.FieldVersion, field.TypeInt64, value)
 		_node.Version = value
@@ -833,6 +1218,30 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetPlanCode sets the "plan_code" field.
+func (u *SubscriptionUpsert) SetPlanCode(v string) *SubscriptionUpsert {
+	u.Set(subscription.FieldPlanCode, v)
+	return u
+}
+
+// UpdatePlanCode sets the "plan_code" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdatePlanCode() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldPlanCode)
+	return u
+}
+
+// SetInterval sets the "interval" field.
+func (u *SubscriptionUpsert) SetInterval(v subscription.Interval) *SubscriptionUpsert {
+	u.Set(subscription.FieldInterval, v)
+	return u
+}
+
+// UpdateInterval sets the "interval" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateInterval() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldInterval)
+	return u
+}
 
 // SetStatus sets the "status" field.
 func (u *SubscriptionUpsert) SetStatus(v subscription.Status) *SubscriptionUpsert {
@@ -1110,6 +1519,264 @@ func (u *SubscriptionUpsert) UpdateLastError() *SubscriptionUpsert {
 	return u
 }
 
+// SetBillingAuthorizationID sets the "billing_authorization_id" field.
+func (u *SubscriptionUpsert) SetBillingAuthorizationID(v string) *SubscriptionUpsert {
+	u.Set(subscription.FieldBillingAuthorizationID, v)
+	return u
+}
+
+// UpdateBillingAuthorizationID sets the "billing_authorization_id" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateBillingAuthorizationID() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldBillingAuthorizationID)
+	return u
+}
+
+// SetBillingAnchorAt sets the "billing_anchor_at" field.
+func (u *SubscriptionUpsert) SetBillingAnchorAt(v time.Time) *SubscriptionUpsert {
+	u.Set(subscription.FieldBillingAnchorAt, v)
+	return u
+}
+
+// UpdateBillingAnchorAt sets the "billing_anchor_at" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateBillingAnchorAt() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldBillingAnchorAt)
+	return u
+}
+
+// ClearBillingAnchorAt clears the value of the "billing_anchor_at" field.
+func (u *SubscriptionUpsert) ClearBillingAnchorAt() *SubscriptionUpsert {
+	u.SetNull(subscription.FieldBillingAnchorAt)
+	return u
+}
+
+// SetNextChargeAt sets the "next_charge_at" field.
+func (u *SubscriptionUpsert) SetNextChargeAt(v time.Time) *SubscriptionUpsert {
+	u.Set(subscription.FieldNextChargeAt, v)
+	return u
+}
+
+// UpdateNextChargeAt sets the "next_charge_at" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateNextChargeAt() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldNextChargeAt)
+	return u
+}
+
+// ClearNextChargeAt clears the value of the "next_charge_at" field.
+func (u *SubscriptionUpsert) ClearNextChargeAt() *SubscriptionUpsert {
+	u.SetNull(subscription.FieldNextChargeAt)
+	return u
+}
+
+// SetDunningAttempts sets the "dunning_attempts" field.
+func (u *SubscriptionUpsert) SetDunningAttempts(v int) *SubscriptionUpsert {
+	u.Set(subscription.FieldDunningAttempts, v)
+	return u
+}
+
+// UpdateDunningAttempts sets the "dunning_attempts" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateDunningAttempts() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldDunningAttempts)
+	return u
+}
+
+// AddDunningAttempts adds v to the "dunning_attempts" field.
+func (u *SubscriptionUpsert) AddDunningAttempts(v int) *SubscriptionUpsert {
+	u.Add(subscription.FieldDunningAttempts, v)
+	return u
+}
+
+// SetDunningDueAt sets the "dunning_due_at" field.
+func (u *SubscriptionUpsert) SetDunningDueAt(v time.Time) *SubscriptionUpsert {
+	u.Set(subscription.FieldDunningDueAt, v)
+	return u
+}
+
+// UpdateDunningDueAt sets the "dunning_due_at" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateDunningDueAt() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldDunningDueAt)
+	return u
+}
+
+// ClearDunningDueAt clears the value of the "dunning_due_at" field.
+func (u *SubscriptionUpsert) ClearDunningDueAt() *SubscriptionUpsert {
+	u.SetNull(subscription.FieldDunningDueAt)
+	return u
+}
+
+// SetCheckmarkIncluded sets the "checkmark_included" field.
+func (u *SubscriptionUpsert) SetCheckmarkIncluded(v bool) *SubscriptionUpsert {
+	u.Set(subscription.FieldCheckmarkIncluded, v)
+	return u
+}
+
+// UpdateCheckmarkIncluded sets the "checkmark_included" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateCheckmarkIncluded() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldCheckmarkIncluded)
+	return u
+}
+
+// SetCreditMinor sets the "credit_minor" field.
+func (u *SubscriptionUpsert) SetCreditMinor(v int64) *SubscriptionUpsert {
+	u.Set(subscription.FieldCreditMinor, v)
+	return u
+}
+
+// UpdateCreditMinor sets the "credit_minor" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateCreditMinor() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldCreditMinor)
+	return u
+}
+
+// AddCreditMinor adds v to the "credit_minor" field.
+func (u *SubscriptionUpsert) AddCreditMinor(v int64) *SubscriptionUpsert {
+	u.Add(subscription.FieldCreditMinor, v)
+	return u
+}
+
+// SetPendingPlanCode sets the "pending_plan_code" field.
+func (u *SubscriptionUpsert) SetPendingPlanCode(v string) *SubscriptionUpsert {
+	u.Set(subscription.FieldPendingPlanCode, v)
+	return u
+}
+
+// UpdatePendingPlanCode sets the "pending_plan_code" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdatePendingPlanCode() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldPendingPlanCode)
+	return u
+}
+
+// SetPendingInterval sets the "pending_interval" field.
+func (u *SubscriptionUpsert) SetPendingInterval(v string) *SubscriptionUpsert {
+	u.Set(subscription.FieldPendingInterval, v)
+	return u
+}
+
+// UpdatePendingInterval sets the "pending_interval" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdatePendingInterval() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldPendingInterval)
+	return u
+}
+
+// SetPeriodPriceMinor sets the "period_price_minor" field.
+func (u *SubscriptionUpsert) SetPeriodPriceMinor(v int64) *SubscriptionUpsert {
+	u.Set(subscription.FieldPeriodPriceMinor, v)
+	return u
+}
+
+// UpdatePeriodPriceMinor sets the "period_price_minor" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdatePeriodPriceMinor() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldPeriodPriceMinor)
+	return u
+}
+
+// AddPeriodPriceMinor adds v to the "period_price_minor" field.
+func (u *SubscriptionUpsert) AddPeriodPriceMinor(v int64) *SubscriptionUpsert {
+	u.Add(subscription.FieldPeriodPriceMinor, v)
+	return u
+}
+
+// SetPriceNoticeAmountMinor sets the "price_notice_amount_minor" field.
+func (u *SubscriptionUpsert) SetPriceNoticeAmountMinor(v int64) *SubscriptionUpsert {
+	u.Set(subscription.FieldPriceNoticeAmountMinor, v)
+	return u
+}
+
+// UpdatePriceNoticeAmountMinor sets the "price_notice_amount_minor" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdatePriceNoticeAmountMinor() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldPriceNoticeAmountMinor)
+	return u
+}
+
+// AddPriceNoticeAmountMinor adds v to the "price_notice_amount_minor" field.
+func (u *SubscriptionUpsert) AddPriceNoticeAmountMinor(v int64) *SubscriptionUpsert {
+	u.Add(subscription.FieldPriceNoticeAmountMinor, v)
+	return u
+}
+
+// SetPriceEffectiveAt sets the "price_effective_at" field.
+func (u *SubscriptionUpsert) SetPriceEffectiveAt(v time.Time) *SubscriptionUpsert {
+	u.Set(subscription.FieldPriceEffectiveAt, v)
+	return u
+}
+
+// UpdatePriceEffectiveAt sets the "price_effective_at" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdatePriceEffectiveAt() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldPriceEffectiveAt)
+	return u
+}
+
+// ClearPriceEffectiveAt clears the value of the "price_effective_at" field.
+func (u *SubscriptionUpsert) ClearPriceEffectiveAt() *SubscriptionUpsert {
+	u.SetNull(subscription.FieldPriceEffectiveAt)
+	return u
+}
+
+// SetCardExpiryMonth sets the "card_expiry_month" field.
+func (u *SubscriptionUpsert) SetCardExpiryMonth(v int) *SubscriptionUpsert {
+	u.Set(subscription.FieldCardExpiryMonth, v)
+	return u
+}
+
+// UpdateCardExpiryMonth sets the "card_expiry_month" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateCardExpiryMonth() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldCardExpiryMonth)
+	return u
+}
+
+// AddCardExpiryMonth adds v to the "card_expiry_month" field.
+func (u *SubscriptionUpsert) AddCardExpiryMonth(v int) *SubscriptionUpsert {
+	u.Add(subscription.FieldCardExpiryMonth, v)
+	return u
+}
+
+// SetCardExpiryYear sets the "card_expiry_year" field.
+func (u *SubscriptionUpsert) SetCardExpiryYear(v int) *SubscriptionUpsert {
+	u.Set(subscription.FieldCardExpiryYear, v)
+	return u
+}
+
+// UpdateCardExpiryYear sets the "card_expiry_year" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateCardExpiryYear() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldCardExpiryYear)
+	return u
+}
+
+// AddCardExpiryYear adds v to the "card_expiry_year" field.
+func (u *SubscriptionUpsert) AddCardExpiryYear(v int) *SubscriptionUpsert {
+	u.Add(subscription.FieldCardExpiryYear, v)
+	return u
+}
+
+// SetCardExpiryNoticedAt sets the "card_expiry_noticed_at" field.
+func (u *SubscriptionUpsert) SetCardExpiryNoticedAt(v time.Time) *SubscriptionUpsert {
+	u.Set(subscription.FieldCardExpiryNoticedAt, v)
+	return u
+}
+
+// UpdateCardExpiryNoticedAt sets the "card_expiry_noticed_at" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateCardExpiryNoticedAt() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldCardExpiryNoticedAt)
+	return u
+}
+
+// ClearCardExpiryNoticedAt clears the value of the "card_expiry_noticed_at" field.
+func (u *SubscriptionUpsert) ClearCardExpiryNoticedAt() *SubscriptionUpsert {
+	u.SetNull(subscription.FieldCardExpiryNoticedAt)
+	return u
+}
+
+// SetEndedReason sets the "ended_reason" field.
+func (u *SubscriptionUpsert) SetEndedReason(v string) *SubscriptionUpsert {
+	u.Set(subscription.FieldEndedReason, v)
+	return u
+}
+
+// UpdateEndedReason sets the "ended_reason" field to the value that was provided on create.
+func (u *SubscriptionUpsert) UpdateEndedReason() *SubscriptionUpsert {
+	u.SetExcluded(subscription.FieldEndedReason)
+	return u
+}
+
 // SetVersion sets the "version" field.
 func (u *SubscriptionUpsert) SetVersion(v int64) *SubscriptionUpsert {
 	u.Set(subscription.FieldVersion, v)
@@ -1169,12 +1836,6 @@ func (u *SubscriptionUpsertOne) UpdateNewValues() *SubscriptionUpsertOne {
 		if _, exists := u.create.mutation.OwnerUserID(); exists {
 			s.SetIgnore(subscription.FieldOwnerUserID)
 		}
-		if _, exists := u.create.mutation.PlanCode(); exists {
-			s.SetIgnore(subscription.FieldPlanCode)
-		}
-		if _, exists := u.create.mutation.Interval(); exists {
-			s.SetIgnore(subscription.FieldInterval)
-		}
 		if _, exists := u.create.mutation.Channel(); exists {
 			s.SetIgnore(subscription.FieldChannel)
 		}
@@ -1210,6 +1871,34 @@ func (u *SubscriptionUpsertOne) Update(set func(*SubscriptionUpsert)) *Subscript
 		set(&SubscriptionUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetPlanCode sets the "plan_code" field.
+func (u *SubscriptionUpsertOne) SetPlanCode(v string) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPlanCode(v)
+	})
+}
+
+// UpdatePlanCode sets the "plan_code" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdatePlanCode() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePlanCode()
+	})
+}
+
+// SetInterval sets the "interval" field.
+func (u *SubscriptionUpsertOne) SetInterval(v subscription.Interval) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetInterval(v)
+	})
+}
+
+// UpdateInterval sets the "interval" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateInterval() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateInterval()
+	})
 }
 
 // SetStatus sets the "status" field.
@@ -1534,6 +2223,307 @@ func (u *SubscriptionUpsertOne) UpdateLastError() *SubscriptionUpsertOne {
 	})
 }
 
+// SetBillingAuthorizationID sets the "billing_authorization_id" field.
+func (u *SubscriptionUpsertOne) SetBillingAuthorizationID(v string) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetBillingAuthorizationID(v)
+	})
+}
+
+// UpdateBillingAuthorizationID sets the "billing_authorization_id" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateBillingAuthorizationID() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateBillingAuthorizationID()
+	})
+}
+
+// SetBillingAnchorAt sets the "billing_anchor_at" field.
+func (u *SubscriptionUpsertOne) SetBillingAnchorAt(v time.Time) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetBillingAnchorAt(v)
+	})
+}
+
+// UpdateBillingAnchorAt sets the "billing_anchor_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateBillingAnchorAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateBillingAnchorAt()
+	})
+}
+
+// ClearBillingAnchorAt clears the value of the "billing_anchor_at" field.
+func (u *SubscriptionUpsertOne) ClearBillingAnchorAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearBillingAnchorAt()
+	})
+}
+
+// SetNextChargeAt sets the "next_charge_at" field.
+func (u *SubscriptionUpsertOne) SetNextChargeAt(v time.Time) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetNextChargeAt(v)
+	})
+}
+
+// UpdateNextChargeAt sets the "next_charge_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateNextChargeAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateNextChargeAt()
+	})
+}
+
+// ClearNextChargeAt clears the value of the "next_charge_at" field.
+func (u *SubscriptionUpsertOne) ClearNextChargeAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearNextChargeAt()
+	})
+}
+
+// SetDunningAttempts sets the "dunning_attempts" field.
+func (u *SubscriptionUpsertOne) SetDunningAttempts(v int) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetDunningAttempts(v)
+	})
+}
+
+// AddDunningAttempts adds v to the "dunning_attempts" field.
+func (u *SubscriptionUpsertOne) AddDunningAttempts(v int) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddDunningAttempts(v)
+	})
+}
+
+// UpdateDunningAttempts sets the "dunning_attempts" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateDunningAttempts() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateDunningAttempts()
+	})
+}
+
+// SetDunningDueAt sets the "dunning_due_at" field.
+func (u *SubscriptionUpsertOne) SetDunningDueAt(v time.Time) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetDunningDueAt(v)
+	})
+}
+
+// UpdateDunningDueAt sets the "dunning_due_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateDunningDueAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateDunningDueAt()
+	})
+}
+
+// ClearDunningDueAt clears the value of the "dunning_due_at" field.
+func (u *SubscriptionUpsertOne) ClearDunningDueAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearDunningDueAt()
+	})
+}
+
+// SetCheckmarkIncluded sets the "checkmark_included" field.
+func (u *SubscriptionUpsertOne) SetCheckmarkIncluded(v bool) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCheckmarkIncluded(v)
+	})
+}
+
+// UpdateCheckmarkIncluded sets the "checkmark_included" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateCheckmarkIncluded() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCheckmarkIncluded()
+	})
+}
+
+// SetCreditMinor sets the "credit_minor" field.
+func (u *SubscriptionUpsertOne) SetCreditMinor(v int64) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCreditMinor(v)
+	})
+}
+
+// AddCreditMinor adds v to the "credit_minor" field.
+func (u *SubscriptionUpsertOne) AddCreditMinor(v int64) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddCreditMinor(v)
+	})
+}
+
+// UpdateCreditMinor sets the "credit_minor" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateCreditMinor() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCreditMinor()
+	})
+}
+
+// SetPendingPlanCode sets the "pending_plan_code" field.
+func (u *SubscriptionUpsertOne) SetPendingPlanCode(v string) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPendingPlanCode(v)
+	})
+}
+
+// UpdatePendingPlanCode sets the "pending_plan_code" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdatePendingPlanCode() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePendingPlanCode()
+	})
+}
+
+// SetPendingInterval sets the "pending_interval" field.
+func (u *SubscriptionUpsertOne) SetPendingInterval(v string) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPendingInterval(v)
+	})
+}
+
+// UpdatePendingInterval sets the "pending_interval" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdatePendingInterval() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePendingInterval()
+	})
+}
+
+// SetPeriodPriceMinor sets the "period_price_minor" field.
+func (u *SubscriptionUpsertOne) SetPeriodPriceMinor(v int64) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPeriodPriceMinor(v)
+	})
+}
+
+// AddPeriodPriceMinor adds v to the "period_price_minor" field.
+func (u *SubscriptionUpsertOne) AddPeriodPriceMinor(v int64) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddPeriodPriceMinor(v)
+	})
+}
+
+// UpdatePeriodPriceMinor sets the "period_price_minor" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdatePeriodPriceMinor() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePeriodPriceMinor()
+	})
+}
+
+// SetPriceNoticeAmountMinor sets the "price_notice_amount_minor" field.
+func (u *SubscriptionUpsertOne) SetPriceNoticeAmountMinor(v int64) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPriceNoticeAmountMinor(v)
+	})
+}
+
+// AddPriceNoticeAmountMinor adds v to the "price_notice_amount_minor" field.
+func (u *SubscriptionUpsertOne) AddPriceNoticeAmountMinor(v int64) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddPriceNoticeAmountMinor(v)
+	})
+}
+
+// UpdatePriceNoticeAmountMinor sets the "price_notice_amount_minor" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdatePriceNoticeAmountMinor() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePriceNoticeAmountMinor()
+	})
+}
+
+// SetPriceEffectiveAt sets the "price_effective_at" field.
+func (u *SubscriptionUpsertOne) SetPriceEffectiveAt(v time.Time) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPriceEffectiveAt(v)
+	})
+}
+
+// UpdatePriceEffectiveAt sets the "price_effective_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdatePriceEffectiveAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePriceEffectiveAt()
+	})
+}
+
+// ClearPriceEffectiveAt clears the value of the "price_effective_at" field.
+func (u *SubscriptionUpsertOne) ClearPriceEffectiveAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearPriceEffectiveAt()
+	})
+}
+
+// SetCardExpiryMonth sets the "card_expiry_month" field.
+func (u *SubscriptionUpsertOne) SetCardExpiryMonth(v int) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCardExpiryMonth(v)
+	})
+}
+
+// AddCardExpiryMonth adds v to the "card_expiry_month" field.
+func (u *SubscriptionUpsertOne) AddCardExpiryMonth(v int) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddCardExpiryMonth(v)
+	})
+}
+
+// UpdateCardExpiryMonth sets the "card_expiry_month" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateCardExpiryMonth() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCardExpiryMonth()
+	})
+}
+
+// SetCardExpiryYear sets the "card_expiry_year" field.
+func (u *SubscriptionUpsertOne) SetCardExpiryYear(v int) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCardExpiryYear(v)
+	})
+}
+
+// AddCardExpiryYear adds v to the "card_expiry_year" field.
+func (u *SubscriptionUpsertOne) AddCardExpiryYear(v int) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddCardExpiryYear(v)
+	})
+}
+
+// UpdateCardExpiryYear sets the "card_expiry_year" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateCardExpiryYear() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCardExpiryYear()
+	})
+}
+
+// SetCardExpiryNoticedAt sets the "card_expiry_noticed_at" field.
+func (u *SubscriptionUpsertOne) SetCardExpiryNoticedAt(v time.Time) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCardExpiryNoticedAt(v)
+	})
+}
+
+// UpdateCardExpiryNoticedAt sets the "card_expiry_noticed_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateCardExpiryNoticedAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCardExpiryNoticedAt()
+	})
+}
+
+// ClearCardExpiryNoticedAt clears the value of the "card_expiry_noticed_at" field.
+func (u *SubscriptionUpsertOne) ClearCardExpiryNoticedAt() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearCardExpiryNoticedAt()
+	})
+}
+
+// SetEndedReason sets the "ended_reason" field.
+func (u *SubscriptionUpsertOne) SetEndedReason(v string) *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetEndedReason(v)
+	})
+}
+
+// UpdateEndedReason sets the "ended_reason" field to the value that was provided on create.
+func (u *SubscriptionUpsertOne) UpdateEndedReason() *SubscriptionUpsertOne {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateEndedReason()
+	})
+}
+
 // SetVersion sets the "version" field.
 func (u *SubscriptionUpsertOne) SetVersion(v int64) *SubscriptionUpsertOne {
 	return u.Update(func(s *SubscriptionUpsert) {
@@ -1764,12 +2754,6 @@ func (u *SubscriptionUpsertBulk) UpdateNewValues() *SubscriptionUpsertBulk {
 			if _, exists := b.mutation.OwnerUserID(); exists {
 				s.SetIgnore(subscription.FieldOwnerUserID)
 			}
-			if _, exists := b.mutation.PlanCode(); exists {
-				s.SetIgnore(subscription.FieldPlanCode)
-			}
-			if _, exists := b.mutation.Interval(); exists {
-				s.SetIgnore(subscription.FieldInterval)
-			}
 			if _, exists := b.mutation.Channel(); exists {
 				s.SetIgnore(subscription.FieldChannel)
 			}
@@ -1806,6 +2790,34 @@ func (u *SubscriptionUpsertBulk) Update(set func(*SubscriptionUpsert)) *Subscrip
 		set(&SubscriptionUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetPlanCode sets the "plan_code" field.
+func (u *SubscriptionUpsertBulk) SetPlanCode(v string) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPlanCode(v)
+	})
+}
+
+// UpdatePlanCode sets the "plan_code" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdatePlanCode() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePlanCode()
+	})
+}
+
+// SetInterval sets the "interval" field.
+func (u *SubscriptionUpsertBulk) SetInterval(v subscription.Interval) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetInterval(v)
+	})
+}
+
+// UpdateInterval sets the "interval" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateInterval() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateInterval()
+	})
 }
 
 // SetStatus sets the "status" field.
@@ -2127,6 +3139,307 @@ func (u *SubscriptionUpsertBulk) SetLastError(v string) *SubscriptionUpsertBulk 
 func (u *SubscriptionUpsertBulk) UpdateLastError() *SubscriptionUpsertBulk {
 	return u.Update(func(s *SubscriptionUpsert) {
 		s.UpdateLastError()
+	})
+}
+
+// SetBillingAuthorizationID sets the "billing_authorization_id" field.
+func (u *SubscriptionUpsertBulk) SetBillingAuthorizationID(v string) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetBillingAuthorizationID(v)
+	})
+}
+
+// UpdateBillingAuthorizationID sets the "billing_authorization_id" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateBillingAuthorizationID() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateBillingAuthorizationID()
+	})
+}
+
+// SetBillingAnchorAt sets the "billing_anchor_at" field.
+func (u *SubscriptionUpsertBulk) SetBillingAnchorAt(v time.Time) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetBillingAnchorAt(v)
+	})
+}
+
+// UpdateBillingAnchorAt sets the "billing_anchor_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateBillingAnchorAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateBillingAnchorAt()
+	})
+}
+
+// ClearBillingAnchorAt clears the value of the "billing_anchor_at" field.
+func (u *SubscriptionUpsertBulk) ClearBillingAnchorAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearBillingAnchorAt()
+	})
+}
+
+// SetNextChargeAt sets the "next_charge_at" field.
+func (u *SubscriptionUpsertBulk) SetNextChargeAt(v time.Time) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetNextChargeAt(v)
+	})
+}
+
+// UpdateNextChargeAt sets the "next_charge_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateNextChargeAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateNextChargeAt()
+	})
+}
+
+// ClearNextChargeAt clears the value of the "next_charge_at" field.
+func (u *SubscriptionUpsertBulk) ClearNextChargeAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearNextChargeAt()
+	})
+}
+
+// SetDunningAttempts sets the "dunning_attempts" field.
+func (u *SubscriptionUpsertBulk) SetDunningAttempts(v int) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetDunningAttempts(v)
+	})
+}
+
+// AddDunningAttempts adds v to the "dunning_attempts" field.
+func (u *SubscriptionUpsertBulk) AddDunningAttempts(v int) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddDunningAttempts(v)
+	})
+}
+
+// UpdateDunningAttempts sets the "dunning_attempts" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateDunningAttempts() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateDunningAttempts()
+	})
+}
+
+// SetDunningDueAt sets the "dunning_due_at" field.
+func (u *SubscriptionUpsertBulk) SetDunningDueAt(v time.Time) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetDunningDueAt(v)
+	})
+}
+
+// UpdateDunningDueAt sets the "dunning_due_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateDunningDueAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateDunningDueAt()
+	})
+}
+
+// ClearDunningDueAt clears the value of the "dunning_due_at" field.
+func (u *SubscriptionUpsertBulk) ClearDunningDueAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearDunningDueAt()
+	})
+}
+
+// SetCheckmarkIncluded sets the "checkmark_included" field.
+func (u *SubscriptionUpsertBulk) SetCheckmarkIncluded(v bool) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCheckmarkIncluded(v)
+	})
+}
+
+// UpdateCheckmarkIncluded sets the "checkmark_included" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateCheckmarkIncluded() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCheckmarkIncluded()
+	})
+}
+
+// SetCreditMinor sets the "credit_minor" field.
+func (u *SubscriptionUpsertBulk) SetCreditMinor(v int64) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCreditMinor(v)
+	})
+}
+
+// AddCreditMinor adds v to the "credit_minor" field.
+func (u *SubscriptionUpsertBulk) AddCreditMinor(v int64) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddCreditMinor(v)
+	})
+}
+
+// UpdateCreditMinor sets the "credit_minor" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateCreditMinor() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCreditMinor()
+	})
+}
+
+// SetPendingPlanCode sets the "pending_plan_code" field.
+func (u *SubscriptionUpsertBulk) SetPendingPlanCode(v string) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPendingPlanCode(v)
+	})
+}
+
+// UpdatePendingPlanCode sets the "pending_plan_code" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdatePendingPlanCode() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePendingPlanCode()
+	})
+}
+
+// SetPendingInterval sets the "pending_interval" field.
+func (u *SubscriptionUpsertBulk) SetPendingInterval(v string) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPendingInterval(v)
+	})
+}
+
+// UpdatePendingInterval sets the "pending_interval" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdatePendingInterval() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePendingInterval()
+	})
+}
+
+// SetPeriodPriceMinor sets the "period_price_minor" field.
+func (u *SubscriptionUpsertBulk) SetPeriodPriceMinor(v int64) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPeriodPriceMinor(v)
+	})
+}
+
+// AddPeriodPriceMinor adds v to the "period_price_minor" field.
+func (u *SubscriptionUpsertBulk) AddPeriodPriceMinor(v int64) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddPeriodPriceMinor(v)
+	})
+}
+
+// UpdatePeriodPriceMinor sets the "period_price_minor" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdatePeriodPriceMinor() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePeriodPriceMinor()
+	})
+}
+
+// SetPriceNoticeAmountMinor sets the "price_notice_amount_minor" field.
+func (u *SubscriptionUpsertBulk) SetPriceNoticeAmountMinor(v int64) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPriceNoticeAmountMinor(v)
+	})
+}
+
+// AddPriceNoticeAmountMinor adds v to the "price_notice_amount_minor" field.
+func (u *SubscriptionUpsertBulk) AddPriceNoticeAmountMinor(v int64) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddPriceNoticeAmountMinor(v)
+	})
+}
+
+// UpdatePriceNoticeAmountMinor sets the "price_notice_amount_minor" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdatePriceNoticeAmountMinor() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePriceNoticeAmountMinor()
+	})
+}
+
+// SetPriceEffectiveAt sets the "price_effective_at" field.
+func (u *SubscriptionUpsertBulk) SetPriceEffectiveAt(v time.Time) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetPriceEffectiveAt(v)
+	})
+}
+
+// UpdatePriceEffectiveAt sets the "price_effective_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdatePriceEffectiveAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdatePriceEffectiveAt()
+	})
+}
+
+// ClearPriceEffectiveAt clears the value of the "price_effective_at" field.
+func (u *SubscriptionUpsertBulk) ClearPriceEffectiveAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearPriceEffectiveAt()
+	})
+}
+
+// SetCardExpiryMonth sets the "card_expiry_month" field.
+func (u *SubscriptionUpsertBulk) SetCardExpiryMonth(v int) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCardExpiryMonth(v)
+	})
+}
+
+// AddCardExpiryMonth adds v to the "card_expiry_month" field.
+func (u *SubscriptionUpsertBulk) AddCardExpiryMonth(v int) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddCardExpiryMonth(v)
+	})
+}
+
+// UpdateCardExpiryMonth sets the "card_expiry_month" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateCardExpiryMonth() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCardExpiryMonth()
+	})
+}
+
+// SetCardExpiryYear sets the "card_expiry_year" field.
+func (u *SubscriptionUpsertBulk) SetCardExpiryYear(v int) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCardExpiryYear(v)
+	})
+}
+
+// AddCardExpiryYear adds v to the "card_expiry_year" field.
+func (u *SubscriptionUpsertBulk) AddCardExpiryYear(v int) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.AddCardExpiryYear(v)
+	})
+}
+
+// UpdateCardExpiryYear sets the "card_expiry_year" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateCardExpiryYear() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCardExpiryYear()
+	})
+}
+
+// SetCardExpiryNoticedAt sets the "card_expiry_noticed_at" field.
+func (u *SubscriptionUpsertBulk) SetCardExpiryNoticedAt(v time.Time) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetCardExpiryNoticedAt(v)
+	})
+}
+
+// UpdateCardExpiryNoticedAt sets the "card_expiry_noticed_at" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateCardExpiryNoticedAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateCardExpiryNoticedAt()
+	})
+}
+
+// ClearCardExpiryNoticedAt clears the value of the "card_expiry_noticed_at" field.
+func (u *SubscriptionUpsertBulk) ClearCardExpiryNoticedAt() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.ClearCardExpiryNoticedAt()
+	})
+}
+
+// SetEndedReason sets the "ended_reason" field.
+func (u *SubscriptionUpsertBulk) SetEndedReason(v string) *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.SetEndedReason(v)
+	})
+}
+
+// UpdateEndedReason sets the "ended_reason" field to the value that was provided on create.
+func (u *SubscriptionUpsertBulk) UpdateEndedReason() *SubscriptionUpsertBulk {
+	return u.Update(func(s *SubscriptionUpsert) {
+		s.UpdateEndedReason()
 	})
 }
 

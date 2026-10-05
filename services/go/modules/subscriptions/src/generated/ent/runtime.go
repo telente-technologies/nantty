@@ -10,8 +10,10 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
 	"zudomart/modules/subscriptions/src/generated/ent/providerplan"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
+	"zudomart/modules/subscriptions/src/generated/ent/subscriptionperiod"
 	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
 	"zudomart/modules/subscriptions/src/generated/ent/trialclaim"
+	"zudomart/modules/subscriptions/src/models"
 
 	"github.com/google/uuid"
 )
@@ -461,12 +463,64 @@ func init() {
 	subscription.DefaultLastError = subscriptionDescLastError.Default.(string)
 	// subscription.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
 	subscription.LastErrorValidator = subscriptionDescLastError.Validators[0].(func(string) error)
+	// subscriptionDescBillingAuthorizationID is the schema descriptor for billing_authorization_id field.
+	subscriptionDescBillingAuthorizationID := subscriptionFields[26].Descriptor()
+	// subscription.DefaultBillingAuthorizationID holds the default value on creation for the billing_authorization_id field.
+	subscription.DefaultBillingAuthorizationID = subscriptionDescBillingAuthorizationID.Default.(string)
+	// subscription.BillingAuthorizationIDValidator is a validator for the "billing_authorization_id" field. It is called by the builders before save.
+	subscription.BillingAuthorizationIDValidator = subscriptionDescBillingAuthorizationID.Validators[0].(func(string) error)
+	// subscriptionDescDunningAttempts is the schema descriptor for dunning_attempts field.
+	subscriptionDescDunningAttempts := subscriptionFields[29].Descriptor()
+	// subscription.DefaultDunningAttempts holds the default value on creation for the dunning_attempts field.
+	subscription.DefaultDunningAttempts = subscriptionDescDunningAttempts.Default.(int)
+	// subscriptionDescCheckmarkIncluded is the schema descriptor for checkmark_included field.
+	subscriptionDescCheckmarkIncluded := subscriptionFields[31].Descriptor()
+	// subscription.DefaultCheckmarkIncluded holds the default value on creation for the checkmark_included field.
+	subscription.DefaultCheckmarkIncluded = subscriptionDescCheckmarkIncluded.Default.(bool)
+	// subscriptionDescCreditMinor is the schema descriptor for credit_minor field.
+	subscriptionDescCreditMinor := subscriptionFields[32].Descriptor()
+	// subscription.DefaultCreditMinor holds the default value on creation for the credit_minor field.
+	subscription.DefaultCreditMinor = subscriptionDescCreditMinor.Default.(int64)
+	// subscriptionDescPendingPlanCode is the schema descriptor for pending_plan_code field.
+	subscriptionDescPendingPlanCode := subscriptionFields[33].Descriptor()
+	// subscription.DefaultPendingPlanCode holds the default value on creation for the pending_plan_code field.
+	subscription.DefaultPendingPlanCode = subscriptionDescPendingPlanCode.Default.(string)
+	// subscription.PendingPlanCodeValidator is a validator for the "pending_plan_code" field. It is called by the builders before save.
+	subscription.PendingPlanCodeValidator = subscriptionDescPendingPlanCode.Validators[0].(func(string) error)
+	// subscriptionDescPendingInterval is the schema descriptor for pending_interval field.
+	subscriptionDescPendingInterval := subscriptionFields[34].Descriptor()
+	// subscription.DefaultPendingInterval holds the default value on creation for the pending_interval field.
+	subscription.DefaultPendingInterval = subscriptionDescPendingInterval.Default.(string)
+	// subscription.PendingIntervalValidator is a validator for the "pending_interval" field. It is called by the builders before save.
+	subscription.PendingIntervalValidator = subscriptionDescPendingInterval.Validators[0].(func(string) error)
+	// subscriptionDescPeriodPriceMinor is the schema descriptor for period_price_minor field.
+	subscriptionDescPeriodPriceMinor := subscriptionFields[35].Descriptor()
+	// subscription.DefaultPeriodPriceMinor holds the default value on creation for the period_price_minor field.
+	subscription.DefaultPeriodPriceMinor = subscriptionDescPeriodPriceMinor.Default.(int64)
+	// subscriptionDescPriceNoticeAmountMinor is the schema descriptor for price_notice_amount_minor field.
+	subscriptionDescPriceNoticeAmountMinor := subscriptionFields[36].Descriptor()
+	// subscription.DefaultPriceNoticeAmountMinor holds the default value on creation for the price_notice_amount_minor field.
+	subscription.DefaultPriceNoticeAmountMinor = subscriptionDescPriceNoticeAmountMinor.Default.(int64)
+	// subscriptionDescCardExpiryMonth is the schema descriptor for card_expiry_month field.
+	subscriptionDescCardExpiryMonth := subscriptionFields[38].Descriptor()
+	// subscription.DefaultCardExpiryMonth holds the default value on creation for the card_expiry_month field.
+	subscription.DefaultCardExpiryMonth = subscriptionDescCardExpiryMonth.Default.(int)
+	// subscriptionDescCardExpiryYear is the schema descriptor for card_expiry_year field.
+	subscriptionDescCardExpiryYear := subscriptionFields[39].Descriptor()
+	// subscription.DefaultCardExpiryYear holds the default value on creation for the card_expiry_year field.
+	subscription.DefaultCardExpiryYear = subscriptionDescCardExpiryYear.Default.(int)
+	// subscriptionDescEndedReason is the schema descriptor for ended_reason field.
+	subscriptionDescEndedReason := subscriptionFields[41].Descriptor()
+	// subscription.DefaultEndedReason holds the default value on creation for the ended_reason field.
+	subscription.DefaultEndedReason = subscriptionDescEndedReason.Default.(string)
+	// subscription.EndedReasonValidator is a validator for the "ended_reason" field. It is called by the builders before save.
+	subscription.EndedReasonValidator = subscriptionDescEndedReason.Validators[0].(func(string) error)
 	// subscriptionDescVersion is the schema descriptor for version field.
-	subscriptionDescVersion := subscriptionFields[26].Descriptor()
+	subscriptionDescVersion := subscriptionFields[42].Descriptor()
 	// subscription.DefaultVersion holds the default value on creation for the version field.
 	subscription.DefaultVersion = subscriptionDescVersion.Default.(int64)
 	// subscriptionDescUpdatedAt is the schema descriptor for updated_at field.
-	subscriptionDescUpdatedAt := subscriptionFields[27].Descriptor()
+	subscriptionDescUpdatedAt := subscriptionFields[43].Descriptor()
 	// subscription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	subscription.DefaultUpdatedAt = subscriptionDescUpdatedAt.Default.(func() time.Time)
 	// subscription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -475,6 +529,155 @@ func init() {
 	subscriptionDescID := subscriptionMixinFields0[0].Descriptor()
 	// subscription.DefaultID holds the default value on creation for the id field.
 	subscription.DefaultID = subscriptionDescID.Default.(func() uuid.UUID)
+	subscriptionperiodMixin := schema.SubscriptionPeriod{}.Mixin()
+	subscriptionperiodMixinFields0 := subscriptionperiodMixin[0].Fields()
+	_ = subscriptionperiodMixinFields0
+	subscriptionperiodFields := schema.SubscriptionPeriod{}.Fields()
+	_ = subscriptionperiodFields
+	// subscriptionperiodDescCreatedAt is the schema descriptor for created_at field.
+	subscriptionperiodDescCreatedAt := subscriptionperiodMixinFields0[1].Descriptor()
+	// subscriptionperiod.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscriptionperiod.DefaultCreatedAt = subscriptionperiodDescCreatedAt.Default.(func() time.Time)
+	// subscriptionperiodDescSubscriptionID is the schema descriptor for subscription_id field.
+	subscriptionperiodDescSubscriptionID := subscriptionperiodFields[0].Descriptor()
+	// subscriptionperiod.SubscriptionIDValidator is a validator for the "subscription_id" field. It is called by the builders before save.
+	subscriptionperiod.SubscriptionIDValidator = func() func(string) error {
+		validators := subscriptionperiodDescSubscriptionID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(subscription_id string) error {
+			for _, fn := range fns {
+				if err := fn(subscription_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionperiodDescPlanCode is the schema descriptor for plan_code field.
+	subscriptionperiodDescPlanCode := subscriptionperiodFields[2].Descriptor()
+	// subscriptionperiod.PlanCodeValidator is a validator for the "plan_code" field. It is called by the builders before save.
+	subscriptionperiod.PlanCodeValidator = func() func(string) error {
+		validators := subscriptionperiodDescPlanCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(plan_code string) error {
+			for _, fn := range fns {
+				if err := fn(plan_code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionperiodDescInterval is the schema descriptor for interval field.
+	subscriptionperiodDescInterval := subscriptionperiodFields[3].Descriptor()
+	// subscriptionperiod.IntervalValidator is a validator for the "interval" field. It is called by the builders before save.
+	subscriptionperiod.IntervalValidator = func() func(string) error {
+		validators := subscriptionperiodDescInterval.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(interval string) error {
+			for _, fn := range fns {
+				if err := fn(interval); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionperiodDescLineItems is the schema descriptor for line_items field.
+	subscriptionperiodDescLineItems := subscriptionperiodFields[6].Descriptor()
+	// subscriptionperiod.DefaultLineItems holds the default value on creation for the line_items field.
+	subscriptionperiod.DefaultLineItems = subscriptionperiodDescLineItems.Default.([]models.LineItem)
+	// subscriptionperiodDescPeriodPriceMinor is the schema descriptor for period_price_minor field.
+	subscriptionperiodDescPeriodPriceMinor := subscriptionperiodFields[7].Descriptor()
+	// subscriptionperiod.DefaultPeriodPriceMinor holds the default value on creation for the period_price_minor field.
+	subscriptionperiod.DefaultPeriodPriceMinor = subscriptionperiodDescPeriodPriceMinor.Default.(int64)
+	// subscriptionperiodDescSubtotalMinor is the schema descriptor for subtotal_minor field.
+	subscriptionperiodDescSubtotalMinor := subscriptionperiodFields[8].Descriptor()
+	// subscriptionperiod.DefaultSubtotalMinor holds the default value on creation for the subtotal_minor field.
+	subscriptionperiod.DefaultSubtotalMinor = subscriptionperiodDescSubtotalMinor.Default.(int64)
+	// subscriptionperiodDescCreditAppliedMinor is the schema descriptor for credit_applied_minor field.
+	subscriptionperiodDescCreditAppliedMinor := subscriptionperiodFields[9].Descriptor()
+	// subscriptionperiod.DefaultCreditAppliedMinor holds the default value on creation for the credit_applied_minor field.
+	subscriptionperiod.DefaultCreditAppliedMinor = subscriptionperiodDescCreditAppliedMinor.Default.(int64)
+	// subscriptionperiodDescAmountDueMinor is the schema descriptor for amount_due_minor field.
+	subscriptionperiodDescAmountDueMinor := subscriptionperiodFields[10].Descriptor()
+	// subscriptionperiod.DefaultAmountDueMinor holds the default value on creation for the amount_due_minor field.
+	subscriptionperiod.DefaultAmountDueMinor = subscriptionperiodDescAmountDueMinor.Default.(int64)
+	// subscriptionperiodDescCurrency is the schema descriptor for currency field.
+	subscriptionperiodDescCurrency := subscriptionperiodFields[11].Descriptor()
+	// subscriptionperiod.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	subscriptionperiod.CurrencyValidator = func() func(string) error {
+		validators := subscriptionperiodDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionperiodDescCheckmarkIncluded is the schema descriptor for checkmark_included field.
+	subscriptionperiodDescCheckmarkIncluded := subscriptionperiodFields[12].Descriptor()
+	// subscriptionperiod.DefaultCheckmarkIncluded holds the default value on creation for the checkmark_included field.
+	subscriptionperiod.DefaultCheckmarkIncluded = subscriptionperiodDescCheckmarkIncluded.Default.(bool)
+	// subscriptionperiodDescAttemptCount is the schema descriptor for attempt_count field.
+	subscriptionperiodDescAttemptCount := subscriptionperiodFields[14].Descriptor()
+	// subscriptionperiod.DefaultAttemptCount holds the default value on creation for the attempt_count field.
+	subscriptionperiod.DefaultAttemptCount = subscriptionperiodDescAttemptCount.Default.(int)
+	// subscriptionperiodDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	subscriptionperiodDescIdempotencyKey := subscriptionperiodFields[15].Descriptor()
+	// subscriptionperiod.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	subscriptionperiod.IdempotencyKeyValidator = func() func(string) error {
+		validators := subscriptionperiodDescIdempotencyKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(idempotency_key string) error {
+			for _, fn := range fns {
+				if err := fn(idempotency_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// subscriptionperiodDescPaymentReference is the schema descriptor for payment_reference field.
+	subscriptionperiodDescPaymentReference := subscriptionperiodFields[16].Descriptor()
+	// subscriptionperiod.DefaultPaymentReference holds the default value on creation for the payment_reference field.
+	subscriptionperiod.DefaultPaymentReference = subscriptionperiodDescPaymentReference.Default.(string)
+	// subscriptionperiod.PaymentReferenceValidator is a validator for the "payment_reference" field. It is called by the builders before save.
+	subscriptionperiod.PaymentReferenceValidator = subscriptionperiodDescPaymentReference.Validators[0].(func(string) error)
+	// subscriptionperiodDescFailureReason is the schema descriptor for failure_reason field.
+	subscriptionperiodDescFailureReason := subscriptionperiodFields[17].Descriptor()
+	// subscriptionperiod.DefaultFailureReason holds the default value on creation for the failure_reason field.
+	subscriptionperiod.DefaultFailureReason = subscriptionperiodDescFailureReason.Default.(string)
+	// subscriptionperiod.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
+	subscriptionperiod.FailureReasonValidator = subscriptionperiodDescFailureReason.Validators[0].(func(string) error)
+	// subscriptionperiodDescUpdatedAt is the schema descriptor for updated_at field.
+	subscriptionperiodDescUpdatedAt := subscriptionperiodFields[19].Descriptor()
+	// subscriptionperiod.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	subscriptionperiod.DefaultUpdatedAt = subscriptionperiodDescUpdatedAt.Default.(func() time.Time)
+	// subscriptionperiod.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	subscriptionperiod.UpdateDefaultUpdatedAt = subscriptionperiodDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// subscriptionperiodDescID is the schema descriptor for id field.
+	subscriptionperiodDescID := subscriptionperiodMixinFields0[0].Descriptor()
+	// subscriptionperiod.DefaultID holds the default value on creation for the id field.
+	subscriptionperiod.DefaultID = subscriptionperiodDescID.Default.(func() uuid.UUID)
 	subscriptionreminderMixin := schema.SubscriptionReminder{}.Mixin()
 	subscriptionreminderMixinFields0 := subscriptionreminderMixin[0].Fields()
 	_ = subscriptionreminderMixinFields0

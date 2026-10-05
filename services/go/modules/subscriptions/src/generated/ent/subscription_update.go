@@ -29,6 +29,34 @@ func (_u *SubscriptionUpdate) Where(ps ...predicate.Subscription) *SubscriptionU
 	return _u
 }
 
+// SetPlanCode sets the "plan_code" field.
+func (_u *SubscriptionUpdate) SetPlanCode(v string) *SubscriptionUpdate {
+	_u.mutation.SetPlanCode(v)
+	return _u
+}
+
+// SetNillablePlanCode sets the "plan_code" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillablePlanCode(v *string) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetPlanCode(*v)
+	}
+	return _u
+}
+
+// SetInterval sets the "interval" field.
+func (_u *SubscriptionUpdate) SetInterval(v subscription.Interval) *SubscriptionUpdate {
+	_u.mutation.SetInterval(v)
+	return _u
+}
+
+// SetNillableInterval sets the "interval" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableInterval(v *subscription.Interval) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetInterval(*v)
+	}
+	return _u
+}
+
 // SetStatus sets the "status" field.
 func (_u *SubscriptionUpdate) SetStatus(v subscription.Status) *SubscriptionUpdate {
 	_u.mutation.SetStatus(v)
@@ -347,6 +375,302 @@ func (_u *SubscriptionUpdate) SetNillableLastError(v *string) *SubscriptionUpdat
 	return _u
 }
 
+// SetBillingAuthorizationID sets the "billing_authorization_id" field.
+func (_u *SubscriptionUpdate) SetBillingAuthorizationID(v string) *SubscriptionUpdate {
+	_u.mutation.SetBillingAuthorizationID(v)
+	return _u
+}
+
+// SetNillableBillingAuthorizationID sets the "billing_authorization_id" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableBillingAuthorizationID(v *string) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetBillingAuthorizationID(*v)
+	}
+	return _u
+}
+
+// SetBillingAnchorAt sets the "billing_anchor_at" field.
+func (_u *SubscriptionUpdate) SetBillingAnchorAt(v time.Time) *SubscriptionUpdate {
+	_u.mutation.SetBillingAnchorAt(v)
+	return _u
+}
+
+// SetNillableBillingAnchorAt sets the "billing_anchor_at" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableBillingAnchorAt(v *time.Time) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetBillingAnchorAt(*v)
+	}
+	return _u
+}
+
+// ClearBillingAnchorAt clears the value of the "billing_anchor_at" field.
+func (_u *SubscriptionUpdate) ClearBillingAnchorAt() *SubscriptionUpdate {
+	_u.mutation.ClearBillingAnchorAt()
+	return _u
+}
+
+// SetNextChargeAt sets the "next_charge_at" field.
+func (_u *SubscriptionUpdate) SetNextChargeAt(v time.Time) *SubscriptionUpdate {
+	_u.mutation.SetNextChargeAt(v)
+	return _u
+}
+
+// SetNillableNextChargeAt sets the "next_charge_at" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableNextChargeAt(v *time.Time) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetNextChargeAt(*v)
+	}
+	return _u
+}
+
+// ClearNextChargeAt clears the value of the "next_charge_at" field.
+func (_u *SubscriptionUpdate) ClearNextChargeAt() *SubscriptionUpdate {
+	_u.mutation.ClearNextChargeAt()
+	return _u
+}
+
+// SetDunningAttempts sets the "dunning_attempts" field.
+func (_u *SubscriptionUpdate) SetDunningAttempts(v int) *SubscriptionUpdate {
+	_u.mutation.ResetDunningAttempts()
+	_u.mutation.SetDunningAttempts(v)
+	return _u
+}
+
+// SetNillableDunningAttempts sets the "dunning_attempts" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableDunningAttempts(v *int) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetDunningAttempts(*v)
+	}
+	return _u
+}
+
+// AddDunningAttempts adds value to the "dunning_attempts" field.
+func (_u *SubscriptionUpdate) AddDunningAttempts(v int) *SubscriptionUpdate {
+	_u.mutation.AddDunningAttempts(v)
+	return _u
+}
+
+// SetDunningDueAt sets the "dunning_due_at" field.
+func (_u *SubscriptionUpdate) SetDunningDueAt(v time.Time) *SubscriptionUpdate {
+	_u.mutation.SetDunningDueAt(v)
+	return _u
+}
+
+// SetNillableDunningDueAt sets the "dunning_due_at" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableDunningDueAt(v *time.Time) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetDunningDueAt(*v)
+	}
+	return _u
+}
+
+// ClearDunningDueAt clears the value of the "dunning_due_at" field.
+func (_u *SubscriptionUpdate) ClearDunningDueAt() *SubscriptionUpdate {
+	_u.mutation.ClearDunningDueAt()
+	return _u
+}
+
+// SetCheckmarkIncluded sets the "checkmark_included" field.
+func (_u *SubscriptionUpdate) SetCheckmarkIncluded(v bool) *SubscriptionUpdate {
+	_u.mutation.SetCheckmarkIncluded(v)
+	return _u
+}
+
+// SetNillableCheckmarkIncluded sets the "checkmark_included" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableCheckmarkIncluded(v *bool) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetCheckmarkIncluded(*v)
+	}
+	return _u
+}
+
+// SetCreditMinor sets the "credit_minor" field.
+func (_u *SubscriptionUpdate) SetCreditMinor(v int64) *SubscriptionUpdate {
+	_u.mutation.ResetCreditMinor()
+	_u.mutation.SetCreditMinor(v)
+	return _u
+}
+
+// SetNillableCreditMinor sets the "credit_minor" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableCreditMinor(v *int64) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetCreditMinor(*v)
+	}
+	return _u
+}
+
+// AddCreditMinor adds value to the "credit_minor" field.
+func (_u *SubscriptionUpdate) AddCreditMinor(v int64) *SubscriptionUpdate {
+	_u.mutation.AddCreditMinor(v)
+	return _u
+}
+
+// SetPendingPlanCode sets the "pending_plan_code" field.
+func (_u *SubscriptionUpdate) SetPendingPlanCode(v string) *SubscriptionUpdate {
+	_u.mutation.SetPendingPlanCode(v)
+	return _u
+}
+
+// SetNillablePendingPlanCode sets the "pending_plan_code" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillablePendingPlanCode(v *string) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetPendingPlanCode(*v)
+	}
+	return _u
+}
+
+// SetPendingInterval sets the "pending_interval" field.
+func (_u *SubscriptionUpdate) SetPendingInterval(v string) *SubscriptionUpdate {
+	_u.mutation.SetPendingInterval(v)
+	return _u
+}
+
+// SetNillablePendingInterval sets the "pending_interval" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillablePendingInterval(v *string) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetPendingInterval(*v)
+	}
+	return _u
+}
+
+// SetPeriodPriceMinor sets the "period_price_minor" field.
+func (_u *SubscriptionUpdate) SetPeriodPriceMinor(v int64) *SubscriptionUpdate {
+	_u.mutation.ResetPeriodPriceMinor()
+	_u.mutation.SetPeriodPriceMinor(v)
+	return _u
+}
+
+// SetNillablePeriodPriceMinor sets the "period_price_minor" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillablePeriodPriceMinor(v *int64) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetPeriodPriceMinor(*v)
+	}
+	return _u
+}
+
+// AddPeriodPriceMinor adds value to the "period_price_minor" field.
+func (_u *SubscriptionUpdate) AddPeriodPriceMinor(v int64) *SubscriptionUpdate {
+	_u.mutation.AddPeriodPriceMinor(v)
+	return _u
+}
+
+// SetPriceNoticeAmountMinor sets the "price_notice_amount_minor" field.
+func (_u *SubscriptionUpdate) SetPriceNoticeAmountMinor(v int64) *SubscriptionUpdate {
+	_u.mutation.ResetPriceNoticeAmountMinor()
+	_u.mutation.SetPriceNoticeAmountMinor(v)
+	return _u
+}
+
+// SetNillablePriceNoticeAmountMinor sets the "price_notice_amount_minor" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillablePriceNoticeAmountMinor(v *int64) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetPriceNoticeAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddPriceNoticeAmountMinor adds value to the "price_notice_amount_minor" field.
+func (_u *SubscriptionUpdate) AddPriceNoticeAmountMinor(v int64) *SubscriptionUpdate {
+	_u.mutation.AddPriceNoticeAmountMinor(v)
+	return _u
+}
+
+// SetPriceEffectiveAt sets the "price_effective_at" field.
+func (_u *SubscriptionUpdate) SetPriceEffectiveAt(v time.Time) *SubscriptionUpdate {
+	_u.mutation.SetPriceEffectiveAt(v)
+	return _u
+}
+
+// SetNillablePriceEffectiveAt sets the "price_effective_at" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillablePriceEffectiveAt(v *time.Time) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetPriceEffectiveAt(*v)
+	}
+	return _u
+}
+
+// ClearPriceEffectiveAt clears the value of the "price_effective_at" field.
+func (_u *SubscriptionUpdate) ClearPriceEffectiveAt() *SubscriptionUpdate {
+	_u.mutation.ClearPriceEffectiveAt()
+	return _u
+}
+
+// SetCardExpiryMonth sets the "card_expiry_month" field.
+func (_u *SubscriptionUpdate) SetCardExpiryMonth(v int) *SubscriptionUpdate {
+	_u.mutation.ResetCardExpiryMonth()
+	_u.mutation.SetCardExpiryMonth(v)
+	return _u
+}
+
+// SetNillableCardExpiryMonth sets the "card_expiry_month" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableCardExpiryMonth(v *int) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetCardExpiryMonth(*v)
+	}
+	return _u
+}
+
+// AddCardExpiryMonth adds value to the "card_expiry_month" field.
+func (_u *SubscriptionUpdate) AddCardExpiryMonth(v int) *SubscriptionUpdate {
+	_u.mutation.AddCardExpiryMonth(v)
+	return _u
+}
+
+// SetCardExpiryYear sets the "card_expiry_year" field.
+func (_u *SubscriptionUpdate) SetCardExpiryYear(v int) *SubscriptionUpdate {
+	_u.mutation.ResetCardExpiryYear()
+	_u.mutation.SetCardExpiryYear(v)
+	return _u
+}
+
+// SetNillableCardExpiryYear sets the "card_expiry_year" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableCardExpiryYear(v *int) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetCardExpiryYear(*v)
+	}
+	return _u
+}
+
+// AddCardExpiryYear adds value to the "card_expiry_year" field.
+func (_u *SubscriptionUpdate) AddCardExpiryYear(v int) *SubscriptionUpdate {
+	_u.mutation.AddCardExpiryYear(v)
+	return _u
+}
+
+// SetCardExpiryNoticedAt sets the "card_expiry_noticed_at" field.
+func (_u *SubscriptionUpdate) SetCardExpiryNoticedAt(v time.Time) *SubscriptionUpdate {
+	_u.mutation.SetCardExpiryNoticedAt(v)
+	return _u
+}
+
+// SetNillableCardExpiryNoticedAt sets the "card_expiry_noticed_at" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableCardExpiryNoticedAt(v *time.Time) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetCardExpiryNoticedAt(*v)
+	}
+	return _u
+}
+
+// ClearCardExpiryNoticedAt clears the value of the "card_expiry_noticed_at" field.
+func (_u *SubscriptionUpdate) ClearCardExpiryNoticedAt() *SubscriptionUpdate {
+	_u.mutation.ClearCardExpiryNoticedAt()
+	return _u
+}
+
+// SetEndedReason sets the "ended_reason" field.
+func (_u *SubscriptionUpdate) SetEndedReason(v string) *SubscriptionUpdate {
+	_u.mutation.SetEndedReason(v)
+	return _u
+}
+
+// SetNillableEndedReason sets the "ended_reason" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableEndedReason(v *string) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetEndedReason(*v)
+	}
+	return _u
+}
+
 // SetVersion sets the "version" field.
 func (_u *SubscriptionUpdate) SetVersion(v int64) *SubscriptionUpdate {
 	_u.mutation.ResetVersion()
@@ -417,6 +741,16 @@ func (_u *SubscriptionUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *SubscriptionUpdate) check() error {
+	if v, ok := _u.mutation.PlanCode(); ok {
+		if err := subscription.PlanCodeValidator(v); err != nil {
+			return &ValidationError{Name: "plan_code", err: fmt.Errorf(`ent: validator failed for field "Subscription.plan_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Interval(); ok {
+		if err := subscription.IntervalValidator(v); err != nil {
+			return &ValidationError{Name: "interval", err: fmt.Errorf(`ent: validator failed for field "Subscription.interval": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := subscription.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Subscription.status": %w`, err)}
@@ -462,6 +796,26 @@ func (_u *SubscriptionUpdate) check() error {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "Subscription.last_error": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.BillingAuthorizationID(); ok {
+		if err := subscription.BillingAuthorizationIDValidator(v); err != nil {
+			return &ValidationError{Name: "billing_authorization_id", err: fmt.Errorf(`ent: validator failed for field "Subscription.billing_authorization_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PendingPlanCode(); ok {
+		if err := subscription.PendingPlanCodeValidator(v); err != nil {
+			return &ValidationError{Name: "pending_plan_code", err: fmt.Errorf(`ent: validator failed for field "Subscription.pending_plan_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PendingInterval(); ok {
+		if err := subscription.PendingIntervalValidator(v); err != nil {
+			return &ValidationError{Name: "pending_interval", err: fmt.Errorf(`ent: validator failed for field "Subscription.pending_interval": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.EndedReason(); ok {
+		if err := subscription.EndedReasonValidator(v); err != nil {
+			return &ValidationError{Name: "ended_reason", err: fmt.Errorf(`ent: validator failed for field "Subscription.ended_reason": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -476,6 +830,12 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.PlanCode(); ok {
+		_spec.SetField(subscription.FieldPlanCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Interval(); ok {
+		_spec.SetField(subscription.FieldInterval, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(subscription.FieldStatus, field.TypeEnum, value)
@@ -558,6 +918,87 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.LastError(); ok {
 		_spec.SetField(subscription.FieldLastError, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.BillingAuthorizationID(); ok {
+		_spec.SetField(subscription.FieldBillingAuthorizationID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.BillingAnchorAt(); ok {
+		_spec.SetField(subscription.FieldBillingAnchorAt, field.TypeTime, value)
+	}
+	if _u.mutation.BillingAnchorAtCleared() {
+		_spec.ClearField(subscription.FieldBillingAnchorAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.NextChargeAt(); ok {
+		_spec.SetField(subscription.FieldNextChargeAt, field.TypeTime, value)
+	}
+	if _u.mutation.NextChargeAtCleared() {
+		_spec.ClearField(subscription.FieldNextChargeAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DunningAttempts(); ok {
+		_spec.SetField(subscription.FieldDunningAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDunningAttempts(); ok {
+		_spec.AddField(subscription.FieldDunningAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.DunningDueAt(); ok {
+		_spec.SetField(subscription.FieldDunningDueAt, field.TypeTime, value)
+	}
+	if _u.mutation.DunningDueAtCleared() {
+		_spec.ClearField(subscription.FieldDunningDueAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CheckmarkIncluded(); ok {
+		_spec.SetField(subscription.FieldCheckmarkIncluded, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CreditMinor(); ok {
+		_spec.SetField(subscription.FieldCreditMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreditMinor(); ok {
+		_spec.AddField(subscription.FieldCreditMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.PendingPlanCode(); ok {
+		_spec.SetField(subscription.FieldPendingPlanCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PendingInterval(); ok {
+		_spec.SetField(subscription.FieldPendingInterval, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PeriodPriceMinor(); ok {
+		_spec.SetField(subscription.FieldPeriodPriceMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPeriodPriceMinor(); ok {
+		_spec.AddField(subscription.FieldPeriodPriceMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.PriceNoticeAmountMinor(); ok {
+		_spec.SetField(subscription.FieldPriceNoticeAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPriceNoticeAmountMinor(); ok {
+		_spec.AddField(subscription.FieldPriceNoticeAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.PriceEffectiveAt(); ok {
+		_spec.SetField(subscription.FieldPriceEffectiveAt, field.TypeTime, value)
+	}
+	if _u.mutation.PriceEffectiveAtCleared() {
+		_spec.ClearField(subscription.FieldPriceEffectiveAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CardExpiryMonth(); ok {
+		_spec.SetField(subscription.FieldCardExpiryMonth, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCardExpiryMonth(); ok {
+		_spec.AddField(subscription.FieldCardExpiryMonth, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CardExpiryYear(); ok {
+		_spec.SetField(subscription.FieldCardExpiryYear, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCardExpiryYear(); ok {
+		_spec.AddField(subscription.FieldCardExpiryYear, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CardExpiryNoticedAt(); ok {
+		_spec.SetField(subscription.FieldCardExpiryNoticedAt, field.TypeTime, value)
+	}
+	if _u.mutation.CardExpiryNoticedAtCleared() {
+		_spec.ClearField(subscription.FieldCardExpiryNoticedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.EndedReason(); ok {
+		_spec.SetField(subscription.FieldEndedReason, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Version(); ok {
 		_spec.SetField(subscription.FieldVersion, field.TypeInt64, value)
 	}
@@ -587,6 +1028,34 @@ type SubscriptionUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *SubscriptionMutation
+}
+
+// SetPlanCode sets the "plan_code" field.
+func (_u *SubscriptionUpdateOne) SetPlanCode(v string) *SubscriptionUpdateOne {
+	_u.mutation.SetPlanCode(v)
+	return _u
+}
+
+// SetNillablePlanCode sets the "plan_code" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillablePlanCode(v *string) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetPlanCode(*v)
+	}
+	return _u
+}
+
+// SetInterval sets the "interval" field.
+func (_u *SubscriptionUpdateOne) SetInterval(v subscription.Interval) *SubscriptionUpdateOne {
+	_u.mutation.SetInterval(v)
+	return _u
+}
+
+// SetNillableInterval sets the "interval" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableInterval(v *subscription.Interval) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetInterval(*v)
+	}
+	return _u
 }
 
 // SetStatus sets the "status" field.
@@ -907,6 +1376,302 @@ func (_u *SubscriptionUpdateOne) SetNillableLastError(v *string) *SubscriptionUp
 	return _u
 }
 
+// SetBillingAuthorizationID sets the "billing_authorization_id" field.
+func (_u *SubscriptionUpdateOne) SetBillingAuthorizationID(v string) *SubscriptionUpdateOne {
+	_u.mutation.SetBillingAuthorizationID(v)
+	return _u
+}
+
+// SetNillableBillingAuthorizationID sets the "billing_authorization_id" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableBillingAuthorizationID(v *string) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetBillingAuthorizationID(*v)
+	}
+	return _u
+}
+
+// SetBillingAnchorAt sets the "billing_anchor_at" field.
+func (_u *SubscriptionUpdateOne) SetBillingAnchorAt(v time.Time) *SubscriptionUpdateOne {
+	_u.mutation.SetBillingAnchorAt(v)
+	return _u
+}
+
+// SetNillableBillingAnchorAt sets the "billing_anchor_at" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableBillingAnchorAt(v *time.Time) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetBillingAnchorAt(*v)
+	}
+	return _u
+}
+
+// ClearBillingAnchorAt clears the value of the "billing_anchor_at" field.
+func (_u *SubscriptionUpdateOne) ClearBillingAnchorAt() *SubscriptionUpdateOne {
+	_u.mutation.ClearBillingAnchorAt()
+	return _u
+}
+
+// SetNextChargeAt sets the "next_charge_at" field.
+func (_u *SubscriptionUpdateOne) SetNextChargeAt(v time.Time) *SubscriptionUpdateOne {
+	_u.mutation.SetNextChargeAt(v)
+	return _u
+}
+
+// SetNillableNextChargeAt sets the "next_charge_at" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableNextChargeAt(v *time.Time) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetNextChargeAt(*v)
+	}
+	return _u
+}
+
+// ClearNextChargeAt clears the value of the "next_charge_at" field.
+func (_u *SubscriptionUpdateOne) ClearNextChargeAt() *SubscriptionUpdateOne {
+	_u.mutation.ClearNextChargeAt()
+	return _u
+}
+
+// SetDunningAttempts sets the "dunning_attempts" field.
+func (_u *SubscriptionUpdateOne) SetDunningAttempts(v int) *SubscriptionUpdateOne {
+	_u.mutation.ResetDunningAttempts()
+	_u.mutation.SetDunningAttempts(v)
+	return _u
+}
+
+// SetNillableDunningAttempts sets the "dunning_attempts" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableDunningAttempts(v *int) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetDunningAttempts(*v)
+	}
+	return _u
+}
+
+// AddDunningAttempts adds value to the "dunning_attempts" field.
+func (_u *SubscriptionUpdateOne) AddDunningAttempts(v int) *SubscriptionUpdateOne {
+	_u.mutation.AddDunningAttempts(v)
+	return _u
+}
+
+// SetDunningDueAt sets the "dunning_due_at" field.
+func (_u *SubscriptionUpdateOne) SetDunningDueAt(v time.Time) *SubscriptionUpdateOne {
+	_u.mutation.SetDunningDueAt(v)
+	return _u
+}
+
+// SetNillableDunningDueAt sets the "dunning_due_at" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableDunningDueAt(v *time.Time) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetDunningDueAt(*v)
+	}
+	return _u
+}
+
+// ClearDunningDueAt clears the value of the "dunning_due_at" field.
+func (_u *SubscriptionUpdateOne) ClearDunningDueAt() *SubscriptionUpdateOne {
+	_u.mutation.ClearDunningDueAt()
+	return _u
+}
+
+// SetCheckmarkIncluded sets the "checkmark_included" field.
+func (_u *SubscriptionUpdateOne) SetCheckmarkIncluded(v bool) *SubscriptionUpdateOne {
+	_u.mutation.SetCheckmarkIncluded(v)
+	return _u
+}
+
+// SetNillableCheckmarkIncluded sets the "checkmark_included" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableCheckmarkIncluded(v *bool) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetCheckmarkIncluded(*v)
+	}
+	return _u
+}
+
+// SetCreditMinor sets the "credit_minor" field.
+func (_u *SubscriptionUpdateOne) SetCreditMinor(v int64) *SubscriptionUpdateOne {
+	_u.mutation.ResetCreditMinor()
+	_u.mutation.SetCreditMinor(v)
+	return _u
+}
+
+// SetNillableCreditMinor sets the "credit_minor" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableCreditMinor(v *int64) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetCreditMinor(*v)
+	}
+	return _u
+}
+
+// AddCreditMinor adds value to the "credit_minor" field.
+func (_u *SubscriptionUpdateOne) AddCreditMinor(v int64) *SubscriptionUpdateOne {
+	_u.mutation.AddCreditMinor(v)
+	return _u
+}
+
+// SetPendingPlanCode sets the "pending_plan_code" field.
+func (_u *SubscriptionUpdateOne) SetPendingPlanCode(v string) *SubscriptionUpdateOne {
+	_u.mutation.SetPendingPlanCode(v)
+	return _u
+}
+
+// SetNillablePendingPlanCode sets the "pending_plan_code" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillablePendingPlanCode(v *string) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetPendingPlanCode(*v)
+	}
+	return _u
+}
+
+// SetPendingInterval sets the "pending_interval" field.
+func (_u *SubscriptionUpdateOne) SetPendingInterval(v string) *SubscriptionUpdateOne {
+	_u.mutation.SetPendingInterval(v)
+	return _u
+}
+
+// SetNillablePendingInterval sets the "pending_interval" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillablePendingInterval(v *string) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetPendingInterval(*v)
+	}
+	return _u
+}
+
+// SetPeriodPriceMinor sets the "period_price_minor" field.
+func (_u *SubscriptionUpdateOne) SetPeriodPriceMinor(v int64) *SubscriptionUpdateOne {
+	_u.mutation.ResetPeriodPriceMinor()
+	_u.mutation.SetPeriodPriceMinor(v)
+	return _u
+}
+
+// SetNillablePeriodPriceMinor sets the "period_price_minor" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillablePeriodPriceMinor(v *int64) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetPeriodPriceMinor(*v)
+	}
+	return _u
+}
+
+// AddPeriodPriceMinor adds value to the "period_price_minor" field.
+func (_u *SubscriptionUpdateOne) AddPeriodPriceMinor(v int64) *SubscriptionUpdateOne {
+	_u.mutation.AddPeriodPriceMinor(v)
+	return _u
+}
+
+// SetPriceNoticeAmountMinor sets the "price_notice_amount_minor" field.
+func (_u *SubscriptionUpdateOne) SetPriceNoticeAmountMinor(v int64) *SubscriptionUpdateOne {
+	_u.mutation.ResetPriceNoticeAmountMinor()
+	_u.mutation.SetPriceNoticeAmountMinor(v)
+	return _u
+}
+
+// SetNillablePriceNoticeAmountMinor sets the "price_notice_amount_minor" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillablePriceNoticeAmountMinor(v *int64) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetPriceNoticeAmountMinor(*v)
+	}
+	return _u
+}
+
+// AddPriceNoticeAmountMinor adds value to the "price_notice_amount_minor" field.
+func (_u *SubscriptionUpdateOne) AddPriceNoticeAmountMinor(v int64) *SubscriptionUpdateOne {
+	_u.mutation.AddPriceNoticeAmountMinor(v)
+	return _u
+}
+
+// SetPriceEffectiveAt sets the "price_effective_at" field.
+func (_u *SubscriptionUpdateOne) SetPriceEffectiveAt(v time.Time) *SubscriptionUpdateOne {
+	_u.mutation.SetPriceEffectiveAt(v)
+	return _u
+}
+
+// SetNillablePriceEffectiveAt sets the "price_effective_at" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillablePriceEffectiveAt(v *time.Time) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetPriceEffectiveAt(*v)
+	}
+	return _u
+}
+
+// ClearPriceEffectiveAt clears the value of the "price_effective_at" field.
+func (_u *SubscriptionUpdateOne) ClearPriceEffectiveAt() *SubscriptionUpdateOne {
+	_u.mutation.ClearPriceEffectiveAt()
+	return _u
+}
+
+// SetCardExpiryMonth sets the "card_expiry_month" field.
+func (_u *SubscriptionUpdateOne) SetCardExpiryMonth(v int) *SubscriptionUpdateOne {
+	_u.mutation.ResetCardExpiryMonth()
+	_u.mutation.SetCardExpiryMonth(v)
+	return _u
+}
+
+// SetNillableCardExpiryMonth sets the "card_expiry_month" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableCardExpiryMonth(v *int) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetCardExpiryMonth(*v)
+	}
+	return _u
+}
+
+// AddCardExpiryMonth adds value to the "card_expiry_month" field.
+func (_u *SubscriptionUpdateOne) AddCardExpiryMonth(v int) *SubscriptionUpdateOne {
+	_u.mutation.AddCardExpiryMonth(v)
+	return _u
+}
+
+// SetCardExpiryYear sets the "card_expiry_year" field.
+func (_u *SubscriptionUpdateOne) SetCardExpiryYear(v int) *SubscriptionUpdateOne {
+	_u.mutation.ResetCardExpiryYear()
+	_u.mutation.SetCardExpiryYear(v)
+	return _u
+}
+
+// SetNillableCardExpiryYear sets the "card_expiry_year" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableCardExpiryYear(v *int) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetCardExpiryYear(*v)
+	}
+	return _u
+}
+
+// AddCardExpiryYear adds value to the "card_expiry_year" field.
+func (_u *SubscriptionUpdateOne) AddCardExpiryYear(v int) *SubscriptionUpdateOne {
+	_u.mutation.AddCardExpiryYear(v)
+	return _u
+}
+
+// SetCardExpiryNoticedAt sets the "card_expiry_noticed_at" field.
+func (_u *SubscriptionUpdateOne) SetCardExpiryNoticedAt(v time.Time) *SubscriptionUpdateOne {
+	_u.mutation.SetCardExpiryNoticedAt(v)
+	return _u
+}
+
+// SetNillableCardExpiryNoticedAt sets the "card_expiry_noticed_at" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableCardExpiryNoticedAt(v *time.Time) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetCardExpiryNoticedAt(*v)
+	}
+	return _u
+}
+
+// ClearCardExpiryNoticedAt clears the value of the "card_expiry_noticed_at" field.
+func (_u *SubscriptionUpdateOne) ClearCardExpiryNoticedAt() *SubscriptionUpdateOne {
+	_u.mutation.ClearCardExpiryNoticedAt()
+	return _u
+}
+
+// SetEndedReason sets the "ended_reason" field.
+func (_u *SubscriptionUpdateOne) SetEndedReason(v string) *SubscriptionUpdateOne {
+	_u.mutation.SetEndedReason(v)
+	return _u
+}
+
+// SetNillableEndedReason sets the "ended_reason" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableEndedReason(v *string) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetEndedReason(*v)
+	}
+	return _u
+}
+
 // SetVersion sets the "version" field.
 func (_u *SubscriptionUpdateOne) SetVersion(v int64) *SubscriptionUpdateOne {
 	_u.mutation.ResetVersion()
@@ -990,6 +1755,16 @@ func (_u *SubscriptionUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *SubscriptionUpdateOne) check() error {
+	if v, ok := _u.mutation.PlanCode(); ok {
+		if err := subscription.PlanCodeValidator(v); err != nil {
+			return &ValidationError{Name: "plan_code", err: fmt.Errorf(`ent: validator failed for field "Subscription.plan_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Interval(); ok {
+		if err := subscription.IntervalValidator(v); err != nil {
+			return &ValidationError{Name: "interval", err: fmt.Errorf(`ent: validator failed for field "Subscription.interval": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := subscription.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Subscription.status": %w`, err)}
@@ -1035,6 +1810,26 @@ func (_u *SubscriptionUpdateOne) check() error {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "Subscription.last_error": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.BillingAuthorizationID(); ok {
+		if err := subscription.BillingAuthorizationIDValidator(v); err != nil {
+			return &ValidationError{Name: "billing_authorization_id", err: fmt.Errorf(`ent: validator failed for field "Subscription.billing_authorization_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PendingPlanCode(); ok {
+		if err := subscription.PendingPlanCodeValidator(v); err != nil {
+			return &ValidationError{Name: "pending_plan_code", err: fmt.Errorf(`ent: validator failed for field "Subscription.pending_plan_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.PendingInterval(); ok {
+		if err := subscription.PendingIntervalValidator(v); err != nil {
+			return &ValidationError{Name: "pending_interval", err: fmt.Errorf(`ent: validator failed for field "Subscription.pending_interval": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.EndedReason(); ok {
+		if err := subscription.EndedReasonValidator(v); err != nil {
+			return &ValidationError{Name: "ended_reason", err: fmt.Errorf(`ent: validator failed for field "Subscription.ended_reason": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1066,6 +1861,12 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.PlanCode(); ok {
+		_spec.SetField(subscription.FieldPlanCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Interval(); ok {
+		_spec.SetField(subscription.FieldInterval, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(subscription.FieldStatus, field.TypeEnum, value)
@@ -1147,6 +1948,87 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 	}
 	if value, ok := _u.mutation.LastError(); ok {
 		_spec.SetField(subscription.FieldLastError, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.BillingAuthorizationID(); ok {
+		_spec.SetField(subscription.FieldBillingAuthorizationID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.BillingAnchorAt(); ok {
+		_spec.SetField(subscription.FieldBillingAnchorAt, field.TypeTime, value)
+	}
+	if _u.mutation.BillingAnchorAtCleared() {
+		_spec.ClearField(subscription.FieldBillingAnchorAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.NextChargeAt(); ok {
+		_spec.SetField(subscription.FieldNextChargeAt, field.TypeTime, value)
+	}
+	if _u.mutation.NextChargeAtCleared() {
+		_spec.ClearField(subscription.FieldNextChargeAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DunningAttempts(); ok {
+		_spec.SetField(subscription.FieldDunningAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDunningAttempts(); ok {
+		_spec.AddField(subscription.FieldDunningAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.DunningDueAt(); ok {
+		_spec.SetField(subscription.FieldDunningDueAt, field.TypeTime, value)
+	}
+	if _u.mutation.DunningDueAtCleared() {
+		_spec.ClearField(subscription.FieldDunningDueAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CheckmarkIncluded(); ok {
+		_spec.SetField(subscription.FieldCheckmarkIncluded, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CreditMinor(); ok {
+		_spec.SetField(subscription.FieldCreditMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreditMinor(); ok {
+		_spec.AddField(subscription.FieldCreditMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.PendingPlanCode(); ok {
+		_spec.SetField(subscription.FieldPendingPlanCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PendingInterval(); ok {
+		_spec.SetField(subscription.FieldPendingInterval, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PeriodPriceMinor(); ok {
+		_spec.SetField(subscription.FieldPeriodPriceMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPeriodPriceMinor(); ok {
+		_spec.AddField(subscription.FieldPeriodPriceMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.PriceNoticeAmountMinor(); ok {
+		_spec.SetField(subscription.FieldPriceNoticeAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPriceNoticeAmountMinor(); ok {
+		_spec.AddField(subscription.FieldPriceNoticeAmountMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.PriceEffectiveAt(); ok {
+		_spec.SetField(subscription.FieldPriceEffectiveAt, field.TypeTime, value)
+	}
+	if _u.mutation.PriceEffectiveAtCleared() {
+		_spec.ClearField(subscription.FieldPriceEffectiveAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CardExpiryMonth(); ok {
+		_spec.SetField(subscription.FieldCardExpiryMonth, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCardExpiryMonth(); ok {
+		_spec.AddField(subscription.FieldCardExpiryMonth, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CardExpiryYear(); ok {
+		_spec.SetField(subscription.FieldCardExpiryYear, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCardExpiryYear(); ok {
+		_spec.AddField(subscription.FieldCardExpiryYear, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CardExpiryNoticedAt(); ok {
+		_spec.SetField(subscription.FieldCardExpiryNoticedAt, field.TypeTime, value)
+	}
+	if _u.mutation.CardExpiryNoticedAtCleared() {
+		_spec.ClearField(subscription.FieldCardExpiryNoticedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.EndedReason(); ok {
+		_spec.SetField(subscription.FieldEndedReason, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Version(); ok {
 		_spec.SetField(subscription.FieldVersion, field.TypeInt64, value)
