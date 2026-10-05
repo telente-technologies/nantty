@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/message.updated.v1.json",
+  "title": "MessageUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conversationId",
+    "messageId",
+    "message"
+  ],
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "messageId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "message": {
+      "type": "object",
+      "description": "Encrypted message envelope (no plaintext): id, conversationId, senderId, kind, createdAt, encryption, location, poll, moderationHidden"
+    },
+    "memberIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  }
+}

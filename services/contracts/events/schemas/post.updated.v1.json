@@ -41,6 +41,22 @@
         "ready",
         "failed"
       ]
+    },
+    "productIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "replyPolicy": {
+      "type": "string"
+    },
+    "sensitiveLabels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   }
 }

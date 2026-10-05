@@ -54,6 +54,30 @@
         "type": "string",
         "format": "uuid"
       }
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]{1,64}$"
+      },
+      "maxItems": 20
+    },
+    "productIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "replyPolicy": {
+      "type": "string"
+    },
+    "sensitiveLabels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   }
 }

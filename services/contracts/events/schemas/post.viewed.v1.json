@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/post.viewed.v1.json",
+  "title": "PostViewed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "actorId",
+    "postId",
+    "postAuthorId"
+  ],
+  "properties": {
+    "actorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "postId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "postAuthorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "enum": [
+        "post",
+        "clip",
+        "story"
+      ]
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]{1,64}$"
+      },
+      "maxItems": 20
+    },
+    "hashtags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]{1,64}$"
+      },
+      "maxItems": 20
+    },
+    "surface": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z_]{1,40}$"
+    },
+    "rankingRequestId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dwellMs": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "position": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "isProductPost": {
+      "type": "boolean"
+    }
+  }
+}
