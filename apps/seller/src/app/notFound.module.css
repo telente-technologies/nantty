@@ -2,17 +2,17 @@
   display: grid;
   place-items: center;
   min-height: 100dvh;
-  padding: 24px 16px;
+  padding: var(--space-6) var(--space-4);
   background: radial-gradient(120% 70% at 50% 0%, var(--blue-400), transparent 60%), var(--blue-900);
 }
 
 .receipt {
   width: min(360px, 100%);
-  padding: 28px 24px 40px;
+  padding: 28px var(--space-6) var(--space-8);
   background: var(--paper);
   color: var(--paper-ink);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--fs-13);
   transform: rotate(-1.5deg);
   box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.55);
   --zigzag: conic-gradient(from -45deg at bottom, transparent, black 1deg 90deg, transparent 91deg) bottom / 14px 100%;
@@ -28,14 +28,14 @@
 }
 
 .dashed {
-  margin: 12px 0;
+  margin: var(--space-3) 0;
   border-top: 1px dashed var(--blue-200);
 }
 
 .row {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   line-height: 1.8;
 }
 
@@ -48,14 +48,14 @@
 }
 
 .message {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   text-align: center;
   line-height: 1.5;
 }
 
 .actions {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   font-family: var(--font-sans);
 }
 
