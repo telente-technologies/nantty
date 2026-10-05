@@ -20,6 +20,7 @@ enum MediaKind {
   video
   audio
   document
+  encrypted
 }
 
 enum MediaStatus {
