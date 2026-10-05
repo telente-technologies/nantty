@@ -2,8 +2,10 @@ package configs
 
 import (
 	"encoding/base64"
+	"net/url"
 	"time"
 
+	ipallowlist "zudomart/modules/admin/src/utils/ipAllowList"
 	platformconfig "zudomart/platform/config"
 )
 
@@ -23,6 +25,23 @@ type AdminSettings struct {
 	InternalApiToken       string
 	DeliveryMode           string
 	AllowedEmailDomains    []string
+	IpAllowList            []string
+	WebAuthn               WebAuthnSettings
+	MetricsSources         MetricsSourceSchemas
+}
+
+type WebAuthnSettings struct {
+	RelyingPartyId   string
+	RelyingPartyName string
+	Origins          []string
+}
+
+type MetricsSourceSchemas struct {
+	Auth     string
+	Users    string
+	Payments string
+	Escrow   string
+	Wallet   string
 }
 
 func (settings AdminSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -44,12 +63,43 @@ func ReadAdminSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		InternalApiToken:       reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
 		DeliveryMode:           reader.ReadStringOrDefault("ADMIN_INVITATION_DELIVERY", "log"),
 		AllowedEmailDomains:    reader.ReadCommaSeparatedListOrDefault("ADMIN_ALLOWED_EMAIL_DOMAINS", nil),
+		IpAllowList:            readIpAllowList(reader),
+		WebAuthn:               readWebAuthnSettings(reader),
+		MetricsSources: MetricsSourceSchemas{
+			Auth:     reader.ReadStringOrDefault("AUTH_DATABASE_SCHEMA", "auth"),
+			Users:    reader.ReadStringOrDefault("USERS_DATABASE_SCHEMA", "users"),
+			Payments: reader.ReadStringOrDefault("PAYMENTS_DATABASE_SCHEMA", "payments"),
+			Escrow:   reader.ReadStringOrDefault("ESCROW_DATABASE_SCHEMA", "escrow"),
+			Wallet:   reader.ReadStringOrDefault("WALLET_DATABASE_SCHEMA", "wallet"),
+		},
 	}
 	reader.RequireMinimumLength("ADMIN_INTERNAL_API_TOKEN", settings.InternalApiToken, 32)
 	if settings.IsProduction() && settings.DeliveryMode == "log" {
 		reader.ReadRequiredString("ADMIN_INVITATION_DELIVERY_NOT_LOG_IN_PRODUCTION")
 	}
 	return settings
+}
+
+func readIpAllowList(reader *platformconfig.EnvironmentReader) []string {
+	entries, valid := ipallowlist.NormalizeEntries(reader.ReadCommaSeparatedListOrDefault("ADMIN_IP_ALLOWLIST", nil))
+	if !valid {
+		reader.ReadRequiredString("ADMIN_IP_ALLOWLIST_AS_VALID_IPS_OR_CIDRS")
+		return nil
+	}
+	return entries
+}
+
+func readWebAuthnSettings(reader *platformconfig.EnvironmentReader) WebAuthnSettings {
+	consoleUrl := reader.ReadStringOrDefault("ADMIN_CONSOLE_URL", "http://localhost:3400")
+	relyingPartyId := reader.ReadStringOrDefault("ADMIN_WEBAUTHN_RP_ID", "")
+	if parsed, err := url.Parse(consoleUrl); relyingPartyId == "" && err == nil {
+		relyingPartyId = parsed.Hostname()
+	}
+	return WebAuthnSettings{
+		RelyingPartyId:   relyingPartyId,
+		RelyingPartyName: reader.ReadStringOrDefault("ADMIN_WEBAUTHN_RP_NAME", "Zudomart Admin"),
+		Origins:          reader.ReadCommaSeparatedListOrDefault("ADMIN_WEBAUTHN_ORIGINS", []string{consoleUrl}),
+	}
 }
 
 func readBase64Key(reader *platformconfig.EnvironmentReader, name string, length int) []byte {

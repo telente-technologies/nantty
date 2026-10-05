@@ -7,10 +7,13 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/go-webauthn/webauthn/webauthn"
+
 	"zudomart/modules/admin/src/configs"
 	"zudomart/modules/admin/src/generated/ent"
 	"zudomart/modules/admin/src/integrations"
 	"zudomart/modules/admin/src/middlewares"
+	recoverycodes "zudomart/modules/admin/src/utils/recoveryCodes"
 	"zudomart/platform/identityports"
 	"zudomart/platform/passwordhash"
 	"zudomart/platform/staffauth"
@@ -26,6 +29,11 @@ type Container struct {
 	Now       func() time.Time
 	Guard     staffauth.Guard
 	Limiter   *middlewares.AttemptRateLimiter
+	WebAuthn  *webauthn.WebAuthn
+}
+
+func (container *Container) RecoveryCodeKey() []byte {
+	return recoverycodes.DeriveHashKey(container.Settings.TotpEncryptionKey)
 }
 
 func (container *Container) RunInTransaction(ctx context.Context, work func(tx *ent.Tx) error) error {

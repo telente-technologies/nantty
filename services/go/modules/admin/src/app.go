@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/go-webauthn/webauthn/webauthn"
 
 	"zudomart/modules/admin/src/configs"
 	"zudomart/modules/admin/src/container"
@@ -22,6 +23,7 @@ import (
 	auditlogservices "zudomart/modules/admin/src/modules/auditLog/services"
 	platformsettings "zudomart/modules/admin/src/modules/platformSettings"
 	seeddefaultsettings "zudomart/modules/admin/src/modules/platformSettings/commands/seedDefaultSettings"
+	staffaccount "zudomart/modules/admin/src/modules/staffAccount"
 	staffadmins "zudomart/modules/admin/src/modules/staffAdmins"
 	staffadminservices "zudomart/modules/admin/src/modules/staffAdmins/services"
 	staffauthmodule "zudomart/modules/admin/src/modules/staffAuth"
@@ -64,6 +66,11 @@ func StartAdminModuleWithSettings(ctx context.Context, settings configs.AdminSet
 		return nil, err
 	}
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database)))
+	relyingParty, err := createWebAuthnRelyingParty(settings)
+	if err != nil {
+		_ = database.Close()
+		return nil, err
+	}
 	adminContainer := &container.Container{
 		Client: client, Settings: settings, Logger: logger, Now: time.Now,
 		Passwords: passwordhash.NewPasswordHasher(passwordhash.RecommendedArgon2idParameters),
@@ -71,6 +78,7 @@ func StartAdminModuleWithSettings(ctx context.Context, settings configs.AdminSet
 		Delivery:  integrations.DevelopmentLogInvitationDelivery{Logger: logger, LoggingAllowed: !settings.IsProduction() && settings.DeliveryMode == "log"},
 		Guard:     staffauth.Guard{Registry: identityports.Default},
 		Limiter:   middlewares.NewAttemptRateLimiter(10, 6*time.Second, time.Now),
+		WebAuthn:  relyingParty,
 	}
 	if err := (seeddefaultsettings.Handler{Container: adminContainer}).Execute(ctx, seeddefaultsettings.Command{}); err != nil {
 		_ = database.Close()
@@ -81,6 +89,7 @@ func StartAdminModuleWithSettings(ctx context.Context, settings configs.AdminSet
 		return nil, fmt.Errorf("seed department role templates: %w", err)
 	}
 	identityports.Default.RegisterStaffSessionChecker(staffadminservices.StaffSessionChecker{Container: adminContainer})
+	identityports.Default.RegisterStaffNetworkPolicy(staffadminservices.StaffNetworkPolicy{Container: adminContainer})
 	identityports.Default.RegisterAuditRecorder(auditlog.AuditRecorder{Container: adminContainer})
 	identityports.Default.RegisterAuditHistoryReader(auditlogservices.AuditHistoryService{Container: adminContainer})
 	identityports.Default.RegisterPlatformSettings(platformsettings.NewSettingsPort(adminContainer))
@@ -93,6 +102,7 @@ func (module *Module) Name() string { return "admin" }
 func (module *Module) MountRoutes(mux *http.ServeMux) {
 	routes := http.NewServeMux()
 	staffauthmodule.MountRoutes(routes, module.container)
+	staffaccount.MountRoutes(routes, module.container)
 	staffadmins.MountRoutes(routes, module.container)
 	platformsettings.MountRoutes(routes, module.container)
 	auditlog.MountRoutes(routes, module.container)
@@ -112,6 +122,21 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 
 func (module *Module) Close(context.Context) error {
 	return errors.Join(module.container.Client.Close())
+}
+
+func createWebAuthnRelyingParty(settings configs.AdminSettings) (*webauthn.WebAuthn, error) {
+	if settings.WebAuthn.RelyingPartyId == "" || len(settings.WebAuthn.Origins) == 0 {
+		return nil, nil
+	}
+	timeout := webauthn.TimeoutConfig{Enforce: true, Timeout: settings.LoginChallengeTtl, TimeoutUVD: settings.LoginChallengeTtl}
+	relyingParty, err := webauthn.New(&webauthn.Config{
+		RPID: settings.WebAuthn.RelyingPartyId, RPDisplayName: settings.WebAuthn.RelyingPartyName, RPOrigins: settings.WebAuthn.Origins,
+		Timeouts: webauthn.TimeoutsConfig{Login: timeout, Registration: timeout},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("configure admin passkeys: %w", err)
+	}
+	return relyingParty, nil
 }
 
 func createDomainEventPublisher(ctx context.Context, settings configs.AdminSettings, dependencies servicemodule.Dependencies) (events.DomainEventPublisher, error) {
