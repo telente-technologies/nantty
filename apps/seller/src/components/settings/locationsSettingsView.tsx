@@ -6,7 +6,7 @@ import { LocationFormDialog } from "@/components/settings/locationFormDialog";
 import { useCanEditStoreSettings } from "@/components/settings/settingsFormFrame";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
@@ -66,7 +66,7 @@ export function LocationsSettingsView() {
           </Callout>
         ) : null}
         {locationsQuery.isLoading && locations.length === 0 ? <LoadingBlock label="Loading locations" /> : null}
-        {locationsQuery.errorMessage ? <Callout tone="error">{locationsQuery.errorMessage}</Callout> : null}
+        {locationsQuery.errorMessage ? <ErrorCallout message={locationsQuery.errorMessage} onRetry={locationsQuery.reload} /> : null}
         <ul className={styles.listReset}>
           {locations.map((location) => (
             <li key={location.id} className={styles.rowCard}>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Button, ButtonLink } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
-import { Callout } from "@/components/ui/feedback";
+import { ErrorCallout } from "@/components/ui/feedback";
 import { DateRangeControl, FilterBar, type DateRangeValue } from "@/components/ui/filterControls";
 import { SelectField } from "@/components/ui/formFields";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
@@ -83,7 +83,7 @@ export function StaffActivityView() {
           Export CSV
         </Button>
       </FilterBar>
-      {auditQuery.errorMessage ? <Callout tone="error">{auditQuery.errorMessage}</Callout> : null}
+      {auditQuery.errorMessage ? <ErrorCallout message={auditQuery.errorMessage} onRetry={auditQuery.reload} /> : null}
       <Panel padded={false}>
         <DataTable<AuditLogEntry>
           caption="Staff activity"

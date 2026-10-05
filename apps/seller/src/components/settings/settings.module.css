@@ -1,13 +1,13 @@
 .formStack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .fieldset {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
   margin: 0;
   padding: 0;
   border: 0;
@@ -23,14 +23,14 @@
 .readOnlyGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-  gap: 12px;
-  padding: 12px 14px;
+  gap: var(--space-3);
+  padding: var(--space-3) 14px;
   border-radius: var(--radius-medium);
   background: var(--surface-sunken);
 }
 
 .readOnlyLabel {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
   font-weight: 600;
 }
@@ -42,7 +42,7 @@
 .rowCard {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 14px;
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);
@@ -54,44 +54,44 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .rowTitle {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-weight: 650;
 }
 
 .mutedText {
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .inlineActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .listReset {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .previewLayout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 20px;
+  gap: var(--space-5);
   align-items: start;
 }
 
 .categoryChecklist {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: var(--space-2) var(--space-4);
 }
 
 @media (max-width: 900px) {
@@ -103,37 +103,37 @@
 .sectionHeading {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
   font-weight: 650;
 }
 
 .cardGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .secretBox {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: var(--space-2);
+  padding: 10px var(--space-3);
   border-radius: var(--radius-small);
   background: var(--surface-sunken);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--fs-13);
   word-break: break-all;
 }
 
 .checkboxGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .monospace {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }

@@ -3,7 +3,7 @@
 import { PlanLockedNotice } from "@/components/billing/planGate";
 import { StaffSeatMeter } from "@/components/staff/staffSeatMeter";
 import { ButtonLink } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { KeyValueList, Panel } from "@/components/ui/panel";
 import { staffRoleLabels, staffRoles } from "@/constants/roles.constant";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
@@ -32,7 +32,7 @@ export function TeamSettingsSummary() {
       <div className={styles.formStack}>
         {hasFeature("team") ? null : <PlanLockedNotice feature="team" compact />}
         {staffQuery.isLoading && !members ? <LoadingBlock label="Loading team" /> : null}
-        {staffQuery.errorMessage ? <Callout tone="error">{staffQuery.errorMessage}</Callout> : null}
+        {staffQuery.errorMessage ? <ErrorCallout message={staffQuery.errorMessage} onRetry={staffQuery.reload} /> : null}
         {members ? (
           <>
             {hasFeature("team") ? <StaffSeatMeter seatsInUse={countStaffSeatsInUse(members)} maximumSeats={limits.maxStaffSeats} /> : null}

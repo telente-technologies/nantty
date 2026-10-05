@@ -1,7 +1,7 @@
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .seatMeter {
@@ -29,7 +29,7 @@
 }
 
 .seatLabel {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--ink-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -40,14 +40,14 @@
 }
 
 .memberContact {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-faint);
 }
 
 .badgeRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .twoColumns {
@@ -59,29 +59,29 @@
 .checklist {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: var(--space-2) var(--space-4);
 }
 
 .sectionTitle {
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-weight: 650;
 }
 
 .divider {
   border: 0;
   border-top: 1px solid var(--divider-soft);
-  margin: 4px 0;
+  margin: var(--space-1) 0;
 }
 
 .actionsRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .muted {
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .candidateList {
@@ -95,7 +95,7 @@
 .candidateButton {
   width: 100%;
   text-align: left;
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border: 1px solid var(--divider);
   border-radius: 8px;
   background: var(--surface-card);
@@ -121,20 +121,20 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .permissionGroup {
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);
-  padding: 10px 12px 12px;
+  padding: 10px var(--space-3) var(--space-3);
   margin: 0;
   min-width: 0;
 }
 
 .permissionGroupTitle {
-  padding: 0 4px;
-  font-size: 12px;
+  padding: 0 var(--space-1);
+  font-size: var(--fs-12);
   font-weight: 650;
   color: var(--ink-muted);
 }
@@ -157,13 +157,13 @@
 .roleCards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .roleCard {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 14px;
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);

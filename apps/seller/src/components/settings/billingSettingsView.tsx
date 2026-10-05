@@ -11,7 +11,7 @@ import { describePlanEntitlements } from "@/utils/goldEntitlements.util";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { KeyValueList, Panel } from "@/components/ui/panel";
 import { StatusBadge, type StatusTone } from "@/components/ui/statusBadge";
@@ -61,7 +61,7 @@ export function BillingSettingsView() {
   }
 
   if (subscriptionQuery.isLoading && !details) return <LoadingBlock label="Loading your plan" />;
-  if (!details) return <Callout tone="error">{subscriptionQuery.errorMessage ?? "Your plan could not be loaded."}</Callout>;
+  if (!details) return <ErrorCallout message={subscriptionQuery.errorMessage ?? "Your plan could not be loaded."} onRetry={subscriptionQuery.reload} />;
 
   return (
     <>
