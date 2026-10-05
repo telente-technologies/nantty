@@ -37,7 +37,7 @@ func ClaimNextExportRequest(ctx context.Context, c *container.Container) (*ent.D
 }
 
 func BuildAndStoreArchive(ctx context.Context, c *container.Container, store ObjectStore, request *ent.DataExportRequest) (key string, size int64, err error) {
-	contents, err := CollectUserOwnedExportData(ctx, c.Client, request.AccountID, c.Now())
+	contents, err := CollectUserOwnedExportData(ctx, c.Client, request.AccountID, c.Now(), c.Settings.AddressPhoneKey)
 	if err != nil {
 		return "", 0, err
 	}

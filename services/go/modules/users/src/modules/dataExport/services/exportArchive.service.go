@@ -17,11 +17,12 @@ import (
 	"zudomart/modules/users/src/generated/ent/userconsent"
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/platform/identityports"
+	"zudomart/platform/usersdirectory"
 )
 
 type ArchiveContents map[string]any
 
-func CollectUserOwnedExportData(ctx context.Context, client *ent.Client, accountId uuid.UUID, now time.Time) (ArchiveContents, error) {
+func CollectUserOwnedExportData(ctx context.Context, client *ent.Client, accountId uuid.UUID, now time.Time, addressPhoneKey []byte) (ArchiveContents, error) {
 	contents := ArchiveContents{"manifest.json": map[string]any{"accountId": accountId.String(), "generatedAt": now.UTC().Format(time.RFC3339), "scope": "data held by the users service; other services contribute their own data on dataExport.requested"}}
 	if directory, err := identityports.Default.AccountDirectory(); err == nil {
 		if summary, found, err := directory.FindAccountSummary(ctx, accountId); err != nil {
@@ -30,7 +31,7 @@ func CollectUserOwnedExportData(ctx context.Context, client *ent.Client, account
 			contents["account.json"] = map[string]any{"id": summary.ID.String(), "username": summary.Username, "name": summary.Name, "email": summary.Email, "birthday": summary.Birthday, "emailVerified": summary.EmailVerified, "createdAt": summary.CreatedAt}
 		}
 	}
-	collectors := []func(context.Context, *ent.Client, uuid.UUID) (string, any, error){collectProfiles, collectAddresses, collectConsents, collectTermsAcceptances, collectUsernameHistory, collectPrivacySettings}
+	collectors := []func(context.Context, *ent.Client, uuid.UUID) (string, any, error){collectProfiles, addressCollector(addressPhoneKey), collectConsents, collectTermsAcceptances, collectUsernameHistory, collectPrivacySettings}
 	for _, collect := range collectors {
 		name, value, err := collect(ctx, client, accountId)
 		if err != nil {
@@ -50,14 +51,24 @@ func collectProfiles(ctx context.Context, client *ent.Client, accountId uuid.UUI
 	return "profiles.json", items, err
 }
 
-func collectAddresses(ctx context.Context, client *ent.Client, accountId uuid.UUID) (string, any, error) {
+func addressCollector(addressPhoneKey []byte) func(context.Context, *ent.Client, uuid.UUID) (string, any, error) {
+	return func(ctx context.Context, client *ent.Client, accountId uuid.UUID) (string, any, error) {
+		return collectAddresses(ctx, client, accountId, addressPhoneKey)
+	}
+}
+
+func collectAddresses(ctx context.Context, client *ent.Client, accountId uuid.UUID, addressPhoneKey []byte) (string, any, error) {
 	rows, err := client.ShippingAddress.Query().Where(shippingaddress.AccountID(accountId)).All(ctx)
 	if err != nil {
 		return "addresses.json", nil, err
 	}
 	views := make([]map[string]any, 0, len(rows))
 	for _, row := range rows {
-		views = append(views, map[string]any{"id": row.ID, "label": row.Label, "recipientName": row.RecipientName, "phone": row.Phone, "line1": row.Line1, "line2": row.Line2, "postalCode": row.PostalCode, "details": row.Details, "countryCode": row.CountryCode, "regionId": row.RegionID, "adminAreaId": row.AdminAreaID, "cityId": row.CityID, "isDefault": row.IsDefault, "createdAt": row.CreatedAt})
+		phone, err := usersdirectory.OpenAddressPhone(addressPhoneKey, row.Phone, derefBytes(row.PhoneSealed))
+		if err != nil {
+			return "addresses.json", nil, err
+		}
+		views = append(views, map[string]any{"id": row.ID, "label": row.Label, "recipientName": row.RecipientName, "phone": phone, "line1": row.Line1, "line2": row.Line2, "postalCode": row.PostalCode, "details": row.Details, "countryCode": row.CountryCode, "regionId": row.RegionID, "adminAreaId": row.AdminAreaID, "cityId": row.CityID, "isDefault": row.IsDefault, "createdAt": row.CreatedAt})
 	}
 	return "addresses.json", views, nil
 }
@@ -120,4 +131,11 @@ func BuildZipArchive(contents ArchiveContents) ([]byte, error) {
 		return nil, err
 	}
 	return buffer.Bytes(), nil
+}
+
+func derefBytes(value *[]byte) []byte {
+	if value == nil {
+		return nil
+	}
+	return *value
 }

@@ -40,8 +40,8 @@ func TestGeoReferenceDataIsServedPerCountryStructure(t *testing.T) {
 	if nigeria["code"] != "NG" || nigeria["currency"] != "NGN" || nigeria["stateLabel"] != "State" || nigeria["lgaLabel"] != "LGA" {
 		t.Fatalf("unexpected Nigeria %v", nigeria)
 	}
-	if levels := nigeria["levels"].([]any); len(levels) != 2 || levels[0] != "state" || levels[1] != "lga" {
-		t.Fatalf("Nigeria has states and LGAs: %v", levels)
+	if levels := nigeria["levels"].([]any); len(levels) != 3 || levels[0] != "state" || levels[1] != "lga" || levels[2] != "city" {
+		t.Fatalf("Nigeria has states, LGAs and cities: %v", levels)
 	}
 	ghana := findByName(t, countries, "Ghana")
 	if levels := ghana["levels"].([]any); len(levels) != 1 || levels[0] != "state" {
