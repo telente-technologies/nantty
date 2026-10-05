@@ -18,4 +18,6 @@ func MountCustomersRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("GET /api/v1/seller/customers/{customerId}", viewer(controller.Get))
 	mux.Handle("GET /api/v1/seller/customers/{customerId}/purchases", viewer(controller.Purchases))
 	mux.Handle("POST /api/v1/seller/customers/{customerId}/notes", manager(controller.AddNote))
+	mux.Handle("POST /api/v1/seller/customers", middlewares.StoreMemberWithOptionalKey(deployed, "customers:manage")(controller.Create))
+	mux.Handle("PATCH /api/v1/seller/customers/{customerId}", manager(controller.Update))
 }

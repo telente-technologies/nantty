@@ -45,6 +45,18 @@ func (controller CustomersController) filtered(request *http.Request) ([]service
 	if sortKey == "name" && query.Get("direction") == "" {
 		descending = false
 	}
+	if tag := query.Get("tag"); tag != "" {
+		tagged := []services.CustomerView{}
+		for _, customer := range customers {
+			if services.CustomerHasTag(customer, tag) {
+				tagged = append(tagged, customer)
+			}
+		}
+		customers = tagged
+	}
+	if customers, err = services.FilterCustomersBySegment(request.Context(), controller.Container, store, query.Get("segmentId"), customers); err != nil {
+		return nil, err
+	}
 	return services.FilterAndSortCustomers(customers, query.Get("q"), query.Get("type"), sortKey, descending), nil
 }
 
