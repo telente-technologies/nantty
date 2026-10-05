@@ -14,6 +14,7 @@ import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.m
 import { createSocialDatabase, type SocialDatabase } from "./databases/prisma.database.js";
 import { createIdentityReadClient } from "./databases/identityRead.database.js";
 import { createIdempotencyGuard } from "./middlewares/idempotency.middleware.js";
+import { createPrismaIdempotencyStore } from "./repositories/idempotency.repository.js";
 import { createIdentityDirectory } from "./integrations/identityDirectory.integration.js";
 import { deterministicFeedRanker } from "./integrations/deterministicFeedRanker.integration.js";
 import { createAdminRankingSettingsSource, staticRankingSettings } from "./integrations/adminRankingSettings.integration.js";
@@ -27,6 +28,10 @@ import { createSafeHttpFetcher } from "./integrations/safeHttpFetcher.integratio
 import { createLinkUnfurler } from "./modules/linkPreviews/services/linkUnfurler.service.js";
 import { createHttpMediaDownloadVariantClient } from "./integrations/httpMediaDownloadVariantClient.integration.js";
 import { createHttpMediaDescriptorResolver } from "./integrations/httpMediaDescriptorResolver.integration.js";
+import { createHttpAdDecisionClient } from "./integrations/httpAdDecisionClient.integration.js";
+import { createHttpProductCatalog } from "./integrations/httpProductCatalog.integration.js";
+import { createIntelligenceSocialProofSelector } from "./integrations/intelligenceSocialProof.integration.js";
+import { createHttpChatMediaAccess } from "./integrations/httpChatMediaAccess.integration.js";
 import { createHttpPremiumEntitlements, noPremiumEntitlements } from "./integrations/premiumEntitlements.integration.js";
 import { createRabbitMqDomainEventPublisher } from "./integrations/rabbitMqDomainEventPublisher.integration.js";
 import { createSnsDomainEventPublisher, noopDomainEventPublisher } from "./integrations/snsDomainEventPublisher.integration.js";
@@ -39,6 +44,7 @@ import { startOutboxRelay } from "./jobs/outboxRelay.job.js";
 import { registerRoutes } from "./routes/index.js";
 import type { HandlerContext } from "./types/handlerContext.type.js";
 import { errorToResponse, json } from "./utils/http.util.js";
+import { createIdentifierHasher, deriveIdentifierHashSecret, type IdentifierHasher } from "./utils/identifierHashing.util.js";
 import { createRouteFactory } from "./utils/route.util.js";
 
 const maximumRequestBodyBytes = 1024 * 1024;
@@ -60,9 +66,12 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
     ranker: createFeedRanker(config, logger),
     authorRanking: createIdentityAuthorRankingDirectory(identityClient, logger, config.moneyInternal === undefined ? undefined : premium),
     rankingSettings: config.adminInternal === undefined ? staticRankingSettings : createAdminRankingSettingsSource(config.adminInternal),
-    ...(config.intelligence === undefined ? {} : { intelligenceExplore: createIntelligenceExploreClient({ baseUrl: config.intelligence.baseUrl, sharedSecret: config.intelligence.sharedSecret, timeoutMs: config.intelligence.exploreTimeoutMs }) }),
+    ...(config.intelligence === undefined ? {} : { intelligenceExplore: createIntelligenceExploreClient({ baseUrl: config.intelligence.baseUrl, sharedSecret: config.intelligence.sharedSecret, timeoutMs: config.intelligence.exploreTimeoutMs, hasher: intelligenceHasher(config.intelligence) }) }),
+    ...(config.commerceInternal === undefined ? {} : { products: createHttpProductCatalog(config.commerceInternal) }),
+    ...(config.adsInternal === undefined ? {} : { ads: createHttpAdDecisionClient(config.adsInternal) }),
+    ...(config.intelligence === undefined ? {} : { socialProof: createIntelligenceSocialProofSelector({ baseUrl: config.intelligence.baseUrl, sharedSecret: config.intelligence.sharedSecret, hasher: intelligenceHasher(config.intelligence) }) }),
     shareCards: createHttpShareCardResolver({ commerce: config.commerceInternal, live: config.liveInternal }),
-    ...(config.mediaInternal === undefined ? {} : { media: createHttpMediaDescriptorResolver(config.mediaInternal), mediaDownloads: createHttpMediaDownloadVariantClient(config.mediaInternal) }),
+    ...(config.mediaInternal === undefined ? {} : { media: createHttpMediaDescriptorResolver(config.mediaInternal), chatMedia: createHttpChatMediaAccess(config.mediaInternal), mediaDownloads: createHttpMediaDownloadVariantClient(config.mediaInternal) }),
     ...(config.linkPreviewsEnabled ? { linkPreviews: createLinkUnfurler({ db: database.client, fetcher: createSafeHttpFetcher(), clock: systemClock, imageStore: config.mediaInternal === undefined ? undefined : createHttpLinkPreviewImageStore(config.mediaInternal, config.linkPreviewMediaOwnerId) }) } : {}),
   };
   const router = createRouter({
@@ -70,7 +79,7 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
     notFoundHandler: () => json(404, { message: "Not found.", code: "NOT_FOUND" }),
     methodNotAllowedHandler: () => json(405, { message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" }),
   });
-  registerRoutes(router, createRouteFactory(createIdempotencyGuard(database)), context, database, internalToken);
+  registerRoutes(router, createRouteFactory(createIdempotencyGuard(createPrismaIdempotencyStore(database.client))), context, database, internalToken);
   const dispatch: HttpMiddleware = async (requestContext) => {
     try {
       return (await router.dispatch(requestContext.request, { signal: requestContext.signal })).response;
@@ -110,6 +119,10 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
   };
 }
 
+function intelligenceHasher(intelligence: NonNullable<SocialConfig["intelligence"]>): IdentifierHasher {
+  return createIdentifierHasher(deriveIdentifierHashSecret(intelligence.idHashSecret ?? "", intelligence.sharedSecret));
+}
+
 function createFeedRanker(config: SocialConfig, logger: Logger): FeedRanker {
   if (config.intelligence === undefined) return deterministicFeedRanker;
   let fallbackCount = 0;
@@ -118,6 +131,7 @@ function createFeedRanker(config: SocialConfig, logger: Logger): FeedRanker {
     sharedSecret: config.intelligence.sharedSecret,
     timeoutMs: config.intelligence.feedRankTimeoutMs,
     fallback: deterministicFeedRanker,
+    hasher: intelligenceHasher(config.intelligence),
     onFallback: (reason) => {
       fallbackCount += 1;
       if (fallbackCount % 100 === 1) logger.warn("feed ranking fell back to the deterministic ranker", { reason, fallbackCount });
