@@ -24,6 +24,8 @@ locals {
     go-commerce = {
       ORDERS_MONEY_GRPC_ADDRESS    = local.grpc_address["go-money"]
       ORDERS_MONEY_INTERNAL_URL    = local.internal_url["go-money"]
+      ORDERS_ADS_INTERNAL_URL      = local.internal_url["go-ads"]
+      ADMIN_INTERNAL_URL           = local.internal_url["go-identity"]
       SELLER_PLAN_ENTITLEMENTS_URL = local.internal_url["go-money"]
       CATALOG_SOCIAL_INTERNAL_URL  = local.internal_url["social"]
       ORDERS_EVENTS_QUEUE          = "commerce-domain-events"
