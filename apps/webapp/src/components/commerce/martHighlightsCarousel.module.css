@@ -1,0 +1,129 @@
+.carousel {
+  position: relative;
+  border-radius: var(--radius-large);
+  overflow: hidden;
+  background: var(--surface-sunken);
+}
+
+.placeholder {
+  aspect-ratio: 16 / 7;
+  border-radius: var(--radius-large);
+  background: var(--color-skeleton);
+}
+
+.track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  position: relative;
+  flex: 0 0 100%;
+  aspect-ratio: 16 / 7;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: flex-end;
+  color: #fff;
+}
+
+.slide:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.caption {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 80%;
+  margin: var(--space-3) var(--space-3) var(--space-7);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-small);
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.title {
+  font-size: var(--text-md);
+  font-weight: 800;
+}
+
+.reason {
+  font-size: var(--text-xs);
+}
+
+.controls {
+  position: absolute;
+  bottom: var(--space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.dot,
+.pause {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.dot::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: #fff;
+  opacity: 0.5;
+  transition: width var(--motion-base) var(--motion-ease), opacity var(--motion-base) ease;
+}
+
+.dotActive::before {
+  width: 14px;
+  opacity: 1;
+}
+
+.dot:focus-visible,
+.pause:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+  border-radius: var(--radius-pill);
+}
+
+@media (min-width: 768px) {
+  .slide,
+  .placeholder {
+    aspect-ratio: 21 / 7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot::before {
+    transition: none;
+  }
+}

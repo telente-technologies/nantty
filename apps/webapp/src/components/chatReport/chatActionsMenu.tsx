@@ -2,12 +2,14 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { Button } from "@/components/ui/button";
 import { MoreIcon } from "@/components/ui/icons";
 import { ModalDialog } from "@/components/ui/modalDialog";
+import { usePopoverMenu } from "@/components/ui/popoverMenu.hook";
+import sheetStyles from "@/components/ui/popoverMenu.module.css";
 import { chatReportsService } from "@/services/chatReports.service";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import type { Conversation } from "@/types";
@@ -24,9 +26,7 @@ interface ChatActionsMenuProps {
 export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenuProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const menuId = useId();
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isOpen: menuIsOpen, close: menuClose, containerRef: menuContainerRef, triggerRef: menuTriggerRef, menuRef: menuMenuRef, triggerProps: menuTriggerProps, menuProps: menuMenuProps } = usePopoverMenu();
   const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
   const isGroupLike = conversation.kind === "group" || conversation.kind === "channel";
   const block = useMutation({
@@ -37,24 +37,8 @@ export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenu
     },
   });
 
-  useEffect(() => {
-    if (!isMenuOpen) return;
-    const closeOnOutsidePointer = (event: PointerEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) setIsMenuOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsMenuOpen(false);
-    };
-    document.addEventListener("pointerdown", closeOnOutsidePointer);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOnOutsidePointer);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [isMenuOpen]);
-
   const startReport = (kind: ChatReportTarget["kind"], alsoBlock = false) => {
-    setIsMenuOpen(false);
+    menuClose(true);
     requireAuthThen(
       () => onStartReport({ kind, reportedUser: kind === "group" ? null : conversation.peer, message: null, alsoBlock }),
       "Sign in to report a chat.",
@@ -66,18 +50,19 @@ export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenu
         { label: "Report user", onSelect: () => startReport("user") },
         { label: "Report and block", onSelect: () => startReport("user", true) },
         { label: "Report conversation", onSelect: () => startReport("conversation") },
-        { label: "Block", onSelect: () => { setIsMenuOpen(false); setIsBlockDialogOpen(true); } },
+        { label: "Block", onSelect: () => { menuClose(true); setIsBlockDialogOpen(true); } },
       ];
 
   return (
-    <div className={`${menuStyles.container} ${styles.menuHost}`} ref={containerRef}>
-      <button type="button" className={menuStyles.trigger} aria-label="Conversation options" aria-haspopup="true" aria-expanded={isMenuOpen} aria-controls={menuId} onClick={() => setIsMenuOpen((open) => !open)}>
+    <div className={`${menuStyles.container} ${styles.menuHost}`} ref={menuContainerRef}>
+      <button type="button" className={menuStyles.trigger} aria-label="Conversation options" ref={menuTriggerRef} {...menuTriggerProps}>
         <MoreIcon size={20} />
       </button>
-      {isMenuOpen ? (
-        <div className={menuStyles.menu} id={menuId}>
+      {menuIsOpen ? <div className={sheetStyles.scrim} aria-hidden="true" onPointerDown={() => menuClose()} /> : null}
+      {menuIsOpen ? (
+        <div className={`${menuStyles.menu} ${sheetStyles.sheet}`} aria-label="Conversation options" ref={menuMenuRef} {...menuMenuProps}>
           {items.map((item) => (
-            <button key={item.label} type="button" className={`${menuStyles.item} ${menuStyles.itemDanger}`} onClick={item.onSelect}>
+            <button key={item.label} type="button" role="menuitem" className={`${menuStyles.item} ${menuStyles.itemDanger}`} onClick={item.onSelect}>
               {item.label}
             </button>
           ))}

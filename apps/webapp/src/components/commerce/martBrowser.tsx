@@ -8,11 +8,12 @@ import { ProductCard } from "@/components/commerce/productCard";
 import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
 import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
-import chipStyles from "@/components/ui/filterChips.module.css";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
 import { productsService } from "@/services/products.service";
 
 import styles from "./martBrowser.module.css";
+import { MartCategoryBar } from "./martCategoryBar";
+import { MartHighlightsCarousel } from "./martHighlightsCarousel";
 import { AppIcon } from "@/components/ui/appIcon";
 
 const featuredCollections = [
@@ -21,9 +22,19 @@ const featuredCollections = [
   { href: "/collections/new_arrivals", label: "New Arrivals", caption: "Just listed by sellers" },
 ];
 
+const HIGHLIGHTS_STALE_MS = 5 * 60_000;
+
 export function MartBrowser() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const martHome = useQuery({ queryKey: ["mart", "home"], queryFn: productsService.fetchMartHome, retry: false });
+  const highlights = useQuery({
+    queryKey: ["mart", "highlights"],
+    queryFn: () => productsService.fetchMartHighlights(),
+    staleTime: HIGHLIGHTS_STALE_MS,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    retry: false,
+  });
   const productsQuery = useInfiniteQuery({
     queryKey: ["products", "page", selectedCategoryId],
     queryFn: ({ pageParam }) => productsService.fetchProductsPage(selectedCategoryId, pageParam),
@@ -44,15 +55,7 @@ export function MartBrowser() {
         <p className={styles.subtitle}>Every order is held in escrow until it arrives.</p>
       </header>
 
-      {martHome.data?.banners.length ? (
-        <div className={styles.banners}>
-          {martHome.data.banners.slice(0, 3).map((banner) => (
-            <Link key={banner.id} href="/explore" className={styles.banner}>
-              <img src={banner.imageUrl ?? undefined} alt="" className={styles.bannerImage} loading="lazy" />
-            </Link>
-          ))}
-        </div>
-      ) : null}
+      <MartHighlightsCarousel highlights={highlights.data?.data ?? []} loading={highlights.isLoading} />
 
       <div className={styles.collectionRow}>
         {featuredCollections.map((collection) => (
@@ -63,27 +66,7 @@ export function MartBrowser() {
         ))}
       </div>
 
-      <div className={chipStyles.chipRow} role="group" aria-label="Filter products by category">
-        <button
-          type="button"
-          className={[chipStyles.chip, selectedCategoryId === null ? chipStyles.chipActive : ""].join(" ")}
-          aria-pressed={selectedCategoryId === null}
-          onClick={() => setSelectedCategoryId(null)}
-        >
-          All
-        </button>
-        {(martHome.data?.categories ?? []).map((category) => (
-          <button
-            key={category.id}
-            type="button"
-            className={[chipStyles.chip, selectedCategoryId === category.id ? chipStyles.chipActive : ""].join(" ")}
-            aria-pressed={selectedCategoryId === category.id}
-            onClick={() => setSelectedCategoryId((previous) => (previous === category.id ? null : category.id))}
-          >
-            {category.name}
-          </button>
-        ))}
-      </div>
+      <MartCategoryBar categories={martHome.data?.categories ?? []} selectedCategoryId={selectedCategoryId} onSelectCategory={setSelectedCategoryId} />
 
       {productsQuery.isLoading ? (
         <ProductGridSkeleton gridClassName={styles.productGrid} />

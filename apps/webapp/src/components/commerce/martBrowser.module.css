@@ -18,32 +18,6 @@
   color: var(--ink-muted);
 }
 
-.banners {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-3);
-}
-
-.banner {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
-  border-radius: var(--radius-large);
-  background: var(--surface-sunken);
-}
-
-.bannerImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform var(--motion-slow) var(--motion-ease);
-}
-
-.banner:hover .bannerImage {
-  transform: scale(1.03);
-}
-
 .collectionRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -85,16 +59,8 @@
 }
 
 @media (min-width: 768px) {
-  .banners {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-
-  .banner {
-    aspect-ratio: 21 / 9;
-  }
-
   .productGrid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
     gap: var(--space-4);
   }
 }

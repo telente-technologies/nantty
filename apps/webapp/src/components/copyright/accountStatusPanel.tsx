@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { Badge } from "@/components/ui/feedback";
+import { Badge, ErrorState } from "@/components/ui/feedback";
+import { RetryButton } from "@/components/ui/controls";
+import { DetailSkeleton } from "@/components/ui/pageSkeletons";
 import { Button } from "@/components/ui/button";
 import rowStyles from "@/components/settings/myReportsList.module.css";
 import settingsStyles from "@/components/settings/settings.module.css";
@@ -22,11 +24,11 @@ const remedyLabel: Record<CopyrightNotice["state"], string> = {
 };
 
 export function AccountStatusPanel() {
-  const { data: health, isPending, isError } = useMyAccountHealth();
+  const { data: health, isPending, isError, refetch } = useMyAccountHealth();
   const [appealTarget, setAppealTarget] = useState<AccountStrike | null>(null);
   const [counterTarget, setCounterTarget] = useState<CopyrightNotice | null>(null);
-  if (isPending) return <p className={rowStyles.meta}>Loading your account status…</p>;
-  if (isError || !health) return <p className={rowStyles.meta} role="alert">We couldn&apos;t load your account status. Try again shortly.</p>;
+  if (isPending) return <DetailSkeleton label="Loading your account status" blocks={3} />;
+  if (isError || !health) return <ErrorState description="We couldn't load your account status." action={<RetryButton onRetry={() => void refetch()} />} />;
   return (
     <>
       <StandingSummary health={health} />
