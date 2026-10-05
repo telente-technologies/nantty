@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/google/uuid"
 
@@ -21,7 +20,6 @@ func (controller BillingController) StartTopUp(writer http.ResponseWriter, reque
 		}
 		command := starttopup.Command{
 			AccountId: account, UserId: user, Request: body, IdempotencyKey: request.Header.Get("Idempotency-Key"),
-			BearerToken: strings.TrimSpace(strings.TrimPrefix(request.Header.Get("Authorization"), "Bearer")),
 		}
 		if err := command.Validate(); err != nil {
 			return err

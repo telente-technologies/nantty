@@ -30,7 +30,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.TopUp
 		return dtos.TopUpCheckout{}, err
 	}
 	started, err := deployed.TopUps.StartTopUp(ctx, interfaces.TopUpStartRequest{
-		BearerToken: command.BearerToken, IdempotencyKey: command.IdempotencyKey, AdAccountId: account.ID.String(),
+		UserId: command.UserId.String(), IdempotencyKey: command.IdempotencyKey, AdAccountId: account.ID.String(),
 		AmountMinor: command.Request.Amount.AmountMinor, Currency: account.Currency, ReturnTo: returnUrl(deployed.Settings.AdsAppUrl, command.Request.ReturnPath),
 	})
 	if err != nil {

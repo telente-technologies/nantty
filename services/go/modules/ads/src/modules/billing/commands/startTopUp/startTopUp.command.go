@@ -12,7 +12,6 @@ import (
 type Command struct {
 	AccountId      uuid.UUID
 	UserId         uuid.UUID
-	BearerToken    string
 	IdempotencyKey string
 	Request        dtos.StartTopUpRequest
 }
