@@ -50,7 +50,7 @@ The browser never calls the API directly. It calls the Ads Manager BFF (`/bff/..
 | PATCH | /ads/accounts/:accountId/members/:userId | members:manage | `{ role }` | `AdAccountMember` | 409 OWNER_ROLE_LOCKED |
 | DELETE | /ads/accounts/:accountId/members/:userId | members:manage | — | 204 | 409 OWNER_CANNOT_BE_REMOVED |
 | GET | /ads/accounts/:accountId/invites | account:view | — | `{ items: AdAccountInvite[] }` (pending only; never return tokens) | 404 |
-| POST | /ads/accounts/:accountId/invites | members:manage | `{ email, role }` | 201 `AdAccountInvite`; emails a single-use link `https://ads.<domain>/invites/<token>` valid 7 days | 400 (duplicate pending, already member) |
+| POST | /ads/accounts/:accountId/invites | members:manage | `{ email, role }` or `{ username, role }` (an existing Zudomart user; a `username` that is an email address is looked up by email) | 201 `AdAccountInvite` (`username` of the invitee, never their email); emails a single-use link `https://ads.<domain>/invites/<token>` valid 7 days | 400 (duplicate pending, already member) |
 | DELETE | /ads/accounts/:accountId/invites/:inviteId | members:manage | — | 204 | 404 |
 | GET | /ads/invites/:token | signed in | — | `InvitePreview` | 404 INVITE_NOT_FOUND |
 | POST | /ads/invites/:token/accept | signed in | — | `{ accountId }` | 403 INVITE_EMAIL_MISMATCH, 404 |
