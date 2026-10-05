@@ -569,7 +569,7 @@ and **exactly one** signals block whose name equals `subjectType` (camelCase), o
 |---|---|---|
 | order | `order` | amount (Money), accountAgeHours, buyerPreviousOrderCount, buyerMedianOrderAmount?, ordersLastHour, failedPaymentAttemptsLastDay, shippingCountry?, accountCountry?, deviceAccountCount (default 1), isNewPaymentInstrument, buyerAndSellerShareDevice, sellerAccountAgeHours (default 10000), sellerDisputeRate |
 | payout | `payout` | amount, lifetimeEarnings (Money), sellerAccountAgeHours, hoursSincePayoutDestinationChanged?, refundRate, disputeRate, payoutsLastDay, payoutDestinationCountry?, sellerCountry?, isIdentityVerified |
-| account_event | `accountEvent` | eventKind (`signup` \| `login` \| `password_change` \| `email_change` \| `phone_change` \| `payout_destination_change`), isNewDevice, isNewCountry, failedOtpAttemptsLastHour, deviceAccountCount, hoursSinceLastCredentialChange?, signupsOnDeviceLastDay, usesAnonymizingNetwork |
+| account_event | `accountEvent` | eventKind (`signup` \| `login` \| `password_change` \| `email_change` \| `payout_destination_change`), isNewDevice, isNewCountry, failedOtpAttemptsLastHour, deviceAccountCount, hoursSinceLastCredentialChange?, signupsOnDeviceLastDay, usesAnonymizingNetwork |
 | coin_purchase | `coinPurchase` | amount (Money), coinAmount, accountAgeHours, purchasesLastDay, failedPaymentAttemptsLastDay, isNewPaymentInstrument, deviceAccountCount, paymentCountry?, accountCountry? |
 | coin_transfer | `coinTransfer` | recipientId, coinAmount, fractionOfSenderBalance, senderAccountAgeHours, recipientAccountAgeHours, senderAndRecipientShareDevice, senderTransfersLastHour, senderDistinctRecipientsLastDay, minutesSinceSenderReceivedTheseCoins?, observedTransferChainDepthLastDay, coinsBoughtWithNewInstrumentLastDay |
 | gift | `gift` | creatorId, coinAmount, senderAccountAgeHours, creatorAccountAgeHours, senderAndCreatorShareDevice, giftsFromSenderToCreatorLastDay, senderShareOfCreatorGiftIncomeLastWeek, coinsBoughtWithNewInstrumentLastDay, hoursUntilCreatorPayoutRequest? |
@@ -777,7 +777,7 @@ It never suspends anything; goTrust opens an advisory case. Publish failures are
 
 ### POST /v1/creators/real-followers
 
-`{creatorId, followers[<=5000]: {followerId, accountAgeDays, hasProfilePhoto, postCount, activeDaysLast30, followedAccountCount, deviceClusterSize, signupBurstSize, phoneVerified}, totalFollowerCount?}`.
+`{creatorId, followers[<=5000]: {followerId, accountAgeDays, hasProfilePhoto, postCount, activeDaysLast30, followedAccountCount, deviceClusterSize, signupBurstSize}, totalFollowerCount?}`.
 Per-follower authenticity is a multiplicative rule model. Response: `{creatorId, sampledFollowers, estimatedRealRatio, estimatedRealFollowers, realFollowersLowerBound, suspiciousFollowers, topReasons, metadata}`.
 With `totalFollowerCount` the sampled ratio is scaled to the total. Use `realFollowersLowerBound` against the eligibility threshold; the decision stays in Go.
 
@@ -785,7 +785,7 @@ With `totalFollowerCount` the sampled ratio is scaled to the total. Use `realFol
 
 Checkmark trust score for the verification hub (go-identity calls it on page view, on "Request verification" and from the recheck scheduler).
 `{profileId, color: blue|gold, accountAgeDays, realFollowers, originalPostsLast60Days, daysSinceLastViolation, fraudScore, riskScore, borderlineContent,
-phoneVerified, emailVerified, accountRestricted, completedOrders, successRatePercent, hasActiveStoreOrBrandPage, thresholds{minimumAccountAgeDays,
+emailVerified, accountRestricted, completedOrders, successRatePercent, hasActiveStoreOrBrandPage, thresholds{minimumAccountAgeDays,
 minimumRealFollowers, noViolationsInDays, minimumCompletedOrders, minimumSuccessRatePercent}}` (thresholds are the admin-editable checkmark rules).
 Response: `{profileId, trustScore 0-100, tier: buy_now|request|blocked, reasons[], recheckAfterHours, scoringSource}`. `buy_now` needs a score of 75+
 and every hard threshold met; restricted accounts or fraud >= 80 / risk >= 85 are `blocked`. Go decides; when this endpoint is down Go falls back to

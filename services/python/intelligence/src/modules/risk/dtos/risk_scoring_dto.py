@@ -52,9 +52,7 @@ class PayoutRiskSignals(ContractModel):
 
 
 class AccountEventRiskSignals(ContractModel):
-    event_kind: Literal[
-        "signup", "login", "password_change", "email_change", "phone_change", "payout_destination_change"
-    ]
+    event_kind: Literal["signup", "login", "password_change", "email_change", "payout_destination_change"]
     is_new_device: bool = False
     is_new_country: bool = False
     failed_otp_attempts_last_hour: int = Field(default=0, ge=0, le=100_000)

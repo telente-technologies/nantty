@@ -31,7 +31,6 @@ def estimate_follower_authenticity(follower: FollowerSignals) -> tuple[float, li
     penalise("mass_following_account", 0.5, follower.followed_account_count >= 2000)
     penalise("shared_device_cluster", 0.4, follower.device_cluster_size >= 5)
     penalise("signup_burst_member", 0.5, follower.signup_burst_size >= 20)
-    penalise("phone_not_verified", 0.9, not follower.phone_verified)
     return probability, reasons
 
 

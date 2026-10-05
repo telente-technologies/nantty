@@ -13,7 +13,6 @@ class FollowerSignals(ContractModel):
     followed_account_count: int = Field(default=0, ge=0, le=10_000_000)
     device_cluster_size: int = Field(default=1, ge=0, le=100_000)
     signup_burst_size: int = Field(default=1, ge=0, le=1_000_000)
-    phone_verified: bool = False
 
 
 class RealFollowersRequest(ContractModel):

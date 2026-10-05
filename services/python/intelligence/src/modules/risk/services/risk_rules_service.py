@@ -12,7 +12,7 @@ from src.modules.risk.dtos.risk_scoring_dto import (
 from src.services.currency_conversion_service import convert_money_to_usd_micros
 
 type RiskRule = tuple[str, float, bool]
-CREDENTIAL_CHANGE_EVENTS = frozenset({"password_change", "email_change", "phone_change", "payout_destination_change"})
+CREDENTIAL_CHANGE_EVENTS = frozenset({"password_change", "email_change", "payout_destination_change"})
 
 ORDER_RISK_FEATURE_SCHEMA_VERSION = 1
 ORDER_RISK_FEATURE_NAMES: tuple[str, ...] = (
