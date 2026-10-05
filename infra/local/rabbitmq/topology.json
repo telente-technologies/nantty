@@ -5,9 +5,9 @@
   "unroutedRetentionMs": 86400000,
   "services": {
     "go-identity": { "publishesEvents": true, "consumes": ["identity-domain-events"] },
-    "go-commerce": { "publishesEvents": true, "consumes": ["commerce-domain-events", "catalog-domain-events"] },
+    "go-commerce": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["commerce-domain-events", "catalog-domain-events", "jobs-catalog-import"] },
     "go-live": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["live-domain-events"] },
-    "go-money": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["jobs-payouts", "money-domain-events"] },
+    "go-money": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["jobs-payouts", "jobs-subscription-billing", "money-domain-events"] },
     "go-ads": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["jobs-ads-reports", "ads-domain-events"] },
     "go-trust": { "publishesEvents": true, "consumes": ["intelligence-trust-advisory", "intelligence-trust-content-scores", "intelligence-trust-live-safety", "intelligence-trust-bot-scores", "trust-domain-events"] },
     "search": { "consumes": ["search-domain-events"] },
@@ -19,7 +19,7 @@
     "intelligence": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["intelligence-domain-events", "jobs-live-frames", "jobs-live-audio"] }
   },
   "eventQueues": {
-    "trust-domain-events": ["report.created", "live.ended", "post.deleted", "security.accessViolationDetected", "verification.fraudSignalDetected"],
+    "trust-domain-events": ["report.created", "live.ended", "post.deleted", "security.accessViolationDetected", "verification.fraudSignalDetected", "payoutAccount.duplicateBankAccount"],
     "search-domain-events": [
       "profile.updated", "username.changed", "creatorProfile.created", "profileCheckmark.changed", "checkmark.approved", "checkmark.revoked",
       "accountStatus.changed", "account.suspended", "account.banned", "user.unbanned", "suspension.ended", "account.deactivated", "account.deletionExecuted",
@@ -38,7 +38,7 @@
       "account.*", "appeal.*", "cardVerification.*", "checkmark.*", "coinPurchase.*", "comment.created",
       "creatorApplication.*", "dataExport.*", "dispute.*", "disputeMessage.*", "escrow.*", "follow.created",
       "followRequest.created", "gift.sent", "live.started", "mention.created", "messageRequest.received",
-      "order.*", "otp.issued", "payment.*", "paymentRefund.bankDetailsRequired", "payout.*", "payoutAccount.*", "planInvoice.*", "planTrial.*", "policyVersion.published",
+      "order.*", "otp.issued", "post.tagged", "payment.*", "paymentRefund.bankDetailsRequired", "payout.*", "payoutAccount.*", "planInvoice.*", "planTrial.*", "subscriptionInvoice.*", "subscriptionPayment.*", "subscriptionTrial.*", "subscriptionRenewal.*", "subscriptionGrace.*", "subscriptionCard.*", "subscriptionPrice.*", "subscription.downgraded", "policyVersion.published",
       "report.closed", "sellerDocuments.*", "session.*", "signIn.*", "ticket.created", "ticket.replied", "ticket.resolved", "twoFactor.*", "videoReply.created",
       "withdrawal.*", "copyrightClaim.warningIssued", "copyrightClaim.audioMuteOrdered", "copyrightClaim.contentTakenDown", "copyrightClaim.counterNoticeReceived",
       "copyrightClaim.restored", "strike.issued", "strike.expired",
@@ -61,7 +61,7 @@
     ]
   },
   "jobQueues": [
-    "jobs-email", "jobs-media", "jobs-reports", "jobs-payouts", "jobs-search-indexing", "jobs-ads-reports",
+    "jobs-email", "jobs-media", "jobs-reports", "jobs-payouts", "jobs-subscription-billing", "jobs-catalog-import", "jobs-search-indexing", "jobs-ads-reports",
     "intelligence-trust-advisory", "intelligence-trust-content-scores", "intelligence-trust-live-safety", "intelligence-trust-bot-scores", "jobs-live-frames", "jobs-live-audio"
   ]
 }

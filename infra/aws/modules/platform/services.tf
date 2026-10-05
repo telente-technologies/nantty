@@ -3,7 +3,7 @@ locals {
     gateway = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = false, rabbit = false, min = 2, max = 12
       public_rules = [{ priority = 100, path_patterns = ["/*"] }], internal = false, request_target = 1500
-      secret_keys  = ["IDENTITY_INTERNAL_TOKEN", "TRUST_INTERNAL_TOKEN", "TURNSTILE_SECRET_KEY"], valkey = true, node = true
+      secret_keys  = ["IDENTITY_INTERNAL_TOKEN", "TRUST_INTERNAL_TOKEN", "TURNSTILE_SECRET_KEY", "GATEWAY_IDENTITY_SECRET"], valkey = true, node = true
     }
     go-identity = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 8, extra_ports = [9101]
@@ -38,27 +38,27 @@ locals {
     social = {
       port         = 8105, cpu = 1024, memory = 2048, health = "/healthz", database = true, rabbit = true, min = 2, max = 12
       public_rules = [], internal = true, request_target = 0, valkey = true, node = true
-      secret_keys  = ["SOCIAL_INTERNAL_TOKEN", "COMMERCE_INTERNAL_TOKEN", "LIVE_INTERNAL_TOKEN", "MONEY_INTERNAL_TOKEN", "ADMIN_INTERNAL_API_TOKEN", "INTELLIGENCE_SHARED_SECRET"]
+      secret_keys  = ["SOCIAL_INTERNAL_TOKEN", "COMMERCE_INTERNAL_TOKEN", "LIVE_INTERNAL_TOKEN", "MONEY_INTERNAL_TOKEN", "ADMIN_INTERNAL_API_TOKEN", "INTELLIGENCE_SHARED_SECRET", "GATEWAY_IDENTITY_SECRET"]
     }
     notifications = {
       port         = 8104, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 6
       public_rules = [], internal = true, request_target = 0, valkey = true, node = true
-      secret_keys  = ["IDENTITY_INTERNAL_TOKEN", "UNSUBSCRIBE_SIGNING_SECRET", "SOCIAL_INTERNAL_TOKEN", "AUTH_OTP_EVENT_KEY"]
+      secret_keys  = ["IDENTITY_INTERNAL_TOKEN", "UNSUBSCRIBE_SIGNING_SECRET", "SOCIAL_INTERNAL_TOKEN", "AUTH_OTP_EVENT_KEY", "GATEWAY_IDENTITY_SECRET"]
     }
     media = {
       port         = 8108, cpu = 1024, memory = 2048, health = "/healthz", database = true, rabbit = true, min = 2, max = 8
       public_rules = [], internal = true, request_target = 0, valkey = true, node = true
-      secret_keys  = ["MEDIA_INTERNAL_TOKEN", "MODERATION_TOKEN"]
+      secret_keys  = ["MEDIA_INTERNAL_TOKEN", "MODERATION_TOKEN", "GATEWAY_IDENTITY_SECRET"]
     }
     search = {
       port         = 8109, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 8
       public_rules = [], internal = true, request_target = 0, valkey = true, node = true
-      secret_keys  = ["SEARCH_INTERNAL_TOKEN", "IDENTITY_INTERNAL_TOKEN", "COMMERCE_INTERNAL_TOKEN", "SOCIAL_INTERNAL_TOKEN", "INTELLIGENCE_SHARED_SECRET"]
+      secret_keys  = ["SEARCH_INTERNAL_TOKEN", "IDENTITY_INTERNAL_TOKEN", "COMMERCE_INTERNAL_TOKEN", "SOCIAL_INTERNAL_TOKEN", "INTELLIGENCE_SHARED_SECRET", "GATEWAY_IDENTITY_SECRET"]
     }
     support = {
       port         = 8111, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 6
       public_rules = [], internal = true, request_target = 0, valkey = false, node = true
-      secret_keys  = ["SUPPORT_INTERNAL_TOKEN", "IDENTITY_INTERNAL_TOKEN", "INTELLIGENCE_SHARED_SECRET"]
+      secret_keys  = ["SUPPORT_INTERNAL_TOKEN", "IDENTITY_INTERNAL_TOKEN", "INTELLIGENCE_SHARED_SECRET", "GATEWAY_IDENTITY_SECRET"]
     }
     realtime = {
       port         = 4000, cpu = 1024, memory = 2048, health = "/healthz", database = false, rabbit = true, min = 2, max = 10

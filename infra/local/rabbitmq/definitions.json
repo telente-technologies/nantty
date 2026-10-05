@@ -111,8 +111,8 @@
       "user": "go-commerce",
       "vhost": "zudomart",
       "configure": "^$",
-      "write": "^(zudomart\\.events|zudomart\\.retry)$",
-      "read": "^(commerce-domain-events|catalog-domain-events)$"
+      "write": "^(zudomart\\.events|zudomart\\.jobs|zudomart\\.retry)$",
+      "read": "^(commerce-domain-events|catalog-domain-events|jobs-catalog-import)$"
     },
     {
       "user": "go-live",
@@ -126,7 +126,7 @@
       "vhost": "zudomart",
       "configure": "^$",
       "write": "^(zudomart\\.events|zudomart\\.jobs|zudomart\\.retry)$",
-      "read": "^(jobs-payouts|money-domain-events)$"
+      "read": "^(jobs-payouts|jobs-subscription-billing|money-domain-events)$"
     },
     {
       "user": "go-ads",
@@ -204,7 +204,7 @@
       "user": "go-commerce",
       "vhost": "zudomart",
       "exchange": "zudomart.retry",
-      "write": "^(commerce-domain-events|catalog-domain-events)\\.retry\\.",
+      "write": "^(commerce-domain-events|catalog-domain-events|jobs-catalog-import)\\.retry\\.",
       "read": "^$"
     },
     {
@@ -218,7 +218,7 @@
       "user": "go-money",
       "vhost": "zudomart",
       "exchange": "zudomart.retry",
-      "write": "^(jobs-payouts|money-domain-events)\\.retry\\.",
+      "write": "^(jobs-payouts|jobs-subscription-billing|money-domain-events)\\.retry\\.",
       "read": "^$"
     },
     {
@@ -1754,6 +1754,162 @@
       }
     },
     {
+      "name": "jobs-subscription-billing",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "jobs-subscription-billing.dlq"
+      }
+    },
+    {
+      "name": "jobs-subscription-billing.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "jobs-subscription-billing.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-subscription-billing"
+      }
+    },
+    {
+      "name": "jobs-subscription-billing.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-subscription-billing"
+      }
+    },
+    {
+      "name": "jobs-subscription-billing.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-subscription-billing"
+      }
+    },
+    {
+      "name": "jobs-subscription-billing.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-subscription-billing"
+      }
+    },
+    {
+      "name": "jobs-catalog-import",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-dead-letter-exchange": "zudomart.dlx",
+        "x-dead-letter-routing-key": "jobs-catalog-import.dlq"
+      }
+    },
+    {
+      "name": "jobs-catalog-import.dlq",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "jobs-catalog-import.retry.30s",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-catalog-import"
+      }
+    },
+    {
+      "name": "jobs-catalog-import.retry.2m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 120000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-catalog-import"
+      }
+    },
+    {
+      "name": "jobs-catalog-import.retry.10m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 600000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-catalog-import"
+      }
+    },
+    {
+      "name": "jobs-catalog-import.retry.30m",
+      "vhost": "zudomart",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-strategy": "at-least-once",
+        "x-overflow": "reject-publish",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "zudomart.retry",
+        "x-dead-letter-routing-key": "jobs-catalog-import"
+      }
+    },
+    {
       "name": "jobs-search-indexing",
       "vhost": "zudomart",
       "durable": true,
@@ -2473,6 +2629,14 @@
       "destination": "trust-domain-events",
       "destination_type": "queue",
       "routing_key": "verification.fraudSignalDetected",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "trust-domain-events",
+      "destination_type": "queue",
+      "routing_key": "payoutAccount.duplicateBankAccount",
       "arguments": {}
     },
     {
@@ -3296,6 +3460,14 @@
       "vhost": "zudomart",
       "destination": "notifications-domain-events",
       "destination_type": "queue",
+      "routing_key": "post.tagged",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
       "routing_key": "payment.*",
       "arguments": {}
     },
@@ -3337,6 +3509,70 @@
       "destination": "notifications-domain-events",
       "destination_type": "queue",
       "routing_key": "planTrial.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "subscriptionInvoice.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "subscriptionPayment.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "subscriptionTrial.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "subscriptionRenewal.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "subscriptionGrace.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "subscriptionCard.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "subscriptionPrice.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "subscription.downgraded",
       "arguments": {}
     },
     {
@@ -4489,6 +4725,118 @@
       "destination": "jobs-payouts",
       "destination_type": "queue",
       "routing_key": "jobs-payouts",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "jobs-subscription-billing.dlq",
+      "destination_type": "queue",
+      "routing_key": "jobs-subscription-billing.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-subscription-billing",
+      "destination_type": "queue",
+      "routing_key": "jobs-subscription-billing",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-subscription-billing.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "jobs-subscription-billing.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-subscription-billing.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "jobs-subscription-billing.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-subscription-billing.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "jobs-subscription-billing.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-subscription-billing.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "jobs-subscription-billing.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.jobs",
+      "vhost": "zudomart",
+      "destination": "jobs-subscription-billing",
+      "destination_type": "queue",
+      "routing_key": "jobs-subscription-billing",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.dlx",
+      "vhost": "zudomart",
+      "destination": "jobs-catalog-import.dlq",
+      "destination_type": "queue",
+      "routing_key": "jobs-catalog-import.dlq",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-catalog-import",
+      "destination_type": "queue",
+      "routing_key": "jobs-catalog-import",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-catalog-import.retry.30s",
+      "destination_type": "queue",
+      "routing_key": "jobs-catalog-import.retry.30s",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-catalog-import.retry.2m",
+      "destination_type": "queue",
+      "routing_key": "jobs-catalog-import.retry.2m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-catalog-import.retry.10m",
+      "destination_type": "queue",
+      "routing_key": "jobs-catalog-import.retry.10m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.retry",
+      "vhost": "zudomart",
+      "destination": "jobs-catalog-import.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "jobs-catalog-import.retry.30m",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.jobs",
+      "vhost": "zudomart",
+      "destination": "jobs-catalog-import",
+      "destination_type": "queue",
+      "routing_key": "jobs-catalog-import",
       "arguments": {}
     },
     {
