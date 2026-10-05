@@ -68,6 +68,30 @@ func (f CustomerNoteFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CustomerNoteMutation", m)
 }
 
+// The CustomerSegmentFunc type is an adapter to allow the use of ordinary
+// function as CustomerSegment mutator.
+type CustomerSegmentFunc func(context.Context, *ent.CustomerSegmentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CustomerSegmentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CustomerSegmentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CustomerSegmentMutation", m)
+}
+
+// The DeliveryAreaFunc type is an adapter to allow the use of ordinary
+// function as DeliveryArea mutator.
+type DeliveryAreaFunc func(context.Context, *ent.DeliveryAreaMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DeliveryAreaFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DeliveryAreaMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeliveryAreaMutation", m)
+}
+
 // The FlashSaleFunc type is an adapter to allow the use of ordinary
 // function as FlashSale mutator.
 type FlashSaleFunc func(context.Context, *ent.FlashSaleMutation) (ent.Value, error)
@@ -330,6 +354,18 @@ func (f StoreCreditEntryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreCreditEntryMutation", m)
+}
+
+// The StoreCustomerProfileFunc type is an adapter to allow the use of ordinary
+// function as StoreCustomerProfile mutator.
+type StoreCustomerProfileFunc func(context.Context, *ent.StoreCustomerProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StoreCustomerProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StoreCustomerProfileMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreCustomerProfileMutation", m)
 }
 
 // The StoreRewardSettingsFunc type is an adapter to allow the use of ordinary

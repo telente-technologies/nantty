@@ -24,6 +24,10 @@ type Tx struct {
 	Checkout *CheckoutClient
 	// CustomerNote is the client for interacting with the CustomerNote builders.
 	CustomerNote *CustomerNoteClient
+	// CustomerSegment is the client for interacting with the CustomerSegment builders.
+	CustomerSegment *CustomerSegmentClient
+	// DeliveryArea is the client for interacting with the DeliveryArea builders.
+	DeliveryArea *DeliveryAreaClient
 	// FlashSale is the client for interacting with the FlashSale builders.
 	FlashSale *FlashSaleClient
 	// FlashSaleItem is the client for interacting with the FlashSaleItem builders.
@@ -68,6 +72,8 @@ type Tx struct {
 	ShippingZone *ShippingZoneClient
 	// StoreCreditEntry is the client for interacting with the StoreCreditEntry builders.
 	StoreCreditEntry *StoreCreditEntryClient
+	// StoreCustomerProfile is the client for interacting with the StoreCustomerProfile builders.
+	StoreCustomerProfile *StoreCustomerProfileClient
 	// StoreRewardSettings is the client for interacting with the StoreRewardSettings builders.
 	StoreRewardSettings *StoreRewardSettingsClient
 	// StoreSuccessStat is the client for interacting with the StoreSuccessStat builders.
@@ -208,6 +214,8 @@ func (tx *Tx) init() {
 	tx.CartItem = NewCartItemClient(tx.config)
 	tx.Checkout = NewCheckoutClient(tx.config)
 	tx.CustomerNote = NewCustomerNoteClient(tx.config)
+	tx.CustomerSegment = NewCustomerSegmentClient(tx.config)
+	tx.DeliveryArea = NewDeliveryAreaClient(tx.config)
 	tx.FlashSale = NewFlashSaleClient(tx.config)
 	tx.FlashSaleItem = NewFlashSaleItemClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
@@ -230,6 +238,7 @@ func (tx *Tx) init() {
 	tx.ShippingRule = NewShippingRuleClient(tx.config)
 	tx.ShippingZone = NewShippingZoneClient(tx.config)
 	tx.StoreCreditEntry = NewStoreCreditEntryClient(tx.config)
+	tx.StoreCustomerProfile = NewStoreCustomerProfileClient(tx.config)
 	tx.StoreRewardSettings = NewStoreRewardSettingsClient(tx.config)
 	tx.StoreSuccessStat = NewStoreSuccessStatClient(tx.config)
 }

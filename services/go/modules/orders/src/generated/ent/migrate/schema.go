@@ -153,6 +153,57 @@ var (
 			},
 		},
 	}
+	// CustomerSegmentsColumns holds the columns for the "customer_segments" table.
+	CustomerSegmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 60},
+		{Name: "description", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "rules", Type: field.TypeJSON},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// CustomerSegmentsTable holds the schema information for the "customer_segments" table.
+	CustomerSegmentsTable = &schema.Table{
+		Name:       "customer_segments",
+		Columns:    CustomerSegmentsColumns,
+		PrimaryKey: []*schema.Column{CustomerSegmentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "customersegment_store_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{CustomerSegmentsColumns[2], CustomerSegmentsColumns[0]},
+			},
+		},
+	}
+	// DeliveryAreasColumns holds the columns for the "delivery_areas" table.
+	DeliveryAreasColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 60},
+		{Name: "state", Type: field.TypeString, Size: 40},
+		{Name: "cities", Type: field.TypeJSON},
+		{Name: "fee_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "estimated_days_min", Type: field.TypeInt},
+		{Name: "estimated_days_max", Type: field.TypeInt},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// DeliveryAreasTable holds the schema information for the "delivery_areas" table.
+	DeliveryAreasTable = &schema.Table{
+		Name:       "delivery_areas",
+		Columns:    DeliveryAreasColumns,
+		PrimaryKey: []*schema.Column{DeliveryAreasColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "deliveryarea_store_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{DeliveryAreasColumns[2], DeliveryAreasColumns[0]},
+			},
+		},
+	}
 	// FlashSalesColumns holds the columns for the "flash_sales" table.
 	FlashSalesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -899,6 +950,45 @@ var (
 			},
 		},
 	}
+	// StoreCustomerProfilesColumns holds the columns for the "store_customer_profiles" table.
+	StoreCustomerProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "buyer_account_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "name", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "phone", Type: field.TypeString, Nullable: true, Size: 20},
+		{Name: "email", Type: field.TypeString, Nullable: true, Size: 120},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "marketing_opt_in", Type: field.TypeBool, Default: false},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// StoreCustomerProfilesTable holds the schema information for the "store_customer_profiles" table.
+	StoreCustomerProfilesTable = &schema.Table{
+		Name:       "store_customer_profiles",
+		Columns:    StoreCustomerProfilesColumns,
+		PrimaryKey: []*schema.Column{StoreCustomerProfilesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "storecustomerprofile_store_id_buyer_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{StoreCustomerProfilesColumns[2], StoreCustomerProfilesColumns[3]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "buyer_account_id IS NOT NULL",
+				},
+			},
+			{
+				Name:    "storecustomerprofile_store_id_phone",
+				Unique:  false,
+				Columns: []*schema.Column{StoreCustomerProfilesColumns[2], StoreCustomerProfilesColumns[5]},
+			},
+			{
+				Name:    "storecustomerprofile_store_id_email",
+				Unique:  false,
+				Columns: []*schema.Column{StoreCustomerProfilesColumns[2], StoreCustomerProfilesColumns[6]},
+			},
+		},
+	}
 	// StoreRewardSettingsColumns holds the columns for the "store_reward_settings" table.
 	StoreRewardSettingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -954,6 +1044,8 @@ var (
 		CartItemsTable,
 		CheckoutsTable,
 		CustomerNotesTable,
+		CustomerSegmentsTable,
+		DeliveryAreasTable,
 		FlashSalesTable,
 		FlashSaleItemsTable,
 		IdempotentRequestsTable,
@@ -976,6 +1068,7 @@ var (
 		ShippingRulesTable,
 		ShippingZonesTable,
 		StoreCreditEntriesTable,
+		StoreCustomerProfilesTable,
 		StoreRewardSettingsTable,
 		StoreSuccessStatsTable,
 	}

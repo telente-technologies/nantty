@@ -21,6 +21,12 @@ type Checkout func(*sql.Selector)
 // CustomerNote is the predicate function for customernote builders.
 type CustomerNote func(*sql.Selector)
 
+// CustomerSegment is the predicate function for customersegment builders.
+type CustomerSegment func(*sql.Selector)
+
+// DeliveryArea is the predicate function for deliveryarea builders.
+type DeliveryArea func(*sql.Selector)
+
 // FlashSale is the predicate function for flashsale builders.
 type FlashSale func(*sql.Selector)
 
@@ -86,6 +92,9 @@ type ShippingZone func(*sql.Selector)
 
 // StoreCreditEntry is the predicate function for storecreditentry builders.
 type StoreCreditEntry func(*sql.Selector)
+
+// StoreCustomerProfile is the predicate function for storecustomerprofile builders.
+type StoreCustomerProfile func(*sql.Selector)
 
 // StoreRewardSettings is the predicate function for storerewardsettings builders.
 type StoreRewardSettings func(*sql.Selector)
