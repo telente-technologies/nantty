@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/topics.selected.v1.json",
+  "title": "TopicsSelected",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "topicIds",
+    "selectedAt"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "topicIds": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 20,
+      "items": {
+        "type": "string"
+      },
+      "description": "Topic slugs; the same ids go-ads uses in audience.topicIds"
+    },
+    "selectedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

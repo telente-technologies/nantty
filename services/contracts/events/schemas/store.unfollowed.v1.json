@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/store.unfollowed.v1.json",
+  "title": "StoreUnfollowed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "storeId",
+    "followerId"
+  ],
+  "properties": {
+    "storeId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "followerId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

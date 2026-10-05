@@ -14,6 +14,13 @@
     },
     "reason": {
       "type": "string"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "assignedUsername": {
+      "type": "string"
     }
   }
 }
