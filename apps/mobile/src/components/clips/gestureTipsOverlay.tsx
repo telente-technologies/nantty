@@ -2,9 +2,9 @@ import { useEffect, type ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Animated, { Easing, cancelAnimation, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Path } from "react-native-svg";
 
 import { DotsThreeVertical24Icon, Heart24Icon, PauseFill24Icon, Speedometer24Icon } from "@/components/icons";
+import { ArrowDownIcon, ArrowUpIcon, HandPointingIcon } from "@/components/icons/phosphorGlyphs";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors.constant";
 import { useTheme } from "@/theme";
@@ -14,25 +14,12 @@ const MUTED_INK_ON_SCRIM = "rgba(255,255,255,0.72)";
 const HAND_TRAVEL = 28;
 
 function SwipeGlyph({ direction }: { direction: "up" | "down" }) {
-  return (
-    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" style={direction === "down" ? styles.flipped : undefined}>
-      <Path d="M12 20V5M6.5 10.5 12 5l5.5 5.5" stroke={INK_ON_SCRIM} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
+  const Arrow = direction === "down" ? ArrowDownIcon : ArrowUpIcon;
+  return <Arrow size={24} weight="bold" color={INK_ON_SCRIM} />;
 }
 
 function HandGlyph() {
-  return (
-    <Svg width={44} height={52} viewBox="0 0 44 52" fill="none">
-      <Path
-        d="M17 24V8.5a3.5 3.5 0 0 1 7 0V22m0-3.5a3.5 3.5 0 0 1 7 0V24m0-2.5a3.5 3.5 0 0 1 7 0v10C38 41 32 48 23.5 48h-1.2c-4.4 0-7.6-1.9-10.2-5.4L6.4 34.8a3.4 3.4 0 0 1 5.3-4.3L17 36"
-        stroke={INK_ON_SCRIM}
-        strokeWidth={2.4}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
+  return <HandPointingIcon size={48} weight="bold" color={INK_ON_SCRIM} />;
 }
 
 const TIPS: readonly { readonly title: string; readonly hint: string; readonly glyph: ReactNode }[] = [
@@ -107,7 +94,6 @@ export function GestureTipsOverlay({ onDismiss }: { onDismiss: () => void }) {
 const styles = StyleSheet.create({
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.78)", alignItems: "center", justifyContent: "center", paddingHorizontal: 32, gap: 24 },
   hero: { height: 96, alignItems: "center", justifyContent: "flex-end", gap: 4 },
-  flipped: { transform: [{ rotate: "180deg" }] },
   tips: { alignSelf: "stretch", gap: 18 },
   tip: { flexDirection: "row", alignItems: "center", gap: 14 },
   glyph: { width: 44, height: 44, borderRadius: 22, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },

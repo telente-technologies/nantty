@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
 
 import { Camera24Icon, ImageSquare24Icon } from "@/components/icons";
+import { CaretUpIcon } from "@/components/icons/phosphorGlyphs";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { PostAudience } from "@/types";
@@ -37,9 +37,7 @@ export function PostToolbar(props: PostToolbarProps) {
         <Text size={13} weight={500} lineHeight={16.9}>
           {props.audience === "everyone" ? "Everyone" : "Followers"}
         </Text>
-        <Svg width={12} height={12} viewBox="0 0 12 12">
-          <Path d="M1.8 8.8h8.4a.6.6 0 0 0 .47-.98l-4.2-5.1a.6.6 0 0 0-.93 0l-4.2 5.1a.6.6 0 0 0 .46.98Z" fill={colors.text} />
-        </Svg>
+        <CaretUpIcon size={12} weight="fill" color={colors.text} />
       </Pressable>
       )}
     </View>

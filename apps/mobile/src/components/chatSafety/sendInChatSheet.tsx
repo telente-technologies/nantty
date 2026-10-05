@@ -7,9 +7,11 @@ import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/errorState";
+import { TextField } from "@/components/ui/input";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
+import { chatCryptoService, readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
 import { chatSafetyService } from "@/services/chatSafety.service";
 import { messagesService } from "@/services/messages.service";
 import type { Conversation, SharedContentReference } from "@/types";
@@ -28,20 +30,33 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
   const styles = useStyles();
   const queryClient = useQueryClient();
   const [selectedConversationIds, setSelectedConversationIds] = useState<readonly string[]>([]);
+  const [note, setNote] = useState("");
   const chats = useQuery({ queryKey: ["conversations", "share-targets"], queryFn: () => messagesService.fetchConversationList("all"), enabled: !!reference });
   const send = useMutation({
-    mutationFn: () => chatSafetyService.sendContentToChats({ conversationIds: selectedConversationIds, reference: reference! }),
+    mutationFn: async () => {
+      const text = note.trim();
+      if (!text) return chatSafetyService.sendContentToChats({ conversationIds: selectedConversationIds, reference: reference! });
+      const selected = (chats.data ?? []).filter((conversation) => selectedConversationIds.includes(conversation.id));
+      const sealed = await Promise.all(selected.map(async (conversation) => ({ conversationId: conversation.id, encrypted: await chatCryptoService.encryptForConversation(conversation, { text, sharedContent: reference! }) })));
+      const result = await chatSafetyService.sendContentToChats({
+        conversationIds: selectedConversationIds, reference: reference!,
+        encryptions: sealed.map(({ conversationId, encrypted }) => ({ conversationId, deviceId: encrypted.encryption.deviceId, ciphertext: encrypted.encryption.ciphertext })),
+      });
+      await Promise.all(sealed.map(({ encrypted }) => encrypted.confirmSent(null)));
+      return result;
+    },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       onClose();
       showAlertWithButtons("Sent", `Shared in ${result.sentCount} ${result.sentCount === 1 ? "chat" : "chats"}.`);
     },
-    onError: (error) => showAlertWithButtons("Couldn't send", error instanceof Error ? error.message : undefined),
+    onError: (error) => showAlertWithButtons("Couldn't send", readChatCryptoErrorMessage(error) ?? (error instanceof Error ? error.message : undefined)),
   });
 
   useEffect(() => {
     if (!reference) {
       setSelectedConversationIds([]);
+      setNote("");
     }
   }, [reference]);
 
@@ -76,6 +91,7 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
             }}
           />
         )}
+        <TextField label="Add a note (optional)" value={note} onChangeText={setNote} maxLength={1000} />
         <Button title={selectedConversationIds.length > 1 ? `Send to ${selectedConversationIds.length} chats` : "Send"} disabled={selectedConversationIds.length === 0} loading={send.isPending} onPress={() => send.mutate()} />
       </View>
     </BottomSheet>
