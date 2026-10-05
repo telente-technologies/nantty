@@ -9,7 +9,6 @@ export function createHeicConverter(options: { readonly heifConvertPath: string;
       await run(options.heifConvertPath, ["-q", "90", inputPath, outputJpegPath], 60_000);
       return true;
     } catch {
-      // falls back to ffmpeg
     }
     if (options.ffmpeg.mode === "disabled") return false;
     try {

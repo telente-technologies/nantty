@@ -43,7 +43,6 @@ export function parseJobMessage(body: string): Job {
     const parsed = JSON.parse(body) as Partial<Job>;
     if (typeof parsed.id === "string" && typeof parsed.type === "string" && typeof parsed.payload === "object" && parsed.payload !== null) return { id: parsed.id, type: parsed.type, payload: parsed.payload };
   } catch {
-    // falls through to the poison error
   }
   throw new PoisonMessageError("malformed job message");
 }

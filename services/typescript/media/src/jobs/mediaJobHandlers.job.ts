@@ -1,7 +1,8 @@
-import { deleteMediaJobType, muteMediaAudioJobType, processMediaJobType } from "../constants/media.constant.js";
+import { deleteMediaJobType, muteMediaAudioJobType, processMediaJobType, renderDownloadVariantJobType } from "../constants/media.constant.js";
 import type { JobHandlers } from "../interfaces/jobQueue.interface.js";
 import { muteMediaAudio, restoreMediaAudio } from "../modules/assets/services/audioRemedy.service.js";
 import { deleteMediaAssets } from "../modules/assets/services/mediaDeletion.service.js";
+import { renderQueuedDownloadVariant } from "../modules/downloads/services/downloadVariantRendering.service.js";
 import { runMediaPipeline } from "../modules/assets/services/mediaPipeline.service.js";
 import type { HandlerContext } from "../types/handlerContext.type.js";
 
@@ -19,6 +20,10 @@ export function createMediaJobHandlers(context: HandlerContext): JobHandlers {
       if (typeof payload["mediaId"] !== "string") return;
       const claimId = typeof payload["claimId"] === "string" ? payload["claimId"] : null;
       await (payload["mode"] === "restore" ? restoreMediaAudio : muteMediaAudio)(context, payload["mediaId"], claimId);
+    },
+    [renderDownloadVariantJobType]: async (payload, attempt) => {
+      if (typeof payload["variantId"] !== "string") return;
+      await renderQueuedDownloadVariant(context, payload["variantId"], attempt);
     },
   };
 }

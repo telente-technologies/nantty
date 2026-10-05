@@ -422,6 +422,7 @@ export type MediaAssetWhereInput = {
   processedAt?: Prisma.DateTimeNullableFilter<"MediaAsset"> | Date | string | null
   variants?: Prisma.MediaVariantListRelationFilter
   accessLogs?: Prisma.MediaAccessLogListRelationFilter
+  downloadVariants?: Prisma.MediaDownloadVariantListRelationFilter
 }
 
 export type MediaAssetOrderByWithRelationInput = {
@@ -455,6 +456,7 @@ export type MediaAssetOrderByWithRelationInput = {
   processedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   variants?: Prisma.MediaVariantOrderByRelationAggregateInput
   accessLogs?: Prisma.MediaAccessLogOrderByRelationAggregateInput
+  downloadVariants?: Prisma.MediaDownloadVariantOrderByRelationAggregateInput
 }
 
 export type MediaAssetWhereUniqueInput = Prisma.AtLeast<{
@@ -491,6 +493,7 @@ export type MediaAssetWhereUniqueInput = Prisma.AtLeast<{
   processedAt?: Prisma.DateTimeNullableFilter<"MediaAsset"> | Date | string | null
   variants?: Prisma.MediaVariantListRelationFilter
   accessLogs?: Prisma.MediaAccessLogListRelationFilter
+  downloadVariants?: Prisma.MediaDownloadVariantListRelationFilter
 }, "id">
 
 export type MediaAssetOrderByWithAggregationInput = {
@@ -594,6 +597,7 @@ export type MediaAssetCreateInput = {
   processedAt?: Date | string | null
   variants?: Prisma.MediaVariantCreateNestedManyWithoutAssetInput
   accessLogs?: Prisma.MediaAccessLogCreateNestedManyWithoutMediaInput
+  downloadVariants?: Prisma.MediaDownloadVariantCreateNestedManyWithoutAssetInput
 }
 
 export type MediaAssetUncheckedCreateInput = {
@@ -627,6 +631,7 @@ export type MediaAssetUncheckedCreateInput = {
   processedAt?: Date | string | null
   variants?: Prisma.MediaVariantUncheckedCreateNestedManyWithoutAssetInput
   accessLogs?: Prisma.MediaAccessLogUncheckedCreateNestedManyWithoutMediaInput
+  downloadVariants?: Prisma.MediaDownloadVariantUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type MediaAssetUpdateInput = {
@@ -660,6 +665,7 @@ export type MediaAssetUpdateInput = {
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   variants?: Prisma.MediaVariantUpdateManyWithoutAssetNestedInput
   accessLogs?: Prisma.MediaAccessLogUpdateManyWithoutMediaNestedInput
+  downloadVariants?: Prisma.MediaDownloadVariantUpdateManyWithoutAssetNestedInput
 }
 
 export type MediaAssetUncheckedUpdateInput = {
@@ -693,6 +699,7 @@ export type MediaAssetUncheckedUpdateInput = {
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   variants?: Prisma.MediaVariantUncheckedUpdateManyWithoutAssetNestedInput
   accessLogs?: Prisma.MediaAccessLogUncheckedUpdateManyWithoutMediaNestedInput
+  downloadVariants?: Prisma.MediaDownloadVariantUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 export type MediaAssetCreateManyInput = {
@@ -946,6 +953,20 @@ export type MediaAssetUpdateOneRequiredWithoutVariantsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MediaAssetUpdateToOneWithWhereWithoutVariantsInput, Prisma.MediaAssetUpdateWithoutVariantsInput>, Prisma.MediaAssetUncheckedUpdateWithoutVariantsInput>
 }
 
+export type MediaAssetCreateNestedOneWithoutDownloadVariantsInput = {
+  create?: Prisma.XOR<Prisma.MediaAssetCreateWithoutDownloadVariantsInput, Prisma.MediaAssetUncheckedCreateWithoutDownloadVariantsInput>
+  connectOrCreate?: Prisma.MediaAssetCreateOrConnectWithoutDownloadVariantsInput
+  connect?: Prisma.MediaAssetWhereUniqueInput
+}
+
+export type MediaAssetUpdateOneRequiredWithoutDownloadVariantsNestedInput = {
+  create?: Prisma.XOR<Prisma.MediaAssetCreateWithoutDownloadVariantsInput, Prisma.MediaAssetUncheckedCreateWithoutDownloadVariantsInput>
+  connectOrCreate?: Prisma.MediaAssetCreateOrConnectWithoutDownloadVariantsInput
+  upsert?: Prisma.MediaAssetUpsertWithoutDownloadVariantsInput
+  connect?: Prisma.MediaAssetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MediaAssetUpdateToOneWithWhereWithoutDownloadVariantsInput, Prisma.MediaAssetUpdateWithoutDownloadVariantsInput>, Prisma.MediaAssetUncheckedUpdateWithoutDownloadVariantsInput>
+}
+
 export type MediaAssetCreateNestedOneWithoutAccessLogsInput = {
   create?: Prisma.XOR<Prisma.MediaAssetCreateWithoutAccessLogsInput, Prisma.MediaAssetUncheckedCreateWithoutAccessLogsInput>
   connectOrCreate?: Prisma.MediaAssetCreateOrConnectWithoutAccessLogsInput
@@ -990,6 +1011,7 @@ export type MediaAssetCreateWithoutVariantsInput = {
   updatedAt?: Date | string
   processedAt?: Date | string | null
   accessLogs?: Prisma.MediaAccessLogCreateNestedManyWithoutMediaInput
+  downloadVariants?: Prisma.MediaDownloadVariantCreateNestedManyWithoutAssetInput
 }
 
 export type MediaAssetUncheckedCreateWithoutVariantsInput = {
@@ -1022,6 +1044,7 @@ export type MediaAssetUncheckedCreateWithoutVariantsInput = {
   updatedAt?: Date | string
   processedAt?: Date | string | null
   accessLogs?: Prisma.MediaAccessLogUncheckedCreateNestedManyWithoutMediaInput
+  downloadVariants?: Prisma.MediaDownloadVariantUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type MediaAssetCreateOrConnectWithoutVariantsInput = {
@@ -1070,6 +1093,7 @@ export type MediaAssetUpdateWithoutVariantsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accessLogs?: Prisma.MediaAccessLogUpdateManyWithoutMediaNestedInput
+  downloadVariants?: Prisma.MediaDownloadVariantUpdateManyWithoutAssetNestedInput
 }
 
 export type MediaAssetUncheckedUpdateWithoutVariantsInput = {
@@ -1101,6 +1125,155 @@ export type MediaAssetUncheckedUpdateWithoutVariantsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accessLogs?: Prisma.MediaAccessLogUncheckedUpdateManyWithoutMediaNestedInput
+  downloadVariants?: Prisma.MediaDownloadVariantUncheckedUpdateManyWithoutAssetNestedInput
+}
+
+export type MediaAssetCreateWithoutDownloadVariantsInput = {
+  id: string
+  ownerId: string
+  purpose: $Enums.MediaPurpose
+  kind: $Enums.MediaKind
+  status?: $Enums.MediaStatus
+  isPrivate?: boolean
+  declaredMimeType: string
+  sniffedMimeType?: string | null
+  sizeBytes: bigint | number
+  sha256?: string | null
+  quarantineBucket: string
+  quarantineKey: string
+  width?: number
+  height?: number
+  durationSeconds?: number | null
+  pageCount?: number | null
+  blurhash?: string | null
+  posterKey?: string | null
+  hlsKey?: string | null
+  scanResult?: string | null
+  moderationScore?: number | null
+  moderationDecision?: string | null
+  rejectionReason?: string | null
+  expiresAt?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  processedAt?: Date | string | null
+  variants?: Prisma.MediaVariantCreateNestedManyWithoutAssetInput
+  accessLogs?: Prisma.MediaAccessLogCreateNestedManyWithoutMediaInput
+}
+
+export type MediaAssetUncheckedCreateWithoutDownloadVariantsInput = {
+  id: string
+  ownerId: string
+  purpose: $Enums.MediaPurpose
+  kind: $Enums.MediaKind
+  status?: $Enums.MediaStatus
+  isPrivate?: boolean
+  declaredMimeType: string
+  sniffedMimeType?: string | null
+  sizeBytes: bigint | number
+  sha256?: string | null
+  quarantineBucket: string
+  quarantineKey: string
+  width?: number
+  height?: number
+  durationSeconds?: number | null
+  pageCount?: number | null
+  blurhash?: string | null
+  posterKey?: string | null
+  hlsKey?: string | null
+  scanResult?: string | null
+  moderationScore?: number | null
+  moderationDecision?: string | null
+  rejectionReason?: string | null
+  expiresAt?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  processedAt?: Date | string | null
+  variants?: Prisma.MediaVariantUncheckedCreateNestedManyWithoutAssetInput
+  accessLogs?: Prisma.MediaAccessLogUncheckedCreateNestedManyWithoutMediaInput
+}
+
+export type MediaAssetCreateOrConnectWithoutDownloadVariantsInput = {
+  where: Prisma.MediaAssetWhereUniqueInput
+  create: Prisma.XOR<Prisma.MediaAssetCreateWithoutDownloadVariantsInput, Prisma.MediaAssetUncheckedCreateWithoutDownloadVariantsInput>
+}
+
+export type MediaAssetUpsertWithoutDownloadVariantsInput = {
+  update: Prisma.XOR<Prisma.MediaAssetUpdateWithoutDownloadVariantsInput, Prisma.MediaAssetUncheckedUpdateWithoutDownloadVariantsInput>
+  create: Prisma.XOR<Prisma.MediaAssetCreateWithoutDownloadVariantsInput, Prisma.MediaAssetUncheckedCreateWithoutDownloadVariantsInput>
+  where?: Prisma.MediaAssetWhereInput
+}
+
+export type MediaAssetUpdateToOneWithWhereWithoutDownloadVariantsInput = {
+  where?: Prisma.MediaAssetWhereInput
+  data: Prisma.XOR<Prisma.MediaAssetUpdateWithoutDownloadVariantsInput, Prisma.MediaAssetUncheckedUpdateWithoutDownloadVariantsInput>
+}
+
+export type MediaAssetUpdateWithoutDownloadVariantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.EnumMediaPurposeFieldUpdateOperationsInput | $Enums.MediaPurpose
+  kind?: Prisma.EnumMediaKindFieldUpdateOperationsInput | $Enums.MediaKind
+  status?: Prisma.EnumMediaStatusFieldUpdateOperationsInput | $Enums.MediaStatus
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sniffedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quarantineBucket?: Prisma.StringFieldUpdateOperationsInput | string
+  quarantineKey?: Prisma.StringFieldUpdateOperationsInput | string
+  width?: Prisma.IntFieldUpdateOperationsInput | number
+  height?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSeconds?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  pageCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  blurhash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posterKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hlsKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scanResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  moderationDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  variants?: Prisma.MediaVariantUpdateManyWithoutAssetNestedInput
+  accessLogs?: Prisma.MediaAccessLogUpdateManyWithoutMediaNestedInput
+}
+
+export type MediaAssetUncheckedUpdateWithoutDownloadVariantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.EnumMediaPurposeFieldUpdateOperationsInput | $Enums.MediaPurpose
+  kind?: Prisma.EnumMediaKindFieldUpdateOperationsInput | $Enums.MediaKind
+  status?: Prisma.EnumMediaStatusFieldUpdateOperationsInput | $Enums.MediaStatus
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  declaredMimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sniffedMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  sha256?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  quarantineBucket?: Prisma.StringFieldUpdateOperationsInput | string
+  quarantineKey?: Prisma.StringFieldUpdateOperationsInput | string
+  width?: Prisma.IntFieldUpdateOperationsInput | number
+  height?: Prisma.IntFieldUpdateOperationsInput | number
+  durationSeconds?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  pageCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  blurhash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posterKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hlsKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scanResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  moderationDecision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  variants?: Prisma.MediaVariantUncheckedUpdateManyWithoutAssetNestedInput
   accessLogs?: Prisma.MediaAccessLogUncheckedUpdateManyWithoutMediaNestedInput
 }
 
@@ -1134,6 +1307,7 @@ export type MediaAssetCreateWithoutAccessLogsInput = {
   updatedAt?: Date | string
   processedAt?: Date | string | null
   variants?: Prisma.MediaVariantCreateNestedManyWithoutAssetInput
+  downloadVariants?: Prisma.MediaDownloadVariantCreateNestedManyWithoutAssetInput
 }
 
 export type MediaAssetUncheckedCreateWithoutAccessLogsInput = {
@@ -1166,6 +1340,7 @@ export type MediaAssetUncheckedCreateWithoutAccessLogsInput = {
   updatedAt?: Date | string
   processedAt?: Date | string | null
   variants?: Prisma.MediaVariantUncheckedCreateNestedManyWithoutAssetInput
+  downloadVariants?: Prisma.MediaDownloadVariantUncheckedCreateNestedManyWithoutAssetInput
 }
 
 export type MediaAssetCreateOrConnectWithoutAccessLogsInput = {
@@ -1214,6 +1389,7 @@ export type MediaAssetUpdateWithoutAccessLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   variants?: Prisma.MediaVariantUpdateManyWithoutAssetNestedInput
+  downloadVariants?: Prisma.MediaDownloadVariantUpdateManyWithoutAssetNestedInput
 }
 
 export type MediaAssetUncheckedUpdateWithoutAccessLogsInput = {
@@ -1246,6 +1422,7 @@ export type MediaAssetUncheckedUpdateWithoutAccessLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   variants?: Prisma.MediaVariantUncheckedUpdateManyWithoutAssetNestedInput
+  downloadVariants?: Prisma.MediaDownloadVariantUncheckedUpdateManyWithoutAssetNestedInput
 }
 
 
@@ -1256,11 +1433,13 @@ export type MediaAssetUncheckedUpdateWithoutAccessLogsInput = {
 export type MediaAssetCountOutputType = {
   variants: number
   accessLogs: number
+  downloadVariants: number
 }
 
 export type MediaAssetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   variants?: boolean | MediaAssetCountOutputTypeCountVariantsArgs
   accessLogs?: boolean | MediaAssetCountOutputTypeCountAccessLogsArgs
+  downloadVariants?: boolean | MediaAssetCountOutputTypeCountDownloadVariantsArgs
 }
 
 /**
@@ -1285,6 +1464,13 @@ export type MediaAssetCountOutputTypeCountVariantsArgs<ExtArgs extends runtime.T
  */
 export type MediaAssetCountOutputTypeCountAccessLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.MediaAccessLogWhereInput
+}
+
+/**
+ * MediaAssetCountOutputType without action
+ */
+export type MediaAssetCountOutputTypeCountDownloadVariantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MediaDownloadVariantWhereInput
 }
 
 
@@ -1319,6 +1505,7 @@ export type MediaAssetSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   processedAt?: boolean
   variants?: boolean | Prisma.MediaAsset$variantsArgs<ExtArgs>
   accessLogs?: boolean | Prisma.MediaAsset$accessLogsArgs<ExtArgs>
+  downloadVariants?: boolean | Prisma.MediaAsset$downloadVariantsArgs<ExtArgs>
   _count?: boolean | Prisma.MediaAssetCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mediaAsset"]>
 
@@ -1419,6 +1606,7 @@ export type MediaAssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type MediaAssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   variants?: boolean | Prisma.MediaAsset$variantsArgs<ExtArgs>
   accessLogs?: boolean | Prisma.MediaAsset$accessLogsArgs<ExtArgs>
+  downloadVariants?: boolean | Prisma.MediaAsset$downloadVariantsArgs<ExtArgs>
   _count?: boolean | Prisma.MediaAssetCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MediaAssetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1429,6 +1617,7 @@ export type $MediaAssetPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     variants: Prisma.$MediaVariantPayload<ExtArgs>[]
     accessLogs: Prisma.$MediaAccessLogPayload<ExtArgs>[]
+    downloadVariants: Prisma.$MediaDownloadVariantPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1855,6 +2044,7 @@ export interface Prisma__MediaAssetClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   variants<T extends Prisma.MediaAsset$variantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MediaAsset$variantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaVariantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accessLogs<T extends Prisma.MediaAsset$accessLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MediaAsset$accessLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaAccessLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  downloadVariants<T extends Prisma.MediaAsset$downloadVariantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MediaAsset$downloadVariantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaDownloadVariantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2350,6 +2540,30 @@ export type MediaAsset$accessLogsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.MediaAccessLogScalarFieldEnum | Prisma.MediaAccessLogScalarFieldEnum[]
+}
+
+/**
+ * MediaAsset.downloadVariants
+ */
+export type MediaAsset$downloadVariantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MediaDownloadVariant
+   */
+  select?: Prisma.MediaDownloadVariantSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MediaDownloadVariant
+   */
+  omit?: Prisma.MediaDownloadVariantOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MediaDownloadVariantInclude<ExtArgs> | null
+  where?: Prisma.MediaDownloadVariantWhereInput
+  orderBy?: Prisma.MediaDownloadVariantOrderByWithRelationInput | Prisma.MediaDownloadVariantOrderByWithRelationInput[]
+  cursor?: Prisma.MediaDownloadVariantWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MediaDownloadVariantScalarFieldEnum | Prisma.MediaDownloadVariantScalarFieldEnum[]
 }
 
 /**
