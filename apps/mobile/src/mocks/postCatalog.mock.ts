@@ -79,7 +79,7 @@ const collectPostMedia = (seed: PostSeed): Media[] => {
     : seed.photoKey
       ? postImageUrlsForPhotoKey(seed.photoKey)
       : [];
-  return urls.slice(0, MAXIMUM_IMAGES_PER_POST).map((url) => ({ type: "image" as const, url }));
+  return urls.slice(0, MAXIMUM_IMAGES_PER_POST).map((url, index) => ({ id: `m_${seed.id}_${index}`, type: "image" as const, url }));
 };
 
 function buildPostFromSeed(seed: PostSeed, sponsored = false): Post {

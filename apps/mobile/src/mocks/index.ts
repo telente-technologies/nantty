@@ -43,11 +43,14 @@ import { mediaMocks } from "./media.mock";
 import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
 import { postsMocks } from "./posts.mock";
+import { mediaDownloadsMocks } from "./mediaDownloads.mock";
 import { taggedUsersMocks } from "./taggedUsers.mock";
 import { postAudienceMocks } from "./postAudience.mock";
 import { placesMocks } from "./places.mock";
 import { postTagsMocks } from "./postTags.mock";
 import { productsMocks } from "./products.mock";
+import { searchMocks } from "./search.mock";
+import { martHighlightsMocks } from "./martHighlights.mock";
 import { storeRewardsMocks } from "./storeRewards.mock";
 import { savesMocks } from "./saves.mock";
 import { guestAccessMocks } from "./guestAccess.mock";
@@ -90,8 +93,11 @@ const routes: MockRoute[] = [
   ...placesMocks,
   ...postTagsMocks,
   ...taggedUsersMocks,
+  ...mediaDownloadsMocks,
   ...postsMocks,
   ...productsMocks,
+  ...searchMocks,
+  ...martHighlightsMocks,
   ...storeRewardsMocks,
   ...savesMocks,
   ...cartMocks,

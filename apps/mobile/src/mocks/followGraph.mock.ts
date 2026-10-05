@@ -15,6 +15,7 @@ import {
   listIncomingFollowRequests,
   privateUserIds,
   rejectedUserIds,
+  relationshipDetailsFor,
   requestedUserIds,
 } from "./socialGraph.mock";
 import { findDirectoryUserById, summariseUser } from "./userDirectory.mock";
@@ -44,7 +45,7 @@ const requestToFollowOrFollow = (userId: string): FollowResult => {
 const toEntry = (userId: string): ConnectionEntry[] => {
   const user = findDirectoryUserById(userId);
   const followState = followStateForUser(userId);
-  return user ? [{ ...summariseUser(user), isFollowing: followState === "accepted", followState }] : [];
+  return user ? [{ ...summariseUser(user), isFollowing: followState === "accepted", followState, ...relationshipDetailsFor(userId) }] : [];
 };
 
 const listConnectionsPage = (ownerId: string, ids: readonly string[], query: URLSearchParams) => {

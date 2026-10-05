@@ -103,16 +103,17 @@ export const ordersMocks: MockRoute[] = [
     return { orderId, reference: `chk-${orderId}`, authorizationUrl: "https://checkout.paystack.com/mock", accessCode: `ac_${orderId}` };
   }),
   createMockRoute("GET", "/api/v1/payments/channels", () => ({ channels: ["card", "bank_transfer", "ussd"] })),
-  createMockRoute("POST", "/api/v1/payments/charge-saved-card", ({ body }) => {
-    const { orderId } = body as { orderId: string };
+  createMockRoute("POST", "/api/v1/payments/saved-cards/charges", ({ body }) => {
+    const { paymentReference } = body as { paymentReference: string };
+    const orderId = paymentReference.replace(/^chk-/, "");
     markCheckoutGroupAsPaid(orderId);
-    return { status: "paid" };
+    return { status: "succeeded", checkoutUrl: null, authorizationUrl: null, paymentIntent: { reference: paymentReference, status: "succeeded" } };
   }),
   createMockRoute("POST", "/api/v1/payments/orders/:orderId/verify", ({ params }) => {
     const attempts = (paymentAttempts.get(params.orderId!) ?? 0) + 1;
     paymentAttempts.set(params.orderId!, attempts);
     if (attempts < 2) return { status: "pending" };
     markCheckoutGroupAsPaid(params.orderId!);
-    return { status: "paid", savedCard: { authorizationCode: "AUTH_mock", brand: "Visa", last4: "4081", expMonth: 8, expYear: 2028 } };
+    return { status: "paid", savedCard: { savedCardId: "0190f3a2-7b1c-7cde-9f00-000000000001", brand: "Visa", last4: "4081", expMonth: 8, expYear: 2028 } };
   }),
 ];
