@@ -36,6 +36,7 @@ export type MainStackParamList = {
   Category: { categoryId: string; name: string; collection?: "sales_of_the_day" | "featured_brands" | "new_arrivals" };
   ProductDetail: { productId: string };
   ProductReviews: { productId: string };
+  WriteReview: { productId: string; productName?: string; imageUrl?: string | null };
   Store: { storeId: string };
   Cart: undefined;
   Checkout: undefined;

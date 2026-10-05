@@ -8,6 +8,7 @@ import { NotificationsScreen } from "@/screens/notifications/notifications.scree
 import { CategoryScreen } from "@/screens/explore/category.screen";
 import { ProductDetailScreen } from "@/screens/product/productDetail.screen";
 import { ProductReviewsScreen } from "@/screens/product/productReviews.screen";
+import { WriteReviewScreen } from "@/screens/product/writeReview.screen";
 import { StoreScreen } from "@/screens/store/storeDetail.screen";
 import { CartScreen } from "@/screens/cart/cart.screen";
 import { CheckoutScreen } from "@/screens/checkout/checkout.screen";
@@ -116,6 +117,7 @@ export function MainNavigator() {
       <Stack.Screen name="Category" component={CategoryScreen} />
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <Stack.Screen name="ProductReviews" component={ProductReviewsScreen} />
+      <Stack.Screen name="WriteReview" component={WriteReviewScreen} />
       <Stack.Screen name="Store" component={StoreScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
