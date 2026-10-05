@@ -10,6 +10,7 @@ import { mountDigestsModule } from "../modules/digests/digests.module.js";
 import { mountExploreModule } from "../modules/explore/explore.module.js";
 import { mountFeedsModule } from "../modules/feeds/feeds.module.js";
 import { mountInternalSourcesModule } from "../modules/internalSources/internalSources.module.js";
+import { mountStoreFollowsModule } from "../modules/storeFollows/storeFollows.module.js";
 import { mountStoreInboxModule } from "../modules/storeInbox/storeInbox.module.js";
 import { mountFollowsModule } from "../modules/follows/follows.module.js";
 import { mountLinkPreviewsModule } from "../modules/linkPreviews/linkPreviews.module.js";
@@ -41,6 +42,7 @@ export function registerRoutes(router: HttpRouter, route: RouteFactory, context:
   mountFeedsModule(router, route, context);
   mountExploreModule(router, route, context);
   mountStoreInboxModule(router, route, context, internalToken);
+  mountStoreFollowsModule(router, route, context, internalToken);
   mountConversationsModule(router, route, context);
   mountMessagesModule(router, route, context);
   mountChatSettingsModule(router, route, context);
