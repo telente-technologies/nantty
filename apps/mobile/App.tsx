@@ -23,6 +23,7 @@ import {
   reactQueryPersistOptions,
 } from "@/cache/queryClient.config";
 import { invalidateQueriesAffectedByReplayedOfflineMutation } from "@/cache/offlineReplayInvalidation.util";
+import { BootSplash } from "@/components/brand/bootSplash";
 import { KeepRealtimeMessagingConnectedWhileSignedIn } from "@/components/chat/appWideRealtimeConnection";
 import { DeviceFrame } from "@/components/ui/deviceFrame";
 import { CelebrationHost } from "@/components/celebrations/celebrationHost";
@@ -37,6 +38,10 @@ import { ThemeProvider, useTheme } from "@/theme";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 WebBrowser.maybeCompleteAuthSession();
+
+const hideNativeSplash = () => {
+  SplashScreen.hideAsync().catch(() => undefined);
+};
 
 export default function App() {
   const [queryClient] = useState(createZudomartQueryClient);
@@ -93,7 +98,13 @@ export default function App() {
     if (ready) SplashScreen.hideAsync().catch(() => undefined);
   }, [ready]);
 
-  if (!ready) return null;
+  if (!ready) {
+    return (
+      <ThemeProvider>
+        <BootSplash onLayout={hideNativeSplash} />
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider>
