@@ -1,4 +1,4 @@
-h1:waJCRJ9q1gjrjrfiqh1ab4zkTvhSp/lMDYQ4YdG+6kQ=
+h1:zFk4jMbGDdqOldEjLsZ0wr49J314s4IJwTM1ik4q4ko=
 20261003211222_create_orders_tables.up.sql h1:pbNSwzL+emKRIA9gQLC8R/1FSMpALZClaanNypduIwU=
 20261004000534_add_flash_sales_bundles_and_campaign_redemptions.up.sql h1:mscFQZjSqfCGceopLlIIuaLuPTV6OYBO21jEAzof1DI=
 20261004120000_add_order_group_payment_mode.up.sql h1:zXTflJWM/H9qyLYr6nJkqOuNDeTglUoeyCgecsScL8Q=
@@ -6,3 +6,4 @@ h1:waJCRJ9q1gjrjrfiqh1ab4zkTvhSp/lMDYQ4YdG+6kQ=
 20261004140000_add_invoice_counters.up.sql h1:9hl49LhDBTsMhRxJf/UF1UXjE2WoafXFks+brmdK4Kk=
 20261005030000_grant_order_status_read_to_money.up.sql h1:jFYOT8jGfvE5MRalhX0MRqVVtJsEjvJbTpJlwYFG8m4=
 20261005043336_add_delivery_areas_customer_profiles_and_segments.up.sql h1:nsB6uU6D6NpG6mN9l/o7YxymcwUhVAAaL3wRr4tY64s=
+20261005160706_add_sale_attribution_and_refund_records.up.sql h1:Ec/v+V0RftuPNzFi2PudbNNeVgBJmKzG/NFNdJJbvCU=
