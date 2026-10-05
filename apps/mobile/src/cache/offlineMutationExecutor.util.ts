@@ -1,5 +1,5 @@
 import { api } from "@/services/apiClient.service";
-import type { Message } from "@/types";
+import { sendEncryptedTextMessage } from "@/services/messages.service";
 
 import { messageHistoryStore } from "./messageHistory.database";
 import type { QueuedOfflineMutation } from "./offlineMutation.type";
@@ -16,10 +16,10 @@ export async function sendQueuedOfflineMutationToServer(mutation: QueuedOfflineM
     case "unfollowUser":
       return api.delete<void>(`/api/v1/users/${mutation.payload.userId}/follow`, idempotencyOptions);
     case "sendMessage": {
-      const deliveredMessage = await api.post<Message>(
-        `/api/v1/conversations/${mutation.payload.conversationId}/messages`,
-        { text: mutation.payload.text, linkPreview: null, mentions: mutation.payload.mentions },
-        idempotencyOptions,
+      const deliveredMessage = await sendEncryptedTextMessage(
+        mutation.payload.conversationId,
+        { text: mutation.payload.text, linkPreview: mutation.payload.linkPreview ?? null, mentions: mutation.payload.mentions },
+        mutation.idempotencyKey,
       );
       messageHistoryStore.replacePendingMessageWithDeliveredMessage(mutation.payload.localMessageId, deliveredMessage);
       return deliveredMessage;

@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 
+import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import type { Conversation, Message, MessageReactionSummary, RealtimeServerEvent } from "@/types";
 
 import { messageHistoryStore } from "./messageHistory.database";
@@ -61,7 +62,9 @@ export function removeExpiredMessagesFromCaches(queryClient: QueryClient, conver
   messageHistoryStore.deleteExpiredMessages();
   const now = new Date().toISOString();
   queryClient.setQueryData<LocallyStoredMessage[]>(["messages", conversationId], (existing) => {
-    if (!existing?.some((message) => message.expiresAt && message.expiresAt <= now)) return existing;
+    const expiredIds = existing?.filter((message) => message.expiresAt && message.expiresAt <= now).map((message) => message.id) ?? [];
+    if (expiredIds.length === 0 || !existing) return existing;
+    void chatCryptoService.forgetMessages(expiredIds).catch(() => undefined);
     return existing.filter((message) => !message.expiresAt || message.expiresAt > now);
   });
 }
