@@ -224,6 +224,7 @@ const DefaultSource = SourceUser
 const (
 	SourceUser       Source = "user"
 	SourceClassifier Source = "classifier"
+	SourceAutomation Source = "automation"
 )
 
 func (s Source) String() string {
@@ -233,7 +234,7 @@ func (s Source) String() string {
 // SourceValidator is a validator for the "source" field enum values. It is called by the builders before save.
 func SourceValidator(s Source) error {
 	switch s {
-	case SourceUser, SourceClassifier:
+	case SourceUser, SourceClassifier, SourceAutomation:
 		return nil
 	default:
 		return fmt.Errorf("contentreport: invalid enum value for source field: %q", s)
