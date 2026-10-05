@@ -17,6 +17,7 @@ import (
 	"zudomart/modules/auth/src/generated/ent"
 	"zudomart/modules/auth/src/integrations"
 	"zudomart/modules/auth/src/migrations"
+	emailverification "zudomart/modules/auth/src/modules/emailVerification"
 	onetimecodes "zudomart/modules/auth/src/modules/oneTimeCodes"
 	"zudomart/modules/auth/src/modules/passwords"
 	"zudomart/modules/auth/src/modules/registration"
@@ -104,6 +105,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	passwords.Mount(mux, module.container)
 	socialsignin.Mount(mux, module.container)
 	signingkeys.Mount(mux, module.container)
+	emailverification.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

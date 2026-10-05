@@ -17,7 +17,7 @@ func (OneTimeCode) Mixin() []ent.Mixin {
 func (OneTimeCode) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("destination").NotEmpty().MaxLen(254).Immutable(),
-		field.Enum("purpose").Values("signup", "reset", "login", "signup_verified", "reset_verified", "login_verified").Immutable(),
+		field.Enum("purpose").Values("signup", "reset", "login", "signup_verified", "reset_verified", "login_verified", "email_verification").Immutable(),
 		field.String("secret_hash").NotEmpty().Immutable().Sensitive(),
 		field.Time("expires_at").Immutable(),
 		field.Int("failed_attempts").Default(0).NonNegative(),

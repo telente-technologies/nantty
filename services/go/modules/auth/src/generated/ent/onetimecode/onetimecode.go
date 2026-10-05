@@ -75,12 +75,13 @@ type Purpose string
 
 // Purpose values.
 const (
-	PurposeSignup         Purpose = "signup"
-	PurposeReset          Purpose = "reset"
-	PurposeLogin          Purpose = "login"
-	PurposeSignupVerified Purpose = "signup_verified"
-	PurposeResetVerified  Purpose = "reset_verified"
-	PurposeLoginVerified  Purpose = "login_verified"
+	PurposeSignup            Purpose = "signup"
+	PurposeReset             Purpose = "reset"
+	PurposeLogin             Purpose = "login"
+	PurposeSignupVerified    Purpose = "signup_verified"
+	PurposeResetVerified     Purpose = "reset_verified"
+	PurposeLoginVerified     Purpose = "login_verified"
+	PurposeEmailVerification Purpose = "email_verification"
 )
 
 func (pu Purpose) String() string {
@@ -90,7 +91,7 @@ func (pu Purpose) String() string {
 // PurposeValidator is a validator for the "purpose" field enum values. It is called by the builders before save.
 func PurposeValidator(pu Purpose) error {
 	switch pu {
-	case PurposeSignup, PurposeReset, PurposeLogin, PurposeSignupVerified, PurposeResetVerified, PurposeLoginVerified:
+	case PurposeSignup, PurposeReset, PurposeLogin, PurposeSignupVerified, PurposeResetVerified, PurposeLoginVerified, PurposeEmailVerification:
 		return nil
 	default:
 		return fmt.Errorf("onetimecode: invalid enum value for purpose field: %q", pu)
