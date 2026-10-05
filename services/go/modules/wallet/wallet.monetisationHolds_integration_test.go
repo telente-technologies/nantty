@@ -3,6 +3,7 @@ package wallet
 import (
 	"context"
 	"net/http"
+	"sync"
 	"testing"
 	"time"
 
@@ -49,5 +50,33 @@ func TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored(t *test
 	}
 	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["creatorTransfers"].(float64) != 1 {
 		t.Fatalf("earnings are released once monetisation is restored: %v", report.Body)
+	}
+}
+
+func TestConcurrentHealthEventsSettleOnTheNewestOne(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: needs Postgres")
+	}
+	harness := startWalletHarness(t, true)
+	holds := harness.wallet.Payouts.Holds
+	creator := uuid.NewString()
+	newest := time.Now().UTC().Truncate(time.Microsecond)
+	var group sync.WaitGroup
+	for index := range 40 {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			change := payoutservices.AccountHealthChange{AccountId: creator, Status: "GOOD_STANDING", CanMonetise: true, OccurredAt: newest.Add(-time.Duration(index+1) * time.Minute)}
+			if index == 20 {
+				change = payoutservices.AccountHealthChange{AccountId: creator, Status: "RESTRICTED", Restrictions: []string{"MONETISATION"}, CanMonetise: false, OccurredAt: newest}
+			}
+			if err := holds.ApplyAccountHealthChange(context.Background(), change); err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+	group.Wait()
+	if paused, err := holds.IsMonetisationPaused(context.Background(), harness.Database, creator); err != nil || !paused {
+		t.Fatalf("the newest restriction must win whatever order the events land in: paused=%v err=%v", paused, err)
 	}
 }

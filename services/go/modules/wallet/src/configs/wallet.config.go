@@ -29,6 +29,7 @@ type WalletSettings struct {
 	CoinNetValueMinorByCurrency  map[string]int64
 	CoinChannelFeeBps            map[string]int64
 	UsersSchema                  string
+	EscrowSchema                 string
 	TrustedCountryHeader         string
 	AdminInternalUrl             string
 	AdminInternalToken           string
@@ -56,6 +57,7 @@ func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		SellerReserveHoldDays:        reader.ReadIntegerOrDefault("WALLET_SELLER_RESERVE_HOLD_DAYS", 90),
 		CoinChannelFeeBps:            ParseChannelFees(reader.ReadStringOrDefault("COIN_CHANNEL_FEE_BPS", "web:300,ios:3000,android:1500")),
 		UsersSchema:                  reader.ReadStringOrDefault("WALLET_USERS_SCHEMA", "users"),
+		EscrowSchema:                 reader.ReadStringOrDefault("ESCROW_DATABASE_SCHEMA", "escrow"),
 		TrustedCountryHeader:         reader.ReadStringOrDefault("PRICING_TRUSTED_COUNTRY_HEADER", "CloudFront-Viewer-Country"),
 		AdminInternalUrl:             reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
 		AdminInternalToken:           reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),

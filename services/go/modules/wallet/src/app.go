@@ -27,6 +27,8 @@ import (
 	coinroutes "zudomart/modules/wallet/src/modules/coins/routes"
 	"zudomart/modules/wallet/src/modules/payouts"
 	payoutroutes "zudomart/modules/wallet/src/modules/payouts/routes"
+	sellermoney "zudomart/modules/wallet/src/modules/sellerMoney"
+	sellermoneyroutes "zudomart/modules/wallet/src/modules/sellerMoney/routes"
 	platformevents "zudomart/platform/events"
 	"zudomart/platform/servicemodule"
 )
@@ -34,6 +36,7 @@ import (
 type Module struct {
 	Coins      *coins.Application
 	Payouts    *payouts.Application
+	Sellers    *sellermoney.Application
 	AdBalances adbalanceservices.AdBalances
 	Reserves   payoutservices.SellerReserves
 }
@@ -73,6 +76,7 @@ func StartWalletModuleWithSettings(ctx context.Context, settings configs.WalletS
 		Coins: coins.NewCoinsApplication(walletContainer), Payouts: payouts.NewPayoutsApplication(walletContainer),
 		AdBalances: adbalanceservices.AdBalances{Container: walletContainer}, Reserves: payoutservices.SellerReserves{Container: walletContainer},
 	}
+	module.Sellers = sellermoney.NewSellerMoneyApplication(module.Payouts)
 	if err := module.Coins.Catalog.SeedDefaultCoinPackagesWhenMissing(ctx); err != nil {
 		_ = resources.Close()
 		return nil, err
@@ -108,6 +112,7 @@ func (module *Module) Name() string { return "wallet" }
 func (module *Module) MountRoutes(mux *http.ServeMux) {
 	coinroutes.MountCoinsRoutes(mux, module.Coins)
 	payoutroutes.MountPayoutsRoutes(mux, module.Payouts)
+	sellermoneyroutes.MountSellerMoneyRoutes(mux, module.Sellers)
 	payoutroutes.MountSellerReserveRoutes(mux, payoutcontrollers.SellerReservesController{Application: module.Payouts, Reserves: module.Reserves})
 	adbalanceroutes.MountAdBalancesRoutes(mux, adbalancecontrollers.AdBalancesController{Container: module.Coins.Container, Balances: module.AdBalances})
 }
@@ -138,6 +143,9 @@ func (module *Module) runPayoutsEveryIntervalUntilContextDone(ctx context.Contex
 			module.Coins.Container.Resources.Logger.InfoContext(ctx, "payout run finished", slog.Any("report", report))
 		case <-confirmTicker.C:
 			module.Payouts.Withdrawals.FinalizeProcessingWithdrawalsOlderThan(ctx, 10*time.Minute)
+			if requested := module.Sellers.Scheduled.RunDueSchedules(ctx, 200); requested > 0 {
+				module.Coins.Container.Resources.Logger.InfoContext(ctx, "scheduled seller payouts requested", slog.Int("count", requested))
+			}
 		}
 	}
 }
