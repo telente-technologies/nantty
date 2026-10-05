@@ -23,6 +23,14 @@ import { createUpdatePostSensitivityHandler } from "./commands/updatePostSensiti
 import { createUpdateReplySettingsHandler } from "./commands/updateReplySettings/updateReplySettings.handler.js";
 import { createPostAudienceController } from "./controllers/postAudience.controller.js";
 import { createListPostQuotesHandler } from "./queries/listPostQuotes/listPostQuotes.handler.js";
+import { createSetPostTagsHandler } from "./commands/setPostTags/setPostTags.handler.js";
+import { createRemoveOwnPostTagHandler } from "./commands/removeOwnPostTag/removeOwnPostTag.handler.js";
+import { createUpdateTaggingSettingsHandler } from "./commands/updateTaggingSettings/updateTaggingSettings.handler.js";
+import { createGetTaggingSettingsHandler } from "./queries/getTaggingSettings/getTaggingSettings.handler.js";
+import { createListPostTaggedUsersHandler } from "./queries/listPostTaggedUsers/listPostTaggedUsers.handler.js";
+import { createListTagCandidatesHandler } from "./queries/listTagCandidates/listTagCandidates.handler.js";
+import { createPostTagsController } from "./controllers/postTags.controller.js";
+import { registerPostTagsRoutes } from "./routes/postTags.routes.js";
 import { registerPostAudienceRoutes } from "./routes/postAudience.routes.js";
 
 export function mountPostsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
@@ -47,5 +55,13 @@ export function mountPostsModule(router: HttpRouter, route: RouteFactory, contex
     updateReplySettings: createUpdateReplySettingsHandler(context),
     updatePostSensitivity: createUpdatePostSensitivityHandler(context),
     listPostQuotes: createListPostQuotesHandler(context),
+  }));
+  registerPostTagsRoutes(router, createPostTagsController(route, {
+    setPostTags: createSetPostTagsHandler(context),
+    removeOwnPostTag: createRemoveOwnPostTagHandler(context),
+    listPostTaggedUsers: createListPostTaggedUsersHandler(context),
+    listTagCandidates: createListTagCandidatesHandler(context),
+    getTaggingSettings: createGetTaggingSettingsHandler(context),
+    updateTaggingSettings: createUpdateTaggingSettingsHandler(context),
   }));
 }

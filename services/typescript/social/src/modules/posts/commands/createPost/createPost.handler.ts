@@ -12,6 +12,8 @@ import type { PostView } from "../../models/post.model.js";
 import type { LinkPreviewView } from "../../../linkPreviews/models/linkPreview.model.js";
 import { postRepository } from "../../repositories/post.repository.js";
 import { buildPostViews } from "../../services/postView.service.js";
+import { selectTaggableUserIds } from "../../services/postTagEligibility.service.js";
+import { syncPostTags } from "../../services/postTagWrite.service.js";
 import { assertMediaFitsPostKind } from "../../services/postRules.service.js";
 import { prepareAudienceSettingsForPublishing } from "../../services/postAudienceRules.service.js";
 import { assertAuthorMayReplyToCommentWithVideo } from "../../services/videoReplyRules.service.js";
@@ -45,6 +47,7 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
     }
     const sensitiveLabels = await prepareAudienceSettingsForPublishing(context, command.authorId, { visibility: command.visibility, sensitiveLabels: command.sensitiveLabels });
     const mentionResult = await prepareMentionsForWrite(context, { surface: "post", authorId: command.authorId, text: command.text, entities: command.mentions });
+    const taggedUserIds = command.kind === "story" ? [] : await selectTaggableUserIds(context, command.authorId, command.taggedUserIds ?? []);
     const now = context.clock.now();
     const actor = await resolveEventActor(context.directory, command.authorId);
     const created = await context.database.transaction(async (transaction) => {
@@ -80,6 +83,7 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
         events.push({ eventType: socialEventTypes.videoReplyCreated, subject: post.id, occurredAt: now, data: { recipientUserId: comment.authorId, actor, url: `/clips/${post.id}`, replyClipId: post.id, originalClipId: comment.postId, commentId: comment.id, authorId: command.authorId, commenterId: comment.authorId } });
       }
       await appendDomainEventsToOutbox(transaction, events);
+      await syncPostTags(transaction, { postId: post.id, kind: post.kind, authorId: command.authorId, actor, desiredUserIds: taggedUserIds, now });
       return post;
     });
     const withPreview = created.media.length === 0 && command.kind === "post" ? await attachLinkPreviewWithinBudget(context, created.id, created.text) : null;

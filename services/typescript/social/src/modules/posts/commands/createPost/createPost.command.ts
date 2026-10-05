@@ -27,5 +27,6 @@ export interface CreatePostCommand {
   readonly replyToComment: ReplyToComment | undefined;
   readonly stickerLayout: StickerLayout | undefined;
   readonly replyPolicy?: "everyone" | "following" | "followers" | "mentioned" | "off" | undefined;
+  readonly taggedUserIds?: readonly string[] | undefined;
   readonly sensitiveLabels?: readonly string[] | undefined;
 }
