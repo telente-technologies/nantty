@@ -176,3 +176,9 @@
     border-top: 1px solid var(--divider);
   }
 }
+
+.sendError {
+  margin: 0 var(--space-4);
+  color: var(--color-danger, #c0362c);
+  font-size: var(--text-sm);
+}

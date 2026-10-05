@@ -15,6 +15,9 @@ import { ErrorState } from "@/components/ui/feedback";
 import { ChatMessagesSkeleton } from "@/components/ui/pageSkeletons";
 import { RetryButton } from "@/components/ui/controls";
 import { useSession } from "@/components/providers/sessionProvider";
+import { DecryptionNotice, EncryptedLinkPreviewCard, SecurityCodeChangedBanner } from "@/components/messages/secureChatNotices";
+import { readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
+import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { messagesService } from "@/services/messages.service";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Message } from "@/types";
@@ -42,7 +45,8 @@ export default function ConversationPage({ params }: { readonly params: Promise<
 
   const messagesQuery = useInfiniteQuery({
     queryKey: ["messages", conversationId],
-    queryFn: ({ pageParam }) => messagesService.fetchMessagesInConversation(conversationId, { cursor: pageParam }),
+    queryFn: ({ pageParam }) => messagesService.fetchDecryptedMessagesInConversation(conversationId, viewer?.id ?? "", { cursor: pageParam }),
+    enabled: Boolean(viewer?.id),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     refetchInterval: 5_000,
@@ -73,7 +77,10 @@ export default function ConversationPage({ params }: { readonly params: Promise<
   }, [messages.length]);
 
   const sendMutation = useMutation({
-    mutationFn: (text: string) => messagesService.sendChatMessage(conversationId, text),
+    mutationFn: (text: string) => {
+      if (!conversationQuery.data || !viewer?.id) throw new Error("This conversation is still loading.");
+      return messagesService.sendChatMessage(conversationQuery.data, viewer.id, text);
+    },
     onSuccess: async () => {
       setDraft("");
       await queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
@@ -116,6 +123,13 @@ export default function ConversationPage({ params }: { readonly params: Promise<
         ) : null}
       </header>
 
+      {conversationQuery.data && viewer?.id ? (
+        <SecurityCodeChangedBanner
+          viewerId={viewer.id}
+          peerIds={(conversationQuery.data.kind ?? "direct") === "group" ? [] : [conversationQuery.data.peer.id]}
+          peerName={conversationQuery.data.peer.name}
+        />
+      ) : null}
       <div className={styles.messages} ref={listRef}>
         {messagesQuery.isLoading ? (
           <ChatMessagesSkeleton label="Loading messages" />
@@ -130,6 +144,8 @@ export default function ConversationPage({ params }: { readonly params: Promise<
               <div key={message.id} className={[styles.bubbleRow, mine ? styles.bubbleRowMine : ""].filter(Boolean).join(" ")}>
                 <div className={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs].join(" ")}>
                   {message.text ? <p className={styles.bubbleText}><MentionText text={message.text} inverseLinks={mine} /></p> : null}
+                  {message.decryptionNotice ? <DecryptionNotice text={message.decryptionNotice} /> : null}
+                  {message.linkPreview ? <EncryptedLinkPreviewCard preview={message.linkPreview} /> : null}
                   {message.media?.url ? (
                     message.media.type === "image" ? (
                       <img src={message.media.url} alt="Photo" className={styles.bubbleImage} loading="lazy" />
@@ -161,6 +177,11 @@ export default function ConversationPage({ params }: { readonly params: Promise<
         <div ref={bottomRef} />
       </div>
 
+      {sendMutation.isError ? (
+        <p className={styles.sendError} role="alert">
+          {readChatCryptoErrorMessage(sendMutation.error) ?? readErrorMessageForDisplay(sendMutation.error)}
+        </p>
+      ) : null}
       <form className={styles.composer} onSubmit={handleSend}>
         <label htmlFor="message-draft" className="visuallyHidden">
           Message
