@@ -11,6 +11,7 @@
 export type * from './models/UploadSession.js'
 export type * from './models/MediaAsset.js'
 export type * from './models/MediaVariant.js'
+export type * from './models/MediaDownloadVariant.js'
 export type * from './models/MediaAccessLog.js'
 export type * from './models/OutboxEvent.js'
 export type * from './commonInputTypes.js'

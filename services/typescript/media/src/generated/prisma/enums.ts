@@ -60,3 +60,13 @@ export const UploadSessionStatus = {
 } as const
 
 export type UploadSessionStatus = (typeof UploadSessionStatus)[keyof typeof UploadSessionStatus]
+
+
+export const DownloadVariantStatus = {
+  pending: 'pending',
+  rendering: 'rendering',
+  ready: 'ready',
+  failed: 'failed'
+} as const
+
+export type DownloadVariantStatus = (typeof DownloadVariantStatus)[keyof typeof DownloadVariantStatus]

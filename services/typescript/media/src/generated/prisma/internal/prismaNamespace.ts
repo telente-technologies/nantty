@@ -400,6 +400,7 @@ export const ModelName = {
   UploadSession: 'UploadSession',
   MediaAsset: 'MediaAsset',
   MediaVariant: 'MediaVariant',
+  MediaDownloadVariant: 'MediaDownloadVariant',
   MediaAccessLog: 'MediaAccessLog',
   OutboxEvent: 'OutboxEvent'
 } as const
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "uploadSession" | "mediaAsset" | "mediaVariant" | "mediaAccessLog" | "outboxEvent"
+    modelProps: "uploadSession" | "mediaAsset" | "mediaVariant" | "mediaDownloadVariant" | "mediaAccessLog" | "outboxEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -640,6 +641,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.MediaVariantCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.MediaVariantCountAggregateOutputType> | number
+        }
+      }
+    }
+    MediaDownloadVariant: {
+      payload: Prisma.$MediaDownloadVariantPayload<ExtArgs>
+      fields: Prisma.MediaDownloadVariantFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MediaDownloadVariantFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MediaDownloadVariantFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload>
+        }
+        findFirst: {
+          args: Prisma.MediaDownloadVariantFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MediaDownloadVariantFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload>
+        }
+        findMany: {
+          args: Prisma.MediaDownloadVariantFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload>[]
+        }
+        create: {
+          args: Prisma.MediaDownloadVariantCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload>
+        }
+        createMany: {
+          args: Prisma.MediaDownloadVariantCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MediaDownloadVariantCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload>[]
+        }
+        delete: {
+          args: Prisma.MediaDownloadVariantDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload>
+        }
+        update: {
+          args: Prisma.MediaDownloadVariantUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload>
+        }
+        deleteMany: {
+          args: Prisma.MediaDownloadVariantDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MediaDownloadVariantUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MediaDownloadVariantUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload>[]
+        }
+        upsert: {
+          args: Prisma.MediaDownloadVariantUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaDownloadVariantPayload>
+        }
+        aggregate: {
+          args: Prisma.MediaDownloadVariantAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMediaDownloadVariant>
+        }
+        groupBy: {
+          args: Prisma.MediaDownloadVariantGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MediaDownloadVariantGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MediaDownloadVariantCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MediaDownloadVariantCountAggregateOutputType> | number
         }
       }
     }
@@ -904,6 +979,28 @@ export const MediaVariantScalarFieldEnum = {
 export type MediaVariantScalarFieldEnum = (typeof MediaVariantScalarFieldEnum)[keyof typeof MediaVariantScalarFieldEnum]
 
 
+export const MediaDownloadVariantScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  cacheKey: 'cacheKey',
+  watermarkHandle: 'watermarkHandle',
+  sourceKey: 'sourceKey',
+  stripAudio: 'stripAudio',
+  status: 'status',
+  bucket: 'bucket',
+  key: 'key',
+  contentType: 'contentType',
+  sizeBytes: 'sizeBytes',
+  attempts: 'attempts',
+  failureReason: 'failureReason',
+  createdAt: 'createdAt',
+  startedAt: 'startedAt',
+  readyAt: 'readyAt'
+} as const
+
+export type MediaDownloadVariantScalarFieldEnum = (typeof MediaDownloadVariantScalarFieldEnum)[keyof typeof MediaDownloadVariantScalarFieldEnum]
+
+
 export const MediaAccessLogScalarFieldEnum = {
   id: 'id',
   mediaId: 'mediaId',
@@ -1111,6 +1208,20 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'DownloadVariantStatus'
+ */
+export type EnumDownloadVariantStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DownloadVariantStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'DownloadVariantStatus[]'
+ */
+export type ListEnumDownloadVariantStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DownloadVariantStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -1277,6 +1388,7 @@ export type GlobalOmitConfig = {
   uploadSession?: Prisma.UploadSessionOmit
   mediaAsset?: Prisma.MediaAssetOmit
   mediaVariant?: Prisma.MediaVariantOmit
+  mediaDownloadVariant?: Prisma.MediaDownloadVariantOmit
   mediaAccessLog?: Prisma.MediaAccessLogOmit
   outboxEvent?: Prisma.OutboxEventOmit
 }

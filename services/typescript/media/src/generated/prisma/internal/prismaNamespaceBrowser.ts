@@ -54,6 +54,7 @@ export const ModelName = {
   UploadSession: 'UploadSession',
   MediaAsset: 'MediaAsset',
   MediaVariant: 'MediaVariant',
+  MediaDownloadVariant: 'MediaDownloadVariant',
   MediaAccessLog: 'MediaAccessLog',
   OutboxEvent: 'OutboxEvent'
 } as const
@@ -146,6 +147,28 @@ export const MediaVariantScalarFieldEnum = {
 } as const
 
 export type MediaVariantScalarFieldEnum = (typeof MediaVariantScalarFieldEnum)[keyof typeof MediaVariantScalarFieldEnum]
+
+
+export const MediaDownloadVariantScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  cacheKey: 'cacheKey',
+  watermarkHandle: 'watermarkHandle',
+  sourceKey: 'sourceKey',
+  stripAudio: 'stripAudio',
+  status: 'status',
+  bucket: 'bucket',
+  key: 'key',
+  contentType: 'contentType',
+  sizeBytes: 'sizeBytes',
+  attempts: 'attempts',
+  failureReason: 'failureReason',
+  createdAt: 'createdAt',
+  startedAt: 'startedAt',
+  readyAt: 'readyAt'
+} as const
+
+export type MediaDownloadVariantScalarFieldEnum = (typeof MediaDownloadVariantScalarFieldEnum)[keyof typeof MediaDownloadVariantScalarFieldEnum]
 
 
 export const MediaAccessLogScalarFieldEnum = {

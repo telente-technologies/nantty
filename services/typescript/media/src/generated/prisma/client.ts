@@ -57,6 +57,11 @@ export type MediaAsset = Prisma.MediaAssetModel
  */
 export type MediaVariant = Prisma.MediaVariantModel
 /**
+ * Model MediaDownloadVariant
+ * 
+ */
+export type MediaDownloadVariant = Prisma.MediaDownloadVariantModel
+/**
  * Model MediaAccessLog
  * 
  */
