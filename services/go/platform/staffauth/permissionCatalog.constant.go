@@ -44,9 +44,9 @@ var DepartmentRoleTemplates = []DepartmentRoleTemplate{
 var permissionAliases = map[string][]string{
 	"audit:read":                {"admin.audit.read"},
 	"audit:export":              {"admin.audit.read"},
-	"config:read":               {"admin.config.read", "privacy.retention.read"},
+	"config:read":               {"admin.config.read", "privacy.retention.read", "money.monetization.read"},
 	"config:rules":              {"admin.config.write", "privacy.retention.write"},
-	"config:plans":              {"admin.config.write"},
+	"config:plans":              {"admin.config.write", "money.monetization.manage"},
 	"settings:edit":             {"admin.config.write"},
 	"staff:manage":              {"admin.staff.read"},
 	"usernames:manage":          {"users.usernames.read", "users.usernames.withhold"},
@@ -55,6 +55,7 @@ var permissionAliases = map[string][]string{
 	"ledger:read":               {"money.ledger.read"},
 	"payouts:approve":           {"money.withdrawals.read", "money.withdrawals.process"},
 	"disputes:resolve":          {"money.disputes.resolve"},
+	"coins:review":              {"money.coins.review"},
 	"config:revenue":            {"money.monetization.manage"},
 }
 

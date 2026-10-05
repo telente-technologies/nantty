@@ -2,6 +2,7 @@ package staffauth
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"slices"
 	"strings"
@@ -86,23 +87,14 @@ type Guard struct {
 }
 
 func (guard Guard) RequireStaff(permission string, requireStepUp bool) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			staff, failure := guard.authenticate(request, requireStepUp)
-			if failure != nil {
-				httpserver.WriteJsonResponse(writer, failure.Status, failure)
-				return
-			}
-			if permission != "" && !staff.Can(permission) {
-				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
-				return
-			}
-			next.ServeHTTP(writer, request.WithContext(ContextWithStaff(request.Context(), staff)))
-		})
-	}
+	return guard.requireStaffWhere(func(staff Staff) bool { return permission == "" || staff.Can(permission) }, requireStepUp)
 }
 
 func (guard Guard) RequireStaffWithAnyPermission(permissions []string, requireStepUp bool) func(http.Handler) http.Handler {
+	return guard.requireStaffWhere(func(staff Staff) bool { return staff.CanAny(permissions...) }, requireStepUp)
+}
+
+func (guard Guard) requireStaffWhere(permitted func(Staff) bool, requireStepUp bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			staff, failure := guard.authenticate(request, requireStepUp)
@@ -110,11 +102,11 @@ func (guard Guard) RequireStaffWithAnyPermission(permissions []string, requireSt
 				httpserver.WriteJsonResponse(writer, failure.Status, failure)
 				return
 			}
-			if !staff.CanAny(permissions...) {
+			if !permitted(staff) {
 				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
 				return
 			}
-			next.ServeHTTP(writer, request.WithContext(ContextWithStaff(request.Context(), staff)))
+			guard.serveAndAuditUnrecordedMutation(writer, request, staff, next)
 		})
 	}
 }
@@ -135,6 +127,9 @@ func (guard Guard) authenticate(request *http.Request, requireStepUp bool) (Staf
 			return Staff{}, httpserver.ErrUnauthorized
 		}
 	}
+	if failure := guard.refuseDisallowedNetwork(request, staff); failure != nil {
+		return Staff{}, failure
+	}
 	if !requireStepUp {
 		return staff, nil
 	}
@@ -145,4 +140,32 @@ func (guard Guard) authenticate(request *http.Request, requireStepUp bool) (Staf
 	}
 	staff.SteppedUp = true
 	return staff, nil
+}
+
+func (guard Guard) refuseDisallowedNetwork(request *http.Request, staff Staff) *httpserver.ApiError {
+	policy, err := guard.Registry.StaffNetworkPolicy()
+	if err != nil {
+		return nil
+	}
+	allowed, err := policy.IsStaffAddressAllowed(request.Context(), staff.Id, ClientAddress(request))
+	if err != nil {
+		return httpserver.NewApiError(http.StatusServiceUnavailable, "UNAVAILABLE", "Staff authentication is unavailable.")
+	}
+	if !allowed {
+		return IpNotAllowed
+	}
+	return nil
+}
+
+var IpNotAllowed = httpserver.NewApiError(http.StatusForbidden, "IP_NOT_ALLOWED", "The admin console cannot be used from this network.")
+
+func ClientAddress(request *http.Request) string {
+	if forwarded := strings.TrimSpace(request.Header.Get("X-Real-Ip")); forwarded != "" {
+		return forwarded
+	}
+	host, _, err := net.SplitHostPort(request.RemoteAddr)
+	if err != nil {
+		return request.RemoteAddr
+	}
+	return host
 }
