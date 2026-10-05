@@ -126,8 +126,6 @@ func upsertPlanSignals(ctx context.Context, tx *ent.Tx, owner *ent.Profile, deci
 	return update.Exec(ctx)
 }
 
-// openVerificationCaseWhenIdentityUnverified implements "pay first, verify after": a paid Blue or Gold plan opens a
-// Smile ID case instead of switching the badge on, unless this profile already passed identity verification.
 func openVerificationCaseWhenIdentityUnverified(ctx context.Context, tx *ent.Tx, now time.Time, owner *ent.Profile, existing *ent.ProfileCheckmark, decision Decision, command Command) (bool, error) {
 	if command.EventType != "entitlement.granted" || command.SubscriptionId == "" || !decision.ChangeCheckmark || decision.Checkmark == profilecheckmark.ColorBlack {
 		return false, nil

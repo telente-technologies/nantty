@@ -82,16 +82,13 @@ func joinedWithinWindow(now time.Time) predicate.CelebrationSetting {
 		days["0229"] = true
 	}
 	args := make([]any, 0, len(days))
-	placeholders := ""
 	for day := range days {
-		if placeholders != "" {
-			placeholders += ","
-		}
-		placeholders += "?"
 		args = append(args, day)
 	}
 	return predicate.CelebrationSetting(func(selector *sql.Selector) {
-		selector.Where(sql.ExprP("to_char(joined_at AT TIME ZONE 'UTC', 'MMDD') IN ("+placeholders+")", args...))
+		selector.Where(sql.P(func(builder *sql.Builder) {
+			builder.WriteString("to_char(").Ident(selector.C(celebrationsetting.FieldJoinedAt)).WriteString(" AT TIME ZONE 'UTC', 'MMDD') IN (").Args(args...).WriteString(")")
+		}))
 	})
 }
 

@@ -32,8 +32,6 @@ type PricingRules struct {
 	BlackGraceDays int `json:"blackGraceDays"`
 }
 
-// SuggestedCheckmarkPrice quotes the research default for the viewer's region; go-money's price book is the source
-// of truth at checkout, so the email says "from".
 func SuggestedCheckmarkPrice(color string, countryCode string) MoneyAmount {
 	region, _ := regionpricing.RegionForCountry(countryCode)
 	planCode := "blue"

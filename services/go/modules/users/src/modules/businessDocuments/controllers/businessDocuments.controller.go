@@ -9,6 +9,7 @@ import (
 	reviewbusinessdocument "zudomart/modules/users/src/modules/businessDocuments/commands/reviewBusinessDocument"
 	"zudomart/modules/users/src/modules/businessDocuments/dtos"
 	getmybusinessdocuments "zudomart/modules/users/src/modules/businessDocuments/queries/getMyBusinessDocuments"
+	getsellerverification "zudomart/modules/users/src/modules/businessDocuments/queries/getSellerVerification"
 	listbusinessdocumentsubmissions "zudomart/modules/users/src/modules/businessDocuments/queries/listBusinessDocumentSubmissions"
 	openbusinessdocument "zudomart/modules/users/src/modules/businessDocuments/queries/openBusinessDocument"
 	"zudomart/modules/users/src/utils"
@@ -90,4 +91,9 @@ func (controller BusinessDocumentsController) Approve() http.HandlerFunc {
 }
 func (controller BusinessDocumentsController) Reject() http.HandlerFunc {
 	return controller.review(false)
+}
+
+func (controller BusinessDocumentsController) SellerVerification(writer http.ResponseWriter, request *http.Request) {
+	result, err := getsellerverification.Handler{Container: controller.Container}.Execute(request.Context(), utils.AccountIdFromRequest(request))
+	controller.respond(writer, request, http.StatusOK, result, err)
 }
