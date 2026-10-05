@@ -1,5 +1,5 @@
 import type { MentionEntity } from "../../../mentions/models/mention.model.js";
-import type { ReplyToComment, StickerLayout } from "../../models/post.model.js";
+import type { ClipSlideshow, MediaTrim, PostLocationTag, ReplyToComment, StickerLayout } from "../../models/post.model.js";
 
 export interface MediaReferenceInput {
   readonly id: string;
@@ -18,7 +18,11 @@ export interface CreatePostCommand {
   readonly kind: "post" | "clip" | "story";
   readonly text: string;
   readonly mediaIds: readonly string[];
-  readonly media: readonly MediaReferenceInput[];
+  readonly mediaTrims?: Readonly<Record<string, MediaTrim>> | undefined;
+  readonly slideshow?: ClipSlideshow | undefined;
+  readonly location?: PostLocationTag | undefined;
+  readonly topics?: readonly string[] | undefined;
+  readonly productIds?: readonly string[] | undefined;
   readonly audience: "everyone" | "followers";
   readonly visibility: "public" | "subscribers";
   readonly isAiGenerated: boolean;

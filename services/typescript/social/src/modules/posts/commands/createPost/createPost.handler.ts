@@ -15,9 +15,11 @@ import { buildPostViews } from "../../services/postView.service.js";
 import { selectTaggableUserIds } from "../../services/postTagEligibility.service.js";
 import { syncPostTags } from "../../services/postTagWrite.service.js";
 import { assertMediaFitsPostKind } from "../../services/postRules.service.js";
+import { buildClipEdit, resolveOwnedPostMedia } from "../../services/postMediaResolution.service.js";
+import { assertProductsTaggable } from "../../services/postProducts.service.js";
 import { prepareAudienceSettingsForPublishing } from "../../services/postAudienceRules.service.js";
 import { assertAuthorMayReplyToCommentWithVideo } from "../../services/videoReplyRules.service.js";
-import type { CreatePostCommand, MediaReferenceInput } from "./createPost.command.js";
+import type { CreatePostCommand } from "./createPost.command.js";
 
 const maximumTextLength = 2200;
 const linkPreviewWaitMs = 1500;
@@ -31,12 +33,10 @@ async function attachLinkPreviewWithinBudget(context: HandlerContext, postId: st
 export function createCreatePostHandler(context: HandlerContext): Handler<CreatePostCommand, PostView> {
   return async (command) => {
     if (command.text.length > maximumTextLength) throw unprocessable("TEXT_TOO_LONG", `Text can be up to ${maximumTextLength} characters.`);
-    const missingIds = command.mediaIds.filter((mediaId) => !command.media.some((candidate) => candidate.id === mediaId));
-    const resolved = missingIds.length === 0 || context.media === undefined ? new Map<string, MediaReferenceInput>() : await context.media.resolveOwnedMedia(command.authorId, missingIds);
-    const descriptors = command.mediaIds.map((mediaId) => command.media.find((candidate) => candidate.id === mediaId) ?? resolved.get(mediaId));
-    if (descriptors.some((descriptor) => descriptor === undefined)) throw unprocessable("MEDIA_NOT_FOUND", "Every media id needs a matching media descriptor.");
-    const media = descriptors.flatMap((descriptor) => (descriptor === undefined ? [] : [descriptor]));
+    const media = await resolveOwnedPostMedia(context, command.authorId, command.mediaIds);
     assertMediaFitsPostKind(command.kind, command.text, media);
+    const clipEdit = buildClipEdit(command, media);
+    const productIds = command.kind === "story" ? [] : await assertProductsTaggable(context, command.productIds ?? []);
     if (command.replyToComment === undefined && command.stickerLayout !== undefined) throw unprocessable("STICKER_WITHOUT_REPLY", "A sticker layout needs a comment to reply to.");
     const comment = command.replyToComment === undefined ? undefined : await assertAuthorMayReplyToCommentWithVideo(context, command.authorId, command.kind, command.replyToComment);
     if (command.soundId !== undefined) {
@@ -63,6 +63,10 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
         isAiGenerated: command.isAiGenerated,
         mentions: mentionResult.entities as unknown as Prisma.InputJsonValue,
         createdAt: now,
+        topics: [...new Set(command.topics ?? [])],
+        productIds,
+        ...(clipEdit === null ? {} : { clipEdit: clipEdit as unknown as Prisma.InputJsonValue }),
+        ...(command.location === undefined || command.kind === "story" ? {} : { location: { placeId: command.location.placeId, name: command.location.name, area: command.location.area ?? null } }),
         ...(command.soundId === undefined ? {} : { soundId: command.soundId }),
         ...(command.kind === "story" ? { expiresAt: new Date(now.getTime() + storyLifetimeHours * 3_600_000) } : {}),
         ...(command.replyToComment === undefined ? {} : { replyToCommentId: command.replyToComment.commentId, replyToClipId: command.replyToComment.clipId, replyToCommenterId: command.replyToComment.commenterUserId }),
@@ -75,7 +79,7 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
         },
       });
       if (command.soundId !== undefined) await soundRepository.incrementUsage(transaction, command.soundId, 1);
-      const events: DomainEventInput[] = [{ eventType: socialEventTypes.postCreated, subject: post.id, occurredAt: now, data: { postId: post.id, authorId: post.authorId, kind: post.kind, audience: post.audience, visibility: post.visibility, replyPolicy: post.replyPolicy, sensitiveLabels: post.sensitiveLabels, isAiGenerated: post.isAiGenerated, text: post.text.slice(0, 2000), mediaIds: post.media.map((media) => media.mediaId) } }];
+      const events: DomainEventInput[] = [{ eventType: socialEventTypes.postCreated, subject: post.id, occurredAt: now, data: { postId: post.id, authorId: post.authorId, kind: post.kind, audience: post.audience, visibility: post.visibility, replyPolicy: post.replyPolicy, sensitiveLabels: post.sensitiveLabels, isAiGenerated: post.isAiGenerated, text: post.text.slice(0, 2000), mediaIds: post.media.map((media) => media.mediaId), topics: post.topics, productIds: post.productIds } }];
       for (const userId of mentionResult.userIdsToNotify) {
         events.push({ eventType: socialEventTypes.mentionCreated, subject: post.id, occurredAt: now, data: { recipientUserId: userId, mentionedUserId: userId, actor, authorId: command.authorId, surface: "post", postId: post.id, excerpt: buildExcerpt(command.text), url: `/post/${post.id}` } });
       }
