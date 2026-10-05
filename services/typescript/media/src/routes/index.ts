@@ -1,6 +1,7 @@
 import type { HttpRouter } from "@zudojs/http";
 
 import type { MediaDatabase } from "../databases/prisma.database.js";
+import { mountDownloadsModule } from "../modules/downloads/downloads.module.js";
 import { mountInternalModule } from "../modules/internal/internal.module.js";
 import { mountUploadsModule } from "../modules/uploads/uploads.module.js";
 import type { HandlerContext } from "../types/handlerContext.type.js";
@@ -14,4 +15,5 @@ export function registerRoutes(router: HttpRouter, route: RouteFactory, context:
   });
   mountUploadsModule(router, route, context);
   mountInternalModule(router, route, context);
+  mountDownloadsModule(router, route, context);
 }

@@ -1,4 +1,5 @@
 import type { MediaConfig } from "../configs/media.config.js";
+import type { BrandedDownloadRenderer } from "../interfaces/brandedDownloadRenderer.interface.js";
 import type { MediaDatabase } from "../databases/prisma.database.js";
 import type { Clock } from "../interfaces/clock.interface.js";
 import type { JobQueue } from "../interfaces/jobQueue.interface.js";
@@ -19,6 +20,7 @@ export interface HandlerContext {
   readonly moderation: ModerationClient | undefined;
   readonly images: ImageProcessor;
   readonly transcoder: MediaTranscoder;
+  readonly branding: BrandedDownloadRenderer;
 }
 
 export type Handler<TInput, TResult> = (input: TInput) => Promise<TResult>;
