@@ -13,7 +13,7 @@ import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
-import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
+import { createIdempotencyKey, readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/clientApi.service";
 import type { OrderDispute } from "@/types/order.type";
 import { formatDateTimeForDisplay, formatRelativeTimeFromNow } from "@/utils/dateFormatting.util";
 
@@ -46,7 +46,7 @@ export function DisputeDetailView({ disputeId }: { readonly disputeId: string })
     setIsSending(true);
     setResponseError(null);
     try {
-      const updated = await sendSellerApiRequest<OrderDispute>(`/seller/disputes/${dispute?.id}/responses`, { method: "POST", body: { body: trimmedResponse } });
+      const updated = await sendSellerApiRequest<OrderDispute>(`/seller/disputes/${dispute?.id}/responses`, { method: "POST", body: { body: trimmedResponse }, idempotencyKey: createIdempotencyKey("dispute_reply") });
       disputeQuery.replaceData(() => updated);
       setResponseText("");
       showToast("Response sent. Zudomart will review it.");

@@ -23,7 +23,7 @@ function FlashSalesBoard() {
   const { showToast } = useToast();
   const { currency } = useMoneyFormatter();
   const [statusFilter, setStatusFilter] = useState<MarketingCampaignStatus | "all">("all");
-  const salesList = useCommerceCursorList<FlashSale>("/seller/marketing/flash-sales", { status: statusFilter, limit: 50 });
+  const salesList = useCommerceCursorList<FlashSale>("/seller/marketing/flash-sales", { status: statusFilter === "all" ? undefined : statusFilter, limit: 50 });
   const [editingSale, setEditingSale] = useState<FlashSale | "new" | null>(null);
   const [busy, setBusy] = useState<{ saleId: string; action: FlashSaleAction } | null>(null);
   const [now, setNow] = useState(() => Date.now());

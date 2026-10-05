@@ -11,22 +11,23 @@ import { staffRoleLabels } from "@/constants/roles.constant";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { readErrorMessageForDisplay, sendRequestToDashboardServer } from "@/services/clientApi.service";
-import type { BrandSummary, MyStoreEntry } from "@/types/brand.type";
+import type { BrandSummary } from "@/types/brand.type";
 import type { CursorPage } from "@/types/pagination.type";
+import { readMyStoreEntries, type MyStoresResponse } from "@/utils/myStores.util";
 
 import styles from "./storeSwitcher.module.css";
 
 export function StoreSwitcher() {
   const { sessionView, can } = useSellerSession();
   const { showToast } = useToast();
-  const storesQuery = useSellerQuery<CursorPage<MyStoreEntry>>("/seller/stores/mine");
+  const storesQuery = useSellerQuery<MyStoresResponse>("/seller/stores/mine");
   const brandsQuery = useSellerQuery<CursorPage<BrandSummary>>(can("settings:view") ? "/seller/brands" : null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [switchingStoreId, setSwitchingStoreId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const access = sessionView?.access;
   const { plan } = usePlanFeatures();
-  const stores = storesQuery.data?.data ?? [];
+  const stores = readMyStoreEntries(storesQuery.data);
   const brands = brandsQuery.data?.data ?? [];
   const brandNameById = new Map(brands.map((brand) => [brand.id, brand.name]));
   const currentBrandId = stores.find((store) => store.storeId === access?.storeId)?.brandId;

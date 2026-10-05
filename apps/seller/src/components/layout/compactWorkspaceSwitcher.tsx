@@ -12,8 +12,7 @@ import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { readErrorMessageForDisplay, sendRequestToDashboardServer } from "@/services/clientApi.service";
-import type { MyStoreEntry } from "@/types/brand.type";
-import type { CursorPage } from "@/types/pagination.type";
+import { readMyStoreEntries, type MyStoresResponse } from "@/utils/myStores.util";
 
 import styles from "./compactWorkspaceSwitcher.module.css";
 
@@ -22,10 +21,10 @@ export function CompactWorkspaceSwitcher() {
   const { plan } = usePlanFeatures();
   const { locations, selectedLocationId, selectLocation } = useStoreContext();
   const { showToast } = useToast();
-  const storesQuery = useSellerQuery<CursorPage<MyStoreEntry>>("/seller/stores/mine");
+  const storesQuery = useSellerQuery<MyStoresResponse>("/seller/stores/mine");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const stores = storesQuery.data?.data ?? [];
+  const stores = readMyStoreEntries(storesQuery.data);
   const activeLocations = locations.filter((location) => location.active);
   const selectedLocationName = activeLocations.find((location) => location.id === selectedLocationId)?.name ?? null;
 
