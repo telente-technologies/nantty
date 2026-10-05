@@ -1,19 +1,22 @@
-import type { CSSProperties } from "react";
+import { AppleLogoIcon, ArrowLeftIcon, CheckIcon, SealCheckIcon, ShieldIcon, TruckIcon, UserCircleIcon, WarningIcon } from "@phosphor-icons/react/dist/ssr";
+import type { Icon, IconWeight } from "@phosphor-icons/react";
 
 import styles from "./appIcon.module.css";
 
-export type AppIconName =
-  | "apple24"
-  | "arrowLeft24"
-  | "check16"
-  | "google24"
-  | "sealCheck20"
-  | "shield24"
-  | "truck24"
-  | "userCircle24"
-  | "warning20";
+const phosphorIcons = {
+  apple24: [AppleLogoIcon, "fill"],
+  arrowLeft24: [ArrowLeftIcon],
+  check16: [CheckIcon],
+  sealCheck20: [SealCheckIcon, "fill"],
+  shield24: [ShieldIcon],
+  truck24: [TruckIcon],
+  userCircle24: [UserCircleIcon],
+  warning20: [WarningIcon],
+} as const satisfies Record<string, readonly [Icon] | readonly [Icon, IconWeight]>;
 
-const MULTI_COLOUR_ICONS: ReadonlySet<AppIconName> = new Set(["google24"]);
+const brandIcons = { google24: "/icons/google24.svg" } as const;
+
+export type AppIconName = keyof typeof phosphorIcons | keyof typeof brandIcons;
 
 interface AppIconProps {
   readonly name: AppIconName;
@@ -22,10 +25,10 @@ interface AppIconProps {
 }
 
 export function AppIcon({ name, size = 24, className }: AppIconProps) {
-  if (MULTI_COLOUR_ICONS.has(name)) {
+  if (name in brandIcons) {
     return (
       <img
-        src={`/icons/${name}.svg`}
+        src={brandIcons[name as keyof typeof brandIcons]}
         alt=""
         aria-hidden="true"
         width={size}
@@ -36,6 +39,6 @@ export function AppIcon({ name, size = 24, className }: AppIconProps) {
     );
   }
 
-  const iconStyle = { "--icon-url": `url("/icons/${name}.svg")`, "--icon-size": `${size}px` } as CSSProperties;
-  return <span aria-hidden="true" className={className ? `${styles.tinted} ${className}` : styles.tinted} style={iconStyle} />;
+  const [PhosphorIcon, weight = "regular"] = phosphorIcons[name as keyof typeof phosphorIcons] as readonly [Icon, IconWeight?];
+  return <PhosphorIcon size={size} weight={weight} aria-hidden="true" focusable="false" className={className ? `${styles.tinted} ${className}` : styles.tinted} />;
 }
