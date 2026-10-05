@@ -42,7 +42,7 @@ function ActivityEntryRow({ entry }: { readonly entry: ActivityEntry }) {
           {entry.actor.isSystem ? <StatusBadge tone="neutral">Automatic</StatusBadge> : null}
           <span>{entry.summary}</span>
         </p>
-        <p className={styles.objectName}>{entry.objectName}</p>
+        {entry.objectName ? <p className={styles.objectName}>{entry.objectName}</p> : null}
         {entry.changes.some((change) => change.from !== null || change.to !== null) ? (
           <ul className={styles.changes} aria-label="Changes">
             {entry.changes.map((change, index) => (

@@ -73,7 +73,7 @@ export interface LandingQuestion {
 }
 
 export const landingQuestions: readonly LandingQuestion[] = [
-  { question: "Do I need a separate account for Ads Manager?", answer: "No. You sign in with the same email or phone and password you use in the Zudomart app. Your posts, clips, products, store and followers are already here." },
+  { question: "Do I need a separate account for Ads Manager?", answer: "No. You sign in with the same email or username and password you use in the Zudomart app. Your posts, clips, products, store and followers are already here." },
   { question: "What is the difference between boosting and Ads Manager?", answer: "Boosting in the app promotes one post with a simple budget. Ads Manager is for businesses and advanced advertisers: full campaigns, audiences, several ads, A/B tests, automated rules, billing and detailed reports." },
   { question: "Which currency will I pay in?", answer: "Your ad account's currency is set from its country when you create it, so you see budgets, bids, spend and invoices in your local currency." },
   { question: "How do I pay?", answer: "Top up a prepaid balance through Paystack's secure checkout by card, bank transfer or USSD, or add a card. Card details are handled by Paystack and never stored by Zudomart." },

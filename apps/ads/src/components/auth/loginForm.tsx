@@ -22,7 +22,7 @@ export function LoginForm() {
   async function signInAndContinue(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (identifier.trim().length < 3 || password.length === 0) {
-      setErrorMessage("Enter your email or phone number and your password.");
+      setErrorMessage("Enter your email or username and your password.");
       return;
     }
     setIsSubmitting(true);
@@ -39,9 +39,9 @@ export function LoginForm() {
   return (
     <form className={styles.form} onSubmit={signInAndContinue} noValidate>
       <h1 className={styles.title}>Sign in to Ads Manager</h1>
-      <p className={styles.lead}>Use the email or phone and password from your Zudomart app. Your store, posts, clips and followers are already here.</p>
+      <p className={styles.lead}>Use the email or username and password from your Zudomart app. Your store, posts, clips and followers are already here.</p>
       {errorMessage ? <InlineNotice tone="error">{errorMessage}</InlineNotice> : null}
-      <TextField label="Email or phone number" value={identifier} onValueChange={setIdentifier} autoComplete="username" inputMode="email" autoFocus required />
+      <TextField label="Email or username" value={identifier} onValueChange={setIdentifier} autoComplete="username" inputMode="email" autoFocus required />
       <TextField label="Password" type="password" value={password} onValueChange={setPassword} autoComplete="current-password" required />
       <Button type="submit" variant="primary" isLoading={isSubmitting} className={styles.submit}>
         Sign in

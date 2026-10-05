@@ -3,7 +3,7 @@
 import { useId, useState, type ChangeEvent } from "react";
 
 import { ZudoIcon } from "@/components/ui/zudoIcon";
-import { describeWhyCreativeFileIsNotAccepted, uploadCreativeFileInChunks, acceptedCreativeMimeTypes } from "@/services/mediaUpload.service";
+import { describeWhyCreativeFileIsNotAccepted, uploadCreativeFile, acceptedCreativeMimeTypes } from "@/services/mediaUpload.service";
 import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 import type { CreativeMedia } from "@/types/creative.type";
 
@@ -33,7 +33,7 @@ export function CreativeUploadField({ accountId, uploadedMedia, onUploadedMediaC
     setUploadError(null);
     setProgressFraction(0);
     try {
-      const uploaded = await uploadCreativeFileInChunks(accountId, file, setProgressFraction);
+      const uploaded = await uploadCreativeFile(accountId, file, setProgressFraction);
       if (uploaded.status === "failed" || !uploaded.media) {
         setUploadError(uploaded.status === "processing" ? "Your file is still processing. Try again in a minute." : "We could not process that file. Try another one.");
       } else {
