@@ -1,4 +1,4 @@
-h1:kTJFsoH6cArsMVWF3CIpbpK3T24vYylja7thZmj04RA=
+h1:uQ+PSTVbIxddT6mZckZXPs3g7yGN5Mrda9ILjLSAFpM=
 20261003101347_create_users_core_tables.up.sql h1:dNCI103B0TCx9zazGKCl3Ln/N+7bPYPmbcR+7djUkCU=
 20261003101400_grant_read_access_to_other_services.up.sql h1:ZvBT+vvQCm5NqTGPiEhOB1osuqSwgQFgMAX7+BBdFH8=
 20261003101713_add_privacy_geo_and_address_tables.up.sql h1:yqWZ0zBt6NwAbqkN3ptPBIu0qjIFptu66IDacpojKwU=
@@ -17,3 +17,5 @@ h1:kTJFsoH6cArsMVWF3CIpbpK3T24vYylja7thZmj04RA=
 20261004160000_grant_read_access_to_admin_created_accounts.up.sql h1:l36Z0Fj9Xgg/q28QyFDP5BgjSb7mpFtd8N1qoH+uGf4=
 20261004200000_add_identity_verification_cases.up.sql h1:QgXqt2uxYZu11XS/Tw5xa4XEE/nC/84IPQ+7pu3oTq8=
 20261004200100_grant_read_access_to_verification_eligibility.up.sql h1:iWBjumVFTUa7ZooZfb2fri9tQdyKo+0dFFQFX0oFBGU=
+20261004210000_restrict_shipping_address_reads_to_orders.up.sql h1:81Qiq8abKR5R+rQT+RvKLRiKY90+6wkFb0DgBTmIzOc=
+20261005022135_add_profile_theme.up.sql h1:8bIIlFd+GU54D63Ezc6xV3FBaX8ng/jU1RK3wseUIDQ=
