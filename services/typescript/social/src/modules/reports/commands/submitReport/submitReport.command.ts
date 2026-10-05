@@ -1,6 +1,8 @@
+import type { ReportTargetType } from "../../services/reportReasons.service.js";
+
 export interface SubmitReportCommand {
   readonly reporterId: string;
-  readonly targetType: "user" | "message" | "conversation" | "group" | "post" | "comment" | "clip" | "live";
+  readonly targetType: ReportTargetType;
   readonly targetId: string;
   readonly conversationId: string | undefined;
   readonly reportedUserId: string | undefined;

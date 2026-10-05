@@ -1,11 +1,13 @@
 import { schema } from "@zudojs/schema";
 
+import { acceptedReportReasons, reportTargetTypes } from "../services/reportReasons.service.js";
+
 export const submitReportBodySchema = schema.object({
-  targetType: schema.enum(["user", "message", "conversation", "group", "post", "comment", "clip", "live"]),
+  targetType: schema.enum([...reportTargetTypes]),
   targetId: schema.string().min(1).max(100),
   conversationId: schema.string().uuid().optional(),
   reportedUserId: schema.string().uuid().optional(),
-  reason: schema.enum(["child_safety", "self_harm", "violence", "harassment", "hate", "sexual_content", "spam", "fraud", "impersonation", "prohibited_items", "scam", "intellectual_property", "other"]),
+  reason: schema.enum(acceptedReportReasons),
   details: schema.string().max(500).optional(),
   blockReportedUser: schema.boolean().optional(),
   evidence: schema.array(schema.record(schema.unknown())).max(100).optional(),

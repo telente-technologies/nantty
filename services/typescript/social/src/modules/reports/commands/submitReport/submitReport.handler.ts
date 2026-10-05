@@ -7,6 +7,8 @@ import type { Handler, HandlerContext } from "../../../../types/handlerContext.t
 import { createBlockUserHandler } from "../../../blocks/commands/blockUser/blockUser.handler.js";
 import { requireConversationMember } from "../../../conversations/services/conversationAccess.service.js";
 import { reportIntakeRepository } from "../../repositories/reportIntake.repository.js";
+import { moderationReasonFor } from "../../services/reportReasons.service.js";
+import { assertReportableBy } from "../../services/reportTarget.service.js";
 import type { SubmitReportCommand } from "./submitReport.command.js";
 
 const evidenceRequiredTargets = new Set(["message", "conversation", "group"]);
@@ -29,13 +31,14 @@ export function createSubmitReportHandler(context: HandlerContext): Handler<Subm
       const access = await requireConversationMember(db, command.conversationId, command.reporterId).catch(() => undefined);
       if (access === undefined) throw forbidden("NOT_A_MEMBER", "You can only report conversations you're in.");
     }
+    await assertReportableBy(db, command.reporterId, command);
     const priority = classifyReportPriority(command.reason, command.targetType);
     const report = await context.database.transaction(async (transaction) => {
       const created = await reportIntakeRepository.create(transaction, { reporterId: command.reporterId, targetType: command.targetType, targetId: command.targetId, reason: command.reason, priority, evidenceHash: command.evidenceHash ?? null });
       await appendDomainEventsToOutbox(transaction, [{
         eventType: socialEventTypes.reportSubmitted, subject: created.id, occurredAt: now,
         data: {
-          reportId: created.id, reporterId: command.reporterId, targetType: command.targetType, targetId: command.targetId, reason: command.reason, priority, details: command.details, blockReportedUser: command.blockReportedUser,
+          reportId: created.id, reporterId: command.reporterId, targetType: command.targetType, targetId: command.targetId, reason: moderationReasonFor(command.reason), priority, details: command.details, blockReportedUser: command.blockReportedUser,
           ...(command.conversationId === undefined ? {} : { conversationId: command.conversationId }), ...(command.reportedUserId === undefined ? {} : { reportedUserId: command.reportedUserId }),
           ...(command.evidenceHash === undefined ? {} : { evidenceHash: command.evidenceHash }), evidence: command.evidence as unknown as Prisma.InputJsonArray,
           ...(command.targetType === "live" && command.liveContext !== undefined ? { liveContext: { ...command.liveContext } } : {}),
