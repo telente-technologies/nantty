@@ -3,12 +3,16 @@ package listsuspendedaccounts
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
+
+	"entgo.io/ent/dialect/sql"
 
 	"zudomart/modules/users/src/container"
 	"zudomart/modules/users/src/generated/ent"
 	"zudomart/modules/users/src/generated/ent/accountsuspension"
 	"zudomart/modules/users/src/generated/ent/predicate"
+	"zudomart/modules/users/src/generated/ent/profile"
 	"zudomart/modules/users/src/modules/accountEnforcement/services"
 )
 
@@ -54,6 +58,9 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Result, error)
 	if query.PendingAppealOnly {
 		predicates = append(predicates, accountsuspension.AppealStatusEQ(accountsuspension.AppealStatusPending))
 	}
+	if search := strings.TrimSpace(strings.TrimPrefix(query.Search, "@")); search != "" {
+		predicates = append(predicates, accountsMatching(search))
+	}
 	offset, _ := strconv.Atoi(query.Cursor)
 	rows, err := handler.Container.Client.AccountSuspension.Query().Where(predicates...).Order(ent.Asc(accountsuspension.FieldDeletionDueAt), ent.Asc(accountsuspension.FieldID)).Offset(offset).Limit(pageSize + 1).All(ctx)
 	if err != nil {
@@ -77,6 +84,14 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Result, error)
 		result.Data = append(result.Data, handler.view(row, summary))
 	}
 	return result, nil
+}
+
+func accountsMatching(search string) predicate.AccountSuspension {
+	return func(selector *sql.Selector) {
+		matching := sql.Select(profile.FieldAccountID).From(sql.Table(profile.Table)).
+			Where(sql.Or(sql.ContainsFold(profile.FieldHandle, search), sql.ContainsFold(profile.FieldDisplayName, search)))
+		selector.Where(sql.In(selector.C(accountsuspension.FieldAccountID), matching))
+	}
 }
 
 func (handler Handler) view(row *ent.AccountSuspension, summary services.PlatformUserSummary) SuspendedAccount {

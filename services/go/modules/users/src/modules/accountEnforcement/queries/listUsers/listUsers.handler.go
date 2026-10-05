@@ -15,11 +15,19 @@ import (
 	"zudomart/platform/identityports"
 )
 
-const pageSize = 25
+const (
+	pageSize        = 25
+	maximumScanned  = 500
+	scanBatchLength = 100
+)
 
 type Query struct {
-	Search string
-	Cursor string
+	Search       string
+	Cursor       string
+	Status       string
+	Verification string
+	Role         string
+	Risk         string
 }
 
 type Result struct {
@@ -32,44 +40,65 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, query Query) (Result, error) {
-	predicates := []predicate.Profile{profile.KindEQ(profile.KindPersonal)}
+	predicates, err := buildFilterPredicates(query)
+	if err != nil {
+		return Result{}, err
+	}
+	predicates = append(predicates, profile.KindEQ(profile.KindPersonal))
 	if search := strings.TrimSpace(strings.TrimPrefix(query.Search, "@")); search != "" {
 		predicates = append(predicates, profile.Or(profile.HandleContainsFold(search), profile.DisplayNameContainsFold(search)))
 	}
+	var after *uuid.UUID
 	if query.Cursor != "" {
 		cursorId, err := uuid.Parse(query.Cursor)
 		if err != nil {
 			return Result{}, usersErrors.Unprocessable("The cursor is invalid.")
 		}
-		predicates = append(predicates, profile.IDLT(cursorId))
+		after = &cursorId
 	}
-	rows, err := handler.Container.Client.Profile.Query().Where(predicates...).Order(ent.Desc(profile.FieldID)).Limit(pageSize + 1).All(ctx)
+	directory, err := identityports.Default.AccountDirectory()
 	if err != nil {
 		return Result{}, err
 	}
 	result := Result{Data: []services.PlatformUserSummary{}}
-	if len(rows) > pageSize {
-		rows = rows[:pageSize]
-		next := rows[len(rows)-1].ID.String()
-		result.NextCursor = &next
-	}
-	directory, err := identityports.Default.AccountDirectory()
-	if err != nil {
-		return result, err
-	}
-	for _, row := range rows {
-		account, found, err := directory.FindAccountSummary(ctx, row.AccountID)
-		if err != nil || !found {
-			if err != nil {
-				return result, err
-			}
-			continue
+	for scanned := 0; scanned < maximumScanned && len(result.Data) < pageSize; {
+		batch := append([]predicate.Profile{}, predicates...)
+		if after != nil {
+			batch = append(batch, profile.IDLT(*after))
 		}
-		summary, err := services.BuildPlatformUserSummary(ctx, handler.Container, services.Target{Account: account, Profile: row})
+		rows, err := handler.Container.Client.Profile.Query().Where(batch...).Order(ent.Desc(profile.FieldID)).Limit(scanBatchLength).All(ctx)
 		if err != nil {
 			return result, err
 		}
-		result.Data = append(result.Data, summary)
+		for index, row := range rows {
+			scanned++
+			after = &rows[index].ID
+			account, found, err := directory.FindAccountSummary(ctx, row.AccountID)
+			if err != nil {
+				return result, err
+			}
+			if !found {
+				continue
+			}
+			summary, err := services.BuildPlatformUserSummary(ctx, handler.Container, services.Target{Account: account, Profile: row})
+			if err != nil {
+				return result, err
+			}
+			if matchesAccountFilters(query, summary) {
+				result.Data = append(result.Data, summary)
+			}
+			if len(result.Data) == pageSize || scanned == maximumScanned {
+				break
+			}
+		}
+		if len(rows) < scanBatchLength && (len(result.Data) < pageSize && scanned < maximumScanned) {
+			return result, nil
+		}
+		if len(rows) == 0 {
+			return result, nil
+		}
 	}
+	next := after.String()
+	result.NextCursor = &next
 	return result, nil
 }
