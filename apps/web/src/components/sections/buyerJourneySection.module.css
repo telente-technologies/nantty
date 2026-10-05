@@ -4,9 +4,9 @@
 
 .stepList {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
   grid-auto-rows: auto auto;
-  margin-top: clamp(40px, 6vw, 64px);
+  margin-top: clamp(var(--space-8), 6vw, 64px);
   padding: 0;
   list-style: none;
   counter-reset: none;
@@ -25,9 +25,9 @@
 
 .stepText {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   align-content: start;
-  padding: 24px 24px 20px;
+  padding: var(--space-6) var(--space-6) var(--space-5);
 }
 
 .stepNumber {
@@ -35,7 +35,7 @@
   place-items: center;
   width: 32px;
   height: 32px;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
   border-radius: 50%;
   background: var(--fill-brand);
   color: var(--ink-on-fill);
@@ -58,7 +58,7 @@
   justify-content: center;
   align-items: flex-start;
   height: 260px;
-  padding-top: 8px;
+  padding-top: var(--space-2);
   overflow: hidden;
   background: linear-gradient(to bottom, var(--surface-card), var(--surface-tint-blue));
 }

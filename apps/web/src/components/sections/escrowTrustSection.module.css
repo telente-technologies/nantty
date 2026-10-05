@@ -8,18 +8,18 @@
 
 .layout {
   display: grid;
-  gap: 56px;
+  gap: var(--space-9);
   align-items: center;
 }
 
 .copyColumn {
   display: grid;
-  gap: 40px;
+  gap: var(--space-8);
 }
 
 .promiseList {
   display: grid;
-  gap: 24px;
+  gap: var(--space-6);
   padding: 0;
   list-style: none;
 }
@@ -27,7 +27,7 @@
 .promise {
   display: grid;
   grid-template-columns: 44px 1fr;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .promiseIcon {
@@ -48,14 +48,14 @@
 
 .promiseDescription {
   display: block;
-  margin-top: 4px;
+  margin-top: var(--space-1);
   color: var(--ink-on-night-muted);
 }
 
 .demoColumn {
   display: flex;
   justify-content: center;
-  padding-block: 12px;
+  padding-block: var(--space-3);
 }
 
 @media (min-width: 960px) {

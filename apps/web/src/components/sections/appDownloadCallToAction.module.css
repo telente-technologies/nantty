@@ -5,9 +5,9 @@
 .panel {
   position: relative;
   display: grid;
-  gap: 40px;
+  gap: var(--space-8);
   overflow: hidden;
-  padding: clamp(32px, 6vw, 72px) clamp(20px, 6vw, 72px) 0;
+  padding: clamp(var(--space-7), 6vw, 72px) clamp(var(--space-5), 6vw, 72px) 0;
   border-radius: var(--radius-large);
   background:
     radial-gradient(70% 90% at 100% 100%, var(--surface-brand-glow), transparent 60%),
@@ -17,10 +17,10 @@
 
 .copyColumn {
   display: grid;
-  gap: 20px;
+  gap: var(--space-5);
   align-content: center;
   justify-items: start;
-  padding-bottom: 8px;
+  padding-bottom: var(--space-2);
 }
 
 .heading {
@@ -60,7 +60,7 @@
   }
 
   .copyColumn {
-    padding-bottom: clamp(32px, 6vw, 72px);
+    padding-bottom: clamp(var(--space-7), 6vw, 72px);
   }
 
   .phone {

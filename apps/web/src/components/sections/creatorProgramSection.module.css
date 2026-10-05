@@ -5,18 +5,18 @@
 
 .layout {
   display: grid;
-  gap: 56px;
+  gap: var(--space-9);
   align-items: center;
 }
 
 .copyColumn {
   display: grid;
-  gap: 40px;
+  gap: var(--space-8);
 }
 
 .streamList {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
   padding: 0;
   list-style: none;
 }
@@ -56,7 +56,7 @@
 .visual {
   display: flex;
   justify-content: center;
-  padding: 40px 16px;
+  padding: var(--space-8) var(--space-4);
   border-radius: var(--radius-large);
   background:
     radial-gradient(circle at 50% 45%, var(--surface-sunshine) 0 34%, transparent 34.5%),

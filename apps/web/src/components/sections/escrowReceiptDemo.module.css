@@ -34,7 +34,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .receiptLabel {
@@ -46,7 +46,7 @@
 }
 
 .statusBadge {
-  padding: 4px 10px;
+  padding: var(--space-1) 10px;
   border-radius: var(--radius-pill);
   font-size: 0.8rem;
   font-weight: 700;
@@ -67,7 +67,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
 .currencyCoin {
@@ -92,7 +92,7 @@
 }
 
 .orderSummary {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   color: var(--ink-muted);
   font-size: 0.925rem;
 }
@@ -104,7 +104,7 @@
 
 .stageList {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
   padding: 0;
   list-style: none;
 }
@@ -112,7 +112,7 @@
 .stage {
   display: grid;
   grid-template-columns: 22px 1fr;
-  gap: 12px;
+  gap: var(--space-3);
   align-items: start;
 }
 
@@ -163,7 +163,7 @@
   display: flex;
   align-items: center;
   min-height: 52px;
-  margin-top: 24px;
+  margin-top: var(--space-6);
 }
 
 .confirmButton,
@@ -171,7 +171,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
   min-height: 52px;
   border: 0;

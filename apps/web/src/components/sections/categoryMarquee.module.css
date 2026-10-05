@@ -62,6 +62,6 @@
 
   .list {
     flex-wrap: wrap;
-    row-gap: 8px;
+    row-gap: var(--space-2);
   }
 }

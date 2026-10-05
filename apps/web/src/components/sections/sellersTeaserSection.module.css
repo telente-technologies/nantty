@@ -6,7 +6,7 @@
 
 .layout {
   display: grid;
-  gap: 56px;
+  gap: var(--space-9);
   align-items: center;
 }
 
@@ -14,7 +14,7 @@
   position: relative;
   display: flex;
   justify-content: center;
-  padding-bottom: 40px;
+  padding-bottom: var(--space-8);
 }
 
 .phone {
@@ -32,7 +32,7 @@
 
 .copyColumn {
   display: grid;
-  gap: 20px;
+  gap: var(--space-5);
   justify-items: start;
 }
 
@@ -56,7 +56,7 @@
 
 .benefitList {
   display: grid;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 0;
   list-style: none;
   font-weight: 500;
@@ -64,7 +64,7 @@
 
 .benefitList li {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   align-items: flex-start;
 }
 
@@ -80,8 +80,8 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 8px;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 @media (min-width: 960px) {
