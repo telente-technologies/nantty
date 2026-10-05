@@ -24,6 +24,7 @@ function directoryWithPrivateAccount(users: readonly UserSummary[], privateId: s
     findMentionTargetStatuses: async () => new Map(),
     hasPersonalizationConsent: async () => false,
     findAccountsAllowingPersonalizedAds: async () => new Set<string>(),
+    findCheckmarkColors: async () => new Map(),
     findAccountCreatedAt: async () => undefined,
   };
 }

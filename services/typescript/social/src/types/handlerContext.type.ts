@@ -7,6 +7,7 @@ import type { FeedRanker } from "../interfaces/feedRanker.interface.js";
 import type { LinkUnfurler } from "../interfaces/linkUnfurler.interface.js";
 import type { IdentityDirectory } from "../interfaces/identityDirectory.interface.js";
 import type { MediaDescriptorResolver } from "../interfaces/mediaDescriptorResolver.interface.js";
+import type { MediaDownloadVariantClient } from "../interfaces/mediaDownloadVariant.interface.js";
 import type { ShareCardResolver } from "../interfaces/shareCardResolver.interface.js";
 import type { SpamScoreProvider } from "../interfaces/spamScoreProvider.interface.js";
 import type { PremiumEntitlements } from "../interfaces/premiumEntitlements.interface.js";
@@ -20,6 +21,7 @@ export interface HandlerContext {
   readonly spamScores?: SpamScoreProvider;
   readonly shareCards?: ShareCardResolver;
   readonly media?: MediaDescriptorResolver;
+  readonly mediaDownloads?: MediaDownloadVariantClient;
   readonly linkPreviews?: LinkUnfurler;
   readonly authorRanking?: AuthorRankingDirectory;
   readonly rankingSettings?: RankingSettingsSource;
