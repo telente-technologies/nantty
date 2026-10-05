@@ -5,6 +5,7 @@ import type { LinkPreviewView } from "../../linkPreviews/models/linkPreview.mode
 import type { ReplyRestrictionReason } from "../services/replyPolicy.service.js";
 import type { SensitiveContentView } from "../services/sensitiveContent.service.js";
 import type { RankingExplanation } from "../../../interfaces/feedRanker.interface.js";
+import type { SponsoredPlacementView } from "../../../interfaces/adDecisions.interface.js";
 
 export interface FeedRankingDisclosure {
   readonly explanations: readonly RankingExplanation[];
@@ -22,6 +23,41 @@ export interface MediaView {
   readonly durationSeconds?: number;
   readonly blurhash: string | null;
   readonly status: "processing" | "ready" | "failed";
+  readonly trim?: MediaTrim;
+}
+
+export interface MediaTrim {
+  readonly startMs: number;
+  readonly endMs: number;
+}
+
+export interface ClipSlideshow {
+  readonly durationsMs: readonly number[];
+  readonly transition: "none" | "crossfade" | "slide";
+}
+
+export interface PostLocationTag {
+  readonly placeId: string;
+  readonly name: string;
+  readonly area?: string | null;
+}
+
+export interface PostClipEdit {
+  readonly trims?: Readonly<Record<string, MediaTrim>>;
+  readonly slideshow?: ClipSlideshow;
+}
+
+export interface TaggedProductView {
+  readonly id: string;
+  readonly name: string;
+  readonly price: { readonly amountMinor: number; readonly currency: string };
+  readonly imageUrl: string | null;
+  readonly stock: number;
+}
+
+export interface FriendsLikedView {
+  readonly count: number;
+  readonly avatars: readonly (string | null)[];
 }
 
 export interface StickerLayout {
@@ -63,9 +99,14 @@ export interface PostView {
   readonly isSaved: boolean;
   readonly saveCount: number;
   readonly isFollowingAuthor: boolean;
-  readonly friendsLiked: null;
-  readonly products: readonly never[];
-  readonly sponsored: null;
+  readonly shares: number;
+  readonly durationSeconds: number | null;
+  readonly friendsLiked: FriendsLikedView | null;
+  readonly products: readonly TaggedProductView[];
+  readonly sponsored: SponsoredPlacementView | null;
+  readonly topics: readonly string[];
+  readonly location: PostLocationTag | null;
+  readonly slideshow: ClipSlideshow | null;
   readonly subscriberOnly: boolean;
   readonly viewerHasAccess: boolean;
   readonly resharedFrom: PostView | null;

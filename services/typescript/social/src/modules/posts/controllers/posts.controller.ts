@@ -3,6 +3,7 @@ import type { Page } from "../../../types/pagination.type.js";
 import { clampPageSize } from "../../../utils/cursor.util.js";
 import type { RouteFactory } from "../../../utils/route.util.js";
 import type { CreatePostCommand } from "../commands/createPost/createPost.command.js";
+import type { MediaTrim } from "../models/post.model.js";
 import type { DeletePostCommand } from "../commands/deletePost/deletePost.command.js";
 import type { LikePostCommand } from "../commands/likePost/likePost.command.js";
 import type { MarkStorySeenCommand } from "../commands/markStorySeen/markStorySeen.command.js";
@@ -41,6 +42,12 @@ export interface PostsHandlers {
   readonly listUserStories: Handler<ListUserStoriesQuery, StoryView[]>;
 }
 
+export function collectMediaSelection(mediaIds: readonly string[] | undefined, media: readonly { readonly id?: string | undefined; readonly mediaId?: string | undefined; readonly trim?: MediaTrim | undefined }[] | undefined): { readonly mediaIds: string[]; readonly mediaTrims: Record<string, MediaTrim> } {
+  const fromMedia = (media ?? []).flatMap((item) => { const id = item.id ?? item.mediaId; return id === undefined ? [] : [{ id, trim: item.trim }]; });
+  const ids = [...new Set([...(mediaIds ?? []), ...fromMedia.map((item) => item.id)])];
+  return { mediaIds: ids, mediaTrims: Object.fromEntries(fromMedia.flatMap((item) => (item.trim === undefined ? [] : [[item.id, item.trim]]))) };
+}
+
 export function createPostsController(route: RouteFactory, handlers: PostsHandlers) {
   return {
     recordImpression: route({ authentication: "optional", params: postIdParamsSchema }, ({ principal, params }) => handlers.recordPostImpression({ viewerId: principal?.accountId, postId: params.postId })),
@@ -51,8 +58,11 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
         authorId: principal.accountId,
         kind: body.kind ?? "post",
         text: body.text ?? "",
-        mediaIds: body.mediaIds ?? [],
-        media: body.media ?? [],
+        ...collectMediaSelection(body.mediaIds, body.media),
+        slideshow: body.slideshow,
+        location: body.location,
+        topics: body.topics,
+        productIds: body.productIds,
         audience: body.audience ?? "everyone",
         visibility: body.visibility ?? "public",
         isAiGenerated: body.isAiGenerated ?? false,
@@ -72,7 +82,7 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
     resharePost: route({ authentication: "required", params: postIdParamsSchema, body: repostBodySchema, successStatus: 201 }, ({ principal, params, body }) => handlers.resharePost({ actorId: principal.accountId, postId: params.postId, text: body?.text ?? "" })),
     listUserPosts: route({ authentication: "optional", params: userIdParamsSchema, query: userPostsQuerySchema }, ({ principal, params, query }) =>
       handlers.listUserPosts({ viewerId: principal?.accountId, ownerId: params.userId === "me" ? (principal?.accountId ?? params.userId) : params.userId, cursor: query.cursor, limit: clampPageSize(query.limit), kind: query.kind })),
-    publishStory: route({ authentication: "required", body: publishStoryBodySchema, successStatus: 201 }, ({ principal, body }) => handlers.publishStory({ authorId: principal.accountId, mediaId: body.mediaId, media: body.media })),
+    publishStory: route({ authentication: "required", body: publishStoryBodySchema, successStatus: 201 }, ({ principal, body }) => handlers.publishStory({ authorId: principal.accountId, mediaId: body.mediaId })),
     markStorySeen: route({ authentication: "required", params: storyIdParamsSchema }, ({ principal, params }) => handlers.markStorySeen({ viewerId: principal.accountId, storyId: params.storyId })),
     listStoryTray: route({ authentication: "required" }, ({ principal }) => handlers.listStoryTray({ viewerId: principal.accountId })),
     listUserStories: route({ authentication: "optional", params: userIdParamsSchema }, ({ principal, params }) =>

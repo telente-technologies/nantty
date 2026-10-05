@@ -6,4 +6,5 @@ export function registerPostAudienceRoutes(router: HttpRouter, controller: Retur
   router.patch("/api/v1/posts/:postId/reply-settings", controller.updateReplySettings);
   router.patch("/api/v1/posts/:postId/sensitivity", controller.updatePostSensitivity);
   router.get("/api/v1/posts/:postId/quotes", controller.listPostQuotes);
+  router.post("/api/v1/posts/:postId/products", controller.setPostProducts);
 }
