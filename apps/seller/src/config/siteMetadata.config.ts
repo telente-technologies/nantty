@@ -1,4 +1,5 @@
-import { buildMailtoHref, buildStoreLinks, buildZudomartEmailAddresses } from "@zudomart/web-kit";
+import { buildMailtoHref, buildZudomartEmailAddresses } from "@zudomart/web-kit/src/contact/zudomartEmailAddresses";
+import { buildStoreLinks } from "@zudomart/web-kit/src/storeBadges/storeLinks";
 
 export const dashboardProductName = "Zudomart Dashboard";
 

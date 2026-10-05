@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useOnReconnect } from "@zudomart/web-kit";
+
 import { readErrorMessageForDisplay, sendSellerApiRequest, type SellerApiRequestOptions } from "@/services/clientApi.service";
 
 export interface SellerQueryState<Payload> {
@@ -42,6 +44,9 @@ export function useSellerQuery<Payload>(apiPath: string | null, query?: SellerAp
   }, [apiPath, serialisedQuery, reloadCounter]);
 
   const reload = useCallback(() => setReloadCounter((counter) => counter + 1), []);
+  useOnReconnect(() => {
+    if (errorMessage) reload();
+  });
   const replaceData = useCallback((updater: (current: Payload | null) => Payload | null) => setData((current) => updater(current)), []);
   return { data, errorMessage, isLoading, reload, replaceData };
 }

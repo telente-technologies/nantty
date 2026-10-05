@@ -122,8 +122,8 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "ANY", pathPattern: /^\/seller\/(orders|returns|disputes)/, permission: "orders:manage" },
   { method: "ANY", pathPattern: /^\/seller\/delivery/, permission: "delivery:manage" },
   { method: "ANY", pathPattern: /^\/seller\/shipping/, permission: "delivery:manage" },
-  { method: "POST", pathPattern: /^\/seller\/consents$/, permission: "signed_in" },
-  { method: "PATCH", pathPattern: /^\/seller\/users\/me\/preferences$/, permission: "signed_in" },
+  { method: "PUT", pathPattern: /^\/users\/me\/consents$/, permission: "signed_in" },
+  { method: "PATCH", pathPattern: /^\/users\/me\/preferences$/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/customers/, permission: "customers:view" },
   { method: "ANY", pathPattern: /^\/seller\/customers/, permission: "customers:manage" },
   { method: "ANY", pathPattern: /^\/seller\/conversations/, permission: "messages:manage" },
@@ -146,6 +146,7 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "GET", pathPattern: /^\/seller\/brands(\/|$)/, permission: "settings:view" },
   { method: "WRITE", pathPattern: /^\/seller\/brands\//, permission: "settings:manage" },
   { method: "ANY", pathPattern: /^\/media\//, permission: "media:upload" },
+  { method: "ANY", pathPattern: /^\/payments\/(payout-onboarding\/me|payout-fees)/, permission: "wallet:withdraw" },
 ];
 
 function doesMethodMatchPattern(method: string, pattern: HttpMethodPattern): boolean {

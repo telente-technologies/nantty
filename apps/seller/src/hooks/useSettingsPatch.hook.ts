@@ -19,7 +19,9 @@ export function useSettingsPatch() {
       setIsSaving(true);
       setServerFieldErrors({});
       try {
-        await sendSellerApiRequest<StoreSettings>("/seller/settings", { method: "PATCH", body: patch });
+        const { storeRewards, ...settingsPatch } = patch;
+        if (storeRewards) await sendSellerApiRequest("/seller/marketing/rewards/settings", { method: "PUT", body: storeRewards });
+        if (Object.keys(settingsPatch).length > 0) await sendSellerApiRequest<StoreSettings>("/seller/settings", { method: "PATCH", body: settingsPatch });
         reloadStoreContext();
         showToast(successMessage);
         return true;

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useOnReconnect } from "@zudomart/web-kit";
+
 import { readErrorMessageForDisplay, sendSellerApiRequest, type SellerApiRequestOptions } from "@/services/clientApi.service";
 import type { CursorPage } from "@/types/pagination.type";
 
@@ -58,5 +60,8 @@ export function useCursorPagedList<Item>(apiPath: string, query: SellerApiReques
   }, [apiPath, nextCursor]);
 
   const reload = useCallback(() => setReloadCounter((counter) => counter + 1), []);
+  useOnReconnect(() => {
+    if (errorMessage) reload();
+  });
   return { items, errorMessage, isLoading, isLoadingMore, hasMore: nextCursor !== null, loadMore, reload };
 }
