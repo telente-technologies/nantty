@@ -27,7 +27,8 @@ export function useLiveSafety(liveId: string, sessionSafety: LiveSafetyState | n
 
   useEffect(() => {
     if (!isActive || shouldUseMockForPath("/ws")) return undefined;
-    return realtimeService.subscribeToRealtimeEvents((event) => {
+    const leaveLiveTopic = realtimeService.subscribeToTopic(`live:${liveId}`);
+    const stopListening = realtimeService.subscribeToRealtimeEvents((event) => {
       if (event.type === "live.safety.paused" || event.type === "live.safety.resumed") {
         if (event.liveId !== liveId) return;
         queryClient.invalidateQueries({ queryKey: ["live", liveId] });
@@ -38,6 +39,10 @@ export function useLiveSafety(liveId: string, sessionSafety: LiveSafetyState | n
         queryClient.invalidateQueries({ queryKey: ["live-safety", liveId] });
       }
     });
+    return () => {
+      leaveLiveTopic();
+      stopListening();
+    };
   }, [isActive, isHost, liveId, queryClient]);
 
   const safety = isHost && safetyQuery.data ? safetyQuery.data.safety : sessionSafety ?? null;

@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { CURRENT_POLICY_VERSION } from "@/config/legalLinks.config";
 import { consentsService } from "@/services/consents.service";
 import { refreshTrackingConsents } from "@/services/productInteractions.service";
 import type { ConsentChoices, ConsentKey, ConsentRecord } from "@/types";
@@ -16,7 +15,7 @@ export function useUpdateConsentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ key, enabled }: { key: ConsentKey; enabled: boolean }) =>
-      consentsService.updateMyConsents({ policyVersionId: CURRENT_POLICY_VERSION, consents: { [key]: enabled } as Partial<ConsentChoices> }),
+      consentsService.updateMyConsents({ consents: { [key]: enabled } as Partial<ConsentChoices> }),
     onMutate: async ({ key, enabled }) => {
       await queryClient.cancelQueries({ queryKey: privacyQueryKeys.consents });
       const previous = queryClient.getQueryData<ConsentRecord>(privacyQueryKeys.consents);

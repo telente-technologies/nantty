@@ -45,7 +45,6 @@ export function usePostConversation(postId: string, sort: ThreadSort) {
       queryFn: () =>
         postThreadService.decideThreadAd(
           postId,
-          slotIndex,
           slotIndex === 0 ? position : REPLIES_BETWEEN_ADS,
           conversations.slice(Math.max(0, position - 2), position + 2).map((reply) => reply.id),
         ),

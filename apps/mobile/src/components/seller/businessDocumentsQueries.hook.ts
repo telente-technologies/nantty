@@ -10,7 +10,7 @@ export const useBusinessDocumentsQuery = () => useQuery({ queryKey: businessDocu
 export function useSubmitBusinessDocumentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ kind, fileUrl }: { kind: BusinessDocumentKind; fileUrl: string }) => businessDocumentsService.submitBusinessDocument(kind, fileUrl),
+    mutationFn: ({ kind, localUri }: { kind: BusinessDocumentKind; localUri: string }) => businessDocumentsService.submitBusinessDocument(kind, localUri),
     onSuccess: (state) => queryClient.setQueryData(businessDocumentsQueryKey, state),
   });
 }

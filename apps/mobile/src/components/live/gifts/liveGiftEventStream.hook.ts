@@ -25,9 +25,14 @@ const deliverGiftEventToChannelOnce = (channel: LiveGiftChannel, event: LiveGift
 
 const startGiftTransportForLive = (liveId: string, streamerUserId: string, channel: LiveGiftChannel) => {
   if (shouldUseMockForPath("/ws")) return startMockLiveGiftEmitter(liveId, streamerUserId, (event) => deliverGiftEventToChannelOnce(channel, event));
-  return realtimeService.subscribeToRealtimeEvents((event) => {
+  const stopListening = realtimeService.subscribeToRealtimeEvents((event) => {
     if (event.type === "gift.sent" && event.liveId === liveId) deliverGiftEventToChannelOnce(channel, event);
   });
+  const leaveLiveTopic = realtimeService.subscribeToTopic(`live:${liveId}`);
+  return () => {
+    leaveLiveTopic();
+    stopListening();
+  };
 };
 
 export function publishLocallySentLiveGiftEvent(event: LiveGiftSentEvent) {
