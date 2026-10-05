@@ -18,13 +18,6 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) error {
-	if err := secrettokens.AssertStaffPasswordMeetsPolicy(command.Password); err != nil {
-		return err
-	}
-	passwordHash, err := handler.Container.Passwords.HashPasswordWithArgon2id(command.Password)
-	if err != nil {
-		return err
-	}
 	return handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		now := handler.Container.Now()
 		invitation, err := tx.StaffInvitation.Query().
@@ -39,6 +32,13 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		if ent.IsNotFound(err) {
 			return adminerrors.InvalidInvitation
 		}
+		if err != nil {
+			return err
+		}
+		if err := secrettokens.AssertStaffPasswordMeetsPolicy(command.Password, staff.Email, staff.DisplayName); err != nil {
+			return err
+		}
+		passwordHash, err := handler.Container.Passwords.HashPasswordWithArgon2id(command.Password)
 		if err != nil {
 			return err
 		}
