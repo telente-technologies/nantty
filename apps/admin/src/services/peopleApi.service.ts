@@ -2,7 +2,7 @@ import { sendAdminApiRequest } from "@/services/adminApiClient.service";
 import type { PagedList } from "@/types/api.type";
 import type { HeldUsername, UserDetail, UserListFilters, UserPersonalDataResponse, UsernameWithholdResult, WithheldUsername } from "@/types/peopleUsers.type";
 import type { PlatformUserSummary } from "@/types/platformUser.type";
-import type { ConfusablePreview, ReservedUsernameCategory, ReservedUsernameEntry, ReservedUsernameKind } from "@/types/usernames.type";
+import type { ConfusablePreview, ReservedUsernameMatchKind, ReservedUsernameRule } from "@/types/usernames.type";
 
 const userPath = (userId: string, suffix = "") => `/admin/users/${encodeURIComponent(userId)}${suffix}`;
 
@@ -58,23 +58,23 @@ export function previewUsernameConfusables(candidate: string, signal?: AbortSign
   return sendAdminApiRequest("/admin/usernames/confusables", { query: { candidate }, signal });
 }
 
-export function fetchReservedUsernames(filters: { search?: string; kind?: string; category?: string }, signal?: AbortSignal): Promise<{ items: ReservedUsernameEntry[] }> {
-  return sendAdminApiRequest("/admin/reserved-usernames", { query: { ...filters }, signal });
+export function fetchReservedUsernames(cursor: string | null, signal?: AbortSignal): Promise<{ items: ReservedUsernameRule[]; nextCursor?: string | null }> {
+  return sendAdminApiRequest("/admin/usernames/reserved", { query: { cursor }, signal });
 }
 
-export function addReservedUsername(input: { value: string; kind: ReservedUsernameKind; category: ReservedUsernameCategory; note: string; reason: string }): Promise<{ entry: ReservedUsernameEntry; existingAccountsMatching: string[] }> {
-  return sendAdminApiRequest("/admin/reserved-usernames", { method: "POST", body: input });
+export function addReservedUsername(input: { term: string; matchKind: ReservedUsernameMatchKind }): Promise<ReservedUsernameRule> {
+  return sendAdminApiRequest("/admin/usernames/reserved", { method: "POST", body: input });
 }
 
-export function removeReservedUsername(entryId: string, reason: string): Promise<void> {
-  return sendAdminApiRequest(`/admin/reserved-usernames/${encodeURIComponent(entryId)}/remove`, { method: "POST", body: { reason } });
+export function removeReservedUsername(ruleId: string): Promise<void> {
+  return sendAdminApiRequest(`/admin/usernames/reserved/${encodeURIComponent(ruleId)}`, { method: "DELETE" });
 }
 
 export function restrictPlatformUser(userId: string, input: { reason: string; features: readonly string[]; durationDays: number }): Promise<UserDetail> {
   return sendAdminApiRequest(userPath(userId, "/restrict"), { method: "POST", body: input });
 }
 
-export function deletePlatformUser(userId: string, input: { reason: string; confirmUsername: string }): Promise<UserDetail & { deletion: { removed: string[]; anonymizedRecords: Record<string, number>; retainedUntil: string } }> {
+export function deletePlatformUser(userId: string, input: { reason: string; confirmUsername: string }): Promise<UserDetail & { deletion: { removed: string[]; anonymizedRecords: string[]; retainedUntil: string } }> {
   return sendAdminApiRequest(userPath(userId, "/delete"), { method: "POST", body: input });
 }
 

@@ -64,7 +64,7 @@ function collectForwardedHeaders(request: NextRequest, stepUpToken: string | nul
   }
   const clientAddress = readClientIpAddress(request);
   if (clientAddress) forwardedHeaders["X-Forwarded-For"] = clientAddress;
-  if (stepUpToken) forwardedHeaders["X-Admin-Step-Up"] = stepUpToken;
+  if (stepUpToken) forwardedHeaders["X-Step-Up-Token"] = stepUpToken;
   return forwardedHeaders;
 }
 
