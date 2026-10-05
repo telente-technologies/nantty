@@ -7,6 +7,7 @@ export const socialEventTypes = {
   userUnblocked: "block.removed",
   postCreated: "post.created",
   postDeleted: "post.deleted",
+  postTagged: "post.tagged",
   postUpdated: "post.updated",
   postReshared: "post.reshared",
   postLiked: "post.liked",

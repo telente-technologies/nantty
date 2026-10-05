@@ -419,6 +419,7 @@ export const ModelName = {
   Sound: 'Sound',
   SoundSave: 'SoundSave',
   ContentPreference: 'ContentPreference',
+  DownloadSetting: 'DownloadSetting',
   Follow: 'Follow',
   Block: 'Block',
   LinkPreviewCache: 'LinkPreviewCache',
@@ -431,7 +432,9 @@ export const ModelName = {
   ChatStreak: 'ChatStreak',
   StreakSenderDay: 'StreakSenderDay',
   StreakRestore: 'StreakRestore',
-  StreakCelebration: 'StreakCelebration'
+  StreakCelebration: 'StreakCelebration',
+  PostTag: 'PostTag',
+  TaggingSetting: 'TaggingSetting'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -447,7 +450,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "follow" | "block" | "linkPreviewCache" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration"
+    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "downloadSetting" | "follow" | "block" | "linkPreviewCache" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration" | "postTag" | "taggingSetting"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2079,6 +2082,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DownloadSetting: {
+      payload: Prisma.$DownloadSettingPayload<ExtArgs>
+      fields: Prisma.DownloadSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DownloadSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DownloadSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.DownloadSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DownloadSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload>
+        }
+        findMany: {
+          args: Prisma.DownloadSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload>[]
+        }
+        create: {
+          args: Prisma.DownloadSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload>
+        }
+        createMany: {
+          args: Prisma.DownloadSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DownloadSettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload>[]
+        }
+        delete: {
+          args: Prisma.DownloadSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload>
+        }
+        update: {
+          args: Prisma.DownloadSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.DownloadSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DownloadSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DownloadSettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.DownloadSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DownloadSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.DownloadSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDownloadSetting>
+        }
+        groupBy: {
+          args: Prisma.DownloadSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DownloadSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DownloadSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DownloadSettingCountAggregateOutputType> | number
+        }
+      }
+    }
     Follow: {
       payload: Prisma.$FollowPayload<ExtArgs>
       fields: Prisma.FollowFieldRefs
@@ -3041,6 +3118,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PostTag: {
+      payload: Prisma.$PostTagPayload<ExtArgs>
+      fields: Prisma.PostTagFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PostTagFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PostTagFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload>
+        }
+        findFirst: {
+          args: Prisma.PostTagFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PostTagFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload>
+        }
+        findMany: {
+          args: Prisma.PostTagFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload>[]
+        }
+        create: {
+          args: Prisma.PostTagCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload>
+        }
+        createMany: {
+          args: Prisma.PostTagCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PostTagCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload>[]
+        }
+        delete: {
+          args: Prisma.PostTagDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload>
+        }
+        update: {
+          args: Prisma.PostTagUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload>
+        }
+        deleteMany: {
+          args: Prisma.PostTagDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PostTagUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PostTagUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload>[]
+        }
+        upsert: {
+          args: Prisma.PostTagUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTagPayload>
+        }
+        aggregate: {
+          args: Prisma.PostTagAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePostTag>
+        }
+        groupBy: {
+          args: Prisma.PostTagGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostTagGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PostTagCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostTagCountAggregateOutputType> | number
+        }
+      }
+    }
+    TaggingSetting: {
+      payload: Prisma.$TaggingSettingPayload<ExtArgs>
+      fields: Prisma.TaggingSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaggingSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaggingSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.TaggingSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaggingSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload>
+        }
+        findMany: {
+          args: Prisma.TaggingSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload>[]
+        }
+        create: {
+          args: Prisma.TaggingSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload>
+        }
+        createMany: {
+          args: Prisma.TaggingSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TaggingSettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload>[]
+        }
+        delete: {
+          args: Prisma.TaggingSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload>
+        }
+        update: {
+          args: Prisma.TaggingSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaggingSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaggingSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TaggingSettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.TaggingSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaggingSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.TaggingSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaggingSetting>
+        }
+        groupBy: {
+          args: Prisma.TaggingSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaggingSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaggingSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaggingSettingCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3088,6 +3313,8 @@ export const ConversationScalarFieldEnum = {
   photoMediaId: 'photoMediaId',
   createdById: 'createdById',
   storeId: 'storeId',
+  orderId: 'orderId',
+  orderNumber: 'orderNumber',
   disappearingMessagesSeconds: 'disappearingMessagesSeconds',
   onlyAdminsCanMentionAll: 'onlyAdminsCanMentionAll',
   lastMessageKind: 'lastMessageKind',
@@ -3141,7 +3368,8 @@ export const MessageScalarFieldEnum = {
   mediaPurgedAt: 'mediaPurgedAt',
   createdAt: 'createdAt',
   pollQuestion: 'pollQuestion',
-  pollAllowMultiple: 'pollAllowMultiple'
+  pollAllowMultiple: 'pollAllowMultiple',
+  senderLabel: 'senderLabel'
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
@@ -3393,6 +3621,15 @@ export const ContentPreferenceScalarFieldEnum = {
 export type ContentPreferenceScalarFieldEnum = (typeof ContentPreferenceScalarFieldEnum)[keyof typeof ContentPreferenceScalarFieldEnum]
 
 
+export const DownloadSettingScalarFieldEnum = {
+  accountId: 'accountId',
+  allowDownloads: 'allowDownloads',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DownloadSettingScalarFieldEnum = (typeof DownloadSettingScalarFieldEnum)[keyof typeof DownloadSettingScalarFieldEnum]
+
+
 export const FollowScalarFieldEnum = {
   id: 'id',
   followerId: 'followerId',
@@ -3549,6 +3786,25 @@ export const StreakCelebrationScalarFieldEnum = {
 } as const
 
 export type StreakCelebrationScalarFieldEnum = (typeof StreakCelebrationScalarFieldEnum)[keyof typeof StreakCelebrationScalarFieldEnum]
+
+
+export const PostTagScalarFieldEnum = {
+  postId: 'postId',
+  taggedUserId: 'taggedUserId',
+  taggedByUserId: 'taggedByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type PostTagScalarFieldEnum = (typeof PostTagScalarFieldEnum)[keyof typeof PostTagScalarFieldEnum]
+
+
+export const TaggingSettingScalarFieldEnum = {
+  accountId: 'accountId',
+  allowTagging: 'allowTagging',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaggingSettingScalarFieldEnum = (typeof TaggingSettingScalarFieldEnum)[keyof typeof TaggingSettingScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -4092,6 +4348,7 @@ export type GlobalOmitConfig = {
   sound?: Prisma.SoundOmit
   soundSave?: Prisma.SoundSaveOmit
   contentPreference?: Prisma.ContentPreferenceOmit
+  downloadSetting?: Prisma.DownloadSettingOmit
   follow?: Prisma.FollowOmit
   block?: Prisma.BlockOmit
   linkPreviewCache?: Prisma.LinkPreviewCacheOmit
@@ -4105,6 +4362,8 @@ export type GlobalOmitConfig = {
   streakSenderDay?: Prisma.StreakSenderDayOmit
   streakRestore?: Prisma.StreakRestoreOmit
   streakCelebration?: Prisma.StreakCelebrationOmit
+  postTag?: Prisma.PostTagOmit
+  taggingSetting?: Prisma.TaggingSettingOmit
 }
 
 /* Types for Logging */

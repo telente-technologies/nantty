@@ -1,4 +1,7 @@
+import { readGatewayIdentitySecretsFromEnvironment } from "../middlewares/gatewayIdentity.middleware.js";
+
 export interface SocialConfig {
+  readonly gatewayIdentitySecrets?: readonly string[];
   readonly host: string;
   readonly port: number;
   readonly databaseUrl: string;
@@ -57,6 +60,7 @@ export function loadSocialConfigFromEnvironment(): SocialConfig {
   const problems: string[] = [];
   const databaseUrl = readRequired("DATABASE_URL", problems);
   const config: SocialConfig = {
+    gatewayIdentitySecrets: readGatewayIdentitySecretsFromEnvironment(problems),
     host: readOrDefault("HOST", "0.0.0.0"),
     port: Number(readOrDefault("PORT", "8105")),
     databaseUrl,

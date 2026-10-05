@@ -10,6 +10,7 @@ import {
 import { createLogger, type Logger } from "@zudojs/logger";
 
 import type { SocialConfig } from "./configs/social.config.js";
+import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
 import { createSocialDatabase, type SocialDatabase } from "./databases/prisma.database.js";
 import { createIdentityReadClient } from "./databases/identityRead.database.js";
 import { createIdempotencyGuard } from "./middlewares/idempotency.middleware.js";
@@ -24,6 +25,7 @@ import { createHttpShareCardResolver } from "./integrations/httpShareCardResolve
 import { createHttpLinkPreviewImageStore } from "./integrations/httpLinkPreviewImageStore.integration.js";
 import { createSafeHttpFetcher } from "./integrations/safeHttpFetcher.integration.js";
 import { createLinkUnfurler } from "./modules/linkPreviews/services/linkUnfurler.service.js";
+import { createHttpMediaDownloadVariantClient } from "./integrations/httpMediaDownloadVariantClient.integration.js";
 import { createHttpMediaDescriptorResolver } from "./integrations/httpMediaDescriptorResolver.integration.js";
 import { createHttpPremiumEntitlements, noPremiumEntitlements } from "./integrations/premiumEntitlements.integration.js";
 import { createRabbitMqDomainEventPublisher } from "./integrations/rabbitMqDomainEventPublisher.integration.js";
@@ -60,7 +62,7 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
     rankingSettings: config.adminInternal === undefined ? staticRankingSettings : createAdminRankingSettingsSource(config.adminInternal),
     ...(config.intelligence === undefined ? {} : { intelligenceExplore: createIntelligenceExploreClient({ baseUrl: config.intelligence.baseUrl, sharedSecret: config.intelligence.sharedSecret, timeoutMs: config.intelligence.exploreTimeoutMs }) }),
     shareCards: createHttpShareCardResolver({ commerce: config.commerceInternal, live: config.liveInternal }),
-    ...(config.mediaInternal === undefined ? {} : { media: createHttpMediaDescriptorResolver(config.mediaInternal) }),
+    ...(config.mediaInternal === undefined ? {} : { media: createHttpMediaDescriptorResolver(config.mediaInternal), mediaDownloads: createHttpMediaDownloadVariantClient(config.mediaInternal) }),
     ...(config.linkPreviewsEnabled ? { linkPreviews: createLinkUnfurler({ db: database.client, fetcher: createSafeHttpFetcher(), clock: systemClock, imageStore: config.mediaInternal === undefined ? undefined : createHttpLinkPreviewImageStore(config.mediaInternal, config.linkPreviewMediaOwnerId) }) } : {}),
   };
   const router = createRouter({
@@ -77,7 +79,7 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
       return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
     }
   };
-  const pipeline = new HttpMiddlewarePipeline({ middlewares: [dispatch] });
+  const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
   const server = createHttpServer({
     adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: true }),
     handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),

@@ -73,6 +73,7 @@ export const ModelName = {
   Sound: 'Sound',
   SoundSave: 'SoundSave',
   ContentPreference: 'ContentPreference',
+  DownloadSetting: 'DownloadSetting',
   Follow: 'Follow',
   Block: 'Block',
   LinkPreviewCache: 'LinkPreviewCache',
@@ -85,7 +86,9 @@ export const ModelName = {
   ChatStreak: 'ChatStreak',
   StreakSenderDay: 'StreakSenderDay',
   StreakRestore: 'StreakRestore',
-  StreakCelebration: 'StreakCelebration'
+  StreakCelebration: 'StreakCelebration',
+  PostTag: 'PostTag',
+  TaggingSetting: 'TaggingSetting'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -112,6 +115,8 @@ export const ConversationScalarFieldEnum = {
   photoMediaId: 'photoMediaId',
   createdById: 'createdById',
   storeId: 'storeId',
+  orderId: 'orderId',
+  orderNumber: 'orderNumber',
   disappearingMessagesSeconds: 'disappearingMessagesSeconds',
   onlyAdminsCanMentionAll: 'onlyAdminsCanMentionAll',
   lastMessageKind: 'lastMessageKind',
@@ -165,7 +170,8 @@ export const MessageScalarFieldEnum = {
   mediaPurgedAt: 'mediaPurgedAt',
   createdAt: 'createdAt',
   pollQuestion: 'pollQuestion',
-  pollAllowMultiple: 'pollAllowMultiple'
+  pollAllowMultiple: 'pollAllowMultiple',
+  senderLabel: 'senderLabel'
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
@@ -417,6 +423,15 @@ export const ContentPreferenceScalarFieldEnum = {
 export type ContentPreferenceScalarFieldEnum = (typeof ContentPreferenceScalarFieldEnum)[keyof typeof ContentPreferenceScalarFieldEnum]
 
 
+export const DownloadSettingScalarFieldEnum = {
+  accountId: 'accountId',
+  allowDownloads: 'allowDownloads',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DownloadSettingScalarFieldEnum = (typeof DownloadSettingScalarFieldEnum)[keyof typeof DownloadSettingScalarFieldEnum]
+
+
 export const FollowScalarFieldEnum = {
   id: 'id',
   followerId: 'followerId',
@@ -573,6 +588,25 @@ export const StreakCelebrationScalarFieldEnum = {
 } as const
 
 export type StreakCelebrationScalarFieldEnum = (typeof StreakCelebrationScalarFieldEnum)[keyof typeof StreakCelebrationScalarFieldEnum]
+
+
+export const PostTagScalarFieldEnum = {
+  postId: 'postId',
+  taggedUserId: 'taggedUserId',
+  taggedByUserId: 'taggedByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type PostTagScalarFieldEnum = (typeof PostTagScalarFieldEnum)[keyof typeof PostTagScalarFieldEnum]
+
+
+export const TaggingSettingScalarFieldEnum = {
+  accountId: 'accountId',
+  allowTagging: 'allowTagging',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaggingSettingScalarFieldEnum = (typeof TaggingSettingScalarFieldEnum)[keyof typeof TaggingSettingScalarFieldEnum]
 
 
 export const SortOrder = {

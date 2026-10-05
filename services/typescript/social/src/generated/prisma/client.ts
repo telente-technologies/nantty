@@ -152,6 +152,11 @@ export type SoundSave = Prisma.SoundSaveModel
  */
 export type ContentPreference = Prisma.ContentPreferenceModel
 /**
+ * Model DownloadSetting
+ * 
+ */
+export type DownloadSetting = Prisma.DownloadSettingModel
+/**
  * Model Follow
  * 
  */
@@ -216,3 +221,13 @@ export type StreakRestore = Prisma.StreakRestoreModel
  * 
  */
 export type StreakCelebration = Prisma.StreakCelebrationModel
+/**
+ * Model PostTag
+ * 
+ */
+export type PostTag = Prisma.PostTagModel
+/**
+ * Model TaggingSetting
+ * 
+ */
+export type TaggingSetting = Prisma.TaggingSettingModel
