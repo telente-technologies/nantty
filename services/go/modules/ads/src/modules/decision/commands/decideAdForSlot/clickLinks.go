@@ -7,7 +7,6 @@ import (
 	"zudomart/modules/ads/src/types"
 )
 
-// buildClickLinks signs one redirect link per clickable surface so the client never handles a raw destination for external or store clicks.
 func (handler Handler) buildClickLinks(creative types.Creative, impressionToken string, claims services.AdTokenClaims) (*types.CreativeClickLinks, error) {
 	deployed := handler.Container
 	link := func(cardIndex int) (string, error) {

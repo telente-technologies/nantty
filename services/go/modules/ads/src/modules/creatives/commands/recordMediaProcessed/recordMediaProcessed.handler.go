@@ -12,7 +12,6 @@ import (
 
 type Handler struct{ Container *container.Container }
 
-// Execute is called by the media pipeline (internal) once transcoding finished or failed.
 func (handler Handler) Execute(ctx context.Context, command Command) error {
 	request := command.Request
 	if request.Status != "ready" && request.Status != "failed" {

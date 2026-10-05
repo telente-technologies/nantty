@@ -27,7 +27,6 @@ var policyKeywordRules = []policyKeywordRule{
 
 var blockedDestinationDomains atomic.Pointer[[]string]
 
-// ConfigureBlockedDomains sets the destination blocklist used by review-time checks.
 func ConfigureBlockedDomains(domains []string) { blockedDestinationDomains.Store(&domains) }
 
 func creativeText(input types.CreativeInput) string {

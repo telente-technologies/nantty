@@ -19,7 +19,6 @@ var callToActionByGoal = map[string]string{"views": "watch_more", "profile_visit
 
 func ObjectiveForGoal(goal string) string { return objectiveByGoal[goal] }
 
-// BoostTargetCountries is the custom audience's country, or none so floors use the booster's billing-currency region.
 func BoostTargetCountries(audience dtos.BoostAudience) []string {
 	if audience.Mode == "custom" && audience.CountryCode != "" {
 		return []string{audience.CountryCode}
@@ -46,7 +45,6 @@ func EstimateRequestForBoost(request dtos.BoostEstimateRequest) regionpricing.Es
 	}
 }
 
-// EstimateBoost turns the regional campaign estimate into the boost sheet's numbers; a custom audience narrows reach by 30%.
 func EstimateBoost(request dtos.BoostEstimateRequest, estimate regionpricing.CampaignEstimate) dtos.BoostEstimate {
 	reach := estimate.Reach
 	if request.Audience.Mode == "custom" {

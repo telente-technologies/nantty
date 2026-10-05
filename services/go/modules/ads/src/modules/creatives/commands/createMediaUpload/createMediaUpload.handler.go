@@ -18,7 +18,6 @@ import (
 
 type Handler struct{ Container *container.Container }
 
-// Execute reserves a media row and returns a presigned S3 PUT; the browser uploads straight to S3.
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.MediaUploadIntent, error) {
 	deployed, request := handler.Container, command.Request
 	kind, extension, supported := services.MediaKindForMimeType(request.MimeType)

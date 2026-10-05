@@ -16,7 +16,6 @@ var sourceTypes = []string{"", "post", "clip", "product", "live", "store"}
 
 type Handler struct{ Container *container.Container }
 
-// Execute lists what the advertiser could promote; social owns eligibility, and anything it leaves unmarked is treated as ineligible.
 func (handler Handler) Execute(ctx context.Context, query Query) ([]map[string]any, string, error) {
 	deployed := handler.Container
 	if !slices.Contains(sourceTypes, query.Type) {

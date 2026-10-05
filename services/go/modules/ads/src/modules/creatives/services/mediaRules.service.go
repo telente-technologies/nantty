@@ -27,7 +27,6 @@ func ObjectKeyForMedia(accountId, mediaId uuid.UUID, extension string) string {
 	return path.Join("ads-media", accountId.String(), mediaId.String(), "original."+extension)
 }
 
-// SafeFileName drops any directory part and control characters; the name is only a label, never part of the object key.
 func SafeFileName(name string) string {
 	name = path.Base(strings.ReplaceAll(strings.TrimSpace(name), "\\", "/"))
 	cleaned := strings.Map(func(character rune) rune {

@@ -27,8 +27,6 @@ func money(amountMinor int64, currency string) map[string]any {
 	return map[string]any{"amountMinor": amountMinor, "currency": currency}
 }
 
-// GetRegionalPricing returns floors, suggested bids, minimum and suggested budgets and boost packages for the
-// targeted countries in the billing currency. The creator revenue share is returned to show it is one percentage everywhere.
 func (controller BillingController) GetRegionalPricing(writer http.ResponseWriter, request *http.Request) {
 	resolution := utils.ResolvePricingRegion(request)
 	currency := strings.ToUpper(request.URL.Query().Get("currency"))
@@ -88,8 +86,6 @@ func durationInDays(body estimateRequestBody) int {
 	return 7
 }
 
-// EstimateCampaignCost previews reach, impressions, clicks, cost per result and total cost for a budget and duration,
-// with a per-region breakdown in the billing currency, before anything is launched.
 func (controller BillingController) EstimateCampaignCost(writer http.ResponseWriter, request *http.Request) {
 	utils.Responder{Logger: controller.Container.Logger}.Run(writer, request, func() error {
 		var body estimateRequestBody
