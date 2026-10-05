@@ -22,6 +22,11 @@ import { createListConversationMembersHandler } from "./queries/listConversation
 import { createListConversationsHandler } from "./queries/listConversations/listConversations.handler.js";
 import { createSearchConversationsHandler } from "./queries/searchConversations/searchConversations.handler.js";
 import { registerConversationsRoutes } from "./routes/conversations.routes.js";
+import { createCreateChannelHandler } from "./commands/createChannel/createChannel.handler.js";
+import { createSubscribeToChannelHandler } from "./commands/subscribeToChannel/subscribeToChannel.handler.js";
+import { createUnsubscribeFromChannelHandler } from "./commands/unsubscribeFromChannel/unsubscribeFromChannel.handler.js";
+import { createChannelsController } from "./controllers/channels.controller.js";
+import { registerChannelsRoutes } from "./routes/channels.routes.js";
 
 export function mountConversationsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
   registerConversationsRoutes(router, createConversationsController(route, {
@@ -43,5 +48,10 @@ export function mountConversationsModule(router: HttpRouter, route: RouteFactory
     getConversation: createGetConversationHandler(context),
     listConversationMembers: createListConversationMembersHandler(context),
     searchConversations: createSearchConversationsHandler(context),
+  }));
+  registerChannelsRoutes(router, createChannelsController(route, {
+    createChannel: createCreateChannelHandler(context),
+    subscribeToChannel: createSubscribeToChannelHandler(context),
+    unsubscribeFromChannel: createUnsubscribeFromChannelHandler(context),
   }));
 }

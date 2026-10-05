@@ -9,7 +9,7 @@ export function createLeaveConversationHandler(context: HandlerContext): Handler
     await context.database.transaction(async (transaction) => {
       await conversationRepository.updateMember(transaction, conversationId, viewerId, { leftAt: context.clock.now(), unreadCount: 0 });
       if (member.role !== "owner" || conversation.kind === "direct") return;
-      const successor = [...conversation.members].filter((candidate) => candidate.accountId !== viewerId).sort((left, right) => Number(right.role === "admin") - Number(left.role === "admin") || left.joinedAt.getTime() - right.joinedAt.getTime())[0];
+      const successor = [...conversation.members].filter((candidate) => candidate.accountId !== viewerId && (conversation.kind !== "channel" || candidate.role === "admin")).sort((left, right) => Number(right.role === "admin") - Number(left.role === "admin") || left.joinedAt.getTime() - right.joinedAt.getTime())[0];
       if (successor !== undefined) await conversationRepository.updateMember(transaction, conversationId, successor.accountId, { role: "owner" });
     });
   };
