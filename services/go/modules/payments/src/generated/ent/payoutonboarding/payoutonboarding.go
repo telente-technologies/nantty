@@ -3,6 +3,7 @@
 package payoutonboarding
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -44,6 +45,16 @@ const (
 	FieldResolvedAccountName = "resolved_account_name"
 	// FieldCompletedSteps holds the string denoting the completed_steps field in the database.
 	FieldCompletedSteps = "completed_steps"
+	// FieldDocumentStatus holds the string denoting the document_status field in the database.
+	FieldDocumentStatus = "document_status"
+	// FieldDocumentSessionID holds the string denoting the document_session_id field in the database.
+	FieldDocumentSessionID = "document_session_id"
+	// FieldDocumentLinkURL holds the string denoting the document_link_url field in the database.
+	FieldDocumentLinkURL = "document_link_url"
+	// FieldDocumentLinkExpiresAt holds the string denoting the document_link_expires_at field in the database.
+	FieldDocumentLinkExpiresAt = "document_link_expires_at"
+	// FieldDocumentRejectionReason holds the string denoting the document_rejection_reason field in the database.
+	FieldDocumentRejectionReason = "document_rejection_reason"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the payoutonboarding in the database.
@@ -68,6 +79,11 @@ var Columns = []string{
 	FieldAccountLast4,
 	FieldResolvedAccountName,
 	FieldCompletedSteps,
+	FieldDocumentStatus,
+	FieldDocumentSessionID,
+	FieldDocumentLinkURL,
+	FieldDocumentLinkExpiresAt,
+	FieldDocumentRejectionReason,
 	FieldUpdatedAt,
 }
 
@@ -128,6 +144,18 @@ var (
 	DefaultResolvedAccountName string
 	// ResolvedAccountNameValidator is a validator for the "resolved_account_name" field. It is called by the builders before save.
 	ResolvedAccountNameValidator func(string) error
+	// DefaultDocumentSessionID holds the default value on creation for the "document_session_id" field.
+	DefaultDocumentSessionID string
+	// DocumentSessionIDValidator is a validator for the "document_session_id" field. It is called by the builders before save.
+	DocumentSessionIDValidator func(string) error
+	// DefaultDocumentLinkURL holds the default value on creation for the "document_link_url" field.
+	DefaultDocumentLinkURL string
+	// DocumentLinkURLValidator is a validator for the "document_link_url" field. It is called by the builders before save.
+	DocumentLinkURLValidator func(string) error
+	// DefaultDocumentRejectionReason holds the default value on creation for the "document_rejection_reason" field.
+	DefaultDocumentRejectionReason string
+	// DocumentRejectionReasonValidator is a validator for the "document_rejection_reason" field. It is called by the builders before save.
+	DocumentRejectionReasonValidator func(string) error
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -135,6 +163,35 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// DocumentStatus defines the type for the "document_status" enum field.
+type DocumentStatus string
+
+// DocumentStatusNotStarted is the default value of the DocumentStatus enum.
+const DefaultDocumentStatus = DocumentStatusNotStarted
+
+// DocumentStatus values.
+const (
+	DocumentStatusNotStarted DocumentStatus = "not_started"
+	DocumentStatusLinkIssued DocumentStatus = "link_issued"
+	DocumentStatusInReview   DocumentStatus = "in_review"
+	DocumentStatusApproved   DocumentStatus = "approved"
+	DocumentStatusRejected   DocumentStatus = "rejected"
+)
+
+func (ds DocumentStatus) String() string {
+	return string(ds)
+}
+
+// DocumentStatusValidator is a validator for the "document_status" field enum values. It is called by the builders before save.
+func DocumentStatusValidator(ds DocumentStatus) error {
+	switch ds {
+	case DocumentStatusNotStarted, DocumentStatusLinkIssued, DocumentStatusInReview, DocumentStatusApproved, DocumentStatusRejected:
+		return nil
+	default:
+		return fmt.Errorf("payoutonboarding: invalid enum value for document_status field: %q", ds)
+	}
+}
 
 // OrderOption defines the ordering options for the PayoutOnboarding queries.
 type OrderOption func(*sql.Selector)
@@ -207,6 +264,31 @@ func ByAccountLast4(opts ...sql.OrderTermOption) OrderOption {
 // ByResolvedAccountName orders the results by the resolved_account_name field.
 func ByResolvedAccountName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResolvedAccountName, opts...).ToFunc()
+}
+
+// ByDocumentStatus orders the results by the document_status field.
+func ByDocumentStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentStatus, opts...).ToFunc()
+}
+
+// ByDocumentSessionID orders the results by the document_session_id field.
+func ByDocumentSessionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentSessionID, opts...).ToFunc()
+}
+
+// ByDocumentLinkURL orders the results by the document_link_url field.
+func ByDocumentLinkURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentLinkURL, opts...).ToFunc()
+}
+
+// ByDocumentLinkExpiresAt orders the results by the document_link_expires_at field.
+func ByDocumentLinkExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentLinkExpiresAt, opts...).ToFunc()
+}
+
+// ByDocumentRejectionReason orders the results by the document_rejection_reason field.
+func ByDocumentRejectionReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDocumentRejectionReason, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

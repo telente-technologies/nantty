@@ -414,6 +414,11 @@ var (
 		{Name: "account_last4", Type: field.TypeString, Size: 4, Default: ""},
 		{Name: "resolved_account_name", Type: field.TypeString, Size: 160, Default: ""},
 		{Name: "completed_steps", Type: field.TypeJSON, Nullable: true},
+		{Name: "document_status", Type: field.TypeEnum, Enums: []string{"not_started", "link_issued", "in_review", "approved", "rejected"}, Default: "not_started"},
+		{Name: "document_session_id", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "document_link_url", Type: field.TypeString, Size: 2000, Default: ""},
+		{Name: "document_link_expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "document_rejection_reason", Type: field.TypeString, Size: 300, Default: ""},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// PayoutOnboardingsTable holds the schema information for the "payout_onboardings" table.
@@ -426,6 +431,11 @@ var (
 				Name:    "payoutonboarding_user_id",
 				Unique:  true,
 				Columns: []*schema.Column{PayoutOnboardingsColumns[2]},
+			},
+			{
+				Name:    "payoutonboarding_document_session_id",
+				Unique:  false,
+				Columns: []*schema.Column{PayoutOnboardingsColumns[17]},
 			},
 		},
 	}

@@ -125,6 +125,26 @@ func ResolvedAccountName(v string) predicate.PayoutOnboarding {
 	return predicate.PayoutOnboarding(sql.FieldEQ(FieldResolvedAccountName, v))
 }
 
+// DocumentSessionID applies equality check predicate on the "document_session_id" field. It's identical to DocumentSessionIDEQ.
+func DocumentSessionID(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEQ(FieldDocumentSessionID, v))
+}
+
+// DocumentLinkURL applies equality check predicate on the "document_link_url" field. It's identical to DocumentLinkURLEQ.
+func DocumentLinkURL(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEQ(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkExpiresAt applies equality check predicate on the "document_link_expires_at" field. It's identical to DocumentLinkExpiresAtEQ.
+func DocumentLinkExpiresAt(v time.Time) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEQ(FieldDocumentLinkExpiresAt, v))
+}
+
+// DocumentRejectionReason applies equality check predicate on the "document_rejection_reason" field. It's identical to DocumentRejectionReasonEQ.
+func DocumentRejectionReason(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEQ(FieldDocumentRejectionReason, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.PayoutOnboarding {
 	return predicate.PayoutOnboarding(sql.FieldEQ(FieldUpdatedAt, v))
@@ -953,6 +973,271 @@ func CompletedStepsIsNil() predicate.PayoutOnboarding {
 // CompletedStepsNotNil applies the NotNil predicate on the "completed_steps" field.
 func CompletedStepsNotNil() predicate.PayoutOnboarding {
 	return predicate.PayoutOnboarding(sql.FieldNotNull(FieldCompletedSteps))
+}
+
+// DocumentStatusEQ applies the EQ predicate on the "document_status" field.
+func DocumentStatusEQ(v DocumentStatus) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEQ(FieldDocumentStatus, v))
+}
+
+// DocumentStatusNEQ applies the NEQ predicate on the "document_status" field.
+func DocumentStatusNEQ(v DocumentStatus) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNEQ(FieldDocumentStatus, v))
+}
+
+// DocumentStatusIn applies the In predicate on the "document_status" field.
+func DocumentStatusIn(vs ...DocumentStatus) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldIn(FieldDocumentStatus, vs...))
+}
+
+// DocumentStatusNotIn applies the NotIn predicate on the "document_status" field.
+func DocumentStatusNotIn(vs ...DocumentStatus) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNotIn(FieldDocumentStatus, vs...))
+}
+
+// DocumentSessionIDEQ applies the EQ predicate on the "document_session_id" field.
+func DocumentSessionIDEQ(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEQ(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDNEQ applies the NEQ predicate on the "document_session_id" field.
+func DocumentSessionIDNEQ(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNEQ(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDIn applies the In predicate on the "document_session_id" field.
+func DocumentSessionIDIn(vs ...string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldIn(FieldDocumentSessionID, vs...))
+}
+
+// DocumentSessionIDNotIn applies the NotIn predicate on the "document_session_id" field.
+func DocumentSessionIDNotIn(vs ...string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNotIn(FieldDocumentSessionID, vs...))
+}
+
+// DocumentSessionIDGT applies the GT predicate on the "document_session_id" field.
+func DocumentSessionIDGT(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldGT(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDGTE applies the GTE predicate on the "document_session_id" field.
+func DocumentSessionIDGTE(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldGTE(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDLT applies the LT predicate on the "document_session_id" field.
+func DocumentSessionIDLT(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldLT(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDLTE applies the LTE predicate on the "document_session_id" field.
+func DocumentSessionIDLTE(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldLTE(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDContains applies the Contains predicate on the "document_session_id" field.
+func DocumentSessionIDContains(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldContains(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDHasPrefix applies the HasPrefix predicate on the "document_session_id" field.
+func DocumentSessionIDHasPrefix(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldHasPrefix(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDHasSuffix applies the HasSuffix predicate on the "document_session_id" field.
+func DocumentSessionIDHasSuffix(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldHasSuffix(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDEqualFold applies the EqualFold predicate on the "document_session_id" field.
+func DocumentSessionIDEqualFold(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEqualFold(FieldDocumentSessionID, v))
+}
+
+// DocumentSessionIDContainsFold applies the ContainsFold predicate on the "document_session_id" field.
+func DocumentSessionIDContainsFold(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldContainsFold(FieldDocumentSessionID, v))
+}
+
+// DocumentLinkURLEQ applies the EQ predicate on the "document_link_url" field.
+func DocumentLinkURLEQ(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEQ(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLNEQ applies the NEQ predicate on the "document_link_url" field.
+func DocumentLinkURLNEQ(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNEQ(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLIn applies the In predicate on the "document_link_url" field.
+func DocumentLinkURLIn(vs ...string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldIn(FieldDocumentLinkURL, vs...))
+}
+
+// DocumentLinkURLNotIn applies the NotIn predicate on the "document_link_url" field.
+func DocumentLinkURLNotIn(vs ...string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNotIn(FieldDocumentLinkURL, vs...))
+}
+
+// DocumentLinkURLGT applies the GT predicate on the "document_link_url" field.
+func DocumentLinkURLGT(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldGT(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLGTE applies the GTE predicate on the "document_link_url" field.
+func DocumentLinkURLGTE(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldGTE(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLLT applies the LT predicate on the "document_link_url" field.
+func DocumentLinkURLLT(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldLT(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLLTE applies the LTE predicate on the "document_link_url" field.
+func DocumentLinkURLLTE(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldLTE(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLContains applies the Contains predicate on the "document_link_url" field.
+func DocumentLinkURLContains(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldContains(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLHasPrefix applies the HasPrefix predicate on the "document_link_url" field.
+func DocumentLinkURLHasPrefix(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldHasPrefix(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLHasSuffix applies the HasSuffix predicate on the "document_link_url" field.
+func DocumentLinkURLHasSuffix(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldHasSuffix(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLEqualFold applies the EqualFold predicate on the "document_link_url" field.
+func DocumentLinkURLEqualFold(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEqualFold(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkURLContainsFold applies the ContainsFold predicate on the "document_link_url" field.
+func DocumentLinkURLContainsFold(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldContainsFold(FieldDocumentLinkURL, v))
+}
+
+// DocumentLinkExpiresAtEQ applies the EQ predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtEQ(v time.Time) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEQ(FieldDocumentLinkExpiresAt, v))
+}
+
+// DocumentLinkExpiresAtNEQ applies the NEQ predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtNEQ(v time.Time) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNEQ(FieldDocumentLinkExpiresAt, v))
+}
+
+// DocumentLinkExpiresAtIn applies the In predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtIn(vs ...time.Time) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldIn(FieldDocumentLinkExpiresAt, vs...))
+}
+
+// DocumentLinkExpiresAtNotIn applies the NotIn predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtNotIn(vs ...time.Time) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNotIn(FieldDocumentLinkExpiresAt, vs...))
+}
+
+// DocumentLinkExpiresAtGT applies the GT predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtGT(v time.Time) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldGT(FieldDocumentLinkExpiresAt, v))
+}
+
+// DocumentLinkExpiresAtGTE applies the GTE predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtGTE(v time.Time) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldGTE(FieldDocumentLinkExpiresAt, v))
+}
+
+// DocumentLinkExpiresAtLT applies the LT predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtLT(v time.Time) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldLT(FieldDocumentLinkExpiresAt, v))
+}
+
+// DocumentLinkExpiresAtLTE applies the LTE predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtLTE(v time.Time) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldLTE(FieldDocumentLinkExpiresAt, v))
+}
+
+// DocumentLinkExpiresAtIsNil applies the IsNil predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtIsNil() predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldIsNull(FieldDocumentLinkExpiresAt))
+}
+
+// DocumentLinkExpiresAtNotNil applies the NotNil predicate on the "document_link_expires_at" field.
+func DocumentLinkExpiresAtNotNil() predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNotNull(FieldDocumentLinkExpiresAt))
+}
+
+// DocumentRejectionReasonEQ applies the EQ predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonEQ(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEQ(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonNEQ applies the NEQ predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonNEQ(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNEQ(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonIn applies the In predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonIn(vs ...string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldIn(FieldDocumentRejectionReason, vs...))
+}
+
+// DocumentRejectionReasonNotIn applies the NotIn predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonNotIn(vs ...string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldNotIn(FieldDocumentRejectionReason, vs...))
+}
+
+// DocumentRejectionReasonGT applies the GT predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonGT(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldGT(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonGTE applies the GTE predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonGTE(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldGTE(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonLT applies the LT predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonLT(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldLT(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonLTE applies the LTE predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonLTE(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldLTE(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonContains applies the Contains predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonContains(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldContains(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonHasPrefix applies the HasPrefix predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonHasPrefix(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldHasPrefix(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonHasSuffix applies the HasSuffix predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonHasSuffix(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldHasSuffix(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonEqualFold applies the EqualFold predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonEqualFold(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldEqualFold(FieldDocumentRejectionReason, v))
+}
+
+// DocumentRejectionReasonContainsFold applies the ContainsFold predicate on the "document_rejection_reason" field.
+func DocumentRejectionReasonContainsFold(v string) predicate.PayoutOnboarding {
+	return predicate.PayoutOnboarding(sql.FieldContainsFold(FieldDocumentRejectionReason, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
