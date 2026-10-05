@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { PauseIcon, PlayIcon } from "@/components/ui/icons";
 import type { MartHighlight } from "@/types/martHighlight.type";
 
 import styles from "./martHighlightsCarousel.module.css";
@@ -117,9 +118,7 @@ export function MartHighlightsCarousel({ highlights, loading }: { readonly highl
         <div className={styles.controls}>
           {reducedMotion ? null : (
             <button type="button" className={styles.pause} onClick={() => setUserPaused((paused) => !paused)} aria-label={userPaused ? "Play highlights" : "Pause highlights"}>
-              <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
-                {userPaused ? <path d="M4 2.5v11l9-5.5z" fill="currentColor" /> : <path d="M4 2.5h3v11H4zM9 2.5h3v11H9z" fill="currentColor" />}
-              </svg>
+              {userPaused ? <PlayIcon size={12} /> : <PauseIcon size={12} />}
             </button>
           )}
           {highlights.map((highlight, dotIndex) => (

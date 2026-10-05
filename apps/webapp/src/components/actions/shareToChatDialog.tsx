@@ -9,8 +9,10 @@ import { Avatar } from "@/components/ui/media";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
+import { useSession } from "@/components/providers/sessionProvider";
+import { chatCryptoService, readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
 import { messagesService } from "@/services/messages.service";
-import { chatSharesService, type ShareReferenceKind } from "@/services/webActions.service";
+import { chatSharesService, toShareReferenceKind, type ShareReferenceKind } from "@/services/webActions.service";
 
 import styles from "./actionDialogs.module.css";
 
@@ -25,13 +27,30 @@ interface ShareToChatDialogProps {
 
 export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareToChatDialogProps) {
   const queryClient = useQueryClient();
+  const { viewer } = useSession();
   const [selectedConversationIds, setSelectedConversationIds] = useState<readonly string[]>([]);
+  const [note, setNote] = useState("");
   const conversationsQuery = useQuery({ queryKey: ["conversations", "all"], queryFn: () => messagesService.fetchConversationList("all"), enabled: isOpen, retry: false });
   const shareMutation = useMutation({
-    mutationFn: () => chatSharesService.shareIntoChats(selectedConversationIds, kind, referenceId),
+    mutationFn: async () => {
+      const text = note.trim();
+      if (!text) return chatSharesService.shareIntoChats(selectedConversationIds, kind, referenceId);
+      if (!viewer?.id) throw new Error("Sign in to send a note.");
+      const conversations = (conversationsQuery.data ?? []).filter((conversation) => selectedConversationIds.includes(conversation.id));
+      const sealed = await Promise.all(
+        conversations.map(async (conversation) => ({
+          conversationId: conversation.id,
+          encrypted: await chatCryptoService.encryptForConversation(conversation, viewer.id, { text, sharedContent: { kind: toShareReferenceKind(kind), id: referenceId } }),
+        })),
+      );
+      const result = await chatSharesService.shareIntoChats(selectedConversationIds, kind, referenceId, sealed.map(({ conversationId, encrypted }) => ({ conversationId, ...encrypted.encryption })));
+      await Promise.all(sealed.map(({ encrypted }) => encrypted.confirmSent(null)));
+      return result;
+    },
     onSuccess: (result) => {
       showToast({ text: result.sentCount === 1 ? "Sent to 1 chat" : `Sent to ${result.sentCount} chats`, actionLabel: "Open messages", actionHref: "/chats" });
       setSelectedConversationIds([]);
+      setNote("");
       void queryClient.invalidateQueries({ queryKey: ["conversations"] });
       onClose();
     },
@@ -83,9 +102,13 @@ export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareT
           ))}
         </fieldset>
       )}
+      <label className={styles.label} htmlFor="share-note">
+        Add a note (optional)
+      </label>
+      <textarea id="share-note" className={styles.textarea} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} />
       {shareMutation.isError ? (
         <p className={styles.error} role="alert">
-          {readErrorMessageForDisplay(shareMutation.error)}
+          {readChatCryptoErrorMessage(shareMutation.error) ?? readErrorMessageForDisplay(shareMutation.error)}
         </p>
       ) : null}
     </ModalDialog>

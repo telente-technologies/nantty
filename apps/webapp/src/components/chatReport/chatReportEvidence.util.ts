@@ -1,6 +1,6 @@
 import type { ChatReportEvidenceMessage, Message } from "@/types";
 
-export const listReportableMessages = (messages: readonly Message[]) => messages.filter((message) => message.kind !== "system");
+export const listReportableMessages = (messages: readonly Message[]) => messages.filter((message) => message.kind !== "system" && !message.decryptionNotice);
 
 export const buildEvidenceMessage = (message: Message, viewerId: string, senderNameById: ReadonlyMap<string, string>): ChatReportEvidenceMessage => ({
   messageId: message.id,

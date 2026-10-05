@@ -32,10 +32,14 @@
   height: auto;
 }
 
-[data-tone="brand"] { color: var(--color-brand); }
-[data-tone="success"] { color: var(--color-success-text); }
-[data-tone="warn"] { color: var(--color-warn-text); }
-[data-tone="danger"] { color: var(--color-danger-text); }
+.balloonSvg[data-tone="brand"],
+.piece[data-tone="brand"] { color: var(--color-brand); }
+.balloonSvg[data-tone="success"],
+.piece[data-tone="success"] { color: var(--color-success-text); }
+.balloonSvg[data-tone="warn"],
+.piece[data-tone="warn"] { color: var(--color-warn-text); }
+.balloonSvg[data-tone="danger"],
+.piece[data-tone="danger"] { color: var(--color-danger-text); }
 
 .confetti {
   width: 100%;
