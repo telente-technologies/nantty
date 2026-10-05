@@ -5,6 +5,9 @@ package ent
 import (
 	"time"
 	"zudomart/modules/subscriptions/src/databases/schema"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptionplan"
 	"zudomart/modules/subscriptions/src/generated/ent/idempotentrequest"
 	"zudomart/modules/subscriptions/src/generated/ent/outboxevent"
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
@@ -22,6 +25,349 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	creatorsubscriptionMixin := schema.CreatorSubscription{}.Mixin()
+	creatorsubscriptionMixinFields0 := creatorsubscriptionMixin[0].Fields()
+	_ = creatorsubscriptionMixinFields0
+	creatorsubscriptionFields := schema.CreatorSubscription{}.Fields()
+	_ = creatorsubscriptionFields
+	// creatorsubscriptionDescCreatedAt is the schema descriptor for created_at field.
+	creatorsubscriptionDescCreatedAt := creatorsubscriptionMixinFields0[1].Descriptor()
+	// creatorsubscription.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creatorsubscription.DefaultCreatedAt = creatorsubscriptionDescCreatedAt.Default.(func() time.Time)
+	// creatorsubscriptionDescSubscriberID is the schema descriptor for subscriber_id field.
+	creatorsubscriptionDescSubscriberID := creatorsubscriptionFields[0].Descriptor()
+	// creatorsubscription.SubscriberIDValidator is a validator for the "subscriber_id" field. It is called by the builders before save.
+	creatorsubscription.SubscriberIDValidator = func() func(string) error {
+		validators := creatorsubscriptionDescSubscriberID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(subscriber_id string) error {
+			for _, fn := range fns {
+				if err := fn(subscriber_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionDescCreatorID is the schema descriptor for creator_id field.
+	creatorsubscriptionDescCreatorID := creatorsubscriptionFields[1].Descriptor()
+	// creatorsubscription.CreatorIDValidator is a validator for the "creator_id" field. It is called by the builders before save.
+	creatorsubscription.CreatorIDValidator = func() func(string) error {
+		validators := creatorsubscriptionDescCreatorID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(creator_id string) error {
+			for _, fn := range fns {
+				if err := fn(creator_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionDescPlanID is the schema descriptor for plan_id field.
+	creatorsubscriptionDescPlanID := creatorsubscriptionFields[2].Descriptor()
+	// creatorsubscription.PlanIDValidator is a validator for the "plan_id" field. It is called by the builders before save.
+	creatorsubscription.PlanIDValidator = func() func(string) error {
+		validators := creatorsubscriptionDescPlanID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(plan_id string) error {
+			for _, fn := range fns {
+				if err := fn(plan_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionDescAmountMinor is the schema descriptor for amount_minor field.
+	creatorsubscriptionDescAmountMinor := creatorsubscriptionFields[4].Descriptor()
+	// creatorsubscription.AmountMinorValidator is a validator for the "amount_minor" field. It is called by the builders before save.
+	creatorsubscription.AmountMinorValidator = creatorsubscriptionDescAmountMinor.Validators[0].(func(int64) error)
+	// creatorsubscriptionDescCurrency is the schema descriptor for currency field.
+	creatorsubscriptionDescCurrency := creatorsubscriptionFields[5].Descriptor()
+	// creatorsubscription.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	creatorsubscription.CurrencyValidator = func() func(string) error {
+		validators := creatorsubscriptionDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionDescBillingAuthorizationID is the schema descriptor for billing_authorization_id field.
+	creatorsubscriptionDescBillingAuthorizationID := creatorsubscriptionFields[7].Descriptor()
+	// creatorsubscription.DefaultBillingAuthorizationID holds the default value on creation for the billing_authorization_id field.
+	creatorsubscription.DefaultBillingAuthorizationID = creatorsubscriptionDescBillingAuthorizationID.Default.(string)
+	// creatorsubscription.BillingAuthorizationIDValidator is a validator for the "billing_authorization_id" field. It is called by the builders before save.
+	creatorsubscription.BillingAuthorizationIDValidator = creatorsubscriptionDescBillingAuthorizationID.Validators[0].(func(string) error)
+	// creatorsubscriptionDescRenewalAttempts is the schema descriptor for renewal_attempts field.
+	creatorsubscriptionDescRenewalAttempts := creatorsubscriptionFields[11].Descriptor()
+	// creatorsubscription.DefaultRenewalAttempts holds the default value on creation for the renewal_attempts field.
+	creatorsubscription.DefaultRenewalAttempts = creatorsubscriptionDescRenewalAttempts.Default.(int)
+	// creatorsubscriptionDescLastError is the schema descriptor for last_error field.
+	creatorsubscriptionDescLastError := creatorsubscriptionFields[12].Descriptor()
+	// creatorsubscription.DefaultLastError holds the default value on creation for the last_error field.
+	creatorsubscription.DefaultLastError = creatorsubscriptionDescLastError.Default.(string)
+	// creatorsubscription.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	creatorsubscription.LastErrorValidator = creatorsubscriptionDescLastError.Validators[0].(func(string) error)
+	// creatorsubscriptionDescUpdatedAt is the schema descriptor for updated_at field.
+	creatorsubscriptionDescUpdatedAt := creatorsubscriptionFields[13].Descriptor()
+	// creatorsubscription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	creatorsubscription.DefaultUpdatedAt = creatorsubscriptionDescUpdatedAt.Default.(func() time.Time)
+	// creatorsubscription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	creatorsubscription.UpdateDefaultUpdatedAt = creatorsubscriptionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// creatorsubscriptionDescID is the schema descriptor for id field.
+	creatorsubscriptionDescID := creatorsubscriptionMixinFields0[0].Descriptor()
+	// creatorsubscription.DefaultID holds the default value on creation for the id field.
+	creatorsubscription.DefaultID = creatorsubscriptionDescID.Default.(func() uuid.UUID)
+	creatorsubscriptionchargeMixin := schema.CreatorSubscriptionCharge{}.Mixin()
+	creatorsubscriptionchargeMixinFields0 := creatorsubscriptionchargeMixin[0].Fields()
+	_ = creatorsubscriptionchargeMixinFields0
+	creatorsubscriptionchargeFields := schema.CreatorSubscriptionCharge{}.Fields()
+	_ = creatorsubscriptionchargeFields
+	// creatorsubscriptionchargeDescCreatedAt is the schema descriptor for created_at field.
+	creatorsubscriptionchargeDescCreatedAt := creatorsubscriptionchargeMixinFields0[1].Descriptor()
+	// creatorsubscriptioncharge.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creatorsubscriptioncharge.DefaultCreatedAt = creatorsubscriptionchargeDescCreatedAt.Default.(func() time.Time)
+	// creatorsubscriptionchargeDescSubscriptionID is the schema descriptor for subscription_id field.
+	creatorsubscriptionchargeDescSubscriptionID := creatorsubscriptionchargeFields[0].Descriptor()
+	// creatorsubscriptioncharge.SubscriptionIDValidator is a validator for the "subscription_id" field. It is called by the builders before save.
+	creatorsubscriptioncharge.SubscriptionIDValidator = func() func(string) error {
+		validators := creatorsubscriptionchargeDescSubscriptionID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(subscription_id string) error {
+			for _, fn := range fns {
+				if err := fn(subscription_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionchargeDescSubscriberID is the schema descriptor for subscriber_id field.
+	creatorsubscriptionchargeDescSubscriberID := creatorsubscriptionchargeFields[1].Descriptor()
+	// creatorsubscriptioncharge.SubscriberIDValidator is a validator for the "subscriber_id" field. It is called by the builders before save.
+	creatorsubscriptioncharge.SubscriberIDValidator = func() func(string) error {
+		validators := creatorsubscriptionchargeDescSubscriberID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(subscriber_id string) error {
+			for _, fn := range fns {
+				if err := fn(subscriber_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionchargeDescCreatorID is the schema descriptor for creator_id field.
+	creatorsubscriptionchargeDescCreatorID := creatorsubscriptionchargeFields[2].Descriptor()
+	// creatorsubscriptioncharge.CreatorIDValidator is a validator for the "creator_id" field. It is called by the builders before save.
+	creatorsubscriptioncharge.CreatorIDValidator = func() func(string) error {
+		validators := creatorsubscriptionchargeDescCreatorID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(creator_id string) error {
+			for _, fn := range fns {
+				if err := fn(creator_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionchargeDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	creatorsubscriptionchargeDescIdempotencyKey := creatorsubscriptionchargeFields[4].Descriptor()
+	// creatorsubscriptioncharge.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	creatorsubscriptioncharge.IdempotencyKeyValidator = func() func(string) error {
+		validators := creatorsubscriptionchargeDescIdempotencyKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(idempotency_key string) error {
+			for _, fn := range fns {
+				if err := fn(idempotency_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionchargeDescPaymentReference is the schema descriptor for payment_reference field.
+	creatorsubscriptionchargeDescPaymentReference := creatorsubscriptionchargeFields[5].Descriptor()
+	// creatorsubscriptioncharge.DefaultPaymentReference holds the default value on creation for the payment_reference field.
+	creatorsubscriptioncharge.DefaultPaymentReference = creatorsubscriptionchargeDescPaymentReference.Default.(string)
+	// creatorsubscriptioncharge.PaymentReferenceValidator is a validator for the "payment_reference" field. It is called by the builders before save.
+	creatorsubscriptioncharge.PaymentReferenceValidator = creatorsubscriptionchargeDescPaymentReference.Validators[0].(func(string) error)
+	// creatorsubscriptionchargeDescAttemptCount is the schema descriptor for attempt_count field.
+	creatorsubscriptionchargeDescAttemptCount := creatorsubscriptionchargeFields[6].Descriptor()
+	// creatorsubscriptioncharge.DefaultAttemptCount holds the default value on creation for the attempt_count field.
+	creatorsubscriptioncharge.DefaultAttemptCount = creatorsubscriptionchargeDescAttemptCount.Default.(int)
+	// creatorsubscriptionchargeDescAmountMinor is the schema descriptor for amount_minor field.
+	creatorsubscriptionchargeDescAmountMinor := creatorsubscriptionchargeFields[7].Descriptor()
+	// creatorsubscriptioncharge.AmountMinorValidator is a validator for the "amount_minor" field. It is called by the builders before save.
+	creatorsubscriptioncharge.AmountMinorValidator = creatorsubscriptionchargeDescAmountMinor.Validators[0].(func(int64) error)
+	// creatorsubscriptionchargeDescCurrency is the schema descriptor for currency field.
+	creatorsubscriptionchargeDescCurrency := creatorsubscriptionchargeFields[8].Descriptor()
+	// creatorsubscriptioncharge.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	creatorsubscriptioncharge.CurrencyValidator = func() func(string) error {
+		validators := creatorsubscriptionchargeDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionchargeDescProviderFeeMinor is the schema descriptor for provider_fee_minor field.
+	creatorsubscriptionchargeDescProviderFeeMinor := creatorsubscriptionchargeFields[10].Descriptor()
+	// creatorsubscriptioncharge.DefaultProviderFeeMinor holds the default value on creation for the provider_fee_minor field.
+	creatorsubscriptioncharge.DefaultProviderFeeMinor = creatorsubscriptionchargeDescProviderFeeMinor.Default.(int64)
+	// creatorsubscriptionchargeDescCreatorShareMinor is the schema descriptor for creator_share_minor field.
+	creatorsubscriptionchargeDescCreatorShareMinor := creatorsubscriptionchargeFields[11].Descriptor()
+	// creatorsubscriptioncharge.DefaultCreatorShareMinor holds the default value on creation for the creator_share_minor field.
+	creatorsubscriptioncharge.DefaultCreatorShareMinor = creatorsubscriptionchargeDescCreatorShareMinor.Default.(int64)
+	// creatorsubscriptionchargeDescPlatformShareMinor is the schema descriptor for platform_share_minor field.
+	creatorsubscriptionchargeDescPlatformShareMinor := creatorsubscriptionchargeFields[12].Descriptor()
+	// creatorsubscriptioncharge.DefaultPlatformShareMinor holds the default value on creation for the platform_share_minor field.
+	creatorsubscriptioncharge.DefaultPlatformShareMinor = creatorsubscriptionchargeDescPlatformShareMinor.Default.(int64)
+	// creatorsubscriptionchargeDescFailureReason is the schema descriptor for failure_reason field.
+	creatorsubscriptionchargeDescFailureReason := creatorsubscriptionchargeFields[14].Descriptor()
+	// creatorsubscriptioncharge.DefaultFailureReason holds the default value on creation for the failure_reason field.
+	creatorsubscriptioncharge.DefaultFailureReason = creatorsubscriptionchargeDescFailureReason.Default.(string)
+	// creatorsubscriptioncharge.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
+	creatorsubscriptioncharge.FailureReasonValidator = creatorsubscriptionchargeDescFailureReason.Validators[0].(func(string) error)
+	// creatorsubscriptionchargeDescUpdatedAt is the schema descriptor for updated_at field.
+	creatorsubscriptionchargeDescUpdatedAt := creatorsubscriptionchargeFields[16].Descriptor()
+	// creatorsubscriptioncharge.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	creatorsubscriptioncharge.DefaultUpdatedAt = creatorsubscriptionchargeDescUpdatedAt.Default.(func() time.Time)
+	// creatorsubscriptioncharge.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	creatorsubscriptioncharge.UpdateDefaultUpdatedAt = creatorsubscriptionchargeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// creatorsubscriptionchargeDescID is the schema descriptor for id field.
+	creatorsubscriptionchargeDescID := creatorsubscriptionchargeMixinFields0[0].Descriptor()
+	// creatorsubscriptioncharge.DefaultID holds the default value on creation for the id field.
+	creatorsubscriptioncharge.DefaultID = creatorsubscriptionchargeDescID.Default.(func() uuid.UUID)
+	creatorsubscriptionplanMixin := schema.CreatorSubscriptionPlan{}.Mixin()
+	creatorsubscriptionplanMixinFields0 := creatorsubscriptionplanMixin[0].Fields()
+	_ = creatorsubscriptionplanMixinFields0
+	creatorsubscriptionplanFields := schema.CreatorSubscriptionPlan{}.Fields()
+	_ = creatorsubscriptionplanFields
+	// creatorsubscriptionplanDescCreatedAt is the schema descriptor for created_at field.
+	creatorsubscriptionplanDescCreatedAt := creatorsubscriptionplanMixinFields0[1].Descriptor()
+	// creatorsubscriptionplan.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creatorsubscriptionplan.DefaultCreatedAt = creatorsubscriptionplanDescCreatedAt.Default.(func() time.Time)
+	// creatorsubscriptionplanDescCreatorID is the schema descriptor for creator_id field.
+	creatorsubscriptionplanDescCreatorID := creatorsubscriptionplanFields[0].Descriptor()
+	// creatorsubscriptionplan.CreatorIDValidator is a validator for the "creator_id" field. It is called by the builders before save.
+	creatorsubscriptionplan.CreatorIDValidator = func() func(string) error {
+		validators := creatorsubscriptionplanDescCreatorID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(creator_id string) error {
+			for _, fn := range fns {
+				if err := fn(creator_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionplanDescName is the schema descriptor for name field.
+	creatorsubscriptionplanDescName := creatorsubscriptionplanFields[1].Descriptor()
+	// creatorsubscriptionplan.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	creatorsubscriptionplan.NameValidator = func() func(string) error {
+		validators := creatorsubscriptionplanDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionplanDescDescription is the schema descriptor for description field.
+	creatorsubscriptionplanDescDescription := creatorsubscriptionplanFields[2].Descriptor()
+	// creatorsubscriptionplan.DefaultDescription holds the default value on creation for the description field.
+	creatorsubscriptionplan.DefaultDescription = creatorsubscriptionplanDescDescription.Default.(string)
+	// creatorsubscriptionplan.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	creatorsubscriptionplan.DescriptionValidator = creatorsubscriptionplanDescDescription.Validators[0].(func(string) error)
+	// creatorsubscriptionplanDescAmountMinor is the schema descriptor for amount_minor field.
+	creatorsubscriptionplanDescAmountMinor := creatorsubscriptionplanFields[3].Descriptor()
+	// creatorsubscriptionplan.AmountMinorValidator is a validator for the "amount_minor" field. It is called by the builders before save.
+	creatorsubscriptionplan.AmountMinorValidator = creatorsubscriptionplanDescAmountMinor.Validators[0].(func(int64) error)
+	// creatorsubscriptionplanDescCurrency is the schema descriptor for currency field.
+	creatorsubscriptionplanDescCurrency := creatorsubscriptionplanFields[4].Descriptor()
+	// creatorsubscriptionplan.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	creatorsubscriptionplan.CurrencyValidator = func() func(string) error {
+		validators := creatorsubscriptionplanDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorsubscriptionplanDescBenefits is the schema descriptor for benefits field.
+	creatorsubscriptionplanDescBenefits := creatorsubscriptionplanFields[6].Descriptor()
+	// creatorsubscriptionplan.DefaultBenefits holds the default value on creation for the benefits field.
+	creatorsubscriptionplan.DefaultBenefits = creatorsubscriptionplanDescBenefits.Default.([]models.CreatorPlanBenefit)
+	// creatorsubscriptionplanDescActive is the schema descriptor for active field.
+	creatorsubscriptionplanDescActive := creatorsubscriptionplanFields[7].Descriptor()
+	// creatorsubscriptionplan.DefaultActive holds the default value on creation for the active field.
+	creatorsubscriptionplan.DefaultActive = creatorsubscriptionplanDescActive.Default.(bool)
+	// creatorsubscriptionplanDescUpdatedAt is the schema descriptor for updated_at field.
+	creatorsubscriptionplanDescUpdatedAt := creatorsubscriptionplanFields[8].Descriptor()
+	// creatorsubscriptionplan.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	creatorsubscriptionplan.DefaultUpdatedAt = creatorsubscriptionplanDescUpdatedAt.Default.(func() time.Time)
+	// creatorsubscriptionplan.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	creatorsubscriptionplan.UpdateDefaultUpdatedAt = creatorsubscriptionplanDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// creatorsubscriptionplanDescID is the schema descriptor for id field.
+	creatorsubscriptionplanDescID := creatorsubscriptionplanMixinFields0[0].Descriptor()
+	// creatorsubscriptionplan.DefaultID holds the default value on creation for the id field.
+	creatorsubscriptionplan.DefaultID = creatorsubscriptionplanDescID.Default.(func() uuid.UUID)
 	idempotentrequestMixin := schema.IdempotentRequest{}.Mixin()
 	idempotentrequestMixinFields0 := idempotentrequestMixin[0].Fields()
 	_ = idempotentrequestMixinFields0

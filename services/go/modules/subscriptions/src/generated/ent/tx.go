@@ -14,6 +14,12 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// CreatorSubscription is the client for interacting with the CreatorSubscription builders.
+	CreatorSubscription *CreatorSubscriptionClient
+	// CreatorSubscriptionCharge is the client for interacting with the CreatorSubscriptionCharge builders.
+	CreatorSubscriptionCharge *CreatorSubscriptionChargeClient
+	// CreatorSubscriptionPlan is the client for interacting with the CreatorSubscriptionPlan builders.
+	CreatorSubscriptionPlan *CreatorSubscriptionPlanClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
@@ -161,6 +167,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.CreatorSubscription = NewCreatorSubscriptionClient(tx.config)
+	tx.CreatorSubscriptionCharge = NewCreatorSubscriptionChargeClient(tx.config)
+	tx.CreatorSubscriptionPlan = NewCreatorSubscriptionPlanClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.PlanPrice = NewPlanPriceClient(tx.config)
@@ -178,7 +187,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: IdempotentRequest.QueryXXX(), the query will be executed
+// applies a query, for example: CreatorSubscription.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
