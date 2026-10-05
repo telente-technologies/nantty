@@ -11,6 +11,26 @@ export interface AuthEndpointResult {
   readonly error: ApiErrorBody | null;
 }
 
+interface BackendViewer extends Partial<User> {
+  readonly isSeller?: boolean;
+  readonly storeId?: string | null;
+  readonly roles?: readonly string[];
+}
+
+export function toStudioViewer(raw: BackendViewer): User {
+  const username = raw.username ?? "";
+  return {
+    id: raw.id ?? "",
+    name: raw.name ?? username,
+    username,
+    avatarUrl: raw.avatarUrl ?? null,
+    email: raw.email ?? null,
+    isCreator: raw.isCreator ?? false,
+    channelHandle: raw.channelHandle ?? `@${username}`,
+    hasStore: raw.hasStore ?? Boolean(raw.isSeller || raw.storeId || raw.roles?.includes("seller")),
+  };
+}
+
 export async function callAuthEndpoint(path: string, body: unknown): Promise<AuthEndpointResult> {
   const result = await callStudioBackend({ method: "POST", path, body: encodeJsonRequestBody(body), contentType: "application/json" });
   return readAuthEndpointResult(result);
@@ -21,7 +41,7 @@ export function readAuthEndpointResult(result: BackendResult): AuthEndpointResul
   const isError = result.status < 200 || result.status >= 300;
   return {
     status: result.status,
-    session: !isError && payload ? payload : null,
+    session: !isError && payload?.user ? { accessToken: payload.accessToken, refreshToken: payload.refreshToken, expiresIn: payload.expiresIn, user: toStudioViewer(payload.user) } : null,
     error: isError ? { message: payload?.message ?? "Something went wrong. Try again.", code: payload?.code } : null,
   };
 }
@@ -43,7 +63,8 @@ export async function exchangeRefreshTokenForNewTokenPair(refreshToken: string):
 
 export async function fetchViewerWithAccessToken(accessToken: string): Promise<User | null> {
   const result = await callStudioBackend({ method: "GET", path: "/api/v1/users/me", accessToken });
-  return result.status === 200 ? readJsonFromBackendResult<User>(result) : null;
+  const viewer = result.status === 200 ? readJsonFromBackendResult<BackendViewer>(result) : null;
+  return viewer ? toStudioViewer(viewer) : null;
 }
 
 export interface RenewedViewerSession {

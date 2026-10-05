@@ -18,7 +18,7 @@ const holder = globalThis as typeof globalThis & { __zudomartStudioPayoutOnboard
 
 const blank = (): PayoutOnboardingState => ({
   role: "creator", status: "not_started", currentStep: "identity", completedSteps: [], requiresBusinessStep: false, requiresDocumentStep: false, legalName: null, idType: null, idLast4: null,
-  bankSummary: null, documentStatus: "not_started", accountStatus: null, syncByStep: {}, earningsPendingTransfer: false, pendingWithdrawable: { amountMinor: 1_250_000, currency: "NGN" }, reviewEstimate: null, reasons: [], verifiedVia: null,
+  bankSummary: null, documentStatus: "not_started", accountStatus: null, syncByStep: {}, earningsPendingTransfer: { amountMinor: 0, currency: "NGN" }, pendingWithdrawable: { amountMinor: 1_250_000, currency: "NGN" }, reviewEstimate: null, reasons: [], verifiedVia: null,
   withdrawalsEnabled: false, firstEarningsUnlockAt: null,
 });
 
@@ -66,10 +66,10 @@ function guard(record: PayoutOnboardingRecord, step: PayoutOnboardingStep): void
 const ok = <T,>(value: T) => value;
 
 export const payoutOnboardingMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/banks", () => [
+  createMockRoute("GET", "/api/v1/banks", () => ({ nextCursor: null, data: [
     { code: "044", name: "Access Bank" }, { code: "058", name: "Guaranty Trust Bank" }, { code: "011", name: "First Bank of Nigeria" }, { code: "033", name: "United Bank for Africa" },
     { code: "057", name: "Zenith Bank" }, { code: "50515", name: "Moniepoint MFB" }, { code: "999992", name: "OPay" }, { code: "999991", name: "PalmPay" },
-  ]),
+  ].map((bank) => ({ ...bank, countryCode: "NG" })) })),
   createMockRoute("GET", "/api/v1/payments/payout-onboarding/me", () => settle(read())),
 
   createMockRoute("GET", "/api/v1/payments/payout-fees", () => {
@@ -116,7 +116,7 @@ export const payoutOnboardingMocks: MockRoute[] = [
     guard(record, "bank");
     const body = ((requestBody ?? {}) as Record<string, unknown>);
     if (normalize(String(body.resolvedAccountName ?? "")) !== normalize(record.legalName)) throw new ApiError(422, "The account name must match your legal name.", "NAME_MISMATCH");
-    const advanced = advance(record, "bank", { bankSummary: `${String(body.bankName ?? "Bank")} ••••${String(body.accountNumber ?? "").slice(-4)}` });
+    const advanced = advance(record, "bank", { bankSummary: { bankName: String(body.bankName ?? "Bank"), accountLast4: String(body.accountNumber ?? "").slice(-4), accountName: String(body.resolvedAccountName ?? "") } });
     if (record.state.requiresDocumentStep) return ok(advanced);
     record.submittedAt = Date.now();
     record.state = { ...record.state, status: "pending_review", accountStatus: "underReview", reviewEstimate: "up to 24 hours" };

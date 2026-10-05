@@ -21,5 +21,5 @@ export const liveSafetyMocks: MockRoute[] = [
     appealed.add(params.liveId!);
     return { status: "received", incidentId: `inc_${params.liveId!}` };
   }),
-  createMockRoute("POST", "/api/v1/reports", () => ({ id: `rep_${Date.now().toString(36)}`, status: "received" })),
+  createMockRoute("POST", "/api/v1/reports", () => ({ id: `rep_${Date.now().toString(36)}`, status: "received", priority: "normal" })),
 ];
