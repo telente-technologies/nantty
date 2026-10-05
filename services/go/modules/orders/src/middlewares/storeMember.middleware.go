@@ -41,7 +41,7 @@ func StoreMember(deployed *container.Container, permission string, requireKey bo
 				httpserver.WriteErrorResponse(writer, request, deployed.Logger, err)
 				return
 			}
-			handler(writer, request.WithContext(context.WithValue(request.Context(), storeAccessContextKey{}, access)))
+			handler(writer, request.WithContext(ContextWithStoreAccess(request.Context(), access)))
 		})
 	}
 }
@@ -87,7 +87,24 @@ func StoreMemberFeature(deployed *container.Container, permission, feature strin
 			if !sellerplans.Default.RequireFeature(writer, request, access.OwnerAccountId, feature) {
 				return
 			}
-			handler(writer, request.WithContext(context.WithValue(request.Context(), storeAccessContextKey{}, access)))
+			handler(writer, request.WithContext(ContextWithStoreAccess(request.Context(), access)))
+		})
+	}
+}
+
+func ContextWithStoreAccess(ctx context.Context, access commerceports.StoreAccess) context.Context {
+	return context.WithValue(ctx, storeAccessContextKey{}, access)
+}
+
+func StoreMemberWithOptionalKey(deployed *container.Container, permission string) func(http.HandlerFunc) http.Handler {
+	return func(handler http.HandlerFunc) http.Handler {
+		return OptionallyIdempotent(deployed)(func(writer http.ResponseWriter, request *http.Request) {
+			access, err := resolveStoreAccess(deployed, request, permission)
+			if err != nil {
+				httpserver.WriteErrorResponse(writer, request, deployed.Logger, err)
+				return
+			}
+			handler(writer, request.WithContext(ContextWithStoreAccess(request.Context(), access)))
 		})
 	}
 }

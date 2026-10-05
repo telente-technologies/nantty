@@ -46,7 +46,6 @@ func applyTimeoutPerAttempt(timeout time.Duration) grpc.UnaryClientInterceptor {
 	}
 }
 
-// Only Unavailable is retried: the request never reached a handler, or the handler is idempotent on its key.
 func callWithRetryOnUnavailable[Result any](ctx context.Context, options InternalGrpcOptions, isIdempotent bool, call func(context.Context) (Result, error)) (Result, error) {
 	attempts := 1
 	if isIdempotent && options.RetryAttempts > 1 {
