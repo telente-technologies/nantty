@@ -178,6 +178,17 @@ func (live LiveMoney) postAndRecordSettlement(ctx context.Context, transaction *
 	if err != nil {
 		return SettledBattle{}, err
 	}
+	for _, payout := range plan.Payouts {
+		if payout.HoldingCoins <= 0 {
+			continue
+		}
+		if _, err := programservices.RecordEarning(ctx, client, programservices.Earning{
+			CreatorId: payout.CreditedUserId, Kind: "gift", Reference: "battle:" + request.BattleId + ":" + payout.UserId, SourceType: "live", SourceId: request.LiveId,
+			Description: "Battle gifts", GrossMinor: payout.HoldingCoins, NetMinor: payout.HoldingCoins, Unit: programservices.CoinUnit, At: settlement.CreatedAt,
+		}); err != nil {
+			return SettledBattle{}, err
+		}
+	}
 	if err := live.Container.Outbox.EnqueueInTransaction(ctx, transaction, "battleSettlement.completed", request.LiveId, settlement.CreatedAt, map[string]any{
 		"battleId": request.BattleId, "liveId": request.LiveId, "rule": plan.RuleApplied, "winnerUserId": plan.WinnerId, "transfers": nonNil(plan.Transfers),
 	}); err != nil {
