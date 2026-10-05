@@ -19,7 +19,7 @@
     "intelligence": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["intelligence-domain-events", "jobs-live-frames", "jobs-live-audio"] }
   },
   "eventQueues": {
-    "trust-domain-events": ["report.created", "live.ended", "post.deleted", "security.accessViolationDetected", "verification.fraudSignalDetected", "payoutAccount.duplicateBankAccount"],
+    "trust-domain-events": ["report.created", "live.ended", "post.deleted", "security.accessViolationDetected", "verification.fraudSignalDetected", "payoutAccount.duplicateBankAccount", "store.created", "verificationApplication.submitted", "message.sent", "suspensionAppeal.submitted"],
     "search-domain-events": [
       "profile.updated", "username.changed", "creatorProfile.created", "profileCheckmark.changed", "checkmark.approved", "checkmark.revoked",
       "accountStatus.changed", "account.suspended", "account.banned", "user.unbanned", "suspension.ended", "account.deactivated", "account.deletionExecuted",
@@ -28,24 +28,24 @@
       "consent.granted", "consent.withdrawn"
     ],
     "support-domain-events": ["account.deletionExecuted"],
-    "money-domain-events": ["orderGroup.refundRequested", "creatorApplication.approved", "adSpend.batched", "verificationCase.refundRequested", "accountHealth.changed"],
-    "ads-domain-events": ["accountHealth.changed"],
+    "money-domain-events": ["orderGroup.refundRequested", "creatorApplication.approved", "adSpend.batched", "verificationCase.refundRequested", "accountHealth.changed", "creatorSubscription.paid", "adCreatorEarnings.posted", "orderGroup.completed"],
+    "ads-domain-events": ["accountHealth.changed", "adBalance.toppedUp"],
     "commerce-domain-events": [
       "escrow.held", "escrow.released", "escrow.refunded", "escrow.partiallyRefunded",
       "directPayment.received", "dispute.opened", "dispute.closed"
     ],
     "notifications-domain-events": [
       "account.*", "appeal.*", "cardVerification.*", "checkmark.*", "coinPurchase.*", "comment.created",
-      "creatorApplication.*", "dataExport.*", "dispute.*", "disputeMessage.*", "escrow.*", "follow.created",
+      "creatorApplication.*", "creatorSubscription.started", "affiliateCommission.credited", "dataExport.*", "dispute.*", "disputeMessage.*", "escrow.*", "follow.created",
       "followRequest.created", "gift.sent", "live.started", "mention.created", "messageRequest.received",
-      "order.*", "otp.issued", "post.tagged", "payment.*", "paymentRefund.bankDetailsRequired", "payout.*", "payoutAccount.*", "planInvoice.*", "planTrial.*", "subscriptionInvoice.*", "subscriptionPayment.*", "subscriptionTrial.*", "subscriptionRenewal.*", "subscriptionGrace.*", "subscriptionCard.*", "subscriptionPrice.*", "subscription.downgraded", "policyVersion.published",
+      "order.*", "otp.issued", "post.tagged", "payment.*", "paymentRefund.bankDetailsRequired", "payout.*", "payoutAccount.*", "planInvoice.*", "planTrial.*", "subscriptionInvoice.*", "subscriptionPayment.*", "subscriptionTrial.*", "subscriptionRenewal.*", "subscriptionGrace.*", "subscriptionCard.*", "subscriptionPrice.*", "subscription.downgraded", "tip.sent", "policyVersion.published",
       "report.closed", "sellerDocuments.*", "session.*", "signIn.*", "ticket.created", "ticket.replied", "ticket.resolved", "twoFactor.*", "videoReply.created",
       "withdrawal.*", "copyrightClaim.warningIssued", "copyrightClaim.audioMuteOrdered", "copyrightClaim.contentTakenDown", "copyrightClaim.counterNoticeReceived",
       "copyrightClaim.restored", "strike.issued", "strike.expired",
       "verification.eligible", "verification.underReview", "verification.approved", "verification.rejectedRefunded"
     ],
     "media-domain-events": ["chatMedia.expired", "clipAudio.muteRequested", "clipAudio.restoreRequested"],
-    "identity-domain-events": ["entitlement.granted", "entitlement.revoked", "entitlement.graceStarted", "account.registered", "verificationRefund.*"],
+    "identity-domain-events": ["entitlement.granted", "entitlement.revoked", "entitlement.graceStarted", "account.registered", "verificationRefund.*", "sellerApplication.reviewed"],
     "catalog-domain-events": ["content.visibilityChanged"],
     "live-domain-events": ["content.visibilityChanged", "accountHealth.changed", "live.safetyHold", "live.safetyReleased", "live.safetyWarning", "live.samplingBoosted", "live.moderatorEnded"],
     "social-domain-events": ["content.visibilityChanged", "content.sensitivityAdvised", "media.processed", "media.rejected", "copyrightClaim.audioMuteOrdered", "copyrightClaim.restored"],

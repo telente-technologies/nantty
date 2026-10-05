@@ -8,12 +8,12 @@ locals {
     go-identity = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 8, extra_ports = [9101]
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["AUTH_SIGNING_KEY_ENCRYPTION_KEY", "AUTH_ONE_TIME_CODE_PEPPER", "AUTH_OTP_EVENT_KEY", "USERS_MEDIA_UPLOAD_SIGNING_KEY", "USERS_INTERNAL_API_TOKEN", "ADMIN_TOTP_ENCRYPTION_KEY", "ADMIN_INTERNAL_API_TOKEN", "AUTH_INTERNAL_GRPC_TOKEN", "MONEY_INTERNAL_API_TOKEN", "SMILE_ID_PARTNER_ID", "SMILE_ID_API_KEY", "VERIFICATION_DOCUMENT_FINGERPRINT_KEY", "INTELLIGENCE_SHARED_SECRET"]
+      secret_keys  = ["ADDRESS_PHONE_ENCRYPTION_KEY", "AUTH_SIGNING_KEY_ENCRYPTION_KEY", "AUTH_ONE_TIME_CODE_PEPPER", "AUTH_OTP_EVENT_KEY", "USERS_MEDIA_UPLOAD_SIGNING_KEY", "USERS_INTERNAL_API_TOKEN", "ADMIN_TOTP_ENCRYPTION_KEY", "ADMIN_INTERNAL_API_TOKEN", "AUTH_INTERNAL_GRPC_TOKEN", "MONEY_INTERNAL_API_TOKEN", "SMILE_ID_PARTNER_ID", "SMILE_ID_API_KEY", "VERIFICATION_DOCUMENT_FINGERPRINT_KEY", "INTELLIGENCE_SHARED_SECRET"]
     }
     go-commerce = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 10
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["CATALOG_INTERNAL_API_TOKEN", "ORDERS_MONEY_GRPC_TOKEN", "SELLER_PLAN_ENTITLEMENTS_TOKEN", "MONEY_INTERNAL_API_TOKEN", "CATALOG_SOCIAL_INTERNAL_TOKEN", "ADMIN_INTERNAL_API_TOKEN", "ADS_INTERNAL_SHARED_SECRET"]
+      secret_keys  = ["ADDRESS_PHONE_ENCRYPTION_KEY", "CATALOG_INTERNAL_API_TOKEN", "ORDERS_MONEY_GRPC_TOKEN", "SELLER_PLAN_ENTITLEMENTS_TOKEN", "MONEY_INTERNAL_API_TOKEN", "CATALOG_SOCIAL_INTERNAL_TOKEN", "ADMIN_INTERNAL_API_TOKEN", "ADS_INTERNAL_SHARED_SECRET"]
     }
     go-money = {
       port         = 8080, cpu = 1024, memory = 2048, health = "/healthz", database = true, rabbit = true, min = 2, max = 8, extra_ports = [9103]

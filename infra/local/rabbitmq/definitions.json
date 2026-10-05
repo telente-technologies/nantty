@@ -2640,6 +2640,38 @@
       "arguments": {}
     },
     {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "trust-domain-events",
+      "destination_type": "queue",
+      "routing_key": "store.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "trust-domain-events",
+      "destination_type": "queue",
+      "routing_key": "verificationApplication.submitted",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "trust-domain-events",
+      "destination_type": "queue",
+      "routing_key": "message.sent",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "trust-domain-events",
+      "destination_type": "queue",
+      "routing_key": "suspensionAppeal.submitted",
+      "arguments": {}
+    },
+    {
       "source": "zudomart.dlx",
       "vhost": "zudomart",
       "destination": "search-domain-events.dlq",
@@ -3096,6 +3128,30 @@
       "arguments": {}
     },
     {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "creatorSubscription.paid",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "adCreatorEarnings.posted",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "orderGroup.completed",
+      "arguments": {}
+    },
+    {
       "source": "zudomart.dlx",
       "vhost": "zudomart",
       "destination": "ads-domain-events.dlq",
@@ -3149,6 +3205,14 @@
       "destination": "ads-domain-events",
       "destination_type": "queue",
       "routing_key": "accountHealth.changed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "ads-domain-events",
+      "destination_type": "queue",
+      "routing_key": "adBalance.toppedUp",
       "arguments": {}
     },
     {
@@ -3357,6 +3421,22 @@
       "destination": "notifications-domain-events",
       "destination_type": "queue",
       "routing_key": "creatorApplication.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "creatorSubscription.started",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "affiliateCommission.credited",
       "arguments": {}
     },
     {
@@ -3573,6 +3653,14 @@
       "destination": "notifications-domain-events",
       "destination_type": "queue",
       "routing_key": "subscription.downgraded",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "tip.sent",
       "arguments": {}
     },
     {
@@ -3909,6 +3997,14 @@
       "destination": "identity-domain-events",
       "destination_type": "queue",
       "routing_key": "verificationRefund.*",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "identity-domain-events",
+      "destination_type": "queue",
+      "routing_key": "sellerApplication.reviewed",
       "arguments": {}
     },
     {
