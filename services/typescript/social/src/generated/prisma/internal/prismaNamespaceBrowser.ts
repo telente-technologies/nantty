@@ -78,6 +78,10 @@ export const ModelName = {
   Block: 'Block',
   StoreFollow: 'StoreFollow',
   LinkPreviewCache: 'LinkPreviewCache',
+  ChatDeviceKey: 'ChatDeviceKey',
+  ChatOneTimePreKey: 'ChatOneTimePreKey',
+  ChatKeyMailboxEntry: 'ChatKeyMailboxEntry',
+  ChatPreKeyClaim: 'ChatPreKeyClaim',
   OutboxEvent: 'OutboxEvent',
   IdempotencyRecord: 'IdempotencyRecord',
   ReportIntake: 'ReportIntake',
@@ -487,6 +491,56 @@ export const LinkPreviewCacheScalarFieldEnum = {
 } as const
 
 export type LinkPreviewCacheScalarFieldEnum = (typeof LinkPreviewCacheScalarFieldEnum)[keyof typeof LinkPreviewCacheScalarFieldEnum]
+
+
+export const ChatDeviceKeyScalarFieldEnum = {
+  accountId: 'accountId',
+  deviceId: 'deviceId',
+  registrationId: 'registrationId',
+  identityKey: 'identityKey',
+  signedPreKeyId: 'signedPreKeyId',
+  signedPreKey: 'signedPreKey',
+  signedPreKeySignature: 'signedPreKeySignature',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatDeviceKeyScalarFieldEnum = (typeof ChatDeviceKeyScalarFieldEnum)[keyof typeof ChatDeviceKeyScalarFieldEnum]
+
+
+export const ChatOneTimePreKeyScalarFieldEnum = {
+  accountId: 'accountId',
+  deviceId: 'deviceId',
+  keyId: 'keyId',
+  publicKey: 'publicKey',
+  createdAt: 'createdAt'
+} as const
+
+export type ChatOneTimePreKeyScalarFieldEnum = (typeof ChatOneTimePreKeyScalarFieldEnum)[keyof typeof ChatOneTimePreKeyScalarFieldEnum]
+
+
+export const ChatKeyMailboxEntryScalarFieldEnum = {
+  id: 'id',
+  recipientAccountId: 'recipientAccountId',
+  recipientDeviceId: 'recipientDeviceId',
+  senderAccountId: 'senderAccountId',
+  senderDeviceId: 'senderDeviceId',
+  conversationId: 'conversationId',
+  ciphertext: 'ciphertext',
+  createdAt: 'createdAt'
+} as const
+
+export type ChatKeyMailboxEntryScalarFieldEnum = (typeof ChatKeyMailboxEntryScalarFieldEnum)[keyof typeof ChatKeyMailboxEntryScalarFieldEnum]
+
+
+export const ChatPreKeyClaimScalarFieldEnum = {
+  id: 'id',
+  requesterId: 'requesterId',
+  targetId: 'targetId',
+  claimedAt: 'claimedAt'
+} as const
+
+export type ChatPreKeyClaimScalarFieldEnum = (typeof ChatPreKeyClaimScalarFieldEnum)[keyof typeof ChatPreKeyClaimScalarFieldEnum]
 
 
 export const OutboxEventScalarFieldEnum = {

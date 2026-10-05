@@ -424,6 +424,10 @@ export const ModelName = {
   Block: 'Block',
   StoreFollow: 'StoreFollow',
   LinkPreviewCache: 'LinkPreviewCache',
+  ChatDeviceKey: 'ChatDeviceKey',
+  ChatOneTimePreKey: 'ChatOneTimePreKey',
+  ChatKeyMailboxEntry: 'ChatKeyMailboxEntry',
+  ChatPreKeyClaim: 'ChatPreKeyClaim',
   OutboxEvent: 'OutboxEvent',
   IdempotencyRecord: 'IdempotencyRecord',
   ReportIntake: 'ReportIntake',
@@ -451,7 +455,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "downloadSetting" | "follow" | "block" | "storeFollow" | "linkPreviewCache" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration" | "postTag" | "taggingSetting"
+    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "downloadSetting" | "follow" | "block" | "storeFollow" | "linkPreviewCache" | "chatDeviceKey" | "chatOneTimePreKey" | "chatKeyMailboxEntry" | "chatPreKeyClaim" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration" | "postTag" | "taggingSetting"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2453,6 +2457,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ChatDeviceKey: {
+      payload: Prisma.$ChatDeviceKeyPayload<ExtArgs>
+      fields: Prisma.ChatDeviceKeyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ChatDeviceKeyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ChatDeviceKeyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload>
+        }
+        findFirst: {
+          args: Prisma.ChatDeviceKeyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ChatDeviceKeyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload>
+        }
+        findMany: {
+          args: Prisma.ChatDeviceKeyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload>[]
+        }
+        create: {
+          args: Prisma.ChatDeviceKeyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload>
+        }
+        createMany: {
+          args: Prisma.ChatDeviceKeyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ChatDeviceKeyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload>[]
+        }
+        delete: {
+          args: Prisma.ChatDeviceKeyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload>
+        }
+        update: {
+          args: Prisma.ChatDeviceKeyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload>
+        }
+        deleteMany: {
+          args: Prisma.ChatDeviceKeyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ChatDeviceKeyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ChatDeviceKeyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload>[]
+        }
+        upsert: {
+          args: Prisma.ChatDeviceKeyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatDeviceKeyPayload>
+        }
+        aggregate: {
+          args: Prisma.ChatDeviceKeyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateChatDeviceKey>
+        }
+        groupBy: {
+          args: Prisma.ChatDeviceKeyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChatDeviceKeyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ChatDeviceKeyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChatDeviceKeyCountAggregateOutputType> | number
+        }
+      }
+    }
+    ChatOneTimePreKey: {
+      payload: Prisma.$ChatOneTimePreKeyPayload<ExtArgs>
+      fields: Prisma.ChatOneTimePreKeyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ChatOneTimePreKeyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ChatOneTimePreKeyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload>
+        }
+        findFirst: {
+          args: Prisma.ChatOneTimePreKeyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ChatOneTimePreKeyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload>
+        }
+        findMany: {
+          args: Prisma.ChatOneTimePreKeyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload>[]
+        }
+        create: {
+          args: Prisma.ChatOneTimePreKeyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload>
+        }
+        createMany: {
+          args: Prisma.ChatOneTimePreKeyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ChatOneTimePreKeyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload>[]
+        }
+        delete: {
+          args: Prisma.ChatOneTimePreKeyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload>
+        }
+        update: {
+          args: Prisma.ChatOneTimePreKeyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload>
+        }
+        deleteMany: {
+          args: Prisma.ChatOneTimePreKeyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ChatOneTimePreKeyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ChatOneTimePreKeyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload>[]
+        }
+        upsert: {
+          args: Prisma.ChatOneTimePreKeyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatOneTimePreKeyPayload>
+        }
+        aggregate: {
+          args: Prisma.ChatOneTimePreKeyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateChatOneTimePreKey>
+        }
+        groupBy: {
+          args: Prisma.ChatOneTimePreKeyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChatOneTimePreKeyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ChatOneTimePreKeyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChatOneTimePreKeyCountAggregateOutputType> | number
+        }
+      }
+    }
+    ChatKeyMailboxEntry: {
+      payload: Prisma.$ChatKeyMailboxEntryPayload<ExtArgs>
+      fields: Prisma.ChatKeyMailboxEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ChatKeyMailboxEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ChatKeyMailboxEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.ChatKeyMailboxEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ChatKeyMailboxEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload>
+        }
+        findMany: {
+          args: Prisma.ChatKeyMailboxEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload>[]
+        }
+        create: {
+          args: Prisma.ChatKeyMailboxEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload>
+        }
+        createMany: {
+          args: Prisma.ChatKeyMailboxEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ChatKeyMailboxEntryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload>[]
+        }
+        delete: {
+          args: Prisma.ChatKeyMailboxEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload>
+        }
+        update: {
+          args: Prisma.ChatKeyMailboxEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.ChatKeyMailboxEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ChatKeyMailboxEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ChatKeyMailboxEntryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload>[]
+        }
+        upsert: {
+          args: Prisma.ChatKeyMailboxEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatKeyMailboxEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.ChatKeyMailboxEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateChatKeyMailboxEntry>
+        }
+        groupBy: {
+          args: Prisma.ChatKeyMailboxEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChatKeyMailboxEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ChatKeyMailboxEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChatKeyMailboxEntryCountAggregateOutputType> | number
+        }
+      }
+    }
+    ChatPreKeyClaim: {
+      payload: Prisma.$ChatPreKeyClaimPayload<ExtArgs>
+      fields: Prisma.ChatPreKeyClaimFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ChatPreKeyClaimFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ChatPreKeyClaimFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload>
+        }
+        findFirst: {
+          args: Prisma.ChatPreKeyClaimFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ChatPreKeyClaimFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload>
+        }
+        findMany: {
+          args: Prisma.ChatPreKeyClaimFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload>[]
+        }
+        create: {
+          args: Prisma.ChatPreKeyClaimCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload>
+        }
+        createMany: {
+          args: Prisma.ChatPreKeyClaimCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ChatPreKeyClaimCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload>[]
+        }
+        delete: {
+          args: Prisma.ChatPreKeyClaimDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload>
+        }
+        update: {
+          args: Prisma.ChatPreKeyClaimUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload>
+        }
+        deleteMany: {
+          args: Prisma.ChatPreKeyClaimDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ChatPreKeyClaimUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ChatPreKeyClaimUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload>[]
+        }
+        upsert: {
+          args: Prisma.ChatPreKeyClaimUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChatPreKeyClaimPayload>
+        }
+        aggregate: {
+          args: Prisma.ChatPreKeyClaimAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateChatPreKeyClaim>
+        }
+        groupBy: {
+          args: Prisma.ChatPreKeyClaimGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChatPreKeyClaimGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ChatPreKeyClaimCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChatPreKeyClaimCountAggregateOutputType> | number
+        }
+      }
+    }
     OutboxEvent: {
       payload: Prisma.$OutboxEventPayload<ExtArgs>
       fields: Prisma.OutboxEventFieldRefs
@@ -3761,6 +4061,56 @@ export const LinkPreviewCacheScalarFieldEnum = {
 export type LinkPreviewCacheScalarFieldEnum = (typeof LinkPreviewCacheScalarFieldEnum)[keyof typeof LinkPreviewCacheScalarFieldEnum]
 
 
+export const ChatDeviceKeyScalarFieldEnum = {
+  accountId: 'accountId',
+  deviceId: 'deviceId',
+  registrationId: 'registrationId',
+  identityKey: 'identityKey',
+  signedPreKeyId: 'signedPreKeyId',
+  signedPreKey: 'signedPreKey',
+  signedPreKeySignature: 'signedPreKeySignature',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatDeviceKeyScalarFieldEnum = (typeof ChatDeviceKeyScalarFieldEnum)[keyof typeof ChatDeviceKeyScalarFieldEnum]
+
+
+export const ChatOneTimePreKeyScalarFieldEnum = {
+  accountId: 'accountId',
+  deviceId: 'deviceId',
+  keyId: 'keyId',
+  publicKey: 'publicKey',
+  createdAt: 'createdAt'
+} as const
+
+export type ChatOneTimePreKeyScalarFieldEnum = (typeof ChatOneTimePreKeyScalarFieldEnum)[keyof typeof ChatOneTimePreKeyScalarFieldEnum]
+
+
+export const ChatKeyMailboxEntryScalarFieldEnum = {
+  id: 'id',
+  recipientAccountId: 'recipientAccountId',
+  recipientDeviceId: 'recipientDeviceId',
+  senderAccountId: 'senderAccountId',
+  senderDeviceId: 'senderDeviceId',
+  conversationId: 'conversationId',
+  ciphertext: 'ciphertext',
+  createdAt: 'createdAt'
+} as const
+
+export type ChatKeyMailboxEntryScalarFieldEnum = (typeof ChatKeyMailboxEntryScalarFieldEnum)[keyof typeof ChatKeyMailboxEntryScalarFieldEnum]
+
+
+export const ChatPreKeyClaimScalarFieldEnum = {
+  id: 'id',
+  requesterId: 'requesterId',
+  targetId: 'targetId',
+  claimedAt: 'claimedAt'
+} as const
+
+export type ChatPreKeyClaimScalarFieldEnum = (typeof ChatPreKeyClaimScalarFieldEnum)[keyof typeof ChatPreKeyClaimScalarFieldEnum]
+
+
 export const OutboxEventScalarFieldEnum = {
   id: 'id',
   eventType: 'eventType',
@@ -4450,6 +4800,10 @@ export type GlobalOmitConfig = {
   block?: Prisma.BlockOmit
   storeFollow?: Prisma.StoreFollowOmit
   linkPreviewCache?: Prisma.LinkPreviewCacheOmit
+  chatDeviceKey?: Prisma.ChatDeviceKeyOmit
+  chatOneTimePreKey?: Prisma.ChatOneTimePreKeyOmit
+  chatKeyMailboxEntry?: Prisma.ChatKeyMailboxEntryOmit
+  chatPreKeyClaim?: Prisma.ChatPreKeyClaimOmit
   outboxEvent?: Prisma.OutboxEventOmit
   idempotencyRecord?: Prisma.IdempotencyRecordOmit
   reportIntake?: Prisma.ReportIntakeOmit
