@@ -2,7 +2,7 @@ import type { Page } from "@/types";
 import type { MartHighlight } from "@/types/martHighlight.type";
 
 import { martImageUrl } from "./mockImages.mock";
-import { listMartProductSummaries } from "./productCatalog.mock";
+import { buildCatalogProductSummary, catalogProductSeeds, isMartSponsoredSeed, listMartProductSummaries } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { productCategories } from "./storeDirectory.mock";
 
@@ -46,6 +46,21 @@ const categoryCandidates = (): Candidate[] =>
     reason: { code: "browsing_history", label: `Because you browsed ${category.name}` },
   }));
 
+const boostedProductCandidates = (round: number): MartHighlight[] =>
+  catalogProductSeeds.filter(isMartSponsoredSeed).map((seed) => {
+    const product = buildCatalogProductSummary(seed, { sponsored: true });
+    return {
+      id: `hl_boost_${product.id}`,
+      kind: "boosted_product",
+      title: product.name,
+      subtitle: product.sponsored?.advertiserName ?? null,
+      imageUrl: product.imageUrl,
+      target: { type: "product", productId: product.id, name: product.name },
+      ranking: { score: Math.round((0.8 + jitter(product.id, round) * 0.2) * 1000) / 1000, reason: { code: "sponsored", label: "Sponsored" } },
+      sponsored: product.sponsored,
+    };
+  });
+
 const jitter = (id: string, round: number) => {
   let hash = round * 7919;
   for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) % 100_003;
@@ -53,11 +68,11 @@ const jitter = (id: string, round: number) => {
 };
 
 export function rankMartHighlights(round: number, limit = DEFAULT_LIMIT): MartHighlight[] {
-  return [...fixedCandidates, ...categoryCandidates()]
-    .map(({ baseScore, reason, ...highlight }) => ({
-      ...highlight,
-      ranking: { score: Math.round((baseScore * 0.6 + jitter(highlight.id, round) * 0.4) * 1000) / 1000, reason },
-    }))
+  const editorial = [...fixedCandidates, ...categoryCandidates()].map(({ baseScore, reason, ...highlight }): MartHighlight => ({
+    ...highlight,
+    ranking: { score: Math.round((baseScore * 0.6 + jitter(highlight.id, round) * 0.4) * 0.8 * 1000) / 1000, reason },
+  }));
+  return [...boostedProductCandidates(round), ...editorial]
     .sort((left, right) => right.ranking.score - left.ranking.score)
     .slice(0, limit);
 }

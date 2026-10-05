@@ -50,6 +50,7 @@ import { postAudienceMocks } from "./postAudience.mock";
 import { placesMocks } from "./places.mock";
 import { postTagsMocks } from "./postTags.mock";
 import { productsMocks } from "./products.mock";
+import { reviewsMocks } from "./reviews.mock";
 import { searchMocks } from "./search.mock";
 import { martHighlightsMocks } from "./martHighlights.mock";
 import { storeRewardsMocks } from "./storeRewards.mock";
@@ -96,6 +97,7 @@ const routes: MockRoute[] = [
   ...taggedUsersMocks,
   ...mediaDownloadsMocks,
   ...postsMocks,
+  ...reviewsMocks,
   ...productsMocks,
   ...searchMocks,
   ...martHighlightsMocks,
