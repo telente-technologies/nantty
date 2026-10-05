@@ -17,11 +17,15 @@ import (
 	"zudomart/modules/catalog/src/generated/ent/idempotentrequest"
 	"zudomart/modules/catalog/src/generated/ent/outboxevent"
 	"zudomart/modules/catalog/src/generated/ent/product"
+	"zudomart/modules/catalog/src/generated/ent/productdailyview"
+	"zudomart/modules/catalog/src/generated/ent/productimportjob"
 	"zudomart/modules/catalog/src/generated/ent/productmedia"
 	"zudomart/modules/catalog/src/generated/ent/productreaction"
 	"zudomart/modules/catalog/src/generated/ent/productvariant"
 	"zudomart/modules/catalog/src/generated/ent/review"
 	"zudomart/modules/catalog/src/generated/ent/store"
+	"zudomart/modules/catalog/src/generated/ent/storeauditentry"
+	"zudomart/modules/catalog/src/generated/ent/storedailytraffic"
 	"zudomart/modules/catalog/src/generated/ent/storemember"
 	"zudomart/modules/catalog/src/generated/ent/storevisitor"
 
@@ -50,6 +54,10 @@ type Client struct {
 	OutboxEvent *OutboxEventClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
+	// ProductDailyView is the client for interacting with the ProductDailyView builders.
+	ProductDailyView *ProductDailyViewClient
+	// ProductImportJob is the client for interacting with the ProductImportJob builders.
+	ProductImportJob *ProductImportJobClient
 	// ProductMedia is the client for interacting with the ProductMedia builders.
 	ProductMedia *ProductMediaClient
 	// ProductReaction is the client for interacting with the ProductReaction builders.
@@ -60,6 +68,10 @@ type Client struct {
 	Review *ReviewClient
 	// Store is the client for interacting with the Store builders.
 	Store *StoreClient
+	// StoreAuditEntry is the client for interacting with the StoreAuditEntry builders.
+	StoreAuditEntry *StoreAuditEntryClient
+	// StoreDailyTraffic is the client for interacting with the StoreDailyTraffic builders.
+	StoreDailyTraffic *StoreDailyTrafficClient
 	// StoreMember is the client for interacting with the StoreMember builders.
 	StoreMember *StoreMemberClient
 	// StoreVisitor is the client for interacting with the StoreVisitor builders.
@@ -81,11 +93,15 @@ func (c *Client) init() {
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.Product = NewProductClient(c.config)
+	c.ProductDailyView = NewProductDailyViewClient(c.config)
+	c.ProductImportJob = NewProductImportJobClient(c.config)
 	c.ProductMedia = NewProductMediaClient(c.config)
 	c.ProductReaction = NewProductReactionClient(c.config)
 	c.ProductVariant = NewProductVariantClient(c.config)
 	c.Review = NewReviewClient(c.config)
 	c.Store = NewStoreClient(c.config)
+	c.StoreAuditEntry = NewStoreAuditEntryClient(c.config)
+	c.StoreDailyTraffic = NewStoreDailyTrafficClient(c.config)
 	c.StoreMember = NewStoreMemberClient(c.config)
 	c.StoreVisitor = NewStoreVisitorClient(c.config)
 }
@@ -186,11 +202,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		IdempotentRequest: NewIdempotentRequestClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		Product:           NewProductClient(cfg),
+		ProductDailyView:  NewProductDailyViewClient(cfg),
+		ProductImportJob:  NewProductImportJobClient(cfg),
 		ProductMedia:      NewProductMediaClient(cfg),
 		ProductReaction:   NewProductReactionClient(cfg),
 		ProductVariant:    NewProductVariantClient(cfg),
 		Review:            NewReviewClient(cfg),
 		Store:             NewStoreClient(cfg),
+		StoreAuditEntry:   NewStoreAuditEntryClient(cfg),
+		StoreDailyTraffic: NewStoreDailyTrafficClient(cfg),
 		StoreMember:       NewStoreMemberClient(cfg),
 		StoreVisitor:      NewStoreVisitorClient(cfg),
 	}, nil
@@ -218,11 +238,15 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		IdempotentRequest: NewIdempotentRequestClient(cfg),
 		OutboxEvent:       NewOutboxEventClient(cfg),
 		Product:           NewProductClient(cfg),
+		ProductDailyView:  NewProductDailyViewClient(cfg),
+		ProductImportJob:  NewProductImportJobClient(cfg),
 		ProductMedia:      NewProductMediaClient(cfg),
 		ProductReaction:   NewProductReactionClient(cfg),
 		ProductVariant:    NewProductVariantClient(cfg),
 		Review:            NewReviewClient(cfg),
 		Store:             NewStoreClient(cfg),
+		StoreAuditEntry:   NewStoreAuditEntryClient(cfg),
+		StoreDailyTraffic: NewStoreDailyTrafficClient(cfg),
 		StoreMember:       NewStoreMemberClient(cfg),
 		StoreVisitor:      NewStoreVisitorClient(cfg),
 	}, nil
@@ -255,8 +279,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Brand, c.Category, c.FeaturedProduct, c.IdempotentRequest, c.OutboxEvent,
-		c.Product, c.ProductMedia, c.ProductReaction, c.ProductVariant, c.Review,
-		c.Store, c.StoreMember, c.StoreVisitor,
+		c.Product, c.ProductDailyView, c.ProductImportJob, c.ProductMedia,
+		c.ProductReaction, c.ProductVariant, c.Review, c.Store, c.StoreAuditEntry,
+		c.StoreDailyTraffic, c.StoreMember, c.StoreVisitor,
 	} {
 		n.Use(hooks...)
 	}
@@ -267,8 +292,9 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Brand, c.Category, c.FeaturedProduct, c.IdempotentRequest, c.OutboxEvent,
-		c.Product, c.ProductMedia, c.ProductReaction, c.ProductVariant, c.Review,
-		c.Store, c.StoreMember, c.StoreVisitor,
+		c.Product, c.ProductDailyView, c.ProductImportJob, c.ProductMedia,
+		c.ProductReaction, c.ProductVariant, c.Review, c.Store, c.StoreAuditEntry,
+		c.StoreDailyTraffic, c.StoreMember, c.StoreVisitor,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -289,6 +315,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OutboxEvent.mutate(ctx, m)
 	case *ProductMutation:
 		return c.Product.mutate(ctx, m)
+	case *ProductDailyViewMutation:
+		return c.ProductDailyView.mutate(ctx, m)
+	case *ProductImportJobMutation:
+		return c.ProductImportJob.mutate(ctx, m)
 	case *ProductMediaMutation:
 		return c.ProductMedia.mutate(ctx, m)
 	case *ProductReactionMutation:
@@ -299,6 +329,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Review.mutate(ctx, m)
 	case *StoreMutation:
 		return c.Store.mutate(ctx, m)
+	case *StoreAuditEntryMutation:
+		return c.StoreAuditEntry.mutate(ctx, m)
+	case *StoreDailyTrafficMutation:
+		return c.StoreDailyTraffic.mutate(ctx, m)
 	case *StoreMemberMutation:
 		return c.StoreMember.mutate(ctx, m)
 	case *StoreVisitorMutation:
@@ -1106,6 +1140,272 @@ func (c *ProductClient) mutate(ctx context.Context, m *ProductMutation) (Value, 
 	}
 }
 
+// ProductDailyViewClient is a client for the ProductDailyView schema.
+type ProductDailyViewClient struct {
+	config
+}
+
+// NewProductDailyViewClient returns a client for the ProductDailyView from the given config.
+func NewProductDailyViewClient(c config) *ProductDailyViewClient {
+	return &ProductDailyViewClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `productdailyview.Hooks(f(g(h())))`.
+func (c *ProductDailyViewClient) Use(hooks ...Hook) {
+	c.hooks.ProductDailyView = append(c.hooks.ProductDailyView, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `productdailyview.Intercept(f(g(h())))`.
+func (c *ProductDailyViewClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ProductDailyView = append(c.inters.ProductDailyView, interceptors...)
+}
+
+// Create returns a builder for creating a ProductDailyView entity.
+func (c *ProductDailyViewClient) Create() *ProductDailyViewCreate {
+	mutation := newProductDailyViewMutation(c.config, OpCreate)
+	return &ProductDailyViewCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProductDailyView entities.
+func (c *ProductDailyViewClient) CreateBulk(builders ...*ProductDailyViewCreate) *ProductDailyViewCreateBulk {
+	return &ProductDailyViewCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProductDailyViewClient) MapCreateBulk(slice any, setFunc func(*ProductDailyViewCreate, int)) *ProductDailyViewCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProductDailyViewCreateBulk{err: fmt.Errorf("calling to ProductDailyViewClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProductDailyViewCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProductDailyViewCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProductDailyView.
+func (c *ProductDailyViewClient) Update() *ProductDailyViewUpdate {
+	mutation := newProductDailyViewMutation(c.config, OpUpdate)
+	return &ProductDailyViewUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProductDailyViewClient) UpdateOne(_m *ProductDailyView) *ProductDailyViewUpdateOne {
+	mutation := newProductDailyViewMutation(c.config, OpUpdateOne, withProductDailyView(_m))
+	return &ProductDailyViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProductDailyViewClient) UpdateOneID(id uuid.UUID) *ProductDailyViewUpdateOne {
+	mutation := newProductDailyViewMutation(c.config, OpUpdateOne, withProductDailyViewID(id))
+	return &ProductDailyViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProductDailyView.
+func (c *ProductDailyViewClient) Delete() *ProductDailyViewDelete {
+	mutation := newProductDailyViewMutation(c.config, OpDelete)
+	return &ProductDailyViewDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProductDailyViewClient) DeleteOne(_m *ProductDailyView) *ProductDailyViewDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProductDailyViewClient) DeleteOneID(id uuid.UUID) *ProductDailyViewDeleteOne {
+	builder := c.Delete().Where(productdailyview.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProductDailyViewDeleteOne{builder}
+}
+
+// Query returns a query builder for ProductDailyView.
+func (c *ProductDailyViewClient) Query() *ProductDailyViewQuery {
+	return &ProductDailyViewQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProductDailyView},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ProductDailyView entity by its id.
+func (c *ProductDailyViewClient) Get(ctx context.Context, id uuid.UUID) (*ProductDailyView, error) {
+	return c.Query().Where(productdailyview.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProductDailyViewClient) GetX(ctx context.Context, id uuid.UUID) *ProductDailyView {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProductDailyViewClient) Hooks() []Hook {
+	return c.hooks.ProductDailyView
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProductDailyViewClient) Interceptors() []Interceptor {
+	return c.inters.ProductDailyView
+}
+
+func (c *ProductDailyViewClient) mutate(ctx context.Context, m *ProductDailyViewMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProductDailyViewCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProductDailyViewUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProductDailyViewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProductDailyViewDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ProductDailyView mutation op: %q", m.Op())
+	}
+}
+
+// ProductImportJobClient is a client for the ProductImportJob schema.
+type ProductImportJobClient struct {
+	config
+}
+
+// NewProductImportJobClient returns a client for the ProductImportJob from the given config.
+func NewProductImportJobClient(c config) *ProductImportJobClient {
+	return &ProductImportJobClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `productimportjob.Hooks(f(g(h())))`.
+func (c *ProductImportJobClient) Use(hooks ...Hook) {
+	c.hooks.ProductImportJob = append(c.hooks.ProductImportJob, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `productimportjob.Intercept(f(g(h())))`.
+func (c *ProductImportJobClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ProductImportJob = append(c.inters.ProductImportJob, interceptors...)
+}
+
+// Create returns a builder for creating a ProductImportJob entity.
+func (c *ProductImportJobClient) Create() *ProductImportJobCreate {
+	mutation := newProductImportJobMutation(c.config, OpCreate)
+	return &ProductImportJobCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProductImportJob entities.
+func (c *ProductImportJobClient) CreateBulk(builders ...*ProductImportJobCreate) *ProductImportJobCreateBulk {
+	return &ProductImportJobCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProductImportJobClient) MapCreateBulk(slice any, setFunc func(*ProductImportJobCreate, int)) *ProductImportJobCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProductImportJobCreateBulk{err: fmt.Errorf("calling to ProductImportJobClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProductImportJobCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProductImportJobCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProductImportJob.
+func (c *ProductImportJobClient) Update() *ProductImportJobUpdate {
+	mutation := newProductImportJobMutation(c.config, OpUpdate)
+	return &ProductImportJobUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProductImportJobClient) UpdateOne(_m *ProductImportJob) *ProductImportJobUpdateOne {
+	mutation := newProductImportJobMutation(c.config, OpUpdateOne, withProductImportJob(_m))
+	return &ProductImportJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProductImportJobClient) UpdateOneID(id uuid.UUID) *ProductImportJobUpdateOne {
+	mutation := newProductImportJobMutation(c.config, OpUpdateOne, withProductImportJobID(id))
+	return &ProductImportJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProductImportJob.
+func (c *ProductImportJobClient) Delete() *ProductImportJobDelete {
+	mutation := newProductImportJobMutation(c.config, OpDelete)
+	return &ProductImportJobDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProductImportJobClient) DeleteOne(_m *ProductImportJob) *ProductImportJobDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProductImportJobClient) DeleteOneID(id uuid.UUID) *ProductImportJobDeleteOne {
+	builder := c.Delete().Where(productimportjob.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProductImportJobDeleteOne{builder}
+}
+
+// Query returns a query builder for ProductImportJob.
+func (c *ProductImportJobClient) Query() *ProductImportJobQuery {
+	return &ProductImportJobQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProductImportJob},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ProductImportJob entity by its id.
+func (c *ProductImportJobClient) Get(ctx context.Context, id uuid.UUID) (*ProductImportJob, error) {
+	return c.Query().Where(productimportjob.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProductImportJobClient) GetX(ctx context.Context, id uuid.UUID) *ProductImportJob {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProductImportJobClient) Hooks() []Hook {
+	return c.hooks.ProductImportJob
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProductImportJobClient) Interceptors() []Interceptor {
+	return c.inters.ProductImportJob
+}
+
+func (c *ProductImportJobClient) mutate(ctx context.Context, m *ProductImportJobMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProductImportJobCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProductImportJobUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProductImportJobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProductImportJobDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ProductImportJob mutation op: %q", m.Op())
+	}
+}
+
 // ProductMediaClient is a client for the ProductMedia schema.
 type ProductMediaClient struct {
 	config
@@ -1771,6 +2071,272 @@ func (c *StoreClient) mutate(ctx context.Context, m *StoreMutation) (Value, erro
 	}
 }
 
+// StoreAuditEntryClient is a client for the StoreAuditEntry schema.
+type StoreAuditEntryClient struct {
+	config
+}
+
+// NewStoreAuditEntryClient returns a client for the StoreAuditEntry from the given config.
+func NewStoreAuditEntryClient(c config) *StoreAuditEntryClient {
+	return &StoreAuditEntryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `storeauditentry.Hooks(f(g(h())))`.
+func (c *StoreAuditEntryClient) Use(hooks ...Hook) {
+	c.hooks.StoreAuditEntry = append(c.hooks.StoreAuditEntry, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `storeauditentry.Intercept(f(g(h())))`.
+func (c *StoreAuditEntryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StoreAuditEntry = append(c.inters.StoreAuditEntry, interceptors...)
+}
+
+// Create returns a builder for creating a StoreAuditEntry entity.
+func (c *StoreAuditEntryClient) Create() *StoreAuditEntryCreate {
+	mutation := newStoreAuditEntryMutation(c.config, OpCreate)
+	return &StoreAuditEntryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StoreAuditEntry entities.
+func (c *StoreAuditEntryClient) CreateBulk(builders ...*StoreAuditEntryCreate) *StoreAuditEntryCreateBulk {
+	return &StoreAuditEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StoreAuditEntryClient) MapCreateBulk(slice any, setFunc func(*StoreAuditEntryCreate, int)) *StoreAuditEntryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StoreAuditEntryCreateBulk{err: fmt.Errorf("calling to StoreAuditEntryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StoreAuditEntryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StoreAuditEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StoreAuditEntry.
+func (c *StoreAuditEntryClient) Update() *StoreAuditEntryUpdate {
+	mutation := newStoreAuditEntryMutation(c.config, OpUpdate)
+	return &StoreAuditEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StoreAuditEntryClient) UpdateOne(_m *StoreAuditEntry) *StoreAuditEntryUpdateOne {
+	mutation := newStoreAuditEntryMutation(c.config, OpUpdateOne, withStoreAuditEntry(_m))
+	return &StoreAuditEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StoreAuditEntryClient) UpdateOneID(id uuid.UUID) *StoreAuditEntryUpdateOne {
+	mutation := newStoreAuditEntryMutation(c.config, OpUpdateOne, withStoreAuditEntryID(id))
+	return &StoreAuditEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StoreAuditEntry.
+func (c *StoreAuditEntryClient) Delete() *StoreAuditEntryDelete {
+	mutation := newStoreAuditEntryMutation(c.config, OpDelete)
+	return &StoreAuditEntryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StoreAuditEntryClient) DeleteOne(_m *StoreAuditEntry) *StoreAuditEntryDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StoreAuditEntryClient) DeleteOneID(id uuid.UUID) *StoreAuditEntryDeleteOne {
+	builder := c.Delete().Where(storeauditentry.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StoreAuditEntryDeleteOne{builder}
+}
+
+// Query returns a query builder for StoreAuditEntry.
+func (c *StoreAuditEntryClient) Query() *StoreAuditEntryQuery {
+	return &StoreAuditEntryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStoreAuditEntry},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StoreAuditEntry entity by its id.
+func (c *StoreAuditEntryClient) Get(ctx context.Context, id uuid.UUID) (*StoreAuditEntry, error) {
+	return c.Query().Where(storeauditentry.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StoreAuditEntryClient) GetX(ctx context.Context, id uuid.UUID) *StoreAuditEntry {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StoreAuditEntryClient) Hooks() []Hook {
+	return c.hooks.StoreAuditEntry
+}
+
+// Interceptors returns the client interceptors.
+func (c *StoreAuditEntryClient) Interceptors() []Interceptor {
+	return c.inters.StoreAuditEntry
+}
+
+func (c *StoreAuditEntryClient) mutate(ctx context.Context, m *StoreAuditEntryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StoreAuditEntryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StoreAuditEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StoreAuditEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StoreAuditEntryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StoreAuditEntry mutation op: %q", m.Op())
+	}
+}
+
+// StoreDailyTrafficClient is a client for the StoreDailyTraffic schema.
+type StoreDailyTrafficClient struct {
+	config
+}
+
+// NewStoreDailyTrafficClient returns a client for the StoreDailyTraffic from the given config.
+func NewStoreDailyTrafficClient(c config) *StoreDailyTrafficClient {
+	return &StoreDailyTrafficClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `storedailytraffic.Hooks(f(g(h())))`.
+func (c *StoreDailyTrafficClient) Use(hooks ...Hook) {
+	c.hooks.StoreDailyTraffic = append(c.hooks.StoreDailyTraffic, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `storedailytraffic.Intercept(f(g(h())))`.
+func (c *StoreDailyTrafficClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StoreDailyTraffic = append(c.inters.StoreDailyTraffic, interceptors...)
+}
+
+// Create returns a builder for creating a StoreDailyTraffic entity.
+func (c *StoreDailyTrafficClient) Create() *StoreDailyTrafficCreate {
+	mutation := newStoreDailyTrafficMutation(c.config, OpCreate)
+	return &StoreDailyTrafficCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StoreDailyTraffic entities.
+func (c *StoreDailyTrafficClient) CreateBulk(builders ...*StoreDailyTrafficCreate) *StoreDailyTrafficCreateBulk {
+	return &StoreDailyTrafficCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StoreDailyTrafficClient) MapCreateBulk(slice any, setFunc func(*StoreDailyTrafficCreate, int)) *StoreDailyTrafficCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StoreDailyTrafficCreateBulk{err: fmt.Errorf("calling to StoreDailyTrafficClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StoreDailyTrafficCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StoreDailyTrafficCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StoreDailyTraffic.
+func (c *StoreDailyTrafficClient) Update() *StoreDailyTrafficUpdate {
+	mutation := newStoreDailyTrafficMutation(c.config, OpUpdate)
+	return &StoreDailyTrafficUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StoreDailyTrafficClient) UpdateOne(_m *StoreDailyTraffic) *StoreDailyTrafficUpdateOne {
+	mutation := newStoreDailyTrafficMutation(c.config, OpUpdateOne, withStoreDailyTraffic(_m))
+	return &StoreDailyTrafficUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StoreDailyTrafficClient) UpdateOneID(id uuid.UUID) *StoreDailyTrafficUpdateOne {
+	mutation := newStoreDailyTrafficMutation(c.config, OpUpdateOne, withStoreDailyTrafficID(id))
+	return &StoreDailyTrafficUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StoreDailyTraffic.
+func (c *StoreDailyTrafficClient) Delete() *StoreDailyTrafficDelete {
+	mutation := newStoreDailyTrafficMutation(c.config, OpDelete)
+	return &StoreDailyTrafficDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StoreDailyTrafficClient) DeleteOne(_m *StoreDailyTraffic) *StoreDailyTrafficDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StoreDailyTrafficClient) DeleteOneID(id uuid.UUID) *StoreDailyTrafficDeleteOne {
+	builder := c.Delete().Where(storedailytraffic.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StoreDailyTrafficDeleteOne{builder}
+}
+
+// Query returns a query builder for StoreDailyTraffic.
+func (c *StoreDailyTrafficClient) Query() *StoreDailyTrafficQuery {
+	return &StoreDailyTrafficQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStoreDailyTraffic},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StoreDailyTraffic entity by its id.
+func (c *StoreDailyTrafficClient) Get(ctx context.Context, id uuid.UUID) (*StoreDailyTraffic, error) {
+	return c.Query().Where(storedailytraffic.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StoreDailyTrafficClient) GetX(ctx context.Context, id uuid.UUID) *StoreDailyTraffic {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StoreDailyTrafficClient) Hooks() []Hook {
+	return c.hooks.StoreDailyTraffic
+}
+
+// Interceptors returns the client interceptors.
+func (c *StoreDailyTrafficClient) Interceptors() []Interceptor {
+	return c.inters.StoreDailyTraffic
+}
+
+func (c *StoreDailyTrafficClient) mutate(ctx context.Context, m *StoreDailyTrafficMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StoreDailyTrafficCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StoreDailyTrafficUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StoreDailyTrafficUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StoreDailyTrafficDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StoreDailyTraffic mutation op: %q", m.Op())
+	}
+}
+
 // StoreMemberClient is a client for the StoreMember schema.
 type StoreMemberClient struct {
 	config
@@ -2041,12 +2607,14 @@ func (c *StoreVisitorClient) mutate(ctx context.Context, m *StoreVisitorMutation
 type (
 	hooks struct {
 		Brand, Category, FeaturedProduct, IdempotentRequest, OutboxEvent, Product,
-		ProductMedia, ProductReaction, ProductVariant, Review, Store, StoreMember,
+		ProductDailyView, ProductImportJob, ProductMedia, ProductReaction,
+		ProductVariant, Review, Store, StoreAuditEntry, StoreDailyTraffic, StoreMember,
 		StoreVisitor []ent.Hook
 	}
 	inters struct {
 		Brand, Category, FeaturedProduct, IdempotentRequest, OutboxEvent, Product,
-		ProductMedia, ProductReaction, ProductVariant, Review, Store, StoreMember,
+		ProductDailyView, ProductImportJob, ProductMedia, ProductReaction,
+		ProductVariant, Review, Store, StoreAuditEntry, StoreDailyTraffic, StoreMember,
 		StoreVisitor []ent.Interceptor
 	}
 )

@@ -14,11 +14,15 @@ import (
 	"zudomart/modules/catalog/src/generated/ent/idempotentrequest"
 	"zudomart/modules/catalog/src/generated/ent/outboxevent"
 	"zudomart/modules/catalog/src/generated/ent/product"
+	"zudomart/modules/catalog/src/generated/ent/productdailyview"
+	"zudomart/modules/catalog/src/generated/ent/productimportjob"
 	"zudomart/modules/catalog/src/generated/ent/productmedia"
 	"zudomart/modules/catalog/src/generated/ent/productreaction"
 	"zudomart/modules/catalog/src/generated/ent/productvariant"
 	"zudomart/modules/catalog/src/generated/ent/review"
 	"zudomart/modules/catalog/src/generated/ent/store"
+	"zudomart/modules/catalog/src/generated/ent/storeauditentry"
+	"zudomart/modules/catalog/src/generated/ent/storedailytraffic"
 	"zudomart/modules/catalog/src/generated/ent/storemember"
 	"zudomart/modules/catalog/src/generated/ent/storevisitor"
 
@@ -91,11 +95,15 @@ func checkColumn(t, c string) error {
 			idempotentrequest.Table: idempotentrequest.ValidColumn,
 			outboxevent.Table:       outboxevent.ValidColumn,
 			product.Table:           product.ValidColumn,
+			productdailyview.Table:  productdailyview.ValidColumn,
+			productimportjob.Table:  productimportjob.ValidColumn,
 			productmedia.Table:      productmedia.ValidColumn,
 			productreaction.Table:   productreaction.ValidColumn,
 			productvariant.Table:    productvariant.ValidColumn,
 			review.Table:            review.ValidColumn,
 			store.Table:             store.ValidColumn,
+			storeauditentry.Table:   storeauditentry.ValidColumn,
+			storedailytraffic.Table: storedailytraffic.ValidColumn,
 			storemember.Table:       storemember.ValidColumn,
 			storevisitor.Table:      storevisitor.ValidColumn,
 		})
