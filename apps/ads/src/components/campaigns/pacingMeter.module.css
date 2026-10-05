@@ -1,7 +1,7 @@
 .meter {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 120px;
 }
 

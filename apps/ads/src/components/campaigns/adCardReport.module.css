@@ -6,7 +6,7 @@
 
 .table th,
 .table td {
-  padding: 8px 6px;
+  padding: var(--space-2) 6px;
   text-align: right;
   border-bottom: 1px solid var(--divider-soft);
 }
