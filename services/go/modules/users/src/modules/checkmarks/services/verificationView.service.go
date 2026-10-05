@@ -28,7 +28,7 @@ type VerificationView struct {
 	GrantsDashboardAccess    bool                                `json:"grantsDashboardAccess"`
 	Subscription             any                                 `json:"subscription"`
 	Applicant                map[string]any                      `json:"applicant"`
-	Documents                []any                               `json:"documents"`
+	Documents                []VerificationDocument              `json:"documents"`
 	Checks                   []any                               `json:"checks"`
 	AllowedTransitions       []string                            `json:"allowedTransitions"`
 	History                  any                                 `json:"history,omitempty"`
@@ -55,17 +55,24 @@ func BuildVerificationView(ctx context.Context, application *container.Container
 	}
 	applicant := map[string]any{}
 	_ = json.Unmarshal(row.Applicant, &applicant)
+	applicant["category"] = "PERSONAL"
+	if _, present := applicant["agencyName"]; !present {
+		applicant["agencyName"], applicant["officialContactEmail"] = nil, nil
+	}
 	subject := "PERSON"
 	if row.Color == verificationapplication.ColorGold {
 		subject = "BUSINESS"
 	}
-	if owner, err := application.Client.Profile.Get(ctx, row.ProfileID); err == nil && owner.ProfileType == profile.ProfileTypeGovernment {
-		subject = "GOVERNMENT"
+	if owner, err := application.Client.Profile.Get(ctx, row.ProfileID); err == nil {
+		applicant["category"] = strings.ToUpper(string(owner.ProfileType))
+		if owner.ProfileType == profile.ProfileTypeGovernment {
+			subject = "GOVERNMENT"
+		}
 	}
 	view := VerificationView{
 		Id: row.ID.String(), User: summary, Color: strings.ToUpper(string(row.Color)), Tier: map[verificationapplication.Color]string{verificationapplication.ColorBlue: "VERIFIED", verificationapplication.ColorGold: "PRO"}[row.Color],
 		Status: statusLabels[row.Status], SubjectKind: subject, SubmittedAt: row.CreatedAt.UTC().Format(time.RFC3339), BadgeVisibleWhenVerified: true,
-		Applicant: applicant, Documents: []any{}, Checks: []any{}, AllowedTransitions: allowedTransitionsByStatus[row.Status],
+		Applicant: applicant, Documents: VerificationDocumentsOf(row), Checks: []any{}, AllowedTransitions: allowedTransitionsByStatus[row.Status],
 	}
 	if row.ReviewedAt != nil {
 		reviewed := row.ReviewedAt.UTC().Format(time.RFC3339)
