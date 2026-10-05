@@ -16,7 +16,7 @@ func completeStaffAndMoneyCollaborators(deployed *container.Container, collabora
 	if deployed.TopUps == nil {
 		deployed.TopUps = integrations.UnavailableTopUpGateway{}
 		if settings.MoneyHttpUrl != "" {
-			deployed.TopUps = integrations.HttpMoneyTopUpGateway{BaseUrl: settings.MoneyHttpUrl, Http: client}
+			deployed.TopUps = integrations.HttpMoneyTopUpGateway{BaseUrl: settings.MoneyHttpUrl, Token: settings.MoneyHttpToken, Http: client}
 		}
 	}
 	deployed.AuditHistory = collaborators.History

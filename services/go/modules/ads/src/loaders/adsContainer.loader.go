@@ -179,6 +179,11 @@ func completeStorageAndJobs(ctx context.Context, deployed *container.Container, 
 		if err != nil {
 			return err
 		}
+		if settings.CreateAssetsBucket && !settings.IsProduction() {
+			if err := storage.EnsureBucketForBrowserUploads(ctx, settings.AssetsCorsOrigins); err != nil {
+				deployed.Logger.Warn("could not prepare the local creatives bucket", "error", err)
+			}
+		}
 		deployed.Storage = storage
 	}
 	if deployed.Storage == nil && !settings.IsProduction() {
