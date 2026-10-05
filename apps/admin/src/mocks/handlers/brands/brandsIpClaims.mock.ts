@@ -58,7 +58,7 @@ export function registerIpClaimMockHandlers(): void {
     const type = request.query.get("type");
     const claims = readBrandsMockStore()
       .claims.map((claim) => presentIpClaimSummary(claim))
-      .filter((claim) => matchesSearchText(search, claim.id, claim.listing.title, claim.claimantBrand.name, claim.accusedSeller.username) && (!status || claim.status === status) && (!type || claim.type === type))
+      .filter((claim) => matchesSearchText(search, claim.id, claim.listing.title, claim.claimantBrand.name, claim.accusedSeller.username) && (!status || status === "ALL" || claim.status === status) && (!type || claim.type === type))
       .sort((first, second) => first.slaDueAt.localeCompare(second.slaDueAt));
     return respondWithJson(200, paginateItems(claims, request));
   });

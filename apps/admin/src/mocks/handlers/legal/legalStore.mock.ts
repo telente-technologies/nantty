@@ -70,7 +70,7 @@ export function presentNoticeProgress(record: LegalNoticeRecord): LegalNoticePro
     id: record.id, documentKey: record.documentKey, documentTitle: definition.title, versionId: record.versionId, versionNumber: record.versionNumber,
     subject: readLegalStore().noticeDrafts.get(record.versionId)?.subject ?? `We've updated our ${definition.title}`, status, recipientCount, sentCount, excludedHardBounces: mockHardBouncedAddresses, excludedSuppressed: mockSuppressedAddresses,
     batchSize: sesBatchSize, ratePerSecond: sesRatePerSecond, batchesTotal, batchesDone: Math.floor(sentCount / sesBatchSize), queuedAt: new Date(record.queuedAtEpochMs).toISOString(),
-    queuedByName: record.queuedByName, estimatedCompletionAt: status === "COMPLETED" ? null : new Date(Date.now() + secondsLeft * 1000).toISOString(), provider: "AWS_SES_MOCK",
+    queuedByName: record.queuedByName, estimatedCompletionAt: status === "COMPLETED" ? null : new Date(Date.now() + secondsLeft * 1000).toISOString(), provider: "AWS_SES",
   };
 }
 

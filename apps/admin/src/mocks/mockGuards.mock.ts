@@ -25,7 +25,7 @@ export function requireMockSuperadmin(request: MockRequest): MockPrincipal {
 
 export function requireMockStepUp(request: MockRequest): void {
   const principal = requireMockPrincipal(request);
-  const token = request.headers.get("x-admin-step-up") ?? "";
+  const token = request.headers.get("x-step-up-token") ?? "";
   const grant = readMockDatabase().stepUpTokens.get(token);
   if (!grant || grant.adminId !== principal.adminId || grant.sessionId !== principal.sessionId || grant.expiresAtEpochMs < Date.now()) {
     throw new MockHttpError(403, "STEP_UP_REQUIRED", "Confirm it's you with your authenticator code to continue.");

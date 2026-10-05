@@ -16,10 +16,10 @@ interface SegmentDefinition {
 
 const unsubscribeFooter = "\n\n--\nYou get this because you agreed to ZudoMart updates. Unsubscribe: {{unsubscribeUrl}}";
 const segments: readonly SegmentDefinition[] = [
-  { id: "all-sellers", label: "All sellers", description: "Everyone with a store.", includes: (user) => user.isSeller && user.status === "ACTIVE" },
-  { id: "gold-sellers", label: "Gold sellers", description: "Stores with the Gold checkmark.", includes: (user) => user.verification?.color === "GOLD" && user.status === "ACTIVE" },
+  { id: "all-users", label: "All users", description: "Every active account.", includes: (user) => user.status === "ACTIVE" },
   { id: "creators", label: "Creators", description: "Creator Program members.", includes: (user) => user.isCreator && user.status === "ACTIVE" },
-  { id: "new-accounts", label: "New accounts", description: "Joined in the last 60 days.", includes: (user) => Date.now() - Date.parse(user.joinedAt) < 60 * 86_400_000 && user.status === "ACTIVE" },
+  { id: "verified", label: "Verified", description: "Accounts with a checkmark.", includes: (user) => Boolean(user.verification) && user.status === "ACTIVE" },
+  { id: "business-owners", label: "Business owners", description: "Everyone with a store.", includes: (user) => user.isSeller && user.status === "ACTIVE" },
 ];
 
 function hasMarketingConsent(user: MockPlatformUserRecord): boolean {
@@ -79,7 +79,7 @@ export function registerSupportEmailMockHandlers(): void {
   registerMockRoute("POST", "/admin/support/email/preview", (request) => {
     requireMockPermission(request, "support:email");
     const plan = buildPlan(request);
-    const preview: EmailPreview = { recipientCount: plan.recipients.length, skippedNoMarketingConsent: plan.skipped, includesUnsubscribeLink: plan.kind === "MARKETING", renderedSubject: plan.subject, renderedBody: plan.renderedBody, provider: "AWS_SES_MOCK" };
+    const preview: EmailPreview = { recipientCount: plan.recipients.length, skippedNoMarketingConsent: plan.skipped, includesUnsubscribeLink: plan.kind === "MARKETING", renderedSubject: plan.subject, renderedBody: plan.renderedBody, provider: "AWS_SES" };
     return respondWithJson(200, preview);
   });
 
@@ -89,7 +89,7 @@ export function registerSupportEmailMockHandlers(): void {
     if (plan.isSegment || plan.kind === "MARKETING") requireMockStepUp(request);
     const reason = readRequiredReason(plan.body);
     if (plan.recipients.length === 0) failValidation("audience", "Nobody in this audience can receive this email. Marketing needs consent.");
-    const record: EmailSendRecord = { id: createMockId("esnd"), kind: plan.kind, subject: plan.subject, audienceLabel: plan.audience.label, recipientCount: plan.recipients.length, skippedNoMarketingConsent: plan.skipped, sentByName: principal.name, sentAt: readIsoNow(), provider: "AWS_SES_MOCK" };
+    const record: EmailSendRecord = { id: createMockId("esnd"), kind: plan.kind, subject: plan.subject, audienceLabel: plan.audience.label, recipientCount: plan.recipients.length, skippedNoMarketingConsent: plan.skipped, sentByName: principal.name, sentAt: readIsoNow(), provider: "AWS_SES" };
     readSends().unshift(record);
     recordMockAuditEntry(request, { action: "support.email_sent", area: "support", target: { type: "emailSend", id: record.id, label: plan.audience.label }, reason, after: { kind: plan.kind, subject: plan.subject, recipientCount: record.recipientCount, skippedNoMarketingConsent: plan.skipped, unsubscribeIncluded: plan.kind === "MARKETING", provider: "AWS_SES" } });
     return respondWithJson(201, record);

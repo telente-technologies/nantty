@@ -69,7 +69,6 @@ export function validateCreatorEligibilityRules(rawContent: unknown): CreatorEli
     minimumPostsInLast30Days: readIntegerBetween(content, "minimumPostsInLast30Days", "content", 0, 1000),
     maximumActiveStrikes: readIntegerBetween(content, "maximumActiveStrikes", "content", 0, 10),
     minimumAccountAgeDays: readIntegerBetween(content, "minimumAccountAgeDays", "content", 0, 3650),
-    requiresVerifiedPhone: readBooleanValue(content, "requiresVerifiedPhone", "content"),
     requiresIdentityVerification: readBooleanValue(content, "requiresIdentityVerification", "content"),
     allowedCountries: readCountryCodeList(content, "allowedCountries", "content"),
   };

@@ -30,7 +30,6 @@ export function validateCreatorThresholds(rawContent: unknown): CreatorProgramTh
   const autoApprove = {
     minimumAccountAgeDays: readIntegerBetween(auto, "minimumAccountAgeDays", "content.autoApprove", 0, 3650),
     requiresVerifiedEmail: readBooleanValue(auto, "requiresVerifiedEmail", "content.autoApprove"),
-    requiresVerifiedPhone: readBooleanValue(auto, "requiresVerifiedPhone", "content.autoApprove"),
     minimumRealFollowers: readIntegerBetween(auto, "minimumRealFollowers", "content.autoApprove", 0, 10_000_000),
     minimumOriginalPostsInLast60Days: readIntegerBetween(auto, "minimumOriginalPostsInLast60Days", "content.autoApprove", 0, 1000),
     noViolationsInDays: readIntegerBetween(auto, "noViolationsInDays", "content.autoApprove", 0, 730),
@@ -57,7 +56,6 @@ export function validateTrialRules(rawContent: unknown): TrialRules {
     onePerPerson: readBooleanValue(content, "onePerPerson", "content"),
     onePerCard: readBooleanValue(content, "onePerCard", "content"),
     onePerDevice: readBooleanValue(content, "onePerDevice", "content"),
-    onePerPhone: readBooleanValue(content, "onePerPhone", "content"),
     maximumRiskScore: readIntegerBetween(content, "maximumRiskScore", "content", 0, 100),
     minimumCompletedOrders: readIntegerBetween(content, "minimumCompletedOrders", "content", 0, 100_000),
   };
