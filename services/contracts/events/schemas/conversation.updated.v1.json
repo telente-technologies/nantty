@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/conversation.updated.v1.json",
+  "title": "ConversationUpdated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conversationId",
+    "changes"
+  ],
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Set when the change is private to one member (mute, folder); realtime then routes to user:<accountId> only"
+    },
+    "changes": {
+      "type": "object"
+    },
+    "memberIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  }
+}

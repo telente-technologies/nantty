@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/message.reactionsChanged.v1.json",
+  "title": "MessageReactionsChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conversationId",
+    "messageId",
+    "reactions"
+  ],
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "messageId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "emoji",
+          "count",
+          "accountIds"
+        ],
+        "properties": {
+          "emoji": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "accountIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      }
+    },
+    "memberIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  }
+}

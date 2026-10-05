@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/message.removed.v1.json",
+  "title": "MessageRemoved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conversationId",
+    "messageId",
+    "reason"
+  ],
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "messageId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reason": {
+      "enum": [
+        "moderation",
+        "deleted",
+        "expired"
+      ]
+    },
+    "memberIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  }
+}

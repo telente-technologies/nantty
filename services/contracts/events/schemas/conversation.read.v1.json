@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/conversation.read.v1.json",
+  "title": "ConversationRead",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conversationId",
+    "readerId",
+    "lastReadAt"
+  ],
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "readerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "lastReadAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "memberIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  }
+}
