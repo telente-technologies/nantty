@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -54,6 +55,8 @@ type CoinPurchase struct {
 	ClawbackShortfallCoins int64 `json:"clawback_shortfall_coins,omitempty"`
 	// ReviewStatus holds the value of the "review_status" field.
 	ReviewStatus coinpurchase.ReviewStatus `json:"review_status,omitempty"`
+	// ReviewFlags holds the value of the "review_flags" field.
+	ReviewFlags []string `json:"review_flags,omitempty"`
 	// ReviewedByStaffID holds the value of the "reviewed_by_staff_id" field.
 	ReviewedByStaffID string `json:"reviewed_by_staff_id,omitempty"`
 	// ReviewedAt holds the value of the "reviewed_at" field.
@@ -72,6 +75,8 @@ func (*CoinPurchase) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case coinpurchase.FieldPaymentIntentID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case coinpurchase.FieldReviewFlags:
+			values[i] = new([]byte)
 		case coinpurchase.FieldCoins, coinpurchase.FieldAmountMinor, coinpurchase.FieldStoreFeeMinor, coinpurchase.FieldClawbackShortfallCoins:
 			values[i] = new(sql.NullInt64)
 		case coinpurchase.FieldUserID, coinpurchase.FieldPackageID, coinpurchase.FieldChannel, coinpurchase.FieldSource, coinpurchase.FieldProvider, coinpurchase.FieldReference, coinpurchase.FieldCurrency, coinpurchase.FieldStatus, coinpurchase.FieldAuthorizationURL, coinpurchase.FieldReviewStatus, coinpurchase.FieldReviewedByStaffID, coinpurchase.FieldReviewNote:
@@ -212,6 +217,14 @@ func (_m *CoinPurchase) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ReviewStatus = coinpurchase.ReviewStatus(value.String)
 			}
+		case coinpurchase.FieldReviewFlags:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field review_flags", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ReviewFlags); err != nil {
+					return fmt.Errorf("unmarshal field review_flags: %w", err)
+				}
+			}
 		case coinpurchase.FieldReviewedByStaffID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field reviewed_by_staff_id", values[i])
@@ -332,6 +345,9 @@ func (_m *CoinPurchase) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("review_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ReviewStatus))
+	builder.WriteString(", ")
+	builder.WriteString("review_flags=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReviewFlags))
 	builder.WriteString(", ")
 	builder.WriteString("reviewed_by_staff_id=")
 	builder.WriteString(_m.ReviewedByStaffID)

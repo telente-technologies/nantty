@@ -204,6 +204,12 @@ func (_c *CoinPurchaseCreate) SetNillableReviewStatus(v *coinpurchase.ReviewStat
 	return _c
 }
 
+// SetReviewFlags sets the "review_flags" field.
+func (_c *CoinPurchaseCreate) SetReviewFlags(v []string) *CoinPurchaseCreate {
+	_c.mutation.SetReviewFlags(v)
+	return _c
+}
+
 // SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
 func (_c *CoinPurchaseCreate) SetReviewedByStaffID(v string) *CoinPurchaseCreate {
 	_c.mutation.SetReviewedByStaffID(v)
@@ -576,6 +582,10 @@ func (_c *CoinPurchaseCreate) createSpec() (*CoinPurchase, *sqlgraph.CreateSpec)
 		_spec.SetField(coinpurchase.FieldReviewStatus, field.TypeEnum, value)
 		_node.ReviewStatus = value
 	}
+	if value, ok := _c.mutation.ReviewFlags(); ok {
+		_spec.SetField(coinpurchase.FieldReviewFlags, field.TypeJSON, value)
+		_node.ReviewFlags = value
+	}
 	if value, ok := _c.mutation.ReviewedByStaffID(); ok {
 		_spec.SetField(coinpurchase.FieldReviewedByStaffID, field.TypeString, value)
 		_node.ReviewedByStaffID = value
@@ -767,6 +777,24 @@ func (u *CoinPurchaseUpsert) SetReviewStatus(v coinpurchase.ReviewStatus) *CoinP
 // UpdateReviewStatus sets the "review_status" field to the value that was provided on create.
 func (u *CoinPurchaseUpsert) UpdateReviewStatus() *CoinPurchaseUpsert {
 	u.SetExcluded(coinpurchase.FieldReviewStatus)
+	return u
+}
+
+// SetReviewFlags sets the "review_flags" field.
+func (u *CoinPurchaseUpsert) SetReviewFlags(v []string) *CoinPurchaseUpsert {
+	u.Set(coinpurchase.FieldReviewFlags, v)
+	return u
+}
+
+// UpdateReviewFlags sets the "review_flags" field to the value that was provided on create.
+func (u *CoinPurchaseUpsert) UpdateReviewFlags() *CoinPurchaseUpsert {
+	u.SetExcluded(coinpurchase.FieldReviewFlags)
+	return u
+}
+
+// ClearReviewFlags clears the value of the "review_flags" field.
+func (u *CoinPurchaseUpsert) ClearReviewFlags() *CoinPurchaseUpsert {
+	u.SetNull(coinpurchase.FieldReviewFlags)
 	return u
 }
 
@@ -1046,6 +1074,27 @@ func (u *CoinPurchaseUpsertOne) SetReviewStatus(v coinpurchase.ReviewStatus) *Co
 func (u *CoinPurchaseUpsertOne) UpdateReviewStatus() *CoinPurchaseUpsertOne {
 	return u.Update(func(s *CoinPurchaseUpsert) {
 		s.UpdateReviewStatus()
+	})
+}
+
+// SetReviewFlags sets the "review_flags" field.
+func (u *CoinPurchaseUpsertOne) SetReviewFlags(v []string) *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewFlags(v)
+	})
+}
+
+// UpdateReviewFlags sets the "review_flags" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertOne) UpdateReviewFlags() *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewFlags()
+	})
+}
+
+// ClearReviewFlags clears the value of the "review_flags" field.
+func (u *CoinPurchaseUpsertOne) ClearReviewFlags() *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.ClearReviewFlags()
 	})
 }
 
@@ -1501,6 +1550,27 @@ func (u *CoinPurchaseUpsertBulk) SetReviewStatus(v coinpurchase.ReviewStatus) *C
 func (u *CoinPurchaseUpsertBulk) UpdateReviewStatus() *CoinPurchaseUpsertBulk {
 	return u.Update(func(s *CoinPurchaseUpsert) {
 		s.UpdateReviewStatus()
+	})
+}
+
+// SetReviewFlags sets the "review_flags" field.
+func (u *CoinPurchaseUpsertBulk) SetReviewFlags(v []string) *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewFlags(v)
+	})
+}
+
+// UpdateReviewFlags sets the "review_flags" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertBulk) UpdateReviewFlags() *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewFlags()
+	})
+}
+
+// ClearReviewFlags clears the value of the "review_flags" field.
+func (u *CoinPurchaseUpsertBulk) ClearReviewFlags() *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.ClearReviewFlags()
 	})
 }
 

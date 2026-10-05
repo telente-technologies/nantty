@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -171,6 +172,24 @@ func (_u *CoinPurchaseUpdate) SetNillableReviewStatus(v *coinpurchase.ReviewStat
 	if v != nil {
 		_u.SetReviewStatus(*v)
 	}
+	return _u
+}
+
+// SetReviewFlags sets the "review_flags" field.
+func (_u *CoinPurchaseUpdate) SetReviewFlags(v []string) *CoinPurchaseUpdate {
+	_u.mutation.SetReviewFlags(v)
+	return _u
+}
+
+// AppendReviewFlags appends value to the "review_flags" field.
+func (_u *CoinPurchaseUpdate) AppendReviewFlags(v []string) *CoinPurchaseUpdate {
+	_u.mutation.AppendReviewFlags(v)
+	return _u
+}
+
+// ClearReviewFlags clears the value of the "review_flags" field.
+func (_u *CoinPurchaseUpdate) ClearReviewFlags() *CoinPurchaseUpdate {
+	_u.mutation.ClearReviewFlags()
 	return _u
 }
 
@@ -350,6 +369,17 @@ func (_u *CoinPurchaseUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.ReviewStatus(); ok {
 		_spec.SetField(coinpurchase.FieldReviewStatus, field.TypeEnum, value)
 	}
+	if value, ok := _u.mutation.ReviewFlags(); ok {
+		_spec.SetField(coinpurchase.FieldReviewFlags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedReviewFlags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, coinpurchase.FieldReviewFlags, value)
+		})
+	}
+	if _u.mutation.ReviewFlagsCleared() {
+		_spec.ClearField(coinpurchase.FieldReviewFlags, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.ReviewedByStaffID(); ok {
 		_spec.SetField(coinpurchase.FieldReviewedByStaffID, field.TypeString, value)
 	}
@@ -528,6 +558,24 @@ func (_u *CoinPurchaseUpdateOne) SetNillableReviewStatus(v *coinpurchase.ReviewS
 	if v != nil {
 		_u.SetReviewStatus(*v)
 	}
+	return _u
+}
+
+// SetReviewFlags sets the "review_flags" field.
+func (_u *CoinPurchaseUpdateOne) SetReviewFlags(v []string) *CoinPurchaseUpdateOne {
+	_u.mutation.SetReviewFlags(v)
+	return _u
+}
+
+// AppendReviewFlags appends value to the "review_flags" field.
+func (_u *CoinPurchaseUpdateOne) AppendReviewFlags(v []string) *CoinPurchaseUpdateOne {
+	_u.mutation.AppendReviewFlags(v)
+	return _u
+}
+
+// ClearReviewFlags clears the value of the "review_flags" field.
+func (_u *CoinPurchaseUpdateOne) ClearReviewFlags() *CoinPurchaseUpdateOne {
+	_u.mutation.ClearReviewFlags()
 	return _u
 }
 
@@ -736,6 +784,17 @@ func (_u *CoinPurchaseUpdateOne) sqlSave(ctx context.Context) (_node *CoinPurcha
 	}
 	if value, ok := _u.mutation.ReviewStatus(); ok {
 		_spec.SetField(coinpurchase.FieldReviewStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ReviewFlags(); ok {
+		_spec.SetField(coinpurchase.FieldReviewFlags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedReviewFlags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, coinpurchase.FieldReviewFlags, value)
+		})
+	}
+	if _u.mutation.ReviewFlagsCleared() {
+		_spec.ClearField(coinpurchase.FieldReviewFlags, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.ReviewedByStaffID(); ok {
 		_spec.SetField(coinpurchase.FieldReviewedByStaffID, field.TypeString, value)

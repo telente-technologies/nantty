@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -40,6 +41,8 @@ type CoinTransfer struct {
 	ReversedAt *time.Time `json:"reversed_at,omitempty"`
 	// ReviewStatus holds the value of the "review_status" field.
 	ReviewStatus cointransfer.ReviewStatus `json:"review_status,omitempty"`
+	// ReviewFlags holds the value of the "review_flags" field.
+	ReviewFlags []string `json:"review_flags,omitempty"`
 	// ReviewedByStaffID holds the value of the "reviewed_by_staff_id" field.
 	ReviewedByStaffID string `json:"reviewed_by_staff_id,omitempty"`
 	// ReviewedAt holds the value of the "reviewed_at" field.
@@ -54,6 +57,8 @@ func (*CoinTransfer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case cointransfer.FieldReviewFlags:
+			values[i] = new([]byte)
 		case cointransfer.FieldCoins, cointransfer.FieldFeeCoins, cointransfer.FieldNetCoins, cointransfer.FieldFeeBps, cointransfer.FieldClawbackShortfallCoins:
 			values[i] = new(sql.NullInt64)
 		case cointransfer.FieldSenderUserID, cointransfer.FieldRecipientUserID, cointransfer.FieldNote, cointransfer.FieldReviewStatus, cointransfer.FieldReviewedByStaffID, cointransfer.FieldReviewNote:
@@ -150,6 +155,14 @@ func (_m *CoinTransfer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ReviewStatus = cointransfer.ReviewStatus(value.String)
 			}
+		case cointransfer.FieldReviewFlags:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field review_flags", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.ReviewFlags); err != nil {
+					return fmt.Errorf("unmarshal field review_flags: %w", err)
+				}
+			}
 		case cointransfer.FieldReviewedByStaffID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field reviewed_by_staff_id", values[i])
@@ -239,6 +252,9 @@ func (_m *CoinTransfer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("review_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ReviewStatus))
+	builder.WriteString(", ")
+	builder.WriteString("review_flags=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReviewFlags))
 	builder.WriteString(", ")
 	builder.WriteString("reviewed_by_staff_id=")
 	builder.WriteString(_m.ReviewedByStaffID)
