@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: services/go/platform/go.mod
           cache-dependency-path: services/go/**/go.sum
@@ -112,7 +112,7 @@ jobs:
       POSTGRES_DB: zudomart
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: services/go/platform/go.mod
           cache-dependency-path: services/go/**/go.sum

@@ -35,7 +35,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm audit --prod --audit-level=high
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: services/go/platform/go.mod
           cache-dependency-path: services/go/**/go.sum
