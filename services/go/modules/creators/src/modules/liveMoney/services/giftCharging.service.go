@@ -151,6 +151,14 @@ func (live LiveMoney) chargeGiftInTransaction(ctx context.Context, transaction *
 	if err != nil {
 		return ChargedGift{}, err
 	}
+	if split.CreatorAmountCoins > 0 && request.BattleId == "" {
+		if _, err := programservices.RecordEarning(ctx, client, programservices.Earning{
+			CreatorId: credited, Kind: "gift", Reference: "gift:" + gift.ID.String(), SourceType: "live", SourceId: request.LiveId, Description: "Live gift",
+			GrossMinor: split.TotalCoins, NetMinor: split.CreatorAmountCoins, Unit: programservices.CoinUnit, At: now,
+		}); err != nil {
+			return ChargedGift{}, err
+		}
+	}
 	if err := live.Container.Outbox.EnqueueInTransaction(ctx, transaction, "giftTransaction.committed", request.LiveId, now, giftSentEventData(gift)); err != nil {
 		return ChargedGift{}, err
 	}

@@ -82,22 +82,6 @@ func (program CreatorProgram) CreditableUserResolver(ctx context.Context, execut
 	}
 }
 
-func (program CreatorProgram) SetCreatorProgramMembership(ctx context.Context, staffId, userId, tierId, status string) (dtos.CreatorMembershipDto, error) {
-	client := program.Container.Client(program.Container.Resources.Database)
-	if _, err := client.CreatorTier.Get(ctx, tierId); ent.IsNotFound(err) {
-		return dtos.CreatorMembershipDto{}, ErrCreatorTierNotFound
-	} else if err != nil {
-		return dtos.CreatorMembershipDto{}, err
-	}
-	err := client.CreatorProgramMember.Create().SetUserID(userId).SetTierID(tierId).SetStatus(creatorprogrammember.Status(status)).
-		SetUpdatedByStaffID(staffId).SetCreatedAt(program.Container.Now().UTC()).
-		OnConflictColumns(creatorprogrammember.FieldUserID).UpdateTierID().UpdateStatus().UpdateUpdatedByStaffID().UpdateUpdatedAt().Exec(ctx)
-	if err != nil {
-		return dtos.CreatorMembershipDto{}, err
-	}
-	return dtos.CreatorMembershipDto{UserId: userId, TierId: tierId, Status: status}, nil
-}
-
 func (program CreatorProgram) EnrollApprovedCreatorInDefaultTier(ctx context.Context, userId string) error {
 	if strings.TrimSpace(userId) == "" {
 		return nil
@@ -129,4 +113,8 @@ func (program CreatorProgram) UpdateCreatorTierShare(ctx context.Context, staffI
 		return dtos.CreatorTierDto{}, err
 	}
 	return dtos.CreatorTierDto{Id: tier.ID, Name: tier.Name, GiftShareBps: tier.GiftShareBps, IsDefault: tier.IsDefault}, nil
+}
+
+func (program CreatorProgram) ApprovedCreatorShare(ctx context.Context, executor databases.ExecutorQuerier, userId string) (int64, bool, error) {
+	return program.giftShareForApprovedMember(ctx, executor, program.Container.Client(executor), userId)
 }
