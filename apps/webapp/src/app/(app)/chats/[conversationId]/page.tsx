@@ -11,7 +11,8 @@ import reportStyles from "@/components/chatReport/chatReport.module.css";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { Avatar } from "@/components/ui/media";
 import { ArrowLeftIcon } from "@/components/ui/icons";
-import { ErrorState, Spinner } from "@/components/ui/feedback";
+import { ErrorState } from "@/components/ui/feedback";
+import { ChatMessagesSkeleton } from "@/components/ui/pageSkeletons";
 import { RetryButton } from "@/components/ui/controls";
 import { useSession } from "@/components/providers/sessionProvider";
 import { messagesService } from "@/services/messages.service";
@@ -117,7 +118,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
 
       <div className={styles.messages} ref={listRef}>
         {messagesQuery.isLoading ? (
-          <Spinner label="Loading messages" />
+          <ChatMessagesSkeleton label="Loading messages" />
         ) : messagesQuery.isError ? (
           <ErrorState description="We couldn't load this conversation." action={<RetryButton onRetry={() => messagesQuery.refetch()} />} />
         ) : messages.length === 0 ? (
@@ -131,7 +132,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
                   {message.text ? <p className={styles.bubbleText}><MentionText text={message.text} inverseLinks={mine} /></p> : null}
                   {message.media?.url ? (
                     message.media.type === "image" ? (
-                      <img src={message.media.url} alt="" className={styles.bubbleImage} loading="lazy" />
+                      <img src={message.media.url} alt="Photo" className={styles.bubbleImage} loading="lazy" />
                     ) : (
                       <video src={message.media.url} controls className={styles.bubbleImage} preload="metadata" />
                     )

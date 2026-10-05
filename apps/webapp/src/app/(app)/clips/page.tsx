@@ -4,7 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
-import { RetryButton } from "@/components/ui/controls";
+import { RetryButton, InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedback";
 import { SegmentedControl } from "@/components/ui/controls";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
@@ -53,7 +53,7 @@ export default function ClipsPage() {
 
   const scrollByOneClip = useCallback((direction: 1 | -1) => {
     const feed = feedRef.current;
-    if (feed) feed.scrollBy({ top: direction * feed.clientHeight, behavior: "smooth" });
+    if (feed) feed.scrollBy({ top: direction * feed.clientHeight, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }, []);
 
   function handleFeedKeys(event: KeyboardEvent<HTMLDivElement>) {
@@ -97,7 +97,7 @@ export default function ClipsPage() {
       ) : clipsQuery.isError ? (
         <ErrorState description="We couldn't load clips." action={<RetryButton onRetry={() => clipsQuery.refetch()} />} />
       ) : clips.length === 0 ? (
-        <EmptyState title="No clips yet" description="Follow creators to see their clips here." />
+        <EmptyState title="No clips yet" description="Follow creators to see their clips here." action={<InlineLink href="/explore">Explore creators</InlineLink>} />
       ) : (
         <div ref={feedRef} className={styles.feed} tabIndex={0} onKeyDown={handleFeedKeys} aria-label="Clips. Use the arrow keys to move between clips.">
           {clips.map((clip, index) => (

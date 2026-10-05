@@ -5,13 +5,14 @@ import Link from "next/link";
 
 import { useSession } from "@/components/providers/sessionProvider";
 import { RetryButton } from "@/components/ui/controls";
-import { ErrorState, Spinner } from "@/components/ui/feedback";
+import { ErrorState } from "@/components/ui/feedback";
 import { AnalyticsIcon, ArrowLeftIcon } from "@/components/ui/icons";
 import { postsService } from "@/services/posts.service";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import { useQuery } from "@tanstack/react-query";
 
 import styles from "./page.module.css";
+import { StatGridSkeleton } from "@/components/ui/pageSkeletons";
 
 const DAY_LABELS: readonly string[] = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -20,7 +21,7 @@ export default function PostAnalyticsPage({ params }: { readonly params: Promise
   const { viewer } = useSession();
   const analytics = useQuery({ queryKey: ["post-analytics", postId], queryFn: () => postsService.fetchPostAnalytics(postId), retry: false });
 
-  if (analytics.isLoading) return <Spinner label="Loading analytics" />;
+  if (analytics.isLoading) return <StatGridSkeleton label="Loading analytics" />;
   if (analytics.isError || !analytics.data) {
     return (
       <ErrorState

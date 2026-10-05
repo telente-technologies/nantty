@@ -16,6 +16,7 @@ import type { Clip } from "@/types";
 
 import styles from "./page.module.css";
 import { IconLabel } from "@/components/ui/appIcon";
+import { findDownloadTargetForPost } from "@/utils/brandedDownload.util";
 
 function canPlayInBrowser(url: string | null): url is string {
   return !!url && !url.endsWith(".m3u8");
@@ -111,7 +112,7 @@ export function ClipPlayerCard({ clip, isActive }: { readonly clip: Clip; readon
           <span className={styles.actionCount}>{formatCompactCount(clip.shares)}</span>
         </span>
         <span className={styles.actionItem}>
-          <ContentActionsMenu shareKind={null} reportTargetType="clip" targetId={clip.id} soundId={clip.sound?.id ?? null} canonicalPath={`/clips?start=${clip.id}`} triggerClassName={styles.actionCircle} />
+          <ContentActionsMenu shareKind={null} reportTargetType="clip" targetId={clip.id} soundId={clip.sound?.id ?? null} canonicalPath={`/clips?start=${clip.id}`} triggerClassName={styles.actionCircle} downloadTarget={findDownloadTargetForPost(clip)} />
         </span>
       </div>
     </article>
