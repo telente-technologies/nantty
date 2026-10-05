@@ -1,3 +1,4 @@
+import type { SearchScope } from "../enums/searchScope.enum.js";
 import type { SearchKind } from "./searchDocument.type.js";
 
 export interface SearchRequest {
@@ -8,6 +9,7 @@ export interface SearchRequest {
   readonly cursor: SearchCursor | undefined;
   readonly region: string | undefined;
   readonly viewerIsAdult?: boolean;
+  readonly scope?: SearchScope;
 }
 
 export interface SearchCursor {
@@ -38,5 +40,6 @@ export interface Page<T> {
 export interface RecentSearch {
   readonly id: string;
   readonly query: string;
+  readonly scope: string;
   readonly searchedAt: string;
 }

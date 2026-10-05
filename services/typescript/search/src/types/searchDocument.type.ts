@@ -5,6 +5,7 @@ export interface SearchDocument {
   readonly kind: SearchKind;
   readonly entityId: string;
   readonly ownerAccountId: string | null;
+  readonly storeId?: string | null;
   readonly title: string;
   readonly subtitle: string | null;
   readonly body: string;
