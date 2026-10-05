@@ -21,7 +21,7 @@ The Zudomart Dashboard (`apps/seller`, hosted at `https://dashboard.<domain>`) i
 ## Auth (existing endpoints the dashboard relies on)
 
 ### POST /api/v1/auth/login
-Body: `{ identifier: string (email, phone or username), password: string }`
+Body: `{ identifier: string (email or username), password: string }`
 Response 200: `{ accessToken, refreshToken, expiresIn, tokenType: "Bearer", user: CurrentUserDto, isNewUser }`
 Errors: 401 INVALID_CREDENTIALS, 429
 
@@ -29,7 +29,7 @@ Errors: 401 INVALID_CREDENTIALS, 429
 Body: `{ refreshToken }` → 200 `{ accessToken, refreshToken, expiresIn, tokenType }`. Errors: 401 INVALID_REFRESH_TOKEN, 401 REFRESH_TOKEN_REUSED (session revoked).
 
 ### POST /api/v1/auth/otp/send
-Body: `{ destination: email|phone, purpose: "reset" }` → 200 `{ expiresIn }`. Used by "Forgot password?". Must not reveal whether an account exists; rate-limited.
+Body: `{ destination: email, purpose: "reset" }` → 200 `{ expiresIn }`. Used by "Forgot password?". Must not reveal whether an account exists; rate-limited.
 
 ### POST /api/v1/auth/otp/verify
 Body: `{ destination, code: "6 digits", purpose: "reset" }` → 200 `{ otpToken }`. Errors: 400 (wrong/expired), 429. Locks after 5 failed attempts.
@@ -263,28 +263,21 @@ Rules: only from in_transit; receive adds the quantities to the destination, can
 Response 200: StockTransfer. Errors: 404 TRANSFER_NOT_FOUND, 409 TRANSFER_ALREADY_FINISHED
 
 ### POST /api/v1/media/uploads
-Permission: media:upload
-Body: { fileName 1–200, mimeType "image/jpeg"|"image/png"|"image/webp"|"image/avif", sizeBytes 1..15 MiB, purpose: "product", (product videos are currently attached as https links in `videos`; a later `purpose: "product_video"` with video/mp4 up to 200 MiB and HLS processing is planned) sha256?: 64 lowercase hex of the whole file }
-Response 201: MediaUploadSession { uploadId, chunkSizeBytes (the dashboard handles any size; mock uses 1 MiB — keep ≤ 8 MiB because the dashboard BFF caps request bodies at 12 MiB), totalChunks, uploadedChunks: number[] (for resuming) }
-Errors: 413 FILE_TOO_LARGE, 415 UNSUPPORTED_MEDIA_TYPE
+Permission: media:upload (served by the TS media service)
+Body: { fileName 1–255, mimeType "image/jpeg"|"image/png"|"image/webp"|"image/avif", sizeBytes 1..10 MiB, purpose: "product", sha256?: 64 hex of the whole file }
+Response 201: `{ mode: "single"|"multipart", uploadMode: "presigned"|"proxied", uploadId, mediaId, chunkSizeBytes, totalChunks, uploadedChunks: number[], expiresAt, url?, headers? }`. Files under 8 MiB are `single`: the browser PUTs the whole file to `url` with `headers` (object storage; its origin must be listed in `SELLER_UPLOAD_ORIGINS` for the CSP and allowed by the bucket CORS rules). Larger files are `multipart`.
 
 ### PUT /api/v1/media/uploads/:uploadId/chunks/:chunkIndex
-Permission: media:upload
-Headers: Content-Type: application/octet-stream; X-Chunk-Sha256: hex SHA-256 of this chunk
-Body: raw bytes; every chunk is exactly chunkSizeBytes except the last.
-Response 200: { uploadId, uploadedChunks: number[] } — idempotent per index (re-sending a chunk replaces it).
-Errors: 400 INVALID_CHUNK_INDEX / CHUNK_SIZE_MISMATCH, 404 UPLOAD_NOT_FOUND, 422 CHUNK_CHECKSUM_MISMATCH (the client retries with backoff)
+Only for `multipart` with `uploadMode: "proxied"`. Headers: Content-Type: application/octet-stream; X-Chunk-Sha256. Errors: 400 CHUNKS_NOT_SUPPORTED (single uploads), 403 PROXIED_CHUNKS_DISABLED.
+
+### POST /api/v1/media/uploads/:uploadId/chunks/urls
+Only for `multipart` with `uploadMode: "presigned"`. Body `{ chunkIndexes: number[] (1–16) }`. Response 200: `{ urls: [{ chunkIndex, url, method: "PUT", expectedBytes, expiresAt }] }`; the browser PUTs each chunk to its URL.
 
 ### POST /api/v1/media/uploads/:uploadId/complete
-Permission: media:upload
-Body: {}
-Rules: all chunks present; whole-file sha256 must match if it was declared; magic bytes must match mimeType; server then processes (AVIF/WebP renditions) asynchronously.
-Response 200: { mediaId, status: "processing"|"ready" }
-Errors: 409 UPLOAD_INCOMPLETE, 415 FILE_TYPE_MISMATCH, 422 FILE_CHECKSUM_MISMATCH
+No body. Response 200: `{ mediaId, status: "processing" }`. Errors: 409 UPLOAD_NOT_RECEIVED / CHUNKS_MISSING / UPLOAD_CLOSED, 422 SIZE_MISMATCH.
 
 ### GET /api/v1/media/:mediaId
-Permission: media:upload
-Response 200: MediaRecord { mediaId, status, url (null until ready; must be an https origin allowed by the dashboard CSP via SELLER_MEDIA_URL), mimeType }. The dashboard polls every second (up to 20 s) until ready.
+Response 200: `{ id, type, status: "processing"|"ready"|"failed", purpose, width, height, variants: [{ url, width, height, format }], failureReason?, failureHint? }`. The dashboard polls every second (up to 20 s) and uses the widest variant.
 
 ## Orders, returns and disputes (online marketplace)
 
@@ -385,7 +378,7 @@ Permission: orders:view. Query: status?, cursor?, limit?. Response 200: `CursorP
 Permission: orders:view. Response 200: `OrderDispute`. Errors: 404 DISPUTE_NOT_FOUND.
 
 ### POST /api/v1/seller/disputes/:disputeId/responses
-Permission: orders:manage
+Permission: orders:manage. Header: `Idempotency-Key` (required; 400 IDEMPOTENCY_KEY_REQUIRED without it).
 Body: body: string 10–2000
 Response 201: `OrderDispute` with the new message (from "seller") appended and status "under_review".
 Errors: 400 VALIDATION_FAILED, 404, 409 DISPUTE_CLOSED.
@@ -931,7 +924,7 @@ Errors: 400 VALIDATION_FAILED (paths `openingHours`, `socialLinks.instagram`, `p
 Account-level settings of the signed-in Zudomart user (they also protect the app). 2-step verification and password changes stay in the Zudomart app. Suggested permission: **signed in** (every member should be able to see and end their own sessions) — today `apiPermissionRules` maps `/seller/security` writes to settings:manage; please relax to `signed_in` when implementing.
 
 ### GET /api/v1/seller/security
-Response 200: SecurityOverview `{ twoStepVerification: { enabled, method: "authenticator_app"|"sms"|null, enabledAt }, passwordChangedAt, sessions: SecuritySession[], loginHistory: LoginHistoryEntry[] }`.
+Response 200: SecurityOverview `{ twoStepVerification: { enabled, method: "authenticator_app"|"email"|null, enabledAt }, passwordChangedAt, sessions: SecuritySession[], loginHistory: LoginHistoryEntry[] }`.
 `SecuritySession = { id, device ("Chrome on Windows", "Zudomart app on iPhone 13"), app: "dashboard"|"mobile_app", location ("Lekki, Lagos"), ipAddress (masked, e.g. "102.89.•••.14"), signedInAt, lastActiveAt, isCurrent }` — all sessions of the user's account, dashboard and app.
 `LoginHistoryEntry = { id, outcome: "success"|"wrong_password"|"blocked", device, location, ipAddress (masked), occurredAt }` — last 20, newest first.
 
@@ -1098,7 +1091,8 @@ Brand-scoped endpoints only work for brands where the signed-in user is an **act
 
 ### GET /api/v1/seller/stores/mine
 Permission: signed in (available before the store is active, used by the switcher).
-Response 200: `CursorPage<MyStoreEntry>` — every store the user belongs to: `{ storeId, storeName, brandId|null, role, verification: { status, tier, badgeVisible }, subscription: { status, plan } | null, isCurrent }`.
+Response 200 (target): `CursorPage<MyStoreEntry>` — every store the user belongs to: `{ storeId, storeName, brandId|null, role, verification: { status, tier, badgeVisible }, subscription: { status, plan } | null, isCurrent }`.
+Backend today: returns the same `SellerAccess` as `GET /seller/access` for the store in `X-Seller-Store` (or the default store). The dashboard reads either shape (`readMyStoreEntries`), so the switcher lists only the current store until the backend returns the list. The store switch BFF checks membership by calling it with the requested store in `X-Seller-Store`.
 
 ### GET /api/v1/seller/brands
 Permission: settings:view. Response 200: `CursorPage<BrandSummary>` — brands the user is an active member of, with `myRole`, `registrationStatus`, `officialStoreStatus`, `storeCount`.
@@ -1165,7 +1159,7 @@ Only `submitted`/`under_review` claims (409 CLAIM_CLOSED otherwise). Response 20
 Plans still come from `GET /seller/subscription/plans` (Pro NGN 5,000/mo, Business NGN 15,000/mo; yearly rows carry the admin yearly discount). Billing is **per business profile**: each store/brand has its own subscription, invoices and payment method. The account email is used for the Paystack customer, receipts and reminders; **no endpoint accepts an email**.
 
 ### GET /api/v1/seller/subscription/trial
-Permission: billing:manage. Response 200: `BillingOffer` = `{ profileName, accountEmail (read-only), trialLength: "DAYS_7"|"MONTH_1", trialDays, yearlyDiscountPercent, verificationCharge: Money, isEligible, ineligibleReasons: [{ code, message }], activeTrial: ActiveTrial|null, bundle: { hasActiveBlue, discountPercent, maximumBusinesses }, goldOnlyPlan: { monthly, yearly, isActive } }`. Eligibility is decided by the server from admin rules (account age, verified email, one trial per person/card/device/phone, max risk score, completed orders). `message` is gentle, user-facing copy. `ActiveTrial` = `{ planId, tier, interval, startedAt, endsAt, daysLeft, isCancelled, cardSummary, priceAfterTrial, verificationCharge: { amount, status: "REFUNDED"|"REFUND_PENDING" }, reminders: [{ daysBefore: 3|1, sendsAt }] }`. The client shows reminders at 3 days and 1 day before the end.
+Permission: billing:manage. Response 200: `BillingOffer` = `{ profileName, accountEmail? (read-only; not sent by the backend yet), trialLength: "DAYS_7"|"MONTH_1", trialDays, yearlyDiscountPercent, verificationCharge: Money, isEligible, ineligibleReasons: [{ code, message }], activeTrial: ActiveTrial|null, bundle: { hasActiveBlue, discountPercent, maximumBusinesses }, goldOnlyPlan: { monthly, yearly, isActive? } }`. Eligibility is decided by the server from admin rules (account age, verified email, one trial per person/card/device/phone, max risk score, completed orders). `message` is gentle, user-facing copy. `ActiveTrial` = `{ planId, tier, interval, startedAt, endsAt, daysLeft, isCancelled, cardSummary, priceAfterTrial, verificationCharge: { amount, status: "REFUNDED"|"REFUND_PENDING" }, reminders?: [{ daysBefore: 3|1, sendsAt }] }` (`reminders` is not sent by the backend yet; the panel hides the row). The client shows reminders at 3 days and 1 day before the end.
 
 Pricing display: monthly with active Blue = price x (1 - bundle%). Yearly = monthly x 12 x (1 - max(yearly%, bundle%)); the bigger discount wins and they never stack. The bundle applies to at most `maximumBusinesses` businesses, lapses at renewal if Blue ends, and never to Black.
 
@@ -1181,10 +1175,13 @@ One tap. No charge is made; access continues until the trial end. Response 200: 
 ## Business documents (never blocks store creation or selling)
 
 ### GET /api/v1/seller/business-documents
-Permission: settings:view. Response 200: `{ documents: [{ kind: "cac_certificate"|"government_id"|"proof_of_address", label, description, status: "not_uploaded"|"in_review"|"approved"|"rejected", fileName, uploadedAt, rejectionReason }], overallStatus: "not_started"|"in_review"|"needs_attention"|"approved", goldCheckmark: "after_approval"|"needs_plan"|"granted", neverBlocksSelling: true }`. The dashboard shows a banner until `overallStatus` is `approved`; Gold comes with Pro/Business after approval.
+Permission: billing:manage (owner only: documents belong to the signed-in account, not the store). Response 200: `{ documents: [{ kind: "cac_certificate"|"identity"|"address_proof", label, status: "not_uploaded"|"pending"|"approved"|"rejected", fileUrl|null (5-minute signed view link), rejectionReason|null, submittedAt|null }], allApproved }`. The dashboard derives the description, the overall status (banner until all are approved) and the Gold checkmark state (Pro/Business after approval).
 
-### POST /api/v1/seller/business-documents/:kind
-Upload or re-upload (any status except approved). Body `{ fileName, mimeType (pdf|jpeg|png), sizeBytes (≤10 MB) }`; the real backend uploads the bytes through the media upload API (purpose `business_document`) and passes `mediaId`. Response 200: the overview; the document becomes `in_review` and goes to the admin queue. Errors: 400 INVALID_FILE, 404 UNKNOWN_DOCUMENT, 409 ALREADY_APPROVED.
+### POST /api/v1/seller/business-documents/:kind/upload-intents
+Body `{ fileName ≤200, contentType: "application/pdf"|"image/jpeg"|"image/png"|"image/webp", sizeBytes ≤10 MB }`. Response 201: `{ documentId, objectKey, uploadUrl, headers, expiresAt }` (10 minutes). The browser PUTs the file to `uploadUrl` with `headers` (origin in `SELLER_UPLOAD_ORIGINS`). Errors: 400 VALIDATION_FAILED, 404 (unknown kind), 409 ALREADY_APPROVED.
+
+### PUT /api/v1/seller/business-documents/:kind
+Body `{ documentId }` (or `{ fileUrl }`). Response 200: the same body as the GET; the document becomes `pending` and goes to the admin queue. Errors: 404 (no upload intent), 409 UPLOAD_MISSING.
 
 ## Store rewards (seller-funded; owner, 2026-10-03)
 Seller-funded store credit. Zudomart does not fund or hold money for it: it is a price reduction the seller absorbs. Credit is valid only at the issuing store, is never cash, never withdrawable, and never usable at other stores. It is earned only when an order completes (after escrow release) and is reversed if the order is refunded.

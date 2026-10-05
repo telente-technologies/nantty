@@ -49,7 +49,6 @@ const resultTypesByScope: Readonly<Record<ReturnType<typeof searchScopeKind>, re
 const ownStoreResultTypes: readonly { readonly label: string; readonly type: SearchResultType }[] = [
   { label: "All", type: "top" },
   { label: "Products", type: "products" },
-  { label: "Orders", type: "orders" },
   { label: "Posts", type: "posts" },
 ];
 

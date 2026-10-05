@@ -14,13 +14,14 @@ function readOriginOrEmpty(configuredUrl: string | undefined): string {
 function buildContentSecurityPolicyHeaderValue(): string {
   const mediaOrigin = readOriginOrEmpty(process.env.SELLER_MEDIA_URL);
   const apiOrigin = readOriginOrEmpty(process.env.SELLER_API_URL ?? (isDevelopmentBuild ? "http://localhost:8080" : undefined));
+  const uploadOrigins = (process.env.SELLER_UPLOAD_ORIGINS ?? "").split(",").map((origin) => readOriginOrEmpty(origin.trim())).filter(Boolean);
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     "script-src": ["'self'", "'unsafe-inline'", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : [])],
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:", "blob:", "https://images.unsplash.com", mediaOrigin].filter(Boolean),
     "font-src": ["'self'"],
-    "connect-src": ["'self'", apiOrigin, ...(isDevelopmentBuild ? ["ws:"] : [])].filter(Boolean),
+    "connect-src": ["'self'", apiOrigin, ...uploadOrigins, ...(isDevelopmentBuild ? ["ws:"] : [])].filter(Boolean),
     "media-src": ["'self'", "blob:"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
