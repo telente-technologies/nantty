@@ -11,6 +11,9 @@ import (
 
 	"zudomart/modules/subscriptions/src/generated/ent/migrate"
 
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptionplan"
 	"zudomart/modules/subscriptions/src/generated/ent/idempotentrequest"
 	"zudomart/modules/subscriptions/src/generated/ent/outboxevent"
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
@@ -34,6 +37,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// CreatorSubscription is the client for interacting with the CreatorSubscription builders.
+	CreatorSubscription *CreatorSubscriptionClient
+	// CreatorSubscriptionCharge is the client for interacting with the CreatorSubscriptionCharge builders.
+	CreatorSubscriptionCharge *CreatorSubscriptionChargeClient
+	// CreatorSubscriptionPlan is the client for interacting with the CreatorSubscriptionPlan builders.
+	CreatorSubscriptionPlan *CreatorSubscriptionPlanClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
@@ -61,6 +70,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.CreatorSubscription = NewCreatorSubscriptionClient(c.config)
+	c.CreatorSubscriptionCharge = NewCreatorSubscriptionChargeClient(c.config)
+	c.CreatorSubscriptionPlan = NewCreatorSubscriptionPlanClient(c.config)
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.PlanPrice = NewPlanPriceClient(c.config)
@@ -161,16 +173,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                  ctx,
-		config:               cfg,
-		IdempotentRequest:    NewIdempotentRequestClient(cfg),
-		OutboxEvent:          NewOutboxEventClient(cfg),
-		PlanPrice:            NewPlanPriceClient(cfg),
-		ProviderPlan:         NewProviderPlanClient(cfg),
-		Subscription:         NewSubscriptionClient(cfg),
-		SubscriptionPeriod:   NewSubscriptionPeriodClient(cfg),
-		SubscriptionReminder: NewSubscriptionReminderClient(cfg),
-		TrialClaim:           NewTrialClaimClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		CreatorSubscription:       NewCreatorSubscriptionClient(cfg),
+		CreatorSubscriptionCharge: NewCreatorSubscriptionChargeClient(cfg),
+		CreatorSubscriptionPlan:   NewCreatorSubscriptionPlanClient(cfg),
+		IdempotentRequest:         NewIdempotentRequestClient(cfg),
+		OutboxEvent:               NewOutboxEventClient(cfg),
+		PlanPrice:                 NewPlanPriceClient(cfg),
+		ProviderPlan:              NewProviderPlanClient(cfg),
+		Subscription:              NewSubscriptionClient(cfg),
+		SubscriptionPeriod:        NewSubscriptionPeriodClient(cfg),
+		SubscriptionReminder:      NewSubscriptionReminderClient(cfg),
+		TrialClaim:                NewTrialClaimClient(cfg),
 	}, nil
 }
 
@@ -188,23 +203,26 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                  ctx,
-		config:               cfg,
-		IdempotentRequest:    NewIdempotentRequestClient(cfg),
-		OutboxEvent:          NewOutboxEventClient(cfg),
-		PlanPrice:            NewPlanPriceClient(cfg),
-		ProviderPlan:         NewProviderPlanClient(cfg),
-		Subscription:         NewSubscriptionClient(cfg),
-		SubscriptionPeriod:   NewSubscriptionPeriodClient(cfg),
-		SubscriptionReminder: NewSubscriptionReminderClient(cfg),
-		TrialClaim:           NewTrialClaimClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		CreatorSubscription:       NewCreatorSubscriptionClient(cfg),
+		CreatorSubscriptionCharge: NewCreatorSubscriptionChargeClient(cfg),
+		CreatorSubscriptionPlan:   NewCreatorSubscriptionPlanClient(cfg),
+		IdempotentRequest:         NewIdempotentRequestClient(cfg),
+		OutboxEvent:               NewOutboxEventClient(cfg),
+		PlanPrice:                 NewPlanPriceClient(cfg),
+		ProviderPlan:              NewProviderPlanClient(cfg),
+		Subscription:              NewSubscriptionClient(cfg),
+		SubscriptionPeriod:        NewSubscriptionPeriodClient(cfg),
+		SubscriptionReminder:      NewSubscriptionReminderClient(cfg),
+		TrialClaim:                NewTrialClaimClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		IdempotentRequest.
+//		CreatorSubscription.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -227,8 +245,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan, c.Subscription,
-		c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
+		c.CreatorSubscription, c.CreatorSubscriptionCharge, c.CreatorSubscriptionPlan,
+		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan,
+		c.Subscription, c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
 	} {
 		n.Use(hooks...)
 	}
@@ -238,8 +257,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan, c.Subscription,
-		c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
+		c.CreatorSubscription, c.CreatorSubscriptionCharge, c.CreatorSubscriptionPlan,
+		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan,
+		c.Subscription, c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -248,6 +268,12 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *CreatorSubscriptionMutation:
+		return c.CreatorSubscription.mutate(ctx, m)
+	case *CreatorSubscriptionChargeMutation:
+		return c.CreatorSubscriptionCharge.mutate(ctx, m)
+	case *CreatorSubscriptionPlanMutation:
+		return c.CreatorSubscriptionPlan.mutate(ctx, m)
 	case *IdempotentRequestMutation:
 		return c.IdempotentRequest.mutate(ctx, m)
 	case *OutboxEventMutation:
@@ -266,6 +292,405 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.TrialClaim.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// CreatorSubscriptionClient is a client for the CreatorSubscription schema.
+type CreatorSubscriptionClient struct {
+	config
+}
+
+// NewCreatorSubscriptionClient returns a client for the CreatorSubscription from the given config.
+func NewCreatorSubscriptionClient(c config) *CreatorSubscriptionClient {
+	return &CreatorSubscriptionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `creatorsubscription.Hooks(f(g(h())))`.
+func (c *CreatorSubscriptionClient) Use(hooks ...Hook) {
+	c.hooks.CreatorSubscription = append(c.hooks.CreatorSubscription, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `creatorsubscription.Intercept(f(g(h())))`.
+func (c *CreatorSubscriptionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CreatorSubscription = append(c.inters.CreatorSubscription, interceptors...)
+}
+
+// Create returns a builder for creating a CreatorSubscription entity.
+func (c *CreatorSubscriptionClient) Create() *CreatorSubscriptionCreate {
+	mutation := newCreatorSubscriptionMutation(c.config, OpCreate)
+	return &CreatorSubscriptionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CreatorSubscription entities.
+func (c *CreatorSubscriptionClient) CreateBulk(builders ...*CreatorSubscriptionCreate) *CreatorSubscriptionCreateBulk {
+	return &CreatorSubscriptionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CreatorSubscriptionClient) MapCreateBulk(slice any, setFunc func(*CreatorSubscriptionCreate, int)) *CreatorSubscriptionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CreatorSubscriptionCreateBulk{err: fmt.Errorf("calling to CreatorSubscriptionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CreatorSubscriptionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CreatorSubscriptionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CreatorSubscription.
+func (c *CreatorSubscriptionClient) Update() *CreatorSubscriptionUpdate {
+	mutation := newCreatorSubscriptionMutation(c.config, OpUpdate)
+	return &CreatorSubscriptionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CreatorSubscriptionClient) UpdateOne(_m *CreatorSubscription) *CreatorSubscriptionUpdateOne {
+	mutation := newCreatorSubscriptionMutation(c.config, OpUpdateOne, withCreatorSubscription(_m))
+	return &CreatorSubscriptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CreatorSubscriptionClient) UpdateOneID(id uuid.UUID) *CreatorSubscriptionUpdateOne {
+	mutation := newCreatorSubscriptionMutation(c.config, OpUpdateOne, withCreatorSubscriptionID(id))
+	return &CreatorSubscriptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CreatorSubscription.
+func (c *CreatorSubscriptionClient) Delete() *CreatorSubscriptionDelete {
+	mutation := newCreatorSubscriptionMutation(c.config, OpDelete)
+	return &CreatorSubscriptionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CreatorSubscriptionClient) DeleteOne(_m *CreatorSubscription) *CreatorSubscriptionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CreatorSubscriptionClient) DeleteOneID(id uuid.UUID) *CreatorSubscriptionDeleteOne {
+	builder := c.Delete().Where(creatorsubscription.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CreatorSubscriptionDeleteOne{builder}
+}
+
+// Query returns a query builder for CreatorSubscription.
+func (c *CreatorSubscriptionClient) Query() *CreatorSubscriptionQuery {
+	return &CreatorSubscriptionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCreatorSubscription},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CreatorSubscription entity by its id.
+func (c *CreatorSubscriptionClient) Get(ctx context.Context, id uuid.UUID) (*CreatorSubscription, error) {
+	return c.Query().Where(creatorsubscription.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CreatorSubscriptionClient) GetX(ctx context.Context, id uuid.UUID) *CreatorSubscription {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CreatorSubscriptionClient) Hooks() []Hook {
+	return c.hooks.CreatorSubscription
+}
+
+// Interceptors returns the client interceptors.
+func (c *CreatorSubscriptionClient) Interceptors() []Interceptor {
+	return c.inters.CreatorSubscription
+}
+
+func (c *CreatorSubscriptionClient) mutate(ctx context.Context, m *CreatorSubscriptionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CreatorSubscriptionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CreatorSubscriptionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CreatorSubscriptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CreatorSubscriptionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CreatorSubscription mutation op: %q", m.Op())
+	}
+}
+
+// CreatorSubscriptionChargeClient is a client for the CreatorSubscriptionCharge schema.
+type CreatorSubscriptionChargeClient struct {
+	config
+}
+
+// NewCreatorSubscriptionChargeClient returns a client for the CreatorSubscriptionCharge from the given config.
+func NewCreatorSubscriptionChargeClient(c config) *CreatorSubscriptionChargeClient {
+	return &CreatorSubscriptionChargeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `creatorsubscriptioncharge.Hooks(f(g(h())))`.
+func (c *CreatorSubscriptionChargeClient) Use(hooks ...Hook) {
+	c.hooks.CreatorSubscriptionCharge = append(c.hooks.CreatorSubscriptionCharge, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `creatorsubscriptioncharge.Intercept(f(g(h())))`.
+func (c *CreatorSubscriptionChargeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CreatorSubscriptionCharge = append(c.inters.CreatorSubscriptionCharge, interceptors...)
+}
+
+// Create returns a builder for creating a CreatorSubscriptionCharge entity.
+func (c *CreatorSubscriptionChargeClient) Create() *CreatorSubscriptionChargeCreate {
+	mutation := newCreatorSubscriptionChargeMutation(c.config, OpCreate)
+	return &CreatorSubscriptionChargeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CreatorSubscriptionCharge entities.
+func (c *CreatorSubscriptionChargeClient) CreateBulk(builders ...*CreatorSubscriptionChargeCreate) *CreatorSubscriptionChargeCreateBulk {
+	return &CreatorSubscriptionChargeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CreatorSubscriptionChargeClient) MapCreateBulk(slice any, setFunc func(*CreatorSubscriptionChargeCreate, int)) *CreatorSubscriptionChargeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CreatorSubscriptionChargeCreateBulk{err: fmt.Errorf("calling to CreatorSubscriptionChargeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CreatorSubscriptionChargeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CreatorSubscriptionChargeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CreatorSubscriptionCharge.
+func (c *CreatorSubscriptionChargeClient) Update() *CreatorSubscriptionChargeUpdate {
+	mutation := newCreatorSubscriptionChargeMutation(c.config, OpUpdate)
+	return &CreatorSubscriptionChargeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CreatorSubscriptionChargeClient) UpdateOne(_m *CreatorSubscriptionCharge) *CreatorSubscriptionChargeUpdateOne {
+	mutation := newCreatorSubscriptionChargeMutation(c.config, OpUpdateOne, withCreatorSubscriptionCharge(_m))
+	return &CreatorSubscriptionChargeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CreatorSubscriptionChargeClient) UpdateOneID(id uuid.UUID) *CreatorSubscriptionChargeUpdateOne {
+	mutation := newCreatorSubscriptionChargeMutation(c.config, OpUpdateOne, withCreatorSubscriptionChargeID(id))
+	return &CreatorSubscriptionChargeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CreatorSubscriptionCharge.
+func (c *CreatorSubscriptionChargeClient) Delete() *CreatorSubscriptionChargeDelete {
+	mutation := newCreatorSubscriptionChargeMutation(c.config, OpDelete)
+	return &CreatorSubscriptionChargeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CreatorSubscriptionChargeClient) DeleteOne(_m *CreatorSubscriptionCharge) *CreatorSubscriptionChargeDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CreatorSubscriptionChargeClient) DeleteOneID(id uuid.UUID) *CreatorSubscriptionChargeDeleteOne {
+	builder := c.Delete().Where(creatorsubscriptioncharge.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CreatorSubscriptionChargeDeleteOne{builder}
+}
+
+// Query returns a query builder for CreatorSubscriptionCharge.
+func (c *CreatorSubscriptionChargeClient) Query() *CreatorSubscriptionChargeQuery {
+	return &CreatorSubscriptionChargeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCreatorSubscriptionCharge},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CreatorSubscriptionCharge entity by its id.
+func (c *CreatorSubscriptionChargeClient) Get(ctx context.Context, id uuid.UUID) (*CreatorSubscriptionCharge, error) {
+	return c.Query().Where(creatorsubscriptioncharge.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CreatorSubscriptionChargeClient) GetX(ctx context.Context, id uuid.UUID) *CreatorSubscriptionCharge {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CreatorSubscriptionChargeClient) Hooks() []Hook {
+	return c.hooks.CreatorSubscriptionCharge
+}
+
+// Interceptors returns the client interceptors.
+func (c *CreatorSubscriptionChargeClient) Interceptors() []Interceptor {
+	return c.inters.CreatorSubscriptionCharge
+}
+
+func (c *CreatorSubscriptionChargeClient) mutate(ctx context.Context, m *CreatorSubscriptionChargeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CreatorSubscriptionChargeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CreatorSubscriptionChargeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CreatorSubscriptionChargeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CreatorSubscriptionChargeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CreatorSubscriptionCharge mutation op: %q", m.Op())
+	}
+}
+
+// CreatorSubscriptionPlanClient is a client for the CreatorSubscriptionPlan schema.
+type CreatorSubscriptionPlanClient struct {
+	config
+}
+
+// NewCreatorSubscriptionPlanClient returns a client for the CreatorSubscriptionPlan from the given config.
+func NewCreatorSubscriptionPlanClient(c config) *CreatorSubscriptionPlanClient {
+	return &CreatorSubscriptionPlanClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `creatorsubscriptionplan.Hooks(f(g(h())))`.
+func (c *CreatorSubscriptionPlanClient) Use(hooks ...Hook) {
+	c.hooks.CreatorSubscriptionPlan = append(c.hooks.CreatorSubscriptionPlan, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `creatorsubscriptionplan.Intercept(f(g(h())))`.
+func (c *CreatorSubscriptionPlanClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CreatorSubscriptionPlan = append(c.inters.CreatorSubscriptionPlan, interceptors...)
+}
+
+// Create returns a builder for creating a CreatorSubscriptionPlan entity.
+func (c *CreatorSubscriptionPlanClient) Create() *CreatorSubscriptionPlanCreate {
+	mutation := newCreatorSubscriptionPlanMutation(c.config, OpCreate)
+	return &CreatorSubscriptionPlanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CreatorSubscriptionPlan entities.
+func (c *CreatorSubscriptionPlanClient) CreateBulk(builders ...*CreatorSubscriptionPlanCreate) *CreatorSubscriptionPlanCreateBulk {
+	return &CreatorSubscriptionPlanCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CreatorSubscriptionPlanClient) MapCreateBulk(slice any, setFunc func(*CreatorSubscriptionPlanCreate, int)) *CreatorSubscriptionPlanCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CreatorSubscriptionPlanCreateBulk{err: fmt.Errorf("calling to CreatorSubscriptionPlanClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CreatorSubscriptionPlanCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CreatorSubscriptionPlanCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CreatorSubscriptionPlan.
+func (c *CreatorSubscriptionPlanClient) Update() *CreatorSubscriptionPlanUpdate {
+	mutation := newCreatorSubscriptionPlanMutation(c.config, OpUpdate)
+	return &CreatorSubscriptionPlanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CreatorSubscriptionPlanClient) UpdateOne(_m *CreatorSubscriptionPlan) *CreatorSubscriptionPlanUpdateOne {
+	mutation := newCreatorSubscriptionPlanMutation(c.config, OpUpdateOne, withCreatorSubscriptionPlan(_m))
+	return &CreatorSubscriptionPlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CreatorSubscriptionPlanClient) UpdateOneID(id uuid.UUID) *CreatorSubscriptionPlanUpdateOne {
+	mutation := newCreatorSubscriptionPlanMutation(c.config, OpUpdateOne, withCreatorSubscriptionPlanID(id))
+	return &CreatorSubscriptionPlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CreatorSubscriptionPlan.
+func (c *CreatorSubscriptionPlanClient) Delete() *CreatorSubscriptionPlanDelete {
+	mutation := newCreatorSubscriptionPlanMutation(c.config, OpDelete)
+	return &CreatorSubscriptionPlanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CreatorSubscriptionPlanClient) DeleteOne(_m *CreatorSubscriptionPlan) *CreatorSubscriptionPlanDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CreatorSubscriptionPlanClient) DeleteOneID(id uuid.UUID) *CreatorSubscriptionPlanDeleteOne {
+	builder := c.Delete().Where(creatorsubscriptionplan.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CreatorSubscriptionPlanDeleteOne{builder}
+}
+
+// Query returns a query builder for CreatorSubscriptionPlan.
+func (c *CreatorSubscriptionPlanClient) Query() *CreatorSubscriptionPlanQuery {
+	return &CreatorSubscriptionPlanQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCreatorSubscriptionPlan},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CreatorSubscriptionPlan entity by its id.
+func (c *CreatorSubscriptionPlanClient) Get(ctx context.Context, id uuid.UUID) (*CreatorSubscriptionPlan, error) {
+	return c.Query().Where(creatorsubscriptionplan.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CreatorSubscriptionPlanClient) GetX(ctx context.Context, id uuid.UUID) *CreatorSubscriptionPlan {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CreatorSubscriptionPlanClient) Hooks() []Hook {
+	return c.hooks.CreatorSubscriptionPlan
+}
+
+// Interceptors returns the client interceptors.
+func (c *CreatorSubscriptionPlanClient) Interceptors() []Interceptor {
+	return c.inters.CreatorSubscriptionPlan
+}
+
+func (c *CreatorSubscriptionPlanClient) mutate(ctx context.Context, m *CreatorSubscriptionPlanMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CreatorSubscriptionPlanCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CreatorSubscriptionPlanUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CreatorSubscriptionPlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CreatorSubscriptionPlanDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CreatorSubscriptionPlan mutation op: %q", m.Op())
 	}
 }
 
@@ -1336,10 +1761,12 @@ func (c *TrialClaimClient) mutate(ctx context.Context, m *TrialClaimMutation) (V
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
+		CreatorSubscription, CreatorSubscriptionCharge, CreatorSubscriptionPlan,
 		IdempotentRequest, OutboxEvent, PlanPrice, ProviderPlan, Subscription,
 		SubscriptionPeriod, SubscriptionReminder, TrialClaim []ent.Hook
 	}
 	inters struct {
+		CreatorSubscription, CreatorSubscriptionCharge, CreatorSubscriptionPlan,
 		IdempotentRequest, OutboxEvent, PlanPrice, ProviderPlan, Subscription,
 		SubscriptionPeriod, SubscriptionReminder, TrialClaim []ent.Interceptor
 	}
