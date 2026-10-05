@@ -19,8 +19,6 @@ const (
 	SuccessRateWindowDays    = 90
 )
 
-// CalculateSuccessRate returns the share (0..1, three decimals) of settled orders that
-// completed without a refund, or nil while the store has fewer than the minimum orders.
 func CalculateSuccessRate(settled, successful int) *float64 {
 	if settled < SuccessRateMinimumOrders || successful < 0 || successful > settled {
 		return nil
@@ -34,9 +32,6 @@ type storeOrderCount struct {
 	Count   int       `json:"count"`
 }
 
-// RefreshStoreSuccessStats rebuilds the rollup from order groups of the last 90 days.
-// Settled = paid orders that ended completed, refunded, returned or cancelled after payment;
-// successful = completed with nothing refunded.
 func RefreshStoreSuccessStats(ctx context.Context, deployed *container.Container) error {
 	now := deployed.Now()
 	settledWhere := []predicate.OrderGroup{
@@ -80,7 +75,6 @@ func countByStore(ctx context.Context, deployed *container.Container, conditions
 	return byStore, nil
 }
 
-// StoreSuccessRates returns the success rate for each store that has enough orders.
 func StoreSuccessRates(ctx context.Context, deployed *container.Container, storeIds []uuid.UUID) (map[uuid.UUID]float64, error) {
 	rows, err := deployed.Client.StoreSuccessStat.Query().Where(storesuccessstat.StoreIDIn(storeIds...)).All(ctx)
 	if err != nil {

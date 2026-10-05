@@ -40,7 +40,6 @@ func DeliverableCountries(ctx context.Context, deployed *container.Container, st
 	return slices.Compact(countries), nil
 }
 
-// SyncStoreShippingCountries tells the catalog where a store delivers so product visibility can follow the shipping rules.
 func SyncStoreShippingCountries(ctx context.Context, deployed *container.Container, storeId uuid.UUID) {
 	sink, err := commerceports.Default.StoreShippingCountries()
 	if err != nil {
