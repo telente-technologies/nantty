@@ -19,7 +19,7 @@ export type ShareReferenceKind = "post" | "clip" | "video" | "product" | "live" 
 
 export interface CoinPurchaseCheckout {
   readonly reference: string;
-  readonly accessCode: string;
+  readonly accessCode?: string;
   readonly authorizationUrl: string;
 }
 
@@ -78,7 +78,10 @@ export const creatorSubscriptionsService = {
 };
 
 export const emailVerificationService = {
-  fetchAccountEmailStatus: () => sendRequestToWebappServer<AccountEmailStatus>("/api/v1/users/me/email"),
+  fetchAccountEmailStatus: async (): Promise<AccountEmailStatus> => {
+    const viewer = await sendRequestToWebappServer<{ email?: string | null; emailVerified?: boolean }>("/api/v1/users/me");
+    return { email: viewer.email ?? null, emailVerified: viewer.emailVerified ?? false };
+  },
   sendVerificationCode: () => sendRequestToWebappServer<{ expiresIn: number; resendAfterSeconds: number }>("/api/v1/users/me/email/verification", { method: "POST" }),
   confirmVerificationCode: (code: string) => sendRequestToWebappServer<AccountEmailStatus>("/api/v1/users/me/email/verification/confirm", { method: "POST", body: { code } }),
 };

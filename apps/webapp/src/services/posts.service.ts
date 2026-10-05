@@ -9,14 +9,14 @@ export const postsService = {
   likePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/like`, { method: "POST", idempotencyKey: createIdempotencyKey("like") }),
   unlikePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/like`, { method: "DELETE" }),
   refreshPostLinkPreview: (postId: string) => sendRequestToWebappServer<LinkPreview | null>(`/api/v1/posts/${postId}/link-preview`, { method: "POST" }),
-  repostPost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/repost`, { method: "POST" }),
+  repostPost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/repost`, { method: "POST", body: {} }),
   fetchCommentsPage: (postId: string, cursor: string | null) =>
     sendRequestToWebappServer<Page<CommentWithReplies>>(`/api/v1/posts/${postId}/comments`, { query: { cursor: cursor ?? undefined } }),
   fetchPostQuotes: (postId: string, cursor: string | null) => sendRequestToWebappServer<Page<Post>>(`/api/v1/posts/${postId}/quotes`, { query: { cursor: cursor ?? undefined } }),
   fetchPostTaggedUsers: (postId: string, cursor: string | null) =>
     sendRequestToWebappServer<Page<TaggedUser>>(`/api/v1/posts/${encodeURIComponent(postId)}/tagged-users`, { query: { cursor: cursor ?? undefined } }),
   updateReplySettings: (postId: string, replyPolicy: ReplyPolicy) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/reply-settings`, { method: "PATCH", body: { replyPolicy } }),
-  recordPostShare: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/share`, { method: "POST" }),
+  recordPostShare: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/share`, { method: "POST", body: {} }),
 };
 
 export const followsService = {

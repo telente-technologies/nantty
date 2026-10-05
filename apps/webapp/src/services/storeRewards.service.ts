@@ -1,7 +1,7 @@
 import type { StoreCreditBalance } from "@/types";
 
-import { sendRequestToWebappServer } from "./clientApi.service";
+import { sendListRequestToWebappServer } from "./clientApi.service";
 
 export const storeRewardsService = {
-  listMyStoreCreditBalances: () => sendRequestToWebappServer<StoreCreditBalance[]>("/api/v1/store-rewards/me"),
+  listMyStoreCreditBalances: () => sendListRequestToWebappServer<StoreCreditBalance>("/api/v1/store-rewards/me"),
 };

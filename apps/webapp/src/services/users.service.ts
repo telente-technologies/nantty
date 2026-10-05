@@ -1,4 +1,4 @@
-import type { AccountSettings, CountryOption, ShippingAddressInput } from "@/types/account.type";
+import type { CountryOption, ShippingAddressInput } from "@/types/account.type";
 import type { Address, Page, Post, User } from "@/types";
 
 import { sendRequestToWebappServer, sendListRequestToWebappServer } from "./clientApi.service";
@@ -19,9 +19,6 @@ export const usersService = {
   fetchPostsByUserId: (userId: string, cursor?: string) =>
     sendRequestToWebappServer<Page<Post>>(`/api/v1/users/${userId}/posts`, { query: { cursor } }),
   updateMyProfileDetails: (update: ProfileDetailsUpdate) => sendRequestToWebappServer<User>("/api/v1/users/me", { method: "PATCH", body: update }),
-  fetchMyAccountSettings: () => sendRequestToWebappServer<AccountSettings>("/api/v1/users/me/settings"),
-  updateMyAccountSettings: (update: Partial<AccountSettings>) =>
-    sendRequestToWebappServer<AccountSettings>("/api/v1/users/me/settings", { method: "PATCH", body: update }),
   updateMyCountryPreference: (countryCode: string) => sendRequestToWebappServer<void>("/api/v1/users/me/preferences", { method: "PATCH", body: { countryCode } }),
   listSupportedCountries: () => sendListRequestToWebappServer<CountryOption>("/api/v1/locale/countries"),
   deactivateMyAccount: () => sendRequestToWebappServer<void>("/api/v1/users/me/deactivate", { method: "POST" }),
