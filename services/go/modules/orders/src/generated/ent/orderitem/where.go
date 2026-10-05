@@ -160,6 +160,11 @@ func AttributionID(v uuid.UUID) predicate.OrderItem {
 	return predicate.OrderItem(sql.FieldEQ(FieldAttributionID, v))
 }
 
+// AffiliateCommissionBps applies equality check predicate on the "affiliate_commission_bps" field. It's identical to AffiliateCommissionBpsEQ.
+func AffiliateCommissionBps(v int64) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldAffiliateCommissionBps, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.OrderItem {
 	return predicate.OrderItem(sql.FieldEQ(FieldCreatedAt, v))
@@ -1188,6 +1193,56 @@ func AttributionIDIsNil() predicate.OrderItem {
 // AttributionIDNotNil applies the NotNil predicate on the "attribution_id" field.
 func AttributionIDNotNil() predicate.OrderItem {
 	return predicate.OrderItem(sql.FieldNotNull(FieldAttributionID))
+}
+
+// AffiliateCommissionBpsEQ applies the EQ predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsEQ(v int64) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldAffiliateCommissionBps, v))
+}
+
+// AffiliateCommissionBpsNEQ applies the NEQ predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsNEQ(v int64) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNEQ(FieldAffiliateCommissionBps, v))
+}
+
+// AffiliateCommissionBpsIn applies the In predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsIn(vs ...int64) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldIn(FieldAffiliateCommissionBps, vs...))
+}
+
+// AffiliateCommissionBpsNotIn applies the NotIn predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsNotIn(vs ...int64) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNotIn(FieldAffiliateCommissionBps, vs...))
+}
+
+// AffiliateCommissionBpsGT applies the GT predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsGT(v int64) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldGT(FieldAffiliateCommissionBps, v))
+}
+
+// AffiliateCommissionBpsGTE applies the GTE predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsGTE(v int64) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldGTE(FieldAffiliateCommissionBps, v))
+}
+
+// AffiliateCommissionBpsLT applies the LT predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsLT(v int64) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldLT(FieldAffiliateCommissionBps, v))
+}
+
+// AffiliateCommissionBpsLTE applies the LTE predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsLTE(v int64) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldLTE(FieldAffiliateCommissionBps, v))
+}
+
+// AffiliateCommissionBpsIsNil applies the IsNil predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsIsNil() predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldIsNull(FieldAffiliateCommissionBps))
+}
+
+// AffiliateCommissionBpsNotNil applies the NotNil predicate on the "affiliate_commission_bps" field.
+func AffiliateCommissionBpsNotNil() predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNotNull(FieldAffiliateCommissionBps))
 }
 
 // And groups predicates with the AND operator between them.
