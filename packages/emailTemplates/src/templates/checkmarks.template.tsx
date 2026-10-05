@@ -24,7 +24,7 @@ export const checkmarkSuggestion = defineEmailTemplate<MarkProps & { readonly pr
     { type: "paragraph", text: [`The ${p.checkmark} checkmark costs `, { strong: `${c.money(p.price)} / month` }, ". It's renewed monthly and you can cancel any time."] },
     { type: "button", label: "Get verified", href: verificationUrl(c) },
   ],
-  sample: { firstName: "Amaka", checkmark: "Blue", accountName: "@amaka.styles", price: ngn(2500), reasons: ["Your profile is complete and your phone number is verified.", "Your account is over 30 days old with no strikes.", "You've been active every week this month."] },
+  sample: { firstName: "Amaka", checkmark: "Blue", accountName: "@amaka.styles", price: ngn(2500), reasons: ["Your profile is complete and your email address is verified.", "Your account is over 30 days old with no strikes.", "You've been active every week this month."] },
 });
 
 export const checkmarkApplicationReceived = defineEmailTemplate<MarkProps & { readonly applicationId: string; readonly reviewWithinDays: number }>({
