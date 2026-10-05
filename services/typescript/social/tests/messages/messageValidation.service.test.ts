@@ -15,7 +15,7 @@ describe("validateOutgoingMessage", () => {
     expect(() => validateOutgoingMessage({ ...base, encryption: undefined }, now)).toThrow(/envelope/);
   });
   it("expires chat media after 30 days", () => {
-    const image = validateOutgoingMessage({ ...base, kind: "image", media: { mediaId: "m", url: null, durationSeconds: undefined } }, now);
+    const image = validateOutgoingMessage({ ...base, kind: "image", media: { mediaId: "m", durationSeconds: undefined } }, now);
     expect(image.mediaExpiresAt?.toISOString()).toBe("2026-11-02T10:00:00.000Z");
   });
   it("limits live location to 8 hours", () => {
