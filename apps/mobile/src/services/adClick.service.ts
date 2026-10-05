@@ -15,7 +15,6 @@ function isSignedRedirect(sponsored: SponsoredPlacement, url: string): boolean {
   return Boolean(links && (links.cta === url || links.media === url || links.cards?.includes(url)));
 }
 
-/** Opens an ad destination: in-app navigation for internal targets, the in-app browser for external links, the store or an installed app for installs. */
 export async function openSponsoredTarget(input: {
   readonly sponsored: SponsoredPlacement;
   readonly placement: AdPlacement;

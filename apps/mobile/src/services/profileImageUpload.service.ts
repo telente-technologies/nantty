@@ -11,7 +11,7 @@ export interface ProfileImageUploadIntent {
   readonly headers: Record<string, string>;
   readonly publicUrl: string;
   readonly expiresAt: string;
-  readonly maximumSize: number;
+  readonly maximumSize?: number;
 }
 
 export const PROFILE_IMAGE_INTENT_PATH = "/api/v1/users/me/media/upload-intents";
