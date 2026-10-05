@@ -79,7 +79,13 @@ func (balances AdBalances) HandleFailedPayment(ctx context.Context, transaction 
 	if err != nil || topUp.Status != adbalancetopup.StatusPending {
 		return err
 	}
-	return topUp.Update().SetStatus(adbalancetopup.StatusFailed).Exec(ctx)
+	if err := topUp.Update().SetStatus(adbalancetopup.StatusFailed).Exec(ctx); err != nil {
+		return err
+	}
+	return balances.Container.Outbox.EnqueueInTransaction(ctx, transaction, "adBalance.topUpFailed", topUp.AdAccountID, balances.Container.Now().UTC(), map[string]any{
+		"adAccountId": topUp.AdAccountID, "topUpId": topUp.ID.String(), "reference": topUp.Reference, "fundedByUserId": topUp.FundedByUserID,
+		"amount": map[string]any{"amountMinor": topUp.AmountMinor, "currency": topUp.Currency}, "failureReason": payment.FailureReason,
+	})
 }
 
 func (balances AdBalances) lockTopUp(ctx context.Context, transaction *sql.Tx, subjectId string) (*ent.AdBalanceTopUp, error) {
