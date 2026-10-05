@@ -113,3 +113,23 @@ func TestPlansDocumentMatchesWhatMoneyReads(t *testing.T) {
 		t.Fatal("tiers must match the color")
 	}
 }
+
+func TestDocumentDefaultsMirrorWhatMoneyAndUsersEnforceToday(t *testing.T) {
+	revenue := defaultRevenueRules()
+	if revenue.CoinTransferFeeBasisPoints != 2500 || revenue.CreatorAdShareBasisPoints != 4000 || revenue.EscrowFee.DefaultBasisPoints != 150 || revenue.EscrowFee.BusinessPlanBasisPoints != 100 {
+		t.Fatalf("revenue defaults drifted from COIN_TRANSFER_FEE_BPS, ADS_REVENUE_CREATOR_SHARE_BPS and ESCROW_FEE_*: %+v", revenue)
+	}
+	if len(revenue.CoinUnitValues) != 7 || revenue.CoinUnitValues[0] != (MoneyValue{AmountMinor: 1000, Currency: "NGN"}) {
+		t.Fatalf("coin unit values must equal COIN_CASH_VALUES: %v", revenue.CoinUnitValues)
+	}
+	usernames := defaultUsernameRules()
+	if usernames.ReleasedUsernameCooldownDays != 120 || usernames.ChangeWindowDays != 30 || usernames.MinimumLength != 3 || usernames.MaximumLength != 30 || usernames.MustStartWithLetter {
+		t.Fatalf("username defaults drifted from the users module: %+v", usernames)
+	}
+	for key, value := range map[string]any{RevenueRulesKey: revenue, UsernameRulesKey: usernames, CreatorEligibilityKey: defaultCreatorEligibility()} {
+		raw, _ := json.Marshal(value)
+		if _, err := PlatformSettingDefinitions[key].Validate(raw); err != nil {
+			t.Errorf("%s default must validate: %v", key, err)
+		}
+	}
+}

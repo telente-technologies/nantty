@@ -24,6 +24,7 @@ import (
 	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
 	"zudomart/modules/creators/src"
 	"zudomart/modules/creators/src/configs"
+	"zudomart/modules/creators/src/generated/ent/creatorearning"
 	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
 	"zudomart/modules/ledger/src/databases"
 	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
@@ -239,6 +240,17 @@ func TestBattleHoldingsSettleOnceByRuleAndTiesKeepTheirOwn(t *testing.T) {
 	}
 	if again, err := harness.client.SettleBattle(ctx, request); err != nil || !again.Replayed {
 		t.Fatalf("second settlement: %+v %v", again, err)
+	}
+	earnings := harness.module.Container.Client(harness.database).CreatorEarning
+	for userId, want := range map[string]int64{rival: 210, removed: 70, host: 0} {
+		rows, err := earnings.Query().Where(creatorearning.CreatorID(userId)).All(context.Background())
+		total := int64(0)
+		for _, row := range rows {
+			total += row.NetMinor
+		}
+		if err != nil || total != want {
+			t.Fatalf("battle earnings for %s: %d %v", userId, total, err)
+		}
 	}
 	request.Rule = moneyv1.BattleSettlementRule_BATTLE_SETTLEMENT_RULE_KEEP_OWN
 	if _, reason, _ := errorReason(func() error { _, err := harness.client.SettleBattle(ctx, request); return err }()); reason != "BATTLE_ALREADY_SETTLED_DIFFERENTLY" {

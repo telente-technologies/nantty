@@ -76,6 +76,16 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		_, err := module.Affiliates.CreditCommissionsForRelease(ctx, completed.Sale())
 		return err
 	})
+	for _, eventType := range []string{"escrow.refunded", "escrow.partiallyRefunded"} {
+		loaders.RegisterMoneyDomainEventHandler(eventType, func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+			var refund affiliateservices.EscrowRefunded
+			if err := loaders.DecodeEventData(envelope, &refund); err != nil {
+				return err
+			}
+			_, err := module.Affiliates.ReverseCommissionsForRefund(ctx, refund, envelope.Type)
+			return err
+		})
+	}
 	return module, nil
 }
 

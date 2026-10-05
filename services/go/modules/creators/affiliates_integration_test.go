@@ -2,6 +2,7 @@ package creators
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"testing"
 
@@ -9,6 +10,7 @@ import (
 
 	affiliateservices "zudomart/modules/creators/src/modules/affiliates/services"
 	"zudomart/modules/creators/src/repositories"
+	"zudomart/modules/ledger/src/databases"
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 )
 
@@ -97,8 +99,51 @@ func TestAffiliateCommissionIsCreditedOncePerOrderAndProductOnRelease(t *testing
 	if credited, _ := harness.module.Affiliates.CreditCommissionsForRelease(context.Background(), paused); credited != 0 {
 		t.Fatalf("paused creators stop earning: %d", credited)
 	}
+	locked, refundOrder := int64(1000), uuid.NewString()
+	harness.call(http.MethodPatch, "/api/v1/seller/affiliates/creators/"+creator, sellerToken, "", map[string]any{"status": "active"})
+	harness.call(http.MethodPatch, "/api/v1/seller/affiliates/settings", sellerToken, "", map[string]any{"defaultCommissionBasisPoints": 200})
+	lockedSale := affiliateservices.AffiliateSaleReleased{OrderId: refundOrder, StoreId: storeId, SellerUserId: seller, BuyerUserId: buyer, Currency: "NGN",
+		Items: []affiliateservices.AttributedItem{{OrderItemId: "locked-1", ProductId: productId, LineTotalMinor: 1_000_000, AttributionSource: "post", AttributionId: "p1", CommissionBps: &locked}}}
+	if _, err := harness.module.Affiliates.CreditCommissionsForRelease(context.Background(), lockedSale); err != nil {
+		t.Fatal(err)
+	}
+	payable := ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")
+	if earned := harness.balance(payable); earned != 144_000+100_000 {
+		t.Fatalf("the rate locked at checkout wins over today's rate: %d", earned)
+	}
+	drain(harness.creatorsHarness, creator, harness.balance(payable)-60_000)
+	refund := affiliateservices.EscrowRefunded{EscrowId: uuid.NewString(), OrderId: refundOrder, Amount: affiliateservices.Money{AmountMinor: 1_000_000, Currency: "NGN"}}
+	refund.Refunded = affiliateservices.Money{AmountMinor: 500_000, Currency: "NGN"}
+	for range 2 {
+		if _, err := harness.module.Affiliates.ReverseCommissionsForRefund(context.Background(), refund, "escrow.partiallyRefunded"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if left := harness.balance(payable); left != 10_000 {
+		t.Fatalf("half the commission comes back once per refund: %d", left)
+	}
+	refund.Refunded.AmountMinor = 1_000_000
+	if _, err := harness.module.Affiliates.ReverseCommissionsForRefund(context.Background(), refund, "escrow.refunded"); err != nil {
+		t.Fatal(err)
+	}
+	if left, debt := harness.balance(payable), harness.balance(affiliateservices.CreatorEarningsDebtAccount(creator, "NGN")); left != 0 || debt != 40_000 {
+		t.Fatalf("a short balance becomes creator debt: payable %d debt %d", left, debt)
+	}
 	if status, _ := harness.call(http.MethodGet, "/api/v1/seller/affiliates/settings", creatorToken, "", nil); status != http.StatusNotFound {
 		t.Fatalf("only store owners manage the program: %d", status)
 	}
 	assertHealthy(t, harness.creatorsHarness)
+}
+
+func drain(harness *creatorsHarness, creator string, amount int64) {
+	err := databases.RunInMoneyTransaction(context.Background(), harness.database, func(ctx context.Context, transaction *sql.Tx) error {
+		_, err := harness.ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{Reference: "withdraw-" + creator, Kind: "test.withdraw", Lines: []ledgermodels.JournalLineRequest{
+			{Account: ledgermodels.CreatorEarningsPayableAccount(creator, "NGN"), Direction: ledgermodels.Debit, AmountMinor: amount},
+			{Account: ledgermodels.PlatformProviderBalanceAccount("paystack", "NGN"), Direction: ledgermodels.Credit, AmountMinor: amount},
+		}})
+		return err
+	})
+	if err != nil {
+		harness.t.Fatal(err)
+	}
 }
