@@ -24,12 +24,12 @@ export interface ActiveTrial {
   readonly cardSummary: string;
   readonly priceAfterTrial: Money;
   readonly verificationCharge: { readonly amount: Money; readonly status: "REFUNDED" | "REFUND_PENDING" };
-  readonly reminders: readonly TrialReminder[];
+  readonly reminders?: readonly TrialReminder[];
 }
 
 export interface BillingOffer {
   readonly profileName: string;
-  readonly accountEmail: string;
+  readonly accountEmail?: string;
   readonly trialLength: TrialLength;
   readonly trialDays: number;
   readonly yearlyDiscountPercent: number;
@@ -38,5 +38,5 @@ export interface BillingOffer {
   readonly ineligibleReasons: readonly TrialIneligibleReason[];
   readonly activeTrial: ActiveTrial | null;
   readonly bundle: { readonly hasActiveBlue: boolean; readonly discountPercent: number; readonly maximumBusinesses: number };
-  readonly goldOnlyPlan: { readonly monthly: Money; readonly yearly: Money; readonly isActive: boolean };
+  readonly goldOnlyPlan: { readonly monthly: Money; readonly yearly: Money; readonly isActive?: boolean };
 }

@@ -120,17 +120,31 @@ export interface StockTransferRequest {
 }
 
 export interface MediaUploadSession {
+  readonly mode: "single" | "multipart";
+  readonly uploadMode: "presigned" | "proxied";
   readonly uploadId: string;
+  readonly mediaId: string;
   readonly chunkSizeBytes: number;
   readonly totalChunks: number;
   readonly uploadedChunks: number[];
+  readonly url?: string;
+  readonly headers?: Record<string, string>;
+}
+
+export interface MediaChunkUploadTarget {
+  readonly chunkIndex: number;
+  readonly url: string;
+  readonly method: "PUT";
+  readonly expectedBytes: number;
+  readonly expiresAt: string;
 }
 
 export interface MediaRecord {
-  readonly mediaId: string;
+  readonly id: string;
   readonly status: "processing" | "ready" | "failed";
-  readonly url: string | null;
-  readonly mimeType: string;
+  readonly variants: readonly { readonly url: string; readonly width: number; readonly height: number; readonly format: string }[];
+  readonly failureReason?: string;
+  readonly failureHint?: string;
 }
 
 export interface ProductUsageSummary {

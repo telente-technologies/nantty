@@ -1,19 +1,34 @@
-export type BusinessDocumentKind = "cac_certificate" | "government_id" | "proof_of_address";
-export type BusinessDocumentStatus = "not_uploaded" | "in_review" | "approved" | "rejected";
+export type BusinessDocumentKind = "cac_certificate" | "identity" | "address_proof";
+export type BusinessDocumentStatus = "not_uploaded" | "pending" | "approved" | "rejected";
 
-export interface BusinessDocumentView {
+export interface BusinessDocumentRecord {
   readonly kind: BusinessDocumentKind;
   readonly label: string;
-  readonly description: string;
   readonly status: BusinessDocumentStatus;
-  readonly fileName: string | null;
-  readonly uploadedAt: string | null;
+  readonly fileUrl: string | null;
   readonly rejectionReason: string | null;
+  readonly submittedAt: string | null;
+}
+
+export interface BusinessDocumentsResponse {
+  readonly documents: BusinessDocumentRecord[];
+  readonly allApproved: boolean;
+}
+
+export interface BusinessDocumentUploadIntent {
+  readonly documentId: string;
+  readonly objectKey: string;
+  readonly uploadUrl: string;
+  readonly headers: Record<string, string>;
+  readonly expiresAt: string;
+}
+
+export interface BusinessDocumentView extends BusinessDocumentRecord {
+  readonly description: string;
 }
 
 export interface BusinessDocumentsOverview {
   readonly documents: BusinessDocumentView[];
   readonly overallStatus: "not_started" | "in_review" | "needs_attention" | "approved";
   readonly goldCheckmark: "after_approval" | "needs_plan" | "granted";
-  readonly neverBlocksSelling: true;
 }

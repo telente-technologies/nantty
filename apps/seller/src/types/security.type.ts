@@ -19,7 +19,7 @@ export interface LoginHistoryEntry {
 }
 
 export interface SecurityOverview {
-  readonly twoStepVerification: { readonly enabled: boolean; readonly method: "authenticator_app" | "sms" | null; readonly enabledAt: string | null };
+  readonly twoStepVerification: { readonly enabled: boolean; readonly method: "authenticator_app" | "email" | null; readonly enabledAt: string | null };
   readonly passwordChangedAt: string | null;
   readonly sessions: SecuritySession[];
   readonly loginHistory: LoginHistoryEntry[];
