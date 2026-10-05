@@ -50,6 +50,7 @@ func StartSubscriptionsModuleWithSettings(ctx context.Context, settings configs.
 	payments.RegisterSavedCardObserver(billing)
 	payments.RegisterStoreSubscriptionNotificationHandler(billing)
 	payments.RegisterStoreRefundHandler(paymentconstants.PurposeSubscription, billing)
+	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeSubscriptionRenewal, billingservices.RenewalPayments{Billing: billing})
 	paymentservices.RegisterSellerPlanLookup(billing.SellerPlanOf)
 	loaders.RegisterMoneyDomainEventHandler("verificationCase.refundRequested", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
 		var request billingservices.VerificationRefundRequest
@@ -68,6 +69,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
+	module.startBillingJobConsumer(ctx)
 	go func() {
 		ticker := time.NewTicker(time.Minute)
 		defer ticker.Stop()
@@ -89,3 +91,23 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 }
 
 func (module *Module) Close(context.Context) error { return module.Billing.Container.Resources.Close() }
+
+func (module *Module) startBillingJobConsumer(ctx context.Context) {
+	container := module.Billing.Container
+	jobs, consumer, err := platformevents.CreateJobQueueAndConsumerFromEnvironment(ctx, platformevents.MessageBusSelection{
+		DeployableName: "go-money", Logger: container.Resources.Logger, IsProduction: container.Settings.Money.IsProduction(),
+	})
+	if err != nil {
+		container.Resources.Logger.Error("subscription billing jobs run inline: the job queue is unavailable", "error", err.Error())
+		return
+	}
+	if jobs == nil || consumer == nil {
+		return
+	}
+	container.Jobs = jobs
+	go func() {
+		if err := consumer.ConsumeQueueUntilContextDone(ctx, container.Settings.BillingJobsQueue, module.Billing.HandleSubscriptionBillingJobMessage, container.Resources.Logger); err != nil && ctx.Err() == nil {
+			container.Resources.Logger.Error("subscription billing job consumer stopped", "error", err.Error())
+		}
+	}()
+}

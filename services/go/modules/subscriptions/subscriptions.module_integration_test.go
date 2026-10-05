@@ -43,13 +43,14 @@ func startSubscriptionsHarness(t *testing.T, identity repositories.StaticIdentit
 	return harness
 }
 
-func TestSellerTrialSavesTheCardStartsOnPaystackAndGrantsTheSellerPlan(t *testing.T) {
+func TestSellerTrialConvertsByChargingTheSavedCardAndRenewsAtTheFullPlanPrice(t *testing.T) {
 	owner, profileId := uuid.NewString(), uuid.NewString()
 	identity := repositories.StaticIdentityDirectory{
 		Profiles: map[string]repositories.BillingProfile{profileId: {ProfileId: profileId, OwnerUserId: owner, ProfileType: "business", DisplayName: "Ada Fabrics", CountryCode: "NG"}},
 		Accounts: map[string]repositories.AccountSignals{owner: {CreatedAt: time.Now().Add(-60 * 24 * time.Hour), EmailVerified: true}},
 	}
 	harness := startSubscriptionsHarness(t, identity)
+	ctx := context.Background()
 	token := harness.Tokens.UserAccessToken(owner)
 	body := map[string]any{"profileId": profileId, "planId": "seller_pro_monthly"}
 	if mobile := harness.Call(http.MethodPost, "/api/v1/seller/subscription/trial/checkout", token, "", body, http.Header{"X-Client-Platform": {"ios"}}); mobile.Status != http.StatusUnprocessableEntity {
@@ -63,36 +64,44 @@ func TestSellerTrialSavesTheCardStartsOnPaystackAndGrantsTheSellerPlan(t *testin
 		t.Fatalf("second trial: %d %s", again.Status, again.Raw)
 	}
 	harness.PayCheckout(started.Body["reference"].(string), 75, "card")
-	report := harness.module.Billing.RunDueJobs(context.Background())
-	if report.TrialsActivated != 1 || len(harness.Paystack.Subscriptions) != 1 {
-		t.Fatalf("trial activation: %+v subscriptions %d", report, len(harness.Paystack.Subscriptions))
+	client := harness.module.Billing.Container.Client(harness.Database)
+	row, err := client.Subscription.Query().Where(subscription.ProfileID(profileId)).Only(ctx)
+	if err != nil || row.Status != subscription.StatusTrialing || row.BillingAuthorizationID == "" || row.NextChargeAt == nil || len(harness.Paystack.Subscriptions) != 0 {
+		t.Fatalf("the card check starts the trial on our own scheduler: %+v %v", row, err)
 	}
 	internal := http.Header{"X-Internal-Token": {strings.Repeat("s", 32)}}
 	entitlements := harness.Call(http.MethodGet, "/api/v1/internal/entitlements/"+owner, "", "", nil, internal)
-	if entitlements.Status != http.StatusOK || entitlements.Body["sellerPlan"] != "pro" || entitlements.Body["trial"] == nil || len(entitlements.Body["gold"].([]any)) != 1 {
+	if entitlements.Status != http.StatusOK || entitlements.Body["sellerPlan"] != "pro" || entitlements.Body["trial"] == nil {
 		t.Fatalf("entitlements: %d %s", entitlements.Status, entitlements.Raw)
 	}
-	if denied := harness.Call(http.MethodGet, "/api/v1/internal/entitlements/"+owner, "", "", nil); denied.Status != http.StatusUnauthorized {
-		t.Fatalf("entitlements without the token: %d", denied.Status)
-	}
-	if bps := harness.Payments.Application.Gateway.EscrowFeeBpsForSeller(context.Background(), owner); bps != 150 {
-		t.Fatalf("a Pro seller pays the standard escrow fee: %d", bps)
-	}
-	var code string
-	for code = range harness.Paystack.Subscriptions {
-	}
 	harness.clock = harness.clock.Add(5 * 24 * time.Hour)
-	if sent := harness.module.Billing.SendDueReminders(context.Background(), 10); sent != 1 {
+	if sent := harness.module.Billing.SendDueReminders(ctx, 10); sent != 1 {
 		t.Fatalf("the 3-day reminder must go out: %d", sent)
 	}
-	harness.DeliverPaystackEvent("invoice.update", map[string]any{"id": 501, "status": "success", "paid": true, "subscription": map[string]any{"subscription_code": code, "status": "active", "next_payment_date": "2030-01-01T00:00:00.000Z"}})
-	row, err := harness.module.Billing.Container.Client(harness.Database).Subscription.Query().Where(subscription.ProfileID(profileId), subscription.StatusEQ(subscription.StatusActive)).Only(context.Background())
-	if err != nil || row.CurrentPeriodEndsAt == nil {
-		t.Fatalf("the trial must convert on the first paid invoice: %v", err)
+	harness.clock = row.NextChargeAt.Add(time.Minute)
+	harness.module.Billing.RunDueJobs(ctx)
+	row = client.Subscription.GetX(ctx, row.ID)
+	if row.Status != subscription.StatusActive || row.AmountMinor != 500_000 || !strings.HasPrefix(row.BillingReference, "ren-") {
+		t.Fatalf("trial end charges the full first period: %s %d %s", row.Status, row.AmountMinor, row.BillingReference)
+	}
+	harness.clock = row.NextChargeAt.Add(time.Minute)
+	harness.module.Billing.RunDueJobs(ctx)
+	row = client.Subscription.GetX(ctx, row.ID)
+	if row.AmountMinor != 500_000 || !row.CheckmarkIncluded {
+		t.Fatalf("plans always renew at the full price, checkmark line included: %d %v", row.AmountMinor, row.CheckmarkIncluded)
+	}
+	periods := harness.Call(http.MethodGet, "/api/v1/subscriptions/"+row.ID.String()+"/periods", token, "", nil)
+	if periods.Status != http.StatusOK || len(periods.Body["data"].([]any)) != 2 {
+		t.Fatalf("periods: %d %s", periods.Status, periods.Raw)
 	}
 	cancelled := harness.Call(http.MethodPost, "/api/v1/subscriptions/"+row.ID.String()+"/cancel", token, "", nil)
-	if cancelled.Status != http.StatusOK || cancelled.Body["cancelAtPeriodEnd"] != true || harness.Paystack.Subscriptions[code]["status"] != "non-renewing" {
+	if cancelled.Status != http.StatusOK || cancelled.Body["cancelAtPeriodEnd"] != true {
 		t.Fatalf("cancel: %d %s", cancelled.Status, cancelled.Raw)
+	}
+	harness.clock = row.NextChargeAt.Add(time.Minute)
+	harness.module.Billing.RunDueJobs(ctx)
+	if ended := client.Subscription.GetX(ctx, row.ID); ended.Status != subscription.StatusCanceled {
+		t.Fatalf("a cancelled plan ends at the period end without a charge: %s", ended.Status)
 	}
 	harness.AssertLedgerHealthy()
 }

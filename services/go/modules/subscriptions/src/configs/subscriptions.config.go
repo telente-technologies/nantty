@@ -18,11 +18,13 @@ type SubscriptionsSettings struct {
 	DefaultCountry         string
 	AccountDirectorySchema string
 	UsersSchema            string
+	CatalogSchema          string
 	FingerprintKey         string
 	StoreProductPlans      map[string]StoreProductPlan
 	TrustedCountryHeader   string
 	AdminInternalUrl       string
 	AdminInternalToken     string
+	BillingJobsQueue       string
 }
 
 func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) SubscriptionsSettings {
@@ -32,11 +34,13 @@ func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.Environment
 		DefaultCountry:         reader.ReadStringOrDefault("SUBSCRIPTIONS_DEFAULT_COUNTRY", "NG"),
 		AccountDirectorySchema: reader.ReadStringOrDefault("SUBSCRIPTIONS_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
 		UsersSchema:            reader.ReadStringOrDefault("SUBSCRIPTIONS_USERS_SCHEMA", "users"),
+		CatalogSchema:          reader.ReadStringOrDefault("SUBSCRIPTIONS_CATALOG_SCHEMA", "catalog"),
 		FingerprintKey:         reader.ReadStringOrDefault("SAVED_CARD_FINGERPRINT_KEY", ""),
 		StoreProductPlans:      ParseStoreProductPlans(reader.ReadStringOrDefault("SUBSCRIPTIONS_STORE_PRODUCT_PLANS", "")),
 		TrustedCountryHeader:   reader.ReadStringOrDefault("PRICING_TRUSTED_COUNTRY_HEADER", "CloudFront-Viewer-Country"),
 		AdminInternalUrl:       reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
 		AdminInternalToken:     reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
+		BillingJobsQueue:       reader.ReadStringOrDefault("SUBSCRIPTION_BILLING_QUEUE", "jobs-subscription-billing"),
 	}
 	if settings.Money.IsProduction() && settings.FingerprintKey == "" {
 		reader.ReadRequiredString("SAVED_CARD_FINGERPRINT_KEY")

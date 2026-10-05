@@ -13,6 +13,7 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent"
 	_ "zudomart/modules/subscriptions/src/generated/ent/runtime"
 	"zudomart/modules/subscriptions/src/repositories"
+	platformevents "zudomart/platform/events"
 	"zudomart/platform/staffaudit"
 )
 
@@ -31,6 +32,7 @@ type Container struct {
 	Outbox       ledgerevents.OutboxTable
 	Idempotency  ledgerutils.SqlIdempotencyRecordStore
 	Now          func() time.Time
+	Jobs         platformevents.JobQueue
 	schemaConfig ent.SchemaConfig
 }
 
@@ -49,7 +51,7 @@ func NewSubscriptionsContainer(resources loaders.MoneyModuleResources, settings 
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{
-			IdempotentRequest: schema, OutboxEvent: schema, PlanPrice: schema, ProviderPlan: schema, Subscription: schema, SubscriptionReminder: schema, TrialClaim: schema,
+			IdempotentRequest: schema, OutboxEvent: schema, PlanPrice: schema, ProviderPlan: schema, Subscription: schema, SubscriptionPeriod: schema, SubscriptionReminder: schema, TrialClaim: schema,
 		},
 	}
 }
