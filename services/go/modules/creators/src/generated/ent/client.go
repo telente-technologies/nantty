@@ -11,11 +11,19 @@ import (
 
 	"zudomart/modules/creators/src/generated/ent/migrate"
 
+	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
+	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
+	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
+	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
+	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
+	"zudomart/modules/creators/src/generated/ent/creatorearning"
 	"zudomart/modules/creators/src/generated/ent/creatorprogrammember"
 	"zudomart/modules/creators/src/generated/ent/creatortier"
+	"zudomart/modules/creators/src/generated/ent/creatorviolation"
 	"zudomart/modules/creators/src/generated/ent/gifttransaction"
 	"zudomart/modules/creators/src/generated/ent/outboxevent"
+	"zudomart/modules/creators/src/generated/ent/tiptransaction"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -31,16 +39,32 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AffiliateCommission is the client for interacting with the AffiliateCommission builders.
+	AffiliateCommission *AffiliateCommissionClient
+	// AffiliateCommissionReversal is the client for interacting with the AffiliateCommissionReversal builders.
+	AffiliateCommissionReversal *AffiliateCommissionReversalClient
+	// AffiliateProductCommission is the client for interacting with the AffiliateProductCommission builders.
+	AffiliateProductCommission *AffiliateProductCommissionClient
+	// AffiliateProgramSetting is the client for interacting with the AffiliateProgramSetting builders.
+	AffiliateProgramSetting *AffiliateProgramSettingClient
 	// BattleSettlement is the client for interacting with the BattleSettlement builders.
 	BattleSettlement *BattleSettlementClient
+	// CreatorAffiliation is the client for interacting with the CreatorAffiliation builders.
+	CreatorAffiliation *CreatorAffiliationClient
+	// CreatorEarning is the client for interacting with the CreatorEarning builders.
+	CreatorEarning *CreatorEarningClient
 	// CreatorProgramMember is the client for interacting with the CreatorProgramMember builders.
 	CreatorProgramMember *CreatorProgramMemberClient
 	// CreatorTier is the client for interacting with the CreatorTier builders.
 	CreatorTier *CreatorTierClient
+	// CreatorViolation is the client for interacting with the CreatorViolation builders.
+	CreatorViolation *CreatorViolationClient
 	// GiftTransaction is the client for interacting with the GiftTransaction builders.
 	GiftTransaction *GiftTransactionClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// TipTransaction is the client for interacting with the TipTransaction builders.
+	TipTransaction *TipTransactionClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -52,11 +76,19 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AffiliateCommission = NewAffiliateCommissionClient(c.config)
+	c.AffiliateCommissionReversal = NewAffiliateCommissionReversalClient(c.config)
+	c.AffiliateProductCommission = NewAffiliateProductCommissionClient(c.config)
+	c.AffiliateProgramSetting = NewAffiliateProgramSettingClient(c.config)
 	c.BattleSettlement = NewBattleSettlementClient(c.config)
+	c.CreatorAffiliation = NewCreatorAffiliationClient(c.config)
+	c.CreatorEarning = NewCreatorEarningClient(c.config)
 	c.CreatorProgramMember = NewCreatorProgramMemberClient(c.config)
 	c.CreatorTier = NewCreatorTierClient(c.config)
+	c.CreatorViolation = NewCreatorViolationClient(c.config)
 	c.GiftTransaction = NewGiftTransactionClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
+	c.TipTransaction = NewTipTransactionClient(c.config)
 }
 
 type (
@@ -149,13 +181,21 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                  ctx,
-		config:               cfg,
-		BattleSettlement:     NewBattleSettlementClient(cfg),
-		CreatorProgramMember: NewCreatorProgramMemberClient(cfg),
-		CreatorTier:          NewCreatorTierClient(cfg),
-		GiftTransaction:      NewGiftTransactionClient(cfg),
-		OutboxEvent:          NewOutboxEventClient(cfg),
+		ctx:                         ctx,
+		config:                      cfg,
+		AffiliateCommission:         NewAffiliateCommissionClient(cfg),
+		AffiliateCommissionReversal: NewAffiliateCommissionReversalClient(cfg),
+		AffiliateProductCommission:  NewAffiliateProductCommissionClient(cfg),
+		AffiliateProgramSetting:     NewAffiliateProgramSettingClient(cfg),
+		BattleSettlement:            NewBattleSettlementClient(cfg),
+		CreatorAffiliation:          NewCreatorAffiliationClient(cfg),
+		CreatorEarning:              NewCreatorEarningClient(cfg),
+		CreatorProgramMember:        NewCreatorProgramMemberClient(cfg),
+		CreatorTier:                 NewCreatorTierClient(cfg),
+		CreatorViolation:            NewCreatorViolationClient(cfg),
+		GiftTransaction:             NewGiftTransactionClient(cfg),
+		OutboxEvent:                 NewOutboxEventClient(cfg),
+		TipTransaction:              NewTipTransactionClient(cfg),
 	}, nil
 }
 
@@ -173,20 +213,28 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                  ctx,
-		config:               cfg,
-		BattleSettlement:     NewBattleSettlementClient(cfg),
-		CreatorProgramMember: NewCreatorProgramMemberClient(cfg),
-		CreatorTier:          NewCreatorTierClient(cfg),
-		GiftTransaction:      NewGiftTransactionClient(cfg),
-		OutboxEvent:          NewOutboxEventClient(cfg),
+		ctx:                         ctx,
+		config:                      cfg,
+		AffiliateCommission:         NewAffiliateCommissionClient(cfg),
+		AffiliateCommissionReversal: NewAffiliateCommissionReversalClient(cfg),
+		AffiliateProductCommission:  NewAffiliateProductCommissionClient(cfg),
+		AffiliateProgramSetting:     NewAffiliateProgramSettingClient(cfg),
+		BattleSettlement:            NewBattleSettlementClient(cfg),
+		CreatorAffiliation:          NewCreatorAffiliationClient(cfg),
+		CreatorEarning:              NewCreatorEarningClient(cfg),
+		CreatorProgramMember:        NewCreatorProgramMemberClient(cfg),
+		CreatorTier:                 NewCreatorTierClient(cfg),
+		CreatorViolation:            NewCreatorViolationClient(cfg),
+		GiftTransaction:             NewGiftTransactionClient(cfg),
+		OutboxEvent:                 NewOutboxEventClient(cfg),
+		TipTransaction:              NewTipTransactionClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		BattleSettlement.
+//		AffiliateCommission.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -208,38 +256,592 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.BattleSettlement.Use(hooks...)
-	c.CreatorProgramMember.Use(hooks...)
-	c.CreatorTier.Use(hooks...)
-	c.GiftTransaction.Use(hooks...)
-	c.OutboxEvent.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.AffiliateCommission, c.AffiliateCommissionReversal,
+		c.AffiliateProductCommission, c.AffiliateProgramSetting, c.BattleSettlement,
+		c.CreatorAffiliation, c.CreatorEarning, c.CreatorProgramMember, c.CreatorTier,
+		c.CreatorViolation, c.GiftTransaction, c.OutboxEvent, c.TipTransaction,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.BattleSettlement.Intercept(interceptors...)
-	c.CreatorProgramMember.Intercept(interceptors...)
-	c.CreatorTier.Intercept(interceptors...)
-	c.GiftTransaction.Intercept(interceptors...)
-	c.OutboxEvent.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.AffiliateCommission, c.AffiliateCommissionReversal,
+		c.AffiliateProductCommission, c.AffiliateProgramSetting, c.BattleSettlement,
+		c.CreatorAffiliation, c.CreatorEarning, c.CreatorProgramMember, c.CreatorTier,
+		c.CreatorViolation, c.GiftTransaction, c.OutboxEvent, c.TipTransaction,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AffiliateCommissionMutation:
+		return c.AffiliateCommission.mutate(ctx, m)
+	case *AffiliateCommissionReversalMutation:
+		return c.AffiliateCommissionReversal.mutate(ctx, m)
+	case *AffiliateProductCommissionMutation:
+		return c.AffiliateProductCommission.mutate(ctx, m)
+	case *AffiliateProgramSettingMutation:
+		return c.AffiliateProgramSetting.mutate(ctx, m)
 	case *BattleSettlementMutation:
 		return c.BattleSettlement.mutate(ctx, m)
+	case *CreatorAffiliationMutation:
+		return c.CreatorAffiliation.mutate(ctx, m)
+	case *CreatorEarningMutation:
+		return c.CreatorEarning.mutate(ctx, m)
 	case *CreatorProgramMemberMutation:
 		return c.CreatorProgramMember.mutate(ctx, m)
 	case *CreatorTierMutation:
 		return c.CreatorTier.mutate(ctx, m)
+	case *CreatorViolationMutation:
+		return c.CreatorViolation.mutate(ctx, m)
 	case *GiftTransactionMutation:
 		return c.GiftTransaction.mutate(ctx, m)
 	case *OutboxEventMutation:
 		return c.OutboxEvent.mutate(ctx, m)
+	case *TipTransactionMutation:
+		return c.TipTransaction.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AffiliateCommissionClient is a client for the AffiliateCommission schema.
+type AffiliateCommissionClient struct {
+	config
+}
+
+// NewAffiliateCommissionClient returns a client for the AffiliateCommission from the given config.
+func NewAffiliateCommissionClient(c config) *AffiliateCommissionClient {
+	return &AffiliateCommissionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `affiliatecommission.Hooks(f(g(h())))`.
+func (c *AffiliateCommissionClient) Use(hooks ...Hook) {
+	c.hooks.AffiliateCommission = append(c.hooks.AffiliateCommission, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `affiliatecommission.Intercept(f(g(h())))`.
+func (c *AffiliateCommissionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AffiliateCommission = append(c.inters.AffiliateCommission, interceptors...)
+}
+
+// Create returns a builder for creating a AffiliateCommission entity.
+func (c *AffiliateCommissionClient) Create() *AffiliateCommissionCreate {
+	mutation := newAffiliateCommissionMutation(c.config, OpCreate)
+	return &AffiliateCommissionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AffiliateCommission entities.
+func (c *AffiliateCommissionClient) CreateBulk(builders ...*AffiliateCommissionCreate) *AffiliateCommissionCreateBulk {
+	return &AffiliateCommissionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AffiliateCommissionClient) MapCreateBulk(slice any, setFunc func(*AffiliateCommissionCreate, int)) *AffiliateCommissionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AffiliateCommissionCreateBulk{err: fmt.Errorf("calling to AffiliateCommissionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AffiliateCommissionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AffiliateCommissionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AffiliateCommission.
+func (c *AffiliateCommissionClient) Update() *AffiliateCommissionUpdate {
+	mutation := newAffiliateCommissionMutation(c.config, OpUpdate)
+	return &AffiliateCommissionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AffiliateCommissionClient) UpdateOne(_m *AffiliateCommission) *AffiliateCommissionUpdateOne {
+	mutation := newAffiliateCommissionMutation(c.config, OpUpdateOne, withAffiliateCommission(_m))
+	return &AffiliateCommissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AffiliateCommissionClient) UpdateOneID(id uuid.UUID) *AffiliateCommissionUpdateOne {
+	mutation := newAffiliateCommissionMutation(c.config, OpUpdateOne, withAffiliateCommissionID(id))
+	return &AffiliateCommissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AffiliateCommission.
+func (c *AffiliateCommissionClient) Delete() *AffiliateCommissionDelete {
+	mutation := newAffiliateCommissionMutation(c.config, OpDelete)
+	return &AffiliateCommissionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AffiliateCommissionClient) DeleteOne(_m *AffiliateCommission) *AffiliateCommissionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AffiliateCommissionClient) DeleteOneID(id uuid.UUID) *AffiliateCommissionDeleteOne {
+	builder := c.Delete().Where(affiliatecommission.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AffiliateCommissionDeleteOne{builder}
+}
+
+// Query returns a query builder for AffiliateCommission.
+func (c *AffiliateCommissionClient) Query() *AffiliateCommissionQuery {
+	return &AffiliateCommissionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAffiliateCommission},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AffiliateCommission entity by its id.
+func (c *AffiliateCommissionClient) Get(ctx context.Context, id uuid.UUID) (*AffiliateCommission, error) {
+	return c.Query().Where(affiliatecommission.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AffiliateCommissionClient) GetX(ctx context.Context, id uuid.UUID) *AffiliateCommission {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AffiliateCommissionClient) Hooks() []Hook {
+	return c.hooks.AffiliateCommission
+}
+
+// Interceptors returns the client interceptors.
+func (c *AffiliateCommissionClient) Interceptors() []Interceptor {
+	return c.inters.AffiliateCommission
+}
+
+func (c *AffiliateCommissionClient) mutate(ctx context.Context, m *AffiliateCommissionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AffiliateCommissionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AffiliateCommissionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AffiliateCommissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AffiliateCommissionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AffiliateCommission mutation op: %q", m.Op())
+	}
+}
+
+// AffiliateCommissionReversalClient is a client for the AffiliateCommissionReversal schema.
+type AffiliateCommissionReversalClient struct {
+	config
+}
+
+// NewAffiliateCommissionReversalClient returns a client for the AffiliateCommissionReversal from the given config.
+func NewAffiliateCommissionReversalClient(c config) *AffiliateCommissionReversalClient {
+	return &AffiliateCommissionReversalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `affiliatecommissionreversal.Hooks(f(g(h())))`.
+func (c *AffiliateCommissionReversalClient) Use(hooks ...Hook) {
+	c.hooks.AffiliateCommissionReversal = append(c.hooks.AffiliateCommissionReversal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `affiliatecommissionreversal.Intercept(f(g(h())))`.
+func (c *AffiliateCommissionReversalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AffiliateCommissionReversal = append(c.inters.AffiliateCommissionReversal, interceptors...)
+}
+
+// Create returns a builder for creating a AffiliateCommissionReversal entity.
+func (c *AffiliateCommissionReversalClient) Create() *AffiliateCommissionReversalCreate {
+	mutation := newAffiliateCommissionReversalMutation(c.config, OpCreate)
+	return &AffiliateCommissionReversalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AffiliateCommissionReversal entities.
+func (c *AffiliateCommissionReversalClient) CreateBulk(builders ...*AffiliateCommissionReversalCreate) *AffiliateCommissionReversalCreateBulk {
+	return &AffiliateCommissionReversalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AffiliateCommissionReversalClient) MapCreateBulk(slice any, setFunc func(*AffiliateCommissionReversalCreate, int)) *AffiliateCommissionReversalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AffiliateCommissionReversalCreateBulk{err: fmt.Errorf("calling to AffiliateCommissionReversalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AffiliateCommissionReversalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AffiliateCommissionReversalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AffiliateCommissionReversal.
+func (c *AffiliateCommissionReversalClient) Update() *AffiliateCommissionReversalUpdate {
+	mutation := newAffiliateCommissionReversalMutation(c.config, OpUpdate)
+	return &AffiliateCommissionReversalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AffiliateCommissionReversalClient) UpdateOne(_m *AffiliateCommissionReversal) *AffiliateCommissionReversalUpdateOne {
+	mutation := newAffiliateCommissionReversalMutation(c.config, OpUpdateOne, withAffiliateCommissionReversal(_m))
+	return &AffiliateCommissionReversalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AffiliateCommissionReversalClient) UpdateOneID(id uuid.UUID) *AffiliateCommissionReversalUpdateOne {
+	mutation := newAffiliateCommissionReversalMutation(c.config, OpUpdateOne, withAffiliateCommissionReversalID(id))
+	return &AffiliateCommissionReversalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AffiliateCommissionReversal.
+func (c *AffiliateCommissionReversalClient) Delete() *AffiliateCommissionReversalDelete {
+	mutation := newAffiliateCommissionReversalMutation(c.config, OpDelete)
+	return &AffiliateCommissionReversalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AffiliateCommissionReversalClient) DeleteOne(_m *AffiliateCommissionReversal) *AffiliateCommissionReversalDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AffiliateCommissionReversalClient) DeleteOneID(id uuid.UUID) *AffiliateCommissionReversalDeleteOne {
+	builder := c.Delete().Where(affiliatecommissionreversal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AffiliateCommissionReversalDeleteOne{builder}
+}
+
+// Query returns a query builder for AffiliateCommissionReversal.
+func (c *AffiliateCommissionReversalClient) Query() *AffiliateCommissionReversalQuery {
+	return &AffiliateCommissionReversalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAffiliateCommissionReversal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AffiliateCommissionReversal entity by its id.
+func (c *AffiliateCommissionReversalClient) Get(ctx context.Context, id uuid.UUID) (*AffiliateCommissionReversal, error) {
+	return c.Query().Where(affiliatecommissionreversal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AffiliateCommissionReversalClient) GetX(ctx context.Context, id uuid.UUID) *AffiliateCommissionReversal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AffiliateCommissionReversalClient) Hooks() []Hook {
+	return c.hooks.AffiliateCommissionReversal
+}
+
+// Interceptors returns the client interceptors.
+func (c *AffiliateCommissionReversalClient) Interceptors() []Interceptor {
+	return c.inters.AffiliateCommissionReversal
+}
+
+func (c *AffiliateCommissionReversalClient) mutate(ctx context.Context, m *AffiliateCommissionReversalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AffiliateCommissionReversalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AffiliateCommissionReversalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AffiliateCommissionReversalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AffiliateCommissionReversalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AffiliateCommissionReversal mutation op: %q", m.Op())
+	}
+}
+
+// AffiliateProductCommissionClient is a client for the AffiliateProductCommission schema.
+type AffiliateProductCommissionClient struct {
+	config
+}
+
+// NewAffiliateProductCommissionClient returns a client for the AffiliateProductCommission from the given config.
+func NewAffiliateProductCommissionClient(c config) *AffiliateProductCommissionClient {
+	return &AffiliateProductCommissionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `affiliateproductcommission.Hooks(f(g(h())))`.
+func (c *AffiliateProductCommissionClient) Use(hooks ...Hook) {
+	c.hooks.AffiliateProductCommission = append(c.hooks.AffiliateProductCommission, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `affiliateproductcommission.Intercept(f(g(h())))`.
+func (c *AffiliateProductCommissionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AffiliateProductCommission = append(c.inters.AffiliateProductCommission, interceptors...)
+}
+
+// Create returns a builder for creating a AffiliateProductCommission entity.
+func (c *AffiliateProductCommissionClient) Create() *AffiliateProductCommissionCreate {
+	mutation := newAffiliateProductCommissionMutation(c.config, OpCreate)
+	return &AffiliateProductCommissionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AffiliateProductCommission entities.
+func (c *AffiliateProductCommissionClient) CreateBulk(builders ...*AffiliateProductCommissionCreate) *AffiliateProductCommissionCreateBulk {
+	return &AffiliateProductCommissionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AffiliateProductCommissionClient) MapCreateBulk(slice any, setFunc func(*AffiliateProductCommissionCreate, int)) *AffiliateProductCommissionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AffiliateProductCommissionCreateBulk{err: fmt.Errorf("calling to AffiliateProductCommissionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AffiliateProductCommissionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AffiliateProductCommissionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AffiliateProductCommission.
+func (c *AffiliateProductCommissionClient) Update() *AffiliateProductCommissionUpdate {
+	mutation := newAffiliateProductCommissionMutation(c.config, OpUpdate)
+	return &AffiliateProductCommissionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AffiliateProductCommissionClient) UpdateOne(_m *AffiliateProductCommission) *AffiliateProductCommissionUpdateOne {
+	mutation := newAffiliateProductCommissionMutation(c.config, OpUpdateOne, withAffiliateProductCommission(_m))
+	return &AffiliateProductCommissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AffiliateProductCommissionClient) UpdateOneID(id uuid.UUID) *AffiliateProductCommissionUpdateOne {
+	mutation := newAffiliateProductCommissionMutation(c.config, OpUpdateOne, withAffiliateProductCommissionID(id))
+	return &AffiliateProductCommissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AffiliateProductCommission.
+func (c *AffiliateProductCommissionClient) Delete() *AffiliateProductCommissionDelete {
+	mutation := newAffiliateProductCommissionMutation(c.config, OpDelete)
+	return &AffiliateProductCommissionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AffiliateProductCommissionClient) DeleteOne(_m *AffiliateProductCommission) *AffiliateProductCommissionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AffiliateProductCommissionClient) DeleteOneID(id uuid.UUID) *AffiliateProductCommissionDeleteOne {
+	builder := c.Delete().Where(affiliateproductcommission.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AffiliateProductCommissionDeleteOne{builder}
+}
+
+// Query returns a query builder for AffiliateProductCommission.
+func (c *AffiliateProductCommissionClient) Query() *AffiliateProductCommissionQuery {
+	return &AffiliateProductCommissionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAffiliateProductCommission},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AffiliateProductCommission entity by its id.
+func (c *AffiliateProductCommissionClient) Get(ctx context.Context, id uuid.UUID) (*AffiliateProductCommission, error) {
+	return c.Query().Where(affiliateproductcommission.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AffiliateProductCommissionClient) GetX(ctx context.Context, id uuid.UUID) *AffiliateProductCommission {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AffiliateProductCommissionClient) Hooks() []Hook {
+	return c.hooks.AffiliateProductCommission
+}
+
+// Interceptors returns the client interceptors.
+func (c *AffiliateProductCommissionClient) Interceptors() []Interceptor {
+	return c.inters.AffiliateProductCommission
+}
+
+func (c *AffiliateProductCommissionClient) mutate(ctx context.Context, m *AffiliateProductCommissionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AffiliateProductCommissionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AffiliateProductCommissionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AffiliateProductCommissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AffiliateProductCommissionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AffiliateProductCommission mutation op: %q", m.Op())
+	}
+}
+
+// AffiliateProgramSettingClient is a client for the AffiliateProgramSetting schema.
+type AffiliateProgramSettingClient struct {
+	config
+}
+
+// NewAffiliateProgramSettingClient returns a client for the AffiliateProgramSetting from the given config.
+func NewAffiliateProgramSettingClient(c config) *AffiliateProgramSettingClient {
+	return &AffiliateProgramSettingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `affiliateprogramsetting.Hooks(f(g(h())))`.
+func (c *AffiliateProgramSettingClient) Use(hooks ...Hook) {
+	c.hooks.AffiliateProgramSetting = append(c.hooks.AffiliateProgramSetting, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `affiliateprogramsetting.Intercept(f(g(h())))`.
+func (c *AffiliateProgramSettingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AffiliateProgramSetting = append(c.inters.AffiliateProgramSetting, interceptors...)
+}
+
+// Create returns a builder for creating a AffiliateProgramSetting entity.
+func (c *AffiliateProgramSettingClient) Create() *AffiliateProgramSettingCreate {
+	mutation := newAffiliateProgramSettingMutation(c.config, OpCreate)
+	return &AffiliateProgramSettingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AffiliateProgramSetting entities.
+func (c *AffiliateProgramSettingClient) CreateBulk(builders ...*AffiliateProgramSettingCreate) *AffiliateProgramSettingCreateBulk {
+	return &AffiliateProgramSettingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AffiliateProgramSettingClient) MapCreateBulk(slice any, setFunc func(*AffiliateProgramSettingCreate, int)) *AffiliateProgramSettingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AffiliateProgramSettingCreateBulk{err: fmt.Errorf("calling to AffiliateProgramSettingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AffiliateProgramSettingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AffiliateProgramSettingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AffiliateProgramSetting.
+func (c *AffiliateProgramSettingClient) Update() *AffiliateProgramSettingUpdate {
+	mutation := newAffiliateProgramSettingMutation(c.config, OpUpdate)
+	return &AffiliateProgramSettingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AffiliateProgramSettingClient) UpdateOne(_m *AffiliateProgramSetting) *AffiliateProgramSettingUpdateOne {
+	mutation := newAffiliateProgramSettingMutation(c.config, OpUpdateOne, withAffiliateProgramSetting(_m))
+	return &AffiliateProgramSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AffiliateProgramSettingClient) UpdateOneID(id string) *AffiliateProgramSettingUpdateOne {
+	mutation := newAffiliateProgramSettingMutation(c.config, OpUpdateOne, withAffiliateProgramSettingID(id))
+	return &AffiliateProgramSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AffiliateProgramSetting.
+func (c *AffiliateProgramSettingClient) Delete() *AffiliateProgramSettingDelete {
+	mutation := newAffiliateProgramSettingMutation(c.config, OpDelete)
+	return &AffiliateProgramSettingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AffiliateProgramSettingClient) DeleteOne(_m *AffiliateProgramSetting) *AffiliateProgramSettingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AffiliateProgramSettingClient) DeleteOneID(id string) *AffiliateProgramSettingDeleteOne {
+	builder := c.Delete().Where(affiliateprogramsetting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AffiliateProgramSettingDeleteOne{builder}
+}
+
+// Query returns a query builder for AffiliateProgramSetting.
+func (c *AffiliateProgramSettingClient) Query() *AffiliateProgramSettingQuery {
+	return &AffiliateProgramSettingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAffiliateProgramSetting},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AffiliateProgramSetting entity by its id.
+func (c *AffiliateProgramSettingClient) Get(ctx context.Context, id string) (*AffiliateProgramSetting, error) {
+	return c.Query().Where(affiliateprogramsetting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AffiliateProgramSettingClient) GetX(ctx context.Context, id string) *AffiliateProgramSetting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AffiliateProgramSettingClient) Hooks() []Hook {
+	return c.hooks.AffiliateProgramSetting
+}
+
+// Interceptors returns the client interceptors.
+func (c *AffiliateProgramSettingClient) Interceptors() []Interceptor {
+	return c.inters.AffiliateProgramSetting
+}
+
+func (c *AffiliateProgramSettingClient) mutate(ctx context.Context, m *AffiliateProgramSettingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AffiliateProgramSettingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AffiliateProgramSettingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AffiliateProgramSettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AffiliateProgramSettingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AffiliateProgramSetting mutation op: %q", m.Op())
 	}
 }
 
@@ -373,6 +975,272 @@ func (c *BattleSettlementClient) mutate(ctx context.Context, m *BattleSettlement
 		return (&BattleSettlementDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown BattleSettlement mutation op: %q", m.Op())
+	}
+}
+
+// CreatorAffiliationClient is a client for the CreatorAffiliation schema.
+type CreatorAffiliationClient struct {
+	config
+}
+
+// NewCreatorAffiliationClient returns a client for the CreatorAffiliation from the given config.
+func NewCreatorAffiliationClient(c config) *CreatorAffiliationClient {
+	return &CreatorAffiliationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `creatoraffiliation.Hooks(f(g(h())))`.
+func (c *CreatorAffiliationClient) Use(hooks ...Hook) {
+	c.hooks.CreatorAffiliation = append(c.hooks.CreatorAffiliation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `creatoraffiliation.Intercept(f(g(h())))`.
+func (c *CreatorAffiliationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CreatorAffiliation = append(c.inters.CreatorAffiliation, interceptors...)
+}
+
+// Create returns a builder for creating a CreatorAffiliation entity.
+func (c *CreatorAffiliationClient) Create() *CreatorAffiliationCreate {
+	mutation := newCreatorAffiliationMutation(c.config, OpCreate)
+	return &CreatorAffiliationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CreatorAffiliation entities.
+func (c *CreatorAffiliationClient) CreateBulk(builders ...*CreatorAffiliationCreate) *CreatorAffiliationCreateBulk {
+	return &CreatorAffiliationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CreatorAffiliationClient) MapCreateBulk(slice any, setFunc func(*CreatorAffiliationCreate, int)) *CreatorAffiliationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CreatorAffiliationCreateBulk{err: fmt.Errorf("calling to CreatorAffiliationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CreatorAffiliationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CreatorAffiliationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CreatorAffiliation.
+func (c *CreatorAffiliationClient) Update() *CreatorAffiliationUpdate {
+	mutation := newCreatorAffiliationMutation(c.config, OpUpdate)
+	return &CreatorAffiliationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CreatorAffiliationClient) UpdateOne(_m *CreatorAffiliation) *CreatorAffiliationUpdateOne {
+	mutation := newCreatorAffiliationMutation(c.config, OpUpdateOne, withCreatorAffiliation(_m))
+	return &CreatorAffiliationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CreatorAffiliationClient) UpdateOneID(id uuid.UUID) *CreatorAffiliationUpdateOne {
+	mutation := newCreatorAffiliationMutation(c.config, OpUpdateOne, withCreatorAffiliationID(id))
+	return &CreatorAffiliationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CreatorAffiliation.
+func (c *CreatorAffiliationClient) Delete() *CreatorAffiliationDelete {
+	mutation := newCreatorAffiliationMutation(c.config, OpDelete)
+	return &CreatorAffiliationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CreatorAffiliationClient) DeleteOne(_m *CreatorAffiliation) *CreatorAffiliationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CreatorAffiliationClient) DeleteOneID(id uuid.UUID) *CreatorAffiliationDeleteOne {
+	builder := c.Delete().Where(creatoraffiliation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CreatorAffiliationDeleteOne{builder}
+}
+
+// Query returns a query builder for CreatorAffiliation.
+func (c *CreatorAffiliationClient) Query() *CreatorAffiliationQuery {
+	return &CreatorAffiliationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCreatorAffiliation},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CreatorAffiliation entity by its id.
+func (c *CreatorAffiliationClient) Get(ctx context.Context, id uuid.UUID) (*CreatorAffiliation, error) {
+	return c.Query().Where(creatoraffiliation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CreatorAffiliationClient) GetX(ctx context.Context, id uuid.UUID) *CreatorAffiliation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CreatorAffiliationClient) Hooks() []Hook {
+	return c.hooks.CreatorAffiliation
+}
+
+// Interceptors returns the client interceptors.
+func (c *CreatorAffiliationClient) Interceptors() []Interceptor {
+	return c.inters.CreatorAffiliation
+}
+
+func (c *CreatorAffiliationClient) mutate(ctx context.Context, m *CreatorAffiliationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CreatorAffiliationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CreatorAffiliationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CreatorAffiliationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CreatorAffiliationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CreatorAffiliation mutation op: %q", m.Op())
+	}
+}
+
+// CreatorEarningClient is a client for the CreatorEarning schema.
+type CreatorEarningClient struct {
+	config
+}
+
+// NewCreatorEarningClient returns a client for the CreatorEarning from the given config.
+func NewCreatorEarningClient(c config) *CreatorEarningClient {
+	return &CreatorEarningClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `creatorearning.Hooks(f(g(h())))`.
+func (c *CreatorEarningClient) Use(hooks ...Hook) {
+	c.hooks.CreatorEarning = append(c.hooks.CreatorEarning, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `creatorearning.Intercept(f(g(h())))`.
+func (c *CreatorEarningClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CreatorEarning = append(c.inters.CreatorEarning, interceptors...)
+}
+
+// Create returns a builder for creating a CreatorEarning entity.
+func (c *CreatorEarningClient) Create() *CreatorEarningCreate {
+	mutation := newCreatorEarningMutation(c.config, OpCreate)
+	return &CreatorEarningCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CreatorEarning entities.
+func (c *CreatorEarningClient) CreateBulk(builders ...*CreatorEarningCreate) *CreatorEarningCreateBulk {
+	return &CreatorEarningCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CreatorEarningClient) MapCreateBulk(slice any, setFunc func(*CreatorEarningCreate, int)) *CreatorEarningCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CreatorEarningCreateBulk{err: fmt.Errorf("calling to CreatorEarningClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CreatorEarningCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CreatorEarningCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CreatorEarning.
+func (c *CreatorEarningClient) Update() *CreatorEarningUpdate {
+	mutation := newCreatorEarningMutation(c.config, OpUpdate)
+	return &CreatorEarningUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CreatorEarningClient) UpdateOne(_m *CreatorEarning) *CreatorEarningUpdateOne {
+	mutation := newCreatorEarningMutation(c.config, OpUpdateOne, withCreatorEarning(_m))
+	return &CreatorEarningUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CreatorEarningClient) UpdateOneID(id uuid.UUID) *CreatorEarningUpdateOne {
+	mutation := newCreatorEarningMutation(c.config, OpUpdateOne, withCreatorEarningID(id))
+	return &CreatorEarningUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CreatorEarning.
+func (c *CreatorEarningClient) Delete() *CreatorEarningDelete {
+	mutation := newCreatorEarningMutation(c.config, OpDelete)
+	return &CreatorEarningDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CreatorEarningClient) DeleteOne(_m *CreatorEarning) *CreatorEarningDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CreatorEarningClient) DeleteOneID(id uuid.UUID) *CreatorEarningDeleteOne {
+	builder := c.Delete().Where(creatorearning.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CreatorEarningDeleteOne{builder}
+}
+
+// Query returns a query builder for CreatorEarning.
+func (c *CreatorEarningClient) Query() *CreatorEarningQuery {
+	return &CreatorEarningQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCreatorEarning},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CreatorEarning entity by its id.
+func (c *CreatorEarningClient) Get(ctx context.Context, id uuid.UUID) (*CreatorEarning, error) {
+	return c.Query().Where(creatorearning.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CreatorEarningClient) GetX(ctx context.Context, id uuid.UUID) *CreatorEarning {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CreatorEarningClient) Hooks() []Hook {
+	return c.hooks.CreatorEarning
+}
+
+// Interceptors returns the client interceptors.
+func (c *CreatorEarningClient) Interceptors() []Interceptor {
+	return c.inters.CreatorEarning
+}
+
+func (c *CreatorEarningClient) mutate(ctx context.Context, m *CreatorEarningMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CreatorEarningCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CreatorEarningUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CreatorEarningUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CreatorEarningDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CreatorEarning mutation op: %q", m.Op())
 	}
 }
 
@@ -642,6 +1510,139 @@ func (c *CreatorTierClient) mutate(ctx context.Context, m *CreatorTierMutation) 
 	}
 }
 
+// CreatorViolationClient is a client for the CreatorViolation schema.
+type CreatorViolationClient struct {
+	config
+}
+
+// NewCreatorViolationClient returns a client for the CreatorViolation from the given config.
+func NewCreatorViolationClient(c config) *CreatorViolationClient {
+	return &CreatorViolationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `creatorviolation.Hooks(f(g(h())))`.
+func (c *CreatorViolationClient) Use(hooks ...Hook) {
+	c.hooks.CreatorViolation = append(c.hooks.CreatorViolation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `creatorviolation.Intercept(f(g(h())))`.
+func (c *CreatorViolationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CreatorViolation = append(c.inters.CreatorViolation, interceptors...)
+}
+
+// Create returns a builder for creating a CreatorViolation entity.
+func (c *CreatorViolationClient) Create() *CreatorViolationCreate {
+	mutation := newCreatorViolationMutation(c.config, OpCreate)
+	return &CreatorViolationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CreatorViolation entities.
+func (c *CreatorViolationClient) CreateBulk(builders ...*CreatorViolationCreate) *CreatorViolationCreateBulk {
+	return &CreatorViolationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CreatorViolationClient) MapCreateBulk(slice any, setFunc func(*CreatorViolationCreate, int)) *CreatorViolationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CreatorViolationCreateBulk{err: fmt.Errorf("calling to CreatorViolationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CreatorViolationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CreatorViolationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CreatorViolation.
+func (c *CreatorViolationClient) Update() *CreatorViolationUpdate {
+	mutation := newCreatorViolationMutation(c.config, OpUpdate)
+	return &CreatorViolationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CreatorViolationClient) UpdateOne(_m *CreatorViolation) *CreatorViolationUpdateOne {
+	mutation := newCreatorViolationMutation(c.config, OpUpdateOne, withCreatorViolation(_m))
+	return &CreatorViolationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CreatorViolationClient) UpdateOneID(id uuid.UUID) *CreatorViolationUpdateOne {
+	mutation := newCreatorViolationMutation(c.config, OpUpdateOne, withCreatorViolationID(id))
+	return &CreatorViolationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CreatorViolation.
+func (c *CreatorViolationClient) Delete() *CreatorViolationDelete {
+	mutation := newCreatorViolationMutation(c.config, OpDelete)
+	return &CreatorViolationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CreatorViolationClient) DeleteOne(_m *CreatorViolation) *CreatorViolationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CreatorViolationClient) DeleteOneID(id uuid.UUID) *CreatorViolationDeleteOne {
+	builder := c.Delete().Where(creatorviolation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CreatorViolationDeleteOne{builder}
+}
+
+// Query returns a query builder for CreatorViolation.
+func (c *CreatorViolationClient) Query() *CreatorViolationQuery {
+	return &CreatorViolationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCreatorViolation},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CreatorViolation entity by its id.
+func (c *CreatorViolationClient) Get(ctx context.Context, id uuid.UUID) (*CreatorViolation, error) {
+	return c.Query().Where(creatorviolation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CreatorViolationClient) GetX(ctx context.Context, id uuid.UUID) *CreatorViolation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CreatorViolationClient) Hooks() []Hook {
+	return c.hooks.CreatorViolation
+}
+
+// Interceptors returns the client interceptors.
+func (c *CreatorViolationClient) Interceptors() []Interceptor {
+	return c.inters.CreatorViolation
+}
+
+func (c *CreatorViolationClient) mutate(ctx context.Context, m *CreatorViolationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CreatorViolationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CreatorViolationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CreatorViolationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CreatorViolationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CreatorViolation mutation op: %q", m.Op())
+	}
+}
+
 // GiftTransactionClient is a client for the GiftTransaction schema.
 type GiftTransactionClient struct {
 	config
@@ -908,15 +1909,152 @@ func (c *OutboxEventClient) mutate(ctx context.Context, m *OutboxEventMutation) 
 	}
 }
 
+// TipTransactionClient is a client for the TipTransaction schema.
+type TipTransactionClient struct {
+	config
+}
+
+// NewTipTransactionClient returns a client for the TipTransaction from the given config.
+func NewTipTransactionClient(c config) *TipTransactionClient {
+	return &TipTransactionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tiptransaction.Hooks(f(g(h())))`.
+func (c *TipTransactionClient) Use(hooks ...Hook) {
+	c.hooks.TipTransaction = append(c.hooks.TipTransaction, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tiptransaction.Intercept(f(g(h())))`.
+func (c *TipTransactionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TipTransaction = append(c.inters.TipTransaction, interceptors...)
+}
+
+// Create returns a builder for creating a TipTransaction entity.
+func (c *TipTransactionClient) Create() *TipTransactionCreate {
+	mutation := newTipTransactionMutation(c.config, OpCreate)
+	return &TipTransactionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TipTransaction entities.
+func (c *TipTransactionClient) CreateBulk(builders ...*TipTransactionCreate) *TipTransactionCreateBulk {
+	return &TipTransactionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TipTransactionClient) MapCreateBulk(slice any, setFunc func(*TipTransactionCreate, int)) *TipTransactionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TipTransactionCreateBulk{err: fmt.Errorf("calling to TipTransactionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TipTransactionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TipTransactionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TipTransaction.
+func (c *TipTransactionClient) Update() *TipTransactionUpdate {
+	mutation := newTipTransactionMutation(c.config, OpUpdate)
+	return &TipTransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TipTransactionClient) UpdateOne(_m *TipTransaction) *TipTransactionUpdateOne {
+	mutation := newTipTransactionMutation(c.config, OpUpdateOne, withTipTransaction(_m))
+	return &TipTransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TipTransactionClient) UpdateOneID(id uuid.UUID) *TipTransactionUpdateOne {
+	mutation := newTipTransactionMutation(c.config, OpUpdateOne, withTipTransactionID(id))
+	return &TipTransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TipTransaction.
+func (c *TipTransactionClient) Delete() *TipTransactionDelete {
+	mutation := newTipTransactionMutation(c.config, OpDelete)
+	return &TipTransactionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TipTransactionClient) DeleteOne(_m *TipTransaction) *TipTransactionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TipTransactionClient) DeleteOneID(id uuid.UUID) *TipTransactionDeleteOne {
+	builder := c.Delete().Where(tiptransaction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TipTransactionDeleteOne{builder}
+}
+
+// Query returns a query builder for TipTransaction.
+func (c *TipTransactionClient) Query() *TipTransactionQuery {
+	return &TipTransactionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTipTransaction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TipTransaction entity by its id.
+func (c *TipTransactionClient) Get(ctx context.Context, id uuid.UUID) (*TipTransaction, error) {
+	return c.Query().Where(tiptransaction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TipTransactionClient) GetX(ctx context.Context, id uuid.UUID) *TipTransaction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TipTransactionClient) Hooks() []Hook {
+	return c.hooks.TipTransaction
+}
+
+// Interceptors returns the client interceptors.
+func (c *TipTransactionClient) Interceptors() []Interceptor {
+	return c.inters.TipTransaction
+}
+
+func (c *TipTransactionClient) mutate(ctx context.Context, m *TipTransactionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TipTransactionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TipTransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TipTransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TipTransactionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TipTransaction mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		BattleSettlement, CreatorProgramMember, CreatorTier, GiftTransaction,
-		OutboxEvent []ent.Hook
+		AffiliateCommission, AffiliateCommissionReversal, AffiliateProductCommission,
+		AffiliateProgramSetting, BattleSettlement, CreatorAffiliation, CreatorEarning,
+		CreatorProgramMember, CreatorTier, CreatorViolation, GiftTransaction,
+		OutboxEvent, TipTransaction []ent.Hook
 	}
 	inters struct {
-		BattleSettlement, CreatorProgramMember, CreatorTier, GiftTransaction,
-		OutboxEvent []ent.Interceptor
+		AffiliateCommission, AffiliateCommissionReversal, AffiliateProductCommission,
+		AffiliateProgramSetting, BattleSettlement, CreatorAffiliation, CreatorEarning,
+		CreatorProgramMember, CreatorTier, CreatorViolation, GiftTransaction,
+		OutboxEvent, TipTransaction []ent.Interceptor
 	}
 )
 
