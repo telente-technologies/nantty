@@ -1,0 +1,85 @@
+.region {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding-block: var(--space-4);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.rowText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  background: var(--surface-card);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+  gap: var(--space-3);
+}
+
+.banner {
+  border-radius: var(--radius-large);
+}
+
+.profileHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: calc(var(--space-7) * -1);
+  padding-inline: var(--space-4);
+}
+
+.bubbleTheirs,
+.bubbleMine {
+  display: flex;
+}
+
+.bubbleMine {
+  justify-content: flex-end;
+}
+
+.bubble {
+  border-radius: var(--radius-large);
+}
+
+.split {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.squareMedia {
+  aspect-ratio: 1;
+  border-radius: var(--radius-large);
+}
+
+.pill {
+  margin-top: var(--space-3);
+  border-radius: var(--radius-pill);
+}
+
+@media (min-width: 768px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}

@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { RetryButton } from "@/components/ui/controls";
-import { ErrorState, Spinner } from "@/components/ui/feedback";
+import { ErrorState } from "@/components/ui/feedback";
 import styles from "@/components/settings/settings.module.css";
 import { legalLinks } from "@/config/legalLinks.config";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
@@ -16,6 +16,7 @@ import type { IdentityJourney } from "@/types/identityVerification.type";
 import { describeEligibilityReason, describeRefund } from "@/utils/identityVerificationCopy.util";
 
 import { IdentityConsentForm } from "./identityConsentForm";
+import { DetailSkeleton } from "@/components/ui/pageSkeletons";
 
 const journeyKey = ["verification", "journey"] as const;
 
@@ -52,7 +53,7 @@ export function IdentityVerificationHub() {
     onSettled: refresh,
   });
 
-  if (journeyQuery.isLoading) return <Spinner label="Checking your eligibility" />;
+  if (journeyQuery.isLoading) return <DetailSkeleton label="Checking your eligibility" blocks={2} />;
   if (journeyQuery.isError || !journeyQuery.data) return <ErrorState description="We couldn't load your verification." action={<RetryButton onRetry={() => journeyQuery.refetch()} />} />;
   const journey = journeyQuery.data;
   const badge = journey.color === "gold" ? "Gold" : "Blue";
