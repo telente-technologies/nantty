@@ -14,16 +14,32 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AffiliateCommission is the client for interacting with the AffiliateCommission builders.
+	AffiliateCommission *AffiliateCommissionClient
+	// AffiliateCommissionReversal is the client for interacting with the AffiliateCommissionReversal builders.
+	AffiliateCommissionReversal *AffiliateCommissionReversalClient
+	// AffiliateProductCommission is the client for interacting with the AffiliateProductCommission builders.
+	AffiliateProductCommission *AffiliateProductCommissionClient
+	// AffiliateProgramSetting is the client for interacting with the AffiliateProgramSetting builders.
+	AffiliateProgramSetting *AffiliateProgramSettingClient
 	// BattleSettlement is the client for interacting with the BattleSettlement builders.
 	BattleSettlement *BattleSettlementClient
+	// CreatorAffiliation is the client for interacting with the CreatorAffiliation builders.
+	CreatorAffiliation *CreatorAffiliationClient
+	// CreatorEarning is the client for interacting with the CreatorEarning builders.
+	CreatorEarning *CreatorEarningClient
 	// CreatorProgramMember is the client for interacting with the CreatorProgramMember builders.
 	CreatorProgramMember *CreatorProgramMemberClient
 	// CreatorTier is the client for interacting with the CreatorTier builders.
 	CreatorTier *CreatorTierClient
+	// CreatorViolation is the client for interacting with the CreatorViolation builders.
+	CreatorViolation *CreatorViolationClient
 	// GiftTransaction is the client for interacting with the GiftTransaction builders.
 	GiftTransaction *GiftTransactionClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
+	// TipTransaction is the client for interacting with the TipTransaction builders.
+	TipTransaction *TipTransactionClient
 
 	// lazily loaded.
 	client     *Client
@@ -155,11 +171,19 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AffiliateCommission = NewAffiliateCommissionClient(tx.config)
+	tx.AffiliateCommissionReversal = NewAffiliateCommissionReversalClient(tx.config)
+	tx.AffiliateProductCommission = NewAffiliateProductCommissionClient(tx.config)
+	tx.AffiliateProgramSetting = NewAffiliateProgramSettingClient(tx.config)
 	tx.BattleSettlement = NewBattleSettlementClient(tx.config)
+	tx.CreatorAffiliation = NewCreatorAffiliationClient(tx.config)
+	tx.CreatorEarning = NewCreatorEarningClient(tx.config)
 	tx.CreatorProgramMember = NewCreatorProgramMemberClient(tx.config)
 	tx.CreatorTier = NewCreatorTierClient(tx.config)
+	tx.CreatorViolation = NewCreatorViolationClient(tx.config)
 	tx.GiftTransaction = NewGiftTransactionClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
+	tx.TipTransaction = NewTipTransactionClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -169,7 +193,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: BattleSettlement.QueryXXX(), the query will be executed
+// applies a query, for example: AffiliateCommission.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
