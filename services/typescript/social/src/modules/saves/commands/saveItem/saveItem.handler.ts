@@ -1,3 +1,6 @@
+import { socialEventTypes } from "../../../../events/eventTypes.event.js";
+import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
+import { extractHashtags } from "../../../internalSources/services/hashtags.service.js";
 import { notFound, unprocessable } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { loadPostVisibleToViewer } from "../../../posts/services/postAccess.service.js";
@@ -10,11 +13,16 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 export function createSaveItemHandler(context: HandlerContext): Handler<SaveItemCommand, void> {
   return async ({ userId, type, targetId, collectionId }) => {
     const db = context.database.client;
-    if (type !== "product") {
-      if (!uuidPattern.test(targetId)) throw unprocessable("INVALID_TARGET", "targetId must be a post id.");
-      await loadPostVisibleToViewer(context, userId, targetId);
-    }
+    const post = type === "product" ? null : uuidPattern.test(targetId) ? await loadPostVisibleToViewer(context, userId, targetId) : null;
+    if (type !== "product" && post === null) throw unprocessable("INVALID_TARGET", "targetId must be a post id.");
     if (collectionId !== undefined && (await saveCollectionRepository.findOwned(db, userId, collectionId)) === null) throw notFound("COLLECTION_NOT_FOUND", "Collection not found.");
-    await db.$transaction((transaction) => savedItemRepository.saveAndCount(transaction, userId, type, targetId, collectionId));
+    const now = context.clock.now();
+    await db.$transaction(async (transaction) => {
+      if (!(await savedItemRepository.saveAndCount(transaction, userId, type, targetId, collectionId))) return;
+      await appendDomainEventsToOutbox(transaction, [{
+        eventType: socialEventTypes.contentSaved, subject: targetId, occurredAt: now,
+        data: { actorId: userId, targetType: type, targetId, ...(post === null ? {} : { postId: post.id, postAuthorId: post.authorId, kind: post.kind, topics: post.topics, hashtags: extractHashtags(post.text).slice(0, 20) }) },
+      }]);
+    });
   };
 }

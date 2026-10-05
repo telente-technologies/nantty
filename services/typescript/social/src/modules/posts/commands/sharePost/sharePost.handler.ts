@@ -12,7 +12,7 @@ export function createSharePostHandler(context: HandlerContext): Handler<SharePo
     await context.database.transaction(async (transaction) => {
       await postRepository.recordShare(transaction, postId, actorId, channel);
       await postRepository.incrementCounter(transaction, postId, "shareCount", 1);
-      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postShared, subject: postId, occurredAt: context.clock.now(), data: { postId, authorId: post.authorId, sharedBy: actorId, channel } }]);
+      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postShared, subject: postId, occurredAt: context.clock.now(), data: { postId, authorId: post.authorId, postAuthorId: post.authorId, actorId: actorId ?? null, topics: post.topics, sharedBy: actorId, channel } }]);
     });
   };
 }

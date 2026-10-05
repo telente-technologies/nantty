@@ -12,7 +12,7 @@ export function createLikePostHandler(context: HandlerContext): Handler<LikePost
     await context.database.transaction(async (transaction) => {
       if (!(await postRepository.addLike(transaction, postId, actorId))) return;
       await postRepository.incrementCounter(transaction, postId, "likeCount", 1);
-      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postLiked, subject: postId, occurredAt: now, data: { postId, authorId: post.authorId, likedBy: actorId } }]);
+      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postLiked, subject: postId, occurredAt: now, data: { postId, authorId: post.authorId, postAuthorId: post.authorId, actorId, topics: post.topics, likedBy: actorId } }]);
     });
   };
 }

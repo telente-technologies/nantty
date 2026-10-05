@@ -16,6 +16,7 @@ import { mountFollowsModule } from "../modules/follows/follows.module.js";
 import { mountLinkPreviewsModule } from "../modules/linkPreviews/linkPreviews.module.js";
 import { mountMentionsModule } from "../modules/mentions/mentions.module.js";
 import { mountMessagesModule } from "../modules/messages/messages.module.js";
+import { mountMessagingKeysModule } from "../modules/messagingKeys/messagingKeys.module.js";
 import { mountPostsModule } from "../modules/posts/posts.module.js";
 import { mountReportsModule } from "../modules/reports/reports.module.js";
 import { mountSearchModule } from "../modules/search/search.module.js";
@@ -43,8 +44,9 @@ export function registerRoutes(router: HttpRouter, route: RouteFactory, context:
   mountExploreModule(router, route, context);
   mountStoreInboxModule(router, route, context, internalToken);
   mountStoreFollowsModule(router, route, context, internalToken);
-  mountConversationsModule(router, route, context);
+  mountConversationsModule(router, route, context, internalToken);
   mountMessagesModule(router, route, context);
+  mountMessagingKeysModule(router, route, context);
   mountChatSettingsModule(router, route, context);
   mountContentPreferencesModule(router, route, context);
   mountStreaksModule(router, route, context);
