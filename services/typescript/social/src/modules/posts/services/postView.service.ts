@@ -6,7 +6,9 @@ import { downloadSettingRepository } from "../../downloads/repositories/download
 import { decidePostDownloadPermission } from "../../downloads/services/downloadPermission.service.js";
 import { savedItemRepository } from "../../saves/repositories/savedItem.repository.js";
 import type { LinkPreviewView } from "../../linkPreviews/models/linkPreview.model.js";
-import type { MediaView, PostView, ReplyToComment, StickerLayout } from "../models/post.model.js";
+import type { MediaView, PostClipEdit, PostLocationTag, PostView, ReplyToComment, StickerLayout } from "../models/post.model.js";
+import { clipDurationSeconds } from "./postMediaResolution.service.js";
+import { loadTaggedProducts } from "./postProducts.service.js";
 import type { SoundView } from "../../sounds/models/sound.model.js";
 import { buildSoundViews } from "../../sounds/services/soundView.service.js";
 import { postRepository, type PostRow } from "../repositories/post.repository.js";
@@ -16,7 +18,8 @@ import { buildSensitiveContentView, isPostWithheldFromViewer, resolveCurrentView
 
 type MediaRow = PostRow["media"][number];
 
-export function toMediaView(row: MediaRow): MediaView {
+export function toMediaView(row: MediaRow, clipEdit?: PostClipEdit | null): MediaView {
+  const trim = clipEdit?.trims?.[row.mediaId];
   return {
     id: row.mediaId,
     type: row.type,
@@ -28,6 +31,7 @@ export function toMediaView(row: MediaRow): MediaView {
     ...(row.durationSeconds === null ? {} : { durationSeconds: row.durationSeconds }),
     blurhash: row.blurhash,
     status: row.status,
+    ...(trim === undefined ? {} : { trim }),
   };
 }
 
@@ -44,7 +48,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
   const everyRow = [...rows, ...originals];
   const postIds = everyRow.map((row) => row.id);
   const authorIds = [...new Set(everyRow.map((row) => row.authorId))];
-  const [authors, liked, saved, followed, followingViewer, tagged, downloadsOff, privateAuthors] = await Promise.all([
+  const [authors, liked, saved, followed, followingViewer, tagged, downloadsOff, privateAuthors, products] = await Promise.all([
     context.directory.findUserSummaries(authorIds),
     viewerId === undefined ? new Set<string>() : postRepository.likedPostIds(db, viewerId, postIds),
     viewerId === undefined ? new Set<string>() : savedItemRepository.savedTargetIds(db, viewerId, postIds),
@@ -53,6 +57,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
     loadTaggedPreviews(context, viewerId, postIds),
     viewerId === undefined ? new Set<string>() : downloadSettingRepository.accountIdsWithDownloadsOff(db, authorIds),
     viewerId === undefined ? new Set<string>() : context.directory.findPrivateAccountIds(authorIds),
+    loadTaggedProducts(context, everyRow),
   ]);
   const soundIds = [...new Set(rows.flatMap((row) => (row.soundId === null ? [] : [row.soundId])))];
   const soundRows = soundIds.length === 0 ? [] : await db.sound.findMany({ where: { id: { in: soundIds } } });
@@ -68,6 +73,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
     const subscriberOnly = row.visibility === "subscribers";
     const hasAccess = !subscriberOnly || viewerId === row.authorId || subscribed.get(row.authorId) === true;
     const original = embedded || row.resharedFromId === null ? undefined : originals.find((candidate) => candidate.id === row.resharedFromId);
+    const clipEdit = row.clipEdit as PostClipEdit | null;
     const replyPermission = decideReplyPermission({
       policy: row.replyPolicy, viewerId, authorId: row.authorId, viewerFollowsAuthor: followed.has(row.authorId), authorFollowsViewer: followingViewer.has(row.authorId),
       mentionedUserIds: mentionedUserIdsFromEntities(row.mentions), subscriberOnly, viewerHasSubscriberAccess: hasAccess,
@@ -78,7 +84,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
       author: authors.get(row.authorId) ?? placeholderAuthor(row.authorId),
       createdAt: row.createdAt.toISOString(),
       text: hasAccess ? row.text : "",
-      media: hasAccess ? row.media.map(toMediaView) : [],
+      media: hasAccess ? row.media.map((media) => toMediaView(media, clipEdit)) : [],
       likes: row.likeCount,
       comments: row.commentCount,
       reposts: row.repostCount,
@@ -88,9 +94,14 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
       isSaved: saved.has(row.id),
       saveCount: row.saveCount,
       isFollowingAuthor: followed.has(row.authorId),
+      shares: row.shareCount,
+      durationSeconds: clipDurationSeconds(row.media, clipEdit),
       friendsLiked: null,
-      products: [],
+      products: hasAccess ? (products.get(row.id) ?? []) : [],
       sponsored: null,
+      topics: row.topics,
+      location: row.location as PostLocationTag | null,
+      slideshow: clipEdit?.slideshow ?? null,
       subscriberOnly,
       viewerHasAccess: hasAccess,
       resharedFrom: original === undefined ? null : toView(original, true),

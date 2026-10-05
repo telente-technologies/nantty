@@ -3,17 +3,25 @@ import { schema } from "@zudojs/schema";
 import { mentionEntitiesSchema } from "../../mentions/validators/mentions.validator.js";
 
 const mediaReferenceSchema = schema.object({
-  id: schema.string().uuid(),
-  type: schema.enum(["image", "video"]),
-  status: schema.enum(["uploaded", "processing", "ready", "failed"]).optional(),
-  url: schema.optional(schema.nullable(schema.string().max(2000))),
-  posterUrl: schema.optional(schema.nullable(schema.string().max(2000))),
-  hlsUrl: schema.optional(schema.nullable(schema.string().max(2000))),
-  width: schema.number().int().min(1).optional(),
-  height: schema.number().int().min(1).optional(),
-  durationSeconds: schema.number().min(0).optional(),
-  blurhash: schema.optional(schema.nullable(schema.string().max(120))),
+  id: schema.string().uuid().optional(),
+  mediaId: schema.string().uuid().optional(),
+  type: schema.enum(["image", "video"]).optional(),
+  trim: schema.object({ startMs: schema.number().int().min(0).max(3_600_000), endMs: schema.number().int().min(1).max(3_600_000) }).optional(),
 });
+
+const slideshowSchema = schema.object({
+  durationsMs: schema.array(schema.number().int().min(500).max(60_000)).min(1).max(10),
+  transition: schema.enum(["none", "crossfade", "slide"]),
+});
+
+const locationTagSchema = schema.object({
+  placeId: schema.string().min(1).max(200),
+  name: schema.string().min(1).max(120),
+  area: schema.optional(schema.nullable(schema.string().max(120))),
+});
+
+const topicSlugsSchema = schema.array(schema.string().min(2).max(40).regex(/^[a-z0-9-]+$/)).max(5);
+const productIdsSchema = schema.array(schema.string().uuid()).max(10);
 
 const stickerLayoutSchema = schema.object({
   x: schema.number().min(0).max(1),
@@ -45,8 +53,13 @@ export const createPostBodySchema = schema.object({
   replyPolicy: replyPolicySchema.optional(),
   sensitiveLabels: schema.array(sensitiveLabelSchema).max(4).optional(),
   taggedUserIds: taggedUserIdsSchema.optional(),
+  slideshow: slideshowSchema.optional(),
+  location: locationTagSchema.optional(),
+  topics: topicSlugsSchema.optional(),
+  productIds: productIdsSchema.optional(),
 });
 
+export const tagProductsBodySchema = schema.object({ productIds: productIdsSchema });
 export const setPostTagsBodySchema = schema.object({ taggedUserIds: taggedUserIdsSchema });
 export const taggingSettingsBodySchema = schema.object({ allowTagging: schema.boolean() });
 export const taggedUsersQuerySchema = schema.object({ cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
@@ -55,7 +68,7 @@ export const replySettingsBodySchema = schema.object({ replyPolicy: replyPolicyS
 export const sensitiveLabelsBodySchema = schema.object({ sensitiveLabels: schema.array(sensitiveLabelSchema).max(4) });
 export const quotesQuerySchema = schema.object({ cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
 
-export const publishStoryBodySchema = schema.object({ mediaId: schema.string().uuid(), media: mediaReferenceSchema });
+export const publishStoryBodySchema = schema.object({ mediaId: schema.string().uuid() });
 export const postIdParamsSchema = schema.object({ postId: schema.string().uuid() });
 export const storyIdParamsSchema = schema.object({ storyId: schema.string().uuid() });
 export const userIdParamsSchema = schema.object({ userId: schema.string().min(1).max(64) });
