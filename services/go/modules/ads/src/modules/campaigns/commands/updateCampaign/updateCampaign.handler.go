@@ -42,9 +42,6 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Campa
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		update := tx.AdCampaign.UpdateOneID(campaign.ID).SetName(merged.Name).SetStartAt(parseTime(merged.Schedule.StartAt))
 		applyBudgetAndCap(update, merged)
-		if merged.Schedule.EndAt != nil {
-			update.SetEndAt(parseTime(*merged.Schedule.EndAt))
-		}
 		if command.Patch.Status != nil {
 			update.SetStatus(adcampaign.Status(*command.Patch.Status))
 		}
@@ -84,9 +81,7 @@ func (handler Handler) mergeAndValidate(campaign *ent.AdCampaign, currency strin
 	if patch.Budget != nil {
 		merged.Budget = patch.Budget
 	}
-	if patch.SpendCap != nil {
-		merged.SpendCap = patch.SpendCap
-	}
+	merged.SpendCap = patch.SpendCap.Resolve(merged.SpendCap)
 	if patch.Schedule != nil {
 		merged.Schedule = *patch.Schedule
 	}

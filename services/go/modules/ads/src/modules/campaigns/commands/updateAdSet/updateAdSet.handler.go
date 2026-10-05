@@ -38,6 +38,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdSet
 	if err := issues.Error(); err != nil {
 		return dtos.AdSet{}, err
 	}
+	if command.Patch.Audience != nil {
+		if err := services.RequireUsableAccountReferences(ctx, deployed.Client, account.ID, dtos.AdSetInput{Audience: merged.Audience}, ""); err != nil {
+			return dtos.AdSet{}, err
+		}
+	}
 	if command.Patch.Status != nil {
 		if err := handler.checkStatusChange(ctx, account, group, *command.Patch.Status); err != nil {
 			return dtos.AdSet{}, err

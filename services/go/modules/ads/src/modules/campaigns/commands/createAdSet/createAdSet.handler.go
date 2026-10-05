@@ -40,6 +40,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdSet
 	if err := issues.Error(); err != nil {
 		return dtos.AdSet{}, err
 	}
+	if err := services.RequireUsableAccountReferences(ctx, deployed.Client, account.ID, command.Request.AdSetInput, ""); err != nil {
+		return dtos.AdSet{}, err
+	}
 	actor := accountservices.ActorFor(ctx, deployed, command.UserId)
 	var group *ent.AdGroup
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {

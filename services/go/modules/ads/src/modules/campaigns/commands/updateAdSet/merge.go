@@ -30,9 +30,7 @@ func merge(current dtos.AdSetInput, patch dtos.AdSetPatch) dtos.AdSetInput {
 	if patch.BidStrategy != nil {
 		current.BidStrategy = *patch.BidStrategy
 	}
-	if patch.FrequencyCap != nil {
-		current.FrequencyCap = patch.FrequencyCap
-	}
+	current.FrequencyCap = patch.FrequencyCap.Resolve(current.FrequencyCap)
 	return current
 }
 
@@ -46,6 +44,8 @@ func applyMerged(update *ent.AdGroupUpdateOne, merged dtos.AdSetInput) {
 	if merged.Schedule.EndAt != nil {
 		end, _ := time.Parse(time.RFC3339, *merged.Schedule.EndAt)
 		update.SetEndAt(end)
+	} else {
+		update.ClearEndAt()
 	}
 	if merged.Budget != nil {
 		update.SetBudgetType(adgroup.BudgetType(merged.Budget.Type)).SetBudgetAmountMinor(merged.Budget.Amount.AmountMinor)
@@ -57,5 +57,7 @@ func applyMerged(update *ent.AdGroupUpdateOne, merged dtos.AdSetInput) {
 	}
 	if merged.FrequencyCap != nil {
 		update.SetFrequencyCapImpressions(merged.FrequencyCap.Impressions).SetFrequencyCapPerDays(merged.FrequencyCap.PerDays)
+	} else {
+		update.ClearFrequencyCapImpressions().ClearFrequencyCapPerDays()
 	}
 }

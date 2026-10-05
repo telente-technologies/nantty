@@ -29,6 +29,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Campa
 	if err := validators.ValidateBundle(command.Submission, account.Currency, deployed.Pricing.FloorsForAudience(ctx, command.Submission.AdSet.Audience, account.Currency)); err != nil {
 		return dtos.CampaignDraftResult{}, err
 	}
+	if err := services.RequireUsableAccountReferences(ctx, deployed.Client, account.ID, command.Submission.AdSet, "adSet."); err != nil {
+		return dtos.CampaignDraftResult{}, err
+	}
 	for index, input := range command.Submission.Ads {
 		if err := adsservices.VerifyCreativeOwnership(ctx, deployed.Ownership, adsservices.AdvertiserIdentity{OwnerUserId: account.OwnerUserID.String(), StoreId: account.StoreID}, input.Creative, fmt.Sprintf("ads.%d.creative", index)); err != nil {
 			return dtos.CampaignDraftResult{}, err

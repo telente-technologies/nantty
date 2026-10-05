@@ -19,5 +19,12 @@ func applyBudgetAndCap(update *ent.AdCampaignUpdateOne, merged dtos.CampaignInpu
 	}
 	if merged.SpendCap != nil {
 		update.SetSpendCapMinor(merged.SpendCap.AmountMinor)
+	} else {
+		update.ClearSpendCapMinor()
+	}
+	if merged.Schedule.EndAt != nil {
+		update.SetEndAt(parseTime(*merged.Schedule.EndAt))
+	} else {
+		update.ClearEndAt()
 	}
 }
