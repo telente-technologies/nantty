@@ -143,6 +143,7 @@ const (
 	StoreNotificationRenewed       StoreNotificationKind = "renewed"
 	StoreNotificationExpired       StoreNotificationKind = "expired"
 	StoreNotificationRenewalFailed StoreNotificationKind = "renewalFailed"
+	StoreNotificationGrace         StoreNotificationKind = "grace"
 	StoreNotificationOther         StoreNotificationKind = "other"
 )
 

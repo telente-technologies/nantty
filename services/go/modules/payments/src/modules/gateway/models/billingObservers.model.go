@@ -26,14 +26,17 @@ type BillingSubscriptionObserver interface {
 }
 
 type SavedCardFingerprint struct {
-	OwnerUserId        string
-	FingerprintHash    string
-	CardLabel          string
-	SavedAt            time.Time
-	Purpose            string
-	SubjectId          string
-	ProviderCustomerId string
-	SetupReference     string
+	OwnerUserId            string
+	FingerprintHash        string
+	CardLabel              string
+	SavedAt                time.Time
+	Purpose                string
+	SubjectId              string
+	ProviderCustomerId     string
+	SetupReference         string
+	BillingAuthorizationId string
+	CardExpiryMonth        int
+	CardExpiryYear         int
 }
 
 type SavedCardObserver interface {

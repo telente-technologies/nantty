@@ -23,26 +23,27 @@ type OrderPayable struct {
 }
 
 type SettledPayment struct {
-	IntentId              uuid.UUID
-	Reference             string
-	Purpose               string
-	OwnerUserId           string
-	SubjectId             string
-	Provider              string
-	AmountMinor           int64
-	AppliedAmountMinor    int64
-	Currency              string
-	ConnectedAccountId    string
-	BeneficiaryUserId     string
-	PlatformFeeMinor      int64
-	ProviderFeeMinor      int64
-	ProviderTransactionId string
-	ProviderCustomerId    string
-	FailureReason         string
-	SettledAt             time.Time
-	OrderPayables         []OrderPayable
-	GroupAllocations      []SettledGroupAllocation
-	Authorization         *CardAuthorizationHandoff
+	IntentId               uuid.UUID
+	Reference              string
+	Purpose                string
+	OwnerUserId            string
+	SubjectId              string
+	Provider               string
+	AmountMinor            int64
+	AppliedAmountMinor     int64
+	Currency               string
+	ConnectedAccountId     string
+	BeneficiaryUserId      string
+	PlatformFeeMinor       int64
+	ProviderFeeMinor       int64
+	ProviderTransactionId  string
+	ProviderCustomerId     string
+	FailureReason          string
+	SettledAt              time.Time
+	OrderPayables          []OrderPayable
+	GroupAllocations       []SettledGroupAllocation
+	Authorization          *CardAuthorizationHandoff
+	BillingAuthorizationId string
 }
 
 type CardAuthorizationHandoff struct {
@@ -128,6 +129,7 @@ type CreatePaymentIntentRequest struct {
 	PlatformFeeMinor  int64
 	ReturnTo          string
 	Metadata          map[string]string
+	Reference         string
 
 	SettleToSellerSubaccount bool
 }

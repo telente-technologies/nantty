@@ -14,7 +14,10 @@ import (
 	"zudomart/platform/httpserver"
 )
 
-var errOrderNotFound = httpserver.NewApiError(http.StatusNotFound, "ORDER_NOT_FOUND", "Order was not found.")
+var (
+	errOrderNotFound  = httpserver.NewApiError(http.StatusNotFound, "ORDER_NOT_FOUND", "Order was not found.")
+	errOrderCancelled = httpserver.NewApiError(http.StatusConflict, "ORDER_CANCELLED", "This order was cancelled, so there is nothing to pay. Start a new checkout if you still want it.")
+)
 
 type Handler struct {
 	Application *gateway.Application
@@ -85,10 +88,20 @@ func (handler Handler) findCheckoutPayables(ctx context.Context, transaction *sq
 	if len(payables) == 0 {
 		return nil, errOrderNotFound
 	}
+	orderIds := make([]string, 0, len(payables))
 	for _, payable := range payables {
 		if payable.BuyerUserId != command.BuyerUserId {
 			return nil, errOrderNotFound
 		}
+		orderIds = append(orderIds, payable.OrderId)
+	}
+	cancelled, err := handler.Application.Container.OrderStatuses.CancelledOrderIds(ctx, orderIds)
+	if err != nil {
+		handler.Application.Container.Resources.Logger.WarnContext(ctx, "order status lookup failed; the late-payment refund still covers a cancelled order", "error", err)
+		return payables, nil
+	}
+	if len(cancelled) > 0 {
+		return nil, errOrderCancelled
 	}
 	return payables, nil
 }
