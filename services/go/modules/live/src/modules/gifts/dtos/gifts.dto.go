@@ -1,5 +1,7 @@
 package dtos
 
+import "encoding/json"
+
 type SendGiftRequest struct {
 	LiveId         string `json:"liveId"`
 	GiftId         string `json:"giftId"`
@@ -16,9 +18,19 @@ type PathSendGiftRequest struct {
 }
 
 type GiftGoalRequest struct {
-	Title       *string `json:"title"`
-	TargetCoins *int64  `json:"targetCoins"`
-	GiftId      *string `json:"giftId"`
+	Title       *string        `json:"title"`
+	TargetCoins *int64         `json:"targetCoins"`
+	GiftId      NullableString `json:"giftId"`
+}
+
+type NullableString struct {
+	Present bool
+	Value   *string
+}
+
+func (field *NullableString) UnmarshalJSON(raw []byte) error {
+	field.Present = true
+	return json.Unmarshal(raw, &field.Value)
 }
 
 type GiftRequest struct {

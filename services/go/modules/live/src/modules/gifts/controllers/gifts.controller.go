@@ -145,7 +145,7 @@ func (controller GiftsController) CreateGiftGoal(writer http.ResponseWriter, req
 		if err != nil {
 			return err
 		}
-		goal, err := (creategiftgoal.Handler{Container: controller.Container}).Execute(request.Context(), creategiftgoal.Command{Actor: actor, LiveId: liveId, Input: types.GiftGoalInput{Title: body.Title, TargetCoins: body.TargetCoins, GiftId: body.GiftId}})
+		goal, err := (creategiftgoal.Handler{Container: controller.Container}).Execute(request.Context(), creategiftgoal.Command{Actor: actor, LiveId: liveId, Input: types.GiftGoalInput{Title: body.Title, TargetCoins: body.TargetCoins, GiftId: body.GiftId.Value, GiftIdPresent: body.GiftId.Present}})
 		if err == nil {
 			httpserver.WriteJsonResponse(writer, http.StatusCreated, goal)
 		}
@@ -163,7 +163,7 @@ func (controller GiftsController) UpdateGiftGoal(writer http.ResponseWriter, req
 		if err != nil {
 			return err
 		}
-		goal, err := (updategiftgoal.Handler{Container: controller.Container}).Execute(request.Context(), updategiftgoal.Command{Actor: actor, LiveId: liveId, GoalId: goalId, Input: types.GiftGoalInput{Title: body.Title, TargetCoins: body.TargetCoins}})
+		goal, err := (updategiftgoal.Handler{Container: controller.Container}).Execute(request.Context(), updategiftgoal.Command{Actor: actor, LiveId: liveId, GoalId: goalId, Input: types.GiftGoalInput{Title: body.Title, TargetCoins: body.TargetCoins, GiftId: body.GiftId.Value, GiftIdPresent: body.GiftId.Present}})
 		if err == nil {
 			httpserver.WriteJsonResponse(writer, http.StatusOK, goal)
 		}

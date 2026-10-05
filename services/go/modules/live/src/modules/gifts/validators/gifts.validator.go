@@ -47,6 +47,9 @@ func ValidateGiftGoalRequest(body dtos.GiftGoalRequest, creating bool) error {
 	if body.TargetCoins != nil && *body.TargetCoins < 10 {
 		collected.Add("targetCoins", "must be at least 10")
 	}
+	if giftId := body.GiftId.Value; giftId != nil && (strings.TrimSpace(*giftId) == "" || len(*giftId) > 64) {
+		collected.Add("giftId", "must be a gift id or null")
+	}
 	return collected.AsError()
 }
 
