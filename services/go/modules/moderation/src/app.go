@@ -19,6 +19,8 @@ import (
 	"zudomart/modules/moderation/src/migrations"
 	accesssecurity "zudomart/modules/moderation/src/modules/accessSecurity"
 	accounthealth "zudomart/modules/moderation/src/modules/accountHealth"
+	"zudomart/modules/moderation/src/modules/appeals"
+	automationrules "zudomart/modules/moderation/src/modules/automationRules"
 	"zudomart/modules/moderation/src/modules/chatReports"
 	"zudomart/modules/moderation/src/modules/contentReports"
 	"zudomart/modules/moderation/src/modules/copyrightClaims"
@@ -145,6 +147,8 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	livesafety.Mount(mux, module.container)
 	accesssecurity.Mount(mux, module.container)
 	accounthealth.Mount(mux, module.container)
+	automationrules.Mount(mux, module.container)
+	appeals.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
@@ -154,6 +158,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	go accesssecurity.RunRetentionUntilContextDone(ctx, module.container)
 	go copyrightclaims.RunTakedownDeadlineWorkerUntilContextDone(ctx, module.container)
 	go accounthealth.RunStrikeExpiryWorkerUntilContextDone(ctx, module.container)
+	go automationrules.RunOccurrenceCleanupUntilContextDone(ctx, module.container)
 	go module.consumeContentSignals(ctx)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},

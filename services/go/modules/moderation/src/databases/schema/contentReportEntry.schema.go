@@ -21,7 +21,7 @@ func (ContentReportEntry) Fields() []ent.Field {
 		field.UUID("reporter_id", uuid.UUID{}).Optional().Nillable().Immutable(),
 		field.String("reason").MaxLen(40).Immutable(),
 		field.String("details").MaxLen(500).Default("").Immutable(),
-		field.Enum("source").Values("user", "classifier").Default("user").Immutable(),
+		field.Enum("source").Values("user", "classifier", "automation").Default("user").Immutable(),
 		field.String("source_event_id").MaxLen(128).Optional().Nillable().Immutable(),
 	}
 }

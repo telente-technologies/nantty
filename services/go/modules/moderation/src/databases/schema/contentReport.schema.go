@@ -30,7 +30,7 @@ func (ContentReport) Fields() []ent.Field {
 		field.Time("last_reported_at"),
 		field.Time("sla_due_at"),
 		field.Enum("visibility").Values("visible", "hidden", "restricted", "removed").Default("visible"),
-		field.Enum("source").Values("user", "classifier").Default("user").Immutable(),
+		field.Enum("source").Values("user", "classifier", "automation").Default("user").Immutable(),
 		field.Bytes("target_preview").Optional().SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.Bytes("classifier_scores").Optional().SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.Enum("classifier_action").Values("none", "allow", "reduce", "hold").Default("none"),
