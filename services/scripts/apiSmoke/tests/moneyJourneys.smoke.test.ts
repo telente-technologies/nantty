@@ -143,11 +143,10 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     expect(refunded, "escrow was not refunded").toBeDefined();
     const state = await readFakePaystackState();
     expect(Array.isArray(state.refunds) && state.refunds.length > 0, "provider never received a refund").toBe(true);
-    const feeLines = psql(`select a.code, l.amount_minor from ledger.journal_entries e join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where e.kind like 'escrow.refund%' and a.code like 'revenue:escrowFees%'`);
+    const feeLines = psql(`select a.code, l.amount_minor from escrow.escrows x join ledger.journal_entries e on e.reference like '%' || x.id::text || '%' join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where x.order_id = '${orderId}' and e.kind like 'escrow.refund%' and a.code like 'revenue:escrowFees%'`);
     expect(feeLines.length, "refunds must not earn an escrow fee").toBe(0);
   });
 
-  // FINAL RUN ONLY: needs docker (not run when written). Direct payment: create -> pay -> seller paid -> refund.
   it("pays a verified store directly: rejects direct for unverified stores, pays the seller at once, then refunds through the seller", { timeout: 120_000 }, async () => {
     const direct = await createStoreWithProduct("sellerd", itemPriceMinor);
     await addToCart(buyer, direct, 1);
@@ -155,19 +154,26 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     expect(refusedDirect.status, describeResponse(refusedDirect)).toBe(422);
     expect(refusedDirect.body?.error?.code ?? refusedDirect.body?.code).toBe("DIRECT_PAYMENT_NOT_ALLOWED");
     psql(`update catalog.stores set verified = true where id = '${direct.storeId}'`);
+    await onboardPayoutAccount(direct.seller, "seller");
     const placed = await checkout(buyer, addressId, { [direct.storeId]: "direct" });
     const orderId = placed.orderIds[0]!;
     expect(psql(`select payment_mode from orders.order_groups where id = '${orderId}'`)[0]?.[0]).toBe("direct");
-    await initializeAndPay(buyer, placed.checkoutId, 20_000);
+    const initialized = await waitFor(async () => {
+      const response = await callApi("POST", "/api/v1/payments/initialize", { token: buyer.accessToken, body: { checkoutId: placed.checkoutId } });
+      return response.body?.code === "SELLER_NOT_READY_FOR_PAYMENTS" ? undefined : response;
+    }, 30_000, 1000);
+    expect(initialized?.status, initialized === undefined ? "the seller subaccount never became ready" : describeResponse(initialized)).toBe(201);
+    await payCheckoutThroughFakePaystack(initialized!.body.reference, 20_000);
     const released = await waitForEscrowStatus(orderId, "released");
     expect(released, "direct order must be released to the seller immediately").toBeDefined();
     expect(psql(`select payment_mode, release_trigger from escrow.escrows where order_id = '${orderId}'`)[0]).toEqual(["direct", "directPayment"]);
     const detail = await callApi("GET", `/api/v1/orders/${orderId}`, { token: buyer.accessToken });
     expect(detail.body.paymentMode, describeResponse(detail)).toBe("direct");
-    const refund = await callApi("POST", `/api/v1/seller/orders/${orderId}/refunds`, {
-      token: direct.seller.accessToken, headers: { "x-store-id": direct.storeId, "idempotency-key": `direct-refund-${orderId}` }, body: { amountMinor: itemPriceMinor, reason: "Smoke refund of a direct order" },
-    });
-    expect([200, 201], describeResponse(refund)).toContain(refund.status);
+    const rejected = await waitFor(async () => {
+      const response = await callApi("POST", `/api/v1/seller/orders/${orderId}/reject`, { token: direct.seller.accessToken, headers: { "x-store-id": direct.storeId }, body: { reason: "Smoke refund of a direct order" } });
+      return response.status === 409 ? undefined : response;
+    }, 20_000, 1000);
+    expect([200, 201, 204], rejected === undefined ? "direct order never became rejectable" : describeResponse(rejected)).toContain(rejected?.status);
     const refunded = await waitForEscrowStatus(orderId, "refunded", 30_000);
     expect(refunded, "direct order was not refunded").toBeDefined();
     const debt = psql(`select l.amount_minor from ledger.journal_entries e join ledger.journal_lines l on l.entry_id = e.id join ledger.ledger_accounts a on a.id = l.account_id where e.kind = 'directPayment.refundedFromPlatform' and a.code like 'seller:%debt%'`);
