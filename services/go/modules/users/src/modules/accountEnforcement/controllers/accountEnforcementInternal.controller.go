@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"crypto/subtle"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -14,15 +13,13 @@ import (
 	warnuser "zudomart/modules/users/src/modules/accountEnforcement/commands/warnUser"
 	"zudomart/modules/users/src/modules/accountEnforcement/dtos"
 	"zudomart/modules/users/src/modules/accountEnforcement/services"
+	revokeaccountcheckmarks "zudomart/modules/users/src/modules/checkmarks/commands/revokeAccountCheckmarks"
 	"zudomart/modules/users/src/types"
 	"zudomart/modules/users/src/utils"
-	"zudomart/platform/httpserver"
 )
 
 func (controller AccountEnforcementController) InternalAction(writer http.ResponseWriter, request *http.Request) {
-	expected := controller.Container.Settings.Privacy.InternalApiToken
-	if expected == "" || subtle.ConstantTimeCompare([]byte(expected), []byte(request.Header.Get("X-Internal-Token"))) != 1 {
-		httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+	if !controller.internalCallerIsTrusted(writer, request) {
 		return
 	}
 	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.InternalActionRequest])
@@ -47,8 +44,14 @@ func (controller AccountEnforcementController) InternalAction(writer http.Respon
 		result, err = deleteuser.Handler{Container: controller.Container}.Execute(request.Context(), deleteuser.Command{Actor: actor, TargetId: body.UserId, ConfirmUsername: body.ConfirmUsername, Reason: body.Reason})
 	case "warn":
 		result, err = warnuser.Handler{Container: controller.Container}.Execute(request.Context(), warnuser.Command{Actor: actor, TargetId: body.UserId, Reason: body.Reason, Source: body.Source, CaseId: body.CaseId})
+	case "reinstate":
+		result, err = controller.internalReinstate(request, body, actor)
+	case "revoke_verification":
+		result, err = revokeaccountcheckmarks.Handler{Container: controller.Container}.Execute(request.Context(), revokeaccountcheckmarks.Command{
+			Actor: actor, TargetId: body.UserId, Reason: body.Reason, Source: body.Source, CaseId: body.CaseId,
+		})
 	default:
-		err = usersErrors.ValidationFailedFor("action", "must be warn, restrict, suspend, ban or delete")
+		err = usersErrors.ValidationFailedFor("action", "must be warn, restrict, suspend, ban, delete, reinstate or revoke_verification")
 	}
 	controller.respond(writer, request, http.StatusOK, result, err)
 }
@@ -74,9 +77,7 @@ type summariesRequest struct {
 }
 
 func (controller AccountEnforcementController) InternalSummaries(writer http.ResponseWriter, request *http.Request) {
-	expected := controller.Container.Settings.Privacy.InternalApiToken
-	if expected == "" || subtle.ConstantTimeCompare([]byte(expected), []byte(request.Header.Get("X-Internal-Token"))) != 1 {
-		httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+	if !controller.internalCallerIsTrusted(writer, request) {
 		return
 	}
 	body, err := utils.DecodeAndValidate(writer, request, acceptAny[summariesRequest])

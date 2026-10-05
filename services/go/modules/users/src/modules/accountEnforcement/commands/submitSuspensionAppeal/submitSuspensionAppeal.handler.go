@@ -3,6 +3,7 @@ package submitsuspensionappeal
 import (
 	"context"
 	"strings"
+	"time"
 
 	"zudomart/modules/users/src/container"
 	usersErrors "zudomart/modules/users/src/errors"
@@ -42,7 +43,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 			return err
 		}
 		return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, accountevents.SuspensionAppealSubmittedType, target.Account.ID.String(), now, accountevents.SuspensionAppealData{
-			AccountId: target.Account.ID.String(), SuspensionId: suspension.ID.String(),
+			AccountId: target.Account.ID.String(), CaseId: suspension.ID.String(), Message: message, ReasonCode: suspension.ReasonCode, Reason: suspension.Note,
+			SuspendedAt: suspension.CreatedAt.UTC().Format(time.RFC3339), SubmittedAt: now.UTC().Format(time.RFC3339), DeletionDueAt: suspension.DeletionDueAt.UTC().Format(time.RFC3339),
 		})
 	})
 }

@@ -17,7 +17,8 @@ import (
 )
 
 type Handler struct {
-	Container *container.Container
+	Container         *container.Container
+	skipDecisionEvent bool
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) (string, error) {
@@ -53,6 +54,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (string, er
 	}
 	if err != nil {
 		return "", err
+	}
+	if handler.skipDecisionEvent {
+		return command.Outcome, nil
 	}
 	return command.Outcome, handler.publishDecision(ctx, suspension, command.Outcome, reason)
 }
