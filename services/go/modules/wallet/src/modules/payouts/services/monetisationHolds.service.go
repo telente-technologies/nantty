@@ -2,7 +2,11 @@ package services
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"time"
+
+	entsql "entgo.io/ent/dialect/sql"
 
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/wallet/src/container"
@@ -23,26 +27,27 @@ type MonetisationHolds struct {
 	Container *container.Container
 }
 
-func ShouldApplyHealthChange(existing *ent.MonetisationHold, occurredAt time.Time) bool {
-	return existing == nil || !occurredAt.Before(existing.HealthChangedAt)
+func HealthChangeConflictOptions() []entsql.ConflictOption {
+	newerOnly := entsql.ExprP(`"` + monetisationhold.Table + `"."` + monetisationhold.FieldHealthChangedAt + `" <= EXCLUDED."` + monetisationhold.FieldHealthChangedAt + `"`)
+	return []entsql.ConflictOption{entsql.ConflictColumns(monetisationhold.FieldID), entsql.ResolveWithNewValues(), entsql.UpdateWhere(newerOnly)}
 }
 
 func (holds MonetisationHolds) ApplyAccountHealthChange(ctx context.Context, change AccountHealthChange) error {
 	if change.AccountId == "" {
 		return nil
 	}
-	client := holds.Container.Client(holds.Container.Resources.Database)
-	existing, err := client.MonetisationHold.Get(ctx, change.AccountId)
-	if err != nil && !ent.IsNotFound(err) {
-		return err
-	}
-	if existing != nil && !ShouldApplyHealthChange(existing, change.OccurredAt) {
+	return UpsertNewerHealthChange(ctx, holds.Container.Client(holds.Container.Resources.Database), change, holds.Container.Now().UTC())
+}
+
+func UpsertNewerHealthChange(ctx context.Context, client *ent.Client, change AccountHealthChange, now time.Time) error {
+	restrictions := append([]string{}, change.Restrictions...)
+	err := client.MonetisationHold.Create().SetID(change.AccountId).SetIsPaused(!change.CanMonetise).SetAccountStatus(change.Status).SetRestrictions(restrictions).SetReason(change.Reason).
+		SetHealthChangedAt(change.OccurredAt).SetUpdatedAt(now).
+		OnConflict(HealthChangeConflictOptions()...).Exec(ctx)
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil
 	}
-	restrictions := append([]string{}, change.Restrictions...)
-	return client.MonetisationHold.Create().SetID(change.AccountId).SetIsPaused(!change.CanMonetise).SetAccountStatus(change.Status).SetRestrictions(restrictions).SetReason(change.Reason).
-		SetHealthChangedAt(change.OccurredAt).SetUpdatedAt(holds.Container.Now().UTC()).
-		OnConflictColumns(monetisationhold.FieldID).UpdateNewValues().Exec(ctx)
+	return err
 }
 
 func (holds MonetisationHolds) IsMonetisationPaused(ctx context.Context, executor databases.ExecutorQuerier, userId string) (bool, error) {

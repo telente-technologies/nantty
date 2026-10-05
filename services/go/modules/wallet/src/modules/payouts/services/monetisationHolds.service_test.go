@@ -1,19 +1,22 @@
 package services
 
 import (
+	"strings"
 	"testing"
-	"time"
 
-	"zudomart/modules/wallet/src/generated/ent"
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+
+	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 )
 
-func TestOlderHealthEventsNeverOverrideNewerOnes(t *testing.T) {
-	now := time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC)
-	existing := &ent.MonetisationHold{HealthChangedAt: now}
-	if !ShouldApplyHealthChange(nil, now) || !ShouldApplyHealthChange(existing, now.Add(time.Minute)) || !ShouldApplyHealthChange(existing, now) {
-		t.Fatal("first, newer and replayed events apply")
-	}
-	if ShouldApplyHealthChange(existing, now.Add(-time.Minute)) {
-		t.Fatal("an out-of-order older event must not lift or set a pause")
+func TestHealthChangeUpsertOnlyOverwritesWithANewerOrEqualEvent(t *testing.T) {
+	query, _ := entsql.Dialect(dialect.Postgres).Insert(monetisationhold.Table).
+		Columns(monetisationhold.FieldID, monetisationhold.FieldHealthChangedAt).Values("acct-1", "2026-10-04T12:00:00Z").
+		OnConflict(HealthChangeConflictOptions()...).Query()
+	for _, want := range []string{`ON CONFLICT ("id") DO UPDATE SET`, `"health_changed_at" = "excluded"."health_changed_at"`, `WHERE "monetisation_holds"."health_changed_at" <= EXCLUDED."health_changed_at"`} {
+		if !strings.Contains(query, want) {
+			t.Fatalf("missing %q in %s", want, query)
+		}
 	}
 }

@@ -57,8 +57,6 @@ func (catalog CoinCatalog) DefaultCoinPackDefinitions() []CoinPackDefinition {
 	return definitions
 }
 
-// SeedDefaultCoinPackagesWhenMissing inserts the regional catalogue and adds any currency an existing pack has no price
-// for yet, never changing a price that is already set.
 func (catalog CoinCatalog) SeedDefaultCoinPackagesWhenMissing(ctx context.Context) error {
 	client := catalog.Container.Client(catalog.Container.Resources.Database)
 	for _, definition := range catalog.DefaultCoinPackDefinitions() {
