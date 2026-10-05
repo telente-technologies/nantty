@@ -91,3 +91,12 @@ func NormalizeShippingCountries(codes []string) []string {
 	slices.Sort(result)
 	return result
 }
+
+func ListedStoreCondition() predicate.Product {
+	return predicate.Product(func(selector *sql.Selector) {
+		selector.Where(sql.P(func(builder *sql.Builder) {
+			builder.WriteString("EXISTS (SELECT 1 FROM stores ls WHERE ls.id = ").WriteString(selector.C(product.FieldStoreID))
+			builder.WriteString(" AND ls.status = 'active' AND ls.moderation_visibility IN ('visible', 'restricted'))")
+		}))
+	})
+}
