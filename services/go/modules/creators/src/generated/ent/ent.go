@@ -8,11 +8,19 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
+	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
+	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
+	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
+	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
+	"zudomart/modules/creators/src/generated/ent/creatorearning"
 	"zudomart/modules/creators/src/generated/ent/creatorprogrammember"
 	"zudomart/modules/creators/src/generated/ent/creatortier"
+	"zudomart/modules/creators/src/generated/ent/creatorviolation"
 	"zudomart/modules/creators/src/generated/ent/gifttransaction"
 	"zudomart/modules/creators/src/generated/ent/outboxevent"
+	"zudomart/modules/creators/src/generated/ent/tiptransaction"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -77,11 +85,19 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			battlesettlement.Table:     battlesettlement.ValidColumn,
-			creatorprogrammember.Table: creatorprogrammember.ValidColumn,
-			creatortier.Table:          creatortier.ValidColumn,
-			gifttransaction.Table:      gifttransaction.ValidColumn,
-			outboxevent.Table:          outboxevent.ValidColumn,
+			affiliatecommission.Table:         affiliatecommission.ValidColumn,
+			affiliatecommissionreversal.Table: affiliatecommissionreversal.ValidColumn,
+			affiliateproductcommission.Table:  affiliateproductcommission.ValidColumn,
+			affiliateprogramsetting.Table:     affiliateprogramsetting.ValidColumn,
+			battlesettlement.Table:            battlesettlement.ValidColumn,
+			creatoraffiliation.Table:          creatoraffiliation.ValidColumn,
+			creatorearning.Table:              creatorearning.ValidColumn,
+			creatorprogrammember.Table:        creatorprogrammember.ValidColumn,
+			creatortier.Table:                 creatortier.ValidColumn,
+			creatorviolation.Table:            creatorviolation.ValidColumn,
+			gifttransaction.Table:             gifttransaction.ValidColumn,
+			outboxevent.Table:                 outboxevent.ValidColumn,
+			tiptransaction.Table:              tiptransaction.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)
