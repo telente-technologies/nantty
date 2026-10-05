@@ -18,7 +18,7 @@ export interface SearchConfig {
   readonly identity: InternalSource | undefined;
   readonly commerce: InternalSource | undefined;
   readonly social: InternalSource | undefined;
-  readonly intelligence: { readonly baseUrl: string; readonly sharedSecret: string; readonly timeoutMs: number } | undefined;
+  readonly intelligence: { readonly baseUrl: string; readonly sharedSecret: string; readonly idHashSecret: string; readonly timeoutMs: number } | undefined;
 }
 
 function readOrDefault(name: string, fallback: string): string {
@@ -51,7 +51,7 @@ export function loadSearchConfigFromEnvironment(): SearchConfig {
     identity: readInternalSource("IDENTITY_INTERNAL"),
     commerce: readInternalSource("COMMERCE_INTERNAL"),
     social: readInternalSource("SOCIAL_INTERNAL"),
-    intelligence: intelligenceUrl === "" ? undefined : { baseUrl: intelligenceUrl, sharedSecret: readOrDefault("INTELLIGENCE_SHARED_SECRET", ""), timeoutMs: Number(readOrDefault("RERANK_TIMEOUT_MS", "100")) },
+    intelligence: intelligenceUrl === "" ? undefined : { baseUrl: intelligenceUrl, sharedSecret: readOrDefault("INTELLIGENCE_SHARED_SECRET", ""), idHashSecret: readOrDefault("INTELLIGENCE_ID_HASH_SECRET", ""), timeoutMs: Number(readOrDefault("RERANK_TIMEOUT_MS", "100")) },
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
   if (config.intelligence !== undefined && config.intelligence.sharedSecret === "") problems.push("INTELLIGENCE_SHARED_SECRET is required when INTELLIGENCE_URL is set");

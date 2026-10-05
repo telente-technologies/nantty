@@ -14,6 +14,7 @@ import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.m
 import { createSearchPrisma } from "./databases/prisma.database.js";
 import { createHttpSourceHydrator } from "./integrations/httpSourceHydrator.integration.js";
 import { createPythonSearchReranker } from "./integrations/pythonSearchReranker.integration.js";
+import { createIdentifierHasher, deriveIdentifierHashSecret } from "./utils/identifierHashing.util.js";
 import type { MessageConsumerFactory, QueueConsumer } from "./interfaces/domainEventConsumer.interface.js";
 import { noReranker } from "./interfaces/searchReranker.interface.js";
 import { createSearchIndexPostgresRepository } from "./modules/indexing/repositories/searchIndex.postgres.repository.js";
@@ -32,7 +33,7 @@ export interface SearchApp {
 export function createSearchApp(config: SearchConfig, consumerFactory: MessageConsumerFactory | undefined, logger: Logger = createLogger({ name: "search" })): SearchApp {
   const prisma = createSearchPrisma(config.databaseUrl, config.databaseSchema);
   const indexStore = createSearchIndexPostgresRepository(prisma);
-  const reranker = config.intelligence === undefined ? noReranker : createPythonSearchReranker(config.intelligence);
+  const reranker = config.intelligence === undefined ? noReranker : createPythonSearchReranker({ ...config.intelligence, hasher: createIdentifierHasher(deriveIdentifierHashSecret(config.intelligence.idHashSecret, config.intelligence.sharedSecret)) });
   const eventProcessor = createSearchEventProcessor(indexStore, createHttpSourceHydrator({ identity: config.identity, commerce: config.commerce, social: config.social }), logger);
   const router = createRouter({
     onError: (error) => errorToResponse(error) ?? json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" }),

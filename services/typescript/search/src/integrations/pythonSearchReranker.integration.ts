@@ -1,11 +1,13 @@
 import { createHash, createHmac, randomBytes } from "node:crypto";
 
 import type { RerankCandidate, SearchReranker } from "../interfaces/searchReranker.interface.js";
+import type { IdentifierHasher } from "../utils/identifierHashing.util.js";
 
 export interface PythonRerankerOptions {
   readonly baseUrl: string;
   readonly sharedSecret: string;
   readonly timeoutMs: number;
+  readonly hasher: IdentifierHasher;
   readonly fetchImplementation?: typeof fetch;
 }
 
@@ -28,9 +30,9 @@ export function createPythonSearchReranker(options: PythonRerankerOptions): Sear
     async rerank(viewerId: string, candidates: readonly RerankCandidate[], limit: number) {
       if (candidates.length < 2 || Date.now() < openUntil) return null;
       const body = JSON.stringify({
-        viewer: { userId: viewerId },
+        viewer: { userId: options.hasher.hashUserId(viewerId) },
         limit: Math.min(Math.max(limit, 1), 200),
-        candidates: candidates.map((candidate) => ({ itemId: candidate.itemId, itemType: candidate.itemType, textRelevanceScore: candidate.textRelevanceScore, ...(candidate.authorId === null ? {} : { authorId: candidate.authorId }), popularityCount: candidate.popularityCount, createdAt: candidate.createdAt })),
+        candidates: candidates.map((candidate) => ({ itemId: candidate.itemId, itemType: candidate.itemType, textRelevanceScore: candidate.textRelevanceScore, ...(candidate.authorId === null ? {} : { authorId: options.hasher.hashUserId(candidate.authorId) }), popularityCount: candidate.popularityCount, createdAt: candidate.createdAt })),
         textRelevanceWeight: 0.7,
         personalizationWeight: 0.2,
         popularityWeight: 0.1,
