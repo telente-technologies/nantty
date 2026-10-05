@@ -16,7 +16,7 @@ import { ProductSupplierSection } from "@/components/catalog/productSupplierSect
 import { ProductVariantsTable } from "@/components/catalog/productVariantsTable";
 import { ProductVideosSection } from "@/components/catalog/productVideosSection";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { FormErrorSummary } from "@/components/ui/formFields";
 import { PageHeader, PageStack } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -47,7 +47,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
     if (productQuery.data) setDraft(convertProductToDraft(productQuery.data));
   }, [productQuery.data]);
 
-  if (productId && productQuery.errorMessage) return <Callout tone="error" title="This product could not be loaded">{productQuery.errorMessage}</Callout>;
+  if (productId && productQuery.errorMessage) return <ErrorCallout title="This product could not be loaded" message={productQuery.errorMessage} onRetry={productQuery.reload} />;
   if (!draft || !settings) return <LoadingBlock label="Loading product" />;
 
   const fieldErrors = convertIssuesToFieldErrorMap(issues);

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { BarcodeSvg } from "@/components/catalog/barcodeSvg";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Callout, EmptyState } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout } from "@/components/ui/feedback";
 import { SearchInput } from "@/components/ui/filterControls";
 import { SelectField, ToggleSwitch } from "@/components/ui/formFields";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
@@ -67,7 +67,7 @@ export function BarcodeLabelsView() {
         <div className="noPrint">
           <Panel title="Choose items">
             <SearchInput label="Search products" placeholder="Search name or SKU" value={searchText} onValueChange={setSearchText} />
-            {productList.errorMessage ? <Callout tone="error">{productList.errorMessage}</Callout> : null}
+            {productList.errorMessage ? <ErrorCallout message={productList.errorMessage} onRetry={productList.reload} /> : null}
             <div className={styles.variantList}>
               {(productList.items ?? []).flatMap((product) => product.variants.map((variant) => (
                 <label key={variant.id} className={styles.variantRow}>

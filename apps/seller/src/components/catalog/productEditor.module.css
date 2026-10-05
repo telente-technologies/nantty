@@ -1,7 +1,7 @@
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 20px;
+  gap: var(--space-5);
   align-items: start;
 }
 
@@ -9,7 +9,7 @@
 .sideColumn {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-5);
   min-width: 0;
 }
 
@@ -24,7 +24,7 @@
 }
 
 .toggleList {
-  margin-top: 8px;
+  margin-top: var(--space-2);
   border-top: 1px solid var(--divider-soft);
 }
 
@@ -44,8 +44,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
   background: var(--frosted-surface);
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-large);
@@ -62,7 +62,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .imageTile img {
@@ -103,7 +103,7 @@
   background: var(--blue-tint);
   color: var(--color-brand);
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--fs-12);
   cursor: pointer;
   text-align: center;
 }
@@ -112,15 +112,15 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 
 .progressRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 110px auto;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .progressRow progress {
@@ -133,21 +133,21 @@
 }
 
 .variantTable {
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-variant-numeric: tabular-nums;
 }
 
 .variantTable th {
-  padding: 8px;
+  padding: var(--space-2);
   text-align: left;
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
   background: var(--surface-sunken);
   white-space: nowrap;
 }
 
 .variantTable td {
-  padding: 6px 8px;
+  padding: 6px var(--space-2);
   border-bottom: 1px solid var(--divider-soft);
   vertical-align: top;
 }
@@ -156,7 +156,7 @@
   width: 100%;
   min-width: 90px;
   height: 34px;
-  padding: 0 8px;
+  padding: 0 var(--space-2);
   border: 1px solid var(--divider);
   border-radius: var(--radius-small);
   background: var(--surface-card);
@@ -168,7 +168,7 @@
 
 .barcodeCell {
   display: flex;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .variantTitle {
@@ -178,7 +178,7 @@
 
 .muted {
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .stockList {
@@ -186,7 +186,7 @@
   flex-direction: column;
   gap: 2px;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 @media (max-width: 1100px) {
@@ -208,14 +208,14 @@
 .attributeList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .attributeRow,
 .videoRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
 }
 
@@ -229,7 +229,7 @@
 .titleWithBadge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 @media (max-width: 520px) {

@@ -1,6 +1,6 @@
 .compactSelect select {
   height: 38px;
-  padding: 0 8px;
+  padding: 0 var(--space-2);
   border: 1px solid var(--divider);
   border-radius: var(--radius-small);
   background: var(--surface-card);

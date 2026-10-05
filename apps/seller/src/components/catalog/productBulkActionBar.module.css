@@ -2,8 +2,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 14px;
-  padding: 8px 10px;
+  gap: var(--space-2) 14px;
+  padding: var(--space-2) 10px;
   border-radius: var(--radius-small);
   background: var(--blue-tint);
 }
@@ -18,7 +18,7 @@
 .percentField input {
   width: 64px;
   height: 32px;
-  padding: 0 8px;
+  padding: 0 var(--space-2);
   border: 1px solid var(--divider);
   border-radius: var(--radius-small);
   background: var(--surface-card);
