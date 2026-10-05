@@ -43,3 +43,12 @@ func ValidateUpdateStore(body dtos.UpdateStoreRequest) error {
 	}
 	return collected.AsError()
 }
+
+func ValidateStoreStatus(request dtos.StoreStatusRequest) error {
+	issues := utils.Issues{}
+	if request.Status != "active" && request.Status != "suspended" {
+		issues.Add("status", "must be active or suspended")
+	}
+	issues.CheckLength("reason", request.Reason, 5, 1000)
+	return issues.AsError()
+}

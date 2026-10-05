@@ -24,6 +24,7 @@ import (
 	moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"
 	"zudomart/modules/creators/src"
 	"zudomart/modules/creators/src/configs"
+	programservices "zudomart/modules/creators/src/modules/creatorProgram/services"
 	"zudomart/modules/ledger/src/databases"
 	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
 	"zudomart/modules/ledger/src/loaders"
@@ -77,7 +78,7 @@ func (harness *creatorsHarness) authorized() context.Context {
 }
 
 func (harness *creatorsHarness) makeCreator(userId, tier string) {
-	if _, err := harness.module.Program.SetCreatorProgramMembership(context.Background(), "staff", userId, tier, "approved"); err != nil {
+	if _, err := harness.module.Program.SetCreatorProgramMembership(context.Background(), programservices.MembershipChange{StaffId: "staff", UserId: userId, TierId: tier, Status: "approved"}); err != nil {
 		harness.t.Fatal(err)
 	}
 }
