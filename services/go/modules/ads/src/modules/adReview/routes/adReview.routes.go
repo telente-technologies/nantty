@@ -19,6 +19,7 @@ func MountAdReviewRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("POST /api/v1/admin/ads/{adId}/reject", review(controller.RejectAd))
 	mux.Handle("POST /api/v1/admin/ads/{adId}/appeal/resolve", review(controller.ResolveAppeal))
 	mux.Handle("GET /api/v1/admin/advertisers", either(controller.ListAdvertisers))
+	mux.Handle("GET /api/v1/admin/advertisers/{advertiserId}", either(controller.GetAdvertiser))
 	mux.Handle("POST /api/v1/admin/advertisers/{advertiserId}/suspend", manage(controller.SuspendAdvertiser))
 	mux.Handle("POST /api/v1/admin/advertisers/{advertiserId}/reinstate", manage(controller.ReinstateAdvertiser))
 	mux.Handle("GET /api/v1/admin/ad-policies", either(controller.ListPolicies))

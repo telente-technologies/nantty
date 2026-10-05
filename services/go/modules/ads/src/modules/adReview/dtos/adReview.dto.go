@@ -78,14 +78,14 @@ type Advertiser struct {
 	Id              string          `json:"id"`
 	Name            string          `json:"name"`
 	Owner           json.RawMessage `json:"owner"`
-	Status          string        `json:"status"`
-	Country         string        `json:"country"`
-	Currency        string        `json:"currency"`
-	SpendByCurrency []types.Money `json:"spendByCurrency"`
-	ActiveCampaigns int           `json:"activeCampaigns"`
-	ViolationCount  int           `json:"violationCount"`
-	LastViolationAt *string       `json:"lastViolationAt"`
-	CreatedAt       string        `json:"createdAt"`
+	Status          string          `json:"status"`
+	Country         string          `json:"country"`
+	Currency        string          `json:"currency"`
+	SpendByCurrency []types.Money   `json:"spendByCurrency"`
+	ActiveCampaigns int             `json:"activeCampaigns"`
+	ViolationCount  int             `json:"violationCount"`
+	LastViolationAt *string         `json:"lastViolationAt"`
+	CreatedAt       string          `json:"createdAt"`
 }
 
 type PolicyCategory struct {

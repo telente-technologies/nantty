@@ -16,6 +16,7 @@ import (
 	updatepolicycategory "zudomart/modules/ads/src/modules/adReview/commands/updatePolicyCategory"
 	"zudomart/modules/ads/src/modules/adReview/dtos"
 	getadforreview "zudomart/modules/ads/src/modules/adReview/queries/getAdForReview"
+	getadvertiser "zudomart/modules/ads/src/modules/adReview/queries/getAdvertiser"
 	listadsforreview "zudomart/modules/ads/src/modules/adReview/queries/listAdsForReview"
 	listadvertisers "zudomart/modules/ads/src/modules/adReview/queries/listAdvertisers"
 	listpolicycategories "zudomart/modules/ads/src/modules/adReview/queries/listPolicyCategories"
@@ -103,6 +104,9 @@ func (controller AdReviewController) ApproveAd(writer http.ResponseWriter, reque
 		if err := utils.DecodeBody(writer, request, &body); err != nil {
 			return err
 		}
+		if err := services.RecordStaffAction(request, controller.Container, "ads.ad.approve", services.AdAuditSubject, adId.String(), body.Reason, nil, body); err != nil {
+			return err
+		}
 		result, err := (approvead.Handler{Container: controller.Container}).Execute(request.Context(), approvead.Command{AdId: adId, Reviewer: reviewer, Reason: body.Reason, OverrideCriticalFlags: body.OverrideCriticalFlags})
 		if err != nil {
 			return err
@@ -125,6 +129,9 @@ func (controller AdReviewController) RejectAd(writer http.ResponseWriter, reques
 		if err := rejectad.Validate(body); err != nil {
 			return err
 		}
+		if err := services.RecordStaffAction(request, controller.Container, "ads.ad.reject", services.AdAuditSubject, adId.String(), body.Reason, nil, body); err != nil {
+			return err
+		}
 		result, err := (rejectad.Handler{Container: controller.Container}).Execute(request.Context(), rejectad.Command{AdId: adId, Reviewer: reviewer, Request: body})
 		if err != nil {
 			return err
@@ -145,6 +152,9 @@ func (controller AdReviewController) ResolveAppeal(writer http.ResponseWriter, r
 			return err
 		}
 		if err := resolveadappeal.Validate(body); err != nil {
+			return err
+		}
+		if err := services.RecordStaffAction(request, controller.Container, "ads.ad.appeal."+body.Decision, services.AdAuditSubject, adId.String(), body.Note, nil, body); err != nil {
 			return err
 		}
 		result, err := (resolveadappeal.Handler{Container: controller.Container}).Execute(request.Context(), resolveadappeal.Command{AdId: adId, Reviewer: reviewer, Request: body})
@@ -181,7 +191,29 @@ func (controller AdReviewController) setSuspension(writer http.ResponseWriter, r
 		if err := setadvertisersuspension.Validate(body.Reason); err != nil {
 			return err
 		}
+		action := "ads.advertiser.reinstate"
+		if suspend {
+			action = "ads.advertiser.suspend"
+		}
+		if err := services.RecordStaffAction(request, controller.Container, action, services.AdvertiserAuditSubject, accountId.String(), body.Reason, nil, body); err != nil {
+			return err
+		}
 		result, err := (setadvertisersuspension.Handler{Container: controller.Container}).Execute(request.Context(), setadvertisersuspension.Command{AccountId: accountId, Suspend: suspend, Reason: body.Reason})
+		if err != nil {
+			return err
+		}
+		httpserver.WriteJsonResponse(writer, http.StatusOK, result)
+		return nil
+	})
+}
+
+func (controller AdReviewController) GetAdvertiser(writer http.ResponseWriter, request *http.Request) {
+	controller.run(writer, request, func(services.Reviewer) error {
+		accountId, err := utils.PathIdentifier(request, "advertiserId")
+		if err != nil {
+			return err
+		}
+		result, err := (getadvertiser.Handler{Container: controller.Container}).Execute(request.Context(), getadvertiser.Query{AccountId: accountId})
 		if err != nil {
 			return err
 		}
@@ -215,6 +247,9 @@ func (controller AdReviewController) CreatePolicy(writer http.ResponseWriter, re
 		if err := utils.DecodeBody(writer, request, &body); err != nil {
 			return err
 		}
+		if err := services.RecordStaffAction(request, controller.Container, "ads.policy.create", "ad_policy", body.Name, body.Reason, nil, body); err != nil {
+			return err
+		}
 		result, err := (createpolicycategory.Handler{Container: controller.Container}).Execute(request.Context(), createpolicycategory.Command{Request: body})
 		if err != nil {
 			return err
@@ -232,6 +267,9 @@ func (controller AdReviewController) UpdatePolicy(writer http.ResponseWriter, re
 		}
 		var body dtos.PolicyCategoryRequest
 		if err := utils.DecodeBody(writer, request, &body); err != nil {
+			return err
+		}
+		if err := services.RecordStaffAction(request, controller.Container, "ads.policy.update", "ad_policy", policyId.String(), body.Reason, nil, body); err != nil {
 			return err
 		}
 		result, err := (updatepolicycategory.Handler{Container: controller.Container}).Execute(request.Context(), updatepolicycategory.Command{CategoryId: policyId, Request: body})
