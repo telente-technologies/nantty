@@ -7,6 +7,7 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
+	BillingAuthorization      string // BillingAuthorization table.
 	BillingSubscription       string // BillingSubscription table.
 	ConnectedAccount          string // ConnectedAccount table.
 	ConnectedAccountJob       string // ConnectedAccountJob table.

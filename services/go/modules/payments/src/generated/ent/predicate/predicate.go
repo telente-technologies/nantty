@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// BillingAuthorization is the predicate function for billingauthorization builders.
+type BillingAuthorization func(*sql.Selector)
+
 // BillingSubscription is the predicate function for billingsubscription builders.
 type BillingSubscription func(*sql.Selector)
 

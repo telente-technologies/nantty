@@ -9,6 +9,40 @@ import (
 )
 
 var (
+	// BillingAuthorizationsColumns holds the columns for the "billing_authorizations" table.
+	BillingAuthorizationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "provider_customer_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "sealed_authorization", Type: field.TypeBytes},
+		{Name: "card_fingerprint_hash", Type: field.TypeString, Size: 64},
+		{Name: "card_brand", Type: field.TypeString, Size: 30, Default: ""},
+		{Name: "card_last4", Type: field.TypeString, Size: 4, Default: ""},
+		{Name: "card_expiry_month", Type: field.TypeInt, Default: 0},
+		{Name: "card_expiry_year", Type: field.TypeInt, Default: 0},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
+	}
+	// BillingAuthorizationsTable holds the schema information for the "billing_authorizations" table.
+	BillingAuthorizationsTable = &schema.Table{
+		Name:       "billing_authorizations",
+		Columns:    BillingAuthorizationsColumns,
+		PrimaryKey: []*schema.Column{BillingAuthorizationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "billingauthorization_user_id_card_fingerprint_hash",
+				Unique:  true,
+				Columns: []*schema.Column{BillingAuthorizationsColumns[2], BillingAuthorizationsColumns[6]},
+			},
+			{
+				Name:    "billingauthorization_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{BillingAuthorizationsColumns[2], BillingAuthorizationsColumns[1]},
+			},
+		},
+	}
 	// BillingSubscriptionsColumns holds the columns for the "billing_subscriptions" table.
 	BillingSubscriptionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -250,7 +284,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "reference", Type: field.TypeString, Size: 80},
-		{Name: "purpose", Type: field.TypeEnum, Enums: []string{"order_checkout", "coin_purchase", "wallet_top_up", "creator_subscription", "ad_balance_top_up", "card_verification"}},
+		{Name: "purpose", Type: field.TypeEnum, Enums: []string{"order_checkout", "coin_purchase", "wallet_top_up", "creator_subscription", "ad_balance_top_up", "card_verification", "subscription_renewal"}},
 		{Name: "owner_user_id", Type: field.TypeString, Size: 80},
 		{Name: "subject_id", Type: field.TypeString, Size: 80},
 		{Name: "provider", Type: field.TypeString, Size: 40},
@@ -648,6 +682,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BillingAuthorizationsTable,
 		BillingSubscriptionsTable,
 		ConnectedAccountsTable,
 		ConnectedAccountJobsTable,

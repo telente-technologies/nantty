@@ -8,6 +8,18 @@ import (
 	"zudomart/modules/payments/src/generated/ent"
 )
 
+// The BillingAuthorizationFunc type is an adapter to allow the use of ordinary
+// function as BillingAuthorization mutator.
+type BillingAuthorizationFunc func(context.Context, *ent.BillingAuthorizationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BillingAuthorizationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BillingAuthorizationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BillingAuthorizationMutation", m)
+}
+
 // The BillingSubscriptionFunc type is an adapter to allow the use of ordinary
 // function as BillingSubscription mutator.
 type BillingSubscriptionFunc func(context.Context, *ent.BillingSubscriptionMutation) (ent.Value, error)

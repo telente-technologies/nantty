@@ -14,6 +14,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// BillingAuthorization is the client for interacting with the BillingAuthorization builders.
+	BillingAuthorization *BillingAuthorizationClient
 	// BillingSubscription is the client for interacting with the BillingSubscription builders.
 	BillingSubscription *BillingSubscriptionClient
 	// ConnectedAccount is the client for interacting with the ConnectedAccount builders.
@@ -177,6 +179,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.BillingAuthorization = NewBillingAuthorizationClient(tx.config)
 	tx.BillingSubscription = NewBillingSubscriptionClient(tx.config)
 	tx.ConnectedAccount = NewConnectedAccountClient(tx.config)
 	tx.ConnectedAccountJob = NewConnectedAccountJobClient(tx.config)
@@ -202,7 +205,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: BillingSubscription.QueryXXX(), the query will be executed
+// applies a query, for example: BillingAuthorization.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
