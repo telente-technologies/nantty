@@ -17,6 +17,7 @@ import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { buildStorePath } from "@/utils/seoPaths.util";
 
 import styles from "./storeDetailView.module.css";
+import { SearchScopeRegistrar } from "@/components/search/searchScopeRegistrar";
 
 interface StoreDetailViewProps {
   readonly initialStore: StoreDetail;
@@ -37,6 +38,7 @@ export function StoreDetailView({ initialStore, initialProducts }: StoreDetailVi
 
   return (
     <div className={styles.page}>
+      <SearchScopeRegistrar scope={`store:${store.id}`} label={store.name} />
       <div className={styles.banner}>{store.bannerUrl ? <MediaImage src={store.bannerUrl} alt="" sizes="100vw" priority /> : null}</div>
       <header className={styles.header}>
         <div className={styles.identity}>

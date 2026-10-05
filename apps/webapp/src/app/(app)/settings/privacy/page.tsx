@@ -6,6 +6,7 @@ import { ConsentChoicesSection } from "@/components/settings/consentChoicesSecti
 import { ContentPreferencesSection } from "@/components/settings/contentPreferencesSection";
 import { DataExportSection } from "@/components/settings/dataExportSection";
 import { DeleteAccountSection } from "@/components/settings/deleteAccountSection";
+import { DownloadPrivacySection } from "@/components/settings/downloadPrivacySection";
 import { MentionPrivacySection } from "@/components/settings/mentionPrivacySection";
 import styles from "@/components/settings/settings.module.css";
 import { legalLinks } from "@/config/legalLinks.config";
@@ -22,6 +23,7 @@ export default function PrivacyAndDataPage() {
       </div>
       <ConsentChoicesSection />
       <MentionPrivacySection />
+      <DownloadPrivacySection />
       <BirthdayBalloonsSection />
       <ContentPreferencesSection />
       <DataExportSection />

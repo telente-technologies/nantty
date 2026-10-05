@@ -29,7 +29,7 @@
 
 .logoWrap {
   margin-top: -52px;
-  padding: 4px;
+  padding: var(--space-1);
   border-radius: 50%;
   background: var(--surface-app);
 }
@@ -74,7 +74,7 @@
 .stats strong {
   color: var(--ink-strong);
   font-size: var(--text-md);
-  margin-right: 4px;
+  margin-right: var(--space-1);
 }
 
 .sectionTitle {
