@@ -64,6 +64,7 @@ func StartAuthModuleWithSettings(ctx context.Context, settings configs.AuthSetti
 		return nil, err
 	}
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database)))
+	client.Session.Use(services.DenylistSessionsOnRevocation(services.SessionDenylistTtl(settings.AccessTokenTimeToLive)))
 	keys := signingkeyservices.NewSigningKeyService(client, signingkeyservices.Settings{
 		EncryptionKey: settings.SigningKeyEncryptionKey, RotationInterval: settings.SigningKeyRotationInterval, AccessTokenTimeToLive: settings.AccessTokenTimeToLive,
 	}, time.Now)
@@ -110,6 +111,8 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 		module.container.Logger.WarnContext(ctx, "signing key maintenance failed", slog.Any("error", err))
 	}
 	go func() { _ = module.container.Keys.RunRotationAndReloadLoopUntilContextDone(ctx, reportError) }()
+	go services.RunRevokedSessionSweeperUntilContextDone(ctx, module.container.Client, module.container.Now,
+		services.SessionDenylistTtl(module.container.Settings.AccessTokenTimeToLive), module.container.Logger)
 	go func() {
 		settings := module.container.Settings
 		directory := services.AccountDirectoryService{Container: module.container}

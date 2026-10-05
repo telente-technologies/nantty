@@ -189,8 +189,13 @@ func TestAdminCreatedAccountsMustChangeTheirPasswordAndOtpEventsCarryTheDestinat
 }
 
 type recordingDeletionCanceller struct {
+	executed  bool
 	pending   bool
 	cancelled []uuid.UUID
+}
+
+func (canceller *recordingDeletionCanceller) AccountDeletionExecuted(context.Context, uuid.UUID) (bool, error) {
+	return canceller.executed, nil
 }
 
 func (canceller *recordingDeletionCanceller) CancelPendingDeletionOnLogin(_ context.Context, accountId uuid.UUID) (bool, error) {
@@ -218,5 +223,35 @@ func TestLoggingInDuringTheDeletionGraceCancelsTheDeletionAndShowsANotice(t *tes
 	again := harness.expect("POST", "/api/v1/auth/login", "", map[string]string{"identifier": email, "password": "firstpass1"}, http.StatusOK)
 	if again["notice"] != nil {
 		t.Fatalf("no notice when nothing was pending: %v", again)
+	}
+}
+
+func TestADeactivatedAccountComesBackOnLoginButAnExecutedDeletionStaysClosed(t *testing.T) {
+	harness := startAuthModuleAgainstFreshSchema(t)
+	email := "away.for.now@example.com"
+	registered := harness.registerAccountAndLogIn(email, "firstpass1")
+	accountId := uuid.MustParse(registered["user"].(map[string]any)["id"].(string))
+	canceller := &recordingDeletionCanceller{}
+	identityports.Default.RegisterDeletionGraceCanceller(canceller)
+	t.Cleanup(func() { identityports.Default.RegisterDeletionGraceCanceller(nil) })
+	directory, err := identityports.Default.AccountDirectory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := directory.DeactivateAccountAndRevokeSessions(context.Background(), accountId); err != nil {
+		t.Fatal(err)
+	}
+	back := harness.expect("POST", "/api/v1/auth/login", "", map[string]string{"identifier": email, "password": "firstpass1"}, http.StatusOK)
+	if back["notice"] != "Welcome back. Your account is active again." {
+		t.Fatalf("logging in after deactivating must reactivate and say so: %v", back)
+	}
+	if err := directory.DeactivateAccountAndRevokeSessions(context.Background(), accountId); err != nil {
+		t.Fatal(err)
+	}
+	harness.expect("POST", "/api/v1/auth/login", "", map[string]string{"identifier": email, "password": "wrongpass1"}, http.StatusUnauthorized)
+	canceller.executed = true
+	refused := harness.expect("POST", "/api/v1/auth/login", "", map[string]string{"identifier": email, "password": "firstpass1"}, http.StatusForbidden)
+	if refused["code"] != "ACCOUNT_DELETED" {
+		t.Fatalf("an executed deletion must say the account was deleted: %v", refused)
 	}
 }
