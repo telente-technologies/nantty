@@ -9,6 +9,7 @@ import (
 	deletestorecategory "zudomart/modules/catalog/src/modules/categories/commands/deleteStoreCategory"
 	updatestorecategory "zudomart/modules/catalog/src/modules/categories/commands/updateStoreCategory"
 	"zudomart/modules/catalog/src/modules/categories/dtos"
+	getplatformcategory "zudomart/modules/catalog/src/modules/categories/queries/getPlatformCategory"
 	listplatformcategories "zudomart/modules/catalog/src/modules/categories/queries/listPlatformCategories"
 	liststorecategories "zudomart/modules/catalog/src/modules/categories/queries/listStoreCategories"
 	"zudomart/modules/catalog/src/modules/categories/validators"
@@ -31,6 +32,16 @@ func (controller CategoriesController) respond(writer http.ResponseWriter, reque
 func (controller CategoriesController) ListPlatformCategories(writer http.ResponseWriter, request *http.Request) {
 	page, err := (listplatformcategories.Handler{Container: controller.Container}).Execute(request.Context(), listplatformcategories.Query{})
 	controller.respond(writer, request, http.StatusOK, page, err)
+}
+
+func (controller CategoriesController) GetPlatformCategory(writer http.ResponseWriter, request *http.Request) {
+	categoryId, err := utils.PathIdentifier(request, "categoryId")
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	view, err := (getplatformcategory.Handler{Container: controller.Container}).Execute(request.Context(), getplatformcategory.Query{CategoryId: categoryId})
+	controller.respond(writer, request, http.StatusOK, view, err)
 }
 
 func (controller CategoriesController) ListStoreCategories(writer http.ResponseWriter, request *http.Request) {
