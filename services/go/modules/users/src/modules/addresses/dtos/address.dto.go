@@ -50,7 +50,7 @@ type AddressResponse struct {
 func ConvertViewToResponse(view services.AddressView) AddressResponse {
 	address := view.Address
 	response := AddressResponse{
-		Id: address.ID.String(), Label: address.Label, FullName: address.RecipientName, Phone: address.Phone, Line1: address.Line1, Line2: address.Line2,
+		Id: address.ID.String(), Label: address.Label, FullName: address.RecipientName, Phone: view.Phone, Line1: address.Line1, Line2: address.Line2,
 		PostalCode: address.PostalCode, Details: address.Details, IsDefault: address.IsDefault, CountryCode: address.CountryCode,
 		State: view.StateName(), City: view.CityName(), Display: view.DisplayLine(),
 		CreatedAt: address.CreatedAt.UTC().Format(time.RFC3339), UpdatedAt: address.UpdatedAt.UTC().Format(time.RFC3339),

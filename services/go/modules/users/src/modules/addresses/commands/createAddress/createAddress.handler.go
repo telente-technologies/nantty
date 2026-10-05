@@ -32,8 +32,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.A
 			return services.ErrAddressLimitReached
 		}
 		regionId, areaId, cityId := services.GeoColumnsFromResolved(resolved)
-		created, err = tx.ShippingAddress.Create().
-			SetAccountID(command.AccountId).SetLabel(input.Label).SetRecipientName(input.FullName).SetPhone(input.Phone).
+		builder := tx.ShippingAddress.Create()
+		if err := services.StorePhone[*ent.ShippingAddressCreate](builder, handler.Container.Settings.AddressPhoneKey, input.Phone); err != nil {
+			return err
+		}
+		created, err = builder.
+			SetAccountID(command.AccountId).SetLabel(input.Label).SetRecipientName(input.FullName).
 			SetLine1(input.Line1).SetLine2(input.Line2).SetPostalCode(input.PostalCode).SetDetails(input.Details).
 			SetCountryCode(resolved.Country.Code).SetNillableRegionID(regionId).SetNillableAdminAreaID(areaId).SetNillableCityID(cityId).
 			SetFreeTextCity(freeTextWhenUnstructured(resolved, input.Geo.FreeTextCity)).SetFreeTextState(freeTextWhenUnstructured(resolved, input.Geo.FreeTextState)).
@@ -49,7 +53,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.A
 	if err != nil {
 		return services.AddressView{}, err
 	}
-	return services.AddressView{Address: created, Country: resolved.Country, Region: resolved.Region, Area: resolved.Area, City: resolved.City}, nil
+	return services.AddressView{Address: created, Country: resolved.Country, Region: resolved.Region, Area: resolved.Area, City: resolved.City, Phone: input.Phone}, nil
 }
 
 func freeTextWhenUnstructured(resolved services.ResolvedGeo, text string) string {

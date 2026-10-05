@@ -43,7 +43,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.A
 				return err
 			}
 		}
-		views = []services.AddressView{{Address: saved, Country: resolved.Country, Region: resolved.Region, Area: resolved.Area, City: resolved.City}}
+		phone, err := services.OpenPhone(handler.Container.Settings.AddressPhoneKey, saved)
+		if err != nil {
+			return err
+		}
+		views = []services.AddressView{{Address: saved, Country: resolved.Country, Region: resolved.Region, Area: resolved.Area, City: resolved.City, Phone: phone}}
 		return nil
 	})
 	if err != nil {
@@ -54,6 +58,14 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.A
 
 func (handler Handler) applyPatch(ctx context.Context, tx *ent.Tx, update *ent.ShippingAddressUpdateOne, current *ent.ShippingAddress, patch models.AddressPatch) (services.ResolvedGeo, error) {
 	applyScalarFields(update, patch)
+	if patch.Phone != nil {
+		if err := services.StorePhone[*ent.ShippingAddressUpdateOne](update, handler.Container.Settings.AddressPhoneKey, *patch.Phone); err != nil {
+			return services.ResolvedGeo{}, err
+		}
+		if handler.Container.Settings.AddressPhoneKey == nil {
+			update.ClearPhoneSealed()
+		}
+	}
 	resolved, err := handler.resolveGeoAfterPatch(ctx, tx, current, patch)
 	if err != nil {
 		return resolved, err
@@ -80,7 +92,7 @@ func (handler Handler) resolveGeoAfterPatch(ctx context.Context, tx *ent.Tx, cur
 	if patch.Geo != nil {
 		return services.ResolveGeoSelection(ctx, tx.Client(), *patch.Geo)
 	}
-	views, err := services.BuildAddressViews(ctx, tx.Client(), []*ent.ShippingAddress{current})
+	views, err := services.BuildAddressViews(ctx, tx.Client(), handler.Container.Settings.AddressPhoneKey, []*ent.ShippingAddress{current})
 	if err != nil {
 		return services.ResolvedGeo{}, err
 	}
@@ -93,9 +105,6 @@ func applyScalarFields(update *ent.ShippingAddressUpdateOne, patch models.Addres
 	}
 	if patch.FullName != nil {
 		update.SetRecipientName(*patch.FullName)
-	}
-	if patch.Phone != nil {
-		update.SetPhone(*patch.Phone)
 	}
 	if patch.Line1 != nil {
 		update.SetLine1(*patch.Line1)
