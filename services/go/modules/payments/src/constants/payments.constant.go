@@ -11,6 +11,7 @@ const (
 	PurposeRefundBankPayout    = "refund_bank_payout"
 	PurposeSubscription        = "subscription"
 	PurposeCardVerification    = "card_verification"
+	PurposeSubscriptionRenewal = "subscription_renewal"
 
 	ProviderPaystack = "paystack"
 	StoreAppleIap    = "apple_iap"
@@ -27,4 +28,5 @@ var ReferencePrefixByPurpose = map[string]string{
 	PurposeCreatorSubscription: "csub-",
 	PurposeAdBalanceTopUp:      "ads-",
 	PurposeCardVerification:    "card-",
+	PurposeSubscriptionRenewal: "ren-",
 }

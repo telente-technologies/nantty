@@ -27,6 +27,7 @@ type Container struct {
 	StoreVerifiers map[string]interfaces.StoreReceiptVerifier
 	Accounts       repositories.VerifiedAccountDirectory
 	CardHandoffs   utils.SavedCardHandoffStore
+	OrderStatuses  repositories.OrderStatusDirectory
 	Ledger         *ledgerservices.Ledger
 	Outbox         ledgerevents.OutboxTable
 	Idempotency    ledgerutils.SqlIdempotencyRecordStore
@@ -39,6 +40,7 @@ type Overrides struct {
 	StoreVerifiers map[string]interfaces.StoreReceiptVerifier
 	Accounts       repositories.VerifiedAccountDirectory
 	CardHandoffs   utils.SavedCardHandoffStore
+	OrderStatuses  repositories.OrderStatusDirectory
 }
 
 func NewPaystackProviderFromSettings(settings configs.PaymentsSettings) *integrations.PaystackProvider {
@@ -67,6 +69,10 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 	if accounts == nil {
 		accounts = repositories.SqlVerifiedAccountDirectory{Database: resources.Database, AuthSchema: settings.AccountDirectorySchema}
 	}
+	orderStatuses := overrides.OrderStatuses
+	if orderStatuses == nil {
+		orderStatuses = repositories.SqlOrderStatusDirectory{Database: resources.Database, OrdersSchema: settings.OrderStatusSchema}
+	}
 	cardHandoffs := overrides.CardHandoffs
 	if cardHandoffs == nil {
 		cardHandoffs = utils.NewMemorySavedCardHandoffStore(15 * time.Minute)
@@ -75,13 +81,13 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 		settings.DefaultProvider = constants.ProviderPaystack
 	}
 	return &Container{
-		Resources: resources, Settings: settings, Providers: providers, StoreVerifiers: storeVerifiers, Accounts: accounts, CardHandoffs: cardHandoffs,
+		Resources: resources, Settings: settings, Providers: providers, StoreVerifiers: storeVerifiers, Accounts: accounts, CardHandoffs: cardHandoffs, OrderStatuses: orderStatuses,
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.payments"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{
-			BillingSubscription: schema, ConnectedAccount: schema, IdempotentRequest: schema, OrderPayable: schema, OutboxEvent: schema,
+			BillingAuthorization: schema, BillingSubscription: schema, ConnectedAccount: schema, IdempotentRequest: schema, OrderPayable: schema, OutboxEvent: schema,
 			PaymentIntent: schema, PaymentRefund: schema, PayoutOnboarding: schema, PayoutTransfer: schema, ConnectedAccountJob: schema, ProviderCustomer: schema, ProviderDispute: schema, ProviderPayoutDestination: schema, SavedCardSetup: schema,
 			StorePurchase: schema, WebhookEvent: schema,
 		},

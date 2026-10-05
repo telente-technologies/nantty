@@ -23,6 +23,7 @@ type PaymentsSettings struct {
 	EscrowMode                  string
 	CheckoutExpiryMinutes       int
 	AccountDirectorySchema      string
+	OrderStatusSchema           string
 	WebSubscriptionPlanProducts map[string]string
 	AppleInAppPurchaseFeeBps    int64
 	GooglePlayBillingFeeBps     int64
@@ -98,6 +99,7 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 		EscrowMode:                  reader.ReadStringOrDefault("ESCROW_MODE", "e2"),
 		CheckoutExpiryMinutes:       reader.ReadIntegerOrDefault("CHECKOUT_SESSION_EXPIRY_MINUTES", 15),
 		AccountDirectorySchema:      reader.ReadStringOrDefault("PAYMENTS_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
+		OrderStatusSchema:           reader.ReadStringOrDefault("PAYMENTS_ORDER_STATUS_SCHEMA", "orders"),
 		WebSubscriptionPlanProducts: parsePlanProducts(reader.ReadStringOrDefault("PAYSTACK_PLAN_CODES", "")),
 		AppleInAppPurchaseFeeBps:    int64(reader.ReadIntegerOrDefault("APPLE_IAP_STORE_FEE_BPS", 3000)),
 		GooglePlayBillingFeeBps:     int64(reader.ReadIntegerOrDefault("GOOGLE_PLAY_STORE_FEE_BPS", 1500)),

@@ -56,3 +56,31 @@ func (SavedCardSetup) Fields() []ent.Field {
 func (SavedCardSetup) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("reference").Unique(), index.Fields("user_id", "created_at"), index.Fields("provider_customer_id", "status")}
 }
+
+type BillingAuthorization struct {
+	ent.Schema
+}
+
+func (BillingAuthorization) Mixin() []ent.Mixin {
+	return []ent.Mixin{TimeOrderedIdentifierMixin{}}
+}
+
+func (BillingAuthorization) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("user_id").NotEmpty().MaxLen(80).Immutable(),
+		field.String("provider").NotEmpty().MaxLen(40).Immutable(),
+		field.String("provider_customer_id").MaxLen(120).Default(""),
+		field.Bytes("sealed_authorization").Sensitive(),
+		field.String("card_fingerprint_hash").NotEmpty().MaxLen(64).Immutable(),
+		field.String("card_brand").MaxLen(30).Default(""),
+		field.String("card_last4").MaxLen(4).Default(""),
+		field.Int("card_expiry_month").Default(0),
+		field.Int("card_expiry_year").Default(0),
+		field.Time("revoked_at").Optional().Nillable(),
+		field.Time("last_used_at").Optional().Nillable(),
+	}
+}
+
+func (BillingAuthorization) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("user_id", "card_fingerprint_hash").Unique(), index.Fields("user_id", "created_at")}
+}

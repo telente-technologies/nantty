@@ -1,9 +1,12 @@
 package payments
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"log/slog"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -98,11 +101,13 @@ func TestFailedPayoutAccountJobsAreRequeuedByReconciliation(t *testing.T) {
 	}
 }
 
-func TestSavedCardAuthorizationReachesTheDeviceButIsNeverStored(t *testing.T) {
+func TestSavedCardAuthorizationNeverLeavesTheServerAndChargesUseTheOwnersSavedCardId(t *testing.T) {
 	skipIntegrationWhenShort(t)
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
-	buyer := uuid.NewString()
-	token := harness.Tokens.UserAccessToken(buyer)
+	var logs bytes.Buffer
+	harness.Payments.Application.Container.Resources.Logger = slog.New(slog.NewTextHandler(&logs, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	buyer, stranger := uuid.NewString(), uuid.NewString()
+	token, strangerToken := harness.Tokens.UserAccessToken(buyer), harness.Tokens.UserAccessToken(stranger)
 	started := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{})
 	if started.Status != http.StatusCreated || started.Body["verificationCharge"].(map[string]any)["amountMinor"].(float64) != 5000 {
 		t.Fatalf("start: %d %s", started.Status, started.Raw)
@@ -110,17 +115,29 @@ func TestSavedCardAuthorizationReachesTheDeviceButIsNeverStored(t *testing.T) {
 	reference := started.Body["reference"].(string)
 	transaction := harness.PayCheckout(reference, 75, "card")
 	completed := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups/"+reference+"/complete", token, "", nil)
-	if completed.Status != http.StatusOK || completed.Body["authorizationCode"] != transaction.AuthorizationCode || completed.Body["last4"] != "4081" {
-		t.Fatalf("complete: %d %s", completed.Status, completed.Raw)
+	savedCardId, _ := completed.Body["savedCardId"].(string)
+	if completed.Status != http.StatusOK || savedCardId == "" || completed.Body["last4"] != "4081" || strings.Contains(string(completed.Raw), transaction.AuthorizationCode) || completed.Body["authorizationCode"] != nil {
+		t.Fatalf("complete must return our saved card id, never the provider authorization: %d %s", completed.Status, completed.Raw)
 	}
-	if again := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups/"+reference+"/complete", token, "", nil); again.Status != http.StatusGone {
-		t.Fatalf("the card reference must be handed out once: %d", again.Status)
+	if again := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups/"+reference+"/complete", token, "", nil); again.Status != http.StatusOK || again.Body["savedCardId"] != savedCardId {
+		t.Fatalf("completing again returns the same saved card: %d %s", again.Status, again.Raw)
+	}
+	other := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", strangerToken, "", map[string]any{})
+	otherReference := other.Body["reference"].(string)
+	if stolen := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", strangerToken, "", map[string]any{"paymentReference": otherReference, "savedCardId": savedCardId}); stolen.Status != http.StatusConflict || stolen.Body["code"] != "BILLING_CARD_MISSING" {
+		t.Fatalf("another account cannot charge this saved card: %d %s", stolen.Status, stolen.Raw)
+	}
+	if legacy := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/charges", strangerToken, "", map[string]any{"paymentReference": otherReference, "authorizationCode": transaction.AuthorizationCode}); legacy.Status != http.StatusBadRequest {
+		t.Fatalf("a provider authorization from a client is refused: %d %s", legacy.Status, legacy.Raw)
 	}
 	harness.Payments.Application.Gateway.RetryPendingRefunds(context.Background(), 10)
 	if len(harness.Paystack.Refunds) != 1 {
 		t.Fatalf("the verification charge must be refunded: %+v", harness.Paystack.Refunds)
 	}
 	assertNoColumnContains(t, harness.Database, harness.Payments.Application.Container.Settings.Money.DatabaseSchema, transaction.AuthorizationCode)
+	if strings.Contains(logs.String(), transaction.AuthorizationCode) || strings.Contains(logs.String(), "AUTH_") {
+		t.Fatal("the provider authorization must never be logged")
+	}
 	harness.AssertLedgerHealthy()
 }
 
