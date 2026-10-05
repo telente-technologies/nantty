@@ -21,8 +21,6 @@ type verificationFraudData struct {
 	AdvisoryOnly bool     `json:"advisoryOnly"`
 }
 
-// VerificationFraudEnvelopeHandler turns Smile ID fraud signals (spoof attempt, ID mismatch, an ID reused across
-// accounts) into an advisory suspension case. Nothing is enforced automatically; a moderator decides.
 func VerificationFraudEnvelopeHandler(application *container.Container) platformevents.MessageHandler {
 	return func(ctx context.Context, body []byte) error {
 		var envelope platformevents.EventEnvelope

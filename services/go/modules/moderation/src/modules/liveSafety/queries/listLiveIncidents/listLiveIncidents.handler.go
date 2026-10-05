@@ -23,10 +23,11 @@ type Query struct {
 }
 
 type Result struct {
-	Items    []services.IncidentSummary `json:"data"`
-	Page     int                        `json:"page"`
-	PageSize int                        `json:"pageSize"`
-	Total    int                        `json:"total"`
+	Items      []services.IncidentSummary `json:"data"`
+	NextCursor *string                    `json:"nextCursor"`
+	Page       int                        `json:"page"`
+	PageSize   int                        `json:"pageSize"`
+	Total      int                        `json:"total"`
 }
 
 type Handler struct {

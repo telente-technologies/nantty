@@ -48,7 +48,7 @@ func TestCopyrightClaimLifecycleFromFilingToCounterNoticeAndRestoration(t *testi
 	}
 	claimId := receipt["claimId"].(string)
 
-	reviewer, _ := harness.staff("copyright:review")
+	reviewer, stepUp := harness.staff("copyright:review")
 	nobody, _ := harness.staff("metrics:read")
 	harness.expect("GET", "/api/v1/admin/copyright-claims", nobody, nil, http.StatusForbidden)
 	queue := harness.expect("GET", "/api/v1/admin/copyright-claims", reviewer, nil, http.StatusOK)["data"].([]any)
@@ -59,7 +59,8 @@ func TestCopyrightClaimLifecycleFromFilingToCounterNoticeAndRestoration(t *testi
 	harness.expect("PUT", "/api/v1/internal/copyright-claims/"+claimId+"/audio-matches", "", map[string]any{"matches": []any{map[string]any{"matchedTrack": "Lagos Nights", "artist": "DJ", "confidencePercent": 93, "source": "fingerprint"}}}, http.StatusNoContent, intakeToken...)
 	harness.expect("POST", base+"/request-info", reviewer, map[string]string{"reason": "send the registration"}, http.StatusOK)
 	harness.expect("POST", base+"/request-info", reviewer, map[string]string{"reason": "send the registration"}, http.StatusConflict)
-	upheld := harness.expect("POST", base+"/uphold", reviewer, map[string]string{"reason": "audio fingerprint matches"}, http.StatusOK)
+	harness.expect("POST", base+"/uphold", reviewer, map[string]string{"reason": "audio fingerprint matches"}, http.StatusForbidden)
+	upheld := harness.expect("POST", base+"/uphold", reviewer, map[string]string{"reason": "audio fingerprint matches"}, http.StatusOK, stepUp...)
 	if upheld["status"] != "UPHELD" || upheld["targetFlag"] != "TAKEN_DOWN" || upheld["infringerStrikeCount"] != float64(1) || upheld["topAudioMatchConfidencePercent"] != float64(93) || upheld["repeatInfringerThreshold"] != float64(3) {
 		t.Fatalf("unexpected %v", upheld)
 	}
@@ -87,18 +88,19 @@ func TestCopyrightClaimLifecycleFromFilingToCounterNoticeAndRestoration(t *testi
 	if status := harness.expect("GET", base, reviewer, nil, http.StatusOK)["status"]; status != "COUNTER_NOTICE" {
 		t.Fatalf("status %v", status)
 	}
-	accepted := harness.expect("POST", base+"/counter-notices/"+noticeId+"/accept", reviewer, map[string]string{"reason": "valid counter-notice"}, http.StatusOK)
+	harness.expect("POST", base+"/counter-notices/"+noticeId+"/accept", reviewer, map[string]string{"reason": "valid counter-notice"}, http.StatusForbidden)
+	accepted := harness.expect("POST", base+"/counter-notices/"+noticeId+"/accept", reviewer, map[string]string{"reason": "valid counter-notice"}, http.StatusOK, stepUp...)
 	if accepted["counterNotices"].([]any)[0].(map[string]any)["status"] != "ACCEPTED" {
 		t.Fatalf("unexpected %v", accepted)
 	}
-	if again := harness.expect("POST", base+"/counter-notices/"+noticeId+"/accept", reviewer, map[string]string{"reason": "valid counter-notice"}, http.StatusConflict); again["code"] != "COUNTER_NOTICE_DECIDED" {
+	if again := harness.expect("POST", base+"/counter-notices/"+noticeId+"/accept", reviewer, map[string]string{"reason": "valid counter-notice"}, http.StatusConflict, stepUp...); again["code"] != "COUNTER_NOTICE_DECIDED" {
 		t.Fatalf("unexpected %v", again)
 	}
 	restore := restoreacceptedtakedowns.Handler{Container: harness.module.Container()}
 	if restored, err := restore.Execute(context.Background()); err != nil || restored != 0 {
 		t.Fatalf("nothing restores before the date: %d %v", restored, err)
 	}
-	harness.expect("POST", base+"/counter-notices/"+noticeId+"/court-action", reviewer, map[string]string{"reason": "claimant filed suit"}, http.StatusOK)
+	harness.expect("POST", base+"/counter-notices/"+noticeId+"/court-action", reviewer, map[string]string{"reason": "claimant filed suit"}, http.StatusOK, stepUp...)
 	if _, err := harness.database.Exec(`UPDATE counter_notices SET restore_eligible_at = now() - interval '1 hour'`); err != nil {
 		t.Fatal(err)
 	}
@@ -126,11 +128,11 @@ func TestRejectedCounterNoticeKeepsTheTakedown(t *testing.T) {
 	harness.targets.own("sound", "s-1", uploader)
 	_, claimantToken := harness.reporter()
 	claimId := harness.expect("POST", "/api/v1/copyright/claims", claimantToken, copyrightClaimBody("sound", "s-1"), http.StatusCreated)["claimId"].(string)
-	reviewer, _ := harness.staff("copyright:review")
+	reviewer, stepUp := harness.staff("copyright:review")
 	base := "/api/v1/admin/copyright-claims/" + claimId
-	harness.expect("POST", base+"/uphold", reviewer, map[string]string{"reason": "matches the master"}, http.StatusOK)
+	harness.expect("POST", base+"/uphold", reviewer, map[string]string{"reason": "matches the master"}, http.StatusOK, stepUp...)
 	created := harness.expect("POST", "/api/v1/copyright/claims/"+claimId+"/counter-notices", harness.tokens.SignAccountAccessToken(t, uploader), map[string]any{"statement": "licensed sample", "contactEmail": "me@example.com", "goodFaith": true}, http.StatusCreated)
-	back := harness.expect("POST", base+"/counter-notices/"+created["noticeId"].(string)+"/reject", reviewer, map[string]string{"reason": "no licence shown"}, http.StatusOK)
+	back := harness.expect("POST", base+"/counter-notices/"+created["noticeId"].(string)+"/reject", reviewer, map[string]string{"reason": "no licence shown"}, http.StatusOK, stepUp...)
 	if back["status"] != "UPHELD" || back["targetFlag"] != "MUTED" || back["remedy"] != "AUDIO_MUTED" {
 		t.Fatalf("a rejected counter-notice returns the claim to upheld: %v", back)
 	}

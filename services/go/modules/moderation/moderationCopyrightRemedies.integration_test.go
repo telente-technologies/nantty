@@ -20,8 +20,8 @@ func (harness *moderationHarness) fileAndUphold(targetType, targetId, scope, upl
 	body := copyrightClaimBody(targetType, targetId)
 	body["claimScope"] = scope
 	claimId := harness.expect("POST", "/api/v1/copyright/claims", claimantToken, body, http.StatusCreated)["claimId"].(string)
-	reviewer, _ := harness.staff("copyright:review")
-	return claimId, harness.expect("POST", "/api/v1/admin/copyright-claims/"+claimId+"/uphold", reviewer, map[string]string{"reason": "proof of ownership matches"}, http.StatusOK)
+	reviewer, stepUp := harness.staff("copyright:review")
+	return claimId, harness.expect("POST", "/api/v1/admin/copyright-claims/"+claimId+"/uphold", reviewer, map[string]string{"reason": "proof of ownership matches"}, http.StatusOK, stepUp...)
 }
 
 func (harness *moderationHarness) accountStatus(accountId string) map[string]any {
@@ -82,8 +82,8 @@ func TestAudioClaimMutesTheSoundtrackKeepsTheVideoAndRestoresAfterCounterNotice(
 	if received := harness.publishedPayload("copyrightClaim.counterNoticeReceived"); received["claimantEmail"] != "owner@label.com" {
 		t.Fatalf("the claimant is told about the counter-notice: %v", received)
 	}
-	reviewer, _ := harness.staff("copyright:review")
-	harness.expect("POST", "/api/v1/admin/copyright-claims/"+claimId+"/counter-notices/"+created["noticeId"].(string)+"/accept", reviewer, map[string]string{"reason": "licence provided"}, http.StatusOK)
+	reviewer, stepUp := harness.staff("copyright:review")
+	harness.expect("POST", "/api/v1/admin/copyright-claims/"+claimId+"/counter-notices/"+created["noticeId"].(string)+"/accept", reviewer, map[string]string{"reason": "licence provided"}, http.StatusOK, stepUp...)
 	if _, err := harness.database.Exec(`UPDATE counter_notices SET restore_eligible_at = now() - interval '1 hour'`); err != nil {
 		t.Fatal(err)
 	}

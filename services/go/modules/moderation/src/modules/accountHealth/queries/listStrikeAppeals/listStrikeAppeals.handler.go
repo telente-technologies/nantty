@@ -25,7 +25,7 @@ type Handler struct {
 	Container *container.Container
 }
 
-func (handler Handler) Execute(ctx context.Context) (map[string][]AppealView, error) {
+func (handler Handler) Execute(ctx context.Context) (map[string]any, error) {
 	rows, err := handler.Container.Client.Strike.Query().Where(strike.AppealStatusEQ(strike.AppealStatusPending)).Order(ent.Asc(strike.FieldAppealedAt)).Limit(100).All(ctx)
 	if err != nil {
 		return nil, err
@@ -39,5 +39,5 @@ func (handler Handler) Execute(ctx context.Context) (map[string][]AppealView, er
 		}
 		views = append(views, view)
 	}
-	return map[string][]AppealView{"data": views}, nil
+	return map[string]any{"data": views, "nextCursor": nil}, nil
 }
