@@ -22,6 +22,7 @@ var (
 	ErrDisputeNotFound    = httpserver.NewApiError(http.StatusNotFound, "DISPUTE_NOT_FOUND", "Dispute was not found.")
 	ErrOrderNotDisputable = httpserver.NewApiError(http.StatusConflict, "ORDER_NOT_DISPUTABLE", "This order can no longer be disputed.")
 	ErrDisputeClosed      = httpserver.NewApiError(http.StatusConflict, "DISPUTE_CLOSED", "This dispute is closed.")
+	ErrRefundCurrency     = httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "refundAmount.currency", Message: "must be the order currency"}})
 	activeDisputeStatuses = []dispute.Status{dispute.StatusAwaitingSeller, dispute.StatusUnderReview}
 )
 
@@ -83,11 +84,12 @@ func (service DisputeService) OpenDisputeInTransaction(ctx context.Context, tran
 }
 
 type ResolveDisputeInput struct {
-	DisputeId   uuid.UUID
-	StaffId     string
-	Outcome     string
-	RefundMinor int64
-	Note        string
+	DisputeId      uuid.UUID
+	StaffId        string
+	Outcome        string
+	RefundMinor    int64
+	RefundCurrency string
+	Note           string
 }
 
 func (service DisputeService) ResolveDisputeInTransaction(ctx context.Context, transaction *sql.Tx, input ResolveDisputeInput) (*ent.Dispute, escrowservices.EscrowSettlementResult, error) {
@@ -99,6 +101,9 @@ func (service DisputeService) ResolveDisputeInTransaction(ctx context.Context, t
 	}
 	if !slices.Contains(activeDisputeStatuses, opened.Status) {
 		return nil, escrowservices.EscrowSettlementResult{}, ErrDisputeClosed
+	}
+	if input.RefundCurrency != "" && input.RefundCurrency != held.Currency {
+		return nil, escrowservices.EscrowSettlementResult{}, ErrRefundCurrency
 	}
 	actor := escrowservices.EscrowActor{Type: "staff", Id: input.StaffId}
 	var result escrowservices.EscrowSettlementResult

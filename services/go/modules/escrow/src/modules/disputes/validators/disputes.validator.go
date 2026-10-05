@@ -2,6 +2,7 @@ package validators
 
 import (
 	"net/url"
+	"strings"
 
 	"zudomart/modules/escrow/src/modules/disputes/dtos"
 	ledgerutils "zudomart/modules/ledger/src/utils"
@@ -35,15 +36,42 @@ func ValidateDisputeMessageRequest(request dtos.DisputeMessageRequestDto) error 
 	return collector.Result()
 }
 
-func ValidateResolveDisputeRequest(request dtos.ResolveDisputeRequestDto) error {
+var resolveOutcomeAliases = map[string]string{"REFUND_FULL": "refund", "REFUND_PARTIAL": "partial", "RELEASE_TO_SELLER": "release"}
+
+type ResolveDisputeDecision struct {
+	Outcome        string
+	Note           string
+	RefundMinor    int64
+	RefundCurrency string
+}
+
+func NormalizeResolveDisputeRequest(request dtos.ResolveDisputeRequestDto) (ResolveDisputeDecision, error) {
 	collector := &ledgerutils.IssueCollector{}
-	collector.RequireOneOf("outcome", request.Outcome, "release", "refund", "partial")
-	collector.RequireLength("note", request.Note, 3, 2000)
-	if request.Outcome == "partial" && request.RefundAmountMinor <= 0 {
+	decision := ResolveDisputeDecision{Outcome: request.Outcome, Note: request.Note, RefundMinor: request.RefundAmountMinor}
+	if alias, found := resolveOutcomeAliases[request.Outcome]; found {
+		decision.Outcome = alias
+	}
+	if request.Reason != "" {
+		if request.Note != "" {
+			collector.Add("reason", "send either note or reason, not both")
+		}
+		decision.Note = request.Reason
+	}
+	if request.RefundAmount != nil {
+		if request.RefundAmountMinor != 0 {
+			collector.Add("refundAmount", "send either refundAmount or refundAmountMinor, not both")
+		}
+		decision.RefundMinor, decision.RefundCurrency = request.RefundAmount.AmountMinor, request.RefundAmount.Currency
+		collector.RequireLength("refundAmount.currency", request.RefundAmount.Currency, 3, 3)
+	}
+	decision.Note = strings.TrimSpace(decision.Note)
+	collector.RequireOneOf("outcome", decision.Outcome, "release", "refund", "partial")
+	collector.RequireLength("note", decision.Note, 3, 2000)
+	if decision.Outcome == "partial" && decision.RefundMinor <= 0 {
 		collector.Add("refundAmountMinor", "is required for a partial outcome")
 	}
-	if request.Outcome != "partial" && request.RefundAmountMinor != 0 {
+	if decision.Outcome != "partial" && decision.RefundMinor != 0 {
 		collector.Add("refundAmountMinor", "is only allowed for a partial outcome")
 	}
-	return collector.Result()
+	return decision, collector.Result()
 }
