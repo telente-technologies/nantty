@@ -111,7 +111,7 @@ export function MembersCard() {
   ];
 
   const inviteColumns: DataTableColumn<AdAccountInvite>[] = [
-    { key: "email", header: "Email", isAlwaysVisible: true, render: (invite) => invite.email },
+    { key: "invitee", header: "Invitee", isAlwaysVisible: true, render: (invite) => (invite.username ? `@${invite.username}` : invite.email ?? "") },
     { key: "role", header: "Role", render: (invite) => roleLabels[invite.role] },
     { key: "by", header: "Invited by", render: (invite) => invite.invitedBy },
     { key: "expires", header: "Expires", render: (invite) => formatDateWithYear(invite.expiresAt) },

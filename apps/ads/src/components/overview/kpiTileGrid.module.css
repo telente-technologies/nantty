@@ -11,8 +11,8 @@
 .tile {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 14px 16px;
+  gap: var(--space-1);
+  padding: 14px var(--space-4);
   border-right: 1px solid var(--divider-soft);
   border-bottom: 1px solid var(--divider-soft);
   min-width: 0;

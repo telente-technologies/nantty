@@ -1,14 +1,14 @@
 .filters {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .filterRow {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .narrowField {
@@ -36,12 +36,12 @@
 .chartGrid {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  gap: 16px;
-  margin-top: 16px;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
 }
 
 .spacedBlock {
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
 .quietText {
@@ -78,7 +78,7 @@
 .scheduledItem {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 10px 0;
   border-bottom: 1px solid var(--divider-soft);
 }
@@ -104,7 +104,7 @@
 .dialogRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .metricFieldset {
@@ -113,19 +113,19 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .metricFieldset legend {
   font-size: var(--fs-13);
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .metricChecklist {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px 12px;
+  gap: 6px var(--space-3);
 }
 
 @media (max-width: 1100px) {

@@ -1,7 +1,7 @@
 .controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
   flex-wrap: wrap;
   margin-bottom: 14px;
 }
@@ -9,8 +9,8 @@
 .columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
-  gap: 16px;
-  margin-top: 16px;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
   align-items: start;
 }
 
@@ -18,7 +18,7 @@
 .sideColumn {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
   min-width: 0;
 }
 
