@@ -12,6 +12,7 @@ type SchemaConfig struct {
 	PlanPrice            string // PlanPrice table.
 	ProviderPlan         string // ProviderPlan table.
 	Subscription         string // Subscription table.
+	SubscriptionPeriod   string // SubscriptionPeriod table.
 	SubscriptionReminder string // SubscriptionReminder table.
 	TrialClaim           string // TrialClaim table.
 }

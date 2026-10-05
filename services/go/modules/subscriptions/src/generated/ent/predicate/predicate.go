@@ -21,6 +21,9 @@ type ProviderPlan func(*sql.Selector)
 // Subscription is the predicate function for subscription builders.
 type Subscription func(*sql.Selector)
 
+// SubscriptionPeriod is the predicate function for subscriptionperiod builders.
+type SubscriptionPeriod func(*sql.Selector)
+
 // SubscriptionReminder is the predicate function for subscriptionreminder builders.
 type SubscriptionReminder func(*sql.Selector)
 

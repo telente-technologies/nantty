@@ -141,6 +141,22 @@ var (
 		{Name: "card_label", Type: field.TypeString, Size: 60, Default: ""},
 		{Name: "activation_pending", Type: field.TypeBool, Default: false},
 		{Name: "last_error", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "billing_authorization_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "billing_anchor_at", Type: field.TypeTime, Nullable: true},
+		{Name: "next_charge_at", Type: field.TypeTime, Nullable: true},
+		{Name: "dunning_attempts", Type: field.TypeInt, Default: 0},
+		{Name: "dunning_due_at", Type: field.TypeTime, Nullable: true},
+		{Name: "checkmark_included", Type: field.TypeBool, Default: true},
+		{Name: "credit_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "pending_plan_code", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "pending_interval", Type: field.TypeString, Size: 10, Default: ""},
+		{Name: "period_price_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "price_notice_amount_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "price_effective_at", Type: field.TypeTime, Nullable: true},
+		{Name: "card_expiry_month", Type: field.TypeInt, Default: 0},
+		{Name: "card_expiry_year", Type: field.TypeInt, Default: 0},
+		{Name: "card_expiry_noticed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "ended_reason", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "version", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -179,12 +195,68 @@ var (
 				Columns: []*schema.Column{SubscriptionsColumns[8], SubscriptionsColumns[16]},
 			},
 			{
+				Name:    "subscriptions_next_charge_due",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionsColumns[30]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "next_charge_at IS NOT NULL",
+				},
+			},
+			{
 				Name:    "subscriptions_activation_pending",
 				Unique:  false,
 				Columns: []*schema.Column{SubscriptionsColumns[26]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "activation_pending",
 				},
+			},
+		},
+	}
+	// SubscriptionPeriodsColumns holds the columns for the "subscription_periods" table.
+	SubscriptionPeriodsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "subscription_id", Type: field.TypeString, Size: 80},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"first", "renewal", "trial_conversion", "upgrade"}},
+		{Name: "plan_code", Type: field.TypeString, Size: 40},
+		{Name: "interval", Type: field.TypeString, Size: 10},
+		{Name: "period_starts_at", Type: field.TypeTime},
+		{Name: "period_ends_at", Type: field.TypeTime},
+		{Name: "line_items", Type: field.TypeJSON},
+		{Name: "period_price_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "subtotal_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "credit_applied_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "amount_due_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "checkmark_included", Type: field.TypeBool, Default: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "paid", "failed", "waived", "void"}, Default: "open"},
+		{Name: "attempt_count", Type: field.TypeInt, Default: 0},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 140},
+		{Name: "payment_reference", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SubscriptionPeriodsTable holds the schema information for the "subscription_periods" table.
+	SubscriptionPeriodsTable = &schema.Table{
+		Name:       "subscription_periods",
+		Columns:    SubscriptionPeriodsColumns,
+		PrimaryKey: []*schema.Column{SubscriptionPeriodsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subscriptionperiod_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{SubscriptionPeriodsColumns[17]},
+			},
+			{
+				Name:    "subscriptionperiod_subscription_id_period_starts_at",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionPeriodsColumns[2], SubscriptionPeriodsColumns[6]},
+			},
+			{
+				Name:    "subscriptionperiod_payment_reference",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionPeriodsColumns[18]},
 			},
 		},
 	}
@@ -248,6 +320,7 @@ var (
 		PlanPricesTable,
 		ProviderPlansTable,
 		SubscriptionsTable,
+		SubscriptionPeriodsTable,
 		SubscriptionRemindersTable,
 		TrialClaimsTable,
 	}
