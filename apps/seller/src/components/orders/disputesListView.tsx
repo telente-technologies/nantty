@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCommerceCursorList } from "@/components/orders/commerceCursorList.hook";
 import { disputeStatusPresentation, ordersSectionTabs } from "@/components/orders/orderPresentation.constant";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
-import { Callout, EmptyState } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout } from "@/components/ui/feedback";
 import { LinkTabs } from "@/components/ui/navigationTabs";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -33,7 +33,7 @@ export function DisputesListView() {
     <PageStack>
       <PageHeader title="Disputes" description="When a buyer reports a problem, escrow release pauses. Reply with details and photos so Zudomart can decide fairly." />
       <LinkTabs label="Order sections" tabs={ordersSectionTabs} />
-      {disputesList.errorMessage ? <Callout tone="error">{disputesList.errorMessage}</Callout> : null}
+      {disputesList.errorMessage ? <ErrorCallout message={disputesList.errorMessage} onRetry={disputesList.reload} /> : null}
       <Panel padded={false}>
         <DataTable
           caption="Disputes"

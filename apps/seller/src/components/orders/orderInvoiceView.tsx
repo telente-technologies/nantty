@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { paymentProviderLabels } from "@/components/orders/orderPresentation.constant";
 import { Button } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
@@ -22,7 +22,7 @@ export function OrderInvoiceView({ orderId, documentKind }: { readonly orderId: 
   const isReceipt = documentKind === "receipt";
 
   if (orderQuery.isLoading && !order) return <LoadingBlock label={`Preparing ${documentKind}`} />;
-  if (!order) return <Callout tone="error">{orderQuery.errorMessage ?? "This order could not be loaded."}</Callout>;
+  if (!order) return <ErrorCallout message={orderQuery.errorMessage ?? "This order could not be loaded."} onRetry={orderQuery.reload} />;
 
   const amountPaidAfterRefunds = { amountMinor: order.total.amountMinor - order.refundedAmount.amountMinor, currency: order.total.currency };
 

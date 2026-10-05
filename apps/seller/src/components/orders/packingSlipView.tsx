@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { SegmentedControl } from "@/components/ui/navigationTabs";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
@@ -21,7 +21,7 @@ export function PackingSlipView({ orderId }: { readonly orderId: string }) {
   const order = orderQuery.data;
 
   if (orderQuery.isLoading && !order) return <LoadingBlock label="Preparing packing slip" />;
-  if (!order) return <Callout tone="error">{orderQuery.errorMessage ?? "This order could not be loaded."}</Callout>;
+  if (!order) return <ErrorCallout message={orderQuery.errorMessage ?? "This order could not be loaded."} onRetry={orderQuery.reload} />;
 
   return (
     <div className={styles.page}>

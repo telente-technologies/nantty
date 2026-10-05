@@ -8,7 +8,7 @@ import { ReturnDecisionDialog, type ReturnDecision } from "@/components/orders/r
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button } from "@/components/ui/button";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
-import { Callout, EmptyState } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout } from "@/components/ui/feedback";
 import { LinkTabs, SegmentedControl } from "@/components/ui/navigationTabs";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -59,7 +59,7 @@ export function ReturnsListView() {
         onValueChange={setStatusFilter}
         options={[{ value: "all", label: "All" }, { value: "requested", label: "Requested" }, { value: "approved", label: "Approved" }, { value: "refunded", label: "Refunded" }, { value: "declined", label: "Declined" }]}
       />
-      {returnsList.errorMessage ? <Callout tone="error">{returnsList.errorMessage}</Callout> : null}
+      {returnsList.errorMessage ? <ErrorCallout message={returnsList.errorMessage} onRetry={returnsList.reload} /> : null}
       <Panel padded={false}>
         <DataTable
           caption="Return requests"

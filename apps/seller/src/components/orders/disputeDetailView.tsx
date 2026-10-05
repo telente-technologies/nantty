@@ -6,7 +6,7 @@ import { useState, type FormEvent } from "react";
 import { disputeStatusPresentation } from "@/components/orders/orderPresentation.constant";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { TextAreaField } from "@/components/ui/formFields";
 import { KeyValueList, PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -33,7 +33,7 @@ export function DisputeDetailView({ disputeId }: { readonly disputeId: string })
   const dispute = disputeQuery.data;
 
   if (disputeQuery.isLoading && !dispute) return <LoadingBlock label="Loading dispute" />;
-  if (!dispute) return <Callout tone="error">{disputeQuery.errorMessage ?? "This dispute could not be loaded."}</Callout>;
+  if (!dispute) return <ErrorCallout message={disputeQuery.errorMessage ?? "This dispute could not be loaded."} onRetry={disputeQuery.reload} />;
   const isResolved = dispute.status === "resolved_for_buyer" || dispute.status === "resolved_for_seller";
 
   async function sendDisputeResponse(event: FormEvent<HTMLFormElement>) {
