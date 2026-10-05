@@ -243,27 +243,6 @@ func (_u *StoreUpdate) SetNillableHasOfficialBadge(v *bool) *StoreUpdate {
 	return _u
 }
 
-// SetFollowerCount sets the "follower_count" field.
-func (_u *StoreUpdate) SetFollowerCount(v int) *StoreUpdate {
-	_u.mutation.ResetFollowerCount()
-	_u.mutation.SetFollowerCount(v)
-	return _u
-}
-
-// SetNillableFollowerCount sets the "follower_count" field if the given value is not nil.
-func (_u *StoreUpdate) SetNillableFollowerCount(v *int) *StoreUpdate {
-	if v != nil {
-		_u.SetFollowerCount(*v)
-	}
-	return _u
-}
-
-// AddFollowerCount adds value to the "follower_count" field.
-func (_u *StoreUpdate) AddFollowerCount(v int) *StoreUpdate {
-	_u.mutation.AddFollowerCount(v)
-	return _u
-}
-
 // SetVerified sets the "verified" field.
 func (_u *StoreUpdate) SetVerified(v bool) *StoreUpdate {
 	_u.mutation.SetVerified(v)
@@ -704,12 +683,6 @@ func (_u *StoreUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.HasOfficialBadge(); ok {
 		_spec.SetField(store.FieldHasOfficialBadge, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.FollowerCount(); ok {
-		_spec.SetField(store.FieldFollowerCount, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedFollowerCount(); ok {
-		_spec.AddField(store.FieldFollowerCount, field.TypeInt, value)
-	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(store.FieldVerified, field.TypeBool, value)
 	}
@@ -1029,27 +1002,6 @@ func (_u *StoreUpdateOne) SetNillableHasOfficialBadge(v *bool) *StoreUpdateOne {
 	if v != nil {
 		_u.SetHasOfficialBadge(*v)
 	}
-	return _u
-}
-
-// SetFollowerCount sets the "follower_count" field.
-func (_u *StoreUpdateOne) SetFollowerCount(v int) *StoreUpdateOne {
-	_u.mutation.ResetFollowerCount()
-	_u.mutation.SetFollowerCount(v)
-	return _u
-}
-
-// SetNillableFollowerCount sets the "follower_count" field if the given value is not nil.
-func (_u *StoreUpdateOne) SetNillableFollowerCount(v *int) *StoreUpdateOne {
-	if v != nil {
-		_u.SetFollowerCount(*v)
-	}
-	return _u
-}
-
-// AddFollowerCount adds value to the "follower_count" field.
-func (_u *StoreUpdateOne) AddFollowerCount(v int) *StoreUpdateOne {
-	_u.mutation.AddFollowerCount(v)
 	return _u
 }
 
@@ -1522,12 +1474,6 @@ func (_u *StoreUpdateOne) sqlSave(ctx context.Context) (_node *Store, err error)
 	}
 	if value, ok := _u.mutation.HasOfficialBadge(); ok {
 		_spec.SetField(store.FieldHasOfficialBadge, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.FollowerCount(); ok {
-		_spec.SetField(store.FieldFollowerCount, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedFollowerCount(); ok {
-		_spec.AddField(store.FieldFollowerCount, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(store.FieldVerified, field.TypeBool, value)

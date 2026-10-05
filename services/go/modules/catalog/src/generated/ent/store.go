@@ -52,8 +52,6 @@ type Store struct {
 	BrandID *uuid.UUID `json:"brand_id,omitempty"`
 	// HasOfficialBadge holds the value of the "has_official_badge" field.
 	HasOfficialBadge bool `json:"has_official_badge,omitempty"`
-	// FollowerCount holds the value of the "follower_count" field.
-	FollowerCount int `json:"follower_count,omitempty"`
 	// Verified holds the value of the "verified" field.
 	Verified bool `json:"verified,omitempty"`
 	// RatingSum holds the value of the "rating_sum" field.
@@ -102,7 +100,7 @@ func (*Store) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case store.FieldHasOfficialBadge, store.FieldVerified, store.FieldPricesIncludeTax:
 			values[i] = new(sql.NullBool)
-		case store.FieldFollowerCount, store.FieldRatingSum, store.FieldRatingCount:
+		case store.FieldRatingSum, store.FieldRatingCount:
 			values[i] = new(sql.NullInt64)
 		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus, store.FieldStatusReason, store.FieldModerationVisibility, store.FieldLocale, store.FieldContactPhone, store.FieldContactEmail, store.FieldContactAddress, store.FieldTagline:
 			values[i] = new(sql.NullString)
@@ -231,12 +229,6 @@ func (_m *Store) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field has_official_badge", values[i])
 			} else if value.Valid {
 				_m.HasOfficialBadge = value.Bool
-			}
-		case store.FieldFollowerCount:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field follower_count", values[i])
-			} else if value.Valid {
-				_m.FollowerCount = int(value.Int64)
 			}
 		case store.FieldVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -445,9 +437,6 @@ func (_m *Store) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("has_official_badge=")
 	builder.WriteString(fmt.Sprintf("%v", _m.HasOfficialBadge))
-	builder.WriteString(", ")
-	builder.WriteString("follower_count=")
-	builder.WriteString(fmt.Sprintf("%v", _m.FollowerCount))
 	builder.WriteString(", ")
 	builder.WriteString("verified=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Verified))

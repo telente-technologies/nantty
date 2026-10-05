@@ -201,20 +201,6 @@ func (_c *StoreCreate) SetNillableHasOfficialBadge(v *bool) *StoreCreate {
 	return _c
 }
 
-// SetFollowerCount sets the "follower_count" field.
-func (_c *StoreCreate) SetFollowerCount(v int) *StoreCreate {
-	_c.mutation.SetFollowerCount(v)
-	return _c
-}
-
-// SetNillableFollowerCount sets the "follower_count" field if the given value is not nil.
-func (_c *StoreCreate) SetNillableFollowerCount(v *int) *StoreCreate {
-	if v != nil {
-		_c.SetFollowerCount(*v)
-	}
-	return _c
-}
-
 // SetVerified sets the "verified" field.
 func (_c *StoreCreate) SetVerified(v bool) *StoreCreate {
 	_c.mutation.SetVerified(v)
@@ -482,10 +468,6 @@ func (_c *StoreCreate) defaults() {
 		v := store.DefaultHasOfficialBadge
 		_c.mutation.SetHasOfficialBadge(v)
 	}
-	if _, ok := _c.mutation.FollowerCount(); !ok {
-		v := store.DefaultFollowerCount
-		_c.mutation.SetFollowerCount(v)
-	}
 	if _, ok := _c.mutation.Verified(); !ok {
 		v := store.DefaultVerified
 		_c.mutation.SetVerified(v)
@@ -615,9 +597,6 @@ func (_c *StoreCreate) check() error {
 	}
 	if _, ok := _c.mutation.HasOfficialBadge(); !ok {
 		return &ValidationError{Name: "has_official_badge", err: errors.New(`ent: missing required field "Store.has_official_badge"`)}
-	}
-	if _, ok := _c.mutation.FollowerCount(); !ok {
-		return &ValidationError{Name: "follower_count", err: errors.New(`ent: missing required field "Store.follower_count"`)}
 	}
 	if _, ok := _c.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Store.verified"`)}
@@ -776,10 +755,6 @@ func (_c *StoreCreate) createSpec() (*Store, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.HasOfficialBadge(); ok {
 		_spec.SetField(store.FieldHasOfficialBadge, field.TypeBool, value)
 		_node.HasOfficialBadge = value
-	}
-	if value, ok := _c.mutation.FollowerCount(); ok {
-		_spec.SetField(store.FieldFollowerCount, field.TypeInt, value)
-		_node.FollowerCount = value
 	}
 	if value, ok := _c.mutation.Verified(); ok {
 		_spec.SetField(store.FieldVerified, field.TypeBool, value)
@@ -1084,24 +1059,6 @@ func (u *StoreUpsert) SetHasOfficialBadge(v bool) *StoreUpsert {
 // UpdateHasOfficialBadge sets the "has_official_badge" field to the value that was provided on create.
 func (u *StoreUpsert) UpdateHasOfficialBadge() *StoreUpsert {
 	u.SetExcluded(store.FieldHasOfficialBadge)
-	return u
-}
-
-// SetFollowerCount sets the "follower_count" field.
-func (u *StoreUpsert) SetFollowerCount(v int) *StoreUpsert {
-	u.Set(store.FieldFollowerCount, v)
-	return u
-}
-
-// UpdateFollowerCount sets the "follower_count" field to the value that was provided on create.
-func (u *StoreUpsert) UpdateFollowerCount() *StoreUpsert {
-	u.SetExcluded(store.FieldFollowerCount)
-	return u
-}
-
-// AddFollowerCount adds v to the "follower_count" field.
-func (u *StoreUpsert) AddFollowerCount(v int) *StoreUpsert {
-	u.Add(store.FieldFollowerCount, v)
 	return u
 }
 
@@ -1628,27 +1585,6 @@ func (u *StoreUpsertOne) SetHasOfficialBadge(v bool) *StoreUpsertOne {
 func (u *StoreUpsertOne) UpdateHasOfficialBadge() *StoreUpsertOne {
 	return u.Update(func(s *StoreUpsert) {
 		s.UpdateHasOfficialBadge()
-	})
-}
-
-// SetFollowerCount sets the "follower_count" field.
-func (u *StoreUpsertOne) SetFollowerCount(v int) *StoreUpsertOne {
-	return u.Update(func(s *StoreUpsert) {
-		s.SetFollowerCount(v)
-	})
-}
-
-// AddFollowerCount adds v to the "follower_count" field.
-func (u *StoreUpsertOne) AddFollowerCount(v int) *StoreUpsertOne {
-	return u.Update(func(s *StoreUpsert) {
-		s.AddFollowerCount(v)
-	})
-}
-
-// UpdateFollowerCount sets the "follower_count" field to the value that was provided on create.
-func (u *StoreUpsertOne) UpdateFollowerCount() *StoreUpsertOne {
-	return u.Update(func(s *StoreUpsert) {
-		s.UpdateFollowerCount()
 	})
 }
 
@@ -2384,27 +2320,6 @@ func (u *StoreUpsertBulk) SetHasOfficialBadge(v bool) *StoreUpsertBulk {
 func (u *StoreUpsertBulk) UpdateHasOfficialBadge() *StoreUpsertBulk {
 	return u.Update(func(s *StoreUpsert) {
 		s.UpdateHasOfficialBadge()
-	})
-}
-
-// SetFollowerCount sets the "follower_count" field.
-func (u *StoreUpsertBulk) SetFollowerCount(v int) *StoreUpsertBulk {
-	return u.Update(func(s *StoreUpsert) {
-		s.SetFollowerCount(v)
-	})
-}
-
-// AddFollowerCount adds v to the "follower_count" field.
-func (u *StoreUpsertBulk) AddFollowerCount(v int) *StoreUpsertBulk {
-	return u.Update(func(s *StoreUpsert) {
-		s.AddFollowerCount(v)
-	})
-}
-
-// UpdateFollowerCount sets the "follower_count" field to the value that was provided on create.
-func (u *StoreUpsertBulk) UpdateFollowerCount() *StoreUpsertBulk {
-	return u.Update(func(s *StoreUpsert) {
-		s.UpdateFollowerCount()
 	})
 }
 

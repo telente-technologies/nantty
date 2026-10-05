@@ -17075,8 +17075,6 @@ type StoreMutation struct {
 	status_changed_at            *time.Time
 	brand_id                     *uuid.UUID
 	has_official_badge           *bool
-	follower_count               *int
-	addfollower_count            *int
 	verified                     *bool
 	rating_sum                   *int64
 	addrating_sum                *int64
@@ -17848,62 +17846,6 @@ func (m *StoreMutation) OldHasOfficialBadge(ctx context.Context) (v bool, err er
 // ResetHasOfficialBadge resets all changes to the "has_official_badge" field.
 func (m *StoreMutation) ResetHasOfficialBadge() {
 	m.has_official_badge = nil
-}
-
-// SetFollowerCount sets the "follower_count" field.
-func (m *StoreMutation) SetFollowerCount(i int) {
-	m.follower_count = &i
-	m.addfollower_count = nil
-}
-
-// FollowerCount returns the value of the "follower_count" field in the mutation.
-func (m *StoreMutation) FollowerCount() (r int, exists bool) {
-	v := m.follower_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFollowerCount returns the old "follower_count" field's value of the Store entity.
-// If the Store object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StoreMutation) OldFollowerCount(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFollowerCount is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFollowerCount requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFollowerCount: %w", err)
-	}
-	return oldValue.FollowerCount, nil
-}
-
-// AddFollowerCount adds i to the "follower_count" field.
-func (m *StoreMutation) AddFollowerCount(i int) {
-	if m.addfollower_count != nil {
-		*m.addfollower_count += i
-	} else {
-		m.addfollower_count = &i
-	}
-}
-
-// AddedFollowerCount returns the value that was added to the "follower_count" field in this mutation.
-func (m *StoreMutation) AddedFollowerCount() (r int, exists bool) {
-	v := m.addfollower_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetFollowerCount resets all changes to the "follower_count" field.
-func (m *StoreMutation) ResetFollowerCount() {
-	m.follower_count = nil
-	m.addfollower_count = nil
 }
 
 // SetVerified sets the "verified" field.
@@ -18718,7 +18660,7 @@ func (m *StoreMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StoreMutation) Fields() []string {
-	fields := make([]string, 0, 34)
+	fields := make([]string, 0, 33)
 	if m.created_at != nil {
 		fields = append(fields, store.FieldCreatedAt)
 	}
@@ -18766,9 +18708,6 @@ func (m *StoreMutation) Fields() []string {
 	}
 	if m.has_official_badge != nil {
 		fields = append(fields, store.FieldHasOfficialBadge)
-	}
-	if m.follower_count != nil {
-		fields = append(fields, store.FieldFollowerCount)
 	}
 	if m.verified != nil {
 		fields = append(fields, store.FieldVerified)
@@ -18861,8 +18800,6 @@ func (m *StoreMutation) Field(name string) (ent.Value, bool) {
 		return m.BrandID()
 	case store.FieldHasOfficialBadge:
 		return m.HasOfficialBadge()
-	case store.FieldFollowerCount:
-		return m.FollowerCount()
 	case store.FieldVerified:
 		return m.Verified()
 	case store.FieldRatingSum:
@@ -18938,8 +18875,6 @@ func (m *StoreMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldBrandID(ctx)
 	case store.FieldHasOfficialBadge:
 		return m.OldHasOfficialBadge(ctx)
-	case store.FieldFollowerCount:
-		return m.OldFollowerCount(ctx)
 	case store.FieldVerified:
 		return m.OldVerified(ctx)
 	case store.FieldRatingSum:
@@ -19095,13 +19030,6 @@ func (m *StoreMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetHasOfficialBadge(v)
 		return nil
-	case store.FieldFollowerCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFollowerCount(v)
-		return nil
 	case store.FieldVerified:
 		v, ok := value.(bool)
 		if !ok {
@@ -19229,9 +19157,6 @@ func (m *StoreMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *StoreMutation) AddedFields() []string {
 	var fields []string
-	if m.addfollower_count != nil {
-		fields = append(fields, store.FieldFollowerCount)
-	}
 	if m.addrating_sum != nil {
 		fields = append(fields, store.FieldRatingSum)
 	}
@@ -19246,8 +19171,6 @@ func (m *StoreMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *StoreMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case store.FieldFollowerCount:
-		return m.AddedFollowerCount()
 	case store.FieldRatingSum:
 		return m.AddedRatingSum()
 	case store.FieldRatingCount:
@@ -19261,13 +19184,6 @@ func (m *StoreMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *StoreMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case store.FieldFollowerCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddFollowerCount(v)
-		return nil
 	case store.FieldRatingSum:
 		v, ok := value.(int64)
 		if !ok {
@@ -19425,9 +19341,6 @@ func (m *StoreMutation) ResetField(name string) error {
 		return nil
 	case store.FieldHasOfficialBadge:
 		m.ResetHasOfficialBadge()
-		return nil
-	case store.FieldFollowerCount:
-		m.ResetFollowerCount()
 		return nil
 	case store.FieldVerified:
 		m.ResetVerified()
