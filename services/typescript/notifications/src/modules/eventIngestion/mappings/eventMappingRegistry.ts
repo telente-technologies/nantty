@@ -1,3 +1,5 @@
+import * as ads from "./ads.mapping.js";
+import * as creatorMoney from "./creatorMoney.mapping.js";
 import * as escrowMoney from "./escrowMoney.mapping.js";
 import * as identity from "./identity.mapping.js";
 import * as identityVerification from "./identityVerification.mapping.js";
@@ -60,6 +62,10 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "videoReply.created": social.videoReplyCreated,
   "messageRequest.received": social.messageRequestReceived,
   "gift.sent": social.giftSent,
+  "creatorSubscription.started": creatorMoney.creatorSubscriptionStarted,
+  "tip.sent": creatorMoney.tipSent,
+  "adInvite.created": ads.adInviteCreated,
+  "affiliateCommission.credited": creatorMoney.affiliateCommissionCredited,
   "live.started": social.liveStarted,
   "checkmark.suggested": verification.checkmarkSuggested,
   "checkmark.applicationSubmitted": verification.checkmarkApplicationSubmitted,
