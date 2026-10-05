@@ -181,6 +181,12 @@ type InventoryStock interface {
 	EnsureDefaultLocation(ctx context.Context, storeId uuid.UUID, countryCode string) (uuid.UUID, error)
 	StoreOwnsLocations(ctx context.Context, storeId uuid.UUID, locationIds []uuid.UUID) (bool, error)
 	ListSuppliersForStore(ctx context.Context, storeId uuid.UUID, supplierIds []uuid.UUID) (map[uuid.UUID]string, error)
+	ProductIdsMatchingStock(ctx context.Context, storeId uuid.UUID, filter StockFilter) ([]uuid.UUID, error)
+}
+
+type StockFilter struct {
+	Level      string
+	LocationId *uuid.UUID
 }
 
 type StoreRewardsLookup interface {

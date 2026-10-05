@@ -66,9 +66,13 @@ func (transfers CoinTransfers) TransferCoinsInTransaction(ctx context.Context, t
 	if err != nil {
 		return dtos.CoinTransferReceiptDto{}, err
 	}
+	flags, err := CoinRiskRules{Container: transfers.Container}.FlagsForTransfer(ctx, transaction, input.SenderUserId, input.RecipientUserId)
+	if err != nil {
+		return dtos.CoinTransferReceiptDto{}, err
+	}
 	client := transfers.Container.Client(transaction)
 	now := transfers.Container.Now().UTC()
-	transfer, err := client.CoinTransfer.Create().SetSenderUserID(input.SenderUserId).SetRecipientUserID(input.RecipientUserId).
+	transfer, err := client.CoinTransfer.Create().SetReviewStatus(ReviewStateForTransferFlags(flags)).SetReviewFlags(flags).SetSenderUserID(input.SenderUserId).SetRecipientUserID(input.RecipientUserId).
 		SetCoins(input.Coins).SetFeeCoins(split.FeeCoins).SetNetCoins(split.NetCoins).SetFeeBps(feeBps).SetNote(input.Note).SetCreatedAt(now).Save(ctx)
 	if err != nil {
 		return dtos.CoinTransferReceiptDto{}, err
