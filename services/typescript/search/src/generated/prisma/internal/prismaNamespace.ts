@@ -985,6 +985,7 @@ export const SearchDocumentScalarFieldEnum = {
   entityId: 'entityId',
   docKey: 'docKey',
   ownerAccountId: 'ownerAccountId',
+  storeId: 'storeId',
   title: 'title',
   titleNormalized: 'titleNormalized',
   subtitle: 'subtitle',
@@ -995,6 +996,7 @@ export const SearchDocumentScalarFieldEnum = {
   visibility: 'visibility',
   available: 'available',
   restrictedForMinors: 'restrictedForMinors',
+  shippingRegions: 'shippingRegions',
   popularity: 'popularity',
   region: 'region',
   version: 'version',
@@ -1054,6 +1056,7 @@ export type ProcessedEventScalarFieldEnum = (typeof ProcessedEventScalarFieldEnu
 export const RecentSearchScalarFieldEnum = {
   id: 'id',
   accountId: 'accountId',
+  scope: 'scope',
   queryNormalized: 'queryNormalized',
   queryDisplay: 'queryDisplay',
   searchedAt: 'searchedAt'

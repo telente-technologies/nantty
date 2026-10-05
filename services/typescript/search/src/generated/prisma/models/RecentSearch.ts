@@ -27,6 +27,7 @@ export type AggregateRecentSearch = {
 export type RecentSearchMinAggregateOutputType = {
   id: string | null
   accountId: string | null
+  scope: string | null
   queryNormalized: string | null
   queryDisplay: string | null
   searchedAt: Date | null
@@ -35,6 +36,7 @@ export type RecentSearchMinAggregateOutputType = {
 export type RecentSearchMaxAggregateOutputType = {
   id: string | null
   accountId: string | null
+  scope: string | null
   queryNormalized: string | null
   queryDisplay: string | null
   searchedAt: Date | null
@@ -43,6 +45,7 @@ export type RecentSearchMaxAggregateOutputType = {
 export type RecentSearchCountAggregateOutputType = {
   id: number
   accountId: number
+  scope: number
   queryNormalized: number
   queryDisplay: number
   searchedAt: number
@@ -53,6 +56,7 @@ export type RecentSearchCountAggregateOutputType = {
 export type RecentSearchMinAggregateInputType = {
   id?: true
   accountId?: true
+  scope?: true
   queryNormalized?: true
   queryDisplay?: true
   searchedAt?: true
@@ -61,6 +65,7 @@ export type RecentSearchMinAggregateInputType = {
 export type RecentSearchMaxAggregateInputType = {
   id?: true
   accountId?: true
+  scope?: true
   queryNormalized?: true
   queryDisplay?: true
   searchedAt?: true
@@ -69,6 +74,7 @@ export type RecentSearchMaxAggregateInputType = {
 export type RecentSearchCountAggregateInputType = {
   id?: true
   accountId?: true
+  scope?: true
   queryNormalized?: true
   queryDisplay?: true
   searchedAt?: true
@@ -150,6 +156,7 @@ export type RecentSearchGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type RecentSearchGroupByOutputType = {
   id: string
   accountId: string
+  scope: string
   queryNormalized: string
   queryDisplay: string
   searchedAt: Date
@@ -179,6 +186,7 @@ export type RecentSearchWhereInput = {
   NOT?: Prisma.RecentSearchWhereInput | Prisma.RecentSearchWhereInput[]
   id?: Prisma.UuidFilter<"RecentSearch"> | string
   accountId?: Prisma.StringFilter<"RecentSearch"> | string
+  scope?: Prisma.StringFilter<"RecentSearch"> | string
   queryNormalized?: Prisma.StringFilter<"RecentSearch"> | string
   queryDisplay?: Prisma.StringFilter<"RecentSearch"> | string
   searchedAt?: Prisma.DateTimeFilter<"RecentSearch"> | Date | string
@@ -187,6 +195,7 @@ export type RecentSearchWhereInput = {
 export type RecentSearchOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   accountId?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
   queryNormalized?: Prisma.SortOrder
   queryDisplay?: Prisma.SortOrder
   searchedAt?: Prisma.SortOrder
@@ -194,19 +203,21 @@ export type RecentSearchOrderByWithRelationInput = {
 
 export type RecentSearchWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  accountId_queryNormalized?: Prisma.RecentSearchAccountIdQueryNormalizedCompoundUniqueInput
+  accountId_scope_queryNormalized?: Prisma.RecentSearchAccountIdScopeQueryNormalizedCompoundUniqueInput
   AND?: Prisma.RecentSearchWhereInput | Prisma.RecentSearchWhereInput[]
   OR?: Prisma.RecentSearchWhereInput[]
   NOT?: Prisma.RecentSearchWhereInput | Prisma.RecentSearchWhereInput[]
   accountId?: Prisma.StringFilter<"RecentSearch"> | string
+  scope?: Prisma.StringFilter<"RecentSearch"> | string
   queryNormalized?: Prisma.StringFilter<"RecentSearch"> | string
   queryDisplay?: Prisma.StringFilter<"RecentSearch"> | string
   searchedAt?: Prisma.DateTimeFilter<"RecentSearch"> | Date | string
-}, "id" | "accountId_queryNormalized">
+}, "id" | "accountId_scope_queryNormalized">
 
 export type RecentSearchOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   accountId?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
   queryNormalized?: Prisma.SortOrder
   queryDisplay?: Prisma.SortOrder
   searchedAt?: Prisma.SortOrder
@@ -221,6 +232,7 @@ export type RecentSearchScalarWhereWithAggregatesInput = {
   NOT?: Prisma.RecentSearchScalarWhereWithAggregatesInput | Prisma.RecentSearchScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"RecentSearch"> | string
   accountId?: Prisma.StringWithAggregatesFilter<"RecentSearch"> | string
+  scope?: Prisma.StringWithAggregatesFilter<"RecentSearch"> | string
   queryNormalized?: Prisma.StringWithAggregatesFilter<"RecentSearch"> | string
   queryDisplay?: Prisma.StringWithAggregatesFilter<"RecentSearch"> | string
   searchedAt?: Prisma.DateTimeWithAggregatesFilter<"RecentSearch"> | Date | string
@@ -229,6 +241,7 @@ export type RecentSearchScalarWhereWithAggregatesInput = {
 export type RecentSearchCreateInput = {
   id?: string
   accountId: string
+  scope?: string
   queryNormalized: string
   queryDisplay: string
   searchedAt?: Date | string
@@ -237,6 +250,7 @@ export type RecentSearchCreateInput = {
 export type RecentSearchUncheckedCreateInput = {
   id?: string
   accountId: string
+  scope?: string
   queryNormalized: string
   queryDisplay: string
   searchedAt?: Date | string
@@ -245,6 +259,7 @@ export type RecentSearchUncheckedCreateInput = {
 export type RecentSearchUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
   queryNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   queryDisplay?: Prisma.StringFieldUpdateOperationsInput | string
   searchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -253,6 +268,7 @@ export type RecentSearchUpdateInput = {
 export type RecentSearchUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
   queryNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   queryDisplay?: Prisma.StringFieldUpdateOperationsInput | string
   searchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -261,6 +277,7 @@ export type RecentSearchUncheckedUpdateInput = {
 export type RecentSearchCreateManyInput = {
   id?: string
   accountId: string
+  scope?: string
   queryNormalized: string
   queryDisplay: string
   searchedAt?: Date | string
@@ -269,6 +286,7 @@ export type RecentSearchCreateManyInput = {
 export type RecentSearchUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
   queryNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   queryDisplay?: Prisma.StringFieldUpdateOperationsInput | string
   searchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -277,19 +295,22 @@ export type RecentSearchUpdateManyMutationInput = {
 export type RecentSearchUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  scope?: Prisma.StringFieldUpdateOperationsInput | string
   queryNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   queryDisplay?: Prisma.StringFieldUpdateOperationsInput | string
   searchedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type RecentSearchAccountIdQueryNormalizedCompoundUniqueInput = {
+export type RecentSearchAccountIdScopeQueryNormalizedCompoundUniqueInput = {
   accountId: string
+  scope: string
   queryNormalized: string
 }
 
 export type RecentSearchCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   accountId?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
   queryNormalized?: Prisma.SortOrder
   queryDisplay?: Prisma.SortOrder
   searchedAt?: Prisma.SortOrder
@@ -298,6 +319,7 @@ export type RecentSearchCountOrderByAggregateInput = {
 export type RecentSearchMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   accountId?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
   queryNormalized?: Prisma.SortOrder
   queryDisplay?: Prisma.SortOrder
   searchedAt?: Prisma.SortOrder
@@ -306,6 +328,7 @@ export type RecentSearchMaxOrderByAggregateInput = {
 export type RecentSearchMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   accountId?: Prisma.SortOrder
+  scope?: Prisma.SortOrder
   queryNormalized?: Prisma.SortOrder
   queryDisplay?: Prisma.SortOrder
   searchedAt?: Prisma.SortOrder
@@ -316,6 +339,7 @@ export type RecentSearchMinOrderByAggregateInput = {
 export type RecentSearchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   accountId?: boolean
+  scope?: boolean
   queryNormalized?: boolean
   queryDisplay?: boolean
   searchedAt?: boolean
@@ -324,6 +348,7 @@ export type RecentSearchSelect<ExtArgs extends runtime.Types.Extensions.Internal
 export type RecentSearchSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   accountId?: boolean
+  scope?: boolean
   queryNormalized?: boolean
   queryDisplay?: boolean
   searchedAt?: boolean
@@ -332,6 +357,7 @@ export type RecentSearchSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 export type RecentSearchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   accountId?: boolean
+  scope?: boolean
   queryNormalized?: boolean
   queryDisplay?: boolean
   searchedAt?: boolean
@@ -340,12 +366,13 @@ export type RecentSearchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type RecentSearchSelectScalar = {
   id?: boolean
   accountId?: boolean
+  scope?: boolean
   queryNormalized?: boolean
   queryDisplay?: boolean
   searchedAt?: boolean
 }
 
-export type RecentSearchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "queryNormalized" | "queryDisplay" | "searchedAt", ExtArgs["result"]["recentSearch"]>
+export type RecentSearchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "scope" | "queryNormalized" | "queryDisplay" | "searchedAt", ExtArgs["result"]["recentSearch"]>
 
 export type $RecentSearchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "RecentSearch"
@@ -353,6 +380,7 @@ export type $RecentSearchPayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     accountId: string
+    scope: string
     queryNormalized: string
     queryDisplay: string
     searchedAt: Date
@@ -781,6 +809,7 @@ export interface Prisma__RecentSearchClient<T, Null = never, ExtArgs extends run
 export interface RecentSearchFieldRefs {
   readonly id: Prisma.FieldRef<"RecentSearch", 'String'>
   readonly accountId: Prisma.FieldRef<"RecentSearch", 'String'>
+  readonly scope: Prisma.FieldRef<"RecentSearch", 'String'>
   readonly queryNormalized: Prisma.FieldRef<"RecentSearch", 'String'>
   readonly queryDisplay: Prisma.FieldRef<"RecentSearch", 'String'>
   readonly searchedAt: Prisma.FieldRef<"RecentSearch", 'DateTime'>

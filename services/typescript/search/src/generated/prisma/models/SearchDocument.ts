@@ -41,6 +41,7 @@ export type SearchDocumentMinAggregateOutputType = {
   entityId: string | null
   docKey: string | null
   ownerAccountId: string | null
+  storeId: string | null
   title: string | null
   titleNormalized: string | null
   subtitle: string | null
@@ -62,6 +63,7 @@ export type SearchDocumentMaxAggregateOutputType = {
   entityId: string | null
   docKey: string | null
   ownerAccountId: string | null
+  storeId: string | null
   title: string | null
   titleNormalized: string | null
   subtitle: string | null
@@ -83,6 +85,7 @@ export type SearchDocumentCountAggregateOutputType = {
   entityId: number
   docKey: number
   ownerAccountId: number
+  storeId: number
   title: number
   titleNormalized: number
   subtitle: number
@@ -93,6 +96,7 @@ export type SearchDocumentCountAggregateOutputType = {
   visibility: number
   available: number
   restrictedForMinors: number
+  shippingRegions: number
   popularity: number
   region: number
   version: number
@@ -118,6 +122,7 @@ export type SearchDocumentMinAggregateInputType = {
   entityId?: true
   docKey?: true
   ownerAccountId?: true
+  storeId?: true
   title?: true
   titleNormalized?: true
   subtitle?: true
@@ -139,6 +144,7 @@ export type SearchDocumentMaxAggregateInputType = {
   entityId?: true
   docKey?: true
   ownerAccountId?: true
+  storeId?: true
   title?: true
   titleNormalized?: true
   subtitle?: true
@@ -160,6 +166,7 @@ export type SearchDocumentCountAggregateInputType = {
   entityId?: true
   docKey?: true
   ownerAccountId?: true
+  storeId?: true
   title?: true
   titleNormalized?: true
   subtitle?: true
@@ -170,6 +177,7 @@ export type SearchDocumentCountAggregateInputType = {
   visibility?: true
   available?: true
   restrictedForMinors?: true
+  shippingRegions?: true
   popularity?: true
   region?: true
   version?: true
@@ -270,6 +278,7 @@ export type SearchDocumentGroupByOutputType = {
   entityId: string
   docKey: string
   ownerAccountId: string | null
+  storeId: string | null
   title: string
   titleNormalized: string
   subtitle: string | null
@@ -280,6 +289,7 @@ export type SearchDocumentGroupByOutputType = {
   visibility: string
   available: boolean
   restrictedForMinors: boolean
+  shippingRegions: string[]
   popularity: number
   region: string | null
   version: bigint
@@ -316,6 +326,7 @@ export type SearchDocumentWhereInput = {
   entityId?: Prisma.StringFilter<"SearchDocument"> | string
   docKey?: Prisma.StringFilter<"SearchDocument"> | string
   ownerAccountId?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
+  storeId?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
   title?: Prisma.StringFilter<"SearchDocument"> | string
   titleNormalized?: Prisma.StringFilter<"SearchDocument"> | string
   subtitle?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
@@ -326,6 +337,7 @@ export type SearchDocumentWhereInput = {
   visibility?: Prisma.StringFilter<"SearchDocument"> | string
   available?: Prisma.BoolFilter<"SearchDocument"> | boolean
   restrictedForMinors?: Prisma.BoolFilter<"SearchDocument"> | boolean
+  shippingRegions?: Prisma.StringNullableListFilter<"SearchDocument">
   popularity?: Prisma.FloatFilter<"SearchDocument"> | number
   region?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
   version?: Prisma.BigIntFilter<"SearchDocument"> | bigint | number
@@ -339,6 +351,7 @@ export type SearchDocumentOrderByWithRelationInput = {
   entityId?: Prisma.SortOrder
   docKey?: Prisma.SortOrder
   ownerAccountId?: Prisma.SortOrderInput | Prisma.SortOrder
+  storeId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   titleNormalized?: Prisma.SortOrder
   subtitle?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -349,6 +362,7 @@ export type SearchDocumentOrderByWithRelationInput = {
   visibility?: Prisma.SortOrder
   available?: Prisma.SortOrder
   restrictedForMinors?: Prisma.SortOrder
+  shippingRegions?: Prisma.SortOrder
   popularity?: Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
@@ -366,6 +380,7 @@ export type SearchDocumentWhereUniqueInput = Prisma.AtLeast<{
   entityId?: Prisma.StringFilter<"SearchDocument"> | string
   docKey?: Prisma.StringFilter<"SearchDocument"> | string
   ownerAccountId?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
+  storeId?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
   title?: Prisma.StringFilter<"SearchDocument"> | string
   titleNormalized?: Prisma.StringFilter<"SearchDocument"> | string
   subtitle?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
@@ -376,6 +391,7 @@ export type SearchDocumentWhereUniqueInput = Prisma.AtLeast<{
   visibility?: Prisma.StringFilter<"SearchDocument"> | string
   available?: Prisma.BoolFilter<"SearchDocument"> | boolean
   restrictedForMinors?: Prisma.BoolFilter<"SearchDocument"> | boolean
+  shippingRegions?: Prisma.StringNullableListFilter<"SearchDocument">
   popularity?: Prisma.FloatFilter<"SearchDocument"> | number
   region?: Prisma.StringNullableFilter<"SearchDocument"> | string | null
   version?: Prisma.BigIntFilter<"SearchDocument"> | bigint | number
@@ -389,6 +405,7 @@ export type SearchDocumentOrderByWithAggregationInput = {
   entityId?: Prisma.SortOrder
   docKey?: Prisma.SortOrder
   ownerAccountId?: Prisma.SortOrderInput | Prisma.SortOrder
+  storeId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   titleNormalized?: Prisma.SortOrder
   subtitle?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -399,6 +416,7 @@ export type SearchDocumentOrderByWithAggregationInput = {
   visibility?: Prisma.SortOrder
   available?: Prisma.SortOrder
   restrictedForMinors?: Prisma.SortOrder
+  shippingRegions?: Prisma.SortOrder
   popularity?: Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
@@ -420,6 +438,7 @@ export type SearchDocumentScalarWhereWithAggregatesInput = {
   entityId?: Prisma.StringWithAggregatesFilter<"SearchDocument"> | string
   docKey?: Prisma.StringWithAggregatesFilter<"SearchDocument"> | string
   ownerAccountId?: Prisma.StringNullableWithAggregatesFilter<"SearchDocument"> | string | null
+  storeId?: Prisma.StringNullableWithAggregatesFilter<"SearchDocument"> | string | null
   title?: Prisma.StringWithAggregatesFilter<"SearchDocument"> | string
   titleNormalized?: Prisma.StringWithAggregatesFilter<"SearchDocument"> | string
   subtitle?: Prisma.StringNullableWithAggregatesFilter<"SearchDocument"> | string | null
@@ -430,6 +449,7 @@ export type SearchDocumentScalarWhereWithAggregatesInput = {
   visibility?: Prisma.StringWithAggregatesFilter<"SearchDocument"> | string
   available?: Prisma.BoolWithAggregatesFilter<"SearchDocument"> | boolean
   restrictedForMinors?: Prisma.BoolWithAggregatesFilter<"SearchDocument"> | boolean
+  shippingRegions?: Prisma.StringNullableListFilter<"SearchDocument">
   popularity?: Prisma.FloatWithAggregatesFilter<"SearchDocument"> | number
   region?: Prisma.StringNullableWithAggregatesFilter<"SearchDocument"> | string | null
   version?: Prisma.BigIntWithAggregatesFilter<"SearchDocument"> | bigint | number
@@ -443,6 +463,7 @@ export type SearchDocumentCreateInput = {
   entityId: string
   docKey: string
   ownerAccountId?: string | null
+  storeId?: string | null
   title: string
   titleNormalized: string
   subtitle?: string | null
@@ -453,6 +474,7 @@ export type SearchDocumentCreateInput = {
   visibility: string
   available: boolean
   restrictedForMinors?: boolean
+  shippingRegions?: Prisma.SearchDocumentCreateshippingRegionsInput | string[]
   popularity?: number
   region?: string | null
   version: bigint | number
@@ -466,6 +488,7 @@ export type SearchDocumentUncheckedCreateInput = {
   entityId: string
   docKey: string
   ownerAccountId?: string | null
+  storeId?: string | null
   title: string
   titleNormalized: string
   subtitle?: string | null
@@ -476,6 +499,7 @@ export type SearchDocumentUncheckedCreateInput = {
   visibility: string
   available: boolean
   restrictedForMinors?: boolean
+  shippingRegions?: Prisma.SearchDocumentCreateshippingRegionsInput | string[]
   popularity?: number
   region?: string | null
   version: bigint | number
@@ -489,6 +513,7 @@ export type SearchDocumentUpdateInput = {
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
   docKey?: Prisma.StringFieldUpdateOperationsInput | string
   ownerAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   titleNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -499,6 +524,7 @@ export type SearchDocumentUpdateInput = {
   visibility?: Prisma.StringFieldUpdateOperationsInput | string
   available?: Prisma.BoolFieldUpdateOperationsInput | boolean
   restrictedForMinors?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shippingRegions?: Prisma.SearchDocumentUpdateshippingRegionsInput | string[]
   popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -512,6 +538,7 @@ export type SearchDocumentUncheckedUpdateInput = {
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
   docKey?: Prisma.StringFieldUpdateOperationsInput | string
   ownerAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   titleNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -522,6 +549,7 @@ export type SearchDocumentUncheckedUpdateInput = {
   visibility?: Prisma.StringFieldUpdateOperationsInput | string
   available?: Prisma.BoolFieldUpdateOperationsInput | boolean
   restrictedForMinors?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shippingRegions?: Prisma.SearchDocumentUpdateshippingRegionsInput | string[]
   popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -535,6 +563,7 @@ export type SearchDocumentCreateManyInput = {
   entityId: string
   docKey: string
   ownerAccountId?: string | null
+  storeId?: string | null
   title: string
   titleNormalized: string
   subtitle?: string | null
@@ -545,6 +574,7 @@ export type SearchDocumentCreateManyInput = {
   visibility: string
   available: boolean
   restrictedForMinors?: boolean
+  shippingRegions?: Prisma.SearchDocumentCreateshippingRegionsInput | string[]
   popularity?: number
   region?: string | null
   version: bigint | number
@@ -558,6 +588,7 @@ export type SearchDocumentUpdateManyMutationInput = {
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
   docKey?: Prisma.StringFieldUpdateOperationsInput | string
   ownerAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   titleNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -568,6 +599,7 @@ export type SearchDocumentUpdateManyMutationInput = {
   visibility?: Prisma.StringFieldUpdateOperationsInput | string
   available?: Prisma.BoolFieldUpdateOperationsInput | boolean
   restrictedForMinors?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shippingRegions?: Prisma.SearchDocumentUpdateshippingRegionsInput | string[]
   popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -581,6 +613,7 @@ export type SearchDocumentUncheckedUpdateManyInput = {
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
   docKey?: Prisma.StringFieldUpdateOperationsInput | string
   ownerAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   titleNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -591,6 +624,7 @@ export type SearchDocumentUncheckedUpdateManyInput = {
   visibility?: Prisma.StringFieldUpdateOperationsInput | string
   available?: Prisma.BoolFieldUpdateOperationsInput | boolean
   restrictedForMinors?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shippingRegions?: Prisma.SearchDocumentUpdateshippingRegionsInput | string[]
   popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
@@ -617,6 +651,7 @@ export type SearchDocumentCountOrderByAggregateInput = {
   entityId?: Prisma.SortOrder
   docKey?: Prisma.SortOrder
   ownerAccountId?: Prisma.SortOrder
+  storeId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   titleNormalized?: Prisma.SortOrder
   subtitle?: Prisma.SortOrder
@@ -627,6 +662,7 @@ export type SearchDocumentCountOrderByAggregateInput = {
   visibility?: Prisma.SortOrder
   available?: Prisma.SortOrder
   restrictedForMinors?: Prisma.SortOrder
+  shippingRegions?: Prisma.SortOrder
   popularity?: Prisma.SortOrder
   region?: Prisma.SortOrder
   version?: Prisma.SortOrder
@@ -645,6 +681,7 @@ export type SearchDocumentMaxOrderByAggregateInput = {
   entityId?: Prisma.SortOrder
   docKey?: Prisma.SortOrder
   ownerAccountId?: Prisma.SortOrder
+  storeId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   titleNormalized?: Prisma.SortOrder
   subtitle?: Prisma.SortOrder
@@ -666,6 +703,7 @@ export type SearchDocumentMinOrderByAggregateInput = {
   entityId?: Prisma.SortOrder
   docKey?: Prisma.SortOrder
   ownerAccountId?: Prisma.SortOrder
+  storeId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   titleNormalized?: Prisma.SortOrder
   subtitle?: Prisma.SortOrder
@@ -691,6 +729,10 @@ export type SearchDocumentCreatetagsInput = {
   set: string[]
 }
 
+export type SearchDocumentCreateshippingRegionsInput = {
+  set: string[]
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -706,6 +748,11 @@ export type SearchDocumentUpdatetagsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type SearchDocumentUpdateshippingRegionsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type FloatFieldUpdateOperationsInput = {
@@ -739,6 +786,7 @@ export type SearchDocumentSelect<ExtArgs extends runtime.Types.Extensions.Intern
   entityId?: boolean
   docKey?: boolean
   ownerAccountId?: boolean
+  storeId?: boolean
   title?: boolean
   titleNormalized?: boolean
   subtitle?: boolean
@@ -749,6 +797,7 @@ export type SearchDocumentSelect<ExtArgs extends runtime.Types.Extensions.Intern
   visibility?: boolean
   available?: boolean
   restrictedForMinors?: boolean
+  shippingRegions?: boolean
   popularity?: boolean
   region?: boolean
   version?: boolean
@@ -762,6 +811,7 @@ export type SearchDocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   entityId?: boolean
   docKey?: boolean
   ownerAccountId?: boolean
+  storeId?: boolean
   title?: boolean
   titleNormalized?: boolean
   subtitle?: boolean
@@ -772,6 +822,7 @@ export type SearchDocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   visibility?: boolean
   available?: boolean
   restrictedForMinors?: boolean
+  shippingRegions?: boolean
   popularity?: boolean
   region?: boolean
   version?: boolean
@@ -785,6 +836,7 @@ export type SearchDocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   entityId?: boolean
   docKey?: boolean
   ownerAccountId?: boolean
+  storeId?: boolean
   title?: boolean
   titleNormalized?: boolean
   subtitle?: boolean
@@ -795,6 +847,7 @@ export type SearchDocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   visibility?: boolean
   available?: boolean
   restrictedForMinors?: boolean
+  shippingRegions?: boolean
   popularity?: boolean
   region?: boolean
   version?: boolean
@@ -808,6 +861,7 @@ export type SearchDocumentSelectScalar = {
   entityId?: boolean
   docKey?: boolean
   ownerAccountId?: boolean
+  storeId?: boolean
   title?: boolean
   titleNormalized?: boolean
   subtitle?: boolean
@@ -818,6 +872,7 @@ export type SearchDocumentSelectScalar = {
   visibility?: boolean
   available?: boolean
   restrictedForMinors?: boolean
+  shippingRegions?: boolean
   popularity?: boolean
   region?: boolean
   version?: boolean
@@ -826,7 +881,7 @@ export type SearchDocumentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SearchDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"kind" | "entityId" | "docKey" | "ownerAccountId" | "title" | "titleNormalized" | "subtitle" | "body" | "tagsText" | "tags" | "summary" | "visibility" | "available" | "restrictedForMinors" | "popularity" | "region" | "version" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["searchDocument"]>
+export type SearchDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"kind" | "entityId" | "docKey" | "ownerAccountId" | "storeId" | "title" | "titleNormalized" | "subtitle" | "body" | "tagsText" | "tags" | "summary" | "visibility" | "available" | "restrictedForMinors" | "shippingRegions" | "popularity" | "region" | "version" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["searchDocument"]>
 
 export type $SearchDocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SearchDocument"
@@ -836,6 +891,7 @@ export type $SearchDocumentPayload<ExtArgs extends runtime.Types.Extensions.Inte
     entityId: string
     docKey: string
     ownerAccountId: string | null
+    storeId: string | null
     title: string
     titleNormalized: string
     subtitle: string | null
@@ -846,6 +902,7 @@ export type $SearchDocumentPayload<ExtArgs extends runtime.Types.Extensions.Inte
     visibility: string
     available: boolean
     restrictedForMinors: boolean
+    shippingRegions: string[]
     popularity: number
     region: string | null
     version: bigint
@@ -1279,6 +1336,7 @@ export interface SearchDocumentFieldRefs {
   readonly entityId: Prisma.FieldRef<"SearchDocument", 'String'>
   readonly docKey: Prisma.FieldRef<"SearchDocument", 'String'>
   readonly ownerAccountId: Prisma.FieldRef<"SearchDocument", 'String'>
+  readonly storeId: Prisma.FieldRef<"SearchDocument", 'String'>
   readonly title: Prisma.FieldRef<"SearchDocument", 'String'>
   readonly titleNormalized: Prisma.FieldRef<"SearchDocument", 'String'>
   readonly subtitle: Prisma.FieldRef<"SearchDocument", 'String'>
@@ -1289,6 +1347,7 @@ export interface SearchDocumentFieldRefs {
   readonly visibility: Prisma.FieldRef<"SearchDocument", 'String'>
   readonly available: Prisma.FieldRef<"SearchDocument", 'Boolean'>
   readonly restrictedForMinors: Prisma.FieldRef<"SearchDocument", 'Boolean'>
+  readonly shippingRegions: Prisma.FieldRef<"SearchDocument", 'String[]'>
   readonly popularity: Prisma.FieldRef<"SearchDocument", 'Float'>
   readonly region: Prisma.FieldRef<"SearchDocument", 'String'>
   readonly version: Prisma.FieldRef<"SearchDocument", 'BigInt'>

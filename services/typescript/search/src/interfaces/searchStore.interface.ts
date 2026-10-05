@@ -26,8 +26,8 @@ export interface SearchQueryStore {
 }
 
 export interface RecentSearchStore {
-  record(accountId: string, normalized: string, display: string): Promise<void>;
-  list(accountId: string, limit: number): Promise<readonly RecentSearch[]>;
+  record(accountId: string, scope: string, normalized: string, display: string): Promise<void>;
+  list(accountId: string, scope: string, limit: number): Promise<readonly RecentSearch[]>;
   remove(accountId: string, id: string): Promise<void>;
-  clear(accountId: string): Promise<void>;
+  clear(accountId: string, scope: string | undefined): Promise<void>;
 }
