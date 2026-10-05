@@ -10,9 +10,11 @@ import (
 )
 
 type PricedCartLine struct {
-	ItemId   uuid.UUID
-	Quantity int
-	Product  commerceports.ProductSnapshot
+	ItemId            uuid.UUID
+	Quantity          int
+	Product           commerceports.ProductSnapshot
+	AttributionSource *string
+	AttributionId     *uuid.UUID
 }
 
 type SellerGroup struct {

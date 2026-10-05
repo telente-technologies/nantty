@@ -135,7 +135,8 @@ func createOrderItem(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup, lin
 	create := tx.OrderItem.Create().SetOrderGroupID(group.ID).SetStoreID(group.StoreID).SetProductID(product.ProductId).SetVariantID(product.VariantId).
 		SetProductName(product.ProductTitle).SetVariantTitle(product.VariantTitle).SetSku(product.Sku).SetSize(product.Size).SetColor(product.Color).
 		SetUnitPriceMinor(product.UnitPrice.AmountMinor).SetQuantity(line.Quantity).SetLineTotalMinor(lineTotal.AmountMinor).SetCategoryName(product.CategoryName).
-		SetTracksStock(product.TrackInventory).SetNillableCategoryID(product.CategoryId)
+		SetTracksStock(product.TrackInventory).SetNillableCategoryID(product.CategoryId).SetTaxable(product.Taxable).
+		SetNillableAttributionSource(line.AttributionSource).SetNillableAttributionID(line.AttributionId)
 	if product.ImageUrl != "" {
 		create.SetImageURL(product.ImageUrl)
 	}

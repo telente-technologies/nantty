@@ -8,7 +8,6 @@ import (
 	"zudomart/modules/orders/src/container"
 	"zudomart/modules/orders/src/enums"
 	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/events"
 	"zudomart/modules/orders/src/generated/ent"
 )
 
@@ -49,9 +48,9 @@ func CancelOrderGroup(ctx context.Context, deployed *container.Container, reques
 		if err != nil {
 			return err
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.refundRequested", group.ID.String(), now, map[string]any{
-			"orderGroupId": group.ID, "storeId": group.StoreID, "buyerAccountId": group.BuyerAccountID, "amountMinor": group.TotalMinor, "currency": group.Currency, "reason": request.Reason,
-		})
+		_, err = EnqueueRefundRequest(ctx, tx, group, RefundRequestRecord{AmountMinor: group.TotalMinor, Currency: group.Currency, Reason: request.Reason, Source: RefundSourceCancellation,
+			CreatedById: actorIdText(request.Actor), CreatedByName: request.Actor.Name}, now)
+		return err
 	})
 	if err != nil {
 		return nil, err

@@ -63,7 +63,7 @@ func PriceCartItems(ctx context.Context, deployed *container.Container, items []
 		if !snapshot.Purchasable {
 			unavailable[item.ID] = true
 		}
-		lines = append(lines, PricedCartLine{ItemId: item.ID, Quantity: item.Quantity, Product: snapshot})
+		lines = append(lines, PricedCartLine{ItemId: item.ID, Quantity: item.Quantity, Product: snapshot, AttributionSource: item.AttributionSource, AttributionId: item.AttributionID})
 	}
 	return lines, unavailable, nil
 }

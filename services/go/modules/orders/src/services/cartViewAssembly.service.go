@@ -18,6 +18,9 @@ func cartItemView(line PricedCartLine, unavailable map[uuid.UUID]bool) types.Car
 		Id: line.ItemId.String(), Product: summary, Quantity: line.Quantity, StoreId: product.StoreId.String(), Available: !unavailable[line.ItemId],
 		VariantDetail: &types.CartVariantView{Id: product.VariantId.String(), Size: product.Size, Color: product.Color, Sku: product.Sku, Title: product.VariantTitle},
 	}
+	if line.AttributionSource != nil && line.AttributionId != nil {
+		view.Attribution = &types.SaleAttributionView{Source: *line.AttributionSource, Id: line.AttributionId.String()}
+	}
 	if product.VariantTitle != "" && product.VariantTitle != "Default" {
 		title := product.VariantTitle
 		view.Variant = &title
