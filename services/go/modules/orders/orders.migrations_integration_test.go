@@ -20,6 +20,11 @@ import (
 
 func startAgainstFreshSchema(t *testing.T) *src.Module {
 	t.Helper()
+	return startAgainstFreshSchemaWith(t, src.Collaborators{})
+}
+
+func startAgainstFreshSchemaWith(t *testing.T, collaborators src.Collaborators) *src.Module {
+	t.Helper()
 	if testing.Short() {
 		t.Skip("integration test")
 	}
@@ -43,7 +48,7 @@ func startAgainstFreshSchema(t *testing.T) *src.Module {
 	settings := configs.ReadOrdersSettingsFromEnvironment(config.NewEnvironmentReader())
 	settings.DatabaseUrl, settings.DatabaseSchema, settings.Environment = databaseUrl, schema, "test"
 	dependencies := servicemodule.Dependencies{DeployableName: "test", Logger: slog.Default(), Environment: config.NewEnvironmentReader(), Health: health.NewRegistryForService("test")}
-	module, err := src.StartOrdersModuleWithSettings(ctx, settings, src.Collaborators{}, dependencies)
+	module, err := src.StartOrdersModuleWithSettings(ctx, settings, collaborators, dependencies)
 	if err != nil {
 		t.Fatalf("start orders: %v", err)
 	}
