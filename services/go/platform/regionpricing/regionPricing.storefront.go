@@ -8,8 +8,6 @@ var appleStorefrontAlpha3ToCountry = map[string]string{
 	"ITA": "IT", "LVA": "LV", "LTU": "LT", "LUX": "LU", "MLT": "MT", "NLD": "NL", "PRT": "PT", "SVK": "SK", "SVN": "SI", "ESP": "ES",
 }
 
-// StorefrontCountry accepts Apple's ISO alpha-3 storefront code or Google Play's alpha-2 billing country. An unmapped
-// but well-formed alpha-3 code is still a real storefront, so it reports known=true and resolves to the US fallback.
 func StorefrontCountry(raw string) (country string, known bool) {
 	code := strings.ToUpper(strings.TrimSpace(raw))
 	if normalized := NormalizeCountryCode(code); normalized != "" {

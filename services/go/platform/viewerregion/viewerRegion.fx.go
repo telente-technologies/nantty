@@ -13,7 +13,6 @@ import (
 
 var ErrRateUnavailable = errors.New("exchange rate unavailable")
 
-// RateReader reads the currency module's latest revisions (units of currency per 1 USD, scaled by 1e8) from its schema.
 type RateReader struct {
 	Database *sql.DB
 	Schema   string
@@ -56,7 +55,6 @@ func (reader *RateReader) LatestUsdRatesE8(ctx context.Context) (map[string]int6
 	return rates, nil
 }
 
-// ConvertMinorUnits rounds down, matching the currency module's own conversion.
 func ConvertMinorUnits(amountMinor int64, from, to string, ratesE8 map[string]int64) (int64, error) {
 	if from == to {
 		return amountMinor, nil

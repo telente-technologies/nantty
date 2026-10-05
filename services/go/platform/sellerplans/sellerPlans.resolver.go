@@ -47,11 +47,13 @@ func MinimumPlanFor(feature string) Plan {
 }
 
 type Limits struct {
-	MaxActiveProducts int
-	MaxLocations      int
+	MaxActiveProducts    int
+	MaxLocations         int
+	MaxStaffSeats        int
+	AnalyticsHistoryDays int
 }
 
-var limitsByPlan = map[Plan]Limits{Free: {100, 1}, Pro: {2000, 3}, Business: {0, 10}}
+var limitsByPlan = map[Plan]Limits{Free: {100, 1, 0, 30}, Pro: {2000, 3, 5, 365}, Business: {0, 10, 25, 730}}
 
 func LimitsFor(plan Plan) Limits { return limitsByPlan[plan] }
 

@@ -20,7 +20,6 @@ func DefaultSettingDocument() SettingDocument {
 	return SettingDocument{Ads: DefaultAdRegionPricing(), CreatorSubscriptionBands: bands}
 }
 
-// ParseSettingDocument reads the admin document and fills any region it leaves out with the research defaults.
 func ParseSettingDocument(raw json.RawMessage, found bool) SettingDocument {
 	document := DefaultSettingDocument()
 	if !found || len(raw) == 0 {
@@ -84,7 +83,6 @@ func ValidateSettingDocument(document SettingDocument) error {
 	return nil
 }
 
-// Documents saved before suggested bids existed keep their floors and take the research suggestions.
 func fillMissingSuggestions(row, defaults AdRegionPricing) AdRegionPricing {
 	if row.SuggestedCpmMinor == 0 {
 		row.SuggestedCpmMinor = max(defaults.SuggestedCpmMinor, row.CpmFloorMinor)

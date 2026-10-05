@@ -15,6 +15,7 @@ import (
 	"zudomart/platform/events"
 	"zudomart/platform/health"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/jwtauth"
 	"zudomart/platform/logging"
 	"zudomart/platform/telemetry"
 	"zudomart/platform/viewerregion"
@@ -30,6 +31,11 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	if err != nil {
 		return err
 	}
+	closeDenylist, err := registerSessionDenylistFromEnvironment(environment, logger)
+	if err != nil {
+		return err
+	}
+	defer closeDenylist()
 	dependencies := Dependencies{DeployableName: deployableName, Logger: logger, Environment: environment, Health: health.NewRegistryForService(deployableName)}
 	modules, err := createModulesInOrder(ctx, dependencies, factories)
 	if err != nil {
@@ -87,4 +93,21 @@ func closersForModules(modules []Module) []func(context.Context) error {
 		}
 		return combined
 	}}
+}
+
+func registerSessionDenylistFromEnvironment(environment *config.EnvironmentReader, logger *slog.Logger) (func(), error) {
+	rawUrl := environment.ReadStringOrDefault("AUTH_SESSION_DENYLIST_URL", environment.ReadStringOrDefault("VALKEY_URL", ""))
+	if rawUrl == "" {
+		if environment.ReadStringOrDefault("APP_ENV", "development") == "production" {
+			return nil, errors.New("AUTH_SESSION_DENYLIST_URL or VALKEY_URL is required in production")
+		}
+		logger.Warn("no session denylist configured: revoked user sessions stay usable until their access token expires")
+		return func() {}, nil
+	}
+	denylist, err := jwtauth.NewRedisSessionDenylistFromUrl(rawUrl)
+	if err != nil {
+		return nil, fmt.Errorf("AUTH_SESSION_DENYLIST_URL: %w", err)
+	}
+	jwtauth.RegisterSessionDenylist(denylist)
+	return func() { _ = denylist.Close() }, nil
 }

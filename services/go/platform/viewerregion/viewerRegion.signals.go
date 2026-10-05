@@ -22,7 +22,6 @@ type Signals struct {
 
 type signalsKey struct{}
 
-// CaptureSignals records the edge-resolved country (IP geolocation happens at the proxy) and the client hint on the request context.
 func CaptureSignals(trustedHeader string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -40,7 +39,6 @@ func SignalsFromContext(ctx context.Context) Signals {
 	return signals
 }
 
-// Resolve follows the currency module's order: profile country, then the IP-derived proxy header, then the client hint.
 func Resolve(profileCountry string, signals Signals) (country, source string) {
 	if code := NormalizeCountryCode(profileCountry); code != "" {
 		return code, SourceProfile

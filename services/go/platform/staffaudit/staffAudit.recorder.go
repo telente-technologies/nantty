@@ -32,8 +32,6 @@ type Recorder interface {
 	Record(ctx context.Context, record Record) error
 }
 
-// HttpRecorder posts to the admin service's internal audit endpoint, so staff edits made in other services
-// appear in the one admin audit log with the admin's name.
 type HttpRecorder struct {
 	BaseUrl string
 	Token   string
