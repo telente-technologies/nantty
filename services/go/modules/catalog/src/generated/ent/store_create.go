@@ -145,6 +145,76 @@ func (_c *StoreCreate) SetNillableStatus(v *string) *StoreCreate {
 	return _c
 }
 
+// SetStatusReason sets the "status_reason" field.
+func (_c *StoreCreate) SetStatusReason(v string) *StoreCreate {
+	_c.mutation.SetStatusReason(v)
+	return _c
+}
+
+// SetNillableStatusReason sets the "status_reason" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableStatusReason(v *string) *StoreCreate {
+	if v != nil {
+		_c.SetStatusReason(*v)
+	}
+	return _c
+}
+
+// SetStatusChangedAt sets the "status_changed_at" field.
+func (_c *StoreCreate) SetStatusChangedAt(v time.Time) *StoreCreate {
+	_c.mutation.SetStatusChangedAt(v)
+	return _c
+}
+
+// SetNillableStatusChangedAt sets the "status_changed_at" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableStatusChangedAt(v *time.Time) *StoreCreate {
+	if v != nil {
+		_c.SetStatusChangedAt(*v)
+	}
+	return _c
+}
+
+// SetBrandID sets the "brand_id" field.
+func (_c *StoreCreate) SetBrandID(v uuid.UUID) *StoreCreate {
+	_c.mutation.SetBrandID(v)
+	return _c
+}
+
+// SetNillableBrandID sets the "brand_id" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableBrandID(v *uuid.UUID) *StoreCreate {
+	if v != nil {
+		_c.SetBrandID(*v)
+	}
+	return _c
+}
+
+// SetHasOfficialBadge sets the "has_official_badge" field.
+func (_c *StoreCreate) SetHasOfficialBadge(v bool) *StoreCreate {
+	_c.mutation.SetHasOfficialBadge(v)
+	return _c
+}
+
+// SetNillableHasOfficialBadge sets the "has_official_badge" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableHasOfficialBadge(v *bool) *StoreCreate {
+	if v != nil {
+		_c.SetHasOfficialBadge(*v)
+	}
+	return _c
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (_c *StoreCreate) SetFollowerCount(v int) *StoreCreate {
+	_c.mutation.SetFollowerCount(v)
+	return _c
+}
+
+// SetNillableFollowerCount sets the "follower_count" field if the given value is not nil.
+func (_c *StoreCreate) SetNillableFollowerCount(v *int) *StoreCreate {
+	if v != nil {
+		_c.SetFollowerCount(*v)
+	}
+	return _c
+}
+
 // SetVerified sets the "verified" field.
 func (_c *StoreCreate) SetVerified(v bool) *StoreCreate {
 	_c.mutation.SetVerified(v)
@@ -408,6 +478,14 @@ func (_c *StoreCreate) defaults() {
 		v := store.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.HasOfficialBadge(); !ok {
+		v := store.DefaultHasOfficialBadge
+		_c.mutation.SetHasOfficialBadge(v)
+	}
+	if _, ok := _c.mutation.FollowerCount(); !ok {
+		v := store.DefaultFollowerCount
+		_c.mutation.SetFollowerCount(v)
+	}
 	if _, ok := _c.mutation.Verified(); !ok {
 		v := store.DefaultVerified
 		_c.mutation.SetVerified(v)
@@ -529,6 +607,17 @@ func (_c *StoreCreate) check() error {
 	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Store.status"`)}
+	}
+	if v, ok := _c.mutation.StatusReason(); ok {
+		if err := store.StatusReasonValidator(v); err != nil {
+			return &ValidationError{Name: "status_reason", err: fmt.Errorf(`ent: validator failed for field "Store.status_reason": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.HasOfficialBadge(); !ok {
+		return &ValidationError{Name: "has_official_badge", err: errors.New(`ent: missing required field "Store.has_official_badge"`)}
+	}
+	if _, ok := _c.mutation.FollowerCount(); !ok {
+		return &ValidationError{Name: "follower_count", err: errors.New(`ent: missing required field "Store.follower_count"`)}
 	}
 	if _, ok := _c.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Store.verified"`)}
@@ -671,6 +760,26 @@ func (_c *StoreCreate) createSpec() (*Store, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(store.FieldStatus, field.TypeString, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.StatusReason(); ok {
+		_spec.SetField(store.FieldStatusReason, field.TypeString, value)
+		_node.StatusReason = &value
+	}
+	if value, ok := _c.mutation.StatusChangedAt(); ok {
+		_spec.SetField(store.FieldStatusChangedAt, field.TypeTime, value)
+		_node.StatusChangedAt = &value
+	}
+	if value, ok := _c.mutation.BrandID(); ok {
+		_spec.SetField(store.FieldBrandID, field.TypeUUID, value)
+		_node.BrandID = &value
+	}
+	if value, ok := _c.mutation.HasOfficialBadge(); ok {
+		_spec.SetField(store.FieldHasOfficialBadge, field.TypeBool, value)
+		_node.HasOfficialBadge = value
+	}
+	if value, ok := _c.mutation.FollowerCount(); ok {
+		_spec.SetField(store.FieldFollowerCount, field.TypeInt, value)
+		_node.FollowerCount = value
 	}
 	if value, ok := _c.mutation.Verified(); ok {
 		_spec.SetField(store.FieldVerified, field.TypeBool, value)
@@ -909,6 +1018,90 @@ func (u *StoreUpsert) SetStatus(v string) *StoreUpsert {
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *StoreUpsert) UpdateStatus() *StoreUpsert {
 	u.SetExcluded(store.FieldStatus)
+	return u
+}
+
+// SetStatusReason sets the "status_reason" field.
+func (u *StoreUpsert) SetStatusReason(v string) *StoreUpsert {
+	u.Set(store.FieldStatusReason, v)
+	return u
+}
+
+// UpdateStatusReason sets the "status_reason" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateStatusReason() *StoreUpsert {
+	u.SetExcluded(store.FieldStatusReason)
+	return u
+}
+
+// ClearStatusReason clears the value of the "status_reason" field.
+func (u *StoreUpsert) ClearStatusReason() *StoreUpsert {
+	u.SetNull(store.FieldStatusReason)
+	return u
+}
+
+// SetStatusChangedAt sets the "status_changed_at" field.
+func (u *StoreUpsert) SetStatusChangedAt(v time.Time) *StoreUpsert {
+	u.Set(store.FieldStatusChangedAt, v)
+	return u
+}
+
+// UpdateStatusChangedAt sets the "status_changed_at" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateStatusChangedAt() *StoreUpsert {
+	u.SetExcluded(store.FieldStatusChangedAt)
+	return u
+}
+
+// ClearStatusChangedAt clears the value of the "status_changed_at" field.
+func (u *StoreUpsert) ClearStatusChangedAt() *StoreUpsert {
+	u.SetNull(store.FieldStatusChangedAt)
+	return u
+}
+
+// SetBrandID sets the "brand_id" field.
+func (u *StoreUpsert) SetBrandID(v uuid.UUID) *StoreUpsert {
+	u.Set(store.FieldBrandID, v)
+	return u
+}
+
+// UpdateBrandID sets the "brand_id" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateBrandID() *StoreUpsert {
+	u.SetExcluded(store.FieldBrandID)
+	return u
+}
+
+// ClearBrandID clears the value of the "brand_id" field.
+func (u *StoreUpsert) ClearBrandID() *StoreUpsert {
+	u.SetNull(store.FieldBrandID)
+	return u
+}
+
+// SetHasOfficialBadge sets the "has_official_badge" field.
+func (u *StoreUpsert) SetHasOfficialBadge(v bool) *StoreUpsert {
+	u.Set(store.FieldHasOfficialBadge, v)
+	return u
+}
+
+// UpdateHasOfficialBadge sets the "has_official_badge" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateHasOfficialBadge() *StoreUpsert {
+	u.SetExcluded(store.FieldHasOfficialBadge)
+	return u
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (u *StoreUpsert) SetFollowerCount(v int) *StoreUpsert {
+	u.Set(store.FieldFollowerCount, v)
+	return u
+}
+
+// UpdateFollowerCount sets the "follower_count" field to the value that was provided on create.
+func (u *StoreUpsert) UpdateFollowerCount() *StoreUpsert {
+	u.SetExcluded(store.FieldFollowerCount)
+	return u
+}
+
+// AddFollowerCount adds v to the "follower_count" field.
+func (u *StoreUpsert) AddFollowerCount(v int) *StoreUpsert {
+	u.Add(store.FieldFollowerCount, v)
 	return u
 }
 
@@ -1358,6 +1551,104 @@ func (u *StoreUpsertOne) SetStatus(v string) *StoreUpsertOne {
 func (u *StoreUpsertOne) UpdateStatus() *StoreUpsertOne {
 	return u.Update(func(s *StoreUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetStatusReason sets the "status_reason" field.
+func (u *StoreUpsertOne) SetStatusReason(v string) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetStatusReason(v)
+	})
+}
+
+// UpdateStatusReason sets the "status_reason" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateStatusReason() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateStatusReason()
+	})
+}
+
+// ClearStatusReason clears the value of the "status_reason" field.
+func (u *StoreUpsertOne) ClearStatusReason() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearStatusReason()
+	})
+}
+
+// SetStatusChangedAt sets the "status_changed_at" field.
+func (u *StoreUpsertOne) SetStatusChangedAt(v time.Time) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetStatusChangedAt(v)
+	})
+}
+
+// UpdateStatusChangedAt sets the "status_changed_at" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateStatusChangedAt() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateStatusChangedAt()
+	})
+}
+
+// ClearStatusChangedAt clears the value of the "status_changed_at" field.
+func (u *StoreUpsertOne) ClearStatusChangedAt() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearStatusChangedAt()
+	})
+}
+
+// SetBrandID sets the "brand_id" field.
+func (u *StoreUpsertOne) SetBrandID(v uuid.UUID) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetBrandID(v)
+	})
+}
+
+// UpdateBrandID sets the "brand_id" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateBrandID() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateBrandID()
+	})
+}
+
+// ClearBrandID clears the value of the "brand_id" field.
+func (u *StoreUpsertOne) ClearBrandID() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearBrandID()
+	})
+}
+
+// SetHasOfficialBadge sets the "has_official_badge" field.
+func (u *StoreUpsertOne) SetHasOfficialBadge(v bool) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetHasOfficialBadge(v)
+	})
+}
+
+// UpdateHasOfficialBadge sets the "has_official_badge" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateHasOfficialBadge() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateHasOfficialBadge()
+	})
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (u *StoreUpsertOne) SetFollowerCount(v int) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetFollowerCount(v)
+	})
+}
+
+// AddFollowerCount adds v to the "follower_count" field.
+func (u *StoreUpsertOne) AddFollowerCount(v int) *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.AddFollowerCount(v)
+	})
+}
+
+// UpdateFollowerCount sets the "follower_count" field to the value that was provided on create.
+func (u *StoreUpsertOne) UpdateFollowerCount() *StoreUpsertOne {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateFollowerCount()
 	})
 }
 
@@ -2016,6 +2307,104 @@ func (u *StoreUpsertBulk) SetStatus(v string) *StoreUpsertBulk {
 func (u *StoreUpsertBulk) UpdateStatus() *StoreUpsertBulk {
 	return u.Update(func(s *StoreUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetStatusReason sets the "status_reason" field.
+func (u *StoreUpsertBulk) SetStatusReason(v string) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetStatusReason(v)
+	})
+}
+
+// UpdateStatusReason sets the "status_reason" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateStatusReason() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateStatusReason()
+	})
+}
+
+// ClearStatusReason clears the value of the "status_reason" field.
+func (u *StoreUpsertBulk) ClearStatusReason() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearStatusReason()
+	})
+}
+
+// SetStatusChangedAt sets the "status_changed_at" field.
+func (u *StoreUpsertBulk) SetStatusChangedAt(v time.Time) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetStatusChangedAt(v)
+	})
+}
+
+// UpdateStatusChangedAt sets the "status_changed_at" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateStatusChangedAt() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateStatusChangedAt()
+	})
+}
+
+// ClearStatusChangedAt clears the value of the "status_changed_at" field.
+func (u *StoreUpsertBulk) ClearStatusChangedAt() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearStatusChangedAt()
+	})
+}
+
+// SetBrandID sets the "brand_id" field.
+func (u *StoreUpsertBulk) SetBrandID(v uuid.UUID) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetBrandID(v)
+	})
+}
+
+// UpdateBrandID sets the "brand_id" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateBrandID() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateBrandID()
+	})
+}
+
+// ClearBrandID clears the value of the "brand_id" field.
+func (u *StoreUpsertBulk) ClearBrandID() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.ClearBrandID()
+	})
+}
+
+// SetHasOfficialBadge sets the "has_official_badge" field.
+func (u *StoreUpsertBulk) SetHasOfficialBadge(v bool) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetHasOfficialBadge(v)
+	})
+}
+
+// UpdateHasOfficialBadge sets the "has_official_badge" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateHasOfficialBadge() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateHasOfficialBadge()
+	})
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (u *StoreUpsertBulk) SetFollowerCount(v int) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.SetFollowerCount(v)
+	})
+}
+
+// AddFollowerCount adds v to the "follower_count" field.
+func (u *StoreUpsertBulk) AddFollowerCount(v int) *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.AddFollowerCount(v)
+	})
+}
+
+// UpdateFollowerCount sets the "follower_count" field to the value that was provided on create.
+func (u *StoreUpsertBulk) UpdateFollowerCount() *StoreUpsertBulk {
+	return u.Update(func(s *StoreUpsert) {
+		s.UpdateFollowerCount()
 	})
 }
 

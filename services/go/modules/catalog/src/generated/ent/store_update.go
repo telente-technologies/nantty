@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // StoreUpdate is the builder for updating Store entities.
@@ -165,6 +166,101 @@ func (_u *StoreUpdate) SetNillableStatus(v *string) *StoreUpdate {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
+	return _u
+}
+
+// SetStatusReason sets the "status_reason" field.
+func (_u *StoreUpdate) SetStatusReason(v string) *StoreUpdate {
+	_u.mutation.SetStatusReason(v)
+	return _u
+}
+
+// SetNillableStatusReason sets the "status_reason" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableStatusReason(v *string) *StoreUpdate {
+	if v != nil {
+		_u.SetStatusReason(*v)
+	}
+	return _u
+}
+
+// ClearStatusReason clears the value of the "status_reason" field.
+func (_u *StoreUpdate) ClearStatusReason() *StoreUpdate {
+	_u.mutation.ClearStatusReason()
+	return _u
+}
+
+// SetStatusChangedAt sets the "status_changed_at" field.
+func (_u *StoreUpdate) SetStatusChangedAt(v time.Time) *StoreUpdate {
+	_u.mutation.SetStatusChangedAt(v)
+	return _u
+}
+
+// SetNillableStatusChangedAt sets the "status_changed_at" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableStatusChangedAt(v *time.Time) *StoreUpdate {
+	if v != nil {
+		_u.SetStatusChangedAt(*v)
+	}
+	return _u
+}
+
+// ClearStatusChangedAt clears the value of the "status_changed_at" field.
+func (_u *StoreUpdate) ClearStatusChangedAt() *StoreUpdate {
+	_u.mutation.ClearStatusChangedAt()
+	return _u
+}
+
+// SetBrandID sets the "brand_id" field.
+func (_u *StoreUpdate) SetBrandID(v uuid.UUID) *StoreUpdate {
+	_u.mutation.SetBrandID(v)
+	return _u
+}
+
+// SetNillableBrandID sets the "brand_id" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableBrandID(v *uuid.UUID) *StoreUpdate {
+	if v != nil {
+		_u.SetBrandID(*v)
+	}
+	return _u
+}
+
+// ClearBrandID clears the value of the "brand_id" field.
+func (_u *StoreUpdate) ClearBrandID() *StoreUpdate {
+	_u.mutation.ClearBrandID()
+	return _u
+}
+
+// SetHasOfficialBadge sets the "has_official_badge" field.
+func (_u *StoreUpdate) SetHasOfficialBadge(v bool) *StoreUpdate {
+	_u.mutation.SetHasOfficialBadge(v)
+	return _u
+}
+
+// SetNillableHasOfficialBadge sets the "has_official_badge" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableHasOfficialBadge(v *bool) *StoreUpdate {
+	if v != nil {
+		_u.SetHasOfficialBadge(*v)
+	}
+	return _u
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (_u *StoreUpdate) SetFollowerCount(v int) *StoreUpdate {
+	_u.mutation.ResetFollowerCount()
+	_u.mutation.SetFollowerCount(v)
+	return _u
+}
+
+// SetNillableFollowerCount sets the "follower_count" field if the given value is not nil.
+func (_u *StoreUpdate) SetNillableFollowerCount(v *int) *StoreUpdate {
+	if v != nil {
+		_u.SetFollowerCount(*v)
+	}
+	return _u
+}
+
+// AddFollowerCount adds value to the "follower_count" field.
+func (_u *StoreUpdate) AddFollowerCount(v int) *StoreUpdate {
+	_u.mutation.AddFollowerCount(v)
 	return _u
 }
 
@@ -509,6 +605,11 @@ func (_u *StoreUpdate) check() error {
 			return &ValidationError{Name: "timezone", err: fmt.Errorf(`ent: validator failed for field "Store.timezone": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.StatusReason(); ok {
+		if err := store.StatusReasonValidator(v); err != nil {
+			return &ValidationError{Name: "status_reason", err: fmt.Errorf(`ent: validator failed for field "Store.status_reason": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Locale(); ok {
 		if err := store.LocaleValidator(v); err != nil {
 			return &ValidationError{Name: "locale", err: fmt.Errorf(`ent: validator failed for field "Store.locale": %w`, err)}
@@ -581,6 +682,33 @@ func (_u *StoreUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(store.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StatusReason(); ok {
+		_spec.SetField(store.FieldStatusReason, field.TypeString, value)
+	}
+	if _u.mutation.StatusReasonCleared() {
+		_spec.ClearField(store.FieldStatusReason, field.TypeString)
+	}
+	if value, ok := _u.mutation.StatusChangedAt(); ok {
+		_spec.SetField(store.FieldStatusChangedAt, field.TypeTime, value)
+	}
+	if _u.mutation.StatusChangedAtCleared() {
+		_spec.ClearField(store.FieldStatusChangedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.BrandID(); ok {
+		_spec.SetField(store.FieldBrandID, field.TypeUUID, value)
+	}
+	if _u.mutation.BrandIDCleared() {
+		_spec.ClearField(store.FieldBrandID, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.HasOfficialBadge(); ok {
+		_spec.SetField(store.FieldHasOfficialBadge, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.FollowerCount(); ok {
+		_spec.SetField(store.FieldFollowerCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedFollowerCount(); ok {
+		_spec.AddField(store.FieldFollowerCount, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(store.FieldVerified, field.TypeBool, value)
@@ -827,6 +955,101 @@ func (_u *StoreUpdateOne) SetNillableStatus(v *string) *StoreUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
+	return _u
+}
+
+// SetStatusReason sets the "status_reason" field.
+func (_u *StoreUpdateOne) SetStatusReason(v string) *StoreUpdateOne {
+	_u.mutation.SetStatusReason(v)
+	return _u
+}
+
+// SetNillableStatusReason sets the "status_reason" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableStatusReason(v *string) *StoreUpdateOne {
+	if v != nil {
+		_u.SetStatusReason(*v)
+	}
+	return _u
+}
+
+// ClearStatusReason clears the value of the "status_reason" field.
+func (_u *StoreUpdateOne) ClearStatusReason() *StoreUpdateOne {
+	_u.mutation.ClearStatusReason()
+	return _u
+}
+
+// SetStatusChangedAt sets the "status_changed_at" field.
+func (_u *StoreUpdateOne) SetStatusChangedAt(v time.Time) *StoreUpdateOne {
+	_u.mutation.SetStatusChangedAt(v)
+	return _u
+}
+
+// SetNillableStatusChangedAt sets the "status_changed_at" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableStatusChangedAt(v *time.Time) *StoreUpdateOne {
+	if v != nil {
+		_u.SetStatusChangedAt(*v)
+	}
+	return _u
+}
+
+// ClearStatusChangedAt clears the value of the "status_changed_at" field.
+func (_u *StoreUpdateOne) ClearStatusChangedAt() *StoreUpdateOne {
+	_u.mutation.ClearStatusChangedAt()
+	return _u
+}
+
+// SetBrandID sets the "brand_id" field.
+func (_u *StoreUpdateOne) SetBrandID(v uuid.UUID) *StoreUpdateOne {
+	_u.mutation.SetBrandID(v)
+	return _u
+}
+
+// SetNillableBrandID sets the "brand_id" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableBrandID(v *uuid.UUID) *StoreUpdateOne {
+	if v != nil {
+		_u.SetBrandID(*v)
+	}
+	return _u
+}
+
+// ClearBrandID clears the value of the "brand_id" field.
+func (_u *StoreUpdateOne) ClearBrandID() *StoreUpdateOne {
+	_u.mutation.ClearBrandID()
+	return _u
+}
+
+// SetHasOfficialBadge sets the "has_official_badge" field.
+func (_u *StoreUpdateOne) SetHasOfficialBadge(v bool) *StoreUpdateOne {
+	_u.mutation.SetHasOfficialBadge(v)
+	return _u
+}
+
+// SetNillableHasOfficialBadge sets the "has_official_badge" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableHasOfficialBadge(v *bool) *StoreUpdateOne {
+	if v != nil {
+		_u.SetHasOfficialBadge(*v)
+	}
+	return _u
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (_u *StoreUpdateOne) SetFollowerCount(v int) *StoreUpdateOne {
+	_u.mutation.ResetFollowerCount()
+	_u.mutation.SetFollowerCount(v)
+	return _u
+}
+
+// SetNillableFollowerCount sets the "follower_count" field if the given value is not nil.
+func (_u *StoreUpdateOne) SetNillableFollowerCount(v *int) *StoreUpdateOne {
+	if v != nil {
+		_u.SetFollowerCount(*v)
+	}
+	return _u
+}
+
+// AddFollowerCount adds value to the "follower_count" field.
+func (_u *StoreUpdateOne) AddFollowerCount(v int) *StoreUpdateOne {
+	_u.mutation.AddFollowerCount(v)
 	return _u
 }
 
@@ -1184,6 +1407,11 @@ func (_u *StoreUpdateOne) check() error {
 			return &ValidationError{Name: "timezone", err: fmt.Errorf(`ent: validator failed for field "Store.timezone": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.StatusReason(); ok {
+		if err := store.StatusReasonValidator(v); err != nil {
+			return &ValidationError{Name: "status_reason", err: fmt.Errorf(`ent: validator failed for field "Store.status_reason": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Locale(); ok {
 		if err := store.LocaleValidator(v); err != nil {
 			return &ValidationError{Name: "locale", err: fmt.Errorf(`ent: validator failed for field "Store.locale": %w`, err)}
@@ -1273,6 +1501,33 @@ func (_u *StoreUpdateOne) sqlSave(ctx context.Context) (_node *Store, err error)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(store.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StatusReason(); ok {
+		_spec.SetField(store.FieldStatusReason, field.TypeString, value)
+	}
+	if _u.mutation.StatusReasonCleared() {
+		_spec.ClearField(store.FieldStatusReason, field.TypeString)
+	}
+	if value, ok := _u.mutation.StatusChangedAt(); ok {
+		_spec.SetField(store.FieldStatusChangedAt, field.TypeTime, value)
+	}
+	if _u.mutation.StatusChangedAtCleared() {
+		_spec.ClearField(store.FieldStatusChangedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.BrandID(); ok {
+		_spec.SetField(store.FieldBrandID, field.TypeUUID, value)
+	}
+	if _u.mutation.BrandIDCleared() {
+		_spec.ClearField(store.FieldBrandID, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.HasOfficialBadge(); ok {
+		_spec.SetField(store.FieldHasOfficialBadge, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.FollowerCount(); ok {
+		_spec.SetField(store.FieldFollowerCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedFollowerCount(); ok {
+		_spec.AddField(store.FieldFollowerCount, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(store.FieldVerified, field.TypeBool, value)

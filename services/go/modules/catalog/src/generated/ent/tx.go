@@ -16,12 +16,18 @@ type Tx struct {
 	config
 	// Brand is the client for interacting with the Brand builders.
 	Brand *BrandClient
+	// BrandOfficialRequest is the client for interacting with the BrandOfficialRequest builders.
+	BrandOfficialRequest *BrandOfficialRequestClient
+	// CatalogFollow is the client for interacting with the CatalogFollow builders.
+	CatalogFollow *CatalogFollowClient
 	// Category is the client for interacting with the Category builders.
 	Category *CategoryClient
 	// FeaturedProduct is the client for interacting with the FeaturedProduct builders.
 	FeaturedProduct *FeaturedProductClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
+	// MartFeature is the client for interacting with the MartFeature builders.
+	MartFeature *MartFeatureClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
 	// Product is the client for interacting with the Product builders.
@@ -38,6 +44,8 @@ type Tx struct {
 	ProductVariant *ProductVariantClient
 	// Review is the client for interacting with the Review builders.
 	Review *ReviewClient
+	// SellerApplication is the client for interacting with the SellerApplication builders.
+	SellerApplication *SellerApplicationClient
 	// Store is the client for interacting with the Store builders.
 	Store *StoreClient
 	// StoreAuditEntry is the client for interacting with the StoreAuditEntry builders.
@@ -180,9 +188,12 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Brand = NewBrandClient(tx.config)
+	tx.BrandOfficialRequest = NewBrandOfficialRequestClient(tx.config)
+	tx.CatalogFollow = NewCatalogFollowClient(tx.config)
 	tx.Category = NewCategoryClient(tx.config)
 	tx.FeaturedProduct = NewFeaturedProductClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
+	tx.MartFeature = NewMartFeatureClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.Product = NewProductClient(tx.config)
 	tx.ProductDailyView = NewProductDailyViewClient(tx.config)
@@ -191,6 +202,7 @@ func (tx *Tx) init() {
 	tx.ProductReaction = NewProductReactionClient(tx.config)
 	tx.ProductVariant = NewProductVariantClient(tx.config)
 	tx.Review = NewReviewClient(tx.config)
+	tx.SellerApplication = NewSellerApplicationClient(tx.config)
 	tx.Store = NewStoreClient(tx.config)
 	tx.StoreAuditEntry = NewStoreAuditEntryClient(tx.config)
 	tx.StoreDailyTraffic = NewStoreDailyTrafficClient(tx.config)

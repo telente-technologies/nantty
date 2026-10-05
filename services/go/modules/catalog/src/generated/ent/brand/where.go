@@ -90,6 +90,56 @@ func Active(v bool) predicate.Brand {
 	return predicate.Brand(sql.FieldEQ(FieldActive, v))
 }
 
+// OwnerAccountID applies equality check predicate on the "owner_account_id" field. It's identical to OwnerAccountIDEQ.
+func OwnerAccountID(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldOwnerAccountID, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldDescription, v))
+}
+
+// CoverURL applies equality check predicate on the "cover_url" field. It's identical to CoverURLEQ.
+func CoverURL(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldCoverURL, v))
+}
+
+// Website applies equality check predicate on the "website" field. It's identical to WebsiteEQ.
+func Website(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldWebsite, v))
+}
+
+// CategoryID applies equality check predicate on the "category_id" field. It's identical to CategoryIDEQ.
+func CategoryID(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldCategoryID, v))
+}
+
+// CategoryName applies equality check predicate on the "category_name" field. It's identical to CategoryNameEQ.
+func CategoryName(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldCategoryName, v))
+}
+
+// CountryCode applies equality check predicate on the "country_code" field. It's identical to CountryCodeEQ.
+func CountryCode(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldCountryCode, v))
+}
+
+// OfficialStatus applies equality check predicate on the "official_status" field. It's identical to OfficialStatusEQ.
+func OfficialStatus(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldOfficialStatus, v))
+}
+
+// FollowerCount applies equality check predicate on the "follower_count" field. It's identical to FollowerCountEQ.
+func FollowerCount(v int) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldFollowerCount, v))
+}
+
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Brand {
 	return predicate.Brand(sql.FieldEQ(FieldCreatedAt, v))
@@ -403,6 +453,596 @@ func ActiveEQ(v bool) predicate.Brand {
 // ActiveNEQ applies the NEQ predicate on the "active" field.
 func ActiveNEQ(v bool) predicate.Brand {
 	return predicate.Brand(sql.FieldNEQ(FieldActive, v))
+}
+
+// OwnerAccountIDEQ applies the EQ predicate on the "owner_account_id" field.
+func OwnerAccountIDEQ(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldOwnerAccountID, v))
+}
+
+// OwnerAccountIDNEQ applies the NEQ predicate on the "owner_account_id" field.
+func OwnerAccountIDNEQ(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldOwnerAccountID, v))
+}
+
+// OwnerAccountIDIn applies the In predicate on the "owner_account_id" field.
+func OwnerAccountIDIn(vs ...uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldOwnerAccountID, vs...))
+}
+
+// OwnerAccountIDNotIn applies the NotIn predicate on the "owner_account_id" field.
+func OwnerAccountIDNotIn(vs ...uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldOwnerAccountID, vs...))
+}
+
+// OwnerAccountIDGT applies the GT predicate on the "owner_account_id" field.
+func OwnerAccountIDGT(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldOwnerAccountID, v))
+}
+
+// OwnerAccountIDGTE applies the GTE predicate on the "owner_account_id" field.
+func OwnerAccountIDGTE(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldOwnerAccountID, v))
+}
+
+// OwnerAccountIDLT applies the LT predicate on the "owner_account_id" field.
+func OwnerAccountIDLT(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldOwnerAccountID, v))
+}
+
+// OwnerAccountIDLTE applies the LTE predicate on the "owner_account_id" field.
+func OwnerAccountIDLTE(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldOwnerAccountID, v))
+}
+
+// OwnerAccountIDIsNil applies the IsNil predicate on the "owner_account_id" field.
+func OwnerAccountIDIsNil() predicate.Brand {
+	return predicate.Brand(sql.FieldIsNull(FieldOwnerAccountID))
+}
+
+// OwnerAccountIDNotNil applies the NotNil predicate on the "owner_account_id" field.
+func OwnerAccountIDNotNil() predicate.Brand {
+	return predicate.Brand(sql.FieldNotNull(FieldOwnerAccountID))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// CoverURLEQ applies the EQ predicate on the "cover_url" field.
+func CoverURLEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldCoverURL, v))
+}
+
+// CoverURLNEQ applies the NEQ predicate on the "cover_url" field.
+func CoverURLNEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldCoverURL, v))
+}
+
+// CoverURLIn applies the In predicate on the "cover_url" field.
+func CoverURLIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldCoverURL, vs...))
+}
+
+// CoverURLNotIn applies the NotIn predicate on the "cover_url" field.
+func CoverURLNotIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldCoverURL, vs...))
+}
+
+// CoverURLGT applies the GT predicate on the "cover_url" field.
+func CoverURLGT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldCoverURL, v))
+}
+
+// CoverURLGTE applies the GTE predicate on the "cover_url" field.
+func CoverURLGTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldCoverURL, v))
+}
+
+// CoverURLLT applies the LT predicate on the "cover_url" field.
+func CoverURLLT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldCoverURL, v))
+}
+
+// CoverURLLTE applies the LTE predicate on the "cover_url" field.
+func CoverURLLTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldCoverURL, v))
+}
+
+// CoverURLContains applies the Contains predicate on the "cover_url" field.
+func CoverURLContains(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContains(FieldCoverURL, v))
+}
+
+// CoverURLHasPrefix applies the HasPrefix predicate on the "cover_url" field.
+func CoverURLHasPrefix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasPrefix(FieldCoverURL, v))
+}
+
+// CoverURLHasSuffix applies the HasSuffix predicate on the "cover_url" field.
+func CoverURLHasSuffix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasSuffix(FieldCoverURL, v))
+}
+
+// CoverURLIsNil applies the IsNil predicate on the "cover_url" field.
+func CoverURLIsNil() predicate.Brand {
+	return predicate.Brand(sql.FieldIsNull(FieldCoverURL))
+}
+
+// CoverURLNotNil applies the NotNil predicate on the "cover_url" field.
+func CoverURLNotNil() predicate.Brand {
+	return predicate.Brand(sql.FieldNotNull(FieldCoverURL))
+}
+
+// CoverURLEqualFold applies the EqualFold predicate on the "cover_url" field.
+func CoverURLEqualFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEqualFold(FieldCoverURL, v))
+}
+
+// CoverURLContainsFold applies the ContainsFold predicate on the "cover_url" field.
+func CoverURLContainsFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContainsFold(FieldCoverURL, v))
+}
+
+// WebsiteEQ applies the EQ predicate on the "website" field.
+func WebsiteEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldWebsite, v))
+}
+
+// WebsiteNEQ applies the NEQ predicate on the "website" field.
+func WebsiteNEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldWebsite, v))
+}
+
+// WebsiteIn applies the In predicate on the "website" field.
+func WebsiteIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldWebsite, vs...))
+}
+
+// WebsiteNotIn applies the NotIn predicate on the "website" field.
+func WebsiteNotIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldWebsite, vs...))
+}
+
+// WebsiteGT applies the GT predicate on the "website" field.
+func WebsiteGT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldWebsite, v))
+}
+
+// WebsiteGTE applies the GTE predicate on the "website" field.
+func WebsiteGTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldWebsite, v))
+}
+
+// WebsiteLT applies the LT predicate on the "website" field.
+func WebsiteLT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldWebsite, v))
+}
+
+// WebsiteLTE applies the LTE predicate on the "website" field.
+func WebsiteLTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldWebsite, v))
+}
+
+// WebsiteContains applies the Contains predicate on the "website" field.
+func WebsiteContains(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContains(FieldWebsite, v))
+}
+
+// WebsiteHasPrefix applies the HasPrefix predicate on the "website" field.
+func WebsiteHasPrefix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasPrefix(FieldWebsite, v))
+}
+
+// WebsiteHasSuffix applies the HasSuffix predicate on the "website" field.
+func WebsiteHasSuffix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasSuffix(FieldWebsite, v))
+}
+
+// WebsiteIsNil applies the IsNil predicate on the "website" field.
+func WebsiteIsNil() predicate.Brand {
+	return predicate.Brand(sql.FieldIsNull(FieldWebsite))
+}
+
+// WebsiteNotNil applies the NotNil predicate on the "website" field.
+func WebsiteNotNil() predicate.Brand {
+	return predicate.Brand(sql.FieldNotNull(FieldWebsite))
+}
+
+// WebsiteEqualFold applies the EqualFold predicate on the "website" field.
+func WebsiteEqualFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEqualFold(FieldWebsite, v))
+}
+
+// WebsiteContainsFold applies the ContainsFold predicate on the "website" field.
+func WebsiteContainsFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContainsFold(FieldWebsite, v))
+}
+
+// CategoryIDEQ applies the EQ predicate on the "category_id" field.
+func CategoryIDEQ(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldCategoryID, v))
+}
+
+// CategoryIDNEQ applies the NEQ predicate on the "category_id" field.
+func CategoryIDNEQ(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldCategoryID, v))
+}
+
+// CategoryIDIn applies the In predicate on the "category_id" field.
+func CategoryIDIn(vs ...uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldCategoryID, vs...))
+}
+
+// CategoryIDNotIn applies the NotIn predicate on the "category_id" field.
+func CategoryIDNotIn(vs ...uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldCategoryID, vs...))
+}
+
+// CategoryIDGT applies the GT predicate on the "category_id" field.
+func CategoryIDGT(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldCategoryID, v))
+}
+
+// CategoryIDGTE applies the GTE predicate on the "category_id" field.
+func CategoryIDGTE(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldCategoryID, v))
+}
+
+// CategoryIDLT applies the LT predicate on the "category_id" field.
+func CategoryIDLT(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldCategoryID, v))
+}
+
+// CategoryIDLTE applies the LTE predicate on the "category_id" field.
+func CategoryIDLTE(v uuid.UUID) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldCategoryID, v))
+}
+
+// CategoryIDIsNil applies the IsNil predicate on the "category_id" field.
+func CategoryIDIsNil() predicate.Brand {
+	return predicate.Brand(sql.FieldIsNull(FieldCategoryID))
+}
+
+// CategoryIDNotNil applies the NotNil predicate on the "category_id" field.
+func CategoryIDNotNil() predicate.Brand {
+	return predicate.Brand(sql.FieldNotNull(FieldCategoryID))
+}
+
+// CategoryNameEQ applies the EQ predicate on the "category_name" field.
+func CategoryNameEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldCategoryName, v))
+}
+
+// CategoryNameNEQ applies the NEQ predicate on the "category_name" field.
+func CategoryNameNEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldCategoryName, v))
+}
+
+// CategoryNameIn applies the In predicate on the "category_name" field.
+func CategoryNameIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldCategoryName, vs...))
+}
+
+// CategoryNameNotIn applies the NotIn predicate on the "category_name" field.
+func CategoryNameNotIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldCategoryName, vs...))
+}
+
+// CategoryNameGT applies the GT predicate on the "category_name" field.
+func CategoryNameGT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldCategoryName, v))
+}
+
+// CategoryNameGTE applies the GTE predicate on the "category_name" field.
+func CategoryNameGTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldCategoryName, v))
+}
+
+// CategoryNameLT applies the LT predicate on the "category_name" field.
+func CategoryNameLT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldCategoryName, v))
+}
+
+// CategoryNameLTE applies the LTE predicate on the "category_name" field.
+func CategoryNameLTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldCategoryName, v))
+}
+
+// CategoryNameContains applies the Contains predicate on the "category_name" field.
+func CategoryNameContains(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContains(FieldCategoryName, v))
+}
+
+// CategoryNameHasPrefix applies the HasPrefix predicate on the "category_name" field.
+func CategoryNameHasPrefix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasPrefix(FieldCategoryName, v))
+}
+
+// CategoryNameHasSuffix applies the HasSuffix predicate on the "category_name" field.
+func CategoryNameHasSuffix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasSuffix(FieldCategoryName, v))
+}
+
+// CategoryNameEqualFold applies the EqualFold predicate on the "category_name" field.
+func CategoryNameEqualFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEqualFold(FieldCategoryName, v))
+}
+
+// CategoryNameContainsFold applies the ContainsFold predicate on the "category_name" field.
+func CategoryNameContainsFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContainsFold(FieldCategoryName, v))
+}
+
+// CountryCodeEQ applies the EQ predicate on the "country_code" field.
+func CountryCodeEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldCountryCode, v))
+}
+
+// CountryCodeNEQ applies the NEQ predicate on the "country_code" field.
+func CountryCodeNEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldCountryCode, v))
+}
+
+// CountryCodeIn applies the In predicate on the "country_code" field.
+func CountryCodeIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldCountryCode, vs...))
+}
+
+// CountryCodeNotIn applies the NotIn predicate on the "country_code" field.
+func CountryCodeNotIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldCountryCode, vs...))
+}
+
+// CountryCodeGT applies the GT predicate on the "country_code" field.
+func CountryCodeGT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldCountryCode, v))
+}
+
+// CountryCodeGTE applies the GTE predicate on the "country_code" field.
+func CountryCodeGTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldCountryCode, v))
+}
+
+// CountryCodeLT applies the LT predicate on the "country_code" field.
+func CountryCodeLT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldCountryCode, v))
+}
+
+// CountryCodeLTE applies the LTE predicate on the "country_code" field.
+func CountryCodeLTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldCountryCode, v))
+}
+
+// CountryCodeContains applies the Contains predicate on the "country_code" field.
+func CountryCodeContains(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContains(FieldCountryCode, v))
+}
+
+// CountryCodeHasPrefix applies the HasPrefix predicate on the "country_code" field.
+func CountryCodeHasPrefix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasPrefix(FieldCountryCode, v))
+}
+
+// CountryCodeHasSuffix applies the HasSuffix predicate on the "country_code" field.
+func CountryCodeHasSuffix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasSuffix(FieldCountryCode, v))
+}
+
+// CountryCodeEqualFold applies the EqualFold predicate on the "country_code" field.
+func CountryCodeEqualFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEqualFold(FieldCountryCode, v))
+}
+
+// CountryCodeContainsFold applies the ContainsFold predicate on the "country_code" field.
+func CountryCodeContainsFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContainsFold(FieldCountryCode, v))
+}
+
+// OfficialStatusEQ applies the EQ predicate on the "official_status" field.
+func OfficialStatusEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldOfficialStatus, v))
+}
+
+// OfficialStatusNEQ applies the NEQ predicate on the "official_status" field.
+func OfficialStatusNEQ(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldOfficialStatus, v))
+}
+
+// OfficialStatusIn applies the In predicate on the "official_status" field.
+func OfficialStatusIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldOfficialStatus, vs...))
+}
+
+// OfficialStatusNotIn applies the NotIn predicate on the "official_status" field.
+func OfficialStatusNotIn(vs ...string) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldOfficialStatus, vs...))
+}
+
+// OfficialStatusGT applies the GT predicate on the "official_status" field.
+func OfficialStatusGT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldOfficialStatus, v))
+}
+
+// OfficialStatusGTE applies the GTE predicate on the "official_status" field.
+func OfficialStatusGTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldOfficialStatus, v))
+}
+
+// OfficialStatusLT applies the LT predicate on the "official_status" field.
+func OfficialStatusLT(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldOfficialStatus, v))
+}
+
+// OfficialStatusLTE applies the LTE predicate on the "official_status" field.
+func OfficialStatusLTE(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldOfficialStatus, v))
+}
+
+// OfficialStatusContains applies the Contains predicate on the "official_status" field.
+func OfficialStatusContains(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContains(FieldOfficialStatus, v))
+}
+
+// OfficialStatusHasPrefix applies the HasPrefix predicate on the "official_status" field.
+func OfficialStatusHasPrefix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasPrefix(FieldOfficialStatus, v))
+}
+
+// OfficialStatusHasSuffix applies the HasSuffix predicate on the "official_status" field.
+func OfficialStatusHasSuffix(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldHasSuffix(FieldOfficialStatus, v))
+}
+
+// OfficialStatusEqualFold applies the EqualFold predicate on the "official_status" field.
+func OfficialStatusEqualFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldEqualFold(FieldOfficialStatus, v))
+}
+
+// OfficialStatusContainsFold applies the ContainsFold predicate on the "official_status" field.
+func OfficialStatusContainsFold(v string) predicate.Brand {
+	return predicate.Brand(sql.FieldContainsFold(FieldOfficialStatus, v))
+}
+
+// FollowerCountEQ applies the EQ predicate on the "follower_count" field.
+func FollowerCountEQ(v int) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldFollowerCount, v))
+}
+
+// FollowerCountNEQ applies the NEQ predicate on the "follower_count" field.
+func FollowerCountNEQ(v int) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldFollowerCount, v))
+}
+
+// FollowerCountIn applies the In predicate on the "follower_count" field.
+func FollowerCountIn(vs ...int) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldFollowerCount, vs...))
+}
+
+// FollowerCountNotIn applies the NotIn predicate on the "follower_count" field.
+func FollowerCountNotIn(vs ...int) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldFollowerCount, vs...))
+}
+
+// FollowerCountGT applies the GT predicate on the "follower_count" field.
+func FollowerCountGT(v int) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldFollowerCount, v))
+}
+
+// FollowerCountGTE applies the GTE predicate on the "follower_count" field.
+func FollowerCountGTE(v int) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldFollowerCount, v))
+}
+
+// FollowerCountLT applies the LT predicate on the "follower_count" field.
+func FollowerCountLT(v int) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldFollowerCount, v))
+}
+
+// FollowerCountLTE applies the LTE predicate on the "follower_count" field.
+func FollowerCountLTE(v int) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldFollowerCount, v))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Brand {
+	return predicate.Brand(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Brand {
+	return predicate.Brand(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Brand {
+	return predicate.Brand(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Brand {
+	return predicate.Brand(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Brand {
+	return predicate.Brand(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Brand {
+	return predicate.Brand(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
 // And groups predicates with the AND operator between them.

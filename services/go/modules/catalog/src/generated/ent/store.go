@@ -44,6 +44,16 @@ type Store struct {
 	Timezone string `json:"timezone,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
+	// StatusReason holds the value of the "status_reason" field.
+	StatusReason *string `json:"status_reason,omitempty"`
+	// StatusChangedAt holds the value of the "status_changed_at" field.
+	StatusChangedAt *time.Time `json:"status_changed_at,omitempty"`
+	// BrandID holds the value of the "brand_id" field.
+	BrandID *uuid.UUID `json:"brand_id,omitempty"`
+	// HasOfficialBadge holds the value of the "has_official_badge" field.
+	HasOfficialBadge bool `json:"has_official_badge,omitempty"`
+	// FollowerCount holds the value of the "follower_count" field.
+	FollowerCount int `json:"follower_count,omitempty"`
 	// Verified holds the value of the "verified" field.
 	Verified bool `json:"verified,omitempty"`
 	// RatingSum holds the value of the "rating_sum" field.
@@ -86,15 +96,17 @@ func (*Store) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case store.FieldBrandID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case store.FieldShippingCountryCodes, store.FieldTaxRates, store.FieldPolicies, store.FieldNotificationPreferences, store.FieldOpeningHours, store.FieldSocialLinks:
 			values[i] = new([]byte)
-		case store.FieldVerified, store.FieldPricesIncludeTax:
+		case store.FieldHasOfficialBadge, store.FieldVerified, store.FieldPricesIncludeTax:
 			values[i] = new(sql.NullBool)
-		case store.FieldRatingSum, store.FieldRatingCount:
+		case store.FieldFollowerCount, store.FieldRatingSum, store.FieldRatingCount:
 			values[i] = new(sql.NullInt64)
-		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus, store.FieldModerationVisibility, store.FieldLocale, store.FieldContactPhone, store.FieldContactEmail, store.FieldContactAddress, store.FieldTagline:
+		case store.FieldName, store.FieldSlug, store.FieldDescription, store.FieldLogoURL, store.FieldBannerURL, store.FieldCountryCode, store.FieldCurrency, store.FieldTimezone, store.FieldStatus, store.FieldStatusReason, store.FieldModerationVisibility, store.FieldLocale, store.FieldContactPhone, store.FieldContactEmail, store.FieldContactAddress, store.FieldTagline:
 			values[i] = new(sql.NullString)
-		case store.FieldCreatedAt, store.FieldUpdatedAt:
+		case store.FieldCreatedAt, store.FieldStatusChangedAt, store.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case store.FieldID, store.FieldOwnerAccountID, store.FieldBusinessProfileID:
 			values[i] = new(uuid.UUID)
@@ -192,6 +204,39 @@ func (_m *Store) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = value.String
+			}
+		case store.FieldStatusReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status_reason", values[i])
+			} else if value.Valid {
+				_m.StatusReason = new(string)
+				*_m.StatusReason = value.String
+			}
+		case store.FieldStatusChangedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field status_changed_at", values[i])
+			} else if value.Valid {
+				_m.StatusChangedAt = new(time.Time)
+				*_m.StatusChangedAt = value.Time
+			}
+		case store.FieldBrandID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field brand_id", values[i])
+			} else if value.Valid {
+				_m.BrandID = new(uuid.UUID)
+				*_m.BrandID = *value.S.(*uuid.UUID)
+			}
+		case store.FieldHasOfficialBadge:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field has_official_badge", values[i])
+			} else if value.Valid {
+				_m.HasOfficialBadge = value.Bool
+			}
+		case store.FieldFollowerCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field follower_count", values[i])
+			} else if value.Valid {
+				_m.FollowerCount = int(value.Int64)
 			}
 		case store.FieldVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -382,6 +427,27 @@ func (_m *Store) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)
+	builder.WriteString(", ")
+	if v := _m.StatusReason; v != nil {
+		builder.WriteString("status_reason=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.StatusChangedAt; v != nil {
+		builder.WriteString("status_changed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.BrandID; v != nil {
+		builder.WriteString("brand_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("has_official_badge=")
+	builder.WriteString(fmt.Sprintf("%v", _m.HasOfficialBadge))
+	builder.WriteString(", ")
+	builder.WriteString("follower_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FollowerCount))
 	builder.WriteString(", ")
 	builder.WriteString("verified=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Verified))

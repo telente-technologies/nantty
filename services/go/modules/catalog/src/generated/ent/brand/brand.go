@@ -28,6 +28,26 @@ const (
 	FieldOfficial = "official"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
+	// FieldOwnerAccountID holds the string denoting the owner_account_id field in the database.
+	FieldOwnerAccountID = "owner_account_id"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
+	// FieldCoverURL holds the string denoting the cover_url field in the database.
+	FieldCoverURL = "cover_url"
+	// FieldWebsite holds the string denoting the website field in the database.
+	FieldWebsite = "website"
+	// FieldCategoryID holds the string denoting the category_id field in the database.
+	FieldCategoryID = "category_id"
+	// FieldCategoryName holds the string denoting the category_name field in the database.
+	FieldCategoryName = "category_name"
+	// FieldCountryCode holds the string denoting the country_code field in the database.
+	FieldCountryCode = "country_code"
+	// FieldOfficialStatus holds the string denoting the official_status field in the database.
+	FieldOfficialStatus = "official_status"
+	// FieldFollowerCount holds the string denoting the follower_count field in the database.
+	FieldFollowerCount = "follower_count"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the brand in the database.
 	Table = "brands"
 )
@@ -42,6 +62,16 @@ var Columns = []string{
 	FieldOwnerProfileID,
 	FieldOfficial,
 	FieldActive,
+	FieldOwnerAccountID,
+	FieldDescription,
+	FieldCoverURL,
+	FieldWebsite,
+	FieldCategoryID,
+	FieldCategoryName,
+	FieldCountryCode,
+	FieldOfficialStatus,
+	FieldFollowerCount,
+	FieldUpdatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -67,6 +97,32 @@ var (
 	DefaultOfficial bool
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
+	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	DescriptionValidator func(string) error
+	// CoverURLValidator is a validator for the "cover_url" field. It is called by the builders before save.
+	CoverURLValidator func(string) error
+	// WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
+	WebsiteValidator func(string) error
+	// DefaultCategoryName holds the default value on creation for the "category_name" field.
+	DefaultCategoryName string
+	// CategoryNameValidator is a validator for the "category_name" field. It is called by the builders before save.
+	CategoryNameValidator func(string) error
+	// DefaultCountryCode holds the default value on creation for the "country_code" field.
+	DefaultCountryCode string
+	// CountryCodeValidator is a validator for the "country_code" field. It is called by the builders before save.
+	CountryCodeValidator func(string) error
+	// DefaultOfficialStatus holds the default value on creation for the "official_status" field.
+	DefaultOfficialStatus string
+	// OfficialStatusValidator is a validator for the "official_status" field. It is called by the builders before save.
+	OfficialStatusValidator func(string) error
+	// DefaultFollowerCount holds the default value on creation for the "follower_count" field.
+	DefaultFollowerCount int
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -112,4 +168,54 @@ func ByOfficial(opts ...sql.OrderTermOption) OrderOption {
 // ByActive orders the results by the active field.
 func ByActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActive, opts...).ToFunc()
+}
+
+// ByOwnerAccountID orders the results by the owner_account_id field.
+func ByOwnerAccountID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOwnerAccountID, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByCoverURL orders the results by the cover_url field.
+func ByCoverURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCoverURL, opts...).ToFunc()
+}
+
+// ByWebsite orders the results by the website field.
+func ByWebsite(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWebsite, opts...).ToFunc()
+}
+
+// ByCategoryID orders the results by the category_id field.
+func ByCategoryID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCategoryID, opts...).ToFunc()
+}
+
+// ByCategoryName orders the results by the category_name field.
+func ByCategoryName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCategoryName, opts...).ToFunc()
+}
+
+// ByCountryCode orders the results by the country_code field.
+func ByCountryCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCountryCode, opts...).ToFunc()
+}
+
+// ByOfficialStatus orders the results by the official_status field.
+func ByOfficialStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOfficialStatus, opts...).ToFunc()
+}
+
+// ByFollowerCount orders the results by the follower_count field.
+func ByFollowerCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFollowerCount, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
