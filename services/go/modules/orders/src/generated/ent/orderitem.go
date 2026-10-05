@@ -53,8 +53,14 @@ type OrderItem struct {
 	// CategoryName holds the value of the "category_name" field.
 	CategoryName string `json:"category_name,omitempty"`
 	// TracksStock holds the value of the "tracks_stock" field.
-	TracksStock  bool `json:"tracks_stock,omitempty"`
-	selectValues sql.SelectValues
+	TracksStock bool `json:"tracks_stock,omitempty"`
+	// Taxable holds the value of the "taxable" field.
+	Taxable bool `json:"taxable,omitempty"`
+	// AttributionSource holds the value of the "attribution_source" field.
+	AttributionSource *string `json:"attribution_source,omitempty"`
+	// AttributionID holds the value of the "attribution_id" field.
+	AttributionID *uuid.UUID `json:"attribution_id,omitempty"`
+	selectValues  sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -62,13 +68,13 @@ func (*OrderItem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case orderitem.FieldCategoryID:
+		case orderitem.FieldCategoryID, orderitem.FieldAttributionID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case orderitem.FieldTracksStock:
+		case orderitem.FieldTracksStock, orderitem.FieldTaxable:
 			values[i] = new(sql.NullBool)
 		case orderitem.FieldUnitPriceMinor, orderitem.FieldQuantity, orderitem.FieldLineTotalMinor, orderitem.FieldCostPriceMinor:
 			values[i] = new(sql.NullInt64)
-		case orderitem.FieldProductName, orderitem.FieldVariantTitle, orderitem.FieldSku, orderitem.FieldSize, orderitem.FieldColor, orderitem.FieldImageURL, orderitem.FieldCategoryName:
+		case orderitem.FieldProductName, orderitem.FieldVariantTitle, orderitem.FieldSku, orderitem.FieldSize, orderitem.FieldColor, orderitem.FieldImageURL, orderitem.FieldCategoryName, orderitem.FieldAttributionSource:
 			values[i] = new(sql.NullString)
 		case orderitem.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -206,6 +212,26 @@ func (_m *OrderItem) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.TracksStock = value.Bool
 			}
+		case orderitem.FieldTaxable:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field taxable", values[i])
+			} else if value.Valid {
+				_m.Taxable = value.Bool
+			}
+		case orderitem.FieldAttributionSource:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field attribution_source", values[i])
+			} else if value.Valid {
+				_m.AttributionSource = new(string)
+				*_m.AttributionSource = value.String
+			}
+		case orderitem.FieldAttributionID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field attribution_id", values[i])
+			} else if value.Valid {
+				_m.AttributionID = new(uuid.UUID)
+				*_m.AttributionID = *value.S.(*uuid.UUID)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -301,6 +327,19 @@ func (_m *OrderItem) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tracks_stock=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TracksStock))
+	builder.WriteString(", ")
+	builder.WriteString("taxable=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Taxable))
+	builder.WriteString(", ")
+	if v := _m.AttributionSource; v != nil {
+		builder.WriteString("attribution_source=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.AttributionID; v != nil {
+		builder.WriteString("attribution_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

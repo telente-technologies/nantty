@@ -77,6 +77,12 @@ func (_u *OrderItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.CategoryIDCleared() {
 		_spec.ClearField(orderitem.FieldCategoryID, field.TypeUUID)
 	}
+	if _u.mutation.AttributionSourceCleared() {
+		_spec.ClearField(orderitem.FieldAttributionSource, field.TypeString)
+	}
+	if _u.mutation.AttributionIDCleared() {
+		_spec.ClearField(orderitem.FieldAttributionID, field.TypeUUID)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{orderitem.Label}
@@ -176,6 +182,12 @@ func (_u *OrderItemUpdateOne) sqlSave(ctx context.Context) (_node *OrderItem, er
 	}
 	if _u.mutation.CategoryIDCleared() {
 		_spec.ClearField(orderitem.FieldCategoryID, field.TypeUUID)
+	}
+	if _u.mutation.AttributionSourceCleared() {
+		_spec.ClearField(orderitem.FieldAttributionSource, field.TypeString)
+	}
+	if _u.mutation.AttributionIDCleared() {
+		_spec.ClearField(orderitem.FieldAttributionID, field.TypeUUID)
 	}
 	_node = &OrderItem{config: _u.config}
 	_spec.Assign = _node.assignValues

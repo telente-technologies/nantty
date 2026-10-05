@@ -212,6 +212,48 @@ func (_c *OrderItemCreate) SetNillableTracksStock(v *bool) *OrderItemCreate {
 	return _c
 }
 
+// SetTaxable sets the "taxable" field.
+func (_c *OrderItemCreate) SetTaxable(v bool) *OrderItemCreate {
+	_c.mutation.SetTaxable(v)
+	return _c
+}
+
+// SetNillableTaxable sets the "taxable" field if the given value is not nil.
+func (_c *OrderItemCreate) SetNillableTaxable(v *bool) *OrderItemCreate {
+	if v != nil {
+		_c.SetTaxable(*v)
+	}
+	return _c
+}
+
+// SetAttributionSource sets the "attribution_source" field.
+func (_c *OrderItemCreate) SetAttributionSource(v string) *OrderItemCreate {
+	_c.mutation.SetAttributionSource(v)
+	return _c
+}
+
+// SetNillableAttributionSource sets the "attribution_source" field if the given value is not nil.
+func (_c *OrderItemCreate) SetNillableAttributionSource(v *string) *OrderItemCreate {
+	if v != nil {
+		_c.SetAttributionSource(*v)
+	}
+	return _c
+}
+
+// SetAttributionID sets the "attribution_id" field.
+func (_c *OrderItemCreate) SetAttributionID(v uuid.UUID) *OrderItemCreate {
+	_c.mutation.SetAttributionID(v)
+	return _c
+}
+
+// SetNillableAttributionID sets the "attribution_id" field if the given value is not nil.
+func (_c *OrderItemCreate) SetNillableAttributionID(v *uuid.UUID) *OrderItemCreate {
+	if v != nil {
+		_c.SetAttributionID(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *OrderItemCreate) SetID(v uuid.UUID) *OrderItemCreate {
 	_c.mutation.SetID(v)
@@ -288,6 +330,10 @@ func (_c *OrderItemCreate) defaults() {
 	if _, ok := _c.mutation.TracksStock(); !ok {
 		v := orderitem.DefaultTracksStock
 		_c.mutation.SetTracksStock(v)
+	}
+	if _, ok := _c.mutation.Taxable(); !ok {
+		v := orderitem.DefaultTaxable
+		_c.mutation.SetTaxable(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := orderitem.DefaultID()
@@ -381,6 +427,14 @@ func (_c *OrderItemCreate) check() error {
 	}
 	if _, ok := _c.mutation.TracksStock(); !ok {
 		return &ValidationError{Name: "tracks_stock", err: errors.New(`ent: missing required field "OrderItem.tracks_stock"`)}
+	}
+	if _, ok := _c.mutation.Taxable(); !ok {
+		return &ValidationError{Name: "taxable", err: errors.New(`ent: missing required field "OrderItem.taxable"`)}
+	}
+	if v, ok := _c.mutation.AttributionSource(); ok {
+		if err := orderitem.AttributionSourceValidator(v); err != nil {
+			return &ValidationError{Name: "attribution_source", err: fmt.Errorf(`ent: validator failed for field "OrderItem.attribution_source": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -489,6 +543,18 @@ func (_c *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.TracksStock(); ok {
 		_spec.SetField(orderitem.FieldTracksStock, field.TypeBool, value)
 		_node.TracksStock = value
+	}
+	if value, ok := _c.mutation.Taxable(); ok {
+		_spec.SetField(orderitem.FieldTaxable, field.TypeBool, value)
+		_node.Taxable = value
+	}
+	if value, ok := _c.mutation.AttributionSource(); ok {
+		_spec.SetField(orderitem.FieldAttributionSource, field.TypeString, value)
+		_node.AttributionSource = &value
+	}
+	if value, ok := _c.mutation.AttributionID(); ok {
+		_spec.SetField(orderitem.FieldAttributionID, field.TypeUUID, value)
+		_node.AttributionID = &value
 	}
 	return _node, _spec
 }
@@ -612,6 +678,15 @@ func (u *OrderItemUpsertOne) UpdateNewValues() *OrderItemUpsertOne {
 		}
 		if _, exists := u.create.mutation.TracksStock(); exists {
 			s.SetIgnore(orderitem.FieldTracksStock)
+		}
+		if _, exists := u.create.mutation.Taxable(); exists {
+			s.SetIgnore(orderitem.FieldTaxable)
+		}
+		if _, exists := u.create.mutation.AttributionSource(); exists {
+			s.SetIgnore(orderitem.FieldAttributionSource)
+		}
+		if _, exists := u.create.mutation.AttributionID(); exists {
+			s.SetIgnore(orderitem.FieldAttributionID)
 		}
 	}))
 	return u
@@ -880,6 +955,15 @@ func (u *OrderItemUpsertBulk) UpdateNewValues() *OrderItemUpsertBulk {
 			}
 			if _, exists := b.mutation.TracksStock(); exists {
 				s.SetIgnore(orderitem.FieldTracksStock)
+			}
+			if _, exists := b.mutation.Taxable(); exists {
+				s.SetIgnore(orderitem.FieldTaxable)
+			}
+			if _, exists := b.mutation.AttributionSource(); exists {
+				s.SetIgnore(orderitem.FieldAttributionSource)
+			}
+			if _, exists := b.mutation.AttributionID(); exists {
+				s.SetIgnore(orderitem.FieldAttributionID)
 			}
 		}
 	}))
