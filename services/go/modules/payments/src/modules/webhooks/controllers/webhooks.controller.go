@@ -64,12 +64,20 @@ func (controller WebhooksController) ReceiveStoreRefundNotification(writer http.
 		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, err)
 		return
 	}
-	if token := request.URL.Query().Get("token"); token != "" {
-		request.Header.Set(integrations.GooglePlayPushTokenHeader, token)
-	}
+	request.Header.Set(integrations.GooglePlayPushTokenHeader, readPushToken(request.Header))
 	if err := controller.Application.Gateway.HandleSignedStoreRefundNotification(request.Context(), request.PathValue("store"), body, request.Header); err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, err)
 		return
 	}
 	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]bool{"received": true})
+}
+
+func readPushToken(headers http.Header) string {
+	if token := strings.TrimSpace(headers.Get(integrations.GooglePlayPushTokenHeader)); token != "" {
+		return token
+	}
+	if bearer, found := strings.CutPrefix(headers.Get("Authorization"), "Bearer "); found {
+		return strings.TrimSpace(bearer)
+	}
+	return ""
 }

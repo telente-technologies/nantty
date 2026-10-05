@@ -5,8 +5,8 @@ type StartSavedCardSetupRequestDto struct {
 }
 
 type ChargeSavedCardRequestDto struct {
-	PaymentReference  string `json:"paymentReference"`
-	AuthorizationCode string `json:"authorizationCode"`
+	PaymentReference string `json:"paymentReference"`
+	SavedCardId      string `json:"savedCardId"`
 }
 
 type RefundBankDestinationRequestDto struct {

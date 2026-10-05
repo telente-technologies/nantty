@@ -2,16 +2,16 @@ package validators
 
 import (
 	"regexp"
-	"strings"
+
+	"github.com/google/uuid"
 
 	ledgerutils "zudomart/modules/ledger/src/utils"
 	"zudomart/modules/payments/src/modules/savedCards/dtos"
 )
 
 var (
-	providerIdentifierPattern = regexp.MustCompile(`^[A-Za-z0-9_]{4,120}$`)
-	bankAccountNumberPattern  = regexp.MustCompile(`^[0-9]{10}$`)
-	bankCodePattern           = regexp.MustCompile(`^[0-9A-Za-z]{2,20}$`)
+	bankAccountNumberPattern = regexp.MustCompile(`^[0-9]{10}$`)
+	bankCodePattern          = regexp.MustCompile(`^[0-9A-Za-z]{2,20}$`)
 )
 
 func ValidateStartSavedCardSetupRequest(request dtos.StartSavedCardSetupRequestDto) error {
@@ -23,8 +23,8 @@ func ValidateStartSavedCardSetupRequest(request dtos.StartSavedCardSetupRequestD
 func ValidateChargeSavedCardRequest(request dtos.ChargeSavedCardRequestDto) error {
 	collector := &ledgerutils.IssueCollector{}
 	collector.RequireLength("paymentReference", request.PaymentReference, 1, 80)
-	if !strings.HasPrefix(request.AuthorizationCode, "AUTH_") || !providerIdentifierPattern.MatchString(request.AuthorizationCode) {
-		collector.Add("authorizationCode", "must be a saved card reference")
+	if _, err := uuid.Parse(request.SavedCardId); err != nil {
+		collector.Add("savedCardId", "must be one of your saved cards")
 	}
 	return collector.Result()
 }

@@ -70,7 +70,7 @@ func (controller SavedCardsController) ChargeSavedCard(writer http.ResponseWrite
 		return
 	}
 	result, err := controller.Application.Gateway.ChargePaymentIntentWithSavedCard(request.Context(), services.SavedCardChargeRequest{
-		UserId: principal.UserId, PaymentIntentReference: body.PaymentReference, AuthorizationCode: body.AuthorizationCode,
+		UserId: principal.UserId, PaymentIntentReference: body.PaymentReference, SavedCardId: body.SavedCardId,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)
