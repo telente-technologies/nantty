@@ -5,6 +5,7 @@ from typing import Literal
 
 from pydantic import ValidationError
 
+from src.events.contract_envelope_normalizer import unwrap_queue_message_body
 from src.events.domain_event_dto import (
     AccountDeletionExecutedDomainEvent,
     AccountDeletionRequestedDomainEvent,
@@ -14,7 +15,6 @@ from src.events.domain_event_dto import (
     MediaProcessedDomainEvent,
     PostCreatedDomainEvent,
     domain_event_type_adapter,
-    unwrap_queue_message_body,
 )
 from src.modules.content_scoring.services.content_scoring_service import ContentScoringService
 from src.modules.domain_events.services.behaviour_feature_service import build_behaviour_operations
@@ -23,6 +23,7 @@ from src.modules.domain_events.services.personal_data_purge_service import Perso
 from src.modules.events_ingestion.services.event_ingestion_service import EventIngestionService
 from src.repositories.online_feature_keyspace_repository import ACCOUNT_DELETED_FIELD
 from src.repositories.online_feature_repository import OnlineFeatureStore
+from src.services.identifier_hashing_service import OpaqueIdentifierHasher
 
 consumer_logger = logging.getLogger("intelligence.domain_events")
 
@@ -43,9 +44,11 @@ class DomainEventConsumerService:
         feature_store: OnlineFeatureStore,
         event_ingestion_service: EventIngestionService,
         purge_service: PersonalDataPurgeService,
+        identifier_hasher: OpaqueIdentifierHasher,
         content_scoring_service: ContentScoringService | None = None,
     ) -> None:
         self.feature_store = feature_store
+        self.identifier_hasher = identifier_hasher
         self.event_ingestion_service = event_ingestion_service
         self.purge_service = purge_service
         self.content_scoring_service = content_scoring_service
@@ -90,12 +93,18 @@ class DomainEventConsumerService:
             await backend.delete_keys([claim_key])
             raise
 
+    def account_identities(self, actor_id: str) -> list[str]:
+        hashed = self.identifier_hasher.hash_user_id(actor_id)
+        return [actor_id] if hashed == actor_id else [actor_id, hashed]
+
     async def apply_event(self, event: DomainEvent) -> DomainEventProcessingOutcome:
         if isinstance(event, AccountDeletionExecutedDomainEvent):
-            await self.purge_service.purge_account(event.actor_id)
+            for identity in self.account_identities(event.actor_id):
+                await self.purge_service.purge_account(identity)
             return DomainEventProcessingOutcome("processed", event.event_id)
         if isinstance(event, AccountDeletionRequestedDomainEvent):
-            await self.purge_service.record_personalization_choice(event.actor_id, False)
+            for identity in self.account_identities(event.actor_id):
+                await self.purge_service.record_personalization_choice(identity, False)
             return DomainEventProcessingOutcome("processed", event.event_id)
         if isinstance(event, ConsentGrantedDomainEvent | ConsentWithdrawnDomainEvent):
             gating_types = {"personalization", "advertising"}
@@ -103,7 +112,8 @@ class DomainEventConsumerService:
             if event.payload.consent_type in gating_types and (
                 not granted or event.payload.consent_type == "personalization"
             ):
-                await self.purge_service.record_personalization_choice(event.actor_id, granted)
+                for identity in self.account_identities(event.actor_id):
+                    await self.purge_service.record_personalization_choice(identity, granted)
             return DomainEventProcessingOutcome("processed", event.event_id)
         await self.score_content_for_trust(event)
         if isinstance(event, MediaProcessedDomainEvent):
@@ -113,8 +123,10 @@ class DomainEventConsumerService:
         )
         if consent_rows[0].get(ACCOUNT_DELETED_FIELD):
             return DomainEventProcessingOutcome("skipped_deleted_account", event.event_id)
-        personalization_allowed = await self.feature_store.is_personalization_allowed(event.actor_id)
-        intelligence_event = translate_to_intelligence_event(event, personalization_allowed)
+        personalization_allowed = await self.feature_store.is_personalization_allowed(
+            self.identifier_hasher.hash_user_id(event.actor_id)
+        )
+        intelligence_event = translate_to_intelligence_event(event, personalization_allowed, self.identifier_hasher)
         if intelligence_event is not None:
             await self.event_ingestion_service.ingest_event_batch([intelligence_event])
         operations = build_behaviour_operations(event, self.feature_store.keyspace)

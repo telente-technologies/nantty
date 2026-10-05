@@ -16,7 +16,7 @@ from src.repositories.online_feature_keyspace_repository import (
 )
 from src.utils.decay_math_util import find_forward_decay_generation
 
-FLOW_DIRECTIONS = ("out", "in", "referred")
+FLOW_DIRECTIONS = ("out", "in")
 BEHAVIOUR_SET_NAMES = ("recipients", "devices", "ips")
 
 

@@ -6,16 +6,15 @@ from src.dtos.common_dto import ContractModel, ExchangeRateToUsd, MoneyAmount, R
 from src.modules.risk.dtos.risk_scoring_dto import RiskReason
 from src.validators.common_field_validator import CountryCode, NonNegativeCount, OpaqueIdentifier, UnitInterval
 
-ExtendedRiskSubjectType = Literal["account", "payment", "ad_click", "referral_removed", "refund", "marketplace"]
+ExtendedRiskSubjectType = Literal["account", "payment", "ad_click", "refund", "marketplace"]
 EXTENDED_RISK_SUBJECT_TYPES: tuple[ExtendedRiskSubjectType, ...] = (
     "account",
     "payment",
     "ad_click",
-    "referral_removed",
     "refund",
     "marketplace",
 )
-SUSPENSION_ELIGIBLE_SUBJECT_TYPES = frozenset({"account", "ad_click", "referral_removed", "marketplace"})
+SUSPENSION_ELIGIBLE_SUBJECT_TYPES = frozenset({"account", "ad_click", "marketplace"})
 
 
 class AccountRiskSignals(ContractModel):
@@ -53,14 +52,6 @@ class AdClickRiskSignals(ContractModel):
     clicker_account_age_hours: float = Field(default=10_000, ge=0, le=1e6)
 
 
-class ReferralRemovedRiskSignals(ContractModel):
-    removal_reason: Literal["referee_deleted", "fake_account", "self_referral", "chargeback"]
-    referrals_removed_last_30_days: NonNegativeCount = 0
-    referrals_total_last_30_days: NonNegativeCount = 0
-    referee_shares_device_with_referrer: bool = False
-    referee_account_age_hours_at_removal: float = Field(default=10_000, ge=0, le=1e6)
-
-
 class RefundRiskSignals(ContractModel):
     amount: MoneyAmount
     order_amount: MoneyAmount
@@ -93,7 +84,6 @@ class ExtendedRiskRequest(ContractModel):
     account: AccountRiskSignals | None = None
     payment: PaymentRiskSignals | None = None
     ad_click: AdClickRiskSignals | None = None
-    referral_removed: ReferralRemovedRiskSignals | None = None
     refund: RefundRiskSignals | None = None
     marketplace: MarketplaceRiskSignals | None = None
     now: AwareDatetime | None = None

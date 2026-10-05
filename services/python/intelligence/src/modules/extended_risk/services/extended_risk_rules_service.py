@@ -6,7 +6,6 @@ from src.modules.extended_risk.dtos.extended_risk_dto import (
     ExtendedRiskRequest,
     MarketplaceRiskSignals,
     PaymentRiskSignals,
-    ReferralRemovedRiskSignals,
     RefundRiskSignals,
 )
 from src.modules.risk.dtos.risk_scoring_dto import RiskReason
@@ -74,22 +73,6 @@ def evaluate_ad_click_rules(signals: AdClickRiskSignals) -> Rules:
     ]
 
 
-def evaluate_referral_removed_rules(signals: ReferralRemovedRiskSignals) -> Rules:
-    removal_rate = (
-        signals.referrals_removed_last_30_days / signals.referrals_total_last_30_days
-        if signals.referrals_total_last_30_days
-        else 0.0
-    )
-    return [
-        ("self_referral_removed", 0.8, signals.removal_reason == "self_referral"),
-        ("fake_account_removed", 0.6, signals.removal_reason == "fake_account"),
-        ("chargeback_removed", 0.4, signals.removal_reason == "chargeback"),
-        ("high_removal_rate", 0.5, signals.referrals_total_last_30_days >= 5 and removal_rate >= 0.5),
-        ("referee_shares_device", 0.5, signals.referee_shares_device_with_referrer),
-        ("referee_removed_within_a_day", 0.25, signals.referee_account_age_hours_at_removal < 24),
-    ]
-
-
 def evaluate_refund_rules(signals: RefundRiskSignals, rates: dict[str, Decimal]) -> Rules:
     amount_usd = convert_money_to_usd_or_none(signals.amount, rates)
     return [
@@ -135,8 +118,6 @@ def evaluate_extended_risk_rules(request: ExtendedRiskRequest, rates: dict[str, 
         rules = evaluate_payment_rules(request.payment, rates)
     elif request.ad_click is not None:
         rules = evaluate_ad_click_rules(request.ad_click)
-    elif request.referral_removed is not None:
-        rules = evaluate_referral_removed_rules(request.referral_removed)
     elif request.refund is not None:
         rules = evaluate_refund_rules(request.refund, rates)
     elif request.marketplace is not None:

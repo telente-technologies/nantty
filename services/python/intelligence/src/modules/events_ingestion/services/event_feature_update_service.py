@@ -16,6 +16,7 @@ from src.events.event_envelope_dto import (
     ProductViewedEvent,
     PurchasedEvent,
     ReportedEvent,
+    SavedEvent,
     SharedEvent,
 )
 from src.interfaces.feature_backend_interface import (
@@ -65,6 +66,8 @@ def calculate_affinity_signal_weight(event: IntelligenceEvent) -> float:
             return 2.0
         case SharedEvent():
             return 3.0
+        case SavedEvent():
+            return 2.5
         case FollowedEvent():
             return 4.0
         case ClipWatchedEvent():
@@ -89,6 +92,9 @@ def find_affinity_targets(event: IntelligenceEvent) -> tuple[list[str], list[str
             return [event.payload.author_id], [*event.payload.topics, *event.payload.hashtags]
         case ClipWatchedEvent():
             return [event.payload.creator_id], [*event.payload.topics, *event.payload.hashtags]
+        case SavedEvent():
+            authors = [event.payload.author_id] if event.payload.author_id else []
+            return authors, [*event.payload.topics, *event.payload.hashtags]
         case ProductViewedEvent():
             return [event.payload.store_id], list(event.payload.topics)
         case AddedToCartEvent() | PurchasedEvent():
@@ -120,6 +126,8 @@ def build_item_statistics_increments(event: IntelligenceEvent) -> list[tuple[str
             return [(event.payload.post_id, "comments", 1.0)]
         case SharedEvent():
             return [(event.payload.post_id, "shares", 1.0)]
+        case SavedEvent():
+            return [(event.payload.target_id, "saves", 1.0)]
         case ClipWatchedEvent():
             completed = 1.0 if event.payload.watch_fraction >= 0.9 else 0.0
             rewatched = 1.0 if event.payload.loop_count >= 1 else 0.0
