@@ -1,9 +1,4 @@
 .icon {
   display: inline-block;
   flex: none;
-  width: var(--icon-size);
-  height: var(--icon-size);
-  background-color: currentColor;
-  -webkit-mask: var(--icon-url) center / contain no-repeat;
-  mask: var(--icon-url) center / contain no-repeat;
 }
