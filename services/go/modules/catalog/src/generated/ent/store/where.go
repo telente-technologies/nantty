@@ -115,6 +115,31 @@ func Status(v string) predicate.Store {
 	return predicate.Store(sql.FieldEQ(FieldStatus, v))
 }
 
+// StatusReason applies equality check predicate on the "status_reason" field. It's identical to StatusReasonEQ.
+func StatusReason(v string) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldStatusReason, v))
+}
+
+// StatusChangedAt applies equality check predicate on the "status_changed_at" field. It's identical to StatusChangedAtEQ.
+func StatusChangedAt(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldStatusChangedAt, v))
+}
+
+// BrandID applies equality check predicate on the "brand_id" field. It's identical to BrandIDEQ.
+func BrandID(v uuid.UUID) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldBrandID, v))
+}
+
+// HasOfficialBadge applies equality check predicate on the "has_official_badge" field. It's identical to HasOfficialBadgeEQ.
+func HasOfficialBadge(v bool) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldHasOfficialBadge, v))
+}
+
+// FollowerCount applies equality check predicate on the "follower_count" field. It's identical to FollowerCountEQ.
+func FollowerCount(v int) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldFollowerCount, v))
+}
+
 // Verified applies equality check predicate on the "verified" field. It's identical to VerifiedEQ.
 func Verified(v bool) predicate.Store {
 	return predicate.Store(sql.FieldEQ(FieldVerified, v))
@@ -893,6 +918,231 @@ func StatusEqualFold(v string) predicate.Store {
 // StatusContainsFold applies the ContainsFold predicate on the "status" field.
 func StatusContainsFold(v string) predicate.Store {
 	return predicate.Store(sql.FieldContainsFold(FieldStatus, v))
+}
+
+// StatusReasonEQ applies the EQ predicate on the "status_reason" field.
+func StatusReasonEQ(v string) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldStatusReason, v))
+}
+
+// StatusReasonNEQ applies the NEQ predicate on the "status_reason" field.
+func StatusReasonNEQ(v string) predicate.Store {
+	return predicate.Store(sql.FieldNEQ(FieldStatusReason, v))
+}
+
+// StatusReasonIn applies the In predicate on the "status_reason" field.
+func StatusReasonIn(vs ...string) predicate.Store {
+	return predicate.Store(sql.FieldIn(FieldStatusReason, vs...))
+}
+
+// StatusReasonNotIn applies the NotIn predicate on the "status_reason" field.
+func StatusReasonNotIn(vs ...string) predicate.Store {
+	return predicate.Store(sql.FieldNotIn(FieldStatusReason, vs...))
+}
+
+// StatusReasonGT applies the GT predicate on the "status_reason" field.
+func StatusReasonGT(v string) predicate.Store {
+	return predicate.Store(sql.FieldGT(FieldStatusReason, v))
+}
+
+// StatusReasonGTE applies the GTE predicate on the "status_reason" field.
+func StatusReasonGTE(v string) predicate.Store {
+	return predicate.Store(sql.FieldGTE(FieldStatusReason, v))
+}
+
+// StatusReasonLT applies the LT predicate on the "status_reason" field.
+func StatusReasonLT(v string) predicate.Store {
+	return predicate.Store(sql.FieldLT(FieldStatusReason, v))
+}
+
+// StatusReasonLTE applies the LTE predicate on the "status_reason" field.
+func StatusReasonLTE(v string) predicate.Store {
+	return predicate.Store(sql.FieldLTE(FieldStatusReason, v))
+}
+
+// StatusReasonContains applies the Contains predicate on the "status_reason" field.
+func StatusReasonContains(v string) predicate.Store {
+	return predicate.Store(sql.FieldContains(FieldStatusReason, v))
+}
+
+// StatusReasonHasPrefix applies the HasPrefix predicate on the "status_reason" field.
+func StatusReasonHasPrefix(v string) predicate.Store {
+	return predicate.Store(sql.FieldHasPrefix(FieldStatusReason, v))
+}
+
+// StatusReasonHasSuffix applies the HasSuffix predicate on the "status_reason" field.
+func StatusReasonHasSuffix(v string) predicate.Store {
+	return predicate.Store(sql.FieldHasSuffix(FieldStatusReason, v))
+}
+
+// StatusReasonIsNil applies the IsNil predicate on the "status_reason" field.
+func StatusReasonIsNil() predicate.Store {
+	return predicate.Store(sql.FieldIsNull(FieldStatusReason))
+}
+
+// StatusReasonNotNil applies the NotNil predicate on the "status_reason" field.
+func StatusReasonNotNil() predicate.Store {
+	return predicate.Store(sql.FieldNotNull(FieldStatusReason))
+}
+
+// StatusReasonEqualFold applies the EqualFold predicate on the "status_reason" field.
+func StatusReasonEqualFold(v string) predicate.Store {
+	return predicate.Store(sql.FieldEqualFold(FieldStatusReason, v))
+}
+
+// StatusReasonContainsFold applies the ContainsFold predicate on the "status_reason" field.
+func StatusReasonContainsFold(v string) predicate.Store {
+	return predicate.Store(sql.FieldContainsFold(FieldStatusReason, v))
+}
+
+// StatusChangedAtEQ applies the EQ predicate on the "status_changed_at" field.
+func StatusChangedAtEQ(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldStatusChangedAt, v))
+}
+
+// StatusChangedAtNEQ applies the NEQ predicate on the "status_changed_at" field.
+func StatusChangedAtNEQ(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldNEQ(FieldStatusChangedAt, v))
+}
+
+// StatusChangedAtIn applies the In predicate on the "status_changed_at" field.
+func StatusChangedAtIn(vs ...time.Time) predicate.Store {
+	return predicate.Store(sql.FieldIn(FieldStatusChangedAt, vs...))
+}
+
+// StatusChangedAtNotIn applies the NotIn predicate on the "status_changed_at" field.
+func StatusChangedAtNotIn(vs ...time.Time) predicate.Store {
+	return predicate.Store(sql.FieldNotIn(FieldStatusChangedAt, vs...))
+}
+
+// StatusChangedAtGT applies the GT predicate on the "status_changed_at" field.
+func StatusChangedAtGT(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldGT(FieldStatusChangedAt, v))
+}
+
+// StatusChangedAtGTE applies the GTE predicate on the "status_changed_at" field.
+func StatusChangedAtGTE(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldGTE(FieldStatusChangedAt, v))
+}
+
+// StatusChangedAtLT applies the LT predicate on the "status_changed_at" field.
+func StatusChangedAtLT(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldLT(FieldStatusChangedAt, v))
+}
+
+// StatusChangedAtLTE applies the LTE predicate on the "status_changed_at" field.
+func StatusChangedAtLTE(v time.Time) predicate.Store {
+	return predicate.Store(sql.FieldLTE(FieldStatusChangedAt, v))
+}
+
+// StatusChangedAtIsNil applies the IsNil predicate on the "status_changed_at" field.
+func StatusChangedAtIsNil() predicate.Store {
+	return predicate.Store(sql.FieldIsNull(FieldStatusChangedAt))
+}
+
+// StatusChangedAtNotNil applies the NotNil predicate on the "status_changed_at" field.
+func StatusChangedAtNotNil() predicate.Store {
+	return predicate.Store(sql.FieldNotNull(FieldStatusChangedAt))
+}
+
+// BrandIDEQ applies the EQ predicate on the "brand_id" field.
+func BrandIDEQ(v uuid.UUID) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldBrandID, v))
+}
+
+// BrandIDNEQ applies the NEQ predicate on the "brand_id" field.
+func BrandIDNEQ(v uuid.UUID) predicate.Store {
+	return predicate.Store(sql.FieldNEQ(FieldBrandID, v))
+}
+
+// BrandIDIn applies the In predicate on the "brand_id" field.
+func BrandIDIn(vs ...uuid.UUID) predicate.Store {
+	return predicate.Store(sql.FieldIn(FieldBrandID, vs...))
+}
+
+// BrandIDNotIn applies the NotIn predicate on the "brand_id" field.
+func BrandIDNotIn(vs ...uuid.UUID) predicate.Store {
+	return predicate.Store(sql.FieldNotIn(FieldBrandID, vs...))
+}
+
+// BrandIDGT applies the GT predicate on the "brand_id" field.
+func BrandIDGT(v uuid.UUID) predicate.Store {
+	return predicate.Store(sql.FieldGT(FieldBrandID, v))
+}
+
+// BrandIDGTE applies the GTE predicate on the "brand_id" field.
+func BrandIDGTE(v uuid.UUID) predicate.Store {
+	return predicate.Store(sql.FieldGTE(FieldBrandID, v))
+}
+
+// BrandIDLT applies the LT predicate on the "brand_id" field.
+func BrandIDLT(v uuid.UUID) predicate.Store {
+	return predicate.Store(sql.FieldLT(FieldBrandID, v))
+}
+
+// BrandIDLTE applies the LTE predicate on the "brand_id" field.
+func BrandIDLTE(v uuid.UUID) predicate.Store {
+	return predicate.Store(sql.FieldLTE(FieldBrandID, v))
+}
+
+// BrandIDIsNil applies the IsNil predicate on the "brand_id" field.
+func BrandIDIsNil() predicate.Store {
+	return predicate.Store(sql.FieldIsNull(FieldBrandID))
+}
+
+// BrandIDNotNil applies the NotNil predicate on the "brand_id" field.
+func BrandIDNotNil() predicate.Store {
+	return predicate.Store(sql.FieldNotNull(FieldBrandID))
+}
+
+// HasOfficialBadgeEQ applies the EQ predicate on the "has_official_badge" field.
+func HasOfficialBadgeEQ(v bool) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldHasOfficialBadge, v))
+}
+
+// HasOfficialBadgeNEQ applies the NEQ predicate on the "has_official_badge" field.
+func HasOfficialBadgeNEQ(v bool) predicate.Store {
+	return predicate.Store(sql.FieldNEQ(FieldHasOfficialBadge, v))
+}
+
+// FollowerCountEQ applies the EQ predicate on the "follower_count" field.
+func FollowerCountEQ(v int) predicate.Store {
+	return predicate.Store(sql.FieldEQ(FieldFollowerCount, v))
+}
+
+// FollowerCountNEQ applies the NEQ predicate on the "follower_count" field.
+func FollowerCountNEQ(v int) predicate.Store {
+	return predicate.Store(sql.FieldNEQ(FieldFollowerCount, v))
+}
+
+// FollowerCountIn applies the In predicate on the "follower_count" field.
+func FollowerCountIn(vs ...int) predicate.Store {
+	return predicate.Store(sql.FieldIn(FieldFollowerCount, vs...))
+}
+
+// FollowerCountNotIn applies the NotIn predicate on the "follower_count" field.
+func FollowerCountNotIn(vs ...int) predicate.Store {
+	return predicate.Store(sql.FieldNotIn(FieldFollowerCount, vs...))
+}
+
+// FollowerCountGT applies the GT predicate on the "follower_count" field.
+func FollowerCountGT(v int) predicate.Store {
+	return predicate.Store(sql.FieldGT(FieldFollowerCount, v))
+}
+
+// FollowerCountGTE applies the GTE predicate on the "follower_count" field.
+func FollowerCountGTE(v int) predicate.Store {
+	return predicate.Store(sql.FieldGTE(FieldFollowerCount, v))
+}
+
+// FollowerCountLT applies the LT predicate on the "follower_count" field.
+func FollowerCountLT(v int) predicate.Store {
+	return predicate.Store(sql.FieldLT(FieldFollowerCount, v))
+}
+
+// FollowerCountLTE applies the LTE predicate on the "follower_count" field.
+func FollowerCountLTE(v int) predicate.Store {
+	return predicate.Store(sql.FieldLTE(FieldFollowerCount, v))
 }
 
 // VerifiedEQ applies the EQ predicate on the "verified" field.

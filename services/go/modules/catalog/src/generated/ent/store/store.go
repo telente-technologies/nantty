@@ -38,6 +38,16 @@ const (
 	FieldTimezone = "timezone"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldStatusReason holds the string denoting the status_reason field in the database.
+	FieldStatusReason = "status_reason"
+	// FieldStatusChangedAt holds the string denoting the status_changed_at field in the database.
+	FieldStatusChangedAt = "status_changed_at"
+	// FieldBrandID holds the string denoting the brand_id field in the database.
+	FieldBrandID = "brand_id"
+	// FieldHasOfficialBadge holds the string denoting the has_official_badge field in the database.
+	FieldHasOfficialBadge = "has_official_badge"
+	// FieldFollowerCount holds the string denoting the follower_count field in the database.
+	FieldFollowerCount = "follower_count"
 	// FieldVerified holds the string denoting the verified field in the database.
 	FieldVerified = "verified"
 	// FieldRatingSum holds the string denoting the rating_sum field in the database.
@@ -91,6 +101,11 @@ var Columns = []string{
 	FieldCurrency,
 	FieldTimezone,
 	FieldStatus,
+	FieldStatusReason,
+	FieldStatusChangedAt,
+	FieldBrandID,
+	FieldHasOfficialBadge,
+	FieldFollowerCount,
 	FieldVerified,
 	FieldRatingSum,
 	FieldRatingCount,
@@ -145,6 +160,12 @@ var (
 	TimezoneValidator func(string) error
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus string
+	// StatusReasonValidator is a validator for the "status_reason" field. It is called by the builders before save.
+	StatusReasonValidator func(string) error
+	// DefaultHasOfficialBadge holds the default value on creation for the "has_official_badge" field.
+	DefaultHasOfficialBadge bool
+	// DefaultFollowerCount holds the default value on creation for the "follower_count" field.
+	DefaultFollowerCount int
 	// DefaultVerified holds the default value on creation for the "verified" field.
 	DefaultVerified bool
 	// DefaultRatingSum holds the default value on creation for the "rating_sum" field.
@@ -249,6 +270,31 @@ func ByTimezone(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByStatusReason orders the results by the status_reason field.
+func ByStatusReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatusReason, opts...).ToFunc()
+}
+
+// ByStatusChangedAt orders the results by the status_changed_at field.
+func ByStatusChangedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatusChangedAt, opts...).ToFunc()
+}
+
+// ByBrandID orders the results by the brand_id field.
+func ByBrandID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBrandID, opts...).ToFunc()
+}
+
+// ByHasOfficialBadge orders the results by the has_official_badge field.
+func ByHasOfficialBadge(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHasOfficialBadge, opts...).ToFunc()
+}
+
+// ByFollowerCount orders the results by the follower_count field.
+func ByFollowerCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFollowerCount, opts...).ToFunc()
 }
 
 // ByVerified orders the results by the verified field.
