@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native
 import { BusinessLabel } from "@/components/chat/businessLabel";
 import { describeConversationForDisplay } from "@/components/chat/conversationDisplay.util";
 import { DisappearingMessagesPicker } from "@/components/chat/disappearingMessagesPicker";
+import { SecurityCodeRow } from "@/components/chatSafety/securityCode";
 import { useChatReportLauncher } from "@/components/chatReport/chatReportLauncher.hook";
 import { GroupMemberPicker } from "@/components/chat/groupMemberPicker";
 import { GroupMemberRow } from "@/components/chat/groupMemberRow";
@@ -130,6 +131,12 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
             </Text>
           ) : null}
         </View>
+
+        {display && !display.isGroup && !display.isChannel && conversation.data ? (
+          <View style={styles.section}>
+            <SecurityCodeRow peerId={conversation.data.peer.id} />
+          </View>
+        ) : null}
 
         {canEditGroup ? (
           <View style={styles.section}>

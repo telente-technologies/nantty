@@ -7,6 +7,7 @@ import { removeExpiredMessagesFromCaches } from "@/cache/messageRealtimeCache.ut
 import { readSavedMessagesForInstantDisplay, syncConversationMessagesIncrementallyAndReadLocalHistory } from "@/cache/messageSync.util";
 import { ChatBubble } from "@/components/chat/chatBubble";
 import { ChatComposerWithVoiceNotes } from "@/components/chat/chatComposerWithVoiceNotes";
+import { SecurityCodeChangedBanner } from "@/components/chatSafety/securityCode";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { describeConversationForDisplay, describeDisappearingMessagesDuration } from "@/components/chat/conversationDisplay.util";
 import { ConversationIntro } from "@/components/chat/conversationIntro";
@@ -145,6 +146,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
             </Text>
           </View>
         ) : null}
+        {peer && !isGroupLike ? <SecurityCodeChangedBanner peerIds={[peer.id]} peerName={peer.name} /> : null}
 
         <FlatList
           ref={listRef}

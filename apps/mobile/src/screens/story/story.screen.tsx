@@ -16,6 +16,7 @@ import { ErrorState } from "@/components/ui/errorState";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
 import { storiesService } from "@/services/stories.service";
 import { showToast } from "@/store/toast.store";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -65,11 +66,12 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
     setIsReplying(false);
     if (!story) return;
     const storyId = story.id;
+    const authorId = story.author.id;
     requireAuthThen(() =>
       storiesService
-        .replyToStory(storyId, text)
+        .replyToStory(storyId, authorId, text)
         .then(() => showToast("Reply sent"))
-        .catch(() => showToast("Reply not sent. Try again.")),
+        .catch((error: unknown) => showToast(readChatCryptoErrorMessage(error) ?? "Reply not sent. Try again.")),
     null, "reply to stories");
   };
 
