@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/conversation.memberLeft.v1.json",
+  "title": "ConversationMemberLeft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conversationId",
+    "accountId"
+  ],
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

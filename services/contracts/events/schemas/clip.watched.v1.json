@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/clip.watched.v1.json",
+  "title": "ClipWatched",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "actorId",
+    "postId",
+    "postAuthorId"
+  ],
+  "properties": {
+    "actorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "postId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "postAuthorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "enum": [
+        "post",
+        "clip",
+        "story"
+      ]
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]{1,64}$"
+      },
+      "maxItems": 20
+    },
+    "hashtags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]{1,64}$"
+      },
+      "maxItems": 20
+    },
+    "surface": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z_]{1,40}$"
+    },
+    "rankingRequestId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "watchFraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "loopCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "durationMs": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "watchMs": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

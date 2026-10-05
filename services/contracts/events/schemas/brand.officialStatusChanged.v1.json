@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/brand.officialStatusChanged.v1.json",
+  "title": "BrandOfficialStatusChanged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "brandId",
+    "officialStatus",
+    "previousOfficialStatus"
+  ],
+  "properties": {
+    "brandId": {
+      "type": "string"
+    },
+    "ownerAccountId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "officialStatus": {
+      "enum": [
+        "NONE",
+        "PENDING",
+        "NEEDS_INFO",
+        "OFFICIAL",
+        "REJECTED",
+        "REVOKED"
+      ]
+    },
+    "previousOfficialStatus": {
+      "type": "string"
+    }
+  }
+}

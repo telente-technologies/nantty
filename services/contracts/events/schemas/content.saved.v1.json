@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/content.saved.v1.json",
+  "title": "ContentSaved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "actorId",
+    "targetType",
+    "targetId"
+  ],
+  "properties": {
+    "actorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "targetType": {
+      "enum": [
+        "post",
+        "video",
+        "clip",
+        "product"
+      ]
+    },
+    "targetId": {
+      "type": "string"
+    },
+    "postId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "postAuthorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "enum": [
+        "post",
+        "clip",
+        "story"
+      ]
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]{1,64}$"
+      },
+      "maxItems": 20
+    },
+    "hashtags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]{1,64}$"
+      },
+      "maxItems": 20
+    }
+  }
+}
