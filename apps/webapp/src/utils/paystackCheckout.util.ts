@@ -1,5 +1,5 @@
 export interface PaystackCheckoutSession {
-  readonly accessCode: string;
+  readonly accessCode?: string;
   readonly authorizationUrl: string;
   readonly reference: string;
 }
@@ -11,11 +11,12 @@ export async function openPaystackCheckout(session: PaystackCheckoutSession): Pr
     window.location.assign(session.authorizationUrl);
     return "redirected";
   };
-  if (!session.accessCode) return redirectToAuthorizationUrl();
+  const accessCode = session.accessCode;
+  if (!accessCode) return redirectToAuthorizationUrl();
   try {
     const { default: PaystackPop } = await import("@paystack/inline-js");
     return await new Promise<PaystackCheckoutOutcome>((resolve) => {
-      new PaystackPop().resumeTransaction(session.accessCode, {
+      new PaystackPop().resumeTransaction(accessCode, {
         onSuccess: () => resolve("completed"),
         onCancel: () => resolve("closed"),
         onError: () => resolve(redirectToAuthorizationUrl()),

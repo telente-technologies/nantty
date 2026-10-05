@@ -14,20 +14,6 @@ export function removeNonDigitCharacters(value: string): string {
   return value.replace(/\D/g, "");
 }
 
-export function isValidNigerianPhoneNumber(value: string): boolean {
-  const digits = removeNonDigitCharacters(value).replace(/^0/, "");
-  return /^[789][01]\d{8}$/.test(digits);
-}
-
-export function convertNigerianPhoneNumberToInternationalFormat(value: string): string {
-  return `+234${removeNonDigitCharacters(value).replace(/^0/, "")}`;
-}
-
-export function formatNigerianPhoneNumberForDisplay(value: string): string {
-  const digits = removeNonDigitCharacters(value).replace(/^0/, "").slice(0, 10);
-  return [digits.slice(0, 4), digits.slice(4, 7), digits.slice(7)].filter(Boolean).join(" ");
-}
-
 export function insertSlashesIntoBirthdayInput(value: string): string {
   const digits = removeNonDigitCharacters(value).slice(0, 8);
   return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)].filter(Boolean).join("/");
