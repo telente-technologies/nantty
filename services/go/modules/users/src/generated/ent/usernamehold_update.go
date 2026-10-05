@@ -119,6 +119,20 @@ func (_u *UsernameHoldUpdate) SetNillableCreatedBy(v *string) *UsernameHoldUpdat
 	return _u
 }
 
+// SetCreatedByName sets the "created_by_name" field.
+func (_u *UsernameHoldUpdate) SetCreatedByName(v string) *UsernameHoldUpdate {
+	_u.mutation.SetCreatedByName(v)
+	return _u
+}
+
+// SetNillableCreatedByName sets the "created_by_name" field if the given value is not nil.
+func (_u *UsernameHoldUpdate) SetNillableCreatedByName(v *string) *UsernameHoldUpdate {
+	if v != nil {
+		_u.SetCreatedByName(*v)
+	}
+	return _u
+}
+
 // SetExpiresAt sets the "expires_at" field.
 func (_u *UsernameHoldUpdate) SetExpiresAt(v time.Time) *UsernameHoldUpdate {
 	_u.mutation.SetExpiresAt(v)
@@ -198,6 +212,11 @@ func (_u *UsernameHoldUpdate) check() error {
 			return &ValidationError{Name: "created_by", err: fmt.Errorf(`ent: validator failed for field "UsernameHold.created_by": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.CreatedByName(); ok {
+		if err := usernamehold.CreatedByNameValidator(v); err != nil {
+			return &ValidationError{Name: "created_by_name", err: fmt.Errorf(`ent: validator failed for field "UsernameHold.created_by_name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -233,6 +252,9 @@ func (_u *UsernameHoldUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(usernamehold.FieldCreatedBy, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CreatedByName(); ok {
+		_spec.SetField(usernamehold.FieldCreatedByName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(usernamehold.FieldExpiresAt, field.TypeTime, value)
@@ -350,6 +372,20 @@ func (_u *UsernameHoldUpdateOne) SetNillableCreatedBy(v *string) *UsernameHoldUp
 	return _u
 }
 
+// SetCreatedByName sets the "created_by_name" field.
+func (_u *UsernameHoldUpdateOne) SetCreatedByName(v string) *UsernameHoldUpdateOne {
+	_u.mutation.SetCreatedByName(v)
+	return _u
+}
+
+// SetNillableCreatedByName sets the "created_by_name" field if the given value is not nil.
+func (_u *UsernameHoldUpdateOne) SetNillableCreatedByName(v *string) *UsernameHoldUpdateOne {
+	if v != nil {
+		_u.SetCreatedByName(*v)
+	}
+	return _u
+}
+
 // SetExpiresAt sets the "expires_at" field.
 func (_u *UsernameHoldUpdateOne) SetExpiresAt(v time.Time) *UsernameHoldUpdateOne {
 	_u.mutation.SetExpiresAt(v)
@@ -442,6 +478,11 @@ func (_u *UsernameHoldUpdateOne) check() error {
 			return &ValidationError{Name: "created_by", err: fmt.Errorf(`ent: validator failed for field "UsernameHold.created_by": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.CreatedByName(); ok {
+		if err := usernamehold.CreatedByNameValidator(v); err != nil {
+			return &ValidationError{Name: "created_by_name", err: fmt.Errorf(`ent: validator failed for field "UsernameHold.created_by_name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -494,6 +535,9 @@ func (_u *UsernameHoldUpdateOne) sqlSave(ctx context.Context) (_node *UsernameHo
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(usernamehold.FieldCreatedBy, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CreatedByName(); ok {
+		_spec.SetField(usernamehold.FieldCreatedByName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(usernamehold.FieldExpiresAt, field.TypeTime, value)

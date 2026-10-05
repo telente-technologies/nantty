@@ -56,6 +56,18 @@ func (f AccountSuspensionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccountSuspensionMutation", m)
 }
 
+// The AccountTopicFunc type is an adapter to allow the use of ordinary
+// function as AccountTopic mutator.
+type AccountTopicFunc func(context.Context, *ent.AccountTopicMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AccountTopicFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AccountTopicMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccountTopicMutation", m)
+}
+
 // The ActingProfileFunc type is an adapter to allow the use of ordinary
 // function as ActingProfile mutator.
 type ActingProfileFunc func(context.Context, *ent.ActingProfileMutation) (ent.Value, error)
@@ -414,6 +426,18 @@ func (f TermsAcceptanceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TermsAcceptanceMutation", m)
+}
+
+// The TopicFunc type is an adapter to allow the use of ordinary
+// function as Topic mutator.
+type TopicFunc func(context.Context, *ent.TopicMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TopicFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TopicMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TopicMutation", m)
 }
 
 // The UserConsentFunc type is an adapter to allow the use of ordinary

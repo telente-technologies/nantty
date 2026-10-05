@@ -103,6 +103,20 @@ func (_c *UsernameHoldCreate) SetNillableCreatedBy(v *string) *UsernameHoldCreat
 	return _c
 }
 
+// SetCreatedByName sets the "created_by_name" field.
+func (_c *UsernameHoldCreate) SetCreatedByName(v string) *UsernameHoldCreate {
+	_c.mutation.SetCreatedByName(v)
+	return _c
+}
+
+// SetNillableCreatedByName sets the "created_by_name" field if the given value is not nil.
+func (_c *UsernameHoldCreate) SetNillableCreatedByName(v *string) *UsernameHoldCreate {
+	if v != nil {
+		_c.SetCreatedByName(*v)
+	}
+	return _c
+}
+
 // SetExpiresAt sets the "expires_at" field.
 func (_c *UsernameHoldCreate) SetExpiresAt(v time.Time) *UsernameHoldCreate {
 	_c.mutation.SetExpiresAt(v)
@@ -182,6 +196,10 @@ func (_c *UsernameHoldCreate) defaults() {
 		v := usernamehold.DefaultCreatedBy
 		_c.mutation.SetCreatedBy(v)
 	}
+	if _, ok := _c.mutation.CreatedByName(); !ok {
+		v := usernamehold.DefaultCreatedByName
+		_c.mutation.SetCreatedByName(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := usernamehold.DefaultID()
 		_c.mutation.SetID(v)
@@ -231,6 +249,14 @@ func (_c *UsernameHoldCreate) check() error {
 	if v, ok := _c.mutation.CreatedBy(); ok {
 		if err := usernamehold.CreatedByValidator(v); err != nil {
 			return &ValidationError{Name: "created_by", err: fmt.Errorf(`ent: validator failed for field "UsernameHold.created_by": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreatedByName(); !ok {
+		return &ValidationError{Name: "created_by_name", err: errors.New(`ent: missing required field "UsernameHold.created_by_name"`)}
+	}
+	if v, ok := _c.mutation.CreatedByName(); ok {
+		if err := usernamehold.CreatedByNameValidator(v); err != nil {
+			return &ValidationError{Name: "created_by_name", err: fmt.Errorf(`ent: validator failed for field "UsernameHold.created_by_name": %w`, err)}
 		}
 	}
 	return nil
@@ -295,6 +321,10 @@ func (_c *UsernameHoldCreate) createSpec() (*UsernameHold, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(usernamehold.FieldCreatedBy, field.TypeString, value)
 		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.CreatedByName(); ok {
+		_spec.SetField(usernamehold.FieldCreatedByName, field.TypeString, value)
+		_node.CreatedByName = value
 	}
 	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(usernamehold.FieldExpiresAt, field.TypeTime, value)

@@ -32,6 +32,8 @@ type UsernameHold struct {
 	Note string `json:"note,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy string `json:"created_by,omitempty"`
+	// CreatedByName holds the value of the "created_by_name" field.
+	CreatedByName string `json:"created_by_name,omitempty"`
 	// ExpiresAt holds the value of the "expires_at" field.
 	ExpiresAt    *time.Time `json:"expires_at,omitempty"`
 	selectValues sql.SelectValues
@@ -44,7 +46,7 @@ func (*UsernameHold) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case usernamehold.FieldHeldForAccountID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case usernamehold.FieldUsername, usernamehold.FieldKind, usernamehold.FieldReason, usernamehold.FieldNote, usernamehold.FieldCreatedBy:
+		case usernamehold.FieldUsername, usernamehold.FieldKind, usernamehold.FieldReason, usernamehold.FieldNote, usernamehold.FieldCreatedBy, usernamehold.FieldCreatedByName:
 			values[i] = new(sql.NullString)
 		case usernamehold.FieldCreatedAt, usernamehold.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -114,6 +116,12 @@ func (_m *UsernameHold) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CreatedBy = value.String
 			}
+		case usernamehold.FieldCreatedByName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by_name", values[i])
+			} else if value.Valid {
+				_m.CreatedByName = value.String
+			}
 		case usernamehold.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
@@ -179,6 +187,9 @@ func (_m *UsernameHold) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_by=")
 	builder.WriteString(_m.CreatedBy)
+	builder.WriteString(", ")
+	builder.WriteString("created_by_name=")
+	builder.WriteString(_m.CreatedByName)
 	builder.WriteString(", ")
 	if v := _m.ExpiresAt; v != nil {
 		builder.WriteString("expires_at=")
