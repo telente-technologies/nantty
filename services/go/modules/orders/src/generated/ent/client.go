@@ -16,6 +16,8 @@ import (
 	"zudomart/modules/orders/src/generated/ent/cartitem"
 	"zudomart/modules/orders/src/generated/ent/checkout"
 	"zudomart/modules/orders/src/generated/ent/customernote"
+	"zudomart/modules/orders/src/generated/ent/customersegment"
+	"zudomart/modules/orders/src/generated/ent/deliveryarea"
 	"zudomart/modules/orders/src/generated/ent/flashsale"
 	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
@@ -38,6 +40,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/shippingrule"
 	"zudomart/modules/orders/src/generated/ent/shippingzone"
 	"zudomart/modules/orders/src/generated/ent/storecreditentry"
+	"zudomart/modules/orders/src/generated/ent/storecustomerprofile"
 	"zudomart/modules/orders/src/generated/ent/storerewardsettings"
 	"zudomart/modules/orders/src/generated/ent/storesuccessstat"
 
@@ -64,6 +67,10 @@ type Client struct {
 	Checkout *CheckoutClient
 	// CustomerNote is the client for interacting with the CustomerNote builders.
 	CustomerNote *CustomerNoteClient
+	// CustomerSegment is the client for interacting with the CustomerSegment builders.
+	CustomerSegment *CustomerSegmentClient
+	// DeliveryArea is the client for interacting with the DeliveryArea builders.
+	DeliveryArea *DeliveryAreaClient
 	// FlashSale is the client for interacting with the FlashSale builders.
 	FlashSale *FlashSaleClient
 	// FlashSaleItem is the client for interacting with the FlashSaleItem builders.
@@ -108,6 +115,8 @@ type Client struct {
 	ShippingZone *ShippingZoneClient
 	// StoreCreditEntry is the client for interacting with the StoreCreditEntry builders.
 	StoreCreditEntry *StoreCreditEntryClient
+	// StoreCustomerProfile is the client for interacting with the StoreCustomerProfile builders.
+	StoreCustomerProfile *StoreCustomerProfileClient
 	// StoreRewardSettings is the client for interacting with the StoreRewardSettings builders.
 	StoreRewardSettings *StoreRewardSettingsClient
 	// StoreSuccessStat is the client for interacting with the StoreSuccessStat builders.
@@ -128,6 +137,8 @@ func (c *Client) init() {
 	c.CartItem = NewCartItemClient(c.config)
 	c.Checkout = NewCheckoutClient(c.config)
 	c.CustomerNote = NewCustomerNoteClient(c.config)
+	c.CustomerSegment = NewCustomerSegmentClient(c.config)
+	c.DeliveryArea = NewDeliveryAreaClient(c.config)
 	c.FlashSale = NewFlashSaleClient(c.config)
 	c.FlashSaleItem = NewFlashSaleItemClient(c.config)
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
@@ -150,6 +161,7 @@ func (c *Client) init() {
 	c.ShippingRule = NewShippingRuleClient(c.config)
 	c.ShippingZone = NewShippingZoneClient(c.config)
 	c.StoreCreditEntry = NewStoreCreditEntryClient(c.config)
+	c.StoreCustomerProfile = NewStoreCustomerProfileClient(c.config)
 	c.StoreRewardSettings = NewStoreRewardSettingsClient(c.config)
 	c.StoreSuccessStat = NewStoreSuccessStatClient(c.config)
 }
@@ -242,37 +254,40 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                 ctx,
-		config:              cfg,
-		CampaignRedemption:  NewCampaignRedemptionClient(cfg),
-		Cart:                NewCartClient(cfg),
-		CartItem:            NewCartItemClient(cfg),
-		Checkout:            NewCheckoutClient(cfg),
-		CustomerNote:        NewCustomerNoteClient(cfg),
-		FlashSale:           NewFlashSaleClient(cfg),
-		FlashSaleItem:       NewFlashSaleItemClient(cfg),
-		IdempotentRequest:   NewIdempotentRequestClient(cfg),
-		InvoiceCounter:      NewInvoiceCounterClient(cfg),
-		OrderEvent:          NewOrderEventClient(cfg),
-		OrderGroup:          NewOrderGroupClient(cfg),
-		OrderItem:           NewOrderItemClient(cfg),
-		OrderNote:           NewOrderNoteClient(cfg),
-		OutboxEvent:         NewOutboxEventClient(cfg),
-		ProcessedEvent:      NewProcessedEventClient(cfg),
-		ProductBundle:       NewProductBundleClient(cfg),
-		ProductBundleItem:   NewProductBundleItemClient(cfg),
-		Promotion:           NewPromotionClient(cfg),
-		PromotionRedemption: NewPromotionRedemptionClient(cfg),
-		ReportExportJob:     NewReportExportJobClient(cfg),
-		ReturnRequest:       NewReturnRequestClient(cfg),
-		ShippingCalculation: NewShippingCalculationClient(cfg),
-		ShippingDestination: NewShippingDestinationClient(cfg),
-		ShippingProfile:     NewShippingProfileClient(cfg),
-		ShippingRule:        NewShippingRuleClient(cfg),
-		ShippingZone:        NewShippingZoneClient(cfg),
-		StoreCreditEntry:    NewStoreCreditEntryClient(cfg),
-		StoreRewardSettings: NewStoreRewardSettingsClient(cfg),
-		StoreSuccessStat:    NewStoreSuccessStatClient(cfg),
+		ctx:                  ctx,
+		config:               cfg,
+		CampaignRedemption:   NewCampaignRedemptionClient(cfg),
+		Cart:                 NewCartClient(cfg),
+		CartItem:             NewCartItemClient(cfg),
+		Checkout:             NewCheckoutClient(cfg),
+		CustomerNote:         NewCustomerNoteClient(cfg),
+		CustomerSegment:      NewCustomerSegmentClient(cfg),
+		DeliveryArea:         NewDeliveryAreaClient(cfg),
+		FlashSale:            NewFlashSaleClient(cfg),
+		FlashSaleItem:        NewFlashSaleItemClient(cfg),
+		IdempotentRequest:    NewIdempotentRequestClient(cfg),
+		InvoiceCounter:       NewInvoiceCounterClient(cfg),
+		OrderEvent:           NewOrderEventClient(cfg),
+		OrderGroup:           NewOrderGroupClient(cfg),
+		OrderItem:            NewOrderItemClient(cfg),
+		OrderNote:            NewOrderNoteClient(cfg),
+		OutboxEvent:          NewOutboxEventClient(cfg),
+		ProcessedEvent:       NewProcessedEventClient(cfg),
+		ProductBundle:        NewProductBundleClient(cfg),
+		ProductBundleItem:    NewProductBundleItemClient(cfg),
+		Promotion:            NewPromotionClient(cfg),
+		PromotionRedemption:  NewPromotionRedemptionClient(cfg),
+		ReportExportJob:      NewReportExportJobClient(cfg),
+		ReturnRequest:        NewReturnRequestClient(cfg),
+		ShippingCalculation:  NewShippingCalculationClient(cfg),
+		ShippingDestination:  NewShippingDestinationClient(cfg),
+		ShippingProfile:      NewShippingProfileClient(cfg),
+		ShippingRule:         NewShippingRuleClient(cfg),
+		ShippingZone:         NewShippingZoneClient(cfg),
+		StoreCreditEntry:     NewStoreCreditEntryClient(cfg),
+		StoreCustomerProfile: NewStoreCustomerProfileClient(cfg),
+		StoreRewardSettings:  NewStoreRewardSettingsClient(cfg),
+		StoreSuccessStat:     NewStoreSuccessStatClient(cfg),
 	}, nil
 }
 
@@ -290,37 +305,40 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                 ctx,
-		config:              cfg,
-		CampaignRedemption:  NewCampaignRedemptionClient(cfg),
-		Cart:                NewCartClient(cfg),
-		CartItem:            NewCartItemClient(cfg),
-		Checkout:            NewCheckoutClient(cfg),
-		CustomerNote:        NewCustomerNoteClient(cfg),
-		FlashSale:           NewFlashSaleClient(cfg),
-		FlashSaleItem:       NewFlashSaleItemClient(cfg),
-		IdempotentRequest:   NewIdempotentRequestClient(cfg),
-		InvoiceCounter:      NewInvoiceCounterClient(cfg),
-		OrderEvent:          NewOrderEventClient(cfg),
-		OrderGroup:          NewOrderGroupClient(cfg),
-		OrderItem:           NewOrderItemClient(cfg),
-		OrderNote:           NewOrderNoteClient(cfg),
-		OutboxEvent:         NewOutboxEventClient(cfg),
-		ProcessedEvent:      NewProcessedEventClient(cfg),
-		ProductBundle:       NewProductBundleClient(cfg),
-		ProductBundleItem:   NewProductBundleItemClient(cfg),
-		Promotion:           NewPromotionClient(cfg),
-		PromotionRedemption: NewPromotionRedemptionClient(cfg),
-		ReportExportJob:     NewReportExportJobClient(cfg),
-		ReturnRequest:       NewReturnRequestClient(cfg),
-		ShippingCalculation: NewShippingCalculationClient(cfg),
-		ShippingDestination: NewShippingDestinationClient(cfg),
-		ShippingProfile:     NewShippingProfileClient(cfg),
-		ShippingRule:        NewShippingRuleClient(cfg),
-		ShippingZone:        NewShippingZoneClient(cfg),
-		StoreCreditEntry:    NewStoreCreditEntryClient(cfg),
-		StoreRewardSettings: NewStoreRewardSettingsClient(cfg),
-		StoreSuccessStat:    NewStoreSuccessStatClient(cfg),
+		ctx:                  ctx,
+		config:               cfg,
+		CampaignRedemption:   NewCampaignRedemptionClient(cfg),
+		Cart:                 NewCartClient(cfg),
+		CartItem:             NewCartItemClient(cfg),
+		Checkout:             NewCheckoutClient(cfg),
+		CustomerNote:         NewCustomerNoteClient(cfg),
+		CustomerSegment:      NewCustomerSegmentClient(cfg),
+		DeliveryArea:         NewDeliveryAreaClient(cfg),
+		FlashSale:            NewFlashSaleClient(cfg),
+		FlashSaleItem:        NewFlashSaleItemClient(cfg),
+		IdempotentRequest:    NewIdempotentRequestClient(cfg),
+		InvoiceCounter:       NewInvoiceCounterClient(cfg),
+		OrderEvent:           NewOrderEventClient(cfg),
+		OrderGroup:           NewOrderGroupClient(cfg),
+		OrderItem:            NewOrderItemClient(cfg),
+		OrderNote:            NewOrderNoteClient(cfg),
+		OutboxEvent:          NewOutboxEventClient(cfg),
+		ProcessedEvent:       NewProcessedEventClient(cfg),
+		ProductBundle:        NewProductBundleClient(cfg),
+		ProductBundleItem:    NewProductBundleItemClient(cfg),
+		Promotion:            NewPromotionClient(cfg),
+		PromotionRedemption:  NewPromotionRedemptionClient(cfg),
+		ReportExportJob:      NewReportExportJobClient(cfg),
+		ReturnRequest:        NewReturnRequestClient(cfg),
+		ShippingCalculation:  NewShippingCalculationClient(cfg),
+		ShippingDestination:  NewShippingDestinationClient(cfg),
+		ShippingProfile:      NewShippingProfileClient(cfg),
+		ShippingRule:         NewShippingRuleClient(cfg),
+		ShippingZone:         NewShippingZoneClient(cfg),
+		StoreCreditEntry:     NewStoreCreditEntryClient(cfg),
+		StoreCustomerProfile: NewStoreCustomerProfileClient(cfg),
+		StoreRewardSettings:  NewStoreRewardSettingsClient(cfg),
+		StoreSuccessStat:     NewStoreSuccessStatClient(cfg),
 	}, nil
 }
 
@@ -351,13 +369,13 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.CampaignRedemption, c.Cart, c.CartItem, c.Checkout, c.CustomerNote,
-		c.FlashSale, c.FlashSaleItem, c.IdempotentRequest, c.InvoiceCounter,
-		c.OrderEvent, c.OrderGroup, c.OrderItem, c.OrderNote, c.OutboxEvent,
-		c.ProcessedEvent, c.ProductBundle, c.ProductBundleItem, c.Promotion,
-		c.PromotionRedemption, c.ReportExportJob, c.ReturnRequest,
-		c.ShippingCalculation, c.ShippingDestination, c.ShippingProfile,
-		c.ShippingRule, c.ShippingZone, c.StoreCreditEntry, c.StoreRewardSettings,
-		c.StoreSuccessStat,
+		c.CustomerSegment, c.DeliveryArea, c.FlashSale, c.FlashSaleItem,
+		c.IdempotentRequest, c.InvoiceCounter, c.OrderEvent, c.OrderGroup, c.OrderItem,
+		c.OrderNote, c.OutboxEvent, c.ProcessedEvent, c.ProductBundle,
+		c.ProductBundleItem, c.Promotion, c.PromotionRedemption, c.ReportExportJob,
+		c.ReturnRequest, c.ShippingCalculation, c.ShippingDestination,
+		c.ShippingProfile, c.ShippingRule, c.ShippingZone, c.StoreCreditEntry,
+		c.StoreCustomerProfile, c.StoreRewardSettings, c.StoreSuccessStat,
 	} {
 		n.Use(hooks...)
 	}
@@ -368,13 +386,13 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.CampaignRedemption, c.Cart, c.CartItem, c.Checkout, c.CustomerNote,
-		c.FlashSale, c.FlashSaleItem, c.IdempotentRequest, c.InvoiceCounter,
-		c.OrderEvent, c.OrderGroup, c.OrderItem, c.OrderNote, c.OutboxEvent,
-		c.ProcessedEvent, c.ProductBundle, c.ProductBundleItem, c.Promotion,
-		c.PromotionRedemption, c.ReportExportJob, c.ReturnRequest,
-		c.ShippingCalculation, c.ShippingDestination, c.ShippingProfile,
-		c.ShippingRule, c.ShippingZone, c.StoreCreditEntry, c.StoreRewardSettings,
-		c.StoreSuccessStat,
+		c.CustomerSegment, c.DeliveryArea, c.FlashSale, c.FlashSaleItem,
+		c.IdempotentRequest, c.InvoiceCounter, c.OrderEvent, c.OrderGroup, c.OrderItem,
+		c.OrderNote, c.OutboxEvent, c.ProcessedEvent, c.ProductBundle,
+		c.ProductBundleItem, c.Promotion, c.PromotionRedemption, c.ReportExportJob,
+		c.ReturnRequest, c.ShippingCalculation, c.ShippingDestination,
+		c.ShippingProfile, c.ShippingRule, c.ShippingZone, c.StoreCreditEntry,
+		c.StoreCustomerProfile, c.StoreRewardSettings, c.StoreSuccessStat,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -393,6 +411,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Checkout.mutate(ctx, m)
 	case *CustomerNoteMutation:
 		return c.CustomerNote.mutate(ctx, m)
+	case *CustomerSegmentMutation:
+		return c.CustomerSegment.mutate(ctx, m)
+	case *DeliveryAreaMutation:
+		return c.DeliveryArea.mutate(ctx, m)
 	case *FlashSaleMutation:
 		return c.FlashSale.mutate(ctx, m)
 	case *FlashSaleItemMutation:
@@ -437,6 +459,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ShippingZone.mutate(ctx, m)
 	case *StoreCreditEntryMutation:
 		return c.StoreCreditEntry.mutate(ctx, m)
+	case *StoreCustomerProfileMutation:
+		return c.StoreCustomerProfile.mutate(ctx, m)
 	case *StoreRewardSettingsMutation:
 		return c.StoreRewardSettings.mutate(ctx, m)
 	case *StoreSuccessStatMutation:
@@ -1108,6 +1132,272 @@ func (c *CustomerNoteClient) mutate(ctx context.Context, m *CustomerNoteMutation
 		return (&CustomerNoteDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown CustomerNote mutation op: %q", m.Op())
+	}
+}
+
+// CustomerSegmentClient is a client for the CustomerSegment schema.
+type CustomerSegmentClient struct {
+	config
+}
+
+// NewCustomerSegmentClient returns a client for the CustomerSegment from the given config.
+func NewCustomerSegmentClient(c config) *CustomerSegmentClient {
+	return &CustomerSegmentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `customersegment.Hooks(f(g(h())))`.
+func (c *CustomerSegmentClient) Use(hooks ...Hook) {
+	c.hooks.CustomerSegment = append(c.hooks.CustomerSegment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `customersegment.Intercept(f(g(h())))`.
+func (c *CustomerSegmentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CustomerSegment = append(c.inters.CustomerSegment, interceptors...)
+}
+
+// Create returns a builder for creating a CustomerSegment entity.
+func (c *CustomerSegmentClient) Create() *CustomerSegmentCreate {
+	mutation := newCustomerSegmentMutation(c.config, OpCreate)
+	return &CustomerSegmentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CustomerSegment entities.
+func (c *CustomerSegmentClient) CreateBulk(builders ...*CustomerSegmentCreate) *CustomerSegmentCreateBulk {
+	return &CustomerSegmentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CustomerSegmentClient) MapCreateBulk(slice any, setFunc func(*CustomerSegmentCreate, int)) *CustomerSegmentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CustomerSegmentCreateBulk{err: fmt.Errorf("calling to CustomerSegmentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CustomerSegmentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CustomerSegmentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CustomerSegment.
+func (c *CustomerSegmentClient) Update() *CustomerSegmentUpdate {
+	mutation := newCustomerSegmentMutation(c.config, OpUpdate)
+	return &CustomerSegmentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CustomerSegmentClient) UpdateOne(_m *CustomerSegment) *CustomerSegmentUpdateOne {
+	mutation := newCustomerSegmentMutation(c.config, OpUpdateOne, withCustomerSegment(_m))
+	return &CustomerSegmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CustomerSegmentClient) UpdateOneID(id uuid.UUID) *CustomerSegmentUpdateOne {
+	mutation := newCustomerSegmentMutation(c.config, OpUpdateOne, withCustomerSegmentID(id))
+	return &CustomerSegmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CustomerSegment.
+func (c *CustomerSegmentClient) Delete() *CustomerSegmentDelete {
+	mutation := newCustomerSegmentMutation(c.config, OpDelete)
+	return &CustomerSegmentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CustomerSegmentClient) DeleteOne(_m *CustomerSegment) *CustomerSegmentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CustomerSegmentClient) DeleteOneID(id uuid.UUID) *CustomerSegmentDeleteOne {
+	builder := c.Delete().Where(customersegment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CustomerSegmentDeleteOne{builder}
+}
+
+// Query returns a query builder for CustomerSegment.
+func (c *CustomerSegmentClient) Query() *CustomerSegmentQuery {
+	return &CustomerSegmentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCustomerSegment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CustomerSegment entity by its id.
+func (c *CustomerSegmentClient) Get(ctx context.Context, id uuid.UUID) (*CustomerSegment, error) {
+	return c.Query().Where(customersegment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CustomerSegmentClient) GetX(ctx context.Context, id uuid.UUID) *CustomerSegment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CustomerSegmentClient) Hooks() []Hook {
+	return c.hooks.CustomerSegment
+}
+
+// Interceptors returns the client interceptors.
+func (c *CustomerSegmentClient) Interceptors() []Interceptor {
+	return c.inters.CustomerSegment
+}
+
+func (c *CustomerSegmentClient) mutate(ctx context.Context, m *CustomerSegmentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CustomerSegmentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CustomerSegmentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CustomerSegmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CustomerSegmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CustomerSegment mutation op: %q", m.Op())
+	}
+}
+
+// DeliveryAreaClient is a client for the DeliveryArea schema.
+type DeliveryAreaClient struct {
+	config
+}
+
+// NewDeliveryAreaClient returns a client for the DeliveryArea from the given config.
+func NewDeliveryAreaClient(c config) *DeliveryAreaClient {
+	return &DeliveryAreaClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `deliveryarea.Hooks(f(g(h())))`.
+func (c *DeliveryAreaClient) Use(hooks ...Hook) {
+	c.hooks.DeliveryArea = append(c.hooks.DeliveryArea, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `deliveryarea.Intercept(f(g(h())))`.
+func (c *DeliveryAreaClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DeliveryArea = append(c.inters.DeliveryArea, interceptors...)
+}
+
+// Create returns a builder for creating a DeliveryArea entity.
+func (c *DeliveryAreaClient) Create() *DeliveryAreaCreate {
+	mutation := newDeliveryAreaMutation(c.config, OpCreate)
+	return &DeliveryAreaCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DeliveryArea entities.
+func (c *DeliveryAreaClient) CreateBulk(builders ...*DeliveryAreaCreate) *DeliveryAreaCreateBulk {
+	return &DeliveryAreaCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DeliveryAreaClient) MapCreateBulk(slice any, setFunc func(*DeliveryAreaCreate, int)) *DeliveryAreaCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DeliveryAreaCreateBulk{err: fmt.Errorf("calling to DeliveryAreaClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DeliveryAreaCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DeliveryAreaCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DeliveryArea.
+func (c *DeliveryAreaClient) Update() *DeliveryAreaUpdate {
+	mutation := newDeliveryAreaMutation(c.config, OpUpdate)
+	return &DeliveryAreaUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DeliveryAreaClient) UpdateOne(_m *DeliveryArea) *DeliveryAreaUpdateOne {
+	mutation := newDeliveryAreaMutation(c.config, OpUpdateOne, withDeliveryArea(_m))
+	return &DeliveryAreaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DeliveryAreaClient) UpdateOneID(id uuid.UUID) *DeliveryAreaUpdateOne {
+	mutation := newDeliveryAreaMutation(c.config, OpUpdateOne, withDeliveryAreaID(id))
+	return &DeliveryAreaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DeliveryArea.
+func (c *DeliveryAreaClient) Delete() *DeliveryAreaDelete {
+	mutation := newDeliveryAreaMutation(c.config, OpDelete)
+	return &DeliveryAreaDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DeliveryAreaClient) DeleteOne(_m *DeliveryArea) *DeliveryAreaDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DeliveryAreaClient) DeleteOneID(id uuid.UUID) *DeliveryAreaDeleteOne {
+	builder := c.Delete().Where(deliveryarea.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DeliveryAreaDeleteOne{builder}
+}
+
+// Query returns a query builder for DeliveryArea.
+func (c *DeliveryAreaClient) Query() *DeliveryAreaQuery {
+	return &DeliveryAreaQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDeliveryArea},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DeliveryArea entity by its id.
+func (c *DeliveryAreaClient) Get(ctx context.Context, id uuid.UUID) (*DeliveryArea, error) {
+	return c.Query().Where(deliveryarea.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DeliveryAreaClient) GetX(ctx context.Context, id uuid.UUID) *DeliveryArea {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DeliveryAreaClient) Hooks() []Hook {
+	return c.hooks.DeliveryArea
+}
+
+// Interceptors returns the client interceptors.
+func (c *DeliveryAreaClient) Interceptors() []Interceptor {
+	return c.inters.DeliveryArea
+}
+
+func (c *DeliveryAreaClient) mutate(ctx context.Context, m *DeliveryAreaMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DeliveryAreaCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DeliveryAreaUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DeliveryAreaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DeliveryAreaDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DeliveryArea mutation op: %q", m.Op())
 	}
 }
 
@@ -4037,6 +4327,139 @@ func (c *StoreCreditEntryClient) mutate(ctx context.Context, m *StoreCreditEntry
 	}
 }
 
+// StoreCustomerProfileClient is a client for the StoreCustomerProfile schema.
+type StoreCustomerProfileClient struct {
+	config
+}
+
+// NewStoreCustomerProfileClient returns a client for the StoreCustomerProfile from the given config.
+func NewStoreCustomerProfileClient(c config) *StoreCustomerProfileClient {
+	return &StoreCustomerProfileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `storecustomerprofile.Hooks(f(g(h())))`.
+func (c *StoreCustomerProfileClient) Use(hooks ...Hook) {
+	c.hooks.StoreCustomerProfile = append(c.hooks.StoreCustomerProfile, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `storecustomerprofile.Intercept(f(g(h())))`.
+func (c *StoreCustomerProfileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StoreCustomerProfile = append(c.inters.StoreCustomerProfile, interceptors...)
+}
+
+// Create returns a builder for creating a StoreCustomerProfile entity.
+func (c *StoreCustomerProfileClient) Create() *StoreCustomerProfileCreate {
+	mutation := newStoreCustomerProfileMutation(c.config, OpCreate)
+	return &StoreCustomerProfileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StoreCustomerProfile entities.
+func (c *StoreCustomerProfileClient) CreateBulk(builders ...*StoreCustomerProfileCreate) *StoreCustomerProfileCreateBulk {
+	return &StoreCustomerProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StoreCustomerProfileClient) MapCreateBulk(slice any, setFunc func(*StoreCustomerProfileCreate, int)) *StoreCustomerProfileCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StoreCustomerProfileCreateBulk{err: fmt.Errorf("calling to StoreCustomerProfileClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StoreCustomerProfileCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StoreCustomerProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StoreCustomerProfile.
+func (c *StoreCustomerProfileClient) Update() *StoreCustomerProfileUpdate {
+	mutation := newStoreCustomerProfileMutation(c.config, OpUpdate)
+	return &StoreCustomerProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StoreCustomerProfileClient) UpdateOne(_m *StoreCustomerProfile) *StoreCustomerProfileUpdateOne {
+	mutation := newStoreCustomerProfileMutation(c.config, OpUpdateOne, withStoreCustomerProfile(_m))
+	return &StoreCustomerProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StoreCustomerProfileClient) UpdateOneID(id uuid.UUID) *StoreCustomerProfileUpdateOne {
+	mutation := newStoreCustomerProfileMutation(c.config, OpUpdateOne, withStoreCustomerProfileID(id))
+	return &StoreCustomerProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StoreCustomerProfile.
+func (c *StoreCustomerProfileClient) Delete() *StoreCustomerProfileDelete {
+	mutation := newStoreCustomerProfileMutation(c.config, OpDelete)
+	return &StoreCustomerProfileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StoreCustomerProfileClient) DeleteOne(_m *StoreCustomerProfile) *StoreCustomerProfileDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StoreCustomerProfileClient) DeleteOneID(id uuid.UUID) *StoreCustomerProfileDeleteOne {
+	builder := c.Delete().Where(storecustomerprofile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StoreCustomerProfileDeleteOne{builder}
+}
+
+// Query returns a query builder for StoreCustomerProfile.
+func (c *StoreCustomerProfileClient) Query() *StoreCustomerProfileQuery {
+	return &StoreCustomerProfileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStoreCustomerProfile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StoreCustomerProfile entity by its id.
+func (c *StoreCustomerProfileClient) Get(ctx context.Context, id uuid.UUID) (*StoreCustomerProfile, error) {
+	return c.Query().Where(storecustomerprofile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StoreCustomerProfileClient) GetX(ctx context.Context, id uuid.UUID) *StoreCustomerProfile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StoreCustomerProfileClient) Hooks() []Hook {
+	return c.hooks.StoreCustomerProfile
+}
+
+// Interceptors returns the client interceptors.
+func (c *StoreCustomerProfileClient) Interceptors() []Interceptor {
+	return c.inters.StoreCustomerProfile
+}
+
+func (c *StoreCustomerProfileClient) mutate(ctx context.Context, m *StoreCustomerProfileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StoreCustomerProfileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StoreCustomerProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StoreCustomerProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StoreCustomerProfileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StoreCustomerProfile mutation op: %q", m.Op())
+	}
+}
+
 // StoreRewardSettingsClient is a client for the StoreRewardSettings schema.
 type StoreRewardSettingsClient struct {
 	config
@@ -4306,22 +4729,22 @@ func (c *StoreSuccessStatClient) mutate(ctx context.Context, m *StoreSuccessStat
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CampaignRedemption, Cart, CartItem, Checkout, CustomerNote, FlashSale,
-		FlashSaleItem, IdempotentRequest, InvoiceCounter, OrderEvent, OrderGroup,
-		OrderItem, OrderNote, OutboxEvent, ProcessedEvent, ProductBundle,
-		ProductBundleItem, Promotion, PromotionRedemption, ReportExportJob,
-		ReturnRequest, ShippingCalculation, ShippingDestination, ShippingProfile,
-		ShippingRule, ShippingZone, StoreCreditEntry, StoreRewardSettings,
-		StoreSuccessStat []ent.Hook
+		CampaignRedemption, Cart, CartItem, Checkout, CustomerNote, CustomerSegment,
+		DeliveryArea, FlashSale, FlashSaleItem, IdempotentRequest, InvoiceCounter,
+		OrderEvent, OrderGroup, OrderItem, OrderNote, OutboxEvent, ProcessedEvent,
+		ProductBundle, ProductBundleItem, Promotion, PromotionRedemption,
+		ReportExportJob, ReturnRequest, ShippingCalculation, ShippingDestination,
+		ShippingProfile, ShippingRule, ShippingZone, StoreCreditEntry,
+		StoreCustomerProfile, StoreRewardSettings, StoreSuccessStat []ent.Hook
 	}
 	inters struct {
-		CampaignRedemption, Cart, CartItem, Checkout, CustomerNote, FlashSale,
-		FlashSaleItem, IdempotentRequest, InvoiceCounter, OrderEvent, OrderGroup,
-		OrderItem, OrderNote, OutboxEvent, ProcessedEvent, ProductBundle,
-		ProductBundleItem, Promotion, PromotionRedemption, ReportExportJob,
-		ReturnRequest, ShippingCalculation, ShippingDestination, ShippingProfile,
-		ShippingRule, ShippingZone, StoreCreditEntry, StoreRewardSettings,
-		StoreSuccessStat []ent.Interceptor
+		CampaignRedemption, Cart, CartItem, Checkout, CustomerNote, CustomerSegment,
+		DeliveryArea, FlashSale, FlashSaleItem, IdempotentRequest, InvoiceCounter,
+		OrderEvent, OrderGroup, OrderItem, OrderNote, OutboxEvent, ProcessedEvent,
+		ProductBundle, ProductBundleItem, Promotion, PromotionRedemption,
+		ReportExportJob, ReturnRequest, ShippingCalculation, ShippingDestination,
+		ShippingProfile, ShippingRule, ShippingZone, StoreCreditEntry,
+		StoreCustomerProfile, StoreRewardSettings, StoreSuccessStat []ent.Interceptor
 	}
 )
 
