@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect } from "react";
 import { ThemeSwitcher } from "@zudomart/web-kit";
 
 import { useSession } from "@/components/providers/sessionProvider";
 import { confirmThenSignOut } from "@/components/profile/profileView";
 import { BookmarkIcon, CreatorIcon, LogOutIcon, OrdersIcon, SettingsIcon, UserIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
+import { usePopoverMenu } from "@/components/ui/popoverMenu.hook";
+import sheetStyles from "@/components/ui/popoverMenu.module.css";
 
 import styles from "./userMenu.module.css";
 
@@ -16,32 +18,11 @@ export function UserMenu() {
   const { viewer } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const menuId = useId();
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const { isOpen: menuIsOpen, close: menuClose, containerRef: menuContainerRef, triggerRef: menuTriggerRef, menuRef: menuMenuRef, triggerProps: menuTriggerProps, menuProps: menuMenuProps } = usePopoverMenu({ closeOnTab: false });
 
   useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const closeOnOutsidePointer = (event: PointerEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) setIsOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setIsOpen(false);
-      triggerRef.current?.focus();
-    };
-    document.addEventListener("pointerdown", closeOnOutsidePointer);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOnOutsidePointer);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [isOpen]);
+    menuClose();
+  }, [pathname, menuClose]);
 
   if (!viewer) {
     return (
@@ -60,45 +41,37 @@ export function UserMenu() {
   ];
 
   return (
-    <div className={styles.container} ref={containerRef}>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={styles.trigger}
-        aria-expanded={isOpen}
-        aria-controls={menuId}
-        aria-label="Account menu"
-        onClick={() => setIsOpen((open) => !open)}
-      >
+    <div className={styles.container} ref={menuContainerRef}>
+      <button type="button" className={styles.trigger} aria-label="Account menu" ref={menuTriggerRef} {...menuTriggerProps}>
         <Avatar name={viewer.name} src={viewer.avatarUrl ?? null} size="sm" />
       </button>
-      {isOpen ? (
-        <div className={styles.panel} id={menuId}>
-          <Link href="/me" className={styles.identity}>
+      {menuIsOpen ? <div className={sheetStyles.scrim} aria-hidden="true" onPointerDown={() => menuClose()} /> : null}
+      {menuIsOpen ? (
+        <div className={`${styles.panel} ${sheetStyles.sheet}`} aria-label="Account" ref={menuMenuRef} {...menuMenuProps}>
+          <Link href="/me" role="menuitem" className={styles.identity}>
             <Avatar name={viewer.name} src={viewer.avatarUrl ?? null} size="md" />
             <span className={styles.identityText}>
               <span className={styles.identityName}>{viewer.name}</span>
               <span className={styles.identityHandle}>@{viewer.username}</span>
             </span>
           </Link>
-          <ul className={styles.links}>
+          <div className={styles.links} role="group">
             {menuLinks.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} className={styles.link}>
-                  {link.icon}
-                  {link.label}
-                </Link>
-              </li>
+              <Link key={link.href} href={link.href} role="menuitem" className={styles.link}>
+                {link.icon}
+                {link.label}
+              </Link>
             ))}
-          </ul>
+          </div>
           <div className={styles.themeRow}>
             <ThemeSwitcher label="Appearance" showLabel />
           </div>
           <button
             type="button"
+            role="menuitem"
             className={styles.link}
             onClick={() => {
-              setIsOpen(false);
+              menuClose(true);
               void confirmThenSignOut().then((didSignOut) => {
                 if (!didSignOut) return;
                 router.push("/login");

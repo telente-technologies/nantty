@@ -108,7 +108,7 @@
 .displayName {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 0;
   font-weight: 700;
   color: var(--ink-strong);
