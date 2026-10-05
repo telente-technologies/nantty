@@ -1,5 +1,6 @@
 import { isMessageAfterSyncCursor } from "@/cache/messageHistory.type";
-import type { Conversation, Message, UserSummary } from "@/types";
+import { ApiError } from "@/errors/api.error";
+import type { Conversation, Message, MessageEncryptionEnvelope, UserSummary } from "@/types";
 
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -107,7 +108,7 @@ export function appendMockMessageAndUpdateConversation(message: Message) {
   const index = mockConversations.findIndex((c) => c.id === message.conversationId);
   if (index >= 0) {
     const current = mockConversations[index]!;
-    mockConversations[index] = { ...current, lastMessage: message.kind === "voice" ? "🎤 Voice note" : message.text, lastMessageAt: message.createdAt };
+    mockConversations[index] = { ...current, lastMessage: message.kind === "voice" ? "🎤 Voice note" : message.encryption?.ciphertext ? "Message" : message.text, lastMessageAt: message.createdAt };
   }
   return message;
 }
@@ -151,13 +152,16 @@ export const chatsMocks: MockRoute[] = [
     return conversation;
   }),
   createMockRoute("POST", "/api/v1/conversations/:conversationId/messages", ({ params, body }) => {
-    const input = body as { text: string; kind?: "voice"; mediaId?: string; durationSeconds?: number };
+    const input = body as { text?: string; kind?: "text" | "voice"; mediaId?: string; durationSeconds?: number; encryption?: MessageEncryptionEnvelope };
+    if (input.text) throw new ApiError(422, "Messages are end-to-end encrypted: send an encryption envelope, never text.", "PLAINTEXT_NOT_ACCEPTED");
+    if ((input.kind ?? "text") === "text" && !input.encryption?.ciphertext) throw new ApiError(422, "A text message needs an encryption envelope.", "ENCRYPTION_REQUIRED");
     const createdAt = new Date().toISOString();
     return appendMockMessageAndUpdateConversation({
       id: `m_${Date.now()}`,
       conversationId: params.conversationId!,
       senderId: getSignedInMockUser().id,
-      text: input.text,
+      text: "",
+      encryption: input.encryption ? { deviceId: input.encryption.deviceId, ciphertext: input.encryption.ciphertext, protocol: input.encryption.protocol ?? "signal-v1" } : null,
       createdAt,
       kind: input.kind ?? "text",
       media: input.kind === "voice" && input.mediaId ? { id: input.mediaId, type: "voice", url: null, durationSeconds: input.durationSeconds } : null,

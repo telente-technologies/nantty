@@ -15,6 +15,7 @@ interface ChatShareBody {
   readonly conversationIds?: unknown;
   readonly reference?: { readonly kind?: unknown; readonly id?: unknown };
   readonly note?: unknown;
+  readonly encryptions?: readonly { readonly conversationId?: unknown; readonly deviceId?: unknown; readonly ciphertext?: unknown }[];
 }
 
 function shareReferenceIntoConversations(body: ChatShareBody) {
@@ -28,11 +29,13 @@ function shareReferenceIntoConversations(body: ChatShareBody) {
   let sentCount = 0;
   for (const conversationId of conversationIds) {
     if (!mockConversations.some((conversation) => conversation.id === conversationId)) continue;
+    const sealed = (body.encryptions ?? []).find((entry) => entry.conversationId === conversationId);
     appendMockMessageAndUpdateConversation({
       id: `m_share_${Date.now()}_${sentCount}`,
       conversationId,
       senderId: getSignedInMockUser().id,
-      text: sharedLink,
+      text: sealed ? "" : sharedLink,
+      encryption: sealed && typeof sealed.ciphertext === "string" && typeof sealed.deviceId === "string" ? { deviceId: sealed.deviceId, ciphertext: sealed.ciphertext, protocol: "signal-v1" } : null,
       createdAt: new Date().toISOString(),
       kind: "text",
     });
