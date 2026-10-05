@@ -8,6 +8,54 @@ import (
 	"zudomart/modules/creators/src/generated/ent"
 )
 
+// The AffiliateCommissionFunc type is an adapter to allow the use of ordinary
+// function as AffiliateCommission mutator.
+type AffiliateCommissionFunc func(context.Context, *ent.AffiliateCommissionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AffiliateCommissionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AffiliateCommissionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateCommissionMutation", m)
+}
+
+// The AffiliateCommissionReversalFunc type is an adapter to allow the use of ordinary
+// function as AffiliateCommissionReversal mutator.
+type AffiliateCommissionReversalFunc func(context.Context, *ent.AffiliateCommissionReversalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AffiliateCommissionReversalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AffiliateCommissionReversalMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateCommissionReversalMutation", m)
+}
+
+// The AffiliateProductCommissionFunc type is an adapter to allow the use of ordinary
+// function as AffiliateProductCommission mutator.
+type AffiliateProductCommissionFunc func(context.Context, *ent.AffiliateProductCommissionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AffiliateProductCommissionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AffiliateProductCommissionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateProductCommissionMutation", m)
+}
+
+// The AffiliateProgramSettingFunc type is an adapter to allow the use of ordinary
+// function as AffiliateProgramSetting mutator.
+type AffiliateProgramSettingFunc func(context.Context, *ent.AffiliateProgramSettingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AffiliateProgramSettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AffiliateProgramSettingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AffiliateProgramSettingMutation", m)
+}
+
 // The BattleSettlementFunc type is an adapter to allow the use of ordinary
 // function as BattleSettlement mutator.
 type BattleSettlementFunc func(context.Context, *ent.BattleSettlementMutation) (ent.Value, error)
@@ -18,6 +66,30 @@ func (f BattleSettlementFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BattleSettlementMutation", m)
+}
+
+// The CreatorAffiliationFunc type is an adapter to allow the use of ordinary
+// function as CreatorAffiliation mutator.
+type CreatorAffiliationFunc func(context.Context, *ent.CreatorAffiliationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreatorAffiliationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreatorAffiliationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreatorAffiliationMutation", m)
+}
+
+// The CreatorEarningFunc type is an adapter to allow the use of ordinary
+// function as CreatorEarning mutator.
+type CreatorEarningFunc func(context.Context, *ent.CreatorEarningMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreatorEarningFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreatorEarningMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreatorEarningMutation", m)
 }
 
 // The CreatorProgramMemberFunc type is an adapter to allow the use of ordinary
@@ -44,6 +116,18 @@ func (f CreatorTierFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreatorTierMutation", m)
 }
 
+// The CreatorViolationFunc type is an adapter to allow the use of ordinary
+// function as CreatorViolation mutator.
+type CreatorViolationFunc func(context.Context, *ent.CreatorViolationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreatorViolationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreatorViolationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreatorViolationMutation", m)
+}
+
 // The GiftTransactionFunc type is an adapter to allow the use of ordinary
 // function as GiftTransaction mutator.
 type GiftTransactionFunc func(context.Context, *ent.GiftTransactionMutation) (ent.Value, error)
@@ -66,6 +150,18 @@ func (f OutboxEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OutboxEventMutation", m)
+}
+
+// The TipTransactionFunc type is an adapter to allow the use of ordinary
+// function as TipTransaction mutator.
+type TipTransactionFunc func(context.Context, *ent.TipTransactionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TipTransactionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TipTransactionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TipTransactionMutation", m)
 }
 
 // Condition is a hook condition function.

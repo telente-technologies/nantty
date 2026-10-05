@@ -23,6 +23,10 @@ const (
 	FieldTierID = "tier_id"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldSuspensionReason holds the string denoting the suspension_reason field in the database.
+	FieldSuspensionReason = "suspension_reason"
+	// FieldSuspendedAt holds the string denoting the suspended_at field in the database.
+	FieldSuspendedAt = "suspended_at"
 	// FieldUpdatedByStaffID holds the string denoting the updated_by_staff_id field in the database.
 	FieldUpdatedByStaffID = "updated_by_staff_id"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -38,6 +42,8 @@ var Columns = []string{
 	FieldUserID,
 	FieldTierID,
 	FieldStatus,
+	FieldSuspensionReason,
+	FieldSuspendedAt,
 	FieldUpdatedByStaffID,
 	FieldUpdatedAt,
 }
@@ -59,6 +65,10 @@ var (
 	UserIDValidator func(string) error
 	// TierIDValidator is a validator for the "tier_id" field. It is called by the builders before save.
 	TierIDValidator func(string) error
+	// DefaultSuspensionReason holds the default value on creation for the "suspension_reason" field.
+	DefaultSuspensionReason string
+	// SuspensionReasonValidator is a validator for the "suspension_reason" field. It is called by the builders before save.
+	SuspensionReasonValidator func(string) error
 	// DefaultUpdatedByStaffID holds the default value on creation for the "updated_by_staff_id" field.
 	DefaultUpdatedByStaffID string
 	// UpdatedByStaffIDValidator is a validator for the "updated_by_staff_id" field. It is called by the builders before save.
@@ -123,6 +133,16 @@ func ByTierID(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// BySuspensionReason orders the results by the suspension_reason field.
+func BySuspensionReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSuspensionReason, opts...).ToFunc()
+}
+
+// BySuspendedAt orders the results by the suspended_at field.
+func BySuspendedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSuspendedAt, opts...).ToFunc()
 }
 
 // ByUpdatedByStaffID orders the results by the updated_by_staff_id field.

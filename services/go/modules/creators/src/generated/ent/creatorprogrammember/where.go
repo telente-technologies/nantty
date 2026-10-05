@@ -70,6 +70,16 @@ func TierID(v string) predicate.CreatorProgramMember {
 	return predicate.CreatorProgramMember(sql.FieldEQ(FieldTierID, v))
 }
 
+// SuspensionReason applies equality check predicate on the "suspension_reason" field. It's identical to SuspensionReasonEQ.
+func SuspensionReason(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldEQ(FieldSuspensionReason, v))
+}
+
+// SuspendedAt applies equality check predicate on the "suspended_at" field. It's identical to SuspendedAtEQ.
+func SuspendedAt(v time.Time) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldEQ(FieldSuspendedAt, v))
+}
+
 // UpdatedByStaffID applies equality check predicate on the "updated_by_staff_id" field. It's identical to UpdatedByStaffIDEQ.
 func UpdatedByStaffID(v string) predicate.CreatorProgramMember {
 	return predicate.CreatorProgramMember(sql.FieldEQ(FieldUpdatedByStaffID, v))
@@ -268,6 +278,121 @@ func StatusIn(vs ...Status) predicate.CreatorProgramMember {
 // StatusNotIn applies the NotIn predicate on the "status" field.
 func StatusNotIn(vs ...Status) predicate.CreatorProgramMember {
 	return predicate.CreatorProgramMember(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// SuspensionReasonEQ applies the EQ predicate on the "suspension_reason" field.
+func SuspensionReasonEQ(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldEQ(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonNEQ applies the NEQ predicate on the "suspension_reason" field.
+func SuspensionReasonNEQ(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldNEQ(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonIn applies the In predicate on the "suspension_reason" field.
+func SuspensionReasonIn(vs ...string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldIn(FieldSuspensionReason, vs...))
+}
+
+// SuspensionReasonNotIn applies the NotIn predicate on the "suspension_reason" field.
+func SuspensionReasonNotIn(vs ...string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldNotIn(FieldSuspensionReason, vs...))
+}
+
+// SuspensionReasonGT applies the GT predicate on the "suspension_reason" field.
+func SuspensionReasonGT(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldGT(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonGTE applies the GTE predicate on the "suspension_reason" field.
+func SuspensionReasonGTE(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldGTE(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonLT applies the LT predicate on the "suspension_reason" field.
+func SuspensionReasonLT(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldLT(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonLTE applies the LTE predicate on the "suspension_reason" field.
+func SuspensionReasonLTE(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldLTE(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonContains applies the Contains predicate on the "suspension_reason" field.
+func SuspensionReasonContains(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldContains(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonHasPrefix applies the HasPrefix predicate on the "suspension_reason" field.
+func SuspensionReasonHasPrefix(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldHasPrefix(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonHasSuffix applies the HasSuffix predicate on the "suspension_reason" field.
+func SuspensionReasonHasSuffix(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldHasSuffix(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonEqualFold applies the EqualFold predicate on the "suspension_reason" field.
+func SuspensionReasonEqualFold(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldEqualFold(FieldSuspensionReason, v))
+}
+
+// SuspensionReasonContainsFold applies the ContainsFold predicate on the "suspension_reason" field.
+func SuspensionReasonContainsFold(v string) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldContainsFold(FieldSuspensionReason, v))
+}
+
+// SuspendedAtEQ applies the EQ predicate on the "suspended_at" field.
+func SuspendedAtEQ(v time.Time) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldEQ(FieldSuspendedAt, v))
+}
+
+// SuspendedAtNEQ applies the NEQ predicate on the "suspended_at" field.
+func SuspendedAtNEQ(v time.Time) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldNEQ(FieldSuspendedAt, v))
+}
+
+// SuspendedAtIn applies the In predicate on the "suspended_at" field.
+func SuspendedAtIn(vs ...time.Time) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldIn(FieldSuspendedAt, vs...))
+}
+
+// SuspendedAtNotIn applies the NotIn predicate on the "suspended_at" field.
+func SuspendedAtNotIn(vs ...time.Time) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldNotIn(FieldSuspendedAt, vs...))
+}
+
+// SuspendedAtGT applies the GT predicate on the "suspended_at" field.
+func SuspendedAtGT(v time.Time) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldGT(FieldSuspendedAt, v))
+}
+
+// SuspendedAtGTE applies the GTE predicate on the "suspended_at" field.
+func SuspendedAtGTE(v time.Time) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldGTE(FieldSuspendedAt, v))
+}
+
+// SuspendedAtLT applies the LT predicate on the "suspended_at" field.
+func SuspendedAtLT(v time.Time) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldLT(FieldSuspendedAt, v))
+}
+
+// SuspendedAtLTE applies the LTE predicate on the "suspended_at" field.
+func SuspendedAtLTE(v time.Time) predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldLTE(FieldSuspendedAt, v))
+}
+
+// SuspendedAtIsNil applies the IsNil predicate on the "suspended_at" field.
+func SuspendedAtIsNil() predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldIsNull(FieldSuspendedAt))
+}
+
+// SuspendedAtNotNil applies the NotNil predicate on the "suspended_at" field.
+func SuspendedAtNotNil() predicate.CreatorProgramMember {
+	return predicate.CreatorProgramMember(sql.FieldNotNull(FieldSuspendedAt))
 }
 
 // UpdatedByStaffIDEQ applies the EQ predicate on the "updated_by_staff_id" field.
