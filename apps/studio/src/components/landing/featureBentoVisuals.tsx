@@ -1,7 +1,10 @@
 import Image from "next/image";
 
 import { LandingIcon, type LandingIconName } from "./landingIcons";
-import styles from "./featureBentoVisuals.module.css";
+import baseStyles from "./featureBentoVisuals.module.css";
+import partStyles from "./featureBentoVisualsParts.module.css";
+
+const styles = { ...baseStyles, ...partStyles };
 
 const giftTray: readonly { name: string; coins: string; icon: LandingIconName }[] = [
   { name: "Heart", coins: "1 coin", icon: "heart" },

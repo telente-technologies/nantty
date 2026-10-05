@@ -50,7 +50,7 @@
 }
 
 .liveBadge {
-  padding: 3px 8px;
+  padding: 3px var(--space-2);
   border-radius: 6px;
   background: var(--stage-live-red);
   font-size: 0.6875rem;
@@ -62,8 +62,8 @@
 .darkPill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
+  gap: var(--space-1);
+  padding: 3px var(--space-2);
   border-radius: 6px;
   background: rgb(7 9 20 / 0.6);
   font-size: 0.6875rem;
@@ -74,7 +74,7 @@
   top: 16px;
   right: 12px;
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .phoneControls span {
@@ -113,7 +113,7 @@
   bottom: 8%;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   max-width: 230px;
   padding: 10px 14px;
   border-radius: 14px;
@@ -143,7 +143,7 @@
   align-items: center;
   gap: 6px;
   height: 30px;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   background: #151a30;
 }
 
@@ -155,8 +155,8 @@
 }
 
 .browserBar p {
-  margin-left: 12px;
-  padding: 2px 12px;
+  margin-left: var(--space-3);
+  padding: 2px var(--space-3);
   border-radius: var(--radius-pill);
   background: rgb(255 255 255 / 0.08);
   color: rgb(255 255 255 / 0.7);
@@ -173,8 +173,8 @@
   left: -2%;
   bottom: -6%;
   display: grid;
-  gap: 4px;
-  padding: 14px 16px;
+  gap: var(--space-1);
+  padding: 14px var(--space-4);
   border-radius: 14px;
   background: var(--color-elevated);
   color: var(--ink-strong);
@@ -228,8 +228,8 @@
   bottom: 8px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
+  gap: var(--space-1);
+  padding: 3px var(--space-2);
   border-radius: var(--radius-pill);
   background: rgb(7 9 20 / 0.6);
   color: #ffffff;
@@ -269,13 +269,13 @@
   .floatingChip,
   .phoneScene .floatingChip {
     position: static;
-    margin-top: 16px;
+    margin-top: var(--space-4);
     max-width: none;
   }
 
   .keyCard {
     position: static;
     width: 100%;
-    margin-top: 16px;
+    margin-top: var(--space-4);
   }
 }

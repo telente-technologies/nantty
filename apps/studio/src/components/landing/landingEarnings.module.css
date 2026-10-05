@@ -36,21 +36,21 @@
 
 .layout {
   display: grid;
-  gap: 16px;
-  margin-top: clamp(36px, 5vw, 56px);
+  gap: var(--space-4);
+  margin-top: clamp(36px, 5vw, var(--space-9));
 }
 
 .streams {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .streamCard {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 4px 16px;
+  gap: var(--space-1) var(--space-4);
   align-content: start;
-  padding: 24px;
+  padding: var(--space-6);
   border-radius: 20px;
   background: var(--deep-hover);
   box-shadow: inset 0 0 0 1px var(--deep-hairline);
@@ -84,10 +84,10 @@
 
 .payoutCard {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
   align-content: start;
   justify-items: start;
-  padding: clamp(24px, 3vw, 32px);
+  padding: clamp(var(--space-6), 3vw, var(--space-7));
   border-radius: 24px;
   background: var(--color-surface);
   color: var(--ink-strong);
@@ -111,9 +111,9 @@
 .bankRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
-  padding: 12px;
+  padding: var(--space-3);
   border-radius: 14px;
   background: var(--surface-sunken);
 }
@@ -145,8 +145,8 @@
 .verifiedChip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
+  gap: var(--space-1);
+  padding: 3px var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--color-success-tint);
   color: var(--color-success-text);
@@ -155,7 +155,7 @@
 }
 
 .payoutHeading {
-  margin-top: 4px;
+  margin-top: var(--space-1);
   font-size: 1.25rem;
   letter-spacing: -0.03em;
 }
@@ -169,7 +169,7 @@
 
 .payoutFacts li {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   line-height: 1.45;
 }
 
@@ -182,6 +182,6 @@
 @media (min-width: 960px) {
   .layout {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-    gap: 24px;
+    gap: var(--space-6);
   }
 }
