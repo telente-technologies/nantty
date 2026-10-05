@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useOnReconnect } from "@zudomart/web-kit";
+
 import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 
 export interface AdsQueryState<Data> {
@@ -43,6 +45,9 @@ export function useAdsQuery<Data>(loadData: (signal: AbortSignal) => Promise<Dat
   }, [dependencyKey, reloadCounter, isEnabled]);
 
   const reload = useCallback(() => setReloadCounter((current) => current + 1), []);
+  useOnReconnect(() => {
+    if (errorMessage) reload();
+  });
   const replaceData = useCallback((updater: (current: Data | null) => Data | null) => setData(updater), []);
   return { data, errorMessage, isLoading, reload, replaceData };
 }

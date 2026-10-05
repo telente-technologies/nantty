@@ -1,5 +1,6 @@
 import { buildAccountApiPath, sendAdsApiRequest } from "@/services/adsApiClient.service";
 import type { Page } from "@/types/api.type";
+import { createClientIdempotencyKey } from "@/utils/formValidation.util";
 import type {
   Ad,
   AdInput,
@@ -46,19 +47,22 @@ export const campaignsApi = {
   updateCampaign: (accountId: string, campaignId: string, changes: Partial<CampaignInput> & { status?: EditableStatus }) =>
     sendAdsApiRequest<Campaign>(buildAccountApiPath(accountId, `/campaigns/${encodeURIComponent(campaignId)}`), { method: "PATCH", body: changes }),
   deleteDraftCampaign: (accountId: string, campaignId: string) => sendAdsApiRequest<void>(buildAccountApiPath(accountId, `/campaigns/${encodeURIComponent(campaignId)}`), { method: "DELETE" }),
-  duplicateCampaign: (accountId: string, campaignId: string) => sendAdsApiRequest<Campaign>(buildAccountApiPath(accountId, `/campaigns/${encodeURIComponent(campaignId)}/duplicate`), { method: "POST" }),
+  duplicateCampaign: (accountId: string, campaignId: string, idempotencyKey = createClientIdempotencyKey("dup")) =>
+    sendAdsApiRequest<Campaign>(buildAccountApiPath(accountId, `/campaigns/${encodeURIComponent(campaignId)}/duplicate`), { method: "POST", idempotencyKey }),
   submitCampaignForReview: (accountId: string, campaignId: string) => sendAdsApiRequest<Campaign>(buildAccountApiPath(accountId, `/campaigns/${encodeURIComponent(campaignId)}/submit`), { method: "POST" }),
   applyBulkAction: (accountId: string, level: "campaign" | "ad_set" | "ad", ids: readonly string[], action: BulkAction) =>
     sendAdsApiRequest<BulkActionResult>(buildAccountApiPath(accountId, "/bulk-actions"), { method: "POST", body: { level, ids, action } }),
   listAdSets: (accountId: string, filters: { campaignId?: string; from?: string; to?: string } = {}) =>
     sendAdsApiRequest<Page<AdSet>>(buildAccountApiPath(accountId, "/ad-sets"), { query: { ...filters, limit: 100 } }),
-  createAdSet: (accountId: string, campaignId: string, input: AdSetInput) => sendAdsApiRequest<AdSet>(buildAccountApiPath(accountId, "/ad-sets"), { method: "POST", body: { campaignId, ...input } }),
+  createAdSet: (accountId: string, campaignId: string, input: AdSetInput, idempotencyKey = createClientIdempotencyKey("adset")) =>
+    sendAdsApiRequest<AdSet>(buildAccountApiPath(accountId, "/ad-sets"), { method: "POST", body: { campaignId, ...input }, idempotencyKey }),
   fetchAdSet: (accountId: string, adSetId: string) => sendAdsApiRequest<AdSet>(buildAccountApiPath(accountId, `/ad-sets/${encodeURIComponent(adSetId)}`)),
   updateAdSet: (accountId: string, adSetId: string, changes: Partial<AdSetInput> & { status?: EditableStatus }) =>
     sendAdsApiRequest<AdSet>(buildAccountApiPath(accountId, `/ad-sets/${encodeURIComponent(adSetId)}`), { method: "PATCH", body: changes }),
   listAds: (accountId: string, filters: { campaignId?: string; adSetId?: string; reviewStatus?: ReviewStatus | ""; from?: string; to?: string } = {}) =>
     sendAdsApiRequest<Page<Ad>>(buildAccountApiPath(accountId, "/ads"), { query: { ...filters, limit: 100 } }),
-  createAd: (accountId: string, adSetId: string, input: AdInput) => sendAdsApiRequest<Ad>(buildAccountApiPath(accountId, "/ads"), { method: "POST", body: { adSetId, ...input } }),
+  createAd: (accountId: string, adSetId: string, input: AdInput, idempotencyKey = createClientIdempotencyKey("ad")) =>
+    sendAdsApiRequest<Ad>(buildAccountApiPath(accountId, "/ads"), { method: "POST", body: { adSetId, ...input }, idempotencyKey }),
   fetchAd: (accountId: string, adId: string) => sendAdsApiRequest<Ad>(buildAccountApiPath(accountId, `/ads/${encodeURIComponent(adId)}`)),
   updateAd: (accountId: string, adId: string, changes: Partial<AdInput> & { status?: EditableStatus }) =>
     sendAdsApiRequest<Ad>(buildAccountApiPath(accountId, `/ads/${encodeURIComponent(adId)}`), { method: "PATCH", body: changes }),

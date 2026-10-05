@@ -63,7 +63,8 @@ export type InviteStatus = "pending" | "accepted" | "revoked" | "expired";
 
 export interface AdAccountInvite {
   readonly id: string;
-  readonly email: string;
+  readonly email?: string;
+  readonly username?: string;
   readonly role: AdAccountRole;
   readonly invitedBy: string;
   readonly status: InviteStatus;
