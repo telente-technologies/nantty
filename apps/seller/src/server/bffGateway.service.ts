@@ -19,8 +19,9 @@ import { decideSellerAccessDestination } from "@/utils/sellerAccessDestination.u
 const maximumForwardedBodyBytes = 12 * 1024 * 1024;
 const forwardedRequestHeaderNames = ["idempotency-key", "x-chunk-sha256", "if-match"];
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
-const allowedApiPathPattern = /^\/(seller|media)(\/[A-Za-z0-9._~:@%-]+)+$/;
+const allowedApiPathPattern = /^\/(seller|media)(\/[A-Za-z0-9._~:@%-]+)+$|^\/payments\/(payout-onboarding\/me(\/[A-Za-z0-9._~:@%-]+)*|payout-fees)$/;
 const readOnlyAccountApiPaths: ReadonlySet<string> = new Set(["/account/status"]);
+const accountWriteApiCalls: ReadonlySet<string> = new Set(["PATCH /users/me/preferences", "PUT /users/me/consents"]);
 const gateApiPathPattern = /^\/seller\/(access|verification|subscription|stores\/mine)(\/|$)/;
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
@@ -47,7 +48,7 @@ async function readRequestBodyWithinLimit(request: NextRequest): Promise<Uint8Ar
 
 export async function forwardBffRequestToSellerApi(request: NextRequest, pathSegments: readonly string[]): Promise<NextResponse> {
   const apiPath = `/${pathSegments.map((segment) => encodeURIComponent(segment)).join("/")}`;
-  const isReadOnlyAccountPath = readOnlyAccountApiPaths.has(apiPath) && request.method === "GET";
+  const isReadOnlyAccountPath = (readOnlyAccountApiPaths.has(apiPath) && request.method === "GET") || accountWriteApiCalls.has(`${request.method} ${apiPath}`);
   if ((!allowedApiPathPattern.test(apiPath) && !isReadOnlyAccountPath) || apiPath.includes("..")) {
     return respondWithBffError(404, "NOT_FOUND", "This endpoint is not available.");
   }
@@ -72,7 +73,7 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
 
   const requiredPermission = findPermissionRequiredForApiCall(request.method, apiPath);
   if (requiredPermission === null) return respondWithBffError(403, "FORBIDDEN", "You do not have access to this.");
-  const isAvailableBeforeStoreIsActive = gateApiPathPattern.test(apiPath);
+  const isAvailableBeforeStoreIsActive = gateApiPathPattern.test(apiPath) || isReadOnlyAccountPath;
   if (!isAvailableBeforeStoreIsActive && decideSellerAccessDestination(cachedAccess.access) !== "app") {
     return respondWithBffError(403, "STORE_NOT_ACTIVE", "This store is restricted. Check the note from Zudomart.");
   }

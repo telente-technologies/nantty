@@ -1,3 +1,5 @@
+import { isBrowserOffline } from "@zudomart/web-kit";
+
 import type { ApiErrorBody } from "@/types/pagination.type";
 
 let currentCsrfToken: string | null = null;
@@ -90,6 +92,7 @@ export function createIdempotencyKey(prefix = "idem"): string {
 }
 
 export function readErrorMessageForDisplay(error: unknown): string {
+  if (isBrowserOffline()) return "You're offline. Check your connection and we'll retry when you're back.";
   if (error instanceof SellerApiRequestError) return error.message;
   if (error instanceof Error && error.name !== "AbortError") return "Something went wrong. Try again.";
   return "Something went wrong. Try again.";

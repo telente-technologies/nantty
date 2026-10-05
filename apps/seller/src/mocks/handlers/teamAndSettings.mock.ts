@@ -49,6 +49,16 @@ function registerStoreSettingsHandlers(): void {
     recordSettingsAudit(request, "settings.updated", "store", database.settings.storeId, `Updated store settings: ${Object.keys(patch).join(", ")}`);
     return respondWithJson(200, database.settings);
   });
+
+  registerMockRoute("PUT", "/seller/marketing/rewards/settings", (request) => {
+    requireMockStorePrincipal(request);
+    const database = readMockDatabase();
+    const body = { storeRewards: readJsonObjectBody(request) };
+    const issues = validateStoreSettingsPatch(body, database.settings, new Set(database.categories.map((category) => category.id)));
+    if (issues.length > 0) return respondWithValidationFailure(issues);
+    database.settings = { ...database.settings, ...normaliseStoreSettingsPatch(body) };
+    return respondWithJson(200, database.settings.storeRewards);
+  });
 }
 
 function registerLocationHandlers(): void {

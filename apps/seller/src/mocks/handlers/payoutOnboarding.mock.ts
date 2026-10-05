@@ -67,14 +67,14 @@ function guard(record: PayoutOnboardingRecord, step: PayoutOnboardingStep): void
 }
 
 export function registerPayoutOnboardingMockHandlers(): void {
-  registerMockRoute("GET", "/seller/payout-onboarding", (request) => respondWithJson(200, settle(read(requireMockStorePrincipal(request).storeId))));
+  registerMockRoute("GET", "/payments/payout-onboarding/me", (request) => respondWithJson(200, settle(read(requireMockStorePrincipal(request).storeId))));
 
-  registerMockRoute("GET", "/seller/payout-onboarding/fees", (request) => {
+  registerMockRoute("GET", "/payments/payout-fees", (request) => {
     requireMockStorePrincipal(request);
     return respondWithJson(200, { currency: "NGN", kind: "flat", fee: { amountMinor: 5000, currency: "NGN" }, arrivalEstimate: "Withdrawals to Nigerian banks usually arrive within minutes.", firstPayoutNote: "Your very first withdrawal is held for one quick safety review before it is sent." });
   });
 
-  registerMockRoute("PUT", "/seller/payout-onboarding/identity", (request) => {
+  registerMockRoute("PUT", "/payments/payout-onboarding/me/identity", (request) => {
     const record = read(requireMockStorePrincipal(request).storeId);
     guard(record, "identity");
     const body = readJsonObjectBody(request);
@@ -92,14 +92,14 @@ export function registerPayoutOnboardingMockHandlers(): void {
     return respondWithJson(200, advance(record, "identity", { legalName, idType: body.idType === "nin" ? "nin" : "bvn", idLast4: idNumber.slice(-4), requiresBusinessStep: body.registeredBusiness === true, accountStatus: record.state.accountStatus === "actionRequired" ? "documentsRequired" : record.state.accountStatus ?? "pending_creation" }));
   });
 
-  registerMockRoute("PUT", "/seller/payout-onboarding/business", (request) => {
+  registerMockRoute("PUT", "/payments/payout-onboarding/me/business", (request) => {
     const record = read(requireMockStorePrincipal(request).storeId);
     guard(record, "business");
     if (!/^(RC|BN)\d{6,8}$/i.test(String(readJsonObjectBody(request).cacNumber ?? "").trim())) throw new MockHttpError(422, "INVALID_CAC", "CAC numbers look like RC1234567 or BN1234567.");
     return respondWithJson(200, advance(record, "business", {}));
   });
 
-  registerMockRoute("POST", "/seller/payout-onboarding/resolve", (request) => {
+  registerMockRoute("POST", "/payments/payout-onboarding/me/resolve", (request) => {
     const record = read(requireMockStorePrincipal(request).storeId);
     const body = readJsonObjectBody(request);
     const accountNumber = String(body.accountNumber ?? "");
@@ -109,7 +109,7 @@ export function registerPayoutOnboardingMockHandlers(): void {
     return respondWithJson(200, { accountName: accountNumber.startsWith("111") ? "CHUKWUEMEKA OBI" : fallbackName.toUpperCase() });
   });
 
-  registerMockRoute("PUT", "/seller/payout-onboarding/bank", (request) => {
+  registerMockRoute("PUT", "/payments/payout-onboarding/me/bank", (request) => {
     const record = read(requireMockStorePrincipal(request).storeId);
     guard(record, "bank");
     const body = readJsonObjectBody(request);
@@ -117,7 +117,7 @@ export function registerPayoutOnboardingMockHandlers(): void {
     return respondWithJson(200, advance(record, "bank", { bankSummary: `${String(body.bankName ?? "Bank")} ••••${String(body.accountNumber ?? "").slice(-4)}` }));
   });
 
-  registerMockRoute("POST", "/seller/payout-onboarding/retry", (request) => {
+  registerMockRoute("POST", "/payments/payout-onboarding/me/retry", (request) => {
     const record = read(requireMockStorePrincipal(request).storeId);
     if (settle(record).accountStatus === "failed") {
       record.creationFailed = false;
@@ -127,7 +127,7 @@ export function registerPayoutOnboardingMockHandlers(): void {
     return respondWithJson(200, settle(record));
   });
 
-  registerMockRoute("POST", "/seller/payout-onboarding/document-link", (request) => {
+  registerMockRoute("POST", "/payments/payout-onboarding/me/document-link", (request) => {
     const record = read(requireMockStorePrincipal(request).storeId);
     guard(record, "document");
     if (record.idNumber.endsWith("5030") && !record.linkFailedOnce) {
@@ -139,7 +139,7 @@ export function registerPayoutOnboardingMockHandlers(): void {
     return respondWithJson(200, { url: "/settings/payouts?verification=mock", returnUrl: "/settings/payouts?verification=returned", expiresAt: new Date(Date.now() + 15 * 60_000).toISOString() });
   });
 
-  registerMockRoute("POST", "/seller/payout-onboarding/document-link/complete", (request) => {
+  registerMockRoute("POST", "/payments/payout-onboarding/me/document-link/complete", (request) => {
     const record = read(requireMockStorePrincipal(request).storeId);
     if (record.state.documentStatus !== "link_issued") throw new MockHttpError(409, "NO_LINK", "Open the verification page first.");
     record.submittedAt = Date.now();
