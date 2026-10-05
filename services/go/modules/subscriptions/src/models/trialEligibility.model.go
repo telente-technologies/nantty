@@ -19,6 +19,7 @@ type TrialSignals struct {
 	EmailVerified     bool
 	PersonUsedTrial   bool
 	DeviceUsedTrial   bool
+	CardUsedTrial     bool
 	PhoneUsedTrial    bool
 	RiskScore         *int
 	CompletedOrders   int
@@ -51,6 +52,9 @@ func EvaluateTrialEligibility(rules TrialRules, signals TrialSignals, now time.T
 	}
 	if rules.OnePerDevice && signals.DeviceUsedTrial {
 		add("DEVICE_ALREADY_USED", "A free trial was already used on this device.")
+	}
+	if rules.OnePerCard && signals.CardUsedTrial {
+		add("CARD_ALREADY_USED", "This card was already used for a free trial.")
 	}
 	if rules.OnePerPhone && signals.PhoneUsedTrial {
 		add("PHONE_ALREADY_USED", "A free trial was already used with this phone number.")

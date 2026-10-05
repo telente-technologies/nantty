@@ -21,6 +21,7 @@ func TestTrialEligibilityFollowsTheAdminRules(t *testing.T) {
 		{"unverified email", func(signals *TrialSignals) { signals.EmailVerified = false }, "EMAIL_NOT_VERIFIED"},
 		{"second trial", func(signals *TrialSignals) { signals.PersonUsedTrial = true }, "TRIAL_ALREADY_USED"},
 		{"same device", func(signals *TrialSignals) { signals.DeviceUsedTrial = true }, "DEVICE_ALREADY_USED"},
+		{"same card", func(signals *TrialSignals) { signals.CardUsedTrial = true }, "CARD_ALREADY_USED"},
 		{"same phone", func(signals *TrialSignals) { signals.PhoneUsedTrial = true }, "PHONE_ALREADY_USED"},
 		{"risky", func(signals *TrialSignals) { signals.RiskScore = &risky }, "RISK_TOO_HIGH"},
 		{"calm score", func(signals *TrialSignals) { signals.RiskScore = &calm }, ""},
