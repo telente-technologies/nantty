@@ -9,4 +9,5 @@ export function registerFeedsRoutes(router: HttpRouter, controller: ReturnType<t
   router.get("/api/v1/feeds/suggested-clips", controller.suggestedClips);
   router.get("/api/v1/clips", controller.clips);
   router.post("/api/v1/feeds/feedback", controller.feedback);
+  router.post("/api/v1/feeds/interactions", controller.interaction);
 }
