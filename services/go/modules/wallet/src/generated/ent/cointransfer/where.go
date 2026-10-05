@@ -95,6 +95,31 @@ func Note(v string) predicate.CoinTransfer {
 	return predicate.CoinTransfer(sql.FieldEQ(FieldNote, v))
 }
 
+// ClawbackShortfallCoins applies equality check predicate on the "clawback_shortfall_coins" field. It's identical to ClawbackShortfallCoinsEQ.
+func ClawbackShortfallCoins(v int64) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldClawbackShortfallCoins, v))
+}
+
+// ReversedAt applies equality check predicate on the "reversed_at" field. It's identical to ReversedAtEQ.
+func ReversedAt(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldReversedAt, v))
+}
+
+// ReviewedByStaffID applies equality check predicate on the "reviewed_by_staff_id" field. It's identical to ReviewedByStaffIDEQ.
+func ReviewedByStaffID(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldReviewedByStaffID, v))
+}
+
+// ReviewedAt applies equality check predicate on the "reviewed_at" field. It's identical to ReviewedAtEQ.
+func ReviewedAt(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldReviewedAt, v))
+}
+
+// ReviewNote applies equality check predicate on the "review_note" field. It's identical to ReviewNoteEQ.
+func ReviewNote(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldReviewNote, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.CoinTransfer {
 	return predicate.CoinTransfer(sql.FieldEQ(FieldCreatedAt, v))
@@ -488,6 +513,296 @@ func NoteEqualFold(v string) predicate.CoinTransfer {
 // NoteContainsFold applies the ContainsFold predicate on the "note" field.
 func NoteContainsFold(v string) predicate.CoinTransfer {
 	return predicate.CoinTransfer(sql.FieldContainsFold(FieldNote, v))
+}
+
+// ClawbackShortfallCoinsEQ applies the EQ predicate on the "clawback_shortfall_coins" field.
+func ClawbackShortfallCoinsEQ(v int64) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldClawbackShortfallCoins, v))
+}
+
+// ClawbackShortfallCoinsNEQ applies the NEQ predicate on the "clawback_shortfall_coins" field.
+func ClawbackShortfallCoinsNEQ(v int64) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNEQ(FieldClawbackShortfallCoins, v))
+}
+
+// ClawbackShortfallCoinsIn applies the In predicate on the "clawback_shortfall_coins" field.
+func ClawbackShortfallCoinsIn(vs ...int64) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldIn(FieldClawbackShortfallCoins, vs...))
+}
+
+// ClawbackShortfallCoinsNotIn applies the NotIn predicate on the "clawback_shortfall_coins" field.
+func ClawbackShortfallCoinsNotIn(vs ...int64) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNotIn(FieldClawbackShortfallCoins, vs...))
+}
+
+// ClawbackShortfallCoinsGT applies the GT predicate on the "clawback_shortfall_coins" field.
+func ClawbackShortfallCoinsGT(v int64) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGT(FieldClawbackShortfallCoins, v))
+}
+
+// ClawbackShortfallCoinsGTE applies the GTE predicate on the "clawback_shortfall_coins" field.
+func ClawbackShortfallCoinsGTE(v int64) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGTE(FieldClawbackShortfallCoins, v))
+}
+
+// ClawbackShortfallCoinsLT applies the LT predicate on the "clawback_shortfall_coins" field.
+func ClawbackShortfallCoinsLT(v int64) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLT(FieldClawbackShortfallCoins, v))
+}
+
+// ClawbackShortfallCoinsLTE applies the LTE predicate on the "clawback_shortfall_coins" field.
+func ClawbackShortfallCoinsLTE(v int64) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLTE(FieldClawbackShortfallCoins, v))
+}
+
+// ReversedAtEQ applies the EQ predicate on the "reversed_at" field.
+func ReversedAtEQ(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldReversedAt, v))
+}
+
+// ReversedAtNEQ applies the NEQ predicate on the "reversed_at" field.
+func ReversedAtNEQ(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNEQ(FieldReversedAt, v))
+}
+
+// ReversedAtIn applies the In predicate on the "reversed_at" field.
+func ReversedAtIn(vs ...time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldIn(FieldReversedAt, vs...))
+}
+
+// ReversedAtNotIn applies the NotIn predicate on the "reversed_at" field.
+func ReversedAtNotIn(vs ...time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNotIn(FieldReversedAt, vs...))
+}
+
+// ReversedAtGT applies the GT predicate on the "reversed_at" field.
+func ReversedAtGT(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGT(FieldReversedAt, v))
+}
+
+// ReversedAtGTE applies the GTE predicate on the "reversed_at" field.
+func ReversedAtGTE(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGTE(FieldReversedAt, v))
+}
+
+// ReversedAtLT applies the LT predicate on the "reversed_at" field.
+func ReversedAtLT(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLT(FieldReversedAt, v))
+}
+
+// ReversedAtLTE applies the LTE predicate on the "reversed_at" field.
+func ReversedAtLTE(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLTE(FieldReversedAt, v))
+}
+
+// ReversedAtIsNil applies the IsNil predicate on the "reversed_at" field.
+func ReversedAtIsNil() predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldIsNull(FieldReversedAt))
+}
+
+// ReversedAtNotNil applies the NotNil predicate on the "reversed_at" field.
+func ReversedAtNotNil() predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNotNull(FieldReversedAt))
+}
+
+// ReviewStatusEQ applies the EQ predicate on the "review_status" field.
+func ReviewStatusEQ(v ReviewStatus) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldReviewStatus, v))
+}
+
+// ReviewStatusNEQ applies the NEQ predicate on the "review_status" field.
+func ReviewStatusNEQ(v ReviewStatus) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNEQ(FieldReviewStatus, v))
+}
+
+// ReviewStatusIn applies the In predicate on the "review_status" field.
+func ReviewStatusIn(vs ...ReviewStatus) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldIn(FieldReviewStatus, vs...))
+}
+
+// ReviewStatusNotIn applies the NotIn predicate on the "review_status" field.
+func ReviewStatusNotIn(vs ...ReviewStatus) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNotIn(FieldReviewStatus, vs...))
+}
+
+// ReviewedByStaffIDEQ applies the EQ predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDEQ(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDNEQ applies the NEQ predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDNEQ(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNEQ(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDIn applies the In predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDIn(vs ...string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldIn(FieldReviewedByStaffID, vs...))
+}
+
+// ReviewedByStaffIDNotIn applies the NotIn predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDNotIn(vs ...string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNotIn(FieldReviewedByStaffID, vs...))
+}
+
+// ReviewedByStaffIDGT applies the GT predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDGT(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGT(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDGTE applies the GTE predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDGTE(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGTE(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDLT applies the LT predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDLT(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLT(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDLTE applies the LTE predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDLTE(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLTE(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDContains applies the Contains predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDContains(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldContains(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDHasPrefix applies the HasPrefix predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDHasPrefix(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldHasPrefix(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDHasSuffix applies the HasSuffix predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDHasSuffix(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldHasSuffix(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDEqualFold applies the EqualFold predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDEqualFold(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEqualFold(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDContainsFold applies the ContainsFold predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDContainsFold(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldContainsFold(FieldReviewedByStaffID, v))
+}
+
+// ReviewedAtEQ applies the EQ predicate on the "reviewed_at" field.
+func ReviewedAtEQ(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldReviewedAt, v))
+}
+
+// ReviewedAtNEQ applies the NEQ predicate on the "reviewed_at" field.
+func ReviewedAtNEQ(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNEQ(FieldReviewedAt, v))
+}
+
+// ReviewedAtIn applies the In predicate on the "reviewed_at" field.
+func ReviewedAtIn(vs ...time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldIn(FieldReviewedAt, vs...))
+}
+
+// ReviewedAtNotIn applies the NotIn predicate on the "reviewed_at" field.
+func ReviewedAtNotIn(vs ...time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNotIn(FieldReviewedAt, vs...))
+}
+
+// ReviewedAtGT applies the GT predicate on the "reviewed_at" field.
+func ReviewedAtGT(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGT(FieldReviewedAt, v))
+}
+
+// ReviewedAtGTE applies the GTE predicate on the "reviewed_at" field.
+func ReviewedAtGTE(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGTE(FieldReviewedAt, v))
+}
+
+// ReviewedAtLT applies the LT predicate on the "reviewed_at" field.
+func ReviewedAtLT(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLT(FieldReviewedAt, v))
+}
+
+// ReviewedAtLTE applies the LTE predicate on the "reviewed_at" field.
+func ReviewedAtLTE(v time.Time) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLTE(FieldReviewedAt, v))
+}
+
+// ReviewedAtIsNil applies the IsNil predicate on the "reviewed_at" field.
+func ReviewedAtIsNil() predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldIsNull(FieldReviewedAt))
+}
+
+// ReviewedAtNotNil applies the NotNil predicate on the "reviewed_at" field.
+func ReviewedAtNotNil() predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNotNull(FieldReviewedAt))
+}
+
+// ReviewNoteEQ applies the EQ predicate on the "review_note" field.
+func ReviewNoteEQ(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEQ(FieldReviewNote, v))
+}
+
+// ReviewNoteNEQ applies the NEQ predicate on the "review_note" field.
+func ReviewNoteNEQ(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNEQ(FieldReviewNote, v))
+}
+
+// ReviewNoteIn applies the In predicate on the "review_note" field.
+func ReviewNoteIn(vs ...string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldIn(FieldReviewNote, vs...))
+}
+
+// ReviewNoteNotIn applies the NotIn predicate on the "review_note" field.
+func ReviewNoteNotIn(vs ...string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNotIn(FieldReviewNote, vs...))
+}
+
+// ReviewNoteGT applies the GT predicate on the "review_note" field.
+func ReviewNoteGT(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGT(FieldReviewNote, v))
+}
+
+// ReviewNoteGTE applies the GTE predicate on the "review_note" field.
+func ReviewNoteGTE(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldGTE(FieldReviewNote, v))
+}
+
+// ReviewNoteLT applies the LT predicate on the "review_note" field.
+func ReviewNoteLT(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLT(FieldReviewNote, v))
+}
+
+// ReviewNoteLTE applies the LTE predicate on the "review_note" field.
+func ReviewNoteLTE(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldLTE(FieldReviewNote, v))
+}
+
+// ReviewNoteContains applies the Contains predicate on the "review_note" field.
+func ReviewNoteContains(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldContains(FieldReviewNote, v))
+}
+
+// ReviewNoteHasPrefix applies the HasPrefix predicate on the "review_note" field.
+func ReviewNoteHasPrefix(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldHasPrefix(FieldReviewNote, v))
+}
+
+// ReviewNoteHasSuffix applies the HasSuffix predicate on the "review_note" field.
+func ReviewNoteHasSuffix(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldHasSuffix(FieldReviewNote, v))
+}
+
+// ReviewNoteEqualFold applies the EqualFold predicate on the "review_note" field.
+func ReviewNoteEqualFold(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldEqualFold(FieldReviewNote, v))
+}
+
+// ReviewNoteContainsFold applies the ContainsFold predicate on the "review_note" field.
+func ReviewNoteContainsFold(v string) predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldContainsFold(FieldReviewNote, v))
 }
 
 // And groups predicates with the AND operator between them.

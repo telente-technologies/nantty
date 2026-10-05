@@ -158,6 +158,10 @@ var (
 		{Name: "credited_at", Type: field.TypeTime, Nullable: true},
 		{Name: "refunded_at", Type: field.TypeTime, Nullable: true},
 		{Name: "clawback_shortfall_coins", Type: field.TypeInt64, Default: 0},
+		{Name: "review_status", Type: field.TypeEnum, Enums: []string{"pending_review", "reviewed", "reversed"}, Default: "pending_review"},
+		{Name: "reviewed_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "reviewed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "review_note", Type: field.TypeString, Size: 1000, Default: ""},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// CoinPurchasesTable holds the schema information for the "coin_purchases" table.
@@ -176,6 +180,16 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{CoinPurchasesColumns[2], CoinPurchasesColumns[1]},
 			},
+			{
+				Name:    "coinpurchase_review_status_id",
+				Unique:  false,
+				Columns: []*schema.Column{CoinPurchasesColumns[18], CoinPurchasesColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						CoinPurchasesColumns[0].Name: true,
+					},
+				},
+			},
 		},
 	}
 	// CoinTransfersColumns holds the columns for the "coin_transfers" table.
@@ -189,6 +203,12 @@ var (
 		{Name: "net_coins", Type: field.TypeInt64},
 		{Name: "fee_bps", Type: field.TypeInt64},
 		{Name: "note", Type: field.TypeString, Size: 140, Default: ""},
+		{Name: "clawback_shortfall_coins", Type: field.TypeInt64, Default: 0},
+		{Name: "reversed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "review_status", Type: field.TypeEnum, Enums: []string{"pending_review", "reviewed", "reversed"}, Default: "pending_review"},
+		{Name: "reviewed_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "reviewed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "review_note", Type: field.TypeString, Size: 1000, Default: ""},
 	}
 	// CoinTransfersTable holds the schema information for the "coin_transfers" table.
 	CoinTransfersTable = &schema.Table{
@@ -205,6 +225,16 @@ var (
 				Name:    "cointransfer_recipient_user_id_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{CoinTransfersColumns[3], CoinTransfersColumns[1]},
+			},
+			{
+				Name:    "cointransfer_review_status_id",
+				Unique:  false,
+				Columns: []*schema.Column{CoinTransfersColumns[11], CoinTransfersColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						CoinTransfersColumns[0].Name: true,
+					},
+				},
 			},
 		},
 	}
@@ -431,10 +461,11 @@ var (
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "provider", Type: field.TypeString, Size: 40},
 		{Name: "destination_label", Type: field.TypeString, Size: 200, Default: ""},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending_review", "queued", "processing", "paid", "failed", "cancelled"}, Default: "pending_review"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending_review", "on_hold", "queued", "processing", "paid", "failed", "cancelled"}, Default: "pending_review"},
 		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
 		{Name: "reviewed_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
 		{Name: "reviewed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "review_note", Type: field.TypeString, Size: 1000, Default: ""},
 		{Name: "processed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "version", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_at", Type: field.TypeTime},

@@ -49,6 +49,14 @@ const (
 	FieldRefundedAt = "refunded_at"
 	// FieldClawbackShortfallCoins holds the string denoting the clawback_shortfall_coins field in the database.
 	FieldClawbackShortfallCoins = "clawback_shortfall_coins"
+	// FieldReviewStatus holds the string denoting the review_status field in the database.
+	FieldReviewStatus = "review_status"
+	// FieldReviewedByStaffID holds the string denoting the reviewed_by_staff_id field in the database.
+	FieldReviewedByStaffID = "reviewed_by_staff_id"
+	// FieldReviewedAt holds the string denoting the reviewed_at field in the database.
+	FieldReviewedAt = "reviewed_at"
+	// FieldReviewNote holds the string denoting the review_note field in the database.
+	FieldReviewNote = "review_note"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the coinpurchase in the database.
@@ -75,6 +83,10 @@ var Columns = []string{
 	FieldCreditedAt,
 	FieldRefundedAt,
 	FieldClawbackShortfallCoins,
+	FieldReviewStatus,
+	FieldReviewedByStaffID,
+	FieldReviewedAt,
+	FieldReviewNote,
 	FieldUpdatedAt,
 }
 
@@ -109,6 +121,14 @@ var (
 	AuthorizationURLValidator func(string) error
 	// DefaultClawbackShortfallCoins holds the default value on creation for the "clawback_shortfall_coins" field.
 	DefaultClawbackShortfallCoins int64
+	// DefaultReviewedByStaffID holds the default value on creation for the "reviewed_by_staff_id" field.
+	DefaultReviewedByStaffID string
+	// ReviewedByStaffIDValidator is a validator for the "reviewed_by_staff_id" field. It is called by the builders before save.
+	ReviewedByStaffIDValidator func(string) error
+	// DefaultReviewNote holds the default value on creation for the "review_note" field.
+	DefaultReviewNote string
+	// ReviewNoteValidator is a validator for the "review_note" field. It is called by the builders before save.
+	ReviewNoteValidator func(string) error
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -189,6 +209,33 @@ func StatusValidator(s Status) error {
 		return nil
 	default:
 		return fmt.Errorf("coinpurchase: invalid enum value for status field: %q", s)
+	}
+}
+
+// ReviewStatus defines the type for the "review_status" enum field.
+type ReviewStatus string
+
+// ReviewStatusPendingReview is the default value of the ReviewStatus enum.
+const DefaultReviewStatus = ReviewStatusPendingReview
+
+// ReviewStatus values.
+const (
+	ReviewStatusPendingReview ReviewStatus = "pending_review"
+	ReviewStatusReviewed      ReviewStatus = "reviewed"
+	ReviewStatusReversed      ReviewStatus = "reversed"
+)
+
+func (rs ReviewStatus) String() string {
+	return string(rs)
+}
+
+// ReviewStatusValidator is a validator for the "review_status" field enum values. It is called by the builders before save.
+func ReviewStatusValidator(rs ReviewStatus) error {
+	switch rs {
+	case ReviewStatusPendingReview, ReviewStatusReviewed, ReviewStatusReversed:
+		return nil
+	default:
+		return fmt.Errorf("coinpurchase: invalid enum value for review_status field: %q", rs)
 	}
 }
 
@@ -283,6 +330,26 @@ func ByRefundedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByClawbackShortfallCoins orders the results by the clawback_shortfall_coins field.
 func ByClawbackShortfallCoins(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClawbackShortfallCoins, opts...).ToFunc()
+}
+
+// ByReviewStatus orders the results by the review_status field.
+func ByReviewStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewStatus, opts...).ToFunc()
+}
+
+// ByReviewedByStaffID orders the results by the reviewed_by_staff_id field.
+func ByReviewedByStaffID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewedByStaffID, opts...).ToFunc()
+}
+
+// ByReviewedAt orders the results by the reviewed_at field.
+func ByReviewedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewedAt, opts...).ToFunc()
+}
+
+// ByReviewNote orders the results by the review_note field.
+func ByReviewNote(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewNote, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

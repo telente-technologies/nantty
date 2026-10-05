@@ -125,6 +125,21 @@ func ClawbackShortfallCoins(v int64) predicate.CoinPurchase {
 	return predicate.CoinPurchase(sql.FieldEQ(FieldClawbackShortfallCoins, v))
 }
 
+// ReviewedByStaffID applies equality check predicate on the "reviewed_by_staff_id" field. It's identical to ReviewedByStaffIDEQ.
+func ReviewedByStaffID(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldEQ(FieldReviewedByStaffID, v))
+}
+
+// ReviewedAt applies equality check predicate on the "reviewed_at" field. It's identical to ReviewedAtEQ.
+func ReviewedAt(v time.Time) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldEQ(FieldReviewedAt, v))
+}
+
+// ReviewNote applies equality check predicate on the "review_note" field. It's identical to ReviewNoteEQ.
+func ReviewNote(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldEQ(FieldReviewNote, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.CoinPurchase {
 	return predicate.CoinPurchase(sql.FieldEQ(FieldUpdatedAt, v))
@@ -928,6 +943,206 @@ func ClawbackShortfallCoinsLT(v int64) predicate.CoinPurchase {
 // ClawbackShortfallCoinsLTE applies the LTE predicate on the "clawback_shortfall_coins" field.
 func ClawbackShortfallCoinsLTE(v int64) predicate.CoinPurchase {
 	return predicate.CoinPurchase(sql.FieldLTE(FieldClawbackShortfallCoins, v))
+}
+
+// ReviewStatusEQ applies the EQ predicate on the "review_status" field.
+func ReviewStatusEQ(v ReviewStatus) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldEQ(FieldReviewStatus, v))
+}
+
+// ReviewStatusNEQ applies the NEQ predicate on the "review_status" field.
+func ReviewStatusNEQ(v ReviewStatus) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNEQ(FieldReviewStatus, v))
+}
+
+// ReviewStatusIn applies the In predicate on the "review_status" field.
+func ReviewStatusIn(vs ...ReviewStatus) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldIn(FieldReviewStatus, vs...))
+}
+
+// ReviewStatusNotIn applies the NotIn predicate on the "review_status" field.
+func ReviewStatusNotIn(vs ...ReviewStatus) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNotIn(FieldReviewStatus, vs...))
+}
+
+// ReviewedByStaffIDEQ applies the EQ predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDEQ(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldEQ(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDNEQ applies the NEQ predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDNEQ(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNEQ(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDIn applies the In predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDIn(vs ...string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldIn(FieldReviewedByStaffID, vs...))
+}
+
+// ReviewedByStaffIDNotIn applies the NotIn predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDNotIn(vs ...string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNotIn(FieldReviewedByStaffID, vs...))
+}
+
+// ReviewedByStaffIDGT applies the GT predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDGT(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldGT(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDGTE applies the GTE predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDGTE(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldGTE(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDLT applies the LT predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDLT(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldLT(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDLTE applies the LTE predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDLTE(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldLTE(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDContains applies the Contains predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDContains(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldContains(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDHasPrefix applies the HasPrefix predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDHasPrefix(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldHasPrefix(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDHasSuffix applies the HasSuffix predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDHasSuffix(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldHasSuffix(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDEqualFold applies the EqualFold predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDEqualFold(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldEqualFold(FieldReviewedByStaffID, v))
+}
+
+// ReviewedByStaffIDContainsFold applies the ContainsFold predicate on the "reviewed_by_staff_id" field.
+func ReviewedByStaffIDContainsFold(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldContainsFold(FieldReviewedByStaffID, v))
+}
+
+// ReviewedAtEQ applies the EQ predicate on the "reviewed_at" field.
+func ReviewedAtEQ(v time.Time) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldEQ(FieldReviewedAt, v))
+}
+
+// ReviewedAtNEQ applies the NEQ predicate on the "reviewed_at" field.
+func ReviewedAtNEQ(v time.Time) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNEQ(FieldReviewedAt, v))
+}
+
+// ReviewedAtIn applies the In predicate on the "reviewed_at" field.
+func ReviewedAtIn(vs ...time.Time) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldIn(FieldReviewedAt, vs...))
+}
+
+// ReviewedAtNotIn applies the NotIn predicate on the "reviewed_at" field.
+func ReviewedAtNotIn(vs ...time.Time) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNotIn(FieldReviewedAt, vs...))
+}
+
+// ReviewedAtGT applies the GT predicate on the "reviewed_at" field.
+func ReviewedAtGT(v time.Time) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldGT(FieldReviewedAt, v))
+}
+
+// ReviewedAtGTE applies the GTE predicate on the "reviewed_at" field.
+func ReviewedAtGTE(v time.Time) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldGTE(FieldReviewedAt, v))
+}
+
+// ReviewedAtLT applies the LT predicate on the "reviewed_at" field.
+func ReviewedAtLT(v time.Time) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldLT(FieldReviewedAt, v))
+}
+
+// ReviewedAtLTE applies the LTE predicate on the "reviewed_at" field.
+func ReviewedAtLTE(v time.Time) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldLTE(FieldReviewedAt, v))
+}
+
+// ReviewedAtIsNil applies the IsNil predicate on the "reviewed_at" field.
+func ReviewedAtIsNil() predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldIsNull(FieldReviewedAt))
+}
+
+// ReviewedAtNotNil applies the NotNil predicate on the "reviewed_at" field.
+func ReviewedAtNotNil() predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNotNull(FieldReviewedAt))
+}
+
+// ReviewNoteEQ applies the EQ predicate on the "review_note" field.
+func ReviewNoteEQ(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldEQ(FieldReviewNote, v))
+}
+
+// ReviewNoteNEQ applies the NEQ predicate on the "review_note" field.
+func ReviewNoteNEQ(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNEQ(FieldReviewNote, v))
+}
+
+// ReviewNoteIn applies the In predicate on the "review_note" field.
+func ReviewNoteIn(vs ...string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldIn(FieldReviewNote, vs...))
+}
+
+// ReviewNoteNotIn applies the NotIn predicate on the "review_note" field.
+func ReviewNoteNotIn(vs ...string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNotIn(FieldReviewNote, vs...))
+}
+
+// ReviewNoteGT applies the GT predicate on the "review_note" field.
+func ReviewNoteGT(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldGT(FieldReviewNote, v))
+}
+
+// ReviewNoteGTE applies the GTE predicate on the "review_note" field.
+func ReviewNoteGTE(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldGTE(FieldReviewNote, v))
+}
+
+// ReviewNoteLT applies the LT predicate on the "review_note" field.
+func ReviewNoteLT(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldLT(FieldReviewNote, v))
+}
+
+// ReviewNoteLTE applies the LTE predicate on the "review_note" field.
+func ReviewNoteLTE(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldLTE(FieldReviewNote, v))
+}
+
+// ReviewNoteContains applies the Contains predicate on the "review_note" field.
+func ReviewNoteContains(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldContains(FieldReviewNote, v))
+}
+
+// ReviewNoteHasPrefix applies the HasPrefix predicate on the "review_note" field.
+func ReviewNoteHasPrefix(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldHasPrefix(FieldReviewNote, v))
+}
+
+// ReviewNoteHasSuffix applies the HasSuffix predicate on the "review_note" field.
+func ReviewNoteHasSuffix(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldHasSuffix(FieldReviewNote, v))
+}
+
+// ReviewNoteEqualFold applies the EqualFold predicate on the "review_note" field.
+func ReviewNoteEqualFold(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldEqualFold(FieldReviewNote, v))
+}
+
+// ReviewNoteContainsFold applies the ContainsFold predicate on the "review_note" field.
+func ReviewNoteContainsFold(v string) predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldContainsFold(FieldReviewNote, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

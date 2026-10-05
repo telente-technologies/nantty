@@ -3,6 +3,7 @@
 package cointransfer
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -30,6 +31,18 @@ const (
 	FieldFeeBps = "fee_bps"
 	// FieldNote holds the string denoting the note field in the database.
 	FieldNote = "note"
+	// FieldClawbackShortfallCoins holds the string denoting the clawback_shortfall_coins field in the database.
+	FieldClawbackShortfallCoins = "clawback_shortfall_coins"
+	// FieldReversedAt holds the string denoting the reversed_at field in the database.
+	FieldReversedAt = "reversed_at"
+	// FieldReviewStatus holds the string denoting the review_status field in the database.
+	FieldReviewStatus = "review_status"
+	// FieldReviewedByStaffID holds the string denoting the reviewed_by_staff_id field in the database.
+	FieldReviewedByStaffID = "reviewed_by_staff_id"
+	// FieldReviewedAt holds the string denoting the reviewed_at field in the database.
+	FieldReviewedAt = "reviewed_at"
+	// FieldReviewNote holds the string denoting the review_note field in the database.
+	FieldReviewNote = "review_note"
 	// Table holds the table name of the cointransfer in the database.
 	Table = "coin_transfers"
 )
@@ -45,6 +58,12 @@ var Columns = []string{
 	FieldNetCoins,
 	FieldFeeBps,
 	FieldNote,
+	FieldClawbackShortfallCoins,
+	FieldReversedAt,
+	FieldReviewStatus,
+	FieldReviewedByStaffID,
+	FieldReviewedAt,
+	FieldReviewNote,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -68,9 +87,46 @@ var (
 	DefaultNote string
 	// NoteValidator is a validator for the "note" field. It is called by the builders before save.
 	NoteValidator func(string) error
+	// DefaultClawbackShortfallCoins holds the default value on creation for the "clawback_shortfall_coins" field.
+	DefaultClawbackShortfallCoins int64
+	// DefaultReviewedByStaffID holds the default value on creation for the "reviewed_by_staff_id" field.
+	DefaultReviewedByStaffID string
+	// ReviewedByStaffIDValidator is a validator for the "reviewed_by_staff_id" field. It is called by the builders before save.
+	ReviewedByStaffIDValidator func(string) error
+	// DefaultReviewNote holds the default value on creation for the "review_note" field.
+	DefaultReviewNote string
+	// ReviewNoteValidator is a validator for the "review_note" field. It is called by the builders before save.
+	ReviewNoteValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// ReviewStatus defines the type for the "review_status" enum field.
+type ReviewStatus string
+
+// ReviewStatusPendingReview is the default value of the ReviewStatus enum.
+const DefaultReviewStatus = ReviewStatusPendingReview
+
+// ReviewStatus values.
+const (
+	ReviewStatusPendingReview ReviewStatus = "pending_review"
+	ReviewStatusReviewed      ReviewStatus = "reviewed"
+	ReviewStatusReversed      ReviewStatus = "reversed"
+)
+
+func (rs ReviewStatus) String() string {
+	return string(rs)
+}
+
+// ReviewStatusValidator is a validator for the "review_status" field enum values. It is called by the builders before save.
+func ReviewStatusValidator(rs ReviewStatus) error {
+	switch rs {
+	case ReviewStatusPendingReview, ReviewStatusReviewed, ReviewStatusReversed:
+		return nil
+	default:
+		return fmt.Errorf("cointransfer: invalid enum value for review_status field: %q", rs)
+	}
+}
 
 // OrderOption defines the ordering options for the CoinTransfer queries.
 type OrderOption func(*sql.Selector)
@@ -118,4 +174,34 @@ func ByFeeBps(opts ...sql.OrderTermOption) OrderOption {
 // ByNote orders the results by the note field.
 func ByNote(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNote, opts...).ToFunc()
+}
+
+// ByClawbackShortfallCoins orders the results by the clawback_shortfall_coins field.
+func ByClawbackShortfallCoins(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClawbackShortfallCoins, opts...).ToFunc()
+}
+
+// ByReversedAt orders the results by the reversed_at field.
+func ByReversedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReversedAt, opts...).ToFunc()
+}
+
+// ByReviewStatus orders the results by the review_status field.
+func ByReviewStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewStatus, opts...).ToFunc()
+}
+
+// ByReviewedByStaffID orders the results by the reviewed_by_staff_id field.
+func ByReviewedByStaffID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewedByStaffID, opts...).ToFunc()
+}
+
+// ByReviewedAt orders the results by the reviewed_at field.
+func ByReviewedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewedAt, opts...).ToFunc()
+}
+
+// ByReviewNote orders the results by the review_note field.
+func ByReviewNote(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewNote, opts...).ToFunc()
 }
