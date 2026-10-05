@@ -15,6 +15,7 @@ func MountReviewsRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("GET /api/v1/products/{productId}/reviews", http.HandlerFunc(controller.ListProductReviews))
 	mux.Handle("GET /api/v1/products/{productId}/rating-summary", http.HandlerFunc(controller.GetRatingSummary))
 	mux.Handle("POST /api/v1/products/{productId}/reviews", signedIn(controller.SubmitProductReview))
+	mux.Handle("DELETE /api/v1/reviews/{reviewId}", signedIn(controller.DeleteOwnReview))
 	mux.Handle("GET /api/v1/stores/{storeId}/reviews", http.HandlerFunc(controller.ListStoreReviews))
 	mux.Handle("POST /api/v1/stores/{storeId}/reviews", signedIn(controller.SubmitStoreReview))
 	mux.Handle("GET /api/v1/seller/reviews", manager(controller.ListSellerReviews))

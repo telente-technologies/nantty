@@ -8,6 +8,7 @@ import (
 
 	"zudomart/modules/catalog/src/container"
 	"zudomart/modules/catalog/src/middlewares"
+	deletereview "zudomart/modules/catalog/src/modules/reviews/commands/deleteReview"
 	removereviewreply "zudomart/modules/catalog/src/modules/reviews/commands/removeReviewReply"
 	replytoreview "zudomart/modules/catalog/src/modules/reviews/commands/replyToReview"
 	reportreview "zudomart/modules/catalog/src/modules/reviews/commands/reportReview"
@@ -171,4 +172,16 @@ func (controller ReviewsController) ReportReview(writer http.ResponseWriter, req
 	view, err := (reportreview.Handler{Container: controller.Container}).Execute(request.Context(),
 		reportreview.Command{Store: middlewares.StoreAccessFrom(request.Context()), ReviewId: reviewId, Request: body})
 	controller.respond(writer, request, http.StatusOK, view, err)
+}
+
+func (controller ReviewsController) DeleteOwnReview(writer http.ResponseWriter, request *http.Request) {
+	reviewId, err := utils.PathIdentifier(request, "reviewId")
+	if err == nil {
+		err = (deletereview.Handler{Container: controller.Container}).Execute(request.Context(), deletereview.Command{AccountId: middlewares.AccountIdFrom(request.Context()), ReviewId: reviewId})
+	}
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	httpserver.WriteNoContentResponse(writer)
 }
