@@ -1,5 +1,6 @@
 import { kindRankingBonus, trigramSimilarityThreshold } from "../constants/search.constant.js";
 import type { PrismaClient } from "../databases/prisma.database.js";
+import type { SearchScope } from "../enums/searchScope.enum.js";
 import { Prisma } from "../generated/prisma/client.js";
 import type { SearchDocument, SearchKind } from "../types/searchDocument.type.js";
 import type { SearchCursor } from "../types/searchResult.type.js";
@@ -24,6 +25,7 @@ export interface SearchRowsInput {
   readonly likePattern: string;
   readonly cursor: SearchCursor | undefined;
   readonly limit: number;
+  readonly scope: SearchScope;
 }
 
 export async function upsertDocumentRow(prisma: PrismaClient, document: SearchDocument, titleNormalized: string): Promise<{ written: number; previousTags: string[] }> {
@@ -32,12 +34,12 @@ export async function upsertDocumentRow(prisma: PrismaClient, document: SearchDo
   const rows = await prisma.$queryRaw<{ written: number; previous_tags: string[] }[]>(Prisma.sql`
     with previous as (select tags from documents where kind = ${document.kind} and entity_id = ${document.entityId}),
     written as (
-      insert into documents (kind, entity_id, doc_key, owner_account_id, title, title_normalized, subtitle, body, tags_text, tags, summary, visibility, available, restricted_for_minors, shipping_regions, popularity, region, version, deleted_at, created_at, updated_at, tsv)
-      values (${document.kind}, ${document.entityId}, ${docKey}, ${document.ownerAccountId}, ${document.title}, ${titleNormalized}, ${document.subtitle}, ${document.body}, ${tagsText}, ${[...document.tags]}::text[],
+      insert into documents (kind, entity_id, doc_key, owner_account_id, store_id, title, title_normalized, subtitle, body, tags_text, tags, summary, visibility, available, restricted_for_minors, shipping_regions, popularity, region, version, deleted_at, created_at, updated_at, tsv)
+      values (${document.kind}, ${document.entityId}, ${docKey}, ${document.ownerAccountId}, ${document.storeId ?? null}, ${document.title}, ${titleNormalized}, ${document.subtitle}, ${document.body}, ${tagsText}, ${[...document.tags]}::text[],
         ${JSON.stringify(document.summary)}::jsonb, ${document.visibility}, ${document.available}, ${document.restrictedForMinors === true}::boolean, ${[...(document.shippingRegions ?? [])]}::text[], ${document.popularity}::float8, ${document.region}, ${BigInt(document.version)}::bigint, null, ${new Date(document.createdAt)}::timestamp, now(),
         setweight(to_tsvector('simple', ${document.title}::text), 'A') || setweight(to_tsvector('simple', ${tagsText}::text), 'B') || setweight(to_tsvector('simple', coalesce(${document.subtitle}::text, '')), 'B') || setweight(to_tsvector('simple', ${document.body}::text), 'C'))
       on conflict (kind, entity_id) do update set
-        owner_account_id = excluded.owner_account_id, title = excluded.title, title_normalized = excluded.title_normalized, subtitle = excluded.subtitle,
+        owner_account_id = excluded.owner_account_id, store_id = excluded.store_id, title = excluded.title, title_normalized = excluded.title_normalized, subtitle = excluded.subtitle,
         body = excluded.body, tags_text = excluded.tags_text, tags = excluded.tags, summary = excluded.summary, visibility = excluded.visibility,
         available = excluded.available, restricted_for_minors = excluded.restricted_for_minors, shipping_regions = excluded.shipping_regions, popularity = excluded.popularity, region = excluded.region, version = excluded.version, deleted_at = null, updated_at = now(), tsv = excluded.tsv
       where documents.version <= excluded.version
@@ -71,6 +73,13 @@ function visibilityFilter(viewerId: string | null, viewerIsAdult: boolean, regio
       or (d.visibility = 'followers' and exists (select 1 from follows f where f.follower_id = ${viewerId}::text and f.followee_id = d.owner_account_id)))`;
 }
 
+function scopeFilter(scope: SearchScope): Prisma.Sql {
+  if (scope.kind === "profile") return Prisma.sql`d.owner_account_id = ${scope.accountId}::text`;
+  if (scope.kind !== "store") return Prisma.sql`true`;
+  return Prisma.sql`((d.kind = 'product' and d.store_id = ${scope.storeId}::text) or (d.kind in ('post', 'clip') and d.owner_account_id = (
+    select so.owner_account_id from documents so where so.kind = 'store' and so.entity_id = ${scope.storeId}::text and so.available and so.deleted_at is null)))`;
+}
+
 function scoreExpression(input: SearchRowsInput): Prisma.Sql {
   const bonuses = Prisma.join(Object.entries(kindRankingBonus).map(([kind, bonus]) => Prisma.sql`when ${kind} then ${bonus}::float8`), " ");
   return Prisma.sql`
@@ -96,6 +105,7 @@ export function searchRows(prisma: PrismaClient, input: SearchRowsInput): Promis
         left join account_states s on s.account_id = d.owner_account_id
         where d.kind = any(${[...input.kinds]}::text[])
           and (d.tsv @@ query.tsq or d.title_normalized % ${input.needle} or d.title_normalized like ${input.likePattern})
+          and ${scopeFilter(input.scope)}
           and ${visibilityFilter(input.viewerId, input.viewerIsAdult, input.region)}
       ) ranked
       where ${cursorScore}::float8 is null or score < ${cursorScore}::float8 or (score = ${cursorScore}::float8 and doc_key > ${cursorKey}::text)

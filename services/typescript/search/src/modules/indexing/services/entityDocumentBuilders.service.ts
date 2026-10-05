@@ -73,6 +73,7 @@ export function buildProductDocument(source: ProductSource, version: number): Se
     kind: "product",
     entityId: source.productId,
     ownerAccountId: source.ownerAccountId,
+    storeId: source.storeId,
     title: source.name,
     subtitle: source.brandName,
     body: [source.description, ...(source.categoryPath ?? [])].join(" "),

@@ -1,11 +1,12 @@
 import { schema } from "@zudojs/schema";
 
-import { maximumPageSize, maximumQueryLength } from "../../../constants/search.constant.js";
-import { searchScopes } from "../../../enums/searchScope.enum.js";
+import { maximumPageSize, maximumQueryLength, maximumScopeLength } from "../../../constants/search.constant.js";
+import { searchTypes } from "../../../enums/searchType.enum.js";
 
 export const searchQuerySchema = schema.object({
   q: schema.string().min(1).max(maximumQueryLength),
-  scope: schema.enum(searchScopes).optional(),
+  scope: schema.string().max(maximumScopeLength).optional(),
+  type: schema.enum(searchTypes).optional(),
   cursor: schema.string().max(300).optional(),
   limit: schema.coerce.number().int().min(1).max(maximumPageSize).optional(),
 });

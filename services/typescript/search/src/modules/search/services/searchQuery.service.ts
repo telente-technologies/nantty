@@ -1,17 +1,20 @@
 import { legacyGroupLimit, suggestionLimit } from "../../../constants/search.constant.js";
-import { kindsByScope, type SearchScope } from "../../../enums/searchScope.enum.js";
+import { globalSearchScope, type SearchScope } from "../../../enums/searchScope.enum.js";
+import { kindsByType, type SearchType } from "../../../enums/searchType.enum.js";
 import type { SearchReranker } from "../../../interfaces/searchReranker.interface.js";
 import type { SearchIndexStore, SearchQueryStore } from "../../../interfaces/searchStore.interface.js";
 import type { SearchKind } from "../../../types/searchDocument.type.js";
 import type { Page, SearchHit } from "../../../types/searchResult.type.js";
 import { decodeSearchCursor, encodeSearchCursor } from "../../../utils/cursor.util.js";
 import { normalizeSearchText } from "../../../utils/queryNormalizer.util.js";
+import { formatSearchScope, restrictKindsToScope } from "../../../utils/searchScope.util.js";
 import { applyRerankOrder, buildRerankCandidates } from "./rerankOrdering.service.js";
 
 export interface SearchInput {
   readonly viewerId: string | undefined;
   readonly query: string;
-  readonly scope: Exclude<SearchScope, "all">;
+  readonly scope?: SearchScope;
+  readonly type: Exclude<SearchType, "all">;
   readonly cursor: string | undefined;
   readonly limit: number;
   readonly region: string | undefined;
@@ -32,7 +35,7 @@ export interface Suggestion {
 }
 
 export interface SearchQueryService {
-  search(input: SearchInput): Promise<Page<Record<string, unknown>>>;
+  search(input: SearchInput): Promise<Page<Record<string, unknown>> & { readonly scope: string }>;
   searchGrouped(viewerId: string | undefined, query: string, region: string | undefined): Promise<LegacyGroupedResults>;
   suggest(viewerId: string | undefined, query: string): Promise<readonly Suggestion[]>;
 }
@@ -40,18 +43,21 @@ export interface SearchQueryService {
 const toItem = (hit: SearchHit): Record<string, unknown> => ({ ...hit.summary, type: hit.kind });
 
 export function createSearchQueryService(queryStore: SearchQueryStore, indexStore: Pick<SearchIndexStore, "hasConsent">, reranker: SearchReranker): SearchQueryService {
-  const fetchHits = (viewerId: string | undefined, query: string, kinds: readonly SearchKind[], limit: number, region: string | undefined, cursor?: string, viewerIsAdult = false) =>
-    queryStore.search({ viewerId, normalizedQuery: normalizeSearchText(query), kinds, limit, region, cursor: decodeSearchCursor(cursor), viewerIsAdult });
+  const fetchHits = (viewerId: string | undefined, query: string, kinds: readonly SearchKind[], limit: number, region: string | undefined, cursor?: string, viewerIsAdult = false, scope: SearchScope = globalSearchScope) =>
+    queryStore.search({ viewerId, normalizedQuery: normalizeSearchText(query), kinds, limit, region, cursor: decodeSearchCursor(cursor), viewerIsAdult, scope });
   return {
     async search(input) {
-      const page = await fetchHits(input.viewerId, input.query, kindsByScope[input.scope], input.limit, input.region, input.cursor, input.viewerIsAdult === true);
+      const scope = input.scope ?? globalSearchScope;
+      const kinds = restrictKindsToScope(kindsByType[input.type], scope);
+      if (kinds.length === 0) return { data: [], nextCursor: null, scope: formatSearchScope(scope) };
+      const page = await fetchHits(input.viewerId, input.query, kinds, input.limit, input.region, input.cursor, input.viewerIsAdult === true, scope);
       let hits = [...page.hits];
       if (input.cursor === undefined && input.viewerId !== undefined && hits.length > 1 && (await indexStore.hasConsent(input.viewerId, "personalization"))) {
         const order = await reranker.rerank(input.viewerId, buildRerankCandidates(hits), hits.length);
         if (order !== null) hits = applyRerankOrder(hits, order);
       }
       const last = page.hits.at(-1);
-      return { data: hits.map(toItem), nextCursor: page.hasMore && last !== undefined ? encodeSearchCursor({ score: last.score, key: `${last.kind}:${last.entityId}` }) : null };
+      return { data: hits.map(toItem), nextCursor: page.hasMore && last !== undefined ? encodeSearchCursor({ score: last.score, key: `${last.kind}:${last.entityId}` }) : null, scope: formatSearchScope(scope) };
     },
     async searchGrouped(viewerId, query, region) {
       const [products, stores, brands, people] = await Promise.all((["product", "store", "brand", "user"] as const).map((kind) => fetchHits(viewerId, query, [kind], kind === "user" ? 8 : legacyGroupLimit, region)));
