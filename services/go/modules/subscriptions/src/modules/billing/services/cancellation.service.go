@@ -25,14 +25,14 @@ func (billing Billing) CancelSubscription(ctx context.Context, userId string, su
 		err = databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 			return billing.Container.Client(transaction).Subscription.UpdateOneID(row.ID).SetStatus(subscription.StatusCanceled).SetActivationPending(false).Exec(ctx)
 		})
-	case subscription.StatusTrialing, subscription.StatusActive, subscription.StatusPastDue:
-		if row.Channel == subscription.ChannelWebPaystack && row.BillingReference != "" {
+	case subscription.StatusTrialing, subscription.StatusActive, subscription.StatusPastDue, subscription.StatusGrace:
+		if row.Channel == subscription.ChannelWebPaystack && row.BillingReference != "" && row.ProviderPlanCode != "" {
 			if err := billing.Container.Payments.CancelBillingSubscription(ctx, row.BillingReference); err != nil {
 				return SubscriptionView{}, err
 			}
 		}
 		err = databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-			if err := billing.Container.Client(transaction).Subscription.UpdateOneID(row.ID).SetCancelAtPeriodEnd(true).Exec(ctx); err != nil {
+			if err := billing.Container.Client(transaction).Subscription.UpdateOneID(row.ID).SetCancelAtPeriodEnd(true).SetPendingPlanCode("").SetPendingInterval("").Exec(ctx); err != nil {
 				return err
 			}
 			return billing.emit(ctx, transaction, "subscription.cancellationScheduled", row.ID.String(), entitlementData(row, string(row.Status)))

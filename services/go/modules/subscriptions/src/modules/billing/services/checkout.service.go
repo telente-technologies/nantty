@@ -15,7 +15,6 @@ import (
 
 	"zudomart/modules/ledger/src/databases"
 	paymentinterfaces "zudomart/modules/payments/src/interfaces"
-	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
 	"zudomart/modules/subscriptions/src/constants"
 	"zudomart/modules/subscriptions/src/generated/ent"
@@ -48,6 +47,7 @@ type CheckoutView struct {
 	Discount         models.PriceQuote `json:"discount"`
 	Trial            bool              `json:"trial"`
 	BillingNote      string            `json:"billingNote,omitempty"`
+	LineItems        []models.LineItem `json:"lineItems,omitempty"`
 }
 
 type TrialNotAvailableError struct {
@@ -95,16 +95,15 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 			return CheckoutView{}, errors.Join(err, trialErrorFor(reasons))
 		}
 	}
-	providerPlan, err := billing.ensureProviderPlan(ctx, request.PlanCode, request.Interval, quote.AmountMinor, currency)
-	if err != nil {
-		return CheckoutView{}, err
-	}
-	subscriptionId := uuid.Must(uuid.NewV7())
+	subscriptionId, periodId := uuid.Must(uuid.NewV7()), uuid.Must(uuid.NewV7())
+	now := billing.Container.Now().UTC()
+	firstCharge := FirstPeriodCharge(request.PlanCode, quote, billing.standaloneCheckmarkPriceMinor(ctx, definition.Checkmark, currency, "web", request.Interval))
+	var intentId uuid.UUID
 	err = databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		create := billing.Container.Client(transaction).Subscription.Create().SetID(subscriptionId).SetProfileID(profile.ProfileId).SetProfileType(profile.ProfileType).
 			SetOwnerUserID(request.UserId).SetPlanCode(request.PlanCode).SetInterval(subscription.Interval(request.Interval)).SetChannel(subscription.ChannelWebPaystack).
 			SetListAmountMinor(quote.ListAmountMinor).SetAmountMinor(quote.AmountMinor).SetCurrency(currency).SetDiscountKind(subscription.DiscountKind(quote.DiscountKind)).
-			SetDiscountBps(quote.DiscountBps).SetWithTrial(request.WithTrial).SetProviderPlanCode(providerPlan).SetCreatedAt(billing.Container.Now())
+			SetDiscountBps(quote.DiscountBps).SetWithTrial(request.WithTrial).SetPeriodPriceMinor(firstCharge.SubtotalMinor + bundleDiscountOf(firstCharge)).SetCreatedAt(now)
 		if request.WithTrial {
 			create.SetStatus(subscription.StatusAwaitingCard).SetTrialDays(trialRules.TrialDays)
 		}
@@ -114,10 +113,15 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 			}
 			return err
 		}
-		if !request.WithTrial {
-			return nil
+		if request.WithTrial {
+			return billing.claimTrialFingerprintsInTransaction(ctx, transaction, subscriptionId.String(), request)
 		}
-		return billing.claimTrialFingerprintsInTransaction(ctx, transaction, subscriptionId.String(), request)
+		var err error
+		intentId, err = billing.createFirstPeriodInTransaction(ctx, transaction, firstPeriodRequest{
+			SubscriptionId: subscriptionId, PeriodId: periodId, OwnerUserId: request.UserId, PlanCode: request.PlanCode, Interval: request.Interval,
+			Currency: currency, Charge: firstCharge, StartsAt: now, ReturnTo: request.ReturnTo, ProfileId: profile.ProfileId,
+		})
+		return err
 	})
 	if err != nil {
 		return CheckoutView{}, err
@@ -135,17 +139,14 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 		view.AuthorizationUrl, view.Reference = started.CheckoutUrl, started.Reference
 		return view, nil
 	}
-	started, err := billing.Container.Payments.StartSubscriptionCheckoutForProduct(ctx, paymentmodels.SubscriptionCheckoutStart{
-		OwnerUserId: request.UserId, PlanCode: request.PlanCode, ProviderPlanId: providerPlan, AmountMinor: quote.AmountMinor, Currency: currency,
-		ReturnTo: request.ReturnTo, ClientPlatform: request.ClientPlatform, Metadata: metadata,
-	})
+	opened, err := billing.Container.Payments.OpenProviderCheckoutForIntent(ctx, intentId)
 	if err != nil {
 		return CheckoutView{}, billing.failStartedSubscription(ctx, subscriptionId, err)
 	}
-	if err := billing.Container.Client(billing.Container.Resources.Database).Subscription.UpdateOneID(subscriptionId).SetBillingReference(started.Reference).Exec(ctx); err != nil {
-		return CheckoutView{}, err
+	if opened.CheckoutUrl != nil {
+		view.AuthorizationUrl = *opened.CheckoutUrl
 	}
-	view.AuthorizationUrl, view.Reference = started.CheckoutUrl, started.Reference
+	view.Reference, view.LineItems = opened.Reference, firstCharge.LineItems
 	return view, nil
 }
 

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"log/slog"
+	"strings"
 
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
 	"zudomart/modules/subscriptions/src/constants"
@@ -11,8 +12,6 @@ import (
 	"zudomart/platform/regionpricing"
 )
 
-// KeepsPlanOnRejection is true for plans that sell more than the checkmark (seller plans and Premium): a rejected
-// verification withholds the checkmark and refunds its share, and the plan keeps running.
 func KeepsPlanOnRejection(planCode string) bool {
 	definition, known := constants.Plans[planCode]
 	return known && (definition.SellerPlan != "" || planCode == constants.PlanPremium)
@@ -22,7 +21,6 @@ func CheckmarkOfPlan(planCode string) string {
 	return constants.Plans[planCode].Checkmark
 }
 
-// ApplyShareToPath turns a share refund of nothing into "nothing charged", so no refund call is made for zero.
 func ApplyShareToPath(path VerificationRefundPath, shareMinor int64) VerificationRefundPath {
 	switch path {
 	case RefundPathCardShare, RefundPathGoogleShare, RefundPathAppleManual:
@@ -43,15 +41,10 @@ func priceChannelOf(channel subscription.Channel) string {
 	return "web"
 }
 
-// checkmarkShareFor is the standalone checkmark price from the price book (research defaults when the book has no
-// row), capped at what this subscription pays per period. Zero means the price is unknown, so nothing is refunded
-// and an alert is logged for a person to settle.
-func (billing Billing) checkmarkShareFor(ctx context.Context, row *ent.Subscription) int64 {
-	checkmark := CheckmarkOfPlan(row.PlanCode)
-	channel, interval := priceChannelOf(row.Channel), row.Interval.String()
-	standalone := regionpricing.DefaultCheckmarkStandalonePrice(checkmark, row.Currency, channel, interval)
-	if region, found := regionpricing.RegionForCurrency(row.Currency); found {
-		if booked, found := billing.FindPriceRow(ctx, regionpricing.CheckmarkStandalonePlan(checkmark), region.Code); found && booked.Active {
+func (billing Billing) standaloneCheckmarkPriceMinor(ctx context.Context, checkmark, currency, channel, interval string) int64 {
+	standalone := regionpricing.DefaultCheckmarkStandalonePrice(checkmark, currency, channel, interval)
+	if region, found := regionpricing.RegionForCurrency(currency); found {
+		if booked, found := billing.FindPriceRow(ctx, regionpricing.CheckmarkStandalonePlan(checkmark), region.Code); found && booked.Active && booked.Currency == currency {
 			if amount := booked.regional().AmountFor(channel, interval); amount > 0 {
 				standalone = amount
 			} else if amount := booked.regional().AmountFor("web", interval); amount > 0 {
@@ -59,6 +52,14 @@ func (billing Billing) checkmarkShareFor(ctx context.Context, row *ent.Subscript
 			}
 		}
 	}
+	return standalone
+}
+
+func (billing Billing) checkmarkShareFor(ctx context.Context, row *ent.Subscription) int64 {
+	if IsEngineManaged(row) && !row.CheckmarkIncluded {
+		return 0
+	}
+	standalone := billing.standaloneCheckmarkPriceMinor(ctx, CheckmarkOfPlan(row.PlanCode), row.Currency, priceChannelOf(row.Channel), row.Interval.String())
 	share := regionpricing.CheckmarkShareMinor(standalone, row.AmountMinor)
 	if share == 0 {
 		billing.Container.Resources.Logger.ErrorContext(ctx, "ALERT no checkmark share price; settle the rejected verification refund by hand", slog.String("subscriptionId", row.ID.String()), slog.String("currency", row.Currency))
@@ -67,6 +68,11 @@ func (billing Billing) checkmarkShareFor(ctx context.Context, row *ent.Subscript
 }
 
 func (billing Billing) refundCheckmarkShareToCard(ctx context.Context, row *ent.Subscription, share int64, request VerificationRefundRequest) (string, error) {
+	if strings.HasPrefix(row.BillingReference, "ren-") {
+		return billing.Container.Payments.RefundSubscriptionPayment(ctx, paymentservices.SubscriptionPaymentRefund{
+			PaymentReference: row.BillingReference, Reference: "verification-share:" + request.CaseId, AmountMinor: share, Reason: "Checkmark verification rejected: " + request.Reason,
+		})
+	}
 	_, err := billing.Container.Payments.RefundBillingSubscriptionPartially(ctx, paymentservices.PartialBillingRefund{
 		BillingReference: row.BillingReference, Reference: "verification-share:" + request.CaseId, AmountMinor: share, Currency: row.Currency,
 		Reason: "Checkmark verification rejected: " + request.Reason,
