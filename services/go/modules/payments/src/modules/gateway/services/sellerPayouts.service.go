@@ -160,6 +160,9 @@ func (gateway *PaymentGateway) FinalizeTransferByReferenceWithProvider(ctx conte
 				return PayoutTransferStatus{}, err
 			}
 			if _, verifyErr := provider.VerifyTransfer(ctx, transfer.Reference); verifyErr != nil {
+				if !isDefinitiveProviderRejection(verifyErr) {
+					return PayoutTransferStatus{Reference: reference, Status: string(transfer.Status)}, nil
+				}
 				return gateway.sendPayoutToProvider(ctx, provider, transfer)
 			}
 		}

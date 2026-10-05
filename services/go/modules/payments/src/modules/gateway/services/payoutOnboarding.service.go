@@ -69,7 +69,9 @@ func (gateway *PaymentGateway) ReadPayoutOnboardingState(ctx context.Context, us
 	if account != nil {
 		inputs.AccountRowStatus, inputs.VerificationStatus, inputs.AccountRoles = string(account.Status), string(account.VerificationStatus), account.Roles
 		inputs.PayoutsActive = ConnectedAccountReadyForPayouts(account)
-		if account.LastError != "" && account.Status != "created" {
+		if IsDuplicateBankAccountJobError(account.LastError) {
+			inputs.VerificationReasons = append(inputs.VerificationReasons, models.OnboardingReason{Step: "bank", Code: duplicateBankAccountCode, Message: ErrBankAccountAlreadyLinked.Message})
+		} else if account.LastError != "" && account.Status != "created" {
 			inputs.VerificationReasons = append(inputs.VerificationReasons, models.OnboardingReason{Step: "bank", Code: "ACCOUNT_SETUP_FAILED", Message: "We could not finish setting up your payout account. Tap Try again."})
 		}
 	}
@@ -154,6 +156,9 @@ func (gateway *PaymentGateway) SavePayoutOnboardingBank(ctx context.Context, use
 		return ErrOnboardingNameMismatch
 	}
 	bank := interfaces.PayeeBankAccount{UserId: userId, AccountName: accountName, BankCode: input.BankCode, AccountNumber: input.AccountNumber, Currency: "NGN"}
+	if err := gateway.ClaimSettlementAccount(ctx, userId, bank); err != nil {
+		return err
+	}
 	return gateway.saveOnboardingStep(ctx, userId, "bank", &bank, func(update *ent.PayoutOnboardingUpdateOne) {
 		update.SetBankCode(input.BankCode).SetBankName(input.BankName).SetAccountLast4(lastFour(input.AccountNumber)).SetResolvedAccountName(accountName)
 	})

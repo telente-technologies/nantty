@@ -17,14 +17,15 @@ type storeSubscriptionRevoker interface {
 	RevokeSubscriptionWithFullRefund(ctx context.Context, purchaseToken string) error
 }
 
-// RefundBillingSubscriptionCharge returns the whole first payment of a Paystack-billed subscription and stops it
-// renewing. A definitive provider rejection is returned as is so the caller can alert instead of retrying.
-func (gateway *PaymentGateway) RefundBillingSubscriptionCharge(ctx context.Context, billingReference, reason string) (interfaces.RefundResult, error) {
+func (gateway *PaymentGateway) RefundBillingSubscriptionCharge(ctx context.Context, billingReference, reference, reason string) (interfaces.RefundResult, error) {
+	if reference == "" {
+		return interfaces.RefundResult{}, errors.New("a refund needs an idempotency reference")
+	}
 	provider, err := gateway.Container.DefaultProvider()
 	if err != nil {
 		return interfaces.RefundResult{}, err
 	}
-	result, err := provider.RefundCharge(ctx, interfaces.RefundRequest{ChargeReference: billingReference, FullRefund: true, Reason: reason})
+	result, err := gateway.refundBillingChargeOnce(ctx, provider, interfaces.RefundRequest{ChargeReference: billingReference, RefundReference: reference, FullRefund: true, Reason: reason}, nil)
 	if err != nil {
 		return result, err
 	}
@@ -35,6 +36,9 @@ func (gateway *PaymentGateway) RefundBillingSubscriptionCharge(ctx context.Conte
 }
 
 func IsDefinitiveProviderRejection(err error) bool {
+	if errors.Is(err, errBillingRefundRejected) {
+		return true
+	}
 	var requestError *integrations.ProviderRequestError
 	return errors.As(err, &requestError) && requestError.IsDefinitiveRejection()
 }

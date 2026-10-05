@@ -16,7 +16,7 @@ import (
 type SavedCardChargeRequest struct {
 	UserId                 string
 	PaymentIntentReference string
-	AuthorizationCode      string
+	SavedCardId            string
 }
 
 type SavedCardChargeView struct {
@@ -46,6 +46,13 @@ func (gateway *PaymentGateway) ChargePaymentIntentWithSavedCard(ctx context.Cont
 	if err != nil {
 		return SavedCardChargeView{}, err
 	}
+	authorization, authorizationCode, err := gateway.openBillingAuthorization(ctx, request.UserId, request.SavedCardId)
+	if err != nil {
+		return SavedCardChargeView{}, err
+	}
+	if authorization.Provider != intent.Provider {
+		return SavedCardChargeView{}, ErrBillingAuthorizationMissing
+	}
 	if intent.AuthorizationURL != "" {
 		return gateway.reissueIntentForHostedCheckout(ctx, intent)
 	}
@@ -56,7 +63,7 @@ func (gateway *PaymentGateway) ChargePaymentIntentWithSavedCard(ctx context.Cont
 	delete(metadata, models.CheckoutGroupsMetadataKey)
 	result, err := provider.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{
 		SplitShares:   splitShares,
-		CustomerEmail: contact.Email, AuthorizationCode: request.AuthorizationCode, Reference: intent.Reference, AmountMinor: intent.AmountMinor,
+		CustomerEmail: contact.Email, AuthorizationCode: authorizationCode, Reference: intent.Reference, AmountMinor: intent.AmountMinor,
 		Currency: intent.Currency, SettlementAccount: intent.ConnectedAccountID, SubaccountBearsFee: gateway.Container.Settings.Paystack.SubaccountBearsFee, Metadata: metadata,
 	})
 	if errors.Is(err, interfaces.ErrSavedCardNotForCustomer) {

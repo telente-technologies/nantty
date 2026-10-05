@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 	"zudomart/modules/payments/src/interfaces"
+	"zudomart/modules/payments/src/utils"
 	"zudomart/platform/httpserver"
 )
 
@@ -44,7 +45,7 @@ func (gateway *PaymentGateway) HandleProviderWebhook(ctx context.Context, provid
 	var claimed bool
 	err = databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		var claimError error
-		claimed, claimError = gateway.claimWebhookEventInTransaction(ctx, gateway.Container.Client(transaction), providerName, notification.EventKey, notification.EventType, notification.Reference, digest[:], rawBody)
+		claimed, claimError = gateway.claimWebhookEventInTransaction(ctx, gateway.Container.Client(transaction), providerName, notification.EventKey, notification.EventType, notification.Reference, digest[:], utils.RedactReusableCardSecrets(rawBody))
 		return claimError
 	})
 	if err != nil {

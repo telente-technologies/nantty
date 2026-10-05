@@ -14,6 +14,7 @@ import (
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 	"zudomart/modules/payments/src/constants"
 	"zudomart/modules/payments/src/generated/ent"
+	"zudomart/modules/payments/src/generated/ent/billingauthorization"
 	"zudomart/modules/payments/src/generated/ent/providercustomer"
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/modules/gateway/models"
@@ -36,11 +37,11 @@ type StartedSavedCardSetup struct {
 }
 
 type DeviceSavedCard struct {
-	AuthorizationCode string `json:"authorizationCode"`
-	Brand             string `json:"brand"`
-	Last4             string `json:"last4"`
-	ExpiryMonth       int    `json:"expiryMonth"`
-	ExpiryYear        int    `json:"expiryYear"`
+	SavedCardId string `json:"savedCardId"`
+	Brand       string `json:"brand"`
+	Last4       string `json:"last4"`
+	ExpiryMonth int    `json:"expiryMonth"`
+	ExpiryYear  int    `json:"expiryYear"`
 }
 
 type CardSetupRequest struct {
@@ -134,18 +135,19 @@ func (handler CardVerificationPayments) HandleSucceededPayment(ctx context.Conte
 	}); err != nil {
 		return err
 	}
-	label := ""
-	if card != nil {
-		label = SavedCardLabel(card.Brand, card.Last4)
-		if card.Reusable && setup.Purpose == "device" {
-			gateway.Container.CardHandoffs.Offer(setup.Reference, utils.SavedCardHandoff{
-				PaymentMethodId: card.AuthorizationCode, Brand: card.Brand, Last4: card.Last4, ExpiryMonth: card.ExpiryMonth, ExpiryYear: card.ExpiryYear,
-			})
+	label, authorizationId, expiryMonth, expiryYear := "", "", 0, 0
+	if setup.Purpose == "trial" || setup.Purpose == "device" {
+		if authorizationId, err = gateway.StoreBillingAuthorizationInTransaction(ctx, transaction, payment.OwnerUserId, payment.Provider, payment.ProviderCustomerId, card); err != nil {
+			return err
 		}
+	}
+	if card != nil {
+		label, expiryMonth, expiryYear = SavedCardLabel(card.Brand, card.Last4), card.ExpiryMonth, card.ExpiryYear
 	}
 	if err := gateway.notifySavedCardObservers(ctx, transaction, models.SavedCardFingerprint{
 		OwnerUserId: payment.OwnerUserId, FingerprintHash: fingerprint, CardLabel: label, SavedAt: now, Purpose: setup.Purpose, SubjectId: setup.SubjectID,
-		ProviderCustomerId: payment.ProviderCustomerId, SetupReference: setup.Reference,
+		ProviderCustomerId: payment.ProviderCustomerId, SetupReference: setup.Reference, BillingAuthorizationId: authorizationId,
+		CardExpiryMonth: expiryMonth, CardExpiryYear: expiryYear,
 	}); err != nil {
 		return err
 	}
@@ -172,14 +174,23 @@ func (gateway *PaymentGateway) CompleteSavedCardSetup(ctx context.Context, userI
 			return DeviceSavedCard{}, errors.Join(err, ErrSavedCardNotReady)
 		}
 	}
-	handoff, found := gateway.Container.CardHandoffs.Take(reference)
-	if !found {
+	if setup.CardFingerprintHash == "" {
 		return DeviceSavedCard{}, ErrSavedCardHandoffGone
 	}
-	if err := setup.Update().SetStatus(savedcardsetup.StatusDelivered).Exec(ctx); err != nil {
+	authorization, err := client.BillingAuthorization.Query().Where(billingauthorization.UserID(userId), billingauthorization.CardFingerprintHash(setup.CardFingerprintHash),
+		billingauthorization.RevokedAtIsNil()).Only(ctx)
+	if ent.IsNotFound(err) {
+		return DeviceSavedCard{}, ErrSavedCardHandoffGone
+	}
+	if err != nil {
 		return DeviceSavedCard{}, err
 	}
-	return DeviceSavedCard{AuthorizationCode: handoff.PaymentMethodId, Brand: handoff.Brand, Last4: handoff.Last4, ExpiryMonth: handoff.ExpiryMonth, ExpiryYear: handoff.ExpiryYear}, nil
+	if setup.Status != savedcardsetup.StatusDelivered {
+		if err := setup.Update().SetStatus(savedcardsetup.StatusDelivered).Exec(ctx); err != nil {
+			return DeviceSavedCard{}, err
+		}
+	}
+	return DeviceSavedCard{SavedCardId: authorization.ID.String(), Brand: authorization.CardBrand, Last4: authorization.CardLast4, ExpiryMonth: authorization.CardExpiryMonth, ExpiryYear: authorization.CardExpiryYear}, nil
 }
 
 func (gateway *PaymentGateway) recordProviderCustomerInTransaction(ctx context.Context, client *ent.Client, userId, provider, customerId string) error {
