@@ -1,63 +1,99 @@
-import { readMockDatabase } from "@/mocks/mockDatabase.mock";
-import { MockHttpError, readJsonObjectBody, requireMockStorePrincipal, respondWithJson } from "@/mocks/mockResponses.mock";
+import { createMockIdentifier, MockHttpError, readJsonObjectBody, requireMockStorePrincipal, respondWithJson, respondWithNoContent } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
-import type { BusinessDocumentKind, BusinessDocumentsOverview, BusinessDocumentView } from "@/types/businessDocuments.type";
+import type { BusinessDocumentKind, BusinessDocumentRecord, BusinessDocumentsResponse, BusinessDocumentUploadIntent } from "@/types/businessDocuments.type";
 
-const kinds: readonly BusinessDocumentKind[] = ["cac_certificate", "government_id", "proof_of_address"];
-const labels: Record<BusinessDocumentKind, { label: string; description: string }> = {
-  cac_certificate: { label: "CAC certificate", description: "Your company or business name registration certificate." },
-  government_id: { label: "Government ID", description: "The owner's NIN slip, passport, driver's licence or voter's card." },
-  proof_of_address: { label: "Proof of address", description: "A recent utility bill or bank statement for your business address." },
-};
-const allowedMimeTypes = ["application/pdf", "image/jpeg", "image/png"];
+const kinds: readonly BusinessDocumentKind[] = ["cac_certificate", "identity", "address_proof"];
+const labels: Record<BusinessDocumentKind, string> = { cac_certificate: "CAC certificate", identity: "Government ID", address_proof: "Proof of address" };
+const allowedContentTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 const maximumBytes = 10 * 1024 * 1024;
 
-const holder = globalThis as typeof globalThis & { __zudomartSellerBusinessDocuments?: Map<string, BusinessDocumentView[]> };
-
-function blank(kind: BusinessDocumentKind): BusinessDocumentView {
-  return { kind, ...labels[kind], status: "not_uploaded", fileName: null, uploadedAt: null, rejectionReason: null };
+interface MockUploadIntent {
+  readonly storeId: string;
+  readonly kind: BusinessDocumentKind;
+  readonly sizeBytes: number;
+  isUploaded: boolean;
 }
 
-function seed(storeId: string): BusinessDocumentView[] {
-  const uploaded = (kind: BusinessDocumentKind, status: BusinessDocumentView["status"], fileName: string, rejectionReason: string | null = null): BusinessDocumentView => ({ ...blank(kind), status, fileName, uploadedAt: new Date(Date.now() - 3 * 86_400_000).toISOString(), rejectionReason });
-  if (storeId === "store_kelechi_kicks") return [uploaded("cac_certificate", "rejected", "business-permit.jpg", "This looks like a local permit, not your CAC registration certificate. Please upload the certificate."), uploaded("government_id", "approved", "nin-slip.pdf"), uploaded("proof_of_address", "in_review", "bill.pdf")];
+const holder = globalThis as typeof globalThis & { __zudomartSellerBusinessDocuments?: Map<string, BusinessDocumentRecord[]>; __zudomartSellerDocumentIntents?: Map<string, MockUploadIntent> };
+
+function blank(kind: BusinessDocumentKind): BusinessDocumentRecord {
+  return { kind, label: labels[kind], status: "not_uploaded", fileUrl: null, rejectionReason: null, submittedAt: null };
+}
+
+function seed(storeId: string): BusinessDocumentRecord[] {
+  const uploaded = (kind: BusinessDocumentKind, status: BusinessDocumentRecord["status"], rejectionReason: string | null = null): BusinessDocumentRecord => ({ ...blank(kind), status, submittedAt: new Date(Date.now() - 3 * 86_400_000).toISOString(), rejectionReason });
+  if (storeId === "store_kelechi_kicks") return [uploaded("cac_certificate", "rejected", "This looks like a local permit, not your CAC registration certificate. Please upload the certificate."), uploaded("identity", "approved"), uploaded("address_proof", "pending")];
   if (storeId === "store_funmi_bakes") return kinds.map(blank);
-  return [uploaded("cac_certificate", "approved", "cac.pdf"), uploaded("government_id", "approved", "id.jpg"), uploaded("proof_of_address", "approved", "bill.pdf")];
+  return [uploaded("cac_certificate", "approved"), uploaded("identity", "approved"), uploaded("address_proof", "approved")];
 }
 
-function readDocuments(storeId: string): BusinessDocumentView[] {
+function readDocuments(storeId: string): BusinessDocumentRecord[] {
   const map = (holder.__zudomartSellerBusinessDocuments ??= new Map());
   if (!map.has(storeId)) map.set(storeId, seed(storeId));
-  return map.get(storeId) as BusinessDocumentView[];
+  return map.get(storeId) as BusinessDocumentRecord[];
 }
 
-function present(storeId: string): BusinessDocumentsOverview {
+function readIntents(): Map<string, MockUploadIntent> {
+  return (holder.__zudomartSellerDocumentIntents ??= new Map());
+}
+
+function present(storeId: string): BusinessDocumentsResponse {
   const documents = readDocuments(storeId);
-  const overallStatus = documents.every((item) => item.status === "approved") ? "approved" : documents.some((item) => item.status === "rejected") ? "needs_attention" : documents.every((item) => item.status === "not_uploaded") ? "not_started" : "in_review";
-  const gateStore = readMockDatabase().gateStores.find((store) => store.storeId === storeId);
-  const hasPaidPlan = gateStore?.subscription.subscription?.status === "active" || gateStore?.subscription.subscription?.status === "trialing";
-  const goldCheckmark = overallStatus !== "approved" ? "after_approval" : hasPaidPlan ? "granted" : "needs_plan";
-  return { documents, overallStatus, goldCheckmark, neverBlocksSelling: true };
+  return { documents, allApproved: documents.every((item) => item.status === "approved") };
+}
+
+function requireKind(candidate: string | undefined): BusinessDocumentKind {
+  const kind = kinds.find((known) => known === candidate);
+  if (!kind) throw new MockHttpError(404, "NOT_FOUND", "That document type does not exist.");
+  return kind;
 }
 
 export function registerBusinessDocumentMockHandlers(): void {
   registerMockRoute("GET", "/seller/business-documents", (request) => respondWithJson(200, present(requireMockStorePrincipal(request).storeId)));
 
-  registerMockRoute("POST", "/seller/business-documents/:kind", (request) => {
+  registerMockRoute("POST", "/seller/business-documents/:kind/upload-intents", (request) => {
     const { storeId } = requireMockStorePrincipal(request);
-    const kind = kinds.find((candidate) => candidate === request.params.kind);
-    if (!kind) throw new MockHttpError(404, "UNKNOWN_DOCUMENT", "That document type does not exist.");
+    const kind = requireKind(request.params.kind);
     const body = readJsonObjectBody(request);
-    const fileName = typeof body.fileName === "string" ? body.fileName.trim().slice(0, 200) : "";
-    const mimeType = typeof body.mimeType === "string" ? body.mimeType : "";
+    const fileName = typeof body.fileName === "string" ? body.fileName.trim() : "";
+    const contentType = typeof body.contentType === "string" ? body.contentType : "";
     const sizeBytes = typeof body.sizeBytes === "number" ? body.sizeBytes : 0;
-    if (!fileName) throw new MockHttpError(400, "INVALID_FILE", "Choose a file to upload.");
-    if (!allowedMimeTypes.includes(mimeType)) throw new MockHttpError(400, "INVALID_FILE", "Upload a PDF, JPEG or PNG file.");
-    if (sizeBytes <= 0 || sizeBytes > maximumBytes) throw new MockHttpError(400, "INVALID_FILE", "Files can be up to 10 MB.");
+    if (!allowedContentTypes.includes(contentType) || sizeBytes <= 0 || sizeBytes > maximumBytes) throw new MockHttpError(400, "VALIDATION_FAILED", "Upload a PDF, JPEG, PNG or WebP file of at most 10 MB.");
+    if (!fileName || fileName.length > 200) throw new MockHttpError(400, "VALIDATION_FAILED", "Choose a file to upload.");
+    if (readDocuments(storeId).find((item) => item.kind === kind)?.status === "approved") throw new MockHttpError(409, "ALREADY_APPROVED", "This document was already approved.");
+    const documentId = createMockIdentifier("doc");
+    readIntents().set(documentId, { storeId, kind, sizeBytes, isUploaded: false });
+    const intent: BusinessDocumentUploadIntent = {
+      documentId,
+      objectKey: `business-documents/${storeId}/${kind}/${documentId}`,
+      uploadUrl: `/bff/seller/business-documents/${kind}/uploads/${documentId}`,
+      headers: { "Content-Type": contentType },
+      expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+    };
+    return respondWithJson(201, intent);
+  });
+
+  registerMockRoute("PUT", "/seller/business-documents/:kind/uploads/:documentId", (request) => {
+    const { storeId } = requireMockStorePrincipal(request);
+    const intent = readIntents().get(request.params.documentId ?? "");
+    if (!intent || intent.storeId !== storeId || intent.kind !== requireKind(request.params.kind)) throw new MockHttpError(404, "NOT_FOUND", "Request an upload link first.");
+    if ((request.binaryBody?.byteLength ?? 0) === 0) throw new MockHttpError(400, "VALIDATION_FAILED", "The file is empty.");
+    intent.isUploaded = true;
+    return respondWithNoContent();
+  });
+
+  registerMockRoute("PUT", "/seller/business-documents/:kind", (request) => {
+    const { storeId } = requireMockStorePrincipal(request);
+    const kind = requireKind(request.params.kind);
+    const body = readJsonObjectBody(request);
+    const documentId = typeof body.documentId === "string" ? body.documentId : "";
+    const intent = readIntents().get(documentId);
+    if (!intent || intent.storeId !== storeId || intent.kind !== kind) throw new MockHttpError(404, "NOT_FOUND", "Request an upload link first.");
+    if (!intent.isUploaded) throw new MockHttpError(409, "UPLOAD_MISSING", "The file has not been uploaded yet.");
+    readIntents().delete(documentId);
     const documents = readDocuments(storeId);
     const index = documents.findIndex((item) => item.kind === kind);
-    if (documents[index]?.status === "approved") throw new MockHttpError(409, "ALREADY_APPROVED", "This document is already approved.");
-    documents[index] = { ...blank(kind), status: "in_review", fileName, uploadedAt: new Date().toISOString() };
+    documents[index] = { ...blank(kind), status: "pending", submittedAt: new Date().toISOString() };
     return respondWithJson(200, present(storeId));
   });
 }

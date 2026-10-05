@@ -18,7 +18,7 @@ function readPasswordResetState(): MockPasswordResetState {
 
 function findUserIdForDestination(destination: string): string | null {
   const normalised = destination.trim().toLowerCase();
-  return readMockDatabase().users.find((user) => user.email === normalised || user.phone === normalised || user.username === normalised)?.id ?? null;
+  return readMockDatabase().users.find((user) => user.email === normalised)?.id ?? null;
 }
 
 export function doesPasswordMatchOverrideForUser(userId: string, candidatePassword: string): boolean | null {

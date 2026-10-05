@@ -186,9 +186,11 @@ export function registerStaffTeamMockHandlers(): void {
     const to = request.query.get("to");
     const fromTime = from ? new Date(`${from}T00:00:00.000Z`).getTime() : Number.NEGATIVE_INFINITY;
     const toTime = to ? new Date(`${to}T23:59:59.999Z`).getTime() : Number.POSITIVE_INFINITY;
-    const entries = readMockDatabase().auditLog.filter((entry) => {
+    const database = readMockDatabase();
+    const actorIds = new Set([actorId, ...database.staff.filter((member) => member.userId === actorId).map((member) => member.id)]);
+    const entries = database.auditLog.filter((entry) => {
       const createdTime = new Date(entry.createdAt).getTime();
-      return (!actorId || entry.actor.id === actorId) && (!action || entry.action.startsWith(action)) && createdTime >= fromTime && createdTime <= toTime;
+      return (!actorId || actorIds.has(entry.actor.id)) && (!action || entry.action.startsWith(action)) && createdTime >= fromTime && createdTime <= toTime;
     });
     return respondWithJson(200, paginateMockList(entries, request.query, 50));
   });

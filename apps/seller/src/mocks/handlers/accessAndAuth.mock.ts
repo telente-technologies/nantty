@@ -67,9 +67,9 @@ export function registerAccessAndAuthMockHandlers(): void {
     const body = readJsonObjectBody(request);
     const identifier = typeof body.identifier === "string" ? body.identifier.trim().toLowerCase() : "";
     const password = typeof body.password === "string" ? body.password : "";
-    const user = readMockDatabase().users.find((candidate) => candidate.email === identifier || candidate.username === identifier || candidate.phone === identifier);
+    const user = readMockDatabase().users.find((candidate) => candidate.email === identifier || candidate.username === identifier);
     const overrideMatch = user ? doesPasswordMatchOverrideForUser(user.id, password) : null;
-    if (!user || !(overrideMatch ?? isDemoPasswordCorrect(password))) return respondWithError(401, "INVALID_CREDENTIALS", "That email, phone or password is not right.");
+    if (!user || !(overrideMatch ?? isDemoPasswordCorrect(password))) return respondWithError(401, "INVALID_CREDENTIALS", "That email, username or password is not right.");
     const tokens = issueMockTokenPair(user.id, randomBytes(12).toString("hex"));
     return respondWithJson(200, { ...tokens, user: convertMockUserToCurrentUser(user.id), isNewUser: false });
   }, { public: true });
@@ -109,10 +109,9 @@ export function registerAccessAndAuthMockHandlers(): void {
       note: gateStore.verificationNote,
       submittedAt: "2026-09-02T10:14:00.000Z",
       documents: [
-        { kind: "government_id", label: "Owner's government ID", status: documentStatus },
         { kind: "cac_certificate", label: "CAC certificate", status: gateStore.verificationStatus === "pending" ? "in_review" : documentStatus },
-        { kind: "proof_of_address", label: "Proof of business address", status: documentStatus },
-        { kind: "bank_account", label: "Payout bank account", status: "approved" },
+        { kind: "identity", label: "Government ID", status: documentStatus },
+        { kind: "address_proof", label: "Proof of address", status: documentStatus },
       ],
     });
   });

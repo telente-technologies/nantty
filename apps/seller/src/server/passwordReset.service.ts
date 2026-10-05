@@ -30,12 +30,9 @@ export function describeNewPasswordProblem(password: string): string | null {
   return null;
 }
 
-export function normaliseSignInDestination(rawDestination: unknown): string | null {
+export function normaliseResetEmailAddress(rawDestination: unknown): string | null {
   if (typeof rawDestination !== "string") return null;
   const trimmed = rawDestination.trim();
   if (trimmed.length < 3 || trimmed.length > 254) return null;
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed)) return trimmed.toLowerCase();
-  const digitsOnly = trimmed.replace(/[\s()-]/g, "");
-  if (/^\+?\d{7,15}$/.test(digitsOnly)) return digitsOnly;
-  return null;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed) ? trimmed.toLowerCase() : null;
 }

@@ -5,7 +5,7 @@ import { MockHttpError, createMockIdentifier, readJsonObjectBody, requireMockSto
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 
 export const allowedProductImageMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"] as const;
-const maximumImageBytes = 15 * 1024 * 1024;
+const maximumImageBytes = 10 * 1024 * 1024;
 const chunkSizeBytes = 1024 * 1024;
 const maximumInlineDataUrlBytes = 2 * 1024 * 1024;
 const fallbackLargeImageUrl = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80&fm=webp";
@@ -38,13 +38,13 @@ export function registerMediaUploadMockRoutes(): void {
     const sizeBytes = body.sizeBytes;
     if (fileName.length < 1 || fileName.length > 200) throw new MockHttpError(400, "INVALID_FILE_NAME", "The file needs a name of 200 characters or fewer.");
     if (!(allowedProductImageMimeTypes as readonly string[]).includes(mimeType)) throw new MockHttpError(415, "UNSUPPORTED_MEDIA_TYPE", "Use a JPEG, PNG, WebP or AVIF image.");
-    if (typeof sizeBytes !== "number" || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > maximumImageBytes) throw new MockHttpError(413, "FILE_TOO_LARGE", "Images must be 15 MB or smaller.");
+    if (typeof sizeBytes !== "number" || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > maximumImageBytes) throw new MockHttpError(413, "FILE_TOO_LARGE", "Images must be 10 MB or smaller.");
     if (body.purpose !== "product") throw new MockHttpError(400, "INVALID_PURPOSE", "Uploads here are for product images.");
     if (body.sha256 !== undefined && (typeof body.sha256 !== "string" || !/^[a-f0-9]{64}$/.test(body.sha256))) throw new MockHttpError(400, "INVALID_SHA256", "The file checksum is not valid.");
     const uploadId = createMockIdentifier("upl");
     const totalChunks = Math.ceil(sizeBytes / chunkSizeBytes);
     readMockDatabase().uploads.set(uploadId, { uploadId, fileName, mimeType, sizeBytes, chunkSizeBytes, totalChunks, receivedChunks: new Map(), mediaId: typeof body.sha256 === "string" ? `sha256:${body.sha256}` : null });
-    return respondWithJson(201, { uploadId, chunkSizeBytes, totalChunks, uploadedChunks: [] });
+    return respondWithJson(201, { mode: "multipart", uploadMode: "proxied", uploadId, mediaId: createMockIdentifier("media"), chunkSizeBytes, totalChunks, uploadedChunks: [] });
   });
 
   registerMockRoute("PUT", "/media/uploads/:uploadId/chunks/:chunkIndex", (request) => {
@@ -76,13 +76,13 @@ export function registerMediaUploadMockRoutes(): void {
     const url = fileBytes.byteLength <= maximumInlineDataUrlBytes ? `data:${upload.mimeType};base64,${Buffer.from(fileBytes).toString("base64")}` : fallbackLargeImageUrl;
     database.media.set(mediaId, { mediaId, url, mimeType: upload.mimeType, status: "ready" });
     database.uploads.delete(upload.uploadId);
-    return respondWithJson(200, { mediaId, status: "ready" });
+    return respondWithJson(200, { mediaId, status: "processing" });
   });
 
   registerMockRoute("GET", "/media/:mediaId", (request) => {
     requireMockStorePrincipal(request);
     const media = readMockDatabase().media.get(request.params.mediaId ?? "");
     if (!media) throw new MockHttpError(404, "MEDIA_NOT_FOUND", "That image does not exist.");
-    return respondWithJson(200, media);
+    return respondWithJson(200, { id: media.mediaId, status: media.status, variants: media.url ? [{ url: media.url, width: 1080, height: 1080, format: media.mimeType.replace("image/", "") }] : [] });
   });
 }
