@@ -50,4 +50,5 @@ func MountAccountEnforcementRoutes(mux *http.ServeMux, container *container.Cont
 	mux.Handle("POST /api/v1/users/me/suspension/appeal", requireAccessToken(http.HandlerFunc(controller.SubmitAppeal)))
 	mux.HandleFunc("POST /api/v1/internal/enforcement/actions", controller.InternalAction)
 	mux.HandleFunc("POST /api/v1/internal/users/summaries", controller.InternalSummaries)
+	mux.HandleFunc("POST /api/v1/internal/suspensions/{caseId}/appeal/decide", controller.InternalDecideAppeal)
 }

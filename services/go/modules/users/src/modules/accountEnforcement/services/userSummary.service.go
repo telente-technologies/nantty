@@ -37,6 +37,7 @@ type PlatformUserSummary struct {
 	RiskLevel     string               `json:"riskLevel"`
 	EmailMasked   *string              `json:"emailMasked"`
 	PhoneMasked   *string              `json:"phoneMasked"`
+	EmailVerified bool                 `json:"emailVerified"`
 }
 
 func MaskEmailAddress(email *string) *string {
@@ -62,7 +63,7 @@ func BuildPlatformUserSummary(ctx context.Context, application *container.Contai
 	summary := PlatformUserSummary{
 		Id: target.Account.ID.String(), Username: target.Account.Username, DisplayName: target.Account.Name, Status: strings.ToUpper(target.Account.Status),
 		IsSeller: containsRole(target.Account.Roles, "seller"), JoinedAt: target.Account.CreatedAt.UTC().Format(time.RFC3339), RiskLevel: "LOW",
-		EmailMasked: MaskEmailAddress(target.Account.Email),
+		EmailMasked: MaskEmailAddress(target.Account.Email), EmailVerified: target.Account.EmailVerified,
 	}
 	if target.Profile == nil {
 		return summary, nil

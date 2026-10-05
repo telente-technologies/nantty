@@ -5,7 +5,7 @@ const (
 	AccountSuspendedType          = "account.suspended"
 	AccountBannedType             = "account.banned"
 	SuspensionEndedType           = "suspension.ended"
-	SuspensionAppealSubmittedType = "suspension.appealSubmitted"
+	SuspensionAppealSubmittedType = "suspensionAppeal.submitted"
 	AppealDecidedType             = "appeal.decided"
 	UsernameReassignedType        = "username.reassigned"
 	AccountWarnedType             = "account.warned"
@@ -55,8 +55,14 @@ type SuspensionEndedData struct {
 }
 
 type SuspensionAppealData struct {
-	AccountId    string `json:"accountId"`
-	SuspensionId string `json:"suspensionId"`
+	AccountId     string `json:"accountId"`
+	CaseId        string `json:"caseId"`
+	Message       string `json:"message"`
+	ReasonCode    string `json:"reasonCode"`
+	Reason        string `json:"reason"`
+	SuspendedAt   string `json:"suspendedAt"`
+	SubmittedAt   string `json:"submittedAt"`
+	DeletionDueAt string `json:"deletionDueAt"`
 }
 
 type AppealDecidedData struct {
