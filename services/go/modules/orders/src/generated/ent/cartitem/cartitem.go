@@ -26,6 +26,10 @@ const (
 	FieldStoreID = "store_id"
 	// FieldQuantity holds the string denoting the quantity field in the database.
 	FieldQuantity = "quantity"
+	// FieldAttributionSource holds the string denoting the attribution_source field in the database.
+	FieldAttributionSource = "attribution_source"
+	// FieldAttributionID holds the string denoting the attribution_id field in the database.
+	FieldAttributionID = "attribution_id"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the cartitem in the database.
@@ -41,6 +45,8 @@ var Columns = []string{
 	FieldVariantID,
 	FieldStoreID,
 	FieldQuantity,
+	FieldAttributionSource,
+	FieldAttributionID,
 	FieldUpdatedAt,
 }
 
@@ -59,6 +65,8 @@ var (
 	DefaultCreatedAt func() time.Time
 	// QuantityValidator is a validator for the "quantity" field. It is called by the builders before save.
 	QuantityValidator func(int) error
+	// AttributionSourceValidator is a validator for the "attribution_source" field. It is called by the builders before save.
+	AttributionSourceValidator func(string) error
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -103,6 +111,16 @@ func ByStoreID(opts ...sql.OrderTermOption) OrderOption {
 // ByQuantity orders the results by the quantity field.
 func ByQuantity(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldQuantity, opts...).ToFunc()
+}
+
+// ByAttributionSource orders the results by the attribution_source field.
+func ByAttributionSource(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAttributionSource, opts...).ToFunc()
+}
+
+// ByAttributionID orders the results by the attribution_id field.
+func ByAttributionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAttributionID, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

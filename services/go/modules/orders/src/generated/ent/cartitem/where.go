@@ -85,6 +85,16 @@ func Quantity(v int) predicate.CartItem {
 	return predicate.CartItem(sql.FieldEQ(FieldQuantity, v))
 }
 
+// AttributionSource applies equality check predicate on the "attribution_source" field. It's identical to AttributionSourceEQ.
+func AttributionSource(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldEQ(FieldAttributionSource, v))
+}
+
+// AttributionID applies equality check predicate on the "attribution_id" field. It's identical to AttributionIDEQ.
+func AttributionID(v uuid.UUID) predicate.CartItem {
+	return predicate.CartItem(sql.FieldEQ(FieldAttributionID, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.CartItem {
 	return predicate.CartItem(sql.FieldEQ(FieldUpdatedAt, v))
@@ -328,6 +338,131 @@ func QuantityLT(v int) predicate.CartItem {
 // QuantityLTE applies the LTE predicate on the "quantity" field.
 func QuantityLTE(v int) predicate.CartItem {
 	return predicate.CartItem(sql.FieldLTE(FieldQuantity, v))
+}
+
+// AttributionSourceEQ applies the EQ predicate on the "attribution_source" field.
+func AttributionSourceEQ(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldEQ(FieldAttributionSource, v))
+}
+
+// AttributionSourceNEQ applies the NEQ predicate on the "attribution_source" field.
+func AttributionSourceNEQ(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldNEQ(FieldAttributionSource, v))
+}
+
+// AttributionSourceIn applies the In predicate on the "attribution_source" field.
+func AttributionSourceIn(vs ...string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldIn(FieldAttributionSource, vs...))
+}
+
+// AttributionSourceNotIn applies the NotIn predicate on the "attribution_source" field.
+func AttributionSourceNotIn(vs ...string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldNotIn(FieldAttributionSource, vs...))
+}
+
+// AttributionSourceGT applies the GT predicate on the "attribution_source" field.
+func AttributionSourceGT(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldGT(FieldAttributionSource, v))
+}
+
+// AttributionSourceGTE applies the GTE predicate on the "attribution_source" field.
+func AttributionSourceGTE(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldGTE(FieldAttributionSource, v))
+}
+
+// AttributionSourceLT applies the LT predicate on the "attribution_source" field.
+func AttributionSourceLT(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldLT(FieldAttributionSource, v))
+}
+
+// AttributionSourceLTE applies the LTE predicate on the "attribution_source" field.
+func AttributionSourceLTE(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldLTE(FieldAttributionSource, v))
+}
+
+// AttributionSourceContains applies the Contains predicate on the "attribution_source" field.
+func AttributionSourceContains(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldContains(FieldAttributionSource, v))
+}
+
+// AttributionSourceHasPrefix applies the HasPrefix predicate on the "attribution_source" field.
+func AttributionSourceHasPrefix(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldHasPrefix(FieldAttributionSource, v))
+}
+
+// AttributionSourceHasSuffix applies the HasSuffix predicate on the "attribution_source" field.
+func AttributionSourceHasSuffix(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldHasSuffix(FieldAttributionSource, v))
+}
+
+// AttributionSourceIsNil applies the IsNil predicate on the "attribution_source" field.
+func AttributionSourceIsNil() predicate.CartItem {
+	return predicate.CartItem(sql.FieldIsNull(FieldAttributionSource))
+}
+
+// AttributionSourceNotNil applies the NotNil predicate on the "attribution_source" field.
+func AttributionSourceNotNil() predicate.CartItem {
+	return predicate.CartItem(sql.FieldNotNull(FieldAttributionSource))
+}
+
+// AttributionSourceEqualFold applies the EqualFold predicate on the "attribution_source" field.
+func AttributionSourceEqualFold(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldEqualFold(FieldAttributionSource, v))
+}
+
+// AttributionSourceContainsFold applies the ContainsFold predicate on the "attribution_source" field.
+func AttributionSourceContainsFold(v string) predicate.CartItem {
+	return predicate.CartItem(sql.FieldContainsFold(FieldAttributionSource, v))
+}
+
+// AttributionIDEQ applies the EQ predicate on the "attribution_id" field.
+func AttributionIDEQ(v uuid.UUID) predicate.CartItem {
+	return predicate.CartItem(sql.FieldEQ(FieldAttributionID, v))
+}
+
+// AttributionIDNEQ applies the NEQ predicate on the "attribution_id" field.
+func AttributionIDNEQ(v uuid.UUID) predicate.CartItem {
+	return predicate.CartItem(sql.FieldNEQ(FieldAttributionID, v))
+}
+
+// AttributionIDIn applies the In predicate on the "attribution_id" field.
+func AttributionIDIn(vs ...uuid.UUID) predicate.CartItem {
+	return predicate.CartItem(sql.FieldIn(FieldAttributionID, vs...))
+}
+
+// AttributionIDNotIn applies the NotIn predicate on the "attribution_id" field.
+func AttributionIDNotIn(vs ...uuid.UUID) predicate.CartItem {
+	return predicate.CartItem(sql.FieldNotIn(FieldAttributionID, vs...))
+}
+
+// AttributionIDGT applies the GT predicate on the "attribution_id" field.
+func AttributionIDGT(v uuid.UUID) predicate.CartItem {
+	return predicate.CartItem(sql.FieldGT(FieldAttributionID, v))
+}
+
+// AttributionIDGTE applies the GTE predicate on the "attribution_id" field.
+func AttributionIDGTE(v uuid.UUID) predicate.CartItem {
+	return predicate.CartItem(sql.FieldGTE(FieldAttributionID, v))
+}
+
+// AttributionIDLT applies the LT predicate on the "attribution_id" field.
+func AttributionIDLT(v uuid.UUID) predicate.CartItem {
+	return predicate.CartItem(sql.FieldLT(FieldAttributionID, v))
+}
+
+// AttributionIDLTE applies the LTE predicate on the "attribution_id" field.
+func AttributionIDLTE(v uuid.UUID) predicate.CartItem {
+	return predicate.CartItem(sql.FieldLTE(FieldAttributionID, v))
+}
+
+// AttributionIDIsNil applies the IsNil predicate on the "attribution_id" field.
+func AttributionIDIsNil() predicate.CartItem {
+	return predicate.CartItem(sql.FieldIsNull(FieldAttributionID))
+}
+
+// AttributionIDNotNil applies the NotNil predicate on the "attribution_id" field.
+func AttributionIDNotNil() predicate.CartItem {
+	return predicate.CartItem(sql.FieldNotNull(FieldAttributionID))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

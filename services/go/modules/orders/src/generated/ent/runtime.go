@@ -26,6 +26,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/productbundleitem"
 	"zudomart/modules/orders/src/generated/ent/promotion"
 	"zudomart/modules/orders/src/generated/ent/promotionredemption"
+	"zudomart/modules/orders/src/generated/ent/refundrecord"
 	"zudomart/modules/orders/src/generated/ent/reportexportjob"
 	"zudomart/modules/orders/src/generated/ent/returnrequest"
 	"zudomart/modules/orders/src/generated/ent/shippingcalculation"
@@ -94,8 +95,12 @@ func init() {
 	cartitemDescQuantity := cartitemFields[4].Descriptor()
 	// cartitem.QuantityValidator is a validator for the "quantity" field. It is called by the builders before save.
 	cartitem.QuantityValidator = cartitemDescQuantity.Validators[0].(func(int) error)
+	// cartitemDescAttributionSource is the schema descriptor for attribution_source field.
+	cartitemDescAttributionSource := cartitemFields[5].Descriptor()
+	// cartitem.AttributionSourceValidator is a validator for the "attribution_source" field. It is called by the builders before save.
+	cartitem.AttributionSourceValidator = cartitemDescAttributionSource.Validators[0].(func(string) error)
 	// cartitemDescUpdatedAt is the schema descriptor for updated_at field.
-	cartitemDescUpdatedAt := cartitemFields[5].Descriptor()
+	cartitemDescUpdatedAt := cartitemFields[7].Descriptor()
 	// cartitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	cartitem.DefaultUpdatedAt = cartitemDescUpdatedAt.Default.(func() time.Time)
 	// cartitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -776,6 +781,14 @@ func init() {
 	orderitemDescTracksStock := orderitemFields[16].Descriptor()
 	// orderitem.DefaultTracksStock holds the default value on creation for the tracks_stock field.
 	orderitem.DefaultTracksStock = orderitemDescTracksStock.Default.(bool)
+	// orderitemDescTaxable is the schema descriptor for taxable field.
+	orderitemDescTaxable := orderitemFields[17].Descriptor()
+	// orderitem.DefaultTaxable holds the default value on creation for the taxable field.
+	orderitem.DefaultTaxable = orderitemDescTaxable.Default.(bool)
+	// orderitemDescAttributionSource is the schema descriptor for attribution_source field.
+	orderitemDescAttributionSource := orderitemFields[18].Descriptor()
+	// orderitem.AttributionSourceValidator is a validator for the "attribution_source" field. It is called by the builders before save.
+	orderitem.AttributionSourceValidator = orderitemDescAttributionSource.Validators[0].(func(string) error)
 	// orderitemDescID is the schema descriptor for id field.
 	orderitemDescID := orderitemMixinFields0[0].Descriptor()
 	// orderitem.DefaultID holds the default value on creation for the id field.
@@ -1027,6 +1040,113 @@ func init() {
 	promotionredemptionDescID := promotionredemptionMixinFields0[0].Descriptor()
 	// promotionredemption.DefaultID holds the default value on creation for the id field.
 	promotionredemption.DefaultID = promotionredemptionDescID.Default.(func() uuid.UUID)
+	refundrecordMixin := schema.RefundRecord{}.Mixin()
+	refundrecordMixinFields0 := refundrecordMixin[0].Fields()
+	_ = refundrecordMixinFields0
+	refundrecordFields := schema.RefundRecord{}.Fields()
+	_ = refundrecordFields
+	// refundrecordDescCreatedAt is the schema descriptor for created_at field.
+	refundrecordDescCreatedAt := refundrecordMixinFields0[1].Descriptor()
+	// refundrecord.DefaultCreatedAt holds the default value on creation for the created_at field.
+	refundrecord.DefaultCreatedAt = refundrecordDescCreatedAt.Default.(func() time.Time)
+	// refundrecordDescOrderReference is the schema descriptor for order_reference field.
+	refundrecordDescOrderReference := refundrecordFields[3].Descriptor()
+	// refundrecord.OrderReferenceValidator is a validator for the "order_reference" field. It is called by the builders before save.
+	refundrecord.OrderReferenceValidator = func() func(string) error {
+		validators := refundrecordDescOrderReference.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(order_reference string) error {
+			for _, fn := range fns {
+				if err := fn(order_reference); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// refundrecordDescCurrency is the schema descriptor for currency field.
+	refundrecordDescCurrency := refundrecordFields[5].Descriptor()
+	// refundrecord.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	refundrecord.CurrencyValidator = func() func(string) error {
+		validators := refundrecordDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// refundrecordDescSource is the schema descriptor for source field.
+	refundrecordDescSource := refundrecordFields[6].Descriptor()
+	// refundrecord.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	refundrecord.SourceValidator = func() func(string) error {
+		validators := refundrecordDescSource.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(source string) error {
+			for _, fn := range fns {
+				if err := fn(source); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// refundrecordDescStatus is the schema descriptor for status field.
+	refundrecordDescStatus := refundrecordFields[7].Descriptor()
+	// refundrecord.DefaultStatus holds the default value on creation for the status field.
+	refundrecord.DefaultStatus = refundrecordDescStatus.Default.(string)
+	// refundrecord.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	refundrecord.StatusValidator = refundrecordDescStatus.Validators[0].(func(string) error)
+	// refundrecordDescReason is the schema descriptor for reason field.
+	refundrecordDescReason := refundrecordFields[8].Descriptor()
+	// refundrecord.DefaultReason holds the default value on creation for the reason field.
+	refundrecord.DefaultReason = refundrecordDescReason.Default.(string)
+	// refundrecord.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	refundrecord.ReasonValidator = refundrecordDescReason.Validators[0].(func(string) error)
+	// refundrecordDescCreatedByAccountID is the schema descriptor for created_by_account_id field.
+	refundrecordDescCreatedByAccountID := refundrecordFields[9].Descriptor()
+	// refundrecord.DefaultCreatedByAccountID holds the default value on creation for the created_by_account_id field.
+	refundrecord.DefaultCreatedByAccountID = refundrecordDescCreatedByAccountID.Default.(string)
+	// refundrecord.CreatedByAccountIDValidator is a validator for the "created_by_account_id" field. It is called by the builders before save.
+	refundrecord.CreatedByAccountIDValidator = refundrecordDescCreatedByAccountID.Validators[0].(func(string) error)
+	// refundrecordDescCreatedByName is the schema descriptor for created_by_name field.
+	refundrecordDescCreatedByName := refundrecordFields[10].Descriptor()
+	// refundrecord.DefaultCreatedByName holds the default value on creation for the created_by_name field.
+	refundrecord.DefaultCreatedByName = refundrecordDescCreatedByName.Default.(string)
+	// refundrecord.CreatedByNameValidator is a validator for the "created_by_name" field. It is called by the builders before save.
+	refundrecord.CreatedByNameValidator = refundrecordDescCreatedByName.Validators[0].(func(string) error)
+	// refundrecordDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	refundrecordDescIdempotencyKey := refundrecordFields[11].Descriptor()
+	// refundrecord.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	refundrecord.IdempotencyKeyValidator = refundrecordDescIdempotencyKey.Validators[0].(func(string) error)
+	// refundrecordDescRequestHash is the schema descriptor for request_hash field.
+	refundrecordDescRequestHash := refundrecordFields[12].Descriptor()
+	// refundrecord.DefaultRequestHash holds the default value on creation for the request_hash field.
+	refundrecord.DefaultRequestHash = refundrecordDescRequestHash.Default.(string)
+	// refundrecord.RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
+	refundrecord.RequestHashValidator = refundrecordDescRequestHash.Validators[0].(func(string) error)
+	// refundrecordDescUpdatedAt is the schema descriptor for updated_at field.
+	refundrecordDescUpdatedAt := refundrecordFields[14].Descriptor()
+	// refundrecord.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	refundrecord.DefaultUpdatedAt = refundrecordDescUpdatedAt.Default.(func() time.Time)
+	// refundrecord.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	refundrecord.UpdateDefaultUpdatedAt = refundrecordDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// refundrecordDescID is the schema descriptor for id field.
+	refundrecordDescID := refundrecordMixinFields0[0].Descriptor()
+	// refundrecord.DefaultID holds the default value on creation for the id field.
+	refundrecord.DefaultID = refundrecordDescID.Default.(func() uuid.UUID)
 	reportexportjobMixin := schema.ReportExportJob{}.Mixin()
 	reportexportjobMixinFields0 := reportexportjobMixin[0].Fields()
 	_ = reportexportjobMixinFields0

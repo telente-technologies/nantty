@@ -56,6 +56,8 @@ type Tx struct {
 	Promotion *PromotionClient
 	// PromotionRedemption is the client for interacting with the PromotionRedemption builders.
 	PromotionRedemption *PromotionRedemptionClient
+	// RefundRecord is the client for interacting with the RefundRecord builders.
+	RefundRecord *RefundRecordClient
 	// ReportExportJob is the client for interacting with the ReportExportJob builders.
 	ReportExportJob *ReportExportJobClient
 	// ReturnRequest is the client for interacting with the ReturnRequest builders.
@@ -230,6 +232,7 @@ func (tx *Tx) init() {
 	tx.ProductBundleItem = NewProductBundleItemClient(tx.config)
 	tx.Promotion = NewPromotionClient(tx.config)
 	tx.PromotionRedemption = NewPromotionRedemptionClient(tx.config)
+	tx.RefundRecord = NewRefundRecordClient(tx.config)
 	tx.ReportExportJob = NewReportExportJobClient(tx.config)
 	tx.ReturnRequest = NewReturnRequestClient(tx.config)
 	tx.ShippingCalculation = NewShippingCalculationClient(tx.config)
