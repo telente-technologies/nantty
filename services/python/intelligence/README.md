@@ -13,7 +13,7 @@ The endpoint and event contract is in [apiContract.md](apiContract.md).
 
 ## Layout
 
-The project mirrors a Zudojs app (`apps/api/src`): shared kinds at the top of `src/`, one folder per
+The project mirrors the TypeScript services (`services/typescript/social/src`): shared kinds at the top of `src/`, one folder per
 domain under `src/modules/`, CQRS commands/queries with handlers, controllers, routes and a module entry.
 
 ```
@@ -70,7 +70,7 @@ the same intent is kept with a snake_case `_<kind>` suffix (`feed_ranking_servic
 | Ads | placements feed, clips (reels, portrait + landscape), stories, mart/search (sponsored product tiles), live (in-stream), live_discovery (promoted live streams) with per-placement creative formats and ad-load rules; eligibility (status, schedule, budget, frequency caps, geo, age, interests, lookalike), logistic CTR model, GSP with quality (eCPM), reserve price, probabilistic pacing throttle, ad-load and brand-safety slotting, host creator echo for revenue share |
 | Trending | forward-decayed short (6 h) vs long (7 d) velocity, one contribution per actor per item per hour, distinct-actor threshold, report/hide penalty |
 | Search | 0.7 text relevance + 0.2 personalisation + 0.1 popularity (+ small freshness tie-break) |
-| Risk | rule sets per subject (orders, payouts, account events, coin purchases, coin transfers, gifts, referrals, cashback) combined with noisy-OR, value-flow graph signals from events, logistic model for orders; recommends allow / review / hold, never bans |
+| Risk | rule sets per subject (orders, payouts, account events, coin purchases, coin transfers, gifts) combined with noisy-OR, value-flow graph signals from events, logistic model for orders; recommends allow / review / hold, never bans |
 | Experiments | deterministic SHA-256 bucketing, per-variant exposure and event counters |
 | Audio fingerprinting | Shazam-style landmarks in numpy/scipy: 1024-sample Hann STFT, hop 256 at 8 kHz, local-maximum spectral peaks (≤18/s), anchor→target pairs (fan-out 4, within 63 frames / 96 bins), 26-bit hashes stored in Redis; matching by offset-histogram voting, confidence = aligned / query landmarks; robust to time shifts, volume changes and moderate noise (see tests). Only hashes are stored, never audio |
 

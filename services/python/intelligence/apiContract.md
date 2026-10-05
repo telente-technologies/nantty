@@ -1,7 +1,7 @@
 # Zudomart Intelligence API Contract (v1)
 
-This is the authoritative contract between the TypeScript API (`apps/api`) and the Python
-intelligence service (`services/python/intelligence`). The Pydantic DTOs in `src/modules/*/dtos/*.py`, `src/dtos/` and `src/events/` are the source
+This is the authoritative contract between the callers (ts-social, ts-search, ts-media, go-ads,
+go-users, go-moderation) and the Python intelligence service (`services/python/intelligence`). The Pydantic DTOs in `src/modules/*/dtos/*.py`, `src/dtos/` and `src/events/` are the source
 of truth; this document mirrors them.
 
 Rule: **the TS API owns the product, Python owns intelligence, events connect them.** Python never
@@ -18,6 +18,16 @@ gets back and falls back to deterministic logic whenever Python is slow, down or
   its own UTC clock otherwise.
 - Ids (`OpaqueIdentifier`): `^[A-Za-z0-9_\-:.]{1,128}$`. Send **opaque or hashed ids only**. Never send
   names, emails, phone numbers, addresses, raw search text or free text of any kind.
+- **User id hashing** (personalization surfaces: viewer ids, `authorId`, `creatorId`, followed/blocked/muted
+  account ids, event `actorId`): `u_` + the first 40 lowercase hex chars of
+  `HMAC-SHA256(key, "user:" + rawUserId)`. Search queries: `q_` + 40 hex of `HMAC-SHA256(key, "query:" + q)`
+  where `q` is NFKC-normalised, trimmed, lowercased and whitespace-collapsed. `key` is
+  `INTELLIGENCE_ID_HASH_SECRET` (UTF-8) when set, otherwise `HMAC-SHA256(INTELLIGENCE_SHARED_SECRET,
+  "zudomart:intelligence:user-id-hash")` (raw 32 bytes), so every caller that signs requests can derive it.
+  Hashing is idempotent: a value already matching `^u_[0-9a-f]{40}$` is used unchanged. Python hashes the
+  raw ids it receives in domain events with the same key, so features written from events and ids sent
+  over HTTP line up. Risk, trust, bot, chat-spam, gift and value-flow endpoints keep raw account ids,
+  because goTrust and the money services act on them.
 - Topic / hashtag slugs: `^[a-z0-9_\-]{1,64}$` (lowercase, no `#`). Max 20 per item.
 - Country: ISO 3166-1 alpha-2 uppercase (`NG`). Region: `^[A-Z0-9\-]{1,12}$` (e.g. `LA`, `NG-LA`).
 - Currency: ISO 4217 (`NGN`).
@@ -241,7 +251,7 @@ They feed topic affinity and trending, so send them.
 | risk_outcome_labeled | subjectType (risk subject types, see 7.10), subjectId, outcome (`fraud_confirmed` \| `fraud_cleared`) — the training label for risk models; send when a case is resolved |
 | coin_transferred | transferId, recipientId, coinAmount (≥1) |
 | gift_sent | giftId, creatorId, coinAmount (≥1), hostContentId? |
-| referral_rewarded | referralId, refereeId |
+| saved | targetId, targetType (`post` \| `clip` \| `product`), authorId?, +topics |
 
 `targetType`: `post` \| `clip` \| `story` \| `live` \| `product` \| `store` \| `account` \| `comment` \| `ad`.
 `placement` (ad events): `feed` \| `clips` \| `mart` \| `search` \| `stories` \| `live` \| `live_discovery`.
@@ -563,14 +573,12 @@ and **exactly one** signals block whose name equals `subjectType` (camelCase), o
 | coin_purchase | `coinPurchase` | amount (Money), coinAmount, accountAgeHours, purchasesLastDay, failedPaymentAttemptsLastDay, isNewPaymentInstrument, deviceAccountCount, paymentCountry?, accountCountry? |
 | coin_transfer | `coinTransfer` | recipientId, coinAmount, fractionOfSenderBalance, senderAccountAgeHours, recipientAccountAgeHours, senderAndRecipientShareDevice, senderTransfersLastHour, senderDistinctRecipientsLastDay, minutesSinceSenderReceivedTheseCoins?, observedTransferChainDepthLastDay, coinsBoughtWithNewInstrumentLastDay |
 | gift | `gift` | creatorId, coinAmount, senderAccountAgeHours, creatorAccountAgeHours, senderAndCreatorShareDevice, giftsFromSenderToCreatorLastDay, senderShareOfCreatorGiftIncomeLastWeek, coinsBoughtWithNewInstrumentLastDay, hoursUntilCreatorPayoutRequest? |
-| referral_reward | `referralReward` | refereeId, referrerAccountAgeHours, refereeAccountAgeHours, shareDevice, sharePaymentInstrument, shareNetworkPrefix, referralsByReferrerLastDay, minutesFromSignupToQualifyingAction?, linkedAccountClusterSize (≥1) |
-| cashback | `cashback` | amount (Money), cashbackOrdersLastWeek, refundAfterCashbackRate, cancelledAfterCashbackCount, buyerAndSellerShareDevice, buyerLinkedToSellerAccount, accountAgeHours |
 
 Context for the value-transfer subjects: coin transfers carry a 25% platform fee and gifts pay creators up
-to 70%, which makes them attractive for laundering between colluding accounts. For `coin_transfer`,
-`gift` and `referral_reward` Python adds graph signals learned from `coin_transferred`, `gift_sent` and
-`referral_rewarded` events (reciprocal flows / gift reciprocity, collection points with many senders,
-referral volume), so forward those events.
+to 70%, which makes them attractive for laundering between colluding accounts. For `coin_transfer`
+and `gift` Python adds graph signals learned from `coin_transferred` and `gift_sent` events (reciprocal
+flows / gift reciprocity, collection points with many senders), so forward those events. Referral and
+cashback scoring was removed with the loyalty programme.
 
 ```json
 {"subjectType": "coin_transfer", "subjectId": "tr_1", "actorId": "u_9f2c",
@@ -593,8 +601,7 @@ Score = noisy-OR of triggered rule weights; for orders a trained logistic model 
 `high` => `hold_for_manual_review`. Reason codes are stable machine strings (e.g.
 `new_account_high_value`, `buyer_and_seller_share_device`, `payout_destination_changed_last_day`,
 `otp_bruteforce`, `signup_farm`, `reciprocal_transfer_ring`, `rapid_forwarding_of_received_coins`,
-`gift_reciprocity_laundering`, `self_referral_ring`, `buyer_linked_to_seller`, `refunds_after_cashback`,
-`exchange_rate_unavailable` with weight 0). Send `risk_outcome_labeled` events when cases resolve.
+`gift_reciprocity_laundering`, `exchange_rate_unavailable` with weight 0). Send `risk_outcome_labeled` events when cases resolve.
 
 ### 7.11 POST /v1/experiments/assign
 
@@ -757,13 +764,13 @@ degrades to heuristics (`metadata.degraded`). Response: `{contentId, categories[
 
 ### POST /v1/risk/score-extended
 
-Subjects not covered by `/v1/risk/score`: `account, payment, ad_click, referral_removed, refund, marketplace`. Exactly one signals block matching
-`subjectType` (`account`, `payment`, `adClick`, `referralRemoved`, `refund`, `marketplace`), camelCase fields as in
+Subjects not covered by `/v1/risk/score`: `account, payment, ad_click, refund, marketplace`. Exactly one signals block matching
+`subjectType` (`account`, `payment`, `adClick`, `refund`, `marketplace`), camelCase fields as in
 `src/modules/extended_risk/dtos/extended_risk_dto.py`. Response: `{subjectType, subjectId, score, level, recommendedAction, reasons, suspensionSuggested, metadata}`.
 
 ### Suspension suggestions (goTrust advisory queue)
 
-When an `account`, `ad_click`, `referral_removed` or `marketplace` risk score, or a chat spam score, is >= 0.8, Python publishes one message per
+When an `account`, `ad_click` or `marketplace` risk score, or a chat spam score, is >= 0.8, Python publishes one message per
 account, source and UTC day as a persistent RabbitMQ job (exchange `zudomart.jobs`, routing key `INTELLIGENCE_TRUST_ADVISORY_QUEUE`, default `intelligence-trust-advisory`; `EVENT_BUS=sqs` keeps `INTELLIGENCE_TRUST_ADVISORY_QUEUE_URL`):
 `{suggestionId, subjectType:"account", subjectId, source, score, evidence:[{code,weight}], advisoryOnly:true, generatedAt}`, `message_id = suggestionId`, `type = suspension.suggested`.
 It never suspends anything; goTrust opens an advisory case. Publish failures are logged and never fail the scoring call.
@@ -814,6 +821,17 @@ actor = `data.accountId` (gift.sent: `data.sender.userId`, falling back to `subj
 
 Expected from social/commerce/ads; must match their contract schemas once published (names and flat payloads are provisional):
 `product.viewed`, `follow.created`, `post.created`, `message.sent`, `report.created`, `block.created`, `ad.impressionRecorded`.
+
+Social engagement (contract envelope `data`, personalization-gated, translated with hashed ids):
+
+| type | data | becomes |
+|---|---|---|
+| post.liked | postId, authorId, likedBy, topics?, hashtags? | `post_liked` (actor `likedBy`) |
+| post.shared | postId, authorId, sharedBy, channel? | `shared` (actor `sharedBy`; unknown channels => `external`, none => `in_app`) |
+| comment.created | commentId, postId, authorId (commenter), recipientUserId, target, postAuthorId? | `commented` once per comment (eventId `comment.created:<commentId>`); needs `postAuthorId` or `target: "post"`, otherwise skipped |
+| content.saved | accountId, targetType (`post` \| `video` \| `clip` \| `product`), targetId, authorId? | `saved` (`video` => `post`) |
+| post.viewed | postId, authorId, viewerId, dwellMs?, position?, isProductPost? | `post_viewed` (impression; seen set + dwell) |
+| clip.watched | clipId, creatorId, viewerId, watchFraction, loopCount?, durationMs | `clip_watched` |
 `message.sent` carries metadata only: `{recipientId, conversationId, containsLink?, linkReported?, deviceId?, ipHash?}`; extra fields reject the event.
 Personalization-gated: product.viewed, follow.created, ad.impressionRecorded, report.created affinity. Safety counters (messages, logins, reports, blocks, posts) are kept for abuse scoring.
 
@@ -849,6 +867,6 @@ Event `context` accepts `actorTrust` (`new`, `low`, `normal`) and `actorClusterK
 - [ ] Forward events through an outbox: batch ≤500, sign, retry with backoff on 5xx/timeouts with the same `eventId`s, drop individually rejected events after logging.
 - [ ] Emit shown events (post_viewed with dwell, clip_watched with watch fraction, ad_impression) for everything displayed, and echo `metadata.requestId` as `context.rankingRequestId` (`auctionId` for ads).
 - [ ] Include `topics`/`hashtags` on item events, `country` on envelopes, `experimentAssignments` when relevant.
-- [ ] Send `risk_outcome_labeled` when fraud cases resolve, and `coin_transferred` / `gift_sent` / `referral_rewarded` for value-flow risk signals.
+- [ ] Send `risk_outcome_labeled` when fraud cases resolve, and `coin_transferred` / `gift_sent` for value-flow risk signals.
 - [ ] Media worker: decode each uploaded sound/clip audio with ffmpeg to 8 kHz mono s16le (≤30 s), call `/v1/audio/fingerprints` (it returns duplicates found before registration), credit `earliestVerifiedSoundId` on reuse, hold uploads matching `isFlaggedCopyright` sounds for review, sync verification/copyright decisions via `/v1/audio/sounds/status`, retry when Python is unavailable without blocking publishing.
 - [ ] Keep the service on an internal network only; share `INTELLIGENCE_SHARED_SECRET` through the secret manager and rotate with the previous-secret mechanism.
