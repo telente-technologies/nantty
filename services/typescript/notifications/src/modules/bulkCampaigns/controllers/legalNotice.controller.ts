@@ -17,25 +17,32 @@ export class LegalNoticeController {
     return staff;
   }
 
+  private async withDraft(context: RouteContext, permissions: readonly string[]) {
+    const staff = await this.staff(context, permissions);
+    const versionId = context.params["versionId"] ?? "";
+    await this.container.noticeDraftProvisioner.ensure(versionId, context.request.getHeader("authorization") ?? undefined);
+    return { staff, versionId };
+  }
+
   public getDraft = async (context: RouteContext) => {
-    await this.staff(context, viewPermissions);
-    return json(200, await this.container.getNoticeDraft.execute(context.params["versionId"] ?? ""));
+    const { versionId } = await this.withDraft(context, viewPermissions);
+    return json(200, await this.container.getNoticeDraft.execute(versionId));
   };
 
   public updateDraft = async (context: RouteContext) => {
-    const staff = await this.staff(context, editPermissions);
     const body = parseWithSchema(updateNoticeDraftBodySchema, readJsonBody(context.request));
-    return json(200, await this.container.updateNoticeDraft.execute({ versionId: context.params["versionId"] ?? "", ...body, actor: { id: staff.id, name: staff.name } }));
+    const { staff, versionId } = await this.withDraft(context, editPermissions);
+    return json(200, await this.container.updateNoticeDraft.execute({ versionId, ...body, actor: { id: staff.id, name: staff.name } }));
   };
 
   public testSend = async (context: RouteContext) => {
-    const staff = await this.staff(context, editPermissions);
-    return json(200, await this.container.sendNoticeTestEmail.execute({ versionId: context.params["versionId"] ?? "", actor: { id: staff.id, name: staff.name } }));
+    const { staff, versionId } = await this.withDraft(context, editPermissions);
+    return json(200, await this.container.sendNoticeTestEmail.execute({ versionId, actor: { id: staff.id, name: staff.name } }));
   };
 
   public preview = async (context: RouteContext) => {
-    await this.staff(context, viewPermissions);
-    return json(200, await this.container.previewLegalNotice.execute(context.params["versionId"] ?? ""));
+    const { versionId } = await this.withDraft(context, viewPermissions);
+    return json(200, await this.container.previewLegalNotice.execute(versionId));
   };
 
   public listNotices = async (context: RouteContext) => {
