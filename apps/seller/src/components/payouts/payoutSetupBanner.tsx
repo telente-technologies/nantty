@@ -9,7 +9,7 @@ import { formatCountdownUntil } from "@/utils/payoutName.util";
 
 export function PayoutSetupBanner() {
   const { formatMoney } = useMoneyFormatter();
-  const { data: state } = useSellerQuery<PayoutOnboardingState>("/seller/payout-onboarding");
+  const { data: state } = useSellerQuery<PayoutOnboardingState>("/payments/payout-onboarding/me");
   if (!state || state.status === "verified") return null;
   const isReady = state.accountStatus === "documentsRequired" && state.status === "in_progress";
   const title = state.status === "pending_review" ? "Payouts are in review" : state.status === "action_needed" ? "Action needed on your payouts" : isReady ? (state.pendingWithdrawable ? `Verify your ID to withdraw ${formatMoney(state.pendingWithdrawable)}` : "Verify your ID to withdraw") : state.completedSteps.length === 0 ? "Set up payouts to withdraw your sales" : "Finish payout setup";

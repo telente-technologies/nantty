@@ -28,7 +28,7 @@ export function PayoutStatusSummary({ state, context, onFix, onChanged }: { read
     setIsRetrying(true);
     setRetryError(null);
     try {
-      await sendSellerApiRequest("/seller/payout-onboarding/retry", { method: "POST" });
+      await sendSellerApiRequest("/payments/payout-onboarding/me/retry", { method: "POST" });
       onChanged();
     } catch (error) {
       setRetryError(readErrorMessageForDisplay(error));

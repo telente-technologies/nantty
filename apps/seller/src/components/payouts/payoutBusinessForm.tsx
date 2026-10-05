@@ -21,7 +21,7 @@ export function PayoutBusinessForm({ stepCount, onSaved }: { readonly stepCount:
     setIsBusy(true);
     setErrorMessage(null);
     try {
-      await sendSellerApiRequest("/seller/payout-onboarding/business", { method: "PUT", body: { cacNumber: cacNumber.trim().toUpperCase(), businessType } });
+      await sendSellerApiRequest("/payments/payout-onboarding/me/business", { method: "PUT", body: { cacNumber: cacNumber.trim().toUpperCase(), businessType } });
       onSaved();
     } catch (error) {
       setErrorMessage(readErrorMessageForDisplay(error));

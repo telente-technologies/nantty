@@ -32,7 +32,7 @@ export function PayoutBankForm({ state, stepNumber, stepCount, onSaved }: { read
     if (!bankCode || accountNumber.length !== 10) return;
     let cancelled = false;
     setIsResolving(true);
-    sendSellerApiRequest<{ accountName: string }>("/seller/payout-onboarding/resolve", { method: "POST", body: { bankCode, accountNumber } })
+    sendSellerApiRequest<{ accountName: string }>("/payments/payout-onboarding/me/resolve", { method: "POST", body: { bankCode, accountNumber } })
       .then((result) => !cancelled && setResolvedName(result.accountName))
       .catch((error: unknown) => !cancelled && setErrorMessage(readErrorMessageForDisplay(error)))
       .finally(() => !cancelled && setIsResolving(false));
@@ -43,7 +43,7 @@ export function PayoutBankForm({ state, stepNumber, stepCount, onSaved }: { read
     setIsBusy(true);
     setErrorMessage(null);
     try {
-      await sendSellerApiRequest("/seller/payout-onboarding/bank", { method: "PUT", body: { bankCode, bankName: bank?.name ?? "", accountNumber, resolvedAccountName: resolvedName } });
+      await sendSellerApiRequest("/payments/payout-onboarding/me/bank", { method: "PUT", body: { bankCode, bankName: bank?.name ?? "", accountNumber, resolvedAccountName: resolvedName } });
       onSaved();
     } catch (error) {
       setErrorMessage(readErrorMessageForDisplay(error));

@@ -41,7 +41,7 @@ export function PayoutDocumentStep({ state, stepNumber, stepCount, onChanged }: 
     setErrorMessage(null);
     setIsUnavailable(false);
     try {
-      const link = await sendSellerApiRequest<PayoutDocumentLink>("/seller/payout-onboarding/document-link", { method: "POST" });
+      const link = await sendSellerApiRequest<PayoutDocumentLink>("/payments/payout-onboarding/me/document-link", { method: "POST" });
       window.open(link.url, "zudomart-payout-verification", "popup,width=520,height=760");
       void onChanged();
     } catch (error) {

@@ -29,7 +29,7 @@ export function PayoutIdentityForm({ state, stepCount, onSaved }: { readonly sta
     setIsBusy(true);
     setErrorMessage(null);
     try {
-      await sendSellerApiRequest("/seller/payout-onboarding/identity", { method: "PUT", body: { legalName: legalName.trim(), dateOfBirth, addressLine1: addressLine1.trim(), city: city.trim(), state: region.trim(), idType, idNumber, registeredBusiness } });
+      await sendSellerApiRequest("/payments/payout-onboarding/me/identity", { method: "PUT", body: { legalName: legalName.trim(), dateOfBirth, addressLine1: addressLine1.trim(), city: city.trim(), state: region.trim(), idType, idNumber, registeredBusiness } });
       onSaved();
     } catch (error) {
       setErrorMessage(readErrorMessageForDisplay(error));

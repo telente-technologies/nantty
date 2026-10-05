@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import { sendSellerApiRequest } from "@/services/clientApi.service";
@@ -23,7 +23,7 @@ const stepOrderNumbers = (state: PayoutOnboardingState) => {
 };
 
 export function PayoutOnboardingPanel({ context }: { readonly context: "seller" | "creator" }) {
-  const query = useSellerQuery<PayoutOnboardingState>("/seller/payout-onboarding");
+  const query = useSellerQuery<PayoutOnboardingState>("/payments/payout-onboarding/me");
   const [isEditing, setIsEditing] = useState(false);
   const verificationParam = useSearchParams().get("verification");
   const handledParamRef = useRef<string | null>(null);
@@ -40,7 +40,7 @@ export function PayoutOnboardingPanel({ context }: { readonly context: "seller" 
     if (!verificationParam || handledParamRef.current === verificationParam) return;
     handledParamRef.current = verificationParam;
     void (async () => {
-      if (verificationParam === "mock") await sendSellerApiRequest("/seller/payout-onboarding/document-link/complete", { method: "POST" }).catch(() => undefined);
+      if (verificationParam === "mock") await sendSellerApiRequest("/payments/payout-onboarding/me/document-link/complete", { method: "POST" }).catch(() => undefined);
       const channel = new BroadcastChannel(PAYOUT_VERIFICATION_CHANNEL);
       channel.postMessage("returned");
       channel.close();
@@ -54,7 +54,7 @@ export function PayoutOnboardingPanel({ context }: { readonly context: "seller" 
     await Promise.resolve();
   }, [reload]);
 
-  if (!state) return query.errorMessage ? <Callout tone="error">{query.errorMessage}</Callout> : <LoadingBlock />;
+  if (!state) return query.errorMessage ? <ErrorCallout message={query.errorMessage} onRetry={query.reload} /> : <LoadingBlock />;
   if (verificationParam === "returned" || verificationParam === "mock") {
     return <Callout tone="success" title="Thanks, we've got your documents">You can close this window. The Zudomart tab you came from will pick up where you left off.</Callout>;
   }
@@ -66,7 +66,7 @@ export function PayoutOnboardingPanel({ context }: { readonly context: "seller" 
     <Panel title="Get paid" description="Set up once. The same details cover everything you earn on Zudomart.">
       <PayoutSyncList state={state} />
       {state.accountStatus === "failed" ? (
-        <Callout tone="caution" title="We couldn't reach our payment partner" action={<Button size="small" onClick={() => void sendSellerApiRequest("/seller/payout-onboarding/retry", { method: "POST" }).then(reload)}>Try again</Button>}>We'll keep trying automatically. Your details are saved.</Callout>
+        <Callout tone="caution" title="We couldn't reach our payment partner" action={<Button size="small" onClick={() => void sendSellerApiRequest("/payments/payout-onboarding/me/retry", { method: "POST" }).then(reload)}>Try again</Button>}>We'll keep trying automatically. Your details are saved.</Callout>
       ) : state.accountStatus === "pending_creation" ? <Callout tone="info" title="Setting up your payout account…">This runs in the background. You can leave and come back.</Callout> : null}
       {state.currentStep === "identity" ? <PayoutIdentityForm state={state} stepCount={stepCount} onSaved={reload} /> : null}
       {state.currentStep === "business" ? <PayoutBusinessForm stepCount={stepCount} onSaved={reload} /> : null}
