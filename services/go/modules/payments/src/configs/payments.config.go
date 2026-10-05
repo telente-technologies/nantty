@@ -15,6 +15,7 @@ type PaymentsSettings struct {
 	Paystack                    PaystackSettings
 	DefaultProvider             string
 	AllowedReturnUrls           []string
+	AdsReturnOrigins            []string
 	OnboardingReturnUrl         string
 	OnboardingRefreshUrl        string
 	ConnectedAccountCountry     string
@@ -91,6 +92,7 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 		},
 		DefaultProvider:             reader.ReadStringOrDefault("PAYMENTS_DEFAULT_PROVIDER", "paystack"),
 		AllowedReturnUrls:           reader.ReadCommaSeparatedListOrDefault("PAYMENT_RETURN_URLS", []string{"https://zudomart.com/pay/return", "https://app.zudomart.com/pay/return"}),
+		AdsReturnOrigins:            reader.ReadCommaSeparatedListOrDefault("PAYMENT_ADS_RETURN_ORIGINS", []string{"https://ads.zudomart.com"}),
 		OnboardingReturnUrl:         reader.ReadStringOrDefault("CONNECT_ONBOARDING_RETURN_URL", "https://zudomart.com/seller/verification/return"),
 		OnboardingRefreshUrl:        reader.ReadStringOrDefault("CONNECT_ONBOARDING_REFRESH_URL", "https://zudomart.com/seller/verification/refresh"),
 		ConnectedAccountCountry:     reader.ReadStringOrDefault("CONNECT_ACCOUNT_COUNTRY", "NG"),

@@ -28,6 +28,7 @@ type Container struct {
 	Accounts       repositories.VerifiedAccountDirectory
 	CardHandoffs   utils.SavedCardHandoffStore
 	OrderStatuses  repositories.OrderStatusDirectory
+	Documents      interfaces.DocumentVerificationProvider
 	Ledger         *ledgerservices.Ledger
 	Outbox         ledgerevents.OutboxTable
 	Idempotency    ledgerutils.SqlIdempotencyRecordStore
@@ -41,6 +42,7 @@ type Overrides struct {
 	Accounts       repositories.VerifiedAccountDirectory
 	CardHandoffs   utils.SavedCardHandoffStore
 	OrderStatuses  repositories.OrderStatusDirectory
+	Documents      interfaces.DocumentVerificationProvider
 }
 
 func NewPaystackProviderFromSettings(settings configs.PaymentsSettings) *integrations.PaystackProvider {
@@ -82,6 +84,7 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 	}
 	return &Container{
 		Resources: resources, Settings: settings, Providers: providers, StoreVerifiers: storeVerifiers, Accounts: accounts, CardHandoffs: cardHandoffs, OrderStatuses: orderStatuses,
+		Documents:   overrides.Documents,
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.payments"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},

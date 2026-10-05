@@ -19,6 +19,8 @@ const (
 
 	ConnectedAccountRoleSeller  = "seller"
 	ConnectedAccountRoleCreator = "creator"
+
+	AppPaymentReturnUrl = "zudomart://payments/return"
 )
 
 var ReferencePrefixByPurpose = map[string]string{

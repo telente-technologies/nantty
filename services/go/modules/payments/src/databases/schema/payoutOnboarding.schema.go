@@ -32,10 +32,15 @@ func (PayoutOnboarding) Fields() []ent.Field {
 		field.String("account_last4").MaxLen(4).Default(""),
 		field.String("resolved_account_name").MaxLen(160).Default(""),
 		field.Strings("completed_steps").Optional(),
+		field.Enum("document_status").Values("not_started", "link_issued", "in_review", "approved", "rejected").Default("not_started"),
+		field.String("document_session_id").MaxLen(200).Default(""),
+		field.String("document_link_url").MaxLen(2000).Default(""),
+		field.Time("document_link_expires_at").Optional().Nillable(),
+		field.String("document_rejection_reason").MaxLen(300).Default(""),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
 func (PayoutOnboarding) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("user_id").Unique()}
+	return []ent.Index{index.Fields("user_id").Unique(), index.Fields("document_session_id")}
 }
