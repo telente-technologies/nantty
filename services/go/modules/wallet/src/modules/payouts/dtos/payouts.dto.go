@@ -1,6 +1,10 @@
 package dtos
 
-import "time"
+import (
+	"time"
+
+	ledgerrepositories "zudomart/modules/ledger/src/repositories"
+)
 
 type MoneyDto struct {
 	AmountMinor int64  `json:"amountMinor"`
@@ -69,4 +73,44 @@ type WalletSummaryDto struct {
 type ReviewWithdrawalRequestDto struct {
 	Decision string `json:"decision"`
 	Reason   string `json:"reason,omitempty"`
+}
+
+type PayoutDestinationDto struct {
+	PayoutAccountId string    `json:"payoutAccountId"`
+	BankName        string    `json:"bankName"`
+	AccountLast4    string    `json:"accountLast4"`
+	AccountName     string    `json:"accountName"`
+	CountryCode     string    `json:"countryCode"`
+	AddedAt         time.Time `json:"addedAt"`
+	Removed         bool      `json:"removed"`
+}
+
+type StaffWithdrawalDto struct {
+	WithdrawalDto
+	UserId            string                          `json:"userId"`
+	User              ledgerrepositories.PartySummary `json:"user"`
+	Provider          string                          `json:"provider"`
+	Destination       *PayoutDestinationDto           `json:"destination"`
+	ReviewedByStaffId *string                         `json:"reviewedByStaffId"`
+	ReviewedAt        *time.Time                      `json:"reviewedAt"`
+	ReviewNote        *string                         `json:"reviewNote"`
+}
+
+type RecentWithdrawalDto struct {
+	Id               string    `json:"id"`
+	Amount           MoneyDto  `json:"amount"`
+	WithdrawalStatus string    `json:"withdrawalStatus"`
+	CreatedAt        time.Time `json:"createdAt"`
+}
+
+type StaffWithdrawalDetailDto struct {
+	StaffWithdrawalDto
+	AvailableBalance  MoneyDto              `json:"availableBalance"`
+	RecentWithdrawals []RecentWithdrawalDto `json:"recentWithdrawals"`
+}
+
+type StaffWithdrawalListDto struct {
+	Data       []StaffWithdrawalDto `json:"data"`
+	NextCursor *string              `json:"nextCursor"`
+	Counts     map[string]int       `json:"counts"`
 }
