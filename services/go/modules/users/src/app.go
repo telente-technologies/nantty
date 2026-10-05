@@ -18,6 +18,7 @@ import (
 	"zudomart/modules/users/src/integrations"
 	"zudomart/modules/users/src/migrations"
 	accountenforcement "zudomart/modules/users/src/modules/accountEnforcement"
+	accountsettings "zudomart/modules/users/src/modules/accountSettings"
 	actingprofiles "zudomart/modules/users/src/modules/actingProfiles"
 	businessdocuments "zudomart/modules/users/src/modules/businessDocuments"
 	businessprofiles "zudomart/modules/users/src/modules/businessProfiles"
@@ -32,6 +33,8 @@ import (
 	"zudomart/modules/users/src/modules/privacy"
 	"zudomart/modules/users/src/modules/profiles"
 	searchsources "zudomart/modules/users/src/modules/searchSources"
+	"zudomart/modules/users/src/modules/sitemap"
+	"zudomart/modules/users/src/modules/topics"
 	"zudomart/modules/users/src/modules/usernames"
 	"zudomart/modules/users/src/services"
 	platformevents "zudomart/platform/events"
@@ -84,6 +87,10 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 		_ = database.Close()
 		return nil, err
 	}
+	if err := topics.SeedReferenceData(ctx, usersContainer); err != nil {
+		_ = database.Close()
+		return nil, err
+	}
 	if settings.Privacy.MoneyInternalUrl != "" {
 		usersContainer.PendingWithdrawals = integrations.NewHttpPendingWithdrawalChecker(settings.Privacy.MoneyInternalUrl, settings.Privacy.MoneyInternalToken)
 	}
@@ -117,6 +124,9 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	contactprivacy.Mount(mux, module.container)
 	searchsources.Mount(mux, module.container)
 	notificationdirectory.Mount(mux, module.container)
+	topics.Mount(mux, module.container)
+	accountsettings.Mount(mux, module.container)
+	sitemap.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

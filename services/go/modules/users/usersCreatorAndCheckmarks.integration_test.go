@@ -23,27 +23,23 @@ func TestCreatorProgramDecisionsFollowTheAdminThresholds(t *testing.T) {
 	cases := []struct {
 		name         string
 		signals      map[string]any
-		phone        bool
 		wantDecision string
 		wantStatus   string
 	}{
-		{"every threshold met is approved automatically", map[string]any{"realFollowers": 1500, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "fraudScore": 10}, true, "auto_approve", "approved"},
-		{"500 to 999 followers goes to manual review", map[string]any{"realFollowers": 700, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "riskScore": 20}, true, "manual_review", "pending"},
-		{"a high fraud score with enough followers goes to review", map[string]any{"realFollowers": 1500, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "fraudScore": 55, "riskScore": 40}, true, "manual_review", "pending"},
-		{"under 500 followers is not eligible", map[string]any{"realFollowers": 120}, true, "not_eligible", "rejected"},
-		{"a risk score above the review limit is not eligible", map[string]any{"realFollowers": 900, "riskScore": 80}, true, "not_eligible", "rejected"},
+		{"every threshold met is approved automatically", map[string]any{"realFollowers": 1500, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "fraudScore": 10}, "auto_approve", "approved"},
+		{"500 to 999 followers goes to manual review", map[string]any{"realFollowers": 700, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "riskScore": 20}, "manual_review", "pending"},
+		{"a high fraud score with enough followers goes to review", map[string]any{"realFollowers": 1500, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "fraudScore": 55, "riskScore": 40}, "manual_review", "pending"},
+		{"under 500 followers is not eligible", map[string]any{"realFollowers": 120}, "not_eligible", "rejected"},
+		{"a risk score above the review limit is not eligible", map[string]any{"realFollowers": 900, "riskScore": 80}, "not_eligible", "rejected"},
 	}
 	for index, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
 			harness := startUsersModuleAgainstFreshSchema(t)
 			username := "creator.case" + string(rune('a'+index))
-			accountId, token := harness.newAccount(username, "Creator Case")
-			if testCase.phone {
-				harness.accounts.SetPhoneVerified(mustParseUuid(accountId))
-			}
+			_, token := harness.newAccount(username, "Creator Case")
 			harness.putSignals(harness.profileIdOf(token), testCase.signals)
 			eligibility := harness.expect("GET", "/api/v1/creators/eligibility", token, nil, http.StatusOK)
-			if eligibility["decision"] != testCase.wantDecision || len(eligibility["requirements"].([]any)) != 5 {
+			if eligibility["decision"] != testCase.wantDecision || len(eligibility["requirements"].([]any)) != 4 {
 				t.Fatalf("unexpected eligibility %v", eligibility)
 			}
 			application := harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{
