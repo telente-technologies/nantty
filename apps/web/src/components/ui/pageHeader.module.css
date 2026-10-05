@@ -1,7 +1,7 @@
 .header {
   display: grid;
-  gap: 20px;
-  padding-block: clamp(48px, 8vw, 112px) clamp(32px, 5vw, 64px);
+  gap: var(--space-5);
+  padding-block: clamp(48px, 8vw, 112px) clamp(var(--space-7), 5vw, 64px);
 }
 
 .title {

@@ -32,7 +32,7 @@ function readBusinessAppUrl(configuredUrl: string | undefined, productionUrl: st
 export const businessAppLinks = {
   sellerDashboard: {
     label: "Zudomart Dashboard",
-    description: "Products, inventory, orders, staff and reports for verified Gold businesses.",
+    description: "Products, inventory, orders, customers and reports. Free for every seller.",
     href: readBusinessAppUrl(process.env.NEXT_PUBLIC_DASHBOARD_URL, "https://dashboard.zudomart.com", "http://localhost:3200"),
   },
   adsManager: {

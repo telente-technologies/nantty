@@ -27,7 +27,7 @@ export const sellerQuestions: readonly QuestionAndAnswer[] = [
   {
     question: "What is the Zudomart Dashboard?",
     answer:
-      "The Zudomart Dashboard is a web app for verified Gold businesses with a subscription. It adds advanced inventory, staff accounts and sales reports. Sign in with the same account you use in the Zudomart app.",
+      "The Zudomart Dashboard is the web app where you run your store: products, inventory, app orders, customers, payouts and reports. It is free for every Zudomart seller. Pro and Business add tools like bulk editing, staff accounts and accounting exports. Sign in with the same account you use in the Zudomart app.",
   },
   {
     question: "How do I advertise my store?",

@@ -1,6 +1,6 @@
 .intro {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
   max-width: 720px;
 }
 

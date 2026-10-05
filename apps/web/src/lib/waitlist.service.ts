@@ -28,6 +28,8 @@ export async function submitWaitlistEmailToApi(signupRequest: WaitlistSignupRequ
     ...(signupRequest.source && allowedSourcePattern.test(signupRequest.source) ? { source: signupRequest.source } : {}),
   };
 
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return { outcome: "failed", message: "You're offline. Reconnect and try again." };
+
   try {
     const response = await postJsonToApi(waitlistApiPath, requestBody);
     if (response.status >= 200 && response.status < 300) {
