@@ -1,3 +1,16 @@
+export const brandPalette = {
+  50: "#D8D5FF",
+  100: "#C4BFFF",
+  200: "#A6A0FF",
+  300: "#8980FF",
+  400: "#6155FF",
+  500: "#3A2BFF",
+  600: "#3024D2",
+  700: "#271DA6",
+  800: "#201884",
+  900: "#181263",
+} as const;
+
 export const lightColors = {
   bg: "#F7F8FE",
   surface: "#FFFFFF",
@@ -10,9 +23,11 @@ export const lightColors = {
   borderStrong: "#CDD1E6",
   borderControl: "#80869F",
   surfaceHover: "#F4F6FD",
-  brand: "#2043F5",
-  brandSolid: "#2043F5",
-  brandTint: "#ECEFFF",
+  brand: "#3A2BFF",
+  brandSolid: "#3A2BFF",
+  brandSolidHover: "#3024D2",
+  brandSolidPressed: "#271DA6",
+  brandTint: "#EFEEFF",
   onBrand: "#FFFFFF",
   accent: "#F5E320",
   onAccent: "#0A0A14",
@@ -26,7 +41,7 @@ export const lightColors = {
   dangerTint: "#FDECEC",
   dangerText: "#B91C1C",
   overlay: "rgba(10, 10, 20, 0.5)",
-  focus: "#2043F5",
+  focus: "#3A2BFF",
 } as const;
 
 export type SemanticColors = { readonly [Key in keyof typeof lightColors]: string };
@@ -43,9 +58,11 @@ export const darkColors: SemanticColors = {
   borderStrong: "#353B57",
   borderControl: "#646C8E",
   surfaceHover: "#1A1E30",
-  brand: "#7B90F9",
-  brandSolid: "#4563F7",
-  brandTint: "#1A2150",
+  brand: "#9C95FF",
+  brandSolid: "#4E40FF",
+  brandSolidHover: "#6155FF",
+  brandSolidPressed: "#3A2BFF",
+  brandTint: "#1E1A52",
   onBrand: "#FFFFFF",
   accent: "#F5E320",
   onAccent: "#0A0A14",
@@ -59,7 +76,7 @@ export const darkColors: SemanticColors = {
   dangerTint: "#2E1416",
   dangerText: "#FCA5A5",
   overlay: "rgba(0, 0, 0, 0.65)",
-  focus: "#8FA1FA",
+  focus: "#A6A0FF",
 };
 
 export const typeScale = { xs: 12, sm: 13, md: 14, base: 16, lg: 20, xl: 24, xxl: 32 } as const;
