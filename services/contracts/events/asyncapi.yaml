@@ -110,6 +110,32 @@ channels:
         $ref: '#/components/messages/messageSent'
       messageCreated:
         $ref: '#/components/messages/messageCreated'
+      messageUpdated:
+        $ref: '#/components/messages/messageUpdated'
+      messageRemoved:
+        $ref: '#/components/messages/messageRemoved'
+      messageReactionsChanged:
+        $ref: '#/components/messages/messageReactionsChanged'
+      conversationRead:
+        $ref: '#/components/messages/conversationRead'
+      conversationUpdated:
+        $ref: '#/components/messages/conversationUpdated'
+      conversationMemberRemoved:
+        $ref: '#/components/messages/conversationMemberRemoved'
+      conversationMemberLeft:
+        $ref: '#/components/messages/conversationMemberLeft'
+      contentSaved:
+        $ref: '#/components/messages/contentSaved'
+      postViewed:
+        $ref: '#/components/messages/postViewed'
+      clipWatched:
+        $ref: '#/components/messages/clipWatched'
+      postLinkClicked:
+        $ref: '#/components/messages/postLinkClicked'
+      storeFollowed:
+        $ref: '#/components/messages/storeFollowed'
+      storeUnfollowed:
+        $ref: '#/components/messages/storeUnfollowed'
       reportCreated:
         $ref: '#/components/messages/reportCreated'
       accountRegistered:
@@ -132,6 +158,10 @@ channels:
         $ref: '#/components/messages/usernameChanged'
       usernameWithheld:
         $ref: '#/components/messages/usernameWithheld'
+      topicsSelected:
+        $ref: '#/components/messages/topicsSelected'
+      suspensionAppealSubmitted:
+        $ref: '#/components/messages/suspensionAppealSubmitted'
       businessProfileCreated:
         $ref: '#/components/messages/businessProfileCreated'
       creatorProfileCreated:
@@ -358,6 +388,18 @@ channels:
         $ref: '#/components/messages/reviewReplied'
       reviewReported:
         $ref: '#/components/messages/reviewReported'
+      sellerApplicationSubmitted:
+        $ref: '#/components/messages/sellerApplicationSubmitted'
+      sellerApplicationReviewed:
+        $ref: '#/components/messages/sellerApplicationReviewed'
+      storeStatusChanged:
+        $ref: '#/components/messages/storeStatusChanged'
+      brandFollowed:
+        $ref: '#/components/messages/brandFollowed'
+      brandOfficialStatusChanged:
+        $ref: '#/components/messages/brandOfficialStatusChanged'
+      reviewDeleted:
+        $ref: '#/components/messages/reviewDeleted'
       orderCreated:
         $ref: '#/components/messages/orderCreated'
       orderCancelled:
@@ -490,6 +532,8 @@ operations:
       - $ref: '#/channels/domainEvents/messages/profileVisibilityChanged'
       - $ref: '#/channels/domainEvents/messages/usernameChanged'
       - $ref: '#/channels/domainEvents/messages/usernameWithheld'
+      - $ref: '#/channels/domainEvents/messages/topicsSelected'
+      - $ref: '#/channels/domainEvents/messages/suspensionAppealSubmitted'
       - $ref: '#/channels/domainEvents/messages/businessProfileCreated'
       - $ref: '#/channels/domainEvents/messages/creatorProfileCreated'
       - $ref: '#/channels/domainEvents/messages/privacySettingsChanged'
@@ -930,6 +974,20 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/username.withheld.v1.json' } }
+    topicsSelected:
+      name: topics.selected
+      headers: { type: object, properties: { eventType: { const: topics.selected } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/topics.selected.v1.json' } }
+    suspensionAppealSubmitted:
+      name: suspensionAppeal.submitted
+      headers: { type: object, properties: { eventType: { const: suspensionAppeal.submitted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/suspensionAppeal.submitted.v1.json' } }
     businessProfileCreated:
       name: businessProfile.created
       headers: { type: object, properties: { eventType: { const: businessProfile.created } } }
@@ -1672,6 +1730,97 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/message.created.v1.json' } }
+    messageUpdated:
+      name: message.updated
+      headers: { type: object, properties: { eventType: { const: message.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/message.updated.v1.json' } }
+    messageRemoved:
+      name: message.removed
+      headers: { type: object, properties: { eventType: { const: message.removed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/message.removed.v1.json' } }
+    messageReactionsChanged:
+      name: message.reactionsChanged
+      headers: { type: object, properties: { eventType: { const: message.reactionsChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/message.reactionsChanged.v1.json' } }
+    conversationRead:
+      name: conversation.read
+      headers: { type: object, properties: { eventType: { const: conversation.read } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/conversation.read.v1.json' } }
+    conversationUpdated:
+      name: conversation.updated
+      headers: { type: object, properties: { eventType: { const: conversation.updated } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/conversation.updated.v1.json' } }
+    conversationMemberRemoved:
+      name: conversation.memberRemoved
+      headers: { type: object, properties: { eventType: { const: conversation.memberRemoved } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/conversation.memberRemoved.v1.json' } }
+    conversationMemberLeft:
+      name: conversation.memberLeft
+      headers: { type: object, properties: { eventType: { const: conversation.memberLeft } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/conversation.memberLeft.v1.json' } }
+    contentSaved:
+      name: content.saved
+      headers: { type: object, properties: { eventType: { const: content.saved } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/content.saved.v1.json' } }
+    postViewed:
+      name: post.viewed
+      headers: { type: object, properties: { eventType: { const: post.viewed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/post.viewed.v1.json' } }
+    clipWatched:
+      name: clip.watched
+      headers: { type: object, properties: { eventType: { const: clip.watched } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/clip.watched.v1.json' } }
+    postLinkClicked:
+      name: post.linkClicked
+      headers: { type: object, properties: { eventType: { const: post.linkClicked } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/post.linkClicked.v1.json' } }
+    storeFollowed:
+      name: store.followed
+      headers: { type: object, properties: { eventType: { const: store.followed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/store.followed.v1.json' } }
+    storeUnfollowed:
+      name: store.unfollowed
+      headers: { type: object, properties: { eventType: { const: store.unfollowed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/store.unfollowed.v1.json' } }
     reportCreated:
       name: report.created
       headers: { type: object, properties: { eventType: { const: report.created } } }
@@ -1812,6 +1961,48 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/review.reported.v1.json' } }
+    sellerApplicationSubmitted:
+      name: sellerApplication.submitted
+      headers: { type: object, properties: { eventType: { const: sellerApplication.submitted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/sellerApplication.submitted.v1.json' } }
+    sellerApplicationReviewed:
+      name: sellerApplication.reviewed
+      headers: { type: object, properties: { eventType: { const: sellerApplication.reviewed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/sellerApplication.reviewed.v1.json' } }
+    storeStatusChanged:
+      name: store.statusChanged
+      headers: { type: object, properties: { eventType: { const: store.statusChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/store.statusChanged.v1.json' } }
+    brandFollowed:
+      name: brand.followed
+      headers: { type: object, properties: { eventType: { const: brand.followed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/brand.followed.v1.json' } }
+    brandOfficialStatusChanged:
+      name: brand.officialStatusChanged
+      headers: { type: object, properties: { eventType: { const: brand.officialStatusChanged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/brand.officialStatusChanged.v1.json' } }
+    reviewDeleted:
+      name: review.deleted
+      headers: { type: object, properties: { eventType: { const: review.deleted } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/review.deleted.v1.json' } }
     orderCreated:
       name: order.created
       headers: { type: object, properties: { eventType: { const: order.created } } }
