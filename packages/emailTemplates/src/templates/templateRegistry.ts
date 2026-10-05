@@ -1,3 +1,4 @@
+import * as ads from "./ads.template";
 import * as auth from "./auth.template";
 import * as buyerOrders from "./buyerOrders.template";
 import * as checkmarks from "./checkmarks.template";
@@ -42,6 +43,7 @@ export const emailTemplates = {
   ...pickTemplates(privacy),
   ...pickTemplates(support),
   ...pickTemplates(marketing),
+  ...pickTemplates(ads),
 };
 
 export type EmailTemplateKey = keyof typeof emailTemplates;
