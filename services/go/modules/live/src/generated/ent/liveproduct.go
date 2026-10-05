@@ -27,7 +27,15 @@ type LiveProduct struct {
 	// Pinned holds the value of the "pinned" field.
 	Pinned bool `json:"pinned,omitempty"`
 	// PinnedAt holds the value of the "pinned_at" field.
-	PinnedAt     *time.Time `json:"pinned_at,omitempty"`
+	PinnedAt *time.Time `json:"pinned_at,omitempty"`
+	// Title holds the value of the "title" field.
+	Title *string `json:"title,omitempty"`
+	// PriceMinor holds the value of the "price_minor" field.
+	PriceMinor *int64 `json:"price_minor,omitempty"`
+	// Currency holds the value of the "currency" field.
+	Currency *string `json:"currency,omitempty"`
+	// ImageURL holds the value of the "image_url" field.
+	ImageURL     *string `json:"image_url,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -38,6 +46,10 @@ func (*LiveProduct) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case liveproduct.FieldPinned:
 			values[i] = new(sql.NullBool)
+		case liveproduct.FieldPriceMinor:
+			values[i] = new(sql.NullInt64)
+		case liveproduct.FieldTitle, liveproduct.FieldCurrency, liveproduct.FieldImageURL:
+			values[i] = new(sql.NullString)
 		case liveproduct.FieldCreatedAt, liveproduct.FieldPinnedAt:
 			values[i] = new(sql.NullTime)
 		case liveproduct.FieldID, liveproduct.FieldLiveID, liveproduct.FieldProductID:
@@ -94,6 +106,34 @@ func (_m *LiveProduct) assignValues(columns []string, values []any) error {
 				_m.PinnedAt = new(time.Time)
 				*_m.PinnedAt = value.Time
 			}
+		case liveproduct.FieldTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field title", values[i])
+			} else if value.Valid {
+				_m.Title = new(string)
+				*_m.Title = value.String
+			}
+		case liveproduct.FieldPriceMinor:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field price_minor", values[i])
+			} else if value.Valid {
+				_m.PriceMinor = new(int64)
+				*_m.PriceMinor = value.Int64
+			}
+		case liveproduct.FieldCurrency:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field currency", values[i])
+			} else if value.Valid {
+				_m.Currency = new(string)
+				*_m.Currency = value.String
+			}
+		case liveproduct.FieldImageURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field image_url", values[i])
+			} else if value.Valid {
+				_m.ImageURL = new(string)
+				*_m.ImageURL = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -145,6 +185,26 @@ func (_m *LiveProduct) String() string {
 	if v := _m.PinnedAt; v != nil {
 		builder.WriteString("pinned_at=")
 		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.Title; v != nil {
+		builder.WriteString("title=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.PriceMinor; v != nil {
+		builder.WriteString("price_minor=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.Currency; v != nil {
+		builder.WriteString("currency=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.ImageURL; v != nil {
+		builder.WriteString("image_url=")
+		builder.WriteString(*v)
 	}
 	builder.WriteByte(')')
 	return builder.String()

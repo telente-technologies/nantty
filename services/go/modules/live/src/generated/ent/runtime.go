@@ -466,6 +466,18 @@ func init() {
 	liveproductDescPinnedAt := liveproductFields[3].Descriptor()
 	// liveproduct.DefaultPinnedAt holds the default value on creation for the pinned_at field.
 	liveproduct.DefaultPinnedAt = liveproductDescPinnedAt.Default.(func() time.Time)
+	// liveproductDescTitle is the schema descriptor for title field.
+	liveproductDescTitle := liveproductFields[4].Descriptor()
+	// liveproduct.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	liveproduct.TitleValidator = liveproductDescTitle.Validators[0].(func(string) error)
+	// liveproductDescCurrency is the schema descriptor for currency field.
+	liveproductDescCurrency := liveproductFields[6].Descriptor()
+	// liveproduct.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	liveproduct.CurrencyValidator = liveproductDescCurrency.Validators[0].(func(string) error)
+	// liveproductDescImageURL is the schema descriptor for image_url field.
+	liveproductDescImageURL := liveproductFields[7].Descriptor()
+	// liveproduct.ImageURLValidator is a validator for the "image_url" field. It is called by the builders before save.
+	liveproduct.ImageURLValidator = liveproductDescImageURL.Validators[0].(func(string) error)
 	// liveproductDescID is the schema descriptor for id field.
 	liveproductDescID := liveproductMixinFields0[0].Descriptor()
 	// liveproduct.DefaultID holds the default value on creation for the id field.

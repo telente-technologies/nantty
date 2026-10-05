@@ -78,6 +78,62 @@ func (_c *LiveProductCreate) SetNillablePinnedAt(v *time.Time) *LiveProductCreat
 	return _c
 }
 
+// SetTitle sets the "title" field.
+func (_c *LiveProductCreate) SetTitle(v string) *LiveProductCreate {
+	_c.mutation.SetTitle(v)
+	return _c
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_c *LiveProductCreate) SetNillableTitle(v *string) *LiveProductCreate {
+	if v != nil {
+		_c.SetTitle(*v)
+	}
+	return _c
+}
+
+// SetPriceMinor sets the "price_minor" field.
+func (_c *LiveProductCreate) SetPriceMinor(v int64) *LiveProductCreate {
+	_c.mutation.SetPriceMinor(v)
+	return _c
+}
+
+// SetNillablePriceMinor sets the "price_minor" field if the given value is not nil.
+func (_c *LiveProductCreate) SetNillablePriceMinor(v *int64) *LiveProductCreate {
+	if v != nil {
+		_c.SetPriceMinor(*v)
+	}
+	return _c
+}
+
+// SetCurrency sets the "currency" field.
+func (_c *LiveProductCreate) SetCurrency(v string) *LiveProductCreate {
+	_c.mutation.SetCurrency(v)
+	return _c
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (_c *LiveProductCreate) SetNillableCurrency(v *string) *LiveProductCreate {
+	if v != nil {
+		_c.SetCurrency(*v)
+	}
+	return _c
+}
+
+// SetImageURL sets the "image_url" field.
+func (_c *LiveProductCreate) SetImageURL(v string) *LiveProductCreate {
+	_c.mutation.SetImageURL(v)
+	return _c
+}
+
+// SetNillableImageURL sets the "image_url" field if the given value is not nil.
+func (_c *LiveProductCreate) SetNillableImageURL(v *string) *LiveProductCreate {
+	if v != nil {
+		_c.SetImageURL(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *LiveProductCreate) SetID(v uuid.UUID) *LiveProductCreate {
 	_c.mutation.SetID(v)
@@ -159,6 +215,21 @@ func (_c *LiveProductCreate) check() error {
 	if _, ok := _c.mutation.Pinned(); !ok {
 		return &ValidationError{Name: "pinned", err: errors.New(`ent: missing required field "LiveProduct.pinned"`)}
 	}
+	if v, ok := _c.mutation.Title(); ok {
+		if err := liveproduct.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "LiveProduct.title": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Currency(); ok {
+		if err := liveproduct.CurrencyValidator(v); err != nil {
+			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "LiveProduct.currency": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.ImageURL(); ok {
+		if err := liveproduct.ImageURLValidator(v); err != nil {
+			return &ValidationError{Name: "image_url", err: fmt.Errorf(`ent: validator failed for field "LiveProduct.image_url": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -214,6 +285,22 @@ func (_c *LiveProductCreate) createSpec() (*LiveProduct, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PinnedAt(); ok {
 		_spec.SetField(liveproduct.FieldPinnedAt, field.TypeTime, value)
 		_node.PinnedAt = &value
+	}
+	if value, ok := _c.mutation.Title(); ok {
+		_spec.SetField(liveproduct.FieldTitle, field.TypeString, value)
+		_node.Title = &value
+	}
+	if value, ok := _c.mutation.PriceMinor(); ok {
+		_spec.SetField(liveproduct.FieldPriceMinor, field.TypeInt64, value)
+		_node.PriceMinor = &value
+	}
+	if value, ok := _c.mutation.Currency(); ok {
+		_spec.SetField(liveproduct.FieldCurrency, field.TypeString, value)
+		_node.Currency = &value
+	}
+	if value, ok := _c.mutation.ImageURL(); ok {
+		_spec.SetField(liveproduct.FieldImageURL, field.TypeString, value)
+		_node.ImageURL = &value
 	}
 	return _node, _spec
 }
@@ -294,6 +381,84 @@ func (u *LiveProductUpsert) UpdatePinnedAt() *LiveProductUpsert {
 // ClearPinnedAt clears the value of the "pinned_at" field.
 func (u *LiveProductUpsert) ClearPinnedAt() *LiveProductUpsert {
 	u.SetNull(liveproduct.FieldPinnedAt)
+	return u
+}
+
+// SetTitle sets the "title" field.
+func (u *LiveProductUpsert) SetTitle(v string) *LiveProductUpsert {
+	u.Set(liveproduct.FieldTitle, v)
+	return u
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *LiveProductUpsert) UpdateTitle() *LiveProductUpsert {
+	u.SetExcluded(liveproduct.FieldTitle)
+	return u
+}
+
+// ClearTitle clears the value of the "title" field.
+func (u *LiveProductUpsert) ClearTitle() *LiveProductUpsert {
+	u.SetNull(liveproduct.FieldTitle)
+	return u
+}
+
+// SetPriceMinor sets the "price_minor" field.
+func (u *LiveProductUpsert) SetPriceMinor(v int64) *LiveProductUpsert {
+	u.Set(liveproduct.FieldPriceMinor, v)
+	return u
+}
+
+// UpdatePriceMinor sets the "price_minor" field to the value that was provided on create.
+func (u *LiveProductUpsert) UpdatePriceMinor() *LiveProductUpsert {
+	u.SetExcluded(liveproduct.FieldPriceMinor)
+	return u
+}
+
+// AddPriceMinor adds v to the "price_minor" field.
+func (u *LiveProductUpsert) AddPriceMinor(v int64) *LiveProductUpsert {
+	u.Add(liveproduct.FieldPriceMinor, v)
+	return u
+}
+
+// ClearPriceMinor clears the value of the "price_minor" field.
+func (u *LiveProductUpsert) ClearPriceMinor() *LiveProductUpsert {
+	u.SetNull(liveproduct.FieldPriceMinor)
+	return u
+}
+
+// SetCurrency sets the "currency" field.
+func (u *LiveProductUpsert) SetCurrency(v string) *LiveProductUpsert {
+	u.Set(liveproduct.FieldCurrency, v)
+	return u
+}
+
+// UpdateCurrency sets the "currency" field to the value that was provided on create.
+func (u *LiveProductUpsert) UpdateCurrency() *LiveProductUpsert {
+	u.SetExcluded(liveproduct.FieldCurrency)
+	return u
+}
+
+// ClearCurrency clears the value of the "currency" field.
+func (u *LiveProductUpsert) ClearCurrency() *LiveProductUpsert {
+	u.SetNull(liveproduct.FieldCurrency)
+	return u
+}
+
+// SetImageURL sets the "image_url" field.
+func (u *LiveProductUpsert) SetImageURL(v string) *LiveProductUpsert {
+	u.Set(liveproduct.FieldImageURL, v)
+	return u
+}
+
+// UpdateImageURL sets the "image_url" field to the value that was provided on create.
+func (u *LiveProductUpsert) UpdateImageURL() *LiveProductUpsert {
+	u.SetExcluded(liveproduct.FieldImageURL)
+	return u
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (u *LiveProductUpsert) ClearImageURL() *LiveProductUpsert {
+	u.SetNull(liveproduct.FieldImageURL)
 	return u
 }
 
@@ -386,6 +551,97 @@ func (u *LiveProductUpsertOne) UpdatePinnedAt() *LiveProductUpsertOne {
 func (u *LiveProductUpsertOne) ClearPinnedAt() *LiveProductUpsertOne {
 	return u.Update(func(s *LiveProductUpsert) {
 		s.ClearPinnedAt()
+	})
+}
+
+// SetTitle sets the "title" field.
+func (u *LiveProductUpsertOne) SetTitle(v string) *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.SetTitle(v)
+	})
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *LiveProductUpsertOne) UpdateTitle() *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.UpdateTitle()
+	})
+}
+
+// ClearTitle clears the value of the "title" field.
+func (u *LiveProductUpsertOne) ClearTitle() *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.ClearTitle()
+	})
+}
+
+// SetPriceMinor sets the "price_minor" field.
+func (u *LiveProductUpsertOne) SetPriceMinor(v int64) *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.SetPriceMinor(v)
+	})
+}
+
+// AddPriceMinor adds v to the "price_minor" field.
+func (u *LiveProductUpsertOne) AddPriceMinor(v int64) *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.AddPriceMinor(v)
+	})
+}
+
+// UpdatePriceMinor sets the "price_minor" field to the value that was provided on create.
+func (u *LiveProductUpsertOne) UpdatePriceMinor() *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.UpdatePriceMinor()
+	})
+}
+
+// ClearPriceMinor clears the value of the "price_minor" field.
+func (u *LiveProductUpsertOne) ClearPriceMinor() *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.ClearPriceMinor()
+	})
+}
+
+// SetCurrency sets the "currency" field.
+func (u *LiveProductUpsertOne) SetCurrency(v string) *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.SetCurrency(v)
+	})
+}
+
+// UpdateCurrency sets the "currency" field to the value that was provided on create.
+func (u *LiveProductUpsertOne) UpdateCurrency() *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.UpdateCurrency()
+	})
+}
+
+// ClearCurrency clears the value of the "currency" field.
+func (u *LiveProductUpsertOne) ClearCurrency() *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.ClearCurrency()
+	})
+}
+
+// SetImageURL sets the "image_url" field.
+func (u *LiveProductUpsertOne) SetImageURL(v string) *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.SetImageURL(v)
+	})
+}
+
+// UpdateImageURL sets the "image_url" field to the value that was provided on create.
+func (u *LiveProductUpsertOne) UpdateImageURL() *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.UpdateImageURL()
+	})
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (u *LiveProductUpsertOne) ClearImageURL() *LiveProductUpsertOne {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.ClearImageURL()
 	})
 }
 
@@ -645,6 +901,97 @@ func (u *LiveProductUpsertBulk) UpdatePinnedAt() *LiveProductUpsertBulk {
 func (u *LiveProductUpsertBulk) ClearPinnedAt() *LiveProductUpsertBulk {
 	return u.Update(func(s *LiveProductUpsert) {
 		s.ClearPinnedAt()
+	})
+}
+
+// SetTitle sets the "title" field.
+func (u *LiveProductUpsertBulk) SetTitle(v string) *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.SetTitle(v)
+	})
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *LiveProductUpsertBulk) UpdateTitle() *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.UpdateTitle()
+	})
+}
+
+// ClearTitle clears the value of the "title" field.
+func (u *LiveProductUpsertBulk) ClearTitle() *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.ClearTitle()
+	})
+}
+
+// SetPriceMinor sets the "price_minor" field.
+func (u *LiveProductUpsertBulk) SetPriceMinor(v int64) *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.SetPriceMinor(v)
+	})
+}
+
+// AddPriceMinor adds v to the "price_minor" field.
+func (u *LiveProductUpsertBulk) AddPriceMinor(v int64) *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.AddPriceMinor(v)
+	})
+}
+
+// UpdatePriceMinor sets the "price_minor" field to the value that was provided on create.
+func (u *LiveProductUpsertBulk) UpdatePriceMinor() *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.UpdatePriceMinor()
+	})
+}
+
+// ClearPriceMinor clears the value of the "price_minor" field.
+func (u *LiveProductUpsertBulk) ClearPriceMinor() *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.ClearPriceMinor()
+	})
+}
+
+// SetCurrency sets the "currency" field.
+func (u *LiveProductUpsertBulk) SetCurrency(v string) *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.SetCurrency(v)
+	})
+}
+
+// UpdateCurrency sets the "currency" field to the value that was provided on create.
+func (u *LiveProductUpsertBulk) UpdateCurrency() *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.UpdateCurrency()
+	})
+}
+
+// ClearCurrency clears the value of the "currency" field.
+func (u *LiveProductUpsertBulk) ClearCurrency() *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.ClearCurrency()
+	})
+}
+
+// SetImageURL sets the "image_url" field.
+func (u *LiveProductUpsertBulk) SetImageURL(v string) *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.SetImageURL(v)
+	})
+}
+
+// UpdateImageURL sets the "image_url" field to the value that was provided on create.
+func (u *LiveProductUpsertBulk) UpdateImageURL() *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.UpdateImageURL()
+	})
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (u *LiveProductUpsertBulk) ClearImageURL() *LiveProductUpsertBulk {
+	return u.Update(func(s *LiveProductUpsert) {
+		s.ClearImageURL()
 	})
 }
 

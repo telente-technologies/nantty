@@ -62,6 +62,93 @@ func (_u *LiveProductUpdate) ClearPinnedAt() *LiveProductUpdate {
 	return _u
 }
 
+// SetTitle sets the "title" field.
+func (_u *LiveProductUpdate) SetTitle(v string) *LiveProductUpdate {
+	_u.mutation.SetTitle(v)
+	return _u
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_u *LiveProductUpdate) SetNillableTitle(v *string) *LiveProductUpdate {
+	if v != nil {
+		_u.SetTitle(*v)
+	}
+	return _u
+}
+
+// ClearTitle clears the value of the "title" field.
+func (_u *LiveProductUpdate) ClearTitle() *LiveProductUpdate {
+	_u.mutation.ClearTitle()
+	return _u
+}
+
+// SetPriceMinor sets the "price_minor" field.
+func (_u *LiveProductUpdate) SetPriceMinor(v int64) *LiveProductUpdate {
+	_u.mutation.ResetPriceMinor()
+	_u.mutation.SetPriceMinor(v)
+	return _u
+}
+
+// SetNillablePriceMinor sets the "price_minor" field if the given value is not nil.
+func (_u *LiveProductUpdate) SetNillablePriceMinor(v *int64) *LiveProductUpdate {
+	if v != nil {
+		_u.SetPriceMinor(*v)
+	}
+	return _u
+}
+
+// AddPriceMinor adds value to the "price_minor" field.
+func (_u *LiveProductUpdate) AddPriceMinor(v int64) *LiveProductUpdate {
+	_u.mutation.AddPriceMinor(v)
+	return _u
+}
+
+// ClearPriceMinor clears the value of the "price_minor" field.
+func (_u *LiveProductUpdate) ClearPriceMinor() *LiveProductUpdate {
+	_u.mutation.ClearPriceMinor()
+	return _u
+}
+
+// SetCurrency sets the "currency" field.
+func (_u *LiveProductUpdate) SetCurrency(v string) *LiveProductUpdate {
+	_u.mutation.SetCurrency(v)
+	return _u
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (_u *LiveProductUpdate) SetNillableCurrency(v *string) *LiveProductUpdate {
+	if v != nil {
+		_u.SetCurrency(*v)
+	}
+	return _u
+}
+
+// ClearCurrency clears the value of the "currency" field.
+func (_u *LiveProductUpdate) ClearCurrency() *LiveProductUpdate {
+	_u.mutation.ClearCurrency()
+	return _u
+}
+
+// SetImageURL sets the "image_url" field.
+func (_u *LiveProductUpdate) SetImageURL(v string) *LiveProductUpdate {
+	_u.mutation.SetImageURL(v)
+	return _u
+}
+
+// SetNillableImageURL sets the "image_url" field if the given value is not nil.
+func (_u *LiveProductUpdate) SetNillableImageURL(v *string) *LiveProductUpdate {
+	if v != nil {
+		_u.SetImageURL(*v)
+	}
+	return _u
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (_u *LiveProductUpdate) ClearImageURL() *LiveProductUpdate {
+	_u.mutation.ClearImageURL()
+	return _u
+}
+
 // Mutation returns the LiveProductMutation object of the builder.
 func (_u *LiveProductUpdate) Mutation() *LiveProductMutation {
 	return _u.mutation
@@ -94,7 +181,30 @@ func (_u *LiveProductUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *LiveProductUpdate) check() error {
+	if v, ok := _u.mutation.Title(); ok {
+		if err := liveproduct.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "LiveProduct.title": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Currency(); ok {
+		if err := liveproduct.CurrencyValidator(v); err != nil {
+			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "LiveProduct.currency": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ImageURL(); ok {
+		if err := liveproduct.ImageURLValidator(v); err != nil {
+			return &ValidationError{Name: "image_url", err: fmt.Errorf(`ent: validator failed for field "LiveProduct.image_url": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *LiveProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(liveproduct.Table, liveproduct.Columns, sqlgraph.NewFieldSpec(liveproduct.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -111,6 +221,33 @@ func (_u *LiveProductUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if _u.mutation.PinnedAtCleared() {
 		_spec.ClearField(liveproduct.FieldPinnedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Title(); ok {
+		_spec.SetField(liveproduct.FieldTitle, field.TypeString, value)
+	}
+	if _u.mutation.TitleCleared() {
+		_spec.ClearField(liveproduct.FieldTitle, field.TypeString)
+	}
+	if value, ok := _u.mutation.PriceMinor(); ok {
+		_spec.SetField(liveproduct.FieldPriceMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPriceMinor(); ok {
+		_spec.AddField(liveproduct.FieldPriceMinor, field.TypeInt64, value)
+	}
+	if _u.mutation.PriceMinorCleared() {
+		_spec.ClearField(liveproduct.FieldPriceMinor, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.Currency(); ok {
+		_spec.SetField(liveproduct.FieldCurrency, field.TypeString, value)
+	}
+	if _u.mutation.CurrencyCleared() {
+		_spec.ClearField(liveproduct.FieldCurrency, field.TypeString)
+	}
+	if value, ok := _u.mutation.ImageURL(); ok {
+		_spec.SetField(liveproduct.FieldImageURL, field.TypeString, value)
+	}
+	if _u.mutation.ImageURLCleared() {
+		_spec.ClearField(liveproduct.FieldImageURL, field.TypeString)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -166,6 +303,93 @@ func (_u *LiveProductUpdateOne) ClearPinnedAt() *LiveProductUpdateOne {
 	return _u
 }
 
+// SetTitle sets the "title" field.
+func (_u *LiveProductUpdateOne) SetTitle(v string) *LiveProductUpdateOne {
+	_u.mutation.SetTitle(v)
+	return _u
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_u *LiveProductUpdateOne) SetNillableTitle(v *string) *LiveProductUpdateOne {
+	if v != nil {
+		_u.SetTitle(*v)
+	}
+	return _u
+}
+
+// ClearTitle clears the value of the "title" field.
+func (_u *LiveProductUpdateOne) ClearTitle() *LiveProductUpdateOne {
+	_u.mutation.ClearTitle()
+	return _u
+}
+
+// SetPriceMinor sets the "price_minor" field.
+func (_u *LiveProductUpdateOne) SetPriceMinor(v int64) *LiveProductUpdateOne {
+	_u.mutation.ResetPriceMinor()
+	_u.mutation.SetPriceMinor(v)
+	return _u
+}
+
+// SetNillablePriceMinor sets the "price_minor" field if the given value is not nil.
+func (_u *LiveProductUpdateOne) SetNillablePriceMinor(v *int64) *LiveProductUpdateOne {
+	if v != nil {
+		_u.SetPriceMinor(*v)
+	}
+	return _u
+}
+
+// AddPriceMinor adds value to the "price_minor" field.
+func (_u *LiveProductUpdateOne) AddPriceMinor(v int64) *LiveProductUpdateOne {
+	_u.mutation.AddPriceMinor(v)
+	return _u
+}
+
+// ClearPriceMinor clears the value of the "price_minor" field.
+func (_u *LiveProductUpdateOne) ClearPriceMinor() *LiveProductUpdateOne {
+	_u.mutation.ClearPriceMinor()
+	return _u
+}
+
+// SetCurrency sets the "currency" field.
+func (_u *LiveProductUpdateOne) SetCurrency(v string) *LiveProductUpdateOne {
+	_u.mutation.SetCurrency(v)
+	return _u
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (_u *LiveProductUpdateOne) SetNillableCurrency(v *string) *LiveProductUpdateOne {
+	if v != nil {
+		_u.SetCurrency(*v)
+	}
+	return _u
+}
+
+// ClearCurrency clears the value of the "currency" field.
+func (_u *LiveProductUpdateOne) ClearCurrency() *LiveProductUpdateOne {
+	_u.mutation.ClearCurrency()
+	return _u
+}
+
+// SetImageURL sets the "image_url" field.
+func (_u *LiveProductUpdateOne) SetImageURL(v string) *LiveProductUpdateOne {
+	_u.mutation.SetImageURL(v)
+	return _u
+}
+
+// SetNillableImageURL sets the "image_url" field if the given value is not nil.
+func (_u *LiveProductUpdateOne) SetNillableImageURL(v *string) *LiveProductUpdateOne {
+	if v != nil {
+		_u.SetImageURL(*v)
+	}
+	return _u
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (_u *LiveProductUpdateOne) ClearImageURL() *LiveProductUpdateOne {
+	_u.mutation.ClearImageURL()
+	return _u
+}
+
 // Mutation returns the LiveProductMutation object of the builder.
 func (_u *LiveProductUpdateOne) Mutation() *LiveProductMutation {
 	return _u.mutation
@@ -211,7 +435,30 @@ func (_u *LiveProductUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *LiveProductUpdateOne) check() error {
+	if v, ok := _u.mutation.Title(); ok {
+		if err := liveproduct.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "LiveProduct.title": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Currency(); ok {
+		if err := liveproduct.CurrencyValidator(v); err != nil {
+			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "LiveProduct.currency": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ImageURL(); ok {
+		if err := liveproduct.ImageURLValidator(v); err != nil {
+			return &ValidationError{Name: "image_url", err: fmt.Errorf(`ent: validator failed for field "LiveProduct.image_url": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *LiveProductUpdateOne) sqlSave(ctx context.Context) (_node *LiveProduct, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(liveproduct.Table, liveproduct.Columns, sqlgraph.NewFieldSpec(liveproduct.FieldID, field.TypeUUID))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -245,6 +492,33 @@ func (_u *LiveProductUpdateOne) sqlSave(ctx context.Context) (_node *LiveProduct
 	}
 	if _u.mutation.PinnedAtCleared() {
 		_spec.ClearField(liveproduct.FieldPinnedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Title(); ok {
+		_spec.SetField(liveproduct.FieldTitle, field.TypeString, value)
+	}
+	if _u.mutation.TitleCleared() {
+		_spec.ClearField(liveproduct.FieldTitle, field.TypeString)
+	}
+	if value, ok := _u.mutation.PriceMinor(); ok {
+		_spec.SetField(liveproduct.FieldPriceMinor, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedPriceMinor(); ok {
+		_spec.AddField(liveproduct.FieldPriceMinor, field.TypeInt64, value)
+	}
+	if _u.mutation.PriceMinorCleared() {
+		_spec.ClearField(liveproduct.FieldPriceMinor, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.Currency(); ok {
+		_spec.SetField(liveproduct.FieldCurrency, field.TypeString, value)
+	}
+	if _u.mutation.CurrencyCleared() {
+		_spec.ClearField(liveproduct.FieldCurrency, field.TypeString)
+	}
+	if value, ok := _u.mutation.ImageURL(); ok {
+		_spec.SetField(liveproduct.FieldImageURL, field.TypeString, value)
+	}
+	if _u.mutation.ImageURLCleared() {
+		_spec.ClearField(liveproduct.FieldImageURL, field.TypeString)
 	}
 	_node = &LiveProduct{config: _u.config}
 	_spec.Assign = _node.assignValues

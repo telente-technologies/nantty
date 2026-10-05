@@ -11981,18 +11981,23 @@ func (m *LiveModeratorMutation) ResetEdge(name string) error {
 // LiveProductMutation represents an operation that mutates the LiveProduct nodes in the graph.
 type LiveProductMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	created_at    *time.Time
-	live_id       *uuid.UUID
-	product_id    *uuid.UUID
-	pinned        *bool
-	pinned_at     *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*LiveProduct, error)
-	predicates    []predicate.LiveProduct
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	created_at     *time.Time
+	live_id        *uuid.UUID
+	product_id     *uuid.UUID
+	pinned         *bool
+	pinned_at      *time.Time
+	title          *string
+	price_minor    *int64
+	addprice_minor *int64
+	currency       *string
+	image_url      *string
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*LiveProduct, error)
+	predicates     []predicate.LiveProduct
 }
 
 var _ ent.Mutation = (*LiveProductMutation)(nil)
@@ -12292,6 +12297,223 @@ func (m *LiveProductMutation) ResetPinnedAt() {
 	delete(m.clearedFields, liveproduct.FieldPinnedAt)
 }
 
+// SetTitle sets the "title" field.
+func (m *LiveProductMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *LiveProductMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the LiveProduct entity.
+// If the LiveProduct object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveProductMutation) OldTitle(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ClearTitle clears the value of the "title" field.
+func (m *LiveProductMutation) ClearTitle() {
+	m.title = nil
+	m.clearedFields[liveproduct.FieldTitle] = struct{}{}
+}
+
+// TitleCleared returns if the "title" field was cleared in this mutation.
+func (m *LiveProductMutation) TitleCleared() bool {
+	_, ok := m.clearedFields[liveproduct.FieldTitle]
+	return ok
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *LiveProductMutation) ResetTitle() {
+	m.title = nil
+	delete(m.clearedFields, liveproduct.FieldTitle)
+}
+
+// SetPriceMinor sets the "price_minor" field.
+func (m *LiveProductMutation) SetPriceMinor(i int64) {
+	m.price_minor = &i
+	m.addprice_minor = nil
+}
+
+// PriceMinor returns the value of the "price_minor" field in the mutation.
+func (m *LiveProductMutation) PriceMinor() (r int64, exists bool) {
+	v := m.price_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPriceMinor returns the old "price_minor" field's value of the LiveProduct entity.
+// If the LiveProduct object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveProductMutation) OldPriceMinor(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPriceMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPriceMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPriceMinor: %w", err)
+	}
+	return oldValue.PriceMinor, nil
+}
+
+// AddPriceMinor adds i to the "price_minor" field.
+func (m *LiveProductMutation) AddPriceMinor(i int64) {
+	if m.addprice_minor != nil {
+		*m.addprice_minor += i
+	} else {
+		m.addprice_minor = &i
+	}
+}
+
+// AddedPriceMinor returns the value that was added to the "price_minor" field in this mutation.
+func (m *LiveProductMutation) AddedPriceMinor() (r int64, exists bool) {
+	v := m.addprice_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPriceMinor clears the value of the "price_minor" field.
+func (m *LiveProductMutation) ClearPriceMinor() {
+	m.price_minor = nil
+	m.addprice_minor = nil
+	m.clearedFields[liveproduct.FieldPriceMinor] = struct{}{}
+}
+
+// PriceMinorCleared returns if the "price_minor" field was cleared in this mutation.
+func (m *LiveProductMutation) PriceMinorCleared() bool {
+	_, ok := m.clearedFields[liveproduct.FieldPriceMinor]
+	return ok
+}
+
+// ResetPriceMinor resets all changes to the "price_minor" field.
+func (m *LiveProductMutation) ResetPriceMinor() {
+	m.price_minor = nil
+	m.addprice_minor = nil
+	delete(m.clearedFields, liveproduct.FieldPriceMinor)
+}
+
+// SetCurrency sets the "currency" field.
+func (m *LiveProductMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *LiveProductMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the LiveProduct entity.
+// If the LiveProduct object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveProductMutation) OldCurrency(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ClearCurrency clears the value of the "currency" field.
+func (m *LiveProductMutation) ClearCurrency() {
+	m.currency = nil
+	m.clearedFields[liveproduct.FieldCurrency] = struct{}{}
+}
+
+// CurrencyCleared returns if the "currency" field was cleared in this mutation.
+func (m *LiveProductMutation) CurrencyCleared() bool {
+	_, ok := m.clearedFields[liveproduct.FieldCurrency]
+	return ok
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *LiveProductMutation) ResetCurrency() {
+	m.currency = nil
+	delete(m.clearedFields, liveproduct.FieldCurrency)
+}
+
+// SetImageURL sets the "image_url" field.
+func (m *LiveProductMutation) SetImageURL(s string) {
+	m.image_url = &s
+}
+
+// ImageURL returns the value of the "image_url" field in the mutation.
+func (m *LiveProductMutation) ImageURL() (r string, exists bool) {
+	v := m.image_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageURL returns the old "image_url" field's value of the LiveProduct entity.
+// If the LiveProduct object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LiveProductMutation) OldImageURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageURL: %w", err)
+	}
+	return oldValue.ImageURL, nil
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (m *LiveProductMutation) ClearImageURL() {
+	m.image_url = nil
+	m.clearedFields[liveproduct.FieldImageURL] = struct{}{}
+}
+
+// ImageURLCleared returns if the "image_url" field was cleared in this mutation.
+func (m *LiveProductMutation) ImageURLCleared() bool {
+	_, ok := m.clearedFields[liveproduct.FieldImageURL]
+	return ok
+}
+
+// ResetImageURL resets all changes to the "image_url" field.
+func (m *LiveProductMutation) ResetImageURL() {
+	m.image_url = nil
+	delete(m.clearedFields, liveproduct.FieldImageURL)
+}
+
 // Where appends a list predicates to the LiveProductMutation builder.
 func (m *LiveProductMutation) Where(ps ...predicate.LiveProduct) {
 	m.predicates = append(m.predicates, ps...)
@@ -12326,7 +12548,7 @@ func (m *LiveProductMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LiveProductMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, liveproduct.FieldCreatedAt)
 	}
@@ -12341,6 +12563,18 @@ func (m *LiveProductMutation) Fields() []string {
 	}
 	if m.pinned_at != nil {
 		fields = append(fields, liveproduct.FieldPinnedAt)
+	}
+	if m.title != nil {
+		fields = append(fields, liveproduct.FieldTitle)
+	}
+	if m.price_minor != nil {
+		fields = append(fields, liveproduct.FieldPriceMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, liveproduct.FieldCurrency)
+	}
+	if m.image_url != nil {
+		fields = append(fields, liveproduct.FieldImageURL)
 	}
 	return fields
 }
@@ -12360,6 +12594,14 @@ func (m *LiveProductMutation) Field(name string) (ent.Value, bool) {
 		return m.Pinned()
 	case liveproduct.FieldPinnedAt:
 		return m.PinnedAt()
+	case liveproduct.FieldTitle:
+		return m.Title()
+	case liveproduct.FieldPriceMinor:
+		return m.PriceMinor()
+	case liveproduct.FieldCurrency:
+		return m.Currency()
+	case liveproduct.FieldImageURL:
+		return m.ImageURL()
 	}
 	return nil, false
 }
@@ -12379,6 +12621,14 @@ func (m *LiveProductMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldPinned(ctx)
 	case liveproduct.FieldPinnedAt:
 		return m.OldPinnedAt(ctx)
+	case liveproduct.FieldTitle:
+		return m.OldTitle(ctx)
+	case liveproduct.FieldPriceMinor:
+		return m.OldPriceMinor(ctx)
+	case liveproduct.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case liveproduct.FieldImageURL:
+		return m.OldImageURL(ctx)
 	}
 	return nil, fmt.Errorf("unknown LiveProduct field %s", name)
 }
@@ -12423,6 +12673,34 @@ func (m *LiveProductMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPinnedAt(v)
 		return nil
+	case liveproduct.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case liveproduct.FieldPriceMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPriceMinor(v)
+		return nil
+	case liveproduct.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case liveproduct.FieldImageURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageURL(v)
+		return nil
 	}
 	return fmt.Errorf("unknown LiveProduct field %s", name)
 }
@@ -12430,13 +12708,21 @@ func (m *LiveProductMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *LiveProductMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addprice_minor != nil {
+		fields = append(fields, liveproduct.FieldPriceMinor)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *LiveProductMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case liveproduct.FieldPriceMinor:
+		return m.AddedPriceMinor()
+	}
 	return nil, false
 }
 
@@ -12445,6 +12731,13 @@ func (m *LiveProductMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *LiveProductMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case liveproduct.FieldPriceMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPriceMinor(v)
+		return nil
 	}
 	return fmt.Errorf("unknown LiveProduct numeric field %s", name)
 }
@@ -12455,6 +12748,18 @@ func (m *LiveProductMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(liveproduct.FieldPinnedAt) {
 		fields = append(fields, liveproduct.FieldPinnedAt)
+	}
+	if m.FieldCleared(liveproduct.FieldTitle) {
+		fields = append(fields, liveproduct.FieldTitle)
+	}
+	if m.FieldCleared(liveproduct.FieldPriceMinor) {
+		fields = append(fields, liveproduct.FieldPriceMinor)
+	}
+	if m.FieldCleared(liveproduct.FieldCurrency) {
+		fields = append(fields, liveproduct.FieldCurrency)
+	}
+	if m.FieldCleared(liveproduct.FieldImageURL) {
+		fields = append(fields, liveproduct.FieldImageURL)
 	}
 	return fields
 }
@@ -12472,6 +12777,18 @@ func (m *LiveProductMutation) ClearField(name string) error {
 	switch name {
 	case liveproduct.FieldPinnedAt:
 		m.ClearPinnedAt()
+		return nil
+	case liveproduct.FieldTitle:
+		m.ClearTitle()
+		return nil
+	case liveproduct.FieldPriceMinor:
+		m.ClearPriceMinor()
+		return nil
+	case liveproduct.FieldCurrency:
+		m.ClearCurrency()
+		return nil
+	case liveproduct.FieldImageURL:
+		m.ClearImageURL()
 		return nil
 	}
 	return fmt.Errorf("unknown LiveProduct nullable field %s", name)
@@ -12495,6 +12812,18 @@ func (m *LiveProductMutation) ResetField(name string) error {
 		return nil
 	case liveproduct.FieldPinnedAt:
 		m.ResetPinnedAt()
+		return nil
+	case liveproduct.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case liveproduct.FieldPriceMinor:
+		m.ResetPriceMinor()
+		return nil
+	case liveproduct.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case liveproduct.FieldImageURL:
+		m.ResetImageURL()
 		return nil
 	}
 	return fmt.Errorf("unknown LiveProduct field %s", name)
