@@ -1,0 +1,59 @@
+.banner {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-2) var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  background: var(--surface-card);
+  font-size: var(--text-sm);
+}
+
+.code {
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  word-spacing: 0.3em;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.action {
+  padding: 6px 12px;
+  border-radius: var(--radius-small);
+  border: 1px solid var(--divider);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.linkCard {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-small);
+  background: rgb(0 0 0 / 0.06);
+  color: inherit;
+  text-decoration: none;
+}
+
+.linkDomain,
+.linkDescription {
+  font-size: var(--text-sm);
+  opacity: 0.8;
+}
+
+.linkTitle {
+  font-weight: 600;
+}
+
+.notice {
+  font-size: var(--text-sm);
+  font-style: italic;
+  opacity: 0.8;
+}

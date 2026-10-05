@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 
+import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import { rememberCsrfTokenForRequests } from "@/services/clientApi.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { User } from "@/types";
@@ -21,6 +22,12 @@ export function SessionProvider({ viewer, csrfToken, children }: SessionContextV
     rememberCsrfTokenForRequests(csrfToken);
     syncAuthStore(viewer);
   }, [csrfToken, viewer, syncAuthStore]);
+
+  useEffect(() => {
+    if (!viewer?.id) return;
+    const timer = setTimeout(() => void chatCryptoService.ensureReady(viewer.id).catch(() => undefined), 1_500);
+    return () => clearTimeout(timer);
+  }, [viewer?.id]);
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

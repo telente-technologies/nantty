@@ -14,6 +14,7 @@ import { Avatar, MediaImage } from "@/components/ui/media";
 import { BellIcon, BookmarkIcon, LogOutIcon, OrdersIcon, SettingsIcon } from "@/components/ui/icons";
 import { requestConfirmation } from "@/components/ui/confirmDialog";
 import { followsService } from "@/services/posts.service";
+import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import { sendRequestToWebappServer } from "@/services/clientApi.service";
 import { messagesService } from "@/services/messages.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -125,6 +126,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
 }
 
 export async function signOut(): Promise<void> {
+  await chatCryptoService.signOut();
   await sendRequestToWebappServer<void>("/auth/logout", { method: "POST" });
 }
 
