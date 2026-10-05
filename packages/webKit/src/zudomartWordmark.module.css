@@ -18,6 +18,37 @@
   color: var(--color-on-brand);
 }
 
+.mono {
+  color: var(--color-text);
+}
+
+.mark {
+  display: block;
+  flex: none;
+}
+
+.markTile {
+  fill: var(--color-brand-solid);
+}
+
+.markGlyph {
+  fill: var(--color-on-brand);
+}
+
+.showOnSmall {
+  display: none;
+}
+
+@media (max-width: 379px) {
+  .hideOnSmall {
+    display: none;
+  }
+
+  .showOnSmall {
+    display: block;
+  }
+}
+
 .label {
   display: inline-flex;
   align-items: center;
