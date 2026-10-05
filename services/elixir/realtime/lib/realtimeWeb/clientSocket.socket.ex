@@ -4,6 +4,7 @@ defmodule RealtimeWeb.ClientSocket do
   alias Phoenix.PubSub
   alias Realtime.Auth.AccessTokenVerifier
   alias Realtime.Presence
+  alias Realtime.Topics.SubscriptionGuard
   alias Realtime.Topics.TopicAuthorizer
 
   @authentication_deadline_ms 10_000
@@ -18,6 +19,7 @@ defmodule RealtimeWeb.ClientSocket do
   @impl true
   def init(state) do
     Process.send_after(self(), :authentication_deadline, @authentication_deadline_ms)
+    schedule_subscription_recheck()
     {:ok, state}
   end
 
@@ -30,6 +32,24 @@ defmodule RealtimeWeb.ClientSocket do
   end
 
   @impl true
+  def handle_info(:recheck_subscriptions, %{principal: nil} = state) do
+    schedule_subscription_recheck()
+    {:ok, state}
+  end
+
+  def handle_info(:recheck_subscriptions, state) do
+    schedule_subscription_recheck()
+    revoke(state, MapSet.to_list(state.topics))
+  end
+
+  def handle_info(
+        {:membership_changed, topic, account_id},
+        %{principal: %{account_id: account_id}} = state
+      ),
+      do: revoke(state, [topic])
+
+  def handle_info({:membership_changed, _topic, _account_id}, state), do: {:ok, state}
+
   def handle_info({:realtime_event, _topic, payload}, state),
     do: {:push, {:text, Jason.encode!(payload)}, state}
 
@@ -122,6 +142,30 @@ defmodule RealtimeWeb.ClientSocket do
     do: Presence.track(self(), topic, principal.account_id, %{joined_at: System.os_time(:second)})
 
   defp track_presence_on_live_topics(_principal, _topic), do: :ok
+
+  defp revoke(state, candidates) do
+    case SubscriptionGuard.revoked_topics(state.principal, candidates) do
+      [] ->
+        {:ok, state}
+
+      revoked ->
+        state = Enum.reduce(revoked, state, &drop_topic/2)
+        {:push, {:text, Jason.encode!(%{type: "subscriptions.revoked", topics: revoked})}, state}
+    end
+  end
+
+  defp drop_topic(topic, state) do
+    PubSub.unsubscribe(Realtime.PubSub, topic)
+
+    if String.starts_with?(topic, "live:"),
+      do: Presence.untrack(self(), topic, state.principal.account_id)
+
+    %{state | topics: MapSet.delete(state.topics, topic)}
+  end
+
+  defp schedule_subscription_recheck do
+    Process.send_after(self(), :recheck_subscriptions, SubscriptionGuard.recheck_interval_ms())
+  end
 
   defp reply(payload, state), do: {:reply, :ok, {:text, Jason.encode!(payload)}, state}
 end

@@ -1,6 +1,7 @@
 defmodule Realtime.Events.DomainEventRouter do
   alias Phoenix.PubSub
   alias Realtime.Events.Throttle
+  alias Realtime.Topics.SubscriptionGuard
 
   @live_event_names %{
     "gift.sent" => "gift.sent",
@@ -121,9 +122,21 @@ defmodule Realtime.Events.DomainEventRouter do
   def throttle_specification_for_event(_event), do: nil
 
   def broadcast_domain_event(event, throttle \\ Throttle) do
+    broadcast_membership_revocation(event)
+
     case route_domain_event_to_topic(event) do
       {:ok, topic, payload} -> broadcast_possibly_throttled(event, topic, payload, throttle)
       :ignore -> :ok
+    end
+  end
+
+  defp broadcast_membership_revocation(event) do
+    case SubscriptionGuard.membership_revocation(event) do
+      {:ok, topic, account_id} ->
+        PubSub.broadcast(Realtime.PubSub, topic, {:membership_changed, topic, account_id})
+
+      :ignore ->
+        :ok
     end
   end
 

@@ -5,6 +5,11 @@ if System.get_env("PHX_SERVER"), do: config(:realtime, RealtimeWeb.Endpoint, ser
 config :realtime, RealtimeWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+if bind_ip = System.get_env("REALTIME_HTTP_IP") do
+  {:ok, parsed_ip} = bind_ip |> String.to_charlist() |> :inet.parse_address()
+  config :realtime, RealtimeWeb.Endpoint, http: [ip: parsed_ip]
+end
+
 if config_env() != :test do
   config :realtime, :access_token,
     jwks_url: System.get_env("AUTH_JWKS_URL", "http://localhost:8101/.well-known/jwks.json"),

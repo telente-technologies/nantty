@@ -187,7 +187,12 @@ defmodule Realtime.Events.DomainEventRouterTest do
     assert {:ok, "user:host-1", %{"type" => "live.safety.hostNotice", "kind" => "hold"}} =
              DomainEventRouter.route_domain_event_to_topic(%{
                "type" => "liveSafety.hostNotice",
-               "data" => %{"liveId" => "l-1", "hostId" => "host-1", "kind" => "hold", "message" => "m"}
+               "data" => %{
+                 "liveId" => "l-1",
+                 "hostId" => "host-1",
+                 "kind" => "hold",
+                 "message" => "m"
+               }
              })
   end
 end
