@@ -12,6 +12,12 @@ export const storeBadgeFiles = {
   playStore: "storeBadges/google-play-badge@2x.png",
 } as const;
 
+export const emailLogoFile = "brand/zudomartLockup@2x.png";
+
+export function buildEmailLogoUrl(assetBaseUrl: string): string {
+  return `${assetBaseUrl.replace(/\/+$/, "")}/${emailLogoFile}`;
+}
+
 export function buildStoreBadgeUrls(assetBaseUrl: string): { readonly appStoreBadgeUrl: string; readonly playStoreBadgeUrl: string } {
   const base = assetBaseUrl.replace(/\/+$/, "");
   return { appStoreBadgeUrl: `${base}/${storeBadgeFiles.appStore}`, playStoreBadgeUrl: `${base}/${storeBadgeFiles.playStore}` };
@@ -26,8 +32,8 @@ export const defaultEmailBrand: EmailBrandConfig = {
   sellerDashboardUrl: "https://dashboard.zudomart.com",
   studioUrl: "https://studio.zudomart.com",
   supportEmails: [`support@${defaultMailboxDomain}`],
-  logoUrl: null,
-  logoWidth: 132,
+  logoUrl: buildEmailLogoUrl(defaultEmailAssetBaseUrl),
+  logoWidth: 150,
   appStoreUrl: "https://apps.apple.com/app/zudomart/id0000000000",
   playStoreUrl: "https://play.google.com/store/apps/details?id=com.zudomart.app",
   ...buildStoreBadgeUrls(defaultEmailAssetBaseUrl),
@@ -63,7 +69,7 @@ export function readEmailBrandFromEnvironment(environment: EmailBrandEnvironment
     webBaseUrl: pick("ZUDOMART_WEB_BASE_URL") ?? defaultEmailBrand.webBaseUrl,
     helpCenterUrl: pick("ZUDOMART_HELP_CENTER_URL") ?? defaultEmailBrand.helpCenterUrl,
     supportEmails: pick("ZUDOMART_SUPPORT_EMAILS")?.split(",").map((email) => email.trim()).filter(Boolean) ?? [`support@${mailboxDomain}`],
-    logoUrl: pick("ZUDOMART_EMAIL_LOGO_URL") ?? null,
+    logoUrl: readBadgeUrl(pick("ZUDOMART_EMAIL_LOGO_URL"), assetBaseUrl ? buildEmailLogoUrl(assetBaseUrl) : defaultEmailBrand.logoUrl),
     appStoreUrl: appStoreId && /^\d{6,12}$/.test(appStoreId) ? `https://apps.apple.com/app/id${appStoreId}` : defaultEmailBrand.appStoreUrl,
     playStoreUrl: playPackage ? `https://play.google.com/store/apps/details?id=${encodeURIComponent(playPackage)}` : defaultEmailBrand.playStoreUrl,
     appStoreBadgeUrl: readBadgeUrl(pick("ZUDOMART_EMAIL_APP_STORE_BADGE_URL"), badges.appStoreBadgeUrl),

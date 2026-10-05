@@ -9,12 +9,13 @@ export function usd(dollars: number): Money {
 }
 
 const image = (id: string) => `https://images.unsplash.com/${id}?w=256&h=256&fit=crop&auto=format&q=80`;
+const placeholder = (label: string) => `https://placehold.co/256x256/e8e4dc/55504a/png?text=${encodeURIComponent(label)}`;
 
 export const sampleImages = {
-  sneakers: image("photo-1542291026-7eec264c27ff"),
+  sneakers: placeholder("Sandals"),
   headphones: image("photo-1505740420928-5e560c06d30e"),
   watch: image("photo-1523275335684-37898b6baf30"),
-  bag: image("photo-1548036328-c9fa89d128fa"),
+  bag: placeholder("Tote"),
   perfume: image("photo-1541643600914-78b084683601"),
   camera: image("photo-1516035069371-29a1b244cc32"),
 };

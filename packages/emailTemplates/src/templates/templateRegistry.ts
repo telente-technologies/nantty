@@ -14,6 +14,7 @@ import * as sellerAccount from "./sellerAccount.template";
 import * as sellerOrders from "./sellerOrders.template";
 import * as social from "./social.template";
 import * as storeRewards from "./storeRewards.template";
+import * as subscriptionBilling from "./subscriptionBilling.template";
 import * as support from "./support.template";
 import * as trust from "./trust.template";
 
@@ -29,6 +30,7 @@ export const emailTemplates = {
   ...pickTemplates(sellerOrders),
   ...pickTemplates(sellerAccount),
   ...pickTemplates(payments),
+  ...pickTemplates(subscriptionBilling),
   ...pickTemplates(storeRewards),
   ...pickTemplates(creator),
   ...pickTemplates(checkmarks),

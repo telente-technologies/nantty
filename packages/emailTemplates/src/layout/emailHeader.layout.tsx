@@ -6,18 +6,9 @@ import { fontStack, monoStack } from "../theme/emailPalette";
 function InlineWordmark() {
   const { palette } = useEmailEnvironment();
   return (
-    <table role="presentation" cellPadding={0} cellSpacing={0} border={0}>
-      <tbody>
-        <tr>
-          <td className="zm-btn" align="center" valign="middle" width={28} height={28} style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: palette.button, fontFamily: fontStack, fontSize: 17, lineHeight: "28px", fontWeight: 800, color: palette.onButton, msoLineHeightRule: "exactly" } as React.CSSProperties}>
-            z
-          </td>
-          <td className="zm-text" valign="middle" style={{ paddingLeft: 8, fontFamily: fontStack, fontSize: 20, lineHeight: "28px", fontWeight: 700, letterSpacing: "-0.035em", color: palette.text }}>
-            zudomart
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <span className="zm-brand" style={{ fontFamily: fontStack, fontSize: 22, lineHeight: "28px", fontWeight: 700, fontStyle: "italic", letterSpacing: "-0.02em", color: palette.brand }}>
+      zudomart
+    </span>
   );
 }
 

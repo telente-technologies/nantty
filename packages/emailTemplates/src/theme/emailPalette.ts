@@ -1,4 +1,4 @@
-import { darkColors, lightColors } from "@zudomart/design-tokens/native";
+import { brandPalette, darkColors, lightColors } from "@zudomart/design-tokens/native";
 
 import type { EmailTheme, Tone } from "../emailTypes";
 
@@ -51,14 +51,14 @@ export const darkPalette: EmailPalette = {
   subtle: "#9196AE",
   line: "#252A40",
   lineStrong: "#343A55",
-  brand: "#8FA1FA",
+  brand: darkColors.brand,
   button: darkColors.brandSolid,
   onButton: darkColors.onBrand,
   dangerButton: "#D93636",
   accent: darkColors.accent,
   onAccent: darkColors.onAccent,
-  toneText: { brand: "#9DAEFB", success: darkColors.successText, warn: darkColors.warnText, danger: darkColors.dangerText, neutral: darkColors.textMuted },
-  toneTint: { brand: "#1B2252", success: darkColors.successTint, warn: darkColors.warnTint, danger: darkColors.dangerTint, neutral: "#1E2234" },
+  toneText: { brand: brandPalette[200], success: darkColors.successText, warn: darkColors.warnText, danger: darkColors.dangerText, neutral: darkColors.textMuted },
+  toneTint: { brand: darkColors.brandTint, success: darkColors.successTint, warn: darkColors.warnTint, danger: darkColors.dangerTint, neutral: "#1E2234" },
   toneSolid: { brand: darkColors.brandSolid, success: darkColors.success, warn: darkColors.warn, danger: darkColors.danger, neutral: "#5D6380" },
 };
 
