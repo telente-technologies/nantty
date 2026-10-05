@@ -102,7 +102,20 @@ type Alert struct {
 	Href        string `json:"href"`
 }
 
+type PeriodPoint struct {
+	Label string `json:"label"`
+	Value int64  `json:"value"`
+}
+
+type PeriodTotals struct {
+	TotalSales money.Money   `json:"totalSales"`
+	Orders     int           `json:"orders"`
+	Series     []PeriodPoint `json:"series"`
+}
+
 type DashboardSummary struct {
+	Period string `json:"period"`
+	PeriodTotals
 	LocationId     *string             `json:"locationId"`
 	GeneratedAt    string              `json:"generatedAt"`
 	SalesToday     PeriodSales         `json:"salesToday"`

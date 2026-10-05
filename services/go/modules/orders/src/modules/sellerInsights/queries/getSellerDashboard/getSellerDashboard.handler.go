@@ -52,12 +52,14 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.Dashboard
 		}
 	}
 	today, week, month, lifetime := orders.SalesSummaries()
+	period, periodTotals := orders.PeriodSummary(query.Period)
 	var locationId *string
 	if query.LocationId != nil {
 		text := query.LocationId.String()
 		locationId = &text
 	}
 	return dtos.DashboardSummary{
+		Period: period, PeriodTotals: periodTotals,
 		LocationId: locationId, GeneratedAt: orders.Now.UTC().Format(time.RFC3339), SalesToday: today, SalesThisWeek: week, SalesThisMonth: month, LifetimeSales: lifetime,
 		OrdersByStatus: orders.StatusCounts(), DailyRevenue: orders.DailyRevenue(30), TopProducts: orders.TopProducts(orders.StartOfDay(orders.Now).AddDate(0, 0, -29), 5),
 		LowStockAlerts: services.LowStockAlertsOf(stock), Traffic: traffic, CustomerGrowth: orders.CustomerGrowth(30),

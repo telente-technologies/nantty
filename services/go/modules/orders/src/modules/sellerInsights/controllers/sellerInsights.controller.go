@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,7 +33,11 @@ func (controller SellerInsightsController) respond(writer http.ResponseWriter, r
 
 func (controller SellerInsightsController) Dashboard(writer http.ResponseWriter, request *http.Request) {
 	store := middlewares.StoreAccessFrom(request.Context())
-	query := getsellerdashboard.Query{Store: store, ActorId: middlewares.AccountIdFrom(request.Context())}
+	query := getsellerdashboard.Query{Store: store, ActorId: middlewares.AccountIdFrom(request.Context()), Period: request.URL.Query().Get("period")}
+	if query.Period != "" && !slices.Contains(services.DashboardPeriods, query.Period) {
+		controller.respond(writer, request, nil, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "period", Message: "must be one of live, today, yesterday, week, month, all"}}))
+		return
+	}
 	if raw := request.URL.Query().Get("locationId"); raw != "" && raw != "all" {
 		locationId, err := utils.OptionalQueryIdentifier(request, "locationId")
 		if err == nil {

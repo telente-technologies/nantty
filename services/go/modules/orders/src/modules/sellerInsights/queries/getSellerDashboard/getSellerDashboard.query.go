@@ -10,4 +10,5 @@ type Query struct {
 	Store      commerceports.StoreAccess
 	ActorId    uuid.UUID
 	LocationId *uuid.UUID
+	Period     string
 }
