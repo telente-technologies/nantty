@@ -24,13 +24,20 @@ func (reader PlatformSettingsReader) GetSettingView(ctx context.Context, key str
 	if err != nil {
 		return models.PlatformSettingView{}, err
 	}
-	return models.ConvertSettingToView(row), nil
+	views, err := BuildSettingViews(ctx, reader.Container.Client, []*ent.PlatformSetting{row})
+	if err != nil {
+		return models.PlatformSettingView{}, err
+	}
+	return views[0], nil
 }
 
 func (reader PlatformSettingsReader) ReadSettingValue(ctx context.Context, key string) (json.RawMessage, int, error) {
-	view, err := reader.GetSettingView(ctx, key)
-	if err == adminerrors.SettingNotFound {
+	row, err := reader.Container.Client.PlatformSetting.Query().Where(platformsetting.Key(key)).Only(ctx)
+	if ent.IsNotFound(err) {
 		return nil, 0, identityports.ErrSettingNotFound
 	}
-	return view.Value, view.Version, err
+	if err != nil {
+		return nil, 0, err
+	}
+	return row.Value, row.Version, nil
 }
