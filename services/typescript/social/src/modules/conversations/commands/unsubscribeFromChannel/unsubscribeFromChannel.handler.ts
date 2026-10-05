@@ -1,3 +1,5 @@
+import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
+import { membershipEndedEvent } from "../../../messages/services/chatRealtimeEvents.service.js";
 import { notFound, unprocessable } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import type { ChannelSubscriptionCommand } from "../subscribeToChannel/subscribeToChannel.command.js";
@@ -11,6 +13,10 @@ export function createUnsubscribeFromChannelHandler(context: HandlerContext): Ha
     const member = channel.members.find((candidate) => candidate.accountId === viewerId);
     if (member === undefined) return;
     if (member.role === "owner") throw unprocessable("OWNER_CANNOT_UNSUBSCRIBE", "Hand the channel to another admin before leaving it.");
-    await conversationRepository.updateMember(db, channelId, viewerId, { leftAt: context.clock.now(), unreadCount: 0 });
+    const now = context.clock.now();
+    await context.database.transaction(async (transaction) => {
+      await conversationRepository.updateMember(transaction, channelId, viewerId, { leftAt: now, unreadCount: 0 });
+      await appendDomainEventsToOutbox(transaction, [membershipEndedEvent(channelId, viewerId, "left", now)]);
+    });
   };
 }

@@ -1,3 +1,5 @@
+import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
+import { conversationUpdatedEvent } from "../../../messages/services/chatRealtimeEvents.service.js";
 import { forbidden, notFound } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { conversationRepository } from "../../repositories/conversation.repository.js";
@@ -13,5 +15,6 @@ export function createSetGroupAdminHandler(context: HandlerContext): Handler<Set
     if (target.role === "owner") throw forbidden("CANNOT_CHANGE_OWNER", "The owner's role can't change.");
     if (!isAdmin && access.member.role !== "owner") throw forbidden("ONLY_OWNER_REMOVES_ADMINS", "Only the owner can remove an admin.");
     await conversationRepository.updateMember(context.database.client, conversationId, userId, { role: isAdmin ? "admin" : "member" });
+    await appendDomainEventsToOutbox(context.database.client, [conversationUpdatedEvent(conversationId, { memberRole: { accountId: userId, role: isAdmin ? "admin" : "member" } }, context.clock.now(), { memberIds: access.conversation.members.map((member) => member.accountId) })]);
   };
 }

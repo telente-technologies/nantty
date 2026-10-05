@@ -1,3 +1,5 @@
+import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
+import { conversationUpdatedEvent } from "../../../messages/services/chatRealtimeEvents.service.js";
 import { forbidden } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import type { ConversationView } from "../../models/conversation.model.js";
@@ -19,6 +21,12 @@ export function createUpdateConversationHandler(context: HandlerContext): Handle
       ...(command.disappearingMessagesSeconds === undefined ? {} : { disappearingMessagesSeconds: command.disappearingMessagesSeconds }),
       ...(command.onlyAdminsCanMentionAll === undefined ? {} : { onlyAdminsCanMentionAll: command.onlyAdminsCanMentionAll }),
     });
+    const changes = {
+      ...(command.name === undefined ? {} : { title: command.name }), ...(command.photoMediaId === undefined ? {} : { photoMediaId: command.photoMediaId }),
+      ...(command.disappearingMessagesSeconds === undefined ? {} : { disappearingMessagesSeconds: command.disappearingMessagesSeconds }),
+      ...(command.onlyAdminsCanMentionAll === undefined ? {} : { onlyAdminsCanMentionAll: command.onlyAdminsCanMentionAll }),
+    };
+    if (Object.keys(changes).length > 0) await appendDomainEventsToOutbox(context.database.client, [conversationUpdatedEvent(command.conversationId, changes, context.clock.now(), { memberIds: access.conversation.members.map((member) => member.accountId) })]);
     return loadConversationViewForMember(context, command.conversationId, command.viewerId);
   };
 }
