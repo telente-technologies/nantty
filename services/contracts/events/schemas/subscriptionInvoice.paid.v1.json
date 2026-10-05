@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/subscriptionInvoice.paid.v1.json",
+  "title": "subscriptionInvoice.paid",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "subscriptionId",
+    "plan",
+    "planLabel",
+    "audience",
+    "interval",
+    "invoiceNumber",
+    "kind",
+    "paidAt",
+    "periodStart",
+    "periodEnd",
+    "lineItems",
+    "total"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "profileId": {
+      "type": "string"
+    },
+    "subscriptionId": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string"
+    },
+    "planLabel": {
+      "type": "string"
+    },
+    "accountName": {
+      "type": "string"
+    },
+    "storeName": {
+      "type": "string"
+    },
+    "audience": {
+      "type": "string",
+      "enum": [
+        "personal",
+        "business"
+      ]
+    },
+    "interval": {
+      "type": "string",
+      "enum": [
+        "month",
+        "year"
+      ]
+    },
+    "price": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "cardLabel": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "invoiceNumber": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "first",
+        "renewal",
+        "trial_conversion",
+        "upgrade"
+      ]
+    },
+    "paidAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "periodStart": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "periodEnd": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lineItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "label",
+          "amountMinor"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "plan_base",
+              "checkmark",
+              "bundle_discount",
+              "proration_credit"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "amountMinor": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "total": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "checkmarkIncluded": {
+      "type": "boolean"
+    },
+    "nextChargeAt": {
+      "type": "string"
+    }
+  }
+}

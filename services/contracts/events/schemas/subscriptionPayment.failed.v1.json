@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/subscriptionPayment.failed.v1.json",
+  "title": "subscriptionPayment.failed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "subscriptionId",
+    "plan",
+    "planLabel",
+    "audience",
+    "interval",
+    "attempt",
+    "reason",
+    "amount",
+    "downgradeAt",
+    "trialConversion"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "profileId": {
+      "type": "string"
+    },
+    "subscriptionId": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string"
+    },
+    "planLabel": {
+      "type": "string"
+    },
+    "accountName": {
+      "type": "string"
+    },
+    "storeName": {
+      "type": "string"
+    },
+    "audience": {
+      "type": "string",
+      "enum": [
+        "personal",
+        "business"
+      ]
+    },
+    "interval": {
+      "type": "string",
+      "enum": [
+        "month",
+        "year"
+      ]
+    },
+    "price": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "cardLabel": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "attempt": {
+      "type": "integer"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "periodId": {
+      "type": "string"
+    },
+    "downgradeAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trialConversion": {
+      "type": "boolean"
+    },
+    "retriesLeft": {
+      "type": "integer"
+    },
+    "actionUrl": {
+      "type": "string"
+    },
+    "retryAt": {
+      "type": "string"
+    },
+    "graceEndsAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

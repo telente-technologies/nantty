@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/subscriptionRenewal.upcoming.v1.json",
+  "title": "subscriptionRenewal.upcoming",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "subscriptionId",
+    "plan",
+    "planLabel",
+    "audience",
+    "interval",
+    "chargeAt",
+    "amount",
+    "lineItems",
+    "daysLeft"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string"
+    },
+    "profileId": {
+      "type": "string"
+    },
+    "subscriptionId": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string"
+    },
+    "planLabel": {
+      "type": "string"
+    },
+    "accountName": {
+      "type": "string"
+    },
+    "storeName": {
+      "type": "string"
+    },
+    "audience": {
+      "type": "string",
+      "enum": [
+        "personal",
+        "business"
+      ]
+    },
+    "interval": {
+      "type": "string",
+      "enum": [
+        "month",
+        "year"
+      ]
+    },
+    "price": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "cardLabel": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "chargeAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "lineItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "label",
+          "amountMinor"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "plan_base",
+              "checkmark",
+              "bundle_discount",
+              "proration_credit"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "amountMinor": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "checkmarkIncluded": {
+      "type": "boolean"
+    },
+    "billingNote": {
+      "type": "string"
+    },
+    "nextPlan": {
+      "type": "string"
+    },
+    "nextPlanLabel": {
+      "type": "string"
+    },
+    "daysLeft": {
+      "type": "integer"
+    }
+  }
+}

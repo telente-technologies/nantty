@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/post.tagged.v1.json",
+  "title": "PostTagged",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recipientUserId",
+    "actor",
+    "postId",
+    "kind"
+  ],
+  "properties": {
+    "recipientUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "taggedUserId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "postId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "enum": [
+        "post",
+        "clip"
+      ]
+    },
+    "url": {
+      "type": "string"
+    }
+  }
+}

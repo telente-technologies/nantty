@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/payoutAccount.duplicateBankAccount.v1.json",
+  "title": "payoutAccount.duplicateBankAccount",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["userId", "linkedUserId", "accountLast4", "bankCode", "suggestionId", "signals", "riskScore", "advisoryOnly"],
+  "properties": {
+    "userId": { "type": "string" },
+    "linkedUserId": { "type": "string" },
+    "accountLast4": { "type": "string", "maxLength": 4 },
+    "bankCode": { "type": "string" },
+    "suggestionId": { "type": "string", "maxLength": 128 },
+    "signals": { "type": "array", "items": { "type": "string" } },
+    "riskScore": { "type": "integer" },
+    "advisoryOnly": { "type": "boolean" }
+  }
+}
