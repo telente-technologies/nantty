@@ -15,13 +15,17 @@ import (
 	billingcontrollers "zudomart/modules/subscriptions/src/modules/billing/controllers"
 	billingroutes "zudomart/modules/subscriptions/src/modules/billing/routes"
 	billingservices "zudomart/modules/subscriptions/src/modules/billing/services"
+	creatorcontrollers "zudomart/modules/subscriptions/src/modules/creatorSubscriptions/controllers"
+	creatorroutes "zudomart/modules/subscriptions/src/modules/creatorSubscriptions/routes"
+	creatorservices "zudomart/modules/subscriptions/src/modules/creatorSubscriptions/services"
 	"zudomart/modules/subscriptions/src/repositories"
 	platformevents "zudomart/platform/events"
 	"zudomart/platform/servicemodule"
 )
 
 type Module struct {
-	Billing billingservices.Billing
+	Billing              billingservices.Billing
+	CreatorSubscriptions creatorservices.CreatorSubscriptions
 }
 
 func NewSubscriptionsModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
@@ -50,7 +54,9 @@ func StartSubscriptionsModuleWithSettings(ctx context.Context, settings configs.
 	payments.RegisterSavedCardObserver(billing)
 	payments.RegisterStoreSubscriptionNotificationHandler(billing)
 	payments.RegisterStoreRefundHandler(paymentconstants.PurposeSubscription, billing)
-	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeSubscriptionRenewal, billingservices.RenewalPayments{Billing: billing})
+	creatorSubscriptions := creatorservices.CreatorSubscriptions{Container: billing.Container}
+	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeCreatorSubscription, creatorSubscriptions)
+	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeSubscriptionRenewal, billingservices.RenewalPayments{Billing: billing, Fallback: creatorSubscriptions})
 	paymentservices.RegisterSellerPlanLookup(billing.SellerPlanOf)
 	loaders.RegisterMoneyDomainEventHandler("verificationCase.refundRequested", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
 		var request billingservices.VerificationRefundRequest
@@ -59,13 +65,14 @@ func StartSubscriptionsModuleWithSettings(ctx context.Context, settings configs.
 		}
 		return billing.HandleVerificationRefundRequested(ctx, request)
 	})
-	return &Module{Billing: billing}, nil
+	return &Module{Billing: billing, CreatorSubscriptions: creatorSubscriptions}, nil
 }
 
 func (module *Module) Name() string { return "subscriptions" }
 
 func (module *Module) MountRoutes(mux *http.ServeMux) {
-	billingroutes.MountBillingRoutes(mux, billingcontrollers.BillingController{Billing: module.Billing})
+	billingroutes.MountBillingRoutes(mux, billingcontrollers.BillingController{Billing: module.Billing, CreatorAccess: module.CreatorSubscriptions.HasSubscriberAccess})
+	creatorroutes.MountCreatorSubscriptionsRoutes(mux, creatorcontrollers.CreatorSubscriptionsController{Service: module.CreatorSubscriptions}, module.Billing.FindOwnedSubscriptionView)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
@@ -79,6 +86,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 				return
 			case <-ticker.C:
 				module.Billing.RunDueJobs(ctx)
+				module.CreatorSubscriptions.RunDueRenewals(ctx, 50)
 			}
 		}
 	}()

@@ -25,6 +25,8 @@ type SubscriptionsSettings struct {
 	AdminInternalUrl       string
 	AdminInternalToken     string
 	BillingJobsQueue       string
+	CreatorsSchema         string
+	SocialSchema           string
 }
 
 func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) SubscriptionsSettings {
@@ -41,6 +43,8 @@ func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.Environment
 		AdminInternalUrl:       reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
 		AdminInternalToken:     reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
 		BillingJobsQueue:       reader.ReadStringOrDefault("SUBSCRIPTION_BILLING_QUEUE", "jobs-subscription-billing"),
+		CreatorsSchema:         reader.ReadStringOrDefault("CREATORS_DATABASE_SCHEMA", "creators"),
+		SocialSchema:           reader.ReadStringOrDefault("SUBSCRIPTIONS_SOCIAL_SCHEMA", "social"),
 	}
 	if settings.Money.IsProduction() && settings.FingerprintKey == "" {
 		reader.ReadRequiredString("SAVED_CARD_FINGERPRINT_KEY")

@@ -19,13 +19,21 @@ type CartVariantView struct {
 }
 
 type CartItemView struct {
-	Id            string             `json:"id"`
-	Product       ProductSummaryView `json:"product"`
-	Quantity      int                `json:"quantity"`
-	Variant       *string            `json:"variant"`
-	VariantDetail *CartVariantView   `json:"variantDetail"`
-	StoreId       string             `json:"storeId"`
-	Available     bool               `json:"available"`
+	Id            string               `json:"id"`
+	Product       ProductSummaryView   `json:"product"`
+	Quantity      int                  `json:"quantity"`
+	Variant       *string              `json:"variant"`
+	VariantDetail *CartVariantView     `json:"variantDetail"`
+	StoreId       string               `json:"storeId"`
+	Available     bool                 `json:"available"`
+	Attribution   *SaleAttributionView `json:"attribution"`
+}
+
+var SaleAttributionSources = []string{"post", "clip", "live"}
+
+type SaleAttributionView struct {
+	Source string `json:"source"`
+	Id     string `json:"id"`
 }
 
 type ShippingQuoteView struct {

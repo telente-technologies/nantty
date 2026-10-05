@@ -27,6 +27,7 @@ type Container struct {
 	Settings     configs.SubscriptionsSettings
 	Payments     *paymentservices.PaymentGateway
 	Identity     repositories.IdentityDirectory
+	Creators     repositories.CreatorDirectory
 	TrialSignals TrialSignalSource
 	Audit        staffaudit.Recorder
 	Outbox       ledgerevents.OutboxTable
@@ -47,15 +48,26 @@ func NewSubscriptionsContainer(resources loaders.MoneyModuleResources, settings 
 	}
 	return &Container{
 		Resources: resources, Settings: settings, Payments: payments, Identity: identity, Audit: audit,
+		Creators: repositories.SqlCreatorDirectory{
+			Database: resources.Database, UsersSchema: firstSet(settings.UsersSchema, "users"), CreatorsSchema: firstSet(settings.CreatorsSchema, "creators"),
+			SocialSchema: firstSet(settings.SocialSchema, "social"), TolerateMissing: !settings.Money.IsProduction(),
+		},
 		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.subscriptions"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{
-			IdempotentRequest: schema, OutboxEvent: schema, PlanPrice: schema, ProviderPlan: schema, Subscription: schema, SubscriptionPeriod: schema, SubscriptionReminder: schema, TrialClaim: schema,
+			CreatorSubscription: schema, CreatorSubscriptionCharge: schema, CreatorSubscriptionPlan: schema, IdempotentRequest: schema, OutboxEvent: schema, PlanPrice: schema, ProviderPlan: schema, Subscription: schema, SubscriptionPeriod: schema, SubscriptionReminder: schema, TrialClaim: schema,
 		},
 	}
 }
 
 func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Client {
 	return ent.NewClient(ent.Driver(databases.EntDriverForExecutor(executor)), ent.AlternateSchema(container.schemaConfig))
+}
+
+func firstSet(value, fallback string) string {
+	if value == "" {
+		return fallback
+	}
+	return value
 }
