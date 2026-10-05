@@ -24,6 +24,14 @@ const (
 	FieldPinned = "pinned"
 	// FieldPinnedAt holds the string denoting the pinned_at field in the database.
 	FieldPinnedAt = "pinned_at"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
+	// FieldPriceMinor holds the string denoting the price_minor field in the database.
+	FieldPriceMinor = "price_minor"
+	// FieldCurrency holds the string denoting the currency field in the database.
+	FieldCurrency = "currency"
+	// FieldImageURL holds the string denoting the image_url field in the database.
+	FieldImageURL = "image_url"
 	// Table holds the table name of the liveproduct in the database.
 	Table = "live_products"
 )
@@ -36,6 +44,10 @@ var Columns = []string{
 	FieldProductID,
 	FieldPinned,
 	FieldPinnedAt,
+	FieldTitle,
+	FieldPriceMinor,
+	FieldCurrency,
+	FieldImageURL,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -55,6 +67,12 @@ var (
 	DefaultPinned bool
 	// DefaultPinnedAt holds the default value on creation for the "pinned_at" field.
 	DefaultPinnedAt func() time.Time
+	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	TitleValidator func(string) error
+	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	CurrencyValidator func(string) error
+	// ImageURLValidator is a validator for the "image_url" field. It is called by the builders before save.
+	ImageURLValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -90,4 +108,24 @@ func ByPinned(opts ...sql.OrderTermOption) OrderOption {
 // ByPinnedAt orders the results by the pinned_at field.
 func ByPinnedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPinnedAt, opts...).ToFunc()
+}
+
+// ByTitle orders the results by the title field.
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTitle, opts...).ToFunc()
+}
+
+// ByPriceMinor orders the results by the price_minor field.
+func ByPriceMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPriceMinor, opts...).ToFunc()
+}
+
+// ByCurrency orders the results by the currency field.
+func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrency, opts...).ToFunc()
+}
+
+// ByImageURL orders the results by the image_url field.
+func ByImageURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImageURL, opts...).ToFunc()
 }

@@ -80,6 +80,26 @@ func PinnedAt(v time.Time) predicate.LiveProduct {
 	return predicate.LiveProduct(sql.FieldEQ(FieldPinnedAt, v))
 }
 
+// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
+func Title(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEQ(FieldTitle, v))
+}
+
+// PriceMinor applies equality check predicate on the "price_minor" field. It's identical to PriceMinorEQ.
+func PriceMinor(v int64) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEQ(FieldPriceMinor, v))
+}
+
+// Currency applies equality check predicate on the "currency" field. It's identical to CurrencyEQ.
+func Currency(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEQ(FieldCurrency, v))
+}
+
+// ImageURL applies equality check predicate on the "image_url" field. It's identical to ImageURLEQ.
+func ImageURL(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEQ(FieldImageURL, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.LiveProduct {
 	return predicate.LiveProduct(sql.FieldEQ(FieldCreatedAt, v))
@@ -258,6 +278,281 @@ func PinnedAtIsNil() predicate.LiveProduct {
 // PinnedAtNotNil applies the NotNil predicate on the "pinned_at" field.
 func PinnedAtNotNil() predicate.LiveProduct {
 	return predicate.LiveProduct(sql.FieldNotNull(FieldPinnedAt))
+}
+
+// TitleEQ applies the EQ predicate on the "title" field.
+func TitleEQ(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEQ(FieldTitle, v))
+}
+
+// TitleNEQ applies the NEQ predicate on the "title" field.
+func TitleNEQ(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNEQ(FieldTitle, v))
+}
+
+// TitleIn applies the In predicate on the "title" field.
+func TitleIn(vs ...string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldIn(FieldTitle, vs...))
+}
+
+// TitleNotIn applies the NotIn predicate on the "title" field.
+func TitleNotIn(vs ...string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNotIn(FieldTitle, vs...))
+}
+
+// TitleGT applies the GT predicate on the "title" field.
+func TitleGT(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldGT(FieldTitle, v))
+}
+
+// TitleGTE applies the GTE predicate on the "title" field.
+func TitleGTE(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldGTE(FieldTitle, v))
+}
+
+// TitleLT applies the LT predicate on the "title" field.
+func TitleLT(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldLT(FieldTitle, v))
+}
+
+// TitleLTE applies the LTE predicate on the "title" field.
+func TitleLTE(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldLTE(FieldTitle, v))
+}
+
+// TitleContains applies the Contains predicate on the "title" field.
+func TitleContains(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldContains(FieldTitle, v))
+}
+
+// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
+func TitleHasPrefix(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldHasPrefix(FieldTitle, v))
+}
+
+// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
+func TitleHasSuffix(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldHasSuffix(FieldTitle, v))
+}
+
+// TitleIsNil applies the IsNil predicate on the "title" field.
+func TitleIsNil() predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldIsNull(FieldTitle))
+}
+
+// TitleNotNil applies the NotNil predicate on the "title" field.
+func TitleNotNil() predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNotNull(FieldTitle))
+}
+
+// TitleEqualFold applies the EqualFold predicate on the "title" field.
+func TitleEqualFold(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEqualFold(FieldTitle, v))
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldContainsFold(FieldTitle, v))
+}
+
+// PriceMinorEQ applies the EQ predicate on the "price_minor" field.
+func PriceMinorEQ(v int64) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEQ(FieldPriceMinor, v))
+}
+
+// PriceMinorNEQ applies the NEQ predicate on the "price_minor" field.
+func PriceMinorNEQ(v int64) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNEQ(FieldPriceMinor, v))
+}
+
+// PriceMinorIn applies the In predicate on the "price_minor" field.
+func PriceMinorIn(vs ...int64) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldIn(FieldPriceMinor, vs...))
+}
+
+// PriceMinorNotIn applies the NotIn predicate on the "price_minor" field.
+func PriceMinorNotIn(vs ...int64) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNotIn(FieldPriceMinor, vs...))
+}
+
+// PriceMinorGT applies the GT predicate on the "price_minor" field.
+func PriceMinorGT(v int64) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldGT(FieldPriceMinor, v))
+}
+
+// PriceMinorGTE applies the GTE predicate on the "price_minor" field.
+func PriceMinorGTE(v int64) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldGTE(FieldPriceMinor, v))
+}
+
+// PriceMinorLT applies the LT predicate on the "price_minor" field.
+func PriceMinorLT(v int64) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldLT(FieldPriceMinor, v))
+}
+
+// PriceMinorLTE applies the LTE predicate on the "price_minor" field.
+func PriceMinorLTE(v int64) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldLTE(FieldPriceMinor, v))
+}
+
+// PriceMinorIsNil applies the IsNil predicate on the "price_minor" field.
+func PriceMinorIsNil() predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldIsNull(FieldPriceMinor))
+}
+
+// PriceMinorNotNil applies the NotNil predicate on the "price_minor" field.
+func PriceMinorNotNil() predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNotNull(FieldPriceMinor))
+}
+
+// CurrencyEQ applies the EQ predicate on the "currency" field.
+func CurrencyEQ(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEQ(FieldCurrency, v))
+}
+
+// CurrencyNEQ applies the NEQ predicate on the "currency" field.
+func CurrencyNEQ(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNEQ(FieldCurrency, v))
+}
+
+// CurrencyIn applies the In predicate on the "currency" field.
+func CurrencyIn(vs ...string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldIn(FieldCurrency, vs...))
+}
+
+// CurrencyNotIn applies the NotIn predicate on the "currency" field.
+func CurrencyNotIn(vs ...string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNotIn(FieldCurrency, vs...))
+}
+
+// CurrencyGT applies the GT predicate on the "currency" field.
+func CurrencyGT(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldGT(FieldCurrency, v))
+}
+
+// CurrencyGTE applies the GTE predicate on the "currency" field.
+func CurrencyGTE(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldGTE(FieldCurrency, v))
+}
+
+// CurrencyLT applies the LT predicate on the "currency" field.
+func CurrencyLT(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldLT(FieldCurrency, v))
+}
+
+// CurrencyLTE applies the LTE predicate on the "currency" field.
+func CurrencyLTE(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldLTE(FieldCurrency, v))
+}
+
+// CurrencyContains applies the Contains predicate on the "currency" field.
+func CurrencyContains(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldContains(FieldCurrency, v))
+}
+
+// CurrencyHasPrefix applies the HasPrefix predicate on the "currency" field.
+func CurrencyHasPrefix(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldHasPrefix(FieldCurrency, v))
+}
+
+// CurrencyHasSuffix applies the HasSuffix predicate on the "currency" field.
+func CurrencyHasSuffix(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldHasSuffix(FieldCurrency, v))
+}
+
+// CurrencyIsNil applies the IsNil predicate on the "currency" field.
+func CurrencyIsNil() predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldIsNull(FieldCurrency))
+}
+
+// CurrencyNotNil applies the NotNil predicate on the "currency" field.
+func CurrencyNotNil() predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNotNull(FieldCurrency))
+}
+
+// CurrencyEqualFold applies the EqualFold predicate on the "currency" field.
+func CurrencyEqualFold(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEqualFold(FieldCurrency, v))
+}
+
+// CurrencyContainsFold applies the ContainsFold predicate on the "currency" field.
+func CurrencyContainsFold(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldContainsFold(FieldCurrency, v))
+}
+
+// ImageURLEQ applies the EQ predicate on the "image_url" field.
+func ImageURLEQ(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEQ(FieldImageURL, v))
+}
+
+// ImageURLNEQ applies the NEQ predicate on the "image_url" field.
+func ImageURLNEQ(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNEQ(FieldImageURL, v))
+}
+
+// ImageURLIn applies the In predicate on the "image_url" field.
+func ImageURLIn(vs ...string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldIn(FieldImageURL, vs...))
+}
+
+// ImageURLNotIn applies the NotIn predicate on the "image_url" field.
+func ImageURLNotIn(vs ...string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNotIn(FieldImageURL, vs...))
+}
+
+// ImageURLGT applies the GT predicate on the "image_url" field.
+func ImageURLGT(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldGT(FieldImageURL, v))
+}
+
+// ImageURLGTE applies the GTE predicate on the "image_url" field.
+func ImageURLGTE(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldGTE(FieldImageURL, v))
+}
+
+// ImageURLLT applies the LT predicate on the "image_url" field.
+func ImageURLLT(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldLT(FieldImageURL, v))
+}
+
+// ImageURLLTE applies the LTE predicate on the "image_url" field.
+func ImageURLLTE(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldLTE(FieldImageURL, v))
+}
+
+// ImageURLContains applies the Contains predicate on the "image_url" field.
+func ImageURLContains(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldContains(FieldImageURL, v))
+}
+
+// ImageURLHasPrefix applies the HasPrefix predicate on the "image_url" field.
+func ImageURLHasPrefix(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldHasPrefix(FieldImageURL, v))
+}
+
+// ImageURLHasSuffix applies the HasSuffix predicate on the "image_url" field.
+func ImageURLHasSuffix(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldHasSuffix(FieldImageURL, v))
+}
+
+// ImageURLIsNil applies the IsNil predicate on the "image_url" field.
+func ImageURLIsNil() predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldIsNull(FieldImageURL))
+}
+
+// ImageURLNotNil applies the NotNil predicate on the "image_url" field.
+func ImageURLNotNil() predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldNotNull(FieldImageURL))
+}
+
+// ImageURLEqualFold applies the EqualFold predicate on the "image_url" field.
+func ImageURLEqualFold(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldEqualFold(FieldImageURL, v))
+}
+
+// ImageURLContainsFold applies the ContainsFold predicate on the "image_url" field.
+func ImageURLContainsFold(v string) predicate.LiveProduct {
+	return predicate.LiveProduct(sql.FieldContainsFold(FieldImageURL, v))
 }
 
 // And groups predicates with the AND operator between them.

@@ -466,6 +466,10 @@ var (
 		{Name: "product_id", Type: field.TypeUUID},
 		{Name: "pinned", Type: field.TypeBool, Default: false},
 		{Name: "pinned_at", Type: field.TypeTime, Nullable: true},
+		{Name: "title", Type: field.TypeString, Nullable: true, Size: 200},
+		{Name: "price_minor", Type: field.TypeInt64, Nullable: true},
+		{Name: "currency", Type: field.TypeString, Nullable: true, Size: 3},
+		{Name: "image_url", Type: field.TypeString, Nullable: true, Size: 500},
 	}
 	// LiveProductsTable holds the schema information for the "live_products" table.
 	LiveProductsTable = &schema.Table{
