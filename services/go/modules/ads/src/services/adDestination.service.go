@@ -20,7 +20,6 @@ var forbiddenDeepLinkSchemes = map[string]bool{"javascript": true, "data": true,
 
 var linkShorteners = []string{"bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd", "buff.ly", "cutt.ly", "rb.gy", "shorturl.at"}
 
-// ValidateHttpsUrl accepts only absolute https links with a real hostname and no credentials.
 func ValidateHttpsUrl(raw string) (*url.URL, bool) {
 	if raw == "" || len(raw) > 2048 || strings.ContainsAny(raw, " \t\r\n\\") {
 		return nil, false
@@ -61,7 +60,6 @@ func hostMatches(host, domain string) bool {
 	return host == domain || strings.HasSuffix(host, "."+domain)
 }
 
-// DestinationHostFlags is the review-time check of an external destination against the blocked list, link shorteners and raw IPs.
 func DestinationHostFlags(raw string, blockedDomains []string) []types.AutoCheckFlag {
 	parsed, ok := ValidateHttpsUrl(raw)
 	if !ok {
@@ -84,7 +82,6 @@ func DestinationHostFlags(raw string, blockedDomains []string) []types.AutoCheck
 	return nil
 }
 
-// ApplyUtm adds utm_* parameters the advertiser did not already put on the link.
 func ApplyUtm(raw string, utm *types.CreativeUtm) (string, error) {
 	parsed, ok := ValidateHttpsUrl(raw)
 	if !ok {
@@ -111,7 +108,6 @@ func ApplyUtm(raw string, utm *types.CreativeUtm) (string, error) {
 	return parsed.String(), nil
 }
 
-// SelectAppLink picks the store link for the viewer platform and falls back to the web link.
 func SelectAppLink(app *types.CreativeApp, platform string) (string, bool) {
 	if app == nil {
 		return "", false
@@ -171,7 +167,14 @@ func resolveDestination(destination types.CreativeDestination, app *types.Creati
 	return "", ErrDestinationUnavailable
 }
 
-// ResolveClickTarget derives the redirect target only from the creative's approved destinations; nothing from the request is trusted.
+func IsSafeClickTarget(target string) bool {
+	if strings.HasPrefix(target, "zudomart://") {
+		return deepLinkPattern.MatchString(target)
+	}
+	_, ok := ValidateHttpsUrl(target)
+	return ok
+}
+
 func ResolveClickTarget(creative types.Creative, cardIndex int, platform string) (string, error) {
 	if creative.Type == "carousel" || len(creative.Cards) > 0 {
 		if cardIndex < 0 || cardIndex >= len(creative.Cards) {
@@ -182,7 +185,6 @@ func ResolveClickTarget(creative types.Creative, cardIndex int, platform string)
 	return resolveDestination(creative.Destination, creative.App, platform)
 }
 
-// DeepLinkForPlatform is the installed-app deep link a client may try before falling back to the redirect.
 func DeepLinkForPlatform(creative types.Creative, platform string) string {
 	return deepLinkFor(creative.App, platform)
 }

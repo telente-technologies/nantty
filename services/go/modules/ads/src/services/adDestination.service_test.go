@@ -126,3 +126,16 @@ func TestClickTokenCannotBeForgedOrReusedAsImpressionToken(t *testing.T) {
 		t.Fatal("expired click token must fail")
 	}
 }
+
+func TestClickTargetsAreOnlyHttpsOrTheAppScheme(t *testing.T) {
+	for _, safe := range []string{"https://shop.example.com/sale?utm_source=zudomart", "zudomart://product/p1", "zudomart://messages"} {
+		if !IsSafeClickTarget(safe) {
+			t.Fatalf("%q should be allowed", safe)
+		}
+	}
+	for _, unsafe := range []string{"", "http://shop.example.com", "//evil.example.com", "javascript:alert(1)", "https://user:pass@evil.example.com", "zudomart://x\"><script>", "intent://evil"} {
+		if IsSafeClickTarget(unsafe) {
+			t.Fatalf("%q must be refused", unsafe)
+		}
+	}
+}

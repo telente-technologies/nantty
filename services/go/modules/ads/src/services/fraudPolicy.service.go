@@ -29,7 +29,6 @@ func DefaultFraudThresholds() FraudThresholds {
 	return FraudThresholds{InvalidScore: 0.9, MinimumMillisToClick: 400, MaximumClicksPerMinute: 8}
 }
 
-// Deterministic rules always run; the model score is advisory and only invalidates above its threshold.
 func EvaluateFraudPolicy(signals FraudSignals, thresholds FraudThresholds) FraudVerdict {
 	score := 0.0
 	if signals.ModelScore != nil {

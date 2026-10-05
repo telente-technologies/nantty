@@ -11,9 +11,6 @@ type ExchangeRateReader interface {
 	UsdRatesE8(ctx context.Context) map[string]int64
 }
 
-// RegionalAdPricing holds the per-region CPM/CPC floors and minimum budgets (admin setting regional-pricing, research
-// defaults otherwise) and converts them into the advertiser's billing currency with the currency module's rates.
-// The creator revenue share is deliberately not part of it: it is one percentage for every region.
 type RegionalAdPricing struct {
 	Settings   PlatformSettingReader
 	Rates      ExchangeRateReader
@@ -49,8 +46,6 @@ func CountriesInAudience(audience types.AudienceSpec) []string {
 	return countries
 }
 
-// FloorsForCountries returns the strictest floors of the targeted countries' regions in the billing currency.
-// An empty target uses the billing currency's own region so a draft without locations still validates sensibly.
 func (pricing *RegionalAdPricing) FloorsForCountries(ctx context.Context, countries []string, billingCurrency string) regionpricing.AdRegionPricing {
 	regions := regionpricing.RegionsForCountries(countries)
 	if len(regions) == 0 {
@@ -69,7 +64,6 @@ func (pricing *RegionalAdPricing) FloorsForAudience(ctx context.Context, audienc
 	return pricing.FloorsForCountries(ctx, CountriesInAudience(audience), billingCurrency)
 }
 
-// ReservePerMilleMinor is the auction reserve for one impression shown to a viewer in viewerCountry, in the ad's currency.
 func (pricing *RegionalAdPricing) ReservePerMilleMinor(ctx context.Context, viewerCountry, adCurrency string) (int64, bool) {
 	if !regionpricing.IsSupportedCurrency(adCurrency) {
 		return 0, false
@@ -82,7 +76,6 @@ func (pricing *RegionalAdPricing) ReservePerMilleMinor(ctx context.Context, view
 	return floors.CpmFloorMinor, true
 }
 
-// ConvertForReporting expresses spend in another currency (usually USD) for cross-account reports; it rounds down.
 func (pricing *RegionalAdPricing) ConvertForReporting(ctx context.Context, amount types.Money, reportingCurrency string) (types.Money, bool) {
 	converted, err := regionpricing.ConvertMinorUnits(amount.AmountMinor, amount.Currency, reportingCurrency, pricing.rates(ctx))
 	if err != nil {
@@ -103,8 +96,6 @@ func (pricing *RegionalAdPricing) regionWeights() map[string]int64 {
 	return weights
 }
 
-// Estimate splits a budget across the targeted regions by audience size (ADS_POPULATION_BY_COUNTRY) and returns
-// delivery and cost estimates per region in the billing currency.
 func (pricing *RegionalAdPricing) Estimate(ctx context.Context, request regionpricing.EstimateRequest) (regionpricing.CampaignEstimate, error) {
 	request.RegionWeights = pricing.regionWeights()
 	return regionpricing.EstimateCampaign(pricing.Table(ctx), request, pricing.rates(ctx))

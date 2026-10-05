@@ -32,7 +32,6 @@ func internalTarget(destination types.CreativeDestination) (string, bool) {
 	return "", false
 }
 
-// CollectOwnershipRefs lists every internal target a creative points at: its source and the destinations of the ad and its cards.
 func CollectOwnershipRefs(input types.CreativeInput, path string) []OwnershipRef {
 	refs := []OwnershipRef{}
 	switch input.Source.Type {
@@ -52,7 +51,6 @@ func CollectOwnershipRefs(input types.CreativeInput, path string) []OwnershipRef
 	return refs
 }
 
-// VerifyOwnership rejects the creative when any internal target is not owned or managed by the advertiser.
 func VerifyOwnership(ctx context.Context, checker interfaces.DestinationOwnership, advertiser AdvertiserIdentity, refs []OwnershipRef) error {
 	var issues []httpserver.ValidationIssue
 	checked := map[string]bool{}

@@ -58,7 +58,6 @@ func (source *PolicySource) SeedDefaultsWhenMissing(ctx context.Context) error {
 	return nil
 }
 
-// MonetizationRows reads the admin monetization.policy setting (cached by the reader); a missing setting falls back to the built-in defaults.
 func (source *PolicySource) MonetizationRows(ctx context.Context) ([]MonetizationPolicyRow, error) {
 	if source.Settings == nil {
 		return nil, nil
