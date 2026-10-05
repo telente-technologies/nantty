@@ -39,12 +39,12 @@ function BusinessDocumentCard({ document }: { document: BusinessDocument }) {
       {document.status === "rejected" && document.rejectionReason ? <Text size={13} lineHeight={17.5} color={colors.error}>{document.rejectionReason}</Text> : null}
       {canUpload ? (
         <>
-          <PhotoEvidencePicker photoUrls={photoUrls} onChangePhotoUrls={setPhotoUrls} maximumPhotos={1} addLabel="Add photo" onUploadingChange={setUploading} privateUploadPurpose="verification_document" />
+          <PhotoEvidencePicker photoUrls={photoUrls} onChangePhotoUrls={setPhotoUrls} maximumPhotos={1} addLabel="Add photo" onUploadingChange={setUploading} keepPhotosOnDevice />
           <Button
             title={document.status === "rejected" ? "Send again" : "Send for review"}
             disabled={photoUrls.length === 0 || uploading}
             loading={submit.isPending}
-            onPress={() => submit.mutate({ kind: document.kind as BusinessDocumentKind, fileUrl: photoUrls[0]! }, { onSuccess: () => setPhotoUrls([]) })}
+            onPress={() => submit.mutate({ kind: document.kind as BusinessDocumentKind, localUri: photoUrls[0]! }, { onSuccess: () => setPhotoUrls([]) })}
           />
           {submit.isError ? <Text size={12} color={colors.error} accessibilityRole="alert">{submit.error.message}</Text> : null}
         </>

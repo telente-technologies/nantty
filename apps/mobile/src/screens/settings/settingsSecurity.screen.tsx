@@ -31,8 +31,8 @@ export function SettingsSecurityScreen({ navigation }: MainScreenProps<"Settings
         title="Two-factor authentication"
         message={
           twoFactorEnabled
-            ? "2FA is on. We ask for a one-time code sent to your phone or email whenever you log in on a new device."
-            : "Add a one-time code, sent to your phone or email, every time you log in on a new device."
+            ? "2FA is on. We ask for a one-time code sent to your email whenever you log in on a new device."
+            : "Add a one-time code, sent to your email, every time you log in on a new device."
         }
         actionTitle={twoFactorEnabled ? "Turn off 2FA" : "Turn on 2FA"}
         actionLoading={updateSettings.isPending}
