@@ -112,7 +112,7 @@ func FilterAndSortCustomers(customers []CustomerView, text, kind, sortKey string
 }
 
 func customerMatches(customer CustomerView, text string) bool {
-	for _, candidate := range []string{customer.Name, derefText(customer.ZudomartUsername), derefText(customer.Phone), derefText(customer.City)} {
+	for _, candidate := range []string{customer.Name, derefText(customer.ZudomartUsername), derefText(customer.Phone), derefText(customer.City), derefText(customer.Email)} {
 		if strings.Contains(strings.ToLower(candidate), text) {
 			return true
 		}
@@ -173,7 +173,7 @@ func LoadStoreCustomers(ctx context.Context, deployed *container.Container, stor
 			customers[index].StoreCreditExpiresAt = state.NextExpiryAt
 		}
 	}
-	return customers, nil
+	return applyCustomerProfiles(ctx, deployed, storeId, currency, customers)
 }
 
 func LoadCustomerNotes(ctx context.Context, deployed *container.Container, storeId, buyerId uuid.UUID) ([]CustomerNoteView, error) {

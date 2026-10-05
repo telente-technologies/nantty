@@ -90,7 +90,31 @@ func BuildCartView(ctx context.Context, deployed *container.Container, accountId
 	if err != nil {
 		return view, err
 	}
+	context.available = markItemsWithoutEnoughStock(ctx, deployed, lines, unavailable)
 	return assembleCartView(groups, unavailable, context, address), nil
+}
+
+func markItemsWithoutEnoughStock(ctx context.Context, deployed *container.Container, lines []PricedCartLine, unavailable map[uuid.UUID]bool) map[uuid.UUID]int {
+	tracked := make([]uuid.UUID, 0, len(lines))
+	for _, line := range lines {
+		if line.Product.TrackInventory {
+			tracked = append(tracked, line.Product.VariantId)
+		}
+	}
+	stock, err := deployed.Stock()
+	if err != nil || len(tracked) == 0 {
+		return map[uuid.UUID]int{}
+	}
+	available, err := stock.AvailableByVariant(ctx, tracked)
+	if err != nil {
+		return map[uuid.UUID]int{}
+	}
+	for _, line := range lines {
+		if line.Product.TrackInventory && available[line.Product.VariantId] < line.Quantity {
+			unavailable[line.ItemId] = true
+		}
+	}
+	return available
 }
 
 type cartContext struct {

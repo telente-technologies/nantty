@@ -2,9 +2,9 @@ package services
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"errors"
-	"crypto/rand"
 	"fmt"
 	"strings"
 
@@ -64,7 +64,6 @@ func persistCheckout(ctx context.Context, deployed *container.Container, tx *ent
 	return result, err
 }
 
-// NextInvoiceNumber serialises invoice numbers per store with a locked counter row.
 func NextInvoiceNumber(ctx context.Context, tx *ent.Tx, storeId uuid.UUID) (string, error) {
 	existing, err := tx.OrderGroup.Query().Where(ordergroup.StoreID(storeId)).Count(ctx)
 	if err != nil {

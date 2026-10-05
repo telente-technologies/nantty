@@ -54,6 +54,9 @@ func assembleCartView(groups []SellerGroup, unavailable map[uuid.UUID]bool, load
 		allAvailable := true
 		for _, line := range group.Lines {
 			item := cartItemView(line, unavailable)
+			if remaining, known := loaded.available[line.Product.VariantId]; known {
+				item.Product.Stock = remaining
+			}
 			allAvailable = allAvailable && item.Available
 			groupView.Items = append(groupView.Items, item)
 			view.Items = append(view.Items, item)

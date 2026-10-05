@@ -7,8 +7,6 @@ import (
 	ordererrors "zudomart/modules/orders/src/errors"
 )
 
-// ResolvePaymentModes sets each planned group's payment mode. Direct payment is only
-// allowed for verified stores; everything else is escrow.
 func ResolvePaymentModes(plan *CheckoutPlan, requested map[uuid.UUID]string) error {
 	for index := range plan.Groups {
 		group := &plan.Groups[index]
