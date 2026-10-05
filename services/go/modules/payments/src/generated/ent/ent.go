@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/payments/src/generated/ent/billingauthorization"
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
 	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
@@ -88,6 +89,7 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			billingauthorization.Table:      billingauthorization.ValidColumn,
 			billingsubscription.Table:       billingsubscription.ValidColumn,
 			connectedaccount.Table:          connectedaccount.ValidColumn,
 			connectedaccountjob.Table:       connectedaccountjob.ValidColumn,

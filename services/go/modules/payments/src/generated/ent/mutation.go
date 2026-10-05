@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"zudomart/modules/payments/src/generated/ent/billingauthorization"
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
 	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
@@ -40,6 +41,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeBillingAuthorization      = "BillingAuthorization"
 	TypeBillingSubscription       = "BillingSubscription"
 	TypeConnectedAccount          = "ConnectedAccount"
 	TypeConnectedAccountJob       = "ConnectedAccountJob"
@@ -57,6 +59,1042 @@ const (
 	TypeStorePurchase             = "StorePurchase"
 	TypeWebhookEvent              = "WebhookEvent"
 )
+
+// BillingAuthorizationMutation represents an operation that mutates the BillingAuthorization nodes in the graph.
+type BillingAuthorizationMutation struct {
+	config
+	op                    Op
+	typ                   string
+	id                    *uuid.UUID
+	created_at            *time.Time
+	user_id               *string
+	provider              *string
+	provider_customer_id  *string
+	sealed_authorization  *[]byte
+	card_fingerprint_hash *string
+	card_brand            *string
+	card_last4            *string
+	card_expiry_month     *int
+	addcard_expiry_month  *int
+	card_expiry_year      *int
+	addcard_expiry_year   *int
+	revoked_at            *time.Time
+	last_used_at          *time.Time
+	clearedFields         map[string]struct{}
+	done                  bool
+	oldValue              func(context.Context) (*BillingAuthorization, error)
+	predicates            []predicate.BillingAuthorization
+}
+
+var _ ent.Mutation = (*BillingAuthorizationMutation)(nil)
+
+// billingauthorizationOption allows management of the mutation configuration using functional options.
+type billingauthorizationOption func(*BillingAuthorizationMutation)
+
+// newBillingAuthorizationMutation creates new mutation for the BillingAuthorization entity.
+func newBillingAuthorizationMutation(c config, op Op, opts ...billingauthorizationOption) *BillingAuthorizationMutation {
+	m := &BillingAuthorizationMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBillingAuthorization,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBillingAuthorizationID sets the ID field of the mutation.
+func withBillingAuthorizationID(id uuid.UUID) billingauthorizationOption {
+	return func(m *BillingAuthorizationMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BillingAuthorization
+		)
+		m.oldValue = func(ctx context.Context) (*BillingAuthorization, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BillingAuthorization.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBillingAuthorization sets the old BillingAuthorization of the mutation.
+func withBillingAuthorization(node *BillingAuthorization) billingauthorizationOption {
+	return func(m *BillingAuthorizationMutation) {
+		m.oldValue = func(context.Context) (*BillingAuthorization, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BillingAuthorizationMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BillingAuthorizationMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of BillingAuthorization entities.
+func (m *BillingAuthorizationMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BillingAuthorizationMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BillingAuthorizationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BillingAuthorization.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *BillingAuthorizationMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *BillingAuthorizationMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *BillingAuthorizationMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *BillingAuthorizationMutation) SetUserID(s string) {
+	m.user_id = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *BillingAuthorizationMutation) UserID() (r string, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *BillingAuthorizationMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetProvider sets the "provider" field.
+func (m *BillingAuthorizationMutation) SetProvider(s string) {
+	m.provider = &s
+}
+
+// Provider returns the value of the "provider" field in the mutation.
+func (m *BillingAuthorizationMutation) Provider() (r string, exists bool) {
+	v := m.provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProvider returns the old "provider" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldProvider(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProvider: %w", err)
+	}
+	return oldValue.Provider, nil
+}
+
+// ResetProvider resets all changes to the "provider" field.
+func (m *BillingAuthorizationMutation) ResetProvider() {
+	m.provider = nil
+}
+
+// SetProviderCustomerID sets the "provider_customer_id" field.
+func (m *BillingAuthorizationMutation) SetProviderCustomerID(s string) {
+	m.provider_customer_id = &s
+}
+
+// ProviderCustomerID returns the value of the "provider_customer_id" field in the mutation.
+func (m *BillingAuthorizationMutation) ProviderCustomerID() (r string, exists bool) {
+	v := m.provider_customer_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProviderCustomerID returns the old "provider_customer_id" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldProviderCustomerID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProviderCustomerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProviderCustomerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProviderCustomerID: %w", err)
+	}
+	return oldValue.ProviderCustomerID, nil
+}
+
+// ResetProviderCustomerID resets all changes to the "provider_customer_id" field.
+func (m *BillingAuthorizationMutation) ResetProviderCustomerID() {
+	m.provider_customer_id = nil
+}
+
+// SetSealedAuthorization sets the "sealed_authorization" field.
+func (m *BillingAuthorizationMutation) SetSealedAuthorization(b []byte) {
+	m.sealed_authorization = &b
+}
+
+// SealedAuthorization returns the value of the "sealed_authorization" field in the mutation.
+func (m *BillingAuthorizationMutation) SealedAuthorization() (r []byte, exists bool) {
+	v := m.sealed_authorization
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSealedAuthorization returns the old "sealed_authorization" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldSealedAuthorization(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSealedAuthorization is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSealedAuthorization requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSealedAuthorization: %w", err)
+	}
+	return oldValue.SealedAuthorization, nil
+}
+
+// ResetSealedAuthorization resets all changes to the "sealed_authorization" field.
+func (m *BillingAuthorizationMutation) ResetSealedAuthorization() {
+	m.sealed_authorization = nil
+}
+
+// SetCardFingerprintHash sets the "card_fingerprint_hash" field.
+func (m *BillingAuthorizationMutation) SetCardFingerprintHash(s string) {
+	m.card_fingerprint_hash = &s
+}
+
+// CardFingerprintHash returns the value of the "card_fingerprint_hash" field in the mutation.
+func (m *BillingAuthorizationMutation) CardFingerprintHash() (r string, exists bool) {
+	v := m.card_fingerprint_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCardFingerprintHash returns the old "card_fingerprint_hash" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldCardFingerprintHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCardFingerprintHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCardFingerprintHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCardFingerprintHash: %w", err)
+	}
+	return oldValue.CardFingerprintHash, nil
+}
+
+// ResetCardFingerprintHash resets all changes to the "card_fingerprint_hash" field.
+func (m *BillingAuthorizationMutation) ResetCardFingerprintHash() {
+	m.card_fingerprint_hash = nil
+}
+
+// SetCardBrand sets the "card_brand" field.
+func (m *BillingAuthorizationMutation) SetCardBrand(s string) {
+	m.card_brand = &s
+}
+
+// CardBrand returns the value of the "card_brand" field in the mutation.
+func (m *BillingAuthorizationMutation) CardBrand() (r string, exists bool) {
+	v := m.card_brand
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCardBrand returns the old "card_brand" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldCardBrand(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCardBrand is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCardBrand requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCardBrand: %w", err)
+	}
+	return oldValue.CardBrand, nil
+}
+
+// ResetCardBrand resets all changes to the "card_brand" field.
+func (m *BillingAuthorizationMutation) ResetCardBrand() {
+	m.card_brand = nil
+}
+
+// SetCardLast4 sets the "card_last4" field.
+func (m *BillingAuthorizationMutation) SetCardLast4(s string) {
+	m.card_last4 = &s
+}
+
+// CardLast4 returns the value of the "card_last4" field in the mutation.
+func (m *BillingAuthorizationMutation) CardLast4() (r string, exists bool) {
+	v := m.card_last4
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCardLast4 returns the old "card_last4" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldCardLast4(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCardLast4 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCardLast4 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCardLast4: %w", err)
+	}
+	return oldValue.CardLast4, nil
+}
+
+// ResetCardLast4 resets all changes to the "card_last4" field.
+func (m *BillingAuthorizationMutation) ResetCardLast4() {
+	m.card_last4 = nil
+}
+
+// SetCardExpiryMonth sets the "card_expiry_month" field.
+func (m *BillingAuthorizationMutation) SetCardExpiryMonth(i int) {
+	m.card_expiry_month = &i
+	m.addcard_expiry_month = nil
+}
+
+// CardExpiryMonth returns the value of the "card_expiry_month" field in the mutation.
+func (m *BillingAuthorizationMutation) CardExpiryMonth() (r int, exists bool) {
+	v := m.card_expiry_month
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCardExpiryMonth returns the old "card_expiry_month" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldCardExpiryMonth(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCardExpiryMonth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCardExpiryMonth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCardExpiryMonth: %w", err)
+	}
+	return oldValue.CardExpiryMonth, nil
+}
+
+// AddCardExpiryMonth adds i to the "card_expiry_month" field.
+func (m *BillingAuthorizationMutation) AddCardExpiryMonth(i int) {
+	if m.addcard_expiry_month != nil {
+		*m.addcard_expiry_month += i
+	} else {
+		m.addcard_expiry_month = &i
+	}
+}
+
+// AddedCardExpiryMonth returns the value that was added to the "card_expiry_month" field in this mutation.
+func (m *BillingAuthorizationMutation) AddedCardExpiryMonth() (r int, exists bool) {
+	v := m.addcard_expiry_month
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCardExpiryMonth resets all changes to the "card_expiry_month" field.
+func (m *BillingAuthorizationMutation) ResetCardExpiryMonth() {
+	m.card_expiry_month = nil
+	m.addcard_expiry_month = nil
+}
+
+// SetCardExpiryYear sets the "card_expiry_year" field.
+func (m *BillingAuthorizationMutation) SetCardExpiryYear(i int) {
+	m.card_expiry_year = &i
+	m.addcard_expiry_year = nil
+}
+
+// CardExpiryYear returns the value of the "card_expiry_year" field in the mutation.
+func (m *BillingAuthorizationMutation) CardExpiryYear() (r int, exists bool) {
+	v := m.card_expiry_year
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCardExpiryYear returns the old "card_expiry_year" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldCardExpiryYear(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCardExpiryYear is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCardExpiryYear requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCardExpiryYear: %w", err)
+	}
+	return oldValue.CardExpiryYear, nil
+}
+
+// AddCardExpiryYear adds i to the "card_expiry_year" field.
+func (m *BillingAuthorizationMutation) AddCardExpiryYear(i int) {
+	if m.addcard_expiry_year != nil {
+		*m.addcard_expiry_year += i
+	} else {
+		m.addcard_expiry_year = &i
+	}
+}
+
+// AddedCardExpiryYear returns the value that was added to the "card_expiry_year" field in this mutation.
+func (m *BillingAuthorizationMutation) AddedCardExpiryYear() (r int, exists bool) {
+	v := m.addcard_expiry_year
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCardExpiryYear resets all changes to the "card_expiry_year" field.
+func (m *BillingAuthorizationMutation) ResetCardExpiryYear() {
+	m.card_expiry_year = nil
+	m.addcard_expiry_year = nil
+}
+
+// SetRevokedAt sets the "revoked_at" field.
+func (m *BillingAuthorizationMutation) SetRevokedAt(t time.Time) {
+	m.revoked_at = &t
+}
+
+// RevokedAt returns the value of the "revoked_at" field in the mutation.
+func (m *BillingAuthorizationMutation) RevokedAt() (r time.Time, exists bool) {
+	v := m.revoked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedAt returns the old "revoked_at" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldRevokedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedAt: %w", err)
+	}
+	return oldValue.RevokedAt, nil
+}
+
+// ClearRevokedAt clears the value of the "revoked_at" field.
+func (m *BillingAuthorizationMutation) ClearRevokedAt() {
+	m.revoked_at = nil
+	m.clearedFields[billingauthorization.FieldRevokedAt] = struct{}{}
+}
+
+// RevokedAtCleared returns if the "revoked_at" field was cleared in this mutation.
+func (m *BillingAuthorizationMutation) RevokedAtCleared() bool {
+	_, ok := m.clearedFields[billingauthorization.FieldRevokedAt]
+	return ok
+}
+
+// ResetRevokedAt resets all changes to the "revoked_at" field.
+func (m *BillingAuthorizationMutation) ResetRevokedAt() {
+	m.revoked_at = nil
+	delete(m.clearedFields, billingauthorization.FieldRevokedAt)
+}
+
+// SetLastUsedAt sets the "last_used_at" field.
+func (m *BillingAuthorizationMutation) SetLastUsedAt(t time.Time) {
+	m.last_used_at = &t
+}
+
+// LastUsedAt returns the value of the "last_used_at" field in the mutation.
+func (m *BillingAuthorizationMutation) LastUsedAt() (r time.Time, exists bool) {
+	v := m.last_used_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUsedAt returns the old "last_used_at" field's value of the BillingAuthorization entity.
+// If the BillingAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BillingAuthorizationMutation) OldLastUsedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUsedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUsedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUsedAt: %w", err)
+	}
+	return oldValue.LastUsedAt, nil
+}
+
+// ClearLastUsedAt clears the value of the "last_used_at" field.
+func (m *BillingAuthorizationMutation) ClearLastUsedAt() {
+	m.last_used_at = nil
+	m.clearedFields[billingauthorization.FieldLastUsedAt] = struct{}{}
+}
+
+// LastUsedAtCleared returns if the "last_used_at" field was cleared in this mutation.
+func (m *BillingAuthorizationMutation) LastUsedAtCleared() bool {
+	_, ok := m.clearedFields[billingauthorization.FieldLastUsedAt]
+	return ok
+}
+
+// ResetLastUsedAt resets all changes to the "last_used_at" field.
+func (m *BillingAuthorizationMutation) ResetLastUsedAt() {
+	m.last_used_at = nil
+	delete(m.clearedFields, billingauthorization.FieldLastUsedAt)
+}
+
+// Where appends a list predicates to the BillingAuthorizationMutation builder.
+func (m *BillingAuthorizationMutation) Where(ps ...predicate.BillingAuthorization) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BillingAuthorizationMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BillingAuthorizationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.BillingAuthorization, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BillingAuthorizationMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BillingAuthorizationMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (BillingAuthorization).
+func (m *BillingAuthorizationMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BillingAuthorizationMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, billingauthorization.FieldCreatedAt)
+	}
+	if m.user_id != nil {
+		fields = append(fields, billingauthorization.FieldUserID)
+	}
+	if m.provider != nil {
+		fields = append(fields, billingauthorization.FieldProvider)
+	}
+	if m.provider_customer_id != nil {
+		fields = append(fields, billingauthorization.FieldProviderCustomerID)
+	}
+	if m.sealed_authorization != nil {
+		fields = append(fields, billingauthorization.FieldSealedAuthorization)
+	}
+	if m.card_fingerprint_hash != nil {
+		fields = append(fields, billingauthorization.FieldCardFingerprintHash)
+	}
+	if m.card_brand != nil {
+		fields = append(fields, billingauthorization.FieldCardBrand)
+	}
+	if m.card_last4 != nil {
+		fields = append(fields, billingauthorization.FieldCardLast4)
+	}
+	if m.card_expiry_month != nil {
+		fields = append(fields, billingauthorization.FieldCardExpiryMonth)
+	}
+	if m.card_expiry_year != nil {
+		fields = append(fields, billingauthorization.FieldCardExpiryYear)
+	}
+	if m.revoked_at != nil {
+		fields = append(fields, billingauthorization.FieldRevokedAt)
+	}
+	if m.last_used_at != nil {
+		fields = append(fields, billingauthorization.FieldLastUsedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BillingAuthorizationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case billingauthorization.FieldCreatedAt:
+		return m.CreatedAt()
+	case billingauthorization.FieldUserID:
+		return m.UserID()
+	case billingauthorization.FieldProvider:
+		return m.Provider()
+	case billingauthorization.FieldProviderCustomerID:
+		return m.ProviderCustomerID()
+	case billingauthorization.FieldSealedAuthorization:
+		return m.SealedAuthorization()
+	case billingauthorization.FieldCardFingerprintHash:
+		return m.CardFingerprintHash()
+	case billingauthorization.FieldCardBrand:
+		return m.CardBrand()
+	case billingauthorization.FieldCardLast4:
+		return m.CardLast4()
+	case billingauthorization.FieldCardExpiryMonth:
+		return m.CardExpiryMonth()
+	case billingauthorization.FieldCardExpiryYear:
+		return m.CardExpiryYear()
+	case billingauthorization.FieldRevokedAt:
+		return m.RevokedAt()
+	case billingauthorization.FieldLastUsedAt:
+		return m.LastUsedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BillingAuthorizationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case billingauthorization.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case billingauthorization.FieldUserID:
+		return m.OldUserID(ctx)
+	case billingauthorization.FieldProvider:
+		return m.OldProvider(ctx)
+	case billingauthorization.FieldProviderCustomerID:
+		return m.OldProviderCustomerID(ctx)
+	case billingauthorization.FieldSealedAuthorization:
+		return m.OldSealedAuthorization(ctx)
+	case billingauthorization.FieldCardFingerprintHash:
+		return m.OldCardFingerprintHash(ctx)
+	case billingauthorization.FieldCardBrand:
+		return m.OldCardBrand(ctx)
+	case billingauthorization.FieldCardLast4:
+		return m.OldCardLast4(ctx)
+	case billingauthorization.FieldCardExpiryMonth:
+		return m.OldCardExpiryMonth(ctx)
+	case billingauthorization.FieldCardExpiryYear:
+		return m.OldCardExpiryYear(ctx)
+	case billingauthorization.FieldRevokedAt:
+		return m.OldRevokedAt(ctx)
+	case billingauthorization.FieldLastUsedAt:
+		return m.OldLastUsedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown BillingAuthorization field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BillingAuthorizationMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case billingauthorization.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case billingauthorization.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case billingauthorization.FieldProvider:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProvider(v)
+		return nil
+	case billingauthorization.FieldProviderCustomerID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProviderCustomerID(v)
+		return nil
+	case billingauthorization.FieldSealedAuthorization:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSealedAuthorization(v)
+		return nil
+	case billingauthorization.FieldCardFingerprintHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCardFingerprintHash(v)
+		return nil
+	case billingauthorization.FieldCardBrand:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCardBrand(v)
+		return nil
+	case billingauthorization.FieldCardLast4:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCardLast4(v)
+		return nil
+	case billingauthorization.FieldCardExpiryMonth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCardExpiryMonth(v)
+		return nil
+	case billingauthorization.FieldCardExpiryYear:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCardExpiryYear(v)
+		return nil
+	case billingauthorization.FieldRevokedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedAt(v)
+		return nil
+	case billingauthorization.FieldLastUsedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUsedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BillingAuthorization field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BillingAuthorizationMutation) AddedFields() []string {
+	var fields []string
+	if m.addcard_expiry_month != nil {
+		fields = append(fields, billingauthorization.FieldCardExpiryMonth)
+	}
+	if m.addcard_expiry_year != nil {
+		fields = append(fields, billingauthorization.FieldCardExpiryYear)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BillingAuthorizationMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case billingauthorization.FieldCardExpiryMonth:
+		return m.AddedCardExpiryMonth()
+	case billingauthorization.FieldCardExpiryYear:
+		return m.AddedCardExpiryYear()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BillingAuthorizationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case billingauthorization.FieldCardExpiryMonth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCardExpiryMonth(v)
+		return nil
+	case billingauthorization.FieldCardExpiryYear:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCardExpiryYear(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BillingAuthorization numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BillingAuthorizationMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(billingauthorization.FieldRevokedAt) {
+		fields = append(fields, billingauthorization.FieldRevokedAt)
+	}
+	if m.FieldCleared(billingauthorization.FieldLastUsedAt) {
+		fields = append(fields, billingauthorization.FieldLastUsedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BillingAuthorizationMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BillingAuthorizationMutation) ClearField(name string) error {
+	switch name {
+	case billingauthorization.FieldRevokedAt:
+		m.ClearRevokedAt()
+		return nil
+	case billingauthorization.FieldLastUsedAt:
+		m.ClearLastUsedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown BillingAuthorization nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BillingAuthorizationMutation) ResetField(name string) error {
+	switch name {
+	case billingauthorization.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case billingauthorization.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case billingauthorization.FieldProvider:
+		m.ResetProvider()
+		return nil
+	case billingauthorization.FieldProviderCustomerID:
+		m.ResetProviderCustomerID()
+		return nil
+	case billingauthorization.FieldSealedAuthorization:
+		m.ResetSealedAuthorization()
+		return nil
+	case billingauthorization.FieldCardFingerprintHash:
+		m.ResetCardFingerprintHash()
+		return nil
+	case billingauthorization.FieldCardBrand:
+		m.ResetCardBrand()
+		return nil
+	case billingauthorization.FieldCardLast4:
+		m.ResetCardLast4()
+		return nil
+	case billingauthorization.FieldCardExpiryMonth:
+		m.ResetCardExpiryMonth()
+		return nil
+	case billingauthorization.FieldCardExpiryYear:
+		m.ResetCardExpiryYear()
+		return nil
+	case billingauthorization.FieldRevokedAt:
+		m.ResetRevokedAt()
+		return nil
+	case billingauthorization.FieldLastUsedAt:
+		m.ResetLastUsedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown BillingAuthorization field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BillingAuthorizationMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BillingAuthorizationMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BillingAuthorizationMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BillingAuthorizationMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BillingAuthorizationMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BillingAuthorizationMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BillingAuthorizationMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown BillingAuthorization unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BillingAuthorizationMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown BillingAuthorization edge %s", name)
+}
 
 // BillingSubscriptionMutation represents an operation that mutates the BillingSubscription nodes in the graph.
 type BillingSubscriptionMutation struct {

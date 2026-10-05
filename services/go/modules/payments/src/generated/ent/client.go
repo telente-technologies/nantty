@@ -11,6 +11,7 @@ import (
 
 	"zudomart/modules/payments/src/generated/ent/migrate"
 
+	"zudomart/modules/payments/src/generated/ent/billingauthorization"
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
 	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
@@ -42,6 +43,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// BillingAuthorization is the client for interacting with the BillingAuthorization builders.
+	BillingAuthorization *BillingAuthorizationClient
 	// BillingSubscription is the client for interacting with the BillingSubscription builders.
 	BillingSubscription *BillingSubscriptionClient
 	// ConnectedAccount is the client for interacting with the ConnectedAccount builders.
@@ -85,6 +88,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.BillingAuthorization = NewBillingAuthorizationClient(c.config)
 	c.BillingSubscription = NewBillingSubscriptionClient(c.config)
 	c.ConnectedAccount = NewConnectedAccountClient(c.config)
 	c.ConnectedAccountJob = NewConnectedAccountJobClient(c.config)
@@ -195,6 +199,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:                       ctx,
 		config:                    cfg,
+		BillingAuthorization:      NewBillingAuthorizationClient(cfg),
 		BillingSubscription:       NewBillingSubscriptionClient(cfg),
 		ConnectedAccount:          NewConnectedAccountClient(cfg),
 		ConnectedAccountJob:       NewConnectedAccountJobClient(cfg),
@@ -230,6 +235,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:                       ctx,
 		config:                    cfg,
+		BillingAuthorization:      NewBillingAuthorizationClient(cfg),
 		BillingSubscription:       NewBillingSubscriptionClient(cfg),
 		ConnectedAccount:          NewConnectedAccountClient(cfg),
 		ConnectedAccountJob:       NewConnectedAccountJobClient(cfg),
@@ -252,7 +258,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		BillingSubscription.
+//		BillingAuthorization.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -275,11 +281,11 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.BillingSubscription, c.ConnectedAccount, c.ConnectedAccountJob,
-		c.IdempotentRequest, c.OrderPayable, c.OutboxEvent, c.PaymentIntent,
-		c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer, c.ProviderCustomer,
-		c.ProviderDispute, c.ProviderPayoutDestination, c.SavedCardSetup,
-		c.StorePurchase, c.WebhookEvent,
+		c.BillingAuthorization, c.BillingSubscription, c.ConnectedAccount,
+		c.ConnectedAccountJob, c.IdempotentRequest, c.OrderPayable, c.OutboxEvent,
+		c.PaymentIntent, c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer,
+		c.ProviderCustomer, c.ProviderDispute, c.ProviderPayoutDestination,
+		c.SavedCardSetup, c.StorePurchase, c.WebhookEvent,
 	} {
 		n.Use(hooks...)
 	}
@@ -289,11 +295,11 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.BillingSubscription, c.ConnectedAccount, c.ConnectedAccountJob,
-		c.IdempotentRequest, c.OrderPayable, c.OutboxEvent, c.PaymentIntent,
-		c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer, c.ProviderCustomer,
-		c.ProviderDispute, c.ProviderPayoutDestination, c.SavedCardSetup,
-		c.StorePurchase, c.WebhookEvent,
+		c.BillingAuthorization, c.BillingSubscription, c.ConnectedAccount,
+		c.ConnectedAccountJob, c.IdempotentRequest, c.OrderPayable, c.OutboxEvent,
+		c.PaymentIntent, c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer,
+		c.ProviderCustomer, c.ProviderDispute, c.ProviderPayoutDestination,
+		c.SavedCardSetup, c.StorePurchase, c.WebhookEvent,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -302,6 +308,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *BillingAuthorizationMutation:
+		return c.BillingAuthorization.mutate(ctx, m)
 	case *BillingSubscriptionMutation:
 		return c.BillingSubscription.mutate(ctx, m)
 	case *ConnectedAccountMutation:
@@ -336,6 +344,139 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.WebhookEvent.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// BillingAuthorizationClient is a client for the BillingAuthorization schema.
+type BillingAuthorizationClient struct {
+	config
+}
+
+// NewBillingAuthorizationClient returns a client for the BillingAuthorization from the given config.
+func NewBillingAuthorizationClient(c config) *BillingAuthorizationClient {
+	return &BillingAuthorizationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `billingauthorization.Hooks(f(g(h())))`.
+func (c *BillingAuthorizationClient) Use(hooks ...Hook) {
+	c.hooks.BillingAuthorization = append(c.hooks.BillingAuthorization, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `billingauthorization.Intercept(f(g(h())))`.
+func (c *BillingAuthorizationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BillingAuthorization = append(c.inters.BillingAuthorization, interceptors...)
+}
+
+// Create returns a builder for creating a BillingAuthorization entity.
+func (c *BillingAuthorizationClient) Create() *BillingAuthorizationCreate {
+	mutation := newBillingAuthorizationMutation(c.config, OpCreate)
+	return &BillingAuthorizationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BillingAuthorization entities.
+func (c *BillingAuthorizationClient) CreateBulk(builders ...*BillingAuthorizationCreate) *BillingAuthorizationCreateBulk {
+	return &BillingAuthorizationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BillingAuthorizationClient) MapCreateBulk(slice any, setFunc func(*BillingAuthorizationCreate, int)) *BillingAuthorizationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BillingAuthorizationCreateBulk{err: fmt.Errorf("calling to BillingAuthorizationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BillingAuthorizationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BillingAuthorizationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BillingAuthorization.
+func (c *BillingAuthorizationClient) Update() *BillingAuthorizationUpdate {
+	mutation := newBillingAuthorizationMutation(c.config, OpUpdate)
+	return &BillingAuthorizationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BillingAuthorizationClient) UpdateOne(_m *BillingAuthorization) *BillingAuthorizationUpdateOne {
+	mutation := newBillingAuthorizationMutation(c.config, OpUpdateOne, withBillingAuthorization(_m))
+	return &BillingAuthorizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BillingAuthorizationClient) UpdateOneID(id uuid.UUID) *BillingAuthorizationUpdateOne {
+	mutation := newBillingAuthorizationMutation(c.config, OpUpdateOne, withBillingAuthorizationID(id))
+	return &BillingAuthorizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BillingAuthorization.
+func (c *BillingAuthorizationClient) Delete() *BillingAuthorizationDelete {
+	mutation := newBillingAuthorizationMutation(c.config, OpDelete)
+	return &BillingAuthorizationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BillingAuthorizationClient) DeleteOne(_m *BillingAuthorization) *BillingAuthorizationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BillingAuthorizationClient) DeleteOneID(id uuid.UUID) *BillingAuthorizationDeleteOne {
+	builder := c.Delete().Where(billingauthorization.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BillingAuthorizationDeleteOne{builder}
+}
+
+// Query returns a query builder for BillingAuthorization.
+func (c *BillingAuthorizationClient) Query() *BillingAuthorizationQuery {
+	return &BillingAuthorizationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBillingAuthorization},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BillingAuthorization entity by its id.
+func (c *BillingAuthorizationClient) Get(ctx context.Context, id uuid.UUID) (*BillingAuthorization, error) {
+	return c.Query().Where(billingauthorization.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BillingAuthorizationClient) GetX(ctx context.Context, id uuid.UUID) *BillingAuthorization {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *BillingAuthorizationClient) Hooks() []Hook {
+	return c.hooks.BillingAuthorization
+}
+
+// Interceptors returns the client interceptors.
+func (c *BillingAuthorizationClient) Interceptors() []Interceptor {
+	return c.inters.BillingAuthorization
+}
+
+func (c *BillingAuthorizationClient) mutate(ctx context.Context, m *BillingAuthorizationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BillingAuthorizationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BillingAuthorizationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BillingAuthorizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BillingAuthorizationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown BillingAuthorization mutation op: %q", m.Op())
 	}
 }
 
@@ -2470,16 +2611,18 @@ func (c *WebhookEventClient) mutate(ctx context.Context, m *WebhookEventMutation
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		BillingSubscription, ConnectedAccount, ConnectedAccountJob, IdempotentRequest,
-		OrderPayable, OutboxEvent, PaymentIntent, PaymentRefund, PayoutOnboarding,
-		PayoutTransfer, ProviderCustomer, ProviderDispute, ProviderPayoutDestination,
-		SavedCardSetup, StorePurchase, WebhookEvent []ent.Hook
+		BillingAuthorization, BillingSubscription, ConnectedAccount,
+		ConnectedAccountJob, IdempotentRequest, OrderPayable, OutboxEvent,
+		PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
+		ProviderCustomer, ProviderDispute, ProviderPayoutDestination, SavedCardSetup,
+		StorePurchase, WebhookEvent []ent.Hook
 	}
 	inters struct {
-		BillingSubscription, ConnectedAccount, ConnectedAccountJob, IdempotentRequest,
-		OrderPayable, OutboxEvent, PaymentIntent, PaymentRefund, PayoutOnboarding,
-		PayoutTransfer, ProviderCustomer, ProviderDispute, ProviderPayoutDestination,
-		SavedCardSetup, StorePurchase, WebhookEvent []ent.Interceptor
+		BillingAuthorization, BillingSubscription, ConnectedAccount,
+		ConnectedAccountJob, IdempotentRequest, OrderPayable, OutboxEvent,
+		PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
+		ProviderCustomer, ProviderDispute, ProviderPayoutDestination, SavedCardSetup,
+		StorePurchase, WebhookEvent []ent.Interceptor
 	}
 )
 

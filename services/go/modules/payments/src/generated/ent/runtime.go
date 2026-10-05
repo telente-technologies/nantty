@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 	"zudomart/modules/payments/src/databases/schema"
+	"zudomart/modules/payments/src/generated/ent/billingauthorization"
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
 	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
@@ -29,6 +30,99 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	billingauthorizationMixin := schema.BillingAuthorization{}.Mixin()
+	billingauthorizationMixinFields0 := billingauthorizationMixin[0].Fields()
+	_ = billingauthorizationMixinFields0
+	billingauthorizationFields := schema.BillingAuthorization{}.Fields()
+	_ = billingauthorizationFields
+	// billingauthorizationDescCreatedAt is the schema descriptor for created_at field.
+	billingauthorizationDescCreatedAt := billingauthorizationMixinFields0[1].Descriptor()
+	// billingauthorization.DefaultCreatedAt holds the default value on creation for the created_at field.
+	billingauthorization.DefaultCreatedAt = billingauthorizationDescCreatedAt.Default.(func() time.Time)
+	// billingauthorizationDescUserID is the schema descriptor for user_id field.
+	billingauthorizationDescUserID := billingauthorizationFields[0].Descriptor()
+	// billingauthorization.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	billingauthorization.UserIDValidator = func() func(string) error {
+		validators := billingauthorizationDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// billingauthorizationDescProvider is the schema descriptor for provider field.
+	billingauthorizationDescProvider := billingauthorizationFields[1].Descriptor()
+	// billingauthorization.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	billingauthorization.ProviderValidator = func() func(string) error {
+		validators := billingauthorizationDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// billingauthorizationDescProviderCustomerID is the schema descriptor for provider_customer_id field.
+	billingauthorizationDescProviderCustomerID := billingauthorizationFields[2].Descriptor()
+	// billingauthorization.DefaultProviderCustomerID holds the default value on creation for the provider_customer_id field.
+	billingauthorization.DefaultProviderCustomerID = billingauthorizationDescProviderCustomerID.Default.(string)
+	// billingauthorization.ProviderCustomerIDValidator is a validator for the "provider_customer_id" field. It is called by the builders before save.
+	billingauthorization.ProviderCustomerIDValidator = billingauthorizationDescProviderCustomerID.Validators[0].(func(string) error)
+	// billingauthorizationDescCardFingerprintHash is the schema descriptor for card_fingerprint_hash field.
+	billingauthorizationDescCardFingerprintHash := billingauthorizationFields[4].Descriptor()
+	// billingauthorization.CardFingerprintHashValidator is a validator for the "card_fingerprint_hash" field. It is called by the builders before save.
+	billingauthorization.CardFingerprintHashValidator = func() func(string) error {
+		validators := billingauthorizationDescCardFingerprintHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(card_fingerprint_hash string) error {
+			for _, fn := range fns {
+				if err := fn(card_fingerprint_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// billingauthorizationDescCardBrand is the schema descriptor for card_brand field.
+	billingauthorizationDescCardBrand := billingauthorizationFields[5].Descriptor()
+	// billingauthorization.DefaultCardBrand holds the default value on creation for the card_brand field.
+	billingauthorization.DefaultCardBrand = billingauthorizationDescCardBrand.Default.(string)
+	// billingauthorization.CardBrandValidator is a validator for the "card_brand" field. It is called by the builders before save.
+	billingauthorization.CardBrandValidator = billingauthorizationDescCardBrand.Validators[0].(func(string) error)
+	// billingauthorizationDescCardLast4 is the schema descriptor for card_last4 field.
+	billingauthorizationDescCardLast4 := billingauthorizationFields[6].Descriptor()
+	// billingauthorization.DefaultCardLast4 holds the default value on creation for the card_last4 field.
+	billingauthorization.DefaultCardLast4 = billingauthorizationDescCardLast4.Default.(string)
+	// billingauthorization.CardLast4Validator is a validator for the "card_last4" field. It is called by the builders before save.
+	billingauthorization.CardLast4Validator = billingauthorizationDescCardLast4.Validators[0].(func(string) error)
+	// billingauthorizationDescCardExpiryMonth is the schema descriptor for card_expiry_month field.
+	billingauthorizationDescCardExpiryMonth := billingauthorizationFields[7].Descriptor()
+	// billingauthorization.DefaultCardExpiryMonth holds the default value on creation for the card_expiry_month field.
+	billingauthorization.DefaultCardExpiryMonth = billingauthorizationDescCardExpiryMonth.Default.(int)
+	// billingauthorizationDescCardExpiryYear is the schema descriptor for card_expiry_year field.
+	billingauthorizationDescCardExpiryYear := billingauthorizationFields[8].Descriptor()
+	// billingauthorization.DefaultCardExpiryYear holds the default value on creation for the card_expiry_year field.
+	billingauthorization.DefaultCardExpiryYear = billingauthorizationDescCardExpiryYear.Default.(int)
+	// billingauthorizationDescID is the schema descriptor for id field.
+	billingauthorizationDescID := billingauthorizationMixinFields0[0].Descriptor()
+	// billingauthorization.DefaultID holds the default value on creation for the id field.
+	billingauthorization.DefaultID = billingauthorizationDescID.Default.(func() uuid.UUID)
 	billingsubscriptionMixin := schema.BillingSubscription{}.Mixin()
 	billingsubscriptionMixinFields0 := billingsubscriptionMixin[0].Fields()
 	_ = billingsubscriptionMixinFields0
