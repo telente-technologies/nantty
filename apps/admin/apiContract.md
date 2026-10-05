@@ -9,14 +9,14 @@ The console ships a mock adapter (`ADMIN_USE_MOCKS=true`, default outside produc
 ### Transport
 - JSON in and out, UTF-8. Timestamps are ISO-8601 UTC strings.
 - Money is always `{ "amountMinor": integer, "currency": "NGN" }` (ISO-4217). Never floats, never an implied currency. Rates are integer basis points (`4000` = 40%).
-- Lists: `?page=1&pageSize=25` (max 200) and return `{ "items": [], "page": 1, "pageSize": 25, "total": 0 }`.
+- Lists return `{ "data": [], "nextCursor": string|null }` (the console client exposes them as `items`). Most backend lists page by `?cursor=`; only live incidents, ads, advertisers, support and help also accept `page`/`pageSize` and return `total`.
 - Errors: `{ "message": "human readable", "code": "MACHINE_CODE", "issues"?: [{ "path": "field", "message": "..." }] }`. Status codes: 400 validation, 401 unauthenticated, 403 forbidden / `STEP_UP_REQUIRED`, 404, 409 state conflict / `VERSION_CONFLICT`, 423 `ACCOUNT_LOCKED`, 429 rate limited.
 
 ### Headers sent by the console
 | Header | Meaning |
 |---|---|
 | `Authorization: Bearer <accessToken>` | Admin access token (10 min). |
-| `X-Admin-Step-Up: <stepUpToken>` | Present when the admin re-authenticated in the last 5 minutes. Required by every endpoint marked **step-up**. |
+| `X-Step-Up-Token: <stepUpToken>` | Present when the admin re-authenticated in the last 5 minutes. Required by every endpoint marked **step-up**. |
 | `Idempotency-Key` | Required on money-moving endpoints (marked **idempotent**). Same key + same admin + same path replays the first response with `Idempotent-Replayed: true`. |
 | `X-Forwarded-For`, `User-Agent` | Admin's client IP and browser, for the audit log, session list and IP allow-list. |
 | `X-Request-Id` | Correlation ID; store it on the audit entry. |
@@ -43,7 +43,7 @@ The console ships a mock adapter (`ADMIN_USE_MOCKS=true`, default outside produc
 | Audit | `audit:read`, `audit:export` |
 
 ### Step-up re-authentication
-Endpoints marked **step-up** reject requests without a valid `X-Admin-Step-Up` token with `403 { "code": "STEP_UP_REQUIRED" }`. A token comes from `POST /api/v1/admin/auth/step-up`, is bound to the admin **and** their session, and expires after 300 seconds.
+Endpoints marked **step-up** reject requests without a valid `X-Step-Up-Token` token with `403 { "code": "STEP_UP_REQUIRED" }`. A token comes from `POST /api/v1/admin/auth/step-up`, is bound to the admin **and** their session, and expires after 300 seconds.
 
 ### Audit
 Every mutation writes one append-only audit entry in the same transaction as the change:
@@ -168,15 +168,15 @@ Withhold: the server generates an unused `user_xxxxxx` username, assigns it atom
 
 ## Reserved usernames
 
-`ReservedUsernameEntry` = `{ id, value, kind EXACT|PREFIX|PATTERN, category BRAND|GOVERNMENT|SYSTEM|OFFENSIVE|PUBLIC_FIGURE, note, addedAt, addedByName }`. PREFIX and PATTERN use `*` glob wildcards only (no regular expressions, to avoid ReDoS); matching runs on both the normalized name and its skeleton.
+Served by go-identity (`users/src/modules/usernames`). `ReservedUsernameRule` = `{ id, term, matchKind exact|prefix|contains|brand, createdAt }`. Terms are `[a-z0-9._]{2,30}`, lowercased, no wildcards; `prefix` and `contains` match the normalized name and its skeleton.
 
-| Method | Path | Permission | Step-up | Body | Response | Audit action |
-|---|---|---|---|---|---|---|
-| GET | `/api/v1/admin/reserved-usernames?search&kind&category` | `reserved-usernames:manage` | no | — | `{ items: ReservedUsernameEntry[] }` | — |
-| POST | `/api/v1/admin/reserved-usernames` | `reserved-usernames:manage` | no | `{ value, kind, category, note?, reason }` | `201 { entry, existingAccountsMatching: string[] }` | `reserved_username.added` |
-| POST | `/api/v1/admin/reserved-usernames/:entryId/remove` | `reserved-usernames:manage` | no | `{ reason }` | `204` | `reserved_username.removed` |
+| Method | Path | Permission | Step-up | Body | Response |
+|---|---|---|---|---|---|
+| GET | `/api/v1/admin/usernames/reserved?cursor=` | `reserved-usernames:manage` | no | — | `{ data: ReservedUsernameRule[], nextCursor }`, 50 per page, newest first |
+| POST | `/api/v1/admin/usernames/reserved` | `reserved-usernames:manage` | **yes** | `{ term, matchKind }` | `201 { id, term, matchKind }` |
+| DELETE | `/api/v1/admin/usernames/reserved/:ruleId` | `reserved-usernames:manage` | **yes** | — | `204` |
 
-Errors: `400 VALIDATION_FAILED` (EXACT: `[a-z0-9._]{2,30}`; PREFIX/PATTERN: `[a-z0-9._*]{2,40}` and must contain `*`), `409 ALREADY_RESERVED`, `404 NOT_FOUND`.
+Errors: `400 VALIDATION_FAILED`, `422 RULE_EXISTS`, `404 NOT_FOUND`. Not served yet (the console no longer sends them): search/kind/category filters, `category`, `note`, `reason`, `addedByName`, `existingAccountsMatching`.
 
 ## Verification
 
@@ -211,7 +211,7 @@ Side effects: the user's public `verification` summary updates in the same trans
 
 `ProgramApplication` = `{ id, kind "sellers"|"creators", user, status PENDING|APPROVED|REJECTED, submittedAt, reviewedAt, reviewedByName, decisionReason, pitch, storeName, categories[], expectedMonthlySales: Money | null (applicant currency), contentNiche, eligibility: [{ key, label, isMet, actual, required }], isEligible }`.
 
-Seller eligibility: identity (NIN/BVN) verified, payout bank account name match, business documents, no prohibited categories, account ACTIVE. Creator eligibility (thresholds come from the creator eligibility rules in configuration): followers ≥ 1,000, posts in last 30 days ≥ 8, active strikes ≤ 0, account age ≥ 30 days, phone verified.
+Seller eligibility: identity (NIN/BVN) verified, payout bank account name match, business documents, no prohibited categories, account ACTIVE. Creator eligibility (thresholds come from the creator eligibility rules in configuration): followers ≥ 1,000, posts in last 30 days ≥ 8, active strikes ≤ 0, account age ≥ 30 days.
 
 | Method | Path | Permission | Step-up | Body | Response | Audit action |
 |---|---|---|---|---|---|---|
@@ -265,7 +265,7 @@ Response `ReportDetail`. Errors: 400 `VALIDATION_FAILED`, 404, 409 `REPORT_ALREA
 Audit: `report.dismiss|hide|restrict|remove|warn_author`; `user.moderated.remove|warn_author`.
 
 ### POST /api/v1/admin/reports/{reportId}/suspend-author
-Permission `moderation:reports`. **Step-up: yes** (`X-Admin-Step-Up`).
+Permission `moderation:reports`. **Step-up: yes** (`X-Step-Up-Token`).
 Body `{ durationDays: 1 | 3 | 7 | 30, reason }`. Suspends the author (signed out, can't post/sell/go live/withdraw; escrow orders continue), +1 strike, hides the target, resolves the report.
 Response `ReportDetail`. Errors: 403 `STEP_UP_REQUIRED`, 409 `AUTHOR_ALREADY_RESTRICTED`, 409 `REPORT_ALREADY_DECIDED`.
 Audit: `report.suspend_author`, `user.moderated.suspend_author`.
@@ -451,7 +451,7 @@ Audit `before`/`after` = `{ status, listingStatus, sellerStrikeCount }`.
 Queue counters (metrics overview): `brandVerification` (Official Store requests in `PENDING`, SLA 72 h, href `/brands?official=PENDING`) and `ipClaims` (claims in `OPEN`, breaching = past `slaDueAt`, href `/ip-claims`).
 # Money: commerce operations
 
-All amounts are `Money = { amountMinor: integer, currency: ISO 4217 }`. The API never converts currencies; an amount sent for an order must be in that order's currency. `PlatformUserSummary` is the user shape defined in the Users section. Lists return `{ items, page, pageSize, total }` and accept `page`, `pageSize` (max 200). Money-moving endpoints require an `Idempotency-Key` header (8–128 chars); a repeated key with the same admin, method and path replays the first response with `Idempotent-Replayed: true`. Missing key → `400 IDEMPOTENCY_KEY_REQUIRED`. Step-up endpoints require a valid `X-Admin-Step-Up` token bound to the admin session, else `403 STEP_UP_REQUIRED`. Every mutation writes an audit entry with `before` / `after`.
+All amounts are `Money = { amountMinor: integer, currency: ISO 4217 }`. The API never converts currencies; an amount sent for an order must be in that order's currency. `PlatformUserSummary` is the user shape defined in the Users section. Lists return `{ items, page, pageSize, total }` and accept `page`, `pageSize` (max 200). Money-moving endpoints require an `Idempotency-Key` header (8–128 chars); a repeated key with the same admin, method and path replays the first response with `Idempotent-Replayed: true`. Missing key → `400 IDEMPOTENCY_KEY_REQUIRED`. Step-up endpoints require a valid `X-Step-Up-Token` token bound to the admin session, else `403 STEP_UP_REQUIRED`. Every mutation writes an audit entry with `before` / `after`.
 
 ## Orders & escrow
 
@@ -597,7 +597,7 @@ interface VersionedRecord<Content> {
 Shared rules for every endpoint in this section:
 
 - **Read** endpoints return the current version (`GET …`), all current records (`GET` collection → `{ items: VersionedRecord[] }`) and the full history (`GET …/{id}/versions` → `{ items: VersionedRecord[] }`, newest first, archived versions included).
-- **Write** endpoints require the step-up header `X-Admin-Step-Up` (issued by `POST /api/v1/admin/auth/step-up`, 5 min, bound to the session). Missing/expired → `403 STEP_UP_REQUIRED`.
+- **Write** endpoints require the step-up header `X-Step-Up-Token` (issued by `POST /api/v1/admin/auth/step-up`, 5 min, bound to the session). Missing/expired → `403 STEP_UP_REQUIRED`.
 - **Optimistic concurrency:** every write body carries `expectedVersion` = the version the admin edited (`0` to create a new record, or to re-create an archived one). Stale → `409 VERSION_CONFLICT` with `{ currentVersion }`.
 - Every write requires `reason` (5–1000 chars) which becomes `changeReason` and the audit reason.
 - Every write appends an audit entry (`area: "config"`) with `before` = previous content (null on create) and `after` = new content (null on archive), `stepUpVerified: true`.
@@ -687,7 +687,6 @@ interface CreatorEligibilityRules {
   minimumPostsInLast30Days: number;    // 0–1000
   maximumActiveStrikes: number;        // 0–10
   minimumAccountAgeDays: number;       // 0–3650
-  requiresVerifiedPhone: boolean;
   requiresIdentityVerification: boolean;
   allowedCountries: string[];          // ISO 3166-1 alpha-2
 }
@@ -895,7 +894,7 @@ Errors: `400 VALIDATION_FAILED` (unknown variable, lengths, category), `403 FORB
 
 ## Suspensions (trust & safety)
 
-Permission: `users:moderate`. **Every write needs step-up** (`X-Admin-Step-Up`) and writes an audit entry. The intelligence service only suggests; no endpoint lets it suspend. Deletion policy: 120 days after suspension the profile, posts, media and messages are deleted and order/payment records are anonymised and kept for the legal period. Reinstating before then stops the clock.
+Permission: `users:moderate`. **Every write needs step-up** (`X-Step-Up-Token`) and writes an audit entry. The intelligence service only suggests; no endpoint lets it suspend. Deletion policy: 120 days after suspension the profile, posts, media and messages are deleted and order/payment records are anonymised and kept for the legal period. Reinstating before then stops the clock.
 
 `SuspensionCaseSummary`: `{ id, user: PlatformUserSummary, source: "PYTHON_SUGGESTION"|"USER_REPORTS", status: "PENDING"|"ESCALATED"|"SUSPENDED"|"DISMISSED", riskScore (0-100), topSignals[], reportCount, createdAt }`. `SuspensionCaseDetail` adds `signals[{label,weight,detail}]`, `evidence[{label,href}]`, `reports[{id,reason,excerpt,reportedAt}]`, `modelVersion`, `decision`, `history`. `SuspendedAccount`: `{ caseId, user, reasonCode, note, suspendedAt, suspendedByName, deletionDueAt, daysUntilDeletion, appeal: { id, status: "PENDING"|"UPHELD"|"OVERTURNED", message, submittedAt, decisionNote }|null }`. Reason codes: `FRAUD|SCAM|COUNTERFEIT|HARASSMENT|IMPERSONATION|SPAM_NETWORK|OTHER`.
 
@@ -975,8 +974,8 @@ Same versioned endpoints as the other documents (`GET /admin/config`, `PUT /admi
 | Key | Content (defaults) |
 |---|---|
 | `checkmark-suggestions` | `blue { requiresIdVerified, minimumAccountAgeDays 90, minimumRealFollowers 1000, noViolationsInDays 90 }`, `gold { requiresBusinessVerification (CAC/KYB), requiresActiveStoreOrBrandPage, minimumCompletedOrders 20, minimumSuccessRatePercent 90 }` (20 orders AND 90% success). Black is never suggested. |
-| `creator-thresholds` | `autoApprove { minimumAccountAgeDays 30, requiresVerifiedEmail, requiresVerifiedPhone, minimumRealFollowers 1000, minimumOriginalPostsInLast60Days 10, noViolationsInDays 90, maximumFraudScore 30 }`, `manualReview { minimumRealFollowers 500, allowsPastViolation, allowsBorderlineOrAiHeavyContent, maximumRiskScore 60 }`. Below manual review is not eligible. |
-| `trial-rules` | `trialLength "DAYS_7"|"MONTH_1"`, `yearlyDiscountPercent 20` (admin-editable), `minimumAccountAgeDays 7`, `requiresVerifiedEmail`, `onePerPerson/Card/Device/Phone`, `maximumRiskScore 50`, `minimumCompletedOrders 0`. |
+| `creator-thresholds` | `autoApprove { minimumAccountAgeDays 30, requiresVerifiedEmail, minimumRealFollowers 1000, minimumOriginalPostsInLast60Days 10, noViolationsInDays 90, maximumFraudScore 30 }`, `manualReview { minimumRealFollowers 500, allowsPastViolation, allowsBorderlineOrAiHeavyContent, maximumRiskScore 60 }`. Below manual review is not eligible. |
+| `trial-rules` | `trialLength "DAYS_7"|"MONTH_1"`, `yearlyDiscountPercent 20` (admin-editable), `minimumAccountAgeDays 7`, `requiresVerifiedEmail`, `onePerPerson/Card/Device`, `maximumRiskScore 50`, `minimumCompletedOrders 0`. |
 | `checkmark-pricing` | `bundleDiscountPercent 15`, `bundleMaximumBusinesses 3`, `goldOnlyMonthlyPrice NGN 3,000`, `blackMonthlyPrice NGN 50,000`, `blackGraceDays 14`. The bundle never stacks with the yearly discount (the bigger wins) and never applies to Black. |
 
 ## Support: live chat and email
@@ -1031,7 +1030,7 @@ Every admin action records: admin name, staff id (`actor.id`), departments/roles
 |---|---|---|---|---|---|
 | POST | `/admin/users/{id}/restrict` | `users:restrict` | `{ features: ("POSTING"|"COMMENTING"|"MESSAGING"|"SELLING"|"GOING_LIVE")[], durationDays (1–90), reason }` | Limits only those features; user notified. | `user.restricted` |
 | POST | `/admin/users/{id}/suspend` | `users:suspend` | `{ durationDays, reason }` | Signs out, notifies, starts the 120-day deletion clock (see Suspensions). Reinstate also `users:suspend`. | `user.suspended` |
-| POST | `/admin/users/{id}/ban` | `users:ban`, step-up | `{ durationDays|null, reason }` | Permanent ban blocks re-signup by email, phone and device fingerprint (stored hashed); unban clears the blocks. User notified. | `user.banned` |
+| POST | `/admin/users/{id}/ban` | `users:ban`, step-up | `{ durationDays|null, reason }` | Permanent ban blocks re-signup by email and device fingerprint (stored hashed); unban clears the blocks. User notified. | `user.banned` |
 | POST | `/admin/users/{id}/delete` | `users:delete`, step-up | `{ confirmUsername, reason }` | Deletes profile, posts, media and messages now; anonymises and retains order/payment/ledger records for 7 years. `409 PENDING_WITHDRAWALS`. Response adds `deletion { removed, anonymizedRecords, retainedUntil }`. | `user.deleted` |
 | POST | `/admin/users/{id}/username/reassign` | `usernames:reassign`, step-up | `{ recipientUserId, reason }` | The owner gets an auto-generated username and a notification; the recipient gets the name and a notification; history kept (`REASSIGNED_AWAY` / `REASSIGNED_TO`). | `username.reassigned_between_accounts` |
 
