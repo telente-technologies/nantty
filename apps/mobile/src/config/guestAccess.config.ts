@@ -65,6 +65,7 @@ export const authOnlyRouteSignInPhrases: Readonly<Record<string, string>> = {
   NewSupportTicket: "contact support",
   SupportTicketDetail: "see your support ticket",
   MyReports: "see your reports",
+  WriteReview: "rate your purchase",
 };
 
 export const guestPublicRouteNames: readonly string[] = [
