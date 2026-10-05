@@ -70,6 +70,9 @@ func ConsumeEntitlementEventsUntilContextDone(ctx context.Context, c *container.
 		if eventType == services.AccountRegisteredEventType {
 			return ensurePersonalProfileForRegisteredAccount(ctx, c, data)
 		}
+		if eventType == usersservices.SellerApplicationReviewedEventType {
+			return usersservices.GrantSellerRoleOnApproval(ctx, data)
+		}
 		if identityverification.HandlesIdentityEvent(eventType) {
 			return identityverification.HandleIdentityEvent(ctx, c, eventType, data)
 		}
