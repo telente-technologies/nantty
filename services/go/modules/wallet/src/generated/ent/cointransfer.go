@@ -33,7 +33,19 @@ type CoinTransfer struct {
 	// FeeBps holds the value of the "fee_bps" field.
 	FeeBps int64 `json:"fee_bps,omitempty"`
 	// Note holds the value of the "note" field.
-	Note         string `json:"note,omitempty"`
+	Note string `json:"note,omitempty"`
+	// ClawbackShortfallCoins holds the value of the "clawback_shortfall_coins" field.
+	ClawbackShortfallCoins int64 `json:"clawback_shortfall_coins,omitempty"`
+	// ReversedAt holds the value of the "reversed_at" field.
+	ReversedAt *time.Time `json:"reversed_at,omitempty"`
+	// ReviewStatus holds the value of the "review_status" field.
+	ReviewStatus cointransfer.ReviewStatus `json:"review_status,omitempty"`
+	// ReviewedByStaffID holds the value of the "reviewed_by_staff_id" field.
+	ReviewedByStaffID string `json:"reviewed_by_staff_id,omitempty"`
+	// ReviewedAt holds the value of the "reviewed_at" field.
+	ReviewedAt *time.Time `json:"reviewed_at,omitempty"`
+	// ReviewNote holds the value of the "review_note" field.
+	ReviewNote   string `json:"review_note,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -42,11 +54,11 @@ func (*CoinTransfer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case cointransfer.FieldCoins, cointransfer.FieldFeeCoins, cointransfer.FieldNetCoins, cointransfer.FieldFeeBps:
+		case cointransfer.FieldCoins, cointransfer.FieldFeeCoins, cointransfer.FieldNetCoins, cointransfer.FieldFeeBps, cointransfer.FieldClawbackShortfallCoins:
 			values[i] = new(sql.NullInt64)
-		case cointransfer.FieldSenderUserID, cointransfer.FieldRecipientUserID, cointransfer.FieldNote:
+		case cointransfer.FieldSenderUserID, cointransfer.FieldRecipientUserID, cointransfer.FieldNote, cointransfer.FieldReviewStatus, cointransfer.FieldReviewedByStaffID, cointransfer.FieldReviewNote:
 			values[i] = new(sql.NullString)
-		case cointransfer.FieldCreatedAt:
+		case cointransfer.FieldCreatedAt, cointransfer.FieldReversedAt, cointransfer.FieldReviewedAt:
 			values[i] = new(sql.NullTime)
 		case cointransfer.FieldID:
 			values[i] = new(uuid.UUID)
@@ -119,6 +131,44 @@ func (_m *CoinTransfer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Note = value.String
 			}
+		case cointransfer.FieldClawbackShortfallCoins:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field clawback_shortfall_coins", values[i])
+			} else if value.Valid {
+				_m.ClawbackShortfallCoins = value.Int64
+			}
+		case cointransfer.FieldReversedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field reversed_at", values[i])
+			} else if value.Valid {
+				_m.ReversedAt = new(time.Time)
+				*_m.ReversedAt = value.Time
+			}
+		case cointransfer.FieldReviewStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field review_status", values[i])
+			} else if value.Valid {
+				_m.ReviewStatus = cointransfer.ReviewStatus(value.String)
+			}
+		case cointransfer.FieldReviewedByStaffID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field reviewed_by_staff_id", values[i])
+			} else if value.Valid {
+				_m.ReviewedByStaffID = value.String
+			}
+		case cointransfer.FieldReviewedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field reviewed_at", values[i])
+			} else if value.Valid {
+				_m.ReviewedAt = new(time.Time)
+				*_m.ReviewedAt = value.Time
+			}
+		case cointransfer.FieldReviewNote:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field review_note", values[i])
+			} else if value.Valid {
+				_m.ReviewNote = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -178,6 +228,28 @@ func (_m *CoinTransfer) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("note=")
 	builder.WriteString(_m.Note)
+	builder.WriteString(", ")
+	builder.WriteString("clawback_shortfall_coins=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ClawbackShortfallCoins))
+	builder.WriteString(", ")
+	if v := _m.ReversedAt; v != nil {
+		builder.WriteString("reversed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("review_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReviewStatus))
+	builder.WriteString(", ")
+	builder.WriteString("reviewed_by_staff_id=")
+	builder.WriteString(_m.ReviewedByStaffID)
+	builder.WriteString(", ")
+	if v := _m.ReviewedAt; v != nil {
+		builder.WriteString("reviewed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("review_note=")
+	builder.WriteString(_m.ReviewNote)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -190,6 +190,62 @@ func (_c *CoinPurchaseCreate) SetNillableClawbackShortfallCoins(v *int64) *CoinP
 	return _c
 }
 
+// SetReviewStatus sets the "review_status" field.
+func (_c *CoinPurchaseCreate) SetReviewStatus(v coinpurchase.ReviewStatus) *CoinPurchaseCreate {
+	_c.mutation.SetReviewStatus(v)
+	return _c
+}
+
+// SetNillableReviewStatus sets the "review_status" field if the given value is not nil.
+func (_c *CoinPurchaseCreate) SetNillableReviewStatus(v *coinpurchase.ReviewStatus) *CoinPurchaseCreate {
+	if v != nil {
+		_c.SetReviewStatus(*v)
+	}
+	return _c
+}
+
+// SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
+func (_c *CoinPurchaseCreate) SetReviewedByStaffID(v string) *CoinPurchaseCreate {
+	_c.mutation.SetReviewedByStaffID(v)
+	return _c
+}
+
+// SetNillableReviewedByStaffID sets the "reviewed_by_staff_id" field if the given value is not nil.
+func (_c *CoinPurchaseCreate) SetNillableReviewedByStaffID(v *string) *CoinPurchaseCreate {
+	if v != nil {
+		_c.SetReviewedByStaffID(*v)
+	}
+	return _c
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (_c *CoinPurchaseCreate) SetReviewedAt(v time.Time) *CoinPurchaseCreate {
+	_c.mutation.SetReviewedAt(v)
+	return _c
+}
+
+// SetNillableReviewedAt sets the "reviewed_at" field if the given value is not nil.
+func (_c *CoinPurchaseCreate) SetNillableReviewedAt(v *time.Time) *CoinPurchaseCreate {
+	if v != nil {
+		_c.SetReviewedAt(*v)
+	}
+	return _c
+}
+
+// SetReviewNote sets the "review_note" field.
+func (_c *CoinPurchaseCreate) SetReviewNote(v string) *CoinPurchaseCreate {
+	_c.mutation.SetReviewNote(v)
+	return _c
+}
+
+// SetNillableReviewNote sets the "review_note" field if the given value is not nil.
+func (_c *CoinPurchaseCreate) SetNillableReviewNote(v *string) *CoinPurchaseCreate {
+	if v != nil {
+		_c.SetReviewNote(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *CoinPurchaseCreate) SetUpdatedAt(v time.Time) *CoinPurchaseCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -272,6 +328,18 @@ func (_c *CoinPurchaseCreate) defaults() {
 	if _, ok := _c.mutation.ClawbackShortfallCoins(); !ok {
 		v := coinpurchase.DefaultClawbackShortfallCoins
 		_c.mutation.SetClawbackShortfallCoins(v)
+	}
+	if _, ok := _c.mutation.ReviewStatus(); !ok {
+		v := coinpurchase.DefaultReviewStatus
+		_c.mutation.SetReviewStatus(v)
+	}
+	if _, ok := _c.mutation.ReviewedByStaffID(); !ok {
+		v := coinpurchase.DefaultReviewedByStaffID
+		_c.mutation.SetReviewedByStaffID(v)
+	}
+	if _, ok := _c.mutation.ReviewNote(); !ok {
+		v := coinpurchase.DefaultReviewNote
+		_c.mutation.SetReviewNote(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := coinpurchase.DefaultUpdatedAt()
@@ -371,6 +439,30 @@ func (_c *CoinPurchaseCreate) check() error {
 	}
 	if _, ok := _c.mutation.ClawbackShortfallCoins(); !ok {
 		return &ValidationError{Name: "clawback_shortfall_coins", err: errors.New(`ent: missing required field "CoinPurchase.clawback_shortfall_coins"`)}
+	}
+	if _, ok := _c.mutation.ReviewStatus(); !ok {
+		return &ValidationError{Name: "review_status", err: errors.New(`ent: missing required field "CoinPurchase.review_status"`)}
+	}
+	if v, ok := _c.mutation.ReviewStatus(); ok {
+		if err := coinpurchase.ReviewStatusValidator(v); err != nil {
+			return &ValidationError{Name: "review_status", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.review_status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ReviewedByStaffID(); !ok {
+		return &ValidationError{Name: "reviewed_by_staff_id", err: errors.New(`ent: missing required field "CoinPurchase.reviewed_by_staff_id"`)}
+	}
+	if v, ok := _c.mutation.ReviewedByStaffID(); ok {
+		if err := coinpurchase.ReviewedByStaffIDValidator(v); err != nil {
+			return &ValidationError{Name: "reviewed_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.reviewed_by_staff_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ReviewNote(); !ok {
+		return &ValidationError{Name: "review_note", err: errors.New(`ent: missing required field "CoinPurchase.review_note"`)}
+	}
+	if v, ok := _c.mutation.ReviewNote(); ok {
+		if err := coinpurchase.ReviewNoteValidator(v); err != nil {
+			return &ValidationError{Name: "review_note", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.review_note": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "CoinPurchase.updated_at"`)}
@@ -479,6 +571,22 @@ func (_c *CoinPurchaseCreate) createSpec() (*CoinPurchase, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.ClawbackShortfallCoins(); ok {
 		_spec.SetField(coinpurchase.FieldClawbackShortfallCoins, field.TypeInt64, value)
 		_node.ClawbackShortfallCoins = value
+	}
+	if value, ok := _c.mutation.ReviewStatus(); ok {
+		_spec.SetField(coinpurchase.FieldReviewStatus, field.TypeEnum, value)
+		_node.ReviewStatus = value
+	}
+	if value, ok := _c.mutation.ReviewedByStaffID(); ok {
+		_spec.SetField(coinpurchase.FieldReviewedByStaffID, field.TypeString, value)
+		_node.ReviewedByStaffID = value
+	}
+	if value, ok := _c.mutation.ReviewedAt(); ok {
+		_spec.SetField(coinpurchase.FieldReviewedAt, field.TypeTime, value)
+		_node.ReviewedAt = &value
+	}
+	if value, ok := _c.mutation.ReviewNote(); ok {
+		_spec.SetField(coinpurchase.FieldReviewNote, field.TypeString, value)
+		_node.ReviewNote = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(coinpurchase.FieldUpdatedAt, field.TypeTime, value)
@@ -647,6 +755,60 @@ func (u *CoinPurchaseUpsert) UpdateClawbackShortfallCoins() *CoinPurchaseUpsert 
 // AddClawbackShortfallCoins adds v to the "clawback_shortfall_coins" field.
 func (u *CoinPurchaseUpsert) AddClawbackShortfallCoins(v int64) *CoinPurchaseUpsert {
 	u.Add(coinpurchase.FieldClawbackShortfallCoins, v)
+	return u
+}
+
+// SetReviewStatus sets the "review_status" field.
+func (u *CoinPurchaseUpsert) SetReviewStatus(v coinpurchase.ReviewStatus) *CoinPurchaseUpsert {
+	u.Set(coinpurchase.FieldReviewStatus, v)
+	return u
+}
+
+// UpdateReviewStatus sets the "review_status" field to the value that was provided on create.
+func (u *CoinPurchaseUpsert) UpdateReviewStatus() *CoinPurchaseUpsert {
+	u.SetExcluded(coinpurchase.FieldReviewStatus)
+	return u
+}
+
+// SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
+func (u *CoinPurchaseUpsert) SetReviewedByStaffID(v string) *CoinPurchaseUpsert {
+	u.Set(coinpurchase.FieldReviewedByStaffID, v)
+	return u
+}
+
+// UpdateReviewedByStaffID sets the "reviewed_by_staff_id" field to the value that was provided on create.
+func (u *CoinPurchaseUpsert) UpdateReviewedByStaffID() *CoinPurchaseUpsert {
+	u.SetExcluded(coinpurchase.FieldReviewedByStaffID)
+	return u
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (u *CoinPurchaseUpsert) SetReviewedAt(v time.Time) *CoinPurchaseUpsert {
+	u.Set(coinpurchase.FieldReviewedAt, v)
+	return u
+}
+
+// UpdateReviewedAt sets the "reviewed_at" field to the value that was provided on create.
+func (u *CoinPurchaseUpsert) UpdateReviewedAt() *CoinPurchaseUpsert {
+	u.SetExcluded(coinpurchase.FieldReviewedAt)
+	return u
+}
+
+// ClearReviewedAt clears the value of the "reviewed_at" field.
+func (u *CoinPurchaseUpsert) ClearReviewedAt() *CoinPurchaseUpsert {
+	u.SetNull(coinpurchase.FieldReviewedAt)
+	return u
+}
+
+// SetReviewNote sets the "review_note" field.
+func (u *CoinPurchaseUpsert) SetReviewNote(v string) *CoinPurchaseUpsert {
+	u.Set(coinpurchase.FieldReviewNote, v)
+	return u
+}
+
+// UpdateReviewNote sets the "review_note" field to the value that was provided on create.
+func (u *CoinPurchaseUpsert) UpdateReviewNote() *CoinPurchaseUpsert {
+	u.SetExcluded(coinpurchase.FieldReviewNote)
 	return u
 }
 
@@ -870,6 +1032,69 @@ func (u *CoinPurchaseUpsertOne) AddClawbackShortfallCoins(v int64) *CoinPurchase
 func (u *CoinPurchaseUpsertOne) UpdateClawbackShortfallCoins() *CoinPurchaseUpsertOne {
 	return u.Update(func(s *CoinPurchaseUpsert) {
 		s.UpdateClawbackShortfallCoins()
+	})
+}
+
+// SetReviewStatus sets the "review_status" field.
+func (u *CoinPurchaseUpsertOne) SetReviewStatus(v coinpurchase.ReviewStatus) *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewStatus(v)
+	})
+}
+
+// UpdateReviewStatus sets the "review_status" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertOne) UpdateReviewStatus() *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewStatus()
+	})
+}
+
+// SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
+func (u *CoinPurchaseUpsertOne) SetReviewedByStaffID(v string) *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewedByStaffID(v)
+	})
+}
+
+// UpdateReviewedByStaffID sets the "reviewed_by_staff_id" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertOne) UpdateReviewedByStaffID() *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewedByStaffID()
+	})
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (u *CoinPurchaseUpsertOne) SetReviewedAt(v time.Time) *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewedAt(v)
+	})
+}
+
+// UpdateReviewedAt sets the "reviewed_at" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertOne) UpdateReviewedAt() *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewedAt()
+	})
+}
+
+// ClearReviewedAt clears the value of the "reviewed_at" field.
+func (u *CoinPurchaseUpsertOne) ClearReviewedAt() *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.ClearReviewedAt()
+	})
+}
+
+// SetReviewNote sets the "review_note" field.
+func (u *CoinPurchaseUpsertOne) SetReviewNote(v string) *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewNote(v)
+	})
+}
+
+// UpdateReviewNote sets the "review_note" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertOne) UpdateReviewNote() *CoinPurchaseUpsertOne {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewNote()
 	})
 }
 
@@ -1262,6 +1487,69 @@ func (u *CoinPurchaseUpsertBulk) AddClawbackShortfallCoins(v int64) *CoinPurchas
 func (u *CoinPurchaseUpsertBulk) UpdateClawbackShortfallCoins() *CoinPurchaseUpsertBulk {
 	return u.Update(func(s *CoinPurchaseUpsert) {
 		s.UpdateClawbackShortfallCoins()
+	})
+}
+
+// SetReviewStatus sets the "review_status" field.
+func (u *CoinPurchaseUpsertBulk) SetReviewStatus(v coinpurchase.ReviewStatus) *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewStatus(v)
+	})
+}
+
+// UpdateReviewStatus sets the "review_status" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertBulk) UpdateReviewStatus() *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewStatus()
+	})
+}
+
+// SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
+func (u *CoinPurchaseUpsertBulk) SetReviewedByStaffID(v string) *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewedByStaffID(v)
+	})
+}
+
+// UpdateReviewedByStaffID sets the "reviewed_by_staff_id" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertBulk) UpdateReviewedByStaffID() *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewedByStaffID()
+	})
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (u *CoinPurchaseUpsertBulk) SetReviewedAt(v time.Time) *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewedAt(v)
+	})
+}
+
+// UpdateReviewedAt sets the "reviewed_at" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertBulk) UpdateReviewedAt() *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewedAt()
+	})
+}
+
+// ClearReviewedAt clears the value of the "reviewed_at" field.
+func (u *CoinPurchaseUpsertBulk) ClearReviewedAt() *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.ClearReviewedAt()
+	})
+}
+
+// SetReviewNote sets the "review_note" field.
+func (u *CoinPurchaseUpsertBulk) SetReviewNote(v string) *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.SetReviewNote(v)
+	})
+}
+
+// UpdateReviewNote sets the "review_note" field to the value that was provided on create.
+func (u *CoinPurchaseUpsertBulk) UpdateReviewNote() *CoinPurchaseUpsertBulk {
+	return u.Update(func(s *CoinPurchaseUpsert) {
+		s.UpdateReviewNote()
 	})
 }
 

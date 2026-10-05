@@ -52,6 +52,14 @@ type CoinPurchase struct {
 	RefundedAt *time.Time `json:"refunded_at,omitempty"`
 	// ClawbackShortfallCoins holds the value of the "clawback_shortfall_coins" field.
 	ClawbackShortfallCoins int64 `json:"clawback_shortfall_coins,omitempty"`
+	// ReviewStatus holds the value of the "review_status" field.
+	ReviewStatus coinpurchase.ReviewStatus `json:"review_status,omitempty"`
+	// ReviewedByStaffID holds the value of the "reviewed_by_staff_id" field.
+	ReviewedByStaffID string `json:"reviewed_by_staff_id,omitempty"`
+	// ReviewedAt holds the value of the "reviewed_at" field.
+	ReviewedAt *time.Time `json:"reviewed_at,omitempty"`
+	// ReviewNote holds the value of the "review_note" field.
+	ReviewNote string `json:"review_note,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -66,9 +74,9 @@ func (*CoinPurchase) scanValues(columns []string) ([]any, error) {
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case coinpurchase.FieldCoins, coinpurchase.FieldAmountMinor, coinpurchase.FieldStoreFeeMinor, coinpurchase.FieldClawbackShortfallCoins:
 			values[i] = new(sql.NullInt64)
-		case coinpurchase.FieldUserID, coinpurchase.FieldPackageID, coinpurchase.FieldChannel, coinpurchase.FieldSource, coinpurchase.FieldProvider, coinpurchase.FieldReference, coinpurchase.FieldCurrency, coinpurchase.FieldStatus, coinpurchase.FieldAuthorizationURL:
+		case coinpurchase.FieldUserID, coinpurchase.FieldPackageID, coinpurchase.FieldChannel, coinpurchase.FieldSource, coinpurchase.FieldProvider, coinpurchase.FieldReference, coinpurchase.FieldCurrency, coinpurchase.FieldStatus, coinpurchase.FieldAuthorizationURL, coinpurchase.FieldReviewStatus, coinpurchase.FieldReviewedByStaffID, coinpurchase.FieldReviewNote:
 			values[i] = new(sql.NullString)
-		case coinpurchase.FieldCreatedAt, coinpurchase.FieldCreditedAt, coinpurchase.FieldRefundedAt, coinpurchase.FieldUpdatedAt:
+		case coinpurchase.FieldCreatedAt, coinpurchase.FieldCreditedAt, coinpurchase.FieldRefundedAt, coinpurchase.FieldReviewedAt, coinpurchase.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case coinpurchase.FieldID:
 			values[i] = new(uuid.UUID)
@@ -198,6 +206,31 @@ func (_m *CoinPurchase) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ClawbackShortfallCoins = value.Int64
 			}
+		case coinpurchase.FieldReviewStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field review_status", values[i])
+			} else if value.Valid {
+				_m.ReviewStatus = coinpurchase.ReviewStatus(value.String)
+			}
+		case coinpurchase.FieldReviewedByStaffID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field reviewed_by_staff_id", values[i])
+			} else if value.Valid {
+				_m.ReviewedByStaffID = value.String
+			}
+		case coinpurchase.FieldReviewedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field reviewed_at", values[i])
+			} else if value.Valid {
+				_m.ReviewedAt = new(time.Time)
+				*_m.ReviewedAt = value.Time
+			}
+		case coinpurchase.FieldReviewNote:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field review_note", values[i])
+			} else if value.Valid {
+				_m.ReviewNote = value.String
+			}
 		case coinpurchase.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -296,6 +329,20 @@ func (_m *CoinPurchase) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("clawback_shortfall_coins=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ClawbackShortfallCoins))
+	builder.WriteString(", ")
+	builder.WriteString("review_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReviewStatus))
+	builder.WriteString(", ")
+	builder.WriteString("reviewed_by_staff_id=")
+	builder.WriteString(_m.ReviewedByStaffID)
+	builder.WriteString(", ")
+	if v := _m.ReviewedAt; v != nil {
+		builder.WriteString("reviewed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("review_note=")
+	builder.WriteString(_m.ReviewNote)
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

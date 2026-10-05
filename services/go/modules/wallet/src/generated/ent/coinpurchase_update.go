@@ -160,6 +160,68 @@ func (_u *CoinPurchaseUpdate) AddClawbackShortfallCoins(v int64) *CoinPurchaseUp
 	return _u
 }
 
+// SetReviewStatus sets the "review_status" field.
+func (_u *CoinPurchaseUpdate) SetReviewStatus(v coinpurchase.ReviewStatus) *CoinPurchaseUpdate {
+	_u.mutation.SetReviewStatus(v)
+	return _u
+}
+
+// SetNillableReviewStatus sets the "review_status" field if the given value is not nil.
+func (_u *CoinPurchaseUpdate) SetNillableReviewStatus(v *coinpurchase.ReviewStatus) *CoinPurchaseUpdate {
+	if v != nil {
+		_u.SetReviewStatus(*v)
+	}
+	return _u
+}
+
+// SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
+func (_u *CoinPurchaseUpdate) SetReviewedByStaffID(v string) *CoinPurchaseUpdate {
+	_u.mutation.SetReviewedByStaffID(v)
+	return _u
+}
+
+// SetNillableReviewedByStaffID sets the "reviewed_by_staff_id" field if the given value is not nil.
+func (_u *CoinPurchaseUpdate) SetNillableReviewedByStaffID(v *string) *CoinPurchaseUpdate {
+	if v != nil {
+		_u.SetReviewedByStaffID(*v)
+	}
+	return _u
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (_u *CoinPurchaseUpdate) SetReviewedAt(v time.Time) *CoinPurchaseUpdate {
+	_u.mutation.SetReviewedAt(v)
+	return _u
+}
+
+// SetNillableReviewedAt sets the "reviewed_at" field if the given value is not nil.
+func (_u *CoinPurchaseUpdate) SetNillableReviewedAt(v *time.Time) *CoinPurchaseUpdate {
+	if v != nil {
+		_u.SetReviewedAt(*v)
+	}
+	return _u
+}
+
+// ClearReviewedAt clears the value of the "reviewed_at" field.
+func (_u *CoinPurchaseUpdate) ClearReviewedAt() *CoinPurchaseUpdate {
+	_u.mutation.ClearReviewedAt()
+	return _u
+}
+
+// SetReviewNote sets the "review_note" field.
+func (_u *CoinPurchaseUpdate) SetReviewNote(v string) *CoinPurchaseUpdate {
+	_u.mutation.SetReviewNote(v)
+	return _u
+}
+
+// SetNillableReviewNote sets the "review_note" field if the given value is not nil.
+func (_u *CoinPurchaseUpdate) SetNillableReviewNote(v *string) *CoinPurchaseUpdate {
+	if v != nil {
+		_u.SetReviewNote(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CoinPurchaseUpdate) SetUpdatedAt(v time.Time) *CoinPurchaseUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -219,6 +281,21 @@ func (_u *CoinPurchaseUpdate) check() error {
 			return &ValidationError{Name: "authorization_url", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.authorization_url": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReviewStatus(); ok {
+		if err := coinpurchase.ReviewStatusValidator(v); err != nil {
+			return &ValidationError{Name: "review_status", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.review_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReviewedByStaffID(); ok {
+		if err := coinpurchase.ReviewedByStaffIDValidator(v); err != nil {
+			return &ValidationError{Name: "reviewed_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.reviewed_by_staff_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReviewNote(); ok {
+		if err := coinpurchase.ReviewNoteValidator(v); err != nil {
+			return &ValidationError{Name: "review_note", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.review_note": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -269,6 +346,21 @@ func (_u *CoinPurchaseUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.AddedClawbackShortfallCoins(); ok {
 		_spec.AddField(coinpurchase.FieldClawbackShortfallCoins, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.ReviewStatus(); ok {
+		_spec.SetField(coinpurchase.FieldReviewStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ReviewedByStaffID(); ok {
+		_spec.SetField(coinpurchase.FieldReviewedByStaffID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ReviewedAt(); ok {
+		_spec.SetField(coinpurchase.FieldReviewedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ReviewedAtCleared() {
+		_spec.ClearField(coinpurchase.FieldReviewedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReviewNote(); ok {
+		_spec.SetField(coinpurchase.FieldReviewNote, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(coinpurchase.FieldUpdatedAt, field.TypeTime, value)
@@ -425,6 +517,68 @@ func (_u *CoinPurchaseUpdateOne) AddClawbackShortfallCoins(v int64) *CoinPurchas
 	return _u
 }
 
+// SetReviewStatus sets the "review_status" field.
+func (_u *CoinPurchaseUpdateOne) SetReviewStatus(v coinpurchase.ReviewStatus) *CoinPurchaseUpdateOne {
+	_u.mutation.SetReviewStatus(v)
+	return _u
+}
+
+// SetNillableReviewStatus sets the "review_status" field if the given value is not nil.
+func (_u *CoinPurchaseUpdateOne) SetNillableReviewStatus(v *coinpurchase.ReviewStatus) *CoinPurchaseUpdateOne {
+	if v != nil {
+		_u.SetReviewStatus(*v)
+	}
+	return _u
+}
+
+// SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
+func (_u *CoinPurchaseUpdateOne) SetReviewedByStaffID(v string) *CoinPurchaseUpdateOne {
+	_u.mutation.SetReviewedByStaffID(v)
+	return _u
+}
+
+// SetNillableReviewedByStaffID sets the "reviewed_by_staff_id" field if the given value is not nil.
+func (_u *CoinPurchaseUpdateOne) SetNillableReviewedByStaffID(v *string) *CoinPurchaseUpdateOne {
+	if v != nil {
+		_u.SetReviewedByStaffID(*v)
+	}
+	return _u
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (_u *CoinPurchaseUpdateOne) SetReviewedAt(v time.Time) *CoinPurchaseUpdateOne {
+	_u.mutation.SetReviewedAt(v)
+	return _u
+}
+
+// SetNillableReviewedAt sets the "reviewed_at" field if the given value is not nil.
+func (_u *CoinPurchaseUpdateOne) SetNillableReviewedAt(v *time.Time) *CoinPurchaseUpdateOne {
+	if v != nil {
+		_u.SetReviewedAt(*v)
+	}
+	return _u
+}
+
+// ClearReviewedAt clears the value of the "reviewed_at" field.
+func (_u *CoinPurchaseUpdateOne) ClearReviewedAt() *CoinPurchaseUpdateOne {
+	_u.mutation.ClearReviewedAt()
+	return _u
+}
+
+// SetReviewNote sets the "review_note" field.
+func (_u *CoinPurchaseUpdateOne) SetReviewNote(v string) *CoinPurchaseUpdateOne {
+	_u.mutation.SetReviewNote(v)
+	return _u
+}
+
+// SetNillableReviewNote sets the "review_note" field if the given value is not nil.
+func (_u *CoinPurchaseUpdateOne) SetNillableReviewNote(v *string) *CoinPurchaseUpdateOne {
+	if v != nil {
+		_u.SetReviewNote(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CoinPurchaseUpdateOne) SetUpdatedAt(v time.Time) *CoinPurchaseUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -497,6 +651,21 @@ func (_u *CoinPurchaseUpdateOne) check() error {
 			return &ValidationError{Name: "authorization_url", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.authorization_url": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ReviewStatus(); ok {
+		if err := coinpurchase.ReviewStatusValidator(v); err != nil {
+			return &ValidationError{Name: "review_status", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.review_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReviewedByStaffID(); ok {
+		if err := coinpurchase.ReviewedByStaffIDValidator(v); err != nil {
+			return &ValidationError{Name: "reviewed_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.reviewed_by_staff_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReviewNote(); ok {
+		if err := coinpurchase.ReviewNoteValidator(v); err != nil {
+			return &ValidationError{Name: "review_note", err: fmt.Errorf(`ent: validator failed for field "CoinPurchase.review_note": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -564,6 +733,21 @@ func (_u *CoinPurchaseUpdateOne) sqlSave(ctx context.Context) (_node *CoinPurcha
 	}
 	if value, ok := _u.mutation.AddedClawbackShortfallCoins(); ok {
 		_spec.AddField(coinpurchase.FieldClawbackShortfallCoins, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.ReviewStatus(); ok {
+		_spec.SetField(coinpurchase.FieldReviewStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ReviewedByStaffID(); ok {
+		_spec.SetField(coinpurchase.FieldReviewedByStaffID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ReviewedAt(); ok {
+		_spec.SetField(coinpurchase.FieldReviewedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ReviewedAtCleared() {
+		_spec.ClearField(coinpurchase.FieldReviewedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReviewNote(); ok {
+		_spec.SetField(coinpurchase.FieldReviewNote, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(coinpurchase.FieldUpdatedAt, field.TypeTime, value)

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"zudomart/modules/wallet/src/generated/ent/cointransfer"
 	"zudomart/modules/wallet/src/generated/ent/internal"
 	"zudomart/modules/wallet/src/generated/ent/predicate"
@@ -25,6 +26,109 @@ type CoinTransferUpdate struct {
 // Where appends a list predicates to the CoinTransferUpdate builder.
 func (_u *CoinTransferUpdate) Where(ps ...predicate.CoinTransfer) *CoinTransferUpdate {
 	_u.mutation.Where(ps...)
+	return _u
+}
+
+// SetClawbackShortfallCoins sets the "clawback_shortfall_coins" field.
+func (_u *CoinTransferUpdate) SetClawbackShortfallCoins(v int64) *CoinTransferUpdate {
+	_u.mutation.ResetClawbackShortfallCoins()
+	_u.mutation.SetClawbackShortfallCoins(v)
+	return _u
+}
+
+// SetNillableClawbackShortfallCoins sets the "clawback_shortfall_coins" field if the given value is not nil.
+func (_u *CoinTransferUpdate) SetNillableClawbackShortfallCoins(v *int64) *CoinTransferUpdate {
+	if v != nil {
+		_u.SetClawbackShortfallCoins(*v)
+	}
+	return _u
+}
+
+// AddClawbackShortfallCoins adds value to the "clawback_shortfall_coins" field.
+func (_u *CoinTransferUpdate) AddClawbackShortfallCoins(v int64) *CoinTransferUpdate {
+	_u.mutation.AddClawbackShortfallCoins(v)
+	return _u
+}
+
+// SetReversedAt sets the "reversed_at" field.
+func (_u *CoinTransferUpdate) SetReversedAt(v time.Time) *CoinTransferUpdate {
+	_u.mutation.SetReversedAt(v)
+	return _u
+}
+
+// SetNillableReversedAt sets the "reversed_at" field if the given value is not nil.
+func (_u *CoinTransferUpdate) SetNillableReversedAt(v *time.Time) *CoinTransferUpdate {
+	if v != nil {
+		_u.SetReversedAt(*v)
+	}
+	return _u
+}
+
+// ClearReversedAt clears the value of the "reversed_at" field.
+func (_u *CoinTransferUpdate) ClearReversedAt() *CoinTransferUpdate {
+	_u.mutation.ClearReversedAt()
+	return _u
+}
+
+// SetReviewStatus sets the "review_status" field.
+func (_u *CoinTransferUpdate) SetReviewStatus(v cointransfer.ReviewStatus) *CoinTransferUpdate {
+	_u.mutation.SetReviewStatus(v)
+	return _u
+}
+
+// SetNillableReviewStatus sets the "review_status" field if the given value is not nil.
+func (_u *CoinTransferUpdate) SetNillableReviewStatus(v *cointransfer.ReviewStatus) *CoinTransferUpdate {
+	if v != nil {
+		_u.SetReviewStatus(*v)
+	}
+	return _u
+}
+
+// SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
+func (_u *CoinTransferUpdate) SetReviewedByStaffID(v string) *CoinTransferUpdate {
+	_u.mutation.SetReviewedByStaffID(v)
+	return _u
+}
+
+// SetNillableReviewedByStaffID sets the "reviewed_by_staff_id" field if the given value is not nil.
+func (_u *CoinTransferUpdate) SetNillableReviewedByStaffID(v *string) *CoinTransferUpdate {
+	if v != nil {
+		_u.SetReviewedByStaffID(*v)
+	}
+	return _u
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (_u *CoinTransferUpdate) SetReviewedAt(v time.Time) *CoinTransferUpdate {
+	_u.mutation.SetReviewedAt(v)
+	return _u
+}
+
+// SetNillableReviewedAt sets the "reviewed_at" field if the given value is not nil.
+func (_u *CoinTransferUpdate) SetNillableReviewedAt(v *time.Time) *CoinTransferUpdate {
+	if v != nil {
+		_u.SetReviewedAt(*v)
+	}
+	return _u
+}
+
+// ClearReviewedAt clears the value of the "reviewed_at" field.
+func (_u *CoinTransferUpdate) ClearReviewedAt() *CoinTransferUpdate {
+	_u.mutation.ClearReviewedAt()
+	return _u
+}
+
+// SetReviewNote sets the "review_note" field.
+func (_u *CoinTransferUpdate) SetReviewNote(v string) *CoinTransferUpdate {
+	_u.mutation.SetReviewNote(v)
+	return _u
+}
+
+// SetNillableReviewNote sets the "review_note" field if the given value is not nil.
+func (_u *CoinTransferUpdate) SetNillableReviewNote(v *string) *CoinTransferUpdate {
+	if v != nil {
+		_u.SetReviewNote(*v)
+	}
 	return _u
 }
 
@@ -60,7 +164,30 @@ func (_u *CoinTransferUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *CoinTransferUpdate) check() error {
+	if v, ok := _u.mutation.ReviewStatus(); ok {
+		if err := cointransfer.ReviewStatusValidator(v); err != nil {
+			return &ValidationError{Name: "review_status", err: fmt.Errorf(`ent: validator failed for field "CoinTransfer.review_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReviewedByStaffID(); ok {
+		if err := cointransfer.ReviewedByStaffIDValidator(v); err != nil {
+			return &ValidationError{Name: "reviewed_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "CoinTransfer.reviewed_by_staff_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReviewNote(); ok {
+		if err := cointransfer.ReviewNoteValidator(v); err != nil {
+			return &ValidationError{Name: "review_note", err: fmt.Errorf(`ent: validator failed for field "CoinTransfer.review_note": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *CoinTransferUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(cointransfer.Table, cointransfer.Columns, sqlgraph.NewFieldSpec(cointransfer.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -68,6 +195,33 @@ func (_u *CoinTransferUpdate) sqlSave(ctx context.Context) (_node int, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.ClawbackShortfallCoins(); ok {
+		_spec.SetField(cointransfer.FieldClawbackShortfallCoins, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedClawbackShortfallCoins(); ok {
+		_spec.AddField(cointransfer.FieldClawbackShortfallCoins, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.ReversedAt(); ok {
+		_spec.SetField(cointransfer.FieldReversedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ReversedAtCleared() {
+		_spec.ClearField(cointransfer.FieldReversedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReviewStatus(); ok {
+		_spec.SetField(cointransfer.FieldReviewStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ReviewedByStaffID(); ok {
+		_spec.SetField(cointransfer.FieldReviewedByStaffID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ReviewedAt(); ok {
+		_spec.SetField(cointransfer.FieldReviewedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ReviewedAtCleared() {
+		_spec.ClearField(cointransfer.FieldReviewedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReviewNote(); ok {
+		_spec.SetField(cointransfer.FieldReviewNote, field.TypeString, value)
 	}
 	_spec.Node.Schema = _u.schemaConfig.CoinTransfer
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
@@ -89,6 +243,109 @@ type CoinTransferUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CoinTransferMutation
+}
+
+// SetClawbackShortfallCoins sets the "clawback_shortfall_coins" field.
+func (_u *CoinTransferUpdateOne) SetClawbackShortfallCoins(v int64) *CoinTransferUpdateOne {
+	_u.mutation.ResetClawbackShortfallCoins()
+	_u.mutation.SetClawbackShortfallCoins(v)
+	return _u
+}
+
+// SetNillableClawbackShortfallCoins sets the "clawback_shortfall_coins" field if the given value is not nil.
+func (_u *CoinTransferUpdateOne) SetNillableClawbackShortfallCoins(v *int64) *CoinTransferUpdateOne {
+	if v != nil {
+		_u.SetClawbackShortfallCoins(*v)
+	}
+	return _u
+}
+
+// AddClawbackShortfallCoins adds value to the "clawback_shortfall_coins" field.
+func (_u *CoinTransferUpdateOne) AddClawbackShortfallCoins(v int64) *CoinTransferUpdateOne {
+	_u.mutation.AddClawbackShortfallCoins(v)
+	return _u
+}
+
+// SetReversedAt sets the "reversed_at" field.
+func (_u *CoinTransferUpdateOne) SetReversedAt(v time.Time) *CoinTransferUpdateOne {
+	_u.mutation.SetReversedAt(v)
+	return _u
+}
+
+// SetNillableReversedAt sets the "reversed_at" field if the given value is not nil.
+func (_u *CoinTransferUpdateOne) SetNillableReversedAt(v *time.Time) *CoinTransferUpdateOne {
+	if v != nil {
+		_u.SetReversedAt(*v)
+	}
+	return _u
+}
+
+// ClearReversedAt clears the value of the "reversed_at" field.
+func (_u *CoinTransferUpdateOne) ClearReversedAt() *CoinTransferUpdateOne {
+	_u.mutation.ClearReversedAt()
+	return _u
+}
+
+// SetReviewStatus sets the "review_status" field.
+func (_u *CoinTransferUpdateOne) SetReviewStatus(v cointransfer.ReviewStatus) *CoinTransferUpdateOne {
+	_u.mutation.SetReviewStatus(v)
+	return _u
+}
+
+// SetNillableReviewStatus sets the "review_status" field if the given value is not nil.
+func (_u *CoinTransferUpdateOne) SetNillableReviewStatus(v *cointransfer.ReviewStatus) *CoinTransferUpdateOne {
+	if v != nil {
+		_u.SetReviewStatus(*v)
+	}
+	return _u
+}
+
+// SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
+func (_u *CoinTransferUpdateOne) SetReviewedByStaffID(v string) *CoinTransferUpdateOne {
+	_u.mutation.SetReviewedByStaffID(v)
+	return _u
+}
+
+// SetNillableReviewedByStaffID sets the "reviewed_by_staff_id" field if the given value is not nil.
+func (_u *CoinTransferUpdateOne) SetNillableReviewedByStaffID(v *string) *CoinTransferUpdateOne {
+	if v != nil {
+		_u.SetReviewedByStaffID(*v)
+	}
+	return _u
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (_u *CoinTransferUpdateOne) SetReviewedAt(v time.Time) *CoinTransferUpdateOne {
+	_u.mutation.SetReviewedAt(v)
+	return _u
+}
+
+// SetNillableReviewedAt sets the "reviewed_at" field if the given value is not nil.
+func (_u *CoinTransferUpdateOne) SetNillableReviewedAt(v *time.Time) *CoinTransferUpdateOne {
+	if v != nil {
+		_u.SetReviewedAt(*v)
+	}
+	return _u
+}
+
+// ClearReviewedAt clears the value of the "reviewed_at" field.
+func (_u *CoinTransferUpdateOne) ClearReviewedAt() *CoinTransferUpdateOne {
+	_u.mutation.ClearReviewedAt()
+	return _u
+}
+
+// SetReviewNote sets the "review_note" field.
+func (_u *CoinTransferUpdateOne) SetReviewNote(v string) *CoinTransferUpdateOne {
+	_u.mutation.SetReviewNote(v)
+	return _u
+}
+
+// SetNillableReviewNote sets the "review_note" field if the given value is not nil.
+func (_u *CoinTransferUpdateOne) SetNillableReviewNote(v *string) *CoinTransferUpdateOne {
+	if v != nil {
+		_u.SetReviewNote(*v)
+	}
+	return _u
 }
 
 // Mutation returns the CoinTransferMutation object of the builder.
@@ -136,7 +393,30 @@ func (_u *CoinTransferUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *CoinTransferUpdateOne) check() error {
+	if v, ok := _u.mutation.ReviewStatus(); ok {
+		if err := cointransfer.ReviewStatusValidator(v); err != nil {
+			return &ValidationError{Name: "review_status", err: fmt.Errorf(`ent: validator failed for field "CoinTransfer.review_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReviewedByStaffID(); ok {
+		if err := cointransfer.ReviewedByStaffIDValidator(v); err != nil {
+			return &ValidationError{Name: "reviewed_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "CoinTransfer.reviewed_by_staff_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ReviewNote(); ok {
+		if err := cointransfer.ReviewNoteValidator(v); err != nil {
+			return &ValidationError{Name: "review_note", err: fmt.Errorf(`ent: validator failed for field "CoinTransfer.review_note": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *CoinTransferUpdateOne) sqlSave(ctx context.Context) (_node *CoinTransfer, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(cointransfer.Table, cointransfer.Columns, sqlgraph.NewFieldSpec(cointransfer.FieldID, field.TypeUUID))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -161,6 +441,33 @@ func (_u *CoinTransferUpdateOne) sqlSave(ctx context.Context) (_node *CoinTransf
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.ClawbackShortfallCoins(); ok {
+		_spec.SetField(cointransfer.FieldClawbackShortfallCoins, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedClawbackShortfallCoins(); ok {
+		_spec.AddField(cointransfer.FieldClawbackShortfallCoins, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.ReversedAt(); ok {
+		_spec.SetField(cointransfer.FieldReversedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ReversedAtCleared() {
+		_spec.ClearField(cointransfer.FieldReversedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReviewStatus(); ok {
+		_spec.SetField(cointransfer.FieldReviewStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ReviewedByStaffID(); ok {
+		_spec.SetField(cointransfer.FieldReviewedByStaffID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ReviewedAt(); ok {
+		_spec.SetField(cointransfer.FieldReviewedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ReviewedAtCleared() {
+		_spec.ClearField(cointransfer.FieldReviewedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ReviewNote(); ok {
+		_spec.SetField(cointransfer.FieldReviewNote, field.TypeString, value)
 	}
 	_spec.Node.Schema = _u.schemaConfig.CoinTransfer
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
