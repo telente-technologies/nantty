@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"testing"
 	"time"
@@ -56,4 +57,9 @@ func TestMigrationsApplyAndModuleStarts(t *testing.T) {
 	if err := module.Container.Database.PingContext(context.Background()); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestEveryCatalogRouteRegistersWithoutConflicts(t *testing.T) {
+	module := startAgainstFreshSchema(t)
+	module.MountRoutes(http.NewServeMux())
 }

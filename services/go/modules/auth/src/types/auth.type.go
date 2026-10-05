@@ -20,4 +20,5 @@ type AuthenticationResult struct {
 	Account           *ent.Account
 	IsNewUser         bool
 	DeletionCancelled bool
+	Reactivated       bool
 }
