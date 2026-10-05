@@ -37,6 +37,6 @@ export const homeQuestions: readonly QuestionAndAnswer[] = [
   },
   {
     question: "When and where does Zudomart launch?",
-    answer: "Zudomart launches first across Nigeria, on iPhone and Android, with more countries after. Join the waitlist and we will email you when it is ready for you.",
+    answer: "Zudomart launches first across Nigeria, on iPhone and Android, with more countries after. Get the app on iPhone or Android, or shop from the web app in your browser.",
   },
 ];

@@ -6,7 +6,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     id: "agreement",
     heading: "Agreement to these terms",
     paragraphs: [
-      "These terms apply when you use the Zudomart website, join the waitlist, or use the Zudomart app. By using them you agree to these terms.",
+      "These terms apply when you use the Zudomart website, the Zudomart web app or the Zudomart mobile app. By using them you agree to these terms.",
       "[Team to replace: legal entity name and governing law.]",
     ],
   },
