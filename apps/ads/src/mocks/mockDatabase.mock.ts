@@ -79,16 +79,15 @@ export interface MockAdRecord {
 }
 
 export interface MockUploadRecord {
-  readonly uploadId: string;
+  readonly mediaId: string;
+  readonly accountId: string;
   readonly userId: string;
   readonly fileName: string;
   readonly mimeType: string;
   readonly sizeBytes: number;
-  readonly chunkSizeBytes: number;
-  readonly totalChunks: number;
-  readonly uploadedChunks: Set<number>;
   readonly clientMetadata: { readonly width: number; readonly height: number; readonly durationSeconds: number | null } | null;
-  mediaId: string | null;
+  bytes: Buffer | null;
+  status: "pending_upload" | "processing";
 }
 
 export interface MockAdsDatabase {

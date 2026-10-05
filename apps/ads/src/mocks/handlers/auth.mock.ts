@@ -38,11 +38,11 @@ export function registerAuthMockHandlers(): void {
       const identifier = String(body.identifier ?? "").trim().toLowerCase();
       const attempts = failedAttemptsByIdentifier.get(identifier);
       if (attempts && attempts.count >= 5 && Date.now() - attempts.firstAttemptAt < 60_000) return respondWithError(429, "RATE_LIMITED", "Too many attempts.");
-      const user = readMockDatabase().users.find((candidate) => candidate.email === identifier || candidate.phone === identifier || candidate.username === identifier);
+      const user = readMockDatabase().users.find((candidate) => candidate.email === identifier || candidate.username === identifier);
       if (!user || !isDemoPasswordCorrect(String(body.password ?? ""))) {
         const current = attempts && Date.now() - attempts.firstAttemptAt < 60_000 ? attempts : { count: 0, firstAttemptAt: Date.now() };
         failedAttemptsByIdentifier.set(identifier, { ...current, count: current.count + 1 });
-        return respondWithError(401, "INVALID_CREDENTIALS", "That email, phone or password is not right.");
+        return respondWithError(401, "INVALID_CREDENTIALS", "That email, username or password is not right.");
       }
       failedAttemptsByIdentifier.delete(identifier);
       return respondWithJson(200, { ...issueMockTokenPair(user.id), user: presentCurrentUser(user.id) });
@@ -64,16 +64,12 @@ export function registerAuthMockHandlers(): void {
     { public: true },
   );
 
-  registerMockRoute(
-    "POST",
-    "/auth/logout",
-    (request) => {
-      const record = readMockDatabase().refreshTokens.get(String(readJsonObjectBody(request).refreshToken ?? ""));
-      if (record) record.revoked = true;
-      return respondWithNoContent();
-    },
-    { public: true },
-  );
+  registerMockRoute("POST", "/auth/logout", (request) => {
+    requirePrincipal(request);
+    const record = readMockDatabase().refreshTokens.get(String(readJsonObjectBody(request).refreshToken ?? ""));
+    if (record) record.revoked = true;
+    return respondWithNoContent();
+  });
 
   registerMockRoute("GET", "/users/me", (request) => respondWithJson(200, presentCurrentUser(requirePrincipal(request).userId)));
 }

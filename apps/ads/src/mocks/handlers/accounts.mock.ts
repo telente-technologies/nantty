@@ -115,6 +115,15 @@ export function registerAccountMockHandlers(): void {
     const objectType = request.query.get("objectType");
     const entries = readMockDatabase().activity.filter((entry) => entry.accountId === account.id && (!objectType || entry.objectType === objectType));
     const page = paginateItems(entries, request, 30);
-    return respondWithJson(200, { ...page, items: page.items.map(({ accountId: _accountId, ...entry }) => entry) });
+    const items = page.items.map((entry) => ({
+      id: entry.id,
+      objectType: entry.objectType,
+      objectId: entry.objectId,
+      actor: entry.actor.isSystem ? "System" : entry.actor.name,
+      summary: entry.summary,
+      changes: Object.fromEntries(entry.changes.map((change) => [change.field, change.to])),
+      createdAt: entry.createdAt,
+    }));
+    return respondWithJson(200, { ...page, items });
   });
 }

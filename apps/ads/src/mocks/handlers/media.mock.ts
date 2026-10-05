@@ -1,65 +1,74 @@
-import { createHash } from "node:crypto";
-
+import { requireAccountAccess } from "@/mocks/mockAccountAccess.mock";
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
-import { MockHttpError, createMockId, readJsonObjectBody, requirePrincipal, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, createMockId, failValidation, readJsonObjectBody, requirePrincipal, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 
-const chunkSizeBytes = 4 * 1024 * 1024;
-const maximumMockUploadBytes = 60 * 1024 * 1024;
+const maximumMockUploadBytes = 12 * 1024 * 1024;
 const acceptedMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/avif", "video/mp4", "video/quicktime"];
+const uploadUrlLifetimeMilliseconds = 30 * 60 * 1000;
 
-const globalHolder = globalThis as typeof globalThis & { zudomartAdsMockChunks?: Map<string, Map<number, Uint8Array>>; zudomartAdsMockFiles?: Map<string, { mimeType: string; bytes: Buffer }> };
-const chunkStore = (globalHolder.zudomartAdsMockChunks ??= new Map());
+const globalHolder = globalThis as typeof globalThis & { zudomartAdsMockFiles?: Map<string, { mimeType: string; bytes: Buffer }> };
 const fileStore = (globalHolder.zudomartAdsMockFiles ??= new Map());
 
+function readClientMetadata(value: unknown) {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "object") failValidation("clientMetadata", "clientMetadata must be an object.");
+  const record = value as Record<string, unknown>;
+  for (const field of ["width", "height", "durationSeconds"]) {
+    const fieldValue = record[field];
+    if (fieldValue !== null && fieldValue !== undefined && !Number.isInteger(fieldValue)) throw new MockHttpError(400, "INVALID_JSON", "The request body is not valid JSON.");
+  }
+  if (!Number.isInteger(record.width) || !Number.isInteger(record.height)) return null;
+  return { width: record.width as number, height: record.height as number, durationSeconds: Number.isInteger(record.durationSeconds) ? (record.durationSeconds as number) : null };
+}
+
 export function registerMediaMockHandlers(): void {
-  registerMockRoute("POST", "/media/uploads", (request) => {
-    const principal = requirePrincipal(request);
+  registerMockRoute("POST", "/ads/accounts/:accountId/creatives/media/uploads", (request) => {
+    const { account, userId } = requireAccountAccess(request, "campaigns:manage");
     const body = readJsonObjectBody(request);
     const mimeType = String(body.mimeType ?? "");
     const sizeBytes = Number(body.sizeBytes);
-    if (!acceptedMimeTypes.includes(mimeType)) throw new MockHttpError(415, "UNSUPPORTED_MEDIA_TYPE", "Use a JPG, PNG, WebP, AVIF, MP4 or MOV file.");
-    if (!Number.isInteger(sizeBytes) || sizeBytes <= 0 || sizeBytes > maximumMockUploadBytes) throw new MockHttpError(413, "FILE_TOO_LARGE", "The demo backend accepts files up to 60 MB.");
-    const rawMetadata = typeof body.clientMetadata === "object" && body.clientMetadata ? (body.clientMetadata as Record<string, unknown>) : null;
-    const clientMetadata = rawMetadata && Number.isInteger(rawMetadata.width) && Number.isInteger(rawMetadata.height) ? { width: rawMetadata.width as number, height: rawMetadata.height as number, durationSeconds: typeof rawMetadata.durationSeconds === "number" ? rawMetadata.durationSeconds : null } : null;
-    const uploadId = createMockId("upl");
-    const totalChunks = Math.ceil(sizeBytes / chunkSizeBytes);
-    readMockDatabase().uploads.set(uploadId, { uploadId, userId: principal.userId, fileName: String(body.fileName ?? "upload").slice(0, 200), mimeType, sizeBytes, chunkSizeBytes, totalChunks, uploadedChunks: new Set(), clientMetadata, mediaId: null });
-    chunkStore.set(uploadId, new Map());
-    return respondWithJson(201, { uploadId, chunkSizeBytes, totalChunks, uploadedChunks: [] });
+    const fileName = String(body.fileName ?? "").trim().slice(0, 200);
+    if (!fileName) failValidation("fileName", "Send the file name.");
+    if (!acceptedMimeTypes.includes(mimeType)) throw new MockHttpError(415, "MEDIA_TYPE_NOT_SUPPORTED", "Upload a JPG, PNG, WebP, AVIF, MP4 or MOV file.");
+    if (!Number.isInteger(sizeBytes) || sizeBytes < 1) failValidation("sizeBytes", "The file is empty.");
+    if (sizeBytes > maximumMockUploadBytes) throw new MockHttpError(413, "MEDIA_TOO_LARGE", "The demo backend accepts files up to 12 MB.");
+    const mediaId = createMockId("med");
+    readMockDatabase().uploads.set(mediaId, { mediaId, accountId: account.id, userId, fileName, mimeType, sizeBytes, clientMetadata: readClientMetadata(body.clientMetadata), bytes: null, status: "pending_upload" });
+    return respondWithJson(201, {
+      mediaId,
+      uploadUrl: `/bff/ads/accounts/${encodeURIComponent(account.id)}/creatives/media/${mediaId}/content`,
+      uploadHeaders: { "Content-Type": mimeType },
+      expiresAt: new Date(Date.now() + uploadUrlLifetimeMilliseconds).toISOString(),
+    });
   });
 
-  registerMockRoute("PUT", "/media/uploads/:uploadId/chunks/:chunkIndex", (request) => {
-    const principal = requirePrincipal(request);
-    const upload = readMockDatabase().uploads.get(request.params.uploadId ?? "");
-    if (!upload || upload.userId !== principal.userId) throw new MockHttpError(404, "NOT_FOUND", "Upload not found.");
-    const chunkIndex = Number(request.params.chunkIndex);
-    if (!Number.isInteger(chunkIndex) || chunkIndex < 0 || chunkIndex >= upload.totalChunks) throw new MockHttpError(400, "BAD_CHUNK_INDEX", "That chunk number is out of range.");
+  registerMockRoute("PUT", "/ads/accounts/:accountId/creatives/media/:mediaId/content", (request) => {
+    const { account } = requireAccountAccess(request, "campaigns:manage");
+    const upload = readMockDatabase().uploads.get(request.params.mediaId ?? "");
+    if (!upload || upload.accountId !== account.id || upload.status !== "pending_upload") throw new MockHttpError(404, "MEDIA_NOT_FOUND", "Media not found.");
     const bytes = request.binaryBody ?? new Uint8Array();
-    const expectedLength = Math.min(upload.chunkSizeBytes, upload.sizeBytes - chunkIndex * upload.chunkSizeBytes);
-    if (bytes.byteLength !== expectedLength) throw new MockHttpError(400, "BAD_CHUNK_LENGTH", "The chunk size does not match.");
-    const declaredHash = request.headers.get("x-chunk-sha256") ?? "";
-    if (createHash("sha256").update(bytes).digest("hex") !== declaredHash) throw new MockHttpError(422, "CHUNK_CHECKSUM_MISMATCH", "The chunk was corrupted in transit. It will be retried.");
-    chunkStore.get(upload.uploadId)?.set(chunkIndex, bytes);
-    upload.uploadedChunks.add(chunkIndex);
-    return respondWithJson(200, { uploadedChunks: [...upload.uploadedChunks].sort((first, second) => first - second) });
+    if (bytes.byteLength !== upload.sizeBytes) throw new MockHttpError(400, "UPLOAD_SIZE_MISMATCH", "The uploaded file size does not match.");
+    upload.bytes = Buffer.from(bytes);
+    return respondWithJson(200, {});
   });
 
-  registerMockRoute("POST", "/media/uploads/:uploadId/complete", (request) => {
-    const principal = requirePrincipal(request);
+  registerMockRoute("POST", "/ads/accounts/:accountId/creatives/media/:mediaId/complete", (request) => {
+    const { account } = requireAccountAccess(request, "campaigns:manage");
     const database = readMockDatabase();
-    const upload = database.uploads.get(request.params.uploadId ?? "");
-    if (!upload || upload.userId !== principal.userId) throw new MockHttpError(404, "NOT_FOUND", "Upload not found.");
-    if (upload.uploadedChunks.size !== upload.totalChunks) throw new MockHttpError(409, "UPLOAD_INCOMPLETE", "Some chunks are missing.");
-    const chunks = chunkStore.get(upload.uploadId) ?? new Map<number, Uint8Array>();
-    const bytes = Buffer.concat(Array.from({ length: upload.totalChunks }, (_, index) => chunks.get(index) ?? new Uint8Array()));
-    chunkStore.delete(upload.uploadId);
-    const mediaId = upload.mediaId ?? createMockId("med");
-    upload.mediaId = mediaId;
-    fileStore.set(mediaId, { mimeType: upload.mimeType, bytes });
+    const upload = database.uploads.get(request.params.mediaId ?? "");
+    if (!upload || upload.accountId !== account.id) throw new MockHttpError(404, "MEDIA_NOT_FOUND", "Media not found.");
+    if (upload.status !== "pending_upload") return respondWithJson(200, { mediaId: upload.mediaId, status: upload.status });
+    const uploadedBytes = upload.bytes;
+    if (!uploadedBytes) throw new MockHttpError(409, "UPLOAD_INCOMPLETE", "The file has not finished uploading.");
+    upload.status = "processing";
+    fileStore.set(upload.mediaId, { mimeType: upload.mimeType, bytes: uploadedBytes });
     const isVideo = upload.mimeType.startsWith("video/");
-    database.media.set(mediaId, { createdAtEpochMs: Date.now(), media: { id: mediaId, kind: isVideo ? "video" : "image", url: `/bff/media/${mediaId}`, posterUrl: null, width: upload.clientMetadata?.width ?? 1080, height: upload.clientMetadata?.height ?? (isVideo ? 1920 : 1080), durationSeconds: isVideo ? (upload.clientMetadata?.durationSeconds ?? 15) : null } });
-    return respondWithJson(200, { mediaId, status: "processing" });
+    database.media.set(upload.mediaId, {
+      createdAtEpochMs: Date.now(),
+      media: { id: upload.mediaId, kind: isVideo ? "video" : "image", url: `/bff/media/${upload.mediaId}`, posterUrl: null, width: upload.clientMetadata?.width ?? 1080, height: upload.clientMetadata?.height ?? (isVideo ? 1920 : 1080), durationSeconds: isVideo ? (upload.clientMetadata?.durationSeconds ?? 15) : null },
+    });
+    return respondWithJson(200, { mediaId: upload.mediaId, status: "processing" });
   });
 
   registerMockRoute("GET", "/media/:mediaId", (request) => {
