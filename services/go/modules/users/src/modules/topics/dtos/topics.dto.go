@@ -19,3 +19,15 @@ func ConvertTopicsToResponse(rows []*ent.Topic) []TopicResponse {
 	}
 	return items
 }
+
+type CreateTopicRequest struct {
+	Name   string `json:"name"`
+	Reason string `json:"reason"`
+}
+
+type UpdateTopicRequest struct {
+	Name       *string `json:"name"`
+	Status     *string `json:"status"`
+	IsTrending *bool   `json:"isTrending"`
+	Reason     string  `json:"reason"`
+}
