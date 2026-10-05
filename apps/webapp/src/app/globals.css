@@ -47,6 +47,7 @@
   --shell-nav-width: 232px;
   --shell-right-rail-width: 288px;
   --bottom-bar-height: 62px;
+  --top-bar-height: 61px;
 
   --z-nav: 40;
   --z-sheet: 60;
@@ -61,6 +62,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
 }
 
 body {
@@ -73,6 +75,7 @@ body {
   letter-spacing: var(--tracking-tight);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
 }
 
 h1,
@@ -138,9 +141,14 @@ button {
 }
 
 :focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-  border-radius: var(--radius-small);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
 }
 
 ::selection {

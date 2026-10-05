@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   title: { default: "Zudomart", template: "%s · Zudomart" },
   description: "Shop the sellers you already watch.",
   applicationName: "Zudomart",
+  manifest: "/manifest.webmanifest",
+  icons: { icon: [{ url: "/brand/favicon.ico", sizes: "48x48" }, { url: "/brand/icon.svg", type: "image/svg+xml" }], apple: "/brand/appleTouchIcon.png" },
   formatDetection: { telephone: false },
 };
 
