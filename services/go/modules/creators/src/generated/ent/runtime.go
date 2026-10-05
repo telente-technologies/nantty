@@ -5,11 +5,19 @@ package ent
 import (
 	"time"
 	"zudomart/modules/creators/src/databases/schema"
+	"zudomart/modules/creators/src/generated/ent/affiliatecommission"
+	"zudomart/modules/creators/src/generated/ent/affiliatecommissionreversal"
+	"zudomart/modules/creators/src/generated/ent/affiliateproductcommission"
+	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
+	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
+	"zudomart/modules/creators/src/generated/ent/creatorearning"
 	"zudomart/modules/creators/src/generated/ent/creatorprogrammember"
 	"zudomart/modules/creators/src/generated/ent/creatortier"
+	"zudomart/modules/creators/src/generated/ent/creatorviolation"
 	"zudomart/modules/creators/src/generated/ent/gifttransaction"
 	"zudomart/modules/creators/src/generated/ent/outboxevent"
+	"zudomart/modules/creators/src/generated/ent/tiptransaction"
 
 	"github.com/google/uuid"
 )
@@ -18,6 +26,367 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	affiliatecommissionMixin := schema.AffiliateCommission{}.Mixin()
+	affiliatecommissionMixinFields0 := affiliatecommissionMixin[0].Fields()
+	_ = affiliatecommissionMixinFields0
+	affiliatecommissionFields := schema.AffiliateCommission{}.Fields()
+	_ = affiliatecommissionFields
+	// affiliatecommissionDescCreatedAt is the schema descriptor for created_at field.
+	affiliatecommissionDescCreatedAt := affiliatecommissionMixinFields0[1].Descriptor()
+	// affiliatecommission.DefaultCreatedAt holds the default value on creation for the created_at field.
+	affiliatecommission.DefaultCreatedAt = affiliatecommissionDescCreatedAt.Default.(func() time.Time)
+	// affiliatecommissionDescOrderID is the schema descriptor for order_id field.
+	affiliatecommissionDescOrderID := affiliatecommissionFields[0].Descriptor()
+	// affiliatecommission.OrderIDValidator is a validator for the "order_id" field. It is called by the builders before save.
+	affiliatecommission.OrderIDValidator = func() func(string) error {
+		validators := affiliatecommissionDescOrderID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(order_id string) error {
+			for _, fn := range fns {
+				if err := fn(order_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionDescOrderNumber is the schema descriptor for order_number field.
+	affiliatecommissionDescOrderNumber := affiliatecommissionFields[1].Descriptor()
+	// affiliatecommission.DefaultOrderNumber holds the default value on creation for the order_number field.
+	affiliatecommission.DefaultOrderNumber = affiliatecommissionDescOrderNumber.Default.(string)
+	// affiliatecommission.OrderNumberValidator is a validator for the "order_number" field. It is called by the builders before save.
+	affiliatecommission.OrderNumberValidator = affiliatecommissionDescOrderNumber.Validators[0].(func(string) error)
+	// affiliatecommissionDescOrderItemID is the schema descriptor for order_item_id field.
+	affiliatecommissionDescOrderItemID := affiliatecommissionFields[2].Descriptor()
+	// affiliatecommission.OrderItemIDValidator is a validator for the "order_item_id" field. It is called by the builders before save.
+	affiliatecommission.OrderItemIDValidator = func() func(string) error {
+		validators := affiliatecommissionDescOrderItemID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(order_item_id string) error {
+			for _, fn := range fns {
+				if err := fn(order_item_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionDescProductID is the schema descriptor for product_id field.
+	affiliatecommissionDescProductID := affiliatecommissionFields[3].Descriptor()
+	// affiliatecommission.ProductIDValidator is a validator for the "product_id" field. It is called by the builders before save.
+	affiliatecommission.ProductIDValidator = func() func(string) error {
+		validators := affiliatecommissionDescProductID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(product_id string) error {
+			for _, fn := range fns {
+				if err := fn(product_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionDescStoreID is the schema descriptor for store_id field.
+	affiliatecommissionDescStoreID := affiliatecommissionFields[4].Descriptor()
+	// affiliatecommission.StoreIDValidator is a validator for the "store_id" field. It is called by the builders before save.
+	affiliatecommission.StoreIDValidator = func() func(string) error {
+		validators := affiliatecommissionDescStoreID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(store_id string) error {
+			for _, fn := range fns {
+				if err := fn(store_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionDescSellerUserID is the schema descriptor for seller_user_id field.
+	affiliatecommissionDescSellerUserID := affiliatecommissionFields[5].Descriptor()
+	// affiliatecommission.SellerUserIDValidator is a validator for the "seller_user_id" field. It is called by the builders before save.
+	affiliatecommission.SellerUserIDValidator = func() func(string) error {
+		validators := affiliatecommissionDescSellerUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(seller_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(seller_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionDescCreatorID is the schema descriptor for creator_id field.
+	affiliatecommissionDescCreatorID := affiliatecommissionFields[6].Descriptor()
+	// affiliatecommission.CreatorIDValidator is a validator for the "creator_id" field. It is called by the builders before save.
+	affiliatecommission.CreatorIDValidator = func() func(string) error {
+		validators := affiliatecommissionDescCreatorID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(creator_id string) error {
+			for _, fn := range fns {
+				if err := fn(creator_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionDescAttributionSource is the schema descriptor for attribution_source field.
+	affiliatecommissionDescAttributionSource := affiliatecommissionFields[7].Descriptor()
+	// affiliatecommission.AttributionSourceValidator is a validator for the "attribution_source" field. It is called by the builders before save.
+	affiliatecommission.AttributionSourceValidator = func() func(string) error {
+		validators := affiliatecommissionDescAttributionSource.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(attribution_source string) error {
+			for _, fn := range fns {
+				if err := fn(attribution_source); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionDescAttributionID is the schema descriptor for attribution_id field.
+	affiliatecommissionDescAttributionID := affiliatecommissionFields[8].Descriptor()
+	// affiliatecommission.AttributionIDValidator is a validator for the "attribution_id" field. It is called by the builders before save.
+	affiliatecommission.AttributionIDValidator = func() func(string) error {
+		validators := affiliatecommissionDescAttributionID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(attribution_id string) error {
+			for _, fn := range fns {
+				if err := fn(attribution_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionDescCurrency is the schema descriptor for currency field.
+	affiliatecommissionDescCurrency := affiliatecommissionFields[12].Descriptor()
+	// affiliatecommission.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	affiliatecommission.CurrencyValidator = func() func(string) error {
+		validators := affiliatecommissionDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionDescReversedMinor is the schema descriptor for reversed_minor field.
+	affiliatecommissionDescReversedMinor := affiliatecommissionFields[14].Descriptor()
+	// affiliatecommission.DefaultReversedMinor holds the default value on creation for the reversed_minor field.
+	affiliatecommission.DefaultReversedMinor = affiliatecommissionDescReversedMinor.Default.(int64)
+	// affiliatecommissionDescID is the schema descriptor for id field.
+	affiliatecommissionDescID := affiliatecommissionMixinFields0[0].Descriptor()
+	// affiliatecommission.DefaultID holds the default value on creation for the id field.
+	affiliatecommission.DefaultID = affiliatecommissionDescID.Default.(func() uuid.UUID)
+	affiliatecommissionreversalMixin := schema.AffiliateCommissionReversal{}.Mixin()
+	affiliatecommissionreversalMixinFields0 := affiliatecommissionreversalMixin[0].Fields()
+	_ = affiliatecommissionreversalMixinFields0
+	affiliatecommissionreversalFields := schema.AffiliateCommissionReversal{}.Fields()
+	_ = affiliatecommissionreversalFields
+	// affiliatecommissionreversalDescCreatedAt is the schema descriptor for created_at field.
+	affiliatecommissionreversalDescCreatedAt := affiliatecommissionreversalMixinFields0[1].Descriptor()
+	// affiliatecommissionreversal.DefaultCreatedAt holds the default value on creation for the created_at field.
+	affiliatecommissionreversal.DefaultCreatedAt = affiliatecommissionreversalDescCreatedAt.Default.(func() time.Time)
+	// affiliatecommissionreversalDescCommissionID is the schema descriptor for commission_id field.
+	affiliatecommissionreversalDescCommissionID := affiliatecommissionreversalFields[0].Descriptor()
+	// affiliatecommissionreversal.CommissionIDValidator is a validator for the "commission_id" field. It is called by the builders before save.
+	affiliatecommissionreversal.CommissionIDValidator = func() func(string) error {
+		validators := affiliatecommissionreversalDescCommissionID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(commission_id string) error {
+			for _, fn := range fns {
+				if err := fn(commission_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionreversalDescRefundKey is the schema descriptor for refund_key field.
+	affiliatecommissionreversalDescRefundKey := affiliatecommissionreversalFields[1].Descriptor()
+	// affiliatecommissionreversal.RefundKeyValidator is a validator for the "refund_key" field. It is called by the builders before save.
+	affiliatecommissionreversal.RefundKeyValidator = func() func(string) error {
+		validators := affiliatecommissionreversalDescRefundKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(refund_key string) error {
+			for _, fn := range fns {
+				if err := fn(refund_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliatecommissionreversalDescID is the schema descriptor for id field.
+	affiliatecommissionreversalDescID := affiliatecommissionreversalMixinFields0[0].Descriptor()
+	// affiliatecommissionreversal.DefaultID holds the default value on creation for the id field.
+	affiliatecommissionreversal.DefaultID = affiliatecommissionreversalDescID.Default.(func() uuid.UUID)
+	affiliateproductcommissionMixin := schema.AffiliateProductCommission{}.Mixin()
+	affiliateproductcommissionMixinFields0 := affiliateproductcommissionMixin[0].Fields()
+	_ = affiliateproductcommissionMixinFields0
+	affiliateproductcommissionFields := schema.AffiliateProductCommission{}.Fields()
+	_ = affiliateproductcommissionFields
+	// affiliateproductcommissionDescCreatedAt is the schema descriptor for created_at field.
+	affiliateproductcommissionDescCreatedAt := affiliateproductcommissionMixinFields0[1].Descriptor()
+	// affiliateproductcommission.DefaultCreatedAt holds the default value on creation for the created_at field.
+	affiliateproductcommission.DefaultCreatedAt = affiliateproductcommissionDescCreatedAt.Default.(func() time.Time)
+	// affiliateproductcommissionDescStoreID is the schema descriptor for store_id field.
+	affiliateproductcommissionDescStoreID := affiliateproductcommissionFields[0].Descriptor()
+	// affiliateproductcommission.StoreIDValidator is a validator for the "store_id" field. It is called by the builders before save.
+	affiliateproductcommission.StoreIDValidator = func() func(string) error {
+		validators := affiliateproductcommissionDescStoreID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(store_id string) error {
+			for _, fn := range fns {
+				if err := fn(store_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliateproductcommissionDescProductID is the schema descriptor for product_id field.
+	affiliateproductcommissionDescProductID := affiliateproductcommissionFields[1].Descriptor()
+	// affiliateproductcommission.ProductIDValidator is a validator for the "product_id" field. It is called by the builders before save.
+	affiliateproductcommission.ProductIDValidator = func() func(string) error {
+		validators := affiliateproductcommissionDescProductID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(product_id string) error {
+			for _, fn := range fns {
+				if err := fn(product_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliateproductcommissionDescIsExcluded is the schema descriptor for is_excluded field.
+	affiliateproductcommissionDescIsExcluded := affiliateproductcommissionFields[3].Descriptor()
+	// affiliateproductcommission.DefaultIsExcluded holds the default value on creation for the is_excluded field.
+	affiliateproductcommission.DefaultIsExcluded = affiliateproductcommissionDescIsExcluded.Default.(bool)
+	// affiliateproductcommissionDescUpdatedBy is the schema descriptor for updated_by field.
+	affiliateproductcommissionDescUpdatedBy := affiliateproductcommissionFields[4].Descriptor()
+	// affiliateproductcommission.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	affiliateproductcommission.DefaultUpdatedBy = affiliateproductcommissionDescUpdatedBy.Default.(string)
+	// affiliateproductcommission.UpdatedByValidator is a validator for the "updated_by" field. It is called by the builders before save.
+	affiliateproductcommission.UpdatedByValidator = affiliateproductcommissionDescUpdatedBy.Validators[0].(func(string) error)
+	// affiliateproductcommissionDescUpdatedAt is the schema descriptor for updated_at field.
+	affiliateproductcommissionDescUpdatedAt := affiliateproductcommissionFields[5].Descriptor()
+	// affiliateproductcommission.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	affiliateproductcommission.DefaultUpdatedAt = affiliateproductcommissionDescUpdatedAt.Default.(func() time.Time)
+	// affiliateproductcommission.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	affiliateproductcommission.UpdateDefaultUpdatedAt = affiliateproductcommissionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// affiliateproductcommissionDescID is the schema descriptor for id field.
+	affiliateproductcommissionDescID := affiliateproductcommissionMixinFields0[0].Descriptor()
+	// affiliateproductcommission.DefaultID holds the default value on creation for the id field.
+	affiliateproductcommission.DefaultID = affiliateproductcommissionDescID.Default.(func() uuid.UUID)
+	affiliateprogramsettingFields := schema.AffiliateProgramSetting{}.Fields()
+	_ = affiliateprogramsettingFields
+	// affiliateprogramsettingDescSellerUserID is the schema descriptor for seller_user_id field.
+	affiliateprogramsettingDescSellerUserID := affiliateprogramsettingFields[1].Descriptor()
+	// affiliateprogramsetting.SellerUserIDValidator is a validator for the "seller_user_id" field. It is called by the builders before save.
+	affiliateprogramsetting.SellerUserIDValidator = func() func(string) error {
+		validators := affiliateprogramsettingDescSellerUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(seller_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(seller_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// affiliateprogramsettingDescCurrency is the schema descriptor for currency field.
+	affiliateprogramsettingDescCurrency := affiliateprogramsettingFields[2].Descriptor()
+	// affiliateprogramsetting.DefaultCurrency holds the default value on creation for the currency field.
+	affiliateprogramsetting.DefaultCurrency = affiliateprogramsettingDescCurrency.Default.(string)
+	// affiliateprogramsetting.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	affiliateprogramsetting.CurrencyValidator = affiliateprogramsettingDescCurrency.Validators[0].(func(string) error)
+	// affiliateprogramsettingDescEnabled is the schema descriptor for enabled field.
+	affiliateprogramsettingDescEnabled := affiliateprogramsettingFields[3].Descriptor()
+	// affiliateprogramsetting.DefaultEnabled holds the default value on creation for the enabled field.
+	affiliateprogramsetting.DefaultEnabled = affiliateprogramsettingDescEnabled.Default.(bool)
+	// affiliateprogramsettingDescDefaultCommissionBps is the schema descriptor for default_commission_bps field.
+	affiliateprogramsettingDescDefaultCommissionBps := affiliateprogramsettingFields[4].Descriptor()
+	// affiliateprogramsetting.DefaultDefaultCommissionBps holds the default value on creation for the default_commission_bps field.
+	affiliateprogramsetting.DefaultDefaultCommissionBps = affiliateprogramsettingDescDefaultCommissionBps.Default.(int64)
+	// affiliateprogramsettingDescCookieWindowDays is the schema descriptor for cookie_window_days field.
+	affiliateprogramsettingDescCookieWindowDays := affiliateprogramsettingFields[6].Descriptor()
+	// affiliateprogramsetting.DefaultCookieWindowDays holds the default value on creation for the cookie_window_days field.
+	affiliateprogramsetting.DefaultCookieWindowDays = affiliateprogramsettingDescCookieWindowDays.Default.(int)
+	// affiliateprogramsettingDescUpdatedAt is the schema descriptor for updated_at field.
+	affiliateprogramsettingDescUpdatedAt := affiliateprogramsettingFields[7].Descriptor()
+	// affiliateprogramsetting.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	affiliateprogramsetting.DefaultUpdatedAt = affiliateprogramsettingDescUpdatedAt.Default.(func() time.Time)
+	// affiliateprogramsetting.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	affiliateprogramsetting.UpdateDefaultUpdatedAt = affiliateprogramsettingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// affiliateprogramsettingDescID is the schema descriptor for id field.
+	affiliateprogramsettingDescID := affiliateprogramsettingFields[0].Descriptor()
+	// affiliateprogramsetting.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	affiliateprogramsetting.IDValidator = func() func(string) error {
+		validators := affiliateprogramsettingDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	battlesettlementMixin := schema.BattleSettlement{}.Mixin()
 	battlesettlementMixinFields0 := battlesettlementMixin[0].Fields()
 	_ = battlesettlementMixinFields0
@@ -109,6 +478,164 @@ func init() {
 	battlesettlementDescID := battlesettlementMixinFields0[0].Descriptor()
 	// battlesettlement.DefaultID holds the default value on creation for the id field.
 	battlesettlement.DefaultID = battlesettlementDescID.Default.(func() uuid.UUID)
+	creatoraffiliationMixin := schema.CreatorAffiliation{}.Mixin()
+	creatoraffiliationMixinFields0 := creatoraffiliationMixin[0].Fields()
+	_ = creatoraffiliationMixinFields0
+	creatoraffiliationFields := schema.CreatorAffiliation{}.Fields()
+	_ = creatoraffiliationFields
+	// creatoraffiliationDescCreatedAt is the schema descriptor for created_at field.
+	creatoraffiliationDescCreatedAt := creatoraffiliationMixinFields0[1].Descriptor()
+	// creatoraffiliation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creatoraffiliation.DefaultCreatedAt = creatoraffiliationDescCreatedAt.Default.(func() time.Time)
+	// creatoraffiliationDescCreatorID is the schema descriptor for creator_id field.
+	creatoraffiliationDescCreatorID := creatoraffiliationFields[0].Descriptor()
+	// creatoraffiliation.CreatorIDValidator is a validator for the "creator_id" field. It is called by the builders before save.
+	creatoraffiliation.CreatorIDValidator = func() func(string) error {
+		validators := creatoraffiliationDescCreatorID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(creator_id string) error {
+			for _, fn := range fns {
+				if err := fn(creator_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatoraffiliationDescStoreID is the schema descriptor for store_id field.
+	creatoraffiliationDescStoreID := creatoraffiliationFields[1].Descriptor()
+	// creatoraffiliation.StoreIDValidator is a validator for the "store_id" field. It is called by the builders before save.
+	creatoraffiliation.StoreIDValidator = func() func(string) error {
+		validators := creatoraffiliationDescStoreID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(store_id string) error {
+			for _, fn := range fns {
+				if err := fn(store_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatoraffiliationDescProductID is the schema descriptor for product_id field.
+	creatoraffiliationDescProductID := creatoraffiliationFields[2].Descriptor()
+	// creatoraffiliation.DefaultProductID holds the default value on creation for the product_id field.
+	creatoraffiliation.DefaultProductID = creatoraffiliationDescProductID.Default.(string)
+	// creatoraffiliation.ProductIDValidator is a validator for the "product_id" field. It is called by the builders before save.
+	creatoraffiliation.ProductIDValidator = creatoraffiliationDescProductID.Validators[0].(func(string) error)
+	// creatoraffiliationDescMessage is the schema descriptor for message field.
+	creatoraffiliationDescMessage := creatoraffiliationFields[4].Descriptor()
+	// creatoraffiliation.DefaultMessage holds the default value on creation for the message field.
+	creatoraffiliation.DefaultMessage = creatoraffiliationDescMessage.Default.(string)
+	// creatoraffiliation.MessageValidator is a validator for the "message" field. It is called by the builders before save.
+	creatoraffiliation.MessageValidator = creatoraffiliationDescMessage.Validators[0].(func(string) error)
+	// creatoraffiliationDescDecisionReason is the schema descriptor for decision_reason field.
+	creatoraffiliationDescDecisionReason := creatoraffiliationFields[5].Descriptor()
+	// creatoraffiliation.DefaultDecisionReason holds the default value on creation for the decision_reason field.
+	creatoraffiliation.DefaultDecisionReason = creatoraffiliationDescDecisionReason.Default.(string)
+	// creatoraffiliation.DecisionReasonValidator is a validator for the "decision_reason" field. It is called by the builders before save.
+	creatoraffiliation.DecisionReasonValidator = creatoraffiliationDescDecisionReason.Validators[0].(func(string) error)
+	// creatoraffiliationDescUpdatedAt is the schema descriptor for updated_at field.
+	creatoraffiliationDescUpdatedAt := creatoraffiliationFields[7].Descriptor()
+	// creatoraffiliation.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	creatoraffiliation.DefaultUpdatedAt = creatoraffiliationDescUpdatedAt.Default.(func() time.Time)
+	// creatoraffiliation.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	creatoraffiliation.UpdateDefaultUpdatedAt = creatoraffiliationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// creatoraffiliationDescID is the schema descriptor for id field.
+	creatoraffiliationDescID := creatoraffiliationMixinFields0[0].Descriptor()
+	// creatoraffiliation.DefaultID holds the default value on creation for the id field.
+	creatoraffiliation.DefaultID = creatoraffiliationDescID.Default.(func() uuid.UUID)
+	creatorearningMixin := schema.CreatorEarning{}.Mixin()
+	creatorearningMixinFields0 := creatorearningMixin[0].Fields()
+	_ = creatorearningMixinFields0
+	creatorearningFields := schema.CreatorEarning{}.Fields()
+	_ = creatorearningFields
+	// creatorearningDescCreatedAt is the schema descriptor for created_at field.
+	creatorearningDescCreatedAt := creatorearningMixinFields0[1].Descriptor()
+	// creatorearning.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creatorearning.DefaultCreatedAt = creatorearningDescCreatedAt.Default.(func() time.Time)
+	// creatorearningDescCreatorID is the schema descriptor for creator_id field.
+	creatorearningDescCreatorID := creatorearningFields[0].Descriptor()
+	// creatorearning.CreatorIDValidator is a validator for the "creator_id" field. It is called by the builders before save.
+	creatorearning.CreatorIDValidator = func() func(string) error {
+		validators := creatorearningDescCreatorID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(creator_id string) error {
+			for _, fn := range fns {
+				if err := fn(creator_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorearningDescReference is the schema descriptor for reference field.
+	creatorearningDescReference := creatorearningFields[2].Descriptor()
+	// creatorearning.ReferenceValidator is a validator for the "reference" field. It is called by the builders before save.
+	creatorearning.ReferenceValidator = func() func(string) error {
+		validators := creatorearningDescReference.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(reference string) error {
+			for _, fn := range fns {
+				if err := fn(reference); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorearningDescSourceType is the schema descriptor for source_type field.
+	creatorearningDescSourceType := creatorearningFields[3].Descriptor()
+	// creatorearning.DefaultSourceType holds the default value on creation for the source_type field.
+	creatorearning.DefaultSourceType = creatorearningDescSourceType.Default.(string)
+	// creatorearning.SourceTypeValidator is a validator for the "source_type" field. It is called by the builders before save.
+	creatorearning.SourceTypeValidator = creatorearningDescSourceType.Validators[0].(func(string) error)
+	// creatorearningDescSourceID is the schema descriptor for source_id field.
+	creatorearningDescSourceID := creatorearningFields[4].Descriptor()
+	// creatorearning.DefaultSourceID holds the default value on creation for the source_id field.
+	creatorearning.DefaultSourceID = creatorearningDescSourceID.Default.(string)
+	// creatorearning.SourceIDValidator is a validator for the "source_id" field. It is called by the builders before save.
+	creatorearning.SourceIDValidator = creatorearningDescSourceID.Validators[0].(func(string) error)
+	// creatorearningDescDescription is the schema descriptor for description field.
+	creatorearningDescDescription := creatorearningFields[5].Descriptor()
+	// creatorearning.DefaultDescription holds the default value on creation for the description field.
+	creatorearning.DefaultDescription = creatorearningDescDescription.Default.(string)
+	// creatorearning.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	creatorearning.DescriptionValidator = creatorearningDescDescription.Validators[0].(func(string) error)
+	// creatorearningDescUnit is the schema descriptor for unit field.
+	creatorearningDescUnit := creatorearningFields[8].Descriptor()
+	// creatorearning.UnitValidator is a validator for the "unit" field. It is called by the builders before save.
+	creatorearning.UnitValidator = func() func(string) error {
+		validators := creatorearningDescUnit.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(unit string) error {
+			for _, fn := range fns {
+				if err := fn(unit); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorearningDescID is the schema descriptor for id field.
+	creatorearningDescID := creatorearningMixinFields0[0].Descriptor()
+	// creatorearning.DefaultID holds the default value on creation for the id field.
+	creatorearning.DefaultID = creatorearningDescID.Default.(func() uuid.UUID)
 	creatorprogrammemberMixin := schema.CreatorProgramMember{}.Mixin()
 	creatorprogrammemberMixinFields0 := creatorprogrammemberMixin[0].Fields()
 	_ = creatorprogrammemberMixinFields0
@@ -154,14 +681,20 @@ func init() {
 			return nil
 		}
 	}()
+	// creatorprogrammemberDescSuspensionReason is the schema descriptor for suspension_reason field.
+	creatorprogrammemberDescSuspensionReason := creatorprogrammemberFields[3].Descriptor()
+	// creatorprogrammember.DefaultSuspensionReason holds the default value on creation for the suspension_reason field.
+	creatorprogrammember.DefaultSuspensionReason = creatorprogrammemberDescSuspensionReason.Default.(string)
+	// creatorprogrammember.SuspensionReasonValidator is a validator for the "suspension_reason" field. It is called by the builders before save.
+	creatorprogrammember.SuspensionReasonValidator = creatorprogrammemberDescSuspensionReason.Validators[0].(func(string) error)
 	// creatorprogrammemberDescUpdatedByStaffID is the schema descriptor for updated_by_staff_id field.
-	creatorprogrammemberDescUpdatedByStaffID := creatorprogrammemberFields[3].Descriptor()
+	creatorprogrammemberDescUpdatedByStaffID := creatorprogrammemberFields[5].Descriptor()
 	// creatorprogrammember.DefaultUpdatedByStaffID holds the default value on creation for the updated_by_staff_id field.
 	creatorprogrammember.DefaultUpdatedByStaffID = creatorprogrammemberDescUpdatedByStaffID.Default.(string)
 	// creatorprogrammember.UpdatedByStaffIDValidator is a validator for the "updated_by_staff_id" field. It is called by the builders before save.
 	creatorprogrammember.UpdatedByStaffIDValidator = creatorprogrammemberDescUpdatedByStaffID.Validators[0].(func(string) error)
 	// creatorprogrammemberDescUpdatedAt is the schema descriptor for updated_at field.
-	creatorprogrammemberDescUpdatedAt := creatorprogrammemberFields[4].Descriptor()
+	creatorprogrammemberDescUpdatedAt := creatorprogrammemberFields[6].Descriptor()
 	// creatorprogrammember.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	creatorprogrammember.DefaultUpdatedAt = creatorprogrammemberDescUpdatedAt.Default.(func() time.Time)
 	// creatorprogrammember.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -224,6 +757,67 @@ func init() {
 			return nil
 		}
 	}()
+	creatorviolationMixin := schema.CreatorViolation{}.Mixin()
+	creatorviolationMixinFields0 := creatorviolationMixin[0].Fields()
+	_ = creatorviolationMixinFields0
+	creatorviolationFields := schema.CreatorViolation{}.Fields()
+	_ = creatorviolationFields
+	// creatorviolationDescCreatedAt is the schema descriptor for created_at field.
+	creatorviolationDescCreatedAt := creatorviolationMixinFields0[1].Descriptor()
+	// creatorviolation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creatorviolation.DefaultCreatedAt = creatorviolationDescCreatedAt.Default.(func() time.Time)
+	// creatorviolationDescUserID is the schema descriptor for user_id field.
+	creatorviolationDescUserID := creatorviolationFields[0].Descriptor()
+	// creatorviolation.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	creatorviolation.UserIDValidator = func() func(string) error {
+		validators := creatorviolationDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorviolationDescReason is the schema descriptor for reason field.
+	creatorviolationDescReason := creatorviolationFields[1].Descriptor()
+	// creatorviolation.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	creatorviolation.ReasonValidator = func() func(string) error {
+		validators := creatorviolationDescReason.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(reason string) error {
+			for _, fn := range fns {
+				if err := fn(reason); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorviolationDescSource is the schema descriptor for source field.
+	creatorviolationDescSource := creatorviolationFields[2].Descriptor()
+	// creatorviolation.DefaultSource holds the default value on creation for the source field.
+	creatorviolation.DefaultSource = creatorviolationDescSource.Default.(string)
+	// creatorviolation.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	creatorviolation.SourceValidator = creatorviolationDescSource.Validators[0].(func(string) error)
+	// creatorviolationDescRecordedByStaffID is the schema descriptor for recorded_by_staff_id field.
+	creatorviolationDescRecordedByStaffID := creatorviolationFields[3].Descriptor()
+	// creatorviolation.DefaultRecordedByStaffID holds the default value on creation for the recorded_by_staff_id field.
+	creatorviolation.DefaultRecordedByStaffID = creatorviolationDescRecordedByStaffID.Default.(string)
+	// creatorviolation.RecordedByStaffIDValidator is a validator for the "recorded_by_staff_id" field. It is called by the builders before save.
+	creatorviolation.RecordedByStaffIDValidator = creatorviolationDescRecordedByStaffID.Validators[0].(func(string) error)
+	// creatorviolationDescID is the schema descriptor for id field.
+	creatorviolationDescID := creatorviolationMixinFields0[0].Descriptor()
+	// creatorviolation.DefaultID holds the default value on creation for the id field.
+	creatorviolation.DefaultID = creatorviolationDescID.Default.(func() uuid.UUID)
 	gifttransactionMixin := schema.GiftTransaction{}.Mixin()
 	gifttransactionMixinFields0 := gifttransactionMixin[0].Fields()
 	_ = gifttransactionMixinFields0
@@ -420,4 +1014,111 @@ func init() {
 	outboxeventDescID := outboxeventMixinFields0[0].Descriptor()
 	// outboxevent.DefaultID holds the default value on creation for the id field.
 	outboxevent.DefaultID = outboxeventDescID.Default.(func() uuid.UUID)
+	tiptransactionMixin := schema.TipTransaction{}.Mixin()
+	tiptransactionMixinFields0 := tiptransactionMixin[0].Fields()
+	_ = tiptransactionMixinFields0
+	tiptransactionFields := schema.TipTransaction{}.Fields()
+	_ = tiptransactionFields
+	// tiptransactionDescCreatedAt is the schema descriptor for created_at field.
+	tiptransactionDescCreatedAt := tiptransactionMixinFields0[1].Descriptor()
+	// tiptransaction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	tiptransaction.DefaultCreatedAt = tiptransactionDescCreatedAt.Default.(func() time.Time)
+	// tiptransactionDescSenderUserID is the schema descriptor for sender_user_id field.
+	tiptransactionDescSenderUserID := tiptransactionFields[0].Descriptor()
+	// tiptransaction.SenderUserIDValidator is a validator for the "sender_user_id" field. It is called by the builders before save.
+	tiptransaction.SenderUserIDValidator = func() func(string) error {
+		validators := tiptransactionDescSenderUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(sender_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(sender_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tiptransactionDescCreatorUserID is the schema descriptor for creator_user_id field.
+	tiptransactionDescCreatorUserID := tiptransactionFields[1].Descriptor()
+	// tiptransaction.CreatorUserIDValidator is a validator for the "creator_user_id" field. It is called by the builders before save.
+	tiptransaction.CreatorUserIDValidator = func() func(string) error {
+		validators := tiptransactionDescCreatorUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(creator_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(creator_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tiptransactionDescTargetID is the schema descriptor for target_id field.
+	tiptransactionDescTargetID := tiptransactionFields[3].Descriptor()
+	// tiptransaction.TargetIDValidator is a validator for the "target_id" field. It is called by the builders before save.
+	tiptransaction.TargetIDValidator = func() func(string) error {
+		validators := tiptransactionDescTargetID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(target_id string) error {
+			for _, fn := range fns {
+				if err := fn(target_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tiptransactionDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	tiptransactionDescIdempotencyKey := tiptransactionFields[8].Descriptor()
+	// tiptransaction.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	tiptransaction.IdempotencyKeyValidator = func() func(string) error {
+		validators := tiptransactionDescIdempotencyKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(idempotency_key string) error {
+			for _, fn := range fns {
+				if err := fn(idempotency_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tiptransactionDescRequestHash is the schema descriptor for request_hash field.
+	tiptransactionDescRequestHash := tiptransactionFields[9].Descriptor()
+	// tiptransaction.RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
+	tiptransaction.RequestHashValidator = func() func(string) error {
+		validators := tiptransactionDescRequestHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(request_hash string) error {
+			for _, fn := range fns {
+				if err := fn(request_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tiptransactionDescLedgerEntryID is the schema descriptor for ledger_entry_id field.
+	tiptransactionDescLedgerEntryID := tiptransactionFields[10].Descriptor()
+	// tiptransaction.LedgerEntryIDValidator is a validator for the "ledger_entry_id" field. It is called by the builders before save.
+	tiptransaction.LedgerEntryIDValidator = tiptransactionDescLedgerEntryID.Validators[0].(func(string) error)
+	// tiptransactionDescID is the schema descriptor for id field.
+	tiptransactionDescID := tiptransactionMixinFields0[0].Descriptor()
+	// tiptransaction.DefaultID holds the default value on creation for the id field.
+	tiptransaction.DefaultID = tiptransactionDescID.Default.(func() uuid.UUID)
 }
