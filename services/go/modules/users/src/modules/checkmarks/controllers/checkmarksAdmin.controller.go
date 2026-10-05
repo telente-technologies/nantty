@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	openverificationdocument "zudomart/modules/users/src/modules/checkmarks/queries/openVerificationDocument"
 
 	createaccountbyadmin "zudomart/modules/users/src/modules/checkmarks/commands/createAccountByAdmin"
 	grantlifetimecheckmark "zudomart/modules/users/src/modules/checkmarks/commands/grantLifetimeCheckmark"
@@ -25,6 +26,12 @@ func (controller CheckmarksController) ListVerifications(writer http.ResponseWri
 
 func (controller CheckmarksController) GetVerification(writer http.ResponseWriter, request *http.Request) {
 	result, err := getverification.Handler{Container: controller.Container}.Execute(request.Context(), request.PathValue("verificationId"))
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller CheckmarksController) OpenVerificationDocument(writer http.ResponseWriter, request *http.Request) {
+	result, err := openverificationdocument.Handler{Container: controller.Container}.Execute(request.Context(), utils.StaffActorFromRequest(request), request.PathValue("verificationId"), request.PathValue("documentId"))
+	writer.Header().Set("Cache-Control", "no-store")
 	controller.respond(writer, request, http.StatusOK, result, err)
 }
 
