@@ -78,3 +78,12 @@ func (controller ContentReportsController) SuspendAuthor(writer http.ResponseWri
 	}
 	controller.decide(writer, request, "SUSPEND_AUTHOR", body.Reason, &body.DurationDays)
 }
+
+func (controller ContentReportsController) RevokeAuthorVerification(writer http.ResponseWriter, request *http.Request) {
+	var body dtos.ReasonRequest
+	if err := httpserver.DecodeJsonBodyRejectingUnknownFields(writer, request, &body); err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	controller.decide(writer, request, "REVOKE_AUTHOR_VERIFICATION", body.Reason, nil)
+}

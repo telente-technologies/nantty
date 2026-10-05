@@ -17,4 +17,5 @@ func MountContentReportsRoutes(mux *http.ServeMux, container *container.Containe
 	mux.Handle("GET /api/v1/admin/reports/{reportId}", staff(false)(http.HandlerFunc(controller.Detail)))
 	mux.Handle("POST /api/v1/admin/reports/{reportId}/actions", staff(false)(http.HandlerFunc(controller.Act)))
 	mux.Handle("POST /api/v1/admin/reports/{reportId}/suspend-author", staff(true)(http.HandlerFunc(controller.SuspendAuthor)))
+	mux.Handle("POST /api/v1/admin/reports/{reportId}/revoke-author-verification", staff(true)(http.HandlerFunc(controller.RevokeAuthorVerification)))
 }

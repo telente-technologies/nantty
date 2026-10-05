@@ -31,15 +31,17 @@ type actionRule struct {
 	addsStrike  bool
 	needsAuthor bool
 	needsStepUp bool
+	permission  string
 }
 
 var actionRules = map[string]actionRule{
-	"DISMISS":        {},
-	"HIDE":           {visibility: "hidden"},
-	"RESTRICT":       {visibility: "restricted"},
-	"REMOVE":         {visibility: "removed", addsStrike: true},
-	"WARN_AUTHOR":    {addsStrike: true, needsAuthor: true},
-	"SUSPEND_AUTHOR": {visibility: "hidden", addsStrike: true, needsAuthor: true, needsStepUp: true},
+	"DISMISS":                    {},
+	"HIDE":                       {visibility: "hidden"},
+	"RESTRICT":                   {visibility: "restricted"},
+	"REMOVE":                     {visibility: "removed", addsStrike: true},
+	"WARN_AUTHOR":                {addsStrike: true, needsAuthor: true},
+	"SUSPEND_AUTHOR":             {visibility: "hidden", addsStrike: true, needsAuthor: true, needsStepUp: true},
+	"REVOKE_AUTHOR_VERIFICATION": {needsAuthor: true, needsStepUp: true, permission: "verification:revoke"},
 }
 
 const maximumReporterNotices = 200
@@ -58,6 +60,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "action", Message: "is not a known action"}})
 	case len(reason) < 5 || len(reason) > 1000:
 		return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "reason", Message: "must be 5 to 1000 characters"}})
+	case rule.permission != "" && !command.Staff.Can(rule.permission):
+		return httpserver.ErrForbidden
 	case rule.needsStepUp && !command.Staff.SteppedUp:
 		return httpserver.NewApiError(http.StatusForbidden, "STEP_UP_REQUIRED", "Confirm your identity again to continue.")
 	case command.Action == "SUSPEND_AUTHOR" && (command.DurationDays == nil || !slices.Contains(suspensionDurations, *command.DurationDays)):
@@ -96,7 +100,26 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 			return err
 		}
 	}
+	if command.Action == "REVOKE_AUTHOR_VERIFICATION" {
+		if err := handler.revokeVerification(ctx, command, report, reason); err != nil {
+			return err
+		}
+	}
 	return handler.record(ctx, command, report, rule, reason)
+}
+
+func (handler Handler) revokeVerification(ctx context.Context, command Command, report *ent.ContentReport, reason string) error {
+	summaries, err := handler.Container.Users.Summaries(ctx, []uuid.UUID{*report.AuthorID})
+	if err != nil {
+		return err
+	}
+	if verification, _ := summaries[report.AuthorID.String()]["verification"].(map[string]any); verification == nil {
+		return conflict("NOT_VERIFIED", "The author has no verification to revoke.")
+	}
+	actor := integrations.StaffActor{Id: command.Staff.Id, Name: command.Staff.Name, Role: command.Staff.Role, IpAddress: command.IpAddress, RequestId: command.RequestId, StepUp: true}
+	return handler.Container.Users.Enforce(ctx, integrations.EnforcementRequest{
+		Action: "revoke_verification", UserId: report.AuthorID.String(), Actor: actor, Reason: "Content report: " + reason, Source: "content_report", CaseId: report.ID.String(),
+	})
 }
 
 func (handler Handler) record(ctx context.Context, command Command, report *ent.ContentReport, rule actionRule, reason string) error {

@@ -8,6 +8,7 @@ import (
 	accesssecurity "zudomart/modules/moderation/src/modules/accessSecurity"
 
 	"zudomart/modules/moderation/src/container"
+	automationrules "zudomart/modules/moderation/src/modules/automationRules"
 	submitcontentreport "zudomart/modules/moderation/src/modules/contentReports/commands/submitContentReport"
 	"zudomart/modules/moderation/src/modules/contentReports/jobs"
 	"zudomart/modules/moderation/src/modules/contentReports/routes"
@@ -56,7 +57,7 @@ func RunConsumersUntilContextDone(ctx context.Context, c *container.Container, q
 func ReportCreatedHandler(c *container.Container) platformevents.MessageHandler {
 	reportCreated, liveEnded, accessViolation := jobs.HandleReportCreatedMessage(c, SubmitHandler(c)), livesafety.LiveEndedHandler(c), accesssecurity.AccessViolationEnvelopeHandler(c)
 	postDeleted, verificationFraud := copyrightjobs.HandlePostDeletedMessage(c), suspensionjobs.VerificationFraudEnvelopeHandler(c)
-	duplicateBankAccount := suspensionjobs.DuplicateBankAccountEnvelopeHandler(c)
+	duplicateBankAccount, automation := suspensionjobs.DuplicateBankAccountEnvelopeHandler(c), automationrules.TriggerHandler(c)
 	return func(ctx context.Context, body []byte) error {
 		if err := reportCreated(ctx, body); err != nil {
 			return err
@@ -73,7 +74,10 @@ func ReportCreatedHandler(c *container.Container) platformevents.MessageHandler 
 		if err := duplicateBankAccount(ctx, body); err != nil {
 			return err
 		}
-		return liveEnded(ctx, body)
+		if err := liveEnded(ctx, body); err != nil {
+			return err
+		}
+		return automation(ctx, body)
 	}
 }
 
