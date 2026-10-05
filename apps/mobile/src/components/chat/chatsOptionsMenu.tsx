@@ -23,7 +23,7 @@ export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, o
   ];
   return (
     <FrameAwareModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Close menu" style={styles.backdrop} onPress={onClose}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Close menu" style={styles.backdrop} onPress={onClose}>
         <View style={[styles.menu, { top: topOffset }]} accessibilityRole="menu">
           {menuItems.map((item) => (
             <Pressable

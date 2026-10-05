@@ -79,6 +79,7 @@ export function ChatBubble({
         {hasBubble ? (
         <Pressable
           disabled={!onLongPress && !isPhoto}
+          accessibilityRole={isPhoto ? "imagebutton" : undefined}
           onPress={isPhoto ? () => openImagePreview([message.media!.url]) : undefined}
           onLongPress={onLongPress}
           delayLongPress={350}

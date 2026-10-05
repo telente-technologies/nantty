@@ -69,10 +69,10 @@ export function LocationBubble({ message, isMine }: { readonly message: Message;
         {addressLine}
       </Text>
       <View style={styles.actions}>
-        <Pressable accessibilityRole="button" hitSlop={6} onPress={openInMaps}>
+        <Pressable accessibilityRole="button" hitSlop={14} onPress={openInMaps}>
           <Text size={13} weight={600} lineHeight={16.9} color={colors.primary}>Open in maps</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" hitSlop={6} onPress={() => void copyAddress()}>
+        <Pressable accessibilityRole="button" hitSlop={14} onPress={() => void copyAddress()}>
           <Text size={13} weight={600} lineHeight={16.9} color={colors.primary}>{hasCopiedAddress ? "Copied" : "Copy address"}</Text>
         </Pressable>
       </View>

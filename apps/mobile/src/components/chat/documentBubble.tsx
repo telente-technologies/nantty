@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Cancel20Icon } from "@/components/icons";
+import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
 import { cancelDocumentUpload } from "@/services/documentUpload.service";
 import { openChatDocument, saveChatDocumentToDevice } from "@/services/documentOpening.service";
@@ -34,19 +36,16 @@ export function DocumentBubble({ message, deliveryStatus, isExpired, onRetry, on
 
   const reportProblem = (title: string) => (error: unknown) => showAlertWithButtons(title, error instanceof Error ? error.message : "Please try again.");
 
-  const offerOpenOrSave = () => {
-    showAlertWithButtons(document.fileName, "Open this file or save it to your device.", [
-      { text: "Open", onPress: () => void openChatDocument(document).catch(reportProblem("Couldn't open file")) },
-      {
-        text: "Save",
-        onPress: () =>
-          void saveChatDocumentToDevice(document)
-            .then((outcome) => outcome === "saved" && showAlertWithButtons("Saved", "The file was saved to the folder you chose."))
-            .catch(reportProblem("Couldn't save file")),
-      },
-      { text: "Cancel", style: "cancel" },
-    ]);
+  const [isOpenOrSaveSheetVisible, setIsOpenOrSaveSheetVisible] = useState(false);
+  const closeSheetThen = (action: () => void) => () => {
+    setIsOpenOrSaveSheetVisible(false);
+    action();
   };
+  const openDocument = () => void openChatDocument(document).catch(reportProblem("Couldn't open file"));
+  const saveDocument = () =>
+    void saveChatDocumentToDevice(document)
+      .then((outcome) => outcome === "saved" && showAlertWithButtons("Saved", "The file was saved to the folder you chose."))
+      .catch(reportProblem("Couldn't save file"));
 
   return (
     <View style={styles.root}>
@@ -55,7 +54,7 @@ export function DocumentBubble({ message, deliveryStatus, isExpired, onRetry, on
         accessibilityLabel={isExpired ? `${document.fileName}, file expired` : `${document.fileName}, ${buildDocumentSummaryLine(document.sizeBytes, document.pageCount)}`}
         accessibilityHint={isExpired || isUploading || hasFailed ? undefined : "Opens or saves the file"}
         disabled={isExpired || isUploading || hasFailed}
-        onPress={offerOpenOrSave}
+        onPress={() => setIsOpenOrSaveSheetVisible(true)}
         style={styles.fileRow}
       >
         <View style={[styles.badge, { backgroundColor: pickBadgeColor(kind.tone, colors), opacity: isExpired ? 0.4 : 1 }]}>
@@ -86,14 +85,26 @@ export function DocumentBubble({ message, deliveryStatus, isExpired, onRetry, on
           <Text size={12} lineHeight={15.6} letterSpacing={0} color={colors.error} style={styles.failedLabel}>
             {upload?.wasCancelled ? "Upload cancelled" : "Upload failed"}
           </Text>
-          <Pressable accessibilityRole="button" hitSlop={6} onPress={onRetry}>
+          <Pressable accessibilityRole="button" hitSlop={14} onPress={onRetry}>
             <Text size={13} weight={600} lineHeight={16.9} color={colors.primary}>Retry</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" hitSlop={6} onPress={onDiscard}>
+          <Pressable accessibilityRole="button" hitSlop={14} onPress={onDiscard}>
             <Text size={13} weight={600} lineHeight={16.9} color={colors.textMuted}>Discard</Text>
           </Pressable>
         </View>
       ) : null}
+      <BottomSheet
+        visible={isOpenOrSaveSheetVisible}
+        onClose={() => setIsOpenOrSaveSheetVisible(false)}
+        title={document.fileName}
+        subtitle={buildDocumentSummaryLine(document.sizeBytes, document.pageCount)}
+        footerActions={[
+          { label: "Open", style: "primary", onPress: closeSheetThen(openDocument) },
+          { label: "Save to device", style: "secondary", onPress: closeSheetThen(saveDocument) },
+        ]}
+      >
+        <Text size={14} lineHeight={19.6} color={colors.textMuted}>Open this file or save it to your device.</Text>
+      </BottomSheet>
     </View>
   );
 }

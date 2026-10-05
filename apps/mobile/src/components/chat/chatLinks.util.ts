@@ -43,9 +43,14 @@ export const findFirstInternalReference = (text: string): SharedContentReference
 
 export const readFullDomain = (rawUrl: string) => parseUrl(rawUrl)?.hostname.replace(/^www\./, "") ?? rawUrl;
 
+export const isWebUrl = (rawUrl: string): boolean => {
+  const protocol = parseUrl(rawUrl)?.protocol;
+  return protocol === "http:" || protocol === "https:";
+};
+
 export const assessLinkRisk = (rawUrl: string): LinkRisk => {
   const hostname = parseUrl(rawUrl)?.hostname.toLowerCase();
-  if (!hostname) return "suspicious";
+  if (!hostname || !isWebUrl(rawUrl)) return "suspicious";
   if (KNOWN_SHORTENER_DOMAINS.includes(hostname)) return "shortened";
   const looksSuspicious =
     /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname) ||

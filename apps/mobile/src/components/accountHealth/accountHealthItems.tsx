@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { BulletLine } from "@/components/ui/bulletLine";
 import { Text } from "@/components/ui/text";
 import { describeAccountStanding, describeRestriction, formatTimeRemaining } from "@/services/accountHealth.service";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -30,7 +31,7 @@ export function AccountStandingCard({ health }: { readonly health: AccountHealth
       {health.restrictions.length > 0 ? (
         <View style={styles.list}>
           <Text size={13} weight={600} lineHeight={18.2}>Paused on your account</Text>
-          {health.restrictions.map((restriction) => <Text key={restriction} size={13} lineHeight={18.2}>• {describeRestriction(restriction)}</Text>)}
+          {health.restrictions.map((restriction) => <BulletLine key={restriction} size={13} lineHeight={18.2} color={colors.text}>{describeRestriction(restriction)}</BulletLine>)}
         </View>
       ) : null}
     </View>

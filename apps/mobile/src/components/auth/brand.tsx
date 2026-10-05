@@ -1,11 +1,11 @@
-import { Text } from "@/components/ui/text";
-import { useTheme } from "@/theme";
+import { View } from "react-native";
 
-export function BrandWordmark() {
-  const { colors } = useTheme();
+import { ZudomartWordmark } from "@/components/brand/zudomartWordmark";
+
+export function BrandWordmark({ height = 30 }: { readonly height?: number }) {
   return (
-    <Text size={21} weight={700} lineHeight={25.2} letterSpacing={-0.42} color={colors.primaryDark} accessibilityRole="header">
-      zudomart
-    </Text>
+    <View accessibilityRole="header" accessibilityLabel="Zudomart">
+      <ZudomartWordmark height={height} />
+    </View>
   );
 }
