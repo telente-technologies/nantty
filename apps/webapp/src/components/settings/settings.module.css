@@ -155,7 +155,7 @@
 }
 
 .radioRow input {
-  margin-top: 4px;
+  margin-top: var(--space-1);
   accent-color: var(--color-brand);
 }
 

@@ -2,6 +2,9 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { RetryButton } from "@/components/ui/controls";
+import { ErrorState } from "@/components/ui/feedback";
+import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { notificationsService } from "@/services/notifications.service";
@@ -22,10 +25,19 @@ export function NotificationPreferencesSection() {
     onError: (error) => showToast({ text: readErrorMessageForDisplay(error), tone: "error" }),
   });
   const row = query.data?.find((item) => item.category === "milestones");
-  if (!row) return null;
+  const heading = <h2 id="milestones-notifications-heading" className={styles.blockHeading}>Milestones</h2>;
+  if (query.isLoading || query.isError || !row) {
+    if (query.isSuccess) return null;
+    return (
+      <section aria-labelledby="milestones-notifications-heading" className={styles.block}>
+        {heading}
+        {query.isLoading ? <ListRowsSkeleton label="Loading notification settings" rows={2} withAvatar={false} /> : <ErrorState description="We couldn't load your notification settings." action={<RetryButton onRetry={() => void query.refetch()} />} />}
+      </section>
+    );
+  }
   return (
     <section aria-labelledby="milestones-notifications-heading" className={styles.block}>
-      <h2 id="milestones-notifications-heading" className={styles.blockHeading}>Milestones</h2>
+      {heading}
       <ConsentToggleRow
         label="Push notifications"
         description="Birthdays and Zudoversaries, like your account anniversary."

@@ -4,11 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { RetryButton } from "@/components/ui/controls";
-import { ErrorState, Spinner } from "@/components/ui/feedback";
+import { ErrorState } from "@/components/ui/feedback";
 import { privacyService } from "@/services/privacy.service";
 import type { DataExportStatus } from "@/types/privacy.type";
 
 import styles from "./settings.module.css";
+import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 
 const statusCopy: Record<DataExportStatus, string> = {
   none: "Get a copy of the personal information we hold about you.",
@@ -28,7 +29,7 @@ export function DataExportSection() {
   });
   const requestExport = useMutation({ mutationFn: privacyService.requestMyDataExport, onSuccess: (request) => queryClient.setQueryData(dataExportQueryKey, request) });
 
-  if (exportQuery.isLoading) return <Spinner label="Loading your data export" />;
+  if (exportQuery.isLoading) return <ListRowsSkeleton label="Loading your data export" rows={2} withAvatar={false} />;
   if (exportQuery.isError || !exportQuery.data) return <ErrorState description="We couldn't load your data export." action={<RetryButton onRetry={() => exportQuery.refetch()} />} />;
 
   const { status, downloadUrl, expiresAt } = exportQuery.data;
