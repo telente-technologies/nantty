@@ -7,10 +7,11 @@
   "display": "standalone",
   "orientation": "any",
   "background_color": "#F7F8FE",
-  "theme_color": "#2043F5",
+  "theme_color": "#3A2BFF",
   "icons": [
-    { "src": "/images/appIcon192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/images/appIcon512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/icons/appIcon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "/brand/icon192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/brand/icon512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/brand/icon512Maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/brand/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }
