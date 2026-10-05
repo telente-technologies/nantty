@@ -1,9 +1,12 @@
+import { readGatewayIdentitySecretsFromEnvironment } from "../middlewares/gatewayIdentity.middleware.js";
+
 export interface InternalSource {
   readonly baseUrl: string;
   readonly internalToken: string;
 }
 
 export interface SearchConfig {
+  readonly gatewayIdentitySecrets?: readonly string[];
   readonly host: string;
   readonly port: number;
   readonly databaseUrl: string;
@@ -36,6 +39,7 @@ export function loadSearchConfigFromEnvironment(): SearchConfig {
   if (internalToken === "") problems.push("SEARCH_INTERNAL_TOKEN is required");
   const intelligenceUrl = readOrDefault("INTELLIGENCE_URL", "");
   const config: SearchConfig = {
+    gatewayIdentitySecrets: readGatewayIdentitySecretsFromEnvironment(problems),
     host: readOrDefault("HOST", "0.0.0.0"),
     port: Number(readOrDefault("PORT", "8109")),
     databaseUrl,

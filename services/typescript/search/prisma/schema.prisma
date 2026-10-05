@@ -16,6 +16,7 @@ model SearchDocument {
   entityId        String   @map("entity_id")
   docKey          String   @map("doc_key")
   ownerAccountId  String?  @map("owner_account_id")
+  storeId         String?  @map("store_id")
   title           String
   titleNormalized String   @map("title_normalized")
   subtitle        String?
@@ -39,6 +40,7 @@ model SearchDocument {
   @@index([tsv], type: Gin)
   @@index([titleNormalized(ops: raw("gin_trgm_ops"))], type: Gin)
   @@index([ownerAccountId])
+  @@index([storeId])
   @@index([tags], type: Gin)
   @@map("documents")
 }
@@ -91,11 +93,12 @@ model ProcessedEvent {
 model RecentSearch {
   id              String   @id @default(uuid()) @db.Uuid
   accountId       String   @map("account_id")
+  scope           String   @default("global")
   queryNormalized String   @map("query_normalized")
   queryDisplay    String   @map("query_display")
   searchedAt      DateTime @default(now()) @map("searched_at")
 
-  @@unique([accountId, queryNormalized])
-  @@index([accountId, searchedAt(sort: Desc)])
+  @@unique([accountId, scope, queryNormalized])
+  @@index([accountId, scope, searchedAt(sort: Desc)])
   @@map("recent_searches")
 }

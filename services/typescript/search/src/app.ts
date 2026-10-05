@@ -10,6 +10,7 @@ import {
 import { createLogger, type Logger } from "@zudojs/logger";
 
 import type { SearchConfig } from "./configs/search.config.js";
+import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
 import { createSearchPrisma } from "./databases/prisma.database.js";
 import { createHttpSourceHydrator } from "./integrations/httpSourceHydrator.integration.js";
 import { createPythonSearchReranker } from "./integrations/pythonSearchReranker.integration.js";
@@ -53,7 +54,7 @@ export function createSearchApp(config: SearchConfig, consumerFactory: MessageCo
       return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
     }
   };
-  const pipeline = new HttpMiddlewarePipeline({ middlewares: [dispatch] });
+  const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
   const server = createHttpServer({
     adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: 256 * 1024, trustProxy: true }),
     handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
