@@ -106,6 +106,9 @@ func (OrderItem) Fields() []ent.Field {
 		field.UUID("category_id", uuid.UUID{}).Optional().Nillable().Immutable(),
 		field.String("category_name").Default("").MaxLen(60).Immutable(),
 		field.Bool("tracks_stock").Default(true).Immutable(),
+		field.Bool("taxable").Default(true).Immutable(),
+		field.String("attribution_source").Optional().Nillable().MaxLen(10).Immutable(),
+		field.UUID("attribution_id", uuid.UUID{}).Optional().Nillable().Immutable(),
 	}
 }
 

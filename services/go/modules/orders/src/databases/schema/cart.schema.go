@@ -43,6 +43,8 @@ func (CartItem) Fields() []ent.Field {
 		field.UUID("variant_id", uuid.UUID{}).Immutable(),
 		field.UUID("store_id", uuid.UUID{}).Immutable(),
 		field.Int("quantity").Positive(),
+		field.String("attribution_source").Optional().Nillable().MaxLen(10),
+		field.UUID("attribution_id", uuid.UUID{}).Optional().Nillable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

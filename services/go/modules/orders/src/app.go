@@ -21,6 +21,7 @@ import (
 	"zudomart/modules/orders/src/interfaces"
 	"zudomart/modules/orders/src/jobs"
 	"zudomart/modules/orders/src/migrations"
+	adminorders "zudomart/modules/orders/src/modules/adminOrders"
 	"zudomart/modules/orders/src/modules/cart"
 	customersegments "zudomart/modules/orders/src/modules/customerSegments"
 	"zudomart/modules/orders/src/modules/customers"
@@ -48,12 +49,16 @@ import (
 	"zudomart/platform/postgres"
 	"zudomart/platform/sellerplans"
 	"zudomart/platform/servicemodule"
+	"zudomart/platform/staffaudit"
+	"zudomart/platform/staffauth"
 	"zudomart/platform/usersdirectory"
 )
 
 type Collaborators struct {
 	Money     interfaces.CheckoutMoney
 	Verifier  *jwtauth.AccessTokenVerifier
+	Staff     container.StaffVerifiers
+	Audit     staffaudit.Recorder
 	Publisher platformevents.DomainEventPublisher
 }
 
@@ -74,11 +79,22 @@ func NewOrdersModule(ctx context.Context, dependencies servicemodule.Dependencie
 	if err != nil {
 		return nil, err
 	}
+	staff := container.StaffVerifiers{}
+	if staff.Access, err = jwtauth.NewAccessTokenVerifierFromRemoteJwks(ctx, settings.AccessTokenJwksUrl, settings.TokenIssuer, staffauth.AccessAudience); err != nil {
+		return nil, err
+	}
+	if staff.StepUp, err = jwtauth.NewAccessTokenVerifierFromRemoteJwks(ctx, settings.AccessTokenJwksUrl, settings.TokenIssuer, staffauth.StepUpAudience); err != nil {
+		return nil, err
+	}
 	publisher, err := createDomainEventPublisher(ctx, settings, dependencies)
 	if err != nil {
 		return nil, err
 	}
-	return StartOrdersModuleWithSettings(ctx, settings, Collaborators{Verifier: verifier, Publisher: publisher}, dependencies)
+	var audit staffaudit.Recorder
+	if settings.AdminInternalUrl != "" {
+		audit = staffaudit.NewHttpRecorder(settings.AdminInternalUrl, settings.AdminInternalToken)
+	}
+	return StartOrdersModuleWithSettings(ctx, settings, Collaborators{Verifier: verifier, Staff: staff, Audit: audit, Publisher: publisher}, dependencies)
 }
 
 func StartOrdersModuleWithSettings(ctx context.Context, settings configs.OrdersSettings, collaborators Collaborators, dependencies servicemodule.Dependencies) (*Module, error) {
@@ -103,7 +119,7 @@ func StartOrdersModuleWithSettings(ctx context.Context, settings configs.OrdersS
 	module.Container = &container.Container{
 		Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Database: database,
 		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Settings: settings, Logger: logger, Now: time.Now,
-		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger),
+		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger), Staff: collaborators.Staff, Audit: collaborators.Audit,
 	}
 	if err := module.attachMoney(settings, collaborators, logger); err != nil {
 		_ = database.Close()
@@ -154,6 +170,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	marketingoverview.Mount(mux, module.Container)
 	sellerconversations.Mount(mux, module.Container)
 	returns.Mount(mux, module.Container)
+	adminorders.Mount(mux, module.Container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

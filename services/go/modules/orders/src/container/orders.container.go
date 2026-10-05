@@ -11,6 +11,7 @@ import (
 	"zudomart/platform/commerceports"
 	"zudomart/platform/idempotency"
 	"zudomart/platform/jwtauth"
+	"zudomart/platform/staffaudit"
 	"zudomart/platform/usersdirectory"
 )
 
@@ -24,6 +25,13 @@ type Container struct {
 	AccessVerifier   *jwtauth.AccessTokenVerifier
 	IdempotencyStore *idempotency.RedisStore
 	Money            interfaces.CheckoutMoney
+	Staff            StaffVerifiers
+	Audit            staffaudit.Recorder
+}
+
+type StaffVerifiers struct {
+	Access *jwtauth.AccessTokenVerifier
+	StepUp *jwtauth.AccessTokenVerifier
 }
 
 func (container *Container) Catalog() (commerceports.CatalogReader, error) {
