@@ -51,7 +51,8 @@ export function createRouteFactory(idempotency: IdempotencyGuard): RouteFactory 
       if (!params.ok) return params.response;
       const query = parseWith(definition.query, normaliseQuery(context.query));
       if (!query.ok) return query.response;
-      const body = parseWith(definition.body, parseJsonBody(context.request.body));
+      const rawBody = parseJsonBody(context.request.body);
+      const body = parseWith(definition.body, rawBody);
       if (!body.ok) return body.response;
       const key = context.request.getHeader("idempotency-key")?.trim();
       if (key !== undefined && key !== "" && !/^[A-Za-z0-9_-]{8,128}$/.test(key)) throw badRequest("INVALID_IDEMPOTENCY_KEY", "Idempotency-Key must be 8 to 128 characters of letters, digits, - or _.");
@@ -60,7 +61,7 @@ export function createRouteFactory(idempotency: IdempotencyGuard): RouteFactory 
         return { status: definition.successStatus ?? (result === undefined ? 204 : 200), body: result };
       });
       const outcome = principal !== undefined && key !== undefined && key !== "" && context.request.method !== "GET"
-        ? await idempotency.run(principal.accountId, key, context.request.path, execute)
+        ? await idempotency.run({ accountId: principal.accountId, key, method: context.request.method, requestPath: context.request.path, body: rawBody }, execute)
         : { ...(await execute()), replayed: false };
       const response = outcome.body === undefined || outcome.body === null ? empty(outcome.status) : json(outcome.status, outcome.body);
       if (outcome.replayed) response.setHeader("idempotent-replayed", "true");

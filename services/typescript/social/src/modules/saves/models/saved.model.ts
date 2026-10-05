@@ -1,4 +1,4 @@
-import type { PostView } from "../../posts/models/post.model.js";
+import type { PostView, TaggedProductView } from "../../posts/models/post.model.js";
 
 export type SavedItemTypeName = "post" | "video" | "clip" | "product";
 export type SavedItemFilter = "all" | SavedItemTypeName;
@@ -8,7 +8,7 @@ export interface SavedItemPreview {
   readonly thumbnailUrl: string | null;
   readonly href: string;
   readonly author: string | null;
-  readonly price: null;
+  readonly price: TaggedProductView["price"] | null;
   readonly durationSeconds: number | null;
 }
 
@@ -21,6 +21,7 @@ export interface SavedItemView {
   readonly preview: SavedItemPreview;
   readonly post?: PostView;
   readonly clip?: PostView;
+  readonly product?: TaggedProductView;
 }
 
 export interface SaveCollectionView {

@@ -33,9 +33,15 @@ export async function buildSavedItemViews(context: HandlerContext, viewerId: str
   const visibleAuthors = await filterAuthorsVisibleToViewer(context, viewerId, posts.map((post) => post.authorId));
   const visiblePosts = posts.filter((post) => visibleAuthors.has(post.authorId));
   const views = new Map((await buildPostViews(context, viewerId, visiblePosts)).map((view) => [view.id, view]));
+  const productIds = rows.filter((row) => row.type === "product").map((row) => row.targetId);
+  const products = productIds.length === 0 || context.products === undefined ? new Map() : await context.products.findProducts(productIds).catch(() => new Map());
   return rows.flatMap((row): SavedItemView[] => {
     const base = { id: row.id, type: row.type, targetId: row.targetId, savedAt: row.createdAt.toISOString(), collectionId: row.collectionId };
-    if (row.type === "product") return [{ ...base, preview: { title: null, thumbnailUrl: null, href: `/products/${row.targetId}`, author: null, price: null, durationSeconds: null } }];
+    if (row.type === "product") {
+      const product = products.get(row.targetId);
+      const preview = { title: product?.name ?? null, thumbnailUrl: product?.imageUrl ?? null, href: `/products/${row.targetId}`, author: null, price: product?.price ?? null, durationSeconds: null };
+      return [{ ...base, preview, ...(product === undefined ? {} : { product: { id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, stock: product.stock } }) }];
+    }
     const view = views.get(row.targetId);
     if (view === undefined) return [];
     return [{ ...base, preview: previewForPost(view), ...(row.type === "clip" ? { clip: view } : { post: view }) }];
