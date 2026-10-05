@@ -6,7 +6,10 @@ import (
 	"strings"
 	liveerrors "zudomart/modules/live/src/errors"
 	"zudomart/modules/live/src/events"
+	"zudomart/modules/live/src/interfaces"
 	"zudomart/modules/live/src/types"
+
+	"github.com/google/uuid"
 
 	"zudomart/modules/live/src/databases/schema"
 	"zudomart/modules/live/src/generated/ent"
@@ -57,9 +60,20 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 	if input.Category == "shopping" && !isSeller {
 		return types.LiveSessionView{}, liveerrors.ShoppingNeedsStore
 	}
-	if len(input.ProductIds) > 0 {
-		if err := service.PinPolicy.CanPinProducts(ctx, actor.UserId, actor.Roles, input.ProductIds); err != nil {
+	if len(input.ProductIds) > 0 && input.StoreId == nil {
+		return types.LiveSessionView{}, liveerrors.LiveHasNoStore
+	}
+	var products map[uuid.UUID]interfaces.StoreProduct
+	if input.StoreId != nil {
+		if err := service.requireStoreMember(ctx, *input.StoreId, actor.UserId); err != nil {
 			return types.LiveSessionView{}, err
+		}
+		if len(input.ProductIds) > 0 {
+			owned, err := service.requireStoreProducts(ctx, *input.StoreId, input.ProductIds, false)
+			if err != nil {
+				return types.LiveSessionView{}, err
+			}
+			products = owned
 		}
 	}
 	adSettings, termsVersion, err := service.buildLiveAdSettingsRecord(input.Monetization)
@@ -98,7 +112,7 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 			return err
 		}
 		for _, productId := range input.ProductIds {
-			if err := tx.LiveProduct.Create().SetLiveID(identifier).SetProductID(productId).Exec(ctx); err != nil {
+			if err := snapshotLiveProduct(tx.LiveProduct.Create().SetLiveID(identifier).SetProductID(productId), products[productId]).Exec(ctx); err != nil {
 				return err
 			}
 		}

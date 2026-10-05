@@ -29,7 +29,22 @@ func (service *LiveService) GetLiveGiftStreamStats(ctx context.Context, actor ty
 	if err != nil {
 		return types.StreamStatsView{}, err
 	}
+	newSubscribers, err := service.newSubscribersDuring(ctx, session)
+	if err != nil {
+		return types.StreamStatsView{}, err
+	}
 	return types.StreamStatsView{
-		LiveId: liveId.String(), GiftCount: session.GiftCount, TotalCoins: session.TotalCoins, CreatorCoins: session.CreatorCoins, TopSupporters: board.Data, Battles: battles,
+		LiveId: liveId.String(), GiftCount: session.GiftCount, TotalCoins: session.TotalCoins, CreatorCoins: session.CreatorCoins, TopSupporters: board.Data, Battles: battles, NewSubscribers: newSubscribers,
 	}, nil
+}
+
+func (service *LiveService) newSubscribersDuring(ctx context.Context, session *ent.LiveSession) (int, error) {
+	if service.Subscribers == nil || session.StartedAt == nil {
+		return 0, nil
+	}
+	endedAt := service.Now()
+	if session.EndedAt != nil {
+		endedAt = *session.EndedAt
+	}
+	return service.Subscribers.CountNewSubscribers(ctx, session.HostID, *session.StartedAt, endedAt)
 }

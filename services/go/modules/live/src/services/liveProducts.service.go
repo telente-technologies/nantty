@@ -12,26 +12,45 @@ import (
 	"zudomart/modules/live/src/generated/ent/livesession"
 )
 
+func requirePinnableSession(session *ent.LiveSession, actor types.Actor) error {
+	if session.HostID != actor.UserId {
+		return liveerrors.NotLiveHost
+	}
+	if session.State == livesession.StateEnded {
+		return liveerrors.LiveNotActive
+	}
+	return nil
+}
+
 func (service *LiveService) PinProductToLive(ctx context.Context, actor types.Actor, liveId, productId uuid.UUID) ([]types.LiveProductView, error) {
-	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
+	current, err := service.Client.LiveSession.Get(ctx, liveId)
+	if ent.IsNotFound(err) {
+		return nil, liveerrors.LiveNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	if err := requirePinnableSession(current, actor); err != nil {
+		return nil, err
+	}
+	product, err := service.requireLiveStoreProduct(ctx, current, actor.UserId, productId)
+	if err != nil {
+		return nil, err
+	}
+	err = service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		session, err := service.lockLiveSession(ctx, tx, liveId)
 		if err != nil {
 			return err
 		}
-		if session.HostID != actor.UserId {
-			return liveerrors.NotLiveHost
-		}
-		if session.State == livesession.StateEnded {
-			return liveerrors.LiveNotActive
-		}
-		if err := service.PinPolicy.CanPinProducts(ctx, actor.UserId, actor.Roles, []uuid.UUID{productId}); err != nil {
+		if err := requirePinnableSession(session, actor); err != nil {
 			return err
 		}
 		if err := tx.LiveProduct.Update().Where(liveproduct.LiveID(liveId), liveproduct.Pinned(true)).SetPinned(false).Exec(ctx); err != nil {
 			return err
 		}
-		err = tx.LiveProduct.Create().SetLiveID(liveId).SetProductID(productId).SetPinned(true).SetPinnedAt(service.Now()).
-			OnConflictColumns(liveproduct.FieldLiveID, liveproduct.FieldProductID).UpdatePinned().UpdatePinnedAt().Exec(ctx)
+		err = snapshotLiveProduct(tx.LiveProduct.Create().SetLiveID(liveId).SetProductID(productId).SetPinned(true).SetPinnedAt(service.Now()), product).
+			OnConflictColumns(liveproduct.FieldLiveID, liveproduct.FieldProductID).
+			UpdatePinned().UpdatePinnedAt().UpdateTitle().UpdatePriceMinor().UpdateCurrency().UpdateImageURL().Exec(ctx)
 		if err != nil {
 			return err
 		}
@@ -70,18 +89,15 @@ func (service *LiveService) ListLiveProducts(ctx context.Context, liveId uuid.UU
 	}
 	views := make([]types.LiveProductView, 0, len(rows))
 	for _, row := range rows {
-		views = append(views, types.LiveProductView{ProductId: row.ProductID.String(), Pinned: row.Pinned})
+		views = append(views, presentLiveProduct(row))
 	}
 	return views, nil
 }
 
-type RolesProductPinPolicy struct{}
-
-func (RolesProductPinPolicy) CanPinProducts(_ context.Context, _ uuid.UUID, roles []string, _ []uuid.UUID) error {
-	for _, role := range roles {
-		if role == "seller" {
-			return nil
-		}
+func presentLiveProduct(row *ent.LiveProduct) types.LiveProductView {
+	view := types.LiveProductView{ProductId: row.ProductID.String(), Pinned: row.Pinned, Title: row.Title, ImageUrl: row.ImageURL}
+	if row.PriceMinor != nil && row.Currency != nil {
+		view.Price = &types.MoneyView{AmountMinor: *row.PriceMinor, Currency: *row.Currency}
 	}
-	return liveerrors.Unprocessable("PRODUCTS_REQUIRE_STORE", "Only accounts with a store can pin products.")
+	return view
 }
