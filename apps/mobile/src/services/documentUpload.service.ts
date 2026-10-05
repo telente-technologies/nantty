@@ -1,38 +1,36 @@
 import { useDocumentUploadsStore } from "@/store/documentUploads.store";
+import type { ID, MessageDocument } from "@/types";
 
-const UPLOAD_TICK_MS = 200;
-const SIMULATED_BYTES_PER_SECOND = 2 * 1024 * 1024;
-const MINIMUM_SIMULATED_UPLOAD_MS = 1200;
-const MAXIMUM_SIMULATED_UPLOAD_MS = 6000;
+import { mediaUploadTransport, readChunkBytesFromLocalFile } from "./mediaUploadTransport.service";
 
 export class DocumentUploadCancelledError extends Error {}
 
-const cancelHandlersByMessageId = new Map<string, () => void>();
+const cancelledMessageIds = new Set<string>();
 
-export const cancelDocumentUpload = (messageId: string) => cancelHandlersByMessageId.get(messageId)?.();
+export const cancelDocumentUpload = (messageId: string) => {
+  cancelledMessageIds.add(messageId);
+  useDocumentUploadsStore.getState().setUpload(messageId, { fraction: 0, wasCancelled: true });
+};
 
-export function uploadDocumentWithProgress(messageId: string, sizeBytes: number): Promise<void> {
-  const totalMs = Math.min(MAXIMUM_SIMULATED_UPLOAD_MS, Math.max(MINIMUM_SIMULATED_UPLOAD_MS, (sizeBytes / SIMULATED_BYTES_PER_SECOND) * 1000));
+export async function uploadDocumentWithProgress(messageId: string, document: MessageDocument): Promise<ID> {
   const { setUpload, clearUpload } = useDocumentUploadsStore.getState();
+  if (!document.url) throw new Error("The document file is missing.");
+  cancelledMessageIds.delete(messageId);
   setUpload(messageId, { fraction: 0, wasCancelled: false });
-  return new Promise((resolve, reject) => {
-    let elapsedMs = 0;
-    const timer = setInterval(() => {
-      elapsedMs += UPLOAD_TICK_MS;
-      if (elapsedMs < totalMs) {
-        setUpload(messageId, { fraction: elapsedMs / totalMs, wasCancelled: false });
-        return;
-      }
-      clearInterval(timer);
-      cancelHandlersByMessageId.delete(messageId);
-      clearUpload(messageId);
-      resolve();
-    }, UPLOAD_TICK_MS);
-    cancelHandlersByMessageId.set(messageId, () => {
-      clearInterval(timer);
-      cancelHandlersByMessageId.delete(messageId);
-      setUpload(messageId, { fraction: 0, wasCancelled: true });
-      reject(new DocumentUploadCancelledError());
-    });
-  });
+  const session = await mediaUploadTransport.createUploadSession({ fileName: document.fileName, mimeType: document.mimeType, sizeBytes: document.sizeBytes, purpose: "chat" });
+  let sentBytes = 0;
+  for (let chunkIndex = 0; chunkIndex < session.totalChunks; chunkIndex++) {
+    if (cancelledMessageIds.has(messageId)) {
+      await mediaUploadTransport.abortUploadSession(session.uploadId).catch(() => undefined);
+      throw new DocumentUploadCancelledError();
+    }
+    if (session.uploadedChunks.includes(chunkIndex)) continue;
+    const offset = chunkIndex * session.chunkSizeBytes;
+    const chunk = await readChunkBytesFromLocalFile(document.url, offset, Math.min(session.chunkSizeBytes, document.sizeBytes - offset));
+    await mediaUploadTransport.uploadChunk(session.uploadId, chunkIndex, chunk, (bytes) => setUpload(messageId, { fraction: Math.min(0.99, (sentBytes + bytes) / document.sizeBytes), wasCancelled: false }));
+    sentBytes += chunk.byteLength;
+  }
+  const completed = await mediaUploadTransport.completeUploadSession(session.uploadId);
+  clearUpload(messageId);
+  return completed.mediaId;
 }
