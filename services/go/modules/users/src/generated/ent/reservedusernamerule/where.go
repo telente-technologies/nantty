@@ -70,6 +70,26 @@ func CreatedBy(v string) predicate.ReservedUsernameRule {
 	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldCreatedBy, v))
 }
 
+// CreatedByName applies equality check predicate on the "created_by_name" field. It's identical to CreatedByNameEQ.
+func CreatedByName(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldCreatedByName, v))
+}
+
+// Category applies equality check predicate on the "category" field. It's identical to CategoryEQ.
+func Category(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldCategory, v))
+}
+
+// Note applies equality check predicate on the "note" field. It's identical to NoteEQ.
+func Note(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldNote, v))
+}
+
+// Reason applies equality check predicate on the "reason" field. It's identical to ReasonEQ.
+func Reason(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldReason, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.ReservedUsernameRule {
 	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldCreatedAt, v))
@@ -258,6 +278,266 @@ func CreatedByEqualFold(v string) predicate.ReservedUsernameRule {
 // CreatedByContainsFold applies the ContainsFold predicate on the "created_by" field.
 func CreatedByContainsFold(v string) predicate.ReservedUsernameRule {
 	return predicate.ReservedUsernameRule(sql.FieldContainsFold(FieldCreatedBy, v))
+}
+
+// CreatedByNameEQ applies the EQ predicate on the "created_by_name" field.
+func CreatedByNameEQ(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldCreatedByName, v))
+}
+
+// CreatedByNameNEQ applies the NEQ predicate on the "created_by_name" field.
+func CreatedByNameNEQ(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldNEQ(FieldCreatedByName, v))
+}
+
+// CreatedByNameIn applies the In predicate on the "created_by_name" field.
+func CreatedByNameIn(vs ...string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldIn(FieldCreatedByName, vs...))
+}
+
+// CreatedByNameNotIn applies the NotIn predicate on the "created_by_name" field.
+func CreatedByNameNotIn(vs ...string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldNotIn(FieldCreatedByName, vs...))
+}
+
+// CreatedByNameGT applies the GT predicate on the "created_by_name" field.
+func CreatedByNameGT(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldGT(FieldCreatedByName, v))
+}
+
+// CreatedByNameGTE applies the GTE predicate on the "created_by_name" field.
+func CreatedByNameGTE(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldGTE(FieldCreatedByName, v))
+}
+
+// CreatedByNameLT applies the LT predicate on the "created_by_name" field.
+func CreatedByNameLT(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldLT(FieldCreatedByName, v))
+}
+
+// CreatedByNameLTE applies the LTE predicate on the "created_by_name" field.
+func CreatedByNameLTE(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldLTE(FieldCreatedByName, v))
+}
+
+// CreatedByNameContains applies the Contains predicate on the "created_by_name" field.
+func CreatedByNameContains(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldContains(FieldCreatedByName, v))
+}
+
+// CreatedByNameHasPrefix applies the HasPrefix predicate on the "created_by_name" field.
+func CreatedByNameHasPrefix(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldHasPrefix(FieldCreatedByName, v))
+}
+
+// CreatedByNameHasSuffix applies the HasSuffix predicate on the "created_by_name" field.
+func CreatedByNameHasSuffix(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldHasSuffix(FieldCreatedByName, v))
+}
+
+// CreatedByNameEqualFold applies the EqualFold predicate on the "created_by_name" field.
+func CreatedByNameEqualFold(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEqualFold(FieldCreatedByName, v))
+}
+
+// CreatedByNameContainsFold applies the ContainsFold predicate on the "created_by_name" field.
+func CreatedByNameContainsFold(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldContainsFold(FieldCreatedByName, v))
+}
+
+// CategoryEQ applies the EQ predicate on the "category" field.
+func CategoryEQ(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldCategory, v))
+}
+
+// CategoryNEQ applies the NEQ predicate on the "category" field.
+func CategoryNEQ(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldNEQ(FieldCategory, v))
+}
+
+// CategoryIn applies the In predicate on the "category" field.
+func CategoryIn(vs ...string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldIn(FieldCategory, vs...))
+}
+
+// CategoryNotIn applies the NotIn predicate on the "category" field.
+func CategoryNotIn(vs ...string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldNotIn(FieldCategory, vs...))
+}
+
+// CategoryGT applies the GT predicate on the "category" field.
+func CategoryGT(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldGT(FieldCategory, v))
+}
+
+// CategoryGTE applies the GTE predicate on the "category" field.
+func CategoryGTE(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldGTE(FieldCategory, v))
+}
+
+// CategoryLT applies the LT predicate on the "category" field.
+func CategoryLT(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldLT(FieldCategory, v))
+}
+
+// CategoryLTE applies the LTE predicate on the "category" field.
+func CategoryLTE(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldLTE(FieldCategory, v))
+}
+
+// CategoryContains applies the Contains predicate on the "category" field.
+func CategoryContains(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldContains(FieldCategory, v))
+}
+
+// CategoryHasPrefix applies the HasPrefix predicate on the "category" field.
+func CategoryHasPrefix(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldHasPrefix(FieldCategory, v))
+}
+
+// CategoryHasSuffix applies the HasSuffix predicate on the "category" field.
+func CategoryHasSuffix(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldHasSuffix(FieldCategory, v))
+}
+
+// CategoryEqualFold applies the EqualFold predicate on the "category" field.
+func CategoryEqualFold(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEqualFold(FieldCategory, v))
+}
+
+// CategoryContainsFold applies the ContainsFold predicate on the "category" field.
+func CategoryContainsFold(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldContainsFold(FieldCategory, v))
+}
+
+// NoteEQ applies the EQ predicate on the "note" field.
+func NoteEQ(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldNote, v))
+}
+
+// NoteNEQ applies the NEQ predicate on the "note" field.
+func NoteNEQ(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldNEQ(FieldNote, v))
+}
+
+// NoteIn applies the In predicate on the "note" field.
+func NoteIn(vs ...string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldIn(FieldNote, vs...))
+}
+
+// NoteNotIn applies the NotIn predicate on the "note" field.
+func NoteNotIn(vs ...string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldNotIn(FieldNote, vs...))
+}
+
+// NoteGT applies the GT predicate on the "note" field.
+func NoteGT(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldGT(FieldNote, v))
+}
+
+// NoteGTE applies the GTE predicate on the "note" field.
+func NoteGTE(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldGTE(FieldNote, v))
+}
+
+// NoteLT applies the LT predicate on the "note" field.
+func NoteLT(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldLT(FieldNote, v))
+}
+
+// NoteLTE applies the LTE predicate on the "note" field.
+func NoteLTE(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldLTE(FieldNote, v))
+}
+
+// NoteContains applies the Contains predicate on the "note" field.
+func NoteContains(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldContains(FieldNote, v))
+}
+
+// NoteHasPrefix applies the HasPrefix predicate on the "note" field.
+func NoteHasPrefix(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldHasPrefix(FieldNote, v))
+}
+
+// NoteHasSuffix applies the HasSuffix predicate on the "note" field.
+func NoteHasSuffix(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldHasSuffix(FieldNote, v))
+}
+
+// NoteEqualFold applies the EqualFold predicate on the "note" field.
+func NoteEqualFold(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEqualFold(FieldNote, v))
+}
+
+// NoteContainsFold applies the ContainsFold predicate on the "note" field.
+func NoteContainsFold(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldContainsFold(FieldNote, v))
+}
+
+// ReasonEQ applies the EQ predicate on the "reason" field.
+func ReasonEQ(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEQ(FieldReason, v))
+}
+
+// ReasonNEQ applies the NEQ predicate on the "reason" field.
+func ReasonNEQ(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldNEQ(FieldReason, v))
+}
+
+// ReasonIn applies the In predicate on the "reason" field.
+func ReasonIn(vs ...string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldIn(FieldReason, vs...))
+}
+
+// ReasonNotIn applies the NotIn predicate on the "reason" field.
+func ReasonNotIn(vs ...string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldNotIn(FieldReason, vs...))
+}
+
+// ReasonGT applies the GT predicate on the "reason" field.
+func ReasonGT(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldGT(FieldReason, v))
+}
+
+// ReasonGTE applies the GTE predicate on the "reason" field.
+func ReasonGTE(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldGTE(FieldReason, v))
+}
+
+// ReasonLT applies the LT predicate on the "reason" field.
+func ReasonLT(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldLT(FieldReason, v))
+}
+
+// ReasonLTE applies the LTE predicate on the "reason" field.
+func ReasonLTE(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldLTE(FieldReason, v))
+}
+
+// ReasonContains applies the Contains predicate on the "reason" field.
+func ReasonContains(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldContains(FieldReason, v))
+}
+
+// ReasonHasPrefix applies the HasPrefix predicate on the "reason" field.
+func ReasonHasPrefix(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldHasPrefix(FieldReason, v))
+}
+
+// ReasonHasSuffix applies the HasSuffix predicate on the "reason" field.
+func ReasonHasSuffix(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldHasSuffix(FieldReason, v))
+}
+
+// ReasonEqualFold applies the EqualFold predicate on the "reason" field.
+func ReasonEqualFold(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldEqualFold(FieldReason, v))
+}
+
+// ReasonContainsFold applies the ContainsFold predicate on the "reason" field.
+func ReasonContainsFold(v string) predicate.ReservedUsernameRule {
+	return predicate.ReservedUsernameRule(sql.FieldContainsFold(FieldReason, v))
 }
 
 // And groups predicates with the AND operator between them.

@@ -23,6 +23,14 @@ const (
 	FieldMatchKind = "match_kind"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
+	// FieldCreatedByName holds the string denoting the created_by_name field in the database.
+	FieldCreatedByName = "created_by_name"
+	// FieldCategory holds the string denoting the category field in the database.
+	FieldCategory = "category"
+	// FieldNote holds the string denoting the note field in the database.
+	FieldNote = "note"
+	// FieldReason holds the string denoting the reason field in the database.
+	FieldReason = "reason"
 	// Table holds the table name of the reservedusernamerule in the database.
 	Table = "reserved_username_rules"
 )
@@ -34,6 +42,10 @@ var Columns = []string{
 	FieldTerm,
 	FieldMatchKind,
 	FieldCreatedBy,
+	FieldCreatedByName,
+	FieldCategory,
+	FieldNote,
+	FieldReason,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -55,6 +67,22 @@ var (
 	DefaultCreatedBy string
 	// CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
 	CreatedByValidator func(string) error
+	// DefaultCreatedByName holds the default value on creation for the "created_by_name" field.
+	DefaultCreatedByName string
+	// CreatedByNameValidator is a validator for the "created_by_name" field. It is called by the builders before save.
+	CreatedByNameValidator func(string) error
+	// DefaultCategory holds the default value on creation for the "category" field.
+	DefaultCategory string
+	// CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	CategoryValidator func(string) error
+	// DefaultNote holds the default value on creation for the "note" field.
+	DefaultNote string
+	// NoteValidator is a validator for the "note" field. It is called by the builders before save.
+	NoteValidator func(string) error
+	// DefaultReason holds the default value on creation for the "reason" field.
+	DefaultReason string
+	// ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	ReasonValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -110,4 +138,24 @@ func ByMatchKind(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedBy orders the results by the created_by field.
 func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByCreatedByName orders the results by the created_by_name field.
+func ByCreatedByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedByName, opts...).ToFunc()
+}
+
+// ByCategory orders the results by the category field.
+func ByCategory(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCategory, opts...).ToFunc()
+}
+
+// ByNote orders the results by the note field.
+func ByNote(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNote, opts...).ToFunc()
+}
+
+// ByReason orders the results by the reason field.
+func ByReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReason, opts...).ToFunc()
 }

@@ -71,6 +71,9 @@ const (
 	ReasonAdminReassignedAway Reason = "admin_reassigned_away"
 	ReasonAdminReassignedTo   Reason = "admin_reassigned_to"
 	ReasonAdminAssignedHeld   Reason = "admin_assigned_held"
+	ReasonAdminWithheld       Reason = "admin_withheld"
+	ReasonAdminRestored       Reason = "admin_restored"
+	ReasonAdminReclaimedTo    Reason = "admin_reclaimed_to"
 )
 
 func (r Reason) String() string {
@@ -80,7 +83,7 @@ func (r Reason) String() string {
 // ReasonValidator is a validator for the "reason" field enum values. It is called by the builders before save.
 func ReasonValidator(r Reason) error {
 	switch r {
-	case ReasonSignup, ReasonUserChange, ReasonAdminChange, ReasonAdminReassignedAway, ReasonAdminReassignedTo, ReasonAdminAssignedHeld:
+	case ReasonSignup, ReasonUserChange, ReasonAdminChange, ReasonAdminReassignedAway, ReasonAdminReassignedTo, ReasonAdminAssignedHeld, ReasonAdminWithheld, ReasonAdminRestored, ReasonAdminReclaimedTo:
 		return nil
 	default:
 		return fmt.Errorf("usernamechange: invalid enum value for reason field: %q", r)
