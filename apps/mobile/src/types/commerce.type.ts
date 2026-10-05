@@ -94,6 +94,7 @@ export type NotificationCategory = "orders" | "social" | "system";
 export interface CategorizedNotification extends AppNotification {
   readonly category: NotificationCategory;
   readonly kind?: "mention" | "videoReply" | "postTag";
+  readonly url?: string | null;
   readonly data?: { readonly ticketId?: string; readonly screen?: string; readonly url?: string | null } | null;
 }
 

@@ -9,7 +9,7 @@ export interface ConsentRecord {
 }
 
 export interface UpdateConsentsInput {
-  readonly policyVersionId: string;
+  readonly policyVersionId?: string;
   readonly consents: Partial<ConsentChoices>;
 }
 

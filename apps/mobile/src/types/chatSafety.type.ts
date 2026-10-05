@@ -77,7 +77,6 @@ export interface ChatStreak {
 export interface SendToChatsInput {
   readonly conversationIds: readonly ID[];
   readonly reference: SharedContentReference;
-  readonly note: string;
 }
 
 export interface SendToChatsResult {
