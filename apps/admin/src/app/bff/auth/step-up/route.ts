@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
   const result = await sendJsonToAdminBackend<StepUpResponse>(
     "POST",
     "/admin/auth/step-up",
-    { method, code: method === "totp" ? code : undefined, credential: method === "webauthn" ? body?.credential : undefined },
+    method === "totp" ? { code } : { method, credential: body?.credential },
     { accessToken, forwardedHeaders: clientAddress ? { "X-Forwarded-For": clientAddress } : {} },
   );
   if (!result.body) return respondWithBackendError(result.status, result.error, "That code did not work. Try the newest code.");

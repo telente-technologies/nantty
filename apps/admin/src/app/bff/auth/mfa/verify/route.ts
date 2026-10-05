@@ -8,7 +8,8 @@ import { respondWithBackendError, respondWithBffError, respondWithJson } from "@
 import { isRequestFromAdminConsoleOrigin, readClientIpAddress, readClientUserAgent } from "@/server/requestOriginGuard.service";
 
 interface MfaVerifiedResponse extends ApiTokenPair {
-  readonly admin: Parameters<typeof convertCurrentAdminResponse>[0];
+  readonly staff?: Parameters<typeof convertCurrentAdminResponse>[0];
+  readonly admin?: Parameters<typeof convertCurrentAdminResponse>[0];
   readonly recoveryCodes?: readonly string[];
 }
 
@@ -27,14 +28,16 @@ export async function POST(request: NextRequest) {
   const clientAddress = readClientIpAddress(request);
   if (clientAddress) forwardedHeaders["X-Forwarded-For"] = clientAddress;
   const result = challenge.enrollmentRequired
-    ? await sendJsonToAdminBackend<MfaVerifiedResponse>("POST", "/admin/auth/mfa/totp/confirm", { mfaToken: challenge.mfaToken, code }, { forwardedHeaders })
-    : await sendJsonToAdminBackend<MfaVerifiedResponse>("POST", "/admin/auth/mfa/verify", { mfaToken: challenge.mfaToken, method, code: method === "webauthn" ? undefined : code, credential: method === "webauthn" ? body?.credential : undefined }, { forwardedHeaders });
+    ? await sendJsonToAdminBackend<MfaVerifiedResponse>("POST", "/admin/auth/mfa/enroll/confirm", { challengeToken: challenge.mfaToken, code }, { forwardedHeaders })
+    : await sendJsonToAdminBackend<MfaVerifiedResponse>("POST", "/admin/auth/mfa/verify", method === "webauthn" ? { challengeToken: challenge.mfaToken, method, credential: body?.credential } : { challengeToken: challenge.mfaToken, code }, { forwardedHeaders });
   if (!result.body) {
     if (result.status === 429) return respondWithBffError(429, "RATE_LIMITED", "Too many codes tried. Wait a minute and try again.");
     return respondWithBackendError(result.status, result.error, "That code did not work. Try the newest code.");
   }
+  const signedInAdmin = result.body.staff ?? result.body.admin;
+  if (!signedInAdmin) return respondWithBffError(502, "UPSTREAM_INVALID_RESPONSE", "Sign-in failed. Try again.");
   const response = respondWithJson({ redirectTo: challenge.nextPath, recoveryCodes: result.body.recoveryCodes ?? null });
   clearCookieByName(response.cookies, sessionCookieNames.pendingMfa);
-  establishNewAdminSession(response.cookies, result.body, convertCurrentAdminResponse(result.body.admin));
+  establishNewAdminSession(response.cookies, result.body, convertCurrentAdminResponse(signedInAdmin));
   return response;
 }

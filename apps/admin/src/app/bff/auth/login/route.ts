@@ -6,9 +6,11 @@ import { respondWithBackendError, respondWithBffError, respondWithJson } from "@
 import { isRequestFromAdminConsoleOrigin, readClientIpAddress, readClientUserAgent, readSafeRelativeRedirectPath } from "@/server/requestOriginGuard.service";
 
 interface LoginChallengeResponse {
-  readonly mfaToken: string;
-  readonly enrollmentRequired: boolean;
-  readonly passkeyAvailable: boolean;
+  readonly status?: "mfa_required" | "mfa_enrollment_required";
+  readonly challengeToken?: string;
+  readonly mfaToken?: string;
+  readonly enrollmentRequired?: boolean;
+  readonly passkeyAvailable?: boolean;
 }
 
 export async function POST(request: NextRequest) {
@@ -29,9 +31,12 @@ export async function POST(request: NextRequest) {
     if (result.status === 401) return respondWithBffError(401, "INVALID_CREDENTIALS", "That email and password do not match an admin account.");
     return respondWithBackendError(result.status, result.error, "Sign-in failed. Try again.");
   }
+  const mfaToken = result.body.challengeToken ?? result.body.mfaToken ?? "";
+  if (!mfaToken) return respondWithBffError(502, "UPSTREAM_INVALID_RESPONSE", "Sign-in failed. Try again.");
+  const enrollmentRequired = result.body.status === "mfa_enrollment_required" || result.body.enrollmentRequired === true;
   const nextPath = readSafeRelativeRedirectPath(typeof body?.next === "string" ? body.next : null, "/");
-  const response = respondWithJson({ step: result.body.enrollmentRequired ? "enroll" : "challenge" });
+  const response = respondWithJson({ step: enrollmentRequired ? "enroll" : "challenge" });
   clearEverySessionCookie(response.cookies);
-  writePendingMfaChallengeCookie(response.cookies, { mfaToken: result.body.mfaToken, email, enrollmentRequired: result.body.enrollmentRequired, passkeyAvailable: result.body.passkeyAvailable === true, nextPath });
+  writePendingMfaChallengeCookie(response.cookies, { mfaToken, email, enrollmentRequired, passkeyAvailable: result.body.passkeyAvailable === true, nextPath });
   return response;
 }

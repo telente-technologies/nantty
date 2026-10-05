@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
+import { OfflineBanner, ThemeInitScript, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@zudomart/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AppThemeProvider } from "@/components/theme/appThemeProvider";
@@ -23,7 +23,8 @@ export const metadata: Metadata = {
   applicationName: adminProductName,
   robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } },
   referrer: "no-referrer",
-  icons: { icon: "/icons/adminAppIcon.svg" },
+  manifest: "/manifest.webmanifest",
+  icons: { icon: [{ url: "/brand/favicon.ico", sizes: "48x48" }, { url: "/brand/icon.svg", type: "image/svg+xml" }], apple: "/brand/appleTouchIcon.png" },
   formatDetection: { telephone: false, email: false, address: false },
 };
 
@@ -45,6 +46,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <ThemeInitScript nonce={nonce} />
       </head>
       <body>
+        <OfflineBanner />
         <AppThemeProvider initialPreference={themePreference} isSignedIn={isSignedIn}>
           {children}
           <ConsentBannerHost isSignedIn={isSignedIn} />
