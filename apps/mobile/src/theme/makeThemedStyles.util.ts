@@ -19,6 +19,7 @@ const LIGHT_INK_TO_THEME_KEY: Readonly<Record<string, keyof ThemeColors>> = {
   "#5B5B5B": "textMuted",
   "#909090": "textSubtle",
   "#D9D9D9": "placeholder",
+  "#3A2BFF": "primary",
 };
 
 export function useThemedIconInk(figmaInk: string): string {

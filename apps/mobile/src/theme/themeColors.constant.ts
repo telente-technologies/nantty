@@ -25,12 +25,12 @@ export const figmaDarkCanvas = "#0E0E10";
 export const figmaDarkSurface = "#2C2C2C";
 
 export const darkThemeColors: ThemeColors = {
-  primary: "#7A8DF9",
-  primaryDark: "#1B39CC",
-  primaryTint: "#222A55",
+  primary: semanticDark.brand,
+  primaryDark: palette.primary[600],
+  primaryTint: semanticDark.brandTint,
   primarySolid: colors.primary,
   onPrimary: colors.white,
-  link: palette.primary[200],
+  link: semanticDark.brand,
   error: semanticDark.danger,
   errorTint: semanticDark.dangerTint,
   success: semanticDark.success,
