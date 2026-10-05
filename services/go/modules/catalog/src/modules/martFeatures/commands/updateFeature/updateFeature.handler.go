@@ -33,9 +33,19 @@ func (handler Handler) Execute(ctx context.Context, command Command) (any, error
 		if reflect.DeepEqual(before, after) {
 			return catalogerrors.NoChange
 		}
-		updated, err = row.Update().SetTitle(after.Title).ClearSubtitle().SetNillableSubtitle(after.Subtitle).SetKind(after.Kind).SetImageID(after.ImageId).
-			SetTargetType(after.TargetType).SetTargetValue(after.TargetValue).SetCountries(after.Countries).SetStartsAt(after.StartsAt).
-			ClearEndsAt().SetNillableEndsAt(after.EndsAt).Save(ctx)
+		change := row.Update().SetTitle(after.Title).SetKind(after.Kind).SetImageID(after.ImageId).
+			SetTargetType(after.TargetType).SetTargetValue(after.TargetValue).SetCountries(after.Countries).SetStartsAt(after.StartsAt)
+		if after.Subtitle == nil {
+			change.ClearSubtitle()
+		} else {
+			change.SetSubtitle(*after.Subtitle)
+		}
+		if after.EndsAt == nil {
+			change.ClearEndsAt()
+		} else {
+			change.SetEndsAt(*after.EndsAt)
+		}
+		updated, err = change.Save(ctx)
 		if err != nil {
 			return err
 		}

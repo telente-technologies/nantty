@@ -2,10 +2,7 @@ package setfollow
 
 import "github.com/google/uuid"
 
-const (
-	TargetStore = "store"
-	TargetBrand = "brand"
-)
+const TargetBrand = "brand"
 
 type Command struct {
 	AccountId  uuid.UUID
