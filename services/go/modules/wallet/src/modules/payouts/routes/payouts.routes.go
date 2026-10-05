@@ -27,6 +27,7 @@ func MountPayoutsRoutes(mux *http.ServeMux, application *payouts.Application) {
 	mux.Handle("POST /api/v1/wallets/me/withdrawals", requireUser(http.HandlerFunc(withdrawals.RequestWithdrawal)))
 	mux.Handle("POST /api/v1/wallets/me/withdrawals/{withdrawalId}/cancel", requireUser(http.HandlerFunc(withdrawals.CancelWithdrawal)))
 	mux.Handle("GET /api/v1/admin/withdrawals", requireStaffRead(http.HandlerFunc(withdrawals.ListWithdrawalsForStaff)))
+	mux.Handle("GET /api/v1/admin/withdrawals/{withdrawalId}", requireStaffRead(http.HandlerFunc(withdrawals.GetWithdrawalForStaff)))
 	mux.Handle("POST /api/v1/admin/withdrawals/{withdrawalId}/review", requireStaffProcess(http.HandlerFunc(withdrawals.ReviewWithdrawal)))
 	mux.Handle("POST /api/v1/admin/payouts/run", requireStaffProcess(http.HandlerFunc(withdrawals.RunPayouts)))
 }
