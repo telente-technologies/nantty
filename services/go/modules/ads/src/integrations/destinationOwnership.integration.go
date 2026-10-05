@@ -11,21 +11,18 @@ import (
 	"zudomart/modules/ads/src/interfaces"
 )
 
-// DenyAllOwnership fails closed when no owning service is configured in production.
 type DenyAllOwnership struct{}
 
 func (DenyAllOwnership) Owns(context.Context, interfaces.OwnershipQuery) (bool, error) {
 	return false, nil
 }
 
-// AllowAllOwnership is for local development and tests only.
 type AllowAllOwnership struct{}
 
 func (AllowAllOwnership) Owns(context.Context, interfaces.OwnershipQuery) (bool, error) {
 	return true, nil
 }
 
-// HttpDestinationOwnership routes each target kind to the service that owns it.
 type HttpDestinationOwnership struct {
 	Social   InternalEndpoint
 	Commerce InternalEndpoint

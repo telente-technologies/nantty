@@ -21,7 +21,6 @@ type S3ObjectStorage struct {
 	presigner *s3.PresignClient
 }
 
-// NewS3ObjectStorage uses the default AWS credential chain; a custom endpoint (LocalStack) switches to path-style addressing.
 func NewS3ObjectStorage(ctx context.Context, bucket, endpoint string) (*S3ObjectStorage, error) {
 	awsConfig, err := awsconfig.LoadDefaultConfig(ctx)
 	if err != nil {
@@ -77,7 +76,6 @@ func (storage *S3ObjectStorage) Exists(ctx context.Context, key string) (bool, i
 	return true, aws.ToInt64(head.ContentLength), nil
 }
 
-// MemoryObjectStorage keeps objects in process for tests and local development without S3.
 type MemoryObjectStorage struct {
 	mutex   sync.Mutex
 	Objects map[string][]byte

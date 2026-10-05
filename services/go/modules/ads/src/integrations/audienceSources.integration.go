@@ -25,7 +25,6 @@ func (UnavailableAudienceSource) Followers(context.Context, string) ([]string, e
 	return nil, adserrors.UpstreamUnavailable
 }
 
-// AuthSchemaIdentityMatcher hashes stored emails with SHA-256 inside Postgres and compares them with the uploaded hashes.
 type AuthSchemaIdentityMatcher struct {
 	Database *sql.DB
 	Schema   string
@@ -60,7 +59,6 @@ func (matcher AuthSchemaIdentityMatcher) MatchEmailHashes(ctx context.Context, h
 	return matched, nil
 }
 
-// MatchPhoneHashes needs go-auth to share how phone_hash is derived; until then phone lists are refused.
 func (AuthSchemaIdentityMatcher) MatchPhoneHashes(context.Context, []string) ([]string, error) {
 	return nil, adserrors.PhoneMatchingUnavailable
 }

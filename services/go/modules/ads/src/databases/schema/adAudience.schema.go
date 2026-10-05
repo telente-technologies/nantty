@@ -40,7 +40,6 @@ func (AdCustomAudience) Indexes() []ent.Index {
 	}
 }
 
-// AdAudienceMember stores matched user ids only; hashed identifiers of unmatched people are never persisted.
 type AdAudienceMember struct{ ent.Schema }
 
 func (AdAudienceMember) Fields() []ent.Field {

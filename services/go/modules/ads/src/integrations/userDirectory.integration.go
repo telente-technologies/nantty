@@ -54,6 +54,15 @@ func (directory AuthSchemaUserDirectory) FindUserByUsername(ctx context.Context,
 	return user, err == nil, err
 }
 
+func (directory AuthSchemaUserDirectory) FindUserByEmail(ctx context.Context, email string) (interfaces.UserSummary, bool, error) {
+	var user interfaces.UserSummary
+	err := directory.Database.QueryRowContext(ctx, `SELECT id, username, name FROM `+directory.table()+` WHERE lower(email) = lower($1) AND status = 'active'`, email).Scan(&user.Id, &user.Username, &user.Name)
+	if errors.Is(err, sql.ErrNoRows) {
+		return user, false, nil
+	}
+	return user, err == nil, err
+}
+
 type NoStoreDirectory struct{}
 
 func (NoStoreDirectory) ListStoresManagedBy(context.Context, string) ([]interfaces.ManagedStore, error) {

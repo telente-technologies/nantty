@@ -191,7 +191,6 @@ func predictedCtrPayload(request types.PctrRequest) map[string]any {
 
 type IntelligenceFraudScorer struct{ Client *IntelligenceClient }
 
-// ScoreAdEvent scores clicks through /v1/risk/score-extended (subject ad_click); other event kinds are not risk-scored.
 func (scorer IntelligenceFraudScorer) ScoreAdEvent(ctx context.Context, impressionId, userId, eventKind string, signals types.AdClickSignals) (*float64, error) {
 	if eventKind != "click" {
 		return nil, nil

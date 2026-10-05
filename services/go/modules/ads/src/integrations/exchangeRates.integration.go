@@ -13,8 +13,6 @@ import (
 	"zudomart/platform/regionpricing"
 )
 
-// CurrencyExchangeRates reads the latest rate per currency from the currency module's revisions table (granted to
-// zudomart_readers) and serves the last good set, or the seed rates, when the read fails.
 type CurrencyExchangeRates struct {
 	database   *sql.DB
 	schema     string

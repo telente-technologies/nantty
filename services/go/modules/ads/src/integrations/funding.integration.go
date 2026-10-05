@@ -17,7 +17,6 @@ func (UnconfiguredFundingGateway) RefundBoostCharge(context.Context, string, str
 	return adserrors.UpstreamUnavailable
 }
 
-// InMemoryFundingGateway moves no real money and is refused in production.
 type InMemoryFundingGateway struct {
 	mutex   sync.Mutex
 	charged map[string]int64
