@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"crypto/subtle"
 	"net/http"
 	"strings"
@@ -15,7 +16,8 @@ import (
 )
 
 type BillingController struct {
-	Billing services.Billing
+	Billing       services.Billing
+	CreatorAccess func(ctx context.Context, subscriberId, creatorId string) (bool, error)
 }
 
 func (controller BillingController) fail(writer http.ResponseWriter, request *http.Request, err error) {
@@ -169,6 +171,9 @@ func (controller BillingController) InternalEntitlements(writer http.ResponseWri
 		return
 	}
 	entitlements, err := controller.Billing.ReadEntitlements(request.Context(), request.PathValue("userId"))
+	if creatorId := request.URL.Query().Get("creatorId"); err == nil && creatorId != "" && controller.CreatorAccess != nil {
+		entitlements.SubscribedToCreator, err = controller.CreatorAccess(request.Context(), entitlements.UserId, creatorId)
+	}
 	if err != nil {
 		controller.fail(writer, request, err)
 		return

@@ -35,6 +35,8 @@ func MountBillingRoutes(mux *http.ServeMux, controller controllers.BillingContro
 	mux.Handle("GET /api/v1/subscriptions/{subscriptionId}/periods", requireUser(http.HandlerFunc(controller.ListPeriods)))
 	mux.Handle("GET /api/v1/subscriptions/{subscriptionId}/upcoming-charge", requireUser(http.HandlerFunc(controller.UpcomingCharge)))
 	mux.Handle("POST /api/v1/subscriptions/store-receipts", requireUser(http.HandlerFunc(controller.RedeemStoreReceipt)))
+	mux.Handle("GET /api/v1/verification/plans", requireUser(http.HandlerFunc(controller.ListVerificationPlans)))
+	mux.Handle("POST /api/v1/verification/subscription/cancel", requireUser(http.HandlerFunc(controller.CancelVerificationSubscription)))
 	mux.HandleFunc("GET /api/v1/internal/entitlements/{userId}", controller.InternalEntitlements)
 	mux.Handle("GET /api/v1/admin/subscriptions/price-table", requirePricingRead(http.HandlerFunc(controller.ListPriceTable)))
 	mux.Handle("PUT /api/v1/admin/subscriptions/price-table/{planCode}/{countryCode}", requirePricingWrite(http.HandlerFunc(controller.UpsertPrice)))
