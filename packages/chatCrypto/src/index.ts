@@ -19,3 +19,6 @@ export { type RandomSource, defaultRandomSource } from "./primitives";
 export type { ChatCryptoStorage } from "./protocolStore";
 export { type KeyValueStore, MemoryKeyValueStore, type Sealer, SealedKeyValueStore, createAeadSealer } from "./storage";
 export { describeDecryptionFailure } from "./failureCopy";
+export { createMockKeyDirectoryBackend } from "./mockKeyDirectoryBackend";
+export { type AttachmentDetails, type AttachmentPointer, decryptAttachment, encryptAttachment, encryptedAttachmentMimeType } from "./attachments";
+export { inlineDistributionLimit } from "./mailbox";

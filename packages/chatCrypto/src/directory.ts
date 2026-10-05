@@ -48,6 +48,20 @@ export interface DeviceAddress {
   readonly deviceId: string;
 }
 
+export interface MailboxEntryInput {
+  readonly userId: string;
+  readonly deviceId: string;
+  readonly ciphertext: string;
+}
+
+export interface MailboxEntry {
+  readonly id: string;
+  readonly conversationId: string;
+  readonly senderId: string;
+  readonly senderDeviceId: string;
+  readonly ciphertext: string;
+}
+
 export interface KeyDirectory {
   registerDevice(deviceId: string, request: DeviceRegistrationRequest): Promise<DeviceKeyStatus>;
   fetchDeviceStatus(deviceId: string): Promise<DeviceKeyStatus | null>;
@@ -56,6 +70,9 @@ export interface KeyDirectory {
   listDevices(userIds: readonly string[]): Promise<UserDeviceList[]>;
   claimPreKeyBundles(devices: readonly DeviceAddress[]): Promise<PreKeyBundle[]>;
   removeDevice(deviceId: string): Promise<void>;
+  depositMailbox(senderDeviceId: string, conversationId: string, entries: readonly MailboxEntryInput[]): Promise<void>;
+  fetchMailbox(deviceId: string): Promise<MailboxEntry[]>;
+  acknowledgeMailbox(deviceId: string, ids: readonly string[]): Promise<void>;
 }
 
 export const keyDirectoryPaths = {
@@ -64,6 +81,9 @@ export const keyDirectoryPaths = {
   signedPreKey: (deviceId: string) => `/api/v1/chat/keys/devices/${encodeURIComponent(deviceId)}/signed-prekey`,
   deviceQuery: "/api/v1/chat/keys/devices/query",
   bundleClaim: "/api/v1/chat/keys/bundles",
+  mailbox: "/api/v1/chat/keys/mailbox",
+  deviceMailbox: (deviceId: string) => `/api/v1/chat/keys/devices/${encodeURIComponent(deviceId)}/mailbox`,
+  mailboxAcknowledge: (deviceId: string) => `/api/v1/chat/keys/devices/${encodeURIComponent(deviceId)}/mailbox/ack`,
 } as const;
 
 export interface KeyDirectoryTransport {
@@ -73,6 +93,8 @@ export interface KeyDirectoryTransport {
   delete(path: string): Promise<void>;
   isNotFound(error: unknown): boolean;
 }
+
+export const mailboxDepositBatchSize = 100;
 
 const listOf = <T>(payload: unknown): T[] => (Array.isArray(payload) ? payload : [...(((payload ?? {}) as { data?: readonly T[] }).data ?? [])]) as T[];
 
@@ -92,5 +114,14 @@ export function createHttpKeyDirectory(transport: KeyDirectoryTransport): KeyDir
     listDevices: async (userIds) => listOf<UserDeviceList>(await transport.post<unknown>(keyDirectoryPaths.deviceQuery, { userIds })),
     claimPreKeyBundles: async (devices) => listOf<PreKeyBundle>(await transport.post<unknown>(keyDirectoryPaths.bundleClaim, { devices })),
     removeDevice: (deviceId) => transport.delete(keyDirectoryPaths.device(deviceId)),
+    depositMailbox: async (senderDeviceId, conversationId, entries) => {
+      for (let start = 0; start < entries.length; start += mailboxDepositBatchSize) {
+        await transport.post<unknown>(keyDirectoryPaths.mailbox, { senderDeviceId, conversationId, entries: entries.slice(start, start + mailboxDepositBatchSize) });
+      }
+    },
+    fetchMailbox: async (deviceId) => listOf<MailboxEntry>(await transport.get<unknown>(keyDirectoryPaths.deviceMailbox(deviceId))),
+    acknowledgeMailbox: async (deviceId, ids) => {
+      if (ids.length > 0) await transport.post<unknown>(keyDirectoryPaths.mailboxAcknowledge(deviceId), { ids });
+    },
   };
 }

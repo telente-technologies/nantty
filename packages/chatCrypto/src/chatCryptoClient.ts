@@ -4,7 +4,10 @@ import { type MessageEnvelope, encodeEnvelope, encryptionProtocol, parseEnvelope
 import { ChatCryptoError, type ChatCryptoErrorCode, isChatCryptoError } from "./errors";
 import { computeSecurityCode, hasUnacknowledgedChange } from "./identityTrust";
 import { createAndRegisterDevice, maintainDeviceKeys } from "./deviceRegistration";
+import { drainMailbox, shouldUseMailbox } from "./mailbox";
+import { assertPayloadMatchesServer } from "./payloadBinding";
 import type { DeviceIdentity } from "./keys";
+import { openLinkPreview, sealLinkPreview } from "./linkPreviewSeal";
 import { type ChatPayload, type ChatPayloadInput, decodePayload, encodePayload } from "./payload";
 import { type RandomSource, aeadKeyLength, aeadNonceLength, defaultRandomSource, openAead, sealAead, sha256Digest } from "./primitives";
 import { type ChatCryptoStorage, ProtocolStore } from "./protocolStore";
@@ -34,7 +37,8 @@ export interface MessageEncryption {
 
 export interface EncryptedOutgoingMessage {
   readonly encryption: MessageEncryption;
-  readonly confirmSent: (messageId: string | null) => Promise<void>;
+  readonly linkPreview: string | null;
+  readonly confirmSent: (messageId: string | null, expiresAt?: string | null) => Promise<void>;
 }
 
 export interface IncomingMessage {
@@ -42,6 +46,9 @@ export interface IncomingMessage {
   readonly conversationId: string;
   readonly senderId: string;
   readonly createdAt?: string;
+  readonly linkPreview?: unknown;
+  readonly expiresAt?: string | null;
+  readonly sharedContent?: unknown;
   readonly encryption?: { readonly deviceId: string; readonly ciphertext: string | null; readonly protocol?: string } | null;
 }
 
@@ -49,7 +56,14 @@ export type DecryptionFailure = ChatCryptoErrorCode | "UNKNOWN" | "SENT_FROM_THI
 export type DecryptionResult = { readonly status: "decrypted"; readonly payload: ChatPayload } | { readonly status: "failed"; readonly reason: DecryptionFailure } | { readonly status: "unencrypted" };
 
 const payloadEntryTag = 0x05;
+
+function withLinkPreview(result: DecryptionResult, sealed: unknown): DecryptionResult {
+  if (result.status !== "decrypted" || result.payload.linkPreview || result.payload.linkPreviewKey === undefined || typeof sealed !== "string") return result;
+  return { status: "decrypted", payload: { ...result.payload, linkPreview: openLinkPreview(sealed, result.payload.linkPreviewKey) } };
+}
+const retryableFailures = new Set<ChatCryptoErrorCode>(["DUPLICATE_MESSAGE", "NO_SENDER_KEY"]);
 const readinessRecheckMilliseconds = 10 * 60_000;
+const mailboxRecheckMilliseconds = 3_000;
 const payloadAssociatedData = (userId: string, deviceId: string) => utf8Encode(`zudomart-payload-v1|${userId}|${deviceId}`);
 const addressKey = (device: { readonly userId: string; readonly deviceId: string }) => `${device.userId}:${device.deviceId}`;
 
@@ -60,6 +74,7 @@ export class ChatCryptoClient {
   private readonly recipients: RecipientResolver;
   private identity: DeviceIdentity | null = null;
   private readyCheckedAt = 0;
+  private mailboxCheckedAt = 0;
   private queue: Promise<unknown> = Promise.resolve();
 
   public constructor(private readonly options: ChatCryptoClientOptions) {
@@ -106,7 +121,9 @@ export class ChatCryptoClient {
   public encryptMessage(target: EncryptionTarget, input: ChatPayloadInput): Promise<EncryptedOutgoingMessage> {
     return this.exclusive(async () => {
       const identity = this.requireIdentity();
-      const payload = encodePayload({ ...input, ...(target.conversationId === null ? {} : { conversationId: target.conversationId }) }, this.now());
+      const sealedPreview = input.linkPreview ? sealLinkPreview(input.linkPreview, this.random) : null;
+      const payloadInput = { ...input, linkPreview: null, ...(sealedPreview === null ? {} : { linkPreviewKey: sealedPreview.key }), ...(target.conversationId === null ? {} : { conversationId: target.conversationId }) };
+      const payload = encodePayload(payloadInput, this.now());
       const resolved = await this.recipients.resolve([...target.memberUserIds, identity.userId]);
       const candidates = resolved.filter((device) => !(device.userId === identity.userId && device.deviceId === identity.deviceId));
       const cipher = this.cipher(identity);
@@ -114,11 +131,11 @@ export class ChatCryptoClient {
       if (!this.options.allowMissingRecipients && !devices.some((device) => device.userId !== identity.userId)) {
         throw new ChatCryptoError("NO_RECIPIENT_DEVICES", "Nobody in this chat has set up secure chat yet.");
       }
-      const parsedPayload = decodePayload(payload);
-      const cache = (messageId: string | null) => (messageId === null ? Promise.resolve() : this.store.savePlaintext(messageId, { payload: parsedPayload, failure: null }));
-      if (target.kind === "group" && target.conversationId !== null) return this.encryptForGroup(identity, cipher, target.conversationId, devices, payload, cache);
+      const parsedPayload = { ...decodePayload(payload), linkPreview: sealedPreview === null ? null : (input.linkPreview ?? null) };
+      const cache = (messageId: string | null, expiresAt?: string | null) => (messageId === null ? Promise.resolve() : this.store.savePlaintext(messageId, { payload: parsedPayload, failure: null, expiresAt: expiresAt ?? null }));
+      if (target.kind === "group" && target.conversationId !== null) return { ...(await this.encryptForGroup(identity, cipher, target.conversationId, devices, payload, cache)), linkPreview: sealedPreview?.sealed ?? null };
       const envelope = await this.encryptPairwise(identity, cipher, devices, payload);
-      return { encryption: this.toEncryption(identity, envelope), confirmSent: (messageId) => this.exclusive(() => cache(messageId)) };
+      return { encryption: this.toEncryption(identity, envelope), linkPreview: sealedPreview?.sealed ?? null, confirmSent: (messageId, expiresAt) => this.exclusive(() => cache(messageId, expiresAt)) };
     });
   }
 
@@ -136,7 +153,7 @@ export class ChatCryptoClient {
     return { v: 1, t: "p", s: identity.deviceId, p: encodeBase64(sealed), n: encodeBase64(nonce), r: entries };
   }
 
-  private async encryptForGroup(identity: DeviceIdentity, cipher: SessionCipher, conversationId: string, devices: readonly ResolvedDevice[], payload: Bytes, cache: (messageId: string | null) => Promise<void>): Promise<EncryptedOutgoingMessage> {
+  private async encryptForGroup(identity: DeviceIdentity, cipher: SessionCipher, conversationId: string, devices: readonly ResolvedDevice[], payload: Bytes, cache: (messageId: string | null, expiresAt?: string | null) => Promise<void>): Promise<Omit<EncryptedOutgoingMessage, "linkPreview">> {
     const current = new Set(devices.map(addressKey));
     let own = await this.store.loadOwnSenderKey(conversationId);
     if (own === null || own.distributedTo.some((address) => !current.has(address))) own = createOwnSenderKey(this.random, this.now().getTime());
@@ -144,22 +161,25 @@ export class ChatCryptoClient {
     const entries = [];
     const needing = devices.filter((device) => !own.distributedTo.includes(addressKey(device)));
     for (const device of needing) entries.push({ u: device.userId, d: device.deviceId, b: encodeBase64(await cipher.encrypt(device.userId, device.deviceId, distribution)) });
+    const mailboxEntries = entries.map((entry) => ({ userId: entry.u, deviceId: entry.d, ciphertext: entry.b }));
+    const viaMailbox = shouldUseMailbox(mailboxEntries);
+    if (viaMailbox) await this.options.directory.depositMailbox(identity.deviceId, conversationId, mailboxEntries);
     const encrypted = groupEncrypt(own, conversationId, identity.userId, identity.deviceId, payload);
     await this.store.saveOwnSenderKey(conversationId, encrypted.own);
-    const envelope: MessageEnvelope = { v: 1, t: "g", s: identity.deviceId, g: encodeBase64(encrypted.message), r: entries };
+    const envelope: MessageEnvelope = { v: 1, t: "g", s: identity.deviceId, g: encodeBase64(encrypted.message), r: viaMailbox ? [] : entries };
     const keyId = own.keyId;
-    const confirmSent = (messageId: string | null) => this.exclusive(async () => {
+    const confirmSent = (messageId: string | null, expiresAt?: string | null) => this.exclusive(async () => {
       const latest = await this.store.loadOwnSenderKey(conversationId);
       if (latest !== null && latest.keyId === keyId) {
         await this.store.saveOwnSenderKey(conversationId, { ...latest, distributedTo: [...new Set([...latest.distributedTo, ...needing.map(addressKey)])] });
       }
-      await cache(messageId);
+      await cache(messageId, expiresAt);
     });
     return { encryption: this.toEncryption(identity, envelope), confirmSent };
   }
 
   public decryptMessage(message: IncomingMessage): Promise<DecryptionResult> {
-    return this.exclusive(() => this.decryptUnlocked(message));
+    return this.exclusive(async () => withLinkPreview(await this.decryptUnlocked(message), message.linkPreview));
   }
 
   public async decryptMessages(messages: readonly IncomingMessage[]): Promise<Map<string, DecryptionResult>> {
@@ -170,7 +190,7 @@ export class ChatCryptoClient {
   }
 
   private async decryptUnlocked(message: IncomingMessage): Promise<DecryptionResult> {
-    const cached = await this.store.loadPlaintext(message.id);
+    const cached = await this.loadLivePlaintext(message.id);
     if (cached !== null) return cached.payload === null ? { status: "failed", reason: (cached.failure ?? "UNKNOWN") as DecryptionFailure } : { status: "decrypted", payload: cached.payload };
     const encryption = message.encryption;
     if (encryption === undefined || encryption === null || encryption.ciphertext === null || encryption.ciphertext === "") return { status: "unencrypted" };
@@ -179,26 +199,58 @@ export class ChatCryptoClient {
     try {
       const envelope = parseEnvelope(encryption.ciphertext);
       if (envelope.s !== encryption.deviceId) throw new ChatCryptoError("INVALID_MESSAGE", "The envelope sender device does not match.");
-      const payloadBytes = await this.openEnvelope(identity, message, envelope);
+      const payloadBytes = await this.openEnvelope(identity, message, envelope).catch(async (error: unknown) => {
+        if (!isChatCryptoError(error, "NO_SENDER_KEY") || !(await this.drainMailboxThrottled(identity))) throw error;
+        return this.openEnvelope(identity, message, envelope);
+      });
       const payload = decodePayload(payloadBytes);
-      if (payload.conversationId !== undefined && payload.conversationId !== message.conversationId) throw new ChatCryptoError("PAYLOAD_MISMATCH", "The message belongs to another conversation.");
-      await this.store.savePlaintext(message.id, { payload, failure: null });
+      assertPayloadMatchesServer(payload, message);
+      await this.store.savePlaintext(message.id, { payload, failure: null, expiresAt: message.expiresAt ?? null });
       return { status: "decrypted", payload };
     } catch (error) {
       if (!isChatCryptoError(error)) return { status: "failed", reason: "UNKNOWN" };
-      if (error.code !== "DUPLICATE_MESSAGE") await this.store.savePlaintext(message.id, { payload: null, failure: error.code });
+      if (!retryableFailures.has(error.code)) await this.store.savePlaintext(message.id, { payload: null, failure: error.code, expiresAt: message.expiresAt ?? null });
       return { status: "failed", reason: error.code };
     }
+  }
+
+  private trustCheck(senderId: string, senderDeviceId: string) {
+    return async (identityKey: Bytes) => {
+      const lookup = async (fresh: boolean) => (await this.recipients.resolve([senderId], { fresh })).find((device) => device.deviceId === senderDeviceId);
+      const listed = (await lookup(false)) ?? (await lookup(true));
+      return listed !== undefined && bytesEqual(decodeBase64(listed.identityKey), identityKey);
+    };
+  }
+
+  private async drainMailboxThrottled(identity: DeviceIdentity): Promise<boolean> {
+    const nowMs = this.now().getTime();
+    if (nowMs - this.mailboxCheckedAt < mailboxRecheckMilliseconds) return false;
+    this.mailboxCheckedAt = nowMs;
+    const applied = await drainMailbox({ store: this.store, directory: this.options.directory, cipher: this.cipher(identity), deviceId: identity.deviceId, isTrusted: (senderId, deviceId) => this.trustCheck(senderId, deviceId) }).catch(() => 0);
+    return applied > 0;
+  }
+
+  private async loadLivePlaintext(messageId: string) {
+    const cached = await this.store.loadPlaintext(messageId);
+    if (cached?.expiresAt && cached.expiresAt <= this.now().toISOString()) {
+      await this.store.deletePlaintext(messageId);
+      return null;
+    }
+    return cached;
+  }
+
+  public purgeExpiredPlaintext(): Promise<number> {
+    return this.exclusive(async () => {
+      let purged = 0;
+      for (const messageId of await this.store.plaintextMessageIds()) if ((await this.store.loadPlaintext(messageId)) !== null && (await this.loadLivePlaintext(messageId)) === null) purged += 1;
+      return purged;
+    });
   }
 
   private async openEnvelope(identity: DeviceIdentity, message: IncomingMessage, envelope: MessageEnvelope): Promise<Bytes> {
     const cipher = this.cipher(identity);
     const entry = envelope.r.find((candidate) => candidate.u === identity.userId && candidate.d === identity.deviceId);
-    const isTrusted = async (identityKey: Bytes) => {
-      const lookup = async (fresh: boolean) => (await this.recipients.resolve([message.senderId], { fresh })).find((device) => device.deviceId === envelope.s);
-      const listed = (await lookup(false)) ?? (await lookup(true));
-      return listed !== undefined && bytesEqual(decodeBase64(listed.identityKey), identityKey);
-    };
+    const isTrusted = this.trustCheck(message.senderId, envelope.s);
     const openEntry = async () => {
       if (entry === undefined) throw new ChatCryptoError("NOT_FOR_THIS_DEVICE", "This message was not encrypted for this device.");
       return cipher.decrypt(message.senderId, envelope.s, decodeBase64(entry.b), isTrusted);
@@ -228,7 +280,7 @@ export class ChatCryptoClient {
   }
 
   public rememberPlaintext(messageId: string, payload: ChatPayload): Promise<void> {
-    return this.exclusive(() => this.store.savePlaintext(messageId, { payload, failure: null }));
+    return this.exclusive(() => this.store.savePlaintext(messageId, { payload, failure: null, expiresAt: null }));
   }
 
   public forgetMessages(messageIds: readonly string[]): Promise<void> {
