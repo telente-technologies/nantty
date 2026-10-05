@@ -42,6 +42,12 @@ const (
 	FieldFailedAttempts = "failed_attempts"
 	// FieldLockedUntil holds the string denoting the locked_until field in the database.
 	FieldLockedUntil = "locked_until"
+	// FieldRecoveryCodeHashes holds the string denoting the recovery_code_hashes field in the database.
+	FieldRecoveryCodeHashes = "recovery_code_hashes"
+	// FieldIPAllowList holds the string denoting the ip_allow_list field in the database.
+	FieldIPAllowList = "ip_allow_list"
+	// FieldThemePreference holds the string denoting the theme_preference field in the database.
+	FieldThemePreference = "theme_preference"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
 	// FieldApprovedBy holds the string denoting the approved_by field in the database.
@@ -56,6 +62,10 @@ const (
 	EdgeChallenges = "challenges"
 	// EdgeInvitations holds the string denoting the invitations edge name in mutations.
 	EdgeInvitations = "invitations"
+	// EdgePasskeys holds the string denoting the passkeys edge name in mutations.
+	EdgePasskeys = "passkeys"
+	// EdgeConsents holds the string denoting the consents edge name in mutations.
+	EdgeConsents = "consents"
 	// Table holds the table name of the staffaccount in the database.
 	Table = "staff_accounts"
 	// SessionsTable is the table that holds the sessions relation/edge.
@@ -79,6 +89,20 @@ const (
 	InvitationsInverseTable = "staff_invitations"
 	// InvitationsColumn is the table column denoting the invitations relation/edge.
 	InvitationsColumn = "staff_id"
+	// PasskeysTable is the table that holds the passkeys relation/edge.
+	PasskeysTable = "staff_webauthn_credentials"
+	// PasskeysInverseTable is the table name for the StaffWebauthnCredential entity.
+	// It exists in this package in order to avoid circular dependency with the "staffwebauthncredential" package.
+	PasskeysInverseTable = "staff_webauthn_credentials"
+	// PasskeysColumn is the table column denoting the passkeys relation/edge.
+	PasskeysColumn = "staff_id"
+	// ConsentsTable is the table that holds the consents relation/edge.
+	ConsentsTable = "staff_consents"
+	// ConsentsInverseTable is the table name for the StaffConsent entity.
+	// It exists in this package in order to avoid circular dependency with the "staffconsent" package.
+	ConsentsInverseTable = "staff_consents"
+	// ConsentsColumn is the table column denoting the consents relation/edge.
+	ConsentsColumn = "staff_id"
 )
 
 // Columns holds all SQL columns for staffaccount fields.
@@ -97,6 +121,9 @@ var Columns = []string{
 	FieldTotpLastUsedStep,
 	FieldFailedAttempts,
 	FieldLockedUntil,
+	FieldRecoveryCodeHashes,
+	FieldIPAllowList,
+	FieldThemePreference,
 	FieldCreatedBy,
 	FieldApprovedBy,
 	FieldApprovedAt,
@@ -132,6 +159,10 @@ var (
 	DefaultFailedAttempts int
 	// FailedAttemptsValidator is a validator for the "failed_attempts" field. It is called by the builders before save.
 	FailedAttemptsValidator func(int) error
+	// DefaultRecoveryCodeHashes holds the default value on creation for the "recovery_code_hashes" field.
+	DefaultRecoveryCodeHashes []string
+	// DefaultIPAllowList holds the default value on creation for the "ip_allow_list" field.
+	DefaultIPAllowList []string
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -194,6 +225,33 @@ func StatusValidator(s Status) error {
 	}
 }
 
+// ThemePreference defines the type for the "theme_preference" enum field.
+type ThemePreference string
+
+// ThemePreferenceSystem is the default value of the ThemePreference enum.
+const DefaultThemePreference = ThemePreferenceSystem
+
+// ThemePreference values.
+const (
+	ThemePreferenceLight  ThemePreference = "light"
+	ThemePreferenceDark   ThemePreference = "dark"
+	ThemePreferenceSystem ThemePreference = "system"
+)
+
+func (tp ThemePreference) String() string {
+	return string(tp)
+}
+
+// ThemePreferenceValidator is a validator for the "theme_preference" field enum values. It is called by the builders before save.
+func ThemePreferenceValidator(tp ThemePreference) error {
+	switch tp {
+	case ThemePreferenceLight, ThemePreferenceDark, ThemePreferenceSystem:
+		return nil
+	default:
+		return fmt.Errorf("staffaccount: invalid enum value for theme_preference field: %q", tp)
+	}
+}
+
 // OrderOption defines the ordering options for the StaffAccount queries.
 type OrderOption func(*sql.Selector)
 
@@ -250,6 +308,11 @@ func ByFailedAttempts(opts ...sql.OrderTermOption) OrderOption {
 // ByLockedUntil orders the results by the locked_until field.
 func ByLockedUntil(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLockedUntil, opts...).ToFunc()
+}
+
+// ByThemePreference orders the results by the theme_preference field.
+func ByThemePreference(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldThemePreference, opts...).ToFunc()
 }
 
 // ByCreatedBy orders the results by the created_by field.
@@ -313,6 +376,34 @@ func ByInvitations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newInvitationsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPasskeysCount orders the results by passkeys count.
+func ByPasskeysCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPasskeysStep(), opts...)
+	}
+}
+
+// ByPasskeys orders the results by passkeys terms.
+func ByPasskeys(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPasskeysStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByConsentsCount orders the results by consents count.
+func ByConsentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newConsentsStep(), opts...)
+	}
+}
+
+// ByConsents orders the results by consents terms.
+func ByConsents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newConsentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newSessionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -332,5 +423,19 @@ func newInvitationsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(InvitationsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, InvitationsTable, InvitationsColumn),
+	)
+}
+func newPasskeysStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PasskeysInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PasskeysTable, PasskeysColumn),
+	)
+}
+func newConsentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ConsentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ConsentsTable, ConsentsColumn),
 	)
 }

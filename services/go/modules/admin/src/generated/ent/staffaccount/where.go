@@ -636,6 +636,26 @@ func LockedUntilNotNil() predicate.StaffAccount {
 	return predicate.StaffAccount(sql.FieldNotNull(FieldLockedUntil))
 }
 
+// ThemePreferenceEQ applies the EQ predicate on the "theme_preference" field.
+func ThemePreferenceEQ(v ThemePreference) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldEQ(FieldThemePreference, v))
+}
+
+// ThemePreferenceNEQ applies the NEQ predicate on the "theme_preference" field.
+func ThemePreferenceNEQ(v ThemePreference) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldNEQ(FieldThemePreference, v))
+}
+
+// ThemePreferenceIn applies the In predicate on the "theme_preference" field.
+func ThemePreferenceIn(vs ...ThemePreference) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldIn(FieldThemePreference, vs...))
+}
+
+// ThemePreferenceNotIn applies the NotIn predicate on the "theme_preference" field.
+func ThemePreferenceNotIn(vs ...ThemePreference) predicate.StaffAccount {
+	return predicate.StaffAccount(sql.FieldNotIn(FieldThemePreference, vs...))
+}
+
 // CreatedByEQ applies the EQ predicate on the "created_by" field.
 func CreatedByEQ(v uuid.UUID) predicate.StaffAccount {
 	return predicate.StaffAccount(sql.FieldEQ(FieldCreatedBy, v))
@@ -887,6 +907,52 @@ func HasInvitations() predicate.StaffAccount {
 func HasInvitationsWith(preds ...predicate.StaffInvitation) predicate.StaffAccount {
 	return predicate.StaffAccount(func(s *sql.Selector) {
 		step := newInvitationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPasskeys applies the HasEdge predicate on the "passkeys" edge.
+func HasPasskeys() predicate.StaffAccount {
+	return predicate.StaffAccount(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PasskeysTable, PasskeysColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPasskeysWith applies the HasEdge predicate on the "passkeys" edge with a given conditions (other predicates).
+func HasPasskeysWith(preds ...predicate.StaffWebauthnCredential) predicate.StaffAccount {
+	return predicate.StaffAccount(func(s *sql.Selector) {
+		step := newPasskeysStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasConsents applies the HasEdge predicate on the "consents" edge.
+func HasConsents() predicate.StaffAccount {
+	return predicate.StaffAccount(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ConsentsTable, ConsentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasConsentsWith applies the HasEdge predicate on the "consents" edge with a given conditions (other predicates).
+func HasConsentsWith(preds ...predicate.StaffConsent) predicate.StaffAccount {
+	return predicate.StaffAccount(func(s *sql.Selector) {
+		step := newConsentsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

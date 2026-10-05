@@ -68,6 +68,18 @@ func (f StaffAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StaffAccountMutation", m)
 }
 
+// The StaffConsentFunc type is an adapter to allow the use of ordinary
+// function as StaffConsent mutator.
+type StaffConsentFunc func(context.Context, *ent.StaffConsentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StaffConsentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StaffConsentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StaffConsentMutation", m)
+}
+
 // The StaffInvitationFunc type is an adapter to allow the use of ordinary
 // function as StaffInvitation mutator.
 type StaffInvitationFunc func(context.Context, *ent.StaffInvitationMutation) (ent.Value, error)
@@ -114,6 +126,18 @@ func (f StaffSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StaffSessionMutation", m)
+}
+
+// The StaffWebauthnCredentialFunc type is an adapter to allow the use of ordinary
+// function as StaffWebauthnCredential mutator.
+type StaffWebauthnCredentialFunc func(context.Context, *ent.StaffWebauthnCredentialMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StaffWebauthnCredentialFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StaffWebauthnCredentialMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StaffWebauthnCredentialMutation", m)
 }
 
 // Condition is a hook condition function.

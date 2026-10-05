@@ -21,6 +21,9 @@ type PlatformSettingRevision func(*sql.Selector)
 // StaffAccount is the predicate function for staffaccount builders.
 type StaffAccount func(*sql.Selector)
 
+// StaffConsent is the predicate function for staffconsent builders.
+type StaffConsent func(*sql.Selector)
+
 // StaffInvitation is the predicate function for staffinvitation builders.
 type StaffInvitation func(*sql.Selector)
 
@@ -32,3 +35,6 @@ type StaffRole func(*sql.Selector)
 
 // StaffSession is the predicate function for staffsession builders.
 type StaffSession func(*sql.Selector)
+
+// StaffWebauthnCredential is the predicate function for staffwebauthncredential builders.
+type StaffWebauthnCredential func(*sql.Selector)

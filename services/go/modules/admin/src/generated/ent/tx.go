@@ -24,6 +24,8 @@ type Tx struct {
 	PlatformSettingRevision *PlatformSettingRevisionClient
 	// StaffAccount is the client for interacting with the StaffAccount builders.
 	StaffAccount *StaffAccountClient
+	// StaffConsent is the client for interacting with the StaffConsent builders.
+	StaffConsent *StaffConsentClient
 	// StaffInvitation is the client for interacting with the StaffInvitation builders.
 	StaffInvitation *StaffInvitationClient
 	// StaffLoginChallenge is the client for interacting with the StaffLoginChallenge builders.
@@ -32,6 +34,8 @@ type Tx struct {
 	StaffRole *StaffRoleClient
 	// StaffSession is the client for interacting with the StaffSession builders.
 	StaffSession *StaffSessionClient
+	// StaffWebauthnCredential is the client for interacting with the StaffWebauthnCredential builders.
+	StaffWebauthnCredential *StaffWebauthnCredentialClient
 
 	// lazily loaded.
 	client     *Client
@@ -168,10 +172,12 @@ func (tx *Tx) init() {
 	tx.PlatformSetting = NewPlatformSettingClient(tx.config)
 	tx.PlatformSettingRevision = NewPlatformSettingRevisionClient(tx.config)
 	tx.StaffAccount = NewStaffAccountClient(tx.config)
+	tx.StaffConsent = NewStaffConsentClient(tx.config)
 	tx.StaffInvitation = NewStaffInvitationClient(tx.config)
 	tx.StaffLoginChallenge = NewStaffLoginChallengeClient(tx.config)
 	tx.StaffRole = NewStaffRoleClient(tx.config)
 	tx.StaffSession = NewStaffSessionClient(tx.config)
+	tx.StaffWebauthnCredential = NewStaffWebauthnCredentialClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

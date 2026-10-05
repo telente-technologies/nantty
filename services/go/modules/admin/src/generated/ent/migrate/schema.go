@@ -135,6 +135,9 @@ var (
 		{Name: "totp_last_used_step", Type: field.TypeInt64, Default: 0},
 		{Name: "failed_attempts", Type: field.TypeInt, Default: 0},
 		{Name: "locked_until", Type: field.TypeTime, Nullable: true},
+		{Name: "recovery_code_hashes", Type: field.TypeJSON},
+		{Name: "ip_allow_list", Type: field.TypeJSON},
+		{Name: "theme_preference", Type: field.TypeEnum, Enums: []string{"light", "dark", "system"}, Default: "system"},
 		{Name: "created_by", Type: field.TypeUUID, Nullable: true},
 		{Name: "approved_by", Type: field.TypeUUID, Nullable: true},
 		{Name: "approved_at", Type: field.TypeTime, Nullable: true},
@@ -150,6 +153,39 @@ var (
 				Name:    "staffaccount_email",
 				Unique:  true,
 				Columns: []*schema.Column{StaffAccountsColumns[2]},
+			},
+		},
+	}
+	// StaffConsentsColumns holds the columns for the "staff_consents" table.
+	StaffConsentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "policy_version", Type: field.TypeString, Size: 40},
+		{Name: "categories", Type: field.TypeJSON},
+		{Name: "source", Type: field.TypeString, Size: 40},
+		{Name: "decided_at", Type: field.TypeTime},
+		{Name: "ip_address", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "user_agent", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "staff_id", Type: field.TypeUUID},
+	}
+	// StaffConsentsTable holds the schema information for the "staff_consents" table.
+	StaffConsentsTable = &schema.Table{
+		Name:       "staff_consents",
+		Columns:    StaffConsentsColumns,
+		PrimaryKey: []*schema.Column{StaffConsentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "staff_consents_staff_accounts_consents",
+				Columns:    []*schema.Column{StaffConsentsColumns[8]},
+				RefColumns: []*schema.Column{StaffAccountsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "staffconsent_staff_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{StaffConsentsColumns[8], StaffConsentsColumns[1]},
 			},
 		},
 	}
@@ -192,6 +228,7 @@ var (
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "consumed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "attempts", Type: field.TypeInt, Default: 0},
+		{Name: "webauthn_session", Type: field.TypeBytes, Nullable: true},
 		{Name: "staff_id", Type: field.TypeUUID},
 	}
 	// StaffLoginChallengesTable holds the schema information for the "staff_login_challenges" table.
@@ -202,7 +239,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "staff_login_challenges_staff_accounts_challenges",
-				Columns:    []*schema.Column{StaffLoginChallengesColumns[7]},
+				Columns:    []*schema.Column{StaffLoginChallengesColumns[8]},
 				RefColumns: []*schema.Column{StaffAccountsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -250,6 +287,9 @@ var (
 		{Name: "last_used_at", Type: field.TypeTime},
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "webauthn_session", Type: field.TypeBytes, Nullable: true},
+		{Name: "webauthn_ceremony", Type: field.TypeEnum, Nullable: true, Enums: []string{"register", "step_up"}},
+		{Name: "webauthn_expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "staff_id", Type: field.TypeUUID},
 	}
 	// StaffSessionsTable holds the schema information for the "staff_sessions" table.
@@ -260,7 +300,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "staff_sessions_staff_accounts_sessions",
-				Columns:    []*schema.Column{StaffSessionsColumns[9]},
+				Columns:    []*schema.Column{StaffSessionsColumns[12]},
 				RefColumns: []*schema.Column{StaffAccountsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -279,7 +319,45 @@ var (
 			{
 				Name:    "staffsession_staff_id_revoked_at",
 				Unique:  false,
-				Columns: []*schema.Column{StaffSessionsColumns[9], StaffSessionsColumns[8]},
+				Columns: []*schema.Column{StaffSessionsColumns[12], StaffSessionsColumns[8]},
+			},
+		},
+	}
+	// StaffWebauthnCredentialsColumns holds the columns for the "staff_webauthn_credentials" table.
+	StaffWebauthnCredentialsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "credential_id", Type: field.TypeString, Size: 1024},
+		{Name: "credential", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "sign_count", Type: field.TypeInt64, Default: 0},
+		{Name: "transports", Type: field.TypeJSON},
+		{Name: "label", Type: field.TypeString, Size: 60},
+		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
+		{Name: "staff_id", Type: field.TypeUUID},
+	}
+	// StaffWebauthnCredentialsTable holds the schema information for the "staff_webauthn_credentials" table.
+	StaffWebauthnCredentialsTable = &schema.Table{
+		Name:       "staff_webauthn_credentials",
+		Columns:    StaffWebauthnCredentialsColumns,
+		PrimaryKey: []*schema.Column{StaffWebauthnCredentialsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "staff_webauthn_credentials_staff_accounts_passkeys",
+				Columns:    []*schema.Column{StaffWebauthnCredentialsColumns[8]},
+				RefColumns: []*schema.Column{StaffAccountsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "staffwebauthncredential_credential_id",
+				Unique:  true,
+				Columns: []*schema.Column{StaffWebauthnCredentialsColumns[2]},
+			},
+			{
+				Name:    "staffwebauthncredential_staff_id",
+				Unique:  false,
+				Columns: []*schema.Column{StaffWebauthnCredentialsColumns[8]},
 			},
 		},
 	}
@@ -290,15 +368,19 @@ var (
 		PlatformSettingsTable,
 		PlatformSettingRevisionsTable,
 		StaffAccountsTable,
+		StaffConsentsTable,
 		StaffInvitationsTable,
 		StaffLoginChallengesTable,
 		StaffRolesTable,
 		StaffSessionsTable,
+		StaffWebauthnCredentialsTable,
 	}
 )
 
 func init() {
+	StaffConsentsTable.ForeignKeys[0].RefTable = StaffAccountsTable
 	StaffInvitationsTable.ForeignKeys[0].RefTable = StaffAccountsTable
 	StaffLoginChallengesTable.ForeignKeys[0].RefTable = StaffAccountsTable
 	StaffSessionsTable.ForeignKeys[0].RefTable = StaffAccountsTable
+	StaffWebauthnCredentialsTable.ForeignKeys[0].RefTable = StaffAccountsTable
 }
