@@ -86,4 +86,5 @@ export interface Message {
   readonly readAt?: ISODate | null;
   readonly encryption?: MessageEncryptionEnvelope | null;
   readonly mentions?: readonly MentionEntity[];
+  readonly decryptionNotice?: string | null;
 }

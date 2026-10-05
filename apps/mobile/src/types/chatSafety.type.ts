@@ -55,7 +55,7 @@ export interface SharedContentCard {
 export interface MessageEncryptionEnvelope {
   readonly deviceId: string;
   readonly ciphertext: string | null;
-  readonly protocol: "signal-v1-pending";
+  readonly protocol: string;
 }
 
 export type ChatStreakState = "none" | "active" | "broken";
@@ -77,6 +77,7 @@ export interface ChatStreak {
 export interface SendToChatsInput {
   readonly conversationIds: readonly ID[];
   readonly reference: SharedContentReference;
+  readonly encryptions?: readonly { readonly conversationId: ID; readonly deviceId: string; readonly ciphertext: string }[];
 }
 
 export interface SendToChatsResult {

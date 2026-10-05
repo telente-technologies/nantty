@@ -3,7 +3,7 @@ import * as Crypto from "expo-crypto";
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import type { ChatReportEvidenceAttachment, ChatReportEvidenceMessage } from "@/types";
 
-const isReportableMessage = (message: LocallyStoredMessage) => message.deliveryStatus === "sent" && message.kind !== "system";
+const isReportableMessage = (message: LocallyStoredMessage) => message.deliveryStatus === "sent" && message.kind !== "system" && !message.decryptionNotice;
 
 export const listReportableMessagesOldestFirst = (messages: readonly LocallyStoredMessage[]) => messages.filter(isReportableMessage);
 

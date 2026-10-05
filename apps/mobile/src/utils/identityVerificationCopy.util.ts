@@ -3,6 +3,7 @@ const reasonCopy: Record<string, string> = {
   real_followers_below_threshold: "Grow your real, active followers.",
   low_recent_activity: "Post original content regularly.",
   recent_violation: "Go a while without any strikes on your account.",
+  email_not_verified: "Verify your email address.",
   high_fraud_score: "Some recent activity on your account needs to settle down.",
   completed_orders_below_threshold: "Complete more orders in your store.",
   success_rate_below_threshold: "Keep your order success rate high.",
