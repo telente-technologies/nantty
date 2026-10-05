@@ -171,6 +171,7 @@ export const SpeakerHigh24Icon = phosphorIcon(SpeakerHighIcon);
 export const Speedometer24Icon = phosphorIcon(GaugeIcon);
 export const SquaresFour24Icon = phosphorIcon(SquaresFourIcon);
 export const Star16Icon = phosphorIcon(StarIcon, { weight: "fill", ink: "#F59E0B", width: 16 });
+export const StarOutline16Icon = phosphorIcon(StarIcon, { weight: "regular", ink: "#A6A6A6", width: 16 });
 export const Tag24Icon = phosphorIcon(TagIcon);
 export const TextIndent24Icon = phosphorIcon(TextIndentIcon);
 export const Trash24Icon = phosphorIcon(TrashIcon, { ink: "#FF3B30" });

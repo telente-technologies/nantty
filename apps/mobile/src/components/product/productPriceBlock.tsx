@@ -5,6 +5,7 @@ import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { Product } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
+import { starsLabel } from "@/utils/productReviews.util";
 
 import { MoneyAmount } from "./moneyAmount";
 import { SponsoredLabel } from "./productCard";
@@ -49,7 +50,7 @@ export function ProductPriceBlock({ product, bookmarked, saveCount, onShare, onT
           {product.title}
         </Text>
       </View>
-      <Pressable accessibilityRole="button" accessibilityLabel={`Rated ${product.rating}, see reviews`} onPress={onPressRating} style={styles.rating}>
+      <Pressable accessibilityRole="button" accessibilityLabel={`Rated ${starsLabel(product.rating)}, see reviews`} onPress={onPressRating} style={styles.rating}>
         <Text size={12} weight={500} lineHeight={14.4}>
           {product.rating.toFixed(1)}
         </Text>
