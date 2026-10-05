@@ -12,7 +12,7 @@ import type {
 } from "@/types";
 import type { CreatorSubscriptionCheckout, CreatorSubscriptionPlan, CreatorSubscriptionState } from "@/types/creator.type";
 
-import { createIdempotencyKey, sendRequestToWebappServer } from "./clientApi.service";
+import { createIdempotencyKey, sendListRequestToWebappServer, sendRequestToWebappServer } from "./clientApi.service";
 
 export type ReportTargetType = "post" | "clip" | "comment" | "live" | "user" | "product" | "message";
 export type ShareReferenceKind = "post" | "clip" | "video" | "product" | "live" | "store" | "profile";
@@ -44,10 +44,10 @@ export const reportsService = {
 };
 
 export const chatSharesService = {
-  shareIntoChats: (conversationIds: readonly ID[], kind: ShareReferenceKind, referenceId: ID, note: string) =>
+  shareIntoChats: (conversationIds: readonly ID[], kind: ShareReferenceKind, referenceId: ID) =>
     sendRequestToWebappServer<{ sentCount: number; shareCount: number }>("/api/v1/chat/shares", {
       method: "POST",
-      body: { conversationIds, reference: { kind, id: referenceId }, note },
+      body: { conversationIds, reference: { kind: kind === "video" ? "post" : kind, id: referenceId } },
       idempotencyKey: createIdempotencyKey("share"),
     }),
 };
@@ -56,16 +56,16 @@ export const liveService = {
   fetchLiveSession: (liveId: ID) => sendRequestToWebappServer<LiveSessionDetails>(`/api/v1/lives/${liveId}`),
   fetchLiveComments: (liveId: ID) => sendRequestToWebappServer<Page<LiveComment>>(`/api/v1/lives/${liveId}/comments`),
   postLiveComment: (liveId: ID, text: string) => sendRequestToWebappServer<LiveComment>(`/api/v1/lives/${liveId}/comments`, { method: "POST", body: { text } }),
-  fetchGiftCatalog: () => sendRequestToWebappServer<LiveGift[]>("/api/v1/gifts"),
+  fetchGiftCatalog: () => sendListRequestToWebappServer<LiveGift>("/api/v1/gifts"),
   sendGift: (liveId: ID, giftId: ID, quantity: number) =>
     sendRequestToWebappServer<SentLiveGiftReceipt>(`/api/v1/lives/${liveId}/gifts`, { method: "POST", body: { giftId, quantity }, idempotencyKey: createIdempotencyKey("gift") }),
 };
 
 export const coinsService = {
   fetchCoinBalance: () => sendRequestToWebappServer<CoinBalance>("/api/v1/coins/balance"),
-  fetchWebCoinPackages: () => sendRequestToWebappServer<CoinPackage[]>("/api/v1/coins/packages", { query: { channel: "web" } }),
+  fetchWebCoinPackages: () => sendListRequestToWebappServer<CoinPackage>("/api/v1/coins/packages"),
   startCoinPurchase: (packageId: ID) =>
-    sendRequestToWebappServer<CoinPurchaseCheckout>("/api/v1/coins/purchases", { method: "POST", body: { packageId, channel: "web" }, idempotencyKey: createIdempotencyKey("coins") }),
+    sendRequestToWebappServer<CoinPurchaseCheckout>("/api/v1/coins/purchases", { method: "POST", body: { packageId }, idempotencyKey: createIdempotencyKey("coins") }),
   confirmCoinPurchase: (reference: string) =>
     sendRequestToWebappServer<{ status: "pending" | "succeeded" | "failed"; coins: number }>(`/api/v1/coins/purchases/${encodeURIComponent(reference)}/verify`, { method: "POST" }),
 };

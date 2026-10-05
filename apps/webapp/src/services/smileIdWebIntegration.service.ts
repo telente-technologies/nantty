@@ -31,8 +31,6 @@ function loadSmileIdScript(): Promise<void> {
   });
 }
 
-// Opens Smile ID's hosted web integration (selfie liveness, ID capture, face match) over the page. The result
-// reaches Zudomart through Smile ID's signed server callback, never from the browser.
 export async function openSmileIdCapture(session: IdentityCaptureSession, policyUrl: string): Promise<"submitted" | "closed"> {
   await loadSmileIdScript();
   return new Promise((resolve, reject) => {

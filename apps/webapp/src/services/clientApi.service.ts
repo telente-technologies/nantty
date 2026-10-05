@@ -112,6 +112,10 @@ export function readErrorMessageForDisplay(error: unknown): string {
   return "Something went wrong. Try again.";
 }
 
+export function isSignInRequiredError(error: unknown): boolean {
+  return error instanceof WebappRequestError && error.status === 401 && (error.code === "UNAUTHENTICATED" || error.code === "SESSION_EXPIRED");
+}
+
 export function isNetworkFailureError(error: unknown): boolean {
   return error instanceof WebappRequestError && error.isNetworkFailure;
 }
