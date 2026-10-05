@@ -23,7 +23,8 @@ type Container struct {
 	Directory        interfaces.ParticipantDirectory
 	Media            interfaces.MediaRoomController
 	Tokens           *integrations.TokenIssuer
-	PinPolicy        interfaces.ProductPinPolicy
+	Catalog          interfaces.StoreCatalog
+	Subscribers      interfaces.SubscriberDirectory
 	Logger           *slog.Logger
 	Now              func() time.Time
 	AccessVerifier   *jwtauth.AccessTokenVerifier

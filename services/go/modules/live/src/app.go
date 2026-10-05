@@ -51,6 +51,8 @@ type Collaborators struct {
 	Recorder         interfaces.RecordingController
 	RecordingStorage interfaces.RecordingStorage
 	Relations        interfaces.SocialRelations
+	Catalog          interfaces.StoreCatalog
+	Subscribers      interfaces.SubscriberDirectory
 	SafetyCapture    interfaces.SafetyCaptureController
 	SafetyObjects    interfaces.SafetyObjectLister
 	Jobs             platformevents.JobQueue
@@ -105,8 +107,8 @@ func StartLiveModuleWithSettings(ctx context.Context, settings configs.LiveSetti
 	}
 	module.Container = &container.Container{
 		Client: client, Settings: settings, Money: collaborators.Money, Directory: collaborators.Directory, Media: collaborators.Media,
-		Tokens:    &integrations.TokenIssuer{ApiKey: settings.LiveKitApiKey, ApiSecret: settings.LiveKitApiSecret, PublicUrl: settings.LiveKitPublicUrl},
-		PinPolicy: integrations.RolesProductPinPolicy{}, Logger: logger, Now: time.Now, AccessVerifier: collaborators.Verifier, StaffVerifier: collaborators.StaffVerifier,
+		Tokens:  &integrations.TokenIssuer{ApiKey: settings.LiveKitApiKey, ApiSecret: settings.LiveKitApiSecret, PublicUrl: settings.LiveKitPublicUrl},
+		Catalog: collaborators.Catalog, Subscribers: collaborators.Subscribers, Logger: logger, Now: time.Now, AccessVerifier: collaborators.Verifier, StaffVerifier: collaborators.StaffVerifier,
 		IdempotencyStore: module.openIdempotencyStore(settings, logger),
 		Ingress:          collaborators.Ingress, Recorder: collaborators.Recorder, RecordingStorage: collaborators.RecordingStorage, Relations: collaborators.Relations,
 		SafetyCapture: collaborators.SafetyCapture, SafetyObjects: collaborators.SafetyObjects, Jobs: collaborators.Jobs,

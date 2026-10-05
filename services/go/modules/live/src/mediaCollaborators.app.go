@@ -13,8 +13,17 @@ func completeMediaAndSocialCollaborators(ctx context.Context, collaborators *Col
 	if collaborators.Ingress == nil {
 		collaborators.Ingress = integrations.NewLiveKitIngressController(settings.LiveKitUrl, settings.LiveKitApiKey, settings.LiveKitApiSecret)
 	}
+	if collaborators.Subscribers == nil {
+		collaborators.Subscribers = integrations.SchemaCreatorSubscriptions{Database: database, Schema: settings.SubscriptionsSchema, TolerateUnreadableTables: !settings.IsProduction(), Logger: logger}
+	}
 	if collaborators.Relations == nil {
-		collaborators.Relations = integrations.SchemaSocialRelations{Database: database, SocialSchema: "social", IdentitySchema: "users", NotificationsSchema: "notifications", TolerateUnreadableTables: !settings.IsProduction(), Logger: logger}
+		collaborators.Relations = integrations.SchemaSocialRelations{Database: database, SocialSchema: "social", IdentitySchema: "users", NotificationsSchema: "notifications", TolerateUnreadableTables: !settings.IsProduction(), Logger: logger, Subscribers: collaborators.Subscribers}
+	}
+	if collaborators.Catalog == nil {
+		if settings.CatalogInternalUrl == "" {
+			logger.Warn("LIVE_CATALOG_INTERNAL_URL is not set: store lives and product pins are refused")
+		}
+		collaborators.Catalog = integrations.NewHttpStoreCatalog(settings.CatalogInternalUrl, settings.CatalogInternalToken, settings.CatalogCallTimeout)
 	}
 	if err := completeSafetyCaptureCollaborators(ctx, collaborators, settings, logger); err != nil {
 		return err

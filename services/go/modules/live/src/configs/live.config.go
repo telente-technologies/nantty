@@ -36,6 +36,10 @@ type LiveSettings struct {
 	LiveAdTermsCurrentVersion       string
 	GiftPlatformBurstLimitPerSecond int
 	InternalApiToken                string
+	CatalogInternalUrl              string
+	CatalogInternalToken            string
+	CatalogCallTimeout              time.Duration
+	SubscriptionsSchema             string
 	EventsQueueName                 string
 	PlatformBlockedWords            []string
 	RecordingBucket                 string
@@ -79,6 +83,10 @@ func ReadLiveSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) L
 		LiveAdTermsCurrentVersion:       reader.ReadStringOrDefault("LIVE_AD_TERMS_VERSION", "2026-10"),
 		GiftPlatformBurstLimitPerSecond: reader.ReadIntegerOrDefault("LIVE_GIFT_BURST_LIMIT_PER_SECOND", 10),
 		InternalApiToken:                reader.ReadStringOrDefault("LIVE_INTERNAL_API_TOKEN", ""),
+		CatalogInternalUrl:              reader.ReadStringOrDefault("LIVE_CATALOG_INTERNAL_URL", ""),
+		CatalogInternalToken:            reader.ReadStringOrDefault("LIVE_CATALOG_INTERNAL_TOKEN", ""),
+		CatalogCallTimeout:              reader.ReadDurationOrDefault("LIVE_CATALOG_CALL_TIMEOUT", 3*time.Second),
+		SubscriptionsSchema:             reader.ReadStringOrDefault("LIVE_SUBSCRIPTIONS_SCHEMA", "subscriptions"),
 		EventsQueueName:                 reader.ReadStringOrDefault("LIVE_EVENTS_QUEUE", ""),
 		PlatformBlockedWords:            splitCommaSeparatedWords(reader.ReadStringOrDefault("LIVE_PLATFORM_BLOCKED_WORDS", "")),
 		RecordingBucket:                 reader.ReadStringOrDefault("LIVE_RECORDING_S3_BUCKET", ""),
@@ -94,6 +102,8 @@ func ReadLiveSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) L
 	if settings.IsProduction() {
 		settings.MoneyGrpcAddress = reader.ReadRequiredString("LIVE_MONEY_GRPC_ADDRESS")
 		settings.AccountDirectoryGrpcAddress = reader.ReadRequiredString("LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS")
+		settings.CatalogInternalUrl = reader.ReadRequiredString("LIVE_CATALOG_INTERNAL_URL")
+		settings.CatalogInternalToken = reader.ReadRequiredString("LIVE_CATALOG_INTERNAL_TOKEN")
 		if len(settings.MoneyGrpcToken) < 32 {
 			reader.ReadRequiredString("LIVE_MONEY_GRPC_TOKEN_OF_AT_LEAST_32_CHARACTERS")
 		}

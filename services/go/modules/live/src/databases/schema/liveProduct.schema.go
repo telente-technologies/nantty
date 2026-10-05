@@ -23,6 +23,10 @@ func (LiveProduct) Fields() []ent.Field {
 		field.UUID("product_id", uuid.UUID{}).Immutable(),
 		field.Bool("pinned").Default(false),
 		field.Time("pinned_at").Optional().Nillable().Default(time.Now),
+		field.String("title").Optional().Nillable().MaxLen(200),
+		field.Int64("price_minor").Optional().Nillable(),
+		field.String("currency").Optional().Nillable().MaxLen(3),
+		field.String("image_url").Optional().Nillable().MaxLen(500),
 	}
 }
 
