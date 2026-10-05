@@ -24,6 +24,8 @@ const (
 	FieldPersonalizedAds = "personalized_ads"
 	// FieldMarketing holds the string denoting the marketing field in the database.
 	FieldMarketing = "marketing"
+	// FieldMarketingFrequency holds the string denoting the marketing_frequency field in the database.
+	FieldMarketingFrequency = "marketing_frequency"
 	// FieldWhoCanMessageMe holds the string denoting the who_can_message_me field in the database.
 	FieldWhoCanMessageMe = "who_can_message_me"
 	// FieldWhoCanMentionMe holds the string denoting the who_can_mention_me field in the database.
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldPersonalization,
 	FieldPersonalizedAds,
 	FieldMarketing,
+	FieldMarketingFrequency,
 	FieldWhoCanMessageMe,
 	FieldWhoCanMentionMe,
 	FieldPolicyVersion,
@@ -78,6 +81,33 @@ var (
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
 )
+
+// MarketingFrequency defines the type for the "marketing_frequency" enum field.
+type MarketingFrequency string
+
+// MarketingFrequencyWeekly is the default value of the MarketingFrequency enum.
+const DefaultMarketingFrequency = MarketingFrequencyWeekly
+
+// MarketingFrequency values.
+const (
+	MarketingFrequencyWeekly        MarketingFrequency = "weekly"
+	MarketingFrequencyImportantOnly MarketingFrequency = "important_only"
+	MarketingFrequencyOff           MarketingFrequency = "off"
+)
+
+func (mf MarketingFrequency) String() string {
+	return string(mf)
+}
+
+// MarketingFrequencyValidator is a validator for the "marketing_frequency" field enum values. It is called by the builders before save.
+func MarketingFrequencyValidator(mf MarketingFrequency) error {
+	switch mf {
+	case MarketingFrequencyWeekly, MarketingFrequencyImportantOnly, MarketingFrequencyOff:
+		return nil
+	default:
+		return fmt.Errorf("privacysetting: invalid enum value for marketing_frequency field: %q", mf)
+	}
+}
 
 // WhoCanMessageMe defines the type for the "who_can_message_me" enum field.
 type WhoCanMessageMe string
@@ -165,6 +195,11 @@ func ByPersonalizedAds(opts ...sql.OrderTermOption) OrderOption {
 // ByMarketing orders the results by the marketing field.
 func ByMarketing(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMarketing, opts...).ToFunc()
+}
+
+// ByMarketingFrequency orders the results by the marketing_frequency field.
+func ByMarketingFrequency(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMarketingFrequency, opts...).ToFunc()
 }
 
 // ByWhoCanMessageMe orders the results by the who_can_message_me field.

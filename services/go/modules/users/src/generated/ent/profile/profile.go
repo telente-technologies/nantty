@@ -46,6 +46,10 @@ const (
 	FieldCountryCode = "country_code"
 	// FieldTheme holds the string denoting the theme field in the database.
 	FieldTheme = "theme"
+	// FieldLanguage holds the string denoting the language field in the database.
+	FieldLanguage = "language"
+	// FieldPushNotificationsEnabled holds the string denoting the push_notifications_enabled field in the database.
+	FieldPushNotificationsEnabled = "push_notifications_enabled"
 	// FieldVerified holds the string denoting the verified field in the database.
 	FieldVerified = "verified"
 	// FieldProfileType holds the string denoting the profile_type field in the database.
@@ -83,6 +87,8 @@ var Columns = []string{
 	FieldIsPrivate,
 	FieldCountryCode,
 	FieldTheme,
+	FieldLanguage,
+	FieldPushNotificationsEnabled,
 	FieldVerified,
 	FieldProfileType,
 	FieldStatus,
@@ -132,6 +138,8 @@ var (
 	DefaultIsPrivate bool
 	// CountryCodeValidator is a validator for the "country_code" field. It is called by the builders before save.
 	CountryCodeValidator func(string) error
+	// DefaultPushNotificationsEnabled holds the default value on creation for the "push_notifications_enabled" field.
+	DefaultPushNotificationsEnabled bool
 	// DefaultVerified holds the default value on creation for the "verified" field.
 	DefaultVerified bool
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -217,6 +225,31 @@ func ThemeValidator(t Theme) error {
 		return nil
 	default:
 		return fmt.Errorf("profile: invalid enum value for theme field: %q", t)
+	}
+}
+
+// Language defines the type for the "language" enum field.
+type Language string
+
+// LanguageEn is the default value of the Language enum.
+const DefaultLanguage = LanguageEn
+
+// Language values.
+const (
+	LanguageEn Language = "en"
+)
+
+func (l Language) String() string {
+	return string(l)
+}
+
+// LanguageValidator is a validator for the "language" field enum values. It is called by the builders before save.
+func LanguageValidator(l Language) error {
+	switch l {
+	case LanguageEn:
+		return nil
+	default:
+		return fmt.Errorf("profile: invalid enum value for language field: %q", l)
 	}
 }
 
@@ -355,6 +388,16 @@ func ByCountryCode(opts ...sql.OrderTermOption) OrderOption {
 // ByTheme orders the results by the theme field.
 func ByTheme(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTheme, opts...).ToFunc()
+}
+
+// ByLanguage orders the results by the language field.
+func ByLanguage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLanguage, opts...).ToFunc()
+}
+
+// ByPushNotificationsEnabled orders the results by the push_notifications_enabled field.
+func ByPushNotificationsEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPushNotificationsEnabled, opts...).ToFunc()
 }
 
 // ByVerified orders the results by the verified field.

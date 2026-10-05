@@ -18,6 +18,9 @@ type AccountRestriction func(*sql.Selector)
 // AccountSuspension is the predicate function for accountsuspension builders.
 type AccountSuspension func(*sql.Selector)
 
+// AccountTopic is the predicate function for accounttopic builders.
+type AccountTopic func(*sql.Selector)
+
 // ActingProfile is the predicate function for actingprofile builders.
 type ActingProfile func(*sql.Selector)
 
@@ -107,6 +110,9 @@ type SuggestionDismissal func(*sql.Selector)
 
 // TermsAcceptance is the predicate function for termsacceptance builders.
 type TermsAcceptance func(*sql.Selector)
+
+// Topic is the predicate function for topic builders.
+type Topic func(*sql.Selector)
 
 // UserConsent is the predicate function for userconsent builders.
 type UserConsent func(*sql.Selector)

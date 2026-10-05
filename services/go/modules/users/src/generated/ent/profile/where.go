@@ -116,6 +116,11 @@ func CountryCode(v string) predicate.Profile {
 	return predicate.Profile(sql.FieldEQ(FieldCountryCode, v))
 }
 
+// PushNotificationsEnabled applies equality check predicate on the "push_notifications_enabled" field. It's identical to PushNotificationsEnabledEQ.
+func PushNotificationsEnabled(v bool) predicate.Profile {
+	return predicate.Profile(sql.FieldEQ(FieldPushNotificationsEnabled, v))
+}
+
 // Verified applies equality check predicate on the "verified" field. It's identical to VerifiedEQ.
 func Verified(v bool) predicate.Profile {
 	return predicate.Profile(sql.FieldEQ(FieldVerified, v))
@@ -919,6 +924,36 @@ func ThemeIn(vs ...Theme) predicate.Profile {
 // ThemeNotIn applies the NotIn predicate on the "theme" field.
 func ThemeNotIn(vs ...Theme) predicate.Profile {
 	return predicate.Profile(sql.FieldNotIn(FieldTheme, vs...))
+}
+
+// LanguageEQ applies the EQ predicate on the "language" field.
+func LanguageEQ(v Language) predicate.Profile {
+	return predicate.Profile(sql.FieldEQ(FieldLanguage, v))
+}
+
+// LanguageNEQ applies the NEQ predicate on the "language" field.
+func LanguageNEQ(v Language) predicate.Profile {
+	return predicate.Profile(sql.FieldNEQ(FieldLanguage, v))
+}
+
+// LanguageIn applies the In predicate on the "language" field.
+func LanguageIn(vs ...Language) predicate.Profile {
+	return predicate.Profile(sql.FieldIn(FieldLanguage, vs...))
+}
+
+// LanguageNotIn applies the NotIn predicate on the "language" field.
+func LanguageNotIn(vs ...Language) predicate.Profile {
+	return predicate.Profile(sql.FieldNotIn(FieldLanguage, vs...))
+}
+
+// PushNotificationsEnabledEQ applies the EQ predicate on the "push_notifications_enabled" field.
+func PushNotificationsEnabledEQ(v bool) predicate.Profile {
+	return predicate.Profile(sql.FieldEQ(FieldPushNotificationsEnabled, v))
+}
+
+// PushNotificationsEnabledNEQ applies the NEQ predicate on the "push_notifications_enabled" field.
+func PushNotificationsEnabledNEQ(v bool) predicate.Profile {
+	return predicate.Profile(sql.FieldNEQ(FieldPushNotificationsEnabled, v))
 }
 
 // VerifiedEQ applies the EQ predicate on the "verified" field.

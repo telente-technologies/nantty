@@ -132,6 +132,26 @@ var (
 			},
 		},
 	}
+	// AccountTopicsColumns holds the columns for the "account_topics" table.
+	AccountTopicsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "topic_id", Type: field.TypeString, Size: 40},
+	}
+	// AccountTopicsTable holds the schema information for the "account_topics" table.
+	AccountTopicsTable = &schema.Table{
+		Name:       "account_topics",
+		Columns:    AccountTopicsColumns,
+		PrimaryKey: []*schema.Column{AccountTopicsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "accounttopic_account_id_topic_id",
+				Unique:  true,
+				Columns: []*schema.Column{AccountTopicsColumns[2], AccountTopicsColumns[3]},
+			},
+		},
+	}
 	// ActingProfilesColumns holds the columns for the "acting_profiles" table.
 	ActingProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -747,6 +767,7 @@ var (
 		{Name: "personalization", Type: field.TypeBool, Default: false},
 		{Name: "personalized_ads", Type: field.TypeBool, Default: false},
 		{Name: "marketing", Type: field.TypeBool, Default: false},
+		{Name: "marketing_frequency", Type: field.TypeEnum, Enums: []string{"weekly", "important_only", "off"}, Default: "weekly"},
 		{Name: "who_can_message_me", Type: field.TypeEnum, Enums: []string{"everyone", "following", "followers", "nobody"}, Default: "everyone"},
 		{Name: "who_can_mention_me", Type: field.TypeEnum, Enums: []string{"everyone", "following", "no_one"}, Default: "everyone"},
 		{Name: "policy_version", Type: field.TypeString, Size: 40, Default: ""},
@@ -783,6 +804,8 @@ var (
 		{Name: "is_private", Type: field.TypeBool, Default: false},
 		{Name: "country_code", Type: field.TypeString, Nullable: true, Size: 2},
 		{Name: "theme", Type: field.TypeEnum, Enums: []string{"system", "light", "dark"}, Default: "system"},
+		{Name: "language", Type: field.TypeEnum, Enums: []string{"en"}, Default: "en"},
+		{Name: "push_notifications_enabled", Type: field.TypeBool, Default: true},
 		{Name: "verified", Type: field.TypeBool, Default: false},
 		{Name: "profile_type", Type: field.TypeEnum, Enums: []string{"personal", "business", "brand", "government"}, Default: "personal"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "archived"}, Default: "active"},
@@ -901,6 +924,10 @@ var (
 		{Name: "term", Type: field.TypeString, Size: 30},
 		{Name: "match_kind", Type: field.TypeEnum, Enums: []string{"exact", "prefix", "contains", "brand"}},
 		{Name: "created_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "created_by_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "category", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "note", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "reason", Type: field.TypeString, Size: 500, Default: ""},
 	}
 	// ReservedUsernameRulesTable holds the schema information for the "reserved_username_rules" table.
 	ReservedUsernameRulesTable = &schema.Table{
@@ -1017,6 +1044,19 @@ var (
 			},
 		},
 	}
+	// TopicsColumns holds the columns for the "topics" table.
+	TopicsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 40},
+		{Name: "name", Type: field.TypeString, Size: 60},
+		{Name: "position", Type: field.TypeInt, Default: 0},
+		{Name: "active", Type: field.TypeBool, Default: true},
+	}
+	// TopicsTable holds the schema information for the "topics" table.
+	TopicsTable = &schema.Table{
+		Name:       "topics",
+		Columns:    TopicsColumns,
+		PrimaryKey: []*schema.Column{TopicsColumns[0]},
+	}
 	// UserConsentsColumns holds the columns for the "user_consents" table.
 	UserConsentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -1057,7 +1097,7 @@ var (
 		{Name: "account_id", Type: field.TypeUUID},
 		{Name: "previous_username", Type: field.TypeString, Size: 30},
 		{Name: "new_username", Type: field.TypeString, Size: 30},
-		{Name: "reason", Type: field.TypeEnum, Enums: []string{"signup", "user_change", "admin_change", "admin_reassigned_away", "admin_reassigned_to", "admin_assigned_held"}},
+		{Name: "reason", Type: field.TypeEnum, Enums: []string{"signup", "user_change", "admin_change", "admin_reassigned_away", "admin_reassigned_to", "admin_assigned_held", "admin_withheld", "admin_restored", "admin_reclaimed_to"}},
 	}
 	// UsernameChangesTable holds the schema information for the "username_changes" table.
 	UsernameChangesTable = &schema.Table{
@@ -1082,6 +1122,7 @@ var (
 		{Name: "reason", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "note", Type: field.TypeString, Size: 500, Default: ""},
 		{Name: "created_by", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "created_by_name", Type: field.TypeString, Size: 120, Default: ""},
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 	}
 	// UsernameHoldsTable holds the schema information for the "username_holds" table.
@@ -1259,6 +1300,7 @@ var (
 		AccountRemovalsTable,
 		AccountRestrictionsTable,
 		AccountSuspensionsTable,
+		AccountTopicsTable,
 		ActingProfilesTable,
 		AdminCreatedAccountsTable,
 		BlackApplicationsTable,
@@ -1289,6 +1331,7 @@ var (
 		ShippingAddressesTable,
 		SuggestionDismissalsTable,
 		TermsAcceptancesTable,
+		TopicsTable,
 		UserConsentsTable,
 		UsernameChangesTable,
 		UsernameHoldsTable,

@@ -170,6 +170,26 @@ func MarketingNEQ(v bool) predicate.PrivacySetting {
 	return predicate.PrivacySetting(sql.FieldNEQ(FieldMarketing, v))
 }
 
+// MarketingFrequencyEQ applies the EQ predicate on the "marketing_frequency" field.
+func MarketingFrequencyEQ(v MarketingFrequency) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldEQ(FieldMarketingFrequency, v))
+}
+
+// MarketingFrequencyNEQ applies the NEQ predicate on the "marketing_frequency" field.
+func MarketingFrequencyNEQ(v MarketingFrequency) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldNEQ(FieldMarketingFrequency, v))
+}
+
+// MarketingFrequencyIn applies the In predicate on the "marketing_frequency" field.
+func MarketingFrequencyIn(vs ...MarketingFrequency) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldIn(FieldMarketingFrequency, vs...))
+}
+
+// MarketingFrequencyNotIn applies the NotIn predicate on the "marketing_frequency" field.
+func MarketingFrequencyNotIn(vs ...MarketingFrequency) predicate.PrivacySetting {
+	return predicate.PrivacySetting(sql.FieldNotIn(FieldMarketingFrequency, vs...))
+}
+
 // WhoCanMessageMeEQ applies the EQ predicate on the "who_can_message_me" field.
 func WhoCanMessageMeEQ(v WhoCanMessageMe) predicate.PrivacySetting {
 	return predicate.PrivacySetting(sql.FieldEQ(FieldWhoCanMessageMe, v))
