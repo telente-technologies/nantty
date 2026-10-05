@@ -69,6 +69,38 @@ const (
 	FieldActivationPending = "activation_pending"
 	// FieldLastError holds the string denoting the last_error field in the database.
 	FieldLastError = "last_error"
+	// FieldBillingAuthorizationID holds the string denoting the billing_authorization_id field in the database.
+	FieldBillingAuthorizationID = "billing_authorization_id"
+	// FieldBillingAnchorAt holds the string denoting the billing_anchor_at field in the database.
+	FieldBillingAnchorAt = "billing_anchor_at"
+	// FieldNextChargeAt holds the string denoting the next_charge_at field in the database.
+	FieldNextChargeAt = "next_charge_at"
+	// FieldDunningAttempts holds the string denoting the dunning_attempts field in the database.
+	FieldDunningAttempts = "dunning_attempts"
+	// FieldDunningDueAt holds the string denoting the dunning_due_at field in the database.
+	FieldDunningDueAt = "dunning_due_at"
+	// FieldCheckmarkIncluded holds the string denoting the checkmark_included field in the database.
+	FieldCheckmarkIncluded = "checkmark_included"
+	// FieldCreditMinor holds the string denoting the credit_minor field in the database.
+	FieldCreditMinor = "credit_minor"
+	// FieldPendingPlanCode holds the string denoting the pending_plan_code field in the database.
+	FieldPendingPlanCode = "pending_plan_code"
+	// FieldPendingInterval holds the string denoting the pending_interval field in the database.
+	FieldPendingInterval = "pending_interval"
+	// FieldPeriodPriceMinor holds the string denoting the period_price_minor field in the database.
+	FieldPeriodPriceMinor = "period_price_minor"
+	// FieldPriceNoticeAmountMinor holds the string denoting the price_notice_amount_minor field in the database.
+	FieldPriceNoticeAmountMinor = "price_notice_amount_minor"
+	// FieldPriceEffectiveAt holds the string denoting the price_effective_at field in the database.
+	FieldPriceEffectiveAt = "price_effective_at"
+	// FieldCardExpiryMonth holds the string denoting the card_expiry_month field in the database.
+	FieldCardExpiryMonth = "card_expiry_month"
+	// FieldCardExpiryYear holds the string denoting the card_expiry_year field in the database.
+	FieldCardExpiryYear = "card_expiry_year"
+	// FieldCardExpiryNoticedAt holds the string denoting the card_expiry_noticed_at field in the database.
+	FieldCardExpiryNoticedAt = "card_expiry_noticed_at"
+	// FieldEndedReason holds the string denoting the ended_reason field in the database.
+	FieldEndedReason = "ended_reason"
 	// FieldVersion holds the string denoting the version field in the database.
 	FieldVersion = "version"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -107,6 +139,22 @@ var Columns = []string{
 	FieldCardLabel,
 	FieldActivationPending,
 	FieldLastError,
+	FieldBillingAuthorizationID,
+	FieldBillingAnchorAt,
+	FieldNextChargeAt,
+	FieldDunningAttempts,
+	FieldDunningDueAt,
+	FieldCheckmarkIncluded,
+	FieldCreditMinor,
+	FieldPendingPlanCode,
+	FieldPendingInterval,
+	FieldPeriodPriceMinor,
+	FieldPriceNoticeAmountMinor,
+	FieldPriceEffectiveAt,
+	FieldCardExpiryMonth,
+	FieldCardExpiryYear,
+	FieldCardExpiryNoticedAt,
+	FieldEndedReason,
 	FieldVersion,
 	FieldUpdatedAt,
 }
@@ -168,6 +216,36 @@ var (
 	DefaultLastError string
 	// LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
 	LastErrorValidator func(string) error
+	// DefaultBillingAuthorizationID holds the default value on creation for the "billing_authorization_id" field.
+	DefaultBillingAuthorizationID string
+	// BillingAuthorizationIDValidator is a validator for the "billing_authorization_id" field. It is called by the builders before save.
+	BillingAuthorizationIDValidator func(string) error
+	// DefaultDunningAttempts holds the default value on creation for the "dunning_attempts" field.
+	DefaultDunningAttempts int
+	// DefaultCheckmarkIncluded holds the default value on creation for the "checkmark_included" field.
+	DefaultCheckmarkIncluded bool
+	// DefaultCreditMinor holds the default value on creation for the "credit_minor" field.
+	DefaultCreditMinor int64
+	// DefaultPendingPlanCode holds the default value on creation for the "pending_plan_code" field.
+	DefaultPendingPlanCode string
+	// PendingPlanCodeValidator is a validator for the "pending_plan_code" field. It is called by the builders before save.
+	PendingPlanCodeValidator func(string) error
+	// DefaultPendingInterval holds the default value on creation for the "pending_interval" field.
+	DefaultPendingInterval string
+	// PendingIntervalValidator is a validator for the "pending_interval" field. It is called by the builders before save.
+	PendingIntervalValidator func(string) error
+	// DefaultPeriodPriceMinor holds the default value on creation for the "period_price_minor" field.
+	DefaultPeriodPriceMinor int64
+	// DefaultPriceNoticeAmountMinor holds the default value on creation for the "price_notice_amount_minor" field.
+	DefaultPriceNoticeAmountMinor int64
+	// DefaultCardExpiryMonth holds the default value on creation for the "card_expiry_month" field.
+	DefaultCardExpiryMonth int
+	// DefaultCardExpiryYear holds the default value on creation for the "card_expiry_year" field.
+	DefaultCardExpiryYear int
+	// DefaultEndedReason holds the default value on creation for the "ended_reason" field.
+	DefaultEndedReason string
+	// EndedReasonValidator is a validator for the "ended_reason" field. It is called by the builders before save.
+	EndedReasonValidator func(string) error
 	// DefaultVersion holds the default value on creation for the "version" field.
 	DefaultVersion int64
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -428,6 +506,86 @@ func ByActivationPending(opts ...sql.OrderTermOption) OrderOption {
 // ByLastError orders the results by the last_error field.
 func ByLastError(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastError, opts...).ToFunc()
+}
+
+// ByBillingAuthorizationID orders the results by the billing_authorization_id field.
+func ByBillingAuthorizationID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBillingAuthorizationID, opts...).ToFunc()
+}
+
+// ByBillingAnchorAt orders the results by the billing_anchor_at field.
+func ByBillingAnchorAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBillingAnchorAt, opts...).ToFunc()
+}
+
+// ByNextChargeAt orders the results by the next_charge_at field.
+func ByNextChargeAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNextChargeAt, opts...).ToFunc()
+}
+
+// ByDunningAttempts orders the results by the dunning_attempts field.
+func ByDunningAttempts(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDunningAttempts, opts...).ToFunc()
+}
+
+// ByDunningDueAt orders the results by the dunning_due_at field.
+func ByDunningDueAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDunningDueAt, opts...).ToFunc()
+}
+
+// ByCheckmarkIncluded orders the results by the checkmark_included field.
+func ByCheckmarkIncluded(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCheckmarkIncluded, opts...).ToFunc()
+}
+
+// ByCreditMinor orders the results by the credit_minor field.
+func ByCreditMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreditMinor, opts...).ToFunc()
+}
+
+// ByPendingPlanCode orders the results by the pending_plan_code field.
+func ByPendingPlanCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPendingPlanCode, opts...).ToFunc()
+}
+
+// ByPendingInterval orders the results by the pending_interval field.
+func ByPendingInterval(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPendingInterval, opts...).ToFunc()
+}
+
+// ByPeriodPriceMinor orders the results by the period_price_minor field.
+func ByPeriodPriceMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPeriodPriceMinor, opts...).ToFunc()
+}
+
+// ByPriceNoticeAmountMinor orders the results by the price_notice_amount_minor field.
+func ByPriceNoticeAmountMinor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPriceNoticeAmountMinor, opts...).ToFunc()
+}
+
+// ByPriceEffectiveAt orders the results by the price_effective_at field.
+func ByPriceEffectiveAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPriceEffectiveAt, opts...).ToFunc()
+}
+
+// ByCardExpiryMonth orders the results by the card_expiry_month field.
+func ByCardExpiryMonth(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCardExpiryMonth, opts...).ToFunc()
+}
+
+// ByCardExpiryYear orders the results by the card_expiry_year field.
+func ByCardExpiryYear(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCardExpiryYear, opts...).ToFunc()
+}
+
+// ByCardExpiryNoticedAt orders the results by the card_expiry_noticed_at field.
+func ByCardExpiryNoticedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCardExpiryNoticedAt, opts...).ToFunc()
+}
+
+// ByEndedReason orders the results by the ended_reason field.
+func ByEndedReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEndedReason, opts...).ToFunc()
 }
 
 // ByVersion orders the results by the version field.

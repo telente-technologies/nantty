@@ -170,6 +170,86 @@ func LastError(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldLastError, v))
 }
 
+// BillingAuthorizationID applies equality check predicate on the "billing_authorization_id" field. It's identical to BillingAuthorizationIDEQ.
+func BillingAuthorizationID(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldBillingAuthorizationID, v))
+}
+
+// BillingAnchorAt applies equality check predicate on the "billing_anchor_at" field. It's identical to BillingAnchorAtEQ.
+func BillingAnchorAt(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldBillingAnchorAt, v))
+}
+
+// NextChargeAt applies equality check predicate on the "next_charge_at" field. It's identical to NextChargeAtEQ.
+func NextChargeAt(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldNextChargeAt, v))
+}
+
+// DunningAttempts applies equality check predicate on the "dunning_attempts" field. It's identical to DunningAttemptsEQ.
+func DunningAttempts(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldDunningAttempts, v))
+}
+
+// DunningDueAt applies equality check predicate on the "dunning_due_at" field. It's identical to DunningDueAtEQ.
+func DunningDueAt(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldDunningDueAt, v))
+}
+
+// CheckmarkIncluded applies equality check predicate on the "checkmark_included" field. It's identical to CheckmarkIncludedEQ.
+func CheckmarkIncluded(v bool) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCheckmarkIncluded, v))
+}
+
+// CreditMinor applies equality check predicate on the "credit_minor" field. It's identical to CreditMinorEQ.
+func CreditMinor(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCreditMinor, v))
+}
+
+// PendingPlanCode applies equality check predicate on the "pending_plan_code" field. It's identical to PendingPlanCodeEQ.
+func PendingPlanCode(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPendingPlanCode, v))
+}
+
+// PendingInterval applies equality check predicate on the "pending_interval" field. It's identical to PendingIntervalEQ.
+func PendingInterval(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPendingInterval, v))
+}
+
+// PeriodPriceMinor applies equality check predicate on the "period_price_minor" field. It's identical to PeriodPriceMinorEQ.
+func PeriodPriceMinor(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPeriodPriceMinor, v))
+}
+
+// PriceNoticeAmountMinor applies equality check predicate on the "price_notice_amount_minor" field. It's identical to PriceNoticeAmountMinorEQ.
+func PriceNoticeAmountMinor(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPriceNoticeAmountMinor, v))
+}
+
+// PriceEffectiveAt applies equality check predicate on the "price_effective_at" field. It's identical to PriceEffectiveAtEQ.
+func PriceEffectiveAt(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPriceEffectiveAt, v))
+}
+
+// CardExpiryMonth applies equality check predicate on the "card_expiry_month" field. It's identical to CardExpiryMonthEQ.
+func CardExpiryMonth(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCardExpiryMonth, v))
+}
+
+// CardExpiryYear applies equality check predicate on the "card_expiry_year" field. It's identical to CardExpiryYearEQ.
+func CardExpiryYear(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCardExpiryYear, v))
+}
+
+// CardExpiryNoticedAt applies equality check predicate on the "card_expiry_noticed_at" field. It's identical to CardExpiryNoticedAtEQ.
+func CardExpiryNoticedAt(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCardExpiryNoticedAt, v))
+}
+
+// EndedReason applies equality check predicate on the "ended_reason" field. It's identical to EndedReasonEQ.
+func EndedReason(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldEndedReason, v))
+}
+
 // Version applies equality check predicate on the "version" field. It's identical to VersionEQ.
 func Version(v int64) predicate.Subscription {
 	return predicate.Subscription(sql.FieldEQ(FieldVersion, v))
@@ -1403,6 +1483,766 @@ func LastErrorEqualFold(v string) predicate.Subscription {
 // LastErrorContainsFold applies the ContainsFold predicate on the "last_error" field.
 func LastErrorContainsFold(v string) predicate.Subscription {
 	return predicate.Subscription(sql.FieldContainsFold(FieldLastError, v))
+}
+
+// BillingAuthorizationIDEQ applies the EQ predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDNEQ applies the NEQ predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDNEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDIn applies the In predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldBillingAuthorizationID, vs...))
+}
+
+// BillingAuthorizationIDNotIn applies the NotIn predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDNotIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldBillingAuthorizationID, vs...))
+}
+
+// BillingAuthorizationIDGT applies the GT predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDGTE applies the GTE predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDLT applies the LT predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDLTE applies the LTE predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDContains applies the Contains predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDHasPrefix applies the HasPrefix predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDHasSuffix applies the HasSuffix predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDEqualFold applies the EqualFold predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldBillingAuthorizationID, v))
+}
+
+// BillingAuthorizationIDContainsFold applies the ContainsFold predicate on the "billing_authorization_id" field.
+func BillingAuthorizationIDContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldBillingAuthorizationID, v))
+}
+
+// BillingAnchorAtEQ applies the EQ predicate on the "billing_anchor_at" field.
+func BillingAnchorAtEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldBillingAnchorAt, v))
+}
+
+// BillingAnchorAtNEQ applies the NEQ predicate on the "billing_anchor_at" field.
+func BillingAnchorAtNEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldBillingAnchorAt, v))
+}
+
+// BillingAnchorAtIn applies the In predicate on the "billing_anchor_at" field.
+func BillingAnchorAtIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldBillingAnchorAt, vs...))
+}
+
+// BillingAnchorAtNotIn applies the NotIn predicate on the "billing_anchor_at" field.
+func BillingAnchorAtNotIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldBillingAnchorAt, vs...))
+}
+
+// BillingAnchorAtGT applies the GT predicate on the "billing_anchor_at" field.
+func BillingAnchorAtGT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldBillingAnchorAt, v))
+}
+
+// BillingAnchorAtGTE applies the GTE predicate on the "billing_anchor_at" field.
+func BillingAnchorAtGTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldBillingAnchorAt, v))
+}
+
+// BillingAnchorAtLT applies the LT predicate on the "billing_anchor_at" field.
+func BillingAnchorAtLT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldBillingAnchorAt, v))
+}
+
+// BillingAnchorAtLTE applies the LTE predicate on the "billing_anchor_at" field.
+func BillingAnchorAtLTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldBillingAnchorAt, v))
+}
+
+// BillingAnchorAtIsNil applies the IsNil predicate on the "billing_anchor_at" field.
+func BillingAnchorAtIsNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldIsNull(FieldBillingAnchorAt))
+}
+
+// BillingAnchorAtNotNil applies the NotNil predicate on the "billing_anchor_at" field.
+func BillingAnchorAtNotNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotNull(FieldBillingAnchorAt))
+}
+
+// NextChargeAtEQ applies the EQ predicate on the "next_charge_at" field.
+func NextChargeAtEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldNextChargeAt, v))
+}
+
+// NextChargeAtNEQ applies the NEQ predicate on the "next_charge_at" field.
+func NextChargeAtNEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldNextChargeAt, v))
+}
+
+// NextChargeAtIn applies the In predicate on the "next_charge_at" field.
+func NextChargeAtIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldNextChargeAt, vs...))
+}
+
+// NextChargeAtNotIn applies the NotIn predicate on the "next_charge_at" field.
+func NextChargeAtNotIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldNextChargeAt, vs...))
+}
+
+// NextChargeAtGT applies the GT predicate on the "next_charge_at" field.
+func NextChargeAtGT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldNextChargeAt, v))
+}
+
+// NextChargeAtGTE applies the GTE predicate on the "next_charge_at" field.
+func NextChargeAtGTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldNextChargeAt, v))
+}
+
+// NextChargeAtLT applies the LT predicate on the "next_charge_at" field.
+func NextChargeAtLT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldNextChargeAt, v))
+}
+
+// NextChargeAtLTE applies the LTE predicate on the "next_charge_at" field.
+func NextChargeAtLTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldNextChargeAt, v))
+}
+
+// NextChargeAtIsNil applies the IsNil predicate on the "next_charge_at" field.
+func NextChargeAtIsNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldIsNull(FieldNextChargeAt))
+}
+
+// NextChargeAtNotNil applies the NotNil predicate on the "next_charge_at" field.
+func NextChargeAtNotNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotNull(FieldNextChargeAt))
+}
+
+// DunningAttemptsEQ applies the EQ predicate on the "dunning_attempts" field.
+func DunningAttemptsEQ(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldDunningAttempts, v))
+}
+
+// DunningAttemptsNEQ applies the NEQ predicate on the "dunning_attempts" field.
+func DunningAttemptsNEQ(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldDunningAttempts, v))
+}
+
+// DunningAttemptsIn applies the In predicate on the "dunning_attempts" field.
+func DunningAttemptsIn(vs ...int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldDunningAttempts, vs...))
+}
+
+// DunningAttemptsNotIn applies the NotIn predicate on the "dunning_attempts" field.
+func DunningAttemptsNotIn(vs ...int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldDunningAttempts, vs...))
+}
+
+// DunningAttemptsGT applies the GT predicate on the "dunning_attempts" field.
+func DunningAttemptsGT(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldDunningAttempts, v))
+}
+
+// DunningAttemptsGTE applies the GTE predicate on the "dunning_attempts" field.
+func DunningAttemptsGTE(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldDunningAttempts, v))
+}
+
+// DunningAttemptsLT applies the LT predicate on the "dunning_attempts" field.
+func DunningAttemptsLT(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldDunningAttempts, v))
+}
+
+// DunningAttemptsLTE applies the LTE predicate on the "dunning_attempts" field.
+func DunningAttemptsLTE(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldDunningAttempts, v))
+}
+
+// DunningDueAtEQ applies the EQ predicate on the "dunning_due_at" field.
+func DunningDueAtEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldDunningDueAt, v))
+}
+
+// DunningDueAtNEQ applies the NEQ predicate on the "dunning_due_at" field.
+func DunningDueAtNEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldDunningDueAt, v))
+}
+
+// DunningDueAtIn applies the In predicate on the "dunning_due_at" field.
+func DunningDueAtIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldDunningDueAt, vs...))
+}
+
+// DunningDueAtNotIn applies the NotIn predicate on the "dunning_due_at" field.
+func DunningDueAtNotIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldDunningDueAt, vs...))
+}
+
+// DunningDueAtGT applies the GT predicate on the "dunning_due_at" field.
+func DunningDueAtGT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldDunningDueAt, v))
+}
+
+// DunningDueAtGTE applies the GTE predicate on the "dunning_due_at" field.
+func DunningDueAtGTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldDunningDueAt, v))
+}
+
+// DunningDueAtLT applies the LT predicate on the "dunning_due_at" field.
+func DunningDueAtLT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldDunningDueAt, v))
+}
+
+// DunningDueAtLTE applies the LTE predicate on the "dunning_due_at" field.
+func DunningDueAtLTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldDunningDueAt, v))
+}
+
+// DunningDueAtIsNil applies the IsNil predicate on the "dunning_due_at" field.
+func DunningDueAtIsNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldIsNull(FieldDunningDueAt))
+}
+
+// DunningDueAtNotNil applies the NotNil predicate on the "dunning_due_at" field.
+func DunningDueAtNotNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotNull(FieldDunningDueAt))
+}
+
+// CheckmarkIncludedEQ applies the EQ predicate on the "checkmark_included" field.
+func CheckmarkIncludedEQ(v bool) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCheckmarkIncluded, v))
+}
+
+// CheckmarkIncludedNEQ applies the NEQ predicate on the "checkmark_included" field.
+func CheckmarkIncludedNEQ(v bool) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldCheckmarkIncluded, v))
+}
+
+// CreditMinorEQ applies the EQ predicate on the "credit_minor" field.
+func CreditMinorEQ(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCreditMinor, v))
+}
+
+// CreditMinorNEQ applies the NEQ predicate on the "credit_minor" field.
+func CreditMinorNEQ(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldCreditMinor, v))
+}
+
+// CreditMinorIn applies the In predicate on the "credit_minor" field.
+func CreditMinorIn(vs ...int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldCreditMinor, vs...))
+}
+
+// CreditMinorNotIn applies the NotIn predicate on the "credit_minor" field.
+func CreditMinorNotIn(vs ...int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldCreditMinor, vs...))
+}
+
+// CreditMinorGT applies the GT predicate on the "credit_minor" field.
+func CreditMinorGT(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldCreditMinor, v))
+}
+
+// CreditMinorGTE applies the GTE predicate on the "credit_minor" field.
+func CreditMinorGTE(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldCreditMinor, v))
+}
+
+// CreditMinorLT applies the LT predicate on the "credit_minor" field.
+func CreditMinorLT(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldCreditMinor, v))
+}
+
+// CreditMinorLTE applies the LTE predicate on the "credit_minor" field.
+func CreditMinorLTE(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldCreditMinor, v))
+}
+
+// PendingPlanCodeEQ applies the EQ predicate on the "pending_plan_code" field.
+func PendingPlanCodeEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeNEQ applies the NEQ predicate on the "pending_plan_code" field.
+func PendingPlanCodeNEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeIn applies the In predicate on the "pending_plan_code" field.
+func PendingPlanCodeIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldPendingPlanCode, vs...))
+}
+
+// PendingPlanCodeNotIn applies the NotIn predicate on the "pending_plan_code" field.
+func PendingPlanCodeNotIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldPendingPlanCode, vs...))
+}
+
+// PendingPlanCodeGT applies the GT predicate on the "pending_plan_code" field.
+func PendingPlanCodeGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeGTE applies the GTE predicate on the "pending_plan_code" field.
+func PendingPlanCodeGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeLT applies the LT predicate on the "pending_plan_code" field.
+func PendingPlanCodeLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeLTE applies the LTE predicate on the "pending_plan_code" field.
+func PendingPlanCodeLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeContains applies the Contains predicate on the "pending_plan_code" field.
+func PendingPlanCodeContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeHasPrefix applies the HasPrefix predicate on the "pending_plan_code" field.
+func PendingPlanCodeHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeHasSuffix applies the HasSuffix predicate on the "pending_plan_code" field.
+func PendingPlanCodeHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeEqualFold applies the EqualFold predicate on the "pending_plan_code" field.
+func PendingPlanCodeEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldPendingPlanCode, v))
+}
+
+// PendingPlanCodeContainsFold applies the ContainsFold predicate on the "pending_plan_code" field.
+func PendingPlanCodeContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldPendingPlanCode, v))
+}
+
+// PendingIntervalEQ applies the EQ predicate on the "pending_interval" field.
+func PendingIntervalEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPendingInterval, v))
+}
+
+// PendingIntervalNEQ applies the NEQ predicate on the "pending_interval" field.
+func PendingIntervalNEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldPendingInterval, v))
+}
+
+// PendingIntervalIn applies the In predicate on the "pending_interval" field.
+func PendingIntervalIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldPendingInterval, vs...))
+}
+
+// PendingIntervalNotIn applies the NotIn predicate on the "pending_interval" field.
+func PendingIntervalNotIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldPendingInterval, vs...))
+}
+
+// PendingIntervalGT applies the GT predicate on the "pending_interval" field.
+func PendingIntervalGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldPendingInterval, v))
+}
+
+// PendingIntervalGTE applies the GTE predicate on the "pending_interval" field.
+func PendingIntervalGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldPendingInterval, v))
+}
+
+// PendingIntervalLT applies the LT predicate on the "pending_interval" field.
+func PendingIntervalLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldPendingInterval, v))
+}
+
+// PendingIntervalLTE applies the LTE predicate on the "pending_interval" field.
+func PendingIntervalLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldPendingInterval, v))
+}
+
+// PendingIntervalContains applies the Contains predicate on the "pending_interval" field.
+func PendingIntervalContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldPendingInterval, v))
+}
+
+// PendingIntervalHasPrefix applies the HasPrefix predicate on the "pending_interval" field.
+func PendingIntervalHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldPendingInterval, v))
+}
+
+// PendingIntervalHasSuffix applies the HasSuffix predicate on the "pending_interval" field.
+func PendingIntervalHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldPendingInterval, v))
+}
+
+// PendingIntervalEqualFold applies the EqualFold predicate on the "pending_interval" field.
+func PendingIntervalEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldPendingInterval, v))
+}
+
+// PendingIntervalContainsFold applies the ContainsFold predicate on the "pending_interval" field.
+func PendingIntervalContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldPendingInterval, v))
+}
+
+// PeriodPriceMinorEQ applies the EQ predicate on the "period_price_minor" field.
+func PeriodPriceMinorEQ(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPeriodPriceMinor, v))
+}
+
+// PeriodPriceMinorNEQ applies the NEQ predicate on the "period_price_minor" field.
+func PeriodPriceMinorNEQ(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldPeriodPriceMinor, v))
+}
+
+// PeriodPriceMinorIn applies the In predicate on the "period_price_minor" field.
+func PeriodPriceMinorIn(vs ...int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldPeriodPriceMinor, vs...))
+}
+
+// PeriodPriceMinorNotIn applies the NotIn predicate on the "period_price_minor" field.
+func PeriodPriceMinorNotIn(vs ...int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldPeriodPriceMinor, vs...))
+}
+
+// PeriodPriceMinorGT applies the GT predicate on the "period_price_minor" field.
+func PeriodPriceMinorGT(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldPeriodPriceMinor, v))
+}
+
+// PeriodPriceMinorGTE applies the GTE predicate on the "period_price_minor" field.
+func PeriodPriceMinorGTE(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldPeriodPriceMinor, v))
+}
+
+// PeriodPriceMinorLT applies the LT predicate on the "period_price_minor" field.
+func PeriodPriceMinorLT(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldPeriodPriceMinor, v))
+}
+
+// PeriodPriceMinorLTE applies the LTE predicate on the "period_price_minor" field.
+func PeriodPriceMinorLTE(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldPeriodPriceMinor, v))
+}
+
+// PriceNoticeAmountMinorEQ applies the EQ predicate on the "price_notice_amount_minor" field.
+func PriceNoticeAmountMinorEQ(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPriceNoticeAmountMinor, v))
+}
+
+// PriceNoticeAmountMinorNEQ applies the NEQ predicate on the "price_notice_amount_minor" field.
+func PriceNoticeAmountMinorNEQ(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldPriceNoticeAmountMinor, v))
+}
+
+// PriceNoticeAmountMinorIn applies the In predicate on the "price_notice_amount_minor" field.
+func PriceNoticeAmountMinorIn(vs ...int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldPriceNoticeAmountMinor, vs...))
+}
+
+// PriceNoticeAmountMinorNotIn applies the NotIn predicate on the "price_notice_amount_minor" field.
+func PriceNoticeAmountMinorNotIn(vs ...int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldPriceNoticeAmountMinor, vs...))
+}
+
+// PriceNoticeAmountMinorGT applies the GT predicate on the "price_notice_amount_minor" field.
+func PriceNoticeAmountMinorGT(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldPriceNoticeAmountMinor, v))
+}
+
+// PriceNoticeAmountMinorGTE applies the GTE predicate on the "price_notice_amount_minor" field.
+func PriceNoticeAmountMinorGTE(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldPriceNoticeAmountMinor, v))
+}
+
+// PriceNoticeAmountMinorLT applies the LT predicate on the "price_notice_amount_minor" field.
+func PriceNoticeAmountMinorLT(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldPriceNoticeAmountMinor, v))
+}
+
+// PriceNoticeAmountMinorLTE applies the LTE predicate on the "price_notice_amount_minor" field.
+func PriceNoticeAmountMinorLTE(v int64) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldPriceNoticeAmountMinor, v))
+}
+
+// PriceEffectiveAtEQ applies the EQ predicate on the "price_effective_at" field.
+func PriceEffectiveAtEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldPriceEffectiveAt, v))
+}
+
+// PriceEffectiveAtNEQ applies the NEQ predicate on the "price_effective_at" field.
+func PriceEffectiveAtNEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldPriceEffectiveAt, v))
+}
+
+// PriceEffectiveAtIn applies the In predicate on the "price_effective_at" field.
+func PriceEffectiveAtIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldPriceEffectiveAt, vs...))
+}
+
+// PriceEffectiveAtNotIn applies the NotIn predicate on the "price_effective_at" field.
+func PriceEffectiveAtNotIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldPriceEffectiveAt, vs...))
+}
+
+// PriceEffectiveAtGT applies the GT predicate on the "price_effective_at" field.
+func PriceEffectiveAtGT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldPriceEffectiveAt, v))
+}
+
+// PriceEffectiveAtGTE applies the GTE predicate on the "price_effective_at" field.
+func PriceEffectiveAtGTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldPriceEffectiveAt, v))
+}
+
+// PriceEffectiveAtLT applies the LT predicate on the "price_effective_at" field.
+func PriceEffectiveAtLT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldPriceEffectiveAt, v))
+}
+
+// PriceEffectiveAtLTE applies the LTE predicate on the "price_effective_at" field.
+func PriceEffectiveAtLTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldPriceEffectiveAt, v))
+}
+
+// PriceEffectiveAtIsNil applies the IsNil predicate on the "price_effective_at" field.
+func PriceEffectiveAtIsNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldIsNull(FieldPriceEffectiveAt))
+}
+
+// PriceEffectiveAtNotNil applies the NotNil predicate on the "price_effective_at" field.
+func PriceEffectiveAtNotNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotNull(FieldPriceEffectiveAt))
+}
+
+// CardExpiryMonthEQ applies the EQ predicate on the "card_expiry_month" field.
+func CardExpiryMonthEQ(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCardExpiryMonth, v))
+}
+
+// CardExpiryMonthNEQ applies the NEQ predicate on the "card_expiry_month" field.
+func CardExpiryMonthNEQ(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldCardExpiryMonth, v))
+}
+
+// CardExpiryMonthIn applies the In predicate on the "card_expiry_month" field.
+func CardExpiryMonthIn(vs ...int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldCardExpiryMonth, vs...))
+}
+
+// CardExpiryMonthNotIn applies the NotIn predicate on the "card_expiry_month" field.
+func CardExpiryMonthNotIn(vs ...int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldCardExpiryMonth, vs...))
+}
+
+// CardExpiryMonthGT applies the GT predicate on the "card_expiry_month" field.
+func CardExpiryMonthGT(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldCardExpiryMonth, v))
+}
+
+// CardExpiryMonthGTE applies the GTE predicate on the "card_expiry_month" field.
+func CardExpiryMonthGTE(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldCardExpiryMonth, v))
+}
+
+// CardExpiryMonthLT applies the LT predicate on the "card_expiry_month" field.
+func CardExpiryMonthLT(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldCardExpiryMonth, v))
+}
+
+// CardExpiryMonthLTE applies the LTE predicate on the "card_expiry_month" field.
+func CardExpiryMonthLTE(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldCardExpiryMonth, v))
+}
+
+// CardExpiryYearEQ applies the EQ predicate on the "card_expiry_year" field.
+func CardExpiryYearEQ(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCardExpiryYear, v))
+}
+
+// CardExpiryYearNEQ applies the NEQ predicate on the "card_expiry_year" field.
+func CardExpiryYearNEQ(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldCardExpiryYear, v))
+}
+
+// CardExpiryYearIn applies the In predicate on the "card_expiry_year" field.
+func CardExpiryYearIn(vs ...int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldCardExpiryYear, vs...))
+}
+
+// CardExpiryYearNotIn applies the NotIn predicate on the "card_expiry_year" field.
+func CardExpiryYearNotIn(vs ...int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldCardExpiryYear, vs...))
+}
+
+// CardExpiryYearGT applies the GT predicate on the "card_expiry_year" field.
+func CardExpiryYearGT(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldCardExpiryYear, v))
+}
+
+// CardExpiryYearGTE applies the GTE predicate on the "card_expiry_year" field.
+func CardExpiryYearGTE(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldCardExpiryYear, v))
+}
+
+// CardExpiryYearLT applies the LT predicate on the "card_expiry_year" field.
+func CardExpiryYearLT(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldCardExpiryYear, v))
+}
+
+// CardExpiryYearLTE applies the LTE predicate on the "card_expiry_year" field.
+func CardExpiryYearLTE(v int) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldCardExpiryYear, v))
+}
+
+// CardExpiryNoticedAtEQ applies the EQ predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldCardExpiryNoticedAt, v))
+}
+
+// CardExpiryNoticedAtNEQ applies the NEQ predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtNEQ(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldCardExpiryNoticedAt, v))
+}
+
+// CardExpiryNoticedAtIn applies the In predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldCardExpiryNoticedAt, vs...))
+}
+
+// CardExpiryNoticedAtNotIn applies the NotIn predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtNotIn(vs ...time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldCardExpiryNoticedAt, vs...))
+}
+
+// CardExpiryNoticedAtGT applies the GT predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtGT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldCardExpiryNoticedAt, v))
+}
+
+// CardExpiryNoticedAtGTE applies the GTE predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtGTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldCardExpiryNoticedAt, v))
+}
+
+// CardExpiryNoticedAtLT applies the LT predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtLT(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldCardExpiryNoticedAt, v))
+}
+
+// CardExpiryNoticedAtLTE applies the LTE predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtLTE(v time.Time) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldCardExpiryNoticedAt, v))
+}
+
+// CardExpiryNoticedAtIsNil applies the IsNil predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtIsNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldIsNull(FieldCardExpiryNoticedAt))
+}
+
+// CardExpiryNoticedAtNotNil applies the NotNil predicate on the "card_expiry_noticed_at" field.
+func CardExpiryNoticedAtNotNil() predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotNull(FieldCardExpiryNoticedAt))
+}
+
+// EndedReasonEQ applies the EQ predicate on the "ended_reason" field.
+func EndedReasonEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldEndedReason, v))
+}
+
+// EndedReasonNEQ applies the NEQ predicate on the "ended_reason" field.
+func EndedReasonNEQ(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldEndedReason, v))
+}
+
+// EndedReasonIn applies the In predicate on the "ended_reason" field.
+func EndedReasonIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldEndedReason, vs...))
+}
+
+// EndedReasonNotIn applies the NotIn predicate on the "ended_reason" field.
+func EndedReasonNotIn(vs ...string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldEndedReason, vs...))
+}
+
+// EndedReasonGT applies the GT predicate on the "ended_reason" field.
+func EndedReasonGT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGT(FieldEndedReason, v))
+}
+
+// EndedReasonGTE applies the GTE predicate on the "ended_reason" field.
+func EndedReasonGTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldGTE(FieldEndedReason, v))
+}
+
+// EndedReasonLT applies the LT predicate on the "ended_reason" field.
+func EndedReasonLT(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLT(FieldEndedReason, v))
+}
+
+// EndedReasonLTE applies the LTE predicate on the "ended_reason" field.
+func EndedReasonLTE(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldLTE(FieldEndedReason, v))
+}
+
+// EndedReasonContains applies the Contains predicate on the "ended_reason" field.
+func EndedReasonContains(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContains(FieldEndedReason, v))
+}
+
+// EndedReasonHasPrefix applies the HasPrefix predicate on the "ended_reason" field.
+func EndedReasonHasPrefix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasPrefix(FieldEndedReason, v))
+}
+
+// EndedReasonHasSuffix applies the HasSuffix predicate on the "ended_reason" field.
+func EndedReasonHasSuffix(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldHasSuffix(FieldEndedReason, v))
+}
+
+// EndedReasonEqualFold applies the EqualFold predicate on the "ended_reason" field.
+func EndedReasonEqualFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEqualFold(FieldEndedReason, v))
+}
+
+// EndedReasonContainsFold applies the ContainsFold predicate on the "ended_reason" field.
+func EndedReasonContainsFold(v string) predicate.Subscription {
+	return predicate.Subscription(sql.FieldContainsFold(FieldEndedReason, v))
 }
 
 // VersionEQ applies the EQ predicate on the "version" field.
