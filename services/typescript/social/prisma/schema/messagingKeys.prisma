@@ -1,0 +1,58 @@
+model ChatDeviceKey {
+  accountId             String   @db.Uuid
+  deviceId              String
+  registrationId        Int
+  identityKey           String
+  signedPreKeyId        Int
+  signedPreKey          String
+  signedPreKeySignature String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  oneTimePreKeys ChatOneTimePreKey[]
+  mailbox        ChatKeyMailboxEntry[]
+
+  @@id([accountId, deviceId])
+  @@map("chat_device_keys")
+}
+
+model ChatOneTimePreKey {
+  accountId String   @db.Uuid
+  deviceId  String
+  keyId     Int
+  publicKey String
+  createdAt DateTime @default(now())
+
+  device ChatDeviceKey @relation(fields: [accountId, deviceId], references: [accountId, deviceId], onDelete: Cascade)
+
+  @@id([accountId, deviceId, keyId])
+  @@map("chat_one_time_prekeys")
+}
+
+model ChatKeyMailboxEntry {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  recipientAccountId String   @db.Uuid
+  recipientDeviceId  String
+  senderAccountId    String   @db.Uuid
+  senderDeviceId     String
+  conversationId     String   @db.Uuid
+  ciphertext         String
+  createdAt          DateTime @default(now())
+
+  recipient ChatDeviceKey @relation(fields: [recipientAccountId, recipientDeviceId], references: [accountId, deviceId], onDelete: Cascade)
+
+  @@index([recipientAccountId, recipientDeviceId, id])
+  @@index([createdAt])
+  @@map("chat_key_mailbox")
+}
+
+model ChatPreKeyClaim {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  requesterId String   @db.Uuid
+  targetId    String   @db.Uuid
+  claimedAt   DateTime @default(now())
+
+  @@index([requesterId, targetId, claimedAt])
+  @@index([requesterId, claimedAt])
+  @@map("chat_prekey_claims")
+}
