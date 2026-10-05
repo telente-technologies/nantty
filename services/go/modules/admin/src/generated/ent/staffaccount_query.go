@@ -9,9 +9,11 @@ import (
 	"math"
 	"zudomart/modules/admin/src/generated/ent/predicate"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	"zudomart/modules/admin/src/generated/ent/staffconsent"
 	"zudomart/modules/admin/src/generated/ent/staffinvitation"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
+	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -31,6 +33,8 @@ type StaffAccountQuery struct {
 	withSessions    *StaffSessionQuery
 	withChallenges  *StaffLoginChallengeQuery
 	withInvitations *StaffInvitationQuery
+	withPasskeys    *StaffWebauthnCredentialQuery
+	withConsents    *StaffConsentQuery
 	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -127,6 +131,50 @@ func (_q *StaffAccountQuery) QueryInvitations() *StaffInvitationQuery {
 			sqlgraph.From(staffaccount.Table, staffaccount.FieldID, selector),
 			sqlgraph.To(staffinvitation.Table, staffinvitation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, staffaccount.InvitationsTable, staffaccount.InvitationsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPasskeys chains the current query on the "passkeys" edge.
+func (_q *StaffAccountQuery) QueryPasskeys() *StaffWebauthnCredentialQuery {
+	query := (&StaffWebauthnCredentialClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(staffaccount.Table, staffaccount.FieldID, selector),
+			sqlgraph.To(staffwebauthncredential.Table, staffwebauthncredential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, staffaccount.PasskeysTable, staffaccount.PasskeysColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryConsents chains the current query on the "consents" edge.
+func (_q *StaffAccountQuery) QueryConsents() *StaffConsentQuery {
+	query := (&StaffConsentClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(staffaccount.Table, staffaccount.FieldID, selector),
+			sqlgraph.To(staffconsent.Table, staffconsent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, staffaccount.ConsentsTable, staffaccount.ConsentsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -329,6 +377,8 @@ func (_q *StaffAccountQuery) Clone() *StaffAccountQuery {
 		withSessions:    _q.withSessions.Clone(),
 		withChallenges:  _q.withChallenges.Clone(),
 		withInvitations: _q.withInvitations.Clone(),
+		withPasskeys:    _q.withPasskeys.Clone(),
+		withConsents:    _q.withConsents.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -365,6 +415,28 @@ func (_q *StaffAccountQuery) WithInvitations(opts ...func(*StaffInvitationQuery)
 		opt(query)
 	}
 	_q.withInvitations = query
+	return _q
+}
+
+// WithPasskeys tells the query-builder to eager-load the nodes that are connected to
+// the "passkeys" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *StaffAccountQuery) WithPasskeys(opts ...func(*StaffWebauthnCredentialQuery)) *StaffAccountQuery {
+	query := (&StaffWebauthnCredentialClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPasskeys = query
+	return _q
+}
+
+// WithConsents tells the query-builder to eager-load the nodes that are connected to
+// the "consents" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *StaffAccountQuery) WithConsents(opts ...func(*StaffConsentQuery)) *StaffAccountQuery {
+	query := (&StaffConsentClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withConsents = query
 	return _q
 }
 
@@ -446,10 +518,12 @@ func (_q *StaffAccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	var (
 		nodes       = []*StaffAccount{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [5]bool{
 			_q.withSessions != nil,
 			_q.withChallenges != nil,
 			_q.withInvitations != nil,
+			_q.withPasskeys != nil,
+			_q.withConsents != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -491,6 +565,20 @@ func (_q *StaffAccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		if err := _q.loadInvitations(ctx, query, nodes,
 			func(n *StaffAccount) { n.Edges.Invitations = []*StaffInvitation{} },
 			func(n *StaffAccount, e *StaffInvitation) { n.Edges.Invitations = append(n.Edges.Invitations, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPasskeys; query != nil {
+		if err := _q.loadPasskeys(ctx, query, nodes,
+			func(n *StaffAccount) { n.Edges.Passkeys = []*StaffWebauthnCredential{} },
+			func(n *StaffAccount, e *StaffWebauthnCredential) { n.Edges.Passkeys = append(n.Edges.Passkeys, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withConsents; query != nil {
+		if err := _q.loadConsents(ctx, query, nodes,
+			func(n *StaffAccount) { n.Edges.Consents = []*StaffConsent{} },
+			func(n *StaffAccount, e *StaffConsent) { n.Edges.Consents = append(n.Edges.Consents, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -572,6 +660,66 @@ func (_q *StaffAccountQuery) loadInvitations(ctx context.Context, query *StaffIn
 	}
 	query.Where(predicate.StaffInvitation(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(staffaccount.InvitationsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.StaffID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "staff_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *StaffAccountQuery) loadPasskeys(ctx context.Context, query *StaffWebauthnCredentialQuery, nodes []*StaffAccount, init func(*StaffAccount), assign func(*StaffAccount, *StaffWebauthnCredential)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*StaffAccount)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(staffwebauthncredential.FieldStaffID)
+	}
+	query.Where(predicate.StaffWebauthnCredential(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(staffaccount.PasskeysColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.StaffID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "staff_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *StaffAccountQuery) loadConsents(ctx context.Context, query *StaffConsentQuery, nodes []*StaffAccount, init func(*StaffAccount), assign func(*StaffAccount, *StaffConsent)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*StaffAccount)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(staffconsent.FieldStaffID)
+	}
+	query.Where(predicate.StaffConsent(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(staffaccount.ConsentsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

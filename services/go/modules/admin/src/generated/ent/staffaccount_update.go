@@ -9,9 +9,11 @@ import (
 	"time"
 	"zudomart/modules/admin/src/generated/ent/predicate"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	"zudomart/modules/admin/src/generated/ent/staffconsent"
 	"zudomart/modules/admin/src/generated/ent/staffinvitation"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
+	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -227,6 +229,44 @@ func (_u *StaffAccountUpdate) ClearLockedUntil() *StaffAccountUpdate {
 	return _u
 }
 
+// SetRecoveryCodeHashes sets the "recovery_code_hashes" field.
+func (_u *StaffAccountUpdate) SetRecoveryCodeHashes(v []string) *StaffAccountUpdate {
+	_u.mutation.SetRecoveryCodeHashes(v)
+	return _u
+}
+
+// AppendRecoveryCodeHashes appends value to the "recovery_code_hashes" field.
+func (_u *StaffAccountUpdate) AppendRecoveryCodeHashes(v []string) *StaffAccountUpdate {
+	_u.mutation.AppendRecoveryCodeHashes(v)
+	return _u
+}
+
+// SetIPAllowList sets the "ip_allow_list" field.
+func (_u *StaffAccountUpdate) SetIPAllowList(v []string) *StaffAccountUpdate {
+	_u.mutation.SetIPAllowList(v)
+	return _u
+}
+
+// AppendIPAllowList appends value to the "ip_allow_list" field.
+func (_u *StaffAccountUpdate) AppendIPAllowList(v []string) *StaffAccountUpdate {
+	_u.mutation.AppendIPAllowList(v)
+	return _u
+}
+
+// SetThemePreference sets the "theme_preference" field.
+func (_u *StaffAccountUpdate) SetThemePreference(v staffaccount.ThemePreference) *StaffAccountUpdate {
+	_u.mutation.SetThemePreference(v)
+	return _u
+}
+
+// SetNillableThemePreference sets the "theme_preference" field if the given value is not nil.
+func (_u *StaffAccountUpdate) SetNillableThemePreference(v *staffaccount.ThemePreference) *StaffAccountUpdate {
+	if v != nil {
+		_u.SetThemePreference(*v)
+	}
+	return _u
+}
+
 // SetApprovedBy sets the "approved_by" field.
 func (_u *StaffAccountUpdate) SetApprovedBy(v uuid.UUID) *StaffAccountUpdate {
 	_u.mutation.SetApprovedBy(v)
@@ -318,6 +358,36 @@ func (_u *StaffAccountUpdate) AddInvitations(v ...*StaffInvitation) *StaffAccoun
 	return _u.AddInvitationIDs(ids...)
 }
 
+// AddPasskeyIDs adds the "passkeys" edge to the StaffWebauthnCredential entity by IDs.
+func (_u *StaffAccountUpdate) AddPasskeyIDs(ids ...uuid.UUID) *StaffAccountUpdate {
+	_u.mutation.AddPasskeyIDs(ids...)
+	return _u
+}
+
+// AddPasskeys adds the "passkeys" edges to the StaffWebauthnCredential entity.
+func (_u *StaffAccountUpdate) AddPasskeys(v ...*StaffWebauthnCredential) *StaffAccountUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPasskeyIDs(ids...)
+}
+
+// AddConsentIDs adds the "consents" edge to the StaffConsent entity by IDs.
+func (_u *StaffAccountUpdate) AddConsentIDs(ids ...uuid.UUID) *StaffAccountUpdate {
+	_u.mutation.AddConsentIDs(ids...)
+	return _u
+}
+
+// AddConsents adds the "consents" edges to the StaffConsent entity.
+func (_u *StaffAccountUpdate) AddConsents(v ...*StaffConsent) *StaffAccountUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConsentIDs(ids...)
+}
+
 // Mutation returns the StaffAccountMutation object of the builder.
 func (_u *StaffAccountUpdate) Mutation() *StaffAccountMutation {
 	return _u.mutation
@@ -386,6 +456,48 @@ func (_u *StaffAccountUpdate) RemoveInvitations(v ...*StaffInvitation) *StaffAcc
 	return _u.RemoveInvitationIDs(ids...)
 }
 
+// ClearPasskeys clears all "passkeys" edges to the StaffWebauthnCredential entity.
+func (_u *StaffAccountUpdate) ClearPasskeys() *StaffAccountUpdate {
+	_u.mutation.ClearPasskeys()
+	return _u
+}
+
+// RemovePasskeyIDs removes the "passkeys" edge to StaffWebauthnCredential entities by IDs.
+func (_u *StaffAccountUpdate) RemovePasskeyIDs(ids ...uuid.UUID) *StaffAccountUpdate {
+	_u.mutation.RemovePasskeyIDs(ids...)
+	return _u
+}
+
+// RemovePasskeys removes "passkeys" edges to StaffWebauthnCredential entities.
+func (_u *StaffAccountUpdate) RemovePasskeys(v ...*StaffWebauthnCredential) *StaffAccountUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePasskeyIDs(ids...)
+}
+
+// ClearConsents clears all "consents" edges to the StaffConsent entity.
+func (_u *StaffAccountUpdate) ClearConsents() *StaffAccountUpdate {
+	_u.mutation.ClearConsents()
+	return _u
+}
+
+// RemoveConsentIDs removes the "consents" edge to StaffConsent entities by IDs.
+func (_u *StaffAccountUpdate) RemoveConsentIDs(ids ...uuid.UUID) *StaffAccountUpdate {
+	_u.mutation.RemoveConsentIDs(ids...)
+	return _u
+}
+
+// RemoveConsents removes "consents" edges to StaffConsent entities.
+func (_u *StaffAccountUpdate) RemoveConsents(v ...*StaffConsent) *StaffAccountUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConsentIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *StaffAccountUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -447,6 +559,11 @@ func (_u *StaffAccountUpdate) check() error {
 	if v, ok := _u.mutation.FailedAttempts(); ok {
 		if err := staffaccount.FailedAttemptsValidator(v); err != nil {
 			return &ValidationError{Name: "failed_attempts", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.failed_attempts": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ThemePreference(); ok {
+		if err := staffaccount.ThemePreferenceValidator(v); err != nil {
+			return &ValidationError{Name: "theme_preference", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.theme_preference": %w`, err)}
 		}
 	}
 	return nil
@@ -527,6 +644,25 @@ func (_u *StaffAccountUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if _u.mutation.LockedUntilCleared() {
 		_spec.ClearField(staffaccount.FieldLockedUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.RecoveryCodeHashes(); ok {
+		_spec.SetField(staffaccount.FieldRecoveryCodeHashes, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRecoveryCodeHashes(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, staffaccount.FieldRecoveryCodeHashes, value)
+		})
+	}
+	if value, ok := _u.mutation.IPAllowList(); ok {
+		_spec.SetField(staffaccount.FieldIPAllowList, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedIPAllowList(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, staffaccount.FieldIPAllowList, value)
+		})
+	}
+	if value, ok := _u.mutation.ThemePreference(); ok {
+		_spec.SetField(staffaccount.FieldThemePreference, field.TypeEnum, value)
 	}
 	if _u.mutation.CreatedByCleared() {
 		_spec.ClearField(staffaccount.FieldCreatedBy, field.TypeUUID)
@@ -674,6 +810,96 @@ func (_u *StaffAccountUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(staffinvitation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PasskeysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.PasskeysTable,
+			Columns: []string{staffaccount.PasskeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffwebauthncredential.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPasskeysIDs(); len(nodes) > 0 && !_u.mutation.PasskeysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.PasskeysTable,
+			Columns: []string{staffaccount.PasskeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffwebauthncredential.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PasskeysIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.PasskeysTable,
+			Columns: []string{staffaccount.PasskeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffwebauthncredential.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConsentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.ConsentsTable,
+			Columns: []string{staffaccount.ConsentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffconsent.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConsentsIDs(); len(nodes) > 0 && !_u.mutation.ConsentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.ConsentsTable,
+			Columns: []string{staffaccount.ConsentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffconsent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConsentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.ConsentsTable,
+			Columns: []string{staffaccount.ConsentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffconsent.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -895,6 +1121,44 @@ func (_u *StaffAccountUpdateOne) ClearLockedUntil() *StaffAccountUpdateOne {
 	return _u
 }
 
+// SetRecoveryCodeHashes sets the "recovery_code_hashes" field.
+func (_u *StaffAccountUpdateOne) SetRecoveryCodeHashes(v []string) *StaffAccountUpdateOne {
+	_u.mutation.SetRecoveryCodeHashes(v)
+	return _u
+}
+
+// AppendRecoveryCodeHashes appends value to the "recovery_code_hashes" field.
+func (_u *StaffAccountUpdateOne) AppendRecoveryCodeHashes(v []string) *StaffAccountUpdateOne {
+	_u.mutation.AppendRecoveryCodeHashes(v)
+	return _u
+}
+
+// SetIPAllowList sets the "ip_allow_list" field.
+func (_u *StaffAccountUpdateOne) SetIPAllowList(v []string) *StaffAccountUpdateOne {
+	_u.mutation.SetIPAllowList(v)
+	return _u
+}
+
+// AppendIPAllowList appends value to the "ip_allow_list" field.
+func (_u *StaffAccountUpdateOne) AppendIPAllowList(v []string) *StaffAccountUpdateOne {
+	_u.mutation.AppendIPAllowList(v)
+	return _u
+}
+
+// SetThemePreference sets the "theme_preference" field.
+func (_u *StaffAccountUpdateOne) SetThemePreference(v staffaccount.ThemePreference) *StaffAccountUpdateOne {
+	_u.mutation.SetThemePreference(v)
+	return _u
+}
+
+// SetNillableThemePreference sets the "theme_preference" field if the given value is not nil.
+func (_u *StaffAccountUpdateOne) SetNillableThemePreference(v *staffaccount.ThemePreference) *StaffAccountUpdateOne {
+	if v != nil {
+		_u.SetThemePreference(*v)
+	}
+	return _u
+}
+
 // SetApprovedBy sets the "approved_by" field.
 func (_u *StaffAccountUpdateOne) SetApprovedBy(v uuid.UUID) *StaffAccountUpdateOne {
 	_u.mutation.SetApprovedBy(v)
@@ -986,6 +1250,36 @@ func (_u *StaffAccountUpdateOne) AddInvitations(v ...*StaffInvitation) *StaffAcc
 	return _u.AddInvitationIDs(ids...)
 }
 
+// AddPasskeyIDs adds the "passkeys" edge to the StaffWebauthnCredential entity by IDs.
+func (_u *StaffAccountUpdateOne) AddPasskeyIDs(ids ...uuid.UUID) *StaffAccountUpdateOne {
+	_u.mutation.AddPasskeyIDs(ids...)
+	return _u
+}
+
+// AddPasskeys adds the "passkeys" edges to the StaffWebauthnCredential entity.
+func (_u *StaffAccountUpdateOne) AddPasskeys(v ...*StaffWebauthnCredential) *StaffAccountUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPasskeyIDs(ids...)
+}
+
+// AddConsentIDs adds the "consents" edge to the StaffConsent entity by IDs.
+func (_u *StaffAccountUpdateOne) AddConsentIDs(ids ...uuid.UUID) *StaffAccountUpdateOne {
+	_u.mutation.AddConsentIDs(ids...)
+	return _u
+}
+
+// AddConsents adds the "consents" edges to the StaffConsent entity.
+func (_u *StaffAccountUpdateOne) AddConsents(v ...*StaffConsent) *StaffAccountUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConsentIDs(ids...)
+}
+
 // Mutation returns the StaffAccountMutation object of the builder.
 func (_u *StaffAccountUpdateOne) Mutation() *StaffAccountMutation {
 	return _u.mutation
@@ -1052,6 +1346,48 @@ func (_u *StaffAccountUpdateOne) RemoveInvitations(v ...*StaffInvitation) *Staff
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveInvitationIDs(ids...)
+}
+
+// ClearPasskeys clears all "passkeys" edges to the StaffWebauthnCredential entity.
+func (_u *StaffAccountUpdateOne) ClearPasskeys() *StaffAccountUpdateOne {
+	_u.mutation.ClearPasskeys()
+	return _u
+}
+
+// RemovePasskeyIDs removes the "passkeys" edge to StaffWebauthnCredential entities by IDs.
+func (_u *StaffAccountUpdateOne) RemovePasskeyIDs(ids ...uuid.UUID) *StaffAccountUpdateOne {
+	_u.mutation.RemovePasskeyIDs(ids...)
+	return _u
+}
+
+// RemovePasskeys removes "passkeys" edges to StaffWebauthnCredential entities.
+func (_u *StaffAccountUpdateOne) RemovePasskeys(v ...*StaffWebauthnCredential) *StaffAccountUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePasskeyIDs(ids...)
+}
+
+// ClearConsents clears all "consents" edges to the StaffConsent entity.
+func (_u *StaffAccountUpdateOne) ClearConsents() *StaffAccountUpdateOne {
+	_u.mutation.ClearConsents()
+	return _u
+}
+
+// RemoveConsentIDs removes the "consents" edge to StaffConsent entities by IDs.
+func (_u *StaffAccountUpdateOne) RemoveConsentIDs(ids ...uuid.UUID) *StaffAccountUpdateOne {
+	_u.mutation.RemoveConsentIDs(ids...)
+	return _u
+}
+
+// RemoveConsents removes "consents" edges to StaffConsent entities.
+func (_u *StaffAccountUpdateOne) RemoveConsents(v ...*StaffConsent) *StaffAccountUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConsentIDs(ids...)
 }
 
 // Where appends a list predicates to the StaffAccountUpdate builder.
@@ -1128,6 +1464,11 @@ func (_u *StaffAccountUpdateOne) check() error {
 	if v, ok := _u.mutation.FailedAttempts(); ok {
 		if err := staffaccount.FailedAttemptsValidator(v); err != nil {
 			return &ValidationError{Name: "failed_attempts", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.failed_attempts": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ThemePreference(); ok {
+		if err := staffaccount.ThemePreferenceValidator(v); err != nil {
+			return &ValidationError{Name: "theme_preference", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.theme_preference": %w`, err)}
 		}
 	}
 	return nil
@@ -1225,6 +1566,25 @@ func (_u *StaffAccountUpdateOne) sqlSave(ctx context.Context) (_node *StaffAccou
 	}
 	if _u.mutation.LockedUntilCleared() {
 		_spec.ClearField(staffaccount.FieldLockedUntil, field.TypeTime)
+	}
+	if value, ok := _u.mutation.RecoveryCodeHashes(); ok {
+		_spec.SetField(staffaccount.FieldRecoveryCodeHashes, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRecoveryCodeHashes(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, staffaccount.FieldRecoveryCodeHashes, value)
+		})
+	}
+	if value, ok := _u.mutation.IPAllowList(); ok {
+		_spec.SetField(staffaccount.FieldIPAllowList, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedIPAllowList(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, staffaccount.FieldIPAllowList, value)
+		})
+	}
+	if value, ok := _u.mutation.ThemePreference(); ok {
+		_spec.SetField(staffaccount.FieldThemePreference, field.TypeEnum, value)
 	}
 	if _u.mutation.CreatedByCleared() {
 		_spec.ClearField(staffaccount.FieldCreatedBy, field.TypeUUID)
@@ -1372,6 +1732,96 @@ func (_u *StaffAccountUpdateOne) sqlSave(ctx context.Context) (_node *StaffAccou
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(staffinvitation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PasskeysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.PasskeysTable,
+			Columns: []string{staffaccount.PasskeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffwebauthncredential.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPasskeysIDs(); len(nodes) > 0 && !_u.mutation.PasskeysCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.PasskeysTable,
+			Columns: []string{staffaccount.PasskeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffwebauthncredential.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PasskeysIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.PasskeysTable,
+			Columns: []string{staffaccount.PasskeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffwebauthncredential.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConsentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.ConsentsTable,
+			Columns: []string{staffaccount.ConsentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffconsent.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConsentsIDs(); len(nodes) > 0 && !_u.mutation.ConsentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.ConsentsTable,
+			Columns: []string{staffaccount.ConsentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffconsent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConsentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.ConsentsTable,
+			Columns: []string{staffaccount.ConsentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffconsent.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
