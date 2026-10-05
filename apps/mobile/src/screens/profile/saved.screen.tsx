@@ -15,6 +15,8 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { savesService } from "@/services/saves.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { SavedItem, SavedItemFilter } from "@/types";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 const GRID_COLUMNS = 3;
 const GRID_GAP = 1;
@@ -31,7 +33,13 @@ const EMPTY_STATE_TITLE: Record<SavedItemFilter, string> = {
 export function SavedScreen({ navigation, route }: MainScreenProps<"Saved">) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const [filter, setFilter] = useState<SavedItemFilter>(route.params?.initialFilter ?? "all");
+  const requestedFilter = route.params?.initialFilter;
+  const [filter, setFilter] = useState<SavedItemFilter>(requestedFilter ?? "all");
+  const [appliedRequestedFilter, setAppliedRequestedFilter] = useState(requestedFilter);
+  if (requestedFilter !== appliedRequestedFilter) {
+    setAppliedRequestedFilter(requestedFilter);
+    if (requestedFilter) setFilter(requestedFilter);
+  }
   const { width: windowWidth } = useWindowDimensions();
   const gridWidth = Math.min(windowWidth, MAXIMUM_GRID_WIDTH);
   const tileWidth = (gridWidth - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
@@ -78,10 +86,10 @@ export function SavedScreen({ navigation, route }: MainScreenProps<"Saved">) {
           ListEmptyComponent={
             <View style={styles.empty}>
               <BookmarkSimple24Icon size={40} color={colors.textSubtle} />
-              <Text size={16} weight={600} lineHeight={19.2} align="center">
+              <Text size={typeScale.base} weight={600} lineHeight={19.2} align="center">
                 {EMPTY_STATE_TITLE[filter]}
               </Text>
-              <Text size={13} lineHeight={18.2} color={colors.textMuted} align="center">
+              <Text size={typeScale.sm} lineHeight={18.2} color={colors.textMuted} align="center">
                 Tap the bookmark on posts, videos, clips and products to keep them here. Only you can see what you save.
               </Text>
             </View>
@@ -96,9 +104,9 @@ export function SavedScreen({ navigation, route }: MainScreenProps<"Saved">) {
 const useStyles = makeThemedStyles((colors) =>
   StyleSheet.create({
     list: { flex: 1, backgroundColor: colors.surface },
-    grid: { alignSelf: "center", gap: GRID_GAP, paddingBottom: 24 },
+    grid: { alignSelf: "center", gap: GRID_GAP, paddingBottom: spacing[6] },
     gridRow: { gap: GRID_GAP },
-    empty: { alignItems: "center", gap: 10, paddingHorizontal: 40, paddingTop: 80 },
-    footer: { paddingVertical: 16 },
+    empty: { alignItems: "center", gap: 10, paddingHorizontal: spacing[8], paddingTop: 80 },
+    footer: { paddingVertical: spacing[4] },
   }),
 );

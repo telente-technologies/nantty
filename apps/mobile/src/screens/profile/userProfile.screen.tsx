@@ -10,6 +10,7 @@ import type { ProfileAction } from "@/components/profile/profileSummary";
 import { followButtonLabelForState, isFollowStateHighlighted, isProfileContentHiddenFromViewer, resolveFollowStateOfUser } from "@/components/profile/followState.util";
 import { SuspendedProfileState } from "@/components/profile/suspendedProfileState";
 import { ProfileView } from "@/components/profile/profileView";
+import { ErrorState } from "@/components/ui/errorState";
 import { Screen } from "@/components/ui/screen";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
@@ -67,10 +68,12 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
       <ProfileHeaderBar
         variant="other"
         onBack={() => navigation.goBack()}
-        onSearch={() => navigation.navigate("Search", { scope: "all" })}
+        onSearch={() => navigation.navigate("Search", profile ? { scope: `profile:${userId}`, scopeLabel: `@${profile.username}` } : { scope: "global" })}
         onMore={() => setMoreSheetVisible(true)}
       />
-      {profile?.account?.status === "suspended" ? <SuspendedProfileState profile={profile} /> : (
+      {profileQuery.isError && !profile ? (
+        <ErrorState message="Couldn't load this profile." onRetry={() => profileQuery.refetch()} retrying={profileQuery.isRefetching} />
+      ) : profile?.account?.status === "suspended" ? <SuspendedProfileState profile={profile} /> : (
       <ProfileView
         profile={viewingOwnProfile ? undefined : profile}
         posts={postsQuery.data?.data ?? []}

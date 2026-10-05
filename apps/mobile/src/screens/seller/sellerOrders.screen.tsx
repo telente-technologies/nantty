@@ -4,14 +4,19 @@ import { FlatList, ScrollView, StyleSheet, View } from "react-native";
 
 import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { StoreOrderRow } from "@/components/seller/storeOrderRow";
+import { Truck24Icon } from "@/components/icons";
 import { Chip } from "@/components/ui/chip";
+import { EmptyState } from "@/components/ui/emptyState";
+import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
-import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { sellerService } from "@/services/seller.service";
 import type { OrderStatus } from "@/types";
+import { spacing } from "@/constants/spacing.constant";
 
 const FILTERS: { key: "all" | OrderStatus; label: string }[] = [
   { key: "all", label: "All" },
@@ -25,7 +30,8 @@ export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders
   const { colors } = useTheme();
   const styles = useStyles();
   const [filter, setFilter] = useState<"all" | OrderStatus>("all");
-  const { data: orders = [], isLoading, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.orders, queryFn: sellerService.listMyStoreOrders });
+  const { data: orders = [], isLoading, isError, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.orders, queryFn: sellerService.listMyStoreOrders });
+  const refreshControl = usePullToRefresh(refetch);
   const visibleOrders = useMemo(
     () => (filter === "all" ? orders : orders.filter((o) => o.status === filter || (filter === "pending" && o.status === "paid"))),
     [orders, filter],
@@ -42,8 +48,7 @@ export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders
       <FlatList
         data={visibleOrders}
         keyExtractor={(order) => order.id}
-        refreshing={isRefetching}
-        onRefresh={refetch}
+        refreshControl={refreshControl}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
@@ -52,10 +57,19 @@ export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders
           </View>
         )}
         ListEmptyComponent={
-          isLoading ? null : (
-            <Text size={14} lineHeight={16.8} color={colors.textSubtle} align="center" style={styles.empty}>
-              No orders here yet
-            </Text>
+          isLoading ? (
+            <ListSkeleton rows={5} avatarSize={48} padding={4} />
+          ) : isError ? (
+            <ErrorState compact message="Couldn't load orders." onRetry={() => refetch()} retrying={isRefetching} />
+          ) : (
+            <EmptyState
+              compact
+              icon={<Truck24Icon color={colors.textMuted} />}
+              title={filter === "all" ? "No orders yet" : `No ${FILTERS.find((f) => f.key === filter)?.label.toLowerCase()} orders`}
+              body={filter === "all" ? "New orders from buyers will land here." : undefined}
+              actionLabel={filter === "all" ? undefined : "Show all orders"}
+              onAction={() => setFilter("all")}
+            />
           )
         }
       />
@@ -65,9 +79,8 @@ export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   filtersBar: { flexGrow: 0, flexShrink: 0 },
-  filters: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-  list: { paddingHorizontal: 12, paddingBottom: 40 },
+  filters: { paddingHorizontal: spacing[4], paddingVertical: spacing[3], gap: spacing[2] },
+  list: { paddingHorizontal: spacing[3], paddingBottom: spacing[8] },
   separator: { height: 12 },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 12 },
-  empty: { marginTop: 80 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing[3] },
 }));

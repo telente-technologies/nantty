@@ -14,7 +14,10 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { sellerService } from "@/services/seller.service";
+import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 const STATUS_COPY = {
   pending: { title: "Application under review", tone: "caution" as const, label: "Under review", body: "We're checking your details and ID. This usually takes up to 2 working days — we'll notify you as soon as it's done." },
@@ -33,7 +36,9 @@ export function SellerApplicationStatusScreen({ navigation }: MainScreenProps<"S
     <Screen>
       <Header title="Seller application" onBack={() => navigation.popToTop()} />
       {!details ? (
-        application.isLoading ? <ListSkeleton /> : (
+        application.isLoading ? <ListSkeleton /> : application.isError ? (
+          <ErrorState message="Couldn't load your application." onRetry={() => application.refetch()} retrying={application.isRefetching} />
+        ) : (
           <View style={styles.empty}>
             <Text align="center" color={colors.textSubtle}>You haven't applied yet.</Text>
             <Button title="Start selling on Zudomart" onPress={() => navigation.replace("SellerApplication")} />
@@ -47,8 +52,8 @@ export function SellerApplicationStatusScreen({ navigation }: MainScreenProps<"S
           <View style={styles.hero}>
             <StatusPill label={STATUS_COPY[details.status].label} tone={STATUS_COPY[details.status].tone} />
             <Text size={21} weight={600} lineHeight={25.2} accessibilityRole="header">{STATUS_COPY[details.status].title}</Text>
-            <Text size={14} lineHeight={19.6} color={colors.textMuted}>{STATUS_COPY[details.status].body}</Text>
-            {details.rejectionReason ? <Text size={13} lineHeight={17.5} color={colors.error}>{details.rejectionReason}</Text> : null}
+            <Text size={typeScale.md} lineHeight={19.6} color={colors.textMuted}>{STATUS_COPY[details.status].body}</Text>
+            {details.rejectionReason ? <Text size={typeScale.sm} lineHeight={17.5} color={colors.error}>{details.rejectionReason}</Text> : null}
           </View>
           <SettingsGroup>
             <SettingsRow label="Store" trailing={{ text: details.storeName, ...muted }} />
@@ -71,7 +76,7 @@ export function SellerApplicationStatusScreen({ navigation }: MainScreenProps<"S
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  empty: { padding: 32, gap: 16 },
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 20 },
-  hero: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
+  empty: { padding: spacing[7], gap: spacing[4] },
+  content: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[8], gap: spacing[5] },
+  hero: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing[4], gap: spacing[2] },
 }));

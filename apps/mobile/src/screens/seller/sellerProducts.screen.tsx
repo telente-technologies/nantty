@@ -3,17 +3,23 @@ import { FlatList, StyleSheet } from "react-native";
 
 import { InventoryCard } from "@/components/seller/inventoryCard";
 import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
+import { Tag24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/emptyState";
+import { ErrorState } from "@/components/ui/errorState";
+import { GridSkeleton } from "@/components/ui/gridSkeleton";
 import { Header } from "@/components/ui/header";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
-import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { sellerService } from "@/services/seller.service";
+import { spacing } from "@/constants/spacing.constant";
 
 export function SellerProductsScreen({ navigation }: MainScreenProps<"SellerProducts">) {
   const { colors } = useTheme();
-  const { data: products = [], isLoading, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.products, queryFn: sellerService.listMyStoreProducts });
+  const { data: products = [], isLoading, isError, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.products, queryFn: sellerService.listMyStoreProducts });
+  const refreshControl = usePullToRefresh(refetch);
   return (
     <Screen>
       <Header title="Products" />
@@ -21,17 +27,18 @@ export function SellerProductsScreen({ navigation }: MainScreenProps<"SellerProd
         data={products}
         keyExtractor={(product) => product.id}
         numColumns={2}
-        refreshing={isRefetching}
-        onRefresh={refetch}
+        refreshControl={refreshControl}
         columnWrapperStyle={styles.column}
         contentContainerStyle={styles.list}
         ListHeaderComponent={<Button title="Add product" onPress={() => navigation.navigate("ProductForm")} style={styles.add} />}
         renderItem={({ item }) => <InventoryCard product={item} onPress={() => navigation.navigate("ProductForm", { productId: item.id })} />}
         ListEmptyComponent={
-          isLoading ? null : (
-            <Text size={14} lineHeight={16.8} color={colors.textSubtle} align="center" style={styles.empty}>
-              You haven't listed any products yet
-            </Text>
+          isLoading ? (
+            <GridSkeleton items={4} />
+          ) : isError ? (
+            <ErrorState compact message="Couldn't load your products." onRetry={() => refetch()} retrying={isRefetching} />
+          ) : (
+            <EmptyState compact icon={<Tag24Icon color={colors.textMuted} />} title="No products yet" body="Add your first product so buyers can find your store." />
           )
         }
       />
@@ -40,8 +47,7 @@ export function SellerProductsScreen({ navigation }: MainScreenProps<"SellerProd
 }
 
 const styles = StyleSheet.create({
-  list: { paddingHorizontal: 12, paddingBottom: 40, gap: 16 },
+  list: { paddingHorizontal: spacing[3], paddingBottom: spacing[8], gap: spacing[4] },
   column: { justifyContent: "space-between" },
-  add: { marginTop: 16, marginBottom: 8 },
-  empty: { marginTop: 60 },
+  add: { marginTop: spacing[4], marginBottom: spacing[2] },
 });

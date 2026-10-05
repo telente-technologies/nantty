@@ -9,11 +9,13 @@ import { useMyProfileQuery, useUserPostsQuery } from "@/components/profile/profi
 import { ProfileView } from "@/components/profile/profileView";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Screen } from "@/components/ui/screen";
+import { ErrorState } from "@/components/ui/errorState";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Post } from "@/types";
 import type { MainStackParamList } from "@/navigation/navigation.types";
 import { webAppLinks } from "@/config/webAppLinks.config";
+import { spacing } from "@/constants/spacing.constant";
 
 export function MeScreen() {
   const { colors } = useTheme();
@@ -41,7 +43,10 @@ export function MeScreen() {
 
   return (
     <Screen>
-      <ProfileHeaderBar variant="own" onSearch={() => navigation.navigate("Search", { scope: "all" })} onMore={() => navigation.navigate("Settings")} />
+      <ProfileHeaderBar variant="own" onSearch={() => navigation.navigate("Search", profile ? { scope: `profile:${profile.id}`, scopeLabel: `@${profile.username}` } : { scope: "global" })} onMore={() => navigation.navigate("Settings")} />
+      {profileQuery.isError && !profile ? (
+        <ErrorState message="Couldn't load your profile." onRetry={() => profileQuery.refetch()} retrying={profileQuery.isRefetching} />
+      ) : (
       <ProfileView
         profile={profile}
         posts={postsQuery.data?.data ?? []}
@@ -61,6 +66,7 @@ export function MeScreen() {
         onOpenStoreTab={profile?.storeId ? () => navigation.navigate("Store", { storeId: profile.storeId! }) : undefined}
         onPressPostMore={setPostWithOpenMenu}
       />
+      )}
       <BottomSheet visible={postWithOpenMenu !== null} onClose={() => setPostWithOpenMenu(null)} floating>
         <View style={styles.menu}>
           <Pressable accessibilityRole="button" style={styles.option} onPress={() => postWithOpenMenu && openPostAction(() => navigation.navigate("PromotePost", { postId: postWithOpenMenu.id }))}>
@@ -76,6 +82,6 @@ export function MeScreen() {
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  menu: { paddingHorizontal: 16, paddingVertical: 8 },
+  menu: { paddingHorizontal: spacing[4], paddingVertical: spacing[2] },
   option: { minHeight: 50, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: colors.background },
 }));

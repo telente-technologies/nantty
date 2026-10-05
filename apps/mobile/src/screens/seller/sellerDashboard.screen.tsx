@@ -13,12 +13,17 @@ import { splitMoneyIntoSymbolAndAmount } from "@/components/seller/splitMoney.ut
 import { useSellerDashboardQuery } from "@/components/seller/sellerQueries.hook";
 import { StoreOrderRow } from "@/components/seller/storeOrderRow";
 import { Header, HeaderAction } from "@/components/ui/header";
+import { useAuthStore } from "@/store/auth.store";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import type { SellerDashboardPeriod } from "@/types/account.type";
+import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 
 export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDashboard">) {
@@ -27,7 +32,9 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
   const [period, setPeriod] = useState<SellerDashboardPeriod>("today");
   const [ordersExpanded, setOrdersExpanded] = useState(true);
   const [inventoryExpanded, setInventoryExpanded] = useState(true);
-  const { data: dashboard, isLoading } = useSellerDashboardQuery(period);
+  const { data: dashboard, isLoading, isError, refetch, isRefetching } = useSellerDashboardQuery(period);
+  const refreshControl = usePullToRefresh(refetch);
+  const myStoreId = useAuthStore((state) => state.user?.storeId ?? null);
   const totalSales = dashboard ? splitMoneyIntoSymbolAndAmount(dashboard.totalSales) : null;
 
   return (
@@ -35,19 +42,23 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
       <Header
         title="Dashboard"
         right={
-          <HeaderAction label="Search your orders and products" onPress={() => navigation.navigate("SellerProducts")}>
-            <MagnifyingGlass24Icon />
-          </HeaderAction>
+          myStoreId ? (
+            <HeaderAction label="Search your products and orders" onPress={() => navigation.navigate("Search", { scope: `store:${myStoreId}`, scopeLabel: "your store" })}>
+              <MagnifyingGlass24Icon />
+            </HeaderAction>
+          ) : null
         }
       />
       <BusinessDocumentsNudge />
       <PeriodChips value={period} onChange={setPeriod} />
-      {isLoading || !dashboard || !totalSales ? (
+      {isError && !dashboard ? (
+        <ErrorState message="Couldn't load your dashboard." onRetry={() => refetch()} retrying={isRefetching} />
+      ) : isLoading || !dashboard || !totalSales ? (
         <ListSkeleton />
       ) : (
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView contentContainerStyle={styles.content} refreshControl={refreshControl}>
           <View style={styles.total} accessibilityLabel={`Total sales ${totalSales.symbol}${totalSales.amount}, ${dashboard.orders} orders`}>
-            <Text size={14} weight={500} lineHeight={16.8} color={colors.textMuted}>
+            <Text size={typeScale.md} weight={500} lineHeight={16.8} color={colors.textMuted}>
               Total sales
             </Text>
             <View style={styles.amount}>
@@ -56,7 +67,7 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
                 {totalSales.amount}
               </Text>
             </View>
-            <Text size={14} weight={500} lineHeight={16.8}>
+            <Text size={typeScale.md} weight={500} lineHeight={16.8}>
               {dashboard.orders} {dashboard.orders === 1 ? "order" : "orders"}
             </Text>
           </View>
@@ -78,7 +89,7 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
                 {dashboard.recentOrders.map((order) => (
                   <StoreOrderRow key={order.id} order={order} onPress={() => navigation.navigate("SellerOrderDetail", { orderId: order.id })} />
                 ))}
-                <Text size={13} weight={500} lineHeight={16.9} color={colors.primary} accessibilityRole="link" onPress={() => navigation.navigate("SellerOrders")}>
+                <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={colors.primary} accessibilityRole="link" onPress={() => navigation.navigate("SellerOrders")}>
                   See all orders
                 </Text>
               </View>
@@ -104,7 +115,7 @@ function SectionTitle({ title, expanded, onToggle }: { title: string; expanded: 
   const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityState={{ expanded }} onPress={onToggle} style={styles.sectionTitle}>
-      <Text size={16} weight={500} lineHeight={19.2}>
+      <Text size={typeScale.base} weight={500} lineHeight={19.2}>
         {title}
       </Text>
       <View style={!expanded && styles.collapsed}>
@@ -115,14 +126,14 @@ function SectionTitle({ title, expanded, onToggle }: { title: string; expanded: 
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  content: { paddingHorizontal: 12, paddingBottom: 40, gap: 16 },
-  total: { alignItems: "center", gap: 8, marginTop: 12, marginBottom: 9 },
+  content: { paddingHorizontal: spacing[3], paddingBottom: spacing[8], gap: spacing[4] },
+  total: { alignItems: "center", gap: spacing[2], marginTop: spacing[3], marginBottom: spacing[2] },
   amount: { flexDirection: "row", alignItems: "center" },
-  ordersCard: { borderWidth: 2, borderColor: colors.skeleton, borderRadius: 24, padding: 12, gap: 24 },
-  orders: { gap: 12 },
-  sectionTitle: { height: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  ordersCard: { borderWidth: 2, borderColor: colors.skeleton, borderRadius: 24, padding: spacing[3], gap: spacing[6] },
+  orders: { gap: spacing[3] },
+  sectionTitle: { minHeight: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   collapsed: { transform: [{ rotate: "-90deg" }] },
-  quickLinks: { flexDirection: "row", gap: 8 },
+  quickLinks: { flexDirection: "row", gap: spacing[2] },
   quickLink: { flex: 1 },
-  inventory: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 16 },
+  inventory: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: spacing[4] },
 }));
