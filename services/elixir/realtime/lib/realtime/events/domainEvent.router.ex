@@ -1,7 +1,14 @@
 defmodule Realtime.Events.DomainEventRouter do
   alias Phoenix.PubSub
+  alias Realtime.Events.AccountEnforcementRouter
+  alias Realtime.Events.ConversationEventRouter
   alias Realtime.Events.Throttle
   alias Realtime.Topics.SubscriptionGuard
+
+  @conversation_event_types ~w(
+    message.created message.updated message.removed message.reactionsChanged
+    conversation.read conversation.updated
+  )
 
   @live_event_names %{
     "gift.sent" => "gift.sent",
@@ -79,13 +86,9 @@ defmodule Realtime.Events.DomainEventRouter do
       when is_map_key(@live_event_names, type) and is_binary(live_id) and live_id != "",
       do: {:ok, "live:#{live_id}", Map.put(data, "type", Map.fetch!(@live_event_names, type))}
 
-  def route_domain_event_to_topic(%{
-        "type" => "message.created",
-        "data" => %{"conversationId" => conversation_id, "message" => message}
-      }),
-      do:
-        {:ok, "conversation:#{conversation_id}",
-         %{"type" => "message.created", "message" => message}}
+  def route_domain_event_to_topic(%{"type" => type} = event)
+      when type in @conversation_event_types,
+      do: ConversationEventRouter.route(event)
 
   def route_domain_event_to_topic(%{
         "type" => "notification.created",
@@ -123,10 +126,15 @@ defmodule Realtime.Events.DomainEventRouter do
 
   def broadcast_domain_event(event, throttle \\ Throttle) do
     broadcast_membership_revocation(event)
+    AccountEnforcementRouter.enforce(event)
 
-    case route_domain_event_to_topic(event) do
-      {:ok, topic, payload} -> broadcast_possibly_throttled(event, topic, payload, throttle)
-      :ignore -> :ok
+    if ConversationEventRouter.conversation_event?(event) do
+      ConversationEventRouter.broadcast(event)
+    else
+      case route_domain_event_to_topic(event) do
+        {:ok, topic, payload} -> broadcast_possibly_throttled(event, topic, payload, throttle)
+        :ignore -> :ok
+      end
     end
   end
 

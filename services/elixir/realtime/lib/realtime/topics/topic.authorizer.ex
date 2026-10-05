@@ -24,20 +24,36 @@ defmodule Realtime.Topics.TopicAuthorizer do
     if checker.can_join?(principal.account_id, topic), do: :ok, else: {:error, :forbidden}
   end
 
-  defp authorize_conversation_member(principal, conversation_id) do
-    membership_checker =
-      Application.get_env(
-        :realtime,
-        :conversation_membership_checker,
-        Realtime.Topics.DenyAllConversationMembership
-      )
+  def conversation_member_summary(principal, conversation_id) do
+    checker = membership_checker()
 
-    if membership_checker.member?(principal.account_id, conversation_id),
+    summary =
+      if Code.ensure_loaded?(checker) and function_exported?(checker, :member_summary, 2),
+        do: checker.member_summary(principal.account_id, conversation_id)
+
+    Map.put(summary || %{}, "id", principal.account_id)
+  end
+
+  def forget_conversation_membership(account_id, conversation_id) do
+    checker = membership_checker()
+
+    if Code.ensure_loaded?(checker) and function_exported?(checker, :forget, 2),
+      do: checker.forget(account_id, conversation_id)
+
+    :ok
+  end
+
+  defp authorize_conversation_member(principal, conversation_id) do
+    if membership_checker().member?(principal.account_id, conversation_id),
       do: :ok,
       else: {:error, :forbidden}
   end
-end
 
-defmodule Realtime.Topics.DenyAllConversationMembership do
-  def member?(_account_id, _conversation_id), do: false
+  defp membership_checker,
+    do:
+      Application.get_env(
+        :realtime,
+        :conversation_membership_checker,
+        Realtime.Topics.ConversationMembershipClient
+      )
 end
