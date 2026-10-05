@@ -20,3 +20,5 @@ export const textStyles = {
   caption: { size: 12, lineHeight: 17 },
   micro: { size: 11, lineHeight: 15 },
 } as const;
+
+export { typeScale } from "@zudomart/design-tokens/native";

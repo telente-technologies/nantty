@@ -1,16 +1,8 @@
+import { brandPalette } from "@zudomart/design-tokens/native";
+
 export const palette = {
-  primary: {
-    50: "#D2DAFD",
-    100: "#B5C1FC",
-    200: "#8FA1FA",
-    300: "#6A82F8",
-    400: "#4563F7",
-    500: "#2043F5",
-    600: "#1B39CC",
-    700: "#152DA3",
-    800: "#10227A",
-    900: "#0B1752",
-  },
+  primary: brandPalette,
+
   secondary: {
     50: "#FDF9D2",
     100: "#FCF6B5",

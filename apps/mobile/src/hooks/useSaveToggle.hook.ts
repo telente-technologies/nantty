@@ -8,14 +8,17 @@ import { requireAuthThen } from "@/utils/requireAuth.util";
 import { showToast } from "@/store/toast.store";
 import { saveTargetKey, useSavedItemsStore } from "@/store/savedItems.store";
 import type { SaveTarget } from "@/types";
+import type { SavedItemFilter } from "@/types/saves.type";
 
 export const savedItemsQueryKeyPrefix = ["saves"] as const;
 
 const playSaveHaptic = (savedNow: boolean) =>
   (savedNow ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light) : Haptics.selectionAsync()).catch(() => undefined);
 
-const openSavedScreen = () => {
-  if (rootNavigationRef.isReady()) rootNavigationRef.navigate("Saved" as never);
+const openSavedScreenFilteredTo = (initialFilter: SavedItemFilter) => {
+  if (!rootNavigationRef.isReady()) return;
+  const navigate = rootNavigationRef.navigate as unknown as (name: "Saved", params: { initialFilter: SavedItemFilter }) => void;
+  navigate("Saved", { initialFilter });
 };
 
 export function useSaveToggle(target: SaveTarget, savedAccordingToServer: boolean) {
@@ -29,7 +32,7 @@ export function useSaveToggle(target: SaveTarget, savedAccordingToServer: boolea
     const saveNow = !(savedStateByTargetKey[targetKey] ?? savedAccordingToServer);
     recordSavedState(target, saveNow);
     playSaveHaptic(saveNow);
-    showToast(saveNow ? "Added to Saved" : "Removed from Saved", saveNow ? { action: { label: "View", onPress: openSavedScreen } } : undefined);
+    showToast(saveNow ? "Added to Saved" : "Removed from Saved", saveNow ? { action: { label: "View saved", onPress: () => openSavedScreenFilteredTo(target.type) } } : undefined);
     try {
       await (saveNow ? savesService.saveItem(target) : savesService.unsaveItem(target));
       queryClient.invalidateQueries({ queryKey: savedItemsQueryKeyPrefix });
