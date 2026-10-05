@@ -44,6 +44,8 @@ const (
 	FieldIsPrivate = "is_private"
 	// FieldCountryCode holds the string denoting the country_code field in the database.
 	FieldCountryCode = "country_code"
+	// FieldTheme holds the string denoting the theme field in the database.
+	FieldTheme = "theme"
 	// FieldVerified holds the string denoting the verified field in the database.
 	FieldVerified = "verified"
 	// FieldProfileType holds the string denoting the profile_type field in the database.
@@ -80,6 +82,7 @@ var Columns = []string{
 	FieldBannerURL,
 	FieldIsPrivate,
 	FieldCountryCode,
+	FieldTheme,
 	FieldVerified,
 	FieldProfileType,
 	FieldStatus,
@@ -187,6 +190,33 @@ func CreatorStatusValidator(cs CreatorStatus) error {
 		return nil
 	default:
 		return fmt.Errorf("profile: invalid enum value for creator_status field: %q", cs)
+	}
+}
+
+// Theme defines the type for the "theme" enum field.
+type Theme string
+
+// ThemeSystem is the default value of the Theme enum.
+const DefaultTheme = ThemeSystem
+
+// Theme values.
+const (
+	ThemeSystem Theme = "system"
+	ThemeLight  Theme = "light"
+	ThemeDark   Theme = "dark"
+)
+
+func (t Theme) String() string {
+	return string(t)
+}
+
+// ThemeValidator is a validator for the "theme" field enum values. It is called by the builders before save.
+func ThemeValidator(t Theme) error {
+	switch t {
+	case ThemeSystem, ThemeLight, ThemeDark:
+		return nil
+	default:
+		return fmt.Errorf("profile: invalid enum value for theme field: %q", t)
 	}
 }
 
@@ -320,6 +350,11 @@ func ByIsPrivate(opts ...sql.OrderTermOption) OrderOption {
 // ByCountryCode orders the results by the country_code field.
 func ByCountryCode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCountryCode, opts...).ToFunc()
+}
+
+// ByTheme orders the results by the theme field.
+func ByTheme(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTheme, opts...).ToFunc()
 }
 
 // ByVerified orders the results by the verified field.

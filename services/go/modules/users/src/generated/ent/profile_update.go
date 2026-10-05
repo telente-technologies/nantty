@@ -220,6 +220,20 @@ func (_u *ProfileUpdate) ClearCountryCode() *ProfileUpdate {
 	return _u
 }
 
+// SetTheme sets the "theme" field.
+func (_u *ProfileUpdate) SetTheme(v profile.Theme) *ProfileUpdate {
+	_u.mutation.SetTheme(v)
+	return _u
+}
+
+// SetNillableTheme sets the "theme" field if the given value is not nil.
+func (_u *ProfileUpdate) SetNillableTheme(v *profile.Theme) *ProfileUpdate {
+	if v != nil {
+		_u.SetTheme(*v)
+	}
+	return _u
+}
+
 // SetVerified sets the "verified" field.
 func (_u *ProfileUpdate) SetVerified(v bool) *ProfileUpdate {
 	_u.mutation.SetVerified(v)
@@ -397,6 +411,11 @@ func (_u *ProfileUpdate) check() error {
 			return &ValidationError{Name: "country_code", err: fmt.Errorf(`ent: validator failed for field "Profile.country_code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Theme(); ok {
+		if err := profile.ThemeValidator(v); err != nil {
+			return &ValidationError{Name: "theme", err: fmt.Errorf(`ent: validator failed for field "Profile.theme": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ProfileType(); ok {
 		if err := profile.ProfileTypeValidator(v); err != nil {
 			return &ValidationError{Name: "profile_type", err: fmt.Errorf(`ent: validator failed for field "Profile.profile_type": %w`, err)}
@@ -472,6 +491,9 @@ func (_u *ProfileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.CountryCodeCleared() {
 		_spec.ClearField(profile.FieldCountryCode, field.TypeString)
+	}
+	if value, ok := _u.mutation.Theme(); ok {
+		_spec.SetField(profile.FieldTheme, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(profile.FieldVerified, field.TypeBool, value)
@@ -740,6 +762,20 @@ func (_u *ProfileUpdateOne) ClearCountryCode() *ProfileUpdateOne {
 	return _u
 }
 
+// SetTheme sets the "theme" field.
+func (_u *ProfileUpdateOne) SetTheme(v profile.Theme) *ProfileUpdateOne {
+	_u.mutation.SetTheme(v)
+	return _u
+}
+
+// SetNillableTheme sets the "theme" field if the given value is not nil.
+func (_u *ProfileUpdateOne) SetNillableTheme(v *profile.Theme) *ProfileUpdateOne {
+	if v != nil {
+		_u.SetTheme(*v)
+	}
+	return _u
+}
+
 // SetVerified sets the "verified" field.
 func (_u *ProfileUpdateOne) SetVerified(v bool) *ProfileUpdateOne {
 	_u.mutation.SetVerified(v)
@@ -930,6 +966,11 @@ func (_u *ProfileUpdateOne) check() error {
 			return &ValidationError{Name: "country_code", err: fmt.Errorf(`ent: validator failed for field "Profile.country_code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Theme(); ok {
+		if err := profile.ThemeValidator(v); err != nil {
+			return &ValidationError{Name: "theme", err: fmt.Errorf(`ent: validator failed for field "Profile.theme": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ProfileType(); ok {
 		if err := profile.ProfileTypeValidator(v); err != nil {
 			return &ValidationError{Name: "profile_type", err: fmt.Errorf(`ent: validator failed for field "Profile.profile_type": %w`, err)}
@@ -1022,6 +1063,9 @@ func (_u *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err er
 	}
 	if _u.mutation.CountryCodeCleared() {
 		_spec.ClearField(profile.FieldCountryCode, field.TypeString)
+	}
+	if value, ok := _u.mutation.Theme(); ok {
+		_spec.SetField(profile.FieldTheme, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(profile.FieldVerified, field.TypeBool, value)

@@ -782,6 +782,7 @@ var (
 		{Name: "banner_url", Type: field.TypeString, Nullable: true, Size: 500},
 		{Name: "is_private", Type: field.TypeBool, Default: false},
 		{Name: "country_code", Type: field.TypeString, Nullable: true, Size: 2},
+		{Name: "theme", Type: field.TypeEnum, Enums: []string{"system", "light", "dark"}, Default: "system"},
 		{Name: "verified", Type: field.TypeBool, Default: false},
 		{Name: "profile_type", Type: field.TypeEnum, Enums: []string{"personal", "business", "brand", "government"}, Default: "personal"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "archived"}, Default: "active"},

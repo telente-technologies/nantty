@@ -194,6 +194,20 @@ func (_c *ProfileCreate) SetNillableCountryCode(v *string) *ProfileCreate {
 	return _c
 }
 
+// SetTheme sets the "theme" field.
+func (_c *ProfileCreate) SetTheme(v profile.Theme) *ProfileCreate {
+	_c.mutation.SetTheme(v)
+	return _c
+}
+
+// SetNillableTheme sets the "theme" field if the given value is not nil.
+func (_c *ProfileCreate) SetNillableTheme(v *profile.Theme) *ProfileCreate {
+	if v != nil {
+		_c.SetTheme(*v)
+	}
+	return _c
+}
+
 // SetVerified sets the "verified" field.
 func (_c *ProfileCreate) SetVerified(v bool) *ProfileCreate {
 	_c.mutation.SetVerified(v)
@@ -334,6 +348,10 @@ func (_c *ProfileCreate) defaults() {
 		v := profile.DefaultIsPrivate
 		_c.mutation.SetIsPrivate(v)
 	}
+	if _, ok := _c.mutation.Theme(); !ok {
+		v := profile.DefaultTheme
+		_c.mutation.SetTheme(v)
+	}
 	if _, ok := _c.mutation.Verified(); !ok {
 		v := profile.DefaultVerified
 		_c.mutation.SetVerified(v)
@@ -435,6 +453,14 @@ func (_c *ProfileCreate) check() error {
 	if v, ok := _c.mutation.CountryCode(); ok {
 		if err := profile.CountryCodeValidator(v); err != nil {
 			return &ValidationError{Name: "country_code", err: fmt.Errorf(`ent: validator failed for field "Profile.country_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Theme(); !ok {
+		return &ValidationError{Name: "theme", err: errors.New(`ent: missing required field "Profile.theme"`)}
+	}
+	if v, ok := _c.mutation.Theme(); ok {
+		if err := profile.ThemeValidator(v); err != nil {
+			return &ValidationError{Name: "theme", err: fmt.Errorf(`ent: validator failed for field "Profile.theme": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Verified(); !ok {
@@ -549,6 +575,10 @@ func (_c *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.CountryCode(); ok {
 		_spec.SetField(profile.FieldCountryCode, field.TypeString, value)
 		_node.CountryCode = &value
+	}
+	if value, ok := _c.mutation.Theme(); ok {
+		_spec.SetField(profile.FieldTheme, field.TypeEnum, value)
+		_node.Theme = value
 	}
 	if value, ok := _c.mutation.Verified(); ok {
 		_spec.SetField(profile.FieldVerified, field.TypeBool, value)

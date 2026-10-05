@@ -1135,11 +1135,11 @@ func init() {
 	// profile.CountryCodeValidator is a validator for the "country_code" field. It is called by the builders before save.
 	profile.CountryCodeValidator = profileDescCountryCode.Validators[0].(func(string) error)
 	// profileDescVerified is the schema descriptor for verified field.
-	profileDescVerified := profileFields[13].Descriptor()
+	profileDescVerified := profileFields[14].Descriptor()
 	// profile.DefaultVerified holds the default value on creation for the verified field.
 	profile.DefaultVerified = profileDescVerified.Default.(bool)
 	// profileDescUpdatedAt is the schema descriptor for updated_at field.
-	profileDescUpdatedAt := profileFields[16].Descriptor()
+	profileDescUpdatedAt := profileFields[17].Descriptor()
 	// profile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	profile.DefaultUpdatedAt = profileDescUpdatedAt.Default.(func() time.Time)
 	// profile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -34,6 +34,7 @@ func (Profile) Fields() []ent.Field {
 		field.String("banner_url").Optional().Nillable().MaxLen(500),
 		field.Bool("is_private").Default(false),
 		field.String("country_code").Optional().Nillable().MaxLen(2),
+		field.Enum("theme").Values("system", "light", "dark").Default("system"),
 		field.Bool("verified").Default(false),
 		field.Enum("profile_type").Values("personal", "business", "brand", "government").Default("personal"),
 		field.Enum("status").Values("active", "archived").Default("active"),

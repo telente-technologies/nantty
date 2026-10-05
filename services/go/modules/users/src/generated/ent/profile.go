@@ -46,6 +46,8 @@ type Profile struct {
 	IsPrivate bool `json:"is_private,omitempty"`
 	// CountryCode holds the value of the "country_code" field.
 	CountryCode *string `json:"country_code,omitempty"`
+	// Theme holds the value of the "theme" field.
+	Theme profile.Theme `json:"theme,omitempty"`
 	// Verified holds the value of the "verified" field.
 	Verified bool `json:"verified,omitempty"`
 	// ProfileType holds the value of the "profile_type" field.
@@ -85,7 +87,7 @@ func (*Profile) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case profile.FieldIsPrivate, profile.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case profile.FieldKind, profile.FieldCreatorStatus, profile.FieldHandle, profile.FieldDisplayName, profile.FieldBio, profile.FieldWebsite, profile.FieldAvatarMediaKey, profile.FieldAvatarURL, profile.FieldBannerMediaKey, profile.FieldBannerURL, profile.FieldCountryCode, profile.FieldProfileType, profile.FieldStatus:
+		case profile.FieldKind, profile.FieldCreatorStatus, profile.FieldHandle, profile.FieldDisplayName, profile.FieldBio, profile.FieldWebsite, profile.FieldAvatarMediaKey, profile.FieldAvatarURL, profile.FieldBannerMediaKey, profile.FieldBannerURL, profile.FieldCountryCode, profile.FieldTheme, profile.FieldProfileType, profile.FieldStatus:
 			values[i] = new(sql.NullString)
 		case profile.FieldCreatedAt, profile.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -201,6 +203,12 @@ func (_m *Profile) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CountryCode = new(string)
 				*_m.CountryCode = value.String
+			}
+		case profile.FieldTheme:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field theme", values[i])
+			} else if value.Valid {
+				_m.Theme = profile.Theme(value.String)
 			}
 		case profile.FieldVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -320,6 +328,9 @@ func (_m *Profile) String() string {
 		builder.WriteString("country_code=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", ")
+	builder.WriteString("theme=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Theme))
 	builder.WriteString(", ")
 	builder.WriteString("verified=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Verified))

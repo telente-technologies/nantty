@@ -21150,6 +21150,7 @@ type ProfileMutation struct {
 	banner_url        *string
 	is_private        *bool
 	country_code      *string
+	theme             *profile.Theme
 	verified          *bool
 	profile_type      *profile.ProfileType
 	status            *profile.Status
@@ -21849,6 +21850,42 @@ func (m *ProfileMutation) ResetCountryCode() {
 	delete(m.clearedFields, profile.FieldCountryCode)
 }
 
+// SetTheme sets the "theme" field.
+func (m *ProfileMutation) SetTheme(pr profile.Theme) {
+	m.theme = &pr
+}
+
+// Theme returns the value of the "theme" field in the mutation.
+func (m *ProfileMutation) Theme() (r profile.Theme, exists bool) {
+	v := m.theme
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTheme returns the old "theme" field's value of the Profile entity.
+// If the Profile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileMutation) OldTheme(ctx context.Context) (v profile.Theme, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTheme is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTheme requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTheme: %w", err)
+	}
+	return oldValue.Theme, nil
+}
+
+// ResetTheme resets all changes to the "theme" field.
+func (m *ProfileMutation) ResetTheme() {
+	m.theme = nil
+}
+
 // SetVerified sets the "verified" field.
 func (m *ProfileMutation) SetVerified(b bool) {
 	m.verified = &b
@@ -22081,7 +22118,7 @@ func (m *ProfileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 19)
 	if m.created_at != nil {
 		fields = append(fields, profile.FieldCreatedAt)
 	}
@@ -22123,6 +22160,9 @@ func (m *ProfileMutation) Fields() []string {
 	}
 	if m.country_code != nil {
 		fields = append(fields, profile.FieldCountryCode)
+	}
+	if m.theme != nil {
+		fields = append(fields, profile.FieldTheme)
 	}
 	if m.verified != nil {
 		fields = append(fields, profile.FieldVerified)
@@ -22172,6 +22212,8 @@ func (m *ProfileMutation) Field(name string) (ent.Value, bool) {
 		return m.IsPrivate()
 	case profile.FieldCountryCode:
 		return m.CountryCode()
+	case profile.FieldTheme:
+		return m.Theme()
 	case profile.FieldVerified:
 		return m.Verified()
 	case profile.FieldProfileType:
@@ -22217,6 +22259,8 @@ func (m *ProfileMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldIsPrivate(ctx)
 	case profile.FieldCountryCode:
 		return m.OldCountryCode(ctx)
+	case profile.FieldTheme:
+		return m.OldTheme(ctx)
 	case profile.FieldVerified:
 		return m.OldVerified(ctx)
 	case profile.FieldProfileType:
@@ -22331,6 +22375,13 @@ func (m *ProfileMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCountryCode(v)
+		return nil
+	case profile.FieldTheme:
+		v, ok := value.(profile.Theme)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTheme(v)
 		return nil
 	case profile.FieldVerified:
 		v, ok := value.(bool)
@@ -22489,6 +22540,9 @@ func (m *ProfileMutation) ResetField(name string) error {
 		return nil
 	case profile.FieldCountryCode:
 		m.ResetCountryCode()
+		return nil
+	case profile.FieldTheme:
+		m.ResetTheme()
 		return nil
 	case profile.FieldVerified:
 		m.ResetVerified()

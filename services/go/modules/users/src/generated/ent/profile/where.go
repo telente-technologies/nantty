@@ -901,6 +901,26 @@ func CountryCodeContainsFold(v string) predicate.Profile {
 	return predicate.Profile(sql.FieldContainsFold(FieldCountryCode, v))
 }
 
+// ThemeEQ applies the EQ predicate on the "theme" field.
+func ThemeEQ(v Theme) predicate.Profile {
+	return predicate.Profile(sql.FieldEQ(FieldTheme, v))
+}
+
+// ThemeNEQ applies the NEQ predicate on the "theme" field.
+func ThemeNEQ(v Theme) predicate.Profile {
+	return predicate.Profile(sql.FieldNEQ(FieldTheme, v))
+}
+
+// ThemeIn applies the In predicate on the "theme" field.
+func ThemeIn(vs ...Theme) predicate.Profile {
+	return predicate.Profile(sql.FieldIn(FieldTheme, vs...))
+}
+
+// ThemeNotIn applies the NotIn predicate on the "theme" field.
+func ThemeNotIn(vs ...Theme) predicate.Profile {
+	return predicate.Profile(sql.FieldNotIn(FieldTheme, vs...))
+}
+
 // VerifiedEQ applies the EQ predicate on the "verified" field.
 func VerifiedEQ(v bool) predicate.Profile {
 	return predicate.Profile(sql.FieldEQ(FieldVerified, v))
