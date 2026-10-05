@@ -888,3 +888,113 @@ Two outbox shapes exist: non-money schemas (admin, auth, users, currency, live) 
 | G11 | Currency columns are unconstrained `varchar` (ent `MaxLen(3)` only in Go) | all money migrations | P3 | `CHECK (currency ~ '^[A-Z]{3}$' OR currency = 'COIN')` on new money tables |
 | G12 | `docs/architecture/database.md` cites stale paths (`internal/ent/schema`) and says users/admin/currency/ledger/live have "no routes" | that file | Info | Point to this folder |
 | G13 | Raw SQL exists beyond grants: money outbox and SQL idempotency store (`ledger/src/events/outbox.event.go`, `ledger/src/utils/idempotencyRecord.util.go`), cross-schema `auth.accounts` read (`wallet/src/repositories/accountDirectory.repository.go`), a SUM in `creators/.../giftShareTiers.service.go`, advisory locks | grep recipe in README §6 | Info (deviation from "ent only except grants") | Accept and list them; all are parameterised |
+
+## 12. Added 4 October 2026 (EXISTING unless marked)
+
+Sources: `ads/src/migrations/20261004140000_add_creator_monetisation_holds.up.sql`, `live/src/migrations/20261004140000_add_live_host_restrictions.up.sql`, `users/src/migrations/20261004200000_add_identity_verification_cases.up.sql`, `users/.../username_holds` (kinds `withheld|quarantine|reserved_official`), `orders/src/migrations/20261004140000_add_invoice_counters.up.sql`, `moderation/src/migrations/20261004103816_add_access_security_tables.up.sql`, `support/prisma/schema.prisma`.
+
+```mermaid
+erDiagram
+  ACCOUNTS ||..o| AD_CREATOR_MONETISATION_HOLDS : "id = creator account id (logical)"
+  ACCOUNTS ||..o| LIVE_HOST_RESTRICTIONS : "id = host account id (logical)"
+  ACCOUNTS ||..o{ VERIFICATION_CASES : "account_id, profile_id (logical)"
+  ACCOUNTS ||..o{ USERNAME_HOLDS : "held_for_account_id (logical)"
+  ACCOUNTS ||..o{ SECURITY_CASES : "account_id; one open per account"
+  ACCOUNTS ||..o{ SUPPORT_TICKETS : "requester_account_id (logical, support schema)"
+  SUPPORT_TICKETS ||--o{ SUPPORT_TICKET_MESSAGES : "ticket_id"
+  SUPPORT_TICKETS ||--o{ SUPPORT_TICKET_EVENTS : "ticket_id"
+  POSTS ||..o{ TAGGED_USERS : "PLANNED, backend pending"
+  ACCOUNTS ||..o{ TAGGED_USERS : "PLANNED, backend pending"
+  AD_CREATOR_MONETISATION_HOLDS {
+    varchar id PK
+    bool is_paused
+    timestamptz health_changed_at
+    timestamptz updated_at
+  }
+  LIVE_HOST_RESTRICTIONS {
+    varchar id PK
+    bool can_go_live
+    timestamptz health_changed_at
+    timestamptz updated_at
+  }
+  VERIFICATION_CASES {
+    uuid id PK
+    uuid profile_id
+    uuid account_id
+    enum color "blue|gold|black"
+    varchar subscription_id
+    varchar plan_code
+    varchar payment_channel
+    enum status
+    enum refund_status "checkmark share only on plans that sell more"
+    varchar smile_job_id
+    varchar smile_reference
+    varchar document_fingerprint
+    int trust_score
+    bool eligible_at_payment
+    text_array decision_reasons
+    text_array fraud_signals
+    timestamptz decided_at
+    timestamptz verified_at
+  }
+  USERNAME_HOLDS {
+    uuid id PK
+    varchar username
+    enum kind "withheld|quarantine|reserved_official"
+    uuid held_for_account_id
+    varchar reason
+    timestamptz expires_at
+  }
+  INVOICE_COUNTERS {
+    uuid id PK "one row per counter scope"
+    bigint last_number "atomic increment, gapless invoice numbers"
+  }
+  SECURITY_CASES {
+    uuid id PK
+    uuid account_id "UK where status = open"
+    enum trigger
+    enum status
+    enum severity
+    int violation_count
+    int failed_challenge_count
+    int passed_challenge_count
+    bool auto_suspended
+    bytea decision
+    timestamptz decided_at
+  }
+  SUPPORT_TICKETS {
+    uuid id PK
+    int number UK
+    uuid requester_account_id
+    varchar status
+    varchar priority
+    varchar category
+    varchar linked_kind
+    varchar linked_id
+    timestamptz first_response_due_at
+    timestamptz resolution_due_at
+    varchar auto_faq_status
+    varchar idempotency_key "UK with requester"
+    timestamptz anonymized_at
+  }
+  SUPPORT_TICKET_MESSAGES {
+    uuid id PK
+    uuid ticket_id FK
+  }
+  SUPPORT_TICKET_EVENTS {
+    uuid id PK
+    uuid ticket_id FK
+  }
+  TAGGED_USERS {
+    uuid post_id "PLANNED"
+    uuid tagged_account_id "PLANNED"
+  }
+```
+
+Notes:
+
+- `ad_creator_monetisation_holds` and `live_host_restrictions` are single-row-per-account projections of the account-health decision (health_changed_at is the last event applied, so replays are ignored). Ads reads the first to pause creator revenue share; live reads the second to block going live.
+- `security_cases` never auto-deletes accounts: the strongest automatic action is `auto_suspended`, and a human decides (`decision`, `decided_at`).
+- `username_holds.kind = quarantine` is the cooling-off window after a username change or move.
+- `invoice_counters.id` scopes the counter; the number is incremented in the same transaction as the order or invoice row.
+- Tagged people (plans.md section 52) exist in the mobile and webapp mock UI only; no table or migration yet.
