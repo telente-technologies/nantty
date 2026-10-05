@@ -23,6 +23,20 @@ type AccessTokenVerifier struct {
 	publicKeySet KeySetProvider
 	issuer       string
 	audience     string
+	denylist     SessionDenylist
+}
+
+func (verifier *AccessTokenVerifier) WithSessionDenylist(denylist SessionDenylist) *AccessTokenVerifier {
+	copied := *verifier
+	copied.denylist = denylist
+	return &copied
+}
+
+func (verifier *AccessTokenVerifier) activeDenylist() SessionDenylist {
+	if verifier.denylist != nil {
+		return verifier.denylist
+	}
+	return RegisteredSessionDenylist()
 }
 
 var ErrInvalidAccessToken = errors.New("invalid access token")
@@ -71,6 +85,9 @@ func (verifier *AccessTokenVerifier) VerifyAccessTokenAndExtractPrincipal(ctx co
 	var sessionId string
 	if err := token.Get("sid", &sessionId); err != nil || sessionId == "" {
 		return Principal{}, fmt.Errorf("%w: missing session", ErrInvalidAccessToken)
+	}
+	if isSessionRevokedFailingOpen(ctx, verifier.activeDenylist(), sessionId) {
+		return Principal{}, fmt.Errorf("%w: session revoked", ErrInvalidAccessToken)
 	}
 	var roles []string
 	if token.Has("roles") {
