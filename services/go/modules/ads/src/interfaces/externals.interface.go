@@ -102,7 +102,7 @@ type DestinationOwnership interface {
 }
 
 type TopUpStartRequest struct {
-	BearerToken    string
+	UserId         string
 	IdempotencyKey string
 	AdAccountId    string
 	AmountMinor    int64
@@ -116,8 +116,17 @@ type StartedTopUp struct {
 	CheckoutUrl string
 }
 
+type TopUpStatus struct {
+	TopUpId     string
+	Status      string
+	AmountMinor int64
+	Currency    string
+	CompletedAt *time.Time
+}
+
 type TopUpGateway interface {
 	StartTopUp(ctx context.Context, request TopUpStartRequest) (StartedTopUp, error)
+	ReadTopUp(ctx context.Context, adAccountId, reference string) (TopUpStatus, error)
 }
 
 type AuditHistoryReader interface {

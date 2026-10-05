@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
 
 	"zudomart/modules/ads/src/interfaces"
@@ -105,4 +106,19 @@ func (storage *MemoryObjectStorage) Exists(_ context.Context, key string) (bool,
 	defer storage.mutex.Unlock()
 	body, found := storage.Objects[key]
 	return found, int64(len(body)), nil
+}
+
+func (storage *S3ObjectStorage) EnsureBucketForBrowserUploads(ctx context.Context, origins []string) error {
+	if _, err := storage.client.HeadBucket(ctx, &s3.HeadBucketInput{Bucket: &storage.bucket}); err != nil {
+		if _, err := storage.client.CreateBucket(ctx, &s3.CreateBucketInput{Bucket: &storage.bucket}); err != nil {
+			return err
+		}
+	}
+	if len(origins) == 0 {
+		return nil
+	}
+	_, err := storage.client.PutBucketCors(ctx, &s3.PutBucketCorsInput{Bucket: &storage.bucket, CORSConfiguration: &s3types.CORSConfiguration{CORSRules: []s3types.CORSRule{{
+		AllowedOrigins: origins, AllowedMethods: []string{"PUT", "GET", "HEAD"}, AllowedHeaders: []string{"*"}, ExposeHeaders: []string{"ETag"}, MaxAgeSeconds: aws.Int32(3600),
+	}}}})
+	return err
 }

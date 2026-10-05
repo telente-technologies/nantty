@@ -66,6 +66,7 @@ type AdsSettings struct {
 	MoneyInternalToken     string
 	MoneyHttpUrl           string
 	AdsAppUrl              string
+	MoneyHttpToken         string
 	AdminInternalUrl       string
 	AdminInternalToken     string
 	AssetsCorsOrigins      []string
@@ -132,6 +133,7 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 	settings.MoneyGrpcAddress = reader.ReadStringOrDefault("ADS_MONEY_GRPC_ADDRESS", "")
 	settings.MoneyInternalToken = reader.ReadStringOrDefault("ADS_MONEY_INTERNAL_TOKEN", "")
 	settings.MoneyHttpUrl = reader.ReadStringOrDefault("ADS_MONEY_HTTP_URL", "")
+	settings.MoneyHttpToken = reader.ReadStringOrDefault("ADS_MONEY_HTTP_TOKEN", reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""))
 	settings.AdsAppUrl = reader.ReadStringOrDefault("ADS_APP_URL", "https://ads.zudomart.com")
 	settings.AdminInternalUrl = reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", "")
 	settings.AdminInternalToken = reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", "")
