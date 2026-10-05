@@ -8,6 +8,7 @@ import { ThemeSwitcher } from "@zudomart/web-kit";
 
 import { businessAppLinks, siteConfig } from "@/lib/siteConfig.config";
 
+import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import { ForBusinessDisclosureMenu } from "./forBusinessMenu";
 import styles from "./siteHeader.module.css";
 import { ZudomartWordmarkHomeLink } from "./zudomartWordmark";
@@ -118,7 +119,7 @@ export function SiteHeaderWithFloatingNavigation() {
             {[businessAppLinks.sellerDashboard, businessAppLinks.adsManager].map((businessAppLink) => (
               <li key={businessAppLink.href}>
                 <a href={businessAppLink.href} className={styles.mobileBusinessLink} target="_blank" rel="noopener noreferrer">
-                  {businessAppLink.label}{"\u00a0↗"}<span className="visuallyHidden"> (opens in a new tab)</span>
+                  {businessAppLink.label}{"\u00a0"}<FigmaIconTintedWithCurrentColor name="arrowUpRight24" size={14} /><span className="visuallyHidden"> (opens in a new tab)</span>
                 </a>
               </li>
             ))}

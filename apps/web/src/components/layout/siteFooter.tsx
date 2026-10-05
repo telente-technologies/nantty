@@ -4,6 +4,7 @@ import { ThemeSwitcher, defaultZudomartWordmarkVariant, zudomartWordmarkFor } fr
 
 import { businessAppLinks, contactEmailDisplayText, contactMailtoHref } from "@/lib/siteConfig.config";
 
+import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import { CookieSettingsButton } from "./cookieSettingsButton";
 import styles from "./siteFooter.module.css";
 import { ZudomartWordmarkHomeLink } from "./zudomartWordmark";
@@ -73,7 +74,7 @@ export function SiteFooterWithGiantWordmark() {
                   <li key={footerLink.href}>
                     {isExternalFooterHref(footerLink.href) ? (
                       <a href={footerLink.href} className={styles.footerLink} target="_blank" rel="noopener noreferrer">
-                        {footerLink.label}{"\u00a0↗"}<span className="visuallyHidden"> (opens in a new tab)</span>
+                        {footerLink.label}{"\u00a0"}<FigmaIconTintedWithCurrentColor name="arrowUpRight24" size={14} /><span className="visuallyHidden"> (opens in a new tab)</span>
                       </a>
                     ) : (
                       <Link href={footerLink.href} className={styles.footerLink}>
