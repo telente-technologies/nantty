@@ -8,4 +8,5 @@ type Command struct {
 	Reason   string
 	Source   string
 	CaseId   string
+	Policy   string
 }

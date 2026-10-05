@@ -2,6 +2,7 @@ package warnuser
 
 import (
 	"context"
+	"strings"
 
 	"zudomart/modules/users/src/container"
 	usersErrors "zudomart/modules/users/src/errors"
@@ -34,16 +35,20 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 		return Result{}, usersErrors.Conflict("INVALID_STATUS", "This account has been deleted.")
 	}
 	now := handler.Container.Now()
+	policy := strings.TrimSpace(command.Policy)
+	if policy == "" {
+		policy = "Community Guidelines"
+	}
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		if err := usersevents.EnqueueOutboxEventInTransaction(ctx, tx, accountevents.AccountWarnedType, target.Account.ID.String(), now, accountevents.AccountWarnedData{
-			AccountId: target.Account.ID.String(), CaseId: command.CaseId, Reason: reason, Policy: "Community Guidelines", PolicyUrl: accountevents.CommunityGuidelinesUrl,
+			AccountId: target.Account.ID.String(), CaseId: command.CaseId, Reason: reason, Policy: policy, PolicyUrl: accountevents.CommunityGuidelinesUrl,
 			AppealUrl: accountevents.AppealUrl, Source: command.Source,
 		}); err != nil {
 			return err
 		}
 		return usersservices.RecordStaffAuditEntry(ctx, command.Actor, usersservices.StaffAuditEntry{
 			Action: "user.warned", SubjectType: "user", SubjectId: target.Account.ID.String(), SubjectLabel: target.Label(), Reason: reason,
-			After: map[string]any{"source": command.Source, "caseId": command.CaseId},
+			After: map[string]any{"source": command.Source, "caseId": command.CaseId, "policy": policy},
 		})
 	})
 	if err != nil {
