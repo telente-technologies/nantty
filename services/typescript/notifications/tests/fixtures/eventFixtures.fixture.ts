@@ -21,6 +21,8 @@ const escrow = { escrowId: "e1", orderId: "o1", orderNumber: "ZM-48213", checkou
 const actor = { id: "actor1", name: "Adaeze Okafor", username: "adaeze" };
 const mark = { accountId: "u1", checkmark: "gold", accountName: "Amaka Stores" };
 const plan = { accountId: "u1", storeName: "Amaka Stores", plan: "pro", price: money(500000), interval: "month", cardLabel: "Visa ending 4242" };
+const subscriber = { accountId: "u1", subscriptionId: "s1", audience: "business", accountName: "Amaka Stores", planLabel: "Pro plan", plan: "seller_pro", interval: "month", cardLabel: "Visa ending 4242" };
+const billingItems = [{ kind: "plan_base", label: "Pro plan", amountMinor: 200000 }, { kind: "checkmark", label: "Gold checkmark", amountMinor: 300000 }];
 const caseAction = { accountId: "u1", caseId: "CASE-1", reason: "Counterfeit listings", policy: "Marketplace policy", policyUrl: "https://zudomart.com/policy", appealUrl: "https://zudomart.com/appeal" };
 
 export interface EventFixture {
@@ -74,6 +76,7 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "account.deletionRequested": { data: { accountId: "u1", requestedAt: "2026-10-03T09:00:00.000Z", scheduledFor: "2026-10-17T09:00:00.000Z", retentionPolicy: [] }, templates: ["accountDeletionScheduled"], inAppRecipients: ["u1"] },
   "account.deletionExecuted": { data: { accountId: "u1", executedAt: "2026-10-17T09:00:00.000Z", finalEmail: "amaka@example.com", retentionPolicy: [], appliedSteps: [] }, templates: ["accountDeletionCompleted"], inAppRecipients: [] },
   "mention.created": { data: { recipientUserId: "u1", actor, surface: "comment", excerpt: "@amaka check this", url: "https://zudomart.com/p/1" }, templates: ["mentionedYou"], inAppRecipients: ["u1"] },
+  "post.tagged": { data: { recipientUserId: "u1", actor, postId: "p1", kind: "clip", url: "/clips/p1" }, templates: [], inAppRecipients: ["u1"] },
   "follow.created": { data: { recipientUserId: "u1", actor }, templates: [], inAppRecipients: ["u1"] },
   "followRequest.created": { data: { recipientUserId: "u1", actor }, templates: [], inAppRecipients: ["u1"] },
   "comment.created": { data: { recipientUserId: "u1", actor, target: "post", excerpt: "Love it" }, templates: [], inAppRecipients: ["u1"] },
@@ -106,6 +109,14 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "verification.underReview": { data: { accountId: "u1", checkmark: "gold", accountName: "Adire Studio", caseId: "c1", reviewWithinDays: 3 }, templates: ["verificationUnderReview"], inAppRecipients: ["u1"] },
   "verification.approved": { data: { accountId: "u1", checkmark: "blue", accountName: "@amaka.styles", caseId: "c1", verifiedAt: "2026-10-04T10:00:00.000Z" }, templates: ["verificationApproved"], inAppRecipients: ["u1"] },
   "verification.rejectedRefunded": { data: { accountId: "u1", checkmark: "blue", accountName: "@tobi", caseId: "c1", reasons: ["Name does not match"], refundMethod: "apple_request", reapplyFrom: "2026-11-03T00:00:00.000Z" }, templates: ["verificationRejectedRefunded"], inAppRecipients: ["u1"] },
+  "subscriptionTrial.ending": { data: { ...subscriber, daysLeft: 1, trialEndsAt: "2026-10-11T09:00:00.000Z", chargeAt: "2026-10-11T09:00:00.000Z", amount: money(500000), lineItems: billingItems }, templates: ["subscriptionTrialEnding"], inAppRecipients: ["u1"] },
+  "subscriptionRenewal.upcoming": { data: { ...subscriber, interval: "year", chargeAt: "2027-10-04T09:00:00.000Z", amount: money(4800000), lineItems: billingItems }, templates: ["subscriptionRenewalUpcoming"], inAppRecipients: ["u1"] },
+  "subscriptionInvoice.paid": { data: { ...subscriber, kind: "renewal", invoiceNumber: "INV-3", paidAt: "2026-11-11T09:00:00.000Z", periodStart: "2026-11-11T09:00:00.000Z", periodEnd: "2026-12-11T09:00:00.000Z", total: money(500000), lineItems: billingItems }, templates: ["subscriptionRenewalReceipt"], inAppRecipients: ["u1"] },
+  "subscriptionPayment.failed": { data: { ...subscriber, attempt: 2, reason: "Insufficient funds", amount: money(500000), retryAt: "2026-11-14T09:00:00.000Z", downgradeAt: "2026-11-23T09:00:00.000Z", trialConversion: false }, templates: ["subscriptionPaymentFailed"], inAppRecipients: ["u1"] },
+  "subscriptionGrace.ending": { data: { ...subscriber, graceEndsAt: "2026-11-23T09:00:00.000Z", amount: money(500000) }, templates: ["subscriptionGraceEnding"], inAppRecipients: ["u1"] },
+  "subscription.downgraded": { data: { ...subscriber, reason: "payment_failed", checkmarkRemoved: true }, templates: ["subscriptionDowngraded"], inAppRecipients: ["u1"] },
+  "subscriptionCard.expiring": { data: { ...subscriber, expiryMonth: 11, expiryYear: 2026, chargeAt: "2026-12-04T09:00:00.000Z" }, templates: ["subscriptionCardExpiring"], inAppRecipients: ["u1"] },
+  "subscriptionPrice.changeNotice": { data: { ...subscriber, oldPrice: money(500000), newPrice: money(600000), effectiveAt: "2026-12-04T09:00:00.000Z" }, templates: ["subscriptionPriceChange"], inAppRecipients: ["u1"] },
   "cardVerification.refunded": { data: { accountId: "u1", amount: money(10000), cardLabel: "Visa ending 4242", reference: "REF-1" }, templates: ["cardVerificationRefunded"], inAppRecipients: ["u1"] },
   "copyrightClaim.warningIssued": { data: { ...copyrightRemedy, deadlineAt: "2026-10-05T11:59:00.000Z", warningId: "0192f0a1-7c3e-7000-8000-00000000c1a2" }, templates: ["copyrightWarning"], inAppRecipients: ["u1"] },
   "copyrightClaim.audioMuteOrdered": { data: copyrightRemedy, templates: ["audioMuted"], inAppRecipients: ["u1"] },
