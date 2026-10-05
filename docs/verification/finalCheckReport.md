@@ -1,6 +1,168 @@
-# Final check report (overnight verification, 2026-10-04)
+# Final check report (overnight verification and final QA pass, 2026-10-04)
 
 Local machine only (8 cores, 15 GB RAM, Docker compose stack). Nothing was committed or pushed. Every number is a local baseline, not a production figure.
+
+## 0.6 End-to-end QA beyond the happy path (2026-10-05, overnight)
+
+Sandbox booted with `security/regression/startSandboxStack.sh` (fake Paystack, every listener on 127.0.0.1, `SANDBOX_RELAXED_LIMITS=1`), now including Phoenix realtime (127.0.0.1:4000) and Python intelligence (127.0.0.1:8090). Pre-flight passed before and after boot. Nothing committed; `docker compose stop` at the end; betng-* untouched; no ledger rows edited (tests only read the ledger; timers were moved on escrow, subscription, deletion and seller-credit rows).
+
+### 0.6.1 Results
+
+| Run | Result |
+| --- | --- |
+| apiSmoke baseline (old 54 tests) | 53/54; the one failure was the sandbox (live had no money gRPC, see fix 1) |
+| apiSmoke final, full suite (19 files) | **89/89**. 2,502 calls, p50 3.3 ms, p95 39 ms, max 105 ms; only 5xx were the expected 503s for unconfigured Google/Apple sign-in; all DLQs empty |
+| New journeys (35 tests in 10 files) | signup 5, social 5, checkout 6, seller 3, gifts 3, subscriptions 2, verification 1, downloads 4, deletion 4, contract fixes 2 |
+| Go, every module, integration on (`go vet` + `go test -p 2`) | 20/20 modules, 126 packages ok |
+| Vitest | gateway 1065, social 204 (`RUN_INTEGRATION=1`), notifications 193, media 110, search 64, support 67 |
+| Realtime `format --check-formatted`, `compile --warnings-as-errors`, `mix test` | 63/63 (hex.pm unreachable at the end; ran with the cached hex home) |
+| Intelligence pytest / ruff / ruff format / mypy | 233 passed, 2 skipped / clean / clean / clean |
+| `tsc --noEmit`: 7 apps, 6 TS services, apiSmoke | 0 errors |
+| App contract tests: webapp 30, studio 5, seller 4, ads 8, admin 7; mobile jest 115 | pass |
+| `backend:check` | pass |
+
+### 0.6.2 Journeys and the unhappy variants covered
+
+Every variant asserts the HTTP status, a `{message, code}` body with a readable message, and the end state; money variants also assert one provider charge/refund and that every journal entry since the test started balances.
+
+- **Sign up** (`signupEdgeJourney`): wrong code then right code; code locked after 5 wrong guesses, fresh code works; taken username gives `USERNAME_TAKEN` + suggestions, no account row, and the same verified email retries; Create account tapped twice creates one account; app closed after the code step: old code dead, new code works, token for another email refused.
+- **Social** (`socialEdgeJourney`): Follow double-tap is one row; self-follow refused; following someone who blocked you refused; tagging a blocker silently drops the tag (no notification, not a candidate) while the friend gets a notification that links to the post; comment on a deleted post gives `POST_NOT_FOUND`; delete racing 6 comments keeps `commentCount` equal to saved comments.
+- **Buy** (`checkoutEdgeJourney`): last unit bought by someone else between cart and pay (`INSUFFICIENT_STOCK`, cart shows unavailable, no half order); seller removes stock after add-to-cart; price change before checkout charges the new price, after checkout keeps the agreed price; double-tapped Pay (same key replays, two keys supersede, both charges captured, the duplicate auto-refunded, escrow holds once); paying again after paid (`ALREADY_PAID`); payment landing after the buyer cancelled (escrow refunded, one provider refund, order stays cancelled, re-pay refused with `ORDER_CANCELLED`); cancel after shipping (`ORDER_NOT_CANCELLABLE`, money stays held).
+- **Sell** (`sellerEdgeJourney`): free-plan seller runs products, orders, inventory levels/summary, customers, shipping profile; Pro tools answer 402 `PLAN_FEATURE_REQUIRED` with `requiredPlan: pro`; refund above the paid amount and a zero refund are refused; a partial refund works once, a second refund for the rest is refused; one provider refund; refunded total never exceeds paid.
+- **Live and gifts** (`giftEdgeJourney`): no coins gives `INSUFFICIENT_COINS` and moves nothing; double-tap with one key charges once and credits the host once; two keys are two gifts; an oversized gift is refused without touching the balance; a 10-gift burst never goes below zero (`GIFT_RATE_LIMITED` where it applies).
+- **Subscribe / trial** (`subscriptionEdgeJourney`): seller trial with a ₦50 card check refunded at once; cancel during the trial keeps access until the end, then ends with no charge and the plan back to free; a second trial gets `TRIAL_NOT_AVAILABLE`. Card declined at renewal: `past_due` with the reason kept, plan kept during dunning, the failed period listed, `pay-now` with a good card restores `active`.
+- **Verification** (`verificationRefundJourney`): Pro plan opens a case; staff reject refunds only the checkmark share (one provider refund, plan stays active); a second reject is refused.
+- **Downloads** (`downloadsEdgeJourney`): allowed for a public post; guests asked to sign in; downloads off gives `DOWNLOADS_DISABLED` (author still can); private account refused for strangers and followers; blocked viewer refused.
+- **Account deletion** (`accountDeletionJourney`): unconfirmed request refused; deletion scheduled exactly 30 days out; second request refused; signing in within 30 days cancels it with a notice and keeps profile and posts; once the grace passes the account is switched off and sign-in answers `ACCOUNT_DELETED`; a deactivated account comes back on sign-in.
+
+### 0.6.3 Fixed in this pass
+
+| # | Defect | Fix |
+| --- | --- | --- |
+| 1 | Sandbox: gifts used an in-memory money fake (no `LIVE_MONEY_GRPC_ADDRESS`), ads boosts likewise; seller plans were never enforced (no entitlements URL, so every seller was Business); realtime/intelligence not started; realtime bound 0.0.0.0 in dev | `startSandboxStack.sh` wires live/ads money gRPC, `SELLER_PLAN_ENTITLEMENTS_URL`, starts intelligence and realtime (`REALTIME_HTTP_IP=127.0.0.1` read in `config/runtime.exs`), optional relaxed limits; `preflight.sh` checks port 4000 |
+| 2 | **Every inventory adjustment and stock transfer returned 500**: ent always sets the `*[]byte` for a NULL `response_body`, so `RunIdempotently` unmarshalled empty JSON | `inventory`, `orders`, `catalog` `container/transaction.container.go` (`len > 0`); new `inventory.idempotency_integration_test.go` |
+| 3 | Cart said `available: true` and `stock: 0` for everything, so buyers only found out at checkout | `orders/services/cartView.service.go` + `cartViewAssembly.service.go`: stock from inventory, short items unavailable |
+| 4 | A cancelled unpaid order could still be paid (charged, then auto-refunded) | `payments` initialize refuses with 409 `ORDER_CANCELLED` (order status read, fail-open with a warning; late-payment refund stays as the safety net); orders migration `20261005030000_grant_order_status_read_to_money` (column grant), `PAYMENTS_ORDER_STATUS_SCHEMA` |
+| 5 | A comment racing a post delete could be saved on the deleted post and notify its author | `social` createComment increments `commentCount` only where `deletedAt` is null inside the transaction, else 404 `POST_NOT_FOUND` |
+| 6 | **Deactivated accounts could never sign in again** (the app says "hidden until you log in again"; login said the password was wrong); executed deletions also said "wrong password" | `auth` login reactivates a deactivated account (notice "Welcome back…", `accountStatus.changed`), refuses executed deletions with 403 `ACCOUNT_DELETED`; port `AccountDeletionExecuted`; auth integration test |
+| 7 | Notifications had no link, so a tapped notification could not open the post | `notifications` inbox adds `url` (from the stored `data.url`, relative paths only) |
+| 8 | Private media bucket refused every write (SeaweedFS ran out of volume slots: "Not enough data nodes"), so downloads were 503 | `infra/local/docker-compose.yml`: `-master.volumeSizeLimitMB=128 -volume.max=64` |
+| 9 | Contract: ads invites by email; theme preference; webapp guest pages | go-ads email-or-username invites (+ test, UI shows `@username`); `profiles.theme` + `PATCH /users/me/preferences {theme}` + `GET /users/me.theme` (migration `20261005022135_add_profile_theme`); webapp `SignInRequiredState`, auth-only reads removed from the guest list, live list/chat/gift tray/who-to-follow ask guests to sign in (+ contract test) |
+| 10 | Old tests: money refund check matched other orders' partial-refund fee lines | scoped to its own escrow |
+
+Fake Paystack: `/__smoke/charges/{ref}/complete?card=decline` saves a card that declines on later charges.
+
+### 0.6.4 Remaining
+
+| Item | Note |
+| --- | --- |
+| Self-service deletion keeps the auth row (email, password hash) | all seeded retention policies are `retain`, so execution only deactivates; erasure needs the owner's retention decision |
+| Blue/Gold checkout needs verification eligibility | journeys use the seller Pro checkmark-share refund; full Blue refund is covered by the Go test only |
+| Social sign-in after deactivation | only the password login reactivates |
+| Gift right after creator approval | `RECIPIENT_CANNOT_RECEIVE_GIFTS` for a few seconds until the creator event lands (clear message, nothing charged) |
+| Unknown-method responses from Go muxes are plain text 405, not `{message, code}` | e.g. `GET /seller/shipping/rules` |
+| Webapp `/videos`, `/trending`, `/topics`, `/mart/highlights`, creator plans | still no backend |
+| Hex.pm unreachable at the end of the run | realtime tests used the cached hex home |
+
+## 0. Final QA and integration pass (2026-10-04, evening)
+
+Compose stack started with `docker compose up -d --wait postgres valkey rabbitmq localstack object-storage` (LiveKit, OpenSearch, Jaeger not needed). Go migrations applied by the services at start (embedded Atlas); `prisma migrate deploy` for social, notifications, media, search, support. Services ran as built binaries / `tsx src/server.ts` from `.env.example`, goMoney against the fake Paystack, Phoenix realtime in `elixir:1.19` with `--network host` (the bridge network has no DNS for hex.pm on this machine). Nothing committed.
+
+### 0.1 Results
+
+| # | Item | Result |
+| --- | --- | --- |
+| 1 | Auth register + username suggestions, 409 `USERNAME_TAKEN` with suggestions (`TestTakenUsernameReturnsSuggestionsFromAvailabilityAndRegister`, `TestUsernameAvailability…`) | pass |
+| 1 | Wallet monetisation holds (`TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored`) | **failed, fixed**, pass |
+| 1 | Live host restrictions (`TestRestrictedHostsCannotGoLiveUntilTheirAccountRecovers`, needs `LIVE_TEST_DATABASE_URL=…/zudomart_test`); copyright claim, third strike, admin policy | pass |
+| 1 | Verification: pay → Smile ID callback → auto-approve; reject → full refund (`TestIdentityVerificationJourneyFromRequestToAutoApproval`, `TestRejectedVerificationRequestsARefund`) | pass |
+| 1 | Plan → checkmark-share partial refund with ledger idempotency key | no integration test existed; **added** `payments.checkmarkShareRefund_integration_test.go` (provider outage then retry: one journal entry `verification-share:<case>`, one provider refund of the share, reuse with other amount refused) | pass |
+| 1 | Trial ₦50 card check refunded at once (`TestCardVerificationChargeIsRefundedAsSoonAsTheCardIsSaved`), seller trial (`TestSellerTrialSaves…`) | pass |
+| 1 | `invoice_counters` concurrency (`TestInvoiceNumbersAreUniqueAndSequentialUnderConcurrency`), evidence retention (`TestEvidenceRetention…`) | pass |
+| 1 | Orders success-rate rollup | no integration test existed; **added** `orders.successRate_integration_test.go` (20 settled in 90 days → 0.85, under-20 store has no rate, stale stores drop out) | pass |
+| 1 | Whole Go workspace, integration on, per module (`go test -p 2 ./...`, `go vet`) | all 20 modules pass after the fixes below. `platform/zzsumcheck` does not compile (see 0.3) |
+| 2 | apiSmoke journeys: social 10, trust 6, commerce 8, live 10 (incl. realtime socket fan-out), money 6 (incl. direct order), **Business plan 1% fee 3 (new)** | 43 / 43 |
+| 2 | Route sweep (848 routes: 763 public, 60 internal hidden, 25 non-API) as guest, customer, superadmin; event flow (consumers, drain, empty DLQs) | 5 / 5 and 3 / 3 after fixes |
+| 3 | Realtime `mix format --check-formatted`, `compile --warnings-as-errors`, `mix test` | 59 / 59 (one test file reformatted) |
+| 3 | Terraform `init -backend=false && validate` | dev, staging, prod valid (staging/prod initialised offline with `-plugin-dir` from dev's aws 5.100.0 after the network drop; this left untracked `.terraform.lock.hcl` files in each env) |
+| 4 | `tsc --noEmit`: mobile, webapp, web, studio, seller, ads, admin; gateway, social, notifications, media, search, support (+ test tsconfigs), apiSmoke | 0 errors |
+| 4 | `apps/api` (legacy) typecheck | 4 errors, not trivial (missing `loaders/admin.loader.js` and `modules/admin/routes`, `SocialSharedServices.discovery`, `AudienceSpec` shape); left |
+| 4 | Vitest: gateway 1051, social 183 (`RUN_INTEGRATION=1`), notifications 183, media 89, search 50, support 62, email templates 205; mobile jest 98; app contract tests admin 7, seller 4, webapp 20, studio 5, ads 8 | all pass after fixes |
+| 4 | Intelligence: pytest 233 passed / 2 skipped, ruff, ruff format, mypy (483 files) | pass |
+| 4 | `backend:check` (300-line limit, no raw SQL in TS) | pass |
+| 5 | Atlas: all 16 `atlas.sum` files verify with `migrate.Validate` (atlas v0.36.2 library, golang-migrate dir); every file is `<14-digit>_<snake>.{up,down}.sql` with a matching pair | pass |
+| 5 | Hand-written SQL | migrations: grants, append-only protections, the owner's ledger FK grant, the two approved users data moves; one extra: `ads/20261003180000_drop_ad_monetization_policies` (hand-written `DROP TABLE`). Runtime: outbox, idempotency store, advisory locks, giftShare SUM (approved) plus cross-schema reads not in the G13 list: `subscriptions/repositories/identityDirectory`, `checkmarkEligibility`, `payments/repositories/verifiedAccountDirectory`, `wallet/utils/viewerCurrency` (all parameterised, identifiers sanitised) | pass with listed deviations |
+
+### 0.2 Speed (per service, smoke journeys through the gateway, ms)
+
+Client: `node:http` (see fix 9). 361 calls in the journeys; the route sweep (1647 calls, mostly 4xx) is p50 5.3 / p95 14.0.
+
+| Service | Calls | p50 | p95 | max |
+| --- | --- | --- | --- | --- |
+| go:admin | 18 | 19.2 | 154.6 | 171.2 (staff login, argon2id) |
+| go:auth | 53 | 18.3 | 125.0 | 144.7 (register/login) |
+| go:catalog | 17 | 27.8 | 63.8 | 65.4 |
+| go:escrow | 2 | 24.4 | 28.1 | 28.6 |
+| go:inventory | 8 | 9.6 | 12.8 | 13.3 |
+| go:live | 26 | 29.2 | 91.9 | 96.2 |
+| go:moderation | 5 | 37.6 | 41.9 | 42.1 |
+| go:orders | 37 | 45.2 | 123.4 | 142.1 (checkout) |
+| go:payments | 42 | 14.4 | 47.3 | 62.3 |
+| go:subscriptions | 1 | 76.8 | 76.8 | 76.8 |
+| go:users | 43 | 16.9 | 43.1 | 45.7 |
+| go:wallet | 48 | 18.4 | 45.9 | 51.4 |
+| ts:media | 30 | 24.5 | 58.0 | 61.0 |
+| ts:notifications | 4 | 9.8 | 11.6 | 11.8 |
+| ts:search | 1 | 25.9 | 25.9 | 25.9 |
+| ts:social | 26 | 49.4 | 210.1 | 316.7 (first DM, for-you feed) |
+| all | 361 | 21.8 | 109.0 | 316.7 |
+
+All within the `performance.md` §5 targets. Single-user journey numbers, not load figures (k6 is not installed any more; section 7 keeps the earlier k6 baselines).
+
+### 0.3 Fixed in this pass
+
+| # | Defect | Fix |
+| --- | --- | --- |
+| 1 | Monetisation holds were queried without the wallet schema (`MonetisationHold` missing from the ent `SchemaConfig`), so every hold read/write failed with `relation "monetisation_holds" does not exist` in any deployment | `go/modules/wallet/src/container/wallet.container.go` |
+| 2 | Anniversary scheduler always failed on Postgres (`?` placeholders in `sql.ExprP`), so no zudoversary email ever went out | `go/modules/users/src/modules/celebrations/services/anniversaryScheduler.service.go` (`sql.P` + `Args`) |
+| 3 | Six lists without `nextCursor`: `/pricing/creator-subscription-bands`, `/explore/categories`, `/explore/who-to-follow`, `/admin/strike-appeals`, `/admin/live-incidents`, `/admin/verification-cases` | `subscriptions/.../views.service.go`, `social/.../explore.controller.ts`, `moderation/.../listStrikeAppeals.handler.go`, `listLiveIncidents.handler.go`, `users/.../identityVerificationAdmin.controller.go` (additive `nextCursor: null`) |
+| 4 | Invalid ad click link returned a plain-text 404 | `ads/.../tracking.controller.go` (`{message, code: AD_LINK_INVALID}`) |
+| 5 | goAds never consumed `ads-domain-events` or `jobs-ads-reports` locally (consumer only created when `ADS_REPORT_QUEUE_NAME` is set); intelligence had no RabbitMQ URL, so `intelligence-domain-events` piled up (273) | `services/go/.env.example` (`ADS_REPORT_QUEUE_NAME`), `services/python/intelligence/.env.example` (`INTELLIGENCE_RABBITMQ_URL`) |
+| 6 | Stale ads test expected the old 50,000 reserve; the regional pricing table is now the source | `ads/adsFlow.integration_test.go` reads the reserve from the pricing table |
+| 7 | Direct-order smoke: seller onboarded as creator (no subaccount) and called a seller refund route that does not exist | `apiSmoke/src/commerceFixtures.util.ts` (`?role=seller`), `tests/moneyJourneys.smoke.test.ts` (refund through seller reject) |
+| 8 | Business plan 1% fee had no end-to-end check | new `apiSmoke/tests/businessPlanFee.smoke.test.ts`: Business checkout → charge + `subscription.create` → active → escrow `commission_bps` 100, fee 11,500 on 1,150,000 → `revenue:escrowFees` 11,500 at release. Fake Paystack: `POST /__smoke/subscriptions/{reference}/create`, ids offset by start time so restarts never reuse recipient codes (`fakePaystackServer_test.go`) |
+| 9 | Latency numbers were wrong: Node 24.19 `fetch` (undici) stalls 1–2 s after short idle gaps on this machine (curl and `node:http` are fast) | `apiSmoke/src/apiClient.util.ts` uses `node:http`, optional `SMOKE_LATENCY_LOG` |
+| 10 | Search keyset test assumed an empty index; support content test flagged official `@zudomart.com` addresses as personal data; seller contract tests loaded a CSS module through the web-kit barrel | `search/tests/integration/searchPostgres.integration.test.ts`, `support/tests/content/helpContentSeed.test.ts`, `apps/seller/src/config/siteMetadata.config.ts` (imports the two pure helpers directly) |
+
+### 0.5 Money fixes after QA (exactly-once refunds, duplicate bank, seller refunds, SEC-0008/0013)
+
+| # | Defect | Fix | Test |
+| --- | --- | --- | --- |
+| 1 | Redelivered checkmark-share / full verification refund could call Paystack twice | Refund intent row (`idempotent_requests`, scope `billingRefund`, key `verification-share:{caseId}` / `verification-refund:{caseId}`) moves pending → submitted → succeeded/failed under a row lock; the ledger entry is posted in the same transaction as pending → submitted, before Paystack is called. A fresh `submitted` row answers `409 REFUND_IN_FLIGHT`; an unknown or stale outcome is looked up (`GET /refund`) before any resend. Paystack refunds take no client reference, so the reference travels in `merchant_note` as `[ref:…]` and the lookup matches on it (`billingRefundIntents.service.go`, `paystackRefundLookup.integration.go`) | `payments.billingRefundExactlyOnce_integration_test.go`: two consumers at once → one `POST /refund`, ledger balanced; lost reply → looked up, not resent; full refund concurrent |
+| 1 | Audit of other Paystack money calls | `payment_refunds` (orders, escrow, card check, subscription payments): a retried attempt (`attempt_count > 1`) is looked up first; stale "provider call failed" rows are requeued by the sweep. Transfers: resent only when `/transfer/verify` says not found (the reference makes Paystack dedupe anyway). `charge_authorization`: Paystack refuses a reused reference; a "Duplicate Transaction Reference" now reads as pending, and the renewal engine confirms the previous attempt's reference with Paystack before charging a new one (`billingChargeOutcome.service.go`, `renewalEngine.service.go`) | `TestCardCheckRefundWithLostReplyIsNotSentTwice`, `TestRenewalWithALostPaystackReplyChargesTheCardOnce` |
+| 2 | Two stores with one bank account retried onboarding forever | HMAC fingerprint of bank code + account number in `provider_payout_destinations` (advisory lock per fingerprint). A second store gets `409 BANK_ACCOUNT_ALREADY_LINKED` "This bank account is already linked to another store.", nothing is queued, and `payoutAccount.duplicateBankAccount` (advisory) goes to `trust-domain-events` → go-trust opens an advisory suspension case. Jobs already queued fail once and are excluded from reconciliation | `payments.duplicateSettlementAccount_integration_test.go`, `payoutDuplicateBank.job_test.go` |
+| 3 | `POST /api/v1/seller/orders/{id}/refunds` missing | go-commerce, `orders:manage`, `Idempotency-Key` required; amount 1 … total − refunded (422 `REFUND_AMOUNT_INVALID` for ≤ 0); 409 `ORDER_NOT_REFUNDABLE` when disputed, unpaid, cancelled/refunded or a refund is already on its way. Escrow held: partial or full out of escrow; released or direct: full only (seller balance, or seller debt for direct). Emits `orderGroup.refundRequested`; go-money's escrow handler posts the ledger and calls Paystack. Gateway route covered by the existing commerce prefix | `orders.sellerRefund_integration_test.go`, `escrow.sellerRefund_integration_test.go`, gateway `upstreamRoutes.routes.test.ts` |
+| SEC-0013 | Refund amount ≤ 0 meant "full" | `RefundSubscriptionPayment` needs an amount > 0 or an explicit `Full: true` (422 `REFUND_AMOUNT_INVALID`); seller refunds likewise | `TestRefundAmountsAtOrBelowZeroAreRefusedNotTreatedAsFull` |
+| SEC-0008 | Paystack `authorization_code` returned to and accepted from devices | Device card setups store the encrypted authorization server-side (AES-GCM, `billing_authorizations`); `/saved-cards/setups/{ref}/complete` returns `savedCardId`; `/saved-cards/charges` takes `savedCardId`, scoped to the owner. Mobile types, mock, service and secure storage switched to `savedCardId` (old key wiped) | `TestSavedCardAuthorizationNeverLeavesTheServerAndChargesUseTheOwnersSavedCardId` (not in any response, column or log) |
+
+Runs (one at a time, `nice -n 5`): payments, escrow, subscriptions (incl. `TestSellerTrialConverts…`, `TestBlackKeeps…`), orders, moderation pass; notifications vitest 193 pass; apiSmoke `moneyJourneys` 6/6 (needs `LEDGER_SELLER_CREDIT_MATURING_INTERVAL=5s`, relaxed gateway OTP limits, `ORDERS_MONEY_GRPC_ADDRESS=localhost:9103`); RabbitMQ definitions load (`jobs-subscription-billing` and the new trust binding present).
+
+Not caused by these fixes:
+- apiSmoke `businessPlanFee` fails at `POST /__smoke/subscriptions/{ref}/create` ("no paid plan checkout"): the renewal engine no longer sends a Paystack plan at checkout, so the smoke step is out of date (billing work).
+- wallet `TestRestrictedCreatorEarnings…` / `TestConcurrentHealthEvents…` passed earlier in this pass, then failed (`sql: no rows`) while `monetisationHolds.service.go` and its tests were being edited by another agent.
+
+Limits: one seller refund per order (escrow allows one partial settlement); released/direct orders refund only in full. The full verification refund path still posts no ledger entry of its own (unchanged).
+
+### 0.4 Remaining
+
+| Item | Reason |
+| --- | --- |
+| `services/go/platform/zzsumcheck/main.go` breaks `go build/vet ./...` for the platform module and `pnpm backend:test:go` (imports `ariga.io/atlas/cmd/atlas/x`, calls undefined `sqltoolDir`) | committed scratch file; deleting it was blocked by the permission classifier. Owner: delete it |
+| `order.cancelled` from checkout abort has no `buyerUserId`, so notifications drop it (WARN, not DLQ) | known 6.2 item: producer/consumer contract |
+| `apps/api` type errors | legacy, not trivial |
+| Docker bridge DNS | `test-realtime-in-docker.sh` cannot fetch hex without `--network host` on this machine |
+| Payments ent schema/migration files changed during this pass by the billing agent | not part of these results; re-run payments tests after that work lands |
+
 
 ## 1. Summary
 
