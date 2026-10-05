@@ -1,7 +1,7 @@
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .list {
@@ -13,7 +13,7 @@
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding: 14px 16px;
+  padding: 14px var(--space-4);
   border-bottom: 1px solid var(--divider-soft);
 }
 
@@ -26,13 +26,13 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .titleRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
@@ -64,13 +64,13 @@
 
 .arms {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-2);
   margin-top: 6px;
 }
 
 .arm {
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);
   background: var(--surface-app);
@@ -97,13 +97,13 @@
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .conditionEditor {
   display: grid;
   grid-template-columns: 1.4fr 1fr 0.9fr 1.2fr auto;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: end;
   padding: 10px;
   border: 1px solid var(--divider-soft);
@@ -123,7 +123,7 @@
   gap: 6px;
   max-height: 200px;
   overflow: auto;
-  padding: 8px;
+  padding: var(--space-2);
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);
 }

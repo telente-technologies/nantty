@@ -12,7 +12,7 @@ export function StandaloneFrame({ children, showUserMenu = true, width = "regula
     <div className={styles.frame}>
       <header className={styles.bar}>
         <Link href="/accounts" className={styles.wordmarkLink} aria-label="Zudomart Ads Manager home">
-          <ZudomartWordmark productLabel="Ads" tone="onDark" />
+          <ZudomartWordmark productLabel="Ads" tone="onDark" withSymbol />
         </Link>
         <nav aria-label="Help" className={styles.links}>
           <Link href="/policy">Advertising policies</Link>

@@ -26,7 +26,7 @@ function AccountRail({ accountId, role }: { readonly accountId: string; readonly
   return (
     <aside className={styles.rail}>
       <Link href="/accounts" className={styles.wordmarkLink} aria-label="All ad accounts">
-        <ZudomartWordmark productLabel="Ads" tone="onDark" hideWordOnNarrowScreens />
+        <ZudomartWordmark productLabel="Ads" tone="onDark" height={20} hideWordOnNarrowScreens withSymbol />
       </Link>
       <nav aria-label="Ad account" className={styles.navigation}>
         {(["manage", "tools", "account"] as const).map((group) => (

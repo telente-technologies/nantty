@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ThemeSwitcher } from "@zudomart/web-kit";
 
@@ -13,6 +13,27 @@ export function UserMenu() {
   const session = useAdsSession();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const displayName = session?.user.name ?? session?.user.username ?? "You";
+  const menuRef = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    function closeMenu(event: PointerEvent | KeyboardEvent) {
+      const menu = menuRef.current;
+      if (!menu?.open) return;
+      if (event instanceof KeyboardEvent) {
+        if (event.key !== "Escape") return;
+        menu.open = false;
+        menu.querySelector("summary")?.focus();
+        return;
+      }
+      if (!menu.contains(event.target as Node)) menu.open = false;
+    }
+    document.addEventListener("pointerdown", closeMenu);
+    document.addEventListener("keydown", closeMenu);
+    return () => {
+      document.removeEventListener("pointerdown", closeMenu);
+      document.removeEventListener("keydown", closeMenu);
+    };
+  }, []);
 
   async function signOutAndReturnToLogin() {
     setIsSigningOut(true);
@@ -24,7 +45,7 @@ export function UserMenu() {
   }
 
   return (
-    <details className={styles.menu}>
+    <details className={styles.menu} ref={menuRef}>
       <summary className={styles.trigger} aria-label={`Signed in as ${displayName}`}>
         <span className={styles.avatar} aria-hidden>
           {displayName.slice(0, 1).toUpperCase()}

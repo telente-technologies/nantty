@@ -13,11 +13,12 @@ import styles from "./accountSwitcher.module.css";
 export function AccountSwitcher({ currentAccount }: { readonly currentAccount: AdAccount }) {
   const [isOpen, setIsOpen] = useState(false);
   const [accounts, setAccounts] = useState<AdAccountSummary[] | null>(null);
+  const [hasLoadFailed, setHasLoadFailed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
-    if (accounts === null) accountsApi.listMyAdAccounts().then((result) => setAccounts(result.items)).catch(() => setAccounts([]));
+    if (accounts === null && !hasLoadFailed) accountsApi.listMyAdAccounts().then((result) => setAccounts(result.items)).catch(() => setHasLoadFailed(true));
     const closeWhenClickingOutside = (event: MouseEvent) => {
       if (!containerRef.current?.contains(event.target as Node)) setIsOpen(false);
     };
@@ -30,7 +31,7 @@ export function AccountSwitcher({ currentAccount }: { readonly currentAccount: A
       document.removeEventListener("mousedown", closeWhenClickingOutside);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [isOpen, accounts]);
+  }, [isOpen, accounts, hasLoadFailed]);
 
   return (
     <div className={styles.container} ref={containerRef}>
@@ -66,7 +67,15 @@ export function AccountSwitcher({ currentAccount }: { readonly currentAccount: A
                 </Link>
               </li>
             ))}
-            {accounts === null ? <li className={styles.menuMessage}>Loading accounts…</li> : null}
+            {accounts === null && !hasLoadFailed ? <li className={styles.menuMessage}>Loading accounts…</li> : null}
+            {hasLoadFailed ? (
+              <li className={styles.menuMessage} role="alert">
+                We couldn&apos;t load your accounts.{" "}
+                <button type="button" className={styles.retryLink} onClick={() => setHasLoadFailed(false)}>
+                  Try again
+                </button>
+              </li>
+            ) : null}
           </ul>
           <div className={styles.menuFooter}>
             <Link href="/accounts" onClick={() => setIsOpen(false)}>

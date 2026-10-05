@@ -9,7 +9,7 @@
   gap: 10px;
   max-width: 340px;
   height: 40px;
-  padding: 0 10px 0 4px;
+  padding: 0 10px 0 var(--space-1);
   border: 1px solid transparent;
   border-radius: var(--radius-medium);
   background: transparent;
@@ -60,7 +60,7 @@
   left: 0;
   z-index: 40;
   width: 340px;
-  padding: 8px;
+  padding: var(--space-2);
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-large);
   background: var(--color-elevated);
@@ -68,7 +68,7 @@
 }
 
 .menuHeading {
-  padding: 4px 8px 8px;
+  padding: var(--space-1) var(--space-2) var(--space-2);
   font-size: var(--fs-12);
   font-weight: 700;
   text-transform: uppercase;
@@ -80,7 +80,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 8px;
+  padding: 6px var(--space-2);
   border-radius: var(--radius-medium);
   color: var(--ink-strong);
   text-decoration: none;
@@ -96,16 +96,41 @@
 }
 
 .menuMessage {
-  padding: 8px;
+  padding: var(--space-2);
   color: var(--ink-muted);
 }
 
 .menuFooter {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 8px 4px;
+  gap: var(--space-2);
+  padding: 10px var(--space-2) var(--space-1);
   margin-top: 6px;
   border-top: 1px solid var(--divider-soft);
   font-weight: 550;
+}
+
+@media (max-width: 767px) {
+  .menu {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 200;
+    width: 100%;
+    min-width: 0;
+    max-height: min(75dvh, 560px);
+    overflow-y: auto;
+    padding: var(--space-3) var(--space-3) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 0 0 100vmax var(--color-overlay);
+  }
+}
+
+.retryLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-link, var(--color-brand));
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
 }
