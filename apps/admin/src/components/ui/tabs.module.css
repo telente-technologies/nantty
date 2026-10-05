@@ -7,7 +7,7 @@
   max-width: 100%;
   border-radius: var(--radius-medium);
   background: var(--surface-sunken);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .tab {
@@ -21,7 +21,7 @@
   background: transparent;
   color: var(--ink-muted);
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--fs-12);
   cursor: pointer;
 }
 

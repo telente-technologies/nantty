@@ -9,5 +9,5 @@
 .summary {
   margin-right: auto;
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
