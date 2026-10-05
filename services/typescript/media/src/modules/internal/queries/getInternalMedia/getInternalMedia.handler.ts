@@ -8,6 +8,8 @@ export interface InternalMediaView {
   readonly ownerId: string;
   readonly purpose: string;
   readonly kind: string;
+  readonly type: string;
+  readonly mimeType: string;
   readonly status: string;
   readonly isPrivate: boolean;
   readonly sizeBytes: number;
@@ -21,6 +23,6 @@ export function createGetInternalMediaHandler(context: HandlerContext): Handler<
     if (asset === null) throw notFound("MEDIA_NOT_FOUND", "Media not found");
     const view = await buildMediaAssetView(context, asset);
     const largestImage = [...view.variants].filter((variant) => variant.format === "jpeg").sort((left, right) => right.width - left.width)[0];
-    return { id: asset.id, ownerId: asset.ownerId, purpose: asset.purpose, kind: asset.kind, status: asset.status, isPrivate: asset.isPrivate, sizeBytes: Number(asset.sizeBytes), displayUrl: largestImage?.url ?? view.posterUrl ?? null, asset: view };
+    return { id: asset.id, ownerId: asset.ownerId, purpose: asset.purpose, kind: asset.kind, type: asset.kind, mimeType: asset.sniffedMimeType ?? asset.declaredMimeType, status: asset.status, isPrivate: asset.isPrivate, sizeBytes: Number(asset.sizeBytes), displayUrl: largestImage?.url ?? view.posterUrl ?? null, asset: view };
   };
 }

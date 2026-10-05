@@ -91,6 +91,17 @@ describe("admin escrow routes", () => {
     expect(route?.upstream).toBe("money");
     expect(route?.authentication).toBe("optional");
   });
+
+  it.each([
+    ["GET", "/api/v1/admin/orders"],
+    ["GET", "/api/v1/admin/orders/ZM-ABC12345"],
+    ["GET", "/api/v1/admin/refunds"],
+    ["POST", "/api/v1/admin/refunds"],
+  ])("%s %s goes to go-commerce with optional authentication", (method, path) => {
+    const route = resolveUpstreamRouteForRequest(method, path);
+    expect(route?.upstream).toBe("commerce");
+    expect(route?.authentication).toBe("optional");
+  });
 });
 
 describe("social routes", () => {
@@ -153,6 +164,9 @@ describe("routes added after the full API sweep", () => {
     ["POST", "/api/v1/admin/live-incidents/inc_1/end-and-suspend", "trust", "optional"],
     ["POST", "/api/v1/live-safety/live_1/appeal", "trust", "required"],
     ["GET", "/api/v1/lives/live_1/safety", "live", "required"],
+    ["GET", "/api/v1/lives/live_1", "live", "optional"],
+    ["DELETE", "/api/v1/lives/live_1/pins", "live", "required"],
+    ["GET", "/api/v1/battles/battle_1", "live", "required"],
   ])("%s %s goes to %s (%s)", (method, path, upstream, authentication) => {
     const route = resolveUpstreamRouteForRequest(method, path);
     expect(route?.upstream).toBe(upstream);

@@ -133,3 +133,18 @@ model NoticeDraft {
 
   @@map("notice_drafts")
 }
+
+model OutboxEvent {
+  id          String    @id @db.Uuid
+  eventType   String    @map("event_type")
+  subject     String
+  payload     Json
+  createdAt   DateTime  @default(now()) @map("created_at")
+  lockedUntil DateTime? @map("locked_until")
+  lockToken   String?   @map("lock_token")
+  attempts    Int       @default(0)
+  publishedAt DateTime? @map("published_at")
+
+  @@index([publishedAt, createdAt])
+  @@map("outbox_events")
+}
