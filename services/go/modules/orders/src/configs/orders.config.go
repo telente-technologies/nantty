@@ -33,6 +33,8 @@ type OrdersSettings struct {
 	InternalApiToken        string
 	MoneyInternalUrl        string
 	MoneyInternalToken      string
+	SocialInternalUrl       string
+	SocialInternalToken     string
 }
 
 func (settings OrdersSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -63,6 +65,8 @@ func ReadOrdersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		InternalApiToken:        reader.ReadStringOrDefault("CATALOG_INTERNAL_API_TOKEN", ""),
 		MoneyInternalUrl:        reader.ReadStringOrDefault("ORDERS_MONEY_INTERNAL_URL", ""),
 		MoneyInternalToken:      reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""),
+		SocialInternalUrl:       reader.ReadStringOrDefault("ORDERS_SOCIAL_INTERNAL_URL", ""),
+		SocialInternalToken:     reader.ReadStringOrDefault("ORDERS_SOCIAL_INTERNAL_TOKEN", ""),
 	}
 	settings.AllowInMemoryMoneyFake = !settings.IsProduction()
 	if settings.IsProduction() {

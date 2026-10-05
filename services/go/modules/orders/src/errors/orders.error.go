@@ -28,6 +28,10 @@ var (
 	OrderNotNew             = Api(http.StatusConflict, "ORDER_NOT_NEW", "Only new orders can be accepted or rejected.")
 	OrderNotShippable       = Api(http.StatusConflict, "ORDER_NOT_SHIPPABLE", "That order cannot be shipped in its current status.")
 	OrderNotCancellable     = Api(http.StatusConflict, "ORDER_NOT_CANCELLABLE", "That order can no longer be cancelled.")
+	RefundAmountInvalid     = Api(http.StatusUnprocessableEntity, "REFUND_AMOUNT_INVALID", "Enter a refund amount above zero.")
+	OrderNotRefundable      = Api(http.StatusConflict, "ORDER_NOT_REFUNDABLE", "This order has already been refunded or a refund is on its way.")
+	OrderRefundDisputed     = Api(http.StatusConflict, "ORDER_NOT_REFUNDABLE", "Zudomart decides refunds while a dispute is open.")
+	OrderRefundOnlyInFull   = Api(http.StatusConflict, "ORDER_NOT_REFUNDABLE", "This order was already paid out to you, so it can only be refunded in full.")
 	OrderNotConfirmable     = Api(http.StatusConflict, "ORDER_NOT_CONFIRMABLE", "Only delivered orders can be confirmed.")
 	NotInTransit            = Api(http.StatusConflict, "NOT_IN_TRANSIT", "Only shipments in transit can record a delivery attempt.")
 	StockUnavailableAtShip  = Api(http.StatusConflict, "INSUFFICIENT_STOCK", "The chosen location does not have enough stock to ship this order.")
@@ -41,4 +45,12 @@ var (
 	ReportNotFound          = Api(http.StatusNotFound, "REPORT_NOT_FOUND", "That report does not exist.")
 	ExportNotFound          = Api(http.StatusNotFound, "EXPORT_NOT_FOUND", "That export could not be found.")
 	RewardsNotConfigured    = Api(http.StatusUnprocessableEntity, "REWARDS_INVALID", "Those reward settings are not valid.")
+)
+
+var (
+	DeliveryAreaNotFound     = Api(http.StatusNotFound, "AREA_NOT_FOUND", "That delivery area could not be found.")
+	DeliveryAreaLimitReached = Api(http.StatusConflict, "AREA_LIMIT_REACHED", "A store can have up to 50 delivery areas.")
+	CustomerExists           = Api(http.StatusConflict, "CUSTOMER_EXISTS", "A customer with that phone or email already exists.")
+	SegmentNotFound          = Api(http.StatusNotFound, "SEGMENT_NOT_FOUND", "That segment could not be found.")
+	SegmentLimitReached      = Api(http.StatusConflict, "SEGMENT_LIMIT_REACHED", "A store can have up to 20 custom segments.")
 )

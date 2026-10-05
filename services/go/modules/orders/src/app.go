@@ -22,14 +22,21 @@ import (
 	"zudomart/modules/orders/src/jobs"
 	"zudomart/modules/orders/src/migrations"
 	"zudomart/modules/orders/src/modules/cart"
+	customersegments "zudomart/modules/orders/src/modules/customerSegments"
 	"zudomart/modules/orders/src/modules/customers"
+	deliveryareas "zudomart/modules/orders/src/modules/deliveryAreas"
+	deliveryareaservices "zudomart/modules/orders/src/modules/deliveryAreas/services"
 	internalsources "zudomart/modules/orders/src/modules/internalSources"
 	marketingcampaigns "zudomart/modules/orders/src/modules/marketingCampaigns"
+	marketingoverview "zudomart/modules/orders/src/modules/marketingOverview"
 	"zudomart/modules/orders/src/modules/orders"
 	"zudomart/modules/orders/src/modules/promotions"
 	"zudomart/modules/orders/src/modules/reports"
 	"zudomart/modules/orders/src/modules/returns"
+	sellerconversations "zudomart/modules/orders/src/modules/sellerConversations"
 	sellerdisputes "zudomart/modules/orders/src/modules/sellerDisputes"
+	sellerinsights "zudomart/modules/orders/src/modules/sellerInsights"
+	sellermoneyrelay "zudomart/modules/orders/src/modules/sellerMoneyRelay"
 	"zudomart/modules/orders/src/modules/sellerOrders"
 	"zudomart/modules/orders/src/modules/shipping"
 	"zudomart/modules/orders/src/modules/storeRewards"
@@ -106,6 +113,8 @@ func StartOrdersModuleWithSettings(ctx context.Context, settings configs.OrdersS
 	commerceports.Default.RegisterPurchaseVerifier(ports)
 	commerceports.Default.RegisterStoreRewardsLookup(ports)
 	commerceports.Default.RegisterStoreSuccessRates(ports)
+	commerceports.Default.RegisterStoreRewardRulesReader(ports)
+	commerceports.Default.RegisterDeliveryAreaNamesReader(deliveryareaservices.DeliveryAreaNames{Container: module.Container})
 	dependencies.Health.AddReadinessCheck("orders-postgres", postgres.ReadinessCheckForDatabase(database))
 	return module, nil
 }
@@ -138,6 +147,12 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	marketingcampaigns.Mount(mux, module.Container)
 	internalsources.Mount(mux, module.Container)
 	sellerdisputes.Mount(mux, module.Container)
+	sellermoneyrelay.Mount(mux, module.Container)
+	deliveryareas.Mount(mux, module.Container)
+	customersegments.Mount(mux, module.Container)
+	sellerinsights.Mount(mux, module.Container)
+	marketingoverview.Mount(mux, module.Container)
+	sellerconversations.Mount(mux, module.Container)
 	returns.Mount(mux, module.Container)
 }
 

@@ -76,7 +76,7 @@ func RunIdempotently[Result any](ctx context.Context, container *Container, scop
 		if record.RequestHash != requestHash {
 			return ErrIdempotencyKeyReused
 		}
-		if record.ResponseBody != nil {
+		if record.ResponseBody != nil && len(*record.ResponseBody) > 0 {
 			return json.Unmarshal(*record.ResponseBody, &result)
 		}
 		result, err = execute(tx)
