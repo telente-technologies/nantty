@@ -234,7 +234,7 @@ Legend: A = `apps/api` Prisma model (124 total, reference), G = Go ent entity (E
 | idempotency | `IdempotencyRecord` | Redis store in `platform/idempotency` | EXISTING (Redis, not a table) |
 | intelligence outbox | `IntelligenceOutboxEvent` | `outbox_event` in `auth` and `live` | EXISTING |
 | currency | `ExchangeRate` | none | PROPOSED |
-| waitlist | `WaitlistEntry` | none | PROPOSED |
+| waitlist | `WaitlistEntry` (legacy `apps/api` only) | none | **DROPPED** by the owner on 2026-10-05; not ported |
 
 ent totals: auth 7 entities (6 domain + outbox), live 14 entities (13 domain + outbox); 2 outbox tables, one per module schema. `live_sessions` table has 28 columns including `livekit_room`, `live_ad_settings`, `sponsorship_line`.
 

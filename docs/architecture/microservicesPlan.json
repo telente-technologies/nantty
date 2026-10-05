@@ -212,7 +212,7 @@
     },
     "campaigns": {
       "marketingCampaigns": { "commands": ["createMarketingCampaign", "sendMarketingCampaign"], "queries": ["listMarketingCampaigns"], "events": [] },
-      "waitlist": { "commands": ["joinWaitlist"], "queries": ["listWaitlistEntries", "countWaitlistEntries"], "events": [] }
+      "waitlist": { "status": "dropped", "droppedOn": "2026-10-05", "note": "Dropped by the owner on 2026-10-05. No waitlist: the website links to the app stores, the web app and seller sign-up instead.", "commands": [], "queries": [], "events": [] }
     }
   },
   "elixir": {

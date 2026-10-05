@@ -71,7 +71,7 @@ flowchart LR
     search["search indexing + query"]:::proposed
     support["support tickets"]:::proposed
     integ["seller webhooks, API keys, couriers"]:::proposed
-    camp["campaigns, waitlist"]:::proposed
+    camp["campaigns<br/>(waitlist dropped 2026-10-05)"]:::proposed
   end
   rt["ex-realtime<br/>/ws, presence, live fan-out,<br/>chat persistence"]:::existing
   py["py-intelligence<br/>ranking, recs, risk, ads pCTR,<br/>moderation scores"]:::existing
