@@ -8,6 +8,9 @@
       ],
       "@zudomart/design-tokens/native": [
         "../../packages/designTokens/native.ts"
+      ],
+      "@zudomart/web-kit/brandPath": [
+        "../../packages/webKit/src/brand/zudomartBrand.path.ts"
       ]
     }
   },

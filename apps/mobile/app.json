@@ -16,7 +16,9 @@
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptiveIconForeground.png",
-        "backgroundColor": "#2043F5"
+        "backgroundImage": "./assets/adaptiveIconBackground.png",
+        "monochromeImage": "./assets/adaptiveIconMonochrome.png",
+        "backgroundColor": "#3A2BFF"
       },
       "permissions": [
         "android.permission.RECORD_AUDIO",
@@ -55,9 +57,13 @@
         "expo-splash-screen",
         {
           "image": "./assets/splashLogo.png",
-          "imageWidth": 200,
+          "imageWidth": 160,
           "resizeMode": "contain",
-          "backgroundColor": "#F7F8FE"
+          "backgroundColor": "#F7F8FE",
+          "dark": {
+            "image": "./assets/splashLogo.png",
+            "backgroundColor": "#0E0E10"
+          }
         }
       ],
       "expo-sharing",
@@ -67,7 +73,15 @@
           "locationWhenInUsePermission": "Allow Zudomart to use your location when you choose to share it in a chat."
         }
       ],
-      "expo-document-picker"
+      "expo-document-picker",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": false,
+          "savePhotosPermission": "Allow Zudomart to save photos and videos you download.",
+          "granularPermissions": ["photo", "video"]
+        }
+      ]
     ],
     "owner": "oyinlola141"
   }
