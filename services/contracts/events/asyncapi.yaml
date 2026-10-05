@@ -86,6 +86,14 @@ channels:
         $ref: '#/components/messages/ipClaimReceived'
       ipClaimDecided:
         $ref: '#/components/messages/ipClaimDecided'
+      notificationCreated:
+        $ref: '#/components/messages/notificationCreated'
+      ticketCreated:
+        $ref: '#/components/messages/ticketCreated'
+      ticketReplied:
+        $ref: '#/components/messages/ticketReplied'
+      ticketResolved:
+        $ref: '#/components/messages/ticketResolved'
       postCreated:
         $ref: '#/components/messages/postCreated'
       mentionCreated:
@@ -710,6 +718,20 @@ operations:
       - $ref: '#/channels/domainEvents/messages/mediaRejected'
       - $ref: '#/channels/domainEvents/messages/mediaHeld'
       - $ref: '#/channels/domainEvents/messages/mediaDeleted'
+  publishNotificationsEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/notificationCreated'
+  publishSupportEvents:
+    action: send
+    channel:
+      $ref: '#/channels/domainEvents'
+    messages:
+      - $ref: '#/channels/domainEvents/messages/ticketCreated'
+      - $ref: '#/channels/domainEvents/messages/ticketReplied'
+      - $ref: '#/channels/domainEvents/messages/ticketResolved'
 
 components:
   messages:
@@ -2182,3 +2204,31 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/ipClaim.decided.v1.json' } }
+    notificationCreated:
+      name: notification.created
+      headers: { type: object, properties: { eventType: { const: notification.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/notification.created.v1.json' } }
+    ticketCreated:
+      name: ticket.created
+      headers: { type: object, properties: { eventType: { const: ticket.created } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/ticket.created.v1.json' } }
+    ticketReplied:
+      name: ticket.replied
+      headers: { type: object, properties: { eventType: { const: ticket.replied } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/ticket.replied.v1.json' } }
+    ticketResolved:
+      name: ticket.resolved
+      headers: { type: object, properties: { eventType: { const: ticket.resolved } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/ticket.resolved.v1.json' } }

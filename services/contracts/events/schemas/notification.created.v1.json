@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/notification.created.v1.json",
+  "title": "NotificationCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "accountId",
+    "notificationId",
+    "notification"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "notificationId": {
+      "type": "string"
+    },
+    "notification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "title",
+        "body",
+        "createdAt",
+        "read",
+        "actor",
+        "url"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "orders",
+            "social",
+            "system"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "mention",
+            "videoReply"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "read": {
+          "type": "boolean"
+        },
+        "actor": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "required": [
+            "id",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "verified": {
+              "type": "boolean"
+            }
+          }
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ticketId": {
+              "type": "string"
+            },
+            "screen": {
+              "type": "string"
+            },
+            "caseId": {
+              "type": "string"
+            },
+            "orderId": {
+              "type": "string"
+            },
+            "disputeId": {
+              "type": "string"
+            },
+            "postId": {
+              "type": "string"
+            },
+            "liveId": {
+              "type": "string"
+            },
+            "conversationId": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

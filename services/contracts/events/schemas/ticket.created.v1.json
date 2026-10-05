@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/ticket.created.v1.json",
+  "title": "TicketCreated",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ticketId",
+    "reference",
+    "accountId",
+    "subject",
+    "category",
+    "channel",
+    "priority",
+    "firstResponseHours"
+  ],
+  "properties": {
+    "ticketId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^SUP-[0-9]+$"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string"
+    },
+    "firstResponseHours": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

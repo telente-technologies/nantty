@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/ticket.resolved.v1.json",
+  "title": "TicketResolved",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ticketId",
+    "reference",
+    "accountId",
+    "subject",
+    "category",
+    "channel",
+    "resolution",
+    "reopenDays",
+    "resolvedAt"
+  ],
+  "properties": {
+    "ticketId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^SUP-[0-9]+$"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "resolution": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "reopenDays": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "resolvedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

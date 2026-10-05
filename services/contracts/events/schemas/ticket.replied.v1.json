@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/ticket.replied.v1.json",
+  "title": "TicketReplied",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ticketId",
+    "reference",
+    "accountId",
+    "subject",
+    "category",
+    "channel",
+    "authorKind",
+    "repliedAt",
+    "status"
+  ],
+  "properties": {
+    "ticketId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reference": {
+      "type": "string",
+      "pattern": "^SUP-[0-9]+$"
+    },
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string"
+    },
+    "authorKind": {
+      "type": "string",
+      "enum": [
+        "customer",
+        "agent"
+      ]
+    },
+    "agentName": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "repliedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string"
+    }
+  }
+}
