@@ -5,18 +5,18 @@
   --landing-mono: var(--font-landing-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
   --deep-surface: var(--blue-900);
   --deep-ink: #ffffff;
-  --deep-ink-muted: #c9d1f7;
+  --deep-ink-muted: #d8d5ff;
   --deep-hairline: rgb(255 255 255 / 0.12);
   --deep-hairline-strong: rgb(255 255 255 / 0.24);
   --deep-hover: rgb(255 255 255 / 0.08);
-  --deep-glass: rgb(11 23 82 / 0.9);
+  --deep-glass: rgb(24 18 99 / 0.9);
   --deep-scrim: rgb(0 0 0 / 0.22);
   --stage-black: #070914;
   --stage-live-red: #ef4444;
   --landing-wash-brand: color-mix(in srgb, var(--color-brand) 13%, var(--color-surface));
   --landing-wash-accent: color-mix(in srgb, var(--color-accent) 28%, var(--color-surface));
-  --landing-screen-shadow: 0 20px 50px -20px rgb(11 23 82 / 0.45);
-  --landing-stage-shadow: 0 40px 80px -30px rgb(11 23 82 / 0.55);
+  --landing-screen-shadow: 0 20px 50px -20px rgb(24 18 99 / 0.45);
+  --landing-stage-shadow: 0 40px 80px -30px rgb(24 18 99 / 0.55);
   min-height: 100dvh;
   overflow-x: clip;
   font-size: var(--fs-16);
@@ -24,7 +24,7 @@
 }
 
 :global(:root[data-theme="dark"]) .page {
-  --deep-surface: #0e1438;
+  --deep-surface: #110d3d;
   --landing-wash-accent: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
   --landing-screen-shadow: 0 0 0 1px var(--color-border), 0 24px 50px -20px rgb(0 0 0 / 0.75);
   --landing-stage-shadow: 0 0 0 1px var(--color-border), 0 40px 80px -30px rgb(0 0 0 / 0.8);
@@ -32,7 +32,7 @@
 
 @media (prefers-color-scheme: dark) {
   :global(:root:not([data-theme="light"])) .page {
-    --deep-surface: #0e1438;
+    --deep-surface: #110d3d;
     --landing-wash-accent: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
     --landing-screen-shadow: 0 0 0 1px var(--color-border), 0 24px 50px -20px rgb(0 0 0 / 0.75);
     --landing-stage-shadow: 0 0 0 1px var(--color-border), 0 40px 80px -30px rgb(0 0 0 / 0.8);
@@ -87,9 +87,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-height: 52px;
-  padding: 0 24px;
+  padding: 0 var(--space-6);
   border-radius: var(--radius-pill);
   font-weight: 700;
   white-space: nowrap;

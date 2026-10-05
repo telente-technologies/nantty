@@ -27,7 +27,7 @@ export function LandingFooter() {
     <footer className={styles.footer}>
       <div className={styles.topRow}>
         <div className={styles.brandColumn}>
-          <ZudomartWordmark productLabel="Studio" tone="onDark" />
+          <ZudomartWordmark productLabel="Studio" tone="onDark" withSymbol />
           <p>The creator studio for going live on Zudomart. Talk, music, gaming, education and IRL. Built in Nigeria.</p>
           <ul className={styles.emailList} aria-label="Contact email addresses">
             {contactEmailRecipients.map((email) => (

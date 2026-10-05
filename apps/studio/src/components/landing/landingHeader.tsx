@@ -42,7 +42,7 @@ export function LandingHeader() {
     <header className={`${styles.header} ${hasScrolled ? styles.scrolled : ""}`}>
       <div className={styles.pill}>
         <Link href="/" className={styles.brand} aria-label="Zudomart Studio home">
-          <ZudomartWordmark productLabel="Studio" tone="onDark" />
+          <ZudomartWordmark productLabel="Studio" tone="onDark" withSymbol />
         </Link>
         <nav aria-label="Main" className={styles.desktopNavigation}>
           <ul>
