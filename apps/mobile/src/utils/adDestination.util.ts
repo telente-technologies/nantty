@@ -32,7 +32,6 @@ function destinationFor(sponsored: SponsoredPlacement, target: AdTapTarget): AdD
   return { type: "url", url: sponsored.ctaUrl };
 }
 
-/** Decides what a tap on an ad does. External and store opens go through the signed redirect so the click is logged server-side. */
 export function resolveAdTapAction(sponsored: SponsoredPlacement, target: AdTapTarget, platform: AdPlatform): AdTapAction {
   const destination = destinationFor(sponsored, target);
   if (!destination) return { kind: "none" };
