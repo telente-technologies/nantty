@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -84,6 +85,17 @@ func (users *fakeUsers) FindUserByUsername(_ context.Context, username string) (
 	defer users.mutex.Unlock()
 	for _, user := range users.known {
 		if user.Username == username {
+			return user, true, nil
+		}
+	}
+	return interfaces.UserSummary{}, false, nil
+}
+
+func (users *fakeUsers) FindUserByEmail(_ context.Context, email string) (interfaces.UserSummary, bool, error) {
+	users.mutex.Lock()
+	defer users.mutex.Unlock()
+	for _, user := range users.known {
+		if strings.EqualFold(user.Username+"@example.test", email) {
 			return user, true, nil
 		}
 	}

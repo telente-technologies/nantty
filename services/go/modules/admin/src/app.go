@@ -68,7 +68,7 @@ func StartAdminModuleWithSettings(ctx context.Context, settings configs.AdminSet
 		Client: client, Settings: settings, Logger: logger, Now: time.Now,
 		Passwords: passwordhash.NewPasswordHasher(passwordhash.RecommendedArgon2idParameters),
 		Tokens:    identityports.Default.StaffTokenService,
-		Delivery:  integrations.DevelopmentLogInvitationDelivery{Logger: logger},
+		Delivery:  integrations.DevelopmentLogInvitationDelivery{Logger: logger, LoggingAllowed: !settings.IsProduction() && settings.DeliveryMode == "log"},
 		Guard:     staffauth.Guard{Registry: identityports.Default},
 		Limiter:   middlewares.NewAttemptRateLimiter(10, 6*time.Second, time.Now),
 	}

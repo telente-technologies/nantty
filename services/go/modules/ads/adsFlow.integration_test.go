@@ -88,8 +88,13 @@ func TestAdvertiserToImpressionToSettlementFlow(t *testing.T) {
 	day := services.DayKeyInTimezone(h.clock.Now(), "Africa/Lagos")
 	report := h.expect("GET", fmt.Sprintf("/api/v1/ads/accounts/%s/reports?from=%s&to=%s&breakdown=campaign", accountId, day, day), &advertiser, "", nil, http.StatusOK)
 	totals := report["totals"].(map[string]any)
-	if totals["impressions"].(float64) != 1 || totals["spend"].(map[string]any)["amountMinor"].(float64) != 50 {
-		t.Fatalf("a single bidder pays the reserve (50 minor per impression): %v", totals)
+	reservePerMille, known := h.module.Container.Pricing.ReservePerMilleMinor(ctx, "NG", "NGN")
+	if !known {
+		t.Fatal("the regional pricing table must price NGN impressions")
+	}
+	reserve := reservePerMille / 1000
+	if totals["impressions"].(float64) != 1 || totals["spend"].(map[string]any)["amountMinor"].(float64) != float64(reserve) {
+		t.Fatalf("a single bidder pays the regional reserve (%d minor per impression): %v", reserve, totals)
 	}
 
 	settlement := services.AdSettlement{Client: h.module.Container.Client, Now: h.clock.Now}
@@ -100,7 +105,7 @@ func TestAdvertiserToImpressionToSettlementFlow(t *testing.T) {
 		t.Fatal("settled impressions must never be billed twice")
 	}
 	reloaded, _ := h.module.Container.Client.AdAccount.Get(ctx, accountUuid)
-	if reloaded.BalanceMinor != 50_000_000-50 {
+	if reloaded.BalanceMinor != 50_000_000-reserve {
 		t.Fatalf("balance should drop by the cleared price, got %d", reloaded.BalanceMinor)
 	}
 }
