@@ -8,19 +8,19 @@
 
 .layout {
   display: grid;
-  gap: 56px;
+  gap: var(--space-9);
   align-items: center;
 }
 
 .copyColumn {
   display: grid;
-  gap: 40px;
+  gap: var(--space-8);
 }
 
 .flowList {
   position: relative;
   display: grid;
-  gap: 24px;
+  gap: var(--space-6);
   padding: 0;
   list-style: none;
 }
@@ -38,7 +38,7 @@
   position: relative;
   display: grid;
   grid-template-columns: 44px 1fr;
-  gap: 16px;
+  gap: var(--space-4);
   align-items: start;
 }
 

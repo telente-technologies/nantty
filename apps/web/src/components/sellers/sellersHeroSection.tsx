@@ -23,12 +23,12 @@ export function SellersPageHeroSection() {
             </ActionLinkStyledAsButton>
           </div>
           <p className={styles.dashboardNote}>
-            Verified Gold business?{" "}
+            Already selling?{" "}
             <a href={businessAppLinks.sellerDashboard.href} target="_blank" rel="noopener noreferrer">
               Open {businessAppLinks.sellerDashboard.label}
               <span className="visuallyHidden"> (opens in a new tab)</span>
             </a>{" "}
-            and sign in with your Zudomart app account.
+            and sign in with your Zudomart app account. It&apos;s free for every seller.
           </p>
         </div>
         <div className={styles.visual}>

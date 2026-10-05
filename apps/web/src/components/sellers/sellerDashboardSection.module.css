@@ -5,14 +5,14 @@
 
 .layout {
   display: grid;
-  gap: 56px;
+  gap: var(--space-9);
   align-items: center;
 }
 
 .visual {
   display: flex;
   justify-content: center;
-  padding: 40px 16px;
+  padding: var(--space-8) var(--space-4);
   border-radius: var(--radius-large);
   background:
     radial-gradient(circle at 50% 40%, var(--surface-tint-blue-disc) 0 32%, transparent 32.5%),
@@ -25,12 +25,12 @@
 
 .copyColumn {
   display: grid;
-  gap: 40px;
+  gap: var(--space-8);
 }
 
 .capabilityList {
   display: grid;
-  gap: 28px 32px;
+  gap: 28px var(--space-7);
   padding: 0;
   list-style: none;
 }
@@ -83,7 +83,7 @@
   align-items: center;
   gap: 6px;
   justify-self: start;
-  padding: 6px 12px;
+  padding: 6px var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--surface-sunshine);
   color: var(--ink-on-sunshine);
@@ -102,7 +102,7 @@
 
 .webDashboardFeatureList {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 0;
   list-style: none;
 }
@@ -120,7 +120,7 @@
 .webDashboardActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
   margin-top: 6px;
 }
 

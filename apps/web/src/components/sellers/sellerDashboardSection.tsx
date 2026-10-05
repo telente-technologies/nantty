@@ -13,7 +13,7 @@ const dashboardCapabilities: ReadonlyArray<{ readonly icon: FigmaIconName; reado
   { icon: "speedometer24", title: "Performance", description: "Track sales by hour, day and month, and which posts, clips and lives brought buyers to your store." },
 ];
 
-const webDashboardFeatures = ["Orders from every channel in one place", "Advanced inventory and variants", "Staff accounts and roles", "Sales and tax reports"] as const;
+const webDashboardFeatures = ["App orders, returns and disputes in one place", "Products, variants and stock levels", "Sales and payout reports", "Staff accounts and roles on Pro and Business"] as const;
 
 export function SellerDashboardSection() {
   return (
@@ -41,7 +41,7 @@ export function SellerDashboardSection() {
           <aside className={styles.webDashboardCard} aria-labelledby="web-dashboard-heading">
             <p className={styles.webDashboardBadge}>
               <FigmaIconTintedWithCurrentColor name="sealCheck20" size={16} />
-              For verified Gold businesses
+              Free for every seller
             </p>
             <h3 id="web-dashboard-heading" className={styles.webDashboardHeading}>
               {businessAppLinks.sellerDashboard.label} on the web

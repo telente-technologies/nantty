@@ -1,13 +1,13 @@
 .hero {
   margin-top: -72px;
-  padding-top: calc(72px + clamp(40px, 7vw, 80px));
+  padding-top: calc(72px + clamp(var(--space-8), 7vw, 80px));
   background: var(--surface-sunshine);
   overflow: hidden;
 }
 
 .layout {
   display: grid;
-  gap: 40px;
+  gap: var(--space-8);
   align-items: end;
 }
 
@@ -15,7 +15,7 @@
   display: grid;
   gap: 22px;
   justify-items: start;
-  padding-bottom: clamp(40px, 7vw, 96px);
+  padding-bottom: clamp(var(--space-8), 7vw, 96px);
 }
 
 .eyebrow {
@@ -54,7 +54,7 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .visual {
