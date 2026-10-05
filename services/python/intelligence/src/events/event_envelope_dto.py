@@ -18,9 +18,9 @@ from src.events.event_payload_dto import (
     PostViewedPayload,
     ProductViewedPayload,
     PurchasedPayload,
-    ReferralRewardedPayload,
     ReportedPayload,
     RiskOutcomeLabeledPayload,
+    SavedPayload,
     SearchedPayload,
     SharedPayload,
 )
@@ -139,9 +139,9 @@ class GiftSentEvent(EventEnvelopeBase):
     payload: GiftSentPayload
 
 
-class ReferralRewardedEvent(EventEnvelopeBase):
-    event_type: Literal["referral_rewarded"]
-    payload: ReferralRewardedPayload
+class SavedEvent(EventEnvelopeBase):
+    event_type: Literal["saved"]
+    payload: SavedPayload
 
 
 type IntelligenceEvent = Annotated[
@@ -163,7 +163,7 @@ type IntelligenceEvent = Annotated[
     | RiskOutcomeLabeledEvent
     | CoinTransferredEvent
     | GiftSentEvent
-    | ReferralRewardedEvent,
+    | SavedEvent,
     Field(discriminator="event_type"),
 ]
 
@@ -188,7 +188,7 @@ SUPPORTED_EVENT_TYPES: tuple[str, ...] = (
     "risk_outcome_labeled",
     "coin_transferred",
     "gift_sent",
-    "referral_rewarded",
+    "saved",
 )
 
 

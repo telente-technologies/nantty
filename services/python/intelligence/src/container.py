@@ -68,6 +68,7 @@ from src.modules.trust_advisory.services.suspension_suggestion_service import Su
 from src.repositories.feature_log_parquet_repository import FeatureLogParquetSink
 from src.repositories.online_feature_keyspace_repository import OnlineFeatureKeyspace
 from src.repositories.online_feature_repository import OnlineFeatureStore
+from src.services.identifier_hashing_service import OpaqueIdentifierHasher, derive_identifier_hash_key
 from src.utils.cqrs_util import CommandBus, QueryBus
 
 
@@ -150,6 +151,14 @@ def build_trust_advisory_publisher(
     return NullTrustAdvisoryPublisher()
 
 
+def build_identifier_hasher(settings: IntelligenceSettings) -> OpaqueIdentifierHasher:
+    return OpaqueIdentifierHasher(
+        derive_identifier_hash_key(
+            settings.id_hash_secret.get_secret_value(), settings.shared_secret.get_secret_value()
+        )
+    )
+
+
 def build_application_container(
     settings: IntelligenceSettings, feature_backend: FeatureBackend | None = None
 ) -> ApplicationContainer:
@@ -193,6 +202,7 @@ def build_application_container(
             feature_store,
             event_ingestion_service,
             PersonalDataPurgeService(backend, feature_store.keyspace),
+            build_identifier_hasher(settings),
             content_scoring_service,
         ),
         feed_ranking_service=FeedRankingService(feature_store, model_holder, feature_log_sink, suggestion_service),

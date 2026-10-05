@@ -23,6 +23,7 @@ class IntelligenceSettings(BaseSettings):
 
     shared_secret: SecretStr = SecretStr("")
     previous_shared_secret: SecretStr = SecretStr("")
+    id_hash_secret: SecretStr = SecretStr("")
     signature_max_clock_skew_seconds: int = Field(default=300, ge=30, le=900)
     nonce_retention_seconds: int = Field(default=900, ge=60, le=3600)
 

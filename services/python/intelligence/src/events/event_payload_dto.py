@@ -125,9 +125,7 @@ class HiddenPayload(ContractModel):
 
 
 class RiskOutcomeLabeledPayload(ContractModel):
-    subject_type: Literal[
-        "order", "payout", "account_event", "coin_purchase", "coin_transfer", "gift", "referral_reward", "cashback"
-    ]
+    subject_type: Literal["order", "payout", "account_event", "coin_purchase", "coin_transfer", "gift"]
     subject_id: OpaqueIdentifier
     outcome: Literal["fraud_confirmed", "fraud_cleared"]
 
@@ -145,6 +143,7 @@ class GiftSentPayload(ContractModel):
     host_content_id: OpaqueIdentifier | None = None
 
 
-class ReferralRewardedPayload(ContractModel):
-    referral_id: OpaqueIdentifier
-    referee_id: OpaqueIdentifier
+class SavedPayload(ItemTopicsMixin):
+    target_id: OpaqueIdentifier
+    target_type: Literal["post", "clip", "product"]
+    author_id: OpaqueIdentifier | None = None
