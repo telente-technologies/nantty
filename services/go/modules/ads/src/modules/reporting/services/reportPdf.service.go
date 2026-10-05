@@ -25,7 +25,6 @@ func truncate(text string, limit int) string {
 	return text[:limit-1] + "~"
 }
 
-// BuildReportPdf renders the report as a paginated landscape table: a totals row first, then one row per breakdown item.
 func BuildReportPdf(response dtos.ReportResponse, columns []string, accountName string) []byte {
 	document := &pdfDocument{}
 	columnWidth := (pdfPageWidth - 2*pdfMargin - pdfLabelWidth) / float64(max(len(columns), 1))

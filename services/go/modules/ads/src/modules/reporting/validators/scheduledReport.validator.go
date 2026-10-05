@@ -10,7 +10,6 @@ import (
 	"zudomart/platform/httpserver"
 )
 
-// ValidateScheduledReport returns the input with trimmed name and lowercased, deduplicated recipients.
 func ValidateScheduledReport(input dtos.ScheduledReportInput) (dtos.ScheduledReportInput, error) {
 	var issues []httpserver.ValidationIssue
 	input.Name = strings.TrimSpace(input.Name)

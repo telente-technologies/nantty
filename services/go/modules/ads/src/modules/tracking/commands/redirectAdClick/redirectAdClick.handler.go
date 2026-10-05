@@ -22,7 +22,6 @@ type Command struct {
 
 type Handler struct{ Container *container.Container }
 
-// Execute logs the click and returns the creative's approved destination for it. The target is never taken from the request.
 func (handler Handler) Execute(ctx context.Context, command Command) (string, error) {
 	deployed := handler.Container
 	claims, err := deployed.Signer.VerifyClick(command.Token)
@@ -46,7 +45,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (string, er
 		platform = services.PlatformFromUserAgent(command.UserAgent)
 	}
 	target, err := services.ResolveClickTarget(row.Creative.Resolved, claims.CardIndex, platform)
-	if err != nil {
+	if err != nil || !services.IsSafeClickTarget(target) {
 		return "", ErrInvalidClick
 	}
 	cardIndex := claims.CardIndex

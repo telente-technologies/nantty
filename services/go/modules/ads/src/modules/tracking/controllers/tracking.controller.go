@@ -58,7 +58,7 @@ func (controller TrackingController) RecordConversion(writer http.ResponseWriter
 func (controller TrackingController) RedirectClick(writer http.ResponseWriter, request *http.Request) {
 	target, err := (redirectadclick.Handler{Container: controller.Container}).Execute(request.Context(), redirectadclick.Command{Token: request.PathValue("token"), UserAgent: request.UserAgent(), Platform: request.URL.Query().Get("platform")})
 	if err != nil {
-		http.Error(writer, "This ad link is no longer valid.", http.StatusNotFound)
+		httpserver.WriteJsonResponse(writer, http.StatusNotFound, httpserver.NewApiError(http.StatusNotFound, "AD_LINK_INVALID", "This ad link is no longer valid."))
 		return
 	}
 	writer.Header().Set("Cache-Control", "no-store")

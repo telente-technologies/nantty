@@ -14,7 +14,6 @@ import (
 
 const maximumCardIndex = 9
 
-// recordCardView counts one view per impression and card; the counter key makes repeats from a swiping viewer no-ops.
 func (handler Handler) recordCardView(ctx context.Context, claims services.AdTokenClaims, event dtos.AdEventDto) error {
 	if event.CardIndex == nil || *event.CardIndex < 0 || *event.CardIndex > maximumCardIndex {
 		return nil

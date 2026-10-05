@@ -13,7 +13,6 @@ const (
 
 type pdfPage struct{ content bytes.Buffer }
 
-// pdfDocument writes a text-only PDF (Helvetica, WinAnsi) with no external dependencies.
 type pdfDocument struct{ pages []*pdfPage }
 
 func (document *pdfDocument) newPage() *pdfPage {

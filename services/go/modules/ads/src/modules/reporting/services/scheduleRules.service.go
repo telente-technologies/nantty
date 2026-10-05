@@ -8,7 +8,6 @@ var scheduledFrequencies = map[string]bool{"daily": true, "weekly": true, "month
 
 func IsKnownFrequency(frequency string) bool { return scheduledFrequencies[frequency] }
 
-// NextSendAfter returns the next 06:00 UTC slot: tomorrow, next Monday, or the 1st of next month.
 func NextSendAfter(frequency string, after time.Time) time.Time {
 	day := time.Date(after.Year(), after.Month(), after.Day(), sendHourUtc, 0, 0, 0, time.UTC)
 	switch frequency {
@@ -24,7 +23,6 @@ func NextSendAfter(frequency string, after time.Time) time.Time {
 	return day.AddDate(0, 0, 1)
 }
 
-// PeriodFor returns the inclusive date range a send at dueAt reports on: yesterday, the last 7 days, or last calendar month.
 func PeriodFor(frequency string, dueAt time.Time) (from, to string) {
 	const layout = "2006-01-02"
 	yesterday := time.Date(dueAt.Year(), dueAt.Month(), dueAt.Day(), 0, 0, 0, 0, time.UTC).AddDate(0, 0, -1)

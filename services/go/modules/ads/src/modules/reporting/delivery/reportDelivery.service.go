@@ -32,8 +32,6 @@ type SendJob struct {
 	DueAt             time.Time `json:"dueAt"`
 }
 
-// EnqueueDueReports claims each due report by moving its next_send_at forward, then queues one SQS job per claim.
-// Without a queue (local development) the job runs inline. A failed enqueue puts the old slot back so the next sweep retries.
 func EnqueueDueReports(ctx context.Context, deployed *container.Container) error {
 	now := deployed.Now()
 	due, err := deployed.Client.AdScheduledReport.Query().Where(adscheduledreport.NextSendAtLTE(now)).Limit(sweepBatchSize).All(ctx)
@@ -63,7 +61,6 @@ func dispatch(ctx context.Context, deployed *container.Container, job SendJob) e
 	return deployed.Jobs.EnqueueJob(ctx, deployed.Settings.ReportQueueName, platformevents.Job{Id: uuid.NewString(), Type: JobType, Payload: payload})
 }
 
-// HandleQueueMessage is the queue consumer entry point; a returned error schedules a retry.
 func HandleQueueMessage(deployed *container.Container) platformevents.MessageHandler {
 	return func(ctx context.Context, body []byte) error {
 		var envelope platformevents.Job
@@ -81,8 +78,6 @@ func HandleQueueMessage(deployed *container.Container) platformevents.MessageHan
 	}
 }
 
-// ProcessSendJob renders the CSV and PDF, stores them with expiring links and emits adReport.ready for notifications to email.
-// It re-checks that the creator still holds reports:view, so removing someone from the account stops their schedules.
 func ProcessSendJob(ctx context.Context, deployed *container.Container, job SendJob) error {
 	reportId, err := uuid.Parse(job.ScheduledReportId)
 	if err != nil {
