@@ -20,6 +20,7 @@ func (PrivacySetting) Fields() []ent.Field {
 		field.Bool("personalization").Default(false),
 		field.Bool("personalized_ads").Default(false),
 		field.Bool("marketing").Default(false),
+		field.Enum("marketing_frequency").Values("weekly", "important_only", "off").Default("weekly"),
 		field.Enum("who_can_message_me").Values("everyone", "following", "followers", "nobody").Default("everyone"),
 		field.Enum("who_can_mention_me").Values("everyone", "following", "no_one").Default("everyone"),
 		field.String("policy_version").Default("").MaxLen(40),
