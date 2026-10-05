@@ -3,6 +3,7 @@ import type { HandlerContext } from "../../../types/handlerContext.type.js";
 import { mediaAssetRepository } from "../repositories/mediaAsset.repository.js";
 import { derivativeBucketFor } from "./derivativePublishing.service.js";
 import { mediaEvents } from "./mediaEvents.service.js";
+import { discardDownloadVariants } from "../../downloads/services/downloadVariantCleanup.service.js";
 
 export async function deleteMediaAssets(context: HandlerContext, mediaIds: readonly string[], reason: string): Promise<number> {
   if (mediaIds.length === 0) return 0;
@@ -12,6 +13,7 @@ export async function deleteMediaAssets(context: HandlerContext, mediaIds: reado
     if (asset.status === "deleted") continue;
     await context.storage.deletePrefix(derivativeBucketFor(context, asset.isPrivate), derivativePrefixFor(asset.id, asset.isPrivate));
     await context.storage.deleteObject(asset.quarantineBucket, asset.quarantineKey).catch(() => undefined);
+    await discardDownloadVariants(context, asset.id);
     const now = context.clock.now();
     await context.database.transaction(async (transaction) => {
       await transaction.mediaVariant.deleteMany({ where: { assetId: asset.id } });

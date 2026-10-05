@@ -8,6 +8,7 @@ import type { MediaAssetWithVariants } from "../models/mediaAsset.model.js";
 import { mediaAssetRepository } from "../repositories/mediaAsset.repository.js";
 import { derivativeBucketFor, uploadDerivatives } from "./derivativePublishing.service.js";
 import { mediaEvents } from "./mediaEvents.service.js";
+import { discardDownloadVariants } from "../../downloads/services/downloadVariantCleanup.service.js";
 import { derivativeKeyFor } from "../../../utils/objectKeys.util.js";
 
 export type AudioRemedyOutcome = "muted" | "restored" | "skipped";
@@ -47,6 +48,7 @@ export async function muteMediaAudio(context: HandlerContext, mediaId: string, c
       await mediaEvents.processed(transaction, muted, now);
       await mediaEvents.audioMuted(transaction, muted, claimId, now);
     });
+    await discardDownloadVariants(context, asset.id);
     return "muted";
   } finally {
     await rm(workDirectory, { recursive: true, force: true });
