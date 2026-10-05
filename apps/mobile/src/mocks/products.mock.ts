@@ -17,7 +17,6 @@ import {
 } from "./productCatalog.mock";
 import { isSavedBySignedInViewer, saveTargetForSignedInViewer, unsaveTargetForSignedInViewer } from "./savedEntries.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
-import { buildReviewSummaryForProduct } from "./reviewFixtures.mock";
 import { directoryStores, productCategories, storeBannerUrl, summariseStore } from "./storeDirectory.mock";
 
 const PAGE_SIZE = 12;
@@ -90,8 +89,6 @@ export const productsMocks: MockRoute[] = [
   createMockRoute("DELETE", "/api/v1/products/:productId/like", ({ params }) => void likedProductIds.delete(params.productId!)),
   createMockRoute("POST", "/api/v1/products/:productId/bookmark", ({ params }) => saveTargetForSignedInViewer("product", params.productId!)),
   createMockRoute("DELETE", "/api/v1/products/:productId/bookmark", ({ params }) => unsaveTargetForSignedInViewer("product", params.productId!)),
-  createMockRoute("GET", "/api/v1/products/:productId/reviews", ({ params }) => buildReviewSummaryForProduct(params.productId!)),
-  createMockRoute("POST", "/api/v1/products/:productId/reviews", () => undefined),
   createMockRoute("GET", "/api/v1/stores/:storeId", ({ params }) => buildStoreDetail(params.storeId!)),
   createMockRoute("GET", "/api/v1/stores/:storeId/products", ({ params }) => listProductSummariesInStore(params.storeId!).map(withLikeState)),
   createMockRoute("POST", "/api/v1/stores/:storeId/follow", ({ params }) => void followedStoreIds.add(params.storeId!)),
