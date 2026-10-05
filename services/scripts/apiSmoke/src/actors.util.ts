@@ -71,7 +71,7 @@ function bootstrapSuperadmin(email: string, password: string): void {
 
 export async function createSuperadmin(): Promise<StaffActor> {
   const email = `smoke.staff.${uniqueSuffix()}@zudomart.com`;
-  const password = "Smoke-Staff-Pass-2026!";
+  const password = "Quartz-Lantern-Pass-2026!";
   bootstrapSuperadmin(email, password);
   const login = await callApi("POST", "/api/v1/admin/auth/login", { body: { email, password } });
   if (login.body?.status !== "mfa_enrollment_required") throw new Error(`staff login: ${describeResponse(login)}`);

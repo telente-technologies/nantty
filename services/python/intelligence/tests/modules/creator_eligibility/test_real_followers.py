@@ -13,7 +13,6 @@ def follower(index: int, **overrides: Any) -> dict[str, Any]:
         "followedAccountCount": 120,
         "deviceClusterSize": 1,
         "signupBurstSize": 1,
-        "phoneVerified": True,
         **overrides,
     }
 
@@ -45,7 +44,6 @@ async def test_bot_farm_is_discounted_and_explained(signed_client: SignedIntelli
             followedAccountCount=5000,
             deviceClusterSize=30,
             signupBurstSize=100,
-            phoneVerified=False,
         )
         for index in range(100)
     ]

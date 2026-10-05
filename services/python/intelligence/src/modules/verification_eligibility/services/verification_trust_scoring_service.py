@@ -56,9 +56,9 @@ def score_verification_trust(request: VerificationEligibilityRequest) -> Verific
     score += 20 * ratio(request.days_since_last_violation, thresholds.no_violations_in_days)
     if request.days_since_last_violation < thresholds.no_violations_in_days:
         reasons.append("recent_violation")
-    score += (7 if request.phone_verified else 0) + (3 if request.email_verified else 0)
-    if not request.phone_verified:
-        reasons.append("phone_not_verified")
+    score += 10 if request.email_verified else 0
+    if not request.email_verified:
+        reasons.append("email_not_verified")
     if request.borderline_content:
         score -= 5
         reasons.append("borderline_content")

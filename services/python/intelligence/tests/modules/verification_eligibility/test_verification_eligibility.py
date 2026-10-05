@@ -13,7 +13,6 @@ def signals(**overrides: Any) -> dict[str, Any]:
         "daysSinceLastViolation": 100000,
         "fraudScore": 0,
         "riskScore": 0,
-        "phoneVerified": True,
         "emailVerified": True,
         **overrides,
     }

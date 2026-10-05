@@ -26,7 +26,6 @@ class VerificationEligibilityRequest(ContractModel):
     fraud_score: int = Field(default=0, ge=0, le=100)
     risk_score: int = Field(default=0, ge=0, le=100)
     borderline_content: bool = False
-    phone_verified: bool = False
     email_verified: bool = False
     account_restricted: bool = False
     completed_orders: int = Field(default=0, ge=0, le=100_000_000)
