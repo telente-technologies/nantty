@@ -625,6 +625,16 @@ func ReviewStatusNotIn(vs ...ReviewStatus) predicate.CoinTransfer {
 	return predicate.CoinTransfer(sql.FieldNotIn(FieldReviewStatus, vs...))
 }
 
+// ReviewFlagsIsNil applies the IsNil predicate on the "review_flags" field.
+func ReviewFlagsIsNil() predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldIsNull(FieldReviewFlags))
+}
+
+// ReviewFlagsNotNil applies the NotNil predicate on the "review_flags" field.
+func ReviewFlagsNotNil() predicate.CoinTransfer {
+	return predicate.CoinTransfer(sql.FieldNotNull(FieldReviewFlags))
+}
+
 // ReviewedByStaffIDEQ applies the EQ predicate on the "reviewed_by_staff_id" field.
 func ReviewedByStaffIDEQ(v string) predicate.CoinTransfer {
 	return predicate.CoinTransfer(sql.FieldEQ(FieldReviewedByStaffID, v))
