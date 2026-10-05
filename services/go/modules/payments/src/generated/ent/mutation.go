@@ -10973,30 +10973,35 @@ func (m *PaymentRefundMutation) ResetEdge(name string) error {
 // PayoutOnboardingMutation represents an operation that mutates the PayoutOnboarding nodes in the graph.
 type PayoutOnboardingMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *uuid.UUID
-	created_at            *time.Time
-	user_id               *string
-	role                  *string
-	legal_name            *string
-	sealed_identity       *[]byte
-	id_type               *string
-	id_last4              *string
-	registered_business   *bool
-	cac_number            *string
-	business_type         *string
-	bank_code             *string
-	bank_name             *string
-	account_last4         *string
-	resolved_account_name *string
-	completed_steps       *[]string
-	appendcompleted_steps []string
-	updated_at            *time.Time
-	clearedFields         map[string]struct{}
-	done                  bool
-	oldValue              func(context.Context) (*PayoutOnboarding, error)
-	predicates            []predicate.PayoutOnboarding
+	op                        Op
+	typ                       string
+	id                        *uuid.UUID
+	created_at                *time.Time
+	user_id                   *string
+	role                      *string
+	legal_name                *string
+	sealed_identity           *[]byte
+	id_type                   *string
+	id_last4                  *string
+	registered_business       *bool
+	cac_number                *string
+	business_type             *string
+	bank_code                 *string
+	bank_name                 *string
+	account_last4             *string
+	resolved_account_name     *string
+	completed_steps           *[]string
+	appendcompleted_steps     []string
+	document_status           *payoutonboarding.DocumentStatus
+	document_session_id       *string
+	document_link_url         *string
+	document_link_expires_at  *time.Time
+	document_rejection_reason *string
+	updated_at                *time.Time
+	clearedFields             map[string]struct{}
+	done                      bool
+	oldValue                  func(context.Context) (*PayoutOnboarding, error)
+	predicates                []predicate.PayoutOnboarding
 }
 
 var _ ent.Mutation = (*PayoutOnboardingMutation)(nil)
@@ -11685,6 +11690,199 @@ func (m *PayoutOnboardingMutation) ResetCompletedSteps() {
 	delete(m.clearedFields, payoutonboarding.FieldCompletedSteps)
 }
 
+// SetDocumentStatus sets the "document_status" field.
+func (m *PayoutOnboardingMutation) SetDocumentStatus(ps payoutonboarding.DocumentStatus) {
+	m.document_status = &ps
+}
+
+// DocumentStatus returns the value of the "document_status" field in the mutation.
+func (m *PayoutOnboardingMutation) DocumentStatus() (r payoutonboarding.DocumentStatus, exists bool) {
+	v := m.document_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentStatus returns the old "document_status" field's value of the PayoutOnboarding entity.
+// If the PayoutOnboarding object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutOnboardingMutation) OldDocumentStatus(ctx context.Context) (v payoutonboarding.DocumentStatus, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentStatus: %w", err)
+	}
+	return oldValue.DocumentStatus, nil
+}
+
+// ResetDocumentStatus resets all changes to the "document_status" field.
+func (m *PayoutOnboardingMutation) ResetDocumentStatus() {
+	m.document_status = nil
+}
+
+// SetDocumentSessionID sets the "document_session_id" field.
+func (m *PayoutOnboardingMutation) SetDocumentSessionID(s string) {
+	m.document_session_id = &s
+}
+
+// DocumentSessionID returns the value of the "document_session_id" field in the mutation.
+func (m *PayoutOnboardingMutation) DocumentSessionID() (r string, exists bool) {
+	v := m.document_session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentSessionID returns the old "document_session_id" field's value of the PayoutOnboarding entity.
+// If the PayoutOnboarding object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutOnboardingMutation) OldDocumentSessionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentSessionID: %w", err)
+	}
+	return oldValue.DocumentSessionID, nil
+}
+
+// ResetDocumentSessionID resets all changes to the "document_session_id" field.
+func (m *PayoutOnboardingMutation) ResetDocumentSessionID() {
+	m.document_session_id = nil
+}
+
+// SetDocumentLinkURL sets the "document_link_url" field.
+func (m *PayoutOnboardingMutation) SetDocumentLinkURL(s string) {
+	m.document_link_url = &s
+}
+
+// DocumentLinkURL returns the value of the "document_link_url" field in the mutation.
+func (m *PayoutOnboardingMutation) DocumentLinkURL() (r string, exists bool) {
+	v := m.document_link_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentLinkURL returns the old "document_link_url" field's value of the PayoutOnboarding entity.
+// If the PayoutOnboarding object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutOnboardingMutation) OldDocumentLinkURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentLinkURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentLinkURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentLinkURL: %w", err)
+	}
+	return oldValue.DocumentLinkURL, nil
+}
+
+// ResetDocumentLinkURL resets all changes to the "document_link_url" field.
+func (m *PayoutOnboardingMutation) ResetDocumentLinkURL() {
+	m.document_link_url = nil
+}
+
+// SetDocumentLinkExpiresAt sets the "document_link_expires_at" field.
+func (m *PayoutOnboardingMutation) SetDocumentLinkExpiresAt(t time.Time) {
+	m.document_link_expires_at = &t
+}
+
+// DocumentLinkExpiresAt returns the value of the "document_link_expires_at" field in the mutation.
+func (m *PayoutOnboardingMutation) DocumentLinkExpiresAt() (r time.Time, exists bool) {
+	v := m.document_link_expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentLinkExpiresAt returns the old "document_link_expires_at" field's value of the PayoutOnboarding entity.
+// If the PayoutOnboarding object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutOnboardingMutation) OldDocumentLinkExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentLinkExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentLinkExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentLinkExpiresAt: %w", err)
+	}
+	return oldValue.DocumentLinkExpiresAt, nil
+}
+
+// ClearDocumentLinkExpiresAt clears the value of the "document_link_expires_at" field.
+func (m *PayoutOnboardingMutation) ClearDocumentLinkExpiresAt() {
+	m.document_link_expires_at = nil
+	m.clearedFields[payoutonboarding.FieldDocumentLinkExpiresAt] = struct{}{}
+}
+
+// DocumentLinkExpiresAtCleared returns if the "document_link_expires_at" field was cleared in this mutation.
+func (m *PayoutOnboardingMutation) DocumentLinkExpiresAtCleared() bool {
+	_, ok := m.clearedFields[payoutonboarding.FieldDocumentLinkExpiresAt]
+	return ok
+}
+
+// ResetDocumentLinkExpiresAt resets all changes to the "document_link_expires_at" field.
+func (m *PayoutOnboardingMutation) ResetDocumentLinkExpiresAt() {
+	m.document_link_expires_at = nil
+	delete(m.clearedFields, payoutonboarding.FieldDocumentLinkExpiresAt)
+}
+
+// SetDocumentRejectionReason sets the "document_rejection_reason" field.
+func (m *PayoutOnboardingMutation) SetDocumentRejectionReason(s string) {
+	m.document_rejection_reason = &s
+}
+
+// DocumentRejectionReason returns the value of the "document_rejection_reason" field in the mutation.
+func (m *PayoutOnboardingMutation) DocumentRejectionReason() (r string, exists bool) {
+	v := m.document_rejection_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDocumentRejectionReason returns the old "document_rejection_reason" field's value of the PayoutOnboarding entity.
+// If the PayoutOnboarding object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutOnboardingMutation) OldDocumentRejectionReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDocumentRejectionReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDocumentRejectionReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDocumentRejectionReason: %w", err)
+	}
+	return oldValue.DocumentRejectionReason, nil
+}
+
+// ResetDocumentRejectionReason resets all changes to the "document_rejection_reason" field.
+func (m *PayoutOnboardingMutation) ResetDocumentRejectionReason() {
+	m.document_rejection_reason = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *PayoutOnboardingMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -11755,7 +11953,7 @@ func (m *PayoutOnboardingMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PayoutOnboardingMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 21)
 	if m.created_at != nil {
 		fields = append(fields, payoutonboarding.FieldCreatedAt)
 	}
@@ -11801,6 +11999,21 @@ func (m *PayoutOnboardingMutation) Fields() []string {
 	if m.completed_steps != nil {
 		fields = append(fields, payoutonboarding.FieldCompletedSteps)
 	}
+	if m.document_status != nil {
+		fields = append(fields, payoutonboarding.FieldDocumentStatus)
+	}
+	if m.document_session_id != nil {
+		fields = append(fields, payoutonboarding.FieldDocumentSessionID)
+	}
+	if m.document_link_url != nil {
+		fields = append(fields, payoutonboarding.FieldDocumentLinkURL)
+	}
+	if m.document_link_expires_at != nil {
+		fields = append(fields, payoutonboarding.FieldDocumentLinkExpiresAt)
+	}
+	if m.document_rejection_reason != nil {
+		fields = append(fields, payoutonboarding.FieldDocumentRejectionReason)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, payoutonboarding.FieldUpdatedAt)
 	}
@@ -11842,6 +12055,16 @@ func (m *PayoutOnboardingMutation) Field(name string) (ent.Value, bool) {
 		return m.ResolvedAccountName()
 	case payoutonboarding.FieldCompletedSteps:
 		return m.CompletedSteps()
+	case payoutonboarding.FieldDocumentStatus:
+		return m.DocumentStatus()
+	case payoutonboarding.FieldDocumentSessionID:
+		return m.DocumentSessionID()
+	case payoutonboarding.FieldDocumentLinkURL:
+		return m.DocumentLinkURL()
+	case payoutonboarding.FieldDocumentLinkExpiresAt:
+		return m.DocumentLinkExpiresAt()
+	case payoutonboarding.FieldDocumentRejectionReason:
+		return m.DocumentRejectionReason()
 	case payoutonboarding.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -11883,6 +12106,16 @@ func (m *PayoutOnboardingMutation) OldField(ctx context.Context, name string) (e
 		return m.OldResolvedAccountName(ctx)
 	case payoutonboarding.FieldCompletedSteps:
 		return m.OldCompletedSteps(ctx)
+	case payoutonboarding.FieldDocumentStatus:
+		return m.OldDocumentStatus(ctx)
+	case payoutonboarding.FieldDocumentSessionID:
+		return m.OldDocumentSessionID(ctx)
+	case payoutonboarding.FieldDocumentLinkURL:
+		return m.OldDocumentLinkURL(ctx)
+	case payoutonboarding.FieldDocumentLinkExpiresAt:
+		return m.OldDocumentLinkExpiresAt(ctx)
+	case payoutonboarding.FieldDocumentRejectionReason:
+		return m.OldDocumentRejectionReason(ctx)
 	case payoutonboarding.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -11999,6 +12232,41 @@ func (m *PayoutOnboardingMutation) SetField(name string, value ent.Value) error 
 		}
 		m.SetCompletedSteps(v)
 		return nil
+	case payoutonboarding.FieldDocumentStatus:
+		v, ok := value.(payoutonboarding.DocumentStatus)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentStatus(v)
+		return nil
+	case payoutonboarding.FieldDocumentSessionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentSessionID(v)
+		return nil
+	case payoutonboarding.FieldDocumentLinkURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentLinkURL(v)
+		return nil
+	case payoutonboarding.FieldDocumentLinkExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentLinkExpiresAt(v)
+		return nil
+	case payoutonboarding.FieldDocumentRejectionReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDocumentRejectionReason(v)
+		return nil
 	case payoutonboarding.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -12042,6 +12310,9 @@ func (m *PayoutOnboardingMutation) ClearedFields() []string {
 	if m.FieldCleared(payoutonboarding.FieldCompletedSteps) {
 		fields = append(fields, payoutonboarding.FieldCompletedSteps)
 	}
+	if m.FieldCleared(payoutonboarding.FieldDocumentLinkExpiresAt) {
+		fields = append(fields, payoutonboarding.FieldDocumentLinkExpiresAt)
+	}
 	return fields
 }
 
@@ -12061,6 +12332,9 @@ func (m *PayoutOnboardingMutation) ClearField(name string) error {
 		return nil
 	case payoutonboarding.FieldCompletedSteps:
 		m.ClearCompletedSteps()
+		return nil
+	case payoutonboarding.FieldDocumentLinkExpiresAt:
+		m.ClearDocumentLinkExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown PayoutOnboarding nullable field %s", name)
@@ -12114,6 +12388,21 @@ func (m *PayoutOnboardingMutation) ResetField(name string) error {
 		return nil
 	case payoutonboarding.FieldCompletedSteps:
 		m.ResetCompletedSteps()
+		return nil
+	case payoutonboarding.FieldDocumentStatus:
+		m.ResetDocumentStatus()
+		return nil
+	case payoutonboarding.FieldDocumentSessionID:
+		m.ResetDocumentSessionID()
+		return nil
+	case payoutonboarding.FieldDocumentLinkURL:
+		m.ResetDocumentLinkURL()
+		return nil
+	case payoutonboarding.FieldDocumentLinkExpiresAt:
+		m.ResetDocumentLinkExpiresAt()
+		return nil
+	case payoutonboarding.FieldDocumentRejectionReason:
+		m.ResetDocumentRejectionReason()
 		return nil
 	case payoutonboarding.FieldUpdatedAt:
 		m.ResetUpdatedAt()

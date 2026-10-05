@@ -210,6 +210,76 @@ func (_c *PayoutOnboardingCreate) SetCompletedSteps(v []string) *PayoutOnboardin
 	return _c
 }
 
+// SetDocumentStatus sets the "document_status" field.
+func (_c *PayoutOnboardingCreate) SetDocumentStatus(v payoutonboarding.DocumentStatus) *PayoutOnboardingCreate {
+	_c.mutation.SetDocumentStatus(v)
+	return _c
+}
+
+// SetNillableDocumentStatus sets the "document_status" field if the given value is not nil.
+func (_c *PayoutOnboardingCreate) SetNillableDocumentStatus(v *payoutonboarding.DocumentStatus) *PayoutOnboardingCreate {
+	if v != nil {
+		_c.SetDocumentStatus(*v)
+	}
+	return _c
+}
+
+// SetDocumentSessionID sets the "document_session_id" field.
+func (_c *PayoutOnboardingCreate) SetDocumentSessionID(v string) *PayoutOnboardingCreate {
+	_c.mutation.SetDocumentSessionID(v)
+	return _c
+}
+
+// SetNillableDocumentSessionID sets the "document_session_id" field if the given value is not nil.
+func (_c *PayoutOnboardingCreate) SetNillableDocumentSessionID(v *string) *PayoutOnboardingCreate {
+	if v != nil {
+		_c.SetDocumentSessionID(*v)
+	}
+	return _c
+}
+
+// SetDocumentLinkURL sets the "document_link_url" field.
+func (_c *PayoutOnboardingCreate) SetDocumentLinkURL(v string) *PayoutOnboardingCreate {
+	_c.mutation.SetDocumentLinkURL(v)
+	return _c
+}
+
+// SetNillableDocumentLinkURL sets the "document_link_url" field if the given value is not nil.
+func (_c *PayoutOnboardingCreate) SetNillableDocumentLinkURL(v *string) *PayoutOnboardingCreate {
+	if v != nil {
+		_c.SetDocumentLinkURL(*v)
+	}
+	return _c
+}
+
+// SetDocumentLinkExpiresAt sets the "document_link_expires_at" field.
+func (_c *PayoutOnboardingCreate) SetDocumentLinkExpiresAt(v time.Time) *PayoutOnboardingCreate {
+	_c.mutation.SetDocumentLinkExpiresAt(v)
+	return _c
+}
+
+// SetNillableDocumentLinkExpiresAt sets the "document_link_expires_at" field if the given value is not nil.
+func (_c *PayoutOnboardingCreate) SetNillableDocumentLinkExpiresAt(v *time.Time) *PayoutOnboardingCreate {
+	if v != nil {
+		_c.SetDocumentLinkExpiresAt(*v)
+	}
+	return _c
+}
+
+// SetDocumentRejectionReason sets the "document_rejection_reason" field.
+func (_c *PayoutOnboardingCreate) SetDocumentRejectionReason(v string) *PayoutOnboardingCreate {
+	_c.mutation.SetDocumentRejectionReason(v)
+	return _c
+}
+
+// SetNillableDocumentRejectionReason sets the "document_rejection_reason" field if the given value is not nil.
+func (_c *PayoutOnboardingCreate) SetNillableDocumentRejectionReason(v *string) *PayoutOnboardingCreate {
+	if v != nil {
+		_c.SetDocumentRejectionReason(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *PayoutOnboardingCreate) SetUpdatedAt(v time.Time) *PayoutOnboardingCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -321,6 +391,22 @@ func (_c *PayoutOnboardingCreate) defaults() {
 		v := payoutonboarding.DefaultResolvedAccountName
 		_c.mutation.SetResolvedAccountName(v)
 	}
+	if _, ok := _c.mutation.DocumentStatus(); !ok {
+		v := payoutonboarding.DefaultDocumentStatus
+		_c.mutation.SetDocumentStatus(v)
+	}
+	if _, ok := _c.mutation.DocumentSessionID(); !ok {
+		v := payoutonboarding.DefaultDocumentSessionID
+		_c.mutation.SetDocumentSessionID(v)
+	}
+	if _, ok := _c.mutation.DocumentLinkURL(); !ok {
+		v := payoutonboarding.DefaultDocumentLinkURL
+		_c.mutation.SetDocumentLinkURL(v)
+	}
+	if _, ok := _c.mutation.DocumentRejectionReason(); !ok {
+		v := payoutonboarding.DefaultDocumentRejectionReason
+		_c.mutation.SetDocumentRejectionReason(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := payoutonboarding.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -427,6 +513,38 @@ func (_c *PayoutOnboardingCreate) check() error {
 			return &ValidationError{Name: "resolved_account_name", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.resolved_account_name": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.DocumentStatus(); !ok {
+		return &ValidationError{Name: "document_status", err: errors.New(`ent: missing required field "PayoutOnboarding.document_status"`)}
+	}
+	if v, ok := _c.mutation.DocumentStatus(); ok {
+		if err := payoutonboarding.DocumentStatusValidator(v); err != nil {
+			return &ValidationError{Name: "document_status", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DocumentSessionID(); !ok {
+		return &ValidationError{Name: "document_session_id", err: errors.New(`ent: missing required field "PayoutOnboarding.document_session_id"`)}
+	}
+	if v, ok := _c.mutation.DocumentSessionID(); ok {
+		if err := payoutonboarding.DocumentSessionIDValidator(v); err != nil {
+			return &ValidationError{Name: "document_session_id", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_session_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DocumentLinkURL(); !ok {
+		return &ValidationError{Name: "document_link_url", err: errors.New(`ent: missing required field "PayoutOnboarding.document_link_url"`)}
+	}
+	if v, ok := _c.mutation.DocumentLinkURL(); ok {
+		if err := payoutonboarding.DocumentLinkURLValidator(v); err != nil {
+			return &ValidationError{Name: "document_link_url", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_link_url": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DocumentRejectionReason(); !ok {
+		return &ValidationError{Name: "document_rejection_reason", err: errors.New(`ent: missing required field "PayoutOnboarding.document_rejection_reason"`)}
+	}
+	if v, ok := _c.mutation.DocumentRejectionReason(); ok {
+		if err := payoutonboarding.DocumentRejectionReasonValidator(v); err != nil {
+			return &ValidationError{Name: "document_rejection_reason", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_rejection_reason": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "PayoutOnboarding.updated_at"`)}
 	}
@@ -526,6 +644,26 @@ func (_c *PayoutOnboardingCreate) createSpec() (*PayoutOnboarding, *sqlgraph.Cre
 	if value, ok := _c.mutation.CompletedSteps(); ok {
 		_spec.SetField(payoutonboarding.FieldCompletedSteps, field.TypeJSON, value)
 		_node.CompletedSteps = value
+	}
+	if value, ok := _c.mutation.DocumentStatus(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentStatus, field.TypeEnum, value)
+		_node.DocumentStatus = value
+	}
+	if value, ok := _c.mutation.DocumentSessionID(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentSessionID, field.TypeString, value)
+		_node.DocumentSessionID = value
+	}
+	if value, ok := _c.mutation.DocumentLinkURL(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentLinkURL, field.TypeString, value)
+		_node.DocumentLinkURL = value
+	}
+	if value, ok := _c.mutation.DocumentLinkExpiresAt(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentLinkExpiresAt, field.TypeTime, value)
+		_node.DocumentLinkExpiresAt = &value
+	}
+	if value, ok := _c.mutation.DocumentRejectionReason(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentRejectionReason, field.TypeString, value)
+		_node.DocumentRejectionReason = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(payoutonboarding.FieldUpdatedAt, field.TypeTime, value)
@@ -748,6 +886,72 @@ func (u *PayoutOnboardingUpsert) UpdateCompletedSteps() *PayoutOnboardingUpsert 
 // ClearCompletedSteps clears the value of the "completed_steps" field.
 func (u *PayoutOnboardingUpsert) ClearCompletedSteps() *PayoutOnboardingUpsert {
 	u.SetNull(payoutonboarding.FieldCompletedSteps)
+	return u
+}
+
+// SetDocumentStatus sets the "document_status" field.
+func (u *PayoutOnboardingUpsert) SetDocumentStatus(v payoutonboarding.DocumentStatus) *PayoutOnboardingUpsert {
+	u.Set(payoutonboarding.FieldDocumentStatus, v)
+	return u
+}
+
+// UpdateDocumentStatus sets the "document_status" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsert) UpdateDocumentStatus() *PayoutOnboardingUpsert {
+	u.SetExcluded(payoutonboarding.FieldDocumentStatus)
+	return u
+}
+
+// SetDocumentSessionID sets the "document_session_id" field.
+func (u *PayoutOnboardingUpsert) SetDocumentSessionID(v string) *PayoutOnboardingUpsert {
+	u.Set(payoutonboarding.FieldDocumentSessionID, v)
+	return u
+}
+
+// UpdateDocumentSessionID sets the "document_session_id" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsert) UpdateDocumentSessionID() *PayoutOnboardingUpsert {
+	u.SetExcluded(payoutonboarding.FieldDocumentSessionID)
+	return u
+}
+
+// SetDocumentLinkURL sets the "document_link_url" field.
+func (u *PayoutOnboardingUpsert) SetDocumentLinkURL(v string) *PayoutOnboardingUpsert {
+	u.Set(payoutonboarding.FieldDocumentLinkURL, v)
+	return u
+}
+
+// UpdateDocumentLinkURL sets the "document_link_url" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsert) UpdateDocumentLinkURL() *PayoutOnboardingUpsert {
+	u.SetExcluded(payoutonboarding.FieldDocumentLinkURL)
+	return u
+}
+
+// SetDocumentLinkExpiresAt sets the "document_link_expires_at" field.
+func (u *PayoutOnboardingUpsert) SetDocumentLinkExpiresAt(v time.Time) *PayoutOnboardingUpsert {
+	u.Set(payoutonboarding.FieldDocumentLinkExpiresAt, v)
+	return u
+}
+
+// UpdateDocumentLinkExpiresAt sets the "document_link_expires_at" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsert) UpdateDocumentLinkExpiresAt() *PayoutOnboardingUpsert {
+	u.SetExcluded(payoutonboarding.FieldDocumentLinkExpiresAt)
+	return u
+}
+
+// ClearDocumentLinkExpiresAt clears the value of the "document_link_expires_at" field.
+func (u *PayoutOnboardingUpsert) ClearDocumentLinkExpiresAt() *PayoutOnboardingUpsert {
+	u.SetNull(payoutonboarding.FieldDocumentLinkExpiresAt)
+	return u
+}
+
+// SetDocumentRejectionReason sets the "document_rejection_reason" field.
+func (u *PayoutOnboardingUpsert) SetDocumentRejectionReason(v string) *PayoutOnboardingUpsert {
+	u.Set(payoutonboarding.FieldDocumentRejectionReason, v)
+	return u
+}
+
+// UpdateDocumentRejectionReason sets the "document_rejection_reason" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsert) UpdateDocumentRejectionReason() *PayoutOnboardingUpsert {
+	u.SetExcluded(payoutonboarding.FieldDocumentRejectionReason)
 	return u
 }
 
@@ -1010,6 +1214,83 @@ func (u *PayoutOnboardingUpsertOne) UpdateCompletedSteps() *PayoutOnboardingUpse
 func (u *PayoutOnboardingUpsertOne) ClearCompletedSteps() *PayoutOnboardingUpsertOne {
 	return u.Update(func(s *PayoutOnboardingUpsert) {
 		s.ClearCompletedSteps()
+	})
+}
+
+// SetDocumentStatus sets the "document_status" field.
+func (u *PayoutOnboardingUpsertOne) SetDocumentStatus(v payoutonboarding.DocumentStatus) *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentStatus(v)
+	})
+}
+
+// UpdateDocumentStatus sets the "document_status" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertOne) UpdateDocumentStatus() *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentStatus()
+	})
+}
+
+// SetDocumentSessionID sets the "document_session_id" field.
+func (u *PayoutOnboardingUpsertOne) SetDocumentSessionID(v string) *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentSessionID(v)
+	})
+}
+
+// UpdateDocumentSessionID sets the "document_session_id" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertOne) UpdateDocumentSessionID() *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentSessionID()
+	})
+}
+
+// SetDocumentLinkURL sets the "document_link_url" field.
+func (u *PayoutOnboardingUpsertOne) SetDocumentLinkURL(v string) *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentLinkURL(v)
+	})
+}
+
+// UpdateDocumentLinkURL sets the "document_link_url" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertOne) UpdateDocumentLinkURL() *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentLinkURL()
+	})
+}
+
+// SetDocumentLinkExpiresAt sets the "document_link_expires_at" field.
+func (u *PayoutOnboardingUpsertOne) SetDocumentLinkExpiresAt(v time.Time) *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentLinkExpiresAt(v)
+	})
+}
+
+// UpdateDocumentLinkExpiresAt sets the "document_link_expires_at" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertOne) UpdateDocumentLinkExpiresAt() *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentLinkExpiresAt()
+	})
+}
+
+// ClearDocumentLinkExpiresAt clears the value of the "document_link_expires_at" field.
+func (u *PayoutOnboardingUpsertOne) ClearDocumentLinkExpiresAt() *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.ClearDocumentLinkExpiresAt()
+	})
+}
+
+// SetDocumentRejectionReason sets the "document_rejection_reason" field.
+func (u *PayoutOnboardingUpsertOne) SetDocumentRejectionReason(v string) *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentRejectionReason(v)
+	})
+}
+
+// UpdateDocumentRejectionReason sets the "document_rejection_reason" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertOne) UpdateDocumentRejectionReason() *PayoutOnboardingUpsertOne {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentRejectionReason()
 	})
 }
 
@@ -1441,6 +1722,83 @@ func (u *PayoutOnboardingUpsertBulk) UpdateCompletedSteps() *PayoutOnboardingUps
 func (u *PayoutOnboardingUpsertBulk) ClearCompletedSteps() *PayoutOnboardingUpsertBulk {
 	return u.Update(func(s *PayoutOnboardingUpsert) {
 		s.ClearCompletedSteps()
+	})
+}
+
+// SetDocumentStatus sets the "document_status" field.
+func (u *PayoutOnboardingUpsertBulk) SetDocumentStatus(v payoutonboarding.DocumentStatus) *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentStatus(v)
+	})
+}
+
+// UpdateDocumentStatus sets the "document_status" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertBulk) UpdateDocumentStatus() *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentStatus()
+	})
+}
+
+// SetDocumentSessionID sets the "document_session_id" field.
+func (u *PayoutOnboardingUpsertBulk) SetDocumentSessionID(v string) *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentSessionID(v)
+	})
+}
+
+// UpdateDocumentSessionID sets the "document_session_id" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertBulk) UpdateDocumentSessionID() *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentSessionID()
+	})
+}
+
+// SetDocumentLinkURL sets the "document_link_url" field.
+func (u *PayoutOnboardingUpsertBulk) SetDocumentLinkURL(v string) *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentLinkURL(v)
+	})
+}
+
+// UpdateDocumentLinkURL sets the "document_link_url" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertBulk) UpdateDocumentLinkURL() *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentLinkURL()
+	})
+}
+
+// SetDocumentLinkExpiresAt sets the "document_link_expires_at" field.
+func (u *PayoutOnboardingUpsertBulk) SetDocumentLinkExpiresAt(v time.Time) *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentLinkExpiresAt(v)
+	})
+}
+
+// UpdateDocumentLinkExpiresAt sets the "document_link_expires_at" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertBulk) UpdateDocumentLinkExpiresAt() *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentLinkExpiresAt()
+	})
+}
+
+// ClearDocumentLinkExpiresAt clears the value of the "document_link_expires_at" field.
+func (u *PayoutOnboardingUpsertBulk) ClearDocumentLinkExpiresAt() *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.ClearDocumentLinkExpiresAt()
+	})
+}
+
+// SetDocumentRejectionReason sets the "document_rejection_reason" field.
+func (u *PayoutOnboardingUpsertBulk) SetDocumentRejectionReason(v string) *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.SetDocumentRejectionReason(v)
+	})
+}
+
+// UpdateDocumentRejectionReason sets the "document_rejection_reason" field to the value that was provided on create.
+func (u *PayoutOnboardingUpsertBulk) UpdateDocumentRejectionReason() *PayoutOnboardingUpsertBulk {
+	return u.Update(func(s *PayoutOnboardingUpsert) {
+		s.UpdateDocumentRejectionReason()
 	})
 }
 

@@ -49,6 +49,16 @@ type PayoutOnboarding struct {
 	ResolvedAccountName string `json:"resolved_account_name,omitempty"`
 	// CompletedSteps holds the value of the "completed_steps" field.
 	CompletedSteps []string `json:"completed_steps,omitempty"`
+	// DocumentStatus holds the value of the "document_status" field.
+	DocumentStatus payoutonboarding.DocumentStatus `json:"document_status,omitempty"`
+	// DocumentSessionID holds the value of the "document_session_id" field.
+	DocumentSessionID string `json:"document_session_id,omitempty"`
+	// DocumentLinkURL holds the value of the "document_link_url" field.
+	DocumentLinkURL string `json:"document_link_url,omitempty"`
+	// DocumentLinkExpiresAt holds the value of the "document_link_expires_at" field.
+	DocumentLinkExpiresAt *time.Time `json:"document_link_expires_at,omitempty"`
+	// DocumentRejectionReason holds the value of the "document_rejection_reason" field.
+	DocumentRejectionReason string `json:"document_rejection_reason,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -63,9 +73,9 @@ func (*PayoutOnboarding) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case payoutonboarding.FieldRegisteredBusiness:
 			values[i] = new(sql.NullBool)
-		case payoutonboarding.FieldUserID, payoutonboarding.FieldRole, payoutonboarding.FieldLegalName, payoutonboarding.FieldIDType, payoutonboarding.FieldIDLast4, payoutonboarding.FieldCacNumber, payoutonboarding.FieldBusinessType, payoutonboarding.FieldBankCode, payoutonboarding.FieldBankName, payoutonboarding.FieldAccountLast4, payoutonboarding.FieldResolvedAccountName:
+		case payoutonboarding.FieldUserID, payoutonboarding.FieldRole, payoutonboarding.FieldLegalName, payoutonboarding.FieldIDType, payoutonboarding.FieldIDLast4, payoutonboarding.FieldCacNumber, payoutonboarding.FieldBusinessType, payoutonboarding.FieldBankCode, payoutonboarding.FieldBankName, payoutonboarding.FieldAccountLast4, payoutonboarding.FieldResolvedAccountName, payoutonboarding.FieldDocumentStatus, payoutonboarding.FieldDocumentSessionID, payoutonboarding.FieldDocumentLinkURL, payoutonboarding.FieldDocumentRejectionReason:
 			values[i] = new(sql.NullString)
-		case payoutonboarding.FieldCreatedAt, payoutonboarding.FieldUpdatedAt:
+		case payoutonboarding.FieldCreatedAt, payoutonboarding.FieldDocumentLinkExpiresAt, payoutonboarding.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case payoutonboarding.FieldID:
 			values[i] = new(uuid.UUID)
@@ -182,6 +192,37 @@ func (_m *PayoutOnboarding) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field completed_steps: %w", err)
 				}
 			}
+		case payoutonboarding.FieldDocumentStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_status", values[i])
+			} else if value.Valid {
+				_m.DocumentStatus = payoutonboarding.DocumentStatus(value.String)
+			}
+		case payoutonboarding.FieldDocumentSessionID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_session_id", values[i])
+			} else if value.Valid {
+				_m.DocumentSessionID = value.String
+			}
+		case payoutonboarding.FieldDocumentLinkURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_link_url", values[i])
+			} else if value.Valid {
+				_m.DocumentLinkURL = value.String
+			}
+		case payoutonboarding.FieldDocumentLinkExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field document_link_expires_at", values[i])
+			} else if value.Valid {
+				_m.DocumentLinkExpiresAt = new(time.Time)
+				*_m.DocumentLinkExpiresAt = value.Time
+			}
+		case payoutonboarding.FieldDocumentRejectionReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field document_rejection_reason", values[i])
+			} else if value.Valid {
+				_m.DocumentRejectionReason = value.String
+			}
 		case payoutonboarding.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -267,6 +308,23 @@ func (_m *PayoutOnboarding) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("completed_steps=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CompletedSteps))
+	builder.WriteString(", ")
+	builder.WriteString("document_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DocumentStatus))
+	builder.WriteString(", ")
+	builder.WriteString("document_session_id=")
+	builder.WriteString(_m.DocumentSessionID)
+	builder.WriteString(", ")
+	builder.WriteString("document_link_url=")
+	builder.WriteString(_m.DocumentLinkURL)
+	builder.WriteString(", ")
+	if v := _m.DocumentLinkExpiresAt; v != nil {
+		builder.WriteString("document_link_expires_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("document_rejection_reason=")
+	builder.WriteString(_m.DocumentRejectionReason)
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

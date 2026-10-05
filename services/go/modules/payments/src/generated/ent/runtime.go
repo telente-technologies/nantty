@@ -1100,8 +1100,26 @@ func init() {
 	payoutonboarding.DefaultResolvedAccountName = payoutonboardingDescResolvedAccountName.Default.(string)
 	// payoutonboarding.ResolvedAccountNameValidator is a validator for the "resolved_account_name" field. It is called by the builders before save.
 	payoutonboarding.ResolvedAccountNameValidator = payoutonboardingDescResolvedAccountName.Validators[0].(func(string) error)
+	// payoutonboardingDescDocumentSessionID is the schema descriptor for document_session_id field.
+	payoutonboardingDescDocumentSessionID := payoutonboardingFields[15].Descriptor()
+	// payoutonboarding.DefaultDocumentSessionID holds the default value on creation for the document_session_id field.
+	payoutonboarding.DefaultDocumentSessionID = payoutonboardingDescDocumentSessionID.Default.(string)
+	// payoutonboarding.DocumentSessionIDValidator is a validator for the "document_session_id" field. It is called by the builders before save.
+	payoutonboarding.DocumentSessionIDValidator = payoutonboardingDescDocumentSessionID.Validators[0].(func(string) error)
+	// payoutonboardingDescDocumentLinkURL is the schema descriptor for document_link_url field.
+	payoutonboardingDescDocumentLinkURL := payoutonboardingFields[16].Descriptor()
+	// payoutonboarding.DefaultDocumentLinkURL holds the default value on creation for the document_link_url field.
+	payoutonboarding.DefaultDocumentLinkURL = payoutonboardingDescDocumentLinkURL.Default.(string)
+	// payoutonboarding.DocumentLinkURLValidator is a validator for the "document_link_url" field. It is called by the builders before save.
+	payoutonboarding.DocumentLinkURLValidator = payoutonboardingDescDocumentLinkURL.Validators[0].(func(string) error)
+	// payoutonboardingDescDocumentRejectionReason is the schema descriptor for document_rejection_reason field.
+	payoutonboardingDescDocumentRejectionReason := payoutonboardingFields[18].Descriptor()
+	// payoutonboarding.DefaultDocumentRejectionReason holds the default value on creation for the document_rejection_reason field.
+	payoutonboarding.DefaultDocumentRejectionReason = payoutonboardingDescDocumentRejectionReason.Default.(string)
+	// payoutonboarding.DocumentRejectionReasonValidator is a validator for the "document_rejection_reason" field. It is called by the builders before save.
+	payoutonboarding.DocumentRejectionReasonValidator = payoutonboardingDescDocumentRejectionReason.Validators[0].(func(string) error)
 	// payoutonboardingDescUpdatedAt is the schema descriptor for updated_at field.
-	payoutonboardingDescUpdatedAt := payoutonboardingFields[14].Descriptor()
+	payoutonboardingDescUpdatedAt := payoutonboardingFields[19].Descriptor()
 	// payoutonboarding.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	payoutonboarding.DefaultUpdatedAt = payoutonboardingDescUpdatedAt.Default.(func() time.Time)
 	// payoutonboarding.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

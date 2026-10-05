@@ -214,6 +214,82 @@ func (_u *PayoutOnboardingUpdate) ClearCompletedSteps() *PayoutOnboardingUpdate 
 	return _u
 }
 
+// SetDocumentStatus sets the "document_status" field.
+func (_u *PayoutOnboardingUpdate) SetDocumentStatus(v payoutonboarding.DocumentStatus) *PayoutOnboardingUpdate {
+	_u.mutation.SetDocumentStatus(v)
+	return _u
+}
+
+// SetNillableDocumentStatus sets the "document_status" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdate) SetNillableDocumentStatus(v *payoutonboarding.DocumentStatus) *PayoutOnboardingUpdate {
+	if v != nil {
+		_u.SetDocumentStatus(*v)
+	}
+	return _u
+}
+
+// SetDocumentSessionID sets the "document_session_id" field.
+func (_u *PayoutOnboardingUpdate) SetDocumentSessionID(v string) *PayoutOnboardingUpdate {
+	_u.mutation.SetDocumentSessionID(v)
+	return _u
+}
+
+// SetNillableDocumentSessionID sets the "document_session_id" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdate) SetNillableDocumentSessionID(v *string) *PayoutOnboardingUpdate {
+	if v != nil {
+		_u.SetDocumentSessionID(*v)
+	}
+	return _u
+}
+
+// SetDocumentLinkURL sets the "document_link_url" field.
+func (_u *PayoutOnboardingUpdate) SetDocumentLinkURL(v string) *PayoutOnboardingUpdate {
+	_u.mutation.SetDocumentLinkURL(v)
+	return _u
+}
+
+// SetNillableDocumentLinkURL sets the "document_link_url" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdate) SetNillableDocumentLinkURL(v *string) *PayoutOnboardingUpdate {
+	if v != nil {
+		_u.SetDocumentLinkURL(*v)
+	}
+	return _u
+}
+
+// SetDocumentLinkExpiresAt sets the "document_link_expires_at" field.
+func (_u *PayoutOnboardingUpdate) SetDocumentLinkExpiresAt(v time.Time) *PayoutOnboardingUpdate {
+	_u.mutation.SetDocumentLinkExpiresAt(v)
+	return _u
+}
+
+// SetNillableDocumentLinkExpiresAt sets the "document_link_expires_at" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdate) SetNillableDocumentLinkExpiresAt(v *time.Time) *PayoutOnboardingUpdate {
+	if v != nil {
+		_u.SetDocumentLinkExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearDocumentLinkExpiresAt clears the value of the "document_link_expires_at" field.
+func (_u *PayoutOnboardingUpdate) ClearDocumentLinkExpiresAt() *PayoutOnboardingUpdate {
+	_u.mutation.ClearDocumentLinkExpiresAt()
+	return _u
+}
+
+// SetDocumentRejectionReason sets the "document_rejection_reason" field.
+func (_u *PayoutOnboardingUpdate) SetDocumentRejectionReason(v string) *PayoutOnboardingUpdate {
+	_u.mutation.SetDocumentRejectionReason(v)
+	return _u
+}
+
+// SetNillableDocumentRejectionReason sets the "document_rejection_reason" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdate) SetNillableDocumentRejectionReason(v *string) *PayoutOnboardingUpdate {
+	if v != nil {
+		_u.SetDocumentRejectionReason(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *PayoutOnboardingUpdate) SetUpdatedAt(v time.Time) *PayoutOnboardingUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -313,6 +389,26 @@ func (_u *PayoutOnboardingUpdate) check() error {
 			return &ValidationError{Name: "resolved_account_name", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.resolved_account_name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.DocumentStatus(); ok {
+		if err := payoutonboarding.DocumentStatusValidator(v); err != nil {
+			return &ValidationError{Name: "document_status", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DocumentSessionID(); ok {
+		if err := payoutonboarding.DocumentSessionIDValidator(v); err != nil {
+			return &ValidationError{Name: "document_session_id", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_session_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DocumentLinkURL(); ok {
+		if err := payoutonboarding.DocumentLinkURLValidator(v); err != nil {
+			return &ValidationError{Name: "document_link_url", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_link_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DocumentRejectionReason(); ok {
+		if err := payoutonboarding.DocumentRejectionReasonValidator(v); err != nil {
+			return &ValidationError{Name: "document_rejection_reason", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_rejection_reason": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -377,6 +473,24 @@ func (_u *PayoutOnboardingUpdate) sqlSave(ctx context.Context) (_node int, err e
 	}
 	if _u.mutation.CompletedStepsCleared() {
 		_spec.ClearField(payoutonboarding.FieldCompletedSteps, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DocumentStatus(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.DocumentSessionID(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentSessionID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DocumentLinkURL(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentLinkURL, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DocumentLinkExpiresAt(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentLinkExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.DocumentLinkExpiresAtCleared() {
+		_spec.ClearField(payoutonboarding.FieldDocumentLinkExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DocumentRejectionReason(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentRejectionReason, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(payoutonboarding.FieldUpdatedAt, field.TypeTime, value)
@@ -587,6 +701,82 @@ func (_u *PayoutOnboardingUpdateOne) ClearCompletedSteps() *PayoutOnboardingUpda
 	return _u
 }
 
+// SetDocumentStatus sets the "document_status" field.
+func (_u *PayoutOnboardingUpdateOne) SetDocumentStatus(v payoutonboarding.DocumentStatus) *PayoutOnboardingUpdateOne {
+	_u.mutation.SetDocumentStatus(v)
+	return _u
+}
+
+// SetNillableDocumentStatus sets the "document_status" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdateOne) SetNillableDocumentStatus(v *payoutonboarding.DocumentStatus) *PayoutOnboardingUpdateOne {
+	if v != nil {
+		_u.SetDocumentStatus(*v)
+	}
+	return _u
+}
+
+// SetDocumentSessionID sets the "document_session_id" field.
+func (_u *PayoutOnboardingUpdateOne) SetDocumentSessionID(v string) *PayoutOnboardingUpdateOne {
+	_u.mutation.SetDocumentSessionID(v)
+	return _u
+}
+
+// SetNillableDocumentSessionID sets the "document_session_id" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdateOne) SetNillableDocumentSessionID(v *string) *PayoutOnboardingUpdateOne {
+	if v != nil {
+		_u.SetDocumentSessionID(*v)
+	}
+	return _u
+}
+
+// SetDocumentLinkURL sets the "document_link_url" field.
+func (_u *PayoutOnboardingUpdateOne) SetDocumentLinkURL(v string) *PayoutOnboardingUpdateOne {
+	_u.mutation.SetDocumentLinkURL(v)
+	return _u
+}
+
+// SetNillableDocumentLinkURL sets the "document_link_url" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdateOne) SetNillableDocumentLinkURL(v *string) *PayoutOnboardingUpdateOne {
+	if v != nil {
+		_u.SetDocumentLinkURL(*v)
+	}
+	return _u
+}
+
+// SetDocumentLinkExpiresAt sets the "document_link_expires_at" field.
+func (_u *PayoutOnboardingUpdateOne) SetDocumentLinkExpiresAt(v time.Time) *PayoutOnboardingUpdateOne {
+	_u.mutation.SetDocumentLinkExpiresAt(v)
+	return _u
+}
+
+// SetNillableDocumentLinkExpiresAt sets the "document_link_expires_at" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdateOne) SetNillableDocumentLinkExpiresAt(v *time.Time) *PayoutOnboardingUpdateOne {
+	if v != nil {
+		_u.SetDocumentLinkExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearDocumentLinkExpiresAt clears the value of the "document_link_expires_at" field.
+func (_u *PayoutOnboardingUpdateOne) ClearDocumentLinkExpiresAt() *PayoutOnboardingUpdateOne {
+	_u.mutation.ClearDocumentLinkExpiresAt()
+	return _u
+}
+
+// SetDocumentRejectionReason sets the "document_rejection_reason" field.
+func (_u *PayoutOnboardingUpdateOne) SetDocumentRejectionReason(v string) *PayoutOnboardingUpdateOne {
+	_u.mutation.SetDocumentRejectionReason(v)
+	return _u
+}
+
+// SetNillableDocumentRejectionReason sets the "document_rejection_reason" field if the given value is not nil.
+func (_u *PayoutOnboardingUpdateOne) SetNillableDocumentRejectionReason(v *string) *PayoutOnboardingUpdateOne {
+	if v != nil {
+		_u.SetDocumentRejectionReason(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *PayoutOnboardingUpdateOne) SetUpdatedAt(v time.Time) *PayoutOnboardingUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -699,6 +889,26 @@ func (_u *PayoutOnboardingUpdateOne) check() error {
 			return &ValidationError{Name: "resolved_account_name", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.resolved_account_name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.DocumentStatus(); ok {
+		if err := payoutonboarding.DocumentStatusValidator(v); err != nil {
+			return &ValidationError{Name: "document_status", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_status": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DocumentSessionID(); ok {
+		if err := payoutonboarding.DocumentSessionIDValidator(v); err != nil {
+			return &ValidationError{Name: "document_session_id", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_session_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DocumentLinkURL(); ok {
+		if err := payoutonboarding.DocumentLinkURLValidator(v); err != nil {
+			return &ValidationError{Name: "document_link_url", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_link_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DocumentRejectionReason(); ok {
+		if err := payoutonboarding.DocumentRejectionReasonValidator(v); err != nil {
+			return &ValidationError{Name: "document_rejection_reason", err: fmt.Errorf(`ent: validator failed for field "PayoutOnboarding.document_rejection_reason": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -780,6 +990,24 @@ func (_u *PayoutOnboardingUpdateOne) sqlSave(ctx context.Context) (_node *Payout
 	}
 	if _u.mutation.CompletedStepsCleared() {
 		_spec.ClearField(payoutonboarding.FieldCompletedSteps, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DocumentStatus(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.DocumentSessionID(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentSessionID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DocumentLinkURL(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentLinkURL, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DocumentLinkExpiresAt(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentLinkExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.DocumentLinkExpiresAtCleared() {
+		_spec.ClearField(payoutonboarding.FieldDocumentLinkExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.DocumentRejectionReason(); ok {
+		_spec.SetField(payoutonboarding.FieldDocumentRejectionReason, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(payoutonboarding.FieldUpdatedAt, field.TypeTime, value)
