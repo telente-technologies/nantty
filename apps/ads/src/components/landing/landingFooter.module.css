@@ -1,19 +1,19 @@
 .footer {
   position: relative;
   overflow: hidden;
-  padding-top: clamp(56px, 8vw, 96px);
+  padding-top: clamp(var(--space-9), 8vw, 96px);
   background: var(--surface-rail);
   color: var(--blue-50);
 }
 
 .footerTop {
   display: grid;
-  gap: 40px;
+  gap: var(--space-8);
 }
 
 .footerBrand {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
   justify-items: start;
   max-width: 380px;
 }
@@ -26,8 +26,8 @@
 
 .footerLinks {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--space-6);
 }
 
 .footerLinks h2 {
@@ -36,12 +36,12 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--blue-200);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .footerLinks ul {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   list-style: none;
 }
 
@@ -51,7 +51,7 @@
 
 .footerBottom {
   margin-top: 48px;
-  padding-block: 20px;
+  padding-block: var(--space-5);
   border-top: 1px solid color-mix(in srgb, var(--color-on-brand) 12%, transparent);
   font-size: var(--fs-14);
   color: var(--blue-200);
@@ -67,6 +67,16 @@
   white-space: nowrap;
   color: color-mix(in srgb, var(--color-on-brand) 6%, transparent);
   user-select: none;
+  display: flex;
+  align-items: baseline;
+  gap: 0.18em;
+}
+
+.giantWordmarkSvg {
+  height: 0.95em;
+  width: auto;
+  flex: none;
+  transform: translateY(0.18em);
 }
 
 .footer a:focus-visible {

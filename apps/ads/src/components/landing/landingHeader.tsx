@@ -19,7 +19,7 @@ export function LandingHeaderWithFloatingNavigation({ primaryAction }: { readonl
     <header className={styles.header}>
       <div className={styles.headerPill}>
         <Link href="/" className={styles.wordmarkLink} aria-label="Zudomart Ads home">
-          <ZudomartWordmark productLabel="Ads" tone="onLight" />
+          <ZudomartWordmark productLabel="Ads" tone="onLight" withSymbol />
         </Link>
         <nav aria-label="Main" className={styles.headerNavigation}>
           <ul>

@@ -1,9 +1,11 @@
 import Link from "next/link";
 
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { ZudomartWordmark, defaultZudomartWordmarkVariant, zudomartWordmarkFor } from "@zudomart/web-kit";
 import { buildContactMailtoLink, contactEmailDisplayText, readZudomartMainSiteUrl } from "@/constants/contact.constant";
 
 import styles from "./landingFooter.module.css";
+
+const giantWordmark = zudomartWordmarkFor(defaultZudomartWordmarkVariant, 400);
 
 export function LandingFooterWithContact() {
   const mainSiteUrl = readZudomartMainSiteUrl();
@@ -11,7 +13,7 @@ export function LandingFooterWithContact() {
     <footer className={styles.footer}>
       <div className={`${styles.container} ${styles.footerTop}`}>
         <div className={styles.footerBrand}>
-          <ZudomartWordmark productLabel="Ads" tone="onDark" />
+          <ZudomartWordmark productLabel="Ads" tone="onDark" withSymbol />
           <p>Ads for the Zudomart marketplace: Marketplace, Feed, Reels and Live. Built in Nigeria.</p>
           <a href={buildContactMailtoLink("Zudomart Ads")} className={styles.footerEmail}>
             {contactEmailDisplayText}
@@ -66,7 +68,10 @@ export function LandingFooterWithContact() {
         <p>© {new Date().getFullYear()} Zudomart. Budgets and billing in your local currency.</p>
       </div>
       <p className={styles.giantWordmark} aria-hidden>
-        zudomart ads
+        <svg className={styles.giantWordmarkSvg} viewBox={`0 0 ${giantWordmark.width} ${giantWordmark.height}`} focusable="false">
+          <path d={giantWordmark.d} fill="currentColor" />
+        </svg>
+        ads
       </p>
     </footer>
   );
