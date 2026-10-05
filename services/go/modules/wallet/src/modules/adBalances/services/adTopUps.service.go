@@ -112,3 +112,29 @@ func BoostAdAccountId(userId string) string { return "user-" + userId }
 func ConvertTopUp(topUp *ent.AdBalanceTopUp) dtos.TopUpDto {
 	return dtos.TopUpDto{Id: topUp.ID.String(), AdAccountId: topUp.AdAccountID, Reference: topUp.Reference, Status: string(topUp.Status), Amount: dtos.MoneyDto{AmountMinor: topUp.AmountMinor, Currency: topUp.Currency}}
 }
+
+func (balances AdBalances) ReadTopUpStatus(ctx context.Context, adAccountId, reference string) (dtos.TopUpStatusDto, error) {
+	client := balances.Container.Client(balances.Container.Resources.Database)
+	topUp, err := client.AdBalanceTopUp.Query().Where(adbalancetopup.AdAccountID(adAccountId), adbalancetopup.Reference(reference)).Only(ctx)
+	if ent.IsNotFound(err) {
+		return dtos.TopUpStatusDto{}, ErrTopUpNotFound
+	}
+	if err != nil {
+		return dtos.TopUpStatusDto{}, err
+	}
+	provider := balances.Container.Payments.Container.Settings.DefaultProvider
+	if topUp.Status == adbalancetopup.StatusPending {
+		intent, err := balances.Container.Payments.VerifyAndSettlePaymentIntentByReference(ctx, reference)
+		if err != nil {
+			return dtos.TopUpStatusDto{}, err
+		}
+		provider = intent.Provider
+		if topUp, err = client.AdBalanceTopUp.Get(ctx, topUp.ID); err != nil {
+			return dtos.TopUpStatusDto{}, err
+		}
+	}
+	return dtos.TopUpStatusDto{
+		Id: topUp.ID.String(), AdAccountId: topUp.AdAccountID, Reference: topUp.Reference, Amount: dtos.MoneyDto{AmountMinor: topUp.AmountMinor, Currency: topUp.Currency},
+		Status: string(topUp.Status), Provider: provider, FundedByUserId: topUp.FundedByUserID, CreatedAt: topUp.CreatedAt, CompletedAt: topUp.CreditedAt,
+	}, nil
+}

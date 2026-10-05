@@ -13,6 +13,8 @@ func MountAdBalancesRoutes(mux *http.ServeMux, controller controllers.AdBalances
 	mux.Handle("GET /api/v1/ads/balance", requireUser(http.HandlerFunc(controller.GetBalance)))
 	mux.Handle("POST /api/v1/ads/balance/refund", requireUser(http.HandlerFunc(controller.RefundUnusedBalance)))
 	mux.HandleFunc("POST /api/v1/internal/ads/spend-batches", controller.ApplySpendBatch)
+	mux.HandleFunc("POST /api/v1/internal/ads/accounts/{adAccountId}/top-ups", controller.StartTopUpForAdAccount)
+	mux.HandleFunc("GET /api/v1/internal/ads/accounts/{adAccountId}/top-ups/{reference}", controller.GetTopUpForAdAccount)
 	mux.HandleFunc("POST /api/v1/internal/ads/boost-debits", controller.DebitWalletForBoost)
 	mux.HandleFunc("POST /api/v1/internal/ads/boost-refunds", controller.RefundBoostRemainder)
 }

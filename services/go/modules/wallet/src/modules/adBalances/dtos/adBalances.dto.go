@@ -1,5 +1,7 @@
 package dtos
 
+import "time"
+
 type MoneyDto struct {
 	AmountMinor int64  `json:"amountMinor"`
 	Currency    string `json:"currency"`
@@ -51,4 +53,22 @@ type BoostDebitResultDto struct {
 	LedgerTransactionId string   `json:"ledgerTransactionId"`
 	BalanceAfter        MoneyDto `json:"balanceAfter"`
 	Replayed            bool     `json:"replayed"`
+}
+
+type InternalStartTopUpRequestDto struct {
+	UserId   string   `json:"userId"`
+	Amount   MoneyDto `json:"amount"`
+	ReturnTo string   `json:"returnTo"`
+}
+
+type TopUpStatusDto struct {
+	Id             string     `json:"id"`
+	AdAccountId    string     `json:"adAccountId"`
+	Reference      string     `json:"reference"`
+	Amount         MoneyDto   `json:"amount"`
+	Status         string     `json:"status"`
+	Provider       string     `json:"provider"`
+	FundedByUserId string     `json:"fundedByUserId"`
+	CreatedAt      time.Time  `json:"createdAt"`
+	CompletedAt    *time.Time `json:"completedAt"`
 }
