@@ -11,7 +11,7 @@ const NON_CREATOR_STATUS: CreatorStatus = { status: "none", canGoLive: false };
 
 const isSignedInUserAFanAccount = () => {
   const signedInUser = useAuthStore.getState().user;
-  const identifiers = [signedInUser?.email, signedInUser?.username, signedInUser?.phone ?? undefined];
+  const identifiers = [signedInUser?.email, signedInUser?.username];
   return identifiers.some((identifier) => identifier?.toLowerCase().includes("fan"));
 };
 

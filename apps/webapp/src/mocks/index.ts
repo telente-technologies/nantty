@@ -49,7 +49,6 @@ import { storeRewardsMocks } from "./storeRewards.mock";
 import { walletMocks } from "./wallet.mock";
 import { chatReportsMocks } from "./chatReports.mock";
 import { reportsMocks } from "./reports.mock";
-import { discoveryMocks } from "./discovery.mock";
 import { exploreMocks } from "./explore.mock";
 import { savesMocks } from "./saves.mock";
 import { webActionsMocks } from "./webActions.mock";
@@ -63,7 +62,6 @@ export const routes: MockRoute[] = [
   ...localeMocks,
   ...usernameMocks,
   ...authMocks,
-  ...discoveryMocks,
   ...exploreMocks,
   ...savesMocks,
   ...webActionsMocks,

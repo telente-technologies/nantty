@@ -34,7 +34,6 @@ function buildEligibilityForSignedInUser(): CreatorEligibility {
   const requirements = [
     { key: "followers" as const, label: "At least 1,000 followers", currentValue: user.followers, requiredValue: 1000 },
     { key: "account_age" as const, label: "Account at least 30 days old", currentValue: accountAgeInDays, requiredValue: 30 },
-    { key: "verified_phone" as const, label: "Verified phone number", currentValue: user.phone ? 1 : 0, requiredValue: 1 },
     { key: "no_violations" as const, label: "No community guideline strikes in 90 days", currentValue: 1, requiredValue: 1 },
     { key: "posts" as const, label: "At least 10 posts", currentValue: user.posts, requiredValue: 10 },
   ].map((requirement) => ({ ...requirement, met: requirement.currentValue >= requirement.requiredValue }));
