@@ -11,7 +11,7 @@ ALTER TABLE "categories" ADD COLUMN "icon_name" character varying NULL;
 -- create index "category_platform_slug_unique" to table: "categories"
 CREATE UNIQUE INDEX "category_platform_slug_unique" ON "categories" ("slug") WHERE (store_id IS NULL);
 -- modify "stores" table
-ALTER TABLE "stores" ADD COLUMN "status_reason" character varying NULL, ADD COLUMN "status_changed_at" timestamptz NULL, ADD COLUMN "brand_id" uuid NULL, ADD COLUMN "has_official_badge" boolean NOT NULL DEFAULT false, ADD COLUMN "follower_count" bigint NOT NULL DEFAULT 0;
+ALTER TABLE "stores" ADD COLUMN "status_reason" character varying NULL, ADD COLUMN "status_changed_at" timestamptz NULL, ADD COLUMN "brand_id" uuid NULL, ADD COLUMN "has_official_badge" boolean NOT NULL DEFAULT false;
 -- create index "store_brand_id" to table: "stores"
 CREATE INDEX "store_brand_id" ON "stores" ("brand_id");
 -- create index "store_status_id" to table: "stores"

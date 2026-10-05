@@ -27,7 +27,7 @@ DROP INDEX "store_status_id";
 -- reverse: create index "store_brand_id" to table: "stores"
 DROP INDEX "store_brand_id";
 -- reverse: modify "stores" table
-ALTER TABLE "stores" DROP COLUMN "follower_count", DROP COLUMN "has_official_badge", DROP COLUMN "brand_id", DROP COLUMN "status_changed_at", DROP COLUMN "status_reason";
+ALTER TABLE "stores" DROP COLUMN "has_official_badge", DROP COLUMN "brand_id", DROP COLUMN "status_changed_at", DROP COLUMN "status_reason";
 -- reverse: create index "category_platform_slug_unique" to table: "categories"
 DROP INDEX "category_platform_slug_unique";
 -- reverse: modify "categories" table
