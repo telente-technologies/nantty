@@ -1,9 +1,10 @@
 import type { Logger } from "@zudojs/logger";
 
 import type { IdentityReadClient } from "../databases/identityRead.database.js";
-import type { IdentityDirectory, MentionTargetStatus, UserSummary, WhoCanMentionMe } from "../interfaces/identityDirectory.interface.js";
+import type { CheckmarkColor, IdentityDirectory, MentionTargetStatus, UserSummary, WhoCanMentionMe } from "../interfaces/identityDirectory.interface.js";
 
 interface ProfileRow {
+  readonly id?: string;
   readonly accountId: string;
   readonly handle: string;
   readonly displayName: string;
@@ -12,7 +13,7 @@ interface ProfileRow {
   readonly creatorStatus: string;
 }
 
-const profileSelect = { accountId: true, handle: true, displayName: true, avatarUrl: true, verified: true, creatorStatus: true } as const;
+const profileSelect = { id: true, accountId: true, handle: true, displayName: true, avatarUrl: true, verified: true, creatorStatus: true } as const;
 
 function toUserSummary(row: ProfileRow): UserSummary {
   return { id: row.accountId, name: row.displayName === "" ? row.handle : row.displayName, username: row.handle, avatarUrl: row.avatarUrl, verified: row.verified, isCreator: row.creatorStatus === "approved" };
@@ -95,6 +96,15 @@ export function createIdentityDirectory(client: IdentityReadClient, logger: Logg
       if (accountIds.length === 0) return new Set<string>();
       const rows = await client.identityPrivacySetting.findMany({ where: { accountId: { in: [...accountIds] }, personalizedAds: true }, select: { accountId: true } });
       return new Set(rows.map((row) => row.accountId));
+    },
+
+    async findCheckmarkColors(accountIds) {
+      const result = new Map<string, CheckmarkColor>();
+      if (accountIds.length === 0) return result;
+      const profiles = await personalProfiles([...new Set(accountIds)]);
+      const rows = await client.identityProfileCheckmark.findMany({ where: { profileId: { in: profiles.map((profile) => profile.id) }, status: { in: ["verified", "grace"] } }, select: { accountId: true, color: true } });
+      for (const row of rows) if (row.color === "blue" || row.color === "gold" || row.color === "black") result.set(row.accountId, row.color);
+      return result;
     },
 
     async findAccountCreatedAt(accountId) {

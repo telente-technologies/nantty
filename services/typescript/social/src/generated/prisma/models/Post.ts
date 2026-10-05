@@ -451,6 +451,7 @@ export type PostWhereInput = {
   media?: Prisma.PostMediaListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   likes?: Prisma.PostLikeListRelationFilter
+  tags?: Prisma.PostTagListRelationFilter
   resharedFrom?: Prisma.XOR<Prisma.PostNullableScalarRelationFilter, Prisma.PostWhereInput> | null
   reshares?: Prisma.PostListRelationFilter
 }
@@ -493,6 +494,7 @@ export type PostOrderByWithRelationInput = {
   media?: Prisma.PostMediaOrderByRelationAggregateInput
   comments?: Prisma.CommentOrderByRelationAggregateInput
   likes?: Prisma.PostLikeOrderByRelationAggregateInput
+  tags?: Prisma.PostTagOrderByRelationAggregateInput
   resharedFrom?: Prisma.PostOrderByWithRelationInput
   reshares?: Prisma.PostOrderByRelationAggregateInput
 }
@@ -538,6 +540,7 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   media?: Prisma.PostMediaListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   likes?: Prisma.PostLikeListRelationFilter
+  tags?: Prisma.PostTagListRelationFilter
   resharedFrom?: Prisma.XOR<Prisma.PostNullableScalarRelationFilter, Prisma.PostWhereInput> | null
   reshares?: Prisma.PostListRelationFilter
 }, "id">
@@ -661,6 +664,7 @@ export type PostCreateInput = {
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagCreateNestedManyWithoutPostInput
   resharedFrom?: Prisma.PostCreateNestedOneWithoutResharesInput
   reshares?: Prisma.PostCreateNestedManyWithoutResharedFromInput
 }
@@ -703,6 +707,7 @@ export type PostUncheckedCreateInput = {
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagUncheckedCreateNestedManyWithoutPostInput
   reshares?: Prisma.PostUncheckedCreateNestedManyWithoutResharedFromInput
 }
 
@@ -743,6 +748,7 @@ export type PostUpdateInput = {
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUpdateManyWithoutPostNestedInput
   resharedFrom?: Prisma.PostUpdateOneWithoutResharesNestedInput
   reshares?: Prisma.PostUpdateManyWithoutResharedFromNestedInput
 }
@@ -785,6 +791,7 @@ export type PostUncheckedUpdateInput = {
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUncheckedUpdateManyWithoutPostNestedInput
   reshares?: Prisma.PostUncheckedUpdateManyWithoutResharedFromNestedInput
 }
 
@@ -1201,6 +1208,20 @@ export type PostUpdateOneRequiredWithoutCommentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutCommentsInput, Prisma.PostUpdateWithoutCommentsInput>, Prisma.PostUncheckedUpdateWithoutCommentsInput>
 }
 
+export type PostCreateNestedOneWithoutTagsInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutTagsInput, Prisma.PostUncheckedCreateWithoutTagsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutTagsInput
+  connect?: Prisma.PostWhereUniqueInput
+}
+
+export type PostUpdateOneRequiredWithoutTagsNestedInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutTagsInput, Prisma.PostUncheckedCreateWithoutTagsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutTagsInput
+  upsert?: Prisma.PostUpsertWithoutTagsInput
+  connect?: Prisma.PostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutTagsInput, Prisma.PostUpdateWithoutTagsInput>, Prisma.PostUncheckedUpdateWithoutTagsInput>
+}
+
 export type PostCreateWithoutResharesInput = {
   id?: string
   authorId: string
@@ -1238,6 +1259,7 @@ export type PostCreateWithoutResharesInput = {
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagCreateNestedManyWithoutPostInput
   resharedFrom?: Prisma.PostCreateNestedOneWithoutResharesInput
 }
 
@@ -1279,6 +1301,7 @@ export type PostUncheckedCreateWithoutResharesInput = {
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutResharesInput = {
@@ -1323,6 +1346,7 @@ export type PostCreateWithoutResharedFromInput = {
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagCreateNestedManyWithoutPostInput
   reshares?: Prisma.PostCreateNestedManyWithoutResharedFromInput
 }
 
@@ -1363,6 +1387,7 @@ export type PostUncheckedCreateWithoutResharedFromInput = {
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagUncheckedCreateNestedManyWithoutPostInput
   reshares?: Prisma.PostUncheckedCreateNestedManyWithoutResharedFromInput
 }
 
@@ -1424,6 +1449,7 @@ export type PostUpdateWithoutResharesInput = {
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUpdateManyWithoutPostNestedInput
   resharedFrom?: Prisma.PostUpdateOneWithoutResharesNestedInput
 }
 
@@ -1465,6 +1491,7 @@ export type PostUncheckedUpdateWithoutResharesInput = {
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostUpsertWithWhereUniqueWithoutResharedFromInput = {
@@ -1559,6 +1586,7 @@ export type PostCreateWithoutMediaInput = {
   createdAt?: Date | string
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagCreateNestedManyWithoutPostInput
   resharedFrom?: Prisma.PostCreateNestedOneWithoutResharesInput
   reshares?: Prisma.PostCreateNestedManyWithoutResharedFromInput
 }
@@ -1600,6 +1628,7 @@ export type PostUncheckedCreateWithoutMediaInput = {
   createdAt?: Date | string
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagUncheckedCreateNestedManyWithoutPostInput
   reshares?: Prisma.PostUncheckedCreateNestedManyWithoutResharedFromInput
 }
 
@@ -1655,6 +1684,7 @@ export type PostUpdateWithoutMediaInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUpdateManyWithoutPostNestedInput
   resharedFrom?: Prisma.PostUpdateOneWithoutResharesNestedInput
   reshares?: Prisma.PostUpdateManyWithoutResharedFromNestedInput
 }
@@ -1696,6 +1726,7 @@ export type PostUncheckedUpdateWithoutMediaInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUncheckedUpdateManyWithoutPostNestedInput
   reshares?: Prisma.PostUncheckedUpdateManyWithoutResharedFromNestedInput
 }
 
@@ -1735,6 +1766,7 @@ export type PostCreateWithoutLikesInput = {
   createdAt?: Date | string
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagCreateNestedManyWithoutPostInput
   resharedFrom?: Prisma.PostCreateNestedOneWithoutResharesInput
   reshares?: Prisma.PostCreateNestedManyWithoutResharedFromInput
 }
@@ -1776,6 +1808,7 @@ export type PostUncheckedCreateWithoutLikesInput = {
   createdAt?: Date | string
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagUncheckedCreateNestedManyWithoutPostInput
   reshares?: Prisma.PostUncheckedCreateNestedManyWithoutResharedFromInput
 }
 
@@ -1831,6 +1864,7 @@ export type PostUpdateWithoutLikesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUpdateManyWithoutPostNestedInput
   resharedFrom?: Prisma.PostUpdateOneWithoutResharesNestedInput
   reshares?: Prisma.PostUpdateManyWithoutResharedFromNestedInput
 }
@@ -1872,6 +1906,7 @@ export type PostUncheckedUpdateWithoutLikesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUncheckedUpdateManyWithoutPostNestedInput
   reshares?: Prisma.PostUncheckedUpdateManyWithoutResharedFromNestedInput
 }
 
@@ -1911,6 +1946,7 @@ export type PostCreateWithoutCommentsInput = {
   createdAt?: Date | string
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagCreateNestedManyWithoutPostInput
   resharedFrom?: Prisma.PostCreateNestedOneWithoutResharesInput
   reshares?: Prisma.PostCreateNestedManyWithoutResharedFromInput
 }
@@ -1952,6 +1988,7 @@ export type PostUncheckedCreateWithoutCommentsInput = {
   createdAt?: Date | string
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
+  tags?: Prisma.PostTagUncheckedCreateNestedManyWithoutPostInput
   reshares?: Prisma.PostUncheckedCreateNestedManyWithoutResharedFromInput
 }
 
@@ -2007,6 +2044,7 @@ export type PostUpdateWithoutCommentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUpdateManyWithoutPostNestedInput
   resharedFrom?: Prisma.PostUpdateOneWithoutResharesNestedInput
   reshares?: Prisma.PostUpdateManyWithoutResharedFromNestedInput
 }
@@ -2047,6 +2085,187 @@ export type PostUncheckedUpdateWithoutCommentsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
+  likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUncheckedUpdateManyWithoutPostNestedInput
+  reshares?: Prisma.PostUncheckedUpdateManyWithoutResharedFromNestedInput
+}
+
+export type PostCreateWithoutTagsInput = {
+  id?: string
+  authorId: string
+  kind: $Enums.PostKind
+  text?: string
+  audience?: $Enums.PostAudience
+  visibility?: $Enums.PostVisibility
+  isAiGenerated?: boolean
+  soundId?: string | null
+  replyToCommentId?: string | null
+  replyToClipId?: string | null
+  replyToCommenterId?: string | null
+  stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  likeCount?: number
+  commentCount?: number
+  repostCount?: number
+  shareCount?: number
+  viewCount?: number
+  profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
+  expiresAt?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPostInput
+  likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
+  resharedFrom?: Prisma.PostCreateNestedOneWithoutResharesInput
+  reshares?: Prisma.PostCreateNestedManyWithoutResharedFromInput
+}
+
+export type PostUncheckedCreateWithoutTagsInput = {
+  id?: string
+  authorId: string
+  kind: $Enums.PostKind
+  text?: string
+  audience?: $Enums.PostAudience
+  visibility?: $Enums.PostVisibility
+  isAiGenerated?: boolean
+  soundId?: string | null
+  resharedFromId?: string | null
+  replyToCommentId?: string | null
+  replyToClipId?: string | null
+  replyToCommenterId?: string | null
+  stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  likeCount?: number
+  commentCount?: number
+  repostCount?: number
+  shareCount?: number
+  viewCount?: number
+  profileVisitCount?: number
+  saveCount?: number
+  quoteCount?: number
+  isQuote?: boolean
+  replyPolicy?: $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostCreatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostCreateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostCreatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: boolean
+  moderationVisibility?: $Enums.ModerationVisibility
+  expiresAt?: Date | string | null
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
+  likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
+  reshares?: Prisma.PostUncheckedCreateNestedManyWithoutResharedFromInput
+}
+
+export type PostCreateOrConnectWithoutTagsInput = {
+  where: Prisma.PostWhereUniqueInput
+  create: Prisma.XOR<Prisma.PostCreateWithoutTagsInput, Prisma.PostUncheckedCreateWithoutTagsInput>
+}
+
+export type PostUpsertWithoutTagsInput = {
+  update: Prisma.XOR<Prisma.PostUpdateWithoutTagsInput, Prisma.PostUncheckedUpdateWithoutTagsInput>
+  create: Prisma.XOR<Prisma.PostCreateWithoutTagsInput, Prisma.PostUncheckedCreateWithoutTagsInput>
+  where?: Prisma.PostWhereInput
+}
+
+export type PostUpdateToOneWithWhereWithoutTagsInput = {
+  where?: Prisma.PostWhereInput
+  data: Prisma.XOR<Prisma.PostUpdateWithoutTagsInput, Prisma.PostUncheckedUpdateWithoutTagsInput>
+}
+
+export type PostUpdateWithoutTagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
+  text?: Prisma.StringFieldUpdateOperationsInput | string
+  audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+  visibility?: Prisma.EnumPostVisibilityFieldUpdateOperationsInput | $Enums.PostVisibility
+  isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  soundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  replyToCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  replyToClipId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  likeCount?: Prisma.IntFieldUpdateOperationsInput | number
+  commentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  repostCount?: Prisma.IntFieldUpdateOperationsInput | number
+  shareCount?: Prisma.IntFieldUpdateOperationsInput | number
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
+  likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
+  resharedFrom?: Prisma.PostUpdateOneWithoutResharesNestedInput
+  reshares?: Prisma.PostUpdateManyWithoutResharedFromNestedInput
+}
+
+export type PostUncheckedUpdateWithoutTagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
+  text?: Prisma.StringFieldUpdateOperationsInput | string
+  audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
+  visibility?: Prisma.EnumPostVisibilityFieldUpdateOperationsInput | $Enums.PostVisibility
+  isAiGenerated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  soundId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resharedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  replyToCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  replyToClipId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  replyToCommenterId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stickerLayout?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mentions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  linkPreview?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  likeCount?: Prisma.IntFieldUpdateOperationsInput | number
+  commentCount?: Prisma.IntFieldUpdateOperationsInput | number
+  repostCount?: Prisma.IntFieldUpdateOperationsInput | number
+  shareCount?: Prisma.IntFieldUpdateOperationsInput | number
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  profileVisitCount?: Prisma.IntFieldUpdateOperationsInput | number
+  saveCount?: Prisma.IntFieldUpdateOperationsInput | number
+  quoteCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isQuote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  replyPolicy?: Prisma.EnumReplyPolicyFieldUpdateOperationsInput | $Enums.ReplyPolicy
+  sensitiveLabels?: Prisma.PostUpdatesensitiveLabelsInput | $Enums.SensitiveLabel[]
+  authorSensitiveLabels?: Prisma.PostUpdateauthorSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  moderationSensitiveLabels?: Prisma.PostUpdatemoderationSensitiveLabelsInput | $Enums.SensitiveLabel[]
+  advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
+  sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
   reshares?: Prisma.PostUncheckedUpdateManyWithoutResharedFromNestedInput
 }
@@ -2124,6 +2343,7 @@ export type PostUpdateWithoutResharedFromInput = {
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUpdateManyWithoutPostNestedInput
   reshares?: Prisma.PostUpdateManyWithoutResharedFromNestedInput
 }
 
@@ -2164,6 +2384,7 @@ export type PostUncheckedUpdateWithoutResharedFromInput = {
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
+  tags?: Prisma.PostTagUncheckedUpdateManyWithoutPostNestedInput
   reshares?: Prisma.PostUncheckedUpdateManyWithoutResharedFromNestedInput
 }
 
@@ -2212,6 +2433,7 @@ export type PostCountOutputType = {
   media: number
   comments: number
   likes: number
+  tags: number
   reshares: number
 }
 
@@ -2219,6 +2441,7 @@ export type PostCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   media?: boolean | PostCountOutputTypeCountMediaArgs
   comments?: boolean | PostCountOutputTypeCountCommentsArgs
   likes?: boolean | PostCountOutputTypeCountLikesArgs
+  tags?: boolean | PostCountOutputTypeCountTagsArgs
   reshares?: boolean | PostCountOutputTypeCountResharesArgs
 }
 
@@ -2251,6 +2474,13 @@ export type PostCountOutputTypeCountCommentsArgs<ExtArgs extends runtime.Types.E
  */
 export type PostCountOutputTypeCountLikesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.PostLikeWhereInput
+}
+
+/**
+ * PostCountOutputType without action
+ */
+export type PostCountOutputTypeCountTagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PostTagWhereInput
 }
 
 /**
@@ -2299,6 +2529,7 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   media?: boolean | Prisma.Post$mediaArgs<ExtArgs>
   comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
   likes?: boolean | Prisma.Post$likesArgs<ExtArgs>
+  tags?: boolean | Prisma.Post$tagsArgs<ExtArgs>
   resharedFrom?: boolean | Prisma.Post$resharedFromArgs<ExtArgs>
   reshares?: boolean | Prisma.Post$resharesArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
@@ -2422,6 +2653,7 @@ export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   media?: boolean | Prisma.Post$mediaArgs<ExtArgs>
   comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
   likes?: boolean | Prisma.Post$likesArgs<ExtArgs>
+  tags?: boolean | Prisma.Post$tagsArgs<ExtArgs>
   resharedFrom?: boolean | Prisma.Post$resharedFromArgs<ExtArgs>
   reshares?: boolean | Prisma.Post$resharesArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
@@ -2439,6 +2671,7 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     media: Prisma.$PostMediaPayload<ExtArgs>[]
     comments: Prisma.$CommentPayload<ExtArgs>[]
     likes: Prisma.$PostLikePayload<ExtArgs>[]
+    tags: Prisma.$PostTagPayload<ExtArgs>[]
     resharedFrom: Prisma.$PostPayload<ExtArgs> | null
     reshares: Prisma.$PostPayload<ExtArgs>[]
   }
@@ -2874,6 +3107,7 @@ export interface Prisma__PostClient<T, Null = never, ExtArgs extends runtime.Typ
   media<T extends Prisma.Post$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostMediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   comments<T extends Prisma.Post$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   likes<T extends Prisma.Post$likesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$likesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostLikePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tags<T extends Prisma.Post$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   resharedFrom<T extends Prisma.Post$resharedFromArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$resharedFromArgs<ExtArgs>>): Prisma.Prisma__PostClient<runtime.Types.Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reshares<T extends Prisma.Post$resharesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$resharesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3409,6 +3643,30 @@ export type Post$likesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   take?: number
   skip?: number
   distinct?: Prisma.PostLikeScalarFieldEnum | Prisma.PostLikeScalarFieldEnum[]
+}
+
+/**
+ * Post.tags
+ */
+export type Post$tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PostTag
+   */
+  select?: Prisma.PostTagSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PostTag
+   */
+  omit?: Prisma.PostTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PostTagInclude<ExtArgs> | null
+  where?: Prisma.PostTagWhereInput
+  orderBy?: Prisma.PostTagOrderByWithRelationInput | Prisma.PostTagOrderByWithRelationInput[]
+  cursor?: Prisma.PostTagWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PostTagScalarFieldEnum | Prisma.PostTagScalarFieldEnum[]
 }
 
 /**

@@ -55,6 +55,7 @@ export type MessageMinAggregateOutputType = {
   createdAt: Date | null
   pollQuestion: string | null
   pollAllowMultiple: boolean | null
+  senderLabel: string | null
 }
 
 export type MessageMaxAggregateOutputType = {
@@ -78,6 +79,7 @@ export type MessageMaxAggregateOutputType = {
   createdAt: Date | null
   pollQuestion: string | null
   pollAllowMultiple: boolean | null
+  senderLabel: string | null
 }
 
 export type MessageCountAggregateOutputType = {
@@ -105,6 +107,7 @@ export type MessageCountAggregateOutputType = {
   createdAt: number
   pollQuestion: number
   pollAllowMultiple: number
+  senderLabel: number
   _all: number
 }
 
@@ -138,6 +141,7 @@ export type MessageMinAggregateInputType = {
   createdAt?: true
   pollQuestion?: true
   pollAllowMultiple?: true
+  senderLabel?: true
 }
 
 export type MessageMaxAggregateInputType = {
@@ -161,6 +165,7 @@ export type MessageMaxAggregateInputType = {
   createdAt?: true
   pollQuestion?: true
   pollAllowMultiple?: true
+  senderLabel?: true
 }
 
 export type MessageCountAggregateInputType = {
@@ -188,6 +193,7 @@ export type MessageCountAggregateInputType = {
   createdAt?: true
   pollQuestion?: true
   pollAllowMultiple?: true
+  senderLabel?: true
   _all?: true
 }
 
@@ -302,6 +308,7 @@ export type MessageGroupByOutputType = {
   createdAt: Date
   pollQuestion: string | null
   pollAllowMultiple: boolean
+  senderLabel: string | null
   _count: MessageCountAggregateOutputType | null
   _avg: MessageAvgAggregateOutputType | null
   _sum: MessageSumAggregateOutputType | null
@@ -352,6 +359,7 @@ export type MessageWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   pollQuestion?: Prisma.StringNullableFilter<"Message"> | string | null
   pollAllowMultiple?: Prisma.BoolFilter<"Message"> | boolean
+  senderLabel?: Prisma.StringNullableFilter<"Message"> | string | null
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   reactions?: Prisma.MessageReactionListRelationFilter
   pollOptions?: Prisma.MessagePollOptionListRelationFilter
@@ -382,6 +390,7 @@ export type MessageOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrderInput | Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
+  senderLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   conversation?: Prisma.ConversationOrderByWithRelationInput
   reactions?: Prisma.MessageReactionOrderByRelationAggregateInput
   pollOptions?: Prisma.MessagePollOptionOrderByRelationAggregateInput
@@ -416,6 +425,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   pollQuestion?: Prisma.StringNullableFilter<"Message"> | string | null
   pollAllowMultiple?: Prisma.BoolFilter<"Message"> | boolean
+  senderLabel?: Prisma.StringNullableFilter<"Message"> | string | null
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   reactions?: Prisma.MessageReactionListRelationFilter
   pollOptions?: Prisma.MessagePollOptionListRelationFilter
@@ -446,6 +456,7 @@ export type MessageOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrderInput | Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
+  senderLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
   _avg?: Prisma.MessageAvgOrderByAggregateInput
   _max?: Prisma.MessageMaxOrderByAggregateInput
@@ -481,6 +492,7 @@ export type MessageScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
   pollQuestion?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
   pollAllowMultiple?: Prisma.BoolWithAggregatesFilter<"Message"> | boolean
+  senderLabel?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
 }
 
 export type MessageCreateInput = {
@@ -507,6 +519,7 @@ export type MessageCreateInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   reactions?: Prisma.MessageReactionCreateNestedManyWithoutMessageInput
   pollOptions?: Prisma.MessagePollOptionCreateNestedManyWithoutMessageInput
@@ -537,6 +550,7 @@ export type MessageUncheckedCreateInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
   reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutMessageInput
   pollOptions?: Prisma.MessagePollOptionUncheckedCreateNestedManyWithoutMessageInput
 }
@@ -565,6 +579,7 @@ export type MessageUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   reactions?: Prisma.MessageReactionUpdateManyWithoutMessageNestedInput
   pollOptions?: Prisma.MessagePollOptionUpdateManyWithoutMessageNestedInput
@@ -595,6 +610,7 @@ export type MessageUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutMessageNestedInput
   pollOptions?: Prisma.MessagePollOptionUncheckedUpdateManyWithoutMessageNestedInput
 }
@@ -624,6 +640,7 @@ export type MessageCreateManyInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
 }
 
 export type MessageUpdateManyMutationInput = {
@@ -650,6 +667,7 @@ export type MessageUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type MessageUncheckedUpdateManyInput = {
@@ -677,6 +695,7 @@ export type MessageUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type MessageListRelationFilter = {
@@ -720,6 +739,7 @@ export type MessageCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
+  senderLabel?: Prisma.SortOrder
 }
 
 export type MessageAvgOrderByAggregateInput = {
@@ -747,6 +767,7 @@ export type MessageMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
+  senderLabel?: Prisma.SortOrder
 }
 
 export type MessageMinOrderByAggregateInput = {
@@ -770,6 +791,7 @@ export type MessageMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
+  senderLabel?: Prisma.SortOrder
 }
 
 export type MessageSumOrderByAggregateInput = {
@@ -883,6 +905,7 @@ export type MessageCreateWithoutConversationInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
   reactions?: Prisma.MessageReactionCreateNestedManyWithoutMessageInput
   pollOptions?: Prisma.MessagePollOptionCreateNestedManyWithoutMessageInput
 }
@@ -911,6 +934,7 @@ export type MessageUncheckedCreateWithoutConversationInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
   reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutMessageInput
   pollOptions?: Prisma.MessagePollOptionUncheckedCreateNestedManyWithoutMessageInput
 }
@@ -969,6 +993,7 @@ export type MessageScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   pollQuestion?: Prisma.StringNullableFilter<"Message"> | string | null
   pollAllowMultiple?: Prisma.BoolFilter<"Message"> | boolean
+  senderLabel?: Prisma.StringNullableFilter<"Message"> | string | null
 }
 
 export type MessageCreateWithoutReactionsInput = {
@@ -995,6 +1020,7 @@ export type MessageCreateWithoutReactionsInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   pollOptions?: Prisma.MessagePollOptionCreateNestedManyWithoutMessageInput
 }
@@ -1024,6 +1050,7 @@ export type MessageUncheckedCreateWithoutReactionsInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
   pollOptions?: Prisma.MessagePollOptionUncheckedCreateNestedManyWithoutMessageInput
 }
 
@@ -1067,6 +1094,7 @@ export type MessageUpdateWithoutReactionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   pollOptions?: Prisma.MessagePollOptionUpdateManyWithoutMessageNestedInput
 }
@@ -1096,6 +1124,7 @@ export type MessageUncheckedUpdateWithoutReactionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollOptions?: Prisma.MessagePollOptionUncheckedUpdateManyWithoutMessageNestedInput
 }
 
@@ -1123,6 +1152,7 @@ export type MessageCreateWithoutPollOptionsInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   reactions?: Prisma.MessageReactionCreateNestedManyWithoutMessageInput
 }
@@ -1152,6 +1182,7 @@ export type MessageUncheckedCreateWithoutPollOptionsInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
   reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutMessageInput
 }
 
@@ -1195,6 +1226,7 @@ export type MessageUpdateWithoutPollOptionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   reactions?: Prisma.MessageReactionUpdateManyWithoutMessageNestedInput
 }
@@ -1224,6 +1256,7 @@ export type MessageUncheckedUpdateWithoutPollOptionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutMessageNestedInput
 }
 
@@ -1251,6 +1284,7 @@ export type MessageCreateManyConversationInput = {
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
+  senderLabel?: string | null
 }
 
 export type MessageUpdateWithoutConversationInput = {
@@ -1277,6 +1311,7 @@ export type MessageUpdateWithoutConversationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reactions?: Prisma.MessageReactionUpdateManyWithoutMessageNestedInput
   pollOptions?: Prisma.MessagePollOptionUpdateManyWithoutMessageNestedInput
 }
@@ -1305,6 +1340,7 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutMessageNestedInput
   pollOptions?: Prisma.MessagePollOptionUncheckedUpdateManyWithoutMessageNestedInput
 }
@@ -1333,6 +1369,7 @@ export type MessageUncheckedUpdateManyWithoutConversationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1400,6 +1437,7 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdAt?: boolean
   pollQuestion?: boolean
   pollAllowMultiple?: boolean
+  senderLabel?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   reactions?: boolean | Prisma.Message$reactionsArgs<ExtArgs>
   pollOptions?: boolean | Prisma.Message$pollOptionsArgs<ExtArgs>
@@ -1431,6 +1469,7 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdAt?: boolean
   pollQuestion?: boolean
   pollAllowMultiple?: boolean
+  senderLabel?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
@@ -1459,6 +1498,7 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdAt?: boolean
   pollQuestion?: boolean
   pollAllowMultiple?: boolean
+  senderLabel?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
@@ -1487,9 +1527,10 @@ export type MessageSelectScalar = {
   createdAt?: boolean
   pollQuestion?: boolean
   pollAllowMultiple?: boolean
+  senderLabel?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "kind" | "clientMessageId" | "ciphertext" | "deviceId" | "protocol" | "mediaId" | "mediaType" | "mediaUrl" | "mediaStatus" | "mediaDurationSeconds" | "linkPreviewEnvelope" | "sharedContent" | "location" | "document" | "mentions" | "expiresAt" | "mediaExpiresAt" | "mediaPurgedAt" | "createdAt" | "pollQuestion" | "pollAllowMultiple", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "kind" | "clientMessageId" | "ciphertext" | "deviceId" | "protocol" | "mediaId" | "mediaType" | "mediaUrl" | "mediaStatus" | "mediaDurationSeconds" | "linkPreviewEnvelope" | "sharedContent" | "location" | "document" | "mentions" | "expiresAt" | "mediaExpiresAt" | "mediaPurgedAt" | "createdAt" | "pollQuestion" | "pollAllowMultiple" | "senderLabel", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   reactions?: boolean | Prisma.Message$reactionsArgs<ExtArgs>
@@ -1535,6 +1576,7 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdAt: Date
     pollQuestion: string | null
     pollAllowMultiple: boolean
+    senderLabel: string | null
   }, ExtArgs["result"]["message"]>
   composites: {}
 }
@@ -1985,6 +2027,7 @@ export interface MessageFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly pollQuestion: Prisma.FieldRef<"Message", 'String'>
   readonly pollAllowMultiple: Prisma.FieldRef<"Message", 'Boolean'>
+  readonly senderLabel: Prisma.FieldRef<"Message", 'String'>
 }
     
 

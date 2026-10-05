@@ -42,6 +42,8 @@ export type ConversationMinAggregateOutputType = {
   photoMediaId: string | null
   createdById: string | null
   storeId: string | null
+  orderId: string | null
+  orderNumber: string | null
   disappearingMessagesSeconds: number | null
   onlyAdminsCanMentionAll: boolean | null
   lastMessageKind: $Enums.MessageKind | null
@@ -57,6 +59,8 @@ export type ConversationMaxAggregateOutputType = {
   photoMediaId: string | null
   createdById: string | null
   storeId: string | null
+  orderId: string | null
+  orderNumber: string | null
   disappearingMessagesSeconds: number | null
   onlyAdminsCanMentionAll: boolean | null
   lastMessageKind: $Enums.MessageKind | null
@@ -72,6 +76,8 @@ export type ConversationCountAggregateOutputType = {
   photoMediaId: number
   createdById: number
   storeId: number
+  orderId: number
+  orderNumber: number
   disappearingMessagesSeconds: number
   onlyAdminsCanMentionAll: number
   lastMessageKind: number
@@ -97,6 +103,8 @@ export type ConversationMinAggregateInputType = {
   photoMediaId?: true
   createdById?: true
   storeId?: true
+  orderId?: true
+  orderNumber?: true
   disappearingMessagesSeconds?: true
   onlyAdminsCanMentionAll?: true
   lastMessageKind?: true
@@ -112,6 +120,8 @@ export type ConversationMaxAggregateInputType = {
   photoMediaId?: true
   createdById?: true
   storeId?: true
+  orderId?: true
+  orderNumber?: true
   disappearingMessagesSeconds?: true
   onlyAdminsCanMentionAll?: true
   lastMessageKind?: true
@@ -127,6 +137,8 @@ export type ConversationCountAggregateInputType = {
   photoMediaId?: true
   createdById?: true
   storeId?: true
+  orderId?: true
+  orderNumber?: true
   disappearingMessagesSeconds?: true
   onlyAdminsCanMentionAll?: true
   lastMessageKind?: true
@@ -229,6 +241,8 @@ export type ConversationGroupByOutputType = {
   photoMediaId: string | null
   createdById: string
   storeId: string | null
+  orderId: string | null
+  orderNumber: string | null
   disappearingMessagesSeconds: number | null
   onlyAdminsCanMentionAll: boolean
   lastMessageKind: $Enums.MessageKind | null
@@ -267,6 +281,8 @@ export type ConversationWhereInput = {
   photoMediaId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   createdById?: Prisma.UuidFilter<"Conversation"> | string
   storeId?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  orderId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
+  orderNumber?: Prisma.StringNullableFilter<"Conversation"> | string | null
   disappearingMessagesSeconds?: Prisma.IntNullableFilter<"Conversation"> | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFilter<"Conversation"> | boolean
   lastMessageKind?: Prisma.EnumMessageKindNullableFilter<"Conversation"> | $Enums.MessageKind | null
@@ -285,6 +301,8 @@ export type ConversationOrderByWithRelationInput = {
   photoMediaId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  orderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  orderNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   disappearingMessagesSeconds?: Prisma.SortOrderInput | Prisma.SortOrder
   onlyAdminsCanMentionAll?: Prisma.SortOrder
   lastMessageKind?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -306,6 +324,8 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   photoMediaId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   createdById?: Prisma.UuidFilter<"Conversation"> | string
   storeId?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  orderId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
+  orderNumber?: Prisma.StringNullableFilter<"Conversation"> | string | null
   disappearingMessagesSeconds?: Prisma.IntNullableFilter<"Conversation"> | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFilter<"Conversation"> | boolean
   lastMessageKind?: Prisma.EnumMessageKindNullableFilter<"Conversation"> | $Enums.MessageKind | null
@@ -324,6 +344,8 @@ export type ConversationOrderByWithAggregationInput = {
   photoMediaId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  orderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  orderNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   disappearingMessagesSeconds?: Prisma.SortOrderInput | Prisma.SortOrder
   onlyAdminsCanMentionAll?: Prisma.SortOrder
   lastMessageKind?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -347,6 +369,8 @@ export type ConversationScalarWhereWithAggregatesInput = {
   photoMediaId?: Prisma.UuidNullableWithAggregatesFilter<"Conversation"> | string | null
   createdById?: Prisma.UuidWithAggregatesFilter<"Conversation"> | string
   storeId?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
+  orderId?: Prisma.UuidNullableWithAggregatesFilter<"Conversation"> | string | null
+  orderNumber?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   disappearingMessagesSeconds?: Prisma.IntNullableWithAggregatesFilter<"Conversation"> | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolWithAggregatesFilter<"Conversation"> | boolean
   lastMessageKind?: Prisma.EnumMessageKindNullableWithAggregatesFilter<"Conversation"> | $Enums.MessageKind | null
@@ -362,6 +386,8 @@ export type ConversationCreateInput = {
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
+  orderId?: string | null
+  orderNumber?: string | null
   disappearingMessagesSeconds?: number | null
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: $Enums.MessageKind | null
@@ -380,6 +406,8 @@ export type ConversationUncheckedCreateInput = {
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
+  orderId?: string | null
+  orderNumber?: string | null
   disappearingMessagesSeconds?: number | null
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: $Enums.MessageKind | null
@@ -398,6 +426,8 @@ export type ConversationUpdateInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -416,6 +446,8 @@ export type ConversationUncheckedUpdateInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -434,6 +466,8 @@ export type ConversationCreateManyInput = {
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
+  orderId?: string | null
+  orderNumber?: string | null
   disappearingMessagesSeconds?: number | null
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: $Enums.MessageKind | null
@@ -449,6 +483,8 @@ export type ConversationUpdateManyMutationInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -464,6 +500,8 @@ export type ConversationUncheckedUpdateManyInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -479,6 +517,8 @@ export type ConversationCountOrderByAggregateInput = {
   photoMediaId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
+  orderNumber?: Prisma.SortOrder
   disappearingMessagesSeconds?: Prisma.SortOrder
   onlyAdminsCanMentionAll?: Prisma.SortOrder
   lastMessageKind?: Prisma.SortOrder
@@ -498,6 +538,8 @@ export type ConversationMaxOrderByAggregateInput = {
   photoMediaId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
+  orderNumber?: Prisma.SortOrder
   disappearingMessagesSeconds?: Prisma.SortOrder
   onlyAdminsCanMentionAll?: Prisma.SortOrder
   lastMessageKind?: Prisma.SortOrder
@@ -513,6 +555,8 @@ export type ConversationMinOrderByAggregateInput = {
   photoMediaId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
+  orderNumber?: Prisma.SortOrder
   disappearingMessagesSeconds?: Prisma.SortOrder
   onlyAdminsCanMentionAll?: Prisma.SortOrder
   lastMessageKind?: Prisma.SortOrder
@@ -611,6 +655,8 @@ export type ConversationCreateWithoutMembersInput = {
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
+  orderId?: string | null
+  orderNumber?: string | null
   disappearingMessagesSeconds?: number | null
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: $Enums.MessageKind | null
@@ -628,6 +674,8 @@ export type ConversationUncheckedCreateWithoutMembersInput = {
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
+  orderId?: string | null
+  orderNumber?: string | null
   disappearingMessagesSeconds?: number | null
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: $Enums.MessageKind | null
@@ -661,6 +709,8 @@ export type ConversationUpdateWithoutMembersInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -678,6 +728,8 @@ export type ConversationUncheckedUpdateWithoutMembersInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -695,6 +747,8 @@ export type ConversationCreateWithoutMessagesInput = {
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
+  orderId?: string | null
+  orderNumber?: string | null
   disappearingMessagesSeconds?: number | null
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: $Enums.MessageKind | null
@@ -712,6 +766,8 @@ export type ConversationUncheckedCreateWithoutMessagesInput = {
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
+  orderId?: string | null
+  orderNumber?: string | null
   disappearingMessagesSeconds?: number | null
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: $Enums.MessageKind | null
@@ -745,6 +801,8 @@ export type ConversationUpdateWithoutMessagesInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -762,6 +820,8 @@ export type ConversationUncheckedUpdateWithoutMessagesInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -779,6 +839,8 @@ export type ConversationCreateWithoutStreakInput = {
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
+  orderId?: string | null
+  orderNumber?: string | null
   disappearingMessagesSeconds?: number | null
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: $Enums.MessageKind | null
@@ -796,6 +858,8 @@ export type ConversationUncheckedCreateWithoutStreakInput = {
   photoMediaId?: string | null
   createdById: string
   storeId?: string | null
+  orderId?: string | null
+  orderNumber?: string | null
   disappearingMessagesSeconds?: number | null
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: $Enums.MessageKind | null
@@ -829,6 +893,8 @@ export type ConversationUpdateWithoutStreakInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -846,6 +912,8 @@ export type ConversationUncheckedUpdateWithoutStreakInput = {
   photoMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   disappearingMessagesSeconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   onlyAdminsCanMentionAll?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastMessageKind?: Prisma.NullableEnumMessageKindFieldUpdateOperationsInput | $Enums.MessageKind | null
@@ -903,6 +971,8 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   photoMediaId?: boolean
   createdById?: boolean
   storeId?: boolean
+  orderId?: boolean
+  orderNumber?: boolean
   disappearingMessagesSeconds?: boolean
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: boolean
@@ -922,6 +992,8 @@ export type ConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   photoMediaId?: boolean
   createdById?: boolean
   storeId?: boolean
+  orderId?: boolean
+  orderNumber?: boolean
   disappearingMessagesSeconds?: boolean
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: boolean
@@ -937,6 +1009,8 @@ export type ConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   photoMediaId?: boolean
   createdById?: boolean
   storeId?: boolean
+  orderId?: boolean
+  orderNumber?: boolean
   disappearingMessagesSeconds?: boolean
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: boolean
@@ -952,6 +1026,8 @@ export type ConversationSelectScalar = {
   photoMediaId?: boolean
   createdById?: boolean
   storeId?: boolean
+  orderId?: boolean
+  orderNumber?: boolean
   disappearingMessagesSeconds?: boolean
   onlyAdminsCanMentionAll?: boolean
   lastMessageKind?: boolean
@@ -959,7 +1035,7 @@ export type ConversationSelectScalar = {
   createdAt?: boolean
 }
 
-export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "kind" | "directKey" | "title" | "photoMediaId" | "createdById" | "storeId" | "disappearingMessagesSeconds" | "onlyAdminsCanMentionAll" | "lastMessageKind" | "lastMessageAt" | "createdAt", ExtArgs["result"]["conversation"]>
+export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "kind" | "directKey" | "title" | "photoMediaId" | "createdById" | "storeId" | "orderId" | "orderNumber" | "disappearingMessagesSeconds" | "onlyAdminsCanMentionAll" | "lastMessageKind" | "lastMessageAt" | "createdAt", ExtArgs["result"]["conversation"]>
 export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.Conversation$membersArgs<ExtArgs>
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
@@ -984,6 +1060,8 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     photoMediaId: string | null
     createdById: string
     storeId: string | null
+    orderId: string | null
+    orderNumber: string | null
     disappearingMessagesSeconds: number | null
     onlyAdminsCanMentionAll: boolean
     lastMessageKind: $Enums.MessageKind | null
@@ -1422,6 +1500,8 @@ export interface ConversationFieldRefs {
   readonly photoMediaId: Prisma.FieldRef<"Conversation", 'String'>
   readonly createdById: Prisma.FieldRef<"Conversation", 'String'>
   readonly storeId: Prisma.FieldRef<"Conversation", 'String'>
+  readonly orderId: Prisma.FieldRef<"Conversation", 'String'>
+  readonly orderNumber: Prisma.FieldRef<"Conversation", 'String'>
   readonly disappearingMessagesSeconds: Prisma.FieldRef<"Conversation", 'Int'>
   readonly onlyAdminsCanMentionAll: Prisma.FieldRef<"Conversation", 'Boolean'>
   readonly lastMessageKind: Prisma.FieldRef<"Conversation", 'MessageKind'>
