@@ -52,24 +52,24 @@ Every mutation writes one append-only audit entry in the same transaction as the
 
 ### Sessions and security expectations
 - Access token 10 min; refresh token rotates on every use, is stored hashed, and **reuse of a used refresh token revokes the whole session** (`401 REFRESH_TOKEN_REUSED`). Absolute session lifetime 12 h.
-- Password + mandatory MFA. 5 failed passwords lock the account for 15 min (`423 ACCOUNT_LOCKED` with `lockedUntil`). 5 wrong MFA codes invalidate the `mfaToken`.
+- Password + mandatory MFA. 5 failed passwords lock the account for 15 min (`423 ACCOUNT_LOCKED` with `lockedUntil`). 5 wrong MFA codes invalidate the `challengeToken`.
 - Optional IP allow-list (`ADMIN_IP_ALLOWLIST`): the API returns `403 IP_NOT_ALLOWED` for other addresses.
 - Login, MFA and step-up endpoints have their own strict rate limits (429).
 ## Authentication & MFA
 
-All auth endpoints are called by the console server only. `mfaToken` is a single-use, 5-minute token that proves the password step passed; it grants nothing else.
+All auth endpoints are called by the console server only. `challengeToken` is a single-use, short-lived token that proves the password step passed; it grants nothing else. The console keeps it in a signed cookie (still named `mfaToken` there). Request bodies are decoded strictly: unknown fields are rejected with `400`.
 
 | Method & path | Auth | Body | Success |
 |---|---|---|---|
-| `POST /api/v1/admin/auth/login` | none | `{ email, password }` | `200 { mfaToken, enrollmentRequired, passkeyAvailable }` |
-| `POST /api/v1/admin/auth/mfa/totp/enroll` | none (`mfaToken`) | `{ mfaToken }` | `200 { secret, otpauthUri, issuer, accountName }` — only when `enrollmentRequired` |
-| `POST /api/v1/admin/auth/mfa/totp/confirm` | none (`mfaToken`) | `{ mfaToken, code }` | `200 { accessToken, refreshToken, expiresIn, tokenType, admin, recoveryCodes: string[8] }` |
-| `POST /api/v1/admin/auth/mfa/verify` | none (`mfaToken`) | `{ mfaToken, method: "totp"\|"recovery"\|"webauthn", code?, credential? }` | `200 { accessToken, refreshToken, expiresIn, tokenType, admin }` |
-| `POST /api/v1/admin/auth/mfa/webauthn/options` | none (`mfaToken`) | `{ mfaToken }` | `200 PublicKeyCredentialRequestOptions` (base64url `challenge`, `allowCredentials[].id`) |
-| `POST /api/v1/admin/auth/refresh` | none | `{ refreshToken }` | `200 { accessToken, refreshToken, expiresIn, tokenType }` (rotates) |
-| `GET /api/v1/admin/auth/me` | bearer | — | `200 { id, email, name, role, permissions[] }` |
-| `POST /api/v1/admin/auth/step-up` | bearer | `{ method: "totp"\|"webauthn", code?, credential? }` | `200 { stepUpToken, expiresIn: 300 }` |
-| `POST /api/v1/admin/auth/step-up/webauthn/options` | bearer | — | `200 PublicKeyCredentialRequestOptions` |
+| `POST /api/v1/admin/auth/login` | none | `{ email, password }` | `200 { status: "mfa_required"\|"mfa_enrollment_required", challengeToken, expiresIn }` |
+| `POST /api/v1/admin/auth/mfa/enroll/start` | none (`challengeToken`) | `{ challengeToken }` | `200 { secret, otpauthUri }`, only when `status` was `mfa_enrollment_required` |
+| `POST /api/v1/admin/auth/mfa/enroll/confirm` | none (`challengeToken`) | `{ challengeToken, code }` | `200 { accessToken, refreshToken, expiresIn, tokenType, staff }` |
+| `POST /api/v1/admin/auth/mfa/verify` | none (`challengeToken`) | `{ challengeToken, code }` (6-digit TOTP) | `200 { accessToken, refreshToken, expiresIn, tokenType, staff }` |
+| `POST /api/v1/admin/auth/refresh` | none | `{ refreshToken }` | `200 { accessToken, refreshToken, expiresIn, tokenType, staff }` (rotates) |
+| `GET /api/v1/admin/auth/me` | bearer | — | `200 { id, email, name, role, permissions[], ... }` |
+| `POST /api/v1/admin/auth/step-up` | bearer | `{ code }` | `200 { stepUpToken, expiresIn }` |
+
+Not built in the backend yet (the console keeps the UI, calls fail with the backend's 400/404): recovery codes (`method: "recovery"`), passkeys (`/mfa/webauthn/options`, `/step-up/webauthn/options`, `method: "webauthn"`), and `recoveryCodes` on enrolment.
 | `POST /api/v1/admin/auth/logout` | none | `{ refreshToken }` | `204` — revokes the session and all its tokens |
 
 `admin` = `{ id, email, name, role, permissions[] }`.
