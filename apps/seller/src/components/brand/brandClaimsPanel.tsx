@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useBrandWorkspace } from "@/components/brand/brandWorkspace";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
-import { Callout } from "@/components/ui/feedback";
+import { ErrorCallout } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
@@ -38,7 +38,7 @@ export function BrandClaimsPanel({ canWithdraw, onChanged }: { readonly canWithd
 
   return (
     <Panel title="Your claims" padded={false}>
-      {claims.errorMessage ? <div style={{ padding: 12 }}><Callout tone="error">{claims.errorMessage}</Callout></div> : null}
+      {claims.errorMessage ? <div style={{ padding: 12 }}><ErrorCallout message={claims.errorMessage} onRetry={claims.reload} /></div> : null}
       <DataTable
         caption="Brand claims"
         rows={claims.items}

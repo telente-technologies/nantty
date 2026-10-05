@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useBrandWorkspace } from "@/components/brand/brandWorkspace";
 import { Button } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
@@ -45,7 +45,7 @@ export function BrandOfficialStoreView() {
   }
 
   if (detailsQuery.isLoading && !details) return <LoadingBlock label="Checking Official Store status" />;
-  if (!details) return <Callout tone="error">{detailsQuery.errorMessage ?? "Official Store status could not be loaded."}</Callout>;
+  if (!details) return <ErrorCallout message={detailsQuery.errorMessage ?? "Official Store status could not be loaded."} onRetry={detailsQuery.reload} />;
   const status = officialStoreLabels[details.officialStore.status];
   const officialStoreName = myStores.find((store) => store.storeId === (details.officialStore.storeId ?? details.candidateStoreId))?.storeName;
 

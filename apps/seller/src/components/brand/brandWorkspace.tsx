@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { ButtonLink } from "@/components/ui/button";
-import { Callout, EmptyState, LoadingBlock } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { SelectField } from "@/components/ui/formFields";
 import { LinkTabs } from "@/components/ui/navigationTabs";
 import { PageHeader, PageStack } from "@/components/ui/panel";
@@ -81,7 +81,7 @@ export function BrandWorkspace({ children }: { readonly children: ReactNode }) {
   }, [brand, myStores, sessionView?.user.id, can, brandQuery]);
 
   if (brandsQuery.isLoading) return <LoadingBlock label="Loading your brands" />;
-  if (brandsQuery.errorMessage) return <Callout tone="error">{brandsQuery.errorMessage}</Callout>;
+  if (brandsQuery.errorMessage) return <ErrorCallout message={brandsQuery.errorMessage} onRetry={brandsQuery.reload} />;
   if (brands.length === 0) {
     return (
       <PageStack>
@@ -117,7 +117,7 @@ export function BrandWorkspace({ children }: { readonly children: ReactNode }) {
           { href: "/brand/protection", label: "Protection" },
         ]}
       />
-      {brandQuery.errorMessage ? <Callout tone="error">{brandQuery.errorMessage}</Callout> : null}
+      {brandQuery.errorMessage ? <ErrorCallout message={brandQuery.errorMessage} onRetry={brandQuery.reload} /> : null}
       {contextValue ? <BrandWorkspaceContext.Provider value={contextValue}>{children}</BrandWorkspaceContext.Provider> : <LoadingBlock label="Loading brand" />}
     </PageStack>
   );

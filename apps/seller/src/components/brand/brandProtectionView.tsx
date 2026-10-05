@@ -7,7 +7,7 @@ import { BrandClaimsPanel } from "@/components/brand/brandClaimsPanel";
 import { useBrandWorkspace } from "@/components/brand/brandWorkspace";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
-import { Callout, EmptyState } from "@/components/ui/feedback";
+import { Callout, EmptyState, ErrorCallout } from "@/components/ui/feedback";
 import { FilterBar, SearchInput } from "@/components/ui/filterControls";
 import { SegmentedControl } from "@/components/ui/navigationTabs";
 import { Panel, PageStack } from "@/components/ui/panel";
@@ -55,7 +55,7 @@ function ProtectedListingsPanel() {
             <SegmentedControl label="Risk" value={riskFilter} onValueChange={setRiskFilter} options={[{ value: "all", label: "All" }, { value: "high", label: "High risk" }, { value: "medium", label: "Medium" }, { value: "low", label: "Low" }]} />
           </FilterBar>
         </div>
-        {listings.errorMessage ? <div style={{ padding: 12 }}><Callout tone="error">{listings.errorMessage}</Callout></div> : null}
+        {listings.errorMessage ? <div style={{ padding: 12 }}><ErrorCallout message={listings.errorMessage} onRetry={listings.reload} /></div> : null}
         <DataTable
           caption="Listings by other sellers tagging your brand"
           rows={listings.items}

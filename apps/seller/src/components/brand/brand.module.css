@@ -44,7 +44,7 @@
 .imageActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
   justify-content: flex-end;
   margin-top: 10px;
 }
@@ -52,7 +52,7 @@
 .twoColumns {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: 16px;
+  gap: var(--space-4);
   align-items: start;
 }
 
@@ -65,7 +65,7 @@
 .actionsRow {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .checklist {
@@ -75,8 +75,8 @@
 
 .checkItem {
   display: flex;
-  gap: 12px;
-  padding: 12px 0;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
   border-bottom: 1px solid var(--divider-soft);
 }
 
@@ -107,7 +107,7 @@
 
 .muted {
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .listingCell {
@@ -128,14 +128,14 @@
 
 .riskReasons {
   margin-top: 2px;
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-faint);
 }
 
 .lockedState {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 @media (max-width: 1000px) {
