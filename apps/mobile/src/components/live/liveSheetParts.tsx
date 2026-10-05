@@ -21,7 +21,7 @@ export function LiveSheetActionButton({ label, onPress, tone = "neutral", disabl
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      hitSlop={4}
+      hitSlop={6}
       style={({ pressed }) => [styles.action, tone === "primary" ? styles.actionPrimary : tone === "danger" ? styles.actionDanger : null, disabled ? styles.actionDisabled : null, pressed ? styles.pressed : null]}
     >
       <Text size={12} weight={600} lineHeight={16} color={ink}>

@@ -11,7 +11,7 @@ const RANK_RING_COLORS = ["#FFC233", "#C9D1DC", "#D9893D"] as const;
 export function LiveTopGiftersChip({ liveId, onPress }: { liveId: string; onPress: () => void }) {
   const topGifters = (useLiveGiftLeaderboard(liveId, true).data?.data ?? []).slice(0, 3);
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Top supporters ranking" onPress={onPress} style={styles.chip} hitSlop={6}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Top supporters ranking" onPress={onPress} style={styles.chip} hitSlop={8}>
       <View style={styles.avatars}>
         {topGifters.map((gifter, index) => (
           <Avatar key={gifter.user.id} uri={gifter.user.avatarUrl} size={22} style={[styles.avatar, { borderColor: RANK_RING_COLORS[index], marginLeft: index === 0 ? 0 : -7 }]} />

@@ -7,6 +7,7 @@ import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
+import { palette } from "@/constants/colors.constant";
 import { useTheme } from "@/theme";
 import type { LiveComment } from "@/types";
 
@@ -76,11 +77,11 @@ export interface LiveCommentsFeedProps {
 export function LiveCommentsFeed({ comments, isShownOverVideo }: LiveCommentsFeedProps) {
   const scrollViewRef = useRef<ScrollView>(null);
   const foreground = useLiveForeground(isShownOverVideo);
-  const { isDark } = useTheme();
+  const { colors } = useTheme();
   const reduceMotion = useReducedMotionPreference();
   const visibleComments = comments.slice(-VISIBLE_COMMENT_COUNT);
   const fadeStartsAt = visibleComments.length > 5 ? 0 : FADED_ROW_OPACITIES.length;
-  const mentionInk = isShownOverVideo ? "#C9D2FF" : isDark ? "#8FA1FA" : "#2043F5";
+  const mentionInk = isShownOverVideo ? palette.primary[100] : colors.link;
   return (
     <ScrollView
       ref={scrollViewRef}

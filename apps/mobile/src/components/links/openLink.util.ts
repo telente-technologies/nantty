@@ -1,6 +1,6 @@
 import * as WebBrowser from "expo-web-browser";
 
-import { assessLinkRisk, buildInternalRoute, readFullDomain, readInternalReferenceFromUrl } from "@/components/chat/chatLinks.util";
+import { assessLinkRisk, buildInternalRoute, isWebUrl, readFullDomain, readInternalReferenceFromUrl } from "@/components/chat/chatLinks.util";
 import { rootNavigationRef } from "@/navigation/navigationRef";
 import { showDialog } from "@/store/dialog.store";
 import type { ThemeColors } from "@/theme/themeColors.constant";
@@ -13,6 +13,7 @@ export interface InAppBrowserColors {
 export const inAppBrowserColorsFromTheme = (colors: ThemeColors): InAppBrowserColors => ({ toolbar: colors.surface, controls: colors.link });
 
 export async function openInAppBrowser(url: string, colors?: InAppBrowserColors) {
+  if (!isWebUrl(url)) return;
   await WebBrowser.openBrowserAsync(url, {
     presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
     toolbarColor: colors?.toolbar,
