@@ -2,6 +2,7 @@ import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient, SendMessageComm
 
 import type { Logger } from "@zudojs/logger";
 
+import type { PublishableDomainEvent } from "../interfaces/domainEventPublisher.interface.js";
 import type { JobQueue, MessageBroker, QueueConsumer, QueueMessage, QueueReader } from "../interfaces/jobQueue.interface.js";
 import { QueueConsumerJob } from "../jobs/queueConsumer.job.js";
 
@@ -31,6 +32,10 @@ export class SqsMessageBroker implements MessageBroker {
 
   public send(queueUrl: string, body: unknown, delaySeconds = 0): Promise<void> {
     return this.client.send(queueUrl, body, delaySeconds);
+  }
+
+  public async publishDomainEvents(events: readonly PublishableDomainEvent[]): Promise<void> {
+    if (events.length > 0) this.logger.warn("EVENT_BUS=sqs has no domain event exchange: outbox events are marked published without being sent", { count: events.length });
   }
 
   public createConsumer(name: string, queueUrl: string, handleMessageBody: (body: string) => Promise<void>): QueueConsumer {

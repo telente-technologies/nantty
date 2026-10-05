@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import type { Logger } from "@zudojs/logger";
 
-import { jobsExchange, retryExchange } from "../constants/rabbitMq.constant.js";
+import { domainEventsExchange, jobsExchange, retryExchange } from "../constants/rabbitMq.constant.js";
+import type { PublishableDomainEvent } from "../interfaces/domainEventPublisher.interface.js";
 import type { MessageBroker, QueueConsumer } from "../interfaces/jobQueue.interface.js";
 import { delayTierAtMost, retryQueueName } from "../utils/retryTier.util.js";
 import { publishConfirmed, type AmqpChannel, type RabbitMqConnection } from "./rabbitMqConnection.integration.js";
@@ -20,6 +21,21 @@ export class RabbitMqMessageBroker implements MessageBroker {
     const channel = await this.channelForPublishing();
     try {
       await publishConfirmed(channel, exchange, routingKey, Buffer.from(JSON.stringify(body)), { messageId: randomUUID(), type, contentType: "application/json", timestamp: Math.floor(Date.now() / 1000) });
+    } catch (error) {
+      this.publishChannel = undefined;
+      await channel.close().catch(() => undefined);
+      throw error;
+    }
+  }
+
+  public async publishDomainEvents(events: readonly PublishableDomainEvent[]): Promise<void> {
+    if (events.length === 0) return;
+    const channel = await this.channelForPublishing();
+    try {
+      await Promise.all(events.map((event) => publishConfirmed(channel, domainEventsExchange, event.eventType, Buffer.from(JSON.stringify(event.payload)), {
+        messageId: event.id, correlationId: event.id, type: event.eventType, contentType: "application/json", timestamp: Math.floor(Date.now() / 1000),
+        headers: { "x-zudomart-subject": event.subject, "x-zudomart-schema": "envelope.v1" },
+      })));
     } catch (error) {
       this.publishChannel = undefined;
       await channel.close().catch(() => undefined);
