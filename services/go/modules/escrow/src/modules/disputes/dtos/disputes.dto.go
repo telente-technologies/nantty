@@ -18,9 +18,11 @@ type DisputeMessageRequestDto struct {
 }
 
 type ResolveDisputeRequestDto struct {
-	Outcome           string `json:"outcome"`
-	Note              string `json:"note"`
-	RefundAmountMinor int64  `json:"refundAmountMinor,omitempty"`
+	Outcome           string               `json:"outcome"`
+	Note              string               `json:"note,omitempty"`
+	Reason            string               `json:"reason,omitempty"`
+	RefundAmountMinor int64                `json:"refundAmountMinor,omitempty"`
+	RefundAmount      *escrowdtos.MoneyDto `json:"refundAmount,omitempty"`
 }
 
 type DisputeMessageDto struct {

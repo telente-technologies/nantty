@@ -10,6 +10,7 @@ import (
 	opendispute "zudomart/modules/escrow/src/modules/disputes/commands/openDispute"
 	postdisputemessage "zudomart/modules/escrow/src/modules/disputes/commands/postDisputeMessage"
 	resolvedispute "zudomart/modules/escrow/src/modules/disputes/commands/resolveDispute"
+	"zudomart/modules/escrow/src/modules/disputes/dtos"
 	getdispute "zudomart/modules/escrow/src/modules/disputes/queries/getDispute"
 	listdisputes "zudomart/modules/escrow/src/modules/disputes/queries/listDisputes"
 	"zudomart/modules/escrow/src/modules/disputes/services"
@@ -138,13 +139,17 @@ func (controller DisputesController) ResolveDispute(writer http.ResponseWriter, 
 		controller.fail(writer, request, err)
 		return
 	}
-	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, validators.ValidateResolveDisputeRequest)
-	if err != nil {
+	var decision validators.ResolveDisputeDecision
+	if _, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.ResolveDisputeRequestDto) error {
+		normalized, err := validators.NormalizeResolveDisputeRequest(body)
+		decision = normalized
+		return err
+	}); err != nil {
 		controller.fail(writer, request, err)
 		return
 	}
 	view, replayed, err := resolvedispute.Handler{Application: controller.Application}.Execute(request.Context(), resolvedispute.Command{IdempotencyKey: key, Input: services.ResolveDisputeInput{
-		DisputeId: disputeId, StaffId: staffMember.Id, Outcome: body.Outcome, RefundMinor: body.RefundAmountMinor, Note: strings.TrimSpace(body.Note),
+		DisputeId: disputeId, StaffId: staffMember.Id, Outcome: decision.Outcome, RefundMinor: decision.RefundMinor, RefundCurrency: decision.RefundCurrency, Note: decision.Note,
 	}})
 	if err != nil {
 		controller.fail(writer, request, err)
