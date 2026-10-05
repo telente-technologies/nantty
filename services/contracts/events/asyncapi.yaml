@@ -90,6 +90,8 @@ channels:
         $ref: '#/components/messages/postCreated'
       mentionCreated:
         $ref: '#/components/messages/mentionCreated'
+      postTagged:
+        $ref: '#/components/messages/postTagged'
       commentCreated:
         $ref: '#/components/messages/commentCreated'
       videoReplyCreated:
@@ -1606,6 +1608,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/mention.created.v1.json' } }
+    postTagged:
+      name: post.tagged
+      headers: { type: object, properties: { eventType: { const: post.tagged } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/post.tagged.v1.json' } }
     commentCreated:
       name: comment.created
       headers: { type: object, properties: { eventType: { const: comment.created } } }

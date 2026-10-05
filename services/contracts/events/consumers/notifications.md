@@ -37,7 +37,7 @@ Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.ev
 | live.started | goLive | R title, liveId, hostName, hostHandle, host{id,name,username,avatarUrl}, notifyUserIds[] (opted-in unblocked followers, at most 1000; notifyTruncated marks more), isShopping, viewerCount, visibility, notifyAudience, startedAt; O emailUserIds[], liveUrl, coverUrl (schema `live.started.v1.json`) |
 
 ## Schemas added in `../schemas` (unpublished before)
-otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.suggested|applicationSubmitted|approved|rejected|revoked|renewalFailed, creatorApplication.submitted|approved|needsReview|ineligible, sellerDocuments.submitted|approved|rejected (goIdentity); planTrial.started|ending|converted, planInvoice.paymentFailed|paid, cardVerification.refunded, payoutAccount.created|verified|creationFailed|actionRequired, paymentRefund.bankDetailsRequired (goMoney). Fields exactly as in each schema (R = schema `required`).
+otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.suggested|applicationSubmitted|approved|rejected|revoked|renewalFailed, creatorApplication.submitted|approved|needsReview|ineligible, sellerDocuments.submitted|approved|rejected (goIdentity); planTrial.started|ending|converted, planInvoice.paymentFailed|paid, cardVerification.refunded, subscriptionTrial.ending, subscriptionRenewal.upcoming, subscriptionInvoice.paid, subscriptionPayment.failed, subscriptionGrace.ending, subscription.downgraded, subscriptionCard.expiring, subscriptionPrice.changeNotice, payoutAccount.created|verified|creationFailed|actionRequired, paymentRefund.bankDetailsRequired (goMoney). Fields exactly as in each schema (R = schema `required`).
 
 ## Owned by other agents (not published here)
 | Type | Producer | Fields read |
@@ -52,6 +52,7 @@ otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.
 | account.restricted / suspended / banned, appeal.decided, report.closed | goTrust | R accountId (reporterUserId for report.closed), caseId, reason, policy, policyUrl, appealUrl + restrictions[], until / appealBy, deletionAt; appeal: outcome, explanation; report: reportId, reportedWhat, outcome, reportedAt |
 | account.warned | goIdentity (via goTrust WARN_AUTHOR / WARN_USER) | R accountId, reason, policy, policyUrl, appealUrl; O caseId (report id), source. In-app + push only, no email template |
 | mention.created | social | R recipientUserId, actor{id,name}, excerpt, url; O surface, mentionedEveryone |
+| post.tagged | social | R recipientUserId, actor{id,name}, postId, kind (post or clip); O taggedUserId, authorId, url |
 | follow.created, followRequest.created, messageRequest.received, videoReply.created | social | R recipientUserId, actor{id,name}; O url |
 | comment.created | social | R recipientUserId, actor; O target, excerpt, url |
 
