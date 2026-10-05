@@ -17,4 +17,7 @@ func MountSessionsRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("GET /api/v1/auth/sessions", requireAccessToken(http.HandlerFunc(controller.ListActiveSessions)))
 	mux.Handle("DELETE /api/v1/auth/sessions", requireAccessToken(http.HandlerFunc(controller.RevokeOtherSessions)))
 	mux.Handle("DELETE /api/v1/auth/sessions/{sessionId}", requireAccessToken(http.HandlerFunc(controller.RevokeSession)))
+	mux.Handle("GET /api/v1/seller/security", requireAccessToken(http.HandlerFunc(controller.GetSecurityOverview)))
+	mux.Handle("DELETE /api/v1/seller/security/sessions/{sessionId}", requireAccessToken(http.HandlerFunc(controller.RevokeDashboardSession)))
+	mux.Handle("POST /api/v1/seller/security/sessions/sign-out-others", requireAccessToken(http.HandlerFunc(controller.SignOutOtherSessions)))
 }
