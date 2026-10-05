@@ -82,7 +82,7 @@
 
 .stateBadge {
   flex-shrink: 0;
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
   font-size: var(--text-2xs);
   font-weight: 800;
@@ -156,11 +156,6 @@
 
 .rowLinkMuted:hover {
   color: var(--color-text);
-}
-
-.empty {
-  font-size: var(--text-sm);
-  color: var(--ink-faint);
 }
 
 @media (max-width: 720px) {

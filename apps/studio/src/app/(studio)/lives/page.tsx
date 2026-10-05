@@ -6,11 +6,13 @@ import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/feedback";
+import { EmptyState, ErrorState } from "@/components/ui/feedback";
+import { ListPageSkeleton } from "@/components/ui/pageSkeletons";
 import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
 import { LiveEarningsPanel } from "@/components/live/liveEarningsPanel";
 import { LIVE_CATEGORY_LABELS, LIVE_CATEGORY_OPTIONS } from "@/constants/liveCategories.constant";
 import { useSession } from "@/components/providers/sessionProvider";
+import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { livesService } from "@/services/lives.service";
 import type { LiveCategory, LiveEarnings, LiveSession, LiveState } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
@@ -63,7 +65,7 @@ export default function LivesDashboardPage() {
     createLive.mutate();
   }
 
-  if (lives.isLoading) return <Spinner label="Loading lives" />;
+  if (lives.isLoading) return <ListPageSkeleton label="Loading lives" />;
 
   return (
     <div className={styles.page}>
@@ -119,13 +121,15 @@ export default function LivesDashboardPage() {
         </p>
       ) : null}
 
+      {lives.isError ? <ErrorState title="We couldn't load your lives" description={readErrorMessageForDisplay(lives.error)} onRetry={() => void lives.refetch()} /> : null}
+
       <ul className={styles.list}>
         {(lives.data ?? []).map((live) => (
           <LiveRow key={live.id} live={live} />
         ))}
       </ul>
 
-      {lives.data?.length === 0 ? <p className={styles.empty}>You haven&apos;t created a live yet.</p> : null}
+      {lives.data?.length === 0 ? <EmptyState title="No lives yet" description="Give your first live a title above and pick a category. You'll get a stream key for OBS, or go live from the Zudomart app." /> : null}
     </div>
   );
 }

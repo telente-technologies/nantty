@@ -4,7 +4,8 @@ import Link from "next/link";
 import { use, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ErrorState, Spinner } from "@/components/ui/feedback";
+import { ErrorState } from "@/components/ui/feedback";
+import { ControlRoomSkeleton } from "@/components/ui/pageSkeletons";
 import { LiveEarningsPanel } from "@/components/live/liveEarningsPanel";
 import { LiveSafetyPanel } from "@/components/live/liveSafetyPanel";
 import { StageGuestsPanel } from "@/components/live/stageGuestsPanel";
@@ -12,47 +13,17 @@ import { useSession } from "@/components/providers/sessionProvider";
 import { LIVE_CATEGORY_LABELS } from "@/constants/liveCategories.constant";
 import { RetryButton } from "@/components/ui/controls";
 import { readPublicSiteUrl } from "@/config/studioEnvironment.config";
+import { isNotFoundError, readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { livesService } from "@/services/lives.service";
 import type { LiveState } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { CopyField, copyGridClassName } from "./copyField";
 import styles from "./page.module.css";
 
 const STATE_LABEL: Record<LiveState, string> = { idle: "Ready", connecting: "Connecting", live: "Live", ended: "Ended" };
-
-function CopyField({ label, value, masked = false }: { readonly label: string; readonly value: string; readonly masked?: boolean }) {
-  const [revealed, setRevealed] = useState(!masked);
-  const [copied, setCopied] = useState(false);
-
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch {
-      setCopied(false);
-    }
-  }
-
-  return (
-    <div className={styles.copyField}>
-      <span className={styles.copyLabel}>{label}</span>
-      <div className={styles.copyValueRow}>
-        <code className={styles.copyValue}>{revealed ? value : "••••••••••••••••••••"}</code>
-        {masked ? (
-          <button type="button" className={styles.copyAction} onClick={() => setRevealed((current) => !current)}>
-            {revealed ? "Hide" : "Reveal"}
-          </button>
-        ) : null}
-        <button type="button" className={styles.copyAction} onClick={copy}>
-          {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export default function ControlRoomPage({ params }: { readonly params: Promise<{ readonly liveId: string }> }) {
   const { liveId } = use(params);
@@ -63,6 +34,8 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
   const comments = useQuery({ queryKey: ["live-comments", liveId], queryFn: () => livesService.listComments(liveId), refetchInterval: 5000 });
   const products = useQuery({ queryKey: ["live-products", liveId], queryFn: () => livesService.listPinnedProducts(liveId), enabled: canPinProducts });
   const catalogue = useQuery({ queryKey: ["live-catalogue"], queryFn: () => livesService.listPinneableProducts(), enabled: canPinProducts });
+  const streamKey = useQuery({ queryKey: ["live-stream-key", liveId], queryFn: () => livesService.fetchStreamKey(liveId) });
+  const overlayScene = useQuery({ queryKey: ["overlay-scene", liveId], queryFn: () => livesService.fetchOverlays(liveId) });
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["live", liveId] });
@@ -73,7 +46,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
 
   const startLive = useMutation({ mutationFn: () => livesService.startLive(liveId), onSuccess: invalidate });
   const endLive = useMutation({ mutationFn: () => livesService.endLive(liveId), onSuccess: invalidate });
-  const rotateKey = useMutation({ mutationFn: () => livesService.rotateStreamKey(liveId), onSuccess: invalidate });
+  const rotateKey = useMutation({ mutationFn: () => livesService.rotateStreamKey(liveId), onSuccess: (key) => queryClient.setQueryData(["live-stream-key", liveId], key) });
   const pinProduct = useMutation({
     mutationFn: (productId: string) => livesService.pinProduct(liveId, productId),
     onSuccess: invalidate,
@@ -88,14 +61,17 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
     },
   });
 
-  if (live.isLoading) return <Spinner label="Loading control room" />;
+  if (live.isLoading) return <ControlRoomSkeleton label="Loading control room" />;
   if (live.isError || !live.data) {
-    return <ErrorState title="Live not found" description="This live session may have been removed." action={<RetryButton onRetry={() => live.refetch()} />} />;
+    if (isNotFoundError(live.error)) return <ErrorState title="Live not found" description="This live may have been removed." action={<Link href="/lives">Back to all lives</Link>} />;
+    return <ErrorState title="We couldn't load this live" description={readErrorMessageForDisplay(live.error)} action={<RetryButton onRetry={() => live.refetch()} />} />;
   }
+
+  const actionError = [startLive, endLive, rotateKey, pinProduct].find((mutation) => mutation.isError)?.error ?? null;
 
   const session = live.data;
   const isLive = session.state === "live";
-  const overlayUrl = `${readPublicSiteUrl()}/overlay/scene_${session.id}`;
+  const overlayUrl = overlayScene.data ? `${readPublicSiteUrl()}/overlay/${overlayScene.data.id}` : null;
 
   return (
     <div className={styles.page}>
@@ -109,7 +85,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
             <h1 className={styles.title}>{session.title}</h1>
           </div>
           <p className={styles.meta}>
-            {session.startedAt ? `Started ${formatTimeSincePosted(session.startedAt)}` : `Created ${formatTimeSincePosted(session.createdAt)}`}
+            {session.startedAt ? `Started ${formatTimeSincePosted(session.startedAt)}` : "Not started yet"}
             {" · "}
             {formatCountWithThousandsSuffix(session.viewers)} watching
             {" · "}
@@ -134,13 +110,19 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
         </div>
       </header>
 
+      {actionError ? (
+        <p className={styles.actionError} role="alert">
+          {readErrorMessageForDisplay(actionError)}
+        </p>
+      ) : null}
+
       <LiveSafetyPanel liveId={session.id} isActive={isLive || session.state === "connecting"} />
 
       <section className={styles.card}>
         <div className={styles.cardHead}>
           <h2 className={styles.cardTitle}>Connect OBS or any encoder</h2>
           <Button variant="secondary" size="sm" busy={rotateKey.isPending} onClick={() => rotateKey.mutate()}>
-            Rotate stream key
+            {streamKey.data ? "Rotate stream key" : "Create stream key"}
           </Button>
         </div>
         <ol className={styles.steps}>
@@ -149,10 +131,12 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
           <li>Paste the stream key into <strong>Stream Key</strong>.</li>
           <li>Add the overlay as a <strong>Browser</strong> source at 1920 × 1080 (use it for alerts, gift goals or your logo), then hit Start Streaming.</li>
         </ol>
-        <div className={styles.copyGrid}>
-          <CopyField label="Server URL" value={session.ingestUrl} />
-          <CopyField label="Stream key" value={session.streamKey} masked />
-          <CopyField label="Overlay browser source (1920 × 1080)" value={overlayUrl} />
+        {streamKey.isSuccess && !streamKey.data ? <p className={styles.muted}>No stream key yet. Create one to connect your encoder.</p> : null}
+        {streamKey.isError ? <p className={styles.actionError} role="alert">{readErrorMessageForDisplay(streamKey.error)}</p> : null}
+        <div className={copyGridClassName}>
+          {streamKey.data ? <CopyField label="Server URL" value={streamKey.data.ingestUrl} /> : null}
+          {streamKey.data ? <CopyField label="Stream key" value={streamKey.data.streamKey} masked /> : null}
+          {overlayUrl ? <CopyField label="Overlay browser source (1920 × 1080)" value={overlayUrl} /> : null}
           {session.hlsUrl ? <CopyField label="Playback (HLS)" value={session.hlsUrl} /> : null}
         </div>
       </section>
@@ -169,11 +153,12 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
             {products.data?.map((product) => (
               <li key={product.id} className={styles.listItem}>
                 <span className={styles.listItemMain}>{product.title}</span>
-                <span className={styles.listItemMeta}>{formatMoneyForDisplay(product.price)}</span>
+                <span className={styles.listItemMeta}>{formatMoneyForDisplay(product.price)}{product.pinned ? " · On screen" : ""}</span>
               </li>
             ))}
           </ul>
-          {(products.data?.length ?? 0) === 0 ? <p className={styles.muted}>Nothing pinned yet.</p> : null}
+          {products.isError ? <ErrorState title="Pinned products didn't load" description={readErrorMessageForDisplay(products.error)} onRetry={() => void products.refetch()} /> : null}
+          {products.isSuccess && products.data.length === 0 ? <p className={styles.muted}>Nothing pinned yet. Pick a product below to show it on stream.</p> : null}
           <div className={styles.chipRow}>
             {catalogue.data
               ?.filter((product) => !products.data?.some((pinned) => pinned.id === product.id))
@@ -204,7 +189,9 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
               </li>
             ))}
           </ul>
-          {(comments.data?.length ?? 0) === 0 ? <p className={styles.muted}>No comments yet.</p> : null}
+          {comments.isError ? <ErrorState title="Chat didn't load" description={readErrorMessageForDisplay(comments.error)} onRetry={() => void comments.refetch()} /> : null}
+          {comments.isSuccess && comments.data.length === 0 ? <p className={styles.muted}>No comments yet. They appear here as viewers chat.</p> : null}
+          {postComment.isError ? <p className={styles.actionError} role="alert">{readErrorMessageForDisplay(postComment.error)}</p> : null}
           <form
             className={styles.commentForm}
             onSubmit={(event) => {

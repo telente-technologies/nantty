@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { AccountHealthSummary } from "@/components/accountHealth/accountHealthSummary";
 import { PayoutOnboardingPanel } from "@/components/payouts/payoutOnboardingPanel";
 import { usePayoutStateQuery } from "@/components/payouts/payoutStateQuery.hook";
+import { ErrorState, Skeleton } from "@/components/ui/feedback";
+import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { payoutOnboardingService } from "@/services/payoutOnboarding.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
@@ -20,7 +22,7 @@ export default function EarningsPage() {
         <h1 className={styles.title}>Earnings and payouts</h1>
         <p className={styles.subtitle}>Gifts and subscriptions are recorded as you earn them. Set up payouts once to withdraw to your bank.</p>
       </header>
-      {state && state.status !== "verified" && state.pendingWithdrawable ? (
+      {state && state.status !== "verified" && state.pendingWithdrawable && state.pendingWithdrawable.amountMinor > 0 ? (
         <p className={styles.notice}>Verify your ID to withdraw {formatMoneyForDisplay(state.pendingWithdrawable)}. Everything else in Studio keeps working.</p>
       ) : null}
       <AccountHealthSummary />
@@ -33,7 +35,11 @@ export default function EarningsPage() {
           <p className={styles.muted}>{formatMoneyForDisplay(fees.data.fee)} flat per withdrawal, added on top of the amount. {fees.data.arrivalEstimate}</p>
           <p className={styles.muted}>{fees.data.firstPayoutNote}</p>
         </section>
-      ) : null}
+      ) : fees.isError ? (
+        <ErrorState title="Payout fee didn't load" description={readErrorMessageForDisplay(fees.error)} onRetry={() => void fees.refetch()} />
+      ) : (
+        <Skeleton height={96} />
+      )}
     </div>
   );
 }
