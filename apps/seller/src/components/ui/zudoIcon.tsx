@@ -1,8 +1,32 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
+import {
+  ArrowDownIcon, ArrowLeftIcon, ArrowRightIcon, ArrowUpIcon, ArrowUpRightIcon, ArrowsClockwiseIcon, ArrowsOutSimpleIcon, BellIcon, BellRingingIcon,
+  BookmarkSimpleIcon, BoxArrowDownIcon, CalendarDotsIcon, CameraIcon, CaretDownIcon, CaretRightIcon, CaretUpDownIcon, CaretUpIcon, ChatCircleIcon,
+  CheckIcon, CopyIcon, CreditCardIcon, DotsThreeVerticalIcon, ExportIcon, EyeClosedIcon, EyeIcon, HeadsetIcon, HeartIcon, ImageIcon, ImageSquareIcon,
+  MagnifyingGlassIcon, MapPinIcon, MinusIcon, PaperPlaneTiltIcon, PlusIcon, QuestionIcon, RepeatIcon, SealCheckIcon, ShareNetworkIcon, ShieldIcon,
+  ShoppingCartIcon, SignOutIcon, SlidersHorizontalIcon, SpeakerHighIcon, SpeedometerIcon, SquaresFourIcon, StarIcon, StorefrontIcon, TagIcon,
+  TextIndentIcon, TrashIcon, TruckIcon, UserCircleIcon, VideoCameraIcon, WarningIcon, XIcon,
+} from "@phosphor-icons/react/dist/ssr";
+import type { Icon, IconWeight } from "@phosphor-icons/react";
 
 import styles from "./zudoIcon.module.css";
 
-export type ZudoIconName = "arrowDown24" | "arrowRight24" | "arrowUp24" | "caretUp24" | "caretUpDown24" | "arrowLeft24" | "arrowsOutSimple24" | "arrowUpRight24" | "bell24" | "bellRinging24" | "bookmarkSimple24" | "boxArrowDown24" | "buildingStore20" | "calendarDots16" | "camera24" | "cancel20" | "caretDown24" | "caretRight24" | "chatCircle24" | "check16" | "copy16" | "creditCard24" | "dotsThreeVertical24" | "export24" | "eye20" | "eyeClosed20" | "headset24" | "heart24" | "image24" | "imageSquare24" | "magnifyingGlass20" | "mapPin24" | "minus16" | "paperPlaneTilt24" | "plus16" | "question24" | "refresh20" | "repeat24" | "sealCheck20" | "share24" | "shield24" | "shoppingCart24" | "slidersHorizontal24" | "speakerHigh24" | "speedometer24" | "squaresFour24" | "star16" | "tag24" | "textIndent24" | "trash24" | "truck24" | "userCircle24" | "userProfile45" | "videoCamera24" | "warning20";
+const iconMap = {
+  arrowDown24: [ArrowDownIcon], arrowRight24: [ArrowRightIcon], arrowUp24: [ArrowUpIcon], caretUp24: [CaretUpIcon], caretUpDown24: [CaretUpDownIcon],
+  arrowLeft24: [ArrowLeftIcon], arrowsOutSimple24: [ArrowsOutSimpleIcon], arrowUpRight24: [ArrowUpRightIcon], bell24: [BellIcon],
+  bellRinging24: [BellRingingIcon], bookmarkSimple24: [BookmarkSimpleIcon], boxArrowDown24: [BoxArrowDownIcon], buildingStore20: [StorefrontIcon],
+  calendarDots16: [CalendarDotsIcon], camera24: [CameraIcon], cancel20: [XIcon], caretDown24: [CaretDownIcon], caretRight24: [CaretRightIcon],
+  chatCircle24: [ChatCircleIcon], check16: [CheckIcon], copy16: [CopyIcon], creditCard24: [CreditCardIcon], dotsThreeVertical24: [DotsThreeVerticalIcon],
+  export24: [ExportIcon], eye20: [EyeIcon], eyeClosed20: [EyeClosedIcon], headset24: [HeadsetIcon], heart24: [HeartIcon], image24: [ImageIcon],
+  imageSquare24: [ImageSquareIcon], magnifyingGlass20: [MagnifyingGlassIcon], mapPin24: [MapPinIcon], minus16: [MinusIcon],
+  paperPlaneTilt24: [PaperPlaneTiltIcon], plus16: [PlusIcon], question24: [QuestionIcon], refresh20: [ArrowsClockwiseIcon], repeat24: [RepeatIcon],
+  sealCheck20: [SealCheckIcon, "fill"], share24: [ShareNetworkIcon], shield24: [ShieldIcon], shoppingCart24: [ShoppingCartIcon], signOut24: [SignOutIcon],
+  slidersHorizontal24: [SlidersHorizontalIcon], speakerHigh24: [SpeakerHighIcon], speedometer24: [SpeedometerIcon], squaresFour24: [SquaresFourIcon],
+  star16: [StarIcon, "fill"], tag24: [TagIcon], textIndent24: [TextIndentIcon], trash24: [TrashIcon], truck24: [TruckIcon],
+  userCircle24: [UserCircleIcon], userProfile45: [UserCircleIcon], videoCamera24: [VideoCameraIcon], warning20: [WarningIcon],
+} as const satisfies Record<string, readonly [Icon] | readonly [Icon, IconWeight]>;
+
+export type ZudoIconName = keyof typeof iconMap;
 
 interface ZudoIconProps {
   readonly name: ZudoIconName;
@@ -12,14 +36,16 @@ interface ZudoIconProps {
 }
 
 export function ZudoIcon({ name, size = 20, className, label }: ZudoIconProps) {
-  const iconStyle = { "--icon-url": `url("/icons/${name}.svg")`, "--icon-size": `${size}px` } as CSSProperties;
+  const [PhosphorIcon, weight = "regular"] = iconMap[name] as readonly [Icon, IconWeight?];
   return (
-    <span
+    <PhosphorIcon
+      size={size}
+      weight={weight}
       aria-hidden={label ? undefined : true}
       role={label ? "img" : undefined}
       aria-label={label}
+      focusable="false"
       className={className ? `${styles.icon} ${className}` : styles.icon}
-      style={iconStyle}
     />
   );
 }

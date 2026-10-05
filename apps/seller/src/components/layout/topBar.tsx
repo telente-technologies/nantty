@@ -70,7 +70,7 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
           <span className={styles.accountName}>{displayName}</span>
           <span className={styles.accountRole}>{sessionView?.effectiveRole ? staffRoleLabels[sessionView.effectiveRole] : ""}</span>
         </span>
-        <IconButton iconName="arrowLeft24" label="Sign out" size="small" onClick={() => void signOutOfDashboard()} disabled={isSigningOut} />
+        <IconButton iconName="signOut24" label="Sign out" size="small" onClick={() => void signOutOfDashboard()} disabled={isSigningOut} />
       </div>
     </header>
   );
