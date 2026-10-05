@@ -29,6 +29,7 @@ type Container struct {
 	Audit            interfaces.AuditTrail
 	Identity         interfaces.IdentityDirectory
 	PrivateMedia     interfaces.PrivateMediaSigner
+	StoreFollows     interfaces.StoreFollowStats
 }
 
 type StaffVerifiers struct {

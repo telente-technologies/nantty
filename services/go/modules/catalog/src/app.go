@@ -19,17 +19,22 @@ import (
 	"zudomart/modules/catalog/src/interfaces"
 	"zudomart/modules/catalog/src/jobs"
 	"zudomart/modules/catalog/src/migrations"
+	adminbrands "zudomart/modules/catalog/src/modules/adminBrands"
 	admincategories "zudomart/modules/catalog/src/modules/adminCategories"
 	"zudomart/modules/catalog/src/modules/brands"
 	"zudomart/modules/catalog/src/modules/categories"
 	featuredproducts "zudomart/modules/catalog/src/modules/featuredProducts"
+	"zudomart/modules/catalog/src/modules/follows"
 	"zudomart/modules/catalog/src/modules/interactions"
 	martfeatures "zudomart/modules/catalog/src/modules/martFeatures"
 	internalsources "zudomart/modules/catalog/src/modules/internalSources"
+	productimports "zudomart/modules/catalog/src/modules/productImports"
 	"zudomart/modules/catalog/src/modules/products"
 	"zudomart/modules/catalog/src/modules/reviews"
+	sellerapplications "zudomart/modules/catalog/src/modules/sellerApplications"
 	"zudomart/modules/catalog/src/modules/sellerProducts"
 	"zudomart/modules/catalog/src/modules/shareCards"
+	"zudomart/modules/catalog/src/modules/sitemap"
 	storesettings "zudomart/modules/catalog/src/modules/storeSettings"
 	storeteam "zudomart/modules/catalog/src/modules/storeTeam"
 	"zudomart/modules/catalog/src/modules/stores"
@@ -53,6 +58,7 @@ type Collaborators struct {
 	Audit        interfaces.AuditTrail
 	Identity     interfaces.IdentityDirectory
 	PrivateMedia interfaces.PrivateMediaSigner
+	StoreFollows interfaces.StoreFollowStats
 }
 
 type Module struct {
@@ -88,6 +94,7 @@ func NewCatalogModule(ctx context.Context, dependencies servicemodule.Dependenci
 		Audit:        integrations.NewHttpAuditTrail(settings.AdminInternalUrl, settings.AdminInternalToken),
 		Identity:     integrations.NewHttpIdentityDirectory(settings.AdminInternalUrl, settings.UsersInternalToken),
 		PrivateMedia: integrations.NewHttpPrivateMediaSigner(settings.MediaInternalUrl, settings.MediaInternalToken),
+		StoreFollows: integrations.NewSocialStoreFollows(settings.SocialInternalUrl, settings.SocialInternalToken),
 	}, dependencies)
 }
 
@@ -110,13 +117,14 @@ func StartCatalogModuleWithSettings(ctx context.Context, settings configs.Catalo
 		Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Database: database,
 		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Rates: &viewerregion.RateReader{Database: database, Schema: "currency"}, Settings: settings, Logger: logger, Now: time.Now,
 		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger),
-		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia,
+		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia, StoreFollows: collaborators.StoreFollows,
 	}
 	commerceports.Default.RegisterCatalogReader(integrations.CommerceCatalog{Container: module.Container})
 	commerceports.Default.RegisterStoreShippingCountries(integrations.CommerceCatalog{Container: module.Container})
 	commerceports.Default.RegisterStoreAuditTrail(services.StoreAuditTrailPort{Container: module.Container})
 	commerceports.Default.RegisterStoreAuditReader(services.StoreAuditTrailPort{Container: module.Container})
 	commerceports.Default.RegisterStoreInsightsReader(integrations.StoreInsights{Container: module.Container})
+	commerceports.Default.RegisterStoreTaxRatesReader(integrations.StoreTaxRates{Container: module.Container})
 	if err := services.SeedStarterTaxonomyWhenEmpty(ctx, module.Container); err != nil {
 		_ = database.Close()
 		return nil, err
@@ -156,6 +164,11 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	storeteam.Mount(mux, module.Container)
 	admincategories.Mount(mux, module.Container)
 	martfeatures.Mount(mux, module.Container)
+	follows.Mount(mux, module.Container)
+	adminbrands.Mount(mux, module.Container)
+	sellerapplications.Mount(mux, module.Container)
+	productimports.Mount(mux, module.Container)
+	sitemap.Mount(mux, module.Container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

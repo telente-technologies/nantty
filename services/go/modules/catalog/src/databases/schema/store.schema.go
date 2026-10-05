@@ -34,7 +34,6 @@ func (Store) Fields() []ent.Field {
 		field.Time("status_changed_at").Optional().Nillable(),
 		field.UUID("brand_id", uuid.UUID{}).Optional().Nillable(),
 		field.Bool("has_official_badge").Default(false),
-		field.Int("follower_count").Default(0),
 		field.Bool("verified").Default(false),
 		field.Int64("rating_sum").Default(0),
 		field.Int("rating_count").Default(0),
