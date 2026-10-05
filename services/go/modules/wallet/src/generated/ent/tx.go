@@ -34,6 +34,10 @@ type Tx struct {
 	OutboxEvent *OutboxEventClient
 	// PayoutAccount is the client for interacting with the PayoutAccount builders.
 	PayoutAccount *PayoutAccountClient
+	// PayoutAccountResolution is the client for interacting with the PayoutAccountResolution builders.
+	PayoutAccountResolution *PayoutAccountResolutionClient
+	// SellerPayoutSchedule is the client for interacting with the SellerPayoutSchedule builders.
+	SellerPayoutSchedule *SellerPayoutScheduleClient
 	// SellerReserveFlag is the client for interacting with the SellerReserveFlag builders.
 	SellerReserveFlag *SellerReserveFlagClient
 	// WalletRiskFlag is the client for interacting with the WalletRiskFlag builders.
@@ -181,6 +185,8 @@ func (tx *Tx) init() {
 	tx.MonetisationHold = NewMonetisationHoldClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.PayoutAccount = NewPayoutAccountClient(tx.config)
+	tx.PayoutAccountResolution = NewPayoutAccountResolutionClient(tx.config)
+	tx.SellerPayoutSchedule = NewSellerPayoutScheduleClient(tx.config)
 	tx.SellerReserveFlag = NewSellerReserveFlagClient(tx.config)
 	tx.WalletRiskFlag = NewWalletRiskFlagClient(tx.config)
 	tx.Withdrawal = NewWithdrawalClient(tx.config)

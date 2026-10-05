@@ -128,6 +128,30 @@ func (f PayoutAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PayoutAccountMutation", m)
 }
 
+// The PayoutAccountResolutionFunc type is an adapter to allow the use of ordinary
+// function as PayoutAccountResolution mutator.
+type PayoutAccountResolutionFunc func(context.Context, *ent.PayoutAccountResolutionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PayoutAccountResolutionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PayoutAccountResolutionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PayoutAccountResolutionMutation", m)
+}
+
+// The SellerPayoutScheduleFunc type is an adapter to allow the use of ordinary
+// function as SellerPayoutSchedule mutator.
+type SellerPayoutScheduleFunc func(context.Context, *ent.SellerPayoutScheduleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SellerPayoutScheduleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SellerPayoutScheduleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SellerPayoutScheduleMutation", m)
+}
+
 // The SellerReserveFlagFunc type is an adapter to allow the use of ordinary
 // function as SellerReserveFlag mutator.
 type SellerReserveFlagFunc func(context.Context, *ent.SellerReserveFlagMutation) (ent.Value, error)

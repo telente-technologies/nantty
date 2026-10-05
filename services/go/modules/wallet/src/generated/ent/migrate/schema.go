@@ -306,6 +306,67 @@ var (
 			},
 		},
 	}
+	// PayoutAccountResolutionsColumns holds the columns for the "payout_account_resolutions" table.
+	PayoutAccountResolutionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "country_code", Type: field.TypeString, Size: 2},
+		{Name: "bank_code", Type: field.TypeString, Size: 20},
+		{Name: "bank_name", Type: field.TypeString, Size: 120},
+		{Name: "account_number_ciphertext", Type: field.TypeBytes},
+		{Name: "account_number_last4", Type: field.TypeString, Size: 4},
+		{Name: "account_name", Type: field.TypeString, Size: 160},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "used_at", Type: field.TypeTime, Nullable: true},
+	}
+	// PayoutAccountResolutionsTable holds the schema information for the "payout_account_resolutions" table.
+	PayoutAccountResolutionsTable = &schema.Table{
+		Name:       "payout_account_resolutions",
+		Columns:    PayoutAccountResolutionsColumns,
+		PrimaryKey: []*schema.Column{PayoutAccountResolutionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "payoutaccountresolution_user_id_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{PayoutAccountResolutionsColumns[2], PayoutAccountResolutionsColumns[9]},
+			},
+		},
+	}
+	// SellerPayoutSchedulesColumns holds the columns for the "seller_payout_schedules" table.
+	SellerPayoutSchedulesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "timezone", Type: field.TypeString, Size: 60, Default: "Africa/Lagos"},
+		{Name: "mode", Type: field.TypeEnum, Enums: []string{"manual", "daily", "weekly", "monthly"}, Default: "manual"},
+		{Name: "weekday", Type: field.TypeInt, Default: 1},
+		{Name: "day_of_month", Type: field.TypeInt, Default: 1},
+		{Name: "keep_minimum_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "payout_account_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "next_run_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_run_on", Type: field.TypeString, Size: 10, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SellerPayoutSchedulesTable holds the schema information for the "seller_payout_schedules" table.
+	SellerPayoutSchedulesTable = &schema.Table{
+		Name:       "seller_payout_schedules",
+		Columns:    SellerPayoutSchedulesColumns,
+		PrimaryKey: []*schema.Column{SellerPayoutSchedulesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "sellerpayoutschedule_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{SellerPayoutSchedulesColumns[2]},
+			},
+			{
+				Name:    "sellerpayoutschedule_mode_next_run_at",
+				Unique:  false,
+				Columns: []*schema.Column{SellerPayoutSchedulesColumns[5], SellerPayoutSchedulesColumns[10]},
+			},
+		},
+	}
 	// SellerReserveFlagsColumns holds the columns for the "seller_reserve_flags" table.
 	SellerReserveFlagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -431,6 +492,8 @@ var (
 		MonetisationHoldsTable,
 		OutboxEventsTable,
 		PayoutAccountsTable,
+		PayoutAccountResolutionsTable,
+		SellerPayoutSchedulesTable,
 		SellerReserveFlagsTable,
 		WalletRiskFlagsTable,
 		WithdrawalsTable,
