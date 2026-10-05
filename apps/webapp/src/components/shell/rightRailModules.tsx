@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Skeleton } from "@zudomart/web-kit";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { useSession } from "@/components/providers/sessionProvider";
 import { CoinIcon, TrendingIcon } from "@/components/ui/icons";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { cartsService } from "@/services/carts.service";
@@ -29,6 +30,7 @@ function RailModuleSkeleton({ rows }: { readonly rows: number }) {
 }
 
 export function WalletSummaryModule() {
+  const { viewer } = useSession();
   const walletQuery = useQuery({ queryKey: ["rail", "wallet"], queryFn: walletsService.fetchMyWalletSummary, retry: false, staleTime: 60_000 });
   const coinsQuery = useQuery({ queryKey: ["rail", "coins"], queryFn: walletsService.fetchMyCoinBalance, retry: false, staleTime: 60_000 });
   if (walletQuery.isError && coinsQuery.isError) return null;
@@ -58,8 +60,8 @@ export function WalletSummaryModule() {
           </div>
         </dl>
       )}
-      <Link href="/creator" className={styles.moduleLink}>
-        Earnings and payouts
+      <Link href={viewer?.isCreator ? "/creator" : "/orders"} className={styles.moduleLink}>
+        {viewer?.isCreator ? "Earnings and payouts" : "Orders and escrow"}
       </Link>
     </section>
   );
@@ -95,8 +97,9 @@ function SuggestedAccountRow({ account }: { readonly account: UserSummary }) {
 }
 
 export function SuggestedAccountsModule() {
-  const accountsQuery = useQuery({ queryKey: ["rail", "suggestedAccounts"], queryFn: discoveryService.fetchSuggestedAccounts, retry: false, staleTime: 5 * 60_000 });
-  if (accountsQuery.isError || (accountsQuery.data && accountsQuery.data.length === 0)) return null;
+  const { viewer } = useSession();
+  const accountsQuery = useQuery({ queryKey: ["rail", "suggestedAccounts"], queryFn: discoveryService.fetchSuggestedAccounts, retry: false, staleTime: 5 * 60_000, enabled: viewer !== null });
+  if (viewer === null || accountsQuery.isError || (accountsQuery.data && accountsQuery.data.length === 0)) return null;
   return (
     <section className={styles.module} aria-labelledby="rail-suggested-title">
       <h2 id="rail-suggested-title" className={styles.moduleTitle}>

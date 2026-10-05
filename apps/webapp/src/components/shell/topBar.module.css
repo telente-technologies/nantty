@@ -61,7 +61,7 @@
   right: 3px;
   min-width: 18px;
   height: 18px;
-  padding-inline: 4px;
+  padding-inline: var(--space-1);
   border: 2px solid var(--surface-card);
   border-radius: var(--radius-pill);
   background: var(--color-danger-text);

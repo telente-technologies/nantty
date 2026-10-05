@@ -17,29 +17,8 @@
 }
 
 .brandMark {
-  position: relative;
-  display: grid;
-  place-items: center;
+  display: block;
   flex: none;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-medium);
-  background: var(--color-brand-solid);
-  color: var(--color-on-brand);
-  font-size: var(--text-lg);
-  font-weight: 900;
-  letter-spacing: -0.06em;
-}
-
-.brandMark::after {
-  content: "";
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-accent);
 }
 
 .nav {

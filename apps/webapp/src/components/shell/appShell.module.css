@@ -109,10 +109,10 @@
   position: absolute;
   top: 6px;
   left: 50%;
-  margin-left: 4px;
+  margin-left: var(--space-1);
   min-width: 17px;
   height: 17px;
-  padding-inline: 4px;
+  padding-inline: var(--space-1);
   border-radius: var(--radius-pill);
   background: var(--color-brand-solid);
   color: var(--color-on-brand);

@@ -1,57 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
 import { ZudomartWordmark } from "@zudomart/web-kit";
 
-import { BellIcon, CartIcon, CloseIcon, SearchIcon } from "@/components/ui/icons";
+import { BellIcon, CartIcon } from "@/components/ui/icons";
 
+import { ScopedSearchBar as SearchBar } from "./scopedSearchBar";
 import { formatBadgeCount, type ShellBadgeCounts } from "./shellNavigation.config";
 import styles from "./topBar.module.css";
 import { UserMenu } from "./userMenu";
-
-function SearchBar() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [value, setValue] = useState(searchParams.get("q") ?? "");
-
-  useEffect(() => {
-    setValue(searchParams.get("q") ?? "");
-  }, [searchParams]);
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const query = value.trim();
-    router.push(query ? `/explore?q=${encodeURIComponent(query)}` : "/explore");
-  }
-
-  return (
-    <form className={styles.searchBar} role="search" onSubmit={handleSubmit}>
-      <SearchIcon size={18} className={styles.searchIcon} />
-      <input
-        type="search"
-        className={styles.searchInput}
-        placeholder="Search products, stores, people"
-        aria-label="Search Zudomart"
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-      />
-      {value ? (
-        <button type="button" className={styles.searchClear} onClick={() => setValue("")} aria-label="Clear search">
-          <CloseIcon size={16} />
-        </button>
-      ) : null}
-    </form>
-  );
-}
 
 export function TopBar({ badgeCounts }: { readonly badgeCounts: ShellBadgeCounts }) {
   return (
     <header className={styles.topBar}>
       <div className={styles.topBarInner}>
         <Link href="/" className={styles.brand} aria-label="Zudomart home">
-          <ZudomartWordmark />
+          <ZudomartWordmark height={20} collapseToMarkOnSmallScreens />
         </Link>
         <div className={styles.topBarSearch}>
           <SearchBar />
