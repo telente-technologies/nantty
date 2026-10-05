@@ -4,7 +4,7 @@ import { appendMockMessageAndUpdateConversation, mockConversations } from "./cha
 import { getSignedInMockUser } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
-const shareableKinds = new Set(["post", "clip", "video", "product", "live", "store", "profile"]);
+const shareableKinds = new Set(["post", "clip", "story", "product", "live", "store", "profile"]);
 const verifiedEmailUserIds = new Set<string>(["u_me"]);
 const sentVerificationCodeUserIds = new Set<string>();
 const shareCountsByReference = new Map<string, number>();
@@ -23,7 +23,7 @@ function shareReferenceIntoConversations(body: ChatShareBody) {
   const referenceId = typeof body.reference?.id === "string" ? body.reference.id : "";
   if (conversationIds.length === 0 || conversationIds.length > 20) throw new ApiError(422, "Choose between 1 and 20 chats");
   if (!shareableKinds.has(kind) || !referenceId) throw new ApiError(422, "This can't be shared");
-  const note = typeof body.note === "string" ? body.note.trim().slice(0, 500) : "";
+  if (typeof body.note === "string" && body.note !== "") throw new ApiError(400, "Notes can't be sent with a share.", "VALIDATION_FAILED");
   const sharedLink = `https://zudomart.com/${kind}/${referenceId}`;
   let sentCount = 0;
   for (const conversationId of conversationIds) {
@@ -32,7 +32,7 @@ function shareReferenceIntoConversations(body: ChatShareBody) {
       id: `m_share_${Date.now()}_${sentCount}`,
       conversationId,
       senderId: getSignedInMockUser().id,
-      text: note ? `${note}\n${sharedLink}` : sharedLink,
+      text: sharedLink,
       createdAt: new Date().toISOString(),
       kind: "text",
     });

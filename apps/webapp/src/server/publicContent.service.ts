@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { cache } from "react";
 
 import type { BrandedProduct } from "@/types/brand.type";
@@ -5,6 +6,7 @@ import type { StoreDetail } from "@/types/commerce.type";
 import type { ProductSummary, User } from "@/types";
 
 import { callWebappBackend, readJsonFromBackendResult } from "./apiTransport.service";
+import { readApiTokensFromCookies } from "./session.service";
 
 export type SitemapKind = "products" | "stores" | "profiles";
 
@@ -19,8 +21,8 @@ export interface SitemapPage {
   readonly totalPages: number;
 }
 
-async function fetchPublicJson<Payload>(path: string, query?: Record<string, string>): Promise<Payload | null> {
-  const result = await callWebappBackend({ method: "GET", path, query: new URLSearchParams(query ?? {}), forwardedHeaders: { "x-client-region": "NG" } });
+async function fetchPublicJson<Payload>(path: string, query?: Record<string, string>, accessToken?: string | null): Promise<Payload | null> {
+  const result = await callWebappBackend({ method: "GET", path, query: new URLSearchParams(query ?? {}), accessToken, forwardedHeaders: { "x-client-region": "NG" } });
   if (result.status !== 200) return null;
   return readJsonFromBackendResult<Payload>(result);
 }
@@ -34,11 +36,16 @@ export const fetchPublicProduct = cache(async (productId: string): Promise<Brand
 export const fetchPublicStore = cache(async (storeId: string): Promise<StoreDetail | null> =>
   safeIdPattern.test(storeId) ? fetchPublicJson<StoreDetail>(`/api/v1/stores/${encodeURIComponent(storeId)}`) : null);
 
-export const fetchPublicStoreProducts = cache(async (storeId: string): Promise<readonly ProductSummary[]> =>
-  (safeIdPattern.test(storeId) ? await fetchPublicJson<ProductSummary[]>(`/api/v1/stores/${encodeURIComponent(storeId)}/products`) : null) ?? []);
+export const fetchPublicStoreProducts = cache(async (storeId: string): Promise<readonly ProductSummary[]> => {
+  const payload = safeIdPattern.test(storeId) ? await fetchPublicJson<ProductSummary[] | { readonly data?: readonly ProductSummary[] }>(`/api/v1/stores/${encodeURIComponent(storeId)}/products`) : null;
+  return Array.isArray(payload) ? payload : (payload?.data ?? []);
+});
 
-export const fetchPublicProfileById = cache(async (userId: string): Promise<User | null> =>
-  safeIdPattern.test(userId) && userId !== "me" ? fetchPublicJson<User>(`/api/v1/users/${encodeURIComponent(userId)}`) : null);
+export const fetchPublicProfileById = cache(async (userId: string): Promise<User | null> => {
+  if (!safeIdPattern.test(userId) || userId === "me") return null;
+  const { accessToken } = readApiTokensFromCookies(await cookies());
+  return fetchPublicJson<User>(`/api/v1/users/${encodeURIComponent(userId)}`, undefined, accessToken);
+});
 
 export const fetchPublicProfileByUsername = cache(async (username: string): Promise<User | null> => {
   if (!usernamePattern.test(username)) return null;

@@ -1,6 +1,6 @@
 import { currentPolicyVersion } from "@/config/legalLinks.config";
 import { ApiError } from "@/errors/api.error";
-import type { ConsentRecord, DataExportRequest, UpdateConsentsInput } from "@/types/privacy.type";
+import type { DataExportRequest } from "@/types/privacy.type";
 
 import { recordMockPolicyAcceptance } from "./legal.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -11,13 +11,22 @@ const exportLinkLifetimeMilliseconds = 7 * 24 * 60 * 60 * 1000;
 const deletionGracePeriodMilliseconds = 30 * 24 * 60 * 60 * 1000;
 const deletionConfirmationWord = "DELETE";
 
-let consentRecord: ConsentRecord = {
-  policyVersion: currentPolicyVersion,
-  consents: { personalization: true, personalizedAds: true, analytics: true, marketing: false },
-  updatedAt: new Date().toISOString(),
-};
+const optionalConsentTypes = ["analytics", "personalization", "advertising", "marketing"] as const;
+let consentPolicyVersion = currentPolicyVersion;
+const grantedConsentTypes = new Map<string, { granted: boolean; decidedAt: string }>(
+  [["personalization", true], ["advertising", true], ["analytics", true], ["marketing", false]].map(([type, granted]) => [type as string, { granted: granted as boolean, decidedAt: new Date().toISOString() }]),
+);
+
+const describeConsents = () => ({
+  data: optionalConsentTypes.map((consentType) => {
+    const decision = grantedConsentTypes.get(consentType);
+    return { consentType, status: decision ? (decision.granted ? "granted" : "withdrawn") : "undecided", policyVersion: consentPolicyVersion, decidedAt: decision?.decidedAt ?? null };
+  }),
+  nextCursor: null,
+  policyVersion: consentPolicyVersion,
+  needsRenewal: false,
+});
 let exportRequestedAtMilliseconds: number | null = null;
-let latestBannerConsent: unknown = null;
 
 function describeDataExport(): DataExportRequest {
   if (exportRequestedAtMilliseconds === null) return { status: "none", requestedAt: null, downloadUrl: null, expiresAt: null };
@@ -29,13 +38,16 @@ function describeDataExport(): DataExportRequest {
 }
 
 export const privacyMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/users/me/consents", () => consentRecord),
+  createMockRoute("GET", "/api/v1/users/me/consents", () => describeConsents()),
   createMockRoute("PUT", "/api/v1/users/me/consents", ({ body }) => {
-    const { policyVersion, policyVersionId, consents } = body as UpdateConsentsInput;
-    if (!policyVersion) throw new ApiError(422, "policyVersion is required");
+    const { policyVersion, policyVersionId, consents } = body as { policyVersion?: string; policyVersionId?: string; consents?: Record<string, boolean> };
     if (policyVersionId) recordMockPolicyAcceptance(policyVersionId);
-    consentRecord = { policyVersion, consents: { ...consentRecord.consents, ...consents }, updatedAt: new Date().toISOString() };
-    return consentRecord;
+    for (const [consentType, granted] of Object.entries(consents ?? {})) {
+      if (!(optionalConsentTypes as readonly string[]).includes(consentType)) throw new ApiError(400, `${consentType} is not a consent type`, "VALIDATION_FAILED");
+      grantedConsentTypes.set(consentType, { granted, decidedAt: new Date().toISOString() });
+    }
+    if (policyVersion) consentPolicyVersion = policyVersion;
+    return describeConsents();
   }),
   createMockRoute("GET", "/api/v1/users/me/data-exports", () => {
     const current = describeDataExport();
@@ -50,11 +62,5 @@ export const privacyMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/users/me/deletion-request", ({ body }) => {
     if ((body as { confirm?: boolean }).confirm !== true) throw new ApiError(422, `Type ${deletionConfirmationWord} to confirm`);
     return { id: "deletion_mock", status: "scheduled", reason: "", requestedAt: new Date().toISOString(), scheduledFor: new Date(Date.now() + deletionGracePeriodMilliseconds).toISOString(), cancelledAt: null, executedAt: null, retentionPolicy: [] };
-  }),
-  createMockRoute("POST", "/api/v1/consents", ({ body }) => {
-    const { policyVersion, decidedAt, categories } = (body ?? {}) as Record<string, unknown>;
-    if (typeof policyVersion !== "string" || typeof decidedAt !== "string" || typeof categories !== "object" || categories === null) throw new ApiError(422, "policyVersion, decidedAt and categories are required");
-    latestBannerConsent = body;
-    return latestBannerConsent;
   }),
 ];
