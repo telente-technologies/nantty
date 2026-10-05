@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .phoneFrame {
@@ -13,16 +13,16 @@
   background: var(--color-surface);
   overflow: hidden;
   box-shadow: var(--shadow-float);
-  font-size: 14px;
+  font-size: var(--fs-14);
   line-height: 1.2;
   color: var(--color-text);
 }
 
 .feedCard {
-  padding: 12px 0;
+  padding: var(--space-3) 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
 }
@@ -31,7 +31,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   min-height: 32px;
 }
 
@@ -59,8 +59,8 @@
 }
 
 .bodyText {
-  padding: 4px 16px;
-  font-size: 14px;
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--fs-14);
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
@@ -71,13 +71,13 @@
 
 .carouselHint {
   text-align: right;
-  padding: 0 16px;
-  font-size: 12px;
+  padding: 0 var(--space-4);
+  font-size: var(--fs-12);
   color: var(--color-text-subtle);
 }
 
 .feedCallToAction {
-  padding: 8px 16px 0;
+  padding: var(--space-2) var(--space-4) 0;
 }
 
 .callToAction {
@@ -89,20 +89,20 @@
   background: var(--color-brand-solid);
   color: var(--color-on-brand);
   font-weight: 500;
-  font-size: 14px;
+  font-size: var(--fs-14);
 }
 
 .interactions {
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 8px 16px 0;
+  gap: var(--space-6);
+  padding: var(--space-2) var(--space-4) 0;
 }
 
 .counter {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-weight: 500;
 }
 
@@ -124,10 +124,10 @@
   left: 0;
   right: 52px;
   bottom: 0;
-  padding: 48px 12px 16px;
+  padding: 48px var(--space-3) var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   background: linear-gradient(to top, rgb(0 0 0 / 0.75), transparent);
 }
 
@@ -142,7 +142,7 @@
 }
 
 .overlayText {
-  font-size: 13px;
+  font-size: var(--fs-13);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -162,10 +162,10 @@
 .storyTop {
   position: absolute;
   inset: 0 0 auto;
-  padding: 10px 10px 24px;
+  padding: 10px 10px var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   background: linear-gradient(to bottom, rgb(0 0 0 / 0.55), transparent);
 }
 
@@ -195,26 +195,26 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
 }
 
 .storeName {
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .storeHandle {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--color-text-muted);
 }
 
 .storeStrip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  padding: 0 16px;
+  gap: var(--space-1);
+  padding: 0 var(--space-4);
 }
 
 .storeThumb {
@@ -233,7 +233,7 @@
 }
 
 .feedLiveCard {
-  padding: 0 16px;
+  padding: 0 var(--space-4);
 }
 
 .letterbox {
@@ -255,7 +255,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px var(--space-3);
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--on-media) 60%, transparent);
   font-size: 12.5px;
