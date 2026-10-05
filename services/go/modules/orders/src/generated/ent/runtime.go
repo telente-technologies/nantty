@@ -10,6 +10,8 @@ import (
 	"zudomart/modules/orders/src/generated/ent/cartitem"
 	"zudomart/modules/orders/src/generated/ent/checkout"
 	"zudomart/modules/orders/src/generated/ent/customernote"
+	"zudomart/modules/orders/src/generated/ent/customersegment"
+	"zudomart/modules/orders/src/generated/ent/deliveryarea"
 	"zudomart/modules/orders/src/generated/ent/flashsale"
 	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
@@ -32,6 +34,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/shippingrule"
 	"zudomart/modules/orders/src/generated/ent/shippingzone"
 	"zudomart/modules/orders/src/generated/ent/storecreditentry"
+	"zudomart/modules/orders/src/generated/ent/storecustomerprofile"
 	"zudomart/modules/orders/src/generated/ent/storerewardsettings"
 	"zudomart/modules/orders/src/generated/ent/storesuccessstat"
 
@@ -219,6 +222,138 @@ func init() {
 	customernoteDescID := customernoteMixinFields0[0].Descriptor()
 	// customernote.DefaultID holds the default value on creation for the id field.
 	customernote.DefaultID = customernoteDescID.Default.(func() uuid.UUID)
+	customersegmentMixin := schema.CustomerSegment{}.Mixin()
+	customersegmentMixinFields0 := customersegmentMixin[0].Fields()
+	_ = customersegmentMixinFields0
+	customersegmentFields := schema.CustomerSegment{}.Fields()
+	_ = customersegmentFields
+	// customersegmentDescCreatedAt is the schema descriptor for created_at field.
+	customersegmentDescCreatedAt := customersegmentMixinFields0[1].Descriptor()
+	// customersegment.DefaultCreatedAt holds the default value on creation for the created_at field.
+	customersegment.DefaultCreatedAt = customersegmentDescCreatedAt.Default.(func() time.Time)
+	// customersegmentDescName is the schema descriptor for name field.
+	customersegmentDescName := customersegmentFields[1].Descriptor()
+	// customersegment.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	customersegment.NameValidator = func() func(string) error {
+		validators := customersegmentDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// customersegmentDescDescription is the schema descriptor for description field.
+	customersegmentDescDescription := customersegmentFields[2].Descriptor()
+	// customersegment.DefaultDescription holds the default value on creation for the description field.
+	customersegment.DefaultDescription = customersegmentDescDescription.Default.(string)
+	// customersegment.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	customersegment.DescriptionValidator = customersegmentDescDescription.Validators[0].(func(string) error)
+	// customersegmentDescUpdatedAt is the schema descriptor for updated_at field.
+	customersegmentDescUpdatedAt := customersegmentFields[4].Descriptor()
+	// customersegment.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	customersegment.DefaultUpdatedAt = customersegmentDescUpdatedAt.Default.(func() time.Time)
+	// customersegment.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	customersegment.UpdateDefaultUpdatedAt = customersegmentDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// customersegmentDescID is the schema descriptor for id field.
+	customersegmentDescID := customersegmentMixinFields0[0].Descriptor()
+	// customersegment.DefaultID holds the default value on creation for the id field.
+	customersegment.DefaultID = customersegmentDescID.Default.(func() uuid.UUID)
+	deliveryareaMixin := schema.DeliveryArea{}.Mixin()
+	deliveryareaMixinFields0 := deliveryareaMixin[0].Fields()
+	_ = deliveryareaMixinFields0
+	deliveryareaFields := schema.DeliveryArea{}.Fields()
+	_ = deliveryareaFields
+	// deliveryareaDescCreatedAt is the schema descriptor for created_at field.
+	deliveryareaDescCreatedAt := deliveryareaMixinFields0[1].Descriptor()
+	// deliveryarea.DefaultCreatedAt holds the default value on creation for the created_at field.
+	deliveryarea.DefaultCreatedAt = deliveryareaDescCreatedAt.Default.(func() time.Time)
+	// deliveryareaDescName is the schema descriptor for name field.
+	deliveryareaDescName := deliveryareaFields[1].Descriptor()
+	// deliveryarea.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	deliveryarea.NameValidator = func() func(string) error {
+		validators := deliveryareaDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// deliveryareaDescState is the schema descriptor for state field.
+	deliveryareaDescState := deliveryareaFields[2].Descriptor()
+	// deliveryarea.StateValidator is a validator for the "state" field. It is called by the builders before save.
+	deliveryarea.StateValidator = func() func(string) error {
+		validators := deliveryareaDescState.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(state string) error {
+			for _, fn := range fns {
+				if err := fn(state); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// deliveryareaDescFeeMinor is the schema descriptor for fee_minor field.
+	deliveryareaDescFeeMinor := deliveryareaFields[4].Descriptor()
+	// deliveryarea.FeeMinorValidator is a validator for the "fee_minor" field. It is called by the builders before save.
+	deliveryarea.FeeMinorValidator = deliveryareaDescFeeMinor.Validators[0].(func(int64) error)
+	// deliveryareaDescCurrency is the schema descriptor for currency field.
+	deliveryareaDescCurrency := deliveryareaFields[5].Descriptor()
+	// deliveryarea.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	deliveryarea.CurrencyValidator = func() func(string) error {
+		validators := deliveryareaDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// deliveryareaDescEstimatedDaysMin is the schema descriptor for estimated_days_min field.
+	deliveryareaDescEstimatedDaysMin := deliveryareaFields[6].Descriptor()
+	// deliveryarea.EstimatedDaysMinValidator is a validator for the "estimated_days_min" field. It is called by the builders before save.
+	deliveryarea.EstimatedDaysMinValidator = deliveryareaDescEstimatedDaysMin.Validators[0].(func(int) error)
+	// deliveryareaDescEstimatedDaysMax is the schema descriptor for estimated_days_max field.
+	deliveryareaDescEstimatedDaysMax := deliveryareaFields[7].Descriptor()
+	// deliveryarea.EstimatedDaysMaxValidator is a validator for the "estimated_days_max" field. It is called by the builders before save.
+	deliveryarea.EstimatedDaysMaxValidator = deliveryareaDescEstimatedDaysMax.Validators[0].(func(int) error)
+	// deliveryareaDescActive is the schema descriptor for active field.
+	deliveryareaDescActive := deliveryareaFields[8].Descriptor()
+	// deliveryarea.DefaultActive holds the default value on creation for the active field.
+	deliveryarea.DefaultActive = deliveryareaDescActive.Default.(bool)
+	// deliveryareaDescUpdatedAt is the schema descriptor for updated_at field.
+	deliveryareaDescUpdatedAt := deliveryareaFields[9].Descriptor()
+	// deliveryarea.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	deliveryarea.DefaultUpdatedAt = deliveryareaDescUpdatedAt.Default.(func() time.Time)
+	// deliveryarea.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	deliveryarea.UpdateDefaultUpdatedAt = deliveryareaDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// deliveryareaDescID is the schema descriptor for id field.
+	deliveryareaDescID := deliveryareaMixinFields0[0].Descriptor()
+	// deliveryarea.DefaultID holds the default value on creation for the id field.
+	deliveryarea.DefaultID = deliveryareaDescID.Default.(func() uuid.UUID)
 	flashsaleMixin := schema.FlashSale{}.Mixin()
 	flashsaleMixinFields0 := flashsaleMixin[0].Fields()
 	_ = flashsaleMixinFields0
@@ -1242,6 +1377,43 @@ func init() {
 	storecreditentryDescID := storecreditentryMixinFields0[0].Descriptor()
 	// storecreditentry.DefaultID holds the default value on creation for the id field.
 	storecreditentry.DefaultID = storecreditentryDescID.Default.(func() uuid.UUID)
+	storecustomerprofileMixin := schema.StoreCustomerProfile{}.Mixin()
+	storecustomerprofileMixinFields0 := storecustomerprofileMixin[0].Fields()
+	_ = storecustomerprofileMixinFields0
+	storecustomerprofileFields := schema.StoreCustomerProfile{}.Fields()
+	_ = storecustomerprofileFields
+	// storecustomerprofileDescCreatedAt is the schema descriptor for created_at field.
+	storecustomerprofileDescCreatedAt := storecustomerprofileMixinFields0[1].Descriptor()
+	// storecustomerprofile.DefaultCreatedAt holds the default value on creation for the created_at field.
+	storecustomerprofile.DefaultCreatedAt = storecustomerprofileDescCreatedAt.Default.(func() time.Time)
+	// storecustomerprofileDescName is the schema descriptor for name field.
+	storecustomerprofileDescName := storecustomerprofileFields[2].Descriptor()
+	// storecustomerprofile.DefaultName holds the default value on creation for the name field.
+	storecustomerprofile.DefaultName = storecustomerprofileDescName.Default.(string)
+	// storecustomerprofile.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	storecustomerprofile.NameValidator = storecustomerprofileDescName.Validators[0].(func(string) error)
+	// storecustomerprofileDescPhone is the schema descriptor for phone field.
+	storecustomerprofileDescPhone := storecustomerprofileFields[3].Descriptor()
+	// storecustomerprofile.PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
+	storecustomerprofile.PhoneValidator = storecustomerprofileDescPhone.Validators[0].(func(string) error)
+	// storecustomerprofileDescEmail is the schema descriptor for email field.
+	storecustomerprofileDescEmail := storecustomerprofileFields[4].Descriptor()
+	// storecustomerprofile.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	storecustomerprofile.EmailValidator = storecustomerprofileDescEmail.Validators[0].(func(string) error)
+	// storecustomerprofileDescMarketingOptIn is the schema descriptor for marketing_opt_in field.
+	storecustomerprofileDescMarketingOptIn := storecustomerprofileFields[6].Descriptor()
+	// storecustomerprofile.DefaultMarketingOptIn holds the default value on creation for the marketing_opt_in field.
+	storecustomerprofile.DefaultMarketingOptIn = storecustomerprofileDescMarketingOptIn.Default.(bool)
+	// storecustomerprofileDescUpdatedAt is the schema descriptor for updated_at field.
+	storecustomerprofileDescUpdatedAt := storecustomerprofileFields[7].Descriptor()
+	// storecustomerprofile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	storecustomerprofile.DefaultUpdatedAt = storecustomerprofileDescUpdatedAt.Default.(func() time.Time)
+	// storecustomerprofile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	storecustomerprofile.UpdateDefaultUpdatedAt = storecustomerprofileDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// storecustomerprofileDescID is the schema descriptor for id field.
+	storecustomerprofileDescID := storecustomerprofileMixinFields0[0].Descriptor()
+	// storecustomerprofile.DefaultID holds the default value on creation for the id field.
+	storecustomerprofile.DefaultID = storecustomerprofileDescID.Default.(func() uuid.UUID)
 	storerewardsettingsMixin := schema.StoreRewardSettings{}.Mixin()
 	storerewardsettingsMixinFields0 := storerewardsettingsMixin[0].Fields()
 	_ = storerewardsettingsMixinFields0

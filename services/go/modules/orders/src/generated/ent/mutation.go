@@ -14,6 +14,8 @@ import (
 	"zudomart/modules/orders/src/generated/ent/cartitem"
 	"zudomart/modules/orders/src/generated/ent/checkout"
 	"zudomart/modules/orders/src/generated/ent/customernote"
+	"zudomart/modules/orders/src/generated/ent/customersegment"
+	"zudomart/modules/orders/src/generated/ent/deliveryarea"
 	"zudomart/modules/orders/src/generated/ent/flashsale"
 	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
@@ -37,6 +39,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/shippingrule"
 	"zudomart/modules/orders/src/generated/ent/shippingzone"
 	"zudomart/modules/orders/src/generated/ent/storecreditentry"
+	"zudomart/modules/orders/src/generated/ent/storecustomerprofile"
 	"zudomart/modules/orders/src/generated/ent/storerewardsettings"
 	"zudomart/modules/orders/src/generated/ent/storesuccessstat"
 
@@ -54,35 +57,38 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCampaignRedemption  = "CampaignRedemption"
-	TypeCart                = "Cart"
-	TypeCartItem            = "CartItem"
-	TypeCheckout            = "Checkout"
-	TypeCustomerNote        = "CustomerNote"
-	TypeFlashSale           = "FlashSale"
-	TypeFlashSaleItem       = "FlashSaleItem"
-	TypeIdempotentRequest   = "IdempotentRequest"
-	TypeInvoiceCounter      = "InvoiceCounter"
-	TypeOrderEvent          = "OrderEvent"
-	TypeOrderGroup          = "OrderGroup"
-	TypeOrderItem           = "OrderItem"
-	TypeOrderNote           = "OrderNote"
-	TypeOutboxEvent         = "OutboxEvent"
-	TypeProcessedEvent      = "ProcessedEvent"
-	TypeProductBundle       = "ProductBundle"
-	TypeProductBundleItem   = "ProductBundleItem"
-	TypePromotion           = "Promotion"
-	TypePromotionRedemption = "PromotionRedemption"
-	TypeReportExportJob     = "ReportExportJob"
-	TypeReturnRequest       = "ReturnRequest"
-	TypeShippingCalculation = "ShippingCalculation"
-	TypeShippingDestination = "ShippingDestination"
-	TypeShippingProfile     = "ShippingProfile"
-	TypeShippingRule        = "ShippingRule"
-	TypeShippingZone        = "ShippingZone"
-	TypeStoreCreditEntry    = "StoreCreditEntry"
-	TypeStoreRewardSettings = "StoreRewardSettings"
-	TypeStoreSuccessStat    = "StoreSuccessStat"
+	TypeCampaignRedemption   = "CampaignRedemption"
+	TypeCart                 = "Cart"
+	TypeCartItem             = "CartItem"
+	TypeCheckout             = "Checkout"
+	TypeCustomerNote         = "CustomerNote"
+	TypeCustomerSegment      = "CustomerSegment"
+	TypeDeliveryArea         = "DeliveryArea"
+	TypeFlashSale            = "FlashSale"
+	TypeFlashSaleItem        = "FlashSaleItem"
+	TypeIdempotentRequest    = "IdempotentRequest"
+	TypeInvoiceCounter       = "InvoiceCounter"
+	TypeOrderEvent           = "OrderEvent"
+	TypeOrderGroup           = "OrderGroup"
+	TypeOrderItem            = "OrderItem"
+	TypeOrderNote            = "OrderNote"
+	TypeOutboxEvent          = "OutboxEvent"
+	TypeProcessedEvent       = "ProcessedEvent"
+	TypeProductBundle        = "ProductBundle"
+	TypeProductBundleItem    = "ProductBundleItem"
+	TypePromotion            = "Promotion"
+	TypePromotionRedemption  = "PromotionRedemption"
+	TypeReportExportJob      = "ReportExportJob"
+	TypeReturnRequest        = "ReturnRequest"
+	TypeShippingCalculation  = "ShippingCalculation"
+	TypeShippingDestination  = "ShippingDestination"
+	TypeShippingProfile      = "ShippingProfile"
+	TypeShippingRule         = "ShippingRule"
+	TypeShippingZone         = "ShippingZone"
+	TypeStoreCreditEntry     = "StoreCreditEntry"
+	TypeStoreCustomerProfile = "StoreCustomerProfile"
+	TypeStoreRewardSettings  = "StoreRewardSettings"
+	TypeStoreSuccessStat     = "StoreSuccessStat"
 )
 
 // CampaignRedemptionMutation represents an operation that mutates the CampaignRedemption nodes in the graph.
@@ -3591,6 +3597,1614 @@ func (m *CustomerNoteMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *CustomerNoteMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown CustomerNote edge %s", name)
+}
+
+// CustomerSegmentMutation represents an operation that mutates the CustomerSegment nodes in the graph.
+type CustomerSegmentMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	store_id      *uuid.UUID
+	name          *string
+	description   *string
+	rules         *[]schema.CustomerSegmentRule
+	appendrules   []schema.CustomerSegmentRule
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*CustomerSegment, error)
+	predicates    []predicate.CustomerSegment
+}
+
+var _ ent.Mutation = (*CustomerSegmentMutation)(nil)
+
+// customersegmentOption allows management of the mutation configuration using functional options.
+type customersegmentOption func(*CustomerSegmentMutation)
+
+// newCustomerSegmentMutation creates new mutation for the CustomerSegment entity.
+func newCustomerSegmentMutation(c config, op Op, opts ...customersegmentOption) *CustomerSegmentMutation {
+	m := &CustomerSegmentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCustomerSegment,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCustomerSegmentID sets the ID field of the mutation.
+func withCustomerSegmentID(id uuid.UUID) customersegmentOption {
+	return func(m *CustomerSegmentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CustomerSegment
+		)
+		m.oldValue = func(ctx context.Context) (*CustomerSegment, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CustomerSegment.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCustomerSegment sets the old CustomerSegment of the mutation.
+func withCustomerSegment(node *CustomerSegment) customersegmentOption {
+	return func(m *CustomerSegmentMutation) {
+		m.oldValue = func(context.Context) (*CustomerSegment, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CustomerSegmentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CustomerSegmentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CustomerSegment entities.
+func (m *CustomerSegmentMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CustomerSegmentMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CustomerSegmentMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CustomerSegment.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CustomerSegmentMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CustomerSegmentMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CustomerSegment entity.
+// If the CustomerSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CustomerSegmentMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CustomerSegmentMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetStoreID sets the "store_id" field.
+func (m *CustomerSegmentMutation) SetStoreID(u uuid.UUID) {
+	m.store_id = &u
+}
+
+// StoreID returns the value of the "store_id" field in the mutation.
+func (m *CustomerSegmentMutation) StoreID() (r uuid.UUID, exists bool) {
+	v := m.store_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreID returns the old "store_id" field's value of the CustomerSegment entity.
+// If the CustomerSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CustomerSegmentMutation) OldStoreID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreID: %w", err)
+	}
+	return oldValue.StoreID, nil
+}
+
+// ResetStoreID resets all changes to the "store_id" field.
+func (m *CustomerSegmentMutation) ResetStoreID() {
+	m.store_id = nil
+}
+
+// SetName sets the "name" field.
+func (m *CustomerSegmentMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CustomerSegmentMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CustomerSegment entity.
+// If the CustomerSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CustomerSegmentMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CustomerSegmentMutation) ResetName() {
+	m.name = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *CustomerSegmentMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *CustomerSegmentMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the CustomerSegment entity.
+// If the CustomerSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CustomerSegmentMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *CustomerSegmentMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetRules sets the "rules" field.
+func (m *CustomerSegmentMutation) SetRules(ssr []schema.CustomerSegmentRule) {
+	m.rules = &ssr
+	m.appendrules = nil
+}
+
+// Rules returns the value of the "rules" field in the mutation.
+func (m *CustomerSegmentMutation) Rules() (r []schema.CustomerSegmentRule, exists bool) {
+	v := m.rules
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRules returns the old "rules" field's value of the CustomerSegment entity.
+// If the CustomerSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CustomerSegmentMutation) OldRules(ctx context.Context) (v []schema.CustomerSegmentRule, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRules is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRules requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRules: %w", err)
+	}
+	return oldValue.Rules, nil
+}
+
+// AppendRules adds ssr to the "rules" field.
+func (m *CustomerSegmentMutation) AppendRules(ssr []schema.CustomerSegmentRule) {
+	m.appendrules = append(m.appendrules, ssr...)
+}
+
+// AppendedRules returns the list of values that were appended to the "rules" field in this mutation.
+func (m *CustomerSegmentMutation) AppendedRules() ([]schema.CustomerSegmentRule, bool) {
+	if len(m.appendrules) == 0 {
+		return nil, false
+	}
+	return m.appendrules, true
+}
+
+// ResetRules resets all changes to the "rules" field.
+func (m *CustomerSegmentMutation) ResetRules() {
+	m.rules = nil
+	m.appendrules = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CustomerSegmentMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CustomerSegmentMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CustomerSegment entity.
+// If the CustomerSegment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CustomerSegmentMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CustomerSegmentMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the CustomerSegmentMutation builder.
+func (m *CustomerSegmentMutation) Where(ps ...predicate.CustomerSegment) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CustomerSegmentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CustomerSegmentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CustomerSegment, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CustomerSegmentMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CustomerSegmentMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CustomerSegment).
+func (m *CustomerSegmentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CustomerSegmentMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, customersegment.FieldCreatedAt)
+	}
+	if m.store_id != nil {
+		fields = append(fields, customersegment.FieldStoreID)
+	}
+	if m.name != nil {
+		fields = append(fields, customersegment.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, customersegment.FieldDescription)
+	}
+	if m.rules != nil {
+		fields = append(fields, customersegment.FieldRules)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, customersegment.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CustomerSegmentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case customersegment.FieldCreatedAt:
+		return m.CreatedAt()
+	case customersegment.FieldStoreID:
+		return m.StoreID()
+	case customersegment.FieldName:
+		return m.Name()
+	case customersegment.FieldDescription:
+		return m.Description()
+	case customersegment.FieldRules:
+		return m.Rules()
+	case customersegment.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CustomerSegmentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case customersegment.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case customersegment.FieldStoreID:
+		return m.OldStoreID(ctx)
+	case customersegment.FieldName:
+		return m.OldName(ctx)
+	case customersegment.FieldDescription:
+		return m.OldDescription(ctx)
+	case customersegment.FieldRules:
+		return m.OldRules(ctx)
+	case customersegment.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown CustomerSegment field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CustomerSegmentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case customersegment.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case customersegment.FieldStoreID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreID(v)
+		return nil
+	case customersegment.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case customersegment.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case customersegment.FieldRules:
+		v, ok := value.([]schema.CustomerSegmentRule)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRules(v)
+		return nil
+	case customersegment.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CustomerSegment field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CustomerSegmentMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CustomerSegmentMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CustomerSegmentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CustomerSegment numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CustomerSegmentMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CustomerSegmentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CustomerSegmentMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown CustomerSegment nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CustomerSegmentMutation) ResetField(name string) error {
+	switch name {
+	case customersegment.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case customersegment.FieldStoreID:
+		m.ResetStoreID()
+		return nil
+	case customersegment.FieldName:
+		m.ResetName()
+		return nil
+	case customersegment.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case customersegment.FieldRules:
+		m.ResetRules()
+		return nil
+	case customersegment.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CustomerSegment field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CustomerSegmentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CustomerSegmentMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CustomerSegmentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CustomerSegmentMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CustomerSegmentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CustomerSegmentMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CustomerSegmentMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CustomerSegment unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CustomerSegmentMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CustomerSegment edge %s", name)
+}
+
+// DeliveryAreaMutation represents an operation that mutates the DeliveryArea nodes in the graph.
+type DeliveryAreaMutation struct {
+	config
+	op                    Op
+	typ                   string
+	id                    *uuid.UUID
+	created_at            *time.Time
+	store_id              *uuid.UUID
+	name                  *string
+	state                 *string
+	cities                *[]string
+	appendcities          []string
+	fee_minor             *int64
+	addfee_minor          *int64
+	currency              *string
+	estimated_days_min    *int
+	addestimated_days_min *int
+	estimated_days_max    *int
+	addestimated_days_max *int
+	active                *bool
+	updated_at            *time.Time
+	clearedFields         map[string]struct{}
+	done                  bool
+	oldValue              func(context.Context) (*DeliveryArea, error)
+	predicates            []predicate.DeliveryArea
+}
+
+var _ ent.Mutation = (*DeliveryAreaMutation)(nil)
+
+// deliveryareaOption allows management of the mutation configuration using functional options.
+type deliveryareaOption func(*DeliveryAreaMutation)
+
+// newDeliveryAreaMutation creates new mutation for the DeliveryArea entity.
+func newDeliveryAreaMutation(c config, op Op, opts ...deliveryareaOption) *DeliveryAreaMutation {
+	m := &DeliveryAreaMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDeliveryArea,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDeliveryAreaID sets the ID field of the mutation.
+func withDeliveryAreaID(id uuid.UUID) deliveryareaOption {
+	return func(m *DeliveryAreaMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DeliveryArea
+		)
+		m.oldValue = func(ctx context.Context) (*DeliveryArea, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DeliveryArea.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDeliveryArea sets the old DeliveryArea of the mutation.
+func withDeliveryArea(node *DeliveryArea) deliveryareaOption {
+	return func(m *DeliveryAreaMutation) {
+		m.oldValue = func(context.Context) (*DeliveryArea, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DeliveryAreaMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DeliveryAreaMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DeliveryArea entities.
+func (m *DeliveryAreaMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DeliveryAreaMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DeliveryAreaMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DeliveryArea.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *DeliveryAreaMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *DeliveryAreaMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *DeliveryAreaMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetStoreID sets the "store_id" field.
+func (m *DeliveryAreaMutation) SetStoreID(u uuid.UUID) {
+	m.store_id = &u
+}
+
+// StoreID returns the value of the "store_id" field in the mutation.
+func (m *DeliveryAreaMutation) StoreID() (r uuid.UUID, exists bool) {
+	v := m.store_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreID returns the old "store_id" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldStoreID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreID: %w", err)
+	}
+	return oldValue.StoreID, nil
+}
+
+// ResetStoreID resets all changes to the "store_id" field.
+func (m *DeliveryAreaMutation) ResetStoreID() {
+	m.store_id = nil
+}
+
+// SetName sets the "name" field.
+func (m *DeliveryAreaMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *DeliveryAreaMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *DeliveryAreaMutation) ResetName() {
+	m.name = nil
+}
+
+// SetState sets the "state" field.
+func (m *DeliveryAreaMutation) SetState(s string) {
+	m.state = &s
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *DeliveryAreaMutation) State() (r string, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldState(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *DeliveryAreaMutation) ResetState() {
+	m.state = nil
+}
+
+// SetCities sets the "cities" field.
+func (m *DeliveryAreaMutation) SetCities(s []string) {
+	m.cities = &s
+	m.appendcities = nil
+}
+
+// Cities returns the value of the "cities" field in the mutation.
+func (m *DeliveryAreaMutation) Cities() (r []string, exists bool) {
+	v := m.cities
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCities returns the old "cities" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldCities(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCities is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCities requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCities: %w", err)
+	}
+	return oldValue.Cities, nil
+}
+
+// AppendCities adds s to the "cities" field.
+func (m *DeliveryAreaMutation) AppendCities(s []string) {
+	m.appendcities = append(m.appendcities, s...)
+}
+
+// AppendedCities returns the list of values that were appended to the "cities" field in this mutation.
+func (m *DeliveryAreaMutation) AppendedCities() ([]string, bool) {
+	if len(m.appendcities) == 0 {
+		return nil, false
+	}
+	return m.appendcities, true
+}
+
+// ResetCities resets all changes to the "cities" field.
+func (m *DeliveryAreaMutation) ResetCities() {
+	m.cities = nil
+	m.appendcities = nil
+}
+
+// SetFeeMinor sets the "fee_minor" field.
+func (m *DeliveryAreaMutation) SetFeeMinor(i int64) {
+	m.fee_minor = &i
+	m.addfee_minor = nil
+}
+
+// FeeMinor returns the value of the "fee_minor" field in the mutation.
+func (m *DeliveryAreaMutation) FeeMinor() (r int64, exists bool) {
+	v := m.fee_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFeeMinor returns the old "fee_minor" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldFeeMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFeeMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFeeMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFeeMinor: %w", err)
+	}
+	return oldValue.FeeMinor, nil
+}
+
+// AddFeeMinor adds i to the "fee_minor" field.
+func (m *DeliveryAreaMutation) AddFeeMinor(i int64) {
+	if m.addfee_minor != nil {
+		*m.addfee_minor += i
+	} else {
+		m.addfee_minor = &i
+	}
+}
+
+// AddedFeeMinor returns the value that was added to the "fee_minor" field in this mutation.
+func (m *DeliveryAreaMutation) AddedFeeMinor() (r int64, exists bool) {
+	v := m.addfee_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFeeMinor resets all changes to the "fee_minor" field.
+func (m *DeliveryAreaMutation) ResetFeeMinor() {
+	m.fee_minor = nil
+	m.addfee_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *DeliveryAreaMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *DeliveryAreaMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *DeliveryAreaMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetEstimatedDaysMin sets the "estimated_days_min" field.
+func (m *DeliveryAreaMutation) SetEstimatedDaysMin(i int) {
+	m.estimated_days_min = &i
+	m.addestimated_days_min = nil
+}
+
+// EstimatedDaysMin returns the value of the "estimated_days_min" field in the mutation.
+func (m *DeliveryAreaMutation) EstimatedDaysMin() (r int, exists bool) {
+	v := m.estimated_days_min
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEstimatedDaysMin returns the old "estimated_days_min" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldEstimatedDaysMin(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEstimatedDaysMin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEstimatedDaysMin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEstimatedDaysMin: %w", err)
+	}
+	return oldValue.EstimatedDaysMin, nil
+}
+
+// AddEstimatedDaysMin adds i to the "estimated_days_min" field.
+func (m *DeliveryAreaMutation) AddEstimatedDaysMin(i int) {
+	if m.addestimated_days_min != nil {
+		*m.addestimated_days_min += i
+	} else {
+		m.addestimated_days_min = &i
+	}
+}
+
+// AddedEstimatedDaysMin returns the value that was added to the "estimated_days_min" field in this mutation.
+func (m *DeliveryAreaMutation) AddedEstimatedDaysMin() (r int, exists bool) {
+	v := m.addestimated_days_min
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetEstimatedDaysMin resets all changes to the "estimated_days_min" field.
+func (m *DeliveryAreaMutation) ResetEstimatedDaysMin() {
+	m.estimated_days_min = nil
+	m.addestimated_days_min = nil
+}
+
+// SetEstimatedDaysMax sets the "estimated_days_max" field.
+func (m *DeliveryAreaMutation) SetEstimatedDaysMax(i int) {
+	m.estimated_days_max = &i
+	m.addestimated_days_max = nil
+}
+
+// EstimatedDaysMax returns the value of the "estimated_days_max" field in the mutation.
+func (m *DeliveryAreaMutation) EstimatedDaysMax() (r int, exists bool) {
+	v := m.estimated_days_max
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEstimatedDaysMax returns the old "estimated_days_max" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldEstimatedDaysMax(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEstimatedDaysMax is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEstimatedDaysMax requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEstimatedDaysMax: %w", err)
+	}
+	return oldValue.EstimatedDaysMax, nil
+}
+
+// AddEstimatedDaysMax adds i to the "estimated_days_max" field.
+func (m *DeliveryAreaMutation) AddEstimatedDaysMax(i int) {
+	if m.addestimated_days_max != nil {
+		*m.addestimated_days_max += i
+	} else {
+		m.addestimated_days_max = &i
+	}
+}
+
+// AddedEstimatedDaysMax returns the value that was added to the "estimated_days_max" field in this mutation.
+func (m *DeliveryAreaMutation) AddedEstimatedDaysMax() (r int, exists bool) {
+	v := m.addestimated_days_max
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetEstimatedDaysMax resets all changes to the "estimated_days_max" field.
+func (m *DeliveryAreaMutation) ResetEstimatedDaysMax() {
+	m.estimated_days_max = nil
+	m.addestimated_days_max = nil
+}
+
+// SetActive sets the "active" field.
+func (m *DeliveryAreaMutation) SetActive(b bool) {
+	m.active = &b
+}
+
+// Active returns the value of the "active" field in the mutation.
+func (m *DeliveryAreaMutation) Active() (r bool, exists bool) {
+	v := m.active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActive returns the old "active" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActive: %w", err)
+	}
+	return oldValue.Active, nil
+}
+
+// ResetActive resets all changes to the "active" field.
+func (m *DeliveryAreaMutation) ResetActive() {
+	m.active = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *DeliveryAreaMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *DeliveryAreaMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the DeliveryArea entity.
+// If the DeliveryArea object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeliveryAreaMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *DeliveryAreaMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the DeliveryAreaMutation builder.
+func (m *DeliveryAreaMutation) Where(ps ...predicate.DeliveryArea) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DeliveryAreaMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DeliveryAreaMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DeliveryArea, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DeliveryAreaMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DeliveryAreaMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DeliveryArea).
+func (m *DeliveryAreaMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DeliveryAreaMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.created_at != nil {
+		fields = append(fields, deliveryarea.FieldCreatedAt)
+	}
+	if m.store_id != nil {
+		fields = append(fields, deliveryarea.FieldStoreID)
+	}
+	if m.name != nil {
+		fields = append(fields, deliveryarea.FieldName)
+	}
+	if m.state != nil {
+		fields = append(fields, deliveryarea.FieldState)
+	}
+	if m.cities != nil {
+		fields = append(fields, deliveryarea.FieldCities)
+	}
+	if m.fee_minor != nil {
+		fields = append(fields, deliveryarea.FieldFeeMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, deliveryarea.FieldCurrency)
+	}
+	if m.estimated_days_min != nil {
+		fields = append(fields, deliveryarea.FieldEstimatedDaysMin)
+	}
+	if m.estimated_days_max != nil {
+		fields = append(fields, deliveryarea.FieldEstimatedDaysMax)
+	}
+	if m.active != nil {
+		fields = append(fields, deliveryarea.FieldActive)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, deliveryarea.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DeliveryAreaMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case deliveryarea.FieldCreatedAt:
+		return m.CreatedAt()
+	case deliveryarea.FieldStoreID:
+		return m.StoreID()
+	case deliveryarea.FieldName:
+		return m.Name()
+	case deliveryarea.FieldState:
+		return m.State()
+	case deliveryarea.FieldCities:
+		return m.Cities()
+	case deliveryarea.FieldFeeMinor:
+		return m.FeeMinor()
+	case deliveryarea.FieldCurrency:
+		return m.Currency()
+	case deliveryarea.FieldEstimatedDaysMin:
+		return m.EstimatedDaysMin()
+	case deliveryarea.FieldEstimatedDaysMax:
+		return m.EstimatedDaysMax()
+	case deliveryarea.FieldActive:
+		return m.Active()
+	case deliveryarea.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DeliveryAreaMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case deliveryarea.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case deliveryarea.FieldStoreID:
+		return m.OldStoreID(ctx)
+	case deliveryarea.FieldName:
+		return m.OldName(ctx)
+	case deliveryarea.FieldState:
+		return m.OldState(ctx)
+	case deliveryarea.FieldCities:
+		return m.OldCities(ctx)
+	case deliveryarea.FieldFeeMinor:
+		return m.OldFeeMinor(ctx)
+	case deliveryarea.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case deliveryarea.FieldEstimatedDaysMin:
+		return m.OldEstimatedDaysMin(ctx)
+	case deliveryarea.FieldEstimatedDaysMax:
+		return m.OldEstimatedDaysMax(ctx)
+	case deliveryarea.FieldActive:
+		return m.OldActive(ctx)
+	case deliveryarea.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown DeliveryArea field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeliveryAreaMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case deliveryarea.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case deliveryarea.FieldStoreID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreID(v)
+		return nil
+	case deliveryarea.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case deliveryarea.FieldState:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case deliveryarea.FieldCities:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCities(v)
+		return nil
+	case deliveryarea.FieldFeeMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFeeMinor(v)
+		return nil
+	case deliveryarea.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case deliveryarea.FieldEstimatedDaysMin:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEstimatedDaysMin(v)
+		return nil
+	case deliveryarea.FieldEstimatedDaysMax:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEstimatedDaysMax(v)
+		return nil
+	case deliveryarea.FieldActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActive(v)
+		return nil
+	case deliveryarea.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DeliveryArea field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DeliveryAreaMutation) AddedFields() []string {
+	var fields []string
+	if m.addfee_minor != nil {
+		fields = append(fields, deliveryarea.FieldFeeMinor)
+	}
+	if m.addestimated_days_min != nil {
+		fields = append(fields, deliveryarea.FieldEstimatedDaysMin)
+	}
+	if m.addestimated_days_max != nil {
+		fields = append(fields, deliveryarea.FieldEstimatedDaysMax)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DeliveryAreaMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case deliveryarea.FieldFeeMinor:
+		return m.AddedFeeMinor()
+	case deliveryarea.FieldEstimatedDaysMin:
+		return m.AddedEstimatedDaysMin()
+	case deliveryarea.FieldEstimatedDaysMax:
+		return m.AddedEstimatedDaysMax()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeliveryAreaMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case deliveryarea.FieldFeeMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFeeMinor(v)
+		return nil
+	case deliveryarea.FieldEstimatedDaysMin:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEstimatedDaysMin(v)
+		return nil
+	case deliveryarea.FieldEstimatedDaysMax:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEstimatedDaysMax(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DeliveryArea numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DeliveryAreaMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DeliveryAreaMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DeliveryAreaMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DeliveryArea nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DeliveryAreaMutation) ResetField(name string) error {
+	switch name {
+	case deliveryarea.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case deliveryarea.FieldStoreID:
+		m.ResetStoreID()
+		return nil
+	case deliveryarea.FieldName:
+		m.ResetName()
+		return nil
+	case deliveryarea.FieldState:
+		m.ResetState()
+		return nil
+	case deliveryarea.FieldCities:
+		m.ResetCities()
+		return nil
+	case deliveryarea.FieldFeeMinor:
+		m.ResetFeeMinor()
+		return nil
+	case deliveryarea.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case deliveryarea.FieldEstimatedDaysMin:
+		m.ResetEstimatedDaysMin()
+		return nil
+	case deliveryarea.FieldEstimatedDaysMax:
+		m.ResetEstimatedDaysMax()
+		return nil
+	case deliveryarea.FieldActive:
+		m.ResetActive()
+		return nil
+	case deliveryarea.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown DeliveryArea field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DeliveryAreaMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DeliveryAreaMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DeliveryAreaMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DeliveryAreaMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DeliveryAreaMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DeliveryAreaMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DeliveryAreaMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown DeliveryArea unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DeliveryAreaMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown DeliveryArea edge %s", name)
 }
 
 // FlashSaleMutation represents an operation that mutates the FlashSale nodes in the graph.
@@ -23442,6 +25056,866 @@ func (m *StoreCreditEntryMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *StoreCreditEntryMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown StoreCreditEntry edge %s", name)
+}
+
+// StoreCustomerProfileMutation represents an operation that mutates the StoreCustomerProfile nodes in the graph.
+type StoreCustomerProfileMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	created_at       *time.Time
+	store_id         *uuid.UUID
+	buyer_account_id *uuid.UUID
+	name             *string
+	phone            *string
+	email            *string
+	tags             *[]string
+	appendtags       []string
+	marketing_opt_in *bool
+	updated_at       *time.Time
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*StoreCustomerProfile, error)
+	predicates       []predicate.StoreCustomerProfile
+}
+
+var _ ent.Mutation = (*StoreCustomerProfileMutation)(nil)
+
+// storecustomerprofileOption allows management of the mutation configuration using functional options.
+type storecustomerprofileOption func(*StoreCustomerProfileMutation)
+
+// newStoreCustomerProfileMutation creates new mutation for the StoreCustomerProfile entity.
+func newStoreCustomerProfileMutation(c config, op Op, opts ...storecustomerprofileOption) *StoreCustomerProfileMutation {
+	m := &StoreCustomerProfileMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeStoreCustomerProfile,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withStoreCustomerProfileID sets the ID field of the mutation.
+func withStoreCustomerProfileID(id uuid.UUID) storecustomerprofileOption {
+	return func(m *StoreCustomerProfileMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *StoreCustomerProfile
+		)
+		m.oldValue = func(ctx context.Context) (*StoreCustomerProfile, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().StoreCustomerProfile.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withStoreCustomerProfile sets the old StoreCustomerProfile of the mutation.
+func withStoreCustomerProfile(node *StoreCustomerProfile) storecustomerprofileOption {
+	return func(m *StoreCustomerProfileMutation) {
+		m.oldValue = func(context.Context) (*StoreCustomerProfile, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m StoreCustomerProfileMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m StoreCustomerProfileMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of StoreCustomerProfile entities.
+func (m *StoreCustomerProfileMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *StoreCustomerProfileMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *StoreCustomerProfileMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().StoreCustomerProfile.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *StoreCustomerProfileMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *StoreCustomerProfileMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the StoreCustomerProfile entity.
+// If the StoreCustomerProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreCustomerProfileMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *StoreCustomerProfileMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetStoreID sets the "store_id" field.
+func (m *StoreCustomerProfileMutation) SetStoreID(u uuid.UUID) {
+	m.store_id = &u
+}
+
+// StoreID returns the value of the "store_id" field in the mutation.
+func (m *StoreCustomerProfileMutation) StoreID() (r uuid.UUID, exists bool) {
+	v := m.store_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreID returns the old "store_id" field's value of the StoreCustomerProfile entity.
+// If the StoreCustomerProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreCustomerProfileMutation) OldStoreID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreID: %w", err)
+	}
+	return oldValue.StoreID, nil
+}
+
+// ResetStoreID resets all changes to the "store_id" field.
+func (m *StoreCustomerProfileMutation) ResetStoreID() {
+	m.store_id = nil
+}
+
+// SetBuyerAccountID sets the "buyer_account_id" field.
+func (m *StoreCustomerProfileMutation) SetBuyerAccountID(u uuid.UUID) {
+	m.buyer_account_id = &u
+}
+
+// BuyerAccountID returns the value of the "buyer_account_id" field in the mutation.
+func (m *StoreCustomerProfileMutation) BuyerAccountID() (r uuid.UUID, exists bool) {
+	v := m.buyer_account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBuyerAccountID returns the old "buyer_account_id" field's value of the StoreCustomerProfile entity.
+// If the StoreCustomerProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreCustomerProfileMutation) OldBuyerAccountID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBuyerAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBuyerAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBuyerAccountID: %w", err)
+	}
+	return oldValue.BuyerAccountID, nil
+}
+
+// ClearBuyerAccountID clears the value of the "buyer_account_id" field.
+func (m *StoreCustomerProfileMutation) ClearBuyerAccountID() {
+	m.buyer_account_id = nil
+	m.clearedFields[storecustomerprofile.FieldBuyerAccountID] = struct{}{}
+}
+
+// BuyerAccountIDCleared returns if the "buyer_account_id" field was cleared in this mutation.
+func (m *StoreCustomerProfileMutation) BuyerAccountIDCleared() bool {
+	_, ok := m.clearedFields[storecustomerprofile.FieldBuyerAccountID]
+	return ok
+}
+
+// ResetBuyerAccountID resets all changes to the "buyer_account_id" field.
+func (m *StoreCustomerProfileMutation) ResetBuyerAccountID() {
+	m.buyer_account_id = nil
+	delete(m.clearedFields, storecustomerprofile.FieldBuyerAccountID)
+}
+
+// SetName sets the "name" field.
+func (m *StoreCustomerProfileMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *StoreCustomerProfileMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the StoreCustomerProfile entity.
+// If the StoreCustomerProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreCustomerProfileMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *StoreCustomerProfileMutation) ResetName() {
+	m.name = nil
+}
+
+// SetPhone sets the "phone" field.
+func (m *StoreCustomerProfileMutation) SetPhone(s string) {
+	m.phone = &s
+}
+
+// Phone returns the value of the "phone" field in the mutation.
+func (m *StoreCustomerProfileMutation) Phone() (r string, exists bool) {
+	v := m.phone
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhone returns the old "phone" field's value of the StoreCustomerProfile entity.
+// If the StoreCustomerProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreCustomerProfileMutation) OldPhone(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhone is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhone requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhone: %w", err)
+	}
+	return oldValue.Phone, nil
+}
+
+// ClearPhone clears the value of the "phone" field.
+func (m *StoreCustomerProfileMutation) ClearPhone() {
+	m.phone = nil
+	m.clearedFields[storecustomerprofile.FieldPhone] = struct{}{}
+}
+
+// PhoneCleared returns if the "phone" field was cleared in this mutation.
+func (m *StoreCustomerProfileMutation) PhoneCleared() bool {
+	_, ok := m.clearedFields[storecustomerprofile.FieldPhone]
+	return ok
+}
+
+// ResetPhone resets all changes to the "phone" field.
+func (m *StoreCustomerProfileMutation) ResetPhone() {
+	m.phone = nil
+	delete(m.clearedFields, storecustomerprofile.FieldPhone)
+}
+
+// SetEmail sets the "email" field.
+func (m *StoreCustomerProfileMutation) SetEmail(s string) {
+	m.email = &s
+}
+
+// Email returns the value of the "email" field in the mutation.
+func (m *StoreCustomerProfileMutation) Email() (r string, exists bool) {
+	v := m.email
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEmail returns the old "email" field's value of the StoreCustomerProfile entity.
+// If the StoreCustomerProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreCustomerProfileMutation) OldEmail(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEmail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEmail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
+	}
+	return oldValue.Email, nil
+}
+
+// ClearEmail clears the value of the "email" field.
+func (m *StoreCustomerProfileMutation) ClearEmail() {
+	m.email = nil
+	m.clearedFields[storecustomerprofile.FieldEmail] = struct{}{}
+}
+
+// EmailCleared returns if the "email" field was cleared in this mutation.
+func (m *StoreCustomerProfileMutation) EmailCleared() bool {
+	_, ok := m.clearedFields[storecustomerprofile.FieldEmail]
+	return ok
+}
+
+// ResetEmail resets all changes to the "email" field.
+func (m *StoreCustomerProfileMutation) ResetEmail() {
+	m.email = nil
+	delete(m.clearedFields, storecustomerprofile.FieldEmail)
+}
+
+// SetTags sets the "tags" field.
+func (m *StoreCustomerProfileMutation) SetTags(s []string) {
+	m.tags = &s
+	m.appendtags = nil
+}
+
+// Tags returns the value of the "tags" field in the mutation.
+func (m *StoreCustomerProfileMutation) Tags() (r []string, exists bool) {
+	v := m.tags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTags returns the old "tags" field's value of the StoreCustomerProfile entity.
+// If the StoreCustomerProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreCustomerProfileMutation) OldTags(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTags: %w", err)
+	}
+	return oldValue.Tags, nil
+}
+
+// AppendTags adds s to the "tags" field.
+func (m *StoreCustomerProfileMutation) AppendTags(s []string) {
+	m.appendtags = append(m.appendtags, s...)
+}
+
+// AppendedTags returns the list of values that were appended to the "tags" field in this mutation.
+func (m *StoreCustomerProfileMutation) AppendedTags() ([]string, bool) {
+	if len(m.appendtags) == 0 {
+		return nil, false
+	}
+	return m.appendtags, true
+}
+
+// ClearTags clears the value of the "tags" field.
+func (m *StoreCustomerProfileMutation) ClearTags() {
+	m.tags = nil
+	m.appendtags = nil
+	m.clearedFields[storecustomerprofile.FieldTags] = struct{}{}
+}
+
+// TagsCleared returns if the "tags" field was cleared in this mutation.
+func (m *StoreCustomerProfileMutation) TagsCleared() bool {
+	_, ok := m.clearedFields[storecustomerprofile.FieldTags]
+	return ok
+}
+
+// ResetTags resets all changes to the "tags" field.
+func (m *StoreCustomerProfileMutation) ResetTags() {
+	m.tags = nil
+	m.appendtags = nil
+	delete(m.clearedFields, storecustomerprofile.FieldTags)
+}
+
+// SetMarketingOptIn sets the "marketing_opt_in" field.
+func (m *StoreCustomerProfileMutation) SetMarketingOptIn(b bool) {
+	m.marketing_opt_in = &b
+}
+
+// MarketingOptIn returns the value of the "marketing_opt_in" field in the mutation.
+func (m *StoreCustomerProfileMutation) MarketingOptIn() (r bool, exists bool) {
+	v := m.marketing_opt_in
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMarketingOptIn returns the old "marketing_opt_in" field's value of the StoreCustomerProfile entity.
+// If the StoreCustomerProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreCustomerProfileMutation) OldMarketingOptIn(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMarketingOptIn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMarketingOptIn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMarketingOptIn: %w", err)
+	}
+	return oldValue.MarketingOptIn, nil
+}
+
+// ResetMarketingOptIn resets all changes to the "marketing_opt_in" field.
+func (m *StoreCustomerProfileMutation) ResetMarketingOptIn() {
+	m.marketing_opt_in = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *StoreCustomerProfileMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *StoreCustomerProfileMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the StoreCustomerProfile entity.
+// If the StoreCustomerProfile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StoreCustomerProfileMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *StoreCustomerProfileMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the StoreCustomerProfileMutation builder.
+func (m *StoreCustomerProfileMutation) Where(ps ...predicate.StoreCustomerProfile) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the StoreCustomerProfileMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *StoreCustomerProfileMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.StoreCustomerProfile, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *StoreCustomerProfileMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *StoreCustomerProfileMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (StoreCustomerProfile).
+func (m *StoreCustomerProfileMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *StoreCustomerProfileMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.created_at != nil {
+		fields = append(fields, storecustomerprofile.FieldCreatedAt)
+	}
+	if m.store_id != nil {
+		fields = append(fields, storecustomerprofile.FieldStoreID)
+	}
+	if m.buyer_account_id != nil {
+		fields = append(fields, storecustomerprofile.FieldBuyerAccountID)
+	}
+	if m.name != nil {
+		fields = append(fields, storecustomerprofile.FieldName)
+	}
+	if m.phone != nil {
+		fields = append(fields, storecustomerprofile.FieldPhone)
+	}
+	if m.email != nil {
+		fields = append(fields, storecustomerprofile.FieldEmail)
+	}
+	if m.tags != nil {
+		fields = append(fields, storecustomerprofile.FieldTags)
+	}
+	if m.marketing_opt_in != nil {
+		fields = append(fields, storecustomerprofile.FieldMarketingOptIn)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, storecustomerprofile.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *StoreCustomerProfileMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case storecustomerprofile.FieldCreatedAt:
+		return m.CreatedAt()
+	case storecustomerprofile.FieldStoreID:
+		return m.StoreID()
+	case storecustomerprofile.FieldBuyerAccountID:
+		return m.BuyerAccountID()
+	case storecustomerprofile.FieldName:
+		return m.Name()
+	case storecustomerprofile.FieldPhone:
+		return m.Phone()
+	case storecustomerprofile.FieldEmail:
+		return m.Email()
+	case storecustomerprofile.FieldTags:
+		return m.Tags()
+	case storecustomerprofile.FieldMarketingOptIn:
+		return m.MarketingOptIn()
+	case storecustomerprofile.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *StoreCustomerProfileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case storecustomerprofile.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case storecustomerprofile.FieldStoreID:
+		return m.OldStoreID(ctx)
+	case storecustomerprofile.FieldBuyerAccountID:
+		return m.OldBuyerAccountID(ctx)
+	case storecustomerprofile.FieldName:
+		return m.OldName(ctx)
+	case storecustomerprofile.FieldPhone:
+		return m.OldPhone(ctx)
+	case storecustomerprofile.FieldEmail:
+		return m.OldEmail(ctx)
+	case storecustomerprofile.FieldTags:
+		return m.OldTags(ctx)
+	case storecustomerprofile.FieldMarketingOptIn:
+		return m.OldMarketingOptIn(ctx)
+	case storecustomerprofile.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown StoreCustomerProfile field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StoreCustomerProfileMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case storecustomerprofile.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case storecustomerprofile.FieldStoreID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreID(v)
+		return nil
+	case storecustomerprofile.FieldBuyerAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBuyerAccountID(v)
+		return nil
+	case storecustomerprofile.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case storecustomerprofile.FieldPhone:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhone(v)
+		return nil
+	case storecustomerprofile.FieldEmail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEmail(v)
+		return nil
+	case storecustomerprofile.FieldTags:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTags(v)
+		return nil
+	case storecustomerprofile.FieldMarketingOptIn:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMarketingOptIn(v)
+		return nil
+	case storecustomerprofile.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown StoreCustomerProfile field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *StoreCustomerProfileMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *StoreCustomerProfileMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StoreCustomerProfileMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown StoreCustomerProfile numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *StoreCustomerProfileMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(storecustomerprofile.FieldBuyerAccountID) {
+		fields = append(fields, storecustomerprofile.FieldBuyerAccountID)
+	}
+	if m.FieldCleared(storecustomerprofile.FieldPhone) {
+		fields = append(fields, storecustomerprofile.FieldPhone)
+	}
+	if m.FieldCleared(storecustomerprofile.FieldEmail) {
+		fields = append(fields, storecustomerprofile.FieldEmail)
+	}
+	if m.FieldCleared(storecustomerprofile.FieldTags) {
+		fields = append(fields, storecustomerprofile.FieldTags)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *StoreCustomerProfileMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *StoreCustomerProfileMutation) ClearField(name string) error {
+	switch name {
+	case storecustomerprofile.FieldBuyerAccountID:
+		m.ClearBuyerAccountID()
+		return nil
+	case storecustomerprofile.FieldPhone:
+		m.ClearPhone()
+		return nil
+	case storecustomerprofile.FieldEmail:
+		m.ClearEmail()
+		return nil
+	case storecustomerprofile.FieldTags:
+		m.ClearTags()
+		return nil
+	}
+	return fmt.Errorf("unknown StoreCustomerProfile nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *StoreCustomerProfileMutation) ResetField(name string) error {
+	switch name {
+	case storecustomerprofile.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case storecustomerprofile.FieldStoreID:
+		m.ResetStoreID()
+		return nil
+	case storecustomerprofile.FieldBuyerAccountID:
+		m.ResetBuyerAccountID()
+		return nil
+	case storecustomerprofile.FieldName:
+		m.ResetName()
+		return nil
+	case storecustomerprofile.FieldPhone:
+		m.ResetPhone()
+		return nil
+	case storecustomerprofile.FieldEmail:
+		m.ResetEmail()
+		return nil
+	case storecustomerprofile.FieldTags:
+		m.ResetTags()
+		return nil
+	case storecustomerprofile.FieldMarketingOptIn:
+		m.ResetMarketingOptIn()
+		return nil
+	case storecustomerprofile.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown StoreCustomerProfile field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *StoreCustomerProfileMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *StoreCustomerProfileMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *StoreCustomerProfileMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *StoreCustomerProfileMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *StoreCustomerProfileMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *StoreCustomerProfileMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *StoreCustomerProfileMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown StoreCustomerProfile unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *StoreCustomerProfileMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown StoreCustomerProfile edge %s", name)
 }
 
 // StoreRewardSettingsMutation represents an operation that mutates the StoreRewardSettings nodes in the graph.

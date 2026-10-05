@@ -13,6 +13,8 @@ import (
 	"zudomart/modules/orders/src/generated/ent/cartitem"
 	"zudomart/modules/orders/src/generated/ent/checkout"
 	"zudomart/modules/orders/src/generated/ent/customernote"
+	"zudomart/modules/orders/src/generated/ent/customersegment"
+	"zudomart/modules/orders/src/generated/ent/deliveryarea"
 	"zudomart/modules/orders/src/generated/ent/flashsale"
 	"zudomart/modules/orders/src/generated/ent/flashsaleitem"
 	"zudomart/modules/orders/src/generated/ent/idempotentrequest"
@@ -35,6 +37,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/shippingrule"
 	"zudomart/modules/orders/src/generated/ent/shippingzone"
 	"zudomart/modules/orders/src/generated/ent/storecreditentry"
+	"zudomart/modules/orders/src/generated/ent/storecustomerprofile"
 	"zudomart/modules/orders/src/generated/ent/storerewardsettings"
 	"zudomart/modules/orders/src/generated/ent/storesuccessstat"
 
@@ -101,35 +104,38 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			campaignredemption.Table:  campaignredemption.ValidColumn,
-			cart.Table:                cart.ValidColumn,
-			cartitem.Table:            cartitem.ValidColumn,
-			checkout.Table:            checkout.ValidColumn,
-			customernote.Table:        customernote.ValidColumn,
-			flashsale.Table:           flashsale.ValidColumn,
-			flashsaleitem.Table:       flashsaleitem.ValidColumn,
-			idempotentrequest.Table:   idempotentrequest.ValidColumn,
-			invoicecounter.Table:      invoicecounter.ValidColumn,
-			orderevent.Table:          orderevent.ValidColumn,
-			ordergroup.Table:          ordergroup.ValidColumn,
-			orderitem.Table:           orderitem.ValidColumn,
-			ordernote.Table:           ordernote.ValidColumn,
-			outboxevent.Table:         outboxevent.ValidColumn,
-			processedevent.Table:      processedevent.ValidColumn,
-			productbundle.Table:       productbundle.ValidColumn,
-			productbundleitem.Table:   productbundleitem.ValidColumn,
-			promotion.Table:           promotion.ValidColumn,
-			promotionredemption.Table: promotionredemption.ValidColumn,
-			reportexportjob.Table:     reportexportjob.ValidColumn,
-			returnrequest.Table:       returnrequest.ValidColumn,
-			shippingcalculation.Table: shippingcalculation.ValidColumn,
-			shippingdestination.Table: shippingdestination.ValidColumn,
-			shippingprofile.Table:     shippingprofile.ValidColumn,
-			shippingrule.Table:        shippingrule.ValidColumn,
-			shippingzone.Table:        shippingzone.ValidColumn,
-			storecreditentry.Table:    storecreditentry.ValidColumn,
-			storerewardsettings.Table: storerewardsettings.ValidColumn,
-			storesuccessstat.Table:    storesuccessstat.ValidColumn,
+			campaignredemption.Table:   campaignredemption.ValidColumn,
+			cart.Table:                 cart.ValidColumn,
+			cartitem.Table:             cartitem.ValidColumn,
+			checkout.Table:             checkout.ValidColumn,
+			customernote.Table:         customernote.ValidColumn,
+			customersegment.Table:      customersegment.ValidColumn,
+			deliveryarea.Table:         deliveryarea.ValidColumn,
+			flashsale.Table:            flashsale.ValidColumn,
+			flashsaleitem.Table:        flashsaleitem.ValidColumn,
+			idempotentrequest.Table:    idempotentrequest.ValidColumn,
+			invoicecounter.Table:       invoicecounter.ValidColumn,
+			orderevent.Table:           orderevent.ValidColumn,
+			ordergroup.Table:           ordergroup.ValidColumn,
+			orderitem.Table:            orderitem.ValidColumn,
+			ordernote.Table:            ordernote.ValidColumn,
+			outboxevent.Table:          outboxevent.ValidColumn,
+			processedevent.Table:       processedevent.ValidColumn,
+			productbundle.Table:        productbundle.ValidColumn,
+			productbundleitem.Table:    productbundleitem.ValidColumn,
+			promotion.Table:            promotion.ValidColumn,
+			promotionredemption.Table:  promotionredemption.ValidColumn,
+			reportexportjob.Table:      reportexportjob.ValidColumn,
+			returnrequest.Table:        returnrequest.ValidColumn,
+			shippingcalculation.Table:  shippingcalculation.ValidColumn,
+			shippingdestination.Table:  shippingdestination.ValidColumn,
+			shippingprofile.Table:      shippingprofile.ValidColumn,
+			shippingrule.Table:         shippingrule.ValidColumn,
+			shippingzone.Table:         shippingzone.ValidColumn,
+			storecreditentry.Table:     storecreditentry.ValidColumn,
+			storecustomerprofile.Table: storecustomerprofile.ValidColumn,
+			storerewardsettings.Table:  storerewardsettings.ValidColumn,
+			storesuccessstat.Table:     storesuccessstat.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)
