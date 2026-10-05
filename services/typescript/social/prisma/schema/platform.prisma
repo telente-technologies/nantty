@@ -14,12 +14,15 @@ model OutboxEvent {
 }
 
 model IdempotencyRecord {
-  accountId      String   @db.Uuid
+  accountId      String    @db.Uuid
   key            String
   requestPath    String
-  responseStatus Int
+  requestHash    String    @default("")
+  responseStatus Int?
   responseBody   Json?
-  createdAt      DateTime @default(now())
+  lockedUntil    DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
 
   @@id([accountId, key])
   @@index([createdAt])

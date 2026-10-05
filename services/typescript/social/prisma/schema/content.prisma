@@ -79,6 +79,10 @@ model Post {
   advisorySensitiveLabels   SensitiveLabel[] @default([])
   sensitiveLabelsReviewed   Boolean          @default(false)
   moderationVisibility ModerationVisibility @default(visible)
+  topics             String[]       @default([])
+  productIds         String[]       @default([])
+  clipEdit           Json?
+  location           Json?
   expiresAt          DateTime?
   deletedAt          DateTime?
   createdAt          DateTime       @default(now())
@@ -215,6 +219,10 @@ model PostDailyStat {
   postId      String @db.Uuid
   day         String
   impressions Int    @default(0)
+  videoViews  Int    @default(0)
+  watchTimeSeconds Int @default(0)
+  linkClicks  Int    @default(0)
+  newFollows  Int    @default(0)
 
   @@id([postId, day])
   @@map("post_daily_stats")

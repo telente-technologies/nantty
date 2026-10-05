@@ -43,6 +43,7 @@ model Conversation {
   kind                         ConversationKind
   directKey                    String?          @unique
   title                        String?
+  description                  String?
   photoMediaId                 String?          @db.Uuid
   createdById                  String           @db.Uuid
   storeId                      String?
@@ -107,6 +108,7 @@ model Message {
   expiresAt        DateTime?
   mediaExpiresAt   DateTime?
   mediaPurgedAt    DateTime?
+  hiddenAt         DateTime?
   createdAt        DateTime    @default(now())
 
   conversation Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)

@@ -27,3 +27,14 @@ model Block {
   @@index([blockedId])
   @@map("blocks")
 }
+
+model StoreFollow {
+  followerId String   @db.Uuid
+  storeId    String
+  createdAt  DateTime @default(now())
+
+  @@id([followerId, storeId])
+  @@index([storeId, createdAt])
+  @@index([followerId, createdAt])
+  @@map("store_follows")
+}
