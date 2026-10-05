@@ -1,6 +1,6 @@
 import type { LiveAdPlacement, LiveMonetizationInput } from "@/types/socialGraph.type";
 
-export const LIVE_AD_TERMS_VERSION = "2026-10-v1";
+export const LIVE_AD_TERMS_VERSION = "2026-10";
 
 export const LIVE_AD_TERMS_SUMMARY = [
   "ZudoMart may show ads in this live only in the places you choose.",

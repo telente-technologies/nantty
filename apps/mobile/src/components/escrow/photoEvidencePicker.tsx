@@ -14,10 +14,11 @@ export interface PhotoEvidencePickerProps {
   readonly maximumPhotos?: number;
   readonly addLabel?: string;
   readonly onUploadingChange?: (uploading: boolean) => void;
+  readonly keepPhotosOnDevice?: boolean;
   readonly privateUploadPurpose?: Extract<MediaUploadPurpose, "dispute_evidence" | "identity_document" | "verification_document">;
 }
 
-export function PhotoEvidencePicker({ photoUrls, onChangePhotoUrls, maximumPhotos = 5, addLabel = "Add photo", onUploadingChange, privateUploadPurpose = "dispute_evidence" }: PhotoEvidencePickerProps) {
+export function PhotoEvidencePicker({ photoUrls, onChangePhotoUrls, maximumPhotos = 5, addLabel = "Add photo", onUploadingChange, keepPhotosOnDevice = false, privateUploadPurpose = "dispute_evidence" }: PhotoEvidencePickerProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const [uploading, setUploading] = useState(false);
@@ -26,6 +27,10 @@ export function PhotoEvidencePicker({ photoUrls, onChangePhotoUrls, maximumPhoto
   const pickAndUploadEvidencePhoto = async () => {
     const picked = await pickSquareOrWideImageFromLibrary([4, 3]);
     if (!picked) return;
+    if (keepPhotosOnDevice) {
+      onChangePhotoUrls([...photoUrls, picked.uri]);
+      return;
+    }
     setUploadError(null);
     setUploading(true);
     onUploadingChange?.(true);

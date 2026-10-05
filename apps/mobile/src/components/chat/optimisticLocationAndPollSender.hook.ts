@@ -14,6 +14,8 @@ import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 import { useConversationMessageCache } from "./conversationMessageCache.hook";
 
+const MAXIMUM_LIVE_LOCATION_MS = 8 * 3_600_000 - 120_000;
+
 export interface OutgoingPollDraft {
   readonly question: string;
   readonly allowMultipleAnswers: boolean;
@@ -61,7 +63,7 @@ export function useOptimisticLocationAndPollSender(conversationId: string | unde
 
   const startSharingLiveLocation = useCallback(
     async (location: SharedLocation, durationMinutes: number) => {
-      const liveLocation = { ...location, liveUntil: new Date(Date.now() + durationMinutes * 60_000).toISOString() };
+      const liveLocation = { ...location, liveUntil: new Date(Date.now() + Math.min(durationMinutes * 60_000, MAXIMUM_LIVE_LOCATION_MS)).toISOString() };
       const delivered = await deliverOptimistically({ kind: "liveLocation", location: liveLocation }, () =>
         messagesService.sendLocationToConversation(conversationId!, "liveLocation", liveLocation, generateIdempotencyKey()),
       );

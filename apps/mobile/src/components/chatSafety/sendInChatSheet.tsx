@@ -7,7 +7,6 @@ import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/errorState";
-import { TextField } from "@/components/ui/input";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -29,10 +28,9 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
   const styles = useStyles();
   const queryClient = useQueryClient();
   const [selectedConversationIds, setSelectedConversationIds] = useState<readonly string[]>([]);
-  const [note, setNote] = useState("");
   const chats = useQuery({ queryKey: ["conversations", "share-targets"], queryFn: () => messagesService.fetchConversationList("all"), enabled: !!reference });
   const send = useMutation({
-    mutationFn: () => chatSafetyService.sendContentToChats({ conversationIds: selectedConversationIds, reference: reference!, note }),
+    mutationFn: () => chatSafetyService.sendContentToChats({ conversationIds: selectedConversationIds, reference: reference! }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       onClose();
@@ -44,7 +42,6 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
   useEffect(() => {
     if (!reference) {
       setSelectedConversationIds([]);
-      setNote("");
     }
   }, [reference]);
 
@@ -79,7 +76,6 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
             }}
           />
         )}
-        <TextField label="Add a note (optional)" value={note} onChangeText={setNote} maxLength={200} />
         <Button title={selectedConversationIds.length > 1 ? `Send to ${selectedConversationIds.length} chats` : "Send"} disabled={selectedConversationIds.length === 0} loading={send.isPending} onPress={() => send.mutate()} />
       </View>
     </BottomSheet>

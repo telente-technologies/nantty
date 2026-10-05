@@ -8,10 +8,9 @@ export interface ResendCodeTimerProps {
   readonly secondsUntilResendAllowed: number;
   readonly restartKey: number;
   readonly onPressResendCode: () => void;
-  readonly onPressRequestCall: () => void;
 }
 
-export function ResendCodeTimer({ secondsUntilResendAllowed, restartKey, onPressResendCode, onPressRequestCall }: ResendCodeTimerProps) {
+export function ResendCodeTimer({ secondsUntilResendAllowed, restartKey, onPressResendCode }: ResendCodeTimerProps) {
   const { colors } = useTheme();
   const [secondsRemaining, setSecondsRemaining] = useState(secondsUntilResendAllowed);
 
@@ -37,14 +36,6 @@ export function ResendCodeTimer({ secondsUntilResendAllowed, restartKey, onPress
           Resend code
         </Text>
       )}
-      <View style={styles.row}>
-        <Text size={12} lineHeight={16.8}>
-          Didn’t get a code?
-        </Text>
-        <Text size={12} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={onPressRequestCall}>
-          Request a call
-        </Text>
-      </View>
     </View>
   );
 }

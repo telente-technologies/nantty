@@ -60,13 +60,14 @@ export function ClipComposer({ mode, initialSoundId, onChangeMode, onClose, onPu
     onPublished,
     buildInput: (mediaIds) => {
       const trimmed = shiftMentionsAfterTrimmingStart(caption.text, caption.mentions);
+      const { slideshow } = buildClipCreateFields(items, mediaIds, edits);
       return {
         text: trimmed.text,
         mentions: trimmed.mentions,
         audience: "everyone",
         kind: "clip",
         mediaIds,
-        ...buildClipCreateFields(items, mediaIds, edits),
+        ...(slideshow ? { slideshow } : {}),
         ...buildPostSettingsFields(settings),
         ...(soundId ? { soundId } : {}),
       };
