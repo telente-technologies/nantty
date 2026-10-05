@@ -73,7 +73,7 @@
 .commentAction {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   min-height: var(--control-sm);
   padding-inline: var(--space-2);
   border: 0;

@@ -5,7 +5,7 @@
   --swipe-like-tint: #d3135f;
   position: relative;
   overflow-x: clip;
-  overflow-clip-margin: 12px;
+  overflow-clip-margin: var(--space-3);
   touch-action: pan-y;
 }
 

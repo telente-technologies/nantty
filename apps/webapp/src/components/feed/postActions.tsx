@@ -139,7 +139,7 @@ export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCoun
         onClose={() => setViewsInfoOpen(false)}
         title="Views"
         description="Times this post was seen. A view counts each time it appears on someone else's screen, including repeat views. The author's own views don't count."
-        layout="centered"
+        layout="sheet"
         size="small"
         icon={<ViewsActionIcon size={22} />}
         actions={[{ label: "Close", variant: "secondary", onClick: () => setViewsInfoOpen(false), isInitialFocus: true }]}

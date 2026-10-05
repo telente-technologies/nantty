@@ -1,10 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 
 import chipStyles from "@/components/ui/filterChips.module.css";
 import { CheckIcon, ChevronDownIcon } from "@/components/ui/icons";
+import { usePopoverMenu } from "@/components/ui/popoverMenu.hook";
+import sheetStyles from "@/components/ui/popoverMenu.module.css";
 import { feedsService } from "@/services/feeds.service";
 
 import styles from "./feedTopicFilterRow.module.css";
@@ -22,37 +23,36 @@ interface FeedTopicFilterRowProps {
 
 export function FeedTopicFilterRow({ feedMode, activeTopicId, onSelectMode, onSelectTopic }: FeedTopicFilterRowProps) {
   const followedQuery = useQuery({ queryKey: ["feed", "topics"], queryFn: feedsService.fetchMyFollowedTopics, retry: false });
-  const [isModeMenuOpen, setIsModeMenuOpen] = useState(false);
+  const { isOpen: modeMenuIsOpen, close: modeMenuClose, containerRef: modeMenuContainerRef, triggerRef: modeMenuTriggerRef, menuRef: modeMenuMenuRef, triggerProps: modeMenuTriggerProps, menuProps: modeMenuMenuProps } = usePopoverMenu();
 
   if (followedQuery.isLoading) return <div className={chipStyles.chipRowLoading} />;
   const topics = followedQuery.data ?? [];
   const isModeChipActive = feedMode === "following" || activeTopicId === null;
 
   const chooseMode = (mode: FeedMode) => {
-    setIsModeMenuOpen(false);
+    modeMenuClose(true);
     onSelectMode(mode);
     if (mode === "following") onSelectTopic(null);
   };
 
   return (
     <div className={styles.row}>
-      <div className={styles.modeWrap}>
+      <div className={styles.modeWrap} ref={modeMenuContainerRef}>
         <button
           type="button"
           className={[chipStyles.chip, isModeChipActive ? chipStyles.chipActive : ""].join(" ")}
-          aria-haspopup="true"
-          aria-expanded={isModeMenuOpen}
-          onClick={() => setIsModeMenuOpen((open) => !open)}
+          aria-label={`Feed type: ${feedModeLabels[feedMode]}`}
+          ref={modeMenuTriggerRef} {...modeMenuTriggerProps}
         >
           {feedModeLabels[feedMode]}
           <ChevronDownIcon size={14} />
         </button>
-        {isModeMenuOpen ? (
+        {modeMenuIsOpen ? (
           <>
-            <div className={styles.modeMenuBackdrop} onClick={() => setIsModeMenuOpen(false)} aria-hidden="true" />
-            <div className={styles.modeMenu} role="group" aria-label="Feed type">
+            <div className={sheetStyles.scrim} onPointerDown={() => modeMenuClose()} aria-hidden="true" />
+            <div className={[styles.modeMenu, sheetStyles.sheet].join(" ")} aria-label="Feed type" ref={modeMenuMenuRef} {...modeMenuMenuProps}>
               {(Object.keys(feedModeLabels) as FeedMode[]).map((mode) => (
-                <button key={mode} type="button" aria-pressed={feedMode === mode} className={styles.modeMenuItem} onClick={() => chooseMode(mode)}>
+                <button key={mode} type="button" role="menuitemradio" aria-checked={feedMode === mode} className={styles.modeMenuItem} onClick={() => chooseMode(mode)}>
                   {feedModeLabels[mode]}
                   {feedMode === mode ? <CheckIcon size={14} /> : null}
                 </button>

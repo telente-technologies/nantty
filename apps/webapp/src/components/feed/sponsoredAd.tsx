@@ -26,7 +26,6 @@ function useAdPlatform(): AdPlatform {
   return platform;
 }
 
-/** A link to an ad destination. External and store links use the signed redirect; internal links navigate in app and log the click here. */
 export function AdAction({ sponsored, placement, itemId, target, className, label, children }: AdActionProps) {
   const platform = useAdPlatform();
   const action = resolveAdTapAction(sponsored, target, platform);
@@ -95,7 +94,6 @@ function CarouselCard({ card, index, total, sponsored, placement, itemId }: { re
   );
 }
 
-/** Horizontal ad cards. Marked data-swipe-ignore so the feed swipe-to-like gesture never captures a sideways drag on it. */
 export function SponsoredCarousel({ sponsored, placement, itemId }: { readonly sponsored: SponsoredPlacement; readonly placement: AdPlacement; readonly itemId: ID }) {
   const cards = sponsored.cards ?? [];
   return (

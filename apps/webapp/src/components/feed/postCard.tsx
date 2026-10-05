@@ -11,6 +11,7 @@ import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { useSession } from "@/components/providers/sessionProvider";
 import { CopyrightCountdownBanner } from "@/components/copyright/copyrightCountdownBanner";
 import { Avatar, MediaImage } from "@/components/ui/media";
+import { findDownloadTargetForPost } from "@/utils/brandedDownload.util";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -86,6 +87,7 @@ export function PostCard({ post, priority = false, swipeable = false }: { readon
           targetId={post.id}
           canonicalPath={`/post/${post.id}`}
           isOwnContent={viewer?.id === post.author.id}
+          downloadTarget={findDownloadTargetForPost(post)}
         />
       </header>
 
