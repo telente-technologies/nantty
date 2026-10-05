@@ -318,6 +318,8 @@ channels:
         $ref: '#/components/messages/disputeClosed'
       disputeMessagePosted:
         $ref: '#/components/messages/disputeMessagePosted'
+      adBalanceTopUpFailed:
+        $ref: '#/components/messages/adBalanceTopUpFailed'
       coinPurchaseCompleted:
         $ref: '#/components/messages/coinPurchaseCompleted'
       coinPurchaseRefunded:
@@ -627,6 +629,7 @@ operations:
       - $ref: '#/channels/domainEvents/messages/disputeResolved'
       - $ref: '#/channels/domainEvents/messages/disputeClosed'
       - $ref: '#/channels/domainEvents/messages/disputeMessagePosted'
+      - $ref: '#/channels/domainEvents/messages/adBalanceTopUpFailed'
       - $ref: '#/channels/domainEvents/messages/coinPurchaseCompleted'
       - $ref: '#/channels/domainEvents/messages/coinPurchaseRefunded'
       - $ref: '#/channels/domainEvents/messages/coinTransferCompleted'
@@ -1478,6 +1481,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/disputeMessage.posted.v1.json' } }
+    adBalanceTopUpFailed:
+      name: adBalance.topUpFailed
+      headers: { type: object, properties: { eventType: { const: adBalance.topUpFailed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adBalance.topUpFailed.v1.json' } }
     coinPurchaseCompleted:
       name: coinPurchase.completed
       headers: { type: object, properties: { eventType: { const: coinPurchase.completed } } }

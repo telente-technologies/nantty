@@ -125,6 +125,9 @@
             },
             "conversationId": {
               "type": "string"
+            },
+            "inviteId": {
+              "type": "string"
             }
           }
         }

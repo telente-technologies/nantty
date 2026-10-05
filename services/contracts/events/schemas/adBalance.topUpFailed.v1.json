@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/adBalance.topUpFailed.v1.json",
+  "title": "AdBalanceTopUpFailed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "adAccountId",
+    "topUpId",
+    "reference",
+    "fundedByUserId",
+    "amount",
+    "failureReason"
+  ],
+  "properties": {
+    "adAccountId": {
+      "type": "string"
+    },
+    "topUpId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "fundedByUserId": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    },
+    "failureReason": {
+      "type": "string"
+    }
+  }
+}
