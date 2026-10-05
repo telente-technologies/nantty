@@ -2,6 +2,7 @@ package loginstaff
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"zudomart/modules/admin/src/container"
@@ -9,8 +10,10 @@ import (
 	"zudomart/modules/admin/src/generated/ent"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
+	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
 	"zudomart/modules/admin/src/modules/staffAuth/models"
 	"zudomart/modules/admin/src/modules/staffAuth/services"
+	"zudomart/modules/admin/src/types"
 	secrettokens "zudomart/modules/admin/src/utils/secretTokens"
 )
 
@@ -38,6 +41,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Log
 	if err != nil || !matches {
 		return models.LoginChallengeResult{}, services.StaffAuthService{Container: handler.Container}.RecordFailedPasswordAttemptAndMaybeLock(ctx, staff.ID, adminerrors.InvalidCredentials)
 	}
+	if !(services.StaffAuthService{Container: handler.Container}).StaffAddressAllowed(staff, types.ClientDetailsFromContext(ctx).IpAddress) {
+		return models.LoginChallengeResult{}, adminerrors.IpNotAllowed
+	}
 	return handler.createChallengeAfterPasswordProof(ctx, staff)
 }
 
@@ -57,5 +63,9 @@ func (handler Handler) createChallengeAfterPasswordProof(ctx context.Context, st
 		return tx.StaffLoginChallenge.Create().SetStaffID(staff.ID).SetTokenHash(secrettokens.HashOpaqueTokenForStorage(token)).
 			SetPurpose(purpose).SetExpiresAt(handler.Container.Now().Add(handler.Container.Settings.LoginChallengeTtl)).Exec(ctx)
 	})
-	return models.LoginChallengeResult{Status: status, ChallengeToken: token, ExpiresIn: int(handler.Container.Settings.LoginChallengeTtl / time.Second)}, err
+	passkeys, countErr := handler.Container.Client.StaffWebauthnCredential.Query().Where(staffwebauthncredential.StaffID(staff.ID)).Count(ctx)
+	return models.LoginChallengeResult{
+		Status: status, ChallengeToken: token, ExpiresIn: int(handler.Container.Settings.LoginChallengeTtl / time.Second),
+		PasskeyAvailable: purpose == staffloginchallenge.PurposeLogin && passkeys > 0 && handler.Container.WebAuthn != nil,
+	}, errors.Join(err, countErr)
 }

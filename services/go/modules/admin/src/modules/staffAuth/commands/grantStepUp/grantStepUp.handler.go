@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/admin/src/modules/staffAuth/models"
 	"zudomart/modules/admin/src/modules/staffAuth/services"
 	"zudomart/modules/admin/src/repositories"
+	jsonencoding "zudomart/modules/admin/src/utils/jsonEncoding"
 	"zudomart/platform/identityports"
 )
 
@@ -32,9 +33,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Ste
 	var staff *ent.StaffAccount
 	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		now := handler.Container.Now()
-		live, err := tx.StaffSession.Query().Where(staffsession.ID(sessionId), staffsession.StaffID(staffId), staffsession.RevokedAtIsNil(), staffsession.ExpiresAtGT(now)).Exist(ctx)
-		if err != nil || !live {
+		session, err := tx.StaffSession.Query().Where(staffsession.ID(sessionId), staffsession.StaffID(staffId), staffsession.RevokedAtIsNil(), staffsession.ExpiresAtGT(now)).ForUpdate().Only(ctx)
+		if err != nil {
 			rejection = adminerrors.InvalidRefreshToken
+			if ent.IsNotFound(err) {
+				return nil
+			}
 			return err
 		}
 		if staff, err = tx.StaffAccount.Query().Where(staffaccount.ID(staffId), staffaccount.StatusEQ(staffaccount.StatusActive)).ForUpdate().Only(ctx); err != nil {
@@ -48,10 +52,14 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Ste
 			rejection = adminerrors.TooManyMfaAttempts
 			return nil
 		}
-		step, matched, err := service.CheckTotpCodeAgainstStaff(staff, command.Code, now)
+		proof := services.SecondFactorProof{Method: command.Method, Code: command.Code, Credential: command.Credential}
+		matched, err := service.VerifySecondFactorInTransaction(ctx, tx, staff, proof, pendingStepUpCeremony(session, now), now)
 		if err != nil {
-			rejection = err
-			return nil
+			if services.IsRejection(err) {
+				rejection = err
+				return nil
+			}
+			return err
 		}
 		if !matched {
 			rejection = adminerrors.InvalidMfaCode
@@ -61,11 +69,15 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Ste
 			}
 			return err
 		}
-		if err := tx.StaffAccount.UpdateOneID(staff.ID).SetTotpLastUsedStep(step).SetFailedAttempts(0).Exec(ctx); err != nil {
+		if err := tx.StaffAccount.UpdateOneID(staff.ID).SetFailedAttempts(0).Exec(ctx); err != nil {
+			return err
+		}
+		if err := session.Update().ClearWebauthnSession().ClearWebauthnCeremony().ClearWebauthnExpiresAt().Exec(ctx); err != nil {
 			return err
 		}
 		return repositories.RecordAuditEventInTransaction(ctx, tx, identityports.AuditEvent{
 			ActorId: staff.ID.String(), ActorRole: string(staff.Role), Action: "staff.step_up_granted", SubjectType: "staff", SubjectId: staff.ID.String(),
+			After: jsonencoding.MustMarshalJson(map[string]string{"method": proof.MethodName(), "sessionId": sessionId.String()}),
 		})
 	})
 	if err != nil {
@@ -81,4 +93,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Ste
 	stepUpTtl := handler.Container.Settings.StepUpTtl
 	token, err := tokens.SignStaffStepUpToken(services.ClaimsForStaff(staff, sessionId), stepUpTtl)
 	return models.StepUpResult{StepUpToken: token, ExpiresIn: int(stepUpTtl / time.Second)}, err
+}
+
+func pendingStepUpCeremony(session *ent.StaffSession, now time.Time) []byte {
+	if session.WebauthnCeremony == nil || *session.WebauthnCeremony != staffsession.WebauthnCeremonyStepUp || session.WebauthnExpiresAt == nil || !session.WebauthnExpiresAt.After(now) {
+		return nil
+	}
+	return session.WebauthnSession
 }

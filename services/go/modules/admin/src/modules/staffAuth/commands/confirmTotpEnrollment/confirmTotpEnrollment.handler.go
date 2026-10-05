@@ -14,5 +14,5 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) (models.StaffSessionResult, error) {
-	return services.StaffAuthService{Container: handler.Container}.CompleteMfaChallenge(ctx, command.ChallengeToken, command.Code, staffloginchallenge.PurposeEnroll)
+	return services.StaffAuthService{Container: handler.Container}.CompleteMfaChallenge(ctx, command.ChallengeToken, services.SecondFactorProof{Method: "totp", Code: command.Code}, staffloginchallenge.PurposeEnroll)
 }
