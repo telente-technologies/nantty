@@ -31,6 +31,14 @@ type StoreMember struct {
 	Permissions []string `json:"permissions,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
+	// LocationIds holds the value of the "location_ids" field.
+	LocationIds []string `json:"location_ids,omitempty"`
+	// InvitedByAccountID holds the value of the "invited_by_account_id" field.
+	InvitedByAccountID *uuid.UUID `json:"invited_by_account_id,omitempty"`
+	// AcceptedAt holds the value of the "accepted_at" field.
+	AcceptedAt *time.Time `json:"accepted_at,omitempty"`
+	// LastActiveAt holds the value of the "last_active_at" field.
+	LastActiveAt *time.Time `json:"last_active_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -41,11 +49,13 @@ func (*StoreMember) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case storemember.FieldPermissions:
+		case storemember.FieldInvitedByAccountID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case storemember.FieldPermissions, storemember.FieldLocationIds:
 			values[i] = new([]byte)
 		case storemember.FieldRole, storemember.FieldStatus:
 			values[i] = new(sql.NullString)
-		case storemember.FieldCreatedAt, storemember.FieldUpdatedAt:
+		case storemember.FieldCreatedAt, storemember.FieldAcceptedAt, storemember.FieldLastActiveAt, storemember.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case storemember.FieldID, storemember.FieldStoreID, storemember.FieldAccountID:
 			values[i] = new(uuid.UUID)
@@ -108,6 +118,35 @@ func (_m *StoreMember) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Status = value.String
 			}
+		case storemember.FieldLocationIds:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field location_ids", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.LocationIds); err != nil {
+					return fmt.Errorf("unmarshal field location_ids: %w", err)
+				}
+			}
+		case storemember.FieldInvitedByAccountID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field invited_by_account_id", values[i])
+			} else if value.Valid {
+				_m.InvitedByAccountID = new(uuid.UUID)
+				*_m.InvitedByAccountID = *value.S.(*uuid.UUID)
+			}
+		case storemember.FieldAcceptedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field accepted_at", values[i])
+			} else if value.Valid {
+				_m.AcceptedAt = new(time.Time)
+				*_m.AcceptedAt = value.Time
+			}
+		case storemember.FieldLastActiveAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_active_at", values[i])
+			} else if value.Valid {
+				_m.LastActiveAt = new(time.Time)
+				*_m.LastActiveAt = value.Time
+			}
 		case storemember.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -167,6 +206,24 @@ func (_m *StoreMember) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)
+	builder.WriteString(", ")
+	builder.WriteString("location_ids=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LocationIds))
+	builder.WriteString(", ")
+	if v := _m.InvitedByAccountID; v != nil {
+		builder.WriteString("invited_by_account_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.AcceptedAt; v != nil {
+		builder.WriteString("accepted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.LastActiveAt; v != nil {
+		builder.WriteString("last_active_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

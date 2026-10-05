@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // StoreMemberUpdate is the builder for updating StoreMember entities.
@@ -72,6 +73,84 @@ func (_u *StoreMemberUpdate) SetNillableStatus(v *string) *StoreMemberUpdate {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
+	return _u
+}
+
+// SetLocationIds sets the "location_ids" field.
+func (_u *StoreMemberUpdate) SetLocationIds(v []string) *StoreMemberUpdate {
+	_u.mutation.SetLocationIds(v)
+	return _u
+}
+
+// AppendLocationIds appends value to the "location_ids" field.
+func (_u *StoreMemberUpdate) AppendLocationIds(v []string) *StoreMemberUpdate {
+	_u.mutation.AppendLocationIds(v)
+	return _u
+}
+
+// ClearLocationIds clears the value of the "location_ids" field.
+func (_u *StoreMemberUpdate) ClearLocationIds() *StoreMemberUpdate {
+	_u.mutation.ClearLocationIds()
+	return _u
+}
+
+// SetInvitedByAccountID sets the "invited_by_account_id" field.
+func (_u *StoreMemberUpdate) SetInvitedByAccountID(v uuid.UUID) *StoreMemberUpdate {
+	_u.mutation.SetInvitedByAccountID(v)
+	return _u
+}
+
+// SetNillableInvitedByAccountID sets the "invited_by_account_id" field if the given value is not nil.
+func (_u *StoreMemberUpdate) SetNillableInvitedByAccountID(v *uuid.UUID) *StoreMemberUpdate {
+	if v != nil {
+		_u.SetInvitedByAccountID(*v)
+	}
+	return _u
+}
+
+// ClearInvitedByAccountID clears the value of the "invited_by_account_id" field.
+func (_u *StoreMemberUpdate) ClearInvitedByAccountID() *StoreMemberUpdate {
+	_u.mutation.ClearInvitedByAccountID()
+	return _u
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (_u *StoreMemberUpdate) SetAcceptedAt(v time.Time) *StoreMemberUpdate {
+	_u.mutation.SetAcceptedAt(v)
+	return _u
+}
+
+// SetNillableAcceptedAt sets the "accepted_at" field if the given value is not nil.
+func (_u *StoreMemberUpdate) SetNillableAcceptedAt(v *time.Time) *StoreMemberUpdate {
+	if v != nil {
+		_u.SetAcceptedAt(*v)
+	}
+	return _u
+}
+
+// ClearAcceptedAt clears the value of the "accepted_at" field.
+func (_u *StoreMemberUpdate) ClearAcceptedAt() *StoreMemberUpdate {
+	_u.mutation.ClearAcceptedAt()
+	return _u
+}
+
+// SetLastActiveAt sets the "last_active_at" field.
+func (_u *StoreMemberUpdate) SetLastActiveAt(v time.Time) *StoreMemberUpdate {
+	_u.mutation.SetLastActiveAt(v)
+	return _u
+}
+
+// SetNillableLastActiveAt sets the "last_active_at" field if the given value is not nil.
+func (_u *StoreMemberUpdate) SetNillableLastActiveAt(v *time.Time) *StoreMemberUpdate {
+	if v != nil {
+		_u.SetLastActiveAt(*v)
+	}
+	return _u
+}
+
+// ClearLastActiveAt clears the value of the "last_active_at" field.
+func (_u *StoreMemberUpdate) ClearLastActiveAt() *StoreMemberUpdate {
+	_u.mutation.ClearLastActiveAt()
 	return _u
 }
 
@@ -161,6 +240,35 @@ func (_u *StoreMemberUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(storemember.FieldStatus, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.LocationIds(); ok {
+		_spec.SetField(storemember.FieldLocationIds, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedLocationIds(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, storemember.FieldLocationIds, value)
+		})
+	}
+	if _u.mutation.LocationIdsCleared() {
+		_spec.ClearField(storemember.FieldLocationIds, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.InvitedByAccountID(); ok {
+		_spec.SetField(storemember.FieldInvitedByAccountID, field.TypeUUID, value)
+	}
+	if _u.mutation.InvitedByAccountIDCleared() {
+		_spec.ClearField(storemember.FieldInvitedByAccountID, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.AcceptedAt(); ok {
+		_spec.SetField(storemember.FieldAcceptedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AcceptedAtCleared() {
+		_spec.ClearField(storemember.FieldAcceptedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LastActiveAt(); ok {
+		_spec.SetField(storemember.FieldLastActiveAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastActiveAtCleared() {
+		_spec.ClearField(storemember.FieldLastActiveAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(storemember.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -227,6 +335,84 @@ func (_u *StoreMemberUpdateOne) SetNillableStatus(v *string) *StoreMemberUpdateO
 	if v != nil {
 		_u.SetStatus(*v)
 	}
+	return _u
+}
+
+// SetLocationIds sets the "location_ids" field.
+func (_u *StoreMemberUpdateOne) SetLocationIds(v []string) *StoreMemberUpdateOne {
+	_u.mutation.SetLocationIds(v)
+	return _u
+}
+
+// AppendLocationIds appends value to the "location_ids" field.
+func (_u *StoreMemberUpdateOne) AppendLocationIds(v []string) *StoreMemberUpdateOne {
+	_u.mutation.AppendLocationIds(v)
+	return _u
+}
+
+// ClearLocationIds clears the value of the "location_ids" field.
+func (_u *StoreMemberUpdateOne) ClearLocationIds() *StoreMemberUpdateOne {
+	_u.mutation.ClearLocationIds()
+	return _u
+}
+
+// SetInvitedByAccountID sets the "invited_by_account_id" field.
+func (_u *StoreMemberUpdateOne) SetInvitedByAccountID(v uuid.UUID) *StoreMemberUpdateOne {
+	_u.mutation.SetInvitedByAccountID(v)
+	return _u
+}
+
+// SetNillableInvitedByAccountID sets the "invited_by_account_id" field if the given value is not nil.
+func (_u *StoreMemberUpdateOne) SetNillableInvitedByAccountID(v *uuid.UUID) *StoreMemberUpdateOne {
+	if v != nil {
+		_u.SetInvitedByAccountID(*v)
+	}
+	return _u
+}
+
+// ClearInvitedByAccountID clears the value of the "invited_by_account_id" field.
+func (_u *StoreMemberUpdateOne) ClearInvitedByAccountID() *StoreMemberUpdateOne {
+	_u.mutation.ClearInvitedByAccountID()
+	return _u
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (_u *StoreMemberUpdateOne) SetAcceptedAt(v time.Time) *StoreMemberUpdateOne {
+	_u.mutation.SetAcceptedAt(v)
+	return _u
+}
+
+// SetNillableAcceptedAt sets the "accepted_at" field if the given value is not nil.
+func (_u *StoreMemberUpdateOne) SetNillableAcceptedAt(v *time.Time) *StoreMemberUpdateOne {
+	if v != nil {
+		_u.SetAcceptedAt(*v)
+	}
+	return _u
+}
+
+// ClearAcceptedAt clears the value of the "accepted_at" field.
+func (_u *StoreMemberUpdateOne) ClearAcceptedAt() *StoreMemberUpdateOne {
+	_u.mutation.ClearAcceptedAt()
+	return _u
+}
+
+// SetLastActiveAt sets the "last_active_at" field.
+func (_u *StoreMemberUpdateOne) SetLastActiveAt(v time.Time) *StoreMemberUpdateOne {
+	_u.mutation.SetLastActiveAt(v)
+	return _u
+}
+
+// SetNillableLastActiveAt sets the "last_active_at" field if the given value is not nil.
+func (_u *StoreMemberUpdateOne) SetNillableLastActiveAt(v *time.Time) *StoreMemberUpdateOne {
+	if v != nil {
+		_u.SetLastActiveAt(*v)
+	}
+	return _u
+}
+
+// ClearLastActiveAt clears the value of the "last_active_at" field.
+func (_u *StoreMemberUpdateOne) ClearLastActiveAt() *StoreMemberUpdateOne {
+	_u.mutation.ClearLastActiveAt()
 	return _u
 }
 
@@ -345,6 +531,35 @@ func (_u *StoreMemberUpdateOne) sqlSave(ctx context.Context) (_node *StoreMember
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(storemember.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.LocationIds(); ok {
+		_spec.SetField(storemember.FieldLocationIds, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedLocationIds(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, storemember.FieldLocationIds, value)
+		})
+	}
+	if _u.mutation.LocationIdsCleared() {
+		_spec.ClearField(storemember.FieldLocationIds, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.InvitedByAccountID(); ok {
+		_spec.SetField(storemember.FieldInvitedByAccountID, field.TypeUUID, value)
+	}
+	if _u.mutation.InvitedByAccountIDCleared() {
+		_spec.ClearField(storemember.FieldInvitedByAccountID, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.AcceptedAt(); ok {
+		_spec.SetField(storemember.FieldAcceptedAt, field.TypeTime, value)
+	}
+	if _u.mutation.AcceptedAtCleared() {
+		_spec.ClearField(storemember.FieldAcceptedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LastActiveAt(); ok {
+		_spec.SetField(storemember.FieldLastActiveAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastActiveAtCleared() {
+		_spec.ClearField(storemember.FieldLastActiveAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(storemember.FieldUpdatedAt, field.TypeTime, value)

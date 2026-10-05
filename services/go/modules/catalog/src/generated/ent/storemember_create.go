@@ -76,6 +76,54 @@ func (_c *StoreMemberCreate) SetNillableStatus(v *string) *StoreMemberCreate {
 	return _c
 }
 
+// SetLocationIds sets the "location_ids" field.
+func (_c *StoreMemberCreate) SetLocationIds(v []string) *StoreMemberCreate {
+	_c.mutation.SetLocationIds(v)
+	return _c
+}
+
+// SetInvitedByAccountID sets the "invited_by_account_id" field.
+func (_c *StoreMemberCreate) SetInvitedByAccountID(v uuid.UUID) *StoreMemberCreate {
+	_c.mutation.SetInvitedByAccountID(v)
+	return _c
+}
+
+// SetNillableInvitedByAccountID sets the "invited_by_account_id" field if the given value is not nil.
+func (_c *StoreMemberCreate) SetNillableInvitedByAccountID(v *uuid.UUID) *StoreMemberCreate {
+	if v != nil {
+		_c.SetInvitedByAccountID(*v)
+	}
+	return _c
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (_c *StoreMemberCreate) SetAcceptedAt(v time.Time) *StoreMemberCreate {
+	_c.mutation.SetAcceptedAt(v)
+	return _c
+}
+
+// SetNillableAcceptedAt sets the "accepted_at" field if the given value is not nil.
+func (_c *StoreMemberCreate) SetNillableAcceptedAt(v *time.Time) *StoreMemberCreate {
+	if v != nil {
+		_c.SetAcceptedAt(*v)
+	}
+	return _c
+}
+
+// SetLastActiveAt sets the "last_active_at" field.
+func (_c *StoreMemberCreate) SetLastActiveAt(v time.Time) *StoreMemberCreate {
+	_c.mutation.SetLastActiveAt(v)
+	return _c
+}
+
+// SetNillableLastActiveAt sets the "last_active_at" field if the given value is not nil.
+func (_c *StoreMemberCreate) SetNillableLastActiveAt(v *time.Time) *StoreMemberCreate {
+	if v != nil {
+		_c.SetLastActiveAt(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *StoreMemberCreate) SetUpdatedAt(v time.Time) *StoreMemberCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -242,6 +290,22 @@ func (_c *StoreMemberCreate) createSpec() (*StoreMember, *sqlgraph.CreateSpec) {
 		_spec.SetField(storemember.FieldStatus, field.TypeString, value)
 		_node.Status = value
 	}
+	if value, ok := _c.mutation.LocationIds(); ok {
+		_spec.SetField(storemember.FieldLocationIds, field.TypeJSON, value)
+		_node.LocationIds = value
+	}
+	if value, ok := _c.mutation.InvitedByAccountID(); ok {
+		_spec.SetField(storemember.FieldInvitedByAccountID, field.TypeUUID, value)
+		_node.InvitedByAccountID = &value
+	}
+	if value, ok := _c.mutation.AcceptedAt(); ok {
+		_spec.SetField(storemember.FieldAcceptedAt, field.TypeTime, value)
+		_node.AcceptedAt = &value
+	}
+	if value, ok := _c.mutation.LastActiveAt(); ok {
+		_spec.SetField(storemember.FieldLastActiveAt, field.TypeTime, value)
+		_node.LastActiveAt = &value
+	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(storemember.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
@@ -337,6 +401,78 @@ func (u *StoreMemberUpsert) SetStatus(v string) *StoreMemberUpsert {
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *StoreMemberUpsert) UpdateStatus() *StoreMemberUpsert {
 	u.SetExcluded(storemember.FieldStatus)
+	return u
+}
+
+// SetLocationIds sets the "location_ids" field.
+func (u *StoreMemberUpsert) SetLocationIds(v []string) *StoreMemberUpsert {
+	u.Set(storemember.FieldLocationIds, v)
+	return u
+}
+
+// UpdateLocationIds sets the "location_ids" field to the value that was provided on create.
+func (u *StoreMemberUpsert) UpdateLocationIds() *StoreMemberUpsert {
+	u.SetExcluded(storemember.FieldLocationIds)
+	return u
+}
+
+// ClearLocationIds clears the value of the "location_ids" field.
+func (u *StoreMemberUpsert) ClearLocationIds() *StoreMemberUpsert {
+	u.SetNull(storemember.FieldLocationIds)
+	return u
+}
+
+// SetInvitedByAccountID sets the "invited_by_account_id" field.
+func (u *StoreMemberUpsert) SetInvitedByAccountID(v uuid.UUID) *StoreMemberUpsert {
+	u.Set(storemember.FieldInvitedByAccountID, v)
+	return u
+}
+
+// UpdateInvitedByAccountID sets the "invited_by_account_id" field to the value that was provided on create.
+func (u *StoreMemberUpsert) UpdateInvitedByAccountID() *StoreMemberUpsert {
+	u.SetExcluded(storemember.FieldInvitedByAccountID)
+	return u
+}
+
+// ClearInvitedByAccountID clears the value of the "invited_by_account_id" field.
+func (u *StoreMemberUpsert) ClearInvitedByAccountID() *StoreMemberUpsert {
+	u.SetNull(storemember.FieldInvitedByAccountID)
+	return u
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (u *StoreMemberUpsert) SetAcceptedAt(v time.Time) *StoreMemberUpsert {
+	u.Set(storemember.FieldAcceptedAt, v)
+	return u
+}
+
+// UpdateAcceptedAt sets the "accepted_at" field to the value that was provided on create.
+func (u *StoreMemberUpsert) UpdateAcceptedAt() *StoreMemberUpsert {
+	u.SetExcluded(storemember.FieldAcceptedAt)
+	return u
+}
+
+// ClearAcceptedAt clears the value of the "accepted_at" field.
+func (u *StoreMemberUpsert) ClearAcceptedAt() *StoreMemberUpsert {
+	u.SetNull(storemember.FieldAcceptedAt)
+	return u
+}
+
+// SetLastActiveAt sets the "last_active_at" field.
+func (u *StoreMemberUpsert) SetLastActiveAt(v time.Time) *StoreMemberUpsert {
+	u.Set(storemember.FieldLastActiveAt, v)
+	return u
+}
+
+// UpdateLastActiveAt sets the "last_active_at" field to the value that was provided on create.
+func (u *StoreMemberUpsert) UpdateLastActiveAt() *StoreMemberUpsert {
+	u.SetExcluded(storemember.FieldLastActiveAt)
+	return u
+}
+
+// ClearLastActiveAt clears the value of the "last_active_at" field.
+func (u *StoreMemberUpsert) ClearLastActiveAt() *StoreMemberUpsert {
+	u.SetNull(storemember.FieldLastActiveAt)
 	return u
 }
 
@@ -455,6 +591,90 @@ func (u *StoreMemberUpsertOne) SetStatus(v string) *StoreMemberUpsertOne {
 func (u *StoreMemberUpsertOne) UpdateStatus() *StoreMemberUpsertOne {
 	return u.Update(func(s *StoreMemberUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetLocationIds sets the "location_ids" field.
+func (u *StoreMemberUpsertOne) SetLocationIds(v []string) *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.SetLocationIds(v)
+	})
+}
+
+// UpdateLocationIds sets the "location_ids" field to the value that was provided on create.
+func (u *StoreMemberUpsertOne) UpdateLocationIds() *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.UpdateLocationIds()
+	})
+}
+
+// ClearLocationIds clears the value of the "location_ids" field.
+func (u *StoreMemberUpsertOne) ClearLocationIds() *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.ClearLocationIds()
+	})
+}
+
+// SetInvitedByAccountID sets the "invited_by_account_id" field.
+func (u *StoreMemberUpsertOne) SetInvitedByAccountID(v uuid.UUID) *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.SetInvitedByAccountID(v)
+	})
+}
+
+// UpdateInvitedByAccountID sets the "invited_by_account_id" field to the value that was provided on create.
+func (u *StoreMemberUpsertOne) UpdateInvitedByAccountID() *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.UpdateInvitedByAccountID()
+	})
+}
+
+// ClearInvitedByAccountID clears the value of the "invited_by_account_id" field.
+func (u *StoreMemberUpsertOne) ClearInvitedByAccountID() *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.ClearInvitedByAccountID()
+	})
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (u *StoreMemberUpsertOne) SetAcceptedAt(v time.Time) *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.SetAcceptedAt(v)
+	})
+}
+
+// UpdateAcceptedAt sets the "accepted_at" field to the value that was provided on create.
+func (u *StoreMemberUpsertOne) UpdateAcceptedAt() *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.UpdateAcceptedAt()
+	})
+}
+
+// ClearAcceptedAt clears the value of the "accepted_at" field.
+func (u *StoreMemberUpsertOne) ClearAcceptedAt() *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.ClearAcceptedAt()
+	})
+}
+
+// SetLastActiveAt sets the "last_active_at" field.
+func (u *StoreMemberUpsertOne) SetLastActiveAt(v time.Time) *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.SetLastActiveAt(v)
+	})
+}
+
+// UpdateLastActiveAt sets the "last_active_at" field to the value that was provided on create.
+func (u *StoreMemberUpsertOne) UpdateLastActiveAt() *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.UpdateLastActiveAt()
+	})
+}
+
+// ClearLastActiveAt clears the value of the "last_active_at" field.
+func (u *StoreMemberUpsertOne) ClearLastActiveAt() *StoreMemberUpsertOne {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.ClearLastActiveAt()
 	})
 }
 
@@ -742,6 +962,90 @@ func (u *StoreMemberUpsertBulk) SetStatus(v string) *StoreMemberUpsertBulk {
 func (u *StoreMemberUpsertBulk) UpdateStatus() *StoreMemberUpsertBulk {
 	return u.Update(func(s *StoreMemberUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetLocationIds sets the "location_ids" field.
+func (u *StoreMemberUpsertBulk) SetLocationIds(v []string) *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.SetLocationIds(v)
+	})
+}
+
+// UpdateLocationIds sets the "location_ids" field to the value that was provided on create.
+func (u *StoreMemberUpsertBulk) UpdateLocationIds() *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.UpdateLocationIds()
+	})
+}
+
+// ClearLocationIds clears the value of the "location_ids" field.
+func (u *StoreMemberUpsertBulk) ClearLocationIds() *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.ClearLocationIds()
+	})
+}
+
+// SetInvitedByAccountID sets the "invited_by_account_id" field.
+func (u *StoreMemberUpsertBulk) SetInvitedByAccountID(v uuid.UUID) *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.SetInvitedByAccountID(v)
+	})
+}
+
+// UpdateInvitedByAccountID sets the "invited_by_account_id" field to the value that was provided on create.
+func (u *StoreMemberUpsertBulk) UpdateInvitedByAccountID() *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.UpdateInvitedByAccountID()
+	})
+}
+
+// ClearInvitedByAccountID clears the value of the "invited_by_account_id" field.
+func (u *StoreMemberUpsertBulk) ClearInvitedByAccountID() *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.ClearInvitedByAccountID()
+	})
+}
+
+// SetAcceptedAt sets the "accepted_at" field.
+func (u *StoreMemberUpsertBulk) SetAcceptedAt(v time.Time) *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.SetAcceptedAt(v)
+	})
+}
+
+// UpdateAcceptedAt sets the "accepted_at" field to the value that was provided on create.
+func (u *StoreMemberUpsertBulk) UpdateAcceptedAt() *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.UpdateAcceptedAt()
+	})
+}
+
+// ClearAcceptedAt clears the value of the "accepted_at" field.
+func (u *StoreMemberUpsertBulk) ClearAcceptedAt() *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.ClearAcceptedAt()
+	})
+}
+
+// SetLastActiveAt sets the "last_active_at" field.
+func (u *StoreMemberUpsertBulk) SetLastActiveAt(v time.Time) *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.SetLastActiveAt(v)
+	})
+}
+
+// UpdateLastActiveAt sets the "last_active_at" field to the value that was provided on create.
+func (u *StoreMemberUpsertBulk) UpdateLastActiveAt() *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.UpdateLastActiveAt()
+	})
+}
+
+// ClearLastActiveAt clears the value of the "last_active_at" field.
+func (u *StoreMemberUpsertBulk) ClearLastActiveAt() *StoreMemberUpsertBulk {
+	return u.Update(func(s *StoreMemberUpsert) {
+		s.ClearLastActiveAt()
 	})
 }
 

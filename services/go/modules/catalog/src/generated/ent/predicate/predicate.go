@@ -24,6 +24,12 @@ type OutboxEvent func(*sql.Selector)
 // Product is the predicate function for product builders.
 type Product func(*sql.Selector)
 
+// ProductDailyView is the predicate function for productdailyview builders.
+type ProductDailyView func(*sql.Selector)
+
+// ProductImportJob is the predicate function for productimportjob builders.
+type ProductImportJob func(*sql.Selector)
+
 // ProductMedia is the predicate function for productmedia builders.
 type ProductMedia func(*sql.Selector)
 
@@ -38,6 +44,12 @@ type Review func(*sql.Selector)
 
 // Store is the predicate function for store builders.
 type Store func(*sql.Selector)
+
+// StoreAuditEntry is the predicate function for storeauditentry builders.
+type StoreAuditEntry func(*sql.Selector)
+
+// StoreDailyTraffic is the predicate function for storedailytraffic builders.
+type StoreDailyTraffic func(*sql.Selector)
 
 // StoreMember is the predicate function for storemember builders.
 type StoreMember func(*sql.Selector)

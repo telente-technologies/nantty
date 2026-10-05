@@ -263,6 +263,68 @@ var (
 			},
 		},
 	}
+	// ProductDailyViewsColumns holds the columns for the "product_daily_views" table.
+	ProductDailyViewsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "product_id", Type: field.TypeUUID},
+		{Name: "day", Type: field.TypeString, Size: 10},
+		{Name: "views", Type: field.TypeInt, Default: 0},
+	}
+	// ProductDailyViewsTable holds the schema information for the "product_daily_views" table.
+	ProductDailyViewsTable = &schema.Table{
+		Name:       "product_daily_views",
+		Columns:    ProductDailyViewsColumns,
+		PrimaryKey: []*schema.Column{ProductDailyViewsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "productdailyview_product_id_day",
+				Unique:  true,
+				Columns: []*schema.Column{ProductDailyViewsColumns[3], ProductDailyViewsColumns[4]},
+			},
+			{
+				Name:    "productdailyview_store_id_day",
+				Unique:  false,
+				Columns: []*schema.Column{ProductDailyViewsColumns[2], ProductDailyViewsColumns[4]},
+			},
+		},
+	}
+	// ProductImportJobsColumns holds the columns for the "product_import_jobs" table.
+	ProductImportJobsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "actor_account_id", Type: field.TypeUUID},
+		{Name: "location_id", Type: field.TypeUUID},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 128},
+		{Name: "request_hash", Type: field.TypeString, Size: 64},
+		{Name: "rows", Type: field.TypeBytes},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"queued", "running", "completed", "failed"}, Default: "queued"},
+		{Name: "created_count", Type: field.TypeInt, Default: 0},
+		{Name: "updated_count", Type: field.TypeInt, Default: 0},
+		{Name: "failures", Type: field.TypeJSON, Nullable: true},
+		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ProductImportJobsTable holds the schema information for the "product_import_jobs" table.
+	ProductImportJobsTable = &schema.Table{
+		Name:       "product_import_jobs",
+		Columns:    ProductImportJobsColumns,
+		PrimaryKey: []*schema.Column{ProductImportJobsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "productimportjob_store_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{ProductImportJobsColumns[2], ProductImportJobsColumns[5]},
+			},
+			{
+				Name:    "productimportjob_status_id",
+				Unique:  false,
+				Columns: []*schema.Column{ProductImportJobsColumns[8], ProductImportJobsColumns[0]},
+			},
+		},
+	}
 	// ProductMediaColumns holds the columns for the "product_media" table.
 	ProductMediaColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -459,6 +521,17 @@ var (
 		{Name: "rating_count", Type: field.TypeInt, Default: 0},
 		{Name: "moderation_visibility", Type: field.TypeString, Default: "visible"},
 		{Name: "shipping_country_codes", Type: field.TypeJSON, Nullable: true},
+		{Name: "locale", Type: field.TypeString, Size: 12, Default: "en-NG"},
+		{Name: "contact_phone", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "contact_email", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "contact_address", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "tax_rates", Type: field.TypeJSON, Nullable: true},
+		{Name: "prices_include_tax", Type: field.TypeBool, Default: false},
+		{Name: "policies", Type: field.TypeJSON, Nullable: true},
+		{Name: "notification_preferences", Type: field.TypeJSON, Nullable: true},
+		{Name: "tagline", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "opening_hours", Type: field.TypeJSON, Nullable: true},
+		{Name: "social_links", Type: field.TypeJSON, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// StoresTable holds the schema information for the "stores" table.
@@ -484,6 +557,66 @@ var (
 			},
 		},
 	}
+	// StoreAuditEntriesColumns holds the columns for the "store_audit_entries" table.
+	StoreAuditEntriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "actor_id", Type: field.TypeString, Size: 80},
+		{Name: "actor_name", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "actor_role", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "action", Type: field.TypeString, Size: 60},
+		{Name: "target_type", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "target_id", Type: field.TypeString, Nullable: true, Size: 80},
+		{Name: "summary", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "ip_address", Type: field.TypeString, Nullable: true, Size: 64},
+	}
+	// StoreAuditEntriesTable holds the schema information for the "store_audit_entries" table.
+	StoreAuditEntriesTable = &schema.Table{
+		Name:       "store_audit_entries",
+		Columns:    StoreAuditEntriesColumns,
+		PrimaryKey: []*schema.Column{StoreAuditEntriesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "storeauditentry_store_newest",
+				Unique:  false,
+				Columns: []*schema.Column{StoreAuditEntriesColumns[2], StoreAuditEntriesColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						StoreAuditEntriesColumns[0].Name: true,
+					},
+				},
+			},
+			{
+				Name:    "storeauditentry_store_id_actor_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{StoreAuditEntriesColumns[2], StoreAuditEntriesColumns[3], StoreAuditEntriesColumns[0]},
+			},
+		},
+	}
+	// StoreDailyTrafficsColumns holds the columns for the "store_daily_traffics" table.
+	StoreDailyTrafficsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "day", Type: field.TypeString, Size: 10},
+		{Name: "store_views", Type: field.TypeInt, Default: 0},
+		{Name: "product_views", Type: field.TypeInt, Default: 0},
+		{Name: "visitors", Type: field.TypeInt, Default: 0},
+	}
+	// StoreDailyTrafficsTable holds the schema information for the "store_daily_traffics" table.
+	StoreDailyTrafficsTable = &schema.Table{
+		Name:       "store_daily_traffics",
+		Columns:    StoreDailyTrafficsColumns,
+		PrimaryKey: []*schema.Column{StoreDailyTrafficsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "storedailytraffic_store_id_day",
+				Unique:  true,
+				Columns: []*schema.Column{StoreDailyTrafficsColumns[2], StoreDailyTrafficsColumns[3]},
+			},
+		},
+	}
 	// StoreMembersColumns holds the columns for the "store_members" table.
 	StoreMembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -493,6 +626,10 @@ var (
 		{Name: "role", Type: field.TypeString},
 		{Name: "permissions", Type: field.TypeJSON, Nullable: true},
 		{Name: "status", Type: field.TypeString, Default: "active"},
+		{Name: "location_ids", Type: field.TypeJSON, Nullable: true},
+		{Name: "invited_by_account_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "accepted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_active_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// StoreMembersTable holds the schema information for the "store_members" table.
@@ -553,11 +690,15 @@ var (
 		IdempotentRequestsTable,
 		OutboxEventsTable,
 		ProductsTable,
+		ProductDailyViewsTable,
+		ProductImportJobsTable,
 		ProductMediaTable,
 		ProductReactionsTable,
 		ProductVariantsTable,
 		ReviewsTable,
 		StoresTable,
+		StoreAuditEntriesTable,
+		StoreDailyTrafficsTable,
 		StoreMembersTable,
 		StoreVisitorsTable,
 	}

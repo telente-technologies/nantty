@@ -80,6 +80,30 @@ func (f ProductFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProductMutation", m)
 }
 
+// The ProductDailyViewFunc type is an adapter to allow the use of ordinary
+// function as ProductDailyView mutator.
+type ProductDailyViewFunc func(context.Context, *ent.ProductDailyViewMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProductDailyViewFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProductDailyViewMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProductDailyViewMutation", m)
+}
+
+// The ProductImportJobFunc type is an adapter to allow the use of ordinary
+// function as ProductImportJob mutator.
+type ProductImportJobFunc func(context.Context, *ent.ProductImportJobMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProductImportJobFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProductImportJobMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProductImportJobMutation", m)
+}
+
 // The ProductMediaFunc type is an adapter to allow the use of ordinary
 // function as ProductMedia mutator.
 type ProductMediaFunc func(context.Context, *ent.ProductMediaMutation) (ent.Value, error)
@@ -138,6 +162,30 @@ func (f StoreFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreMutation", m)
+}
+
+// The StoreAuditEntryFunc type is an adapter to allow the use of ordinary
+// function as StoreAuditEntry mutator.
+type StoreAuditEntryFunc func(context.Context, *ent.StoreAuditEntryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StoreAuditEntryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StoreAuditEntryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreAuditEntryMutation", m)
+}
+
+// The StoreDailyTrafficFunc type is an adapter to allow the use of ordinary
+// function as StoreDailyTraffic mutator.
+type StoreDailyTrafficFunc func(context.Context, *ent.StoreDailyTrafficMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StoreDailyTrafficFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StoreDailyTrafficMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreDailyTrafficMutation", m)
 }
 
 // The StoreMemberFunc type is an adapter to allow the use of ordinary

@@ -26,6 +26,10 @@ type Tx struct {
 	OutboxEvent *OutboxEventClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
+	// ProductDailyView is the client for interacting with the ProductDailyView builders.
+	ProductDailyView *ProductDailyViewClient
+	// ProductImportJob is the client for interacting with the ProductImportJob builders.
+	ProductImportJob *ProductImportJobClient
 	// ProductMedia is the client for interacting with the ProductMedia builders.
 	ProductMedia *ProductMediaClient
 	// ProductReaction is the client for interacting with the ProductReaction builders.
@@ -36,6 +40,10 @@ type Tx struct {
 	Review *ReviewClient
 	// Store is the client for interacting with the Store builders.
 	Store *StoreClient
+	// StoreAuditEntry is the client for interacting with the StoreAuditEntry builders.
+	StoreAuditEntry *StoreAuditEntryClient
+	// StoreDailyTraffic is the client for interacting with the StoreDailyTraffic builders.
+	StoreDailyTraffic *StoreDailyTrafficClient
 	// StoreMember is the client for interacting with the StoreMember builders.
 	StoreMember *StoreMemberClient
 	// StoreVisitor is the client for interacting with the StoreVisitor builders.
@@ -177,11 +185,15 @@ func (tx *Tx) init() {
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.Product = NewProductClient(tx.config)
+	tx.ProductDailyView = NewProductDailyViewClient(tx.config)
+	tx.ProductImportJob = NewProductImportJobClient(tx.config)
 	tx.ProductMedia = NewProductMediaClient(tx.config)
 	tx.ProductReaction = NewProductReactionClient(tx.config)
 	tx.ProductVariant = NewProductVariantClient(tx.config)
 	tx.Review = NewReviewClient(tx.config)
 	tx.Store = NewStoreClient(tx.config)
+	tx.StoreAuditEntry = NewStoreAuditEntryClient(tx.config)
+	tx.StoreDailyTraffic = NewStoreDailyTrafficClient(tx.config)
 	tx.StoreMember = NewStoreMemberClient(tx.config)
 	tx.StoreVisitor = NewStoreVisitorClient(tx.config)
 }
