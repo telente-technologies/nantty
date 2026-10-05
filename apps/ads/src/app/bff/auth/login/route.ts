@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   const identifier = typeof body?.identifier === "string" ? body.identifier.trim() : "";
   const password = typeof body?.password === "string" ? body.password : "";
   if (identifier.length < 3 || identifier.length > 254 || password.length < 1 || password.length > 128) {
-    return respondWithBffError(400, "VALIDATION_FAILED", "Enter your email or phone number and your password.");
+    return respondWithBffError(400, "VALIDATION_FAILED", "Enter your email or username and your password.");
   }
 
   const userAgent = request.headers.get("user-agent")?.slice(0, 200) ?? "zudomart-ads-manager";
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   if (loginResult.status !== 200) {
     const errorBody = readJsonFromBackendResult<ApiErrorBody>(loginResult);
     const isRateLimited = loginResult.status === 429;
-    return respondWithBffError(isRateLimited ? 429 : 401, errorBody?.code ?? "INVALID_CREDENTIALS", isRateLimited ? "Too many attempts. Wait a minute and try again." : errorBody?.message ?? "That email, phone or password is not right.");
+    return respondWithBffError(isRateLimited ? 429 : 401, errorBody?.code ?? "INVALID_CREDENTIALS", isRateLimited ? "Too many attempts. Wait a minute and try again." : errorBody?.message ?? "That email, username or password is not right.");
   }
   const loginBody = readJsonFromBackendResult<LoginResponseBody>(loginResult);
   if (!loginBody) return respondWithBffError(502, "BAD_UPSTREAM_RESPONSE", "Sign-in failed. Try again.");

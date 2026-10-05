@@ -1,6 +1,8 @@
 # Zudomart Ads Manager — API contract
 
-Consumer: `apps/ads` (Ads Manager, `ads.<domain>`). Implementer: `apps/api` (ads module), which calls the Python ads service (`services/python/intelligence`) for ranking, the second-price auction with quality score, pacing and frequency capping. This app never talks to the Python service.
+Consumer: `apps/ads` (Ads Manager, `ads.<domain>`). Implementer: go-ads (`services/go/modules/ads`, deployable `goAds`) behind the gateway; identity routes are go-identity, `/users/me/*` go-users. go-ads calls the Python ads service (`services/python/intelligence`) for ranking, the second-price auction with quality score, pacing and frequency capping. This app never talks to the Python service.
+
+Rows marked **mock-only** have no backend route yet; the mock adapter serves them and the real gateway returns 404.
 
 The browser never calls the API directly. It calls the Ads Manager BFF (`/bff/...`), which adds `Authorization: Bearer <accessToken>` from an httpOnly cookie, checks the ad-account role, verifies CSRF, and forwards to `GET|POST|PUT|PATCH|DELETE {ADS_API_URL}/api/v1/<path>`. The mock adapter (`src/mocks/**`, on by default in dev via `ADS_USE_MOCKS`) implements every endpoint below and is the reference behaviour.
 
@@ -8,9 +10,9 @@ The browser never calls the API directly. It calls the Ads Manager BFF (`/bff/..
 
 - **Schemas**: the TypeScript interfaces in `apps/ads/src/types/*.type.ts` are the canonical request/response shapes (names in the tables refer to them). Timestamps are ISO-8601 UTC strings; report dates are `YYYY-MM-DD` in the ad account time zone.
 - **Money**: always `Money = { amountMinor: integer, currency: ISO-4217 }` in the **ad account currency** (set from the account country at creation and immutable). Reject any request whose `currency` differs from the account currency with `400 VALIDATION_FAILED`. Never assume NGN.
-- **Errors**: `{ message: string, code: string, issues?: { path: string, message: string }[] }`. `path` uses dot notation matching the request body (e.g. `adSet.budget.amount`, `ads.0.creative.headline`). Common codes: `400 VALIDATION_FAILED`, `401 UNAUTHENTICATED`, `403 FORBIDDEN`, `404 NOT_FOUND | AD_ACCOUNT_NOT_FOUND`, `409 <STATE_CONFLICT>`, `402 INSUFFICIENT_BALANCE`, `413 FILE_TOO_LARGE`, `415 UNSUPPORTED_MEDIA_TYPE`, `422 CHUNK_CHECKSUM_MISMATCH`, `429 RATE_LIMITED`, `503 UPSTREAM_UNAVAILABLE`.
-- **Pagination**: `?cursor=<opaque>&limit=<1..200>` → `Page<T> = { items: T[], nextCursor: string | null, total: number }`.
-- **Idempotency**: `Idempotency-Key` (≤256 chars) is **required** on payment endpoints and accepted on every POST that creates something. Same key + same user + same path within 24h must replay the first response (status + body) and set `Idempotent-Replayed: true`.
+- **Errors**: `{ message: string, code: string, issues?: { path: string, message: string }[] }`. `path` uses dot notation matching the request body (e.g. `adSet.budget.amount`, `ads.0.creative.headline`). Common codes: `400 VALIDATION_FAILED` (generic `message: "Validation failed"`; the UI shows the first issue's message), `400 INVALID_JSON` (also for unknown fields and wrong number types: go-ads rejects unknown keys), `400 IDEMPOTENCY_KEY_REQUIRED`, `401 UNAUTHENTICATED` (gateway) / `UNAUTHORIZED` (service), `403 FORBIDDEN`, `404 NOT_FOUND | AD_ACCOUNT_NOT_FOUND`, `409 <STATE_CONFLICT>`, `402 INSUFFICIENT_BALANCE`, `413 MEDIA_TOO_LARGE`, `415 MEDIA_TYPE_NOT_SUPPORTED`, `429 RATE_LIMITED`, `503 UPSTREAM_UNAVAILABLE | STORAGE_UNAVAILABLE`.
+- **Pagination**: `?cursor=<opaque>&limit=<1..200>` (content sources: 1..50). Lists come back as `{ data: T[], nextCursor: string | null, total?: number }` (`total` only on campaigns, ad sets and ads). `adaptListEnvelope` (`src/utils/listEnvelope.util.ts`) turns that into the internal `Page<T> = { items, nextCursor, total }` at the client boundary, so `{ items }` in the tables below means the server's `{ data }`.
+- **Idempotency**: `Idempotency-Key` (8–128 of `A-Z a-z 0-9 - _`) is **required** (400 `IDEMPOTENCY_KEY_REQUIRED` without it) on `POST /ads/accounts`, `POST …/campaigns`, `POST …/campaigns/:id/duplicate`, `POST …/ad-sets`, `POST …/ads`, `POST …/audiences/customer-lists` and the payment endpoints. Same key + same request replays the first response and sets `Idempotent-Replayed: true`; same key + different request is 409 `IDEMPOTENCY_KEY_REUSED`.
 - **Delivery range**: list/detail endpoints for campaigns, ad sets and ads accept `?from=YYYY-MM-DD&to=YYYY-MM-DD`; `delivery` metrics cover that range (lifetime when omitted). `delivery.spentToday` is today's spend so far.
 - **Account scoping**: every `/ads/accounts/:accountId/...` handler must load the caller's membership for `:accountId` and enforce the permission below (404 `AD_ACCOUNT_NOT_FOUND` for non-members, 403 `FORBIDDEN` for insufficient role). The BFF checks the same matrix, but the API is the authority.
 
@@ -31,15 +33,17 @@ The browser never calls the API directly. It calls the Ads Manager BFF (`/bff/..
 |---|---|---|---|---|
 | POST | /auth/login | `{ identifier, password }` | `{ accessToken, refreshToken, expiresIn, tokenType, user: { id, name, username, email, avatarUrl } }` | 401 INVALID_CREDENTIALS, 429 |
 | POST | /auth/refresh | `{ refreshToken }` | `{ accessToken, refreshToken, expiresIn }` (rotates; old token revoked) | 401 INVALID_REFRESH_TOKEN |
-| POST | /auth/logout | `{ refreshToken }` | 204 | — |
+| POST | /auth/logout | `{ refreshToken }` + `Authorization: Bearer` (the gateway requires it; the BFF refreshes once on 401) | 204 | 401 |
 | GET | /users/me | — | `{ id, name, username, email, avatarUrl }` | 401 |
-| GET | /topics | — | `Topic[]` | — |
+| GET | /topics | — | `Topic[]` — **mock-only** | — |
+| PATCH | /users/me/preferences | `{ theme: "system" \| "light" \| "dark" }` (go-users; also takes `countryCode`) | 204 | 400 |
+| PUT | /users/me/consents | `{ policyVersion, consents: Record<string, boolean> }` (go-users) | consent state | 409 STALE_POLICY_VERSION |
 
 ## Accounts, members and invites
 
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|
-| GET | /ads/memberships | signed in | — | `{ items: AdAccountMembership[] }` (used by the BFF to cache roles) | 401 |
+| GET | /ads/memberships | signed in | — | `{ data: AdAccountMembership[] }` (used by the BFF to cache roles) | 401 |
 | GET | /ads/accounts | signed in | — | `{ items: AdAccountSummary[] }` (`myRole` = caller's role) | 401 |
 | POST | /ads/accounts | signed in | `CreateAdAccountRequest` | 201 `AdAccount` (caller becomes owner + admin; currency from country) | 400 (`storeId` not owned/managed, store already has an account, max 10 admin accounts) |
 | GET | /ads/business-profiles | signed in | — | `{ items: LinkedBusinessProfile[] }` stores the caller owns/manages | 401 |
@@ -50,13 +54,13 @@ The browser never calls the API directly. It calls the Ads Manager BFF (`/bff/..
 | PATCH | /ads/accounts/:accountId/members/:userId | members:manage | `{ role }` | `AdAccountMember` | 409 OWNER_ROLE_LOCKED |
 | DELETE | /ads/accounts/:accountId/members/:userId | members:manage | — | 204 | 409 OWNER_CANNOT_BE_REMOVED |
 | GET | /ads/accounts/:accountId/invites | account:view | — | `{ items: AdAccountInvite[] }` (pending only; never return tokens) | 404 |
-| POST | /ads/accounts/:accountId/invites | members:manage | `{ email, role }` or `{ username, role }` (an existing Zudomart user; a `username` that is an email address is looked up by email) | 201 `AdAccountInvite` (`username` of the invitee, never their email); emails a single-use link `https://ads.<domain>/invites/<token>` valid 7 days | 400 (duplicate pending, already member) |
+| POST | /ads/accounts/:accountId/invites | members:manage | `{ email, role }` or `{ username, role }` (an existing Zudomart user; a `username` that is an email address is looked up by email) | 201 `AdAccountInvite` (`username` of the invitee, never their email), valid 7 days. The accept link is `https://ads.<domain>/invites/<inviteId>`; go-ads does not send it yet (see backend gaps) | 400 (unknown user, duplicate pending, already member) |
 | DELETE | /ads/accounts/:accountId/invites/:inviteId | members:manage | — | 204 | 404 |
-| GET | /ads/invites/:token | signed in | — | `InvitePreview` | 404 INVITE_NOT_FOUND |
-| POST | /ads/invites/:token/accept | signed in | — | `{ accountId }` | 403 INVITE_EMAIL_MISMATCH, 404 |
-| GET | /ads/accounts/:accountId/activity | account:view | `?objectType=&cursor=&limit=` | `Page<ActivityEntry>` newest first | 404 |
+| GET | /ads/invites/:inviteId | signed in (invitee) | — | `InvitePreview` | 403 INVITE_USER_MISMATCH, 404 INVITE_NOT_FOUND |
+| POST | /ads/invites/:inviteId/accept | signed in (invitee) | — | `{ accountId }` | 403 INVITE_USER_MISMATCH, 404 |
+| GET | /ads/accounts/:accountId/activity | account:view | `?objectType=&cursor=&limit=` | `Page<ActivityEntryResponse>` newest first: `{ id, objectType, objectId, actor: string ("System" for automatic), summary, changes: object, createdAt }`. `accountsApi.listActivity` converts it to the UI `ActivityEntry` | 404 |
 
-Write an `ActivityEntry` for every mutation below (actor, summary, field changes), plus system entries for review decisions and rule actions.
+Write an activity entry for every mutation below (actor, summary, field changes), plus system entries for review decisions and rule actions.
 
 ## Campaigns, ad sets and ads
 
@@ -67,7 +71,7 @@ Status machine for campaigns, ad sets and ads: `draft → in_review → active �
 | GET | /ads/accounts/:accountId/campaigns | campaigns:view | `?status=&objective=&search=&from=&to=&cursor=&limit=` | `Page<Campaign>` | 404 |
 | POST | /ads/accounts/:accountId/campaigns | campaigns:manage | `CampaignDraftSubmission` (campaign + one ad set + 1–6 ads; `submitForReview`) + `Idempotency-Key` | 201 `CampaignDraftResult` | 400 (issues paths `campaign.*`, `adSet.*`, `ads.N.*`), 409 AD_ACCOUNT_NOT_ACTIVE |
 | GET | /ads/accounts/:accountId/campaigns/:campaignId | campaigns:view | `?from=&to=` | `Campaign` | 404 |
-| PATCH | /ads/accounts/:accountId/campaigns/:campaignId | campaigns:manage | `Partial<CampaignInput> & { status?: "active" \| "paused" }` (objective immutable) | `Campaign` | 400, 402 INSUFFICIENT_BALANCE, 409 STATUS_CHANGE_NOT_ALLOWED |
+| PATCH | /ads/accounts/:accountId/campaigns/:campaignId | campaigns:manage | `Partial<CampaignInput> & { status?: "active" \| "paused" }` (objective immutable; go-ads treats `null` as "unchanged", so `spendCap: null` and `schedule.endAt: null` cannot clear a value yet) | `Campaign` | 400, 402 INSUFFICIENT_BALANCE, 409 STATUS_CHANGE_NOT_ALLOWED |
 | DELETE | /ads/accounts/:accountId/campaigns/:campaignId | campaigns:manage | — | 204 (drafts only, cascades) | 409 ONLY_DRAFTS_CAN_BE_DELETED |
 | POST | /ads/accounts/:accountId/campaigns/:campaignId/submit | campaigns:manage | — | `Campaign` (draft/rejected ads → in_review) | 409 NOTHING_TO_SUBMIT |
 | POST | /ads/accounts/:accountId/campaigns/:campaignId/duplicate | campaigns:manage | — | 201 `Campaign` (draft copy with ad sets and ads) | 404 |
@@ -75,14 +79,14 @@ Status machine for campaigns, ad sets and ads: `draft → in_review → active �
 | GET | /ads/accounts/:accountId/ad-sets | campaigns:view | `?campaignId=&from=&to=` | `Page<AdSet>` | 404 |
 | POST | /ads/accounts/:accountId/ad-sets | campaigns:manage | `{ campaignId } & AdSetInput` | 201 `AdSet` (draft) | 400 |
 | GET | /ads/accounts/:accountId/ad-sets/:adSetId | campaigns:view | `?from=&to=` | `AdSet` | 404 |
-| PATCH | /ads/accounts/:accountId/ad-sets/:adSetId | campaigns:manage | `Partial<AdSetInput> & { status? }` | `AdSet` | 400, 409 |
+| PATCH | /ads/accounts/:accountId/ad-sets/:adSetId | campaigns:manage | `Partial<AdSetInput> & { status? }` (go-ads cannot clear `frequencyCap` or `schedule.endAt` with `null` yet) | `AdSet` | 400, 409 |
 | GET | /ads/accounts/:accountId/ads | campaigns:view | `?campaignId=&adSetId=&reviewStatus=&from=&to=` | `Page<Ad>` | 404 |
 | POST | /ads/accounts/:accountId/ads | campaigns:manage | `{ adSetId } & AdInput` | 201 `Ad` (draft) | 400 |
 | GET | /ads/accounts/:accountId/ads/:adId | campaigns:view | `?from=&to=` | `Ad` | 404 |
 | PATCH | /ads/accounts/:accountId/ads/:adId | campaigns:manage | `{ name?, creative?: CreativeInput, status? }` | `Ad` | 400, 409 |
 | POST | /ads/accounts/:accountId/ads/:adId/appeal | campaigns:manage | `{ message }` (20–1000 chars) | `Ad` with `review.appeal.status = "pending"` | 409 NOT_REJECTED, 409 ALREADY_APPEALED (one appeal per decision) |
 
-Validation (mirror `src/mocks/mockCampaignValidation.mock.ts`): name ≤120; lifetime budget needs `endAt`; `endAt > startAt`; daily budget ≥ per-currency minimum (NGN 100,000 minor, GHS 1,000, KES 10,000, ZAR 2,000, GBP/EUR/USD 100); `budgetLevel: "campaign"` ⇒ campaign budget and no ad-set budget, `"ad_set"` ⇒ the reverse; bid `amount` required unless `auto`; frequency cap 1–20 impressions per 1–30 days; ages 18–65 (65 = 65+); ≥1 location; custom audiences must belong to the account; placements ⊆ `feed, clips, mart, search, stories, live` (automatic = all); headline ≤60, primary text ≤500; destination `url` must be `https://` without credentials (see Rich ad formats for card, app-install and promoted-post rules); creative sources must belong to the account and be eligible.
+Validation (mirror `src/mocks/mockCampaignValidation.mock.ts`): name ≤120; lifetime budget needs `endAt`; `endAt > startAt`; daily budget ≥ per-currency minimum (NGN 100,000 minor, GHS 1,000, KES 10,000, ZAR 2,000, GBP/EUR/USD 100); `budgetLevel: "campaign"` ⇒ campaign budget and no ad-set budget, `"ad_set"` ⇒ the reverse; bid `amount` required unless `auto`; frequency cap 1–20 impressions per 1–30 days; ages 18–65 (65 = 65+); ≥1 location; custom audiences must belong to the account (go-ads currently rejects any `customAudienceIds` with "Custom audiences are not available yet."); placements ⊆ `feed, clips, mart, search, stories, live` (automatic = all); headline ≤60, primary text ≤500; destination `url` must be `https://` without credentials (see Rich ad formats for card, app-install and promoted-post rules); creative sources must belong to the account and be eligible.
 
 Policy review: run automated checks at submit (prohibited categories in `src/constants/policy.constant.ts`), then human review. On rejection set `review.policyCode` (a code from the policy page, used for `/policy#<code>` links) and a plain-language `policyReason`.
 
@@ -104,14 +108,13 @@ The rules live in `src/utils/adPlacementRules.util.ts` and must be mirrored serv
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|
 | GET | /ads/accounts/:accountId/content-sources | campaigns:view | `?type=post\|clip\|product\|live\|store&search=&cursor=&limit=` (live = scheduled or ongoing sessions with `live: CreativeLiveStream`) | `Page<ContentSource>` from the account owner's profile or linked store; `eligible:false` + `ineligibleReason` for giveaways, removed or age-restricted content | 404 |
-| POST | /ads/accounts/:accountId/creatives/preview | campaigns:view | `CreativeInput` | `Creative` resolved exactly as it will render (identity, verified badge, media, product price) | 400 |
-| GET | /ads/accounts/:accountId/creatives/media/:mediaId | campaigns:view | — | `UploadedMedia` (`processing` until transcoded) | 404 |
-| POST | /media/uploads | signed in | `{ fileName, mimeType, sizeBytes, purpose: "ad_creative", adAccountId, clientMetadata?: { width, height, durationSeconds } }` (hints read in the browser; the server re-derives them when processing) | 201 `UploadSession` | 413, 415 |
-| PUT | /media/uploads/:uploadId/chunks/:index | uploader | raw bytes, `Content-Type: application/octet-stream`, `X-Chunk-Sha256: <hex>` | `{ uploadedChunks: number[] }` | 400 BAD_CHUNK_INDEX/LENGTH, 422 CHUNK_CHECKSUM_MISMATCH |
-| POST | /media/uploads/:uploadId/complete | uploader | — | `{ mediaId, status: "processing" }` | 409 UPLOAD_INCOMPLETE |
-| GET | /media/:mediaId | signed in | — | file bytes (or a redirect to the CDN) | 404 |
+| POST | /ads/accounts/:accountId/creatives/preview | campaigns:view | `CreativeInput` | `Creative` resolved exactly as it will render (identity, verified badge, media, product price) — **mock-only** | 400 |
+| POST | /ads/accounts/:accountId/creatives/media/uploads | campaigns:manage | `{ fileName, mimeType, sizeBytes, clientMetadata?: { width, height, durationSeconds } \| null }` (integers; hints read in the browser) | 201 `MediaUploadIntent` `{ mediaId, uploadUrl, uploadHeaders, expiresAt }` | 400, 413 MEDIA_TOO_LARGE, 415 MEDIA_TYPE_NOT_SUPPORTED, 503 STORAGE_UNAVAILABLE |
+| PUT | `uploadUrl` | presigned | the whole file, with `uploadHeaders` (the browser sends it straight to object storage) | 200 | storage error |
+| POST | /ads/accounts/:accountId/creatives/media/:mediaId/complete | campaigns:manage | — | `{ mediaId, status: "processing" }` | 404 MEDIA_NOT_FOUND, 409 UPLOAD_INCOMPLETE |
+| GET | /ads/accounts/:accountId/creatives/media/:mediaId | campaigns:view | — | `UploadedMedia` (`processing` until transcoded) | 404 MEDIA_NOT_FOUND |
 
-Accepted: JPG, PNG, WebP, AVIF, MP4, MOV up to 500 MB; chunk size is chosen by the server (≤12 MB, the BFF body limit). Process to AVIF/WebP and H.264/HLS like other media; `Creative.media[].url` must be an https CDN URL whose origin is set as `ADS_MEDIA_URL` in the Ads Manager CSP.
+Accepted: JPG, PNG, WebP, AVIF, MP4, MOV up to 500 MB. `mediaIds` and card `mediaId`s in a `CreativeInput` must be ids from this flow (the generic `/media/uploads` ids are unknown to go-ads). The upload origin must be in `ADS_UPLOAD_URL` (CSP `connect-src`) and allow CORS `PUT` from the Ads Manager origin; `Creative.media[].url` must be an https CDN URL whose origin is set as `ADS_MEDIA_URL`. The mock returns a same-origin `uploadUrl` through the BFF (12 MB limit).
 
 ## Rich ad formats
 
@@ -140,8 +143,8 @@ Delivery (`POST /api/v1/ads/decide` in the social apps, not the Ads Manager): `D
 
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|
-| GET | /ads/locations | signed in | `?search=&countryCode=` | `{ items: LocationTarget[] }` (≤25; countries, states/regions, cities; Nigeria-first ordering) | — |
-| GET | /ads/behaviours | signed in | — | `{ items: Behaviour[] }` | — |
+| GET | /ads/locations | signed in | `?search=&countryCode=` | `{ items: LocationTarget[] }` (≤25; countries, states/regions, cities; Nigeria-first ordering) — **mock-only** | — |
+| GET | /ads/behaviours | signed in | — | `{ items: Behaviour[] }` — **mock-only** | — |
 | GET | /ads/accounts/:accountId/audiences | campaigns:view | `?type=` | `Page<CustomAudience>` | 404 |
 | POST | /ads/accounts/:accountId/audiences | audiences:manage | `CreateCustomAudienceRequest` | 201 `CustomAudience` (`building`, becomes `ready`/`too_small`) | 400 (store audience without linked store, lookalike of lookalike, similarity not 1–10) |
 | POST | /ads/accounts/:accountId/audiences/customer-lists | audiences:manage | `CustomerListUploadRequest` + `Idempotency-Key` | 201 `CustomAudience` | 400 unless every row is a 64-char lowercase SHA-256 hex; 1–50,000 rows per request |
@@ -156,17 +159,19 @@ Customer lists: the browser normalizes (emails trimmed + lowercased; phones to E
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|
 | GET | /ads/accounts/:accountId/billing | billing:view | — | `BillingOverview` | 404 |
-| POST | /ads/accounts/:accountId/billing/top-ups | billing:manage | `{ amount: Money, provider: "paystack", returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` `{ topUpId, reference, provider: "paystack", authorizationUrl, accessCode }` — the app opens the Paystack Popup with `accessCode` and falls back to redirecting to `authorizationUrl`; the callback returns to `https://ads.<domain><returnPath>?reference=<ref>` | 400 (amount outside min/max, wrong currency), 400 IDEMPOTENCY_KEY_REQUIRED |
-| GET | /ads/accounts/:accountId/billing/top-ups/:reference | billing:view | — | `TopUp` — verify with the provider server-side (and via webhook); credit the balance exactly once | 404 |
+| POST | /ads/accounts/:accountId/billing/top-ups **(mock-only)** | billing:manage | `{ amount: Money, provider: "paystack", returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` `{ topUpId, reference, provider: "paystack", authorizationUrl, accessCode }` — the app opens the Paystack Popup with `accessCode` and falls back to redirecting to `authorizationUrl`; the callback returns to `https://ads.<domain><returnPath>?reference=<ref>` | 400 (amount outside min/max, wrong currency), 400 IDEMPOTENCY_KEY_REQUIRED |
+| GET | /ads/accounts/:accountId/billing/top-ups/:reference **(mock-only)** | billing:view | — | `TopUp` — verify with the provider server-side (and via webhook); credit the balance exactly once | 404 |
 | GET | /ads/accounts/:accountId/billing/transactions | billing:view | `?cursor=&limit=` | `Page<BillingTransaction>` (signed amounts) | 404 |
-| GET | /ads/accounts/:accountId/billing/transactions/:transactionId/receipt | billing:view | — | PDF (`Content-Disposition: attachment`) | 404 NO_RECEIPT |
-| GET | /ads/accounts/:accountId/billing/invoices | billing:view | `?cursor=&limit=` | `Page<Invoice>` monthly, with VAT | 404 |
-| GET | /ads/accounts/:accountId/billing/invoices/:invoiceId/download | billing:view | — | PDF attachment | 404 |
+| GET | /ads/accounts/:accountId/billing/transactions/:transactionId/receipt **(mock-only)** | billing:view | — | PDF (`Content-Disposition: attachment`) | 404 NO_RECEIPT |
+| GET | /ads/accounts/:accountId/billing/invoices **(mock-only)** | billing:view | `?cursor=&limit=` | `Page<Invoice>` monthly, with VAT | 404 |
+| GET | /ads/accounts/:accountId/billing/invoices/:invoiceId/download **(mock-only)** | billing:view | — | PDF attachment | 404 |
 | PUT | /ads/accounts/:accountId/billing/spend-limit | billing:manage | `{ amount: Money \| null }` (monthly account spending limit; null removes) | `BillingOverview` | 400 |
-| PUT | /ads/accounts/:accountId/billing/funding-mode | billing:manage | `{ fundingMode }` | `BillingOverview` | 400 (card modes need a card) |
-| POST | /ads/accounts/:accountId/billing/payment-methods | billing:manage | `{ provider, returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` (card authorization through the Paystack Popup; returns with `?cardReference=`) | 400 |
-| POST | /ads/accounts/:accountId/billing/payment-methods/:paymentMethodId/default | billing:manage | — | `BillingOverview` | 404 |
-| DELETE | /ads/accounts/:accountId/billing/payment-methods/:paymentMethodId | billing:manage | — | 204 | 409 CARD_REQUIRED |
+| PUT | /ads/accounts/:accountId/billing/funding-mode | billing:manage | `{ fundingMode }` | `BillingOverview` | 400 (card modes need a card; go-ads accepts only `prepaid` for now) |
+| POST | /ads/accounts/:accountId/billing/payment-methods **(mock-only)** | billing:manage | `{ provider, returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` (card authorization through the Paystack Popup; returns with `?cardReference=`) | 400 |
+| POST | /ads/accounts/:accountId/billing/payment-methods/:paymentMethodId/default **(mock-only)** | billing:manage | — | `BillingOverview` | 404 |
+| DELETE | /ads/accounts/:accountId/billing/payment-methods/:paymentMethodId **(mock-only)** | billing:manage | — | 204 | 409 CARD_REQUIRED |
+
+go-money already serves `POST /ads/balance/top-ups` (`{ adAccountId, amount, returnTo }` + Idempotency-Key → `{ id, adAccountId, reference, status, amount, checkoutUrl }`, NGN only, ₦1,000–₦10,000,000), but go-ads does not credit the ad account from it and has no status lookup, so the app keeps the account-scoped top-up rows above (mock-only).
 
 Spend order: ad credits (Gold Premium monthly grant, expires at month end) → prepaid balance → default card (when `fundingMode` allows). Delivery pauses at zero available funds or when the monthly spend limit or a campaign `spendCap` is reached. Card data never touches Zudomart servers (tokenized by the provider). The mock adapter returns plain-text receipts and invoices; the real API returns PDFs. The ads service bills on actual second-price clearing; creator revenue share for ads served on creator content is computed server-side and is not exposed to advertisers.
 
@@ -176,6 +181,7 @@ Spend order: ad credits (Gold Premium monthly grant, expires at month end) → p
 |---|---|---|---|---|---|
 | GET | /ads/accounts/:accountId/reports | reports:view | `?from&to` (≤400 days) `&compareFrom&compareTo&breakdown=campaign\|ad_set\|ad\|placement\|day\|country\|state\|age\|gender&campaignIds=a,b&clickWindowDays=1\|7\|28&viewWindowDays=0\|1` | `ReportResponse` (totals, rows, daily series, optional comparison) | 400 |
 | GET | /ads/accounts/:accountId/reports/export | reports:view | same query + `&columns=spend,impressions,…` (`MetricKey`s) | `text/csv; charset=utf-8` with BOM, attachment; money columns in major units with the currency in the header; cells starting with `= + - @` prefixed with `'` | 400 |
+| GET | /ads/accounts/:accountId/reports/export.pdf | reports:view | same query | `application/pdf` attachment (served by go-ads, not used by the app yet) | 400 |
 | GET | /ads/accounts/:accountId/reports/scheduled | reports:view | — | `Page<ScheduledReport>` | 404 |
 | POST | /ads/accounts/:accountId/reports/scheduled | reports:view | `ScheduledReportInput` (1–10 recipients) | 201 `ScheduledReport` | 400 |
 | DELETE | /ads/accounts/:accountId/reports/scheduled/:scheduledReportId | reports:view | — | 204 | 404 |
@@ -183,6 +189,8 @@ Spend order: ad credits (Gold Premium monthly grant, expires at month end) → p
 Metric definitions: CTR = clicks/impressions; CPC = spend/clicks; CPM = spend/impressions×1000; frequency = impressions/reach; ROAS = conversionValue/spend; `conversions`/`conversionValue` are Zudomart store orders attributed within the chosen click/view windows (last-touch; one order counted once); `averageWatchPercent` is a 0–1 ratio. Demographic rows under 100 people are merged into "Other" to protect privacy.
 
 ## Tools
+
+Every row in this section is **mock-only**.
 
 | Method | Path | Permission | Request | Response | Errors |
 |---|---|---|---|---|---|
