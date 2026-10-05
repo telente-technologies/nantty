@@ -164,3 +164,11 @@ describe("routes added after the full API sweep", () => {
     expect(route).toMatchObject({ upstream: "live", authentication: "optional", rawBodyPassthrough: true });
   });
 });
+
+describe("seller order refunds", () => {
+  it("routes the seller refund to commerce with authentication", () => {
+    const route = resolveUpstreamRouteForRequest("POST", "/api/v1/seller/orders/0b7c2f4e-1111-4a2b-9c3d-123456789abc/refunds");
+    expect(route?.upstream).toBe("commerce");
+    expect(route?.authentication).toBe("required");
+  });
+});
