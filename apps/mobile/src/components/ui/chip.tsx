@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet } from "react-native";
-import Svg, { Path } from "react-native-svg";
 
+import { CaretDownIcon } from "@/components/icons/phosphorGlyphs";
 import { makeThemedStyles, useTheme } from "@/theme";
 
 import { Text } from "./text";
@@ -28,9 +28,7 @@ export function Chip({ label, selected = false, onPress, kind = "topic", dropdow
         {label}
       </Text>
       {dropdown ? (
-        <Svg width={12} height={12} viewBox="0 0 12 12">
-          <Path d="M1.8 3.2h8.4a.6.6 0 0 1 .47.98l-4.2 5.1a.6.6 0 0 1-.93 0l-4.2-5.1a.6.6 0 0 1 .46-.98Z" fill={colors.text} />
-        </Svg>
+        <CaretDownIcon size={12} weight="fill" color={colors.text} />
       ) : null}
     </Pressable>
   );
