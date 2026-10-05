@@ -17,6 +17,9 @@ describe("notifications routes", () => {
     ["GET", "/api/v1/admin/legal/versions/v1/notice-draft", "optional"],
     ["POST", "/api/v1/admin/legal/versions/v1/notice-draft/test-send", "optional"],
     ["GET", "/api/v1/admin/legal/versions/v1/notice-preview", "optional"],
+    ["GET", "/api/v1/admin/email-templates", "optional"],
+    ["GET", "/api/v1/admin/email-templates/supportTicketReceived/preview", "optional"],
+    ["POST", "/api/v1/admin/email-templates/policy-updated/preview", "optional"],
     ["GET", "/api/v1/admin/legal/versions/v1", "identity-fallback"],
   ];
 
