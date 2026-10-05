@@ -23,11 +23,13 @@ export function MfaEnrollmentForm() {
   const [completion, setCompletion] = useState<{ redirectTo: string; recoveryCodes: readonly string[] } | null>(null);
   const [hasSavedCodes, setHasSavedCodes] = useState(false);
 
+  const [loadAttempt, setLoadAttempt] = useState(0);
+
   useEffect(() => {
     sendRequestToAdminConsoleServer<EnrollmentSecret>("/bff/auth/mfa/enrollment", { method: "POST", promptForStepUp: false })
       .then(setSecret)
       .catch((error: unknown) => setLoadError(readErrorMessageForDisplay(error)));
-  }, []);
+  }, [loadAttempt]);
 
   async function confirmCode(event: FormEvent) {
     event.preventDefault();
@@ -43,7 +45,17 @@ export function MfaEnrollmentForm() {
     }
   }
 
-  if (loadError) return <ErrorBlock message={loadError} />;
+  if (loadError) {
+    return (
+      <ErrorBlock
+        message={loadError}
+        onRetry={() => {
+          setLoadError(null);
+          setLoadAttempt((attempt) => attempt + 1);
+        }}
+      />
+    );
+  }
   if (!secret) return <LoadingBlock label="Preparing your authenticator key" lines={3} />;
   if (completion) {
     return (

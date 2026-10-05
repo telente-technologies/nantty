@@ -14,7 +14,7 @@ export function AuthCard({ environment, title, description, children, footer }: 
     <div className={styles.page}>
       <section className={styles.brandPanel} aria-label="About this console">
         <div className={styles.brandRow}>
-          <ZudomartWordmark productLabel="Admin" tone="onDark" height={28} />
+          <ZudomartWordmark productLabel="Admin" tone="onDark" height={28} withSymbol />
           <EnvironmentBadge environment={environment} />
         </div>
         <div className={styles.brandBody}>
