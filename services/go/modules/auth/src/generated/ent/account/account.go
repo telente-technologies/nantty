@@ -34,10 +34,6 @@ const (
 	FieldEmailVerifiedAt = "email_verified_at"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldPhoneHash holds the string denoting the phone_hash field in the database.
-	FieldPhoneHash = "phone_hash"
-	// FieldPhoneVerifiedAt holds the string denoting the phone_verified_at field in the database.
-	FieldPhoneVerifiedAt = "phone_verified_at"
 	// FieldMustChangePassword holds the string denoting the must_change_password field in the database.
 	FieldMustChangePassword = "must_change_password"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -76,8 +72,6 @@ var Columns = []string{
 	FieldRoles,
 	FieldEmailVerifiedAt,
 	FieldStatus,
-	FieldPhoneHash,
-	FieldPhoneVerifiedAt,
 	FieldMustChangePassword,
 	FieldUpdatedAt,
 }
@@ -105,8 +99,6 @@ var (
 	NameValidator func(string) error
 	// DefaultRoles holds the default value on creation for the "roles" field.
 	DefaultRoles []string
-	// PhoneHashValidator is a validator for the "phone_hash" field. It is called by the builders before save.
-	PhoneHashValidator func(string) error
 	// DefaultMustChangePassword holds the default value on creation for the "must_change_password" field.
 	DefaultMustChangePassword bool
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -192,16 +184,6 @@ func ByEmailVerifiedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
-}
-
-// ByPhoneHash orders the results by the phone_hash field.
-func ByPhoneHash(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPhoneHash, opts...).ToFunc()
-}
-
-// ByPhoneVerifiedAt orders the results by the phone_verified_at field.
-func ByPhoneVerifiedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPhoneVerifiedAt, opts...).ToFunc()
 }
 
 // ByMustChangePassword orders the results by the must_change_password field.

@@ -20,8 +20,6 @@ var (
 		{Name: "roles", Type: field.TypeJSON},
 		{Name: "email_verified_at", Type: field.TypeTime, Nullable: true},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "deactivated", "suspended", "banned", "deleted"}, Default: "active"},
-		{Name: "phone_hash", Type: field.TypeString, Nullable: true, Size: 64},
-		{Name: "phone_verified_at", Type: field.TypeTime, Nullable: true},
 		{Name: "must_change_password", Type: field.TypeBool, Default: false},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -48,7 +46,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "destination", Type: field.TypeString, Size: 254},
-		{Name: "purpose", Type: field.TypeEnum, Enums: []string{"signup", "reset", "login", "signup_verified", "reset_verified", "login_verified"}},
+		{Name: "purpose", Type: field.TypeEnum, Enums: []string{"signup", "reset", "login", "signup_verified", "reset_verified", "login_verified", "email_verification"}},
 		{Name: "secret_hash", Type: field.TypeString},
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "failed_attempts", Type: field.TypeInt, Default: 0},
@@ -129,7 +127,7 @@ var (
 	RegistrationBlocksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "kind", Type: field.TypeEnum, Enums: []string{"email", "phone", "device"}},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"email", "device"}},
 		{Name: "value_hash", Type: field.TypeString, Size: 64},
 		{Name: "account_id", Type: field.TypeUUID},
 		{Name: "reason", Type: field.TypeString, Size: 500, Default: ""},
