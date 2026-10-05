@@ -17,6 +17,17 @@ export const mentionCreated: EventMapping = (event, data) => {
   ];
 };
 
+export const postTagged: EventMapping = (event, data) => {
+  const noun = data.text("kind", "post") === "clip" ? "clip" : "post";
+  return [
+    intentFor(event, data.text("recipientUserId"), {
+      category: "social",
+      inApp: { category: "social", title: actorNameOf(data), body: `tagged you in a ${noun}.`, actor: readActor(data), data: { url: data.optionalText("url") ?? null } },
+      push: { title: actorNameOf(data), body: `tagged you in a ${noun}.`, data: { url: data.optionalText("url") ?? null } },
+    }),
+  ];
+};
+
 export const followCreated: EventMapping = (event, data) => [
   intentFor(event, data.text("recipientUserId"), {
     category: "social",

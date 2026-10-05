@@ -2,6 +2,7 @@ import { HttpMiddlewarePipeline, createHttpServer, createNodeHttpAdapter, create
 import { createLogger, type Logger } from "@zudojs/logger";
 
 import type { NotificationsConfig } from "./configs/notifications.config.js";
+import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
 import { createContainer, type Container, type ContainerOverrides } from "./container.js";
 import { createDomainEventMessageHandler, createJobMessageHandler, createSesFeedbackMessageHandler } from "./jobs/messageRouting.job.js";
 import { DigestSchedulerJob } from "./jobs/digestScheduler.job.js";
@@ -47,7 +48,7 @@ export function createNotificationsApp(config: NotificationsConfig, options: { r
   const container = createContainer(config, logger, options.overrides);
   const handleRequest = createRequestHandler(createRoutes(container), logger, container);
   const pipeline = new HttpMiddlewarePipeline({
-    middlewares: [async (context) => {
+    middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), async (context) => {
       const response = (await handleRequest(context.request)).clone();
       response.setHeader("x-request-id", context.request.id);
       response.setHeader("x-content-type-options", "nosniff");

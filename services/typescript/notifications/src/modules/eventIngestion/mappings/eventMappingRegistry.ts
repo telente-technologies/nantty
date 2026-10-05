@@ -6,6 +6,7 @@ import * as milestones from "./milestones.mapping.js";
 import type { EventMapping } from "./mappingHelpers.js";
 import * as orders from "./orders.mapping.js";
 import * as social from "./social.mapping.js";
+import * as subscriptionBilling from "./subscriptionBilling.mapping.js";
 import * as support from "./support.mapping.js";
 import * as verification from "./verification.mapping.js";
 
@@ -52,6 +53,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "account.deletionRequested": identity.deletionRequested,
   "account.deletionExecuted": identity.deletionExecuted,
   "mention.created": social.mentionCreated,
+  "post.tagged": social.postTagged,
   "follow.created": social.followCreated,
   "followRequest.created": social.followRequestCreated,
   "comment.created": social.commentCreated,
@@ -82,6 +84,14 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "planInvoice.paymentFailed": verification.planInvoicePaymentFailed,
   "planInvoice.paid": verification.planInvoicePaid,
   "cardVerification.refunded": verification.cardVerificationRefunded,
+  "subscriptionTrial.ending": subscriptionBilling.subscriptionTrialEnding,
+  "subscriptionRenewal.upcoming": subscriptionBilling.subscriptionRenewalUpcoming,
+  "subscriptionInvoice.paid": subscriptionBilling.subscriptionInvoicePaid,
+  "subscriptionPayment.failed": subscriptionBilling.subscriptionPaymentFailed,
+  "subscriptionGrace.ending": subscriptionBilling.subscriptionGraceEnding,
+  "subscription.downgraded": subscriptionBilling.subscriptionDowngraded,
+  "subscriptionCard.expiring": subscriptionBilling.subscriptionCardExpiring,
+  "subscriptionPrice.changeNotice": subscriptionBilling.subscriptionPriceChange,
   "copyrightClaim.warningIssued": copyright.copyrightWarningIssued,
   "copyrightClaim.audioMuteOrdered": copyright.copyrightAudioMuted,
   "copyrightClaim.contentTakenDown": copyright.copyrightContentTakenDown,

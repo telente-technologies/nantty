@@ -1,4 +1,7 @@
+import { readGatewayIdentitySecretsFromEnvironment } from "../middlewares/gatewayIdentity.middleware.js";
+
 export interface NotificationsConfig {
+  readonly gatewayIdentitySecrets?: readonly string[];
   readonly host: string;
   readonly port: number;
   readonly databaseUrl: string;
@@ -38,6 +41,7 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
   const authIssuer = readRequired("AUTH_TOKEN_ISSUER", problems);
   const messageBus = readOrDefault("EVENT_BUS", "rabbitmq") === "sqs" ? "sqs" : "rabbitmq";
   const config: NotificationsConfig = {
+    gatewayIdentitySecrets: readGatewayIdentitySecretsFromEnvironment(problems),
     host: readOrDefault("HOST", "0.0.0.0"),
     port: Number(readOrDefault("PORT", "8104")),
     databaseUrl: readRequired("DATABASE_URL", problems),

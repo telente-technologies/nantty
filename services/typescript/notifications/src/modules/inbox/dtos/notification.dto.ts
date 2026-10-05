@@ -9,6 +9,7 @@ export interface NotificationResponse {
   readonly createdAt: string;
   readonly read: boolean;
   readonly actor: StoredNotification["actor"];
+  readonly url: string | null;
 }
 
 export function convertNotificationToResponse(notification: StoredNotification): NotificationResponse {
@@ -21,5 +22,6 @@ export function convertNotificationToResponse(notification: StoredNotification):
     createdAt: notification.createdAt.toISOString(),
     read: notification.readAt !== null,
     actor: notification.actor,
+    url: typeof notification.data["url"] === "string" && notification.data["url"].startsWith("/") ? notification.data["url"] : null,
   };
 }
