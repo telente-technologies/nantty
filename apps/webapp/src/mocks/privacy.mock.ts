@@ -37,16 +37,19 @@ export const privacyMocks: MockRoute[] = [
     consentRecord = { policyVersion, consents: { ...consentRecord.consents, ...consents }, updatedAt: new Date().toISOString() };
     return consentRecord;
   }),
-  createMockRoute("GET", "/api/v1/users/me/data-export", () => describeDataExport()),
-  createMockRoute("POST", "/api/v1/users/me/data-export", () => {
+  createMockRoute("GET", "/api/v1/users/me/data-exports", () => {
+    const current = describeDataExport();
+    return { data: current.status === "none" ? [] : [{ id: "export_mock", ...current }], nextCursor: null };
+  }),
+  createMockRoute("POST", "/api/v1/users/me/data-exports", () => {
     const { status } = describeDataExport();
     if (status === "requested" || status === "processing") throw new ApiError(409, "An export is already in progress");
     exportRequestedAtMilliseconds = Date.now();
-    return describeDataExport();
+    return { id: "export_mock", ...describeDataExport() };
   }),
-  createMockRoute("POST", "/api/v1/users/me/deletion", ({ body }) => {
-    if ((body as { confirmation?: string }).confirmation !== deletionConfirmationWord) throw new ApiError(422, `Type ${deletionConfirmationWord} to confirm`);
-    return { scheduledFor: new Date(Date.now() + deletionGracePeriodMilliseconds).toISOString() };
+  createMockRoute("POST", "/api/v1/users/me/deletion-request", ({ body }) => {
+    if ((body as { confirm?: boolean }).confirm !== true) throw new ApiError(422, `Type ${deletionConfirmationWord} to confirm`);
+    return { id: "deletion_mock", status: "scheduled", reason: "", requestedAt: new Date().toISOString(), scheduledFor: new Date(Date.now() + deletionGracePeriodMilliseconds).toISOString(), cancelledAt: null, executedAt: null, retentionPolicy: [] };
   }),
   createMockRoute("POST", "/api/v1/consents", ({ body }) => {
     const { policyVersion, decidedAt, categories } = (body ?? {}) as Record<string, unknown>;

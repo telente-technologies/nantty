@@ -26,6 +26,7 @@ const buildClipFromVideoSeed = (seed: ClipVideoSeed): Clip => {
     text: seed.caption,
     media: [
       {
+        id: `m_${seed.id}`,
         type: "video",
         url: seed.videoUrl,
         posterUrl: seed.posterUrl,

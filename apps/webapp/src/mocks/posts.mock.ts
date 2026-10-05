@@ -1,6 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 import type { Post, PostAnalytics, PostAnalyticsDaily } from "@/types";
 
+import { findMockClipsByIds } from "./clips.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -61,7 +62,7 @@ const buildPostAnalytics = (post: Post): PostAnalytics => {
 
 export const postsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId", ({ params }) => {
-    const post = findPostIncludingSponsored(params.postId!);
+    const post = findPostIncludingSponsored(params.postId!) ?? findMockClipsByIds([params.postId!])[0];
     if (!post) throw new ApiError(404, "This post was removed");
     return withCurrentProductPrices(post);
   }),
@@ -74,7 +75,7 @@ export const postsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/posts/:postId/repost", ({ params }) => updateMockPost(params.postId!, (p) => ({ ...p, reposts: p.reposts + 1 }))),
   createMockRoute("POST", "/api/v1/posts/:postId/share", () => undefined),
   createMockRoute("GET", "/api/v1/posts/:postId/analytics", ({ params }) => {
-    const post = findPostIncludingSponsored(params.postId!);
+    const post = findPostIncludingSponsored(params.postId!) ?? findMockClipsByIds([params.postId!])[0];
     if (!post) throw new ApiError(404, "This post was removed");
     if (post.author.id !== getSignedInMockUser().id) throw new ApiError(403, "Only the author of a post can see its analytics.", "NOT_POST_OWNER");
     return buildPostAnalytics(post);
