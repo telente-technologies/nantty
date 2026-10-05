@@ -7,7 +7,7 @@ import { SIGNED_IN_BUYER, mockOrderRecords } from "./orderFixtures.mock";
 import { listPostsByAuthor, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { setFollowingAuthor } from "./followGraph.mock";
-import { blockedUserIds, canSignedInUserSeeProfileContent, followedUserIds, followerUserIds, followStateForUser, privateUserIds } from "./socialGraph.mock";
+import { blockedUserIds, canSignedInUserSeeProfileContent, followedUserIds, followerUserIds, followStateForUser, privateUserIds, relationshipDetailsFor } from "./socialGraph.mock";
 import { findActiveLiveForHost } from "./activeLives.mock";
 import { findDirectoryStoreById } from "./storeDirectory.mock";
 import { SUSPENDED_USER_IDS, directoryUsers, directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser } from "./userDirectory.mock";
@@ -24,7 +24,7 @@ export const signedInProfile = (): User => {
   return { ...base, ...profileEditsByUserId.get(base.id), following: base.id === "u_me" ? followedUserIds.size + 403 : base.following };
 };
 
-const toConnectionEntry = (user: User): ConnectionEntry => ({ ...summariseUser(user), isFollowing: followedUserIds.has(user.id) });
+const toConnectionEntry = (user: User): ConnectionEntry => ({ ...summariseUser(user), isFollowing: followedUserIds.has(user.id), ...relationshipDetailsFor(user.id) });
 
 const storeOwnersIBoughtFrom = () =>
   [...new Set(mockOrderRecords.filter((record) => record.buyerUserId === SIGNED_IN_BUYER).map((record) => findDirectoryStoreById(record.storeId).ownerUserKey))];

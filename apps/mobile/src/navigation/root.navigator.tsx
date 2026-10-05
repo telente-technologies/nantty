@@ -2,6 +2,7 @@ import { DarkTheme, DefaultTheme, NavigationContainer, type Theme as NavigationT
 import { useMemo } from "react";
 
 import { GuestAuthReplayCoordinator } from "@/components/auth/guestAuthReplay";
+import { MediaDownloadHost } from "@/components/downloads/mediaDownloadHost";
 import { GuestAuthSheet } from "@/components/auth/guestAuthSheet";
 import { PolicyReacceptScreen } from "@/components/legal/policyReacceptScreen";
 import { PolicyUpdateBanner } from "@/components/legal/policyUpdateBanner";
@@ -53,6 +54,7 @@ export function RootNavigator() {
       <GuestAuthReplayCoordinator />
       <GuestAuthSheet />
       <PolicyUpdateBanner />
+      {canShowMainApp ? <MediaDownloadHost /> : null}
       <DialogHost />
       <ToastHost />
     </NavigationContainer>

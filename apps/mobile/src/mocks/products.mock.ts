@@ -1,6 +1,6 @@
 import { ApiError } from "@/errors/api.error";
 import type { Page, ProductSummary } from "@/types";
-import type { MartHome, ProductCollection, SearchResults, StoreDetail } from "@/types/commerce.type";
+import type { MartHome, ProductCollection, StoreDetail } from "@/types/commerce.type";
 
 import { BRAND_ID_BY_PRODUCT_KEY, brandTagForProductKey, findBrandRecord, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandSummary } from "./brandDirectory.mock";
 import { followedBrandIds } from "./brands.mock";
@@ -9,10 +9,8 @@ import { isAuthorContentVisibleToSignedInViewer } from "./socialGraph.mock";
 import { listPostsByAuthor, withCurrentProductPrices } from "./postCatalog.mock";
 import {
   buildCatalogProductDetail,
-  buildCatalogProductSummary,
   catalogProductSeeds,
   findCatalogSeedByProductId,
-  isMartSponsoredSeed,
   listMartProductSummaries,
   listProductSummariesInStore,
   listProductsInCollection,
@@ -20,8 +18,7 @@ import {
 import { isSavedBySignedInViewer, saveTargetForSignedInViewer, unsaveTargetForSignedInViewer } from "./savedEntries.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { buildReviewSummaryForProduct } from "./reviewFixtures.mock";
-import { directoryStores, findDirectoryStoreById, productCategories, storeBannerUrl, summariseStore } from "./storeDirectory.mock";
-import { directoryUsersExcludingAccounts, summariseUser } from "./userDirectory.mock";
+import { directoryStores, productCategories, storeBannerUrl, summariseStore } from "./storeDirectory.mock";
 
 const PAGE_SIZE = 12;
 const likedProductIds = new Set<string>();
@@ -55,30 +52,6 @@ const buildStoreDetail = (storeId: string): StoreDetail => {
     })(),
   };
 };
-
-const matchesSearch = (text: string, term: string) => text.toLowerCase().includes(term);
-
-function searchCatalog(term: string): SearchResults {
-  const matchingSeeds = catalogProductSeeds.filter(
-    (seed) => matchesSearch(seed.name, term) || matchesSearch(seed.title, term) || matchesSearch(findDirectoryStoreById(seed.storeId).name, term),
-  );
-  const sponsoredSeed =
-    catalogProductSeeds.find((seed) => isMartSponsoredSeed(seed) && seed.categoryId === matchingSeeds[0]?.categoryId) ??
-    (matchingSeeds.length > 0 ? catalogProductSeeds.find(isMartSponsoredSeed) : undefined);
-  const organic = matchingSeeds.filter((seed) => seed !== sponsoredSeed).map((seed) => buildCatalogProductSummary(seed));
-  const sponsored = sponsoredSeed ? [buildCatalogProductSummary(sponsoredSeed, { sponsored: true })] : [];
-  return {
-    products: [...sponsored, ...organic].slice(0, 16).map(withLikeState),
-    stores: directoryStores.filter((store) => matchesSearch(store.name, term) || matchesSearch(store.bio, term)).map(summariseStore),
-    brands: mockBrandRecords
-      .filter((brand) => matchesSearch(brand.name, term) || matchesSearch(brand.handle, term) || matchesSearch(brand.description, term))
-      .map((brand) => presentBrandSummary(brand, followedBrandIds)),
-    people: directoryUsersExcludingAccounts
-      .filter((user) => matchesSearch(user.name, term) || matchesSearch(user.username, term))
-      .slice(0, 8)
-      .map(summariseUser),
-  };
-}
 
 export const productsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/mart/home", (): MartHome => ({
@@ -123,5 +96,4 @@ export const productsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/stores/:storeId/products", ({ params }) => listProductSummariesInStore(params.storeId!).map(withLikeState)),
   createMockRoute("POST", "/api/v1/stores/:storeId/follow", ({ params }) => void followedStoreIds.add(params.storeId!)),
   createMockRoute("DELETE", "/api/v1/stores/:storeId/follow", ({ params }) => void followedStoreIds.delete(params.storeId!)),
-  createMockRoute("GET", "/api/v1/search", ({ query }) => searchCatalog((query.get("q") ?? "").trim().toLowerCase())),
 ];

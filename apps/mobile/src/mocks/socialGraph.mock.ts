@@ -36,3 +36,11 @@ export const buildFriendsLikedFromFollowedUsers = (friendUserIds: readonly strin
   count: totalCount,
   avatars: friendUserIds.map((userId) => findDirectoryUserById(userId)?.avatarUrl ?? null),
 });
+
+export const mutualConnectionsWith = (userId: string) => {
+  let hash = 0;
+  for (const character of userId) hash = (hash * 31 + character.charCodeAt(0)) % 997;
+  return followerUserIds.includes(userId) && followedUserIds.has(userId) ? 6 + (hash % 20) : hash % 12;
+};
+
+export const relationshipDetailsFor = (userId: string) => ({ followsYou: followerUserIds.includes(userId), mutualConnections: mutualConnectionsWith(userId) });

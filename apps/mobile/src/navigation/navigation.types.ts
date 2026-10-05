@@ -3,6 +3,7 @@ import type { NavigatorScreenParams } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import type { SavedItemFilter } from "@/types/saves.type";
+import type { SearchScopeKey } from "@/types/search.type";
 import type { SupportLinkedReference, SupportTicketCategory } from "@/types/support.type";
 
 export type AuthStackParamList = {
@@ -30,7 +31,7 @@ export type MainTabParamList = {
 
 export type MainStackParamList = {
   Tabs: NavigatorScreenParams<MainTabParamList> | undefined;
-  Search: { scope?: "all" | "mart" | "messages" } | undefined;
+  Search: { scope?: SearchScopeKey | "all" | "messages"; scopeLabel?: string } | undefined;
   Notifications: undefined;
   Category: { categoryId: string; name: string; collection?: "sales_of_the_day" | "featured_brands" | "new_arrivals" };
   ProductDetail: { productId: string };
