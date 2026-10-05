@@ -55,7 +55,7 @@
   color: var(--ink-strong);
 }
 
-.waitlistButton {
+.downloadButton {
   display: none;
   align-items: center;
   min-height: 44px;
@@ -68,7 +68,7 @@
   text-decoration: none;
 }
 
-.waitlistButton:hover {
+.downloadButton:hover {
   background: var(--fill-brand-hover);
 }
 
@@ -187,7 +187,7 @@
   color: var(--surface-sunshine);
 }
 
-.mobileWaitlistButton {
+.mobileDownloadButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,7 +201,7 @@
 
 @media (min-width: 880px) {
   .desktopNavigation,
-  .waitlistButton {
+  .downloadButton {
     display: flex;
   }
 

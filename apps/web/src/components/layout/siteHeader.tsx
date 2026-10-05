@@ -72,8 +72,8 @@ export function SiteHeaderWithFloatingNavigation() {
           </ul>
         </nav>
         <ThemeSwitcher iconOnly label="Colour theme" className={styles.themeSwitcher} />
-        <Link href="/#waitlist" className={styles.waitlistButton}>
-          Get early access
+        <Link href="/#download" className={styles.downloadButton}>
+          Get the app
         </Link>
         <button
           ref={menuToggleButtonRef}
@@ -124,8 +124,8 @@ export function SiteHeaderWithFloatingNavigation() {
             ))}
           </ul>
         </nav>
-        <Link href="/#waitlist" className={styles.mobileWaitlistButton} onClick={() => setIsMobileMenuOpen(false)}>
-          Get early access
+        <Link href="/#download" className={styles.mobileDownloadButton} onClick={() => setIsMobileMenuOpen(false)}>
+          Get the app
         </Link>
       </div>
     </header>

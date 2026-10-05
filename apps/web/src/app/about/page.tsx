@@ -62,9 +62,9 @@ export default function AboutPage() {
       <section className={`pageContainer ${styles.split}`} aria-label="Get involved">
         <div className={`${styles.splitCard} ${styles.splitCardBuyer}`}>
           <h2 className={styles.splitHeading}>Shopping?</h2>
-          <p>Join the waitlist and get the app first when we launch in your city.</p>
-          <ActionLinkStyledAsButton href="/#waitlist" appearance="onDark">
-            Join the waitlist
+          <p>Get the app on iPhone or Android, or shop from the web app in your browser.</p>
+          <ActionLinkStyledAsButton href="/#download" appearance="onDark">
+            Get the app
           </ActionLinkStyledAsButton>
         </div>
         <div className={`${styles.splitCard} ${styles.splitCardSeller} lightIsland`}>

@@ -8,11 +8,11 @@ export function LaunchAnnouncementBar() {
   return (
     <aside className={styles.bar} aria-label="Launch announcement">
       <p className={styles.message}>
-        <span className={styles.badge}>Early access</span>
+        <span className={styles.badge}>Launching</span>
         <span>
           Zudomart opens in {siteConfig.launchCountry} first.{" "}
-          <Link href="/#waitlist" className={styles.link}>
-            Save your spot
+          <Link href="/#download" className={styles.link}>
+            Get the app
           </Link>
         </span>
       </p>

@@ -8,6 +8,7 @@ import { SellerPayoutsSection } from "@/components/sellers/sellerPayoutsSection"
 import { SellersPageHeroSection } from "@/components/sellers/sellersHeroSection";
 import { SellerOnboardingStepsSection } from "@/components/sellers/sellerStepsSection";
 import { sellerQuestions } from "@/content/sellerQuestions.content";
+import { businessAppLinks } from "@/lib/siteConfig.config";
 
 export const metadata: Metadata = {
   title: "Sell on Zudomart",
@@ -28,10 +29,10 @@ export default function SellersPage() {
       <AppDownloadCallToActionPanel
         sectionId="apply"
         headingId="apply-heading"
-        heading="Open your store early."
-        description="Seller applications open in the app at launch. Join the seller waitlist and we'll invite you to apply first."
-        defaultRole="seller"
-        source="web-sellers"
+        heading="Open your store."
+        description="Apply to sell from the Zudomart app or the Zudomart Dashboard. We review every seller before their store opens."
+        actionLabel={`Apply on ${businessAppLinks.sellerDashboard.label}`}
+        actionHref={businessAppLinks.sellerDashboard.href}
       />
     </>
   );
