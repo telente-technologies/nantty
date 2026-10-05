@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 	"zudomart/modules/users/src/generated/ent/topic"
 
 	"entgo.io/ent"
@@ -21,7 +22,11 @@ type Topic struct {
 	// Position holds the value of the "position" field.
 	Position int `json:"position,omitempty"`
 	// Active holds the value of the "active" field.
-	Active       bool `json:"active,omitempty"`
+	Active bool `json:"active,omitempty"`
+	// IsTrending holds the value of the "is_trending" field.
+	IsTrending bool `json:"is_trending,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -30,12 +35,14 @@ func (*Topic) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case topic.FieldActive:
+		case topic.FieldActive, topic.FieldIsTrending:
 			values[i] = new(sql.NullBool)
 		case topic.FieldPosition:
 			values[i] = new(sql.NullInt64)
 		case topic.FieldID, topic.FieldName:
 			values[i] = new(sql.NullString)
+		case topic.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -74,6 +81,18 @@ func (_m *Topic) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field active", values[i])
 			} else if value.Valid {
 				_m.Active = value.Bool
+			}
+		case topic.FieldIsTrending:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_trending", values[i])
+			} else if value.Valid {
+				_m.IsTrending = value.Bool
+			}
+		case topic.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -119,6 +138,12 @@ func (_m *Topic) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("active=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Active))
+	builder.WriteString(", ")
+	builder.WriteString("is_trending=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsTrending))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

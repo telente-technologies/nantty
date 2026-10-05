@@ -973,7 +973,8 @@ var (
 		{Name: "account_id", Type: field.TypeUUID},
 		{Name: "label", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "recipient_name", Type: field.TypeString, Size: 80},
-		{Name: "phone", Type: field.TypeString, Size: 16},
+		{Name: "phone", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "phone_sealed", Type: field.TypeBytes, Nullable: true},
 		{Name: "line1", Type: field.TypeString, Size: 160},
 		{Name: "line2", Type: field.TypeString, Size: 160, Default: ""},
 		{Name: "postal_code", Type: field.TypeString, Size: 12, Default: ""},
@@ -1050,6 +1051,8 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 60},
 		{Name: "position", Type: field.TypeInt, Default: 0},
 		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "is_trending", Type: field.TypeBool, Default: false},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// TopicsTable holds the schema information for the "topics" table.
 	TopicsTable = &schema.Table{

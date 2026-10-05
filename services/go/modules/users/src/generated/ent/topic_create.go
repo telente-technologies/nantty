@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"zudomart/modules/users/src/generated/ent/topic"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -49,6 +50,34 @@ func (_c *TopicCreate) SetActive(v bool) *TopicCreate {
 func (_c *TopicCreate) SetNillableActive(v *bool) *TopicCreate {
 	if v != nil {
 		_c.SetActive(*v)
+	}
+	return _c
+}
+
+// SetIsTrending sets the "is_trending" field.
+func (_c *TopicCreate) SetIsTrending(v bool) *TopicCreate {
+	_c.mutation.SetIsTrending(v)
+	return _c
+}
+
+// SetNillableIsTrending sets the "is_trending" field if the given value is not nil.
+func (_c *TopicCreate) SetNillableIsTrending(v *bool) *TopicCreate {
+	if v != nil {
+		_c.SetIsTrending(*v)
+	}
+	return _c
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_c *TopicCreate) SetUpdatedAt(v time.Time) *TopicCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (_c *TopicCreate) SetNillableUpdatedAt(v *time.Time) *TopicCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
 	return _c
 }
@@ -102,6 +131,14 @@ func (_c *TopicCreate) defaults() {
 		v := topic.DefaultActive
 		_c.mutation.SetActive(v)
 	}
+	if _, ok := _c.mutation.IsTrending(); !ok {
+		v := topic.DefaultIsTrending
+		_c.mutation.SetIsTrending(v)
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		v := topic.DefaultUpdatedAt()
+		_c.mutation.SetUpdatedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -119,6 +156,12 @@ func (_c *TopicCreate) check() error {
 	}
 	if _, ok := _c.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Topic.active"`)}
+	}
+	if _, ok := _c.mutation.IsTrending(); !ok {
+		return &ValidationError{Name: "is_trending", err: errors.New(`ent: missing required field "Topic.is_trending"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Topic.updated_at"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := topic.IDValidator(v); err != nil {
@@ -171,6 +214,14 @@ func (_c *TopicCreate) createSpec() (*Topic, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Active(); ok {
 		_spec.SetField(topic.FieldActive, field.TypeBool, value)
 		_node.Active = value
+	}
+	if value, ok := _c.mutation.IsTrending(); ok {
+		_spec.SetField(topic.FieldIsTrending, field.TypeBool, value)
+		_node.IsTrending = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(topic.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	return _node, _spec
 }

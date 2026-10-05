@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"zudomart/modules/users/src/generated/ent/predicate"
 	"zudomart/modules/users/src/generated/ent/topic"
 
@@ -76,6 +77,26 @@ func (_u *TopicUpdate) SetNillableActive(v *bool) *TopicUpdate {
 	return _u
 }
 
+// SetIsTrending sets the "is_trending" field.
+func (_u *TopicUpdate) SetIsTrending(v bool) *TopicUpdate {
+	_u.mutation.SetIsTrending(v)
+	return _u
+}
+
+// SetNillableIsTrending sets the "is_trending" field if the given value is not nil.
+func (_u *TopicUpdate) SetNillableIsTrending(v *bool) *TopicUpdate {
+	if v != nil {
+		_u.SetIsTrending(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *TopicUpdate) SetUpdatedAt(v time.Time) *TopicUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // Mutation returns the TopicMutation object of the builder.
 func (_u *TopicUpdate) Mutation() *TopicMutation {
 	return _u.mutation
@@ -83,6 +104,7 @@ func (_u *TopicUpdate) Mutation() *TopicMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TopicUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -105,6 +127,14 @@ func (_u *TopicUpdate) Exec(ctx context.Context) error {
 func (_u *TopicUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *TopicUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := topic.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -141,6 +171,12 @@ func (_u *TopicUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(topic.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.IsTrending(); ok {
+		_spec.SetField(topic.FieldIsTrending, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(topic.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -211,6 +247,26 @@ func (_u *TopicUpdateOne) SetNillableActive(v *bool) *TopicUpdateOne {
 	return _u
 }
 
+// SetIsTrending sets the "is_trending" field.
+func (_u *TopicUpdateOne) SetIsTrending(v bool) *TopicUpdateOne {
+	_u.mutation.SetIsTrending(v)
+	return _u
+}
+
+// SetNillableIsTrending sets the "is_trending" field if the given value is not nil.
+func (_u *TopicUpdateOne) SetNillableIsTrending(v *bool) *TopicUpdateOne {
+	if v != nil {
+		_u.SetIsTrending(*v)
+	}
+	return _u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *TopicUpdateOne) SetUpdatedAt(v time.Time) *TopicUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // Mutation returns the TopicMutation object of the builder.
 func (_u *TopicUpdateOne) Mutation() *TopicMutation {
 	return _u.mutation
@@ -231,6 +287,7 @@ func (_u *TopicUpdateOne) Select(field string, fields ...string) *TopicUpdateOne
 
 // Save executes the query and returns the updated Topic entity.
 func (_u *TopicUpdateOne) Save(ctx context.Context) (*Topic, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -253,6 +310,14 @@ func (_u *TopicUpdateOne) Exec(ctx context.Context) error {
 func (_u *TopicUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_u *TopicUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := topic.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -306,6 +371,12 @@ func (_u *TopicUpdateOne) sqlSave(ctx context.Context) (_node *Topic, err error)
 	}
 	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(topic.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.IsTrending(); ok {
+		_spec.SetField(topic.FieldIsTrending, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(topic.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &Topic{config: _u.config}
 	_spec.Assign = _node.assignValues
