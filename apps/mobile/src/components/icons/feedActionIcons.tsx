@@ -1,13 +1,5 @@
-import { BookmarkSimpleIcon } from "phosphor-react-native/src/icons/BookmarkSimple";
-import { ChartBarIcon } from "phosphor-react-native/src/icons/ChartBar";
-import { ChatCircleIcon } from "phosphor-react-native/src/icons/ChatCircle";
-import { ExportIcon } from "phosphor-react-native/src/icons/Export";
-import { GiftIcon } from "phosphor-react-native/src/icons/Gift";
-import { HeartIcon } from "phosphor-react-native/src/icons/Heart";
-import { PaperPlaneTiltIcon } from "phosphor-react-native/src/icons/PaperPlaneTilt";
-import { RepeatIcon } from "phosphor-react-native/src/icons/Repeat";
-
 import type { IconProps } from "./icon.types";
+import { BookmarkSimpleIcon, ChartBarIcon, ChatCircleIcon, ExportIcon, GiftIcon, HeartIcon, PaperPlaneTiltIcon, RepeatIcon } from "./phosphorGlyphs";
 import { phosphorIcon } from "./phosphorIcon";
 
 type ToggleIconProps = IconProps & { readonly filled?: boolean };

@@ -1,90 +1,91 @@
-import { AppleLogoIcon } from "phosphor-react-native/src/icons/AppleLogo";
-import { ArrowLeftIcon } from "phosphor-react-native/src/icons/ArrowLeft";
-import { ArrowUpRightIcon } from "phosphor-react-native/src/icons/ArrowUpRight";
-import { ArrowsClockwiseIcon } from "phosphor-react-native/src/icons/ArrowsClockwise";
-import { ArrowsOutSimpleIcon } from "phosphor-react-native/src/icons/ArrowsOutSimple";
-import { BellIcon } from "phosphor-react-native/src/icons/Bell";
-import { BellRingingIcon } from "phosphor-react-native/src/icons/BellRinging";
-import { BellSlashIcon } from "phosphor-react-native/src/icons/BellSlash";
-import { BookmarkSimpleIcon } from "phosphor-react-native/src/icons/BookmarkSimple";
-import { BoxArrowDownIcon } from "phosphor-react-native/src/icons/BoxArrowDown";
-import { CalendarDotsIcon } from "phosphor-react-native/src/icons/CalendarDots";
-import { CameraIcon } from "phosphor-react-native/src/icons/Camera";
-import { CameraPlusIcon } from "phosphor-react-native/src/icons/CameraPlus";
-import { CaretDownIcon } from "phosphor-react-native/src/icons/CaretDown";
-import { CaretRightIcon } from "phosphor-react-native/src/icons/CaretRight";
-import { ChartBarIcon } from "phosphor-react-native/src/icons/ChartBar";
-import { ChartBarHorizontalIcon } from "phosphor-react-native/src/icons/ChartBarHorizontal";
-import { ChatCenteredTextIcon } from "phosphor-react-native/src/icons/ChatCenteredText";
-import { ChatCircleIcon } from "phosphor-react-native/src/icons/ChatCircle";
-import { ChatsCircleIcon } from "phosphor-react-native/src/icons/ChatsCircle";
-import { CheckIcon } from "phosphor-react-native/src/icons/Check";
-import { CoinIcon } from "phosphor-react-native/src/icons/Coin";
-import { CopyIcon } from "phosphor-react-native/src/icons/Copy";
-import { CreditCardIcon } from "phosphor-react-native/src/icons/CreditCard";
-import { CrownIcon } from "phosphor-react-native/src/icons/Crown";
-import { DotsThreeVerticalIcon } from "phosphor-react-native/src/icons/DotsThreeVertical";
-import { ExportIcon } from "phosphor-react-native/src/icons/Export";
-import { EyeIcon } from "phosphor-react-native/src/icons/Eye";
-import { EyeClosedIcon } from "phosphor-react-native/src/icons/EyeClosed";
-import { FileTextIcon } from "phosphor-react-native/src/icons/FileText";
-import { FilmSlateIcon } from "phosphor-react-native/src/icons/FilmSlate";
-import { FlagIcon } from "phosphor-react-native/src/icons/Flag";
-import { FlameIcon } from "phosphor-react-native/src/icons/Flame";
-import { GaugeIcon } from "phosphor-react-native/src/icons/Gauge";
-import { GifIcon } from "phosphor-react-native/src/icons/Gif";
-import { GiftIcon } from "phosphor-react-native/src/icons/Gift";
-import { HandPalmIcon } from "phosphor-react-native/src/icons/HandPalm";
-import { HandshakeIcon } from "phosphor-react-native/src/icons/Handshake";
-import { HeadsetIcon } from "phosphor-react-native/src/icons/Headset";
-import { HeartIcon } from "phosphor-react-native/src/icons/Heart";
-import { HeartBreakIcon } from "phosphor-react-native/src/icons/HeartBreak";
-import { HourglassIcon } from "phosphor-react-native/src/icons/Hourglass";
-import { HouseIcon } from "phosphor-react-native/src/icons/House";
-import { ImageIcon } from "phosphor-react-native/src/icons/Image";
-import { ImageSquareIcon } from "phosphor-react-native/src/icons/ImageSquare";
-import { LightningIcon } from "phosphor-react-native/src/icons/Lightning";
-import { LockSimpleIcon } from "phosphor-react-native/src/icons/LockSimple";
-import { MagnifyingGlassIcon } from "phosphor-react-native/src/icons/MagnifyingGlass";
-import { MapPinIcon } from "phosphor-react-native/src/icons/MapPin";
-import { MedalIcon } from "phosphor-react-native/src/icons/Medal";
-import { MicrophoneIcon } from "phosphor-react-native/src/icons/Microphone";
-import { MicrophoneSlashIcon } from "phosphor-react-native/src/icons/MicrophoneSlash";
-import { MinusIcon } from "phosphor-react-native/src/icons/Minus";
-import { MusicNotesIcon } from "phosphor-react-native/src/icons/MusicNotes";
-import { PaperPlaneTiltIcon } from "phosphor-react-native/src/icons/PaperPlaneTilt";
-import { PauseIcon } from "phosphor-react-native/src/icons/Pause";
-import { PlayIcon } from "phosphor-react-native/src/icons/Play";
-import { PlusIcon } from "phosphor-react-native/src/icons/Plus";
-import { QuestionIcon } from "phosphor-react-native/src/icons/Question";
-import { RepeatIcon } from "phosphor-react-native/src/icons/Repeat";
-import { SealCheckIcon } from "phosphor-react-native/src/icons/SealCheck";
-import { SelectionIcon } from "phosphor-react-native/src/icons/Selection";
-import { ShareNetworkIcon } from "phosphor-react-native/src/icons/ShareNetwork";
-import { ShieldIcon } from "phosphor-react-native/src/icons/Shield";
-import { ShoppingCartIcon } from "phosphor-react-native/src/icons/ShoppingCart";
-import { SignOutIcon } from "phosphor-react-native/src/icons/SignOut";
-import { SlidersHorizontalIcon } from "phosphor-react-native/src/icons/SlidersHorizontal";
-import { SmileyIcon } from "phosphor-react-native/src/icons/Smiley";
-import { SpeakerHighIcon } from "phosphor-react-native/src/icons/SpeakerHigh";
-import { SquaresFourIcon } from "phosphor-react-native/src/icons/SquaresFour";
-import { StarIcon } from "phosphor-react-native/src/icons/Star";
-import { StorefrontIcon } from "phosphor-react-native/src/icons/Storefront";
-import { SwordIcon } from "phosphor-react-native/src/icons/Sword";
-import { TagIcon } from "phosphor-react-native/src/icons/Tag";
-import { TelevisionSimpleIcon } from "phosphor-react-native/src/icons/TelevisionSimple";
-import { TextIndentIcon } from "phosphor-react-native/src/icons/TextIndent";
-import { TrashIcon } from "phosphor-react-native/src/icons/Trash";
-import { TrophyIcon } from "phosphor-react-native/src/icons/Trophy";
-import { TruckIcon } from "phosphor-react-native/src/icons/Truck";
-import { UserCircleIcon } from "phosphor-react-native/src/icons/UserCircle";
-import { UserFocusIcon } from "phosphor-react-native/src/icons/UserFocus";
-import { UsersIcon } from "phosphor-react-native/src/icons/Users";
-import { VideoCameraIcon } from "phosphor-react-native/src/icons/VideoCamera";
-import { WarningIcon } from "phosphor-react-native/src/icons/Warning";
-import { WifiSlashIcon } from "phosphor-react-native/src/icons/WifiSlash";
-import { XIcon } from "phosphor-react-native/src/icons/X";
-
+import {
+  AppleLogoIcon,
+  ArrowLeftIcon,
+  ArrowUpRightIcon,
+  ArrowsClockwiseIcon,
+  ArrowsOutSimpleIcon,
+  BellIcon,
+  BellRingingIcon,
+  BellSlashIcon,
+  BookmarkSimpleIcon,
+  BoxArrowDownIcon,
+  CalendarDotsIcon,
+  CameraIcon,
+  CameraPlusIcon,
+  CaretDownIcon,
+  CaretRightIcon,
+  ChartBarHorizontalIcon,
+  ChartBarIcon,
+  ChatCenteredTextIcon,
+  ChatCircleIcon,
+  ChatsCircleIcon,
+  CheckIcon,
+  CoinIcon,
+  CopyIcon,
+  CreditCardIcon,
+  CrownIcon,
+  DotsThreeVerticalIcon,
+  ExportIcon,
+  EyeClosedIcon,
+  EyeIcon,
+  FileTextIcon,
+  FilmSlateIcon,
+  FlagIcon,
+  FlameIcon,
+  GaugeIcon,
+  GifIcon,
+  GiftIcon,
+  HandPalmIcon,
+  HandshakeIcon,
+  HeadsetIcon,
+  HeartBreakIcon,
+  HeartIcon,
+  HourglassIcon,
+  HouseIcon,
+  ImageIcon,
+  ImageSquareIcon,
+  LightningIcon,
+  LockSimpleIcon,
+  MagnifyingGlassIcon,
+  MapPinIcon,
+  MedalIcon,
+  MicrophoneIcon,
+  MicrophoneSlashIcon,
+  MinusIcon,
+  MusicNotesIcon,
+  PaperPlaneTiltIcon,
+  PauseIcon,
+  PlayIcon,
+  PlusIcon,
+  QuestionIcon,
+  RepeatIcon,
+  SealCheckIcon,
+  SelectionIcon,
+  ShareNetworkIcon,
+  ShieldIcon,
+  ShoppingCartIcon,
+  SignOutIcon,
+  SlidersHorizontalIcon,
+  SmileyIcon,
+  SpeakerHighIcon,
+  SquaresFourIcon,
+  StarIcon,
+  StorefrontIcon,
+  SwordIcon,
+  TagIcon,
+  TelevisionSimpleIcon,
+  TextIndentIcon,
+  TrashIcon,
+  TrophyIcon,
+  TruckIcon,
+  UserCircleIcon,
+  UserFocusIcon,
+  UsersIcon,
+  VideoCameraIcon,
+  WarningIcon,
+  WifiSlashIcon,
+  XIcon,
+} from "./phosphorGlyphs";
 import { phosphorIcon } from "./phosphorIcon";
 
 export const Apple24Icon = phosphorIcon(AppleLogoIcon, { weight: "fill" });

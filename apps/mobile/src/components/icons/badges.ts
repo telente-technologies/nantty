@@ -1,11 +1,4 @@
-import { ArrowLeftIcon } from "phosphor-react-native/src/icons/ArrowLeft";
-import { ChatsCircleIcon } from "phosphor-react-native/src/icons/ChatsCircle";
-import { DotsThreeVerticalIcon } from "phosphor-react-native/src/icons/DotsThreeVertical";
-import { MagnifyingGlassIcon } from "phosphor-react-native/src/icons/MagnifyingGlass";
-import { PlusIcon } from "phosphor-react-native/src/icons/Plus";
-import { ShoppingBagOpenIcon } from "phosphor-react-native/src/icons/ShoppingBagOpen";
-import { SignOutIcon } from "phosphor-react-native/src/icons/SignOut";
-
+import { ArrowLeftIcon, ChatsCircleIcon, DotsThreeVerticalIcon, MagnifyingGlassIcon, PlusIcon, ShoppingBagOpenIcon, SignOutIcon } from "./phosphorGlyphs";
 import { phosphorBadgeIcon } from "./phosphorIcon";
 
 const ROUNDED_TILE = { box: 32, radius: 8, fill: "#D9D9D9", glyph: 20, glyphInk: "#000000" } as const;
