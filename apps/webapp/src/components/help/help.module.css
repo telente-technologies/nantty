@@ -71,10 +71,10 @@
   padding: 0 var(--space-4);
   font: inherit;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-on-brand);
   text-decoration: none;
   cursor: pointer;
-  background: var(--color-brand);
+  background: var(--color-brand-solid);
   border: 0;
   border-radius: 999px;
 }
@@ -103,7 +103,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: var(--space-3);
   padding: 0;
   margin: 0;
@@ -132,7 +132,7 @@
 }
 
 .card:hover {
-  border-color: var(--color-brand);
+  border-color: var(--color-brand-solid);
 }
 
 .cardTitle {
@@ -221,9 +221,9 @@
 }
 
 .voteButtonSelected {
-  color: #fff;
-  background: var(--color-brand);
-  border-color: var(--color-brand);
+  color: var(--color-on-brand);
+  background: var(--color-brand-solid);
+  border-color: var(--color-brand-solid);
 }
 
 .thread {
@@ -238,7 +238,7 @@
 .message {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   max-width: 85%;
 }
 
@@ -255,9 +255,9 @@
 }
 
 .mine .bubble {
-  color: #fff;
-  background: var(--color-brand);
-  border-color: var(--color-brand);
+  color: var(--color-on-brand);
+  background: var(--color-brand-solid);
+  border-color: var(--color-brand-solid);
 }
 
 .field {

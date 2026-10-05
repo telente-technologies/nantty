@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { SignInRequiredState } from "@/components/auth/signInRequiredState";
 import { useSession } from "@/components/providers/sessionProvider";
 import { CoinIcon } from "@/components/ui/icons";
 import { showToast } from "@/components/ui/toast";
@@ -22,7 +23,7 @@ export function LiveGiftTray({ liveId, hostName }: { readonly liveId: string; re
   const [quantity, setQuantity] = useState<number>(1);
   const [coinsNeeded, setCoinsNeeded] = useState<number | null>(null);
   const [isCoinStoreOpen, setIsCoinStoreOpen] = useState(false);
-  const giftsQuery = useQuery({ queryKey: ["gifts"], queryFn: liveService.fetchGiftCatalog, staleTime: 10 * 60_000, retry: false });
+  const giftsQuery = useQuery({ queryKey: ["gifts"], queryFn: liveService.fetchGiftCatalog, staleTime: 10 * 60_000, retry: false, enabled: viewer !== null });
   const balanceQuery = useQuery({ queryKey: ["coins", "balance"], queryFn: coinsService.fetchCoinBalance, enabled: viewer !== null, retry: false });
   const sendGiftMutation = useMutation({
     mutationFn: (gift: LiveGift) => liveService.sendGift(liveId, gift.id, quantity),
@@ -58,6 +59,7 @@ export function LiveGiftTray({ liveId, hostName }: { readonly liveId: string; re
           </button>
         ))}
       </div>
+      {viewer === null ? <SignInRequiredState title="Sign in to send gifts" description={`Sign in or create a free account to send gifts to ${hostName}.`} /> : null}
       <ul className={panelStyles.giftGrid}>
         {(giftsQuery.data ?? []).map((gift) => (
           <li key={gift.id}>

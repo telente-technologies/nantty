@@ -3,6 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
+import { RetryButton } from "@/components/ui/controls";
+import { EmptyState, ErrorState } from "@/components/ui/feedback";
+import { ChatIcon } from "@/components/ui/icons";
+import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { supportService } from "@/services/support.service";
 
@@ -13,9 +17,17 @@ export const supportTicketsQueryKey = ["support", "tickets"] as const;
 
 export function SupportTicketList() {
   const tickets = useQuery({ queryKey: supportTicketsQueryKey, queryFn: supportService.listMyTickets });
-  if (tickets.isLoading) return <p className={styles.muted} aria-live="polite">Loading your requests…</p>;
-  if (tickets.isError) return <p className={styles.error} role="alert">{readErrorMessageForDisplay(tickets.error)}</p>;
-  if ((tickets.data ?? []).length === 0) return <p className={styles.muted}>You haven't contacted support yet.</p>;
+  if (tickets.isLoading) return <ListRowsSkeleton label="Loading your requests" rows={4} withAvatar={false} />;
+  if (tickets.isError) return <ErrorState description={readErrorMessageForDisplay(tickets.error)} action={<RetryButton onRetry={() => tickets.refetch()} />} />;
+  if ((tickets.data ?? []).length === 0) {
+    return (
+      <EmptyState
+        icon={<ChatIcon size={28} />}
+        title="No support requests"
+        description="You haven't contacted support yet. Most answers are in the Help Centre."
+      />
+    );
+  }
   return (
     <ul className={styles.list}>
       {(tickets.data ?? []).map((ticket) => (

@@ -1,7 +1,7 @@
 import { DocumentIcon, ExternalLinkIcon } from "@/components/ui/icons";
 import type { PolicyVersionSummary } from "@/types/policyUpdate.type";
 
-import styles from "./policyUpdate.module.css";
+import styles from "./policyDocumentCard.module.css";
 import { formatPolicyEffectiveDate, hasPolicyTakenEffect, listPolicyHighlights } from "./policyHighlights.util";
 
 export function PolicyDocumentCard({ version }: { readonly version: PolicyVersionSummary }) {
