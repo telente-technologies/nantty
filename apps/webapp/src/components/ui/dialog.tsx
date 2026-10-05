@@ -4,7 +4,9 @@ import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, ty
 
 import { Button } from "./button";
 import styles from "./dialog.module.css";
+import sheetStyles from "./dialogSheet.module.css";
 import { CloseIcon } from "./icons";
+import { useSheetDragToClose } from "./sheetDrag.hook";
 
 export type DialogTone = "neutral" | "brand" | "danger" | "success" | "caution";
 export type DialogLayout = "centered" | "sheet";
@@ -128,6 +130,8 @@ export function Dialog({
   const requestClose = useCallback(() => {
     if (dismissible) onClose();
   }, [dismissible, onClose]);
+  const dragHandlers = useSheetDragToClose(layout === "sheet" && dismissible, onClose, { dragging: sheetStyles.dragging, settling: sheetStyles.settling });
+  const dragZoneProps = layout === "sheet" ? { ...dragHandlers, className: sheetStyles.dragZone } : {};
 
   const trapFocus = (event: KeyboardEvent<HTMLDialogElement>) => {
     if (event.key !== "Tab" || !dialogRef.current) return;
@@ -145,7 +149,7 @@ export function Dialog({
   };
 
   if (!isRendered) return null;
-  const classes = [styles.dialog, styles[layout], styles[size], isClosing ? styles.closing : ""].filter(Boolean).join(" ");
+  const classes = [styles.dialog, layout === "sheet" ? sheetStyles.sheet : "", styles[size], isClosing ? styles.closing : ""].filter(Boolean).join(" ");
   const hasActions = (actions?.length ?? 0) > 0;
   return (
     <dialog
@@ -156,6 +160,7 @@ export function Dialog({
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}
       data-tone={tone}
+      data-closing={isClosing ? "true" : undefined}
       onKeyDown={trapFocus}
       onCancel={(event) => {
         event.preventDefault();
@@ -165,9 +170,13 @@ export function Dialog({
         if (event.target === dialogRef.current) requestClose();
       }}
     >
-      <div className={styles.panel}>
-        {layout === "sheet" ? <span className={styles.handle} aria-hidden="true" /> : null}
-        <header className={[styles.header, icon ? styles.headerWithIcon : ""].join(" ")}>
+      <div className={styles.panel} data-sheet-panel="true" data-part="panel">
+        {layout === "sheet" ? (
+          <div {...dragZoneProps} aria-hidden="true">
+            <span className={styles.handle} data-part="handle" />
+          </div>
+        ) : null}
+        <header {...dragHandlers} data-part="header" className={[styles.header, icon ? styles.headerWithIcon : "", layout === "sheet" ? sheetStyles.dragZone : ""].join(" ")}>
           {icon ? <span className={styles.iconBadge} aria-hidden="true">{icon}</span> : null}
           <div className={styles.headingText}>
             <h2 id={titleId} className={styles.title}>{title}</h2>
@@ -181,10 +190,10 @@ export function Dialog({
         </header>
         {children ? <div className={styles.body}>{children}</div> : null}
         {hasActions || footer ? (
-          <footer className={styles.footer}>
-            {footer ? <div className={styles.customFooter}>{footer}</div> : null}
+          <footer className={styles.footer} data-part="footer">
+            {footer ? <div className={styles.customFooter} data-part="customFooter">{footer}</div> : null}
             {actions?.slice(0, 3).map((action) => (
-              <Button key={action.label} variant={action.variant ?? "secondary"} busy={action.busy} disabled={action.disabled} onClick={action.onClick} className={styles.action} data-autofocus={action.isInitialFocus ? "true" : undefined}>
+              <Button key={action.label} variant={action.variant ?? "secondary"} busy={action.busy} disabled={action.disabled} onClick={action.onClick} className={styles.action} data-part="action" data-autofocus={action.isInitialFocus ? "true" : undefined}>
                 {action.label}
               </Button>
             ))}

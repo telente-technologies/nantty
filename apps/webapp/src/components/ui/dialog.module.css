@@ -131,7 +131,7 @@
 }
 
 .title {
-  font-size: 1.125rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   line-height: 1.35;
   letter-spacing: -0.01em;
@@ -229,45 +229,6 @@
   }
 }
 
-@media (max-width: 639px) {
-  .sheet {
-    width: 100vw;
-    max-height: calc(100dvh - 24px);
-    margin: auto 0 0;
-  }
-
-  .sheet .panel {
-    border-bottom: 0;
-    border-radius: 24px 24px 0 0;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    animation-name: sheetIn;
-    animation-duration: 280ms;
-  }
-
-  .sheet.closing .panel {
-    animation-name: sheetOut;
-  }
-
-  .sheet .handle {
-    display: block;
-    width: 36px;
-    height: 5px;
-    margin: 8px auto 0;
-    border-radius: 3px;
-    background: var(--divider-strong);
-  }
-
-  .sheet .header {
-    padding-top: var(--space-4);
-  }
-
-  .sheet .footer {
-    border-top: 1px solid var(--divider);
-    padding-top: var(--space-3);
-    padding-bottom: var(--space-4);
-  }
-}
-
 @keyframes panelIn {
   from {
     opacity: 0;
@@ -279,18 +240,6 @@
   to {
     opacity: 0;
     transform: translateY(4px) scale(0.98);
-  }
-}
-
-@keyframes sheetIn {
-  from {
-    transform: translateY(100%);
-  }
-}
-
-@keyframes sheetOut {
-  to {
-    transform: translateY(100%);
   }
 }
 
