@@ -46,7 +46,7 @@ export function PlanPriceBookPanel() {
           rows={rows}
           isLoading={table.isLoading}
           readRowKey={(row) => `${row.planCode}:${row.countryCode}`}
-          onRowOpen={can("config:plans") ? setEditing : undefined}
+          onRowOpen={can("config:revenue") ? setEditing : undefined}
           columns={[
             { key: "region", header: "Region", render: (row) => `${row.countryCode} · ${row.currency}`, isMono: true },
             { key: "web", header: "Web monthly / yearly", render: (row) => `${priceOrDash(row.monthlyAmountMinor, row.currency)} / ${priceOrDash(row.yearlyAmountMinor, row.currency)}` },

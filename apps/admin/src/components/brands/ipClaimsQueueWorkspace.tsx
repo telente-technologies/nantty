@@ -15,14 +15,14 @@ import { fetchIpClaims } from "@/services/brandsApi.service";
 
 import { ipClaimColumns, isIpClaimPastSla } from "./ipClaimColumns";
 
-type ClaimStatusFilter = "OPEN" | "NEEDS_INFO" | "UPHELD" | "REJECTED" | "";
+type ClaimStatusFilter = "OPEN" | "NEEDS_INFO" | "UPHELD" | "REJECTED" | "ALL";
 
 const statusTabs: readonly { key: ClaimStatusFilter; label: string }[] = [
   { key: "OPEN", label: "Open" },
   { key: "NEEDS_INFO", label: "Needs info" },
   { key: "UPHELD", label: "Upheld" },
   { key: "REJECTED", label: "Rejected" },
-  { key: "", label: "All" },
+  { key: "ALL", label: "All" },
 ];
 
 export function IpClaimsQueueWorkspace() {

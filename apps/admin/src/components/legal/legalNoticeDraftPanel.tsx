@@ -22,7 +22,7 @@ function DraftForm({ initial, versionId, canEdit, canSendTest }: { readonly init
   const [summaryText, setSummaryText] = useState(initial.summaryText);
   const [changesText, setChangesText] = useState(initial.whatChanged.join("\n"));
   const [reacceptNote, setReacceptNote] = useState(initial.reacceptNote ?? "");
-  const saveMutation = useAdminMutation(() => saveLegalNoticeDraft(versionId, { subject, summaryText, whatChanged: changesText.split("\n"), reacceptNote: reacceptNote.trim() || null }));
+  const saveMutation = useAdminMutation(() => saveLegalNoticeDraft(versionId, { subject, summaryText, whatChanged: changesText.split("\n").map((line) => line.trim()).filter(Boolean), reacceptNote: reacceptNote.trim() || null }));
   const testMutation = useAdminMutation(() => sendLegalNoticeTestToMyself(versionId));
   const livePreview: LegalNoticeDraft = { ...draft, subject, summaryText, whatChanged: changesText.split("\n").map((line) => line.trim()).filter(Boolean), reacceptNote: reacceptNote.trim() || null };
 

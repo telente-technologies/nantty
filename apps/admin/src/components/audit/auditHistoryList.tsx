@@ -9,9 +9,9 @@ import { formatDateTime, formatRelativeTimeFromNow } from "@/utils/formatting.ut
 
 import styles from "./auditHistoryList.module.css";
 
-export function AuditHistoryList({ entries, emptyMessage = "No admin actions recorded yet." }: { readonly entries: readonly AuditLogEntry[]; readonly emptyMessage?: string }) {
+export function AuditHistoryList({ entries, emptyMessage = "No admin actions recorded yet." }: { readonly entries?: readonly AuditLogEntry[]; readonly emptyMessage?: string }) {
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
-  if (entries.length === 0) return <p className={styles.empty}>{emptyMessage}</p>;
+  if (!entries || entries.length === 0) return <p className={styles.empty}>{emptyMessage}</p>;
   return (
     <ol className={styles.timeline}>
       {entries.map((entry) => {

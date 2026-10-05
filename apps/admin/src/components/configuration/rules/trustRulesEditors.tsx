@@ -55,7 +55,6 @@ export function CreatorThresholdsEditor({ rules, canWrite, onChange }: EditorPro
       </div>
       <div className={styles.checks}>
         <CheckboxField label="Verified email" checked={rules.autoApprove.requiresVerifiedEmail} disabled={disabled} onChange={(event) => setAuto("requiresVerifiedEmail", event.target.checked)} />
-        <CheckboxField label="Verified phone" checked={rules.autoApprove.requiresVerifiedPhone} disabled={disabled} onChange={(event) => setAuto("requiresVerifiedPhone", event.target.checked)} />
       </div>
       <h3 className={styles.sectionTitle}>Manual review covers</h3>
       <div className={styles.grid}>
@@ -76,8 +75,8 @@ const trialLengthOptions = [{ value: "DAYS_7", label: "7 days" }, { value: "MONT
 export function TrialRulesEditor({ rules, canWrite, onChange }: EditorProps<TrialRules>) {
   const disabled = !canWrite;
   const set = <Key extends keyof TrialRules>(key: Key, value: TrialRules[Key]) => onChange((current) => ({ ...current, [key]: value }));
-  const toggles: readonly { key: "requiresVerifiedEmail" | "onePerPerson" | "onePerCard" | "onePerDevice" | "onePerPhone"; label: string }[] = [
-    { key: "requiresVerifiedEmail", label: "Verified email required" }, { key: "onePerPerson", label: "One trial per person" }, { key: "onePerCard", label: "One trial per card" }, { key: "onePerDevice", label: "One trial per device" }, { key: "onePerPhone", label: "One trial per phone number" },
+  const toggles: readonly { key: "requiresVerifiedEmail" | "onePerPerson" | "onePerCard" | "onePerDevice"; label: string }[] = [
+    { key: "requiresVerifiedEmail", label: "Verified email required" }, { key: "onePerPerson", label: "One trial per person" }, { key: "onePerCard", label: "One trial per card" }, { key: "onePerDevice", label: "One trial per device" },
   ];
   return (
     <div className={styles.editor}>

@@ -16,7 +16,6 @@ export function CreatorEligibilityEditor({ rules, canWrite, onChange }: { readon
         <WholeNumberField label="Minimum account age (days)" value={rules.minimumAccountAgeDays} maximum={3650} isDisabled={isDisabled} onChange={(value) => setField("minimumAccountAgeDays", value)} />
       </div>
       <div className={styles.checks}>
-        <CheckboxField label="Verified phone number required" checked={rules.requiresVerifiedPhone} disabled={isDisabled} onChange={(event) => setField("requiresVerifiedPhone", event.target.checked)} />
         <CheckboxField label="Identity verification (KYC) required" description="Needed before creators can receive gift and affiliate payouts." checked={rules.requiresIdentityVerification} disabled={isDisabled} onChange={(event) => setField("requiresIdentityVerification", event.target.checked)} />
       </div>
       <EditableTextList label="Countries where people can apply" items={rules.allowedCountries} placeholder="Two-letter code, e.g. NG" maximumLength={2} isDisabled={isDisabled} onChange={(countries) => setField("allowedCountries", countries.map((country) => country.toUpperCase().replace(/[^A-Z]/g, "")))} />
