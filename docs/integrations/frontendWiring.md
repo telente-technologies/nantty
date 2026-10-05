@@ -1,6 +1,6 @@
 # Frontend wiring: switching from mocks to the real backend
 
-As of 2026-10-03. Mocks stay the default in every app. Nothing changes until a prefix variable is set. Gateway: `http://localhost:8080` (`pnpm backend:dev:gateway`, see `services/README.md`).
+As of 2026-10-05 (contract check: [apiContractCheck.md](../verification/apiContractCheck.md)). Mocks stay the default in every app. Nothing changes until a prefix variable is set. Gateway: `http://localhost:8080` (`pnpm backend:dev:gateway`, see `services/README.md`).
 
 ## How the switch works
 
@@ -30,6 +30,7 @@ Expo inlines `EXPO_PUBLIC_*` at bundle time: restart Metro after changing it. Ne
 
 - Lists are `{ data, nextCursor }`. Mobile `apiClient` returns the whole envelope when `nextCursor` is present and unwraps `{data}` only for single resources. Use `api.getPage` (cursor lists, infinite queries) or `api.getList` (array only; also accepts bare arrays).
 - Ads and admin keep their internal `{items,...}` page types; `adaptListEnvelope` converts server `{data,nextCursor,total}` and `{data,page,pageSize,total}` at the client boundary. Mock handlers are converted the other way in the transport, so mock mode exercises the same path.
+- Go services decode request bodies strictly: an unknown field is a `400 VALIDATION_FAILED`. Send only the DTO fields; extra UI-only fields break real calls even though the mocks accept them.
 - Errors are `{ message, code, issues? }`. A 401 with no session opens the guest sign-in prompt (mobile: non-GET only; webapp: non-GET with `UNAUTHENTICATED`/`SESSION_EXPIRED`); with a session, one refresh then a retry, then sign-out. The gateway answers `UNAUTHENTICATED`.
 - Profile images use upload intents and send `avatarMediaId`/`bannerMediaId`.
 - Social sign-in sends the raw nonce. `503 SOCIAL_SIGN_IN_NOT_CONFIGURED` is shown as "not configured".
@@ -58,7 +59,9 @@ Apps: mobile, webapp, studio, seller, ads. Backend: go-identity behind the gatew
 - [ ] Username policy, availability reasons, change errors.
 - [ ] Profiles list and acting profile (mobile); business profile creation with `categories`.
 - [ ] Addresses: list is an envelope, response has `countryCode`, geo ids, `display`. Mobile sends `countryId` (id or code) with state/LGA/city ids. Webapp address form has no geo pickers yet: do not switch addresses for the webapp until it does.
-- [ ] Countries and currency in settings.
+- [ ] Countries and currency in settings. Theme is not stored server-side yet: `PATCH /users/me/preferences {theme}` is rejected (only `countryCode`), so keep theme local until go-identity has the field.
+- [ ] Privacy: consents `GET/PUT /users/me/consents` (web cookie banner uses the PUT when signed in), export `GET/POST /users/me/data-exports`, deletion `POST /users/me/deletion-request {confirm, reason}`.
+- [ ] Webapp guests: `/lives/suggested`, `/users/suggested`, `/gifts`, `/lives/:id/comments`, `/users/:id` need auth at the gateway, so guests get 401 once these are switched.
 - Still mocked under these prefixes: `/users/me/settings`, `/topics`, `/users/me/topics`, `/users/me/blocked`, follows, verification, brands. Keep their paths out of the list until built (prefix `/api/v1/users` covers them, so expect 404s there until ts-social and settings land).
 
 ### 3. Social (`/api/v1/feeds`, `/api/v1/posts`, `/api/v1/follows`, `/api/v1/media`)
@@ -69,6 +72,7 @@ Backend: ts-social (`pnpm backend:dev:social`), ts.media later.
 - [ ] Post audience values match the server enum.
 - [ ] Follow and unfollow with and without `Idempotency-Key`.
 - [ ] Media upload via `/api/v1/media` (mobile chunk transport).
+- [ ] Tagged people: composer sends `taggedUserIds` (max 20, untaggable ids dropped silently); posts carry `taggedUsers` (first 3) and `taggedUsersCount`; `GET /posts/:id/tagged-users` returns `{ data, nextCursor }` (guests allowed, 404 when hidden); `DELETE /posts/:id/tags/me`; author edits with `PUT /posts/:id/tags`; `GET/PUT /me/tagging-settings` for `allowTagging`. `GET /tags/candidates?q=` is live (tagging-off users are omitted, not shown disabled).
 
 ### 4. Notifications (`/api/v1/notifications`)
 
@@ -86,7 +90,8 @@ Backend: ts-social (`pnpm backend:dev:social`), ts.media later.
 Payout onboarding screens are owned by another workstream; coordinate before switching `/wallets`.
 
 - [ ] Lists are envelopes (`getList` handles them).
-- [ ] Coin purchase body is `{packageId}`; app clients buy through IAP.
+- [ ] Coin purchase body is `{packageId}` (no `channel`); app clients buy through IAP.
+- [ ] Mobile checkout: `POST /payments/initialize {orderId, provider}`; a saved card is charged with `POST /payments/saved-cards/charges {paymentReference, savedCardId}` after initialize. Saving a new card needs `/payments/saved-cards/setups` (not wired).
 - [ ] Withdrawal response carries `fee`, `netAmount`, `withdrawalStatus`.
 - [ ] Escrow and disputes: `GET /orders/:id/escrow`, `POST /orders/:id/disputes`.
 
@@ -95,17 +100,25 @@ Payout onboarding screens are owned by another workstream; coordinate before swi
 - [ ] Orders list accepts bare array or page.
 - [ ] Cart variant request (`size,color`) vs response (`variant`) agreed with go-commerce.
 - [ ] Seller dashboard BFF reads `{data,nextCursor}`.
+- [x] Seller domains backed 2026-10-05: settings, storefront, staff and audit log, wallet and payouts, finance, dashboard, analytics, delivery areas, customers (create/update, segments), marketing overview and product options. `apps/seller/.env.example` now lists them in `SELLER_REAL_API_PREFIXES` (mocks stay the default switch).
+- [x] Payout onboarding: the dashboard calls `/payments/payout-onboarding/me/*` and `/payments/payout-fees`; the BFF forwards them (owner only, `wallet:withdraw`).
+- [x] Store rewards save through `PUT /seller/marketing/rewards/settings` (the settings PATCH no longer carries `storeRewards`).
+- [ ] Still mocked (57 calls): affiliates, brands workspace, conversations (incl. `POST /seller/orders/:id/conversation`, which sits under the `/seller/orders` prefix), developers, integrations, security sessions, subscription details/verify/trial verify and cancel, verification, preferences, consents, ads summary, product import (under `/seller/products`). Business documents still need the two-step upload. Leave `/seller/subscription` off the prefix list until `GET /seller/subscription` exists.
+- [ ] App side: the Zudomart app must show team requests (`GET /stores/team-requests`, accept/decline) so invited staff can join.
 
 ### 8. Ads (`/api/v1/ads`)
 
 Apps: ads (and the mobile ad events path).
 
 - [ ] Memberships, accounts, campaigns, reports, billing lists go through `adaptListEnvelope`.
-- [ ] `Idempotency-Key` length (ads allows 256, server 8 to 128): keep keys under 128.
+- [ ] `Idempotency-Key` length (ads allows 256, server 8 to 128): keep keys under 128. Required on account, campaign, duplicate, ad set, ad, customer list and boost creation (all sent now).
+- [ ] Invites: go-ads invites by `username`, the UI by email. Do not switch `/ads/accounts/*/invites` until one side changes.
+- [ ] Billing top-ups, invoices, payment methods, conversion events, experiments, rules, locations and behaviours have no backend yet.
 
 ### 9. Admin (`/api/v1/admin`)
 
-- [ ] Staff login with TOTP and step-up; step-up prompts still work.
+- [ ] Staff login with TOTP and step-up; step-up prompts still work. The BFF now speaks the backend shape (`challengeToken`, `/mfa/enroll/start|confirm`, `staff`); passkeys and recovery codes are not in the backend.
+- [ ] Not built in the backend: metrics overview, own account sessions/passkeys, appeals, orders, refunds, payouts detail, coins review, ledger accounts/entries, catalog admin, brands, reserved usernames (backend path is `/admin/usernames/reserved`).
 - [ ] Tables use `{data,page,pageSize,total}`; cursor lists (audit log) show without page numbers.
 
 ## Contract tests
@@ -117,8 +130,10 @@ Mock responses are validated against per-endpoint schemas so drift is caught bef
 | mobile | `cd apps/mobile && npx jest` | users, auth, geo, live envelopes, username errors, envelope helpers |
 | webapp | `cd apps/webapp && pnpm test:contracts` | auth, users, addresses, countries, suggested lives |
 | studio | `cd apps/studio && pnpm test:contracts` | auth incl. social, live comments page |
-| seller | `cd apps/seller && pnpm test:contracts` | login, error shape |
+| seller | `cd apps/seller && pnpm test:contracts` | login, error shape, 22 newly backed endpoints (`sellerDomains.contract.ts`) |
 | ads | `cd apps/ads && pnpm test:contracts` | login, memberships, campaign list, adapter |
 | admin | `cd apps/admin && pnpm test:contracts` | table envelope, adapter |
+
+Live run: `services/scripts/apiSmoke/tests/frontendContracts.smoke.test.ts` loads the mobile, webapp and studio contract lists and checks them (plus seller login, ads memberships and admin table envelopes) against the real gateway with a fresh user and superadmin. It runs with the rest of apiSmoke (`pnpm backend:test:smoke`, needs `SMOKE_IDENTITY_LOG`). Contracts that use mock fixture ids are skipped.
 
 The web app tests use `tsx` (added as a devDependency; run `pnpm install` once). When a backend contract changes, edit the schema first, then the mock, then the client.

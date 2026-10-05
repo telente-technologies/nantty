@@ -271,6 +271,14 @@ sequenceDiagram
 
 Refunds are drawn from Zudomart's balance. For a direct group already settled to the seller, Zudomart pays the buyer and books **seller debt**, recovered from later releases (E2) or by reducing later direct shares. Whether Paystack claws back a subaccount's share on refund or chargeback is **UNCONFIRMED — ask Paystack**.
 
+### 6.5a Verification checkmark share refund (4 Oct 2026)
+
+A rejected identity check refunds through the same `POST /refund` path. Standalone checkmark tiers get the full charge and `POST /subscription/disable`. Seller Pro, Business and Premium keep the plan: a **partial** refund of the checkmark share (standalone price in the buyer's region, channel and interval, capped at the amount paid) with `merchant_note` "verification share", the ledger entry posted first under idempotency key `verification-share:{caseId}`, and the Paystack subscription left active. Renewals still charge the plan's full amount (open item, plans.md section 53.6). Code: `services/go/modules/subscriptions/src/modules/billing/services/verificationRefunds.service.go`.
+
+### 6.5b Fee lines, direct vs escrow
+
+Zudomart takes 0% product commission. Escrow groups: escrow fee 1.5% (1% Business plan) of the group total including shipping plus the allocated Paystack fee, both deducted from the payout at release as separate lines. Direct groups (verified stores): no Zudomart fee; the split sends `groupTotal - allocatedPaystackFee` to the subaccount (`bearer_type: account`), so the seller bears the Paystack fee. See `checkoutPaymentFlowPlan.md` section 2.2.
+
 ### 6.6 Saved cards
 
 ```mermaid
