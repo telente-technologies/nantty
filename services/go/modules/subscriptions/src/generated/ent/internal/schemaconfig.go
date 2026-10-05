@@ -7,14 +7,17 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
-	IdempotentRequest    string // IdempotentRequest table.
-	OutboxEvent          string // OutboxEvent table.
-	PlanPrice            string // PlanPrice table.
-	ProviderPlan         string // ProviderPlan table.
-	Subscription         string // Subscription table.
-	SubscriptionPeriod   string // SubscriptionPeriod table.
-	SubscriptionReminder string // SubscriptionReminder table.
-	TrialClaim           string // TrialClaim table.
+	CreatorSubscription       string // CreatorSubscription table.
+	CreatorSubscriptionCharge string // CreatorSubscriptionCharge table.
+	CreatorSubscriptionPlan   string // CreatorSubscriptionPlan table.
+	IdempotentRequest         string // IdempotentRequest table.
+	OutboxEvent               string // OutboxEvent table.
+	PlanPrice                 string // PlanPrice table.
+	ProviderPlan              string // ProviderPlan table.
+	Subscription              string // Subscription table.
+	SubscriptionPeriod        string // SubscriptionPeriod table.
+	SubscriptionReminder      string // SubscriptionReminder table.
+	TrialClaim                string // TrialClaim table.
 }
 
 type schemaCtxKey struct{}

@@ -9,6 +9,128 @@ import (
 )
 
 var (
+	// CreatorSubscriptionsColumns holds the columns for the "creator_subscriptions" table.
+	CreatorSubscriptionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "subscriber_id", Type: field.TypeString, Size: 80},
+		{Name: "creator_id", Type: field.TypeString, Size: 80},
+		{Name: "plan_id", Type: field.TypeString, Size: 80},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "active", "past_due", "cancelled", "expired", "failed"}, Default: "pending"},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "interval", Type: field.TypeEnum, Enums: []string{"month", "year"}},
+		{Name: "billing_authorization_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "current_period_start", Type: field.TypeTime, Nullable: true},
+		{Name: "current_period_end", Type: field.TypeTime, Nullable: true},
+		{Name: "next_charge_at", Type: field.TypeTime, Nullable: true},
+		{Name: "renewal_attempts", Type: field.TypeInt, Default: 0},
+		{Name: "last_error", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// CreatorSubscriptionsTable holds the schema information for the "creator_subscriptions" table.
+	CreatorSubscriptionsTable = &schema.Table{
+		Name:       "creator_subscriptions",
+		Columns:    CreatorSubscriptionsColumns,
+		PrimaryKey: []*schema.Column{CreatorSubscriptionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creatorsubscription_subscriber_id_creator_id",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorSubscriptionsColumns[2], CreatorSubscriptionsColumns[3]},
+			},
+			{
+				Name:    "creatorsubscription_creator_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorSubscriptionsColumns[3], CreatorSubscriptionsColumns[5]},
+			},
+			{
+				Name:    "creatorsubscription_status_current_period_end",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorSubscriptionsColumns[5], CreatorSubscriptionsColumns[11]},
+			},
+			{
+				Name:    "creator_subscriptions_next_charge_due",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorSubscriptionsColumns[12]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "next_charge_at IS NOT NULL",
+				},
+			},
+		},
+	}
+	// CreatorSubscriptionChargesColumns holds the columns for the "creator_subscription_charges" table.
+	CreatorSubscriptionChargesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "subscription_id", Type: field.TypeString, Size: 80},
+		{Name: "subscriber_id", Type: field.TypeString, Size: 80},
+		{Name: "creator_id", Type: field.TypeString, Size: 80},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"initial", "renewal"}},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 160},
+		{Name: "payment_reference", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "attempt_count", Type: field.TypeInt, Default: 0},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "succeeded", "failed"}, Default: "pending"},
+		{Name: "provider_fee_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "creator_share_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "platform_share_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "period_start", Type: field.TypeTime, Nullable: true},
+		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// CreatorSubscriptionChargesTable holds the schema information for the "creator_subscription_charges" table.
+	CreatorSubscriptionChargesTable = &schema.Table{
+		Name:       "creator_subscription_charges",
+		Columns:    CreatorSubscriptionChargesColumns,
+		PrimaryKey: []*schema.Column{CreatorSubscriptionChargesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creatorsubscriptioncharge_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{CreatorSubscriptionChargesColumns[6]},
+			},
+			{
+				Name:    "creatorsubscriptioncharge_payment_reference",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorSubscriptionChargesColumns[7]},
+			},
+			{
+				Name:    "creatorsubscriptioncharge_subscription_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorSubscriptionChargesColumns[2], CreatorSubscriptionChargesColumns[1]},
+			},
+		},
+	}
+	// CreatorSubscriptionPlansColumns holds the columns for the "creator_subscription_plans" table.
+	CreatorSubscriptionPlansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "creator_id", Type: field.TypeString, Size: 80},
+		{Name: "name", Type: field.TypeString, Size: 80},
+		{Name: "description", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "interval", Type: field.TypeEnum, Enums: []string{"month", "year"}, Default: "month"},
+		{Name: "benefits", Type: field.TypeJSON},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// CreatorSubscriptionPlansTable holds the schema information for the "creator_subscription_plans" table.
+	CreatorSubscriptionPlansTable = &schema.Table{
+		Name:       "creator_subscription_plans",
+		Columns:    CreatorSubscriptionPlansColumns,
+		PrimaryKey: []*schema.Column{CreatorSubscriptionPlansColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creatorsubscriptionplan_creator_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorSubscriptionPlansColumns[2], CreatorSubscriptionPlansColumns[1]},
+			},
+		},
+	}
 	// IdempotentRequestsColumns holds the columns for the "idempotent_requests" table.
 	IdempotentRequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -315,6 +437,9 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CreatorSubscriptionsTable,
+		CreatorSubscriptionChargesTable,
+		CreatorSubscriptionPlansTable,
 		IdempotentRequestsTable,
 		OutboxEventsTable,
 		PlanPricesTable,

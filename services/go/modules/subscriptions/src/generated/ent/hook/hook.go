@@ -8,6 +8,42 @@ import (
 	"zudomart/modules/subscriptions/src/generated/ent"
 )
 
+// The CreatorSubscriptionFunc type is an adapter to allow the use of ordinary
+// function as CreatorSubscription mutator.
+type CreatorSubscriptionFunc func(context.Context, *ent.CreatorSubscriptionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreatorSubscriptionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreatorSubscriptionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreatorSubscriptionMutation", m)
+}
+
+// The CreatorSubscriptionChargeFunc type is an adapter to allow the use of ordinary
+// function as CreatorSubscriptionCharge mutator.
+type CreatorSubscriptionChargeFunc func(context.Context, *ent.CreatorSubscriptionChargeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreatorSubscriptionChargeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreatorSubscriptionChargeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreatorSubscriptionChargeMutation", m)
+}
+
+// The CreatorSubscriptionPlanFunc type is an adapter to allow the use of ordinary
+// function as CreatorSubscriptionPlan mutator.
+type CreatorSubscriptionPlanFunc func(context.Context, *ent.CreatorSubscriptionPlanMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreatorSubscriptionPlanFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreatorSubscriptionPlanMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreatorSubscriptionPlanMutation", m)
+}
+
 // The IdempotentRequestFunc type is an adapter to allow the use of ordinary
 // function as IdempotentRequest mutator.
 type IdempotentRequestFunc func(context.Context, *ent.IdempotentRequestMutation) (ent.Value, error)

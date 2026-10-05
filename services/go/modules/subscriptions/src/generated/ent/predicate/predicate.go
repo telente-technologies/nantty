@@ -6,6 +6,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// CreatorSubscription is the predicate function for creatorsubscription builders.
+type CreatorSubscription func(*sql.Selector)
+
+// CreatorSubscriptionCharge is the predicate function for creatorsubscriptioncharge builders.
+type CreatorSubscriptionCharge func(*sql.Selector)
+
+// CreatorSubscriptionPlan is the predicate function for creatorsubscriptionplan builders.
+type CreatorSubscriptionPlan func(*sql.Selector)
+
 // IdempotentRequest is the predicate function for idempotentrequest builders.
 type IdempotentRequest func(*sql.Selector)
 
