@@ -37,12 +37,10 @@ const DECISION_NOTES = {
 } as const;
 
 function buildEligibilityForSignedInUser(): CreatorEligibility {
-  const user = getSignedInMockUser();
   const stats = trustStatsForSignedInUser();
   const requirements = [
     { key: "followers" as const, label: "At least 1,000 real followers", currentValue: stats.realFollowers, requiredValue: 1000 },
     { key: "account_age" as const, label: "Account at least 30 days old", currentValue: accountAgeInDaysForSignedInUser(), requiredValue: 30 },
-    { key: "verified_phone" as const, label: "Verified phone number", currentValue: user.phone ? 1 : 0, requiredValue: 1 },
     { key: "original_posts" as const, label: "10 original posts in the last 60 days", currentValue: stats.originalPostsLast60Days, requiredValue: 10 },
     { key: "no_violations" as const, label: "No violations in the last 90 days", currentValue: stats.violationsLast90Days === 0 ? 1 : 0, requiredValue: 1 },
   ].map((requirement) => ({ ...requirement, met: requirement.currentValue >= requirement.requiredValue }));

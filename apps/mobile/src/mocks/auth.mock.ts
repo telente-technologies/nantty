@@ -52,11 +52,11 @@ export const authMocks: MockRoute[] = [
     return buildMockAuthSession();
   }),
   createMockRoute("POST", "/api/v1/auth/register", ({ body }) => {
-    const { username, email, phone } = body as { username?: string; email?: string; phone?: string };
+    const { username, email } = body as { username?: string; email?: string };
     const availability = username?.trim() ? checkAvailability(username) : null;
     if (availability && !availability.available) throw buildUsernameUnavailableError(availability);
     mockSession.signedInUserId = demoFanAccount.id;
-    applyProfileEditForSignedInUser({ username: username?.trim() || generateAutomaticUsername(email ?? phone ?? "zudo") });
+    applyProfileEditForSignedInUser({ username: username?.trim() || generateAutomaticUsername(email ?? "zudo") });
     return { ...buildMockAuthSession(), user: signedInProfile() };
   }),
   createMockRoute("POST", "/api/v1/auth/otp/send", () => ({ expiresIn: 60 })),

@@ -1,4 +1,3 @@
-import { isMessageAfterSyncCursor } from "@/cache/messageHistory.type";
 import type { Conversation, Message, UserSummary } from "@/types";
 
 import { ApiError } from "@/errors/api.error";
@@ -172,9 +171,9 @@ export const chatsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/conversations/:conversationId", ({ params }) => decorateConversation(findMockConversation(params.conversationId!))),
   createMockRoute("GET", "/api/v1/conversations/:conversationId/messages", ({ params, query }) => {
     const allMessages = mockMessagesByConversation.get(params.conversationId!) ?? [];
-    const afterCursor = query.get("after");
+    const afterIndex = allMessages.findIndex((message) => message.id === query.get("after"));
     return {
-      data: afterCursor ? allMessages.filter((message) => isMessageAfterSyncCursor(message, afterCursor)) : allMessages,
+      data: afterIndex >= 0 ? allMessages.slice(afterIndex + 1) : allMessages,
       nextCursor: null,
     };
   }),

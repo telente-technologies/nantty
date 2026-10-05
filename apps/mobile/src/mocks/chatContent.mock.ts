@@ -82,7 +82,7 @@ export const chatContentMocks: MockRoute[] = [
         id: `m_share_${Date.now()}_${index}`,
         conversationId: conversation.id,
         senderId: getSignedInMockUser().id,
-        text: input.note.trim(),
+        text: "",
         createdAt: new Date().toISOString(),
         kind: "shared",
         sharedContent: card,
