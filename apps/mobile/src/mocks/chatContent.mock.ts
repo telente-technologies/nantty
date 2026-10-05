@@ -72,12 +72,14 @@ export const chatContentMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/link-previews/resolve", ({ query }) => lookupLinkPreview(query.get("url") ?? "")),
   createMockRoute("GET", "/api/v1/chat/content", ({ query }) => resolveSharedContentCard({ kind: query.get("kind") as SharedContentReference["kind"], id: query.get("id") ?? "" })),
   createMockRoute("POST", "/api/v1/chat/shares", ({ body }) => {
-    const input = body as SendToChatsInput;
+    const input = body as SendToChatsInput & { readonly note?: string };
+    if (input.note) throw new ApiError(400, "Notes travel encrypted, never as plain text.", "VALIDATION_FAILED");
     if (input.conversationIds.length === 0) throw new ApiError(400, "Pick at least one chat");
     const card = resolveSharedContentCard(input.reference);
     if (card.availability !== "available") throw new ApiError(409, card.title);
     input.conversationIds.forEach((conversationId, index) => {
       const conversation = findMockConversation(conversationId);
+      const sealed = input.encryptions?.find((entry) => entry.conversationId === conversationId);
       appendMockMessageAndUpdateConversation({
         id: `m_share_${Date.now()}_${index}`,
         conversationId: conversation.id,
@@ -86,7 +88,7 @@ export const chatContentMocks: MockRoute[] = [
         createdAt: new Date().toISOString(),
         kind: "shared",
         sharedContent: card,
-        encryption: { deviceId: "mock-device-1", ciphertext: null, protocol: "signal-v1-pending" },
+        encryption: sealed ? { deviceId: sealed.deviceId, ciphertext: sealed.ciphertext, protocol: "signal-v1" } : null,
       });
     });
     const shareCount = (shareCountByReferenceKey.get(referenceKey(input.reference)) ?? 0) + input.conversationIds.length;

@@ -188,7 +188,9 @@ export const chatsMocks: MockRoute[] = [
     return conversation;
   }),
   createMockRoute("POST", "/api/v1/conversations/:conversationId/messages", ({ params, body }) => {
-    const input = body as { text: string; kind?: "voice" | "image" | "shared" | "location" | "liveLocation" | "document" | "poll"; location?: Message["location"]; document?: Message["document"]; poll?: PollInput; mediaId?: string; durationSeconds?: number; linkPreview?: Message["linkPreview"]; sharedContent?: Message["sharedContent"]; mentions?: Message["mentions"] };
+    const input = body as { text?: string; encryption?: { deviceId: string; ciphertext: string; protocol?: string }; kind?: "text" | "voice" | "image" | "shared" | "location" | "liveLocation" | "document" | "poll"; location?: Message["location"]; document?: Message["document"]; poll?: PollInput; mediaId?: string; durationSeconds?: number; linkPreview?: string | null; sharedContent?: Message["sharedContent"]; mentions?: Message["mentions"] };
+    if (input.text && input.kind !== "poll") throw new ApiError(422, "Messages are end-to-end encrypted: send an encryption envelope, never text.", "PLAINTEXT_NOT_ACCEPTED");
+    if ((input.kind ?? "text") === "text" && !input.encryption?.ciphertext) throw new ApiError(422, "A text message needs an encryption envelope.", "ENCRYPTION_REQUIRED");
     const conversation = findMockConversation(params.conversationId!);
     if (outgoingRequestConversationIds.has(conversation.id) && !isOutgoingRequestAllowedByPeer(conversation.peer.id)) {
       throw new ApiError(403, `${conversation.peer.name} isn't accepting message requests from you`);
@@ -208,7 +210,7 @@ export const chatsMocks: MockRoute[] = [
       id: `m_${Date.now()}`,
       conversationId: params.conversationId!,
       senderId: getSignedInMockUser().id,
-      text: input.text,
+      text: input.kind === "poll" ? (input.text ?? "") : "",
       createdAt,
       ...(sanitizedMentions.mentions.length ? { mentions: sanitizedMentions.mentions } : {}),
       kind: input.kind ?? "text",
@@ -217,9 +219,9 @@ export const chatsMocks: MockRoute[] = [
       location: input.location ? { ...input.location, updatedAt: createdAt } : null,
       document: input.document ?? null,
       poll: input.poll ? buildPollFromInput(input.poll) : null,
-      linkPreview: input.linkPreview ?? null,
+      linkPreview: typeof input.linkPreview === "string" ? (input.linkPreview as never) : null,
       sharedContent: input.sharedContent ?? null,
-      encryption: { deviceId: "mock-device-1", ciphertext: null, protocol: "signal-v1-pending" },
+      encryption: input.encryption ? { deviceId: input.encryption.deviceId, ciphertext: input.encryption.ciphertext, protocol: input.encryption.protocol ?? "signal-v1" } : null,
       expiresAt: withExpiryForConversation(params.conversationId!, createdAt),
     });
   }),

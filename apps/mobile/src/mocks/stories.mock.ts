@@ -1,4 +1,5 @@
 import type { Story, StoryTrayItem } from "@/types";
+import { ApiError } from "@/errors/api.error";
 
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
 import { findMockPostMediaById } from "./media.mock";
@@ -39,7 +40,10 @@ export const storiesMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/stories/tray", () => tray()),
   createMockRoute("GET", "/api/v1/users/:userId/stories", ({ params }) => buildStoriesForUser(params.userId!)),
   createMockRoute("POST", "/api/v1/stories/:storyId/seen", ({ params }) => void seenStoryIds.add(params.storyId!)),
-  createMockRoute("POST", "/api/v1/stories/:storyId/replies", () => undefined),
+  createMockRoute("POST", "/api/v1/stories/:storyId/replies", ({ body }) => {
+    const input = (body ?? {}) as { text?: string; encryption?: { ciphertext?: string } };
+    if (input.text !== undefined || !input.encryption?.ciphertext) throw new ApiError(400, "Story replies are end-to-end encrypted.", "VALIDATION_FAILED");
+  }),
   createMockRoute("POST", "/api/v1/stories", ({ body }) => ({
     id: `st_${Date.now()}`,
     author: summariseUser(getSignedInMockUser()),

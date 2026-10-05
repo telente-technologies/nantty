@@ -21,6 +21,7 @@ import { cartMocks } from "./cart.mock";
 import { chatContentMocks } from "./chatContent.mock";
 import { chatInboxMocks } from "./chatInbox.mock";
 import { chatAttachmentMocks } from "./chatAttachmentRoutes.mock";
+import { chatKeysMocks } from "./chatKeys.mock";
 import { chatsMocks } from "./chats.mock";
 import { groupsMocks } from "./groups.mock";
 import { clipsMocks } from "./clips.mock";
@@ -113,6 +114,7 @@ const routes: MockRoute[] = [
   ...businessProfilesMocks,
   ...supportMocks,
   ...groupsMocks,
+  ...chatKeysMocks,
   ...chatsMocks,
   ...chatAttachmentMocks,
   ...chatInboxMocks,
