@@ -9,6 +9,7 @@
     "lint": "eslint -c ../../packages/eslintConfig/next.config.mjs src"
   },
   "dependencies": {
+    "@phosphor-icons/react": "2.1.10",
     "@zudomart/design-tokens": "workspace:*",
     "@zudomart/web-kit": "workspace:*",
     "next": "^16.3.6",
