@@ -2,6 +2,7 @@ import type { NewNotification, NotificationRepository, StoredNotification } from
 import type { PrismaClient } from "../../../databases/prisma.database.js";
 import type { ActorSummary } from "../../../types/notification.type.js";
 import { Prisma } from "../../../generated/prisma/client.js";
+import { buildNotificationCreatedOutboxRow } from "../../../events/notificationCreated.event.js";
 
 type Row = Awaited<ReturnType<PrismaClient["notification"]["findFirstOrThrow"]>>;
 
@@ -23,14 +24,19 @@ function decodeNotificationCursor(cursor: string): { createdAt: Date; id: string
 }
 
 export class NotificationPrismaRepository implements NotificationRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public constructor(private readonly prisma: PrismaClient, private readonly webBaseUrl?: string) {}
 
   public async insertIfAbsent(notification: NewNotification): Promise<StoredNotification | null> {
     try {
-      const row = await this.prisma.notification.create({
-        data: { ...notification, actor: notification.actor === null ? Prisma.JsonNull : (notification.actor as unknown as Prisma.InputJsonValue), data: notification.data as Prisma.InputJsonValue },
+      return await this.prisma.$transaction(async (transaction) => {
+        const row = await transaction.notification.create({
+          data: { ...notification, actor: notification.actor === null ? Prisma.JsonNull : (notification.actor as unknown as Prisma.InputJsonValue), data: notification.data as Prisma.InputJsonValue },
+        });
+        const stored = convertRow(row);
+        const event = buildNotificationCreatedOutboxRow(stored, this.webBaseUrl);
+        await transaction.outboxEvent.create({ data: { id: event.id, eventType: event.eventType, subject: event.subject, payload: event.payload as Prisma.InputJsonValue } });
+        return stored;
       });
-      return convertRow(row);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return null;
       throw error;

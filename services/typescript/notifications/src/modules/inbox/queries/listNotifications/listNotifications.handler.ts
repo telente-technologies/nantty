@@ -3,10 +3,10 @@ import { convertNotificationToResponse, type NotificationResponse } from "../../
 import type { ListNotificationsQuery } from "./listNotifications.query.js";
 
 export class ListNotificationsHandler {
-  public constructor(private readonly notifications: NotificationRepository) {}
+  public constructor(private readonly notifications: NotificationRepository, private readonly webBaseUrl?: string) {}
 
   public async execute(query: ListNotificationsQuery): Promise<{ readonly data: readonly NotificationResponse[]; readonly nextCursor: string | null }> {
     const page = await this.notifications.list(query.userId, query.filter, query.limit, query.cursor);
-    return { data: page.rows.map(convertNotificationToResponse), nextCursor: page.nextCursor };
+    return { data: page.rows.map((row) => convertNotificationToResponse(row, this.webBaseUrl)), nextCursor: page.nextCursor };
   }
 }

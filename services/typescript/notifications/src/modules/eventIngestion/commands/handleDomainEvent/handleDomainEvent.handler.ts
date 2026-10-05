@@ -11,12 +11,17 @@ export interface PolicyPublishedPort {
   handlePolicyPublished(command: HandleDomainEventCommand): Promise<void>;
 }
 
+export interface SupportInboxPort {
+  notifyTicketCreated(event: HandleDomainEventCommand["event"]): Promise<readonly string[]>;
+}
+
 export class HandleDomainEventHandler {
   public constructor(
     private readonly dispatcher: NotificationDispatcherService,
     private readonly policyPublished: PolicyPublishedPort,
     private readonly mappingContext: MappingContext,
     private readonly logger: Logger,
+    private readonly supportInbox?: SupportInboxPort,
   ) {}
 
   public async execute(command: HandleDomainEventCommand): Promise<HandleDomainEventResult> {
@@ -36,6 +41,7 @@ export class HandleDomainEventHandler {
       return { handled: false, intents: 0, reason: "incomplete_event_data" };
     }
     for (const intent of intents) await this.dispatcher.dispatch(intent);
+    if (event.type === "ticket.created") await this.supportInbox?.notifyTicketCreated(event);
     return { handled: true, intents: intents.length };
   }
 }
