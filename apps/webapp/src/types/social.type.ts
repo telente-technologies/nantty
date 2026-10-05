@@ -161,7 +161,7 @@ export interface CreatorStatus {
 export interface LiveGift {
   readonly id: ID;
   readonly name: string;
-  readonly emoji: string;
+  readonly emoji?: string;
   readonly imageUrl?: string | null;
   readonly priceCoins: number;
 }

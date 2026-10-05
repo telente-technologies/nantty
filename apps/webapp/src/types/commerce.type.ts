@@ -57,7 +57,7 @@ export interface PaymentInitialization {
   readonly orderId: ID;
   readonly reference: string;
   readonly authorizationUrl: string;
-  readonly accessCode: string;
+  readonly accessCode?: string;
 }
 
 export interface CheckoutResult {

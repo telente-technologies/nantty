@@ -2,7 +2,7 @@ import type { ID, ISODate, ProductSummary, StoreSummary } from "./models.type";
 import type { Money } from "./money.type";
 
 export interface CreatorEligibilityRequirement {
-  readonly key: "followers" | "account_age" | "verified_phone" | "no_violations" | "posts";
+  readonly key: "followers" | "account_age" | "no_violations" | "posts";
   readonly label: string;
   readonly currentValue: number;
   readonly requiredValue: number;
