@@ -23,7 +23,8 @@ type Handler struct{ Container *container.Container }
 
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdAccountInvite, error) {
 	deployed := handler.Container
-	if _, _, err := accountservices.LoadAccountForPermission(ctx, deployed, command.AccountId, command.ActorUserId, services.PermissionMembersManage); err != nil {
+	account, _, err := accountservices.LoadAccountForPermission(ctx, deployed, command.AccountId, command.ActorUserId, services.PermissionMembersManage)
+	if err != nil {
 		return dtos.AdAccountInvite{}, err
 	}
 	invitee, err := findInvitee(ctx, deployed, command.Request)
@@ -31,7 +32,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdAcc
 		return dtos.AdAccountInvite{}, err
 	}
 	inviteeId := uuid.MustParse(invitee.Id)
-	if err := handler.rejectExistingMemberOrInvite(ctx, command.AccountId, inviteeId); err != nil {
+	_, byEmail := InviteeIdentifier(command.Request)
+	if err := handler.rejectExistingMemberOrInvite(ctx, command.AccountId, inviteeId, issuePath(byEmail)); err != nil {
 		return dtos.AdAccountInvite{}, err
 	}
 	actor := accountservices.ActorFor(ctx, deployed, command.ActorUserId)
@@ -43,6 +45,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdAcc
 			return err
 		}
 		saved = invite
+		if err := enqueueInviteCreated(ctx, tx, deployed, account, invite); err != nil {
+			return err
+		}
 		return services.RecordActivityInTransaction(ctx, tx, command.AccountId, "invite", invite.ID.String(), actor, "Invited @"+invitee.Username, map[string]string{"role": command.Request.Role})
 	})
 	if err != nil {
@@ -53,10 +58,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdAcc
 
 func findInvitee(ctx context.Context, deployed *container.Container, request dtos.InviteMemberRequest) (interfaces.UserSummary, error) {
 	identifier, byEmail := InviteeIdentifier(request)
-	lookup, path, message := deployed.Users.FindUserByUsername, "username", "No Zudomart user has that username."
+	lookup, message := deployed.Users.FindUserByUsername, "No Zudomart user has that username."
 	if byEmail {
-		lookup, path, message = deployed.Users.FindUserByEmail, "email", "No Zudomart user has that email. Ask them to sign up first, then invite them."
+		lookup, message = deployed.Users.FindUserByEmail, "No Zudomart user has that email. Ask them to sign up first, then invite them."
 	}
+	path := issuePath(byEmail)
 	invitee, found, err := lookup(ctx, identifier)
 	if err != nil {
 		return invitee, err
@@ -67,9 +73,9 @@ func findInvitee(ctx context.Context, deployed *container.Container, request dto
 	return invitee, nil
 }
 
-func (handler Handler) rejectExistingMemberOrInvite(ctx context.Context, accountId, inviteeId uuid.UUID) error {
+func (handler Handler) rejectExistingMemberOrInvite(ctx context.Context, accountId, inviteeId uuid.UUID, path string) error {
 	issue := func(message string) error {
-		return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "username", Message: message}})
+		return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: path, Message: message}})
 	}
 	isMember, err := handler.Container.Client.AdAccountMember.Query().Where(adaccountmember.AccountID(accountId), adaccountmember.UserID(inviteeId)).Exist(ctx)
 	if err != nil {

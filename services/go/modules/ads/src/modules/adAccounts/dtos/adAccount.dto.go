@@ -111,3 +111,11 @@ type InviteMemberRequest struct {
 	Email    string `json:"email"`
 	Role     string `json:"role"`
 }
+
+type PendingInvite struct {
+	Id          string `json:"id"`
+	AccountName string `json:"accountName"`
+	Role        string `json:"role"`
+	InvitedBy   string `json:"invitedBy"`
+	ExpiresAt   string `json:"expiresAt"`
+}

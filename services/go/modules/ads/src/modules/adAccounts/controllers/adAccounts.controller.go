@@ -21,6 +21,7 @@ import (
 	listbusinessprofiles "zudomart/modules/ads/src/modules/adAccounts/queries/listBusinessProfiles"
 	listinvites "zudomart/modules/ads/src/modules/adAccounts/queries/listInvites"
 	listmembers "zudomart/modules/ads/src/modules/adAccounts/queries/listMembers"
+	listmyinvites "zudomart/modules/ads/src/modules/adAccounts/queries/listMyInvites"
 	previewinvite "zudomart/modules/ads/src/modules/adAccounts/queries/previewInvite"
 	"zudomart/modules/ads/src/utils"
 	"zudomart/platform/httpserver"
@@ -207,6 +208,13 @@ func (controller AdAccountsController) RevokeInvite(writer http.ResponseWriter, 
 		}
 		httpserver.WriteNoContentResponse(writer)
 		return nil
+	})
+}
+
+func (controller AdAccountsController) ListMyInvites(writer http.ResponseWriter, request *http.Request) {
+	controller.run(writer, request, func(user, _ uuid.UUID) error {
+		items, err := (listmyinvites.Handler{Container: controller.Container}).Execute(request.Context(), listmyinvites.Query{UserId: user})
+		return list(writer, items, err)
 	})
 }
 
