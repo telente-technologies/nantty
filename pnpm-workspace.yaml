@@ -3,6 +3,7 @@ packages:
   - "packages/*"
   - "services/typescript/*"
   - "services/scripts/apiSmoke"
+  - "services/scripts/browserE2e"
 
 # Dependencies allowed to run install scripts (pnpm 10).
 onlyBuiltDependencies:
