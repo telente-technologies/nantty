@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { SegmentedControl } from "@/components/ui/navigationTabs";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
@@ -59,7 +59,7 @@ export function SubscriptionPlanPicker({ currentPlanId, currentPlan, offer }: { 
   }
 
   if (plansQuery.isLoading) return <LoadingBlock label="Loading plans" />;
-  if (!plansQuery.data) return <Callout tone="error">{plansQuery.errorMessage ?? "Plans could not be loaded."}</Callout>;
+  if (!plansQuery.data) return <ErrorCallout message={plansQuery.errorMessage ?? "Plans could not be loaded."} onRetry={plansQuery.reload} />;
   const paidPlans = plansQuery.data.data.filter((plan) => plan.interval === billingInterval);
   const hasYearlyPlans = plansQuery.data.data.some((plan) => plan.interval === "year");
 

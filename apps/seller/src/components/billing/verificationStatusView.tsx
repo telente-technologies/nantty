@@ -2,7 +2,7 @@
 
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { GateStep } from "@/components/billing/gateFrame";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { Panel, PageHeader } from "@/components/ui/panel";
 import { StatusBadge, type StatusTone } from "@/components/ui/statusBadge";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
@@ -62,7 +62,7 @@ export function VerificationStatusView() {
         </ol>
       </Panel>
       <Panel title="Documents">
-        {verificationQuery.isLoading ? <LoadingBlock /> : verificationQuery.data ? <VerificationDocumentsList details={verificationQuery.data} /> : <Callout tone="error">{verificationQuery.errorMessage}</Callout>}
+        {verificationQuery.isLoading ? <LoadingBlock /> : verificationQuery.data ? <VerificationDocumentsList details={verificationQuery.data} /> : <ErrorCallout message={verificationQuery.errorMessage} onRetry={verificationQuery.reload} />}
       </Panel>
     </>
   );
