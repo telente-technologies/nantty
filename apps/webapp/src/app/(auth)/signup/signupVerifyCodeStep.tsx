@@ -15,10 +15,9 @@ interface SignUpVerifyCodeStepProps {
   readonly onCodeChange: (code: string) => void;
   readonly onCompleteCode: (code: string) => void;
   readonly onResend: () => void;
-  readonly onRequestCall: () => void;
 }
 
-export function SignUpVerifyCodeStep({ code, hasError, isBusy, canContinue, resendSeconds, onCodeChange, onCompleteCode, onResend, onRequestCall }: SignUpVerifyCodeStepProps) {
+export function SignUpVerifyCodeStep({ code, hasError, isBusy, canContinue, resendSeconds, onCodeChange, onCompleteCode, onResend }: SignUpVerifyCodeStepProps) {
   const otpInputRef = useRef<HTMLInputElement>(null);
   return (
     <>
@@ -61,12 +60,7 @@ export function SignUpVerifyCodeStep({ code, hasError, isBusy, canContinue, rese
           </button>
         )}
       </div>
-      <div className={stepStyles.resendRow}>
-        <span>Didn’t get a code?</span>
-        <button type="button" className={stepStyles.resendButtonLink} onClick={onRequestCall}>
-          Request a call
-        </button>
-      </div>
+      <p className={stepStyles.resendRow}>Didn’t get it? Check your spam folder, then resend.</p>
 
       <Button type="submit" fullWidth size="lg" busy={isBusy} disabled={!canContinue}>
         Next

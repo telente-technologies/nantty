@@ -32,7 +32,7 @@
 .wordmark {
   display: none;
   margin-bottom: var(--space-6);
-  font-size: 1.5rem;
+  font-size: var(--text-xl);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.02em;
@@ -56,7 +56,7 @@
     overflow: hidden;
     padding: var(--space-8) var(--gutter);
     background:
-      radial-gradient(120% 80% at 15% 10%, rgb(69 99 247 / 0.55) 0%, transparent 55%),
+      radial-gradient(120% 80% at 15% 10%, rgb(97 85 255 / 0.55) 0%, transparent 55%),
       linear-gradient(155deg, var(--blue-800) 0%, var(--blue-900) 45%, color-mix(in srgb, var(--blue-900), black 40%) 100%);
   }
 
@@ -75,8 +75,8 @@
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8125rem;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -128,7 +128,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: rgb(255 255 255 / 0.9);
 }
 

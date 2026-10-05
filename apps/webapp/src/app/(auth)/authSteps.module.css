@@ -42,6 +42,11 @@
   outline: none;
 }
 
+.otpRow:has(.otpHiddenInput:focus-visible) .otpBoxActive {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .resendRow {
   display: flex;
   align-items: center;

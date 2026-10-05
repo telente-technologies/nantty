@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 
 import { AppIcon } from "@/components/ui/appIcon";
 import { authService } from "@/services/auth.service";
@@ -12,20 +12,10 @@ import type { User } from "@/types";
 import { SocialSignInButtons } from "../socialSignIn";
 import styles from "../authForm.module.css";
 import { BirthdayStepFields, ContactStepFields, PasswordStepFields, UsernameStepFields } from "./signupFieldSteps";
-import {
-  describeSignUpStepHeading,
-  isBirthdayValidForNewAccount,
-  isPasswordStrongEnoughForAccount,
-  isValidEmailAddress,
-  MINIMUM_CUSTOMISING_SCREEN_DURATION_MS,
-  MINIMUM_TOPICS_TO_CONTINUE,
-  parseBirthdayFromDayMonthYear,
-  RESEND_SECONDS,
-  STEP_ORDER,
-  type SignUpStep,
-} from "./signupRules.util";
+import { describeSignUpStepHeading, isBirthdayValidForNewAccount, isPasswordStrongEnoughForAccount, isValidEmailAddress, MINIMUM_CUSTOMISING_SCREEN_DURATION_MS, MINIMUM_TOPICS_TO_CONTINUE, parseBirthdayFromDayMonthYear, RESEND_SECONDS, STEP_ORDER, type SignUpStep } from "./signupRules.util";
 import { SignUpTopicsStep } from "./signupTopicsStep";
 import { SignUpVerifyCodeStep } from "./signupVerifyCodeStep";
+import { useResendCountdown } from "./useResendCountdown.hook";
 import { useUsernameAvailability } from "./useUsernameAvailability.hook";
 
 export default function SignUpPage() {
@@ -43,17 +33,11 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [resendSeconds, setResendSeconds] = useState(RESEND_SECONDS);
-  const [resendRestartKey, setResendRestartKey] = useState(0);
   const [registered, setRegistered] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [customisingFeed, setCustomisingFeed] = useState(false);
 
-  useEffect(() => {
-    setResendSeconds(RESEND_SECONDS);
-    const interval = setInterval(() => setResendSeconds((seconds) => Math.max(0, seconds - 1)), 1000);
-    return () => clearInterval(interval);
-  }, [resendRestartKey]);
+  const { secondsLeft: resendSeconds, restart: restartResendCountdown } = useResendCountdown(RESEND_SECONDS);
 
   const { availabilityMessage, isAvailableMessage, isUsernameUsable, suggestions: liveSuggestions } = useUsernameAvailability(username, step === "username" && !registered);
 
@@ -89,7 +73,7 @@ export default function SignUpPage() {
       setDestination(nextDestination);
       setCode("");
       setMessage(null);
-      setResendRestartKey((key) => key + 1);
+      restartResendCountdown();
       setStep("verify");
     } catch (caught) {
       if (caught instanceof WebappRequestError && caught.code === "USERNAME_TAKEN") setConflictSuggestions(caught.suggestions ?? []);
@@ -119,7 +103,7 @@ export default function SignUpPage() {
     setError(null);
     try {
       await authService.sendOneTimeCode(destination, "signup");
-      setResendRestartKey((key) => key + 1);
+      restartResendCountdown();
       setMessage(successMessage);
     } catch {
       setError("We couldn't resend the code. Please try again.");
@@ -259,7 +243,6 @@ export default function SignUpPage() {
             onCodeChange={setCode}
             onCompleteCode={(completedCode) => void verifyCode(completedCode)}
             onResend={() => void resendCode("We sent you a new code.")}
-            onRequestCall={() => void resendCode("You'll get a call with your code shortly.")}
           />
         ) : null}
 

@@ -1,3 +1,4 @@
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -48,8 +49,8 @@ export default function AuthLayout({ children }: { readonly children: ReactNode 
 
       <main id="main-content" className={styles.main} tabIndex={-1}>
         <div className={styles.panel}>
-          <Link href="/welcome" className={styles.wordmark}>
-            zudomart
+          <Link href="/welcome" className={styles.wordmark} aria-label="Zudomart">
+            <ZudomartWordmark height={30} />
           </Link>
           {children}
         </div>
