@@ -11,7 +11,7 @@ const guestBrowsablePagePatterns: readonly RegExp[] = [
 const publicApiReadPatterns: readonly RegExp[] = [
   /^\/api\/v1\/feeds\/(popular|for-you|suggested-clips)$/,
   /^\/api\/v1\/explore\/(categories|trends|headlines|who-to-follow|posts-for-you)$/,
-  /^\/api\/v1\/(clips|videos|trending|categories|topics|search|mart\/home|mart\/highlights|products|products\/featured|brands)$/,
+  /^\/api\/v1\/(clips|videos|categories|topics|search|mart\/home|mart\/highlights|products|products\/featured|brands)$/,
   /^\/api\/v1\/creators\/(?!me$)[A-Za-z0-9_.~%-]+\/subscription-plans$/,
   /^\/api\/v1\/search\/[a-z-]+$/,
   /^\/api\/v1\/help\/(categories|topics)(\/[a-z0-9-]+)?$/,
