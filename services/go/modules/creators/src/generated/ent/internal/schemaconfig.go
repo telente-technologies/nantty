@@ -7,11 +7,19 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
-	BattleSettlement     string // BattleSettlement table.
-	CreatorProgramMember string // CreatorProgramMember table.
-	CreatorTier          string // CreatorTier table.
-	GiftTransaction      string // GiftTransaction table.
-	OutboxEvent          string // OutboxEvent table.
+	AffiliateCommission         string // AffiliateCommission table.
+	AffiliateCommissionReversal string // AffiliateCommissionReversal table.
+	AffiliateProductCommission  string // AffiliateProductCommission table.
+	AffiliateProgramSetting     string // AffiliateProgramSetting table.
+	BattleSettlement            string // BattleSettlement table.
+	CreatorAffiliation          string // CreatorAffiliation table.
+	CreatorEarning              string // CreatorEarning table.
+	CreatorProgramMember        string // CreatorProgramMember table.
+	CreatorTier                 string // CreatorTier table.
+	CreatorViolation            string // CreatorViolation table.
+	GiftTransaction             string // GiftTransaction table.
+	OutboxEvent                 string // OutboxEvent table.
+	TipTransaction              string // TipTransaction table.
 }
 
 type schemaCtxKey struct{}

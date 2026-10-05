@@ -6,8 +6,26 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AffiliateCommission is the predicate function for affiliatecommission builders.
+type AffiliateCommission func(*sql.Selector)
+
+// AffiliateCommissionReversal is the predicate function for affiliatecommissionreversal builders.
+type AffiliateCommissionReversal func(*sql.Selector)
+
+// AffiliateProductCommission is the predicate function for affiliateproductcommission builders.
+type AffiliateProductCommission func(*sql.Selector)
+
+// AffiliateProgramSetting is the predicate function for affiliateprogramsetting builders.
+type AffiliateProgramSetting func(*sql.Selector)
+
 // BattleSettlement is the predicate function for battlesettlement builders.
 type BattleSettlement func(*sql.Selector)
+
+// CreatorAffiliation is the predicate function for creatoraffiliation builders.
+type CreatorAffiliation func(*sql.Selector)
+
+// CreatorEarning is the predicate function for creatorearning builders.
+type CreatorEarning func(*sql.Selector)
 
 // CreatorProgramMember is the predicate function for creatorprogrammember builders.
 type CreatorProgramMember func(*sql.Selector)
@@ -15,8 +33,14 @@ type CreatorProgramMember func(*sql.Selector)
 // CreatorTier is the predicate function for creatortier builders.
 type CreatorTier func(*sql.Selector)
 
+// CreatorViolation is the predicate function for creatorviolation builders.
+type CreatorViolation func(*sql.Selector)
+
 // GiftTransaction is the predicate function for gifttransaction builders.
 type GiftTransaction func(*sql.Selector)
 
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
+
+// TipTransaction is the predicate function for tiptransaction builders.
+type TipTransaction func(*sql.Selector)

@@ -9,6 +9,120 @@ import (
 )
 
 var (
+	// AffiliateCommissionsColumns holds the columns for the "affiliate_commissions" table.
+	AffiliateCommissionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "order_id", Type: field.TypeString, Size: 80},
+		{Name: "order_number", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "order_item_id", Type: field.TypeString, Size: 120},
+		{Name: "product_id", Type: field.TypeString, Size: 80},
+		{Name: "store_id", Type: field.TypeString, Size: 80},
+		{Name: "seller_user_id", Type: field.TypeString, Size: 80},
+		{Name: "creator_id", Type: field.TypeString, Size: 80},
+		{Name: "attribution_source", Type: field.TypeString, Size: 10},
+		{Name: "attribution_id", Type: field.TypeString, Size: 80},
+		{Name: "sale_minor", Type: field.TypeInt64},
+		{Name: "commission_bps", Type: field.TypeInt64},
+		{Name: "commission_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"paid", "reversed"}, Default: "paid"},
+		{Name: "reversed_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "ordered_at", Type: field.TypeTime, Nullable: true},
+		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+	}
+	// AffiliateCommissionsTable holds the schema information for the "affiliate_commissions" table.
+	AffiliateCommissionsTable = &schema.Table{
+		Name:       "affiliate_commissions",
+		Columns:    AffiliateCommissionsColumns,
+		PrimaryKey: []*schema.Column{AffiliateCommissionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "affiliatecommission_order_item_id",
+				Unique:  true,
+				Columns: []*schema.Column{AffiliateCommissionsColumns[4]},
+			},
+			{
+				Name:    "affiliatecommission_order_id",
+				Unique:  false,
+				Columns: []*schema.Column{AffiliateCommissionsColumns[2]},
+			},
+			{
+				Name:    "affiliatecommission_store_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AffiliateCommissionsColumns[6], AffiliateCommissionsColumns[1]},
+			},
+			{
+				Name:    "affiliatecommission_creator_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AffiliateCommissionsColumns[8], AffiliateCommissionsColumns[1]},
+			},
+		},
+	}
+	// AffiliateCommissionReversalsColumns holds the columns for the "affiliate_commission_reversals" table.
+	AffiliateCommissionReversalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "commission_id", Type: field.TypeString, Size: 80},
+		{Name: "refund_key", Type: field.TypeString, Size: 160},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "recovered_minor", Type: field.TypeInt64},
+		{Name: "shortfall_minor", Type: field.TypeInt64},
+	}
+	// AffiliateCommissionReversalsTable holds the schema information for the "affiliate_commission_reversals" table.
+	AffiliateCommissionReversalsTable = &schema.Table{
+		Name:       "affiliate_commission_reversals",
+		Columns:    AffiliateCommissionReversalsColumns,
+		PrimaryKey: []*schema.Column{AffiliateCommissionReversalsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "affiliatecommissionreversal_commission_id_refund_key",
+				Unique:  true,
+				Columns: []*schema.Column{AffiliateCommissionReversalsColumns[2], AffiliateCommissionReversalsColumns[3]},
+			},
+		},
+	}
+	// AffiliateProductCommissionsColumns holds the columns for the "affiliate_product_commissions" table.
+	AffiliateProductCommissionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "store_id", Type: field.TypeString, Size: 80},
+		{Name: "product_id", Type: field.TypeString, Size: 80},
+		{Name: "commission_bps", Type: field.TypeInt64, Nullable: true},
+		{Name: "is_excluded", Type: field.TypeBool, Default: false},
+		{Name: "updated_by", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AffiliateProductCommissionsTable holds the schema information for the "affiliate_product_commissions" table.
+	AffiliateProductCommissionsTable = &schema.Table{
+		Name:       "affiliate_product_commissions",
+		Columns:    AffiliateProductCommissionsColumns,
+		PrimaryKey: []*schema.Column{AffiliateProductCommissionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "affiliateproductcommission_store_id_product_id",
+				Unique:  true,
+				Columns: []*schema.Column{AffiliateProductCommissionsColumns[2], AffiliateProductCommissionsColumns[3]},
+			},
+		},
+	}
+	// AffiliateProgramSettingsColumns holds the columns for the "affiliate_program_settings" table.
+	AffiliateProgramSettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 80},
+		{Name: "seller_user_id", Type: field.TypeString, Size: 80},
+		{Name: "currency", Type: field.TypeString, Size: 3, Default: ""},
+		{Name: "enabled", Type: field.TypeBool, Default: false},
+		{Name: "default_commission_bps", Type: field.TypeInt64, Default: 0},
+		{Name: "auto_approve_followers_above", Type: field.TypeInt64, Nullable: true},
+		{Name: "cookie_window_days", Type: field.TypeInt, Default: 30},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AffiliateProgramSettingsTable holds the schema information for the "affiliate_program_settings" table.
+	AffiliateProgramSettingsTable = &schema.Table{
+		Name:       "affiliate_program_settings",
+		Columns:    AffiliateProgramSettingsColumns,
+		PrimaryKey: []*schema.Column{AffiliateProgramSettingsColumns[0]},
+	}
 	// BattleSettlementsColumns holds the columns for the "battle_settlements" table.
 	BattleSettlementsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -37,6 +151,79 @@ var (
 			},
 		},
 	}
+	// CreatorAffiliationsColumns holds the columns for the "creator_affiliations" table.
+	CreatorAffiliationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "creator_id", Type: field.TypeString, Size: 80},
+		{Name: "store_id", Type: field.TypeString, Size: 80},
+		{Name: "product_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"requested", "active", "paused", "declined", "removed"}, Default: "requested"},
+		{Name: "message", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "decision_reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "decided_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// CreatorAffiliationsTable holds the schema information for the "creator_affiliations" table.
+	CreatorAffiliationsTable = &schema.Table{
+		Name:       "creator_affiliations",
+		Columns:    CreatorAffiliationsColumns,
+		PrimaryKey: []*schema.Column{CreatorAffiliationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creator_affiliations_open",
+				Unique:  true,
+				Columns: []*schema.Column{CreatorAffiliationsColumns[2], CreatorAffiliationsColumns[3], CreatorAffiliationsColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status IN ('requested','active','paused')",
+				},
+			},
+			{
+				Name:    "creatoraffiliation_store_id_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorAffiliationsColumns[3], CreatorAffiliationsColumns[5], CreatorAffiliationsColumns[1]},
+			},
+		},
+	}
+	// CreatorEarningsColumns holds the columns for the "creator_earnings" table.
+	CreatorEarningsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "creator_id", Type: field.TypeString, Size: 80},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"gift", "tip", "subscription", "affiliate", "ad_revenue"}},
+		{Name: "reference", Type: field.TypeString, Size: 200},
+		{Name: "source_type", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "source_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "description", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "gross_minor", Type: field.TypeInt64},
+		{Name: "net_minor", Type: field.TypeInt64},
+		{Name: "unit", Type: field.TypeString, Size: 4},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "available", "reversed"}, Default: "available"},
+		{Name: "available_at", Type: field.TypeTime, Nullable: true},
+	}
+	// CreatorEarningsTable holds the schema information for the "creator_earnings" table.
+	CreatorEarningsTable = &schema.Table{
+		Name:       "creator_earnings",
+		Columns:    CreatorEarningsColumns,
+		PrimaryKey: []*schema.Column{CreatorEarningsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creatorearning_reference",
+				Unique:  true,
+				Columns: []*schema.Column{CreatorEarningsColumns[4]},
+			},
+			{
+				Name:    "creatorearning_creator_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorEarningsColumns[2], CreatorEarningsColumns[1]},
+			},
+			{
+				Name:    "creatorearning_creator_id_kind_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorEarningsColumns[2], CreatorEarningsColumns[3], CreatorEarningsColumns[1]},
+			},
+		},
+	}
 	// CreatorProgramMembersColumns holds the columns for the "creator_program_members" table.
 	CreatorProgramMembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -44,6 +231,8 @@ var (
 		{Name: "user_id", Type: field.TypeString, Size: 80},
 		{Name: "tier_id", Type: field.TypeString, Size: 40},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"approved", "suspended"}, Default: "approved"},
+		{Name: "suspension_reason", Type: field.TypeString, Size: 500, Default: ""},
+		{Name: "suspended_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -74,6 +263,28 @@ var (
 		Name:       "creator_tiers",
 		Columns:    CreatorTiersColumns,
 		PrimaryKey: []*schema.Column{CreatorTiersColumns[0]},
+	}
+	// CreatorViolationsColumns holds the columns for the "creator_violations" table.
+	CreatorViolationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "reason", Type: field.TypeString, Size: 500},
+		{Name: "source", Type: field.TypeString, Size: 40, Default: "staff"},
+		{Name: "recorded_by_staff_id", Type: field.TypeString, Size: 80, Default: ""},
+	}
+	// CreatorViolationsTable holds the schema information for the "creator_violations" table.
+	CreatorViolationsTable = &schema.Table{
+		Name:       "creator_violations",
+		Columns:    CreatorViolationsColumns,
+		PrimaryKey: []*schema.Column{CreatorViolationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creatorviolation_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorViolationsColumns[2], CreatorViolationsColumns[1]},
+			},
+		},
 	}
 	// GiftTransactionsColumns holds the columns for the "gift_transactions" table.
 	GiftTransactionsColumns = []*schema.Column{
@@ -152,13 +363,55 @@ var (
 			},
 		},
 	}
+	// TipTransactionsColumns holds the columns for the "tip_transactions" table.
+	TipTransactionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "sender_user_id", Type: field.TypeString, Size: 80},
+		{Name: "creator_user_id", Type: field.TypeString, Size: 80},
+		{Name: "target_type", Type: field.TypeEnum, Enums: []string{"post", "clip", "live"}},
+		{Name: "target_id", Type: field.TypeString, Size: 80},
+		{Name: "coins", Type: field.TypeInt64},
+		{Name: "creator_coins", Type: field.TypeInt64},
+		{Name: "platform_fee_coins", Type: field.TypeInt64},
+		{Name: "creator_share_bps", Type: field.TypeInt64},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 128},
+		{Name: "request_hash", Type: field.TypeString, Size: 64},
+		{Name: "ledger_entry_id", Type: field.TypeString, Size: 80},
+	}
+	// TipTransactionsTable holds the schema information for the "tip_transactions" table.
+	TipTransactionsTable = &schema.Table{
+		Name:       "tip_transactions",
+		Columns:    TipTransactionsColumns,
+		PrimaryKey: []*schema.Column{TipTransactionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "tiptransaction_sender_user_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{TipTransactionsColumns[2], TipTransactionsColumns[10]},
+			},
+			{
+				Name:    "tiptransaction_creator_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{TipTransactionsColumns[3], TipTransactionsColumns[1]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AffiliateCommissionsTable,
+		AffiliateCommissionReversalsTable,
+		AffiliateProductCommissionsTable,
+		AffiliateProgramSettingsTable,
 		BattleSettlementsTable,
+		CreatorAffiliationsTable,
+		CreatorEarningsTable,
 		CreatorProgramMembersTable,
 		CreatorTiersTable,
+		CreatorViolationsTable,
 		GiftTransactionsTable,
 		OutboxEventsTable,
+		TipTransactionsTable,
 	}
 )
 
