@@ -62,16 +62,12 @@ func init() {
 	accountDescRoles := accountFields[5].Descriptor()
 	// account.DefaultRoles holds the default value on creation for the roles field.
 	account.DefaultRoles = accountDescRoles.Default.([]string)
-	// accountDescPhoneHash is the schema descriptor for phone_hash field.
-	accountDescPhoneHash := accountFields[8].Descriptor()
-	// account.PhoneHashValidator is a validator for the "phone_hash" field. It is called by the builders before save.
-	account.PhoneHashValidator = accountDescPhoneHash.Validators[0].(func(string) error)
 	// accountDescMustChangePassword is the schema descriptor for must_change_password field.
-	accountDescMustChangePassword := accountFields[10].Descriptor()
+	accountDescMustChangePassword := accountFields[8].Descriptor()
 	// account.DefaultMustChangePassword holds the default value on creation for the must_change_password field.
 	account.DefaultMustChangePassword = accountDescMustChangePassword.Default.(bool)
 	// accountDescUpdatedAt is the schema descriptor for updated_at field.
-	accountDescUpdatedAt := accountFields[11].Descriptor()
+	accountDescUpdatedAt := accountFields[9].Descriptor()
 	// account.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
 	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

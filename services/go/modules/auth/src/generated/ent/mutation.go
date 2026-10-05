@@ -58,8 +58,6 @@ type AccountMutation struct {
 	appendroles              []string
 	email_verified_at        *time.Time
 	status                   *account.Status
-	phone_hash               *string
-	phone_verified_at        *time.Time
 	must_change_password     *bool
 	updated_at               *time.Time
 	clearedFields            map[string]struct{}
@@ -569,104 +567,6 @@ func (m *AccountMutation) ResetStatus() {
 	m.status = nil
 }
 
-// SetPhoneHash sets the "phone_hash" field.
-func (m *AccountMutation) SetPhoneHash(s string) {
-	m.phone_hash = &s
-}
-
-// PhoneHash returns the value of the "phone_hash" field in the mutation.
-func (m *AccountMutation) PhoneHash() (r string, exists bool) {
-	v := m.phone_hash
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPhoneHash returns the old "phone_hash" field's value of the Account entity.
-// If the Account object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AccountMutation) OldPhoneHash(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPhoneHash is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPhoneHash requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPhoneHash: %w", err)
-	}
-	return oldValue.PhoneHash, nil
-}
-
-// ClearPhoneHash clears the value of the "phone_hash" field.
-func (m *AccountMutation) ClearPhoneHash() {
-	m.phone_hash = nil
-	m.clearedFields[account.FieldPhoneHash] = struct{}{}
-}
-
-// PhoneHashCleared returns if the "phone_hash" field was cleared in this mutation.
-func (m *AccountMutation) PhoneHashCleared() bool {
-	_, ok := m.clearedFields[account.FieldPhoneHash]
-	return ok
-}
-
-// ResetPhoneHash resets all changes to the "phone_hash" field.
-func (m *AccountMutation) ResetPhoneHash() {
-	m.phone_hash = nil
-	delete(m.clearedFields, account.FieldPhoneHash)
-}
-
-// SetPhoneVerifiedAt sets the "phone_verified_at" field.
-func (m *AccountMutation) SetPhoneVerifiedAt(t time.Time) {
-	m.phone_verified_at = &t
-}
-
-// PhoneVerifiedAt returns the value of the "phone_verified_at" field in the mutation.
-func (m *AccountMutation) PhoneVerifiedAt() (r time.Time, exists bool) {
-	v := m.phone_verified_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPhoneVerifiedAt returns the old "phone_verified_at" field's value of the Account entity.
-// If the Account object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AccountMutation) OldPhoneVerifiedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPhoneVerifiedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPhoneVerifiedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPhoneVerifiedAt: %w", err)
-	}
-	return oldValue.PhoneVerifiedAt, nil
-}
-
-// ClearPhoneVerifiedAt clears the value of the "phone_verified_at" field.
-func (m *AccountMutation) ClearPhoneVerifiedAt() {
-	m.phone_verified_at = nil
-	m.clearedFields[account.FieldPhoneVerifiedAt] = struct{}{}
-}
-
-// PhoneVerifiedAtCleared returns if the "phone_verified_at" field was cleared in this mutation.
-func (m *AccountMutation) PhoneVerifiedAtCleared() bool {
-	_, ok := m.clearedFields[account.FieldPhoneVerifiedAt]
-	return ok
-}
-
-// ResetPhoneVerifiedAt resets all changes to the "phone_verified_at" field.
-func (m *AccountMutation) ResetPhoneVerifiedAt() {
-	m.phone_verified_at = nil
-	delete(m.clearedFields, account.FieldPhoneVerifiedAt)
-}
-
 // SetMustChangePassword sets the "must_change_password" field.
 func (m *AccountMutation) SetMustChangePassword(b bool) {
 	m.must_change_password = &b
@@ -881,7 +781,7 @@ func (m *AccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AccountMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, account.FieldCreatedAt)
 	}
@@ -908,12 +808,6 @@ func (m *AccountMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, account.FieldStatus)
-	}
-	if m.phone_hash != nil {
-		fields = append(fields, account.FieldPhoneHash)
-	}
-	if m.phone_verified_at != nil {
-		fields = append(fields, account.FieldPhoneVerifiedAt)
 	}
 	if m.must_change_password != nil {
 		fields = append(fields, account.FieldMustChangePassword)
@@ -947,10 +841,6 @@ func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 		return m.EmailVerifiedAt()
 	case account.FieldStatus:
 		return m.Status()
-	case account.FieldPhoneHash:
-		return m.PhoneHash()
-	case account.FieldPhoneVerifiedAt:
-		return m.PhoneVerifiedAt()
 	case account.FieldMustChangePassword:
 		return m.MustChangePassword()
 	case account.FieldUpdatedAt:
@@ -982,10 +872,6 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldEmailVerifiedAt(ctx)
 	case account.FieldStatus:
 		return m.OldStatus(ctx)
-	case account.FieldPhoneHash:
-		return m.OldPhoneHash(ctx)
-	case account.FieldPhoneVerifiedAt:
-		return m.OldPhoneVerifiedAt(ctx)
 	case account.FieldMustChangePassword:
 		return m.OldMustChangePassword(ctx)
 	case account.FieldUpdatedAt:
@@ -1062,20 +948,6 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case account.FieldPhoneHash:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPhoneHash(v)
-		return nil
-	case account.FieldPhoneVerifiedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPhoneVerifiedAt(v)
-		return nil
 	case account.FieldMustChangePassword:
 		v, ok := value.(bool)
 		if !ok {
@@ -1132,12 +1004,6 @@ func (m *AccountMutation) ClearedFields() []string {
 	if m.FieldCleared(account.FieldEmailVerifiedAt) {
 		fields = append(fields, account.FieldEmailVerifiedAt)
 	}
-	if m.FieldCleared(account.FieldPhoneHash) {
-		fields = append(fields, account.FieldPhoneHash)
-	}
-	if m.FieldCleared(account.FieldPhoneVerifiedAt) {
-		fields = append(fields, account.FieldPhoneVerifiedAt)
-	}
 	return fields
 }
 
@@ -1163,12 +1029,6 @@ func (m *AccountMutation) ClearField(name string) error {
 		return nil
 	case account.FieldEmailVerifiedAt:
 		m.ClearEmailVerifiedAt()
-		return nil
-	case account.FieldPhoneHash:
-		m.ClearPhoneHash()
-		return nil
-	case account.FieldPhoneVerifiedAt:
-		m.ClearPhoneVerifiedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Account nullable field %s", name)
@@ -1204,12 +1064,6 @@ func (m *AccountMutation) ResetField(name string) error {
 		return nil
 	case account.FieldStatus:
 		m.ResetStatus()
-		return nil
-	case account.FieldPhoneHash:
-		m.ResetPhoneHash()
-		return nil
-	case account.FieldPhoneVerifiedAt:
-		m.ResetPhoneVerifiedAt()
 		return nil
 	case account.FieldMustChangePassword:
 		m.ResetMustChangePassword()
