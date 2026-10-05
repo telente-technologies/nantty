@@ -17,7 +17,7 @@ export const mentionEntitySchema = schema.union([allMentionSchema, userMentionSc
 export const mentionEntitiesSchema = schema.array(mentionEntitySchema).max(100);
 
 export const candidatesQuerySchema = schema.object({
-  surface: schema.enum(["post", "comment", "group"]),
+  surface: schema.enum(["post", "comment", "group", "direct"]),
   q: schema.string().max(50).optional(),
   conversationId: schema.string().uuid().optional(),
 });
