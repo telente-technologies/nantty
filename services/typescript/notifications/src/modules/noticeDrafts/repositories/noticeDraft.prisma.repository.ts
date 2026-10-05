@@ -25,6 +25,11 @@ export class NoticeDraftPrismaRepository implements NoticeDraftRepository {
     return convertRow(await this.prisma.noticeDraft.update({ where: { versionId }, data: { ...changes, whatChanged: [...changes.whatChanged] } }));
   }
 
+  public async refreshVersionFacts(versionId: string, facts: Parameters<NoticeDraftRepository["refreshVersionFacts"]>[1]): Promise<NoticeDraft | null> {
+    if ((await this.find(versionId)) === null) return null;
+    return convertRow(await this.prisma.noticeDraft.update({ where: { versionId }, data: facts }));
+  }
+
   public async appendTestSend(versionId: string, testSend: Parameters<NoticeDraftRepository["appendTestSend"]>[1]): Promise<NoticeDraft | null> {
     const existing = await this.find(versionId);
     if (existing === null) return null;
