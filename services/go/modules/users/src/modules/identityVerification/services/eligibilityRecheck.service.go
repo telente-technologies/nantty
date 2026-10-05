@@ -9,8 +9,6 @@ import (
 	usersservices "zudomart/modules/users/src/services"
 )
 
-// RecheckQueuedEligibilityOnce asks Python again for every queued "Request verification" that is due. When an
-// account now qualifies, StoreEligibilityAssessment sends the "You can now apply" notice exactly once.
 func RecheckQueuedEligibilityOnce(ctx context.Context, application *container.Container, limit int) (checked int, becameEligible int) {
 	rows, err := application.Client.VerificationEligibility.Query().
 		Where(verificationeligibility.StateEQ(verificationeligibility.StateRequested), verificationeligibility.NextCheckAtLTE(application.Now())).

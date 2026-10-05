@@ -19,8 +19,6 @@ type AutoDecision struct {
 	FraudSignals []string
 }
 
-// DecideVerificationCase never rejects on its own: anything short of a clean pass goes to a person, and only fraud
-// signals are forwarded to go-trust as advisory cases.
 func DecideVerificationCase(input AutoDecisionInput) AutoDecision {
 	decision := AutoDecision{Reasons: []string{}, FraudSignals: []string{}}
 	require := func(passed bool, reason string) {

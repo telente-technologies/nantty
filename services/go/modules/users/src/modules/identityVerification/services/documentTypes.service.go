@@ -7,8 +7,6 @@ type CountryDocuments struct {
 	Enhanced bool
 }
 
-// SupportedDocuments lists the photo IDs we accept per country. Enhanced Document Verification adds the government
-// database lookup (for example NIN in Nigeria) where Smile ID offers it; elsewhere only the document and face are checked.
 var SupportedDocuments = map[string]CountryDocuments{
 	"NG": {Types: []string{"NIN_SLIP", "IDENTITY_CARD", "PASSPORT", "DRIVERS_LICENSE", "VOTER_ID"}, Enhanced: true},
 	"GH": {Types: []string{"GHANA_CARD", "PASSPORT", "DRIVERS_LICENSE", "VOTER_ID"}, Enhanced: true},

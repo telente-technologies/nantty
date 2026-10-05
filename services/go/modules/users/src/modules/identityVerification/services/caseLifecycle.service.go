@@ -17,7 +17,6 @@ import (
 
 var refundablePlans = map[string]bool{"blue": true, "gold_only": true}
 
-// Plans that sell more than the checkmark keep running on a rejection; only the checkmark's share is refunded.
 var checkmarkShareRefundPlans = map[string]bool{"seller_pro": true, "seller_business": true, "premium": true}
 
 const (
@@ -48,8 +47,6 @@ func IdentityAlreadyVerified(ctx context.Context, tx *ent.Tx, profileId uuid.UUI
 	return tx.VerificationCase.Query().Where(verificationcase.ProfileID(profileId), verificationcase.StatusEQ(verificationcase.StatusApproved)).Exist(ctx)
 }
 
-// OpenVerificationCaseInTransaction turns a successful payment into a case. It is idempotent on the subscription,
-// so a replayed entitlement event never opens a second case.
 func OpenVerificationCaseInTransaction(ctx context.Context, tx *ent.Tx, now time.Time, request OpenCaseRequest) (*ent.VerificationCase, error) {
 	existing, err := tx.VerificationCase.Query().Where(verificationcase.SubscriptionID(request.SubscriptionId)).Only(ctx)
 	if err == nil {
@@ -135,8 +132,6 @@ func RejectCaseInTransaction(ctx context.Context, tx *ent.Tx, now time.Time, row
 	return rejected, usersevents.EnqueueOutboxEventInTransaction(ctx, tx, verificationevents.VerificationCaseDecidedType, row.ProfileID.String(), now, caseEventData(rejected, false, reason))
 }
 
-// ShareRefundNotice is sent when the refund outcome for a plan that keeps running is known, because the amount
-// refunded for the checkmark is only known to billing.
 func ShareRefundNotice(profile *ent.Profile, row *ent.VerificationCase, outcome string, amount *verificationevents.Money, now time.Time) verificationevents.VerificationNotice {
 	notice := NoticeFor(profile, string(row.Color))
 	notice.CaseId, notice.Reasons, notice.ReapplyFrom = row.ID.String(), []string{row.DecisionReason}, now.AddDate(0, 0, 30).UTC().Format(time.RFC3339)

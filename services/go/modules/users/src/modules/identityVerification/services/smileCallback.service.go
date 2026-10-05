@@ -8,6 +8,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -20,6 +21,11 @@ const (
 )
 
 var ErrSmileCallbackMalformed = errors.New("smile id callback is malformed")
+
+const (
+	smileCallbackMaximumAge = time.Hour
+	smileCallbackFutureSkew = 5 * time.Minute
+)
 
 type smileCallbackBody struct {
 	Signature       string            `json:"signature"`
@@ -40,13 +46,11 @@ type smileCallbackBody struct {
 	} `json:"PartnerParams"`
 }
 
-// SmileCallbackEnvelope is everything Zudomart reads from a callback. Image links, dates of birth, addresses and
-// photos are never decoded, and the ID number and name live only in memory until they are reduced to a keyed
-// fingerprint and a match score.
 type SmileCallbackEnvelope struct {
 	Signature string
 	Timestamp string
 	JobId     string
+	UserId    string
 	Result    SmileVerificationResult
 	idNumber  string
 	FullName  string
@@ -81,7 +85,16 @@ func ParseSmileIdCallback(raw []byte) (SmileCallbackEnvelope, error) {
 		FaceMatchConfidence: parseConfidence(body.ConfidenceValue),
 		SpoofSuspected:      liveness == CheckFailed || strings.Contains(strings.ToLower(body.ResultText), "spoof"),
 	}
-	return SmileCallbackEnvelope{Signature: body.Signature, Timestamp: body.Timestamp, JobId: body.PartnerParams.JobId, Result: result, idNumber: body.IdNumber, FullName: body.FullName}, nil
+	return SmileCallbackEnvelope{Signature: body.Signature, Timestamp: body.Timestamp, JobId: body.PartnerParams.JobId, UserId: body.PartnerParams.UserId, Result: result, idNumber: body.IdNumber, FullName: body.FullName}, nil
+}
+
+func (envelope SmileCallbackEnvelope) IsFresh(now time.Time) bool {
+	signedAt, err := time.Parse(time.RFC3339Nano, envelope.Timestamp)
+	return err == nil && !signedAt.Before(now.Add(-smileCallbackMaximumAge)) && !signedAt.After(now.Add(smileCallbackFutureSkew))
+}
+
+func (envelope SmileCallbackEnvelope) BelongsTo(accountId string) bool {
+	return envelope.UserId == "" || strings.EqualFold(envelope.UserId, accountId)
 }
 
 func (envelope SmileCallbackEnvelope) DocumentFingerprint(key string) string {

@@ -15,9 +15,6 @@ const (
 	tokenMatchFloor               = 0.84
 )
 
-// ScoreNameMatch compares the name on the ID with the names the person uses on Zudomart. Every profile name token is
-// matched to its closest ID token (Jaro-Winkler), so word order and extra middle names on the ID do not hurt, while a
-// one-word display name can never score high enough to auto-approve on its own.
 func ScoreNameMatch(documentName string, profileNames ...string) float64 {
 	documentTokens := normalizeNameTokens(documentName)
 	if len(documentTokens) == 0 {

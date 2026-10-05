@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"entgo.io/ent"
 
@@ -70,5 +71,26 @@ func TestNoBiometricOrRawIdentityDataIsPersisted(t *testing.T) {
 				t.Fatalf("the stored result carries %s", resultType.Field(index).Name)
 			}
 		}
+	}
+}
+
+func TestSmileCallbackMustBeRecentAndBelongToTheCase(t *testing.T) {
+	envelope, err := ParseSmileIdCallback([]byte(passingCallback))
+	if err != nil {
+		t.Fatal(err)
+	}
+	signedAt := time.Date(2026, 10, 4, 10, 0, 0, 0, time.UTC)
+	if !envelope.IsFresh(signedAt.Add(10 * time.Minute)) {
+		t.Fatal("a callback signed ten minutes ago is accepted")
+	}
+	if envelope.IsFresh(signedAt.Add(2*time.Hour)) || envelope.IsFresh(signedAt.Add(-time.Hour)) {
+		t.Fatal("an old or future-dated signature must not be replayable")
+	}
+	if !envelope.BelongsTo("USER-1") || envelope.BelongsTo("someone-else") {
+		t.Fatal("the echoed user id must match the case owner")
+	}
+	envelope.Timestamp = "not a time"
+	if envelope.IsFresh(signedAt) {
+		t.Fatal("an unreadable timestamp is rejected")
 	}
 }

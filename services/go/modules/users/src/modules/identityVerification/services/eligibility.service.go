@@ -52,8 +52,6 @@ func BuildEligibilitySignals(ctx context.Context, application *container.Contain
 	}, nil
 }
 
-// FallbackEligibilityAssessment runs only when the intelligence service cannot answer. It never offers "Buy now":
-// the request is queued and the scheduler asks Python again later.
 func FallbackEligibilityAssessment(signals integrations.EligibilitySignals) integrations.EligibilityAssessment {
 	assessment := integrations.EligibilityAssessment{Tier: TierRequest, TrustScore: max(0, 50-signals.FraudScore/2-signals.RiskScore/2), Reasons: []string{"trust_service_unavailable"}, RecheckAfterHours: 6, Source: "fallback"}
 	if signals.AccountRestricted {
