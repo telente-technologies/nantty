@@ -48,6 +48,28 @@ const (
 	FieldModerationVisibility = "moderation_visibility"
 	// FieldShippingCountryCodes holds the string denoting the shipping_country_codes field in the database.
 	FieldShippingCountryCodes = "shipping_country_codes"
+	// FieldLocale holds the string denoting the locale field in the database.
+	FieldLocale = "locale"
+	// FieldContactPhone holds the string denoting the contact_phone field in the database.
+	FieldContactPhone = "contact_phone"
+	// FieldContactEmail holds the string denoting the contact_email field in the database.
+	FieldContactEmail = "contact_email"
+	// FieldContactAddress holds the string denoting the contact_address field in the database.
+	FieldContactAddress = "contact_address"
+	// FieldTaxRates holds the string denoting the tax_rates field in the database.
+	FieldTaxRates = "tax_rates"
+	// FieldPricesIncludeTax holds the string denoting the prices_include_tax field in the database.
+	FieldPricesIncludeTax = "prices_include_tax"
+	// FieldPolicies holds the string denoting the policies field in the database.
+	FieldPolicies = "policies"
+	// FieldNotificationPreferences holds the string denoting the notification_preferences field in the database.
+	FieldNotificationPreferences = "notification_preferences"
+	// FieldTagline holds the string denoting the tagline field in the database.
+	FieldTagline = "tagline"
+	// FieldOpeningHours holds the string denoting the opening_hours field in the database.
+	FieldOpeningHours = "opening_hours"
+	// FieldSocialLinks holds the string denoting the social_links field in the database.
+	FieldSocialLinks = "social_links"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the store in the database.
@@ -74,6 +96,17 @@ var Columns = []string{
 	FieldRatingCount,
 	FieldModerationVisibility,
 	FieldShippingCountryCodes,
+	FieldLocale,
+	FieldContactPhone,
+	FieldContactEmail,
+	FieldContactAddress,
+	FieldTaxRates,
+	FieldPricesIncludeTax,
+	FieldPolicies,
+	FieldNotificationPreferences,
+	FieldTagline,
+	FieldOpeningHours,
+	FieldSocialLinks,
 	FieldUpdatedAt,
 }
 
@@ -120,6 +153,28 @@ var (
 	DefaultRatingCount int
 	// DefaultModerationVisibility holds the default value on creation for the "moderation_visibility" field.
 	DefaultModerationVisibility string
+	// DefaultLocale holds the default value on creation for the "locale" field.
+	DefaultLocale string
+	// LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
+	LocaleValidator func(string) error
+	// DefaultContactPhone holds the default value on creation for the "contact_phone" field.
+	DefaultContactPhone string
+	// ContactPhoneValidator is a validator for the "contact_phone" field. It is called by the builders before save.
+	ContactPhoneValidator func(string) error
+	// DefaultContactEmail holds the default value on creation for the "contact_email" field.
+	DefaultContactEmail string
+	// ContactEmailValidator is a validator for the "contact_email" field. It is called by the builders before save.
+	ContactEmailValidator func(string) error
+	// DefaultContactAddress holds the default value on creation for the "contact_address" field.
+	DefaultContactAddress string
+	// ContactAddressValidator is a validator for the "contact_address" field. It is called by the builders before save.
+	ContactAddressValidator func(string) error
+	// DefaultPricesIncludeTax holds the default value on creation for the "prices_include_tax" field.
+	DefaultPricesIncludeTax bool
+	// DefaultTagline holds the default value on creation for the "tagline" field.
+	DefaultTagline string
+	// TaglineValidator is a validator for the "tagline" field. It is called by the builders before save.
+	TaglineValidator func(string) error
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -214,6 +269,36 @@ func ByRatingCount(opts ...sql.OrderTermOption) OrderOption {
 // ByModerationVisibility orders the results by the moderation_visibility field.
 func ByModerationVisibility(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldModerationVisibility, opts...).ToFunc()
+}
+
+// ByLocale orders the results by the locale field.
+func ByLocale(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLocale, opts...).ToFunc()
+}
+
+// ByContactPhone orders the results by the contact_phone field.
+func ByContactPhone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContactPhone, opts...).ToFunc()
+}
+
+// ByContactEmail orders the results by the contact_email field.
+func ByContactEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContactEmail, opts...).ToFunc()
+}
+
+// ByContactAddress orders the results by the contact_address field.
+func ByContactAddress(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContactAddress, opts...).ToFunc()
+}
+
+// ByPricesIncludeTax orders the results by the prices_include_tax field.
+func ByPricesIncludeTax(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPricesIncludeTax, opts...).ToFunc()
+}
+
+// ByTagline orders the results by the tagline field.
+func ByTagline(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTagline, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.
