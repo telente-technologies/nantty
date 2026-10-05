@@ -1,4 +1,5 @@
 import type { FeedRanker, RankedCandidate, RankingCandidate, RankingContext, RankingExplanation } from "../interfaces/feedRanker.interface.js";
+import type { IdentifierHasher } from "../utils/identifierHashing.util.js";
 import { createCircuitBreaker, signIntelligenceRequest } from "../utils/intelligenceRequestSigning.util.js";
 import { defaultBoostPolicy } from "./deterministicFeedRanker.integration.js";
 
@@ -7,6 +8,7 @@ export interface IntelligenceFeedRankerOptions {
   readonly sharedSecret: string;
   readonly timeoutMs: number;
   readonly fallback: FeedRanker;
+  readonly hasher: IdentifierHasher;
   readonly fetchImplementation?: typeof fetch;
   readonly onFallback?: (reason: string) => void;
 }
@@ -25,18 +27,18 @@ const maximumItemsReturned = 100;
 
 const toTopicSlugs = (values: readonly string[] | undefined): string[] => [...new Set((values ?? []).filter((value) => topicSlugPattern.test(value)))].slice(0, 20);
 
-export function buildIntelligenceFeedRequest(candidates: readonly RankingCandidate[], context: RankingContext) {
+export function buildIntelligenceFeedRequest(candidates: readonly RankingCandidate[], context: RankingContext, hasher: IdentifierHasher) {
   const policy = context.boostPolicy ?? defaultBoostPolicy;
   return {
     feedMode: "for_you",
     viewer: {
-      userId: context.viewerId ?? "guest",
+      userId: context.viewerId === null ? "guest" : hasher.hashUserId(context.viewerId),
       ...(context.viewerCountry ? { country: context.viewerCountry } : {}),
-      followedAccountIds: context.personalized ? [...new Set(candidates.filter((candidate) => candidate.followedAuthor).map((candidate) => candidate.authorId))].slice(0, 5000) : [],
+      followedAccountIds: context.personalized ? [...new Set(candidates.filter((candidate) => candidate.followedAuthor).map((candidate) => hasher.hashUserId(candidate.authorId)))].slice(0, 5000) : [],
     },
     candidates: candidates.slice(0, maximumCandidatesSent).map((candidate) => ({
       itemId: candidate.postId,
-      authorId: candidate.authorId,
+      authorId: hasher.hashUserId(candidate.authorId),
       createdAt: candidate.createdAt.toISOString(),
       mediaKind: "image",
       likeCount: candidate.likeCount,
@@ -91,7 +93,7 @@ export function createIntelligenceFeedRanker(options: IntelligenceFeedRankerOpti
         options.onFallback?.("circuit_open");
         return fallbackOrder;
       }
-      const body = JSON.stringify(buildIntelligenceFeedRequest(candidates, context));
+      const body = JSON.stringify(buildIntelligenceFeedRequest(candidates, context, options.hasher));
       try {
         const response = await send(new URL(rankPath, options.baseUrl), { method: "POST", body, headers: signIntelligenceRequest(options.sharedSecret, "POST", rankPath, body), signal: AbortSignal.timeout(options.timeoutMs) });
         if (!response.ok) throw new Error(`feed rank responded ${response.status}`);

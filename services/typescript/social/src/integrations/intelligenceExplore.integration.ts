@@ -1,10 +1,12 @@
 import type { IntelligenceExploreClient, IntelligenceHeadline, IntelligenceTrendItem } from "../interfaces/intelligenceExplore.interface.js";
+import type { IdentifierHasher } from "../utils/identifierHashing.util.js";
 import { createCircuitBreaker, signIntelligenceRequest } from "../utils/intelligenceRequestSigning.util.js";
 
 export interface IntelligenceExploreOptions {
   readonly baseUrl: string;
   readonly sharedSecret: string;
   readonly timeoutMs: number;
+  readonly hasher: IdentifierHasher;
   readonly fetchImplementation?: typeof fetch;
 }
 
@@ -44,7 +46,7 @@ export function createIntelligenceExploreClient(options: IntelligenceExploreOpti
         ...(input.category && input.category !== "other" ? { category: input.category } : {}),
         limit: input.limit,
         excludedStoryKeys: onlySlugs(input.excludedStoryKeys).slice(0, 500),
-        posts: input.posts.slice(0, 1000).map((sourcePost) => ({ ...sourcePost, hashtags: onlySlugs(sourcePost.hashtags).slice(0, 20), text: sourcePost.text.slice(0, 2000) })),
+        posts: input.posts.slice(0, 1000).map((sourcePost) => ({ ...sourcePost, authorId: options.hasher.hashUserId(sourcePost.authorId), hashtags: onlySlugs(sourcePost.hashtags).slice(0, 20), text: sourcePost.text.slice(0, 2000) })),
       });
       return payload?.headlines ?? null;
     },

@@ -3,6 +3,8 @@ import type { MediaReferenceInput } from "../modules/posts/commands/createPost/c
 
 interface InternalMediaResponse {
   readonly ownerId: string;
+  readonly purpose?: string;
+  readonly isPrivate?: boolean;
   readonly kind: string;
   readonly status: string;
   readonly displayUrl: string | null;
@@ -18,9 +20,11 @@ interface InternalMediaResponse {
 }
 
 const usableStatuses = new Set(["uploaded", "processing", "ready", "held"]);
+const postPurposes = new Set(["post", "clip", "story"]);
 
 function convertToMediaReference(mediaId: string, media: InternalMediaResponse): MediaReferenceInput | undefined {
   if ((media.kind !== "image" && media.kind !== "video") || !usableStatuses.has(media.status)) return undefined;
+  if (media.isPrivate === true || (media.purpose !== undefined && !postPurposes.has(media.purpose))) return undefined;
   const ready = media.status === "ready";
   return {
     id: mediaId,
