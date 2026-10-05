@@ -13,7 +13,7 @@ export function AppThemeProvider({ initialPreference, children }: { readonly ini
   const saveThemePreferenceToProfile = useCallback(
     async (theme: ThemePreference) => {
       if (!isSignedIn) return;
-      await sendSellerApiRequest<void>("/seller/users/me/preferences", { method: "PATCH", body: { theme } });
+      await sendSellerApiRequest<void>("/users/me/preferences", { method: "PATCH", body: { theme } });
     },
     [isSignedIn],
   );
