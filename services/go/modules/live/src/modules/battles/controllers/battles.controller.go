@@ -8,9 +8,11 @@ import (
 	endbattleearlyashost "zudomart/modules/live/src/modules/battles/commands/endBattleEarlyAsHost"
 	respondtowinnertakesallproposal "zudomart/modules/live/src/modules/battles/commands/respondToWinnerTakesAllProposal"
 	startpendingbattlewithoutwinnertakesall "zudomart/modules/live/src/modules/battles/commands/startPendingBattleWithoutWinnerTakesAll"
+	getbattle "zudomart/modules/live/src/modules/battles/queries/getBattle"
 	"zudomart/modules/live/src/modules/battles/validators"
 	"zudomart/modules/live/src/types"
 	"zudomart/modules/live/src/utils"
+	"zudomart/platform/httpserver"
 
 	"github.com/google/uuid"
 )
@@ -35,6 +37,23 @@ func (controller BattlesController) CreateBattle(writer http.ResponseWriter, req
 		}
 		return (createlivebattle.Handler{Container: controller.Container}).Execute(request.Context(), createlivebattle.Command{Actor: actor, LiveId: liveId, Input: input})
 	})
+}
+
+func (controller BattlesController) GetBattle(writer http.ResponseWriter, request *http.Request) {
+	actor, err := utils.ActorFrom(request)
+	var battleId uuid.UUID
+	if err == nil {
+		battleId, err = utils.PathIdentifier(request, "battleId")
+	}
+	var view types.BattleView
+	if err == nil {
+		view, err = (getbattle.Handler{Container: controller.Container}).Execute(request.Context(), getbattle.Query{Viewer: actor.UserId, BattleId: battleId})
+	}
+	if err != nil {
+		controller.responder().Error(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, view)
 }
 
 func (controller BattlesController) ActOnBattle(writer http.ResponseWriter, request *http.Request) {

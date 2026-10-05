@@ -13,5 +13,6 @@ func MountBattlesRoutes(mux *http.ServeMux, deployed *container.Container) {
 	authenticated := middlewares.Authenticated(deployed)
 	idempotent := middlewares.Idempotent(deployed)
 	mux.Handle("POST /api/v1/lives/{liveId}/battles", idempotent(controller.CreateBattle))
+	mux.Handle("GET /api/v1/battles/{battleId}", authenticated(controller.GetBattle))
 	mux.Handle("POST /api/v1/battles/{battleId}/{action}", authenticated(controller.ActOnBattle))
 }
