@@ -50,7 +50,6 @@ function destinationFor(sponsored: SponsoredPlacement, target: AdTapTarget): AdD
   return sponsored.ctaUrl ? { type: "url", url: sponsored.ctaUrl } : null;
 }
 
-/** Decides what a click on an ad does. External and store opens go through the signed redirect so the click is logged server-side. */
 export function resolveAdTapAction(sponsored: SponsoredPlacement, target: AdTapTarget, platform: AdPlatform): AdTapAction {
   const destination = destinationFor(sponsored, target);
   if (!destination) return { kind: "none" };

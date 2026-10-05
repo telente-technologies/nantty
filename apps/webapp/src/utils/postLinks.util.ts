@@ -45,7 +45,7 @@ export function readInternalPathFromUrl(rawUrl: string): string | null {
   const url = parseHttpUrl(rawUrl);
   const hostname = url?.hostname.toLowerCase().replace(/^www\./, "");
   if (!url || !hostname || !readInternalHosts().includes(hostname)) return null;
-  return `${url.pathname || "/"}${url.search}${url.hash}`;
+  return `${url.pathname.replace(/^[/\\]+/, "/") || "/"}${url.search}${url.hash}`;
 }
 
 export function findFirstInternalReference(text: string): InternalLinkReference | null {
