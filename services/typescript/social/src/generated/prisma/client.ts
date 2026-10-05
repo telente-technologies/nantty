@@ -177,6 +177,26 @@ export type StoreFollow = Prisma.StoreFollowModel
  */
 export type LinkPreviewCache = Prisma.LinkPreviewCacheModel
 /**
+ * Model ChatDeviceKey
+ * 
+ */
+export type ChatDeviceKey = Prisma.ChatDeviceKeyModel
+/**
+ * Model ChatOneTimePreKey
+ * 
+ */
+export type ChatOneTimePreKey = Prisma.ChatOneTimePreKeyModel
+/**
+ * Model ChatKeyMailboxEntry
+ * 
+ */
+export type ChatKeyMailboxEntry = Prisma.ChatKeyMailboxEntryModel
+/**
+ * Model ChatPreKeyClaim
+ * 
+ */
+export type ChatPreKeyClaim = Prisma.ChatPreKeyClaimModel
+/**
  * Model OutboxEvent
  * 
  */
