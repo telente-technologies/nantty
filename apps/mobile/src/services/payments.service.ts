@@ -1,4 +1,4 @@
-import type { PaymentChannel, PaymentInitialization, PaymentProvider, PaymentVerification, SavedCardCharge } from "@/types/commerce.type";
+import type { PaymentChannel, PaymentInitialization, PaymentProvider, PaymentVerification, SavedCardCharge, SavedCardOffer } from "@/types/commerce.type";
 
 import * as WebBrowser from "expo-web-browser";
 
@@ -12,6 +12,19 @@ interface SavedCardChargeWire {
   readonly status: string;
   readonly authorizationUrl?: string | null;
   readonly checkoutUrl?: string | null;
+}
+
+interface StartedCardSetupWire {
+  readonly reference: string;
+  readonly checkoutUrl: string;
+}
+
+interface DeviceSavedCardWire {
+  readonly savedCardId: string;
+  readonly brand: string;
+  readonly last4: string;
+  readonly expiryMonth: number;
+  readonly expiryYear: number;
 }
 
 const toSavedCardCharge = (wire: SavedCardChargeWire): SavedCardCharge => {
@@ -29,6 +42,12 @@ export const paymentsService = {
     const intent = await paymentsService.initializeOrderPayment(orderId, "paystack", idempotencyKey);
     const charge = await api.post<SavedCardChargeWire>("/api/v1/payments/saved-cards/charges", { paymentReference: intent.reference, savedCardId });
     return toSavedCardCharge(charge);
+  },
+  setUpCardOnThisDevice: async (idempotencyKey: string): Promise<SavedCardOffer | null> => {
+    const setup = await api.post<StartedCardSetupWire>("/api/v1/payments/saved-cards/setups", {}, { idempotencyKey });
+    await paymentsService.openHostedCheckoutInAppBrowser(setup.checkoutUrl).catch(() => "dismissed");
+    const card = await api.post<DeviceSavedCardWire>(`/api/v1/payments/saved-cards/setups/${encodeURIComponent(setup.reference)}/complete`).catch(() => null);
+    return card ? { savedCardId: card.savedCardId, brand: card.brand, last4: card.last4, expMonth: card.expiryMonth, expYear: card.expiryYear } : null;
   },
   verifyOrderPayment: (orderId: string) => api.post<PaymentVerification>(`/api/v1/payments/orders/${orderId}/verify`),
   openHostedCheckoutInAppBrowser: async (authorizationUrl: string): Promise<"returned" | "dismissed"> => {

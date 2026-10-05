@@ -12,6 +12,7 @@ import { mediaUploadTransport, readChunkBytesFromLocalFile } from "./mediaUpload
 import { DeviceOfflineError, retryWithExponentialBackoffAndJitter, runTasksWithBoundedConcurrency } from "./mediaUploadRetry.service";
 
 const MULTIPART_PART_CONCURRENCY = 4;
+const MAXIMUM_CHUNK_URLS_PER_REQUEST = 16;
 const SINGLE_PUT_MAXIMUM_BYTES = 8 * 1024 * 1024;
 const MAXIMUM_JOB_FAILURES_BEFORE_GIVING_UP = 5;
 const MEDIA_PROCESSING_POLL_TIMEOUT_MS = 5 * 60_000;
@@ -154,7 +155,7 @@ async function uploadMissingChunksForJob(job: UploadJob) {
   const prefetchedTargets = new Map<number, ChunkUploadUrl>();
   if (missingChunkIndexes.length > 1) {
     try {
-      const batch = await mediaUploadTransport.fetchChunkUploadUrls(uploadId, missingChunkIndexes);
+      const batch = await mediaUploadTransport.fetchChunkUploadUrls(uploadId, missingChunkIndexes.slice(0, MAXIMUM_CHUNK_URLS_PER_REQUEST));
       batch.urls.forEach(({ chunkIndex, ...target }) => prefetchedTargets.set(chunkIndex, target));
     } catch {
       prefetchedTargets.clear();

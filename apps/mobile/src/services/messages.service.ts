@@ -40,8 +40,8 @@ export const buildLocalPendingMessageFromDraft = (draft: OutgoingMessageDraft): 
 });
 
 export const messagesService = {
-  fetchConversationList: (filter: ConversationFilter) => api.get<Conversation[]>("/api/v1/conversations", { filter }),
-  fetchInboxFolder: (folder: InboxFolder) => api.get<Conversation[]>("/api/v1/conversations", { folder }),
+  fetchConversationList: (filter: ConversationFilter) => api.getList<Conversation>("/api/v1/conversations", { filter }),
+  fetchInboxFolder: (folder: InboxFolder) => api.getList<Conversation>("/api/v1/conversations", { folder }),
   acceptMessageRequest: (conversationId: string) => api.post<Conversation>(`/api/v1/conversations/${conversationId}/accept`),
   deleteMessageRequest: (conversationId: string) => api.delete<void>(`/api/v1/conversations/${conversationId}`),
   blockConversationPeer: (conversationId: string) => api.post<void>(`/api/v1/conversations/${conversationId}/block`),
@@ -54,7 +54,7 @@ export const messagesService = {
     const deliveredMessage = await runNowOrQueueWhenOffline(
       { kind: "sendMessage", payload: { conversationId: draft.conversationId, text: draft.text, localMessageId: draft.localMessageId, linkPreview: draft.linkPreview ?? null, mentions: draft.mentions } },
       (idempotencyKey) =>
-        api.post<Message>(`/api/v1/conversations/${draft.conversationId}/messages`, { text: draft.text, linkPreview: draft.linkPreview ?? null, mentions: draft.mentions }, { idempotencyKey }),
+        api.post<Message>(`/api/v1/conversations/${draft.conversationId}/messages`, { text: draft.text, linkPreview: null, mentions: draft.mentions }, { idempotencyKey }),
     );
     return deliveredMessage
       ? { message: deliveredMessage, delivered: true }
@@ -81,6 +81,7 @@ export const messagesService = {
   removeReactionFromMessage: (messageId: string, emoji: string) =>
     api.delete<MessageReactionSummary[]>(`/api/v1/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`),
   markConversationAsRead: (conversationId: string) => api.post<void>(`/api/v1/conversations/${conversationId}/read`),
-  searchConversationsAndPeople: (query: string) => api.get<ChatSearchResults>("/api/v1/conversations/search", { q: query }),
-  fetchPeopleToMessage: (query: string) => api.getList<UserSummary>("/api/v1/search/people", { q: query }),
+  searchConversationsAndPeople: async (query: string): Promise<ChatSearchResults> =>
+    query.trim() ? api.get<ChatSearchResults>("/api/v1/conversations/search", { q: query.trim() }) : { conversations: [], people: [] },
+  fetchPeopleToMessage: async (query: string): Promise<UserSummary[]> => (query.trim() ? [...(await api.getList<UserSummary>("/api/v1/search/people", { q: query.trim() }))] : []),
 };

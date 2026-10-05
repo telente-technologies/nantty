@@ -9,9 +9,9 @@ export const postThreadService = {
   fetchConversation: (postId: ID, sort: ThreadSort, cursor?: string) =>
     api.get<Page<ThreadReply>>(`/api/v1/posts/${postId}/thread`, { sort, cursor }),
   fetchThreadReplies: (commentId: ID, cursor?: string) => api.get<Page<ThreadReply>>(`/api/v1/comments/${commentId}/thread`, { cursor }),
-  decideThreadAd: (postId: ID, slotIndex: number, slotsSinceLastAd: number, neighbourContentIds: readonly ID[]) =>
+  decideThreadAd: (postId: ID, slotsSinceLastAd: number, neighbourContentIds: readonly ID[]) =>
     api.post<ThreadAdDecision>("/api/v1/ads/decide", {
-      slot: { kind: THREAD_AD_SLOT_KIND, contentId: postId, slotIndex, slotsSinceLastAd, neighbourContentIds: neighbourContentIds.slice(0, 10) },
+      slot: { kind: THREAD_AD_SLOT_KIND, contentId: postId, slotsSinceLastAd, neighbourContentIds: neighbourContentIds.slice(0, 10) },
       sessionId: adSessionId,
     }),
 };
