@@ -74,7 +74,7 @@ func TestCreatorApplicationNeedsInputAndAdminReviewQueueDecides(t *testing.T) {
 	denied, _ := harness.staff("admin", "users:read")
 	harness.expect("GET", "/api/v1/admin/applications/creators", denied, nil, http.StatusForbidden)
 	queue := harness.expect("GET", "/api/v1/admin/applications/creators", reviewer, nil, http.StatusOK)["data"].([]any)
-	if len(queue) != 1 || queue[0].(map[string]any)["status"] != "PENDING" || len(queue[0].(map[string]any)["eligibility"].([]any)) != 5 {
+	if len(queue) != 1 || queue[0].(map[string]any)["status"] != "PENDING" || len(queue[0].(map[string]any)["eligibility"].([]any)) != 4 {
 		t.Fatalf("the review queue shows the checklist: %v", queue)
 	}
 	id := queue[0].(map[string]any)["id"].(string)

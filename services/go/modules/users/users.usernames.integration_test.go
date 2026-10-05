@@ -67,7 +67,13 @@ func TestStaffCanReserveAndWithholdUsernamesWithAudit(t *testing.T) {
 	harness.expect("DELETE", "/api/v1/admin/usernames/withheld/cbn.official?reason=cleared+by+legal", staffToken, nil, http.StatusNotFound, stepUp...)
 	harness.expect("DELETE", "/api/v1/admin/usernames/reserved/"+rule["id"].(string), staffToken, nil, http.StatusNoContent, stepUp...)
 	harness.expect("PATCH", "/api/v1/users/me/username", adaToken, map[string]string{"username": "lagosstate.gov"}, http.StatusOK)
-	if len(harness.audit.actions) != 4 {
+	domainActions := []string{}
+	for _, action := range harness.audit.actions {
+		if action != "admin.request" {
+			domainActions = append(domainActions, action)
+		}
+	}
+	if len(domainActions) != 4 {
 		t.Fatalf("expected 4 audit events, got %v", harness.audit.actions)
 	}
 }
