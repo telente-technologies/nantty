@@ -1,0 +1,116 @@
+.composer {
+  position: sticky;
+  bottom: calc(var(--bottom-bar-height) + env(safe-area-inset-bottom, 0px));
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--divider);
+  border-radius: 0 0 var(--radius-large) var(--radius-large);
+  background: var(--surface-card);
+}
+
+.composerReplyingTo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: calc(34px + var(--space-3));
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.composerReplyingTo strong {
+  color: var(--color-brand);
+  font-weight: 500;
+}
+
+.composerRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.composerInput {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--control-md);
+  padding: var(--space-2) 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-strong);
+  font-size: var(--text-md);
+}
+
+.composerInput:focus {
+  outline: none;
+}
+
+.composerInput:focus-visible {
+  box-shadow: inset 0 -2px 0 var(--color-focus);
+}
+
+.composerSend {
+  min-height: var(--control-md);
+  padding-inline: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.composerSend:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.guestPrompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: var(--text-md);
+  text-align: left;
+  cursor: pointer;
+}
+
+.guestPromptAction {
+  color: var(--color-brand);
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .composer {
+    bottom: 0;
+  }
+}
+
+.restricted {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--ink-muted);
+}
+
+.restrictedText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.restrictedText strong {
+  color: var(--ink-strong);
+}

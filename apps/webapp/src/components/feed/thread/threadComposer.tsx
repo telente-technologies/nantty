@@ -18,6 +18,7 @@ import { maximumMentionsPerText } from "@/types/mentions.type";
 import { buildMentionEntitiesFromText, countMentionsInText, type MentionDraft } from "@/utils/mentions.util";
 
 import styles from "./thread.module.css";
+import composerStyles from "./threadComposer.module.css";
 
 interface ThreadComposerProps {
   readonly postId: string;
@@ -56,10 +57,10 @@ export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCanc
 
   if (!viewer) {
     return (
-      <div className={styles.composer}>
-        <button type="button" className={styles.guestPrompt} onClick={() => requireAuthThen(() => undefined, "Sign in to join the conversation.")}>
+      <div className={composerStyles.composer}>
+        <button type="button" className={composerStyles.guestPrompt} onClick={() => requireAuthThen(() => undefined, "Sign in to join the conversation.")}>
           <span>Post your reply</span>
-          <span className={styles.guestPromptAction}>Sign in to reply</span>
+          <span className={composerStyles.guestPromptAction}>Sign in to reply</span>
         </button>
       </div>
     );
@@ -67,9 +68,9 @@ export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCanc
 
   if (replyRestriction) {
     return (
-      <div className={[styles.composer, styles.restricted].join(" ")} role="note" aria-label="Who can reply?">
+      <div className={[composerStyles.composer, composerStyles.restricted].join(" ")} role="note" aria-label="Who can reply?">
         <LockIcon size={18} />
-        <p className={styles.restrictedText}>
+        <p className={composerStyles.restrictedText}>
           <strong>Who can reply?</strong>
           <span>{replyRestriction.message}</span>
         </p>
@@ -79,8 +80,8 @@ export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCanc
 
   const inputId = `thread-reply-${postId}`;
   return (
-    <form className={styles.composer} onSubmit={submitReply}>
-      <p className={styles.composerReplyingTo}>
+    <form className={composerStyles.composer} onSubmit={submitReply}>
+      <p className={composerStyles.composerReplyingTo}>
         Replying to <strong>@{replyingToUsername}</strong>
         {replyTarget ? (
           <button type="button" className={styles.textAction} onClick={onCancelReply}>
@@ -88,7 +89,7 @@ export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCanc
           </button>
         ) : null}
       </p>
-      <div className={styles.composerRow}>
+      <div className={composerStyles.composerRow}>
         <Avatar name={viewer.name} src={viewer.avatarUrl} size="sm" />
         <label htmlFor={inputId} className="visuallyHidden">
           Post your reply to @{replyingToUsername}
@@ -96,7 +97,7 @@ export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCanc
         <MentionAutocompleteInput
           key={replyTarget?.id ?? "post"}
           id={inputId}
-          className={styles.composerInput}
+          className={composerStyles.composerInput}
           value={text}
           maxLength={1000}
           autoFocus={replyTarget !== null}
@@ -107,7 +108,7 @@ export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCanc
           onChooseMention={(mention) => setChosenMentions((current) => (current.some((entry) => entry.userId === mention.userId) ? current : [...current, mention]))}
           onChange={setText}
         />
-        <button type="submit" className={styles.composerSend} disabled={!text.trim() || postMutation.isPending}>
+        <button type="submit" className={composerStyles.composerSend} disabled={!text.trim() || postMutation.isPending}>
           Reply
         </button>
       </div>

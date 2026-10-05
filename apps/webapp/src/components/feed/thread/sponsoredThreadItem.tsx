@@ -10,6 +10,7 @@ import { sponsoredPlacementFromDecidedAd } from "@/utils/adCreativeMapping.util"
 import type { ThreadDecidedAd } from "@/types/postThread.type";
 
 import styles from "./thread.module.css";
+import adStyles from "./threadAd.module.css";
 
 const IMPRESSION_VISIBLE_RATIO = 0.5;
 const IMPRESSION_VISIBLE_MS = 1_000;
@@ -48,7 +49,7 @@ export function SponsoredThreadItem({ ad, postId }: { readonly ad: ThreadDecided
   }, [sponsored, postId]);
 
   return (
-    <article ref={rootRef} className={[styles.row, styles.sponsored].join(" ")} aria-label={`Promoted by ${creative.identity.name}`}>
+    <article ref={rootRef} className={[styles.row, adStyles.sponsored].join(" ")} aria-label={`Promoted by ${creative.identity.name}`}>
       <div className={styles.rail}>
         <Avatar name={creative.identity.name} src={creative.identity.avatarUrl} size="md" />
       </div>
@@ -66,19 +67,19 @@ export function SponsoredThreadItem({ ad, postId }: { readonly ad: ThreadDecided
         {isCarousel ? <SponsoredCarousel sponsored={sponsored} placement="feedCommentThread" itemId={postId} /> : null}
         {isInstall ? <SponsoredAppInstallRow sponsored={sponsored} placement="feedCommentThread" itemId={postId} /> : null}
         {isCarousel || isInstall ? null : (
-          <AdAction sponsored={sponsored} placement="feedCommentThread" itemId={postId} target={{ kind: "cta" }} className={styles.adCard} label={`${creative.headline}, ${sponsored.ctaLabel}`}>
+          <AdAction sponsored={sponsored} placement="feedCommentThread" itemId={postId} target={{ kind: "cta" }} className={adStyles.adCard} label={`${creative.headline}, ${sponsored.ctaLabel}`}>
             {image ? (
-              <span className={styles.adMedia} style={{ aspectRatio: `${image.width} / ${Math.max(image.height, 1)}` }}>
+              <span className={adStyles.adMedia} style={{ aspectRatio: `${image.width} / ${Math.max(image.height, 1)}` }}>
                 <MediaImage src={image.url} alt="" sizes="(max-width: 768px) 80vw, 520px" />
               </span>
             ) : null}
-            <span className={styles.adFooter}>
-              <span className={styles.adHeadline}>{creative.headline}</span>
-              <span className={styles.adCta}>{sponsored.ctaLabel}</span>
+            <span className={adStyles.adFooter}>
+              <span className={adStyles.adHeadline}>{creative.headline}</span>
+              <span className={adStyles.adCta}>{sponsored.ctaLabel}</span>
             </span>
           </AdAction>
         )}
-        <p className={styles.promoted}>{ad.label}</p>
+        <p className={adStyles.promoted}>{ad.label}</p>
       </div>
     </article>
   );

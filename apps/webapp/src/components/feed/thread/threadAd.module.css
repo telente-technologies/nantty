@@ -1,0 +1,57 @@
+.sponsored {
+  padding-block: var(--space-1) var(--space-3);
+  border-bottom: 1px solid var(--divider);
+}
+
+.adCard {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-2);
+  overflow: hidden;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  color: inherit;
+  text-decoration: none;
+}
+
+.adCard:hover .adCta,
+.adCard:focus-visible .adCta {
+  filter: brightness(1.08);
+}
+
+.adMedia {
+  position: relative;
+  display: block;
+  max-height: 360px;
+  background: var(--surface-sunken);
+}
+
+.adFooter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+.adHeadline {
+  flex: 1;
+  font-weight: 600;
+}
+
+.adCta {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-sm);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.promoted {
+  margin: var(--space-1) 0 0;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+}

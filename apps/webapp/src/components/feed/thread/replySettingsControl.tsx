@@ -34,7 +34,7 @@ export function ReplySettingsControl({ post }: { readonly post: Post }) {
       <button type="button" className={styles.textAction} onClick={() => setIsOpen(true)} aria-haspopup="dialog">
         Change
       </button>
-      <Dialog isOpen={isOpen} onClose={() => setIsOpen(false)} title="Who can reply?" description="Choose who can reply to this post. You can always reply." layout="centered" size="small">
+      <Dialog isOpen={isOpen} onClose={() => setIsOpen(false)} title="Who can reply?" description="Choose who can reply to this post. You can always reply." layout="sheet" size="small">
         <fieldset className={settingsStyles.radioGroup} disabled={update.isPending}>
           <legend className="visuallyHidden">Who can reply</legend>
           {replyPolicyOptions.map((option) => (

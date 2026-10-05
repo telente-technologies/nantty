@@ -17,6 +17,7 @@ import { SponsoredThreadItem } from "./sponsoredThreadItem";
 import { ThreadComposer } from "./threadComposer";
 import { ThreadReplyBranch } from "./threadReply";
 import styles from "./thread.module.css";
+import panelStyles from "./conversationPanel.module.css";
 
 const SORT_OPTIONS = [
   { value: "top", label: "Top" },
@@ -27,9 +28,9 @@ function ThreadSkeleton({ rows }: { readonly rows: number }) {
   return (
     <div aria-busy="true" aria-label="Loading replies">
       {Array.from({ length: rows }, (_, index) => (
-        <div key={index} className={styles.skeletonRow}>
+        <div key={index} className={panelStyles.skeletonRow}>
           <Skeleton width={44} height={44} circle />
-          <div className={styles.skeletonBody}>
+          <div className={panelStyles.skeletonBody}>
             <Skeleton width="50%" height={14} />
             <Skeleton width="92%" height={13} />
             <Skeleton width={index % 2 === 0 ? "70%" : "40%"} height={13} />
@@ -60,8 +61,8 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
   const panelId = `conversation-${post.id}`;
 
   return (
-    <section className={styles.panel} id="comments" aria-labelledby={`${panelId}-title`}>
-      <p className={styles.timestamp}>
+    <section className={panelStyles.panel} id="comments" aria-labelledby={`${panelId}-title`}>
+      <p className={panelStyles.timestamp}>
         <time dateTime={post.createdAt}>{formatFullTimestamp(post.createdAt)}</time>
         {post.views > 0 ? (
           <>
@@ -76,16 +77,16 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
       {isOwnPost ? <ReplySettingsControl post={post} /> : null}
       <UnderlineTabs options={SORT_OPTIONS} value={sort} onChange={setSort} label="Sort replies" panelId={panelId} />
       {focusedReply ? (
-        <div className={styles.focusBar}>
+        <div className={panelStyles.focusBar}>
           <strong>Thread</strong>
           <button type="button" className={styles.textAction} onClick={() => setFocusedReply(null)}>
             Back to all replies
           </button>
         </div>
       ) : null}
-      <div id={panelId} role="tabpanel" className={styles.list}>
+      <div id={panelId} role="tabpanel" className={panelStyles.list}>
         {focusedReply ? (
-          <div className={styles.conversation}>
+          <div className={panelStyles.conversation}>
             <ThreadReplyBranch key={focusedReply.id} reply={{ ...focusedReply, inlineReplies: [] }} postId={post.id} hasParentAbove={false} showReplyingTo onReply={setReplyTarget} startExpanded onOpenThread={setFocusedReply} />
           </div>
         ) : query.isLoading ? (
@@ -99,7 +100,7 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
             row.kind === "sponsored" ? (
               <SponsoredThreadItem key={row.key} ad={row.ad} postId={post.id} />
             ) : (
-              <div key={row.key} className={styles.conversation}>
+              <div key={row.key} className={panelStyles.conversation}>
                 <ThreadReplyBranch reply={row.reply} postId={post.id} hasParentAbove={false} showReplyingTo={false} onReply={setReplyTarget} onOpenThread={setFocusedReply} />
               </div>
             ),
