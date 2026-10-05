@@ -27,6 +27,13 @@ export interface RankedFeedRequest {
   readonly limit: number;
   readonly category?: TrendCategoryTab;
   readonly country?: string;
+  readonly topicId?: string | undefined;
+}
+
+export function matchesTopic(row: PostRow, topicId: string | undefined): boolean {
+  if (topicId === undefined) return true;
+  const topic = topicId.toLowerCase();
+  return row.topics.includes(topic) || extractHashtags(row.text).includes(topic);
 }
 
 export function toRankingCandidate(row: PostRow, followedAuthors: ReadonlySet<string>, author?: AuthorRankingProfile, integrity?: EngagementIntegritySignals): RankingCandidate {
@@ -71,7 +78,7 @@ export async function buildRankedFeedPage(context: HandlerContext, request: Rank
     context.authorRanking?.findSuspendedAccountIds(authorIds) ?? Promise.resolve(new Set<string>()),
   ]);
   const trendingSet = new Set(trendingHashtags);
-  const eligible = rows.filter((row) => !privateAuthors.has(row.authorId) && !hiddenAuthors.has(row.authorId) && !suspended.has(row.authorId) && !dismissed.has(row.id) && row.authorId !== request.viewerId && !isPostWithheldFromViewer(row, policy) && matchesExploreCategory(row, request.category, trendingSet));
+  const eligible = rows.filter((row) => !privateAuthors.has(row.authorId) && !hiddenAuthors.has(row.authorId) && !suspended.has(row.authorId) && !dismissed.has(row.id) && row.authorId !== request.viewerId && !isPostWithheldFromViewer(row, policy) && matchesExploreCategory(row, request.category, trendingSet) && matchesTopic(row, request.topicId));
   const integrity = context.authorRanking === undefined ? new Map<string, EngagementIntegritySignals>() : await computeEngagementIntegritySignals(db, context.authorRanking, eligible, now);
   const candidates = eligible.map((row) => toRankingCandidate(row, followed, authorProfiles.get(row.authorId), integrity.get(row.id)));
   const ranked = await context.ranker.rank(candidates, { viewerId: request.viewerId ?? null, personalized: request.personalized, now, boostPolicy: settings.boostPolicy, trendingHashtags, viewerCountry });
