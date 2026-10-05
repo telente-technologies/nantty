@@ -18,5 +18,5 @@ func MountProfilesRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("POST /api/v1/users/me/deactivate", requireAccessToken(http.HandlerFunc(controller.DeactivateAccount)))
 	mux.Handle("GET /api/v1/users/username/{username}", requireAccessToken(http.HandlerFunc(controller.GetUserProfileByUsername)))
 	mux.HandleFunc("GET /api/v1/users/by-username/{username}", controller.GetUserProfileByUsername)
-	mux.Handle("GET /api/v1/users/{userId}", requireAccessToken(http.HandlerFunc(controller.GetUserProfile)))
+	mux.HandleFunc("GET /api/v1/users/{userId}", controller.GetUserProfile)
 }

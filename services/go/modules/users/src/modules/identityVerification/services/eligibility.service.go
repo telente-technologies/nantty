@@ -42,7 +42,7 @@ func BuildEligibilitySignals(ctx context.Context, application *container.Contain
 	return integrations.EligibilitySignals{
 		ProfileId: profile.ID.String(), Color: color, AccountAgeDays: max(int(application.Now().Sub(account.CreatedAt).Hours()/24), 0),
 		RealFollowers: signals.RealFollowers, OriginalPostsLast60Days: signals.OriginalPostsLast60Days, DaysSinceLastViolation: min(signals.DaysSinceLastViolation, 100000),
-		FraudScore: signals.FraudScore, RiskScore: signals.RiskScore, BorderlineContent: signals.BorderlineContent, PhoneVerified: account.PhoneVerified,
+		FraudScore: signals.FraudScore, RiskScore: signals.RiskScore, BorderlineContent: signals.BorderlineContent,
 		EmailVerified: account.EmailVerified, AccountRestricted: !account.Active || account.Status == "suspended", CompletedOrders: signals.CompletedOrders,
 		SuccessRatePercent: signals.SuccessRatePercent, HasActiveStoreOrBrandPage: signals.HasActiveStoreOrBrandPage,
 		Thresholds: integrations.EligibilityThresholds{

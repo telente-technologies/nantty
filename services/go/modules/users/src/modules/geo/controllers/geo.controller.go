@@ -12,6 +12,7 @@ import (
 	listcities "zudomart/modules/users/src/modules/geo/queries/listCities"
 	listcountries "zudomart/modules/users/src/modules/geo/queries/listCountries"
 	listregions "zudomart/modules/users/src/modules/geo/queries/listRegions"
+	"zudomart/modules/users/src/modules/geo/services"
 	"zudomart/modules/users/src/utils"
 	"zudomart/platform/httpserver"
 )
@@ -22,9 +23,13 @@ type GeoController struct {
 
 func (controller GeoController) ListCountries(writer http.ResponseWriter, request *http.Request) {
 	countries, err := listcountries.Handler{Container: controller.Container}.Execute(request.Context(), listcountries.Query{})
+	var withCities map[uuid.UUID]bool
+	if err == nil {
+		withCities, err = services.FindCountriesWithCitiesUnderAdminAreas(request.Context(), controller.Container.Client)
+	}
 	items := make([]dtos.GeoCountryResponse, 0, len(countries))
 	for _, country := range countries {
-		items = append(items, dtos.ConvertCountryToResponse(country))
+		items = append(items, dtos.ConvertCountryToResponse(country, withCities[country.ID]))
 	}
 	controller.respond(writer, request, items, err)
 }

@@ -21,8 +21,8 @@ type GeoAreaResponse struct {
 	ParentId string `json:"parentId"`
 }
 
-func ConvertCountryToResponse(country *ent.GeoCountry) GeoCountryResponse {
-	response := GeoCountryResponse{Id: country.ID.String(), Code: country.Code, Name: country.Name, Currency: services.CurrencyForCountry(country), Levels: services.DescribeCountryLevels(country)}
+func ConvertCountryToResponse(country *ent.GeoCountry, hasCities bool) GeoCountryResponse {
+	response := GeoCountryResponse{Id: country.ID.String(), Code: country.Code, Name: country.Name, Currency: services.CurrencyForCountry(country), Levels: services.DescribeCountryLevels(country, hasCities)}
 	if country.RegionLabel != nil {
 		response.StateLabel = *country.RegionLabel
 	}
