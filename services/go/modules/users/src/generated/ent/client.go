@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/accountremoval"
 	"zudomart/modules/users/src/generated/ent/accountrestriction"
 	"zudomart/modules/users/src/generated/ent/accountsuspension"
+	"zudomart/modules/users/src/generated/ent/accounttopic"
 	"zudomart/modules/users/src/generated/ent/actingprofile"
 	"zudomart/modules/users/src/generated/ent/admincreatedaccount"
 	"zudomart/modules/users/src/generated/ent/blackapplication"
@@ -45,6 +46,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/shippingaddress"
 	"zudomart/modules/users/src/generated/ent/suggestiondismissal"
 	"zudomart/modules/users/src/generated/ent/termsacceptance"
+	"zudomart/modules/users/src/generated/ent/topic"
 	"zudomart/modules/users/src/generated/ent/userconsent"
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/modules/users/src/generated/ent/usernamehold"
@@ -74,6 +76,8 @@ type Client struct {
 	AccountRestriction *AccountRestrictionClient
 	// AccountSuspension is the client for interacting with the AccountSuspension builders.
 	AccountSuspension *AccountSuspensionClient
+	// AccountTopic is the client for interacting with the AccountTopic builders.
+	AccountTopic *AccountTopicClient
 	// ActingProfile is the client for interacting with the ActingProfile builders.
 	ActingProfile *ActingProfileClient
 	// AdminCreatedAccount is the client for interacting with the AdminCreatedAccount builders.
@@ -134,6 +138,8 @@ type Client struct {
 	SuggestionDismissal *SuggestionDismissalClient
 	// TermsAcceptance is the client for interacting with the TermsAcceptance builders.
 	TermsAcceptance *TermsAcceptanceClient
+	// Topic is the client for interacting with the Topic builders.
+	Topic *TopicClient
 	// UserConsent is the client for interacting with the UserConsent builders.
 	UserConsent *UserConsentClient
 	// UsernameChange is the client for interacting with the UsernameChange builders.
@@ -161,6 +167,7 @@ func (c *Client) init() {
 	c.AccountRemoval = NewAccountRemovalClient(c.config)
 	c.AccountRestriction = NewAccountRestrictionClient(c.config)
 	c.AccountSuspension = NewAccountSuspensionClient(c.config)
+	c.AccountTopic = NewAccountTopicClient(c.config)
 	c.ActingProfile = NewActingProfileClient(c.config)
 	c.AdminCreatedAccount = NewAdminCreatedAccountClient(c.config)
 	c.BlackApplication = NewBlackApplicationClient(c.config)
@@ -191,6 +198,7 @@ func (c *Client) init() {
 	c.ShippingAddress = NewShippingAddressClient(c.config)
 	c.SuggestionDismissal = NewSuggestionDismissalClient(c.config)
 	c.TermsAcceptance = NewTermsAcceptanceClient(c.config)
+	c.Topic = NewTopicClient(c.config)
 	c.UserConsent = NewUserConsentClient(c.config)
 	c.UsernameChange = NewUsernameChangeClient(c.config)
 	c.UsernameHold = NewUsernameHoldClient(c.config)
@@ -293,6 +301,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AccountRemoval:          NewAccountRemovalClient(cfg),
 		AccountRestriction:      NewAccountRestrictionClient(cfg),
 		AccountSuspension:       NewAccountSuspensionClient(cfg),
+		AccountTopic:            NewAccountTopicClient(cfg),
 		ActingProfile:           NewActingProfileClient(cfg),
 		AdminCreatedAccount:     NewAdminCreatedAccountClient(cfg),
 		BlackApplication:        NewBlackApplicationClient(cfg),
@@ -323,6 +332,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ShippingAddress:         NewShippingAddressClient(cfg),
 		SuggestionDismissal:     NewSuggestionDismissalClient(cfg),
 		TermsAcceptance:         NewTermsAcceptanceClient(cfg),
+		Topic:                   NewTopicClient(cfg),
 		UserConsent:             NewUserConsentClient(cfg),
 		UsernameChange:          NewUsernameChangeClient(cfg),
 		UsernameHold:            NewUsernameHoldClient(cfg),
@@ -352,6 +362,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AccountRemoval:          NewAccountRemovalClient(cfg),
 		AccountRestriction:      NewAccountRestrictionClient(cfg),
 		AccountSuspension:       NewAccountSuspensionClient(cfg),
+		AccountTopic:            NewAccountTopicClient(cfg),
 		ActingProfile:           NewActingProfileClient(cfg),
 		AdminCreatedAccount:     NewAdminCreatedAccountClient(cfg),
 		BlackApplication:        NewBlackApplicationClient(cfg),
@@ -382,6 +393,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ShippingAddress:         NewShippingAddressClient(cfg),
 		SuggestionDismissal:     NewSuggestionDismissalClient(cfg),
 		TermsAcceptance:         NewTermsAcceptanceClient(cfg),
+		Topic:                   NewTopicClient(cfg),
 		UserConsent:             NewUserConsentClient(cfg),
 		UsernameChange:          NewUsernameChangeClient(cfg),
 		UsernameHold:            NewUsernameHoldClient(cfg),
@@ -418,16 +430,16 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AccountBan, c.AccountRemoval, c.AccountRestriction, c.AccountSuspension,
-		c.ActingProfile, c.AdminCreatedAccount, c.BlackApplication, c.BusinessCategory,
-		c.BusinessDocument, c.CelebrationSetting, c.CelebrationView, c.CheckmarkGrant,
-		c.CreatorApplication, c.DataExportRequest, c.DeletionRequest, c.GeoAdminArea,
-		c.GeoCity, c.GeoCountry, c.GeoRegion, c.LegalDocument, c.LegalNotice,
-		c.LegalNoticeDraft, c.LegalVersion, c.OutboxEvent, c.PolicyVersion,
-		c.PrivacySetting, c.Profile, c.ProfileCheckmark, c.ProfileSignal,
-		c.ReservedUsernameRule, c.RetentionPolicy, c.ShippingAddress,
-		c.SuggestionDismissal, c.TermsAcceptance, c.UserConsent, c.UsernameChange,
-		c.UsernameHold, c.VerificationApplication, c.VerificationCase,
-		c.VerificationEligibility,
+		c.AccountTopic, c.ActingProfile, c.AdminCreatedAccount, c.BlackApplication,
+		c.BusinessCategory, c.BusinessDocument, c.CelebrationSetting,
+		c.CelebrationView, c.CheckmarkGrant, c.CreatorApplication, c.DataExportRequest,
+		c.DeletionRequest, c.GeoAdminArea, c.GeoCity, c.GeoCountry, c.GeoRegion,
+		c.LegalDocument, c.LegalNotice, c.LegalNoticeDraft, c.LegalVersion,
+		c.OutboxEvent, c.PolicyVersion, c.PrivacySetting, c.Profile,
+		c.ProfileCheckmark, c.ProfileSignal, c.ReservedUsernameRule, c.RetentionPolicy,
+		c.ShippingAddress, c.SuggestionDismissal, c.TermsAcceptance, c.Topic,
+		c.UserConsent, c.UsernameChange, c.UsernameHold, c.VerificationApplication,
+		c.VerificationCase, c.VerificationEligibility,
 	} {
 		n.Use(hooks...)
 	}
@@ -438,16 +450,16 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AccountBan, c.AccountRemoval, c.AccountRestriction, c.AccountSuspension,
-		c.ActingProfile, c.AdminCreatedAccount, c.BlackApplication, c.BusinessCategory,
-		c.BusinessDocument, c.CelebrationSetting, c.CelebrationView, c.CheckmarkGrant,
-		c.CreatorApplication, c.DataExportRequest, c.DeletionRequest, c.GeoAdminArea,
-		c.GeoCity, c.GeoCountry, c.GeoRegion, c.LegalDocument, c.LegalNotice,
-		c.LegalNoticeDraft, c.LegalVersion, c.OutboxEvent, c.PolicyVersion,
-		c.PrivacySetting, c.Profile, c.ProfileCheckmark, c.ProfileSignal,
-		c.ReservedUsernameRule, c.RetentionPolicy, c.ShippingAddress,
-		c.SuggestionDismissal, c.TermsAcceptance, c.UserConsent, c.UsernameChange,
-		c.UsernameHold, c.VerificationApplication, c.VerificationCase,
-		c.VerificationEligibility,
+		c.AccountTopic, c.ActingProfile, c.AdminCreatedAccount, c.BlackApplication,
+		c.BusinessCategory, c.BusinessDocument, c.CelebrationSetting,
+		c.CelebrationView, c.CheckmarkGrant, c.CreatorApplication, c.DataExportRequest,
+		c.DeletionRequest, c.GeoAdminArea, c.GeoCity, c.GeoCountry, c.GeoRegion,
+		c.LegalDocument, c.LegalNotice, c.LegalNoticeDraft, c.LegalVersion,
+		c.OutboxEvent, c.PolicyVersion, c.PrivacySetting, c.Profile,
+		c.ProfileCheckmark, c.ProfileSignal, c.ReservedUsernameRule, c.RetentionPolicy,
+		c.ShippingAddress, c.SuggestionDismissal, c.TermsAcceptance, c.Topic,
+		c.UserConsent, c.UsernameChange, c.UsernameHold, c.VerificationApplication,
+		c.VerificationCase, c.VerificationEligibility,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -464,6 +476,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AccountRestriction.mutate(ctx, m)
 	case *AccountSuspensionMutation:
 		return c.AccountSuspension.mutate(ctx, m)
+	case *AccountTopicMutation:
+		return c.AccountTopic.mutate(ctx, m)
 	case *ActingProfileMutation:
 		return c.ActingProfile.mutate(ctx, m)
 	case *AdminCreatedAccountMutation:
@@ -524,6 +538,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SuggestionDismissal.mutate(ctx, m)
 	case *TermsAcceptanceMutation:
 		return c.TermsAcceptance.mutate(ctx, m)
+	case *TopicMutation:
+		return c.Topic.mutate(ctx, m)
 	case *UserConsentMutation:
 		return c.UserConsent.mutate(ctx, m)
 	case *UsernameChangeMutation:
@@ -1070,6 +1086,139 @@ func (c *AccountSuspensionClient) mutate(ctx context.Context, m *AccountSuspensi
 		return (&AccountSuspensionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AccountSuspension mutation op: %q", m.Op())
+	}
+}
+
+// AccountTopicClient is a client for the AccountTopic schema.
+type AccountTopicClient struct {
+	config
+}
+
+// NewAccountTopicClient returns a client for the AccountTopic from the given config.
+func NewAccountTopicClient(c config) *AccountTopicClient {
+	return &AccountTopicClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `accounttopic.Hooks(f(g(h())))`.
+func (c *AccountTopicClient) Use(hooks ...Hook) {
+	c.hooks.AccountTopic = append(c.hooks.AccountTopic, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `accounttopic.Intercept(f(g(h())))`.
+func (c *AccountTopicClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AccountTopic = append(c.inters.AccountTopic, interceptors...)
+}
+
+// Create returns a builder for creating a AccountTopic entity.
+func (c *AccountTopicClient) Create() *AccountTopicCreate {
+	mutation := newAccountTopicMutation(c.config, OpCreate)
+	return &AccountTopicCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AccountTopic entities.
+func (c *AccountTopicClient) CreateBulk(builders ...*AccountTopicCreate) *AccountTopicCreateBulk {
+	return &AccountTopicCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AccountTopicClient) MapCreateBulk(slice any, setFunc func(*AccountTopicCreate, int)) *AccountTopicCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AccountTopicCreateBulk{err: fmt.Errorf("calling to AccountTopicClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AccountTopicCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AccountTopicCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AccountTopic.
+func (c *AccountTopicClient) Update() *AccountTopicUpdate {
+	mutation := newAccountTopicMutation(c.config, OpUpdate)
+	return &AccountTopicUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AccountTopicClient) UpdateOne(_m *AccountTopic) *AccountTopicUpdateOne {
+	mutation := newAccountTopicMutation(c.config, OpUpdateOne, withAccountTopic(_m))
+	return &AccountTopicUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AccountTopicClient) UpdateOneID(id uuid.UUID) *AccountTopicUpdateOne {
+	mutation := newAccountTopicMutation(c.config, OpUpdateOne, withAccountTopicID(id))
+	return &AccountTopicUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AccountTopic.
+func (c *AccountTopicClient) Delete() *AccountTopicDelete {
+	mutation := newAccountTopicMutation(c.config, OpDelete)
+	return &AccountTopicDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AccountTopicClient) DeleteOne(_m *AccountTopic) *AccountTopicDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AccountTopicClient) DeleteOneID(id uuid.UUID) *AccountTopicDeleteOne {
+	builder := c.Delete().Where(accounttopic.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AccountTopicDeleteOne{builder}
+}
+
+// Query returns a query builder for AccountTopic.
+func (c *AccountTopicClient) Query() *AccountTopicQuery {
+	return &AccountTopicQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAccountTopic},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AccountTopic entity by its id.
+func (c *AccountTopicClient) Get(ctx context.Context, id uuid.UUID) (*AccountTopic, error) {
+	return c.Query().Where(accounttopic.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AccountTopicClient) GetX(ctx context.Context, id uuid.UUID) *AccountTopic {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AccountTopicClient) Hooks() []Hook {
+	return c.hooks.AccountTopic
+}
+
+// Interceptors returns the client interceptors.
+func (c *AccountTopicClient) Interceptors() []Interceptor {
+	return c.inters.AccountTopic
+}
+
+func (c *AccountTopicClient) mutate(ctx context.Context, m *AccountTopicMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AccountTopicCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AccountTopicUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AccountTopicUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AccountTopicDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AccountTopic mutation op: %q", m.Op())
 	}
 }
 
@@ -5095,6 +5244,139 @@ func (c *TermsAcceptanceClient) mutate(ctx context.Context, m *TermsAcceptanceMu
 	}
 }
 
+// TopicClient is a client for the Topic schema.
+type TopicClient struct {
+	config
+}
+
+// NewTopicClient returns a client for the Topic from the given config.
+func NewTopicClient(c config) *TopicClient {
+	return &TopicClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `topic.Hooks(f(g(h())))`.
+func (c *TopicClient) Use(hooks ...Hook) {
+	c.hooks.Topic = append(c.hooks.Topic, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `topic.Intercept(f(g(h())))`.
+func (c *TopicClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Topic = append(c.inters.Topic, interceptors...)
+}
+
+// Create returns a builder for creating a Topic entity.
+func (c *TopicClient) Create() *TopicCreate {
+	mutation := newTopicMutation(c.config, OpCreate)
+	return &TopicCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Topic entities.
+func (c *TopicClient) CreateBulk(builders ...*TopicCreate) *TopicCreateBulk {
+	return &TopicCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TopicClient) MapCreateBulk(slice any, setFunc func(*TopicCreate, int)) *TopicCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TopicCreateBulk{err: fmt.Errorf("calling to TopicClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TopicCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TopicCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Topic.
+func (c *TopicClient) Update() *TopicUpdate {
+	mutation := newTopicMutation(c.config, OpUpdate)
+	return &TopicUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TopicClient) UpdateOne(_m *Topic) *TopicUpdateOne {
+	mutation := newTopicMutation(c.config, OpUpdateOne, withTopic(_m))
+	return &TopicUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TopicClient) UpdateOneID(id string) *TopicUpdateOne {
+	mutation := newTopicMutation(c.config, OpUpdateOne, withTopicID(id))
+	return &TopicUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Topic.
+func (c *TopicClient) Delete() *TopicDelete {
+	mutation := newTopicMutation(c.config, OpDelete)
+	return &TopicDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TopicClient) DeleteOne(_m *Topic) *TopicDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TopicClient) DeleteOneID(id string) *TopicDeleteOne {
+	builder := c.Delete().Where(topic.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TopicDeleteOne{builder}
+}
+
+// Query returns a query builder for Topic.
+func (c *TopicClient) Query() *TopicQuery {
+	return &TopicQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTopic},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Topic entity by its id.
+func (c *TopicClient) Get(ctx context.Context, id string) (*Topic, error) {
+	return c.Query().Where(topic.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TopicClient) GetX(ctx context.Context, id string) *Topic {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TopicClient) Hooks() []Hook {
+	return c.hooks.Topic
+}
+
+// Interceptors returns the client interceptors.
+func (c *TopicClient) Interceptors() []Interceptor {
+	return c.inters.Topic
+}
+
+func (c *TopicClient) mutate(ctx context.Context, m *TopicMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TopicCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TopicUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TopicUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TopicDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Topic mutation op: %q", m.Op())
+	}
+}
+
 // UserConsentClient is a client for the UserConsent schema.
 type UserConsentClient struct {
 	config
@@ -5896,26 +6178,26 @@ func (c *VerificationEligibilityClient) mutate(ctx context.Context, m *Verificat
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AccountBan, AccountRemoval, AccountRestriction, AccountSuspension,
+		AccountBan, AccountRemoval, AccountRestriction, AccountSuspension, AccountTopic,
 		ActingProfile, AdminCreatedAccount, BlackApplication, BusinessCategory,
 		BusinessDocument, CelebrationSetting, CelebrationView, CheckmarkGrant,
 		CreatorApplication, DataExportRequest, DeletionRequest, GeoAdminArea, GeoCity,
 		GeoCountry, GeoRegion, LegalDocument, LegalNotice, LegalNoticeDraft,
 		LegalVersion, OutboxEvent, PolicyVersion, PrivacySetting, Profile,
 		ProfileCheckmark, ProfileSignal, ReservedUsernameRule, RetentionPolicy,
-		ShippingAddress, SuggestionDismissal, TermsAcceptance, UserConsent,
+		ShippingAddress, SuggestionDismissal, TermsAcceptance, Topic, UserConsent,
 		UsernameChange, UsernameHold, VerificationApplication, VerificationCase,
 		VerificationEligibility []ent.Hook
 	}
 	inters struct {
-		AccountBan, AccountRemoval, AccountRestriction, AccountSuspension,
+		AccountBan, AccountRemoval, AccountRestriction, AccountSuspension, AccountTopic,
 		ActingProfile, AdminCreatedAccount, BlackApplication, BusinessCategory,
 		BusinessDocument, CelebrationSetting, CelebrationView, CheckmarkGrant,
 		CreatorApplication, DataExportRequest, DeletionRequest, GeoAdminArea, GeoCity,
 		GeoCountry, GeoRegion, LegalDocument, LegalNotice, LegalNoticeDraft,
 		LegalVersion, OutboxEvent, PolicyVersion, PrivacySetting, Profile,
 		ProfileCheckmark, ProfileSignal, ReservedUsernameRule, RetentionPolicy,
-		ShippingAddress, SuggestionDismissal, TermsAcceptance, UserConsent,
+		ShippingAddress, SuggestionDismissal, TermsAcceptance, Topic, UserConsent,
 		UsernameChange, UsernameHold, VerificationApplication, VerificationCase,
 		VerificationEligibility []ent.Interceptor
 	}
