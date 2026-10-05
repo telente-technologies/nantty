@@ -8,6 +8,7 @@ export function registerFollowsRoutes(router: HttpRouter, controller: ReturnType
   router.get("/api/v1/users/:userId/followers", controller.listFollowers);
   router.get("/api/v1/users/:userId/following", controller.listFollowing);
   router.get("/api/v1/users/:userId/follow-status", controller.getFollowStatus);
+  router.get("/api/v1/users/:userId/connections", controller.listConnections);
   router.get("/api/v1/users/me/follow-requests", controller.listFollowRequests);
   router.post("/api/v1/follow-requests/:requestId/accept", controller.acceptFollowRequest);
   router.post("/api/v1/follow-requests/:requestId/reject", controller.rejectFollowRequest);
