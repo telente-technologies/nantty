@@ -1,12 +1,12 @@
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .muted {
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .primaryCell {
@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: var(--space-2) 10px;
   border-bottom: 1px solid var(--divider-soft);
 }
 
@@ -60,14 +60,14 @@
 .cardGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   background: var(--surface-card);
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-large);
@@ -77,7 +77,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .cardTitle {
@@ -88,14 +88,14 @@
 .itemList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .itemRow {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .itemName {
@@ -106,7 +106,7 @@
 .strike {
   color: var(--ink-faint);
   text-decoration: line-through;
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .progressTrack {
@@ -139,7 +139,7 @@
 .priceLine {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--space-2);
   font-variant-numeric: tabular-nums;
 }
 
@@ -150,14 +150,14 @@
 .editorItemRow {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 0.8fr) auto;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: start;
 }
 
 .twoColumns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--space-3);
 }
 
 .featuredRow {
@@ -165,7 +165,7 @@
   grid-template-columns: auto auto minmax(0, 1fr) auto auto;
   gap: 10px;
   align-items: center;
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border-bottom: 1px solid var(--divider-soft);
 }
 
