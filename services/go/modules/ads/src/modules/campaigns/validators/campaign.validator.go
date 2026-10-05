@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	audienceservices "zudomart/modules/ads/src/modules/audiences/services"
 	"zudomart/modules/ads/src/modules/campaigns/dtos"
 	"zudomart/modules/ads/src/services"
 	"zudomart/modules/ads/src/types"
@@ -14,14 +15,15 @@ import (
 )
 
 var (
-	objectives   = []string{"awareness", "traffic", "engagement", "messages", "sales", "followers", "store_promotion"}
-	budgetTypes  = []string{"daily", "lifetime"}
-	bidTypes     = []string{"auto", "max_cpc", "max_cpm", "target_cost"}
-	callsToAct   = []string{"shop_now", "learn_more", "visit_store", "send_message", "follow", "watch_more", "order_now", "sign_up", "install", "download", "book_now", "contact_us"}
-	formats      = []string{"feed_post", "clip", "product", "store", "story", "live"}
-	sourceTypes  = []string{"post", "clip", "product", "store", "live", "upload"}
-	destinations = []string{"post", "profile", "store", "product", "messages", "url", "app_store"}
-	genders      = []string{"", "all", "female", "male"}
+	objectives    = []string{"awareness", "traffic", "engagement", "messages", "sales", "followers", "store_promotion"}
+	budgetTypes   = []string{"daily", "lifetime"}
+	bidTypes      = []string{"auto", "max_cpc", "max_cpm", "target_cost"}
+	callsToAct    = []string{"shop_now", "learn_more", "visit_store", "send_message", "follow", "watch_more", "order_now", "sign_up", "install", "download", "book_now", "contact_us"}
+	formats       = []string{"feed_post", "clip", "product", "store", "story", "live"}
+	sourceTypes   = []string{"post", "clip", "product", "store", "live", "upload"}
+	destinations  = []string{"post", "profile", "store", "product", "messages", "url", "app_store"}
+	genders       = []string{"", "all", "female", "male"}
+	locationTypes = []string{"country", "state", "city"}
 )
 
 type PricingFloors = regionpricing.AdRegionPricing
@@ -175,8 +177,17 @@ func validateAudience(audience types.AudienceSpec, issues *Issues, path string) 
 	if !slices.Contains(genders, audience.Gender) {
 		issues.Add(path+".gender", "Choose all, female or male.")
 	}
-	if len(audience.CustomAudienceIds)+len(audience.ExcludedCustomAudienceIds) > 0 {
-		issues.Add(path+".customAudienceIds", "Custom audiences are not available yet.")
+	for _, location := range slices.Concat(audience.Locations, audience.ExcludedLocations) {
+		if !slices.Contains(locationTypes, location.Type) || location.Code == "" || len(location.CountryCode) != 2 {
+			issues.Add(path+".locations", "Choose locations from the list.")
+			break
+		}
+	}
+	for _, behaviourId := range audience.BehaviourIds {
+		if !audienceservices.IsKnownBehaviour(behaviourId) {
+			issues.Add(path+".behaviourIds", "Choose behaviours from the list.")
+			break
+		}
 	}
 }
 

@@ -63,6 +63,10 @@ func PresentAdSet(group *ent.AdGroup, currency string, adCount int, delivery dto
 	if group.ConversionEventID != "" {
 		presented.ConversionEventId = &group.ConversionEventID
 	}
+	if group.ExperimentID != nil {
+		experimentId := group.ExperimentID.String()
+		presented.ExperimentId = &experimentId
+	}
 	if presented.Placements == nil {
 		presented.Placements = []string{}
 	}

@@ -122,25 +122,25 @@ type CampaignDraftResult struct {
 }
 
 type CampaignPatch struct {
-	Name        *string         `json:"name"`
-	BudgetLevel *string         `json:"budgetLevel"`
-	Budget      *types.Budget   `json:"budget"`
-	SpendCap    *types.Money    `json:"spendCap"`
-	Schedule    *types.Schedule `json:"schedule"`
-	Status      *string         `json:"status"`
-	Objective   *string         `json:"objective"`
+	Name        *string                     `json:"name"`
+	BudgetLevel *string                     `json:"budgetLevel"`
+	Budget      *types.Budget               `json:"budget"`
+	SpendCap    types.Nullable[types.Money] `json:"spendCap,omitzero"`
+	Schedule    *types.Schedule             `json:"schedule"`
+	Status      *string                     `json:"status"`
+	Objective   *string                     `json:"objective"`
 }
 
 type AdSetPatch struct {
-	Name          *string             `json:"name"`
-	Audience      *types.AudienceSpec `json:"audience"`
-	PlacementMode *string             `json:"placementMode"`
-	Placements    *[]string           `json:"placements"`
-	Schedule      *types.Schedule     `json:"schedule"`
-	Budget        *types.Budget       `json:"budget"`
-	BidStrategy   *types.BidStrategy  `json:"bidStrategy"`
-	FrequencyCap  *types.FrequencyCap `json:"frequencyCap"`
-	Status        *string             `json:"status"`
+	Name          *string                            `json:"name"`
+	Audience      *types.AudienceSpec                `json:"audience"`
+	PlacementMode *string                            `json:"placementMode"`
+	Placements    *[]string                          `json:"placements"`
+	Schedule      *types.Schedule                    `json:"schedule"`
+	Budget        *types.Budget                      `json:"budget"`
+	BidStrategy   *types.BidStrategy                 `json:"bidStrategy"`
+	FrequencyCap  types.Nullable[types.FrequencyCap] `json:"frequencyCap,omitzero"`
+	Status        *string                            `json:"status"`
 }
 
 type AdPatch struct {
