@@ -1,5 +1,6 @@
-import { StyleSheet, Switch, View } from "react-native";
+import { Pressable, StyleSheet, Switch, View } from "react-native";
 
+import { Minus16Icon, Plus16Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Chip } from "@/components/ui/chip";
 import { TextField } from "@/components/ui/input";
@@ -82,8 +83,12 @@ export function LiveMonetizationSheet({ visible, onClose, draft, onChangeDraft }
             </View>
             <View style={styles.stepper}>
               <Text size={14} weight={500} lineHeight={16.8} style={styles.flex}>Max interruptions: {draft.maxInterruptions}</Text>
-              <Chip kind="filter" label="-" onPress={() => changeMaxInterruptions(-1)} />
-              <Chip kind="filter" label="+" onPress={() => changeMaxInterruptions(1)} />
+              <Pressable accessibilityRole="button" accessibilityLabel="Fewer interruptions" hitSlop={8} onPress={() => changeMaxInterruptions(-1)} style={styles.stepButton}>
+                <Minus16Icon color={colors.text} />
+              </Pressable>
+              <Pressable accessibilityRole="button" accessibilityLabel="More interruptions" hitSlop={8} onPress={() => changeMaxInterruptions(1)} style={styles.stepButton}>
+                <Plus16Icon color={colors.text} />
+              </Pressable>
             </View>
             <Text size={14} weight={500} lineHeight={16.8}>Minimum interval</Text>
             <View style={styles.chips}>
@@ -114,4 +119,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   terms: { gap: 8, padding: 14, borderRadius: 14, backgroundColor: colors.background },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   stepper: { flexDirection: "row", alignItems: "center", gap: 8 },
+  stepButton: { width: 32, height: 25, borderRadius: 4, alignItems: "center", justifyContent: "center", backgroundColor: colors.surface },
 }));

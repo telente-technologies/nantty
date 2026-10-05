@@ -28,7 +28,7 @@ const TIPS: readonly { readonly title: string; readonly hint: string; readonly g
   { title: "Pause or play", hint: "Tap once", glyph: <PauseFill24Icon color={INK_ON_SCRIM} /> },
   { title: "Like", hint: "Double-tap", glyph: <Heart24Icon color={INK_ON_SCRIM} /> },
   { title: "Play at 2×", hint: "Press and hold", glyph: <Speedometer24Icon color={INK_ON_SCRIM} /> },
-  { title: "More options", hint: "Tap ⋮ beside the clip", glyph: <DotsThreeVertical24Icon color={INK_ON_SCRIM} /> },
+  { title: "More options", hint: "Tap the three-dot button beside the clip", glyph: <DotsThreeVertical24Icon color={INK_ON_SCRIM} /> },
 ];
 
 function AnimatedSwipeHand() {
