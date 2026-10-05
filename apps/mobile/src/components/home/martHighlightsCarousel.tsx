@@ -24,14 +24,16 @@ export interface MartHighlightsCarouselProps {
 const captionFor = (highlight: MartHighlight) =>
   highlight.sponsored ? [highlight.sponsored.label, highlight.subtitle].filter(Boolean).join(" · ") : highlight.ranking.reason.label;
 
+const isForeground = (state: string | null | undefined) => state !== "background" && state !== "inactive";
+
 function useForegroundAndScreenReader() {
-  const [foreground, setForeground] = useState(AppState.currentState === "active");
+  const [foreground, setForeground] = useState(isForeground(AppState.currentState));
   const [screenReader, setScreenReader] = useState(false);
   useEffect(() => {
     let mounted = true;
     AccessibilityInfo.isScreenReaderEnabled().then((value) => mounted && setScreenReader(value)).catch(() => undefined);
     const readerSubscription = AccessibilityInfo.addEventListener("screenReaderChanged", setScreenReader);
-    const appSubscription = AppState.addEventListener("change", (state) => setForeground(state === "active"));
+    const appSubscription = AppState.addEventListener("change", (state) => setForeground(isForeground(state)));
     return () => {
       mounted = false;
       readerSubscription.remove();
