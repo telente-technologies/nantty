@@ -29,7 +29,7 @@
 }
 
 .subtitle {
-  margin-top: 4px;
+  margin-top: var(--space-1);
   font-size: var(--text-sm);
   color: var(--ink-muted);
 }
@@ -50,7 +50,7 @@
 }
 
 .paymentBody {
-  margin-top: 4px;
+  margin-top: var(--space-1);
   font-size: var(--text-sm);
   color: var(--color-brand);
 }
@@ -66,7 +66,7 @@
   align-items: center;
   justify-content: center;
   min-height: 42px;
-  padding-inline: 20px;
+  padding-inline: var(--space-5);
   border-radius: var(--radius-pill);
   background: var(--color-brand-solid);
   color: var(--color-on-brand);

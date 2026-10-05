@@ -3,7 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
-import { RetryButton } from "@/components/ui/controls";
+import { SignInRequiredState } from "@/components/auth/signInRequiredState";
+import { RetryButton, InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { LiveIcon } from "@/components/ui/icons";
 import { Avatar, MediaImage } from "@/components/ui/media";
@@ -14,14 +15,14 @@ import styles from "./page.module.css";
 
 export default function LivePage() {
   const { viewer } = useSession();
-  const livesQuery = useQuery({ queryKey: ["lives", "suggested"], queryFn: discoveryService.fetchSuggestedLives, retry: false, refetchInterval: 30_000 });
+  const livesQuery = useQuery({ queryKey: ["lives", "suggested"], queryFn: discoveryService.fetchSuggestedLives, retry: false, refetchInterval: 30_000, enabled: viewer !== null });
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>Live now</h1>
-          <p className={styles.subtitle}>Creators and sellers streaming right now. Watch, chat and send gifts in the Zudomart app.</p>
+          <p className={styles.subtitle}>Creators and sellers streaming right now. Watch, chat and send gifts.</p>
         </div>
         {viewer?.isCreator ? (
           <span className={styles.goLiveHint}>
@@ -34,16 +35,18 @@ export default function LivePage() {
         ) : null}
       </header>
 
-      {livesQuery.isLoading ? (
+      {viewer === null ? (
+        <SignInRequiredState title="Sign in to watch live" description="Sign in or create a free account to see who is live and join the chat." />
+      ) : livesQuery.isLoading ? (
         <div className={styles.grid}>
           {Array.from({ length: 6 }, (_, index) => (
             <Skeleton key={index} height="auto" className={styles.cardSkeleton} />
           ))}
         </div>
       ) : livesQuery.isError ? (
-        <ErrorState description="We couldn't load live streams." action={<RetryButton onRetry={() => livesQuery.refetch()} />} />
+        <ErrorState error={livesQuery.error} description="We couldn't load live streams." action={<RetryButton onRetry={() => livesQuery.refetch()} />} />
       ) : (livesQuery.data ?? []).length === 0 ? (
-        <EmptyState icon={<LiveIcon size={28} />} title="Nobody is live right now" description="Follow creators to hear when they go live." />
+        <EmptyState icon={<LiveIcon size={28} />} title="Nobody is live right now" description="Follow creators to hear when they go live." action={<InlineLink href="/clips">Watch clips instead</InlineLink>} />
       ) : (
         <ul className={styles.grid}>
           {livesQuery.data?.map((live) => (

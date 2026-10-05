@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 
-import { Badge, ErrorState, Spinner } from "@/components/ui/feedback";
+import { Badge, ErrorState } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
 import { Button } from "@/components/ui/button";
 import { MediaImage } from "@/components/ui/media";
@@ -15,6 +15,7 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { OrderStatus } from "@/types";
 
 import styles from "./page.module.css";
+import { DetailSkeleton } from "@/components/ui/pageSkeletons";
 
 interface PendingPayment {
   readonly orderId: string;
@@ -88,7 +89,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
     },
   });
 
-  if (orderQuery.isLoading) return <Spinner label="Loading order" />;
+  if (orderQuery.isLoading) return <DetailSkeleton label="Loading order" blocks={3} />;
   if (orderQuery.isError || !orderQuery.data) {
     return <ErrorState title="Order not found" description="This order may belong to another account." action={<RetryButton onRetry={() => orderQuery.refetch()} />} />;
   }
