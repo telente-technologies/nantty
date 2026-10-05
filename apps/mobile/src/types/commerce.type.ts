@@ -21,18 +21,49 @@ export interface SearchResults {
   readonly brands?: readonly import("./brand.type").BrandSummary[];
 }
 
-export interface ProductReview {
+export interface ReviewAuthor {
   readonly id: ID;
-  readonly author: UserSummary;
-  readonly rating: number;
-  readonly text: string;
+  readonly name: string;
+  readonly username: string;
+  readonly avatarUrl?: string | null;
+}
+
+export interface ReviewReply {
+  readonly body: string;
+  readonly authorName: string;
   readonly createdAt: ISODate;
 }
 
-export interface ProductReviewSummary {
+export interface ProductReview {
+  readonly id: ID;
+  readonly author: ReviewAuthor;
+  readonly rating: number;
+  readonly text: string;
+  readonly title?: string | null;
+  readonly isVerifiedPurchase: boolean;
+  readonly reply?: ReviewReply | null;
+  readonly createdAt: ISODate;
+}
+
+export interface ProductReviewPage {
   readonly average: number;
   readonly count: number;
   readonly reviews: readonly ProductReview[];
+  readonly nextCursor: string | null;
+}
+
+export type RatingStar = "1" | "2" | "3" | "4" | "5";
+
+export interface ProductRatingSummary {
+  readonly average: number;
+  readonly count: number;
+  readonly distribution: Readonly<Record<RatingStar, number>>;
+}
+
+export interface SubmitReviewInput {
+  readonly rating: number;
+  readonly text: string;
+  readonly title?: string | null;
 }
 
 export interface StoreDetail extends StoreSummary {
