@@ -138,6 +138,58 @@ func (_u *StaffSessionUpdate) ClearRevokedAt() *StaffSessionUpdate {
 	return _u
 }
 
+// SetWebauthnSession sets the "webauthn_session" field.
+func (_u *StaffSessionUpdate) SetWebauthnSession(v []byte) *StaffSessionUpdate {
+	_u.mutation.SetWebauthnSession(v)
+	return _u
+}
+
+// ClearWebauthnSession clears the value of the "webauthn_session" field.
+func (_u *StaffSessionUpdate) ClearWebauthnSession() *StaffSessionUpdate {
+	_u.mutation.ClearWebauthnSession()
+	return _u
+}
+
+// SetWebauthnCeremony sets the "webauthn_ceremony" field.
+func (_u *StaffSessionUpdate) SetWebauthnCeremony(v staffsession.WebauthnCeremony) *StaffSessionUpdate {
+	_u.mutation.SetWebauthnCeremony(v)
+	return _u
+}
+
+// SetNillableWebauthnCeremony sets the "webauthn_ceremony" field if the given value is not nil.
+func (_u *StaffSessionUpdate) SetNillableWebauthnCeremony(v *staffsession.WebauthnCeremony) *StaffSessionUpdate {
+	if v != nil {
+		_u.SetWebauthnCeremony(*v)
+	}
+	return _u
+}
+
+// ClearWebauthnCeremony clears the value of the "webauthn_ceremony" field.
+func (_u *StaffSessionUpdate) ClearWebauthnCeremony() *StaffSessionUpdate {
+	_u.mutation.ClearWebauthnCeremony()
+	return _u
+}
+
+// SetWebauthnExpiresAt sets the "webauthn_expires_at" field.
+func (_u *StaffSessionUpdate) SetWebauthnExpiresAt(v time.Time) *StaffSessionUpdate {
+	_u.mutation.SetWebauthnExpiresAt(v)
+	return _u
+}
+
+// SetNillableWebauthnExpiresAt sets the "webauthn_expires_at" field if the given value is not nil.
+func (_u *StaffSessionUpdate) SetNillableWebauthnExpiresAt(v *time.Time) *StaffSessionUpdate {
+	if v != nil {
+		_u.SetWebauthnExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearWebauthnExpiresAt clears the value of the "webauthn_expires_at" field.
+func (_u *StaffSessionUpdate) ClearWebauthnExpiresAt() *StaffSessionUpdate {
+	_u.mutation.ClearWebauthnExpiresAt()
+	return _u
+}
+
 // Mutation returns the StaffSessionMutation object of the builder.
 func (_u *StaffSessionUpdate) Mutation() *StaffSessionMutation {
 	return _u.mutation
@@ -187,6 +239,11 @@ func (_u *StaffSessionUpdate) check() error {
 			return &ValidationError{Name: "refresh_hash", err: fmt.Errorf(`ent: validator failed for field "StaffSession.refresh_hash": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.WebauthnCeremony(); ok {
+		if err := staffsession.WebauthnCeremonyValidator(v); err != nil {
+			return &ValidationError{Name: "webauthn_ceremony", err: fmt.Errorf(`ent: validator failed for field "StaffSession.webauthn_ceremony": %w`, err)}
+		}
+	}
 	if _u.mutation.StaffCleared() && len(_u.mutation.StaffIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "StaffSession.staff"`)
 	}
@@ -231,6 +288,24 @@ func (_u *StaffSessionUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if _u.mutation.RevokedAtCleared() {
 		_spec.ClearField(staffsession.FieldRevokedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.WebauthnSession(); ok {
+		_spec.SetField(staffsession.FieldWebauthnSession, field.TypeBytes, value)
+	}
+	if _u.mutation.WebauthnSessionCleared() {
+		_spec.ClearField(staffsession.FieldWebauthnSession, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.WebauthnCeremony(); ok {
+		_spec.SetField(staffsession.FieldWebauthnCeremony, field.TypeEnum, value)
+	}
+	if _u.mutation.WebauthnCeremonyCleared() {
+		_spec.ClearField(staffsession.FieldWebauthnCeremony, field.TypeEnum)
+	}
+	if value, ok := _u.mutation.WebauthnExpiresAt(); ok {
+		_spec.SetField(staffsession.FieldWebauthnExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.WebauthnExpiresAtCleared() {
+		_spec.ClearField(staffsession.FieldWebauthnExpiresAt, field.TypeTime)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -362,6 +437,58 @@ func (_u *StaffSessionUpdateOne) ClearRevokedAt() *StaffSessionUpdateOne {
 	return _u
 }
 
+// SetWebauthnSession sets the "webauthn_session" field.
+func (_u *StaffSessionUpdateOne) SetWebauthnSession(v []byte) *StaffSessionUpdateOne {
+	_u.mutation.SetWebauthnSession(v)
+	return _u
+}
+
+// ClearWebauthnSession clears the value of the "webauthn_session" field.
+func (_u *StaffSessionUpdateOne) ClearWebauthnSession() *StaffSessionUpdateOne {
+	_u.mutation.ClearWebauthnSession()
+	return _u
+}
+
+// SetWebauthnCeremony sets the "webauthn_ceremony" field.
+func (_u *StaffSessionUpdateOne) SetWebauthnCeremony(v staffsession.WebauthnCeremony) *StaffSessionUpdateOne {
+	_u.mutation.SetWebauthnCeremony(v)
+	return _u
+}
+
+// SetNillableWebauthnCeremony sets the "webauthn_ceremony" field if the given value is not nil.
+func (_u *StaffSessionUpdateOne) SetNillableWebauthnCeremony(v *staffsession.WebauthnCeremony) *StaffSessionUpdateOne {
+	if v != nil {
+		_u.SetWebauthnCeremony(*v)
+	}
+	return _u
+}
+
+// ClearWebauthnCeremony clears the value of the "webauthn_ceremony" field.
+func (_u *StaffSessionUpdateOne) ClearWebauthnCeremony() *StaffSessionUpdateOne {
+	_u.mutation.ClearWebauthnCeremony()
+	return _u
+}
+
+// SetWebauthnExpiresAt sets the "webauthn_expires_at" field.
+func (_u *StaffSessionUpdateOne) SetWebauthnExpiresAt(v time.Time) *StaffSessionUpdateOne {
+	_u.mutation.SetWebauthnExpiresAt(v)
+	return _u
+}
+
+// SetNillableWebauthnExpiresAt sets the "webauthn_expires_at" field if the given value is not nil.
+func (_u *StaffSessionUpdateOne) SetNillableWebauthnExpiresAt(v *time.Time) *StaffSessionUpdateOne {
+	if v != nil {
+		_u.SetWebauthnExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearWebauthnExpiresAt clears the value of the "webauthn_expires_at" field.
+func (_u *StaffSessionUpdateOne) ClearWebauthnExpiresAt() *StaffSessionUpdateOne {
+	_u.mutation.ClearWebauthnExpiresAt()
+	return _u
+}
+
 // Mutation returns the StaffSessionMutation object of the builder.
 func (_u *StaffSessionUpdateOne) Mutation() *StaffSessionMutation {
 	return _u.mutation
@@ -422,6 +549,11 @@ func (_u *StaffSessionUpdateOne) check() error {
 	if v, ok := _u.mutation.RefreshHash(); ok {
 		if err := staffsession.RefreshHashValidator(v); err != nil {
 			return &ValidationError{Name: "refresh_hash", err: fmt.Errorf(`ent: validator failed for field "StaffSession.refresh_hash": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WebauthnCeremony(); ok {
+		if err := staffsession.WebauthnCeremonyValidator(v); err != nil {
+			return &ValidationError{Name: "webauthn_ceremony", err: fmt.Errorf(`ent: validator failed for field "StaffSession.webauthn_ceremony": %w`, err)}
 		}
 	}
 	if _u.mutation.StaffCleared() && len(_u.mutation.StaffIDs()) > 0 {
@@ -485,6 +617,24 @@ func (_u *StaffSessionUpdateOne) sqlSave(ctx context.Context) (_node *StaffSessi
 	}
 	if _u.mutation.RevokedAtCleared() {
 		_spec.ClearField(staffsession.FieldRevokedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.WebauthnSession(); ok {
+		_spec.SetField(staffsession.FieldWebauthnSession, field.TypeBytes, value)
+	}
+	if _u.mutation.WebauthnSessionCleared() {
+		_spec.ClearField(staffsession.FieldWebauthnSession, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.WebauthnCeremony(); ok {
+		_spec.SetField(staffsession.FieldWebauthnCeremony, field.TypeEnum, value)
+	}
+	if _u.mutation.WebauthnCeremonyCleared() {
+		_spec.ClearField(staffsession.FieldWebauthnCeremony, field.TypeEnum)
+	}
+	if value, ok := _u.mutation.WebauthnExpiresAt(); ok {
+		_spec.SetField(staffsession.FieldWebauthnExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.WebauthnExpiresAtCleared() {
+		_spec.ClearField(staffsession.FieldWebauthnExpiresAt, field.TypeTime)
 	}
 	_node = &StaffSession{config: _u.config}
 	_spec.Assign = _node.assignValues
