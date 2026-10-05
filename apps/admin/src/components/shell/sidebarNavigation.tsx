@@ -23,7 +23,7 @@ export function SidebarNavigation({ isOpenOnSmallScreens, onNavigate }: { readon
     <aside className={`${styles.sidebar} ${isOpenOnSmallScreens ? styles.open : ""}`} aria-label="Admin sections">
       <div className={styles.brand}>
         <Link href="/" aria-label="Zudomart Admin home">
-          <ZudomartWordmark productLabel="Admin" tone="onDark" />
+          <ZudomartWordmark productLabel="Admin" tone="onDark" withSymbol />
         </Link>
         <EnvironmentBadge environment={environment} />
       </div>

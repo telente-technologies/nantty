@@ -1,13 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { ThemeSwitcher } from "@zudomart/web-kit";
+import { ThemeSwitcher, ZudomartLogoMark } from "@zudomart/web-kit";
 
 import { useAdminPermissions, useAdminSession } from "@/components/session/adminSessionProvider";
 import { Button } from "@/components/ui/button";
 import { KeyboardKey } from "@/components/ui/surfaces";
+import { useToast } from "@/components/ui/toastProvider";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
 import { readErrorMessageForDisplay, sendRequestToAdminConsoleServer } from "@/services/adminApiClient.service";
 
@@ -20,6 +22,7 @@ export function ConsoleTopBar({ onOpenNavigation }: { readonly onOpenNavigation:
   const { can } = useAdminPermissions();
   const [searchText, setSearchText] = useState("");
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const { showToast } = useToast();
   const sessionEndsAt = new Date((sessionStartedAtEpochSeconds + absoluteTimeoutSeconds) * 1000);
 
   function searchUsers(event: FormEvent) {
@@ -34,7 +37,7 @@ export function ConsoleTopBar({ onOpenNavigation }: { readonly onOpenNavigation:
       const result = await sendRequestToAdminConsoleServer<{ redirectTo: string }>("/bff/auth/logout", { method: "POST", promptForStepUp: false });
       window.location.assign(result.redirectTo);
     } catch (error) {
-      window.alert(readErrorMessageForDisplay(error));
+      showToast(`Sign-out failed. ${readErrorMessageForDisplay(error)}`, "error");
       setIsSigningOut(false);
     }
   }
@@ -44,6 +47,9 @@ export function ConsoleTopBar({ onOpenNavigation }: { readonly onOpenNavigation:
       <button type="button" className={styles.menuButton} onClick={onOpenNavigation} aria-label="Open navigation">
         <ZudoIcon name="squaresFour24" size={18} />
       </button>
+      <Link href="/" className={styles.compactBrand} aria-label="Zudomart Admin start page">
+        <ZudomartLogoMark size={28} />
+      </Link>
       {can("users:read") ? (
         <form className={styles.search} role="search" onSubmit={searchUsers}>
           <ZudoIcon name="magnifyingGlass16" size={14} className={styles.searchIcon} />

@@ -4,9 +4,9 @@
   z-index: 20;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   height: var(--topbar-height);
-  padding: 0 24px;
+  padding: 0 var(--space-6);
   background: var(--topbar-glass);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--divider);
@@ -25,12 +25,12 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex: 1;
   min-width: 0;
   max-width: 440px;
   height: 32px;
-  padding: 0 8px 0 30px;
+  padding: 0 var(--space-2) 0 30px;
   border: 1px solid var(--color-border-control);
   border-radius: var(--radius-small);
   background: var(--surface-card);
@@ -71,7 +71,7 @@
 }
 
 .mockNotice {
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border: 1px dashed var(--caution);
   border-radius: var(--radius-pill);
   color: var(--caution-ink);
@@ -82,11 +82,17 @@
 
 .session {
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
+}
+
+.compactBrand {
+  display: none;
+  flex: none;
 }
 
 @media (max-width: 900px) {
-  .menuButton {
+  .menuButton,
+  .compactBrand {
     display: inline-flex;
   }
 
@@ -95,13 +101,13 @@
   }
 
   .topBar {
-    padding: 0 12px;
+    padding: 0 var(--space-3);
   }
 }
 
 @media (max-width: 640px) {
   .topBar {
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   .right {
