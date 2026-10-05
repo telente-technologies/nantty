@@ -5,6 +5,8 @@ import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "rea
 import { ArrowUpRight24Icon, CaretRight24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 export function SettingsGroup({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const styles = useStyles();
@@ -44,14 +46,14 @@ export function SettingsRow({ label, icon, trailing = "chevron", labelColor, onP
     >
       <View style={styles.leading}>
         {icon}
-        <Text size={14} lineHeight={16.8} color={labelColor ?? colors.text}>
+        <Text size={typeScale.md} lineHeight={16.8} color={labelColor ?? colors.text}>
           {label}
         </Text>
       </View>
       {trailing === "chevron" ? <CaretRight24Icon /> : null}
       {trailing === "external" ? <ArrowUpRight24Icon /> : null}
       {trailingValue ? (
-        <Text size={13} weight={trailingValue.weight ?? 500} lineHeight={16.9} color={trailingValue.color ?? colors.primary} numberOfLines={1}>
+        <Text size={typeScale.sm} weight={trailingValue.weight ?? 500} lineHeight={16.9} color={trailingValue.color ?? colors.primary} numberOfLines={1}>
           {trailingValue.text}
         </Text>
       ) : null}
@@ -64,7 +66,7 @@ export function SettingsCenteredAction({ label, color, onPress }: { label: strin
   const styles = useStyles();
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.group, styles.centered, pressed && styles.pressed]}>
-      <Text size={13} weight={500} lineHeight={16.9} color={color ?? colors.error}>
+      <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={color ?? colors.error}>
         {label}
       </Text>
     </Pressable>
@@ -74,9 +76,9 @@ export function SettingsCenteredAction({ label, color, onPress }: { label: strin
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   group: { backgroundColor: colors.surface, borderRadius: 12, overflow: "hidden" },
   row: { backgroundColor: colors.surface, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
-  iconRow: { height: 48, paddingHorizontal: 12 },
-  plainRow: { height: 44, paddingHorizontal: 12 },
-  leading: { flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 1 },
+  iconRow: { height: 48, paddingHorizontal: spacing[3] },
+  plainRow: { height: 44, paddingHorizontal: spacing[3] },
+  leading: { flexDirection: "row", alignItems: "center", gap: spacing[3], flexShrink: 1 },
   centered: { height: 44, alignItems: "center", justifyContent: "center" },
   pressed: { opacity: 0.7 },
 }));

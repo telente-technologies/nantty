@@ -7,6 +7,8 @@ import type { Order } from "@/types";
 
 import { OrderStatusPill } from "./orderStatusPill";
 import { splitMoneyIntoSymbolAndAmount } from "./splitMoney.util";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 
 export function StoreOrderRow({ order, onPress }: { order: Order; onPress: () => void }) {
@@ -26,18 +28,18 @@ export function StoreOrderRow({ order, onPress }: { order: Order; onPress: () =>
           {firstItem?.product.imageUrl ? <Image source={{ uri: firstItem.product.imageUrl }} style={StyleSheet.absoluteFill} /> : null}
         </View>
         <View style={styles.text}>
-          <Text size={14} weight={500} lineHeight={16.8} numberOfLines={1}>
+          <Text size={typeScale.md} weight={500} lineHeight={16.8} numberOfLines={1}>
             {firstItem?.product.name ?? `Order #${order.reference}`}
           </Text>
-          <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted} numberOfLines={1}>
+          <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={colors.textMuted} numberOfLines={1}>
             Buyer: {order.buyer.name}
           </Text>
         </View>
       </View>
       <View style={styles.trailing}>
         <OrderStatusPill status={order.status} />
-        <Text size={16} weight={600} lineHeight={19.2}>
-          <Text size={12} weight={600} lineHeight={19.2}>{total.symbol}</Text>
+        <Text size={typeScale.base} weight={600} lineHeight={19.2}>
+          <Text size={typeScale.xs} weight={600} lineHeight={19.2}>{total.symbol}</Text>
           {total.amount}
         </Text>
       </View>
@@ -46,9 +48,9 @@ export function StoreOrderRow({ order, onPress }: { order: Order; onPress: () =>
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  row: { height: 52, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 24 },
-  product: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
+  row: { height: 52, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing[6] },
+  product: { flex: 1, flexDirection: "row", alignItems: "center", gap: spacing[3] },
   thumbnail: { width: 52, height: 52, borderRadius: 8, backgroundColor: colors.placeholder, overflow: "hidden" },
-  text: { flex: 1, gap: 8 },
-  trailing: { alignItems: "flex-end", gap: 5 },
+  text: { flex: 1, gap: spacing[2] },
+  trailing: { alignItems: "flex-end", gap: spacing[1] },
 }));

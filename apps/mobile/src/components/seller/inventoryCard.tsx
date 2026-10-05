@@ -6,6 +6,8 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { ProductSummary } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 const LOW_STOCK_THRESHOLD = 5;
 
@@ -20,16 +22,16 @@ export function InventoryCard({ product, onPress }: { product: ProductSummary; o
       </View>
       <View style={styles.info}>
         <View style={styles.nameRow}>
-          <Text size={14} lineHeight={16.8} numberOfLines={1} style={styles.name}>
+          <Text size={typeScale.md} lineHeight={16.8} numberOfLines={1} style={styles.name}>
             {product.name}
           </Text>
-          <Text size={14} weight={500} lineHeight={16.8}>
+          <Text size={typeScale.md} weight={500} lineHeight={16.8}>
             {formatMoneyForDisplay(product.price)}
           </Text>
         </View>
         <View style={styles.stock}>
           <BoxArrowDown24Icon />
-          <Text size={14} weight={500} lineHeight={16.8} color={stock <= LOW_STOCK_THRESHOLD ? colors.error : colors.success}>
+          <Text size={typeScale.md} weight={500} lineHeight={16.8} color={stock <= LOW_STOCK_THRESHOLD ? colors.error : colors.success}>
             {stock} in stock
           </Text>
         </View>
@@ -39,10 +41,10 @@ export function InventoryCard({ product, onPress }: { product: ProductSummary; o
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  card: { width: 175, gap: 8 },
+  card: { width: 175, gap: spacing[2] },
   image: { height: 170, backgroundColor: colors.placeholder, overflow: "hidden" },
-  info: { gap: 8 },
+  info: { gap: spacing[2] },
   nameRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 2 },
   name: { flexShrink: 1 },
-  stock: { flexDirection: "row", alignItems: "center", gap: 8 },
+  stock: { flexDirection: "row", alignItems: "center", gap: spacing[2] },
 }));
