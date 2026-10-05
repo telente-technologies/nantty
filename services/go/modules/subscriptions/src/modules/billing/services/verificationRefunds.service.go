@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -37,10 +38,6 @@ type VerificationRefundRequest struct {
 	Reason         string `json:"reason"`
 }
 
-// DecideVerificationRefundPath picks how a rejected verification is refunded. A trial that has not converted was
-// never charged (its card check was already refunded), Google Play can be revoked with a full refund, and Apple
-// gives developers no refund API, so those purchases are flagged for a manual store refund. A seller plan or Premium
-// keeps running, so only the checkmark's share is refunded and the plan is never cancelled.
 func DecideVerificationRefundPath(row *ent.Subscription, now time.Time) VerificationRefundPath {
 	keeps := KeepsPlanOnRejection(row.PlanCode)
 	switch {
@@ -101,7 +98,11 @@ func (billing Billing) HandleVerificationRefundRequested(ctx context.Context, re
 		return err
 	}
 	return databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-		if err := billing.Container.Client(transaction).Subscription.UpdateOneID(row.ID).SetLastError(verificationRefundDone).Exec(ctx); err != nil {
+		locked, err := billing.Container.Client(transaction).Subscription.Query().Where(subscription.ID(row.ID)).ForUpdate().Only(ctx)
+		if err != nil || locked.LastError == verificationRefundDone {
+			return err
+		}
+		if err := locked.Update().SetLastError(verificationRefundDone).Exec(ctx); err != nil {
 			return err
 		}
 		data := map[string]any{
@@ -134,7 +135,12 @@ func (billing Billing) executeVerificationRefund(ctx context.Context, row *ent.S
 		}
 		return "succeeded", nil
 	case RefundPathCard:
-		if _, err := payments.RefundBillingSubscriptionCharge(ctx, row.BillingReference, "Checkmark verification rejected: "+reason); err != nil {
+		if strings.HasPrefix(row.BillingReference, "ren-") {
+			return payments.RefundSubscriptionPayment(ctx, paymentservices.SubscriptionPaymentRefund{
+				PaymentReference: row.BillingReference, Reference: "verification-refund:" + request.CaseId, Full: true, Reason: "Checkmark verification rejected: " + reason,
+			})
+		}
+		if _, err := payments.RefundBillingSubscriptionCharge(ctx, row.BillingReference, "verification-refund:"+request.CaseId, "Checkmark verification rejected: "+reason); err != nil {
 			if paymentservices.IsDefinitiveProviderRejection(err) {
 				billing.Container.Resources.Logger.ErrorContext(ctx, "ALERT verification refund rejected by the provider; refund it by hand", "subscriptionId", row.ID.String(), "error", err.Error())
 				return "failed", nil

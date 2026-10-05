@@ -10,8 +10,6 @@ type CheckmarkEligibilityReader interface {
 	CheckmarkPurchaseAllowed(ctx context.Context, profileId string) (bool, error)
 }
 
-// CheckmarkPurchaseAllowed reads go-identity's verdict (read-only grant): "Buy now" is open when Python rated the
-// profile high-trust, a queued request has since qualified, or the identity was already verified once.
 func (directory SqlIdentityDirectory) CheckmarkPurchaseAllowed(ctx context.Context, profileId string) (bool, error) {
 	eligibility := pgx.Identifier{directory.UsersSchema, "verification_eligibilities"}.Sanitize()
 	cases := pgx.Identifier{directory.UsersSchema, "verification_cases"}.Sanitize()

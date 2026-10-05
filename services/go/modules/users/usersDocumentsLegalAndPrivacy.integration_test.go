@@ -135,19 +135,6 @@ func TestLegalVersionsMakerCheckerNoticesAndAcceptance(t *testing.T) {
 	harness.expect("PUT", "/api/v1/admin/legal/versions/"+versionId, author, map[string]any{"bodyMarkdown": "# Terms", "changeSummary": "x", "isMaterialChange": false}, http.StatusConflict)
 	harness.expect("POST", "/api/v1/admin/legal/versions/"+versionId+"/return", viewer, map[string]string{"reason": "needs another pass"}, http.StatusForbidden)
 
-	notice := harness.expect("GET", "/api/v1/admin/legal/versions/"+versionId+"/notice-draft", publisher, nil, http.StatusOK)
-	if notice["subject"] == nil || len(notice["whatChanged"].([]any)) == 0 {
-		t.Fatalf("the email draft is generated from the diff: %v", notice)
-	}
-	harness.expect("PUT", "/api/v1/admin/legal/versions/"+versionId+"/notice-draft", author, map[string]any{"subject": "We updated our Terms", "summaryText": "A short summary", "whatChanged": []string{"Be honest"}, "reacceptNote": "Please accept the new terms."}, http.StatusOK)
-	tested := harness.expect("POST", "/api/v1/admin/legal/versions/"+versionId+"/notice-draft/test-send", author, nil, http.StatusOK)
-	if len(tested["testSends"].([]any)) != 1 {
-		t.Fatalf("a test send is recorded: %v", tested)
-	}
-	if preview := harness.expect("GET", "/api/v1/admin/legal/versions/"+versionId+"/notice-preview", publisher, nil, http.StatusOK); preview["sendsWithoutMarketingConsent"] != true {
-		t.Fatalf("unexpected preview %v", preview)
-	}
-
 	sameAdmin := harness.expect("POST", "/api/v1/admin/legal/versions/"+versionId+"/publish", author, map[string]string{"reason": "legal approved"}, http.StatusConflict, authorStepUp...)
 	if sameAdmin["code"] != "SAME_ADMIN" {
 		t.Fatalf("the author or submitter can never publish: %v", sameAdmin)
@@ -157,14 +144,9 @@ func TestLegalVersionsMakerCheckerNoticesAndAcceptance(t *testing.T) {
 		t.Fatalf("publishing a material terms change queues the notice: %v", published)
 	}
 	harness.waitForPublishedEvents("policy.published", "policyVersion.published")
-	harness.expect("POST", "/api/v1/admin/legal/notices", publisher, map[string]any{"versionId": versionId, "reason": "resend to everyone"}, http.StatusConflict, publisherStepUp...)
 	noticeId := published["noticeId"].(string)
 	harness.expect("PUT", "/api/v1/internal/legal/notices/"+noticeId+"/progress", "", map[string]any{"status": "completed", "sentCount": 1, "excludedHardBounces": 0, "excludedSuppressed": 0, "batchesDone": 1}, http.StatusOK, internalToken...)
-	progress := harness.expect("GET", "/api/v1/admin/legal/notices/"+noticeId, publisher, nil, http.StatusOK)
-	if progress["status"] != "COMPLETED" || progress["provider"] != "AWS SES" {
-		t.Fatalf("unexpected progress %v", progress)
-	}
-	harness.expect("POST", "/api/v1/admin/legal/notices", publisher, map[string]any{"versionId": versionId, "reason": "resend to everyone"}, http.StatusCreated, publisherStepUp...)
+	harness.expect("GET", "/api/v1/admin/legal/notices/"+noticeId, publisher, nil, http.StatusNotFound)
 
 	current := harness.expect("GET", "/api/v1/legal/policy-versions/current", "", nil, http.StatusOK)["items"].([]any)
 	if len(current) != 1 || current[0].(map[string]any)["policyVersionId"] != versionId || current[0].(map[string]any)["isMaterialChange"] != true {

@@ -96,6 +96,15 @@ func (billing Billing) HandleStoreSubscriptionNotice(ctx context.Context, transa
 		return row.Update().SetStatus(subscription.StatusActive).SetCurrentPeriodEndsAt(*notice.ExpiresAt).Exec(ctx)
 	case string(paymentinterfaces.StoreNotificationRenewalFailed):
 		return row.Update().SetStatus(subscription.StatusPastDue).Exec(ctx)
+	case string(paymentinterfaces.StoreNotificationGrace):
+		update := row.Update().SetStatus(subscription.StatusGrace)
+		if notice.ExpiresAt != nil {
+			update.SetGraceEndsAt(*notice.ExpiresAt)
+		}
+		if row, err = update.Save(ctx); err != nil {
+			return err
+		}
+		return billing.emit(ctx, transaction, "entitlement.graceStarted", row.ProfileID, entitlementData(row, string(row.Status)))
 	case string(paymentinterfaces.StoreNotificationExpired):
 		return billing.revokeInTransaction(ctx, transaction, row, subscription.StatusDowngraded)
 	}

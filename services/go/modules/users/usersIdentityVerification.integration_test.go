@@ -59,7 +59,7 @@ func signedSmileCallback(jobId, fullName, liveness, idNumber string) map[string]
 		"Country": "NG", "IDType": "NIN_SLIP", "IDNumber": idNumber, "FullName": fullName, "ConfidenceValue": "99",
 		"Actions":       map[string]string{"Liveness_Check": liveness, "Verify_Document": "Passed", "Selfie_To_ID_Card_Compare": "Completed", "Verify_ID_Number": "Verified"},
 		"ImageLinks":    map[string]string{"selfie_image": "https://smile.test/selfie.jpg"},
-		"PartnerParams": map[string]any{"job_id": jobId, "user_id": "u", "job_type": 11},
+		"PartnerParams": map[string]any{"job_id": jobId, "job_type": 11},
 	}
 }
 

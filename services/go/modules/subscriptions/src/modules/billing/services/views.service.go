@@ -140,7 +140,7 @@ func (billing Billing) CreatorSubscriptionBands(ctx context.Context, resolution 
 		}
 		items = append(items, map[string]any{"band": band.Band, "price": money(amount, currency)})
 	}
-	return map[string]any{"region": region, "channel": resolution.Channel, "billingNote": billingNote, "creatorSharePercentOfNet": 80, "data": items}
+	return map[string]any{"region": region, "channel": resolution.Channel, "billingNote": billingNote, "creatorSharePercentOfNet": 80, "data": items, "nextCursor": nil}
 }
 
 func (billing Billing) BuildOffer(ctx context.Context, userId, profileId string) (map[string]any, error) {
