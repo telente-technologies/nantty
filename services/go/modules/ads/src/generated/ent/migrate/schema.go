@@ -234,6 +234,44 @@ var (
 			},
 		},
 	}
+	// AdAutomatedRulesColumns holds the columns for the "ad_automated_rules" table.
+	AdAutomatedRulesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 100},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "paused"}, Default: "active"},
+		{Name: "level", Type: field.TypeEnum, Enums: []string{"campaign", "ad_set", "ad"}},
+		{Name: "target_ids", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "conditions", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "action_type", Type: field.TypeEnum, Enums: []string{"pause", "notify", "increase_budget", "decrease_budget"}},
+		{Name: "action_percent", Type: field.TypeInt, Nullable: true},
+		{Name: "check_every_minutes", Type: field.TypeInt, Default: 60},
+		{Name: "last_run_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_triggered_at", Type: field.TypeTime, Nullable: true},
+		{Name: "trigger_count", Type: field.TypeInt, Default: 0},
+		{Name: "next_run_at", Type: field.TypeTime},
+		{Name: "created_by_user_id", Type: field.TypeUUID},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdAutomatedRulesTable holds the schema information for the "ad_automated_rules" table.
+	AdAutomatedRulesTable = &schema.Table{
+		Name:       "ad_automated_rules",
+		Columns:    AdAutomatedRulesColumns,
+		PrimaryKey: []*schema.Column{AdAutomatedRulesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adautomatedrule_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdAutomatedRulesColumns[2], AdAutomatedRulesColumns[1]},
+			},
+			{
+				Name:    "adautomatedrule_status_next_run_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdAutomatedRulesColumns[4], AdAutomatedRulesColumns[14]},
+			},
+		},
+	}
 	// AdBoostsColumns holds the columns for the "ad_boosts" table.
 	AdBoostsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -406,6 +444,41 @@ var (
 			},
 		},
 	}
+	// AdConversionEventsColumns holds the columns for the "ad_conversion_events" table.
+	AdConversionEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 80},
+		{Name: "event_type", Type: field.TypeEnum, Enums: []string{"purchase", "add_to_cart", "checkout_started", "message_started", "profile_follow", "store_visit"}},
+		{Name: "store_id", Type: field.TypeString, Size: 80},
+		{Name: "store_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "is_built_in", Type: field.TypeBool, Default: false},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "paused"}, Default: "active"},
+		{Name: "tracks_value", Type: field.TypeBool, Default: false},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdConversionEventsTable holds the schema information for the "ad_conversion_events" table.
+	AdConversionEventsTable = &schema.Table{
+		Name:       "ad_conversion_events",
+		Columns:    AdConversionEventsColumns,
+		PrimaryKey: []*schema.Column{AdConversionEventsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adconversionevent_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdConversionEventsColumns[2], AdConversionEventsColumns[1]},
+			},
+			{
+				Name:    "ad_conversion_events_built_in",
+				Unique:  true,
+				Columns: []*schema.Column{AdConversionEventsColumns[2], AdConversionEventsColumns[5], AdConversionEventsColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "is_built_in",
+				},
+			},
+		},
+	}
 	// AdCreatorEarningsColumns holds the columns for the "ad_creator_earnings" table.
 	AdCreatorEarningsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -478,6 +551,41 @@ var (
 				Annotation: &entsql.IndexAnnotation{
 					Where: "idempotency_key <> ''",
 				},
+			},
+		},
+	}
+	// AdExperimentsColumns holds the columns for the "ad_experiments" table.
+	AdExperimentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "campaign_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 100},
+		{Name: "variable", Type: field.TypeEnum, Enums: []string{"audience", "creative", "placement", "bid_strategy"}},
+		{Name: "metric", Type: field.TypeEnum, Enums: []string{"cost_per_result", "ctr", "roas", "conversions"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "running", "completed", "stopped"}, Default: "draft"},
+		{Name: "arms", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "start_at", Type: field.TypeTime},
+		{Name: "end_at", Type: field.TypeTime},
+		{Name: "result", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "created_by_user_id", Type: field.TypeUUID},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdExperimentsTable holds the schema information for the "ad_experiments" table.
+	AdExperimentsTable = &schema.Table{
+		Name:       "ad_experiments",
+		Columns:    AdExperimentsColumns,
+		PrimaryKey: []*schema.Column{AdExperimentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adexperiment_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdExperimentsColumns[2], AdExperimentsColumns[1]},
+			},
+			{
+				Name:    "adexperiment_status_end_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdExperimentsColumns[7], AdExperimentsColumns[10]},
 			},
 		},
 	}
@@ -557,6 +665,7 @@ var (
 		{Name: "frequency_cap_impressions", Type: field.TypeInt, Nullable: true},
 		{Name: "frequency_cap_per_days", Type: field.TypeInt, Nullable: true},
 		{Name: "conversion_event_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "experiment_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// AdGroupsTable holds the schema information for the "ad_groups" table.
@@ -579,6 +688,11 @@ var (
 				Name:    "adgroup_status_start_at",
 				Unique:  false,
 				Columns: []*schema.Column{AdGroupsColumns[5], AdGroupsColumns[9]},
+			},
+			{
+				Name:    "adgroup_experiment_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdGroupsColumns[18]},
 			},
 		},
 	}
@@ -851,6 +965,46 @@ var (
 			},
 		},
 	}
+	// AdTopUpsColumns holds the columns for the "ad_top_ups" table.
+	AdTopUpsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "money_top_up_id", Type: field.TypeString, Size: 80},
+		{Name: "reference", Type: field.TypeString, Size: 80},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "provider", Type: field.TypeString, Size: 20, Default: "paystack"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "succeeded", "failed", "abandoned"}, Default: "pending"},
+		{Name: "failure_reason", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "authorization_url", Type: field.TypeString, Size: 600, Default: ""},
+		{Name: "requested_by_user_id", Type: field.TypeUUID},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdTopUpsTable holds the schema information for the "ad_top_ups" table.
+	AdTopUpsTable = &schema.Table{
+		Name:       "ad_top_ups",
+		Columns:    AdTopUpsColumns,
+		PrimaryKey: []*schema.Column{AdTopUpsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adtopup_reference",
+				Unique:  true,
+				Columns: []*schema.Column{AdTopUpsColumns[4]},
+			},
+			{
+				Name:    "adtopup_money_top_up_id",
+				Unique:  true,
+				Columns: []*schema.Column{AdTopUpsColumns[3]},
+			},
+			{
+				Name:    "adtopup_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdTopUpsColumns[2], AdTopUpsColumns[1]},
+			},
+		},
+	}
 	// OutboxEventsColumns holds the columns for the "outbox_events" table.
 	OutboxEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -885,14 +1039,17 @@ var (
 		AdAccountMembersTable,
 		AdActivityEntriesTable,
 		AdAudienceMembersTable,
+		AdAutomatedRulesTable,
 		AdBoostsTable,
 		AdCampaignsTable,
 		AdCardStatsDailiesTable,
 		AdContentSignalsTable,
 		AdConversionsTable,
+		AdConversionEventsTable,
 		AdCreatorEarningsTable,
 		AdCreatorMonetisationHoldsTable,
 		AdCustomAudiencesTable,
+		AdExperimentsTable,
 		AdFrequencyPoliciesTable,
 		AdFundsTransactionsTable,
 		AdGroupsTable,
@@ -903,6 +1060,7 @@ var (
 		AdScheduledReportsTable,
 		AdSpendBatchesTable,
 		AdStatsDailiesTable,
+		AdTopUpsTable,
 		OutboxEventsTable,
 	}
 )

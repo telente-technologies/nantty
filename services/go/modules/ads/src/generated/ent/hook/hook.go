@@ -80,6 +80,18 @@ func (f AdAudienceMemberFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdAudienceMemberMutation", m)
 }
 
+// The AdAutomatedRuleFunc type is an adapter to allow the use of ordinary
+// function as AdAutomatedRule mutator.
+type AdAutomatedRuleFunc func(context.Context, *ent.AdAutomatedRuleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdAutomatedRuleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdAutomatedRuleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdAutomatedRuleMutation", m)
+}
+
 // The AdBoostFunc type is an adapter to allow the use of ordinary
 // function as AdBoost mutator.
 type AdBoostFunc func(context.Context, *ent.AdBoostMutation) (ent.Value, error)
@@ -140,6 +152,18 @@ func (f AdConversionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdConversionMutation", m)
 }
 
+// The AdConversionEventFunc type is an adapter to allow the use of ordinary
+// function as AdConversionEvent mutator.
+type AdConversionEventFunc func(context.Context, *ent.AdConversionEventMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdConversionEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdConversionEventMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdConversionEventMutation", m)
+}
+
 // The AdCreatorEarningFunc type is an adapter to allow the use of ordinary
 // function as AdCreatorEarning mutator.
 type AdCreatorEarningFunc func(context.Context, *ent.AdCreatorEarningMutation) (ent.Value, error)
@@ -174,6 +198,18 @@ func (f AdCustomAudienceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdCustomAudienceMutation", m)
+}
+
+// The AdExperimentFunc type is an adapter to allow the use of ordinary
+// function as AdExperiment mutator.
+type AdExperimentFunc func(context.Context, *ent.AdExperimentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdExperimentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdExperimentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdExperimentMutation", m)
 }
 
 // The AdFrequencyPolicyFunc type is an adapter to allow the use of ordinary
@@ -294,6 +330,18 @@ func (f AdStatsDailyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdStatsDailyMutation", m)
+}
+
+// The AdTopUpFunc type is an adapter to allow the use of ordinary
+// function as AdTopUp mutator.
+type AdTopUpFunc func(context.Context, *ent.AdTopUpMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdTopUpFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdTopUpMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdTopUpMutation", m)
 }
 
 // The OutboxEventFunc type is an adapter to allow the use of ordinary
