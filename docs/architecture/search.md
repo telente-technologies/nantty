@@ -98,3 +98,14 @@ Migration to OpenSearch (no code written, per owner decision):
 4. Backfill by keyset scan of `search.documents` into `search_v{N}`, dual-write during the scan, swap the alias, drop the old index.
 5. Shadow-query both backends, compare top-10 overlap per scope, flip per scope by flag. Keep Postgres as the fallback for one release.
 6. Triggers: p95 above 300 ms on the replica, over about 500k documents, or a need for facets, synonyms or multilingual analyzers.
+
+## 9. People search ownership (2026-10-05)
+
+| Route | Owner | Use |
+| --- | --- | --- |
+| `GET /api/v1/search?type=people` (also `users`, `all`) | ts.search | The only discovery search for accounts: ranked, region-aware, consent-gated rerank, the same visibility rules as every other kind. New search screens use this. |
+| `GET /api/v1/search/people` | ts.social | A picker for chat, live guests and mentions, not discovery. It returns `ConnectionEntry` rows with the viewer's follow state, drops blocked and inactive accounts, and ranks only by username match. |
+
+The social route stays because the mobile and webapp chat and live pickers depend on its connection shape. It must not grow ranking, filters or new callers. If a picker ever needs ranking, it should call ts.search and add follow state on top. Retiring `/search/people` is not safe until those callers have moved.
+
+Python rerank calls from ts.search send only HMAC ids (`u_` + 40 hex, `user:<id>`), using the same contract and secret derivation as ts.social (`INTELLIGENCE_ID_HASH_SECRET`, or derived from `INTELLIGENCE_SHARED_SECRET` when unset). Both services must therefore share the same values.
