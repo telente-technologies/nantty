@@ -12015,38 +12015,40 @@ func (m *OrderGroupMutation) ResetEdge(name string) error {
 // OrderItemMutation represents an operation that mutates the OrderItem nodes in the graph.
 type OrderItemMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *uuid.UUID
-	created_at          *time.Time
-	order_group_id      *uuid.UUID
-	store_id            *uuid.UUID
-	product_id          *uuid.UUID
-	variant_id          *uuid.UUID
-	product_name        *string
-	variant_title       *string
-	sku                 *string
-	size                *string
-	color               *string
-	image_url           *string
-	unit_price_minor    *int64
-	addunit_price_minor *int64
-	quantity            *int
-	addquantity         *int
-	line_total_minor    *int64
-	addline_total_minor *int64
-	cost_price_minor    *int64
-	addcost_price_minor *int64
-	category_id         *uuid.UUID
-	category_name       *string
-	tracks_stock        *bool
-	taxable             *bool
-	attribution_source  *string
-	attribution_id      *uuid.UUID
-	clearedFields       map[string]struct{}
-	done                bool
-	oldValue            func(context.Context) (*OrderItem, error)
-	predicates          []predicate.OrderItem
+	op                          Op
+	typ                         string
+	id                          *uuid.UUID
+	created_at                  *time.Time
+	order_group_id              *uuid.UUID
+	store_id                    *uuid.UUID
+	product_id                  *uuid.UUID
+	variant_id                  *uuid.UUID
+	product_name                *string
+	variant_title               *string
+	sku                         *string
+	size                        *string
+	color                       *string
+	image_url                   *string
+	unit_price_minor            *int64
+	addunit_price_minor         *int64
+	quantity                    *int
+	addquantity                 *int
+	line_total_minor            *int64
+	addline_total_minor         *int64
+	cost_price_minor            *int64
+	addcost_price_minor         *int64
+	category_id                 *uuid.UUID
+	category_name               *string
+	tracks_stock                *bool
+	taxable                     *bool
+	attribution_source          *string
+	attribution_id              *uuid.UUID
+	affiliate_commission_bps    *int64
+	addaffiliate_commission_bps *int64
+	clearedFields               map[string]struct{}
+	done                        bool
+	oldValue                    func(context.Context) (*OrderItem, error)
+	predicates                  []predicate.OrderItem
 }
 
 var _ ent.Mutation = (*OrderItemMutation)(nil)
@@ -13055,6 +13057,76 @@ func (m *OrderItemMutation) ResetAttributionID() {
 	delete(m.clearedFields, orderitem.FieldAttributionID)
 }
 
+// SetAffiliateCommissionBps sets the "affiliate_commission_bps" field.
+func (m *OrderItemMutation) SetAffiliateCommissionBps(i int64) {
+	m.affiliate_commission_bps = &i
+	m.addaffiliate_commission_bps = nil
+}
+
+// AffiliateCommissionBps returns the value of the "affiliate_commission_bps" field in the mutation.
+func (m *OrderItemMutation) AffiliateCommissionBps() (r int64, exists bool) {
+	v := m.affiliate_commission_bps
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAffiliateCommissionBps returns the old "affiliate_commission_bps" field's value of the OrderItem entity.
+// If the OrderItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderItemMutation) OldAffiliateCommissionBps(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAffiliateCommissionBps is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAffiliateCommissionBps requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAffiliateCommissionBps: %w", err)
+	}
+	return oldValue.AffiliateCommissionBps, nil
+}
+
+// AddAffiliateCommissionBps adds i to the "affiliate_commission_bps" field.
+func (m *OrderItemMutation) AddAffiliateCommissionBps(i int64) {
+	if m.addaffiliate_commission_bps != nil {
+		*m.addaffiliate_commission_bps += i
+	} else {
+		m.addaffiliate_commission_bps = &i
+	}
+}
+
+// AddedAffiliateCommissionBps returns the value that was added to the "affiliate_commission_bps" field in this mutation.
+func (m *OrderItemMutation) AddedAffiliateCommissionBps() (r int64, exists bool) {
+	v := m.addaffiliate_commission_bps
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAffiliateCommissionBps clears the value of the "affiliate_commission_bps" field.
+func (m *OrderItemMutation) ClearAffiliateCommissionBps() {
+	m.affiliate_commission_bps = nil
+	m.addaffiliate_commission_bps = nil
+	m.clearedFields[orderitem.FieldAffiliateCommissionBps] = struct{}{}
+}
+
+// AffiliateCommissionBpsCleared returns if the "affiliate_commission_bps" field was cleared in this mutation.
+func (m *OrderItemMutation) AffiliateCommissionBpsCleared() bool {
+	_, ok := m.clearedFields[orderitem.FieldAffiliateCommissionBps]
+	return ok
+}
+
+// ResetAffiliateCommissionBps resets all changes to the "affiliate_commission_bps" field.
+func (m *OrderItemMutation) ResetAffiliateCommissionBps() {
+	m.affiliate_commission_bps = nil
+	m.addaffiliate_commission_bps = nil
+	delete(m.clearedFields, orderitem.FieldAffiliateCommissionBps)
+}
+
 // Where appends a list predicates to the OrderItemMutation builder.
 func (m *OrderItemMutation) Where(ps ...predicate.OrderItem) {
 	m.predicates = append(m.predicates, ps...)
@@ -13089,7 +13161,7 @@ func (m *OrderItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderItemMutation) Fields() []string {
-	fields := make([]string, 0, 21)
+	fields := make([]string, 0, 22)
 	if m.created_at != nil {
 		fields = append(fields, orderitem.FieldCreatedAt)
 	}
@@ -13153,6 +13225,9 @@ func (m *OrderItemMutation) Fields() []string {
 	if m.attribution_id != nil {
 		fields = append(fields, orderitem.FieldAttributionID)
 	}
+	if m.affiliate_commission_bps != nil {
+		fields = append(fields, orderitem.FieldAffiliateCommissionBps)
+	}
 	return fields
 }
 
@@ -13203,6 +13278,8 @@ func (m *OrderItemMutation) Field(name string) (ent.Value, bool) {
 		return m.AttributionSource()
 	case orderitem.FieldAttributionID:
 		return m.AttributionID()
+	case orderitem.FieldAffiliateCommissionBps:
+		return m.AffiliateCommissionBps()
 	}
 	return nil, false
 }
@@ -13254,6 +13331,8 @@ func (m *OrderItemMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldAttributionSource(ctx)
 	case orderitem.FieldAttributionID:
 		return m.OldAttributionID(ctx)
+	case orderitem.FieldAffiliateCommissionBps:
+		return m.OldAffiliateCommissionBps(ctx)
 	}
 	return nil, fmt.Errorf("unknown OrderItem field %s", name)
 }
@@ -13410,6 +13489,13 @@ func (m *OrderItemMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAttributionID(v)
 		return nil
+	case orderitem.FieldAffiliateCommissionBps:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAffiliateCommissionBps(v)
+		return nil
 	}
 	return fmt.Errorf("unknown OrderItem field %s", name)
 }
@@ -13430,6 +13516,9 @@ func (m *OrderItemMutation) AddedFields() []string {
 	if m.addcost_price_minor != nil {
 		fields = append(fields, orderitem.FieldCostPriceMinor)
 	}
+	if m.addaffiliate_commission_bps != nil {
+		fields = append(fields, orderitem.FieldAffiliateCommissionBps)
+	}
 	return fields
 }
 
@@ -13446,6 +13535,8 @@ func (m *OrderItemMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedLineTotalMinor()
 	case orderitem.FieldCostPriceMinor:
 		return m.AddedCostPriceMinor()
+	case orderitem.FieldAffiliateCommissionBps:
+		return m.AddedAffiliateCommissionBps()
 	}
 	return nil, false
 }
@@ -13483,6 +13574,13 @@ func (m *OrderItemMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddCostPriceMinor(v)
 		return nil
+	case orderitem.FieldAffiliateCommissionBps:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAffiliateCommissionBps(v)
+		return nil
 	}
 	return fmt.Errorf("unknown OrderItem numeric field %s", name)
 }
@@ -13505,6 +13603,9 @@ func (m *OrderItemMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(orderitem.FieldAttributionID) {
 		fields = append(fields, orderitem.FieldAttributionID)
+	}
+	if m.FieldCleared(orderitem.FieldAffiliateCommissionBps) {
+		fields = append(fields, orderitem.FieldAffiliateCommissionBps)
 	}
 	return fields
 }
@@ -13534,6 +13635,9 @@ func (m *OrderItemMutation) ClearField(name string) error {
 		return nil
 	case orderitem.FieldAttributionID:
 		m.ClearAttributionID()
+		return nil
+	case orderitem.FieldAffiliateCommissionBps:
+		m.ClearAffiliateCommissionBps()
 		return nil
 	}
 	return fmt.Errorf("unknown OrderItem nullable field %s", name)
@@ -13605,6 +13709,9 @@ func (m *OrderItemMutation) ResetField(name string) error {
 		return nil
 	case orderitem.FieldAttributionID:
 		m.ResetAttributionID()
+		return nil
+	case orderitem.FieldAffiliateCommissionBps:
+		m.ResetAffiliateCommissionBps()
 		return nil
 	}
 	return fmt.Errorf("unknown OrderItem field %s", name)

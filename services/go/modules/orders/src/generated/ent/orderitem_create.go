@@ -254,6 +254,20 @@ func (_c *OrderItemCreate) SetNillableAttributionID(v *uuid.UUID) *OrderItemCrea
 	return _c
 }
 
+// SetAffiliateCommissionBps sets the "affiliate_commission_bps" field.
+func (_c *OrderItemCreate) SetAffiliateCommissionBps(v int64) *OrderItemCreate {
+	_c.mutation.SetAffiliateCommissionBps(v)
+	return _c
+}
+
+// SetNillableAffiliateCommissionBps sets the "affiliate_commission_bps" field if the given value is not nil.
+func (_c *OrderItemCreate) SetNillableAffiliateCommissionBps(v *int64) *OrderItemCreate {
+	if v != nil {
+		_c.SetAffiliateCommissionBps(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *OrderItemCreate) SetID(v uuid.UUID) *OrderItemCreate {
 	_c.mutation.SetID(v)
@@ -556,6 +570,10 @@ func (_c *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 		_spec.SetField(orderitem.FieldAttributionID, field.TypeUUID, value)
 		_node.AttributionID = &value
 	}
+	if value, ok := _c.mutation.AffiliateCommissionBps(); ok {
+		_spec.SetField(orderitem.FieldAffiliateCommissionBps, field.TypeInt64, value)
+		_node.AffiliateCommissionBps = &value
+	}
 	return _node, _spec
 }
 
@@ -687,6 +705,9 @@ func (u *OrderItemUpsertOne) UpdateNewValues() *OrderItemUpsertOne {
 		}
 		if _, exists := u.create.mutation.AttributionID(); exists {
 			s.SetIgnore(orderitem.FieldAttributionID)
+		}
+		if _, exists := u.create.mutation.AffiliateCommissionBps(); exists {
+			s.SetIgnore(orderitem.FieldAffiliateCommissionBps)
 		}
 	}))
 	return u
@@ -964,6 +985,9 @@ func (u *OrderItemUpsertBulk) UpdateNewValues() *OrderItemUpsertBulk {
 			}
 			if _, exists := b.mutation.AttributionID(); exists {
 				s.SetIgnore(orderitem.FieldAttributionID)
+			}
+			if _, exists := b.mutation.AffiliateCommissionBps(); exists {
+				s.SetIgnore(orderitem.FieldAffiliateCommissionBps)
 			}
 		}
 	}))
