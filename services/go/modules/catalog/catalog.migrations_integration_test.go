@@ -21,6 +21,11 @@ import (
 
 func startAgainstFreshSchema(t *testing.T) *src.Module {
 	t.Helper()
+	return startAgainstFreshSchemaWith(t, src.Collaborators{}, nil)
+}
+
+func startAgainstFreshSchemaWith(t *testing.T, collaborators src.Collaborators, adjust func(*configs.CatalogSettings)) *src.Module {
+	t.Helper()
 	if testing.Short() {
 		t.Skip("integration test")
 	}
@@ -43,8 +48,11 @@ func startAgainstFreshSchema(t *testing.T) *src.Module {
 	})
 	settings := configs.ReadCatalogSettingsFromEnvironment(config.NewEnvironmentReader())
 	settings.DatabaseUrl, settings.DatabaseSchema, settings.Environment = databaseUrl, schema, "test"
+	if adjust != nil {
+		adjust(&settings)
+	}
 	dependencies := servicemodule.Dependencies{DeployableName: "test", Logger: slog.Default(), Environment: config.NewEnvironmentReader(), Health: health.NewRegistryForService("test")}
-	module, err := src.StartCatalogModuleWithSettings(ctx, settings, src.Collaborators{}, dependencies)
+	module, err := src.StartCatalogModuleWithSettings(ctx, settings, collaborators, dependencies)
 	if err != nil {
 		t.Fatalf("start catalog: %v", err)
 	}

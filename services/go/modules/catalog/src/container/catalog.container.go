@@ -25,4 +25,13 @@ type Container struct {
 	AccessVerifier   *jwtauth.AccessTokenVerifier
 	IdempotencyStore *idempotency.RedisStore
 	Jobs             platformevents.JobQueue
+	Staff            StaffVerifiers
+	Audit            interfaces.AuditTrail
+	Identity         interfaces.IdentityDirectory
+	PrivateMedia     interfaces.PrivateMediaSigner
+}
+
+type StaffVerifiers struct {
+	Access *jwtauth.AccessTokenVerifier
+	StepUp *jwtauth.AccessTokenVerifier
 }

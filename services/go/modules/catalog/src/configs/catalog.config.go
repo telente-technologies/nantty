@@ -1,6 +1,8 @@
 package configs
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"time"
 
 	platformconfig "zudomart/platform/config"
@@ -24,12 +26,20 @@ type CatalogSettings struct {
 	SocialInternalToken    string
 	PublicWebBaseUrl       string
 	ImportJobsQueue        string
+	AdminInternalUrl       string
+	AdminInternalToken     string
+	UsersInternalToken     string
+	MediaInternalUrl       string
+	MediaInternalToken     string
+	DataEncryptionKey      []byte
+	MartImageLibrary       string
+	MartCountries          []string
 }
 
 func (settings CatalogSettings) IsProduction() bool { return settings.Environment == "production" }
 
 func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) CatalogSettings {
-	return CatalogSettings{
+	settings := CatalogSettings{
 		Environment:            reader.ReadStringOrDefault("APP_ENV", "development"),
 		DatabaseUrl:            reader.ReadRequiredString("CATALOG_DATABASE_URL"),
 		DatabaseSchema:         reader.ReadStringOrDefault("CATALOG_DATABASE_SCHEMA", "catalog"),
@@ -46,5 +56,29 @@ func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		PublicWebBaseUrl:       reader.ReadStringOrDefault("PUBLIC_WEB_BASE_URL", "https://zudomart.com"),
 		ImportJobsQueue:        reader.ReadStringOrDefault("CATALOG_IMPORT_JOBS_QUEUE", "jobs-catalog-import"),
 		ScheduledPublishPeriod: reader.ReadDurationOrDefault("CATALOG_SCHEDULED_PUBLISH_INTERVAL", 30*time.Second),
+		AdminInternalUrl:       reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
+		AdminInternalToken:     reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
+		UsersInternalToken:     reader.ReadStringOrDefault("USERS_INTERNAL_API_TOKEN", ""),
+		MediaInternalUrl:       reader.ReadStringOrDefault("MEDIA_INTERNAL_URL", ""),
+		MediaInternalToken:     reader.ReadStringOrDefault("MEDIA_INTERNAL_TOKEN", ""),
+		MartImageLibrary:       reader.ReadStringOrDefault("CATALOG_MART_IMAGE_LIBRARY", ""),
+		MartCountries:          reader.ReadCommaSeparatedListOrDefault("CATALOG_MART_COUNTRIES", []string{"NG", "GH", "KE", "ZA", "GB", "US"}),
 	}
+	settings.DataEncryptionKey = ReadDataEncryptionKey(reader, settings.IsProduction())
+	return settings
+}
+
+var developmentDataKey = sha256.Sum256([]byte("zudomart-catalog-local-only-data-key"))
+
+func ReadDataEncryptionKey(reader *platformconfig.EnvironmentReader, isProduction bool) []byte {
+	encoded := reader.ReadStringOrDefault("CATALOG_DATA_ENCRYPTION_KEY", "")
+	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	if encoded == "" && !isProduction {
+		return developmentDataKey[:]
+	}
+	if err != nil || len(decoded) != 32 {
+		reader.ReadRequiredString("CATALOG_DATA_ENCRYPTION_KEY_AS_BASE64_OF_32_BYTES")
+		return nil
+	}
+	return decoded
 }

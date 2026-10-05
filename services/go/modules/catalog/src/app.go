@@ -16,12 +16,15 @@ import (
 	"zudomart/modules/catalog/src/events"
 	"zudomart/modules/catalog/src/generated/ent"
 	"zudomart/modules/catalog/src/integrations"
+	"zudomart/modules/catalog/src/interfaces"
 	"zudomart/modules/catalog/src/jobs"
 	"zudomart/modules/catalog/src/migrations"
+	admincategories "zudomart/modules/catalog/src/modules/adminCategories"
 	"zudomart/modules/catalog/src/modules/brands"
 	"zudomart/modules/catalog/src/modules/categories"
 	featuredproducts "zudomart/modules/catalog/src/modules/featuredProducts"
 	"zudomart/modules/catalog/src/modules/interactions"
+	martfeatures "zudomart/modules/catalog/src/modules/martFeatures"
 	internalsources "zudomart/modules/catalog/src/modules/internalSources"
 	"zudomart/modules/catalog/src/modules/products"
 	"zudomart/modules/catalog/src/modules/reviews"
@@ -37,14 +40,19 @@ import (
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/postgres"
 	"zudomart/platform/sellerplans"
+	"zudomart/platform/staffauth"
 	"zudomart/platform/servicemodule"
 	"zudomart/platform/usersdirectory"
 	"zudomart/platform/viewerregion"
 )
 
 type Collaborators struct {
-	Verifier  *jwtauth.AccessTokenVerifier
-	Publisher platformevents.DomainEventPublisher
+	Verifier     *jwtauth.AccessTokenVerifier
+	Publisher    platformevents.DomainEventPublisher
+	Staff        container.StaffVerifiers
+	Audit        interfaces.AuditTrail
+	Identity     interfaces.IdentityDirectory
+	PrivateMedia interfaces.PrivateMediaSigner
 }
 
 type Module struct {
@@ -64,11 +72,23 @@ func NewCatalogModule(ctx context.Context, dependencies servicemodule.Dependenci
 	if err != nil {
 		return nil, err
 	}
+	staff := container.StaffVerifiers{}
+	if staff.Access, err = jwtauth.NewAccessTokenVerifierFromRemoteJwks(ctx, settings.AccessTokenJwksUrl, settings.TokenIssuer, staffauth.AccessAudience); err != nil {
+		return nil, err
+	}
+	if staff.StepUp, err = jwtauth.NewAccessTokenVerifierFromRemoteJwks(ctx, settings.AccessTokenJwksUrl, settings.TokenIssuer, staffauth.StepUpAudience); err != nil {
+		return nil, err
+	}
 	publisher, err := createDomainEventPublisher(ctx, settings, dependencies)
 	if err != nil {
 		return nil, err
 	}
-	return StartCatalogModuleWithSettings(ctx, settings, Collaborators{Verifier: verifier, Publisher: publisher}, dependencies)
+	return StartCatalogModuleWithSettings(ctx, settings, Collaborators{
+		Verifier: verifier, Publisher: publisher, Staff: staff,
+		Audit:        integrations.NewHttpAuditTrail(settings.AdminInternalUrl, settings.AdminInternalToken),
+		Identity:     integrations.NewHttpIdentityDirectory(settings.AdminInternalUrl, settings.UsersInternalToken),
+		PrivateMedia: integrations.NewHttpPrivateMediaSigner(settings.MediaInternalUrl, settings.MediaInternalToken),
+	}, dependencies)
 }
 
 func StartCatalogModuleWithSettings(ctx context.Context, settings configs.CatalogSettings, collaborators Collaborators, dependencies servicemodule.Dependencies) (*Module, error) {
@@ -90,6 +110,7 @@ func StartCatalogModuleWithSettings(ctx context.Context, settings configs.Catalo
 		Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Database: database,
 		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Rates: &viewerregion.RateReader{Database: database, Schema: "currency"}, Settings: settings, Logger: logger, Now: time.Now,
 		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger),
+		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia,
 	}
 	commerceports.Default.RegisterCatalogReader(integrations.CommerceCatalog{Container: module.Container})
 	commerceports.Default.RegisterStoreShippingCountries(integrations.CommerceCatalog{Container: module.Container})
@@ -133,6 +154,8 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	featuredproducts.Mount(mux, module.Container)
 	storesettings.Mount(mux, module.Container)
 	storeteam.Mount(mux, module.Container)
+	admincategories.Mount(mux, module.Container)
+	martfeatures.Mount(mux, module.Container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
