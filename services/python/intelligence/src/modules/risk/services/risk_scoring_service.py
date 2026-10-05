@@ -19,11 +19,9 @@ from src.modules.risk.services.risk_rules_service import (
 )
 from src.modules.risk.services.value_flow_feature_service import ValueFlowSignals, read_value_flow_signals
 from src.modules.risk.services.value_transfer_risk_rules_service import (
-    evaluate_cashback_risk_rules,
     evaluate_coin_purchase_risk_rules,
     evaluate_coin_transfer_risk_rules,
     evaluate_gift_risk_rules,
-    evaluate_referral_reward_risk_rules,
 )
 from src.repositories.feature_log_parquet_repository import FeatureLogParquetSink
 from src.repositories.online_feature_repository import OnlineFeatureStore
@@ -62,10 +60,6 @@ def evaluate_rules_for_subject(
         return evaluate_coin_transfer_risk_rules(request.coin_transfer, flow)
     if request.gift is not None:
         return evaluate_gift_risk_rules(request.gift, flow)
-    if request.referral_reward is not None:
-        return evaluate_referral_reward_risk_rules(request.referral_reward, flow)
-    if request.cashback is not None:
-        return evaluate_cashback_risk_rules(request.cashback, rates)
     return []
 
 
@@ -94,7 +88,7 @@ class RiskScoringService:
         now = resolve_request_time(request.now)
         request_id = resolve_request_identifier(request.request_id)
         usd_rate_lookup = build_usd_rate_lookup(request.exchange_rates)
-        needs_flow = request.subject_type in {"coin_transfer", "gift", "referral_reward"}
+        needs_flow = request.subject_type in {"coin_transfer", "gift"}
         flow = (
             await read_value_flow_signals(
                 self.feature_store, request.actor_id, find_value_flow_counterparty(request), now

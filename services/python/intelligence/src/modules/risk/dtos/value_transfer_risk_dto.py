@@ -42,25 +42,3 @@ class GiftRiskSignals(ContractModel):
     sender_share_of_creator_gift_income_last_week: UnitInterval = 0.0
     coins_bought_with_new_instrument_last_day: bool = False
     hours_until_creator_payout_request: float | None = Field(default=None, ge=0, le=1e6)
-
-
-class ReferralRewardRiskSignals(ContractModel):
-    referee_id: OpaqueIdentifier
-    referrer_account_age_hours: float = Field(ge=0, le=1e6)
-    referee_account_age_hours: float = Field(ge=0, le=1e6)
-    share_device: bool = False
-    share_payment_instrument: bool = False
-    share_network_prefix: bool = False
-    referrals_by_referrer_last_day: int = Field(default=0, ge=0, le=100_000)
-    minutes_from_signup_to_qualifying_action: float | None = Field(default=None, ge=0, le=1e6)
-    linked_account_cluster_size: int = Field(default=1, ge=1, le=100_000)
-
-
-class CashbackRiskSignals(ContractModel):
-    amount: MoneyAmount
-    cashback_orders_last_week: int = Field(default=0, ge=0, le=100_000)
-    refund_after_cashback_rate: UnitInterval = 0.0
-    cancelled_after_cashback_count: int = Field(default=0, ge=0, le=100_000)
-    buyer_and_seller_share_device: bool = False
-    buyer_linked_to_seller_account: bool = False
-    account_age_hours: float = Field(ge=0, le=1e6)

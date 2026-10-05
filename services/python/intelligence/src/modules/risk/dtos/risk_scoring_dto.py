@@ -4,17 +4,13 @@ from pydantic import AwareDatetime, Field, model_validator
 
 from src.dtos.common_dto import ContractModel, ExchangeRateToUsd, MoneyAmount, RankingResponseMetadata
 from src.modules.risk.dtos.value_transfer_risk_dto import (
-    CashbackRiskSignals,
     CoinPurchaseRiskSignals,
     CoinTransferRiskSignals,
     GiftRiskSignals,
-    ReferralRewardRiskSignals,
 )
 from src.validators.common_field_validator import CountryCode, OpaqueIdentifier, UnitInterval
 
-RiskSubjectType = Literal[
-    "order", "payout", "account_event", "coin_purchase", "coin_transfer", "gift", "referral_reward", "cashback"
-]
+RiskSubjectType = Literal["order", "payout", "account_event", "coin_purchase", "coin_transfer", "gift"]
 
 RISK_SUBJECT_TYPES: tuple[RiskSubjectType, ...] = (
     "order",
@@ -23,8 +19,6 @@ RISK_SUBJECT_TYPES: tuple[RiskSubjectType, ...] = (
     "coin_purchase",
     "coin_transfer",
     "gift",
-    "referral_reward",
-    "cashback",
 )
 
 
@@ -82,8 +76,6 @@ class RiskScoringRequest(ContractModel):
     coin_purchase: CoinPurchaseRiskSignals | None = None
     coin_transfer: CoinTransferRiskSignals | None = None
     gift: GiftRiskSignals | None = None
-    referral_reward: ReferralRewardRiskSignals | None = None
-    cashback: CashbackRiskSignals | None = None
     now: AwareDatetime | None = None
 
     @model_validator(mode="after")

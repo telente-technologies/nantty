@@ -2,11 +2,9 @@ from decimal import Decimal
 
 from src.modules.risk.dtos.risk_scoring_dto import RiskReason
 from src.modules.risk.dtos.value_transfer_risk_dto import (
-    CashbackRiskSignals,
     CoinPurchaseRiskSignals,
     CoinTransferRiskSignals,
     GiftRiskSignals,
-    ReferralRewardRiskSignals,
 )
 from src.modules.risk.services.risk_rules_service import (
     RiskRule,
@@ -80,33 +78,5 @@ def evaluate_gift_risk_rules(signals: GiftRiskSignals, flow: ValueFlowSignals) -
         ),
         ("creator_cashes_out_quickly", 0.3, is_below(signals.hours_until_creator_payout_request, 24)),
         ("coins_bought_with_new_instrument", 0.2, signals.coins_bought_with_new_instrument_last_day),
-    ]
-    return convert_triggered_rules_to_reasons(rules)
-
-
-def evaluate_referral_reward_risk_rules(signals: ReferralRewardRiskSignals, flow: ValueFlowSignals) -> list[RiskReason]:
-    rules: list[RiskRule] = [
-        ("referrer_and_referee_share_device", 0.5, signals.share_device),
-        ("referrer_and_referee_share_payment_instrument", 0.5, signals.share_payment_instrument),
-        ("referrer_and_referee_share_network", 0.15, signals.share_network_prefix),
-        ("referral_velocity", 0.3, signals.referrals_by_referrer_last_day >= 10),
-        ("referral_volume_last_week", 0.2, flow.actor_distinct_referrals >= 30),
-        ("instant_qualifying_action", 0.25, is_below(signals.minutes_from_signup_to_qualifying_action, 10)),
-        ("self_referral_ring", 0.4, signals.linked_account_cluster_size >= 3),
-        ("new_referrer_account", 0.15, signals.referrer_account_age_hours < 24),
-    ]
-    return convert_triggered_rules_to_reasons(rules)
-
-
-def evaluate_cashback_risk_rules(signals: CashbackRiskSignals, usd_rate_lookup: dict[str, Decimal]) -> list[RiskReason]:
-    amount_usd = convert_money_to_usd_or_none(signals.amount, usd_rate_lookup)
-    rules: list[RiskRule] = [
-        ("buyer_linked_to_seller", 0.6, signals.buyer_linked_to_seller_account),
-        ("buyer_and_seller_share_device", 0.45, signals.buyer_and_seller_share_device),
-        ("refunds_after_cashback", 0.35, signals.refund_after_cashback_rate >= 0.3),
-        ("cancellations_after_cashback", 0.3, signals.cancelled_after_cashback_count >= 3),
-        ("cashback_velocity", 0.2, signals.cashback_orders_last_week >= 10),
-        ("new_account_cashback", 0.2, signals.account_age_hours < 24 and is_at_least(amount_usd, 50)),
-        ("exchange_rate_unavailable", 0.0, amount_usd is None),
     ]
     return convert_triggered_rules_to_reasons(rules)
