@@ -2,6 +2,7 @@ package paymentstesting
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -23,6 +24,7 @@ func TestServeFakePaystackForLocalApiSmoke(t *testing.T) {
 	}
 	eventIdBase := time.Now().Unix() * 1000
 	fake := StartFakePaystack(t)
+	fake.nextId = eventIdBase
 	fake.FundPlatformBalance("NGN", 1_000_000_000)
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /__smoke/charges/{reference}/complete", func(writer http.ResponseWriter, request *http.Request) {
@@ -32,7 +34,30 @@ func TestServeFakePaystackForLocalApiSmoke(t *testing.T) {
 			writeFakeJson(writer, http.StatusNotFound, map[string]any{"message": "unknown reference"})
 			return
 		}
+		if request.URL.Query().Get("card") == "decline" {
+			fake.mutex.Lock()
+			transaction.AuthorizationCode = fmt.Sprintf("AUTH_DECLINE_%06d", transaction.Id)
+			fake.mutex.Unlock()
+		}
 		writeSignedSmokeWebhook(writer, "charge.success", map[string]any{"id": eventIdBase + transaction.Id, "reference": transaction.Reference, "status": "success", "amount": transaction.AmountMinor, "currency": transaction.Currency, "channel": "card"})
+	})
+	mux.HandleFunc("POST /__smoke/subscriptions/{reference}/create", func(writer http.ResponseWriter, request *http.Request) {
+		fake.mutex.Lock()
+		transaction := fake.Transactions[request.PathValue("reference")]
+		var data map[string]any
+		if transaction != nil && transaction.Status == "success" && transaction.PlanCode != "" {
+			fake.nextId++
+			code := fmt.Sprintf("SUB_smoke_%d", fake.nextId)
+			nextPayment := time.Now().UTC().AddDate(0, 1, 0).Format(time.RFC3339)
+			fake.Subscriptions[code] = map[string]any{"subscription_code": code, "email_token": "tok_" + code, "status": "active", "customer": transaction.CustomerCode, "plan": transaction.PlanCode, "next_payment_date": nextPayment}
+			data = map[string]any{"id": fake.nextId, "subscription_code": code, "email_token": "tok_" + code, "status": "active", "customer": map[string]any{"customer_code": transaction.CustomerCode}, "plan": map[string]any{"plan_code": transaction.PlanCode}, "next_payment_date": nextPayment}
+		}
+		fake.mutex.Unlock()
+		if data == nil {
+			writeFakeJson(writer, http.StatusNotFound, map[string]any{"message": "no paid plan checkout for this reference"})
+			return
+		}
+		writeSignedSmokeWebhook(writer, "subscription.create", data)
 	})
 	mux.HandleFunc("POST /__smoke/transfers/{reference}/{status}", func(writer http.ResponseWriter, request *http.Request) {
 		transfer := fake.SetTransferStatus(request.PathValue("reference"), request.PathValue("status"))

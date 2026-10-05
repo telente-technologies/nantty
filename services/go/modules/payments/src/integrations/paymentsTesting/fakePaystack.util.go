@@ -57,6 +57,9 @@ type FakePaystack struct {
 	SubaccountCreations  int
 	FailNextRequests     int
 	RefundsNeedAttention bool
+	RefundDelay          time.Duration
+	LoseNextRefundReply  bool
+	LoseNextChargeReply  bool
 }
 
 func StartFakePaystack(t *testing.T) *FakePaystack {

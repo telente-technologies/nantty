@@ -129,6 +129,7 @@ func (verifier *AppleAppStoreVerifier) VerifySignedRefundNotification(_ context.
 	}
 	var payload struct {
 		NotificationType string `json:"notificationType"`
+		Subtype          string `json:"subtype"`
 		NotificationUuid string `json:"notificationUUID"`
 		SignedDate       int64  `json:"signedDate"`
 		Data             struct {
@@ -145,7 +146,7 @@ func (verifier *AppleAppStoreVerifier) VerifySignedRefundNotification(_ context.
 	}
 	notification := interfaces.StoreRefundNotification{
 		NotificationId: payload.NotificationUuid, StoreTransactionId: transaction.TransactionId, OriginalTransactionId: transaction.OriginalTransactionId,
-		ProductId: transaction.ProductId, Kind: classifyAppleNotification(payload.NotificationType),
+		ProductId: transaction.ProductId, Kind: classifyAppleNotification(payload.NotificationType, payload.Subtype),
 	}
 	if transaction.RevocationDate > 0 {
 		notification.RefundedAt = time.UnixMilli(transaction.RevocationDate).UTC()
@@ -157,7 +158,10 @@ func (verifier *AppleAppStoreVerifier) VerifySignedRefundNotification(_ context.
 	return notification, nil
 }
 
-func classifyAppleNotification(notificationType string) interfaces.StoreNotificationKind {
+func classifyAppleNotification(notificationType, subtype string) interfaces.StoreNotificationKind {
+	if notificationType == "DID_FAIL_TO_RENEW" && subtype == "GRACE_PERIOD" {
+		return interfaces.StoreNotificationGrace
+	}
 	switch notificationType {
 	case "REFUND", "REVOKE":
 		return interfaces.StoreNotificationRefund

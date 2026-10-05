@@ -11,8 +11,6 @@ import (
 	"zudomart/modules/payments/src/interfaces"
 )
 
-// RevokeSubscriptionWithFullRefund ends a Play subscription now and refunds the whole latest payment through
-// Google (subscriptionsv2.revoke with a full-refund revoke context).
 func (verifier *GooglePlayVerifier) RevokeSubscriptionWithFullRefund(ctx context.Context, purchaseToken string) error {
 	token, err := verifier.tokens.AccessToken(ctx)
 	if err != nil {

@@ -181,6 +181,9 @@ func (provider *PaystackProvider) ChargeAuthorization(ctx context.Context, reque
 	}
 	err := provider.http.send(ctx, paystackRequest{method: http.MethodPost, path: "/transaction/charge_authorization", body: body, retrySafe: true}, &response)
 	var requestError *ProviderRequestError
+	if errors.As(err, &requestError) && strings.Contains(strings.ToLower(requestError.Message), "duplicate transaction reference") {
+		return interfaces.AuthorizationChargeResult{Outcome: interfaces.OutcomePending}, nil
+	}
 	if errors.As(err, &requestError) && requestError.IsDefinitiveRejection() {
 		return interfaces.AuthorizationChargeResult{}, errors.Join(interfaces.ErrSavedCardNotForCustomer, err)
 	}
@@ -203,7 +206,7 @@ func (provider *PaystackProvider) RefundCharge(ctx context.Context, request inte
 	if transaction == "" {
 		return interfaces.RefundResult{}, errors.New("paystack: a refund needs the transaction reference")
 	}
-	body := map[string]any{"transaction": transaction, "merchant_note": truncate(request.Reason, 250)}
+	body := map[string]any{"transaction": transaction, "merchant_note": interfaces.RefundReferenceNote(truncate(request.Reason, 250), request.RefundReference)}
 	if !request.FullRefund {
 		body["amount"] = request.AmountMinor
 	}

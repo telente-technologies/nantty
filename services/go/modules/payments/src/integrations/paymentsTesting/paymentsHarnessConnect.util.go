@@ -2,6 +2,8 @@ package paymentstesting
 
 import (
 	"context"
+	"fmt"
+	"hash/fnv"
 	"net/http"
 
 	"zudomart/modules/payments/src/modules/gateway/services"
@@ -19,7 +21,7 @@ func (harness *MoneyHarness) OnboardConnectedAccount(userId string, acceptPaymen
 	}); err != nil {
 		harness.T.Fatalf("identity for %s: %v", userId, err)
 	}
-	if err := gateway.SavePayoutOnboardingBank(context.Background(), userId, services.OnboardingBankInput{BankCode: "058", BankName: "Guaranty Trust Bank", AccountNumber: "0123456789"}); err != nil {
+	if err := gateway.SavePayoutOnboardingBank(context.Background(), userId, services.OnboardingBankInput{BankCode: "058", BankName: "Guaranty Trust Bank", AccountNumber: TestBankAccountNumberFor(userId)}); err != nil {
 		harness.T.Fatalf("bank for %s: %v", userId, err)
 	}
 	gateway.ProcessDueConnectedAccountJobs(context.Background(), 20)
@@ -61,4 +63,10 @@ func (harness *MoneyHarness) CompleteCheckoutThroughWebhook(reference string, pa
 	}
 	harness.DeliverPaystackEvent("charge.success", map[string]any{"id": transaction.Id, "reference": reference, "status": "success", "amount": transaction.AmountMinor, "currency": transaction.Currency})
 	return transaction
+}
+
+func TestBankAccountNumberFor(userId string) string {
+	digest := fnv.New32a()
+	_, _ = digest.Write([]byte(userId))
+	return fmt.Sprintf("2%09d", digest.Sum32()%1_000_000_000)
 }

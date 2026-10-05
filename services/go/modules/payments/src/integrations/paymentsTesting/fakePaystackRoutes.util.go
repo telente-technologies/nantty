@@ -3,6 +3,7 @@ package paymentstesting
 import (
 	"net/http"
 	"strings"
+	"time"
 )
 
 func (fake *FakePaystack) route(request fakeRequest) (int, any, any) {
@@ -18,6 +19,8 @@ func (fake *FakePaystack) route(request fakeRequest) (int, any, any) {
 		return http.StatusNotFound, "Transaction reference not found", nil
 	case resource == "transaction" && len(segments) > 1 && segments[1] == "charge_authorization":
 		return fake.chargeAuthorization(request)
+	case resource == "refund" && request.method == http.MethodGet:
+		return http.StatusOK, fake.Refunds, map[string]any{"page": 1, "pageCount": 1}
 	case resource == "refund":
 		return fake.createRefund(request)
 	case resource == "bank" && len(segments) == 2 && segments[1] == "resolve":
@@ -128,6 +131,10 @@ func (fake *FakePaystack) chargeAuthorization(request fakeRequest) (int, any, an
 	default:
 		fake.creditForTransaction(transaction)
 	}
+	if fake.LoseNextChargeReply {
+		fake.LoseNextChargeReply = false
+		return http.StatusGatewayTimeout, "upstream timed out", nil
+	}
 	return http.StatusOK, transactionBody(transaction), nil
 }
 
@@ -163,9 +170,14 @@ func (fake *FakePaystack) createRefund(request fakeRequest) (int, any, any) {
 	if fake.RefundsNeedAttention || transaction.Channel == "bank_transfer" {
 		status = "needs-attention"
 	}
+	time.Sleep(fake.RefundDelay)
 	fake.PlatformBalance[transaction.Currency] -= amount
-	refund := map[string]any{"id": fake.nextIdNumber(), "status": status, "amount": amount, "transaction_reference": transaction.Reference}
+	refund := map[string]any{"id": fake.nextIdNumber(), "status": status, "amount": amount, "transaction_reference": transaction.Reference, "merchant_note": text(request.body["merchant_note"])}
 	fake.Refunds = append(fake.Refunds, refund)
+	if fake.LoseNextRefundReply {
+		fake.LoseNextRefundReply = false
+		return http.StatusGatewayTimeout, "upstream timed out", nil
+	}
 	return http.StatusOK, refund, nil
 }
 

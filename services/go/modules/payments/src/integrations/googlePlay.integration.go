@@ -201,8 +201,10 @@ func (verifier *GooglePlayVerifier) convertSubscriptionNotification(ctx context.
 		notification.StoreTransactionId, notification.ExpiresAt = verified.StoreTransactionId, verified.ExpiresAt
 	case 12, 13:
 		notification.Kind = interfaces.StoreNotificationExpired
-	case 5, 6:
+	case 5:
 		notification.Kind = interfaces.StoreNotificationRenewalFailed
+	case 6:
+		notification.Kind = interfaces.StoreNotificationGrace
 	}
 	return notification, nil
 }
