@@ -19,8 +19,11 @@ import { creatorProgramService } from "@/services/creatorProgram.service";
 import { paymentsService } from "@/services/payments.service";
 import type { CreatorSubscriptionCheckout, CreatorSubscriptionState } from "@/types/creator.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { BulletLine } from "@/components/ui/bulletLine";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 const VERIFY_MAX_ATTEMPTS = 6;
 const VERIFY_RETRY_DELAY_MS = 1_500;
@@ -77,7 +80,7 @@ export function CreatorSubscribeScreen({ navigation, route }: MainScreenProps<"C
         <View style={styles.done}>
           <StatusPill label="Active" tone="success" />
           <Text size={21} weight={600} lineHeight={25.2} align="center">You're subscribed to {creator.data?.name}!</Text>
-          <Text size={14} lineHeight={19.6} color={colors.textMuted} align="center">Enjoy {chosenPlan?.name}. Manage or cancel anytime in Settings.</Text>
+          <Text size={typeScale.md} lineHeight={19.6} color={colors.textMuted} align="center">Enjoy {chosenPlan?.name}. Manage or cancel anytime in Settings.</Text>
           <Button title="Back to profile" onPress={() => navigation.goBack()} />
         </View>
       </Screen>
@@ -93,29 +96,30 @@ export function CreatorSubscribeScreen({ navigation, route }: MainScreenProps<"C
             <Avatar uri={creator.data.avatarUrl} size={56} />
             <View style={styles.flex}>
               <View style={styles.nameRow}>
-                <Text size={16} weight={600} lineHeight={19.2}>{creator.data.name}</Text>
+                <Text size={typeScale.base} weight={600} lineHeight={19.2}>{creator.data.name}</Text>
                 <VerificationBadge verification={creator.data.verification} legacyVerified={creator.data.verified} />
               </View>
-              <Text size={13} lineHeight={16.9} color={colors.textSubtle}>@{creator.data.username}</Text>
+              <Text size={typeScale.sm} lineHeight={16.9} color={colors.textSubtle}>@{creator.data.username}</Text>
             </View>
           </View>
         ) : null}
         {plans.isLoading ? <ListSkeleton rows={3} /> : null}
+        {plans.isError && !plans.data ? <ErrorState compact message="Couldn't load subscription plans." onRetry={() => plans.refetch()} retrying={plans.isRefetching} /> : null}
         {plans.data?.length === 0 ? <Text color={colors.textSubtle}>This creator doesn't offer subscriptions yet.</Text> : null}
         {(plans.data ?? []).map((plan) => (
           <SelectableRow key={plan.id} selected={plan.id === planId} onPress={() => setChosenPlanId(plan.id)} accessibilityLabel={`${plan.name}, ${formatMoneyForDisplay(plan.price)} per ${plan.interval}`}>
             <Text size={15} weight={600} lineHeight={18}>{plan.name}</Text>
-            <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>{formatMoneyForDisplay(plan.price)} / {plan.interval}</Text>
+            <Text size={typeScale.md} weight={500} lineHeight={16.8} color={colors.primary}>{formatMoneyForDisplay(plan.price)} / {plan.interval}</Text>
             {plan.benefits.map((benefit) => (
               <BulletLine key={benefit} size={13} lineHeight={17.5}>{benefit}</BulletLine>
             ))}
           </SelectableRow>
         ))}
-        <Text size={12} lineHeight={16.8} color={colors.textSubtle}>You'll pay in a secure payment window. Renews automatically until you cancel.</Text>
+        <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>You'll pay in a secure payment window. Renews automatically until you cancel.</Text>
       </ScrollView>
       <View style={styles.footer}>
-        {subscribe.isError ? <Text size={12} color={colors.error} align="center">{subscribe.error.message}</Text> : null}
-        {subscription ? <Text size={12} color={colors.caution} align="center">Payment not completed yet. Try again when ready.</Text> : null}
+        {subscribe.isError ? <Text size={typeScale.xs} color={colors.error} align="center">{subscribe.error.message}</Text> : null}
+        {subscription ? <Text size={typeScale.xs} color={colors.caution} align="center">Payment not completed yet. Try again when ready.</Text> : null}
         <Button title={chosenPlan ? `Subscribe for ${formatMoneyForDisplay(chosenPlan.price)}` : "Subscribe"} disabled={!planId} loading={subscribe.isPending} onPress={() => subscribe.mutate()} />
       </View>
     </Screen>
@@ -124,9 +128,9 @@ export function CreatorSubscribeScreen({ navigation, route }: MainScreenProps<"C
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 12 },
-  creator: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 8 },
-  nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  done: { flex: 1, padding: 32, justifyContent: "center", alignItems: "center", gap: 12 },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  content: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[6], gap: spacing[3] },
+  creator: { flexDirection: "row", alignItems: "center", gap: spacing[3], marginBottom: spacing[2] },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: spacing[1] },
+  done: { flex: 1, padding: spacing[7], justifyContent: "center", alignItems: "center", gap: spacing[3] },
+  footer: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[6], gap: spacing[2] },
 });

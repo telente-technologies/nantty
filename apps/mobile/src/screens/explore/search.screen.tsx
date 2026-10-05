@@ -1,30 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { ExploreHome } from "@/components/explore/exploreHome";
-import { ProductMasonry } from "@/components/home/productMasonry";
-import { PersonRow } from "@/components/search/personRow";
+import { RecentSearchList } from "@/components/search/recentSearchList";
+import { useRecentSearches } from "@/components/search/recentSearches.hook";
 import { SearchBar } from "@/components/search/searchBar";
-import { BrandRow } from "@/components/store/brandRow";
+import { SearchResultSections, type SearchResultHandlers } from "@/components/search/searchResultSections";
+import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
+import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { useAuthStore } from "@/store/auth.store";
 import { trackProductInteraction } from "@/services/productInteractions.service";
-import { searchService, type SearchScope } from "@/services/search.service";
-import { ListSkeleton } from "@/components/ui/listSkeleton";
-import { ErrorState } from "@/components/ui/errorState";
-
-const SCOPES: { label: string; scope: SearchScope }[] = [
-  { label: "All", scope: "all" },
-  { label: "Products", scope: "products" },
-  { label: "Stores", scope: "stores" },
-  { label: "Brands", scope: "brands" },
-  { label: "People", scope: "people" },
-];
+import { searchService } from "@/services/search.service";
+import type { SearchContext, SearchResultType } from "@/types/search.type";
+import { defaultSearchResultType, globalSearchContext, resolveSearchContext, searchPlaceholder, searchResultTypesForScope, searchScopeChipLabel } from "@/utils/searchScope.util";
+import { spacing } from "@/constants/spacing.constant";
 
 function useDebouncedText(text: string, delayMs: number) {
   const [debounced, setDebounced] = useState(text);
@@ -37,75 +34,93 @@ function useDebouncedText(text: string, delayMs: number) {
 
 export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
   const { colors } = useTheme();
+  const [context, setContext] = useState<SearchContext>(() => resolveSearchContext(route.params?.scope, route.params?.scopeLabel));
+  const [type, setType] = useState<SearchResultType>(() => defaultSearchResultType(context.scope));
   const [query, setQuery] = useState("");
-  const [scope, setScope] = useState<SearchScope>(route.params?.scope === "mart" ? "products" : "all");
   const debouncedQuery = useDebouncedText(query.trim(), 300);
-  const results = useQuery({
-    queryKey: ["search", debouncedQuery, scope],
-    queryFn: () => searchService.searchProductsStoresAndPeople(debouncedQuery, scope),
+  const recents = useRecentSearches(context.scope);
+  const results = useInfiniteQuery({
+    queryKey: ["search", context.scope, type, debouncedQuery],
+    queryFn: ({ pageParam }) => searchService.searchWithinScope(debouncedQuery, context.scope, type, pageParam),
+    initialPageParam: null as string | null,
+    getNextPageParam: (page) => page.nextCursor,
     enabled: debouncedQuery.length > 0,
   });
   useEffect(() => {
-    if (debouncedQuery.length > 0) void trackProductInteraction("search.performed", { query: debouncedQuery, scope });
-  }, [debouncedQuery, scope]);
-  const data = results.data;
+    if (debouncedQuery.length > 0) void trackProductInteraction("search.performed", { query: debouncedQuery, scope: context.scope, type });
+  }, [debouncedQuery, context.scope, type]);
+
+  const items = results.data?.pages.flatMap((page) => page.data) ?? [];
+  const ownStoreId = useAuthStore((state) => state.user?.storeId ?? null);
+  const tabs = searchResultTypesForScope(context.scope, ownStoreId);
+  const chipLabel = searchScopeChipLabel(context);
+  const widenToGlobal = () => {
+    setContext(globalSearchContext);
+    setType("top");
+  };
+  const remember = () => recents.recordSearch(query);
+  const rememberThen = (open: () => void) => {
+    remember();
+    open();
+  };
+  const handlers: SearchResultHandlers = {
+    onOpenUser: (userId) => rememberThen(() => navigation.navigate("UserProfile", { userId })),
+    onOpenStore: (storeId) => rememberThen(() => navigation.navigate("Store", { storeId })),
+    onOpenBrand: (brandId) => rememberThen(() => navigation.navigate("BrandProfile", { brandId })),
+    onOpenPost: (item) => rememberThen(() => (item.type === "clip" ? navigation.navigate("Tabs", { screen: "Clips", params: { startId: item.id } }) : navigation.navigate("PostDetail", { postId: item.id }))),
+    onOpenCategory: (categoryId, name) => rememberThen(() => navigation.navigate("Category", { categoryId, name })),
+    onSearchHashtag: (tag) => setQuery(`#${tag}`),
+    onOpenOrder: (orderId) => rememberThen(() => navigation.navigate("SellerOrderDetail", { orderId })),
+  };
 
   return (
     <Screen background={colors.surface}>
       <Header />
       <View style={styles.searchRow}>
-        <SearchBar value={query} onChangeText={setQuery} placeholder="Search for anything..." />
+        <SearchBar
+          value={query}
+          onChangeText={setQuery}
+          onSubmitEditing={remember}
+          placeholder={searchPlaceholder(context)}
+          scopeChip={chipLabel ? { label: chipLabel, onClear: widenToGlobal } : null}
+        />
       </View>
-      {query.trim().length > 0 ? (
+      {query.trim().length > 0 && tabs.length > 0 ? (
         <View style={styles.scopes}>
-          {SCOPES.map((option) => (
-            <Chip key={option.scope} kind="filter" label={option.label} selected={scope === option.scope} onPress={() => setScope(option.scope)} />
+          {tabs.map((option) => (
+            <Chip key={option.type} kind="filter" label={option.label} selected={type === option.type} onPress={() => setType(option.type)} />
           ))}
         </View>
       ) : null}
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {debouncedQuery.length === 0 ? (
-          <ExploreHome
-            onSearchHashtag={(hashtag) => setQuery(`#${hashtag}`)}
-            onOpenPost={(postId) => navigation.navigate("PostDetail", { postId })}
-            onOpenProfile={(userId) => navigation.navigate("UserProfile", { userId })}
-          />
+          <>
+            <RecentSearchList entries={recents.entries} onSelect={setQuery} onRemove={recents.removeSearch} onClear={recents.clearSearches} />
+            {context.scope === "global" ? (
+              <ExploreHome
+                onSearchHashtag={(hashtag) => setQuery(`#${hashtag}`)}
+                onOpenPost={(postId) => navigation.navigate("PostDetail", { postId })}
+                onOpenProfile={(userId) => navigation.navigate("UserProfile", { userId })}
+              />
+            ) : recents.entries.length === 0 ? (
+              <Text align="center" color={colors.textSubtle} style={styles.state}>{searchPlaceholder(context)}</Text>
+            ) : null}
+          </>
         ) : results.isError ? (
           <ErrorState message="Search is unavailable right now." onRetry={() => void results.refetch()} />
         ) : results.isLoading ? (
           <ListSkeleton />
-        ) : !data || (data.products.length + data.stores.length + data.people.length + (data.brands?.length ?? 0) === 0) ? (
-          <Text align="center" color={colors.textSubtle} style={styles.state}>No results for “{debouncedQuery}”.</Text>
+        ) : items.length === 0 ? (
+          <View style={styles.empty}>
+            <Text align="center" color={colors.textSubtle}>No results for “{debouncedQuery}”{chipLabel ? ` in ${context.label}` : ""}.</Text>
+            {chipLabel ? <Button title="Search everywhere" variant="outline" onPress={widenToGlobal} /> : null}
+          </View>
         ) : (
           <>
-            {data.stores.length > 0 && (scope === "all" || scope === "stores") ? (
-              <View style={styles.section}>
-                <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted}>Stores</Text>
-                {data.stores.map((store) => (
-                  <PersonRow key={store.id} name={store.name} handle={`${store.rating.toFixed(1)} rating · ${store.reviewCount} reviews`} avatarUrl={store.logoUrl} onPress={() => navigation.navigate("Store", { storeId: store.id })} />
-                ))}
-              </View>
-            ) : null}
-            {(data.brands?.length ?? 0) > 0 && (scope === "all" || scope === "brands") ? (
-              <View style={styles.section}>
-                <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted}>Brands</Text>
-                {data.brands!.map((brand) => (
-                  <BrandRow key={brand.id} brand={brand} onPress={() => navigation.navigate("BrandProfile", { brandId: brand.id })} />
-                ))}
-              </View>
-            ) : null}
-            {data.people.length > 0 && (scope === "all" || scope === "people") ? (
-              <View style={styles.section}>
-                <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted}>People</Text>
-                {data.people.map((person) => (
-                  <PersonRow key={person.id} name={person.name} handle={`@${person.username}`} avatarUrl={person.avatarUrl} verified={person.verified} onPress={() => navigation.navigate("UserProfile", { userId: person.id })} />
-                ))}
-              </View>
-            ) : null}
-            {data.products.length > 0 && (scope === "all" || scope === "products") ? (
-              <View>
-                <Text size={13} weight={500} lineHeight={16.9} color={colors.textMuted} style={styles.productsTitle}>Products</Text>
-                <ProductMasonry products={data.products} adPlacement="search" />
+            <SearchResultSections items={items} handlers={handlers} />
+            {results.hasNextPage ? (
+              <View style={styles.more}>
+                <Button title="Show more" variant="outline" loading={results.isFetchingNextPage} onPress={() => void results.fetchNextPage()} />
               </View>
             ) : null}
           </>
@@ -116,10 +131,10 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
 }
 
 const styles = StyleSheet.create({
-  searchRow: { paddingHorizontal: 16, flexDirection: "row" },
-  scopes: { paddingHorizontal: 16, paddingVertical: 12, flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  content: { paddingBottom: 24, gap: 20 },
-  section: { paddingHorizontal: 16, gap: 4 },
-  productsTitle: { marginBottom: 8, paddingHorizontal: 16 },
-  state: { marginTop: 64, paddingHorizontal: 32 },
+  searchRow: { paddingHorizontal: spacing[4], flexDirection: "row" },
+  scopes: { paddingHorizontal: spacing[4], paddingVertical: spacing[3], flexDirection: "row", flexWrap: "wrap", gap: spacing[2] },
+  content: { paddingBottom: spacing[6], gap: spacing[5] },
+  state: { marginTop: 64, paddingHorizontal: spacing[7] },
+  empty: { marginTop: 64, paddingHorizontal: spacing[7], gap: spacing[4] },
+  more: { paddingHorizontal: spacing[4] },
 });

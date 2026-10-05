@@ -23,8 +23,11 @@ import { useDeliveryAddressStore } from "@/store/deliveryAddress.store";
 import type { PaymentChannel, SavedCardDisplay } from "@/types/commerce.type";
 import type { PaymentMode } from "@/types";
 import { directChoicesFor } from "@/utils/paymentMode.util";
-import { readSavedCardDisplay, unlockSavedCardAuthorizationCode } from "@/utils/savedCard.util";
+import { readSavedCardDisplay, unlockSavedCardId } from "@/utils/savedCard.util";
+import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 const CHANNEL_LABELS: Record<PaymentChannel, { name: string; note: string }> = {
   card: { name: "Card", note: "Debit or credit card" },
@@ -60,13 +63,13 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
     mutationFn: async () => {
       const result = await ordersService.checkoutCartIntoOrders(addressId!, checkoutKey.current, directChoicesFor(cart.data?.groups ?? [], paymentModes));
       if (useSavedCard && savedCard) {
-        const code = await unlockSavedCardAuthorizationCode();
+        const code = await unlockSavedCardId();
         if (!code) throw new Error("Saved card not unlocked");
         const charge = await paymentsService.chargeSavedCard(result.payableOrderId, code, `${checkoutKey.current}-saved`);
         if (charge.status !== "action_required") return { orderId: result.payableOrderId, authorizationUrl: undefined };
         return { orderId: result.payableOrderId, authorizationUrl: charge.authorizationUrl };
       }
-      const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, "paystack", saveNewCard, `${checkoutKey.current}-pay`);
+      const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, "paystack", `${checkoutKey.current}-pay`);
       return { orderId: payment.orderId, authorizationUrl: payment.authorizationUrl };
     },
     onSuccess: (payment) => {
@@ -79,11 +82,11 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
     },
   });
 
-  if (cart.isLoading || addresses.isLoading) {
+  if (cart.isLoading || addresses.isLoading || (cart.isError && !cart.data)) {
     return (
       <Screen>
         <Header title="Checkout" paddingHorizontal={12} />
-        <ListSkeleton />
+        {cart.isError ? <ErrorState message="Couldn't load your cart." onRetry={() => cart.refetch()} retrying={cart.isRefetching} /> : <ListSkeleton />}
       </Screen>
     );
   }
@@ -93,7 +96,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
       <Header title="Checkout" paddingHorizontal={12} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Shipping address</Text>
+          <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">Shipping address</Text>
           {(addresses.data ?? []).map((address) => (
             <SelectableRow
               key={address.id}
@@ -101,38 +104,38 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
               onPress={() => chooseDeliveryAddress(address.id)}
               accessibilityLabel={`${address.fullName}, ${address.line1}, ${address.city}`}
             >
-              <Text size={14} weight={500} lineHeight={16.8}>{address.fullName}</Text>
-              <Text size={13} lineHeight={16.9} color={colors.textMuted}>
+              <Text size={typeScale.md} weight={500} lineHeight={16.8}>{address.fullName}</Text>
+              <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>
                 {formatAddressLocation(address)}
               </Text>
-              <Text size={13} lineHeight={16.9} color={colors.textMuted}>{address.phone}</Text>
+              <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>{address.phone}</Text>
             </SelectableRow>
           ))}
           <Button variant="subtle" title="Add new address" onPress={() => navigation.navigate("AddressForm")} />
         </View>
         <View style={styles.section}>
-          <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Payment method</Text>
+          <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">Payment method</Text>
           {savedCard ? (
             <SelectableRow selected={useSavedCard} onPress={() => setUseSavedCard(true)} accessibilityLabel={`Saved ${savedCard.brand} card ending ${savedCard.last4}`}>
-              <Text size={14} weight={500} lineHeight={16.8}>{savedCard.brand} ending {savedCard.last4}</Text>
-              <Text size={13} lineHeight={16.9} color={colors.textMuted}>Saved on this device. Confirmed with your fingerprint or face.</Text>
+              <Text size={typeScale.md} weight={500} lineHeight={16.8}>{savedCard.brand} ending {savedCard.last4}</Text>
+              <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>Saved on this device. Confirmed with your fingerprint or face.</Text>
             </SelectableRow>
           ) : null}
           <SelectableRow selected={!useSavedCard} onPress={() => setUseSavedCard(false)} accessibilityLabel="Pay in the secure payment window">
-            <Text size={14} weight={500} lineHeight={16.8}>{savedCard ? "Another way to pay" : "Secure payment window"}</Text>
-            <Text size={13} lineHeight={16.9} color={colors.textMuted}>
+            <Text size={typeScale.md} weight={500} lineHeight={16.8}>{savedCard ? "Another way to pay" : "Secure payment window"}</Text>
+            <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>
               {(channels.data?.channels ?? []).map((channel) => CHANNEL_LABELS[channel].name).join(", ") || "Card, bank transfer or USSD"}
             </Text>
           </SelectableRow>
           {!useSavedCard ? (
             <SelectableRow selected={saveNewCard} onPress={() => setSaveNewCard((value) => !value)} accessibilityLabel="Save this card on this device">
-              <Text size={13} lineHeight={16.9}>Save my card on this device for next time</Text>
+              <Text size={typeScale.sm} lineHeight={16.9}>Save my card on this device for next time</Text>
             </SelectableRow>
           ) : null}
         </View>
         {cart.data ? (
           <View style={styles.section}>
-            <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">How to pay each seller</Text>
+            <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">How to pay each seller</Text>
             {cart.data.groups.map((group) => (
               <PaymentModeChooser key={group.storeId} group={group} mode={paymentModes[group.storeId] ?? "escrow"} onChange={(mode) => choosePaymentMode(group.storeId, mode)} />
             ))}
@@ -140,21 +143,21 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
         ) : null}
         {cart.data ? (
           <View style={styles.section}>
-            <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Sellers and shipping</Text>
+            <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">Sellers and shipping</Text>
             {cart.data.groups.map((group) => (
               <CartSellerGroupCard key={group.storeId} group={group} showItems={false} />
             ))}
             <CartGrandTotalCard cart={cart.data} />
           </View>
         ) : null}
-        <Text size={12} lineHeight={16.8} color={colors.textMuted}>
+        <Text size={typeScale.xs} lineHeight={16.8} color={colors.textMuted}>
           Escrow orders are held until you confirm delivery. Direct orders pay the seller right away.
         </Text>
         <PurchaseTermsText />
       </ScrollView>
       <View style={styles.footer}>
         {placeOrderAndStartPayment.isError ? (
-          <Text size={12} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
+          <Text size={typeScale.xs} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
             Couldn't place your order. Please try again.
           </Text>
         ) : null}
@@ -170,7 +173,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
 }
 
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 12, paddingTop: 8, paddingBottom: 24, gap: 24 },
-  section: { gap: 12 },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 8 },
+  content: { paddingHorizontal: spacing[3], paddingTop: spacing[2], paddingBottom: spacing[6], gap: spacing[6] },
+  section: { gap: spacing[3] },
+  footer: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[6], gap: spacing[2] },
 });

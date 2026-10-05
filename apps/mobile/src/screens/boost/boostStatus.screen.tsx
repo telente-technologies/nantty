@@ -13,7 +13,10 @@ import { boostsService } from "@/services/boosts.service";
 import type { Boost } from "@/types/boost.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 const STATUS_APPEARANCE: Record<Boost["status"], { label: string; tone: StatusTone }> = {
   pending_payment: { label: "Waiting for payment", tone: "neutral" },
@@ -31,7 +34,7 @@ export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostS
     return (
       <Screen>
         <Header title="Boost" />
-        <ListSkeleton />
+        {boost.isError ? <ErrorState message="Couldn't load this boost." onRetry={() => boost.refetch()} retrying={boost.isRefetching} /> : <ListSkeleton />}
       </Screen>
     );
   }
@@ -48,19 +51,19 @@ export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostS
       <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={boost.isRefetching} onRefresh={() => boost.refetch()} tintColor={colors.primary} />}>
         <View style={styles.card}>
           <StatusPill label={STATUS_APPEARANCE[details.status].label} tone={STATUS_APPEARANCE[details.status].tone} />
-          <Text size={14} lineHeight={16.8} color={colors.textMuted}>
+          <Text size={typeScale.md} lineHeight={16.8} color={colors.textMuted}>
             Spent {formatMoneyForDisplay(details.spent)} of {formatMoneyForDisplay(details.totalBudget)}
           </Text>
           {details.startsAt && details.endsAt ? (
-            <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{formatFriendlyDate(details.startsAt)} – {formatFriendlyDate(details.endsAt)}</Text>
+            <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>{formatFriendlyDate(details.startsAt)} – {formatFriendlyDate(details.endsAt)}</Text>
           ) : null}
-          {details.rejectionReason ? <Text size={13} color={colors.error}>{details.rejectionReason}</Text> : null}
+          {details.rejectionReason ? <Text size={typeScale.sm} color={colors.error}>{details.rejectionReason}</Text> : null}
         </View>
         <View style={styles.grid}>
           {metrics.map((metric) => (
             <View key={metric.label} style={styles.metric}>
               <Text size={21} weight={600} lineHeight={25.2}>{formatCountWithThousandsSuffix(metric.value)}</Text>
-              <Text size={12} lineHeight={16.8} color={colors.textMuted}>{metric.label}</Text>
+              <Text size={typeScale.xs} lineHeight={16.8} color={colors.textMuted}>{metric.label}</Text>
             </View>
           ))}
         </View>
@@ -71,8 +74,8 @@ export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostS
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 16 },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  metric: { width: "48.5%", backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 4 },
+  content: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[8], gap: spacing[4] },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing[4], gap: spacing[2] },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: spacing[2] },
+  metric: { width: "48.5%", backgroundColor: colors.surface, borderRadius: 12, padding: spacing[4], gap: spacing[1] },
 }));

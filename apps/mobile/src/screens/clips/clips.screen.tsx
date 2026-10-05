@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ClipCommentsSheet } from "@/components/clips/clipCommentsSheet";
 import { ClipPage, type ClipEngagement } from "@/components/clips/clipPage";
+import { ClipsFeedState } from "@/components/clips/clipsFeedState";
 import { ClipsHeader } from "@/components/clips/clipsHeader";
 import { rememberClipGestureTipsSeen, shouldShowClipGestureTips } from "@/components/clips/clipGestureTipsSeen.util";
 import { GestureTipsOverlay } from "@/components/clips/gestureTipsOverlay";
@@ -218,12 +219,22 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
           )}
         />
       ) : null}
+      {clips.length === 0 ? (
+        <ClipsFeedState
+          tab={tab}
+          isPending={clipsFeed.isPending}
+          isError={clipsFeed.isError}
+          isRefetching={clipsFeed.isRefetching}
+          onRetry={() => clipsFeed.refetch()}
+          onExploreForYou={() => switchFeedTabAndScrollToTop("forYou")}
+        />
+      ) : null}
       <View style={[styles.header, { paddingTop: insets.top }]} pointerEvents="box-none">
         <ClipsHeader
           tab={tab}
           onChangeTab={switchFeedTabAndScrollToTop}
           onBack={() => navigation.navigate("Home")}
-          onSearch={() => navigation.navigate("Search", { scope: "all" })}
+          onSearch={() => navigation.navigate("Search", { scope: "global" })}
           foregroundColor={colors.white}
         />
       </View>

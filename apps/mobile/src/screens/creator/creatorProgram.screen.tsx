@@ -13,7 +13,10 @@ import { palette } from "@/constants/colors.constant";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 const BENEFITS = [
   { title: "Go live", body: "Host live shows, pin products and chat with your audience in real time." },
@@ -48,26 +51,32 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
         <View style={styles.hero}>
           {approved ? <StatusPill label="You're a Zudomart Creator" tone="success" /> : null}
           <Text size={21} weight={600} lineHeight={25.2} color={colors.white}>Turn your audience into income</Text>
-          <Text size={14} lineHeight={19.6} color={palette.primary[50]}>
+          <Text size={typeScale.md} lineHeight={19.6} color={palette.primary[50]}>
             Accepted creators can go live, receive gifts, earn commissions on sellers' products and offer paid subscriptions.
           </Text>
         </View>
 
         <View style={styles.card}>
-          <Text size={16} weight={600} lineHeight={19.2}>What you get</Text>
+          <Text size={typeScale.base} weight={600} lineHeight={19.2}>What you get</Text>
           {BENEFITS.map((benefit) => (
             <View key={benefit.title} style={styles.benefit}>
-              <Text size={14} weight={500} lineHeight={16.8}>{benefit.title}</Text>
-              <Text size={13} lineHeight={17.5} color={colors.textMuted}>{benefit.body}</Text>
+              <Text size={typeScale.md} weight={500} lineHeight={16.8}>{benefit.title}</Text>
+              <Text size={typeScale.sm} lineHeight={17.5} color={colors.textMuted}>{benefit.body}</Text>
             </View>
           ))}
         </View>
 
         {!approved ? (
           <View style={styles.card}>
-            <Text size={16} weight={600} lineHeight={19.2}>Eligibility</Text>
+            <Text size={typeScale.base} weight={600} lineHeight={19.2}>Eligibility</Text>
             {eligibility.data ? <CreatorDecisionBanner decision={eligibility.data.decision} note={eligibility.data.decisionNote} /> : null}
-            {eligibility.data ? <EligibilityChecklist requirements={eligibility.data.requirements} /> : <ListSkeleton rows={3} />}
+            {eligibility.data ? (
+              <EligibilityChecklist requirements={eligibility.data.requirements} />
+            ) : eligibility.isError ? (
+              <ErrorState compact message="Couldn't check your eligibility." onRetry={() => eligibility.refetch()} retrying={eligibility.isRefetching} />
+            ) : (
+              <ListSkeleton rows={3} />
+            )}
           </View>
         ) : null}
 
@@ -81,9 +90,9 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
-  hero: { backgroundColor: colors.primarySolid, borderRadius: 12, padding: 20, gap: 8 },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 12 },
+  content: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[6], gap: spacing[4] },
+  hero: { backgroundColor: colors.primarySolid, borderRadius: 12, padding: spacing[5], gap: spacing[2] },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing[4], gap: spacing[3] },
   benefit: { gap: 2 },
-  footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
+  footer: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[6] },
 }));

@@ -6,7 +6,12 @@ import { StatusPill, type StatusTone } from "@/components/escrow/statusPill";
 import { useUserProfileQuery } from "@/components/profile/profileQueries.hook";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Crown24Icon } from "@/components/icons";
+import { EmptyState } from "@/components/ui/emptyState";
+import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -15,6 +20,8 @@ import { creatorProgramService } from "@/services/creatorProgram.service";
 import type { CreatorSubscriptionState } from "@/types/creator.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 const STATUS_PRESENTATION: Record<CreatorSubscriptionState["status"], { label: string; tone: StatusTone }> = {
   pending: { label: "Pending", tone: "caution" },
@@ -37,7 +44,8 @@ export function MySubscriptionsScreen({ navigation }: MainScreenProps<"MySubscri
   const { colors } = useTheme();
   const styles = useStyles();
   const queryClient = useQueryClient();
-  const { data: subscriptions = [], isLoading } = useMySubscriptionsQuery();
+  const { data: subscriptions = [], isLoading, isError, refetch, isRefetching } = useMySubscriptionsQuery();
+  const refreshControl = usePullToRefresh(refetch);
   const invalidate = () => queryClient.invalidateQueries({ queryKey: creatorQueryKeys.mySubscriptions });
 
   const cancel = useMutation({ mutationFn: creatorProgramService.cancelSubscription, onSuccess: invalidate });
@@ -59,11 +67,13 @@ export function MySubscriptionsScreen({ navigation }: MainScreenProps<"MySubscri
   return (
     <Screen background={colors.surface}>
       <Header title="Subscriptions" />
-      <ScrollView contentContainerStyle={styles.content}>
-        {subscriptions.length === 0 && !isLoading ? (
-          <Text size={14} lineHeight={19.6} color={colors.textSubtle} align="center" style={styles.empty}>
-            You don't have any creator subscriptions yet.
-          </Text>
+      <ScrollView contentContainerStyle={styles.content} refreshControl={refreshControl}>
+        {isLoading ? <ListSkeleton rows={3} padding={0} /> : null}
+        {isError && subscriptions.length === 0 ? (
+          <ErrorState compact message="Couldn't load your subscriptions." onRetry={() => refetch()} retrying={isRefetching} />
+        ) : null}
+        {subscriptions.length === 0 && !isLoading && !isError ? (
+          <EmptyState compact icon={<Crown24Icon color={colors.textMuted} />} title="No subscriptions yet" body="Subscribe to a creator from their profile to unlock members-only posts." />
         ) : null}
         {subscriptions.map((subscription) => (
           <SubscriptionCard
@@ -75,8 +85,8 @@ export function MySubscriptionsScreen({ navigation }: MainScreenProps<"MySubscri
             onResume={() => resume.mutate(subscription.subscriptionId)}
           />
         ))}
-        {cancel.isError ? <Text size={12} color={colors.error}>{cancel.error.message}</Text> : null}
-        {resume.isError ? <Text size={12} color={colors.error}>{resume.error.message}</Text> : null}
+        {cancel.isError ? <Text size={typeScale.xs} color={colors.error}>{cancel.error.message}</Text> : null}
+        {resume.isError ? <Text size={typeScale.xs} color={colors.error}>{resume.error.message}</Text> : null}
       </ScrollView>
     </Screen>
   );
@@ -109,7 +119,7 @@ function SubscriptionCard({
           <Text size={15} weight={600} lineHeight={18} numberOfLines={1} onPress={onPressCreator} accessibilityRole="link">
             {creator.data?.name ?? "Creator"}
           </Text>
-          <Text size={13} lineHeight={16.9} color={colors.textSubtle} numberOfLines={1}>
+          <Text size={typeScale.sm} lineHeight={16.9} color={colors.textSubtle} numberOfLines={1}>
             {creator.data?.username ? `@${creator.data.username}` : "@"}
           </Text>
         </View>
@@ -117,11 +127,11 @@ function SubscriptionCard({
       </View>
 
       <View style={styles.detailRows}>
-        <Text size={14} lineHeight={19.6} color={colors.text}>
+        <Text size={typeScale.md} lineHeight={19.6} color={colors.text}>
           {formatMoneyForDisplay(subscription.price)} / {subscription.interval}
         </Text>
         {renewsOn ? (
-          <Text size={13} lineHeight={16.9} color={colors.textMuted}>
+          <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>
             {canCancel(subscription.status) ? `Renews ${renewsOn}` : `Ended ${renewsOn}`}
           </Text>
         ) : null}
@@ -138,9 +148,8 @@ function SubscriptionCard({
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 12 },
-  empty: { marginTop: 80 },
-  card: { borderWidth: 1, borderColor: colors.divider, borderRadius: 12, padding: 14, gap: 12 },
+  content: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[8], gap: spacing[3] },
+  card: { borderWidth: 1, borderColor: colors.divider, borderRadius: 12, padding: 14, gap: spacing[3] },
   identity: { flexDirection: "row", alignItems: "center", gap: 10 },
   names: { flex: 1, gap: 2 },
   detailRows: { gap: 2 },
