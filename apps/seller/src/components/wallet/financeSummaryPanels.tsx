@@ -3,10 +3,9 @@
 import Link from "next/link";
 
 import { FeaturePlanBadge } from "@/components/billing/planGate";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Callout, LoadingBlock, StatTile } from "@/components/ui/feedback";
 import { Panel, ResponsiveGrid } from "@/components/ui/panel";
-import { useToast } from "@/components/ui/toastProvider";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { usePlanFeatures } from "@/hooks/usePlanFeatures.hook";
 import type { FinanceSummary } from "@/types/finance.type";
@@ -53,14 +52,19 @@ export function UpcomingEscrowReleasesPanel({ summary }: { readonly summary: Fin
 
 export function AccountingExportPanel() {
   const { hasFeature } = usePlanFeatures();
-  const { showToast } = useToast();
   const canConnect = hasFeature("accounting_integrations");
   return (
     <Panel title={<span className={styles.titleWithBadge}>Export to accounting software <FeaturePlanBadge feature="accounting_integrations" /></span>} description="Send settlements, fees and payouts to QuickBooks, Xero or Zoho Books every day.">
       <div className={styles.statementRow}>
-        <Button iconName="export24" disabled={!canConnect} onClick={() => showToast("Connect your accounting software from Settings › Integrations.", "info")}>
-          Connect accounting software
-        </Button>
+        {canConnect ? (
+          <ButtonLink iconName="export24" href="/settings/integrations">
+            Connect accounting software
+          </ButtonLink>
+        ) : (
+          <ButtonLink iconName="export24" href="/settings/billing">
+            See plans
+          </ButtonLink>
+        )}
         {!canConnect ? <span className={styles.muted}>Part of the Business plan. You can still download statements and reports any time.</span> : null}
       </div>
     </Panel>

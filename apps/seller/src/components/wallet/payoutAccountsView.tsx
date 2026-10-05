@@ -6,7 +6,7 @@ import { AddPayoutAccountDialog } from "@/components/wallet/addPayoutAccountDial
 import { WalletTabs } from "@/components/wallet/walletTabs";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button } from "@/components/ui/button";
-import { Callout, EmptyState, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, EmptyState, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -63,7 +63,7 @@ export function PayoutAccountsView({ embedded = false }: { readonly embedded?: b
       {embedded ? null : <WalletTabs />}
       {!canManageAccounts ? <Callout tone="info">Only the store owner can add or remove payout accounts.</Callout> : null}
       <Panel title={embedded ? "Payout accounts" : undefined} description={embedded ? "Where withdrawals are sent. Account numbers are always partly hidden." : undefined} actions={embedded ? addAccountButton : undefined}>
-        {accountsQuery.errorMessage ? <Callout tone="error">{accountsQuery.errorMessage}</Callout> : null}
+        {accountsQuery.errorMessage ? <ErrorCallout message={accountsQuery.errorMessage} onRetry={accountsQuery.reload} /> : null}
         {!accounts && accountsQuery.isLoading ? <LoadingBlock /> : null}
         {accounts && accounts.length === 0 ? <EmptyState iconName="creditCard24" title="No payout accounts yet" description="Add the bank account you want withdrawals sent to." /> : null}
         {accounts && accounts.length > 0 ? (

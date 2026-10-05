@@ -1,7 +1,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .toolbar {
@@ -16,7 +16,7 @@
 .document {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-5);
   padding: 28px;
   background: var(--surface-card);
   border: 1px solid var(--divider-soft);
@@ -27,8 +27,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 16px;
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
   border-bottom: 2px solid var(--ink-strong);
 }
 
@@ -47,29 +47,29 @@
   flex-direction: column;
   gap: 2px;
   text-align: right;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .muted {
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .summary div {
-  padding: 12px;
+  padding: var(--space-3);
   border-radius: var(--radius-medium);
   background: var(--surface-sunken);
 }
 
 .summary dt {
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .summary dd {
@@ -87,7 +87,7 @@
 
 .table th,
 .table td {
-  padding: 8px 6px;
+  padding: var(--space-2) 6px;
   border-bottom: 1px solid var(--divider-soft);
   text-align: left;
   vertical-align: top;
@@ -115,12 +115,12 @@
 
 .footnote {
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 @media (max-width: 640px) {
   .document {
-    padding: 16px;
+    padding: var(--space-4);
     overflow-x: auto;
   }
 

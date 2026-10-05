@@ -1,5 +1,6 @@
 "use client";
 
+import { ZudomartWordmark } from "@zudomart/web-kit";
 import Link from "next/link";
 
 import { formatStatementMonthLabel, walletTransactionKindLabels } from "@/components/wallet/walletPresentation.constant";
@@ -31,7 +32,9 @@ export function StatementDocumentView({ month }: { readonly month: string }) {
         <article className={styles.document} aria-label={`Statement for ${formatStatementMonthLabel(month, locale)}`}>
           <header className={styles.header}>
             <div>
-              <p className={styles.brand}>Zudomart</p>
+              <div className={styles.brand}>
+                <ZudomartWordmark height={26} />
+              </div>
               <h1 className={styles.title}>Wallet statement</h1>
               <p className={styles.muted}>{formatStatementMonthLabel(month, locale)}</p>
             </div>

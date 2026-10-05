@@ -34,8 +34,8 @@ export function WithdrawView() {
   const balancesQuery = useSellerQuery<WalletBalances>("/seller/wallet/balances");
   const settingsQuery = useSellerQuery<WalletPayoutSettings>("/seller/wallet/payout-settings");
   const accountsQuery = useSellerQuery<CursorPage<PayoutAccount>>("/seller/wallet/payout-accounts");
-  const onboardingQuery = useSellerQuery<PayoutOnboardingState>("/seller/payout-onboarding");
-  const feesQuery = useSellerQuery<PayoutFees>("/seller/payout-onboarding/fees");
+  const onboardingQuery = useSellerQuery<PayoutOnboardingState>("/payments/payout-onboarding/me");
+  const feesQuery = useSellerQuery<PayoutFees>("/payments/payout-fees");
   const payoutsQuery = useSellerQuery<CursorPage<Payout>>("/seller/wallet/payouts", { limit: 50 });
   const [amountText, setAmountText] = useState("");
   const [amountMinor, setAmountMinor] = useState<number | null>(null);

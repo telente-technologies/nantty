@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { MoneyField, SelectField } from "@/components/ui/formFields";
 import { Panel } from "@/components/ui/panel";
 import { useToast } from "@/components/ui/toastProvider";
@@ -95,7 +95,7 @@ export function PayoutScheduleForm() {
   const schedule = scheduleQuery.data;
   return (
     <Panel title="Withdrawal preferences" description="Withdraw by hand whenever you like, or let Zudomart send your available balance to your bank on a schedule.">
-      {scheduleQuery.errorMessage ? <Callout tone="error">{scheduleQuery.errorMessage}</Callout> : null}
+      {scheduleQuery.errorMessage ? <ErrorCallout message={scheduleQuery.errorMessage} onRetry={scheduleQuery.reload} /> : null}
       {schedule && accountsQuery.data ? (
         <PayoutScheduleFormFields key={`${schedule.mode}-${schedule.nextRunAt ?? ""}`} schedule={schedule} accounts={accountsQuery.data.data} onSaved={(saved) => scheduleQuery.replaceData(() => saved)} />
       ) : !scheduleQuery.errorMessage ? (

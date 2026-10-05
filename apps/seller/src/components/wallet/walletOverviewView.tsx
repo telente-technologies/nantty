@@ -11,7 +11,7 @@ import { useWalletCursorPages } from "@/components/wallet/useWalletCursorPages.h
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { ButtonLink } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/dataTable";
-import { Callout, EmptyState, LoadingBlock } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { DateRangeControl, FilterBar, type DateRangeValue } from "@/components/ui/filterControls";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
@@ -93,7 +93,7 @@ export function WalletOverviewView() {
       />
       <WalletTabs />
       <PayoutSetupBanner />
-      {balancesQuery.data ? <WalletBalanceCards balances={balancesQuery.data} /> : balancesQuery.errorMessage ? <Callout tone="error">{balancesQuery.errorMessage}</Callout> : <LoadingBlock label="Loading balances" />}
+      {balancesQuery.data ? <WalletBalanceCards balances={balancesQuery.data} /> : balancesQuery.errorMessage ? <ErrorCallout message={balancesQuery.errorMessage} onRetry={balancesQuery.reload} /> : <LoadingBlock label="Loading balances" />}
       <FinanceSummarySection summary={summaryQuery.data} isLoading={summaryQuery.isLoading} errorMessage={summaryQuery.errorMessage} onRetry={summaryQuery.reload} />
       <div className={styles.overviewGrid}>
         <WalletTransactionsPanel />
