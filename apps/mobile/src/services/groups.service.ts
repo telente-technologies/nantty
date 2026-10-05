@@ -4,7 +4,7 @@ import { api } from "./apiClient.service";
 
 export const groupsService = {
   createGroupConversation: (input: NewGroupConversationInput) => api.post<Conversation>("/api/v1/conversations/groups", input),
-  fetchConversationMembers: (conversationId: string) => api.get<ConversationMember[]>(`/api/v1/conversations/${conversationId}/members`),
+  fetchConversationMembers: (conversationId: string) => api.getList<ConversationMember>(`/api/v1/conversations/${conversationId}/members`),
   addMembersToGroup: (conversationId: string, userIds: readonly string[]) =>
     api.post<ConversationMember[]>(`/api/v1/conversations/${conversationId}/members`, { userIds }),
   removeMemberFromGroup: (conversationId: string, userId: string) =>

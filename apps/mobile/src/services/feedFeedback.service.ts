@@ -7,7 +7,7 @@ import { api } from "./apiClient.service";
 export type FeedFeedbackType = "hide" | "not_interested";
 
 export const feedFeedbackService = {
-  sendFeedFeedbackForPost: (postId: ID, type: FeedFeedbackType) => api.post<void>("/api/v1/feeds/feedback", { postId, type }),
+  sendFeedFeedbackForPost: (postId: ID, type: FeedFeedbackType) => api.post<void>("/api/v1/feeds/feedback", { postId, kind: type === "not_interested" ? "notInterested" : "hide" }),
 };
 
 const FEED_QUERY_KEY_PREFIXES_THAT_LIST_POSTS = [["feed"], ["clips"]] as const;
