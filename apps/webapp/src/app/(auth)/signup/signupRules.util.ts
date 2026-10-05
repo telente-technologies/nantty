@@ -78,12 +78,6 @@ export function isValidUsername(value: string): boolean {
   return /^[A-Za-z0-9_.]{3,20}$/.test(value);
 }
 
-export function describeCodeDestination(destination: string): string {
-  if (!destination.startsWith("+234")) return destination;
-  const digits = destination.slice(4);
-  return `+234 ${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
-}
-
 export interface SignUpHeading {
   readonly title: string;
   readonly subtitle: string;
@@ -91,7 +85,7 @@ export interface SignUpHeading {
 
 export function describeSignUpStepHeading(step: SignUpStep, destination: string, isCustomisingFeed: boolean): SignUpHeading {
   if (step === "contact") return { title: "What’s your email?", subtitle: "We’ll send you a 6-digit code to confirm it’s you." };
-  if (step === "verify") return { title: "Enter 6-digit code", subtitle: `Your code was sent to ${describeCodeDestination(destination)}` };
+  if (step === "verify") return { title: "Enter 6-digit code", subtitle: `Your code was sent to ${destination}` };
   if (step === "birthday") return { title: "When’s your birthday?", subtitle: "Your birthday won’t be shown publicly." };
   if (step === "password") return { title: "Create password", subtitle: "Choose a strong password to protect your account." };
   if (step === "username") {

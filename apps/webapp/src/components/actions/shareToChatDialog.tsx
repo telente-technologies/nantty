@@ -26,14 +26,12 @@ interface ShareToChatDialogProps {
 export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareToChatDialogProps) {
   const queryClient = useQueryClient();
   const [selectedConversationIds, setSelectedConversationIds] = useState<readonly string[]>([]);
-  const [note, setNote] = useState("");
   const conversationsQuery = useQuery({ queryKey: ["conversations", "all"], queryFn: () => messagesService.fetchConversationList("all"), enabled: isOpen, retry: false });
   const shareMutation = useMutation({
-    mutationFn: () => chatSharesService.shareIntoChats(selectedConversationIds, kind, referenceId, note.trim()),
+    mutationFn: () => chatSharesService.shareIntoChats(selectedConversationIds, kind, referenceId),
     onSuccess: (result) => {
       showToast({ text: result.sentCount === 1 ? "Sent to 1 chat" : `Sent to ${result.sentCount} chats`, actionLabel: "Open messages", actionHref: "/chats" });
       setSelectedConversationIds([]);
-      setNote("");
       void queryClient.invalidateQueries({ queryKey: ["conversations"] });
       onClose();
     },
@@ -85,10 +83,6 @@ export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareT
           ))}
         </fieldset>
       )}
-      <label className={styles.label} htmlFor="share-note">
-        Add a note (optional)
-      </label>
-      <textarea id="share-note" className={styles.textarea} maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} />
       {shareMutation.isError ? (
         <p className={styles.error} role="alert">
           {readErrorMessageForDisplay(shareMutation.error)}

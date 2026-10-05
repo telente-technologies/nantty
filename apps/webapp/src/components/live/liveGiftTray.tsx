@@ -30,7 +30,7 @@ export function LiveGiftTray({ liveId, hostName }: { readonly liveId: string; re
     onSuccess: (receipt, gift) => {
       queryClient.setQueryData(["coins", "balance"], { coins: receipt.coinBalance });
       void queryClient.invalidateQueries({ queryKey: ["live", liveId, "comments"] });
-      showToast({ text: `Sent ${receipt.quantity > 1 ? `${receipt.quantity} × ` : ""}${gift.emoji} ${gift.name} to ${hostName}` });
+      showToast({ text: `Sent ${receipt.quantity > 1 ? `${receipt.quantity} × ` : ""}${gift.emoji ?? "🎁"} ${gift.name} to ${hostName}` });
     },
     onError: (error, gift) => {
       if (error instanceof WebappRequestError && error.code === "INSUFFICIENT_COINS") {
@@ -71,7 +71,7 @@ export function LiveGiftTray({ liveId, hostName }: { readonly liveId: string; re
               onClick={() => requireAuthThen(() => sendGiftMutation.mutate(gift), `Sign in to send gifts to ${hostName}.`)}
             >
               <span className={panelStyles.giftEmoji} aria-hidden="true">
-                {gift.emoji}
+                {gift.emoji ?? "🎁"}
               </span>
               <span className={panelStyles.giftName}>{gift.name}</span>
               <span className={panelStyles.giftPrice}>

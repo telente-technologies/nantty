@@ -15,10 +15,10 @@ import styles from "./actionDialogs.module.css";
 const reportReasons = [
   { value: "spam", label: "Spam or misleading" },
   { value: "scam", label: "Scam or fraud" },
-  { value: "counterfeit", label: "Counterfeit or fake product" },
+  { value: "prohibited_items", label: "Counterfeit or fake product" },
   { value: "harassment", label: "Harassment or bullying" },
   { value: "hate", label: "Hate speech or symbols" },
-  { value: "nudity", label: "Nudity or sexual content" },
+  { value: "sexual_content", label: "Nudity or sexual content" },
   { value: "violence", label: "Violence or dangerous acts" },
   { value: "intellectual_property", label: "Copyright or trademark" },
   { value: "other", label: "Something else" },

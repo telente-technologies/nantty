@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
-import { currentPolicyVersion } from "@/config/legalLinks.config";
 import { privacyService } from "@/services/privacy.service";
 import type { ConsentKey, ConsentRecord } from "@/types/privacy.type";
 
@@ -25,7 +24,7 @@ export function ConsentChoicesSection() {
   const queryClient = useQueryClient();
   const consentsQuery = useQuery({ queryKey: consentsQueryKey, queryFn: privacyService.fetchMyConsents });
   const updateConsent = useMutation({
-    mutationFn: ({ key, enabled }: { key: ConsentKey; enabled: boolean }) => privacyService.updateMyConsents({ policyVersion: currentPolicyVersion, consents: { [key]: enabled } }),
+    mutationFn: ({ key, enabled }: { key: ConsentKey; enabled: boolean }) => privacyService.updateMyConsents({ consents: { [key]: enabled } }),
     onMutate: async ({ key, enabled }) => {
       await queryClient.cancelQueries({ queryKey: consentsQueryKey });
       const previous = queryClient.getQueryData<ConsentRecord>(consentsQueryKey);
