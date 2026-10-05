@@ -14,7 +14,6 @@ import (
 
 const memberInsertChunk = 2000
 
-// ResolveMembers asks the owning service for the people behind an engagement audience.
 func ResolveMembers(ctx context.Context, deployed *container.Container, account *ent.AdAccount, request dtos.CreateAudienceRequest) ([]string, error) {
 	source := deployed.AudienceSource
 	switch request.Type {
@@ -26,7 +25,6 @@ func ResolveMembers(ctx context.Context, deployed *container.Container, account 
 	return source.Followers(ctx, account.OwnerUserID.String())
 }
 
-// StoreMembers replaces the audience's members and sets its final status; only matched user ids are kept.
 func StoreMembers(ctx context.Context, client *ent.Client, audienceId uuid.UUID, userIds []string) (int64, error) {
 	unique := make(map[uuid.UUID]struct{}, len(userIds))
 	for _, raw := range userIds {
@@ -64,7 +62,6 @@ func FinishBuilding(ctx context.Context, client *ent.Client, row *ent.AdCustomAu
 	return update.Save(ctx)
 }
 
-// AudienceIdsContaining lists ready audiences the user belongs to, for targeting at serve time.
 func AudienceIdsContaining(ctx context.Context, client *ent.Client, userId uuid.UUID) ([]string, error) {
 	memberships, err := client.AdAudienceMember.Query().Where(adaudiencemember.UserID(userId)).Select(adaudiencemember.FieldAudienceID).Limit(500).All(ctx)
 	if err != nil || len(memberships) == 0 {

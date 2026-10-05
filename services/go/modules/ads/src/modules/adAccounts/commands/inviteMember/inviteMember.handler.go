@@ -2,7 +2,6 @@ package invitemember
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,6 +10,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent"
 	"zudomart/modules/ads/src/generated/ent/adaccountinvite"
 	"zudomart/modules/ads/src/generated/ent/adaccountmember"
+	"zudomart/modules/ads/src/interfaces"
 	"zudomart/modules/ads/src/modules/adAccounts/dtos"
 	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
 	"zudomart/modules/ads/src/services"
@@ -26,12 +26,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdAcc
 	if _, _, err := accountservices.LoadAccountForPermission(ctx, deployed, command.AccountId, command.ActorUserId, services.PermissionMembersManage); err != nil {
 		return dtos.AdAccountInvite{}, err
 	}
-	invitee, found, err := deployed.Users.FindUserByUsername(ctx, strings.TrimPrefix(strings.TrimSpace(command.Request.Username), "@"))
+	invitee, err := findInvitee(ctx, deployed, command.Request)
 	if err != nil {
 		return dtos.AdAccountInvite{}, err
-	}
-	if !found {
-		return dtos.AdAccountInvite{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "username", Message: "No Zudomart user has that username."}})
 	}
 	inviteeId := uuid.MustParse(invitee.Id)
 	if err := handler.rejectExistingMemberOrInvite(ctx, command.AccountId, inviteeId); err != nil {
@@ -52,6 +49,22 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdAcc
 		return dtos.AdAccountInvite{}, err
 	}
 	return accountservices.PresentInvite(saved), nil
+}
+
+func findInvitee(ctx context.Context, deployed *container.Container, request dtos.InviteMemberRequest) (interfaces.UserSummary, error) {
+	identifier, byEmail := InviteeIdentifier(request)
+	lookup, path, message := deployed.Users.FindUserByUsername, "username", "No Zudomart user has that username."
+	if byEmail {
+		lookup, path, message = deployed.Users.FindUserByEmail, "email", "No Zudomart user has that email. Ask them to sign up first, then invite them."
+	}
+	invitee, found, err := lookup(ctx, identifier)
+	if err != nil {
+		return invitee, err
+	}
+	if !found {
+		return invitee, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: path, Message: message}})
+	}
+	return invitee, nil
 }
 
 func (handler Handler) rejectExistingMemberOrInvite(ctx context.Context, accountId, inviteeId uuid.UUID) error {

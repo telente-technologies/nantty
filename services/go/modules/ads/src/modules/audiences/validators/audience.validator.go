@@ -76,7 +76,6 @@ func validateRetention(days *int) []httpserver.ValidationIssue {
 	return nil
 }
 
-// ValidateCustomerList accepts only SHA-256 hex digests; the returned list is deduplicated.
 func ValidateCustomerList(request dtos.CustomerListRequest) ([]string, error) {
 	issues := validateName(request.Name)
 	if request.IdentifierType != "email" && request.IdentifierType != "phone" {

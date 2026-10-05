@@ -108,5 +108,6 @@ type ChangeRoleRequest struct {
 
 type InviteMemberRequest struct {
 	Username string `json:"username"`
+	Email    string `json:"email"`
 	Role     string `json:"role"`
 }

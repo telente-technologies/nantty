@@ -2,7 +2,6 @@ package services
 
 const MinimumTargetableAudience int64 = 100
 
-// RoundToRange turns an exact count into a coarse range so small audiences cannot be probed.
 func RoundToRange(exact int64) (lower, upper int64) {
 	if exact <= 0 {
 		return 0, 100

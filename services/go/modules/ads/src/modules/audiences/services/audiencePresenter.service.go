@@ -26,7 +26,6 @@ func PresentAudience(row *ent.AdCustomAudience, usedInAdSets int) dtos.CustomAud
 	return audience
 }
 
-// CountAdSetsUsing counts ad sets that include or exclude the audience.
 func CountAdSetsUsing(ctx context.Context, deployed *container.Container, accountId, audienceId uuid.UUID) int {
 	var count int
 	err := deployed.Database.QueryRowContext(ctx, `SELECT count(*) FROM ad_groups WHERE account_id = $1 AND status <> 'completed' AND (audience->'customAudienceIds' @> to_jsonb($2::text) OR audience->'excludedCustomAudienceIds' @> to_jsonb($2::text))`, accountId, audienceId.String()).Scan(&count)

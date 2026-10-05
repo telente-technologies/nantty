@@ -16,7 +16,6 @@ import (
 
 type Handler struct{ Container *container.Container }
 
-// Execute matches the uploaded hashes and keeps only the matched user ids. The hashes themselves are never stored or logged.
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.CustomAudience, error) {
 	deployed := handler.Container
 	hashes, err := validators.ValidateCustomerList(command.Request)

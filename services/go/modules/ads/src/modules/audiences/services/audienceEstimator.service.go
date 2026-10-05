@@ -53,7 +53,6 @@ func locationAudience(locations []types.LocationTarget, population map[string]in
 	return total
 }
 
-// ModelAudienceSize returns a deterministic size from configured country populations and the targeting filters.
 func ModelAudienceSize(spec types.AudienceSpec, inputs EstimateInputs) int64 {
 	size := locationAudience(spec.Locations, inputs.Population) - locationAudience(spec.ExcludedLocations, inputs.Population)*0.9
 	size *= 0.9 * float64(max(spec.AgeMax-spec.AgeMin+1, 1)) / 48
