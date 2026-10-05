@@ -8,6 +8,7 @@ import { blockRepository } from "../../../blocks/repositories/block.repository.j
 import { findDirectPeerId, requireConversationMember } from "../../../conversations/services/conversationAccess.service.js";
 import { conversationRepository } from "../../../conversations/repositories/conversation.repository.js";
 import { prepareMentionsForWrite } from "../../../mentions/services/mentionWrite.service.js";
+import { deviceKeyRepository } from "../../../messagingKeys/repositories/deviceKey.repository.js";
 import type { MessageView } from "../../models/message.model.js";
 import { messageRepository } from "../../repositories/message.repository.js";
 import { applyMessageDelivery } from "../../services/messageDelivery.service.js";
@@ -29,6 +30,9 @@ export function createSendMessageHandler(context: HandlerContext): Handler<SendM
       if (existing !== null) return (await buildMessageViews(context, command.senderId, [existing], { peerLastReadAt: null, isDirect: peerId !== undefined }))[0] as MessageView;
     }
     const validated = validateOutgoingMessage(command.message, now);
+    if (validated.deviceId !== null && (await deviceKeyRepository.find(db, command.senderId, validated.deviceId)) === null) {
+      throw forbidden("DEVICE_NOT_REGISTERED", "This device is not registered for secure chat. Sign in again on this device.");
+    }
     const verifiedMedia = validated.media === undefined ? undefined : await verifyChatMediaOwnership(context.chatMedia, command.senderId, validated.kind, validated.media.mediaId);
     const mediaDuration = verifiedMedia?.durationSeconds ?? validated.media?.durationSeconds;
     const mentions = await prepareMentionsForWrite(context, {
@@ -56,7 +60,7 @@ export function createSendMessageHandler(context: HandlerContext): Handler<SendM
           ...(validated.mediaExpiresAt === null ? {} : { mediaExpiresAt: validated.mediaExpiresAt }),
           ...(validated.poll === null ? {} : { pollQuestion: validated.poll.question, pollAllowMultiple: validated.poll.allowMultipleAnswers }),
         }, validated.poll?.options ?? []);
-        const envelope = { id: message.id, conversationId: message.conversationId, senderId: message.senderId, kind: message.kind, createdAt: message.createdAt.toISOString(), encryption: { deviceId: message.deviceId, ciphertext: message.ciphertext, protocol: message.protocol }, mentions: mentions.entities };
+        const envelope = { id: message.id, conversationId: message.conversationId, senderId: message.senderId, kind: message.kind, createdAt: message.createdAt.toISOString(), encryption: { deviceId: message.deviceId, ciphertext: message.ciphertext, protocol: message.protocol }, linkPreview: message.linkPreviewEnvelope, mentions: mentions.entities };
         await appendDomainEventsToOutbox(transaction, await applyMessageDelivery(transaction, { conversation, message, mentions, isNewConversation: priorMessageCount === 0, now, messageEnvelope: envelope, actor }));
         return message.id;
       });

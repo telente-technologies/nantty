@@ -13,6 +13,7 @@ const rulesByMessageKind: Partial<Record<MessageKindName, ChatMediaRule>> = {
   video: { purposes: ["chat"], mediaKind: "video" },
   document: { purposes: ["chat", "document"], mediaKind: "document" },
 };
+export const encryptedMediaKind = "encrypted";
 const usableStatuses = new Set(["uploaded", "processing", "ready"]);
 
 export interface VerifiedChatMedia {
@@ -28,7 +29,8 @@ export async function verifyChatMediaOwnership(access: ChatMediaAccess | undefin
   if (access === undefined) throw new SocialError(503, "MEDIA_UNAVAILABLE", "Media messages are temporarily unavailable.");
   const media = await access.describe(mediaId);
   if (media === undefined || media.ownerId !== senderId) throw forbidden("MEDIA_NOT_OWNED", "You can only send media you uploaded.");
-  if (!rule.purposes.includes(media.purpose) || media.kind !== rule.mediaKind) throw unprocessable("MEDIA_TYPE_MISMATCH", `This upload can't be sent as a ${kind} message.`);
+  const kindMatches = media.kind === rule.mediaKind || (media.kind === encryptedMediaKind && media.purpose !== "document");
+  if (!rule.purposes.includes(media.purpose) || !kindMatches) throw unprocessable("MEDIA_TYPE_MISMATCH", `This upload can't be sent as a ${kind} message.`);
   if (!usableStatuses.has(media.status)) throw unprocessable("MEDIA_NOT_USABLE", "This upload can't be sent.");
   return { mediaId: media.id, ready: media.status === "ready", sizeBytes: media.sizeBytes, durationSeconds: media.durationSeconds };
 }
