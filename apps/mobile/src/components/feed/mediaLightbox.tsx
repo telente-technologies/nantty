@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Animated, FlatList, PanResponder, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Cancel20Icon } from "@/components/icons";
+import { BoxArrowDown24Icon, Cancel20Icon } from "@/components/icons";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 import { mediaGlass } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
@@ -17,9 +17,10 @@ export interface MediaLightboxProps {
   readonly images: readonly Media[];
   readonly initialIndex: number;
   readonly onClose: () => void;
+  readonly onDownloadImage?: (media: Media) => void;
 }
 
-export function MediaLightbox({ images, initialIndex, onClose }: MediaLightboxProps) {
+export function MediaLightbox({ images, initialIndex, onClose, onDownloadImage }: MediaLightboxProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { width, height } = useWindowDimensions();
@@ -69,10 +70,17 @@ export function MediaLightbox({ images, initialIndex, onClose }: MediaLightboxPr
           <Pressable accessibilityRole="button" accessibilityLabel="Close image viewer" hitSlop={12} onPress={onClose} style={styles.close}>
             <Cancel20Icon color={colors.white} />
           </Pressable>
-          <View style={styles.counter}>
-            <Text size={13} lineHeight={16} color={colors.white}>
-              {activeIndex + 1} / {images.length}
-            </Text>
+          <View style={styles.trailing}>
+            <View style={styles.counter}>
+              <Text size={13} lineHeight={16} color={colors.white}>
+                {activeIndex + 1} / {images.length}
+              </Text>
+            </View>
+            {onDownloadImage && images[activeIndex] ? (
+              <Pressable accessibilityRole="button" accessibilityLabel="Download image" hitSlop={12} onPress={() => onDownloadImage(images[activeIndex] as Media)} style={styles.close}>
+                <BoxArrowDown24Icon size={20} color={colors.white} />
+              </Pressable>
+            ) : null}
           </View>
         </View>
       </View>
@@ -224,6 +232,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  trailing: { flexDirection: "row", alignItems: "center", gap: 10 },
   counter: {
     paddingHorizontal: 10,
     height: 28,

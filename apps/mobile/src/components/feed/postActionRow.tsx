@@ -3,9 +3,11 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { BookmarkActionIcon, LikeActionIcon, ReplyActionIcon, RepostActionIcon, ShareActionIcon, ViewsActionIcon } from "@/components/icons";
-import { Dialog } from "@/components/ui/dialog";
+import { BottomSheet } from "@/components/ui/bottomSheet";
+import { Text } from "@/components/ui/text";
 import { useSaveToggle } from "@/hooks/useSaveToggle.hook";
 import type { MainStackParamList } from "@/navigation/navigation.types";
+import { useTheme } from "@/theme";
 import { saveTargetForPost, type Post } from "@/types";
 
 import { PostActionButton } from "./postActionButton";
@@ -26,6 +28,7 @@ export interface PostActionRowProps {
 
 export function PostActionRow({ post, isOwnPost, onToggleLike, onPressComments, onRepost, onShare, onPressAnalytics, likePopKey }: PostActionRowProps) {
   const [viewsInfoOpen, setViewsInfoOpen] = useState(false);
+  const { colors } = useTheme();
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const openViewsHelpArticle = () => {
     setViewsInfoOpen(false);
@@ -63,16 +66,17 @@ export function PostActionRow({ post, isOwnPost, onToggleLike, onPressComments, 
         renderIcon={(ink) => <BookmarkActionIcon size={ICON_SIZE} color={ink} filled={isSaved} />}
       />
       <PostActionButton label="Share" tone="reply" onPress={onShare} renderIcon={(ink) => <ShareActionIcon size={ICON_SIZE} color={ink} />} />
-      <Dialog
+      <BottomSheet
         visible={viewsInfoOpen}
         onClose={() => setViewsInfoOpen(false)}
         title="Views"
-        message="Times this post was seen. A view counts each time it appears on someone else's screen, including repeat views. The author's own views don't count."
-        actions={[
-          { label: "Learn more", style: "primary", onPress: openViewsHelpArticle, accessibilityHint: "Opens the help article About views" },
-          { label: "Close", style: "secondary", onPress: () => setViewsInfoOpen(false) },
-        ]}
-      />
+        scrollable
+        footerActions={[{ label: "Learn more", style: "primary", onPress: openViewsHelpArticle, accessibilityHint: "Opens the help article About views" }]}
+      >
+        <Text size={14} lineHeight={20} color={colors.textMuted} maxFontSizeMultiplier={1.8}>
+          Times this post was seen. A view counts each time it appears on someone else&apos;s screen, including repeat views. The author&apos;s own views don&apos;t count.
+        </Text>
+      </BottomSheet>
     </View>
   );
 }

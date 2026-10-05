@@ -19,7 +19,6 @@ interface SponsoredCarouselProps {
   readonly itemId: ID;
 }
 
-/** Horizontal ad cards. Rendered inside an ad post only, which is excluded from the feed swipe-to-like gesture so sideways drags scroll the cards. */
 export function SponsoredCarousel({ sponsored, placement, itemId }: SponsoredCarouselProps) {
   const { colors } = useTheme();
   const styles = useStyles();

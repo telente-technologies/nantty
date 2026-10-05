@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, type AccessibilityActionEvent, type AccessibilityActionInfo } from "react-native";
 
 import { MentionText } from "@/components/mentions/mentionText";
-import { DotsThreeVertical24Icon, Group1256Icon, ReplyActionIcon } from "@/components/icons";
+import { BoxArrowDown24Icon, DotsThreeVertical24Icon, Group1256Icon, ReplyActionIcon } from "@/components/icons";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
@@ -31,6 +31,9 @@ import { saveTargetForPost } from "@/types";
 import { webAppLinks } from "@/config/webAppLinks.config";
 import { PostLinkCard } from "./postLinkCard";
 import { TaggedPeopleLine } from "@/components/taggedPeople/taggedPeopleLine";
+import { canOfferDownloadForPost, findFirstDownloadableMedia, isDownloadableMedia } from "@/components/downloads/downloadablePostMedia.util";
+import { useMediaDownloadStore } from "@/store/mediaDownload.store";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
 const DOUBLE_TAP_WINDOW_MS = 280;
 
@@ -75,6 +78,15 @@ export function PostCard(props: PostCardProps) {
       setHasOpenedOptionsSheet(true);
       setIsOptionsSheetOpen(true);
     });
+  const startBrandedDownload = useMediaDownloadStore((state) => state.startBrandedDownload);
+  const canDownload = canOfferDownloadForPost(post);
+  const downloadMedia = (media: Post["media"][number] | undefined) => {
+    if (isDownloadableMedia(media)) requireAuthThen(() => startBrandedDownload(post.id, media), null, "download");
+  };
+  const optionActions = [
+    ...(canDownload ? [{ label: "Download", icon: <BoxArrowDown24Icon size={20} />, onPress: () => downloadMedia(findFirstDownloadableMedia(post)) }] : []),
+    ...(isOwnPost ? [{ label: "Edit reply settings", icon: <ReplyActionIcon size={20} />, onPress: () => setReplySettingsPost(post) }] : []),
+  ];
   const [likeBurstKey, setLikeBurstKey] = useState(0);
   const lastBodyTapAt = useRef(0);
   const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -191,6 +203,7 @@ export function PostCard(props: PostCardProps) {
                 onPressViewProducts={post.products.length > 0 ? props.onPressViewProducts : undefined}
                 saveTarget={saveTargetForPost(post)}
                 savedAccordingToServer={post.bookmarked}
+                onDownloadMedia={canDownload ? downloadMedia : undefined}
               />
             </View>
           </SponsoredMedia>
@@ -230,7 +243,7 @@ export function PostCard(props: PostCardProps) {
               : null
           }
           onClose={() => setIsOptionsSheetOpen(false)}
-          additionalActions={isOwnPost ? [{ label: "Edit reply settings", icon: <ReplyActionIcon size={20} />, onPress: () => setReplySettingsPost(post) }] : undefined}
+          additionalActions={optionActions.length > 0 ? optionActions : undefined}
         />
       ) : null}
       {isOwnPost ? <ReplySettingsSheet post={replySettingsPost} onClose={() => setReplySettingsPost(null)} /> : null}

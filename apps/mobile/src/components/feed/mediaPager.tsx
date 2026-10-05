@@ -22,12 +22,13 @@ export interface MediaPagerProps {
   readonly saveTarget?: SaveTarget;
   readonly savedAccordingToServer?: boolean;
   readonly overlay?: ReactNode;
+  readonly onDownloadMedia?: (media: Media) => void;
 }
 
 const MAXIMUM_PAGER_WIDTH = 393;
 const DEFAULT_PHOTO_PAGER_HEIGHT = 335;
 
-export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer, overlay }: MediaPagerProps) {
+export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer, overlay, onDownloadMedia }: MediaPagerProps) {
   const styles = useStyles();
   const { width: windowWidth } = useWindowDimensions();
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
@@ -149,7 +150,7 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
         savedAccordingToServer={savedAccordingToServer}
       />
       {openedImageIndex !== null ? (
-        <MediaLightbox images={imagePages} initialIndex={openedImageIndex} onClose={() => setOpenedImageIndex(null)} />
+        <MediaLightbox images={imagePages} initialIndex={openedImageIndex} onClose={() => setOpenedImageIndex(null)} onDownloadImage={onDownloadMedia} />
       ) : null}
     </View>
   );

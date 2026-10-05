@@ -15,7 +15,7 @@ export function ViewQuotesLink({ post }: { readonly post: Post }) {
   if (quotes <= 0) return null;
   const label = `View quotes (${formatCountWithThousandsSuffix(quotes)})`;
   return (
-    <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={() => navigation.navigate("PostQuotes", { postId: post.id })} hitSlop={6} style={styles.link}>
+    <Pressable accessibilityRole="link" accessibilityLabel={label} onPress={() => navigation.navigate("PostQuotes", { postId: post.id })} hitSlop={14} style={styles.link}>
       <Text size={13} weight={500} lineHeight={18} color={colors.primary}>
         {label}
       </Text>

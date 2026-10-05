@@ -15,7 +15,6 @@ interface SponsoredMediaProps {
 
 const isMediaTappable = (sponsored: SponsoredPlacement) => Boolean(sponsored.mediaClickable) || sponsored.adType === "promoted_post" || sponsored.adType === "app_install";
 
-/** Wraps the media of an ad post: swaps in the carousel, or makes the media itself open the destination. Organic posts pass straight through. */
 export function SponsoredMedia({ sponsored, placement, itemId, children }: SponsoredMediaProps) {
   const navigation = useNavigation();
   if (!sponsored) return <>{children}</>;
