@@ -23,6 +23,7 @@ import { RunDigestBatchHandler } from "./modules/digests/commands/runDigestBatch
 import { DeliveryPrismaRepository } from "./modules/delivery/repositories/delivery.prisma.repository.js";
 import { EmailDeliveryService } from "./modules/delivery/services/emailDelivery.service.js";
 import { NotificationDispatcherService } from "./modules/delivery/services/notificationDispatcher.service.js";
+import { SupportInboxAlertService } from "./modules/delivery/services/supportInboxAlert.service.js";
 import { QueueAdminEmailHandler } from "./modules/bulkCampaigns/commands/queueAdminEmail/queueAdminEmail.handler.js";
 import { ProcessBulkBatchHandler } from "./modules/bulkCampaigns/commands/processBulkBatch/processBulkBatch.handler.js";
 import { QueueLegalNoticeHandler } from "./modules/bulkCampaigns/commands/queueLegalNotice/queueLegalNotice.handler.js";
@@ -34,6 +35,7 @@ import { ListLegalNoticesHandler } from "./modules/bulkCampaigns/queries/listLeg
 import { PreviewLegalNoticeHandler } from "./modules/bulkCampaigns/queries/previewLegalNotice/previewLegalNotice.handler.js";
 import { AudiencePlannerService } from "./modules/bulkCampaigns/services/audiencePlanner.service.js";
 import { LegalAudienceService } from "./modules/bulkCampaigns/services/legalAudience.service.js";
+import { PreviewEmailTemplateHandler } from "./modules/emailTemplates/queries/previewEmailTemplate/previewEmailTemplate.handler.js";
 import { HandleDomainEventHandler } from "./modules/eventIngestion/commands/handleDomainEvent/handleDomainEvent.handler.js";
 import { ListNotificationPreferencesHandler } from "./modules/inbox/queries/listNotificationPreferences/listNotificationPreferences.handler.js";
 import { GetUnreadCountHandler } from "./modules/inbox/queries/getUnreadCount/getUnreadCount.handler.js";
@@ -50,6 +52,9 @@ import { CreateDraftFromPublishedPolicyHandler } from "./modules/noticeDrafts/co
 import { SendNoticeTestEmailHandler } from "./modules/noticeDrafts/commands/sendNoticeTestEmail/sendNoticeTestEmail.handler.js";
 import { UpdateNoticeDraftHandler } from "./modules/noticeDrafts/commands/updateNoticeDraft/updateNoticeDraft.handler.js";
 import { GetNoticeDraftHandler } from "./modules/noticeDrafts/queries/getNoticeDraft/getNoticeDraft.handler.js";
+import { NoticeDraftProvisionerService } from "./modules/noticeDrafts/services/noticeDraftProvisioner.service.js";
+import { IdentityLegalVersionSource } from "./integrations/identityLegalVersions.integration.js";
+import type { LegalVersionSource } from "./interfaces/legalVersionSource.interface.js";
 import { NoticeDraftPrismaRepository } from "./modules/noticeDrafts/repositories/noticeDraft.prisma.repository.js";
 import { RecordSesFeedbackHandler } from "./modules/suppression/commands/recordSesFeedback/recordSesFeedback.handler.js";
 import { SuppressionPrismaRepository } from "./modules/suppression/repositories/suppression.prisma.repository.js";
@@ -65,6 +70,7 @@ export interface ContainerOverrides {
   readonly sesFeedbackReader?: QueueReader | null;
   readonly pushSender?: PushSender;
   readonly staffAuthenticator?: StaffAuthenticator;
+  readonly legalVersions?: LegalVersionSource | null;
   readonly pause?: (milliseconds: number) => Promise<void>;
 }
 
@@ -79,7 +85,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const brand = readEmailBrandFromEnvironment(process.env);
   const acceptUrl = `${config.webBaseUrl}/settings/legal/accept`;
 
-  const notifications: NotificationRepository = new NotificationPrismaRepository(prisma);
+  const notifications: NotificationRepository = new NotificationPrismaRepository(prisma, config.webBaseUrl);
   const deliveries: DeliveryRepository = new DeliveryPrismaRepository(prisma);
   const preferences: PreferenceRepository = new PreferencePrismaRepository(prisma);
   const deviceTokens: DeviceTokenRepository = new DeviceTokenPrismaRepository(prisma);
@@ -95,6 +101,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const legalAudience = new LegalAudienceService(identity, suppressions, batchSize, ratePerSecond);
   const queueLegalNotice = new QueueLegalNoticeHandler({ drafts, campaigns, audience: legalAudience, jobQueue, jobsQueueUrl: config.queues.jobs, identity, batchSize, ratePerSecond, acceptUrl });
   const planner = new AudiencePlannerService(identity);
+  const supportInbox = config.supportInbox === undefined ? undefined : new SupportInboxAlertService({ emailDelivery, ...config.supportInbox });
   const policyPublished = new CreateDraftFromPublishedPolicyHandler(drafts, config.webBaseUrl, config.policyNotice.autoSend, queueLegalNotice);
 
   return {
@@ -104,7 +111,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     staffAuthenticator: overrides.staffAuthenticator ?? new StaffAuthenticator({ jwksUrl: config.auth.jwksUrl, issuer: config.auth.staffIssuer }),
     unsubscribeTokens,
     unsubscribeFromMarketing: new UnsubscribeFromMarketingHandler(unsubscribeTokens, identity),
-    listNotifications: new ListNotificationsHandler(notifications),
+    listNotifications: new ListNotificationsHandler(notifications, config.webBaseUrl),
     getUnreadCount: new GetUnreadCountHandler(notifications),
     markNotificationRead: new MarkNotificationReadHandler(notifications),
     markAllNotificationsRead: new MarkAllNotificationsReadHandler(notifications),
@@ -116,13 +123,15 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     listAdminEmailSends: new ListAdminEmailSendsHandler(campaigns),
     previewAdminEmail: new PreviewAdminEmailHandler(planner),
     queueAdminEmail: new QueueAdminEmailHandler({ planner, campaigns, jobQueue, jobsQueueUrl: config.queues.jobs, identity, batchSize, ratePerSecond }),
+    noticeDraftProvisioner: new NoticeDraftProvisionerService(drafts, overrides.legalVersions !== undefined ? overrides.legalVersions : new IdentityLegalVersionSource(config.identity.baseUrl), config.webBaseUrl),
     getNoticeDraft: new GetNoticeDraftHandler(drafts),
     updateNoticeDraft: new UpdateNoticeDraftHandler(drafts, identity),
     sendNoticeTestEmail: new SendNoticeTestEmailHandler({ drafts, identity, sender: emailSender, acceptUrl, brand }),
     previewLegalNotice: new PreviewLegalNoticeHandler(drafts, legalAudience, batchSize, ratePerSecond),
     listLegalNotices: new ListLegalNoticesHandler(campaigns, drafts),
     queueLegalNotice,
-    handleDomainEvent: new HandleDomainEventHandler(dispatcher, policyPublished, { webBaseUrl: config.webBaseUrl, sellerDashboardUrl: brand.sellerDashboardUrl, otpEnvelopeKeys: config.otpEnvelopeKeys }, logger),
+    previewEmailTemplate: new PreviewEmailTemplateHandler(brand, config.webBaseUrl),
+    handleDomainEvent: new HandleDomainEventHandler(dispatcher, policyPublished, { webBaseUrl: config.webBaseUrl, sellerDashboardUrl: brand.sellerDashboardUrl, otpEnvelopeKeys: config.otpEnvelopeKeys }, logger, supportInbox),
     processBulkBatch: new ProcessBulkBatchHandler({ campaigns, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, pause: overrides.pause ?? ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))) }),
     deliverEmailIfStillUnread: new DeliverEmailIfStillUnreadHandler({ notifications, deliveries, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs }),
     runDigestBatch: config.digestSource === null ? null : new RunDigestBatchHandler({ source: new SocialHttpDigestSource(config.digestSource.baseUrl, config.digestSource.internalToken), identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, batchSize }),

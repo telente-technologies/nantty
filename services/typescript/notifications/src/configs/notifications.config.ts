@@ -17,12 +17,21 @@ export interface NotificationsConfig {
   readonly unsubscribeSigningSecret: string;
   readonly publicApiBaseUrl: string;
   readonly webBaseUrl: string;
+  readonly supportInbox?: { readonly recipients: readonly string[]; readonly adminBaseUrl: string };
   readonly otpEnvelopeKeys: Readonly<Record<string, Buffer>>;
   readonly marketingMaxPerWeek: number;
   readonly policyNotice: { readonly batchSize: number; readonly ratePerSecond: number; readonly autoSend: boolean };
   readonly digestSource: { readonly baseUrl: string; readonly internalToken: string } | null;
   readonly pushProvider: "expo" | "log";
   readonly emailProvider?: "ses" | "log";
+}
+
+const emailAddressPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function readSupportInboxRecipients(problems: string[]): string[] {
+  const recipients = readOrDefault("SUPPORT_NOTIFICATION_EMAILS", "support@zudomart.com").split(",").map((entry) => entry.trim().toLowerCase()).filter(Boolean);
+  for (const recipient of recipients) if (!emailAddressPattern.test(recipient)) problems.push(`SUPPORT_NOTIFICATION_EMAILS has an invalid address: "${recipient}"`);
+  return recipients;
 }
 
 function readRequired(name: string, problems: string[]): string {
@@ -60,6 +69,7 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
     publicApiBaseUrl: readRequired("PUBLIC_API_BASE_URL", problems),
     otpEnvelopeKeys: { [readOrDefault("AUTH_OTP_EVENT_KEY_ID", "otp-1")]: Buffer.from(readOrDefault("AUTH_OTP_EVENT_KEY", ""), "base64") },
     webBaseUrl: readOrDefault("ZUDOMART_WEB_BASE_URL", "https://zudomart.com"),
+    supportInbox: { recipients: readSupportInboxRecipients(problems), adminBaseUrl: readOrDefault("ADMIN_WEB_BASE_URL", "https://admin.zudomart.com") },
     marketingMaxPerWeek: Number(readOrDefault("MARKETING_MAX_PER_WEEK", "3")),
     policyNotice: {
       batchSize: Number(readOrDefault("POLICY_NOTICE_BATCH_SIZE", "200")),

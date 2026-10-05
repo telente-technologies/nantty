@@ -6,8 +6,10 @@ import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.m
 import { createContainer, type Container, type ContainerOverrides } from "./container.js";
 import { createDomainEventMessageHandler, createJobMessageHandler, createSesFeedbackMessageHandler } from "./jobs/messageRouting.job.js";
 import { DigestSchedulerJob } from "./jobs/digestScheduler.job.js";
+import { OutboxRelayJob, relayPendingOutboxEvents } from "./jobs/outboxRelay.job.js";
 import { QueueConsumerJob } from "./jobs/queueConsumer.job.js";
 import { createBulkCampaignRoutes } from "./modules/bulkCampaigns/routes/bulkCampaigns.routes.js";
+import { createEmailTemplateRoutes } from "./modules/emailTemplates/routes/emailTemplates.routes.js";
 import { createInboxRoutes } from "./modules/inbox/routes/inbox.routes.js";
 import { createUnsubscribeRoutes } from "./modules/unsubscribe/routes/unsubscribe.routes.js";
 import type { RouteDefinition } from "./types/route.type.js";
@@ -15,7 +17,7 @@ import { convertErrorToResponse, json } from "./utils/http.util.js";
 import { matchRoute } from "./utils/routeMatcher.util.js";
 
 export function createRoutes(container: Container): readonly RouteDefinition[] {
-  return [...createInboxRoutes(container), ...createUnsubscribeRoutes(container), ...createBulkCampaignRoutes(container)];
+  return [...createInboxRoutes(container), ...createUnsubscribeRoutes(container), ...createBulkCampaignRoutes(container), ...createEmailTemplateRoutes(container)];
 }
 
 async function checkDatabaseReadiness(container: Container | undefined) {
@@ -67,6 +69,7 @@ export function createNotificationsApp(config: NotificationsConfig, options: { r
     ]
     : [];
   const digestScheduler = config.consumersEnabled && container.runDigestBatch !== null ? new DigestSchedulerJob(container.broker, config.queues.jobs) : null;
+  const outboxRelay = config.consumersEnabled ? new OutboxRelayJob(() => relayPendingOutboxEvents(container.prisma, container.broker), logger) : null;
   return {
     container,
     server,
@@ -75,9 +78,11 @@ export function createNotificationsApp(config: NotificationsConfig, options: { r
       await server.start();
       for (const consumer of consumers) consumer.start();
       digestScheduler?.start();
+      outboxRelay?.start();
     },
     async stop() {
       digestScheduler?.stop();
+      outboxRelay?.stop();
       await Promise.all(consumers.map((consumer) => consumer.stop()));
       await server.stop();
       await container.broker.close();
