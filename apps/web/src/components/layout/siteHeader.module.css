@@ -2,16 +2,16 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  padding: 12px var(--gutter) 0;
+  padding: var(--space-3) var(--gutter) 0;
 }
 
 .pill {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
   max-width: var(--content-width);
   margin-inline: auto;
-  padding: 8px 8px 8px 22px;
+  padding: var(--space-2) var(--space-2) var(--space-2) 22px;
   border-radius: var(--radius-pill);
   background: var(--surface-glass);
   -webkit-backdrop-filter: saturate(1.4) blur(14px);
@@ -33,7 +33,7 @@
 .navigationList {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 0;
   list-style: none;
 }
@@ -59,7 +59,7 @@
   display: none;
   align-items: center;
   min-height: 44px;
-  padding: 0 20px;
+  padding: 0 var(--space-5);
   border-radius: var(--radius-pill);
   background: var(--fill-brand);
   color: var(--ink-on-fill);
@@ -126,8 +126,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 32px;
-  padding: 32px var(--gutter) 40px;
+  gap: var(--space-7);
+  padding: var(--space-7) var(--gutter) var(--space-8);
   background: var(--surface-brand-band);
   overflow-y: auto;
 }
@@ -138,7 +138,7 @@
 
 .mobileNavigationList {
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 0;
   list-style: none;
 }
@@ -159,7 +159,7 @@
 }
 
 .mobileBusinessHeading {
-  margin: 28px 0 8px;
+  margin: 28px 0 var(--space-2);
   color: var(--ink-on-night-muted);
   font-size: 0.8rem;
   font-weight: 700;

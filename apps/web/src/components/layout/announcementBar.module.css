@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 4px 12px;
+  gap: var(--space-1) var(--space-3);
   padding: 10px var(--gutter);
   text-align: center;
 }

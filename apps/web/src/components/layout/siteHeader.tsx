@@ -56,7 +56,7 @@ export function SiteHeaderWithFloatingNavigation() {
   return (
     <header className={`${styles.header} ${hasScrolledPastTop ? styles.scrolled : ""}`}>
       <div className={styles.pill}>
-        <ZudomartWordmarkHomeLink />
+        <ZudomartWordmarkHomeLink collapseOnSmallScreens />
         <nav aria-label="Main" className={styles.desktopNavigation}>
           <ul className={styles.navigationList}>
             {siteConfig.primaryNavigation.map((navigationLink) => (

@@ -1,12 +1,14 @@
 import Link from "next/link";
 
-import { ThemeSwitcher } from "@zudomart/web-kit";
+import { ThemeSwitcher, defaultZudomartWordmarkVariant, zudomartWordmarkFor } from "@zudomart/web-kit";
 
 import { businessAppLinks, contactEmailDisplayText, contactMailtoHref } from "@/lib/siteConfig.config";
 
 import { CookieSettingsButton } from "./cookieSettingsButton";
 import styles from "./siteFooter.module.css";
 import { ZudomartWordmarkHomeLink } from "./zudomartWordmark";
+
+const giantWordmark = zudomartWordmarkFor(defaultZudomartWordmarkVariant, 400);
 
 const footerLinkGroups = [
   {
@@ -90,9 +92,11 @@ export function SiteFooterWithGiantWordmark() {
         <p>Prices in your local currency. Payments held in escrow until delivery is confirmed.</p>
         <ThemeSwitcher label="Colour theme" className={styles.themeSwitcher} />
       </div>
-      <p className={styles.giantWordmark} aria-hidden="true">
-        zudomart
-      </p>
+      <div className={styles.giantWordmark} aria-hidden="true">
+        <svg viewBox={`0 0 ${giantWordmark.width} ${giantWordmark.height}`} focusable="false">
+          <path d={giantWordmark.d} fill="currentColor" />
+        </svg>
+      </div>
     </footer>
   );
 }
