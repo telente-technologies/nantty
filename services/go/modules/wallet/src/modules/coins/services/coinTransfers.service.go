@@ -17,6 +17,7 @@ import (
 var (
 	ErrCannotSendCoinsToSelf   = httpserver.NewApiError(http.StatusUnprocessableEntity, "CANNOT_SEND_TO_SELF", "You cannot send coins to yourself.")
 	ErrRecipientCannotReceive  = httpserver.NewApiError(http.StatusUnprocessableEntity, "RECIPIENT_CANNOT_RECEIVE", "This person cannot receive coins.")
+	ErrCoinTransferBlocked     = httpserver.NewApiError(http.StatusUnprocessableEntity, "COIN_TRANSFER_BLOCKED", "You cannot send coins to this person.")
 	ErrInsufficientCoins       = httpserver.NewApiError(http.StatusPaymentRequired, "INSUFFICIENT_COINS", "You don't have enough coins. Buy more coins and try again.")
 	ErrInsufficientEarnedCoins = httpserver.NewApiError(http.StatusUnprocessableEntity, "INSUFFICIENT_EARNED_COINS", "You do not have enough earned coins to convert.")
 )
@@ -52,6 +53,13 @@ func (transfers CoinTransfers) TransferCoinsInTransaction(ctx context.Context, t
 	}
 	if !active {
 		return dtos.CoinTransferReceiptDto{}, ErrRecipientCannotReceive
+	}
+	blocked, err := transfers.Container.Blocks.BlockedEitherWay(ctx, input.SenderUserId, input.RecipientUserId)
+	if err != nil {
+		return dtos.CoinTransferReceiptDto{}, err
+	}
+	if blocked {
+		return dtos.CoinTransferReceiptDto{}, ErrCoinTransferBlocked
 	}
 	feeBps := transfers.Container.Settings.CoinTransferFeeBps
 	split, err := models.SplitCoinTransfer(input.Coins, feeBps)
