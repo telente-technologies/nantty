@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@paystack/inline-js": "^2.26.0",
+    "@phosphor-icons/react": "2.1.10",
     "@zudomart/design-tokens": "workspace:*",
     "@zudomart/web-kit": "workspace:*",
     "next": "^16.3.6",
