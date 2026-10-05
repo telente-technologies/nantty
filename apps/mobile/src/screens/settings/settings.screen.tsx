@@ -34,6 +34,8 @@ import { describeAccountStanding } from "@/services/accountHealth.service";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   const { colors } = useTheme();
@@ -77,12 +79,12 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
           <Avatar uri={profile?.avatarUrl} size={48} />
           <View style={styles.profileText}>
             <View style={styles.nameRow}>
-              <Text size={14} weight={600} lineHeight={16.8} numberOfLines={1}>
+              <Text size={typeScale.md} weight={600} lineHeight={16.8} numberOfLines={1}>
                 {profile?.name ?? " "}
               </Text>
               <VerificationBadge verification={profile?.verification} legacyVerified={profile?.verified} size={16} />
             </View>
-            <Text size={14} lineHeight={16.8} numberOfLines={1}>
+            <Text size={typeScale.md} lineHeight={16.8} numberOfLines={1}>
               {profile?.email ?? " "}
             </Text>
           </View>
@@ -130,7 +132,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
 
       <Pressable accessibilityRole="button" onPress={confirmLogOut} style={styles.logOut}>
         <Frame83032Icon />
-        <Text size={14} lineHeight={16.8} color={colors.error}>
+        <Text size={typeScale.md} lineHeight={16.8} color={colors.error}>
           Log out
         </Text>
       </Pressable>
@@ -143,23 +145,23 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     height: 80,
     backgroundColor: colors.surface,
     borderRadius: 12,
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing[3],
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 10,
   },
-  profileIdentity: { flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 1 },
-  profileText: { gap: 4, flexShrink: 1 },
-  nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  profileIdentity: { flexDirection: "row", alignItems: "center", gap: spacing[3], flexShrink: 1 },
+  profileText: { gap: spacing[1], flexShrink: 1 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: spacing[1] },
   logOut: {
     height: 48,
     backgroundColor: colors.surface,
     borderRadius: 12,
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing[3],
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: spacing[3],
     marginTop: 6,
   },
 }));

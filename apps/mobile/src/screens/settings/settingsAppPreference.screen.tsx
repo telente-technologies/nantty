@@ -11,8 +11,10 @@ import { localeService } from "@/services/locale.service";
 import { usersService } from "@/services/users.service";
 import { useLocaleStore } from "@/store/locale.store";
 import { useThemePreferenceStore, type ThemePreference } from "@/store/themePreference.store";
+import { useTheme } from "@/theme";
 
 export function SettingsAppPreferenceScreen() {
+  const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [pickerVisible, setPickerVisible] = useState(false);
   const [themeSheetVisible, setThemeSheetVisible] = useState(false);
@@ -47,7 +49,7 @@ export function SettingsAppPreferenceScreen() {
     <SettingsPage title="App Preference">
       <SettingsGroup>
         <SettingsRow label="Theme" trailing={{ text: describeThemePreference(themePreference) }} onPress={() => setThemeSheetVisible(true)} />
-        <SettingsRow label="Language" trailing={{ text: "English" }} />
+        <SettingsRow label="Language" trailing={{ text: "English", color: colors.textMuted, weight: 400 }} />
         <SettingsRow label="Country & Currency" trailing={{ text: currencyLabel }} onPress={() => setPickerVisible(true)} />
         <SettingsRow label="Accessibility" onPress={() => Linking.openSettings()} />
       </SettingsGroup>

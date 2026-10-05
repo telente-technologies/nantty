@@ -51,7 +51,7 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
         <Frame75332Icon />
       </Pressable>
       <View style={styles.topActions}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Search" hitSlop={8} onPress={() => navigation.navigate("Search", { scope: "mart" })}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Search" hitSlop={8} onPress={() => navigation.navigate("Search", store.data ? { scope: `store:${storeId}`, scopeLabel: store.data.name } : { scope: "mart" })}>
           <Frame75232Icon />
         </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel="Share store" hitSlop={8} onPress={() => offerSendInChat({ kind: "store", id: storeId })}>

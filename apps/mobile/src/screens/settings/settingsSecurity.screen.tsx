@@ -19,7 +19,11 @@ export function SettingsSecurityScreen({ navigation }: MainScreenProps<"Settings
       <SettingsGroup>
         <SettingsRow label="Password" onPress={() => navigation.navigate("ChangePassword")} />
         <SettingsRow label="Blocked users" onPress={() => navigation.navigate("BlockedUsers")} />
-        <SettingsRow label="2FA" onPress={() => setOpenSheet("twoFactor")} />
+        <SettingsRow
+          label="Two-factor authentication"
+          trailing={settings ? { text: twoFactorEnabled ? "ON" : "OFF", weight: 400 } : "chevron"}
+          onPress={settings ? () => setOpenSheet("twoFactor") : undefined}
+        />
         <SettingsRow label="Data" onPress={() => setOpenSheet("data")} />
       </SettingsGroup>
       <InfoSheet
