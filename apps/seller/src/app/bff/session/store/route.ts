@@ -7,8 +7,7 @@ import { isMutationProtectedAgainstCsrf } from "@/server/requestOriginGuard.serv
 import { renewSellerAccessCache, writeRenewedSessionCookies } from "@/server/sellerAuthentication.service";
 import { readJsonFromBackendResult } from "@/server/sellerApiTransport.service";
 import { clearStoreScopedCookies, readApiTokensFromCookies, readCachedSellerAccessFromCookies, readSessionIdFromCookies, writeSelectedStoreCookie } from "@/server/sellerSession.service";
-import type { MyStoreEntry } from "@/types/brand.type";
-import type { CursorPage } from "@/types/pagination.type";
+import { readMyStoreEntries, type MyStoresResponse } from "@/utils/myStores.util";
 import { decideSellerAccessDestination, gatePagePathByDestination } from "@/utils/sellerAccessDestination.util";
 
 export async function POST(request: NextRequest) {
@@ -19,8 +18,8 @@ export async function POST(request: NextRequest) {
   const storeId = typeof body?.storeId === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(body.storeId) ? body.storeId : null;
   if (!storeId) return respondWithBffError(400, "VALIDATION_FAILED", "Choose one of your stores.");
 
-  const outcome = await callBackendAsSignedInSeller(request, { method: "GET", path: "/seller/stores/mine" });
-  const myStores = readJsonFromBackendResult<CursorPage<MyStoreEntry>>(outcome.result)?.data ?? [];
+  const outcome = await callBackendAsSignedInSeller(request, { method: "GET", path: "/seller/stores/mine", storeId });
+  const myStores = readMyStoreEntries(readJsonFromBackendResult<MyStoresResponse>(outcome.result));
   if (!myStores.some((store) => store.storeId === storeId)) return respondWithBffError(404, "STORE_NOT_FOUND", "You are not a member of that store.");
 
   const tokens = readApiTokensFromCookies(request.cookies);
