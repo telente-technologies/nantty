@@ -92,3 +92,13 @@ describe("staff endpoints", () => {
     expect((await post("/internal/support/auto-faq/run", {}, { "x-internal-token": internalToken })).status).toBe(200);
   });
 });
+
+describe("support macros", () => {
+  it("let live chat agents read macros but not change them", async () => {
+    const chatAgent = await server.signStaffToken("adm_7", "Chidi Live", ["support:chat"]);
+    expect((await fetch(`${server.baseUrl}/api/v1/admin/support/macros`, { headers: { authorization: `Bearer ${chatAgent}` } })).status).toBe(200);
+    expect((await post("/api/v1/admin/support/macros", { title: "Hello", body: "Hi {{user.displayName}}" }, { authorization: `Bearer ${chatAgent}` })).status).toBe(403);
+    const emailOnly = await server.signStaffToken("adm_6", "Ema Il", ["support:email"]);
+    expect((await fetch(`${server.baseUrl}/api/v1/admin/support/macros`, { headers: { authorization: `Bearer ${emailOnly}` } })).status).toBe(403);
+  });
+});
