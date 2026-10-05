@@ -29,6 +29,7 @@ import (
 	"zudomart/modules/ads/src/modules/creatives"
 	"zudomart/modules/ads/src/modules/decision"
 	"zudomart/modules/ads/src/modules/reporting"
+	"zudomart/modules/ads/src/modules/tools"
 	"zudomart/modules/ads/src/modules/tracking"
 	platformevents "zudomart/platform/events"
 	"zudomart/platform/postgres"
@@ -106,6 +107,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	reporting.Mount(mux, deployed)
 	audiences.Mount(mux, deployed)
 	creatives.Mount(mux, deployed)
+	tools.Mount(mux, deployed)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

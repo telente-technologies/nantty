@@ -1,6 +1,10 @@
 package dtos
 
-import "zudomart/modules/ads/src/types"
+import (
+	"encoding/json"
+
+	"zudomart/modules/ads/src/types"
+)
 
 type AdvertiserRef struct {
 	Id     string `json:"id"`
@@ -71,9 +75,9 @@ type AppealForReview struct {
 }
 
 type Advertiser struct {
-	Id              string        `json:"id"`
-	Name            string        `json:"name"`
-	Owner           AdvertiserRef `json:"owner"`
+	Id              string          `json:"id"`
+	Name            string          `json:"name"`
+	Owner           json.RawMessage `json:"owner"`
 	Status          string        `json:"status"`
 	Country         string        `json:"country"`
 	Currency        string        `json:"currency"`
@@ -126,4 +130,14 @@ type PagedList[Item any] struct {
 	Page       int     `json:"page"`
 	PageSize   int     `json:"pageSize"`
 	Total      int     `json:"total"`
+}
+
+type AdvertiserDetail struct {
+	Advertiser
+	History []json.RawMessage `json:"history"`
+}
+
+type AdForReviewDetail struct {
+	AdForReview
+	History []json.RawMessage `json:"history"`
 }
