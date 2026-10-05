@@ -3,7 +3,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   border: 1px solid transparent;
   border-radius: var(--radius-small);
   font-weight: 600;
@@ -28,19 +28,19 @@
 .small {
   height: 30px;
   padding: 0 10px;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .medium {
   height: 38px;
   padding: 0 14px;
-  font-size: 14px;
+  font-size: var(--fs-14);
 }
 
 .large {
   height: 52px;
-  padding: 0 20px;
-  font-size: 16px;
+  padding: 0 var(--space-5);
+  font-size: var(--fs-16);
 }
 
 .iconButton.small {

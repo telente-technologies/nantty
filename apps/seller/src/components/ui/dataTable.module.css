@@ -7,24 +7,24 @@
 }
 
 .table {
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-variant-numeric: tabular-nums;
 }
 
 .table th {
   position: sticky;
   top: 0;
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   background: var(--surface-sunken);
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-weight: 600;
   white-space: nowrap;
   border-bottom: 1px solid var(--divider-soft);
 }
 
 .table td {
-  padding: 11px 12px;
+  padding: 11px var(--space-3);
   border-bottom: 1px solid var(--divider-soft);
   vertical-align: middle;
 }
@@ -57,7 +57,7 @@
 }
 
 .empty {
-  padding: 32px 16px;
+  padding: var(--space-7) var(--space-4);
   text-align: center;
   color: var(--ink-muted);
 }
@@ -65,14 +65,14 @@
 .footer {
   display: flex;
   justify-content: center;
-  padding: 12px;
+  padding: var(--space-3);
   border-top: 1px solid var(--divider-soft);
 }
 
 .sortButton {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 0;
   border: 0;
   background: none;
@@ -97,7 +97,7 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 28px 16px;
+  padding: 28px var(--space-4);
   text-align: center;
   color: var(--error-ink);
 }
@@ -147,8 +147,8 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 12px;
-    padding: 4px 0;
+    gap: var(--space-3);
+    padding: var(--space-1) 0;
     border-bottom: 0;
     text-align: right !important;
   }
@@ -163,7 +163,7 @@
     flex: none;
     max-width: 45%;
     color: var(--ink-muted);
-    font-size: 12px;
+    font-size: var(--fs-12);
     font-weight: 600;
     text-align: left;
   }
@@ -173,6 +173,6 @@
   }
 
   .stackOnPhones td:first-child {
-    font-size: 14px;
+    font-size: var(--fs-14);
   }
 }

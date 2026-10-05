@@ -49,7 +49,7 @@ export function DataTable<Row>({ caption, columns, rows, readRowKey, isLoading, 
   const showError = Boolean(errorMessage) && !isLoading && (!rows || rows.length === 0);
   return (
     <div className={styles.wrapper}>
-      <div className={styles.scroller}>
+      <div className={styles.scroller} role="region" aria-label={caption} tabIndex={0}>
         <table className={`${styles.table} ${styles.stackOnPhones}`}>
           <caption className="visuallyHidden">{caption}</caption>
           <thead>

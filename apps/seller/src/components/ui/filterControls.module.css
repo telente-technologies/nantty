@@ -1,9 +1,9 @@
 .search {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   height: 38px;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   min-width: min(100%, 260px);
   flex: 1 1 260px;
   max-height: 38px;
@@ -36,7 +36,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .presets {
@@ -55,7 +55,7 @@
   background: transparent;
   color: var(--ink-muted);
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .preset[aria-pressed="true"] {
@@ -70,7 +70,7 @@
 
 .dateInput {
   height: 36px;
-  padding: 0 8px;
+  padding: 0 var(--space-2);
   border: 1px solid var(--divider);
   border-radius: var(--radius-small);
   background: var(--surface-card);
