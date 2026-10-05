@@ -51,7 +51,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@zudomart/web-kit"],
+  transpilePackages: ["@zudomart/web-kit", "@zudomart/chat-crypto"],
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
