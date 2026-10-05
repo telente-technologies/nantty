@@ -14,7 +14,7 @@ export const productsService = {
   fetchProductCollectionPage: (collection: ProductCollection, cursor: string | null) =>
     api.get<Page<ProductSummary>>("/api/v1/products", { collection, cursor: cursor ?? undefined }),
   fetchProductDetailById: (productId: string) => api.get<BrandedProduct>(`/api/v1/products/${productId}`),
-  fetchFeaturedProducts: () => api.get<ProductSummary[]>("/api/v1/products/featured"),
+  fetchFeaturedProducts: () => api.getList<ProductSummary>("/api/v1/products/featured"),
   likeProduct: (productId: string) => api.post<void>(`/api/v1/products/${productId}/like`),
   unlikeProduct: (productId: string) => api.delete<void>(`/api/v1/products/${productId}/like`),
 };

@@ -13,9 +13,9 @@ export const explainWhySoundCannotBeReused = (sound: ClipSound): string | null =
 };
 
 export const soundsService = {
-  searchSounds: (query: string) => api.get<ClipSound[]>("/api/v1/sounds", { q: query }),
-  fetchTrendingSounds: () => api.get<ClipSound[]>("/api/v1/sounds/trending"),
-  fetchSavedSounds: () => api.get<ClipSound[]>("/api/v1/sounds/saved"),
+  searchSounds: (query: string) => api.getList<ClipSound>("/api/v1/sounds", { q: query }),
+  fetchTrendingSounds: () => api.getList<ClipSound>("/api/v1/sounds/trending"),
+  fetchSavedSounds: () => api.getList<ClipSound>("/api/v1/sounds/saved"),
   fetchSoundById: (soundId: ID) => api.get<ClipSound>(`/api/v1/sounds/${soundId}`),
   fetchClipsUsingSound: (soundId: ID, cursor?: string) => api.get<Page<Clip>>(`/api/v1/sounds/${soundId}/clips`, { cursor }),
   updateSoundAsOwner: (soundId: ID, input: UpdateSoundInput) => api.patch<ClipSound>(`/api/v1/sounds/${soundId}`, input),

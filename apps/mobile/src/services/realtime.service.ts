@@ -12,7 +12,9 @@ const BASE_RECONNECT_DELAY_MS = 1_000;
 const MAXIMUM_RECONNECT_DELAY_MS = 30_000;
 
 const realtimeEventListeners = new Set<RealtimeEventListener>();
+const topicSubscriberCounts = new Map<string, number>();
 let openSocket: WebSocket | null = null;
+let isSocketAuthenticated = false;
 let reconnectAttemptCount = 0;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
@@ -22,6 +24,10 @@ let stopMockEmitter: (() => void) | null = null;
 export const buildRealtimeWebSocketUrl = (httpBaseUrl: string) => `${httpBaseUrl.replace(/^http(s?):\/\//i, (_, secure: string) => (secure ? "wss://" : "ws://")).replace(/\/$/, "")}/ws`;
 
 const deliverEventToListeners = (event: RealtimeServerEvent) => realtimeEventListeners.forEach((listener) => listener(event));
+
+const sendTopicFrame = (type: "subscribe" | "unsubscribe", topic: string) => {
+  if (isSocketAuthenticated && openSocket?.readyState === WebSocket.OPEN) openSocket.send(JSON.stringify({ type, topic }));
+};
 
 function clearConnectionTimers() {
   if (heartbeatTimer) clearInterval(heartbeatTimer);
@@ -65,14 +71,22 @@ function openAuthenticatedWebSocket() {
   socket.onmessage = (frame) => {
     lastServerFrameAt = Date.now();
     try {
-      const event = JSON.parse(String(frame.data)) as RealtimeServerEvent;
+      const event = JSON.parse(String(frame.data)) as RealtimeServerEvent | { readonly type: "auth.ok" };
+      if (event.type === "auth.ok") {
+        isSocketAuthenticated = true;
+        topicSubscriberCounts.forEach((_, topic) => sendTopicFrame("subscribe", topic));
+        return;
+      }
       if (event.type !== "pong") deliverEventToListeners(event);
     } catch {
       return;
     }
   };
   socket.onclose = () => {
-    if (openSocket === socket) openSocket = null;
+    if (openSocket === socket) {
+      openSocket = null;
+      isSocketAuthenticated = false;
+    }
     clearConnectionTimers();
     scheduleReconnectWithBackoffAndJitter();
   };
@@ -93,6 +107,7 @@ function stopRealtimeTransport() {
   clearConnectionTimers();
   const socket = openSocket;
   openSocket = null;
+  isSocketAuthenticated = false;
   socket?.close();
 }
 
@@ -103,6 +118,20 @@ export const realtimeService = {
     return () => {
       realtimeEventListeners.delete(listener);
       if (realtimeEventListeners.size === 0) stopRealtimeTransport();
+    };
+  },
+  subscribeToTopic: (topic: string) => {
+    const count = topicSubscriberCounts.get(topic) ?? 0;
+    topicSubscriberCounts.set(topic, count + 1);
+    if (count === 0) sendTopicFrame("subscribe", topic);
+    return () => {
+      const remaining = (topicSubscriberCounts.get(topic) ?? 1) - 1;
+      if (remaining > 0) {
+        topicSubscriberCounts.set(topic, remaining);
+        return;
+      }
+      topicSubscriberCounts.delete(topic);
+      sendTopicFrame("unsubscribe", topic);
     };
   },
   sendTypingSignal: (conversationId: string, isTyping: boolean) => {
