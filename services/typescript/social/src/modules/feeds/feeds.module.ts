@@ -2,6 +2,7 @@ import type { HttpRouter } from "@zudojs/http";
 
 import type { HandlerContext } from "../../types/handlerContext.type.js";
 import type { RouteFactory } from "../../utils/route.util.js";
+import { createRecordFeedInteractionHandler } from "./commands/recordFeedInteraction/recordFeedInteraction.handler.js";
 import { createRecordFeedFeedbackHandler } from "./commands/recordFeedFeedback/recordFeedFeedback.handler.js";
 import { createFeedsController } from "./controllers/feeds.controller.js";
 import { createGetFollowingFeedHandler } from "./queries/getFollowingFeed/getFollowingFeed.handler.js";
@@ -17,5 +18,6 @@ export function mountFeedsModule(router: HttpRouter, route: RouteFactory, contex
     getPopularFeed: createGetPopularFeedHandler(context),
     listClips: createListClipsHandler(context),
     recordFeedFeedback: createRecordFeedFeedbackHandler(context),
+    recordFeedInteraction: createRecordFeedInteractionHandler(context),
   }));
 }

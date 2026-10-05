@@ -24,6 +24,10 @@ export function createApplyContentVisibilityHandler(context: HandlerContext): Ha
       if (targetType === "comment") {
         return (await db.comment.updateMany({ where: { id: targetId }, data: { moderationVisibility: visibility } })).count > 0;
       }
+      if (targetType === "message") {
+        const hiddenAt = visibility === "hidden" || visibility === "removed" ? occurredAt : null;
+        return (await db.message.updateMany({ where: { id: targetId }, data: { hiddenAt } })).count > 0;
+      }
       if (targetType === "sound") {
         const updated = await db.sound.updateMany({ where: { id: targetId, status: { not: "under_copyright_review" } }, data: { status: soundStatusForVisibility(visibility) } });
         if (updated.count === 0) return false;

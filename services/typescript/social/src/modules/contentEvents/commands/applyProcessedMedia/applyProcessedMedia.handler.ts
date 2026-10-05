@@ -36,7 +36,7 @@ export function createApplyProcessedMediaHandler(context: HandlerContext, mediaP
       });
       const messages = await transaction.message.updateMany({
         where: { mediaId: command.mediaId, mediaPurgedAt: null },
-        data: { mediaStatus: "ready", ...(url === null ? {} : { mediaUrl: url }), ...(command.durationSeconds === undefined ? {} : { mediaDurationSeconds: Math.round(command.durationSeconds) }) },
+        data: { mediaStatus: "ready", ...(command.durationSeconds === undefined ? {} : { mediaDurationSeconds: Math.round(command.durationSeconds) }) },
       });
       if (postMedia.count > 0) {
         const posts = await transaction.postMedia.findMany({ where: { mediaId: command.mediaId }, select: { postId: true } });
