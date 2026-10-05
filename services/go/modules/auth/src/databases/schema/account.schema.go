@@ -27,8 +27,6 @@ func (Account) Fields() []ent.Field {
 		field.Strings("roles").Default([]string{"buyer"}),
 		field.Time("email_verified_at").Optional().Nillable(),
 		field.Enum("status").Values("active", "deactivated", "suspended", "banned", "deleted").Default("active"),
-		field.String("phone_hash").Optional().Nillable().MaxLen(64),
-		field.Time("phone_verified_at").Optional().Nillable(),
 		field.Bool("must_change_password").Default(false),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

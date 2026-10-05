@@ -13,16 +13,19 @@ const (
 	SlotSearchTile  = "searchTile"
 	SlotStory       = "story"
 	SlotLiveBreak   = "liveBreak"
+
+	SlotFeedCommentThread = "feedCommentThread"
 )
 
 var placementBySlotKind = map[string]string{
 	SlotFeedPost: "feed", SlotPreRoll: "feed", SlotPostRoll: "feed", SlotClipBetween: "clips",
-	SlotMartTile: "mart", SlotSearchTile: "search", SlotStory: "stories", SlotLiveBreak: "live",
+	SlotMartTile: "mart", SlotSearchTile: "search", SlotStory: "stories", SlotLiveBreak: "live", SlotFeedCommentThread: "feed",
 }
 
 var creativeFormatsBySlotKind = map[string][]string{
 	SlotFeedPost: {"feed_post", "live", "product"}, SlotPreRoll: {"feed_post", "clip"}, SlotPostRoll: {"feed_post", "clip"},
 	SlotClipBetween: {"clip", "live"}, SlotMartTile: {"product"}, SlotSearchTile: {"product"}, SlotStory: {"story", "clip"}, SlotLiveBreak: {"live"},
+	SlotFeedCommentThread: {"feed_post", "product"},
 }
 
 func PlacementForSlotKind(slotKind string) (string, bool) {
