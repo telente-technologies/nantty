@@ -14,11 +14,13 @@ import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { fontFamily } from "@/constants/typography.constant";
+import { fontFamily, typeScale } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { supportService } from "@/services/support.service";
+import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { spacing } from "@/constants/spacing.constant";
 
 const LIVE_CHAT_POLL_MS = 3000;
 
@@ -54,7 +56,7 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
     return (
       <Screen>
         <Header title="Support" />
-        <ListSkeleton />
+        {ticket.isError ? <ErrorState message="Couldn't load this ticket." onRetry={() => ticket.refetch()} retrying={ticket.isRefetching} /> : <ListSkeleton />}
       </Screen>
     );
   }
@@ -66,24 +68,24 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
       <View style={styles.flex}>
         <ScrollView ref={scrollRef} onLayout={keepLatestMessageVisible} keyboardDismissMode="interactive" contentContainerStyle={styles.content}>
           <View style={styles.card}>
-            <Text size={16} weight={600} lineHeight={19.2}>{details.subject}</Text>
+            <Text size={typeScale.base} weight={600} lineHeight={19.2}>{details.subject}</Text>
             <StatusPill label={TICKET_STATUS_APPEARANCE[details.status].label} tone={TICKET_STATUS_APPEARANCE[details.status].tone} />
-            {details.linkedReference ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>Linked to {details.linkedReference.label}</Text> : null}
+            {details.linkedReference ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textMuted}>Linked to {details.linkedReference.label}</Text> : null}
           </View>
           <SupportRecordingNotice />
           {details.messages.map((message) => (
             <View key={message.id} style={[styles.bubbleWrap, !message.fromSupport && styles.mine]}>
               <Text size={11} lineHeight={14} color={colors.textSubtle}>{message.authorName}</Text>
               <View style={[styles.bubble, { backgroundColor: message.fromSupport ? colors.successTint : colors.primarySolid }]}>
-                <Text size={14} lineHeight={19} color={message.fromSupport ? colors.text : colors.white}>{message.text}</Text>
+                <Text size={typeScale.md} lineHeight={19} color={message.fromSupport ? colors.text : colors.white}>{message.text}</Text>
               </View>
               <Text size={11} lineHeight={14} color={colors.textSubtle}>{formatFriendlyDateTime(message.createdAt)}</Text>
             </View>
           ))}
           {details.canRate ? <TicketRatingCard ticketId={ticketId} onRated={() => ticket.refetch()} /> : null}
-          {details.satisfactionScore ? <Text size={12} lineHeight={16.8} color={colors.textSubtle}>You rated this {details.satisfactionScore} out of 5. Thank you.</Text> : null}
-          {closed ? <Text size={12} lineHeight={16.8} color={colors.textSubtle}>This request is closed. Contact support again if you still need help.</Text> : null}
-          {details.agentTyping ? <Text size={12} lineHeight={16.8} color={colors.textSubtle} accessibilityLiveRegion="polite">Zudomart Support is typing…</Text> : null}
+          {details.satisfactionScore ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>You rated this {details.satisfactionScore} out of 5. Thank you.</Text> : null}
+          {closed ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>This request is closed. Contact support again if you still need help.</Text> : null}
+          {details.agentTyping ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle} accessibilityLiveRegion="polite">Zudomart Support is typing…</Text> : null}
         </ScrollView>
         {closed ? null : (
           <View style={styles.composer}>
@@ -102,12 +104,12 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   keyboardArea: { backgroundColor: colors.surface },
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 14 },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
-  bubbleWrap: { maxWidth: "85%", gap: 4 },
+  content: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[6], gap: 14 },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing[4], gap: spacing[2] },
+  bubbleWrap: { maxWidth: "85%", gap: spacing[1] },
   mine: { alignSelf: "flex-end", alignItems: "flex-end" },
-  bubble: { borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
-  composer: { flexDirection: "row", alignItems: "flex-end", gap: 8, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.divider },
+  bubble: { borderRadius: 12, paddingHorizontal: spacing[3], paddingVertical: spacing[2] },
+  composer: { flexDirection: "row", alignItems: "flex-end", gap: spacing[2], paddingHorizontal: spacing[4], paddingVertical: 10, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.divider },
   input: { flex: 1, minHeight: 40, maxHeight: 120, borderRadius: 20, borderWidth: 1, borderColor: colors.divider, paddingHorizontal: 14, paddingVertical: 10, fontFamily: fontFamily[400], fontSize: 14, color: colors.text },
   send: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primarySolid, alignItems: "center", justifyContent: "center" },
   sendDisabled: { backgroundColor: colors.disabled },

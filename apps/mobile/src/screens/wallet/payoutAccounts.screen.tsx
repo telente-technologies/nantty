@@ -13,11 +13,19 @@ import { usePayoutAccountsQuery, walletQueryKeys } from "@/components/wallet/wal
 import { useTheme } from "@/theme";
 import { walletsService } from "@/services/wallets.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
+import { ErrorState } from "@/components/ui/errorState";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
+import { Skeleton } from "@/components/ui/skeleton";
+import { showToast } from "@/store/toast.store";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 export function PayoutAccountsScreen() {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
-  const { data: accounts = [] } = usePayoutAccountsQuery();
+  const accountsQuery = usePayoutAccountsQuery();
+  const accounts = accountsQuery.data ?? [];
+  const refreshControl = usePullToRefresh(accountsQuery.refetch);
   const [bankCode, setBankCode] = useState("");
   const [bankName, setBankName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -32,7 +40,14 @@ export function PayoutAccountsScreen() {
       refreshPayoutAccounts();
     },
   });
-  const removeAccount = useMutation({ mutationFn: walletsService.removePayoutAccount, onSuccess: refreshPayoutAccounts });
+  const removeAccount = useMutation({
+    mutationFn: walletsService.removePayoutAccount,
+    onSuccess: () => {
+      showToast("Account removed");
+      return refreshPayoutAccounts();
+    },
+    onError: () => showToast("Couldn't remove the account. Try again."),
+  });
 
   const confirmAndRemovePayoutAccount = (accountId: string, label: string) =>
     showAlertWithButtons("Remove account?", `${label} will no longer receive withdrawals.`, [
@@ -43,8 +58,12 @@ export function PayoutAccountsScreen() {
   return (
     <Screen>
       <Header title="Payout accounts" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        {accounts.length ? (
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" refreshControl={refreshControl}>
+        {accountsQuery.isPending ? (
+          <Skeleton height={48} radius={12} />
+        ) : accountsQuery.isError ? (
+          <ErrorState compact message="Couldn't load your payout accounts." onRetry={() => accountsQuery.refetch()} retrying={accountsQuery.isRefetching} />
+        ) : accounts.length ? (
           <SettingsGroup>
             {accounts.map((account) => (
               <SettingsRow
@@ -56,7 +75,7 @@ export function PayoutAccountsScreen() {
             ))}
           </SettingsGroup>
         ) : null}
-        <Text size={16} weight={500} lineHeight={19.2}>
+        <Text size={typeScale.base} weight={500} lineHeight={19.2}>
           Add a bank account
         </Text>
         <BankPickerField
@@ -75,11 +94,11 @@ export function PayoutAccountsScreen() {
           value={accountNumber}
           onChangeText={(value) => setAccountNumber(value.replace(/\D/g, ""))}
         />
-        <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
+        <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>
           We verify the account name with your bank. Withdrawals can only go to an account in your name.
         </Text>
         {addAccount.isError ? (
-          <Text size={12} lineHeight={14.4} color={colors.error}>
+          <Text size={typeScale.xs} lineHeight={14.4} color={colors.error}>
             {addAccount.error.message}
           </Text>
         ) : null}
@@ -89,4 +108,4 @@ export function PayoutAccountsScreen() {
   );
 }
 
-const styles = StyleSheet.create({ content: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40, gap: 16 } });
+const styles = StyleSheet.create({ content: { paddingHorizontal: spacing[4], paddingTop: spacing[6], paddingBottom: spacing[8], gap: spacing[4] } });

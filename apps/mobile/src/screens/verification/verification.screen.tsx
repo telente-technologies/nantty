@@ -9,7 +9,9 @@ import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { VerificationPlanCard } from "@/components/profile/verificationPlanCard";
 import { useMyVerificationQuery, useVerificationPlansQuery, verificationQueryKeys } from "@/components/profile/verificationQueries.hook";
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -20,6 +22,8 @@ import { useActingProfileStore } from "@/store/actingProfile.store";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/apiClient.service";
 import { verificationService } from "@/services/verification.service";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 export function VerificationScreen({ navigation }: MainScreenProps<"Verification">) {
   const { colors } = useTheme();
@@ -42,21 +46,26 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
   const currentForProfile = verificationForProfileKind(mine.data?.current, kind ?? "person");
   const goldPending = type === "business" && currentForProfile?.status !== "active";
   const application = mine.data?.application;
+  const refreshControl = usePullToRefresh(plans.refetch, mine.refetch);
+  const loadFailed = (mine.isError && !mine.data) || (plans.isError && !plans.data);
 
   return (
     <Screen>
       <Header title="Verification" />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} refreshControl={refreshControl}>
+        {loadFailed ? (
+          <ErrorState compact message="Couldn't load verification details." onRetry={() => Promise.all([plans.refetch(), mine.refetch()])} retrying={plans.isRefetching || mine.isRefetching} />
+        ) : null}
         {type === "personal" && (currentForProfile || application) ? (
           <View style={styles.card}>
             <View style={styles.row}>
-              <Text size={16} weight={600} lineHeight={19.2}>Your verification</Text>
+              <Text size={typeScale.base} weight={600} lineHeight={19.2}>Your verification</Text>
               <VerificationBadge verification={currentForProfile} size={20} />
             </View>
             {application?.status === "pending" ? <StatusPill label="Application under review" tone="caution" /> : null}
-            {application?.status === "rejected" ? <Text size={13} color={colors.error}>{application.rejectionReason ?? "Your application wasn't approved."}</Text> : null}
+            {application?.status === "rejected" ? <Text size={typeScale.sm} color={colors.error}>{application.rejectionReason ?? "Your application wasn't approved."}</Text> : null}
             {subscription ? (
-              <Text size={13} lineHeight={17.5} color={colors.textMuted}>
+              <Text size={typeScale.sm} lineHeight={17.5} color={colors.textMuted}>
                 {subscription.cancelAtPeriodEnd
                   ? `Cancelled — your badge stays until ${subscription.renewsAt ? formatFriendlyDate(subscription.renewsAt) : "the end of this period"}.`
                   : `Renews ${subscription.renewsAt ? formatFriendlyDate(subscription.renewsAt) : "automatically"}.`}
@@ -68,8 +77,8 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
 
         {type === "personal" ? (
           <View style={styles.section}>
-            <Text size={16} weight={600} lineHeight={19.2}>Blue: people</Text>
-            <Text size={13} lineHeight={17.5} color={colors.textMuted}>For personal accounts, including creator accounts. Confirms you are who you say you are.</Text>
+            <Text size={typeScale.base} weight={600} lineHeight={19.2}>Blue: people</Text>
+            <Text size={typeScale.sm} lineHeight={17.5} color={colors.textMuted}>For personal accounts, including creator accounts. Confirms you are who you say you are.</Text>
             {(plans.data ?? []).filter((plan) => plan.color === "blue").map((plan) => (
               <VerificationPlanCard key={plan.id} plan={plan} current={subscription?.planId === plan.id} />
             ))}
@@ -80,10 +89,10 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
         {type === "business" ? (
           <View style={styles.card}>
             <View style={styles.row}>
-              <Text size={16} weight={600} lineHeight={19.2}>Gold: businesses and brands</Text>
+              <Text size={typeScale.base} weight={600} lineHeight={19.2}>Gold: businesses and brands</Text>
               <VerificationBadge verification={currentForProfile} size={20} />
             </View>
-            <Text size={13} lineHeight={17.5} color={colors.textMuted}>
+            <Text size={typeScale.sm} lineHeight={17.5} color={colors.textMuted}>
               {goldPending ? "Gold after business verification" : "Your business profile is verified."}
             </Text>
             {goldPending ? <Button title="Verify your identity" onPress={() => navigation.navigate("IdentityVerification")} /> : null}
@@ -94,10 +103,10 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
         {type === "government" ? (
           <View style={styles.card}>
             <View style={styles.row}>
-              <Text size={16} weight={600} lineHeight={19.2}>Black: government</Text>
+              <Text size={typeScale.base} weight={600} lineHeight={19.2}>Black: government</Text>
               <VerificationBadge verification={currentForProfile} size={20} />
             </View>
-            <Text size={13} lineHeight={17.5} color={colors.textMuted}>Official government bodies apply through a reviewed process. This badge can't be bought in the app.</Text>
+            <Text size={typeScale.sm} lineHeight={17.5} color={colors.textMuted}>Official government bodies apply through a reviewed process. This badge can't be bought in the app.</Text>
             <Button variant="subtle" title="Apply for government verification" onPress={() => webHandoffService.openGovernmentApplication()} />
           </View>
         ) : null}
@@ -117,8 +126,8 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40, gap: 20 },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
+  content: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[8], gap: spacing[5] },
+  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing[4], gap: spacing[2] },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   section: { gap: 10 },
 }));

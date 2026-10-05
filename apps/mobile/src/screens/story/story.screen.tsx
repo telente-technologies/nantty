@@ -1,24 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useCallback, useEffect, useState } from "react";
-import { PanResponder, Platform, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, PanResponder, Platform, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageComposerBar } from "@/components/chat/messageComposerBar";
 import { DotsThreeVertical24Icon } from "@/components/icons";
 import { ClipVideoPlayer } from "@/components/media/clipVideoPlayer";
 import { useStoryAutoAdvance } from "@/components/story/storyAutoAdvance.hook";
+import { StoryOptionsSheet } from "@/components/story/storyOptionsSheet";
 import { StoryProgressBar } from "@/components/story/storyProgressBar";
 import { Avatar } from "@/components/ui/avatar";
+import { EmptyState } from "@/components/ui/emptyState";
+import { ErrorState } from "@/components/ui/errorState";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { storiesService } from "@/services/stories.service";
+import { showToast } from "@/store/toast.store";
+import { makeThemedStyles, useTheme } from "@/theme";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const openUserProfile = useOpenUserProfile();
   const { width } = useWindowDimensions();
   const [isReplying, setIsReplying] = useState(false);
@@ -30,7 +40,7 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
   const [isActiveStoryVideo, setIsActiveStoryVideo] = useState(isFirstStoryVideo);
   const { activeIndex, progress, goToNextStory, goToPreviousStory } = useStoryAutoAdvance(
     list.length,
-    isReplying || isActiveStoryVideo,
+    isReplying || isOptionsOpen || isActiveStoryVideo,
     closeStoryViewer,
   );
   const story = list[activeIndex];
@@ -51,6 +61,32 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
     },
   });
 
+  const sendReply = (text: string) => {
+    setIsReplying(false);
+    if (!story) return;
+    const storyId = story.id;
+    requireAuthThen(() =>
+      storiesService
+        .replyToStory(storyId, text)
+        .then(() => showToast("Reply sent"))
+        .catch(() => showToast("Reply not sent. Try again.")),
+    null, "reply to stories");
+  };
+
+  if (stories.isPending || stories.isError || list.length === 0) {
+    return (
+      <View style={[styles.root, styles.centered, { paddingTop: insets.top }]}>
+        {stories.isPending ? (
+          <ActivityIndicator color={colors.primary} accessibilityLabel="Loading stories" />
+        ) : stories.isError ? (
+          <ErrorState message="Couldn't load stories." onRetry={() => stories.refetch()} retrying={stories.isRefetching} />
+        ) : (
+          <EmptyState title="No stories right now" body="Stories disappear after 24 hours." actionLabel="Close" onAction={closeStoryViewer} />
+        )}
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.root, { paddingTop: insets.top + 4 }]}>
       <StoryProgressBar
@@ -67,11 +103,11 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
         >
           <Avatar uri={story?.author.avatarUrl} size={32} />
           <View style={styles.nameRow}>
-            <Text size={14} weight={500} lineHeight={16.8}>
+            <Text size={typeScale.md} weight={500} lineHeight={16.8}>
               {story?.author.name ?? ""}
             </Text>
             <View style={styles.dot} />
-            <Text size={14} weight={500} lineHeight={16.8} color={colors.textMuted}>
+            <Text size={typeScale.md} weight={500} lineHeight={16.8} color={colors.textMuted}>
               {story ? formatTimeSincePosted(story.createdAt) : ""}
             </Text>
           </View>
@@ -85,12 +121,12 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
               style={styles.livePill}
             >
               <View style={styles.liveDot} />
-              <Text size={12} weight={700} lineHeight={14} color={colors.white}>
+              <Text size={typeScale.xs} weight={700} lineHeight={14} color={colors.white}>
                 LIVE · Watch
               </Text>
             </Pressable>
           ) : null}
-          <Pressable accessibilityRole="button" accessibilityLabel="Story options" hitSlop={10}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Story options" onPress={() => setIsOptionsOpen(true)} style={styles.iconButton}>
             <DotsThreeVertical24Icon />
           </Pressable>
         </View>
@@ -100,7 +136,7 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
           <ClipVideoPlayer
             key={story.id}
             media={story.media}
-            isActive={!isReplying}
+            isActive={!isReplying && !isOptionsOpen}
             isMuted={Platform.OS === "web"}
             loop={false}
             style={StyleSheet.absoluteFill}
@@ -128,25 +164,31 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
       <View onTouchStart={() => setIsReplying(true)}>
         <MessageComposerBar
           plusOnRight
-          onSend={(text) => {
-            if (story) storiesService.replyToStory(story.id, text).catch(() => undefined);
-            setIsReplying(false);
-          }}
+          onSend={sendReply}
         />
       </View>
+      <StoryOptionsSheet
+        story={story}
+        visible={isOptionsOpen}
+        onClose={() => setIsOptionsOpen(false)}
+        onOpenProfile={openUserProfile}
+        onReportClosed={() => setIsOptionsOpen(false)}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.white },
-  header: { marginTop: 4, height: 32, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  author: { flexDirection: "row", alignItems: "center", gap: 9 },
-  nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  headerActions: { flexDirection: "row", alignItems: "center", gap: 12 },
-  livePill: { flexDirection: "row", alignItems: "center", gap: 5, minHeight: 28, paddingHorizontal: 10, borderRadius: 14, backgroundColor: colors.live },
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.background },
+  centered: { alignItems: "center", justifyContent: "center" },
+  iconButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center", marginRight: -10 },
+  header: { marginTop: spacing[1], height: 44, paddingHorizontal: spacing[4], flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  author: { flexDirection: "row", alignItems: "center", gap: spacing[2] },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: spacing[1] },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: spacing[3] },
+  livePill: { flexDirection: "row", alignItems: "center", gap: spacing[1], minHeight: 28, paddingHorizontal: 10, borderRadius: 14, backgroundColor: colors.live },
   liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.white },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.avatar },
-  media: { flex: 1, marginTop: 12 },
+  media: { flex: 1, marginTop: spacing[3] },
   tapZone: { position: "absolute", top: 0, bottom: 0 },
-});
+}));

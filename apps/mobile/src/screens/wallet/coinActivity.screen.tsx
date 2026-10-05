@@ -3,12 +3,19 @@ import { FlatList, StyleSheet, View } from "react-native";
 
 import { formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
 import { Button } from "@/components/ui/button";
+import { Coin24Icon } from "@/components/icons";
+import { EmptyState } from "@/components/ui/emptyState";
+import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { coinsService } from "@/services/coins.service";
 import type { CoinActivityEntry } from "@/types";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 export function CoinActivityScreen() {
   const { colors } = useTheme();
@@ -20,37 +27,34 @@ export function CoinActivityScreen() {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
   const entries: CoinActivityEntry[] = activity.data?.pages.flatMap((page) => page.data) ?? [];
+  const refreshControl = usePullToRefresh(activity.refetch);
   return (
     <Screen>
       <Header title="Coin activity" />
       <FlatList
         data={entries}
         keyExtractor={(entry) => entry.id}
-        refreshing={activity.isRefetching}
-        onRefresh={() => activity.refetch()}
+        refreshControl={refreshControl}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
           <View style={styles.row}>
             <View style={styles.flex}>
-              <Text size={14} weight={500} lineHeight={16.8} color={item.type === "credit" ? colors.success : colors.error}>
+              <Text size={typeScale.md} weight={500} lineHeight={16.8} color={item.type === "credit" ? colors.success : colors.error}>
                 {item.type === "credit" ? "+" : "−"}{item.coins.toLocaleString("en-US")} coins
               </Text>
-              <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Balance {item.balanceAfter.toLocaleString("en-US")} coins</Text>
+              <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>Balance {item.balanceAfter.toLocaleString("en-US")} coins</Text>
             </View>
-            <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{formatFriendlyDateTime(item.createdAt)}</Text>
+            <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>{formatFriendlyDateTime(item.createdAt)}</Text>
           </View>
         )}
         ListEmptyComponent={
-          activity.isPending ? null : activity.isError ? (
-            <View style={styles.errorState}>
-              <Text size={14} lineHeight={16.8} color={colors.error} align="center">Could not load coin activity</Text>
-              <Button variant="subtle" title="Retry" onPress={() => activity.refetch()} />
-            </View>
+          activity.isPending ? (
+            <ListSkeleton rows={8} avatarSize={0} padding={12} />
+          ) : activity.isError ? (
+            <ErrorState compact message="Couldn't load coin activity." onRetry={() => activity.refetch()} retrying={activity.isRefetching} />
           ) : (
-            <Text size={14} lineHeight={16.8} color={colors.textSubtle} align="center" style={styles.empty}>
-              No coin activity yet
-            </Text>
+            <EmptyState compact icon={<Coin24Icon color={colors.textMuted} />} title="No coin activity yet" body="Coins you buy, send and receive will show up here." />
           )
         }
         ListFooterComponent={
@@ -64,11 +68,9 @@ export function CoinActivityScreen() {
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  list: { marginHorizontal: 16, marginTop: 24, borderRadius: 12, overflow: "hidden", paddingBottom: 40 },
+  list: { marginHorizontal: spacing[4], marginTop: spacing[6], borderRadius: 12, overflow: "hidden", paddingBottom: spacing[8] },
   separator: { height: 1, backgroundColor: colors.background },
-  errorState: { marginTop: 60, gap: 12, alignItems: "center" },
-  empty: { marginTop: 60 },
-  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, backgroundColor: colors.surface, paddingHorizontal: 16, paddingVertical: 14 },
+  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing[3], backgroundColor: colors.surface, paddingHorizontal: spacing[4], paddingVertical: 14 },
   flex: { flex: 1 },
-  loadMore: { marginTop: 12, marginHorizontal: 16 },
+  loadMore: { marginTop: spacing[3], marginHorizontal: spacing[4] },
 }));
