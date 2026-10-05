@@ -13,4 +13,7 @@ type WithholdUsernameRequest struct {
 type AddReservedUsernameRuleRequest struct {
 	Term      string `json:"term"`
 	MatchKind string `json:"matchKind"`
+	Category  string `json:"category"`
+	Note      string `json:"note"`
+	Reason    string `json:"reason"`
 }

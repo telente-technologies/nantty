@@ -63,7 +63,7 @@ func (controller UsernamesController) SuggestUsername(writer http.ResponseWriter
 }
 
 func (controller UsernamesController) ListReservedUsernameRules(writer http.ResponseWriter, request *http.Request) {
-	page, err := listreservedusernamerules.Handler{Container: controller.Container}.Execute(request.Context(), listreservedusernamerules.Query{Cursor: request.URL.Query().Get("cursor")})
+	page, err := listreservedusernamerules.Handler{Container: controller.Container}.Execute(request.Context(), listreservedusernamerules.Query{Cursor: request.URL.Query().Get("cursor"), Search: request.URL.Query().Get("q"), Kind: request.URL.Query().Get("kind")})
 	controller.respondJson(writer, request, http.StatusOK, page, err)
 }
 
@@ -74,7 +74,7 @@ func (controller UsernamesController) AddReservedUsernameRule(writer http.Respon
 		return
 	}
 	result, err := addreservedusernamerule.Handler{Container: controller.Container}.Execute(request.Context(), addreservedusernamerule.Command{
-		Actor: utils.StaffActorFromRequest(request), Term: body.Term, MatchKind: body.MatchKind,
+		Actor: utils.StaffActorFromRequest(request), Term: body.Term, MatchKind: body.MatchKind, Category: body.Category, Note: body.Note, Reason: body.Reason,
 	})
 	controller.respondJson(writer, request, http.StatusCreated, result, err)
 }

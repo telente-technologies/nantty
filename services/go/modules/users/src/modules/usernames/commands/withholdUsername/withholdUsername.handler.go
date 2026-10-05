@@ -41,7 +41,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		if _, err := tx.UsernameHold.Delete().Where(usernamehold.Username(username)).Exec(ctx); err != nil {
 			return err
 		}
-		if err := tx.UsernameHold.Create().SetUsername(username).SetKind(usernamehold.KindWithheld).SetReason(reason).SetNote(command.Note).SetCreatedBy(command.Actor.Id).Exec(ctx); err != nil {
+		if err := tx.UsernameHold.Create().SetUsername(username).SetKind(usernamehold.KindWithheld).SetReason(reason).SetNote(command.Note).SetCreatedBy(command.Actor.Id).SetCreatedByName(command.Actor.Name).Exec(ctx); err != nil {
 			return err
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, "username.withheld", username, handler.Container.Now(), events.UsernameWithheldEventData{Username: username, Reason: reason})
