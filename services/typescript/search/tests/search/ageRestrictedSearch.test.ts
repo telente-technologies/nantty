@@ -4,7 +4,7 @@ import { createSearchHarness, envelope } from "../fakes/searchHarness.fake.js";
 import { postSource } from "../fakes/sourceFixtures.fake.js";
 import { buildPostDocument } from "../../src/modules/indexing/services/contentDocumentBuilders.service.js";
 
-const base = { cursor: undefined, limit: 20, region: undefined, scope: "posts" } as const;
+const base = { cursor: undefined, limit: 20, region: undefined, type: "posts" } as const;
 
 describe("age-restricted search results", () => {
   it("marks nudity and dangerous-act posts as restricted for minors when indexing", () => {

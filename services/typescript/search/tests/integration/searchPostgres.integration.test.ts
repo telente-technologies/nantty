@@ -54,7 +54,9 @@ describe.skipIf(!enabled)("search postgres integration (needs Postgres migrated 
     expect(first.hasMore).toBe(true);
     const last = first.hits.at(-1)!;
     const second = await query.search({ viewerId: undefined, kinds: ["product"], limit: 3, cursor: { score: last.score, key: `${last.kind}:${last.entityId}` }, region: undefined, normalizedQuery: `${marker} pager` });
-    expect(new Set([...first.hits, ...second.hits].map((hit) => hit.entityId)).size).toBe(5);
+    const ids = [...first.hits, ...second.hits].map((hit) => hit.entityId);
+    expect(new Set(ids).size, "pages must not overlap").toBe(ids.length);
+    expect(ids.filter((id) => id.startsWith(`${marker}-`)).sort()).toEqual([0, 1, 2, 3, 4].map((number) => `${marker}-${number}`));
   });
 
   it("treats quotes and SQL fragments in the query and viewer as plain data", async () => {

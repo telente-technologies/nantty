@@ -4,7 +4,7 @@ import { createSearchHarness, envelope } from "../fakes/searchHarness.fake.js";
 import { productSource } from "../fakes/sourceFixtures.fake.js";
 import { buildProductDocument } from "../../src/modules/indexing/services/entityDocumentBuilders.service.js";
 
-const base = { cursor: undefined, limit: 20, scope: "products" } as const;
+const base = { cursor: undefined, limit: 20, type: "products" } as const;
 
 describe("shipping-region visibility in search", () => {
   it("indexes the seller's shipping regions on the product document", () => {

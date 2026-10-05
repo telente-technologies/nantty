@@ -1,6 +1,7 @@
 import type { RecentSearchStore, SearchIndexStore, SearchQueryStore, UpsertOutcome } from "../../src/interfaces/searchStore.interface.js";
 import type { AccountState, ConsentType, SearchDocument } from "../../src/types/searchDocument.type.js";
 import type { RecentSearch, SearchHit } from "../../src/types/searchResult.type.js";
+import type { SearchScope } from "../../src/enums/searchScope.enum.js";
 import { buildNormalizedTitle } from "../../src/modules/indexing/services/normalizedTitle.service.js";
 import { extractQueryTokens, stripLeadingMarkers } from "../../src/utils/queryNormalizer.util.js";
 
@@ -79,6 +80,14 @@ export class InMemorySearchStore implements SearchIndexStore, SearchQueryStore, 
     return document.visibility === "public" || owner === viewerId || (document.visibility === "followers" && follows);
   }
 
+  private inScope(document: StoredDocument, scope: SearchScope | undefined): boolean {
+    if (scope === undefined || scope.kind === "global" || scope.kind === "mart") return true;
+    if (scope.kind === "profile") return document.ownerAccountId === scope.accountId;
+    const storeDocument = this.documents.get(`store:${scope.storeId}`);
+    if (document.kind === "product") return document.storeId === scope.storeId;
+    return (document.kind === "post" || document.kind === "clip") && storeDocument !== undefined && storeDocument.available && !storeDocument.tombstoned && document.ownerAccountId === storeDocument.ownerAccountId;
+  }
+
   private score(document: StoredDocument, needle: string, tokens: readonly string[]): number | null {
     const title = document.normalizedTitle;
     const text = `${title} ${document.subtitle ?? ""} ${document.body} ${document.tags.join(" ")}`.toLowerCase();
@@ -93,7 +102,7 @@ export class InMemorySearchStore implements SearchIndexStore, SearchQueryStore, 
     const tokens = extractQueryTokens(request.normalizedQuery);
     if (tokens.length === 0) return { hits: [], hasMore: false };
     const scored = [...this.documents.values()]
-      .filter((document) => request.kinds.includes(document.kind) && this.isVisible(document, request.viewerId) && (request.viewerIsAdult === true || document.restrictedForMinors !== true || document.ownerAccountId === request.viewerId) && (request.region === undefined || (document.shippingRegions ?? []).length === 0 || (document.shippingRegions ?? []).includes(request.region) || document.ownerAccountId === request.viewerId))
+      .filter((document) => request.kinds.includes(document.kind) && this.inScope(document, request.scope) && this.isVisible(document, request.viewerId) && (request.viewerIsAdult === true || document.restrictedForMinors !== true || document.ownerAccountId === request.viewerId) && (request.region === undefined || (document.shippingRegions ?? []).length === 0 || (document.shippingRegions ?? []).includes(request.region) || document.ownerAccountId === request.viewerId))
       .flatMap((document) => {
         const score = this.score(document, needle, tokens);
         return score === null ? [] : [{ document, score: Math.round(score * 1e6) / 1e6 }];
@@ -104,14 +113,17 @@ export class InMemorySearchStore implements SearchIndexStore, SearchQueryStore, 
     return { hits, hasMore: afterCursor.length > request.limit };
   }
 
-  public async record(accountId: string, normalized: string, display: string): Promise<void> {
-    const index = this.recents.findIndex((entry) => entry.accountId === accountId && entry.normalized === normalized);
+  private recentSequence = 0;
+
+  public async record(accountId: string, scope: string, normalized: string, display: string): Promise<void> {
+    const index = this.recents.findIndex((entry) => entry.accountId === accountId && entry.scope === scope && entry.normalized === normalized);
     if (index >= 0) this.recents.splice(index, 1);
-    this.recents.unshift({ id: `00000000-0000-4000-8000-${String(this.recents.length + 1).padStart(12, "0")}`, accountId, normalized, query: display, searchedAt: new Date().toISOString() });
+    this.recentSequence += 1;
+    this.recents.unshift({ id: `00000000-0000-4000-8000-${String(this.recentSequence).padStart(12, "0")}`, accountId, scope, normalized, query: display, searchedAt: new Date().toISOString() });
   }
 
-  public async list(accountId: string, limit: number): Promise<readonly RecentSearch[]> {
-    return this.recents.filter((entry) => entry.accountId === accountId).slice(0, limit).map(({ id, query, searchedAt }) => ({ id, query, searchedAt }));
+  public async list(accountId: string, scope: string, limit: number): Promise<readonly RecentSearch[]> {
+    return this.recents.filter((entry) => entry.accountId === accountId && entry.scope === scope).slice(0, limit).map(({ id, query, scope: entryScope, searchedAt }) => ({ id, query, scope: entryScope, searchedAt }));
   }
 
   public async remove(accountId: string, id: string): Promise<void> {
@@ -119,7 +131,7 @@ export class InMemorySearchStore implements SearchIndexStore, SearchQueryStore, 
     if (index >= 0) this.recents.splice(index, 1);
   }
 
-  public async clear(accountId: string): Promise<void> {
-    for (let index = this.recents.length - 1; index >= 0; index -= 1) if (this.recents[index]?.accountId === accountId) this.recents.splice(index, 1);
+  public async clear(accountId: string, scope: string | undefined): Promise<void> {
+    for (let index = this.recents.length - 1; index >= 0; index -= 1) if (this.recents[index]?.accountId === accountId && (scope === undefined || this.recents[index]?.scope === scope)) this.recents.splice(index, 1);
   }
 }
