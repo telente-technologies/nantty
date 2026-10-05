@@ -36,6 +36,7 @@ import (
 type fakeUsers struct {
 	mutex    sync.Mutex
 	Requests []integrations.EnforcementRequest
+	Verified map[string]bool
 }
 
 func (users *fakeUsers) Enforce(_ context.Context, request integrations.EnforcementRequest) error {
@@ -49,6 +50,11 @@ func (users *fakeUsers) Summaries(_ context.Context, ids []uuid.UUID) (map[strin
 	summaries := map[string]integrations.UserSummary{}
 	for _, identifier := range ids {
 		summaries[identifier.String()] = integrations.UserSummary{"id": identifier.String(), "username": "user-" + identifier.String()[:6]}
+		users.mutex.Lock()
+		if users.Verified[identifier.String()] {
+			summaries[identifier.String()]["verification"] = map[string]any{"color": "BLUE", "status": "ACTIVE"}
+		}
+		users.mutex.Unlock()
 	}
 	return summaries, nil
 }
@@ -125,7 +131,7 @@ func startModerationAgainstFreshSchema(t *testing.T) *moderationHarness {
 	staffVerifiers := middlewares.StaffTokenVerifiers{Access: verifier(staffauth.AccessAudience), StepUp: verifier(staffauth.StepUpAudience)}
 	accessVerifier := verifier(identitytest.FakeAccountAudience)
 	settings := configs.ModerationSettings{Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema, ReportsPerHour: 5, IntakeToken: strings.Repeat("m", 32)}
-	harness := &moderationHarness{t: t, tokens: tokens, users: &fakeUsers{}, audit: &fakeAudit{}, publisher: &events.RecordingPublisher{}, targets: &fakeTargets{owners: map[string]string{}}, schema: schema}
+	harness := &moderationHarness{t: t, tokens: tokens, users: &fakeUsers{Verified: map[string]bool{}}, audit: &fakeAudit{}, publisher: &events.RecordingPublisher{}, targets: &fakeTargets{owners: map[string]string{}, missing: map[string]bool{}}, schema: schema}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil)), Health: health.NewRegistryForService("moderation-test")}
 	module, err := src.StartModerationModuleWithSettings(ctx, settings, harness.publisher, dependencies, src.Overrides{AccessVerifier: accessVerifier, StaffVerifiers: &staffVerifiers, Users: harness.users, Audit: harness.audit, Targets: harness.targets})
 	if err != nil {

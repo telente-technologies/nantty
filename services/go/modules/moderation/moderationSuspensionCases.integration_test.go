@@ -52,6 +52,11 @@ func TestSuspensionCasesAreAdvisoryAndOnlyAnAdminApprovalSuspends(t *testing.T) 
 		t.Fatalf("unexpected queue %v", queue)
 	}
 	caseId := created["id"].(string)
+	for search, want := range map[string]int{account: 1, caseId: 1, "risk-2026": 1, uuid.NewString(): 0, "nothing-like-it": 0} {
+		if found := harness.expect("GET", "/api/v1/admin/suspensions/cases?search="+search, viewer, nil, http.StatusOK)["data"].([]any); len(found) != want {
+			t.Fatalf("search %q found %d cases", search, len(found))
+		}
+	}
 	detail := harness.expect("GET", "/api/v1/admin/suspensions/cases/"+caseId, viewer, nil, http.StatusOK)
 	if len(detail["signals"].([]any)) != 1 || detail["modelVersion"] != "risk-2026-10" {
 		t.Fatalf("unexpected detail %v", detail)
