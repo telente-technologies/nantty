@@ -19,4 +19,8 @@ func MountStaffAuthRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("POST /api/v1/admin/auth/logout", requireStaff(http.HandlerFunc(controller.LogOut)))
 	mux.Handle("GET /api/v1/admin/auth/me", requireStaff(http.HandlerFunc(controller.Me)))
 	mux.Handle("POST /api/v1/admin/auth/step-up", requireStaff(http.HandlerFunc(controller.StepUp)))
+	mux.HandleFunc("POST /api/v1/admin/auth/mfa/webauthn/options", controller.PasskeySignInOptions)
+	mux.Handle("POST /api/v1/admin/auth/step-up/webauthn/options", requireStaff(http.HandlerFunc(controller.PasskeyStepUpOptions)))
+	mux.Handle("PATCH /api/v1/admin/auth/me/preferences", requireStaff(http.HandlerFunc(controller.UpdatePreferences)))
+	mux.Handle("PATCH /api/v1/admin/users/me/preferences", requireStaff(http.HandlerFunc(controller.UpdatePreferences)))
 }
