@@ -12,5 +12,6 @@ export interface NoticeDraftRepository {
   find(versionId: string): Promise<NoticeDraft | null>;
   createIfAbsent(draft: Omit<NoticeDraft, "updatedAt" | "testSends" | "updatedByName">): Promise<NoticeDraft>;
   update(versionId: string, changes: { readonly subject: string; readonly summaryText: string; readonly whatChanged: readonly string[]; readonly reacceptNote: string | null; readonly updatedByName: string }): Promise<NoticeDraft | null>;
+  refreshVersionFacts(versionId: string, facts: { readonly versionNumber: number; readonly effectiveAt: Date; readonly requiresReacceptance: boolean; readonly reacceptNote: string | null }): Promise<NoticeDraft | null>;
   appendTestSend(versionId: string, testSend: { readonly sentToEmail: string; readonly sentByName: string; readonly sentAt: string }): Promise<NoticeDraft | null>;
 }

@@ -1,3 +1,5 @@
+import type { DomainEventPublisher } from "./domainEventPublisher.interface.js";
+
 export interface JobQueue {
   send(queueUrl: string, body: unknown, delaySeconds?: number): Promise<void>;
 }
@@ -18,7 +20,7 @@ export interface QueueConsumer {
   stop(): Promise<void>;
 }
 
-export interface MessageBroker extends JobQueue {
+export interface MessageBroker extends JobQueue, DomainEventPublisher {
   createConsumer(name: string, queue: string, handleMessageBody: (body: string) => Promise<void>): QueueConsumer;
   close(): Promise<void>;
 }
