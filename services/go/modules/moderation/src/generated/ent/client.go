@@ -11,6 +11,11 @@ import (
 
 	"zudomart/modules/moderation/src/generated/ent/migrate"
 
+	"zudomart/modules/moderation/src/generated/ent/appeal"
+	"zudomart/modules/moderation/src/generated/ent/automationeventoccurrence"
+	"zudomart/modules/moderation/src/generated/ent/automationexecution"
+	"zudomart/modules/moderation/src/generated/ent/automationrule"
+	"zudomart/modules/moderation/src/generated/ent/automationruleversion"
 	"zudomart/modules/moderation/src/generated/ent/chatreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
@@ -42,6 +47,16 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Appeal is the client for interacting with the Appeal builders.
+	Appeal *AppealClient
+	// AutomationEventOccurrence is the client for interacting with the AutomationEventOccurrence builders.
+	AutomationEventOccurrence *AutomationEventOccurrenceClient
+	// AutomationExecution is the client for interacting with the AutomationExecution builders.
+	AutomationExecution *AutomationExecutionClient
+	// AutomationRule is the client for interacting with the AutomationRule builders.
+	AutomationRule *AutomationRuleClient
+	// AutomationRuleVersion is the client for interacting with the AutomationRuleVersion builders.
+	AutomationRuleVersion *AutomationRuleVersionClient
 	// ChatReport is the client for interacting with the ChatReport builders.
 	ChatReport *ChatReportClient
 	// ContentReport is the client for interacting with the ContentReport builders.
@@ -87,6 +102,11 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Appeal = NewAppealClient(c.config)
+	c.AutomationEventOccurrence = NewAutomationEventOccurrenceClient(c.config)
+	c.AutomationExecution = NewAutomationExecutionClient(c.config)
+	c.AutomationRule = NewAutomationRuleClient(c.config)
+	c.AutomationRuleVersion = NewAutomationRuleVersionClient(c.config)
 	c.ChatReport = NewChatReportClient(c.config)
 	c.ContentReport = NewContentReportClient(c.config)
 	c.ContentReportEntry = NewContentReportEntryClient(c.config)
@@ -194,25 +214,30 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                      ctx,
-		config:                   cfg,
-		ChatReport:               NewChatReportClient(cfg),
-		ContentReport:            NewContentReportClient(cfg),
-		ContentReportEntry:       NewContentReportEntryClient(cfg),
-		CopyrightClaim:           NewCopyrightClaimClient(cfg),
-		CopyrightPolicySetting:   NewCopyrightPolicySettingClient(cfg),
-		CounterNotice:            NewCounterNoticeClient(cfg),
-		EvidenceRetentionSetting: NewEvidenceRetentionSettingClient(cfg),
-		IpClaim:                  NewIpClaimClient(cfg),
-		LegalReport:              NewLegalReportClient(cfg),
-		LiveSafetyIncident:       NewLiveSafetyIncidentClient(cfg),
-		LiveSafetySignal:         NewLiveSafetySignalClient(cfg),
-		OutboxEvent:              NewOutboxEventClient(cfg),
-		SecurityAccountState:     NewSecurityAccountStateClient(cfg),
-		SecurityCase:             NewSecurityCaseClient(cfg),
-		SecurityEvent:            NewSecurityEventClient(cfg),
-		Strike:                   NewStrikeClient(cfg),
-		SuspensionCase:           NewSuspensionCaseClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		Appeal:                    NewAppealClient(cfg),
+		AutomationEventOccurrence: NewAutomationEventOccurrenceClient(cfg),
+		AutomationExecution:       NewAutomationExecutionClient(cfg),
+		AutomationRule:            NewAutomationRuleClient(cfg),
+		AutomationRuleVersion:     NewAutomationRuleVersionClient(cfg),
+		ChatReport:                NewChatReportClient(cfg),
+		ContentReport:             NewContentReportClient(cfg),
+		ContentReportEntry:        NewContentReportEntryClient(cfg),
+		CopyrightClaim:            NewCopyrightClaimClient(cfg),
+		CopyrightPolicySetting:    NewCopyrightPolicySettingClient(cfg),
+		CounterNotice:             NewCounterNoticeClient(cfg),
+		EvidenceRetentionSetting:  NewEvidenceRetentionSettingClient(cfg),
+		IpClaim:                   NewIpClaimClient(cfg),
+		LegalReport:               NewLegalReportClient(cfg),
+		LiveSafetyIncident:        NewLiveSafetyIncidentClient(cfg),
+		LiveSafetySignal:          NewLiveSafetySignalClient(cfg),
+		OutboxEvent:               NewOutboxEventClient(cfg),
+		SecurityAccountState:      NewSecurityAccountStateClient(cfg),
+		SecurityCase:              NewSecurityCaseClient(cfg),
+		SecurityEvent:             NewSecurityEventClient(cfg),
+		Strike:                    NewStrikeClient(cfg),
+		SuspensionCase:            NewSuspensionCaseClient(cfg),
 	}, nil
 }
 
@@ -230,32 +255,37 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                      ctx,
-		config:                   cfg,
-		ChatReport:               NewChatReportClient(cfg),
-		ContentReport:            NewContentReportClient(cfg),
-		ContentReportEntry:       NewContentReportEntryClient(cfg),
-		CopyrightClaim:           NewCopyrightClaimClient(cfg),
-		CopyrightPolicySetting:   NewCopyrightPolicySettingClient(cfg),
-		CounterNotice:            NewCounterNoticeClient(cfg),
-		EvidenceRetentionSetting: NewEvidenceRetentionSettingClient(cfg),
-		IpClaim:                  NewIpClaimClient(cfg),
-		LegalReport:              NewLegalReportClient(cfg),
-		LiveSafetyIncident:       NewLiveSafetyIncidentClient(cfg),
-		LiveSafetySignal:         NewLiveSafetySignalClient(cfg),
-		OutboxEvent:              NewOutboxEventClient(cfg),
-		SecurityAccountState:     NewSecurityAccountStateClient(cfg),
-		SecurityCase:             NewSecurityCaseClient(cfg),
-		SecurityEvent:            NewSecurityEventClient(cfg),
-		Strike:                   NewStrikeClient(cfg),
-		SuspensionCase:           NewSuspensionCaseClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		Appeal:                    NewAppealClient(cfg),
+		AutomationEventOccurrence: NewAutomationEventOccurrenceClient(cfg),
+		AutomationExecution:       NewAutomationExecutionClient(cfg),
+		AutomationRule:            NewAutomationRuleClient(cfg),
+		AutomationRuleVersion:     NewAutomationRuleVersionClient(cfg),
+		ChatReport:                NewChatReportClient(cfg),
+		ContentReport:             NewContentReportClient(cfg),
+		ContentReportEntry:        NewContentReportEntryClient(cfg),
+		CopyrightClaim:            NewCopyrightClaimClient(cfg),
+		CopyrightPolicySetting:    NewCopyrightPolicySettingClient(cfg),
+		CounterNotice:             NewCounterNoticeClient(cfg),
+		EvidenceRetentionSetting:  NewEvidenceRetentionSettingClient(cfg),
+		IpClaim:                   NewIpClaimClient(cfg),
+		LegalReport:               NewLegalReportClient(cfg),
+		LiveSafetyIncident:        NewLiveSafetyIncidentClient(cfg),
+		LiveSafetySignal:          NewLiveSafetySignalClient(cfg),
+		OutboxEvent:               NewOutboxEventClient(cfg),
+		SecurityAccountState:      NewSecurityAccountStateClient(cfg),
+		SecurityCase:              NewSecurityCaseClient(cfg),
+		SecurityEvent:             NewSecurityEventClient(cfg),
+		Strike:                    NewStrikeClient(cfg),
+		SuspensionCase:            NewSuspensionCaseClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		ChatReport.
+//		Appeal.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -278,11 +308,12 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.ChatReport, c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
-		c.CopyrightPolicySetting, c.CounterNotice, c.EvidenceRetentionSetting,
-		c.IpClaim, c.LegalReport, c.LiveSafetyIncident, c.LiveSafetySignal,
-		c.OutboxEvent, c.SecurityAccountState, c.SecurityCase, c.SecurityEvent,
-		c.Strike, c.SuspensionCase,
+		c.Appeal, c.AutomationEventOccurrence, c.AutomationExecution, c.AutomationRule,
+		c.AutomationRuleVersion, c.ChatReport, c.ContentReport, c.ContentReportEntry,
+		c.CopyrightClaim, c.CopyrightPolicySetting, c.CounterNotice,
+		c.EvidenceRetentionSetting, c.IpClaim, c.LegalReport, c.LiveSafetyIncident,
+		c.LiveSafetySignal, c.OutboxEvent, c.SecurityAccountState, c.SecurityCase,
+		c.SecurityEvent, c.Strike, c.SuspensionCase,
 	} {
 		n.Use(hooks...)
 	}
@@ -292,11 +323,12 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.ChatReport, c.ContentReport, c.ContentReportEntry, c.CopyrightClaim,
-		c.CopyrightPolicySetting, c.CounterNotice, c.EvidenceRetentionSetting,
-		c.IpClaim, c.LegalReport, c.LiveSafetyIncident, c.LiveSafetySignal,
-		c.OutboxEvent, c.SecurityAccountState, c.SecurityCase, c.SecurityEvent,
-		c.Strike, c.SuspensionCase,
+		c.Appeal, c.AutomationEventOccurrence, c.AutomationExecution, c.AutomationRule,
+		c.AutomationRuleVersion, c.ChatReport, c.ContentReport, c.ContentReportEntry,
+		c.CopyrightClaim, c.CopyrightPolicySetting, c.CounterNotice,
+		c.EvidenceRetentionSetting, c.IpClaim, c.LegalReport, c.LiveSafetyIncident,
+		c.LiveSafetySignal, c.OutboxEvent, c.SecurityAccountState, c.SecurityCase,
+		c.SecurityEvent, c.Strike, c.SuspensionCase,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -305,6 +337,16 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AppealMutation:
+		return c.Appeal.mutate(ctx, m)
+	case *AutomationEventOccurrenceMutation:
+		return c.AutomationEventOccurrence.mutate(ctx, m)
+	case *AutomationExecutionMutation:
+		return c.AutomationExecution.mutate(ctx, m)
+	case *AutomationRuleMutation:
+		return c.AutomationRule.mutate(ctx, m)
+	case *AutomationRuleVersionMutation:
+		return c.AutomationRuleVersion.mutate(ctx, m)
 	case *ChatReportMutation:
 		return c.ChatReport.mutate(ctx, m)
 	case *ContentReportMutation:
@@ -341,6 +383,671 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SuspensionCase.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AppealClient is a client for the Appeal schema.
+type AppealClient struct {
+	config
+}
+
+// NewAppealClient returns a client for the Appeal from the given config.
+func NewAppealClient(c config) *AppealClient {
+	return &AppealClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `appeal.Hooks(f(g(h())))`.
+func (c *AppealClient) Use(hooks ...Hook) {
+	c.hooks.Appeal = append(c.hooks.Appeal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `appeal.Intercept(f(g(h())))`.
+func (c *AppealClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Appeal = append(c.inters.Appeal, interceptors...)
+}
+
+// Create returns a builder for creating a Appeal entity.
+func (c *AppealClient) Create() *AppealCreate {
+	mutation := newAppealMutation(c.config, OpCreate)
+	return &AppealCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Appeal entities.
+func (c *AppealClient) CreateBulk(builders ...*AppealCreate) *AppealCreateBulk {
+	return &AppealCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AppealClient) MapCreateBulk(slice any, setFunc func(*AppealCreate, int)) *AppealCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AppealCreateBulk{err: fmt.Errorf("calling to AppealClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AppealCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AppealCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Appeal.
+func (c *AppealClient) Update() *AppealUpdate {
+	mutation := newAppealMutation(c.config, OpUpdate)
+	return &AppealUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AppealClient) UpdateOne(_m *Appeal) *AppealUpdateOne {
+	mutation := newAppealMutation(c.config, OpUpdateOne, withAppeal(_m))
+	return &AppealUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AppealClient) UpdateOneID(id uuid.UUID) *AppealUpdateOne {
+	mutation := newAppealMutation(c.config, OpUpdateOne, withAppealID(id))
+	return &AppealUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Appeal.
+func (c *AppealClient) Delete() *AppealDelete {
+	mutation := newAppealMutation(c.config, OpDelete)
+	return &AppealDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AppealClient) DeleteOne(_m *Appeal) *AppealDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AppealClient) DeleteOneID(id uuid.UUID) *AppealDeleteOne {
+	builder := c.Delete().Where(appeal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AppealDeleteOne{builder}
+}
+
+// Query returns a query builder for Appeal.
+func (c *AppealClient) Query() *AppealQuery {
+	return &AppealQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAppeal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Appeal entity by its id.
+func (c *AppealClient) Get(ctx context.Context, id uuid.UUID) (*Appeal, error) {
+	return c.Query().Where(appeal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AppealClient) GetX(ctx context.Context, id uuid.UUID) *Appeal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AppealClient) Hooks() []Hook {
+	return c.hooks.Appeal
+}
+
+// Interceptors returns the client interceptors.
+func (c *AppealClient) Interceptors() []Interceptor {
+	return c.inters.Appeal
+}
+
+func (c *AppealClient) mutate(ctx context.Context, m *AppealMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AppealCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AppealUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AppealUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AppealDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Appeal mutation op: %q", m.Op())
+	}
+}
+
+// AutomationEventOccurrenceClient is a client for the AutomationEventOccurrence schema.
+type AutomationEventOccurrenceClient struct {
+	config
+}
+
+// NewAutomationEventOccurrenceClient returns a client for the AutomationEventOccurrence from the given config.
+func NewAutomationEventOccurrenceClient(c config) *AutomationEventOccurrenceClient {
+	return &AutomationEventOccurrenceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `automationeventoccurrence.Hooks(f(g(h())))`.
+func (c *AutomationEventOccurrenceClient) Use(hooks ...Hook) {
+	c.hooks.AutomationEventOccurrence = append(c.hooks.AutomationEventOccurrence, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `automationeventoccurrence.Intercept(f(g(h())))`.
+func (c *AutomationEventOccurrenceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AutomationEventOccurrence = append(c.inters.AutomationEventOccurrence, interceptors...)
+}
+
+// Create returns a builder for creating a AutomationEventOccurrence entity.
+func (c *AutomationEventOccurrenceClient) Create() *AutomationEventOccurrenceCreate {
+	mutation := newAutomationEventOccurrenceMutation(c.config, OpCreate)
+	return &AutomationEventOccurrenceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AutomationEventOccurrence entities.
+func (c *AutomationEventOccurrenceClient) CreateBulk(builders ...*AutomationEventOccurrenceCreate) *AutomationEventOccurrenceCreateBulk {
+	return &AutomationEventOccurrenceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AutomationEventOccurrenceClient) MapCreateBulk(slice any, setFunc func(*AutomationEventOccurrenceCreate, int)) *AutomationEventOccurrenceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AutomationEventOccurrenceCreateBulk{err: fmt.Errorf("calling to AutomationEventOccurrenceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AutomationEventOccurrenceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AutomationEventOccurrenceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AutomationEventOccurrence.
+func (c *AutomationEventOccurrenceClient) Update() *AutomationEventOccurrenceUpdate {
+	mutation := newAutomationEventOccurrenceMutation(c.config, OpUpdate)
+	return &AutomationEventOccurrenceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AutomationEventOccurrenceClient) UpdateOne(_m *AutomationEventOccurrence) *AutomationEventOccurrenceUpdateOne {
+	mutation := newAutomationEventOccurrenceMutation(c.config, OpUpdateOne, withAutomationEventOccurrence(_m))
+	return &AutomationEventOccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AutomationEventOccurrenceClient) UpdateOneID(id uuid.UUID) *AutomationEventOccurrenceUpdateOne {
+	mutation := newAutomationEventOccurrenceMutation(c.config, OpUpdateOne, withAutomationEventOccurrenceID(id))
+	return &AutomationEventOccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AutomationEventOccurrence.
+func (c *AutomationEventOccurrenceClient) Delete() *AutomationEventOccurrenceDelete {
+	mutation := newAutomationEventOccurrenceMutation(c.config, OpDelete)
+	return &AutomationEventOccurrenceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AutomationEventOccurrenceClient) DeleteOne(_m *AutomationEventOccurrence) *AutomationEventOccurrenceDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AutomationEventOccurrenceClient) DeleteOneID(id uuid.UUID) *AutomationEventOccurrenceDeleteOne {
+	builder := c.Delete().Where(automationeventoccurrence.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AutomationEventOccurrenceDeleteOne{builder}
+}
+
+// Query returns a query builder for AutomationEventOccurrence.
+func (c *AutomationEventOccurrenceClient) Query() *AutomationEventOccurrenceQuery {
+	return &AutomationEventOccurrenceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAutomationEventOccurrence},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AutomationEventOccurrence entity by its id.
+func (c *AutomationEventOccurrenceClient) Get(ctx context.Context, id uuid.UUID) (*AutomationEventOccurrence, error) {
+	return c.Query().Where(automationeventoccurrence.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AutomationEventOccurrenceClient) GetX(ctx context.Context, id uuid.UUID) *AutomationEventOccurrence {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AutomationEventOccurrenceClient) Hooks() []Hook {
+	return c.hooks.AutomationEventOccurrence
+}
+
+// Interceptors returns the client interceptors.
+func (c *AutomationEventOccurrenceClient) Interceptors() []Interceptor {
+	return c.inters.AutomationEventOccurrence
+}
+
+func (c *AutomationEventOccurrenceClient) mutate(ctx context.Context, m *AutomationEventOccurrenceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AutomationEventOccurrenceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AutomationEventOccurrenceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AutomationEventOccurrenceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AutomationEventOccurrenceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AutomationEventOccurrence mutation op: %q", m.Op())
+	}
+}
+
+// AutomationExecutionClient is a client for the AutomationExecution schema.
+type AutomationExecutionClient struct {
+	config
+}
+
+// NewAutomationExecutionClient returns a client for the AutomationExecution from the given config.
+func NewAutomationExecutionClient(c config) *AutomationExecutionClient {
+	return &AutomationExecutionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `automationexecution.Hooks(f(g(h())))`.
+func (c *AutomationExecutionClient) Use(hooks ...Hook) {
+	c.hooks.AutomationExecution = append(c.hooks.AutomationExecution, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `automationexecution.Intercept(f(g(h())))`.
+func (c *AutomationExecutionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AutomationExecution = append(c.inters.AutomationExecution, interceptors...)
+}
+
+// Create returns a builder for creating a AutomationExecution entity.
+func (c *AutomationExecutionClient) Create() *AutomationExecutionCreate {
+	mutation := newAutomationExecutionMutation(c.config, OpCreate)
+	return &AutomationExecutionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AutomationExecution entities.
+func (c *AutomationExecutionClient) CreateBulk(builders ...*AutomationExecutionCreate) *AutomationExecutionCreateBulk {
+	return &AutomationExecutionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AutomationExecutionClient) MapCreateBulk(slice any, setFunc func(*AutomationExecutionCreate, int)) *AutomationExecutionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AutomationExecutionCreateBulk{err: fmt.Errorf("calling to AutomationExecutionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AutomationExecutionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AutomationExecutionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AutomationExecution.
+func (c *AutomationExecutionClient) Update() *AutomationExecutionUpdate {
+	mutation := newAutomationExecutionMutation(c.config, OpUpdate)
+	return &AutomationExecutionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AutomationExecutionClient) UpdateOne(_m *AutomationExecution) *AutomationExecutionUpdateOne {
+	mutation := newAutomationExecutionMutation(c.config, OpUpdateOne, withAutomationExecution(_m))
+	return &AutomationExecutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AutomationExecutionClient) UpdateOneID(id uuid.UUID) *AutomationExecutionUpdateOne {
+	mutation := newAutomationExecutionMutation(c.config, OpUpdateOne, withAutomationExecutionID(id))
+	return &AutomationExecutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AutomationExecution.
+func (c *AutomationExecutionClient) Delete() *AutomationExecutionDelete {
+	mutation := newAutomationExecutionMutation(c.config, OpDelete)
+	return &AutomationExecutionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AutomationExecutionClient) DeleteOne(_m *AutomationExecution) *AutomationExecutionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AutomationExecutionClient) DeleteOneID(id uuid.UUID) *AutomationExecutionDeleteOne {
+	builder := c.Delete().Where(automationexecution.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AutomationExecutionDeleteOne{builder}
+}
+
+// Query returns a query builder for AutomationExecution.
+func (c *AutomationExecutionClient) Query() *AutomationExecutionQuery {
+	return &AutomationExecutionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAutomationExecution},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AutomationExecution entity by its id.
+func (c *AutomationExecutionClient) Get(ctx context.Context, id uuid.UUID) (*AutomationExecution, error) {
+	return c.Query().Where(automationexecution.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AutomationExecutionClient) GetX(ctx context.Context, id uuid.UUID) *AutomationExecution {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AutomationExecutionClient) Hooks() []Hook {
+	return c.hooks.AutomationExecution
+}
+
+// Interceptors returns the client interceptors.
+func (c *AutomationExecutionClient) Interceptors() []Interceptor {
+	return c.inters.AutomationExecution
+}
+
+func (c *AutomationExecutionClient) mutate(ctx context.Context, m *AutomationExecutionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AutomationExecutionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AutomationExecutionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AutomationExecutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AutomationExecutionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AutomationExecution mutation op: %q", m.Op())
+	}
+}
+
+// AutomationRuleClient is a client for the AutomationRule schema.
+type AutomationRuleClient struct {
+	config
+}
+
+// NewAutomationRuleClient returns a client for the AutomationRule from the given config.
+func NewAutomationRuleClient(c config) *AutomationRuleClient {
+	return &AutomationRuleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `automationrule.Hooks(f(g(h())))`.
+func (c *AutomationRuleClient) Use(hooks ...Hook) {
+	c.hooks.AutomationRule = append(c.hooks.AutomationRule, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `automationrule.Intercept(f(g(h())))`.
+func (c *AutomationRuleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AutomationRule = append(c.inters.AutomationRule, interceptors...)
+}
+
+// Create returns a builder for creating a AutomationRule entity.
+func (c *AutomationRuleClient) Create() *AutomationRuleCreate {
+	mutation := newAutomationRuleMutation(c.config, OpCreate)
+	return &AutomationRuleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AutomationRule entities.
+func (c *AutomationRuleClient) CreateBulk(builders ...*AutomationRuleCreate) *AutomationRuleCreateBulk {
+	return &AutomationRuleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AutomationRuleClient) MapCreateBulk(slice any, setFunc func(*AutomationRuleCreate, int)) *AutomationRuleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AutomationRuleCreateBulk{err: fmt.Errorf("calling to AutomationRuleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AutomationRuleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AutomationRuleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AutomationRule.
+func (c *AutomationRuleClient) Update() *AutomationRuleUpdate {
+	mutation := newAutomationRuleMutation(c.config, OpUpdate)
+	return &AutomationRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AutomationRuleClient) UpdateOne(_m *AutomationRule) *AutomationRuleUpdateOne {
+	mutation := newAutomationRuleMutation(c.config, OpUpdateOne, withAutomationRule(_m))
+	return &AutomationRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AutomationRuleClient) UpdateOneID(id string) *AutomationRuleUpdateOne {
+	mutation := newAutomationRuleMutation(c.config, OpUpdateOne, withAutomationRuleID(id))
+	return &AutomationRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AutomationRule.
+func (c *AutomationRuleClient) Delete() *AutomationRuleDelete {
+	mutation := newAutomationRuleMutation(c.config, OpDelete)
+	return &AutomationRuleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AutomationRuleClient) DeleteOne(_m *AutomationRule) *AutomationRuleDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AutomationRuleClient) DeleteOneID(id string) *AutomationRuleDeleteOne {
+	builder := c.Delete().Where(automationrule.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AutomationRuleDeleteOne{builder}
+}
+
+// Query returns a query builder for AutomationRule.
+func (c *AutomationRuleClient) Query() *AutomationRuleQuery {
+	return &AutomationRuleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAutomationRule},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AutomationRule entity by its id.
+func (c *AutomationRuleClient) Get(ctx context.Context, id string) (*AutomationRule, error) {
+	return c.Query().Where(automationrule.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AutomationRuleClient) GetX(ctx context.Context, id string) *AutomationRule {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AutomationRuleClient) Hooks() []Hook {
+	return c.hooks.AutomationRule
+}
+
+// Interceptors returns the client interceptors.
+func (c *AutomationRuleClient) Interceptors() []Interceptor {
+	return c.inters.AutomationRule
+}
+
+func (c *AutomationRuleClient) mutate(ctx context.Context, m *AutomationRuleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AutomationRuleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AutomationRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AutomationRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AutomationRuleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AutomationRule mutation op: %q", m.Op())
+	}
+}
+
+// AutomationRuleVersionClient is a client for the AutomationRuleVersion schema.
+type AutomationRuleVersionClient struct {
+	config
+}
+
+// NewAutomationRuleVersionClient returns a client for the AutomationRuleVersion from the given config.
+func NewAutomationRuleVersionClient(c config) *AutomationRuleVersionClient {
+	return &AutomationRuleVersionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `automationruleversion.Hooks(f(g(h())))`.
+func (c *AutomationRuleVersionClient) Use(hooks ...Hook) {
+	c.hooks.AutomationRuleVersion = append(c.hooks.AutomationRuleVersion, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `automationruleversion.Intercept(f(g(h())))`.
+func (c *AutomationRuleVersionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AutomationRuleVersion = append(c.inters.AutomationRuleVersion, interceptors...)
+}
+
+// Create returns a builder for creating a AutomationRuleVersion entity.
+func (c *AutomationRuleVersionClient) Create() *AutomationRuleVersionCreate {
+	mutation := newAutomationRuleVersionMutation(c.config, OpCreate)
+	return &AutomationRuleVersionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AutomationRuleVersion entities.
+func (c *AutomationRuleVersionClient) CreateBulk(builders ...*AutomationRuleVersionCreate) *AutomationRuleVersionCreateBulk {
+	return &AutomationRuleVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AutomationRuleVersionClient) MapCreateBulk(slice any, setFunc func(*AutomationRuleVersionCreate, int)) *AutomationRuleVersionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AutomationRuleVersionCreateBulk{err: fmt.Errorf("calling to AutomationRuleVersionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AutomationRuleVersionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AutomationRuleVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AutomationRuleVersion.
+func (c *AutomationRuleVersionClient) Update() *AutomationRuleVersionUpdate {
+	mutation := newAutomationRuleVersionMutation(c.config, OpUpdate)
+	return &AutomationRuleVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AutomationRuleVersionClient) UpdateOne(_m *AutomationRuleVersion) *AutomationRuleVersionUpdateOne {
+	mutation := newAutomationRuleVersionMutation(c.config, OpUpdateOne, withAutomationRuleVersion(_m))
+	return &AutomationRuleVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AutomationRuleVersionClient) UpdateOneID(id uuid.UUID) *AutomationRuleVersionUpdateOne {
+	mutation := newAutomationRuleVersionMutation(c.config, OpUpdateOne, withAutomationRuleVersionID(id))
+	return &AutomationRuleVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AutomationRuleVersion.
+func (c *AutomationRuleVersionClient) Delete() *AutomationRuleVersionDelete {
+	mutation := newAutomationRuleVersionMutation(c.config, OpDelete)
+	return &AutomationRuleVersionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AutomationRuleVersionClient) DeleteOne(_m *AutomationRuleVersion) *AutomationRuleVersionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AutomationRuleVersionClient) DeleteOneID(id uuid.UUID) *AutomationRuleVersionDeleteOne {
+	builder := c.Delete().Where(automationruleversion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AutomationRuleVersionDeleteOne{builder}
+}
+
+// Query returns a query builder for AutomationRuleVersion.
+func (c *AutomationRuleVersionClient) Query() *AutomationRuleVersionQuery {
+	return &AutomationRuleVersionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAutomationRuleVersion},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AutomationRuleVersion entity by its id.
+func (c *AutomationRuleVersionClient) Get(ctx context.Context, id uuid.UUID) (*AutomationRuleVersion, error) {
+	return c.Query().Where(automationruleversion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AutomationRuleVersionClient) GetX(ctx context.Context, id uuid.UUID) *AutomationRuleVersion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AutomationRuleVersionClient) Hooks() []Hook {
+	return c.hooks.AutomationRuleVersion
+}
+
+// Interceptors returns the client interceptors.
+func (c *AutomationRuleVersionClient) Interceptors() []Interceptor {
+	return c.inters.AutomationRuleVersion
+}
+
+func (c *AutomationRuleVersionClient) mutate(ctx context.Context, m *AutomationRuleVersionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AutomationRuleVersionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AutomationRuleVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AutomationRuleVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AutomationRuleVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AutomationRuleVersion mutation op: %q", m.Op())
 	}
 }
 
@@ -2608,18 +3315,20 @@ func (c *SuspensionCaseClient) mutate(ctx context.Context, m *SuspensionCaseMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim,
-		CopyrightPolicySetting, CounterNotice, EvidenceRetentionSetting, IpClaim,
-		LegalReport, LiveSafetyIncident, LiveSafetySignal, OutboxEvent,
-		SecurityAccountState, SecurityCase, SecurityEvent, Strike,
-		SuspensionCase []ent.Hook
+		Appeal, AutomationEventOccurrence, AutomationExecution, AutomationRule,
+		AutomationRuleVersion, ChatReport, ContentReport, ContentReportEntry,
+		CopyrightClaim, CopyrightPolicySetting, CounterNotice,
+		EvidenceRetentionSetting, IpClaim, LegalReport, LiveSafetyIncident,
+		LiveSafetySignal, OutboxEvent, SecurityAccountState, SecurityCase,
+		SecurityEvent, Strike, SuspensionCase []ent.Hook
 	}
 	inters struct {
-		ChatReport, ContentReport, ContentReportEntry, CopyrightClaim,
-		CopyrightPolicySetting, CounterNotice, EvidenceRetentionSetting, IpClaim,
-		LegalReport, LiveSafetyIncident, LiveSafetySignal, OutboxEvent,
-		SecurityAccountState, SecurityCase, SecurityEvent, Strike,
-		SuspensionCase []ent.Interceptor
+		Appeal, AutomationEventOccurrence, AutomationExecution, AutomationRule,
+		AutomationRuleVersion, ChatReport, ContentReport, ContentReportEntry,
+		CopyrightClaim, CopyrightPolicySetting, CounterNotice,
+		EvidenceRetentionSetting, IpClaim, LegalReport, LiveSafetyIncident,
+		LiveSafetySignal, OutboxEvent, SecurityAccountState, SecurityCase,
+		SecurityEvent, Strike, SuspensionCase []ent.Interceptor
 	}
 )
 

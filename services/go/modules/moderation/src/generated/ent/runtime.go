@@ -5,6 +5,11 @@ package ent
 import (
 	"time"
 	"zudomart/modules/moderation/src/databases/schema"
+	"zudomart/modules/moderation/src/generated/ent/appeal"
+	"zudomart/modules/moderation/src/generated/ent/automationeventoccurrence"
+	"zudomart/modules/moderation/src/generated/ent/automationexecution"
+	"zudomart/modules/moderation/src/generated/ent/automationrule"
+	"zudomart/modules/moderation/src/generated/ent/automationruleversion"
 	"zudomart/modules/moderation/src/generated/ent/chatreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
@@ -30,6 +35,204 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	appealMixin := schema.Appeal{}.Mixin()
+	appealMixinFields0 := appealMixin[0].Fields()
+	_ = appealMixinFields0
+	appealFields := schema.Appeal{}.Fields()
+	_ = appealFields
+	// appealDescCreatedAt is the schema descriptor for created_at field.
+	appealDescCreatedAt := appealMixinFields0[1].Descriptor()
+	// appeal.DefaultCreatedAt holds the default value on creation for the created_at field.
+	appeal.DefaultCreatedAt = appealDescCreatedAt.Default.(func() time.Time)
+	// appealDescSourceKey is the schema descriptor for source_key field.
+	appealDescSourceKey := appealFields[0].Descriptor()
+	// appeal.SourceKeyValidator is a validator for the "source_key" field. It is called by the builders before save.
+	appeal.SourceKeyValidator = appealDescSourceKey.Validators[0].(func(string) error)
+	// appealDescTargetType is the schema descriptor for target_type field.
+	appealDescTargetType := appealFields[5].Descriptor()
+	// appeal.TargetTypeValidator is a validator for the "target_type" field. It is called by the builders before save.
+	appeal.TargetTypeValidator = appealDescTargetType.Validators[0].(func(string) error)
+	// appealDescTargetID is the schema descriptor for target_id field.
+	appealDescTargetID := appealFields[6].Descriptor()
+	// appeal.TargetIDValidator is a validator for the "target_id" field. It is called by the builders before save.
+	appeal.TargetIDValidator = appealDescTargetID.Validators[0].(func(string) error)
+	// appealDescStatement is the schema descriptor for statement field.
+	appealDescStatement := appealFields[9].Descriptor()
+	// appeal.StatementValidator is a validator for the "statement" field. It is called by the builders before save.
+	appeal.StatementValidator = appealDescStatement.Validators[0].(func(string) error)
+	// appealDescEvidenceNotes is the schema descriptor for evidence_notes field.
+	appealDescEvidenceNotes := appealFields[10].Descriptor()
+	// appeal.DefaultEvidenceNotes holds the default value on creation for the evidence_notes field.
+	appeal.DefaultEvidenceNotes = appealDescEvidenceNotes.Default.([]string)
+	// appealDescID is the schema descriptor for id field.
+	appealDescID := appealMixinFields0[0].Descriptor()
+	// appeal.DefaultID holds the default value on creation for the id field.
+	appeal.DefaultID = appealDescID.Default.(func() uuid.UUID)
+	automationeventoccurrenceMixin := schema.AutomationEventOccurrence{}.Mixin()
+	automationeventoccurrenceMixinFields0 := automationeventoccurrenceMixin[0].Fields()
+	_ = automationeventoccurrenceMixinFields0
+	automationeventoccurrenceFields := schema.AutomationEventOccurrence{}.Fields()
+	_ = automationeventoccurrenceFields
+	// automationeventoccurrenceDescCreatedAt is the schema descriptor for created_at field.
+	automationeventoccurrenceDescCreatedAt := automationeventoccurrenceMixinFields0[1].Descriptor()
+	// automationeventoccurrence.DefaultCreatedAt holds the default value on creation for the created_at field.
+	automationeventoccurrence.DefaultCreatedAt = automationeventoccurrenceDescCreatedAt.Default.(func() time.Time)
+	// automationeventoccurrenceDescEvent is the schema descriptor for event field.
+	automationeventoccurrenceDescEvent := automationeventoccurrenceFields[0].Descriptor()
+	// automationeventoccurrence.EventValidator is a validator for the "event" field. It is called by the builders before save.
+	automationeventoccurrence.EventValidator = automationeventoccurrenceDescEvent.Validators[0].(func(string) error)
+	// automationeventoccurrenceDescSubjectKey is the schema descriptor for subject_key field.
+	automationeventoccurrenceDescSubjectKey := automationeventoccurrenceFields[1].Descriptor()
+	// automationeventoccurrence.SubjectKeyValidator is a validator for the "subject_key" field. It is called by the builders before save.
+	automationeventoccurrence.SubjectKeyValidator = automationeventoccurrenceDescSubjectKey.Validators[0].(func(string) error)
+	// automationeventoccurrenceDescSourceEventID is the schema descriptor for source_event_id field.
+	automationeventoccurrenceDescSourceEventID := automationeventoccurrenceFields[2].Descriptor()
+	// automationeventoccurrence.SourceEventIDValidator is a validator for the "source_event_id" field. It is called by the builders before save.
+	automationeventoccurrence.SourceEventIDValidator = automationeventoccurrenceDescSourceEventID.Validators[0].(func(string) error)
+	// automationeventoccurrenceDescID is the schema descriptor for id field.
+	automationeventoccurrenceDescID := automationeventoccurrenceMixinFields0[0].Descriptor()
+	// automationeventoccurrence.DefaultID holds the default value on creation for the id field.
+	automationeventoccurrence.DefaultID = automationeventoccurrenceDescID.Default.(func() uuid.UUID)
+	automationexecutionMixin := schema.AutomationExecution{}.Mixin()
+	automationexecutionMixinFields0 := automationexecutionMixin[0].Fields()
+	_ = automationexecutionMixinFields0
+	automationexecutionFields := schema.AutomationExecution{}.Fields()
+	_ = automationexecutionFields
+	// automationexecutionDescCreatedAt is the schema descriptor for created_at field.
+	automationexecutionDescCreatedAt := automationexecutionMixinFields0[1].Descriptor()
+	// automationexecution.DefaultCreatedAt holds the default value on creation for the created_at field.
+	automationexecution.DefaultCreatedAt = automationexecutionDescCreatedAt.Default.(func() time.Time)
+	// automationexecutionDescRuleID is the schema descriptor for rule_id field.
+	automationexecutionDescRuleID := automationexecutionFields[0].Descriptor()
+	// automationexecution.RuleIDValidator is a validator for the "rule_id" field. It is called by the builders before save.
+	automationexecution.RuleIDValidator = automationexecutionDescRuleID.Validators[0].(func(string) error)
+	// automationexecutionDescRuleName is the schema descriptor for rule_name field.
+	automationexecutionDescRuleName := automationexecutionFields[2].Descriptor()
+	// automationexecution.RuleNameValidator is a validator for the "rule_name" field. It is called by the builders before save.
+	automationexecution.RuleNameValidator = automationexecutionDescRuleName.Validators[0].(func(string) error)
+	// automationexecutionDescEvent is the schema descriptor for event field.
+	automationexecutionDescEvent := automationexecutionFields[3].Descriptor()
+	// automationexecution.EventValidator is a validator for the "event" field. It is called by the builders before save.
+	automationexecution.EventValidator = automationexecutionDescEvent.Validators[0].(func(string) error)
+	// automationexecutionDescSubjectKey is the schema descriptor for subject_key field.
+	automationexecutionDescSubjectKey := automationexecutionFields[4].Descriptor()
+	// automationexecution.SubjectKeyValidator is a validator for the "subject_key" field. It is called by the builders before save.
+	automationexecution.SubjectKeyValidator = automationexecutionDescSubjectKey.Validators[0].(func(string) error)
+	// automationexecutionDescSubjectLabel is the schema descriptor for subject_label field.
+	automationexecutionDescSubjectLabel := automationexecutionFields[5].Descriptor()
+	// automationexecution.DefaultSubjectLabel holds the default value on creation for the subject_label field.
+	automationexecution.DefaultSubjectLabel = automationexecutionDescSubjectLabel.Default.(string)
+	// automationexecution.SubjectLabelValidator is a validator for the "subject_label" field. It is called by the builders before save.
+	automationexecution.SubjectLabelValidator = automationexecutionDescSubjectLabel.Validators[0].(func(string) error)
+	// automationexecutionDescActionsRun is the schema descriptor for actions_run field.
+	automationexecutionDescActionsRun := automationexecutionFields[9].Descriptor()
+	// automationexecution.DefaultActionsRun holds the default value on creation for the actions_run field.
+	automationexecution.DefaultActionsRun = automationexecutionDescActionsRun.Default.([]string)
+	// automationexecutionDescError is the schema descriptor for error field.
+	automationexecutionDescError := automationexecutionFields[10].Descriptor()
+	// automationexecution.ErrorValidator is a validator for the "error" field. It is called by the builders before save.
+	automationexecution.ErrorValidator = automationexecutionDescError.Validators[0].(func(string) error)
+	// automationexecutionDescID is the schema descriptor for id field.
+	automationexecutionDescID := automationexecutionMixinFields0[0].Descriptor()
+	// automationexecution.DefaultID holds the default value on creation for the id field.
+	automationexecution.DefaultID = automationexecutionDescID.Default.(func() uuid.UUID)
+	automationruleFields := schema.AutomationRule{}.Fields()
+	_ = automationruleFields
+	// automationruleDescVersion is the schema descriptor for version field.
+	automationruleDescVersion := automationruleFields[1].Descriptor()
+	// automationrule.VersionValidator is a validator for the "version" field. It is called by the builders before save.
+	automationrule.VersionValidator = automationruleDescVersion.Validators[0].(func(int) error)
+	// automationruleDescEvent is the schema descriptor for event field.
+	automationruleDescEvent := automationruleFields[2].Descriptor()
+	// automationrule.EventValidator is a validator for the "event" field. It is called by the builders before save.
+	automationrule.EventValidator = automationruleDescEvent.Validators[0].(func(string) error)
+	// automationruleDescIsEnabled is the schema descriptor for is_enabled field.
+	automationruleDescIsEnabled := automationruleFields[3].Descriptor()
+	// automationrule.DefaultIsEnabled holds the default value on creation for the is_enabled field.
+	automationrule.DefaultIsEnabled = automationruleDescIsEnabled.Default.(bool)
+	// automationruleDescIsArchived is the schema descriptor for is_archived field.
+	automationruleDescIsArchived := automationruleFields[4].Descriptor()
+	// automationrule.DefaultIsArchived holds the default value on creation for the is_archived field.
+	automationrule.DefaultIsArchived = automationruleDescIsArchived.Default.(bool)
+	// automationruleDescChangeReason is the schema descriptor for change_reason field.
+	automationruleDescChangeReason := automationruleFields[6].Descriptor()
+	// automationrule.ChangeReasonValidator is a validator for the "change_reason" field. It is called by the builders before save.
+	automationrule.ChangeReasonValidator = automationruleDescChangeReason.Validators[0].(func(string) error)
+	// automationruleDescUpdatedByID is the schema descriptor for updated_by_id field.
+	automationruleDescUpdatedByID := automationruleFields[7].Descriptor()
+	// automationrule.DefaultUpdatedByID holds the default value on creation for the updated_by_id field.
+	automationrule.DefaultUpdatedByID = automationruleDescUpdatedByID.Default.(string)
+	// automationrule.UpdatedByIDValidator is a validator for the "updated_by_id" field. It is called by the builders before save.
+	automationrule.UpdatedByIDValidator = automationruleDescUpdatedByID.Validators[0].(func(string) error)
+	// automationruleDescUpdatedByName is the schema descriptor for updated_by_name field.
+	automationruleDescUpdatedByName := automationruleFields[8].Descriptor()
+	// automationrule.DefaultUpdatedByName holds the default value on creation for the updated_by_name field.
+	automationrule.DefaultUpdatedByName = automationruleDescUpdatedByName.Default.(string)
+	// automationrule.UpdatedByNameValidator is a validator for the "updated_by_name" field. It is called by the builders before save.
+	automationrule.UpdatedByNameValidator = automationruleDescUpdatedByName.Validators[0].(func(string) error)
+	// automationruleDescCreatedAt is the schema descriptor for created_at field.
+	automationruleDescCreatedAt := automationruleFields[9].Descriptor()
+	// automationrule.DefaultCreatedAt holds the default value on creation for the created_at field.
+	automationrule.DefaultCreatedAt = automationruleDescCreatedAt.Default.(func() time.Time)
+	// automationruleDescID is the schema descriptor for id field.
+	automationruleDescID := automationruleFields[0].Descriptor()
+	// automationrule.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	automationrule.IDValidator = func() func(string) error {
+		validators := automationruleDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	automationruleversionMixin := schema.AutomationRuleVersion{}.Mixin()
+	automationruleversionMixinFields0 := automationruleversionMixin[0].Fields()
+	_ = automationruleversionMixinFields0
+	automationruleversionFields := schema.AutomationRuleVersion{}.Fields()
+	_ = automationruleversionFields
+	// automationruleversionDescCreatedAt is the schema descriptor for created_at field.
+	automationruleversionDescCreatedAt := automationruleversionMixinFields0[1].Descriptor()
+	// automationruleversion.DefaultCreatedAt holds the default value on creation for the created_at field.
+	automationruleversion.DefaultCreatedAt = automationruleversionDescCreatedAt.Default.(func() time.Time)
+	// automationruleversionDescRuleID is the schema descriptor for rule_id field.
+	automationruleversionDescRuleID := automationruleversionFields[0].Descriptor()
+	// automationruleversion.RuleIDValidator is a validator for the "rule_id" field. It is called by the builders before save.
+	automationruleversion.RuleIDValidator = automationruleversionDescRuleID.Validators[0].(func(string) error)
+	// automationruleversionDescVersion is the schema descriptor for version field.
+	automationruleversionDescVersion := automationruleversionFields[1].Descriptor()
+	// automationruleversion.VersionValidator is a validator for the "version" field. It is called by the builders before save.
+	automationruleversion.VersionValidator = automationruleversionDescVersion.Validators[0].(func(int) error)
+	// automationruleversionDescChangeReason is the schema descriptor for change_reason field.
+	automationruleversionDescChangeReason := automationruleversionFields[3].Descriptor()
+	// automationruleversion.ChangeReasonValidator is a validator for the "change_reason" field. It is called by the builders before save.
+	automationruleversion.ChangeReasonValidator = automationruleversionDescChangeReason.Validators[0].(func(string) error)
+	// automationruleversionDescUpdatedByID is the schema descriptor for updated_by_id field.
+	automationruleversionDescUpdatedByID := automationruleversionFields[4].Descriptor()
+	// automationruleversion.DefaultUpdatedByID holds the default value on creation for the updated_by_id field.
+	automationruleversion.DefaultUpdatedByID = automationruleversionDescUpdatedByID.Default.(string)
+	// automationruleversion.UpdatedByIDValidator is a validator for the "updated_by_id" field. It is called by the builders before save.
+	automationruleversion.UpdatedByIDValidator = automationruleversionDescUpdatedByID.Validators[0].(func(string) error)
+	// automationruleversionDescUpdatedByName is the schema descriptor for updated_by_name field.
+	automationruleversionDescUpdatedByName := automationruleversionFields[5].Descriptor()
+	// automationruleversion.DefaultUpdatedByName holds the default value on creation for the updated_by_name field.
+	automationruleversion.DefaultUpdatedByName = automationruleversionDescUpdatedByName.Default.(string)
+	// automationruleversion.UpdatedByNameValidator is a validator for the "updated_by_name" field. It is called by the builders before save.
+	automationruleversion.UpdatedByNameValidator = automationruleversionDescUpdatedByName.Validators[0].(func(string) error)
+	// automationruleversionDescIsArchived is the schema descriptor for is_archived field.
+	automationruleversionDescIsArchived := automationruleversionFields[6].Descriptor()
+	// automationruleversion.DefaultIsArchived holds the default value on creation for the is_archived field.
+	automationruleversion.DefaultIsArchived = automationruleversionDescIsArchived.Default.(bool)
+	// automationruleversionDescID is the schema descriptor for id field.
+	automationruleversionDescID := automationruleversionMixinFields0[0].Descriptor()
+	// automationruleversion.DefaultID holds the default value on creation for the id field.
+	automationruleversion.DefaultID = automationruleversionDescID.Default.(func() uuid.UUID)
 	chatreportMixin := schema.ChatReport{}.Mixin()
 	chatreportMixinFields0 := chatreportMixin[0].Fields()
 	_ = chatreportMixinFields0

@@ -8,6 +8,11 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"zudomart/modules/moderation/src/generated/ent/appeal"
+	"zudomart/modules/moderation/src/generated/ent/automationeventoccurrence"
+	"zudomart/modules/moderation/src/generated/ent/automationexecution"
+	"zudomart/modules/moderation/src/generated/ent/automationrule"
+	"zudomart/modules/moderation/src/generated/ent/automationruleversion"
 	"zudomart/modules/moderation/src/generated/ent/chatreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
@@ -41,24 +46,4544 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeChatReport               = "ChatReport"
-	TypeContentReport            = "ContentReport"
-	TypeContentReportEntry       = "ContentReportEntry"
-	TypeCopyrightClaim           = "CopyrightClaim"
-	TypeCopyrightPolicySetting   = "CopyrightPolicySetting"
-	TypeCounterNotice            = "CounterNotice"
-	TypeEvidenceRetentionSetting = "EvidenceRetentionSetting"
-	TypeIpClaim                  = "IpClaim"
-	TypeLegalReport              = "LegalReport"
-	TypeLiveSafetyIncident       = "LiveSafetyIncident"
-	TypeLiveSafetySignal         = "LiveSafetySignal"
-	TypeOutboxEvent              = "OutboxEvent"
-	TypeSecurityAccountState     = "SecurityAccountState"
-	TypeSecurityCase             = "SecurityCase"
-	TypeSecurityEvent            = "SecurityEvent"
-	TypeStrike                   = "Strike"
-	TypeSuspensionCase           = "SuspensionCase"
+	TypeAppeal                    = "Appeal"
+	TypeAutomationEventOccurrence = "AutomationEventOccurrence"
+	TypeAutomationExecution       = "AutomationExecution"
+	TypeAutomationRule            = "AutomationRule"
+	TypeAutomationRuleVersion     = "AutomationRuleVersion"
+	TypeChatReport                = "ChatReport"
+	TypeContentReport             = "ContentReport"
+	TypeContentReportEntry        = "ContentReportEntry"
+	TypeCopyrightClaim            = "CopyrightClaim"
+	TypeCopyrightPolicySetting    = "CopyrightPolicySetting"
+	TypeCounterNotice             = "CounterNotice"
+	TypeEvidenceRetentionSetting  = "EvidenceRetentionSetting"
+	TypeIpClaim                   = "IpClaim"
+	TypeLegalReport               = "LegalReport"
+	TypeLiveSafetyIncident        = "LiveSafetyIncident"
+	TypeLiveSafetySignal          = "LiveSafetySignal"
+	TypeOutboxEvent               = "OutboxEvent"
+	TypeSecurityAccountState      = "SecurityAccountState"
+	TypeSecurityCase              = "SecurityCase"
+	TypeSecurityEvent             = "SecurityEvent"
+	TypeStrike                    = "Strike"
+	TypeSuspensionCase            = "SuspensionCase"
 )
+
+// AppealMutation represents an operation that mutates the Appeal nodes in the graph.
+type AppealMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *uuid.UUID
+	created_at           *time.Time
+	source_key           *string
+	decision_type        *appeal.DecisionType
+	appellant_id         *uuid.UUID
+	report_id            *uuid.UUID
+	strike_id            *uuid.UUID
+	target_type          *string
+	target_id            *string
+	target               *[]byte
+	original_decision    *[]byte
+	statement            *string
+	evidence_notes       *[]string
+	appendevidence_notes []string
+	status               *appeal.Status
+	submitted_at         *time.Time
+	sla_due_at           *time.Time
+	decision             *[]byte
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*Appeal, error)
+	predicates           []predicate.Appeal
+}
+
+var _ ent.Mutation = (*AppealMutation)(nil)
+
+// appealOption allows management of the mutation configuration using functional options.
+type appealOption func(*AppealMutation)
+
+// newAppealMutation creates new mutation for the Appeal entity.
+func newAppealMutation(c config, op Op, opts ...appealOption) *AppealMutation {
+	m := &AppealMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAppeal,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAppealID sets the ID field of the mutation.
+func withAppealID(id uuid.UUID) appealOption {
+	return func(m *AppealMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Appeal
+		)
+		m.oldValue = func(ctx context.Context) (*Appeal, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Appeal.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAppeal sets the old Appeal of the mutation.
+func withAppeal(node *Appeal) appealOption {
+	return func(m *AppealMutation) {
+		m.oldValue = func(context.Context) (*Appeal, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AppealMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AppealMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Appeal entities.
+func (m *AppealMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AppealMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AppealMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Appeal.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AppealMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AppealMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AppealMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetSourceKey sets the "source_key" field.
+func (m *AppealMutation) SetSourceKey(s string) {
+	m.source_key = &s
+}
+
+// SourceKey returns the value of the "source_key" field in the mutation.
+func (m *AppealMutation) SourceKey() (r string, exists bool) {
+	v := m.source_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceKey returns the old "source_key" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldSourceKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceKey: %w", err)
+	}
+	return oldValue.SourceKey, nil
+}
+
+// ResetSourceKey resets all changes to the "source_key" field.
+func (m *AppealMutation) ResetSourceKey() {
+	m.source_key = nil
+}
+
+// SetDecisionType sets the "decision_type" field.
+func (m *AppealMutation) SetDecisionType(at appeal.DecisionType) {
+	m.decision_type = &at
+}
+
+// DecisionType returns the value of the "decision_type" field in the mutation.
+func (m *AppealMutation) DecisionType() (r appeal.DecisionType, exists bool) {
+	v := m.decision_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDecisionType returns the old "decision_type" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldDecisionType(ctx context.Context) (v appeal.DecisionType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDecisionType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDecisionType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDecisionType: %w", err)
+	}
+	return oldValue.DecisionType, nil
+}
+
+// ResetDecisionType resets all changes to the "decision_type" field.
+func (m *AppealMutation) ResetDecisionType() {
+	m.decision_type = nil
+}
+
+// SetAppellantID sets the "appellant_id" field.
+func (m *AppealMutation) SetAppellantID(u uuid.UUID) {
+	m.appellant_id = &u
+}
+
+// AppellantID returns the value of the "appellant_id" field in the mutation.
+func (m *AppealMutation) AppellantID() (r uuid.UUID, exists bool) {
+	v := m.appellant_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppellantID returns the old "appellant_id" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldAppellantID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppellantID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppellantID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppellantID: %w", err)
+	}
+	return oldValue.AppellantID, nil
+}
+
+// ResetAppellantID resets all changes to the "appellant_id" field.
+func (m *AppealMutation) ResetAppellantID() {
+	m.appellant_id = nil
+}
+
+// SetReportID sets the "report_id" field.
+func (m *AppealMutation) SetReportID(u uuid.UUID) {
+	m.report_id = &u
+}
+
+// ReportID returns the value of the "report_id" field in the mutation.
+func (m *AppealMutation) ReportID() (r uuid.UUID, exists bool) {
+	v := m.report_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReportID returns the old "report_id" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldReportID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReportID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReportID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReportID: %w", err)
+	}
+	return oldValue.ReportID, nil
+}
+
+// ClearReportID clears the value of the "report_id" field.
+func (m *AppealMutation) ClearReportID() {
+	m.report_id = nil
+	m.clearedFields[appeal.FieldReportID] = struct{}{}
+}
+
+// ReportIDCleared returns if the "report_id" field was cleared in this mutation.
+func (m *AppealMutation) ReportIDCleared() bool {
+	_, ok := m.clearedFields[appeal.FieldReportID]
+	return ok
+}
+
+// ResetReportID resets all changes to the "report_id" field.
+func (m *AppealMutation) ResetReportID() {
+	m.report_id = nil
+	delete(m.clearedFields, appeal.FieldReportID)
+}
+
+// SetStrikeID sets the "strike_id" field.
+func (m *AppealMutation) SetStrikeID(u uuid.UUID) {
+	m.strike_id = &u
+}
+
+// StrikeID returns the value of the "strike_id" field in the mutation.
+func (m *AppealMutation) StrikeID() (r uuid.UUID, exists bool) {
+	v := m.strike_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStrikeID returns the old "strike_id" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldStrikeID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStrikeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStrikeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStrikeID: %w", err)
+	}
+	return oldValue.StrikeID, nil
+}
+
+// ClearStrikeID clears the value of the "strike_id" field.
+func (m *AppealMutation) ClearStrikeID() {
+	m.strike_id = nil
+	m.clearedFields[appeal.FieldStrikeID] = struct{}{}
+}
+
+// StrikeIDCleared returns if the "strike_id" field was cleared in this mutation.
+func (m *AppealMutation) StrikeIDCleared() bool {
+	_, ok := m.clearedFields[appeal.FieldStrikeID]
+	return ok
+}
+
+// ResetStrikeID resets all changes to the "strike_id" field.
+func (m *AppealMutation) ResetStrikeID() {
+	m.strike_id = nil
+	delete(m.clearedFields, appeal.FieldStrikeID)
+}
+
+// SetTargetType sets the "target_type" field.
+func (m *AppealMutation) SetTargetType(s string) {
+	m.target_type = &s
+}
+
+// TargetType returns the value of the "target_type" field in the mutation.
+func (m *AppealMutation) TargetType() (r string, exists bool) {
+	v := m.target_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTargetType returns the old "target_type" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldTargetType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTargetType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTargetType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTargetType: %w", err)
+	}
+	return oldValue.TargetType, nil
+}
+
+// ResetTargetType resets all changes to the "target_type" field.
+func (m *AppealMutation) ResetTargetType() {
+	m.target_type = nil
+}
+
+// SetTargetID sets the "target_id" field.
+func (m *AppealMutation) SetTargetID(s string) {
+	m.target_id = &s
+}
+
+// TargetID returns the value of the "target_id" field in the mutation.
+func (m *AppealMutation) TargetID() (r string, exists bool) {
+	v := m.target_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTargetID returns the old "target_id" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldTargetID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTargetID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTargetID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTargetID: %w", err)
+	}
+	return oldValue.TargetID, nil
+}
+
+// ResetTargetID resets all changes to the "target_id" field.
+func (m *AppealMutation) ResetTargetID() {
+	m.target_id = nil
+}
+
+// SetTarget sets the "target" field.
+func (m *AppealMutation) SetTarget(b []byte) {
+	m.target = &b
+}
+
+// Target returns the value of the "target" field in the mutation.
+func (m *AppealMutation) Target() (r []byte, exists bool) {
+	v := m.target
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTarget returns the old "target" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldTarget(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTarget is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTarget requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTarget: %w", err)
+	}
+	return oldValue.Target, nil
+}
+
+// ResetTarget resets all changes to the "target" field.
+func (m *AppealMutation) ResetTarget() {
+	m.target = nil
+}
+
+// SetOriginalDecision sets the "original_decision" field.
+func (m *AppealMutation) SetOriginalDecision(b []byte) {
+	m.original_decision = &b
+}
+
+// OriginalDecision returns the value of the "original_decision" field in the mutation.
+func (m *AppealMutation) OriginalDecision() (r []byte, exists bool) {
+	v := m.original_decision
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOriginalDecision returns the old "original_decision" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldOriginalDecision(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOriginalDecision is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOriginalDecision requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOriginalDecision: %w", err)
+	}
+	return oldValue.OriginalDecision, nil
+}
+
+// ResetOriginalDecision resets all changes to the "original_decision" field.
+func (m *AppealMutation) ResetOriginalDecision() {
+	m.original_decision = nil
+}
+
+// SetStatement sets the "statement" field.
+func (m *AppealMutation) SetStatement(s string) {
+	m.statement = &s
+}
+
+// Statement returns the value of the "statement" field in the mutation.
+func (m *AppealMutation) Statement() (r string, exists bool) {
+	v := m.statement
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatement returns the old "statement" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldStatement(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatement is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatement requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatement: %w", err)
+	}
+	return oldValue.Statement, nil
+}
+
+// ResetStatement resets all changes to the "statement" field.
+func (m *AppealMutation) ResetStatement() {
+	m.statement = nil
+}
+
+// SetEvidenceNotes sets the "evidence_notes" field.
+func (m *AppealMutation) SetEvidenceNotes(s []string) {
+	m.evidence_notes = &s
+	m.appendevidence_notes = nil
+}
+
+// EvidenceNotes returns the value of the "evidence_notes" field in the mutation.
+func (m *AppealMutation) EvidenceNotes() (r []string, exists bool) {
+	v := m.evidence_notes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvidenceNotes returns the old "evidence_notes" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldEvidenceNotes(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvidenceNotes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvidenceNotes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvidenceNotes: %w", err)
+	}
+	return oldValue.EvidenceNotes, nil
+}
+
+// AppendEvidenceNotes adds s to the "evidence_notes" field.
+func (m *AppealMutation) AppendEvidenceNotes(s []string) {
+	m.appendevidence_notes = append(m.appendevidence_notes, s...)
+}
+
+// AppendedEvidenceNotes returns the list of values that were appended to the "evidence_notes" field in this mutation.
+func (m *AppealMutation) AppendedEvidenceNotes() ([]string, bool) {
+	if len(m.appendevidence_notes) == 0 {
+		return nil, false
+	}
+	return m.appendevidence_notes, true
+}
+
+// ResetEvidenceNotes resets all changes to the "evidence_notes" field.
+func (m *AppealMutation) ResetEvidenceNotes() {
+	m.evidence_notes = nil
+	m.appendevidence_notes = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *AppealMutation) SetStatus(a appeal.Status) {
+	m.status = &a
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *AppealMutation) Status() (r appeal.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldStatus(ctx context.Context) (v appeal.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *AppealMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetSubmittedAt sets the "submitted_at" field.
+func (m *AppealMutation) SetSubmittedAt(t time.Time) {
+	m.submitted_at = &t
+}
+
+// SubmittedAt returns the value of the "submitted_at" field in the mutation.
+func (m *AppealMutation) SubmittedAt() (r time.Time, exists bool) {
+	v := m.submitted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubmittedAt returns the old "submitted_at" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldSubmittedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubmittedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubmittedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubmittedAt: %w", err)
+	}
+	return oldValue.SubmittedAt, nil
+}
+
+// ResetSubmittedAt resets all changes to the "submitted_at" field.
+func (m *AppealMutation) ResetSubmittedAt() {
+	m.submitted_at = nil
+}
+
+// SetSLADueAt sets the "sla_due_at" field.
+func (m *AppealMutation) SetSLADueAt(t time.Time) {
+	m.sla_due_at = &t
+}
+
+// SLADueAt returns the value of the "sla_due_at" field in the mutation.
+func (m *AppealMutation) SLADueAt() (r time.Time, exists bool) {
+	v := m.sla_due_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSLADueAt returns the old "sla_due_at" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldSLADueAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSLADueAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSLADueAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSLADueAt: %w", err)
+	}
+	return oldValue.SLADueAt, nil
+}
+
+// ResetSLADueAt resets all changes to the "sla_due_at" field.
+func (m *AppealMutation) ResetSLADueAt() {
+	m.sla_due_at = nil
+}
+
+// SetDecision sets the "decision" field.
+func (m *AppealMutation) SetDecision(b []byte) {
+	m.decision = &b
+}
+
+// Decision returns the value of the "decision" field in the mutation.
+func (m *AppealMutation) Decision() (r []byte, exists bool) {
+	v := m.decision
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDecision returns the old "decision" field's value of the Appeal entity.
+// If the Appeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppealMutation) OldDecision(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDecision is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDecision requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDecision: %w", err)
+	}
+	return oldValue.Decision, nil
+}
+
+// ClearDecision clears the value of the "decision" field.
+func (m *AppealMutation) ClearDecision() {
+	m.decision = nil
+	m.clearedFields[appeal.FieldDecision] = struct{}{}
+}
+
+// DecisionCleared returns if the "decision" field was cleared in this mutation.
+func (m *AppealMutation) DecisionCleared() bool {
+	_, ok := m.clearedFields[appeal.FieldDecision]
+	return ok
+}
+
+// ResetDecision resets all changes to the "decision" field.
+func (m *AppealMutation) ResetDecision() {
+	m.decision = nil
+	delete(m.clearedFields, appeal.FieldDecision)
+}
+
+// Where appends a list predicates to the AppealMutation builder.
+func (m *AppealMutation) Where(ps ...predicate.Appeal) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AppealMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AppealMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Appeal, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AppealMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AppealMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Appeal).
+func (m *AppealMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AppealMutation) Fields() []string {
+	fields := make([]string, 0, 16)
+	if m.created_at != nil {
+		fields = append(fields, appeal.FieldCreatedAt)
+	}
+	if m.source_key != nil {
+		fields = append(fields, appeal.FieldSourceKey)
+	}
+	if m.decision_type != nil {
+		fields = append(fields, appeal.FieldDecisionType)
+	}
+	if m.appellant_id != nil {
+		fields = append(fields, appeal.FieldAppellantID)
+	}
+	if m.report_id != nil {
+		fields = append(fields, appeal.FieldReportID)
+	}
+	if m.strike_id != nil {
+		fields = append(fields, appeal.FieldStrikeID)
+	}
+	if m.target_type != nil {
+		fields = append(fields, appeal.FieldTargetType)
+	}
+	if m.target_id != nil {
+		fields = append(fields, appeal.FieldTargetID)
+	}
+	if m.target != nil {
+		fields = append(fields, appeal.FieldTarget)
+	}
+	if m.original_decision != nil {
+		fields = append(fields, appeal.FieldOriginalDecision)
+	}
+	if m.statement != nil {
+		fields = append(fields, appeal.FieldStatement)
+	}
+	if m.evidence_notes != nil {
+		fields = append(fields, appeal.FieldEvidenceNotes)
+	}
+	if m.status != nil {
+		fields = append(fields, appeal.FieldStatus)
+	}
+	if m.submitted_at != nil {
+		fields = append(fields, appeal.FieldSubmittedAt)
+	}
+	if m.sla_due_at != nil {
+		fields = append(fields, appeal.FieldSLADueAt)
+	}
+	if m.decision != nil {
+		fields = append(fields, appeal.FieldDecision)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AppealMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case appeal.FieldCreatedAt:
+		return m.CreatedAt()
+	case appeal.FieldSourceKey:
+		return m.SourceKey()
+	case appeal.FieldDecisionType:
+		return m.DecisionType()
+	case appeal.FieldAppellantID:
+		return m.AppellantID()
+	case appeal.FieldReportID:
+		return m.ReportID()
+	case appeal.FieldStrikeID:
+		return m.StrikeID()
+	case appeal.FieldTargetType:
+		return m.TargetType()
+	case appeal.FieldTargetID:
+		return m.TargetID()
+	case appeal.FieldTarget:
+		return m.Target()
+	case appeal.FieldOriginalDecision:
+		return m.OriginalDecision()
+	case appeal.FieldStatement:
+		return m.Statement()
+	case appeal.FieldEvidenceNotes:
+		return m.EvidenceNotes()
+	case appeal.FieldStatus:
+		return m.Status()
+	case appeal.FieldSubmittedAt:
+		return m.SubmittedAt()
+	case appeal.FieldSLADueAt:
+		return m.SLADueAt()
+	case appeal.FieldDecision:
+		return m.Decision()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AppealMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case appeal.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case appeal.FieldSourceKey:
+		return m.OldSourceKey(ctx)
+	case appeal.FieldDecisionType:
+		return m.OldDecisionType(ctx)
+	case appeal.FieldAppellantID:
+		return m.OldAppellantID(ctx)
+	case appeal.FieldReportID:
+		return m.OldReportID(ctx)
+	case appeal.FieldStrikeID:
+		return m.OldStrikeID(ctx)
+	case appeal.FieldTargetType:
+		return m.OldTargetType(ctx)
+	case appeal.FieldTargetID:
+		return m.OldTargetID(ctx)
+	case appeal.FieldTarget:
+		return m.OldTarget(ctx)
+	case appeal.FieldOriginalDecision:
+		return m.OldOriginalDecision(ctx)
+	case appeal.FieldStatement:
+		return m.OldStatement(ctx)
+	case appeal.FieldEvidenceNotes:
+		return m.OldEvidenceNotes(ctx)
+	case appeal.FieldStatus:
+		return m.OldStatus(ctx)
+	case appeal.FieldSubmittedAt:
+		return m.OldSubmittedAt(ctx)
+	case appeal.FieldSLADueAt:
+		return m.OldSLADueAt(ctx)
+	case appeal.FieldDecision:
+		return m.OldDecision(ctx)
+	}
+	return nil, fmt.Errorf("unknown Appeal field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AppealMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case appeal.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case appeal.FieldSourceKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceKey(v)
+		return nil
+	case appeal.FieldDecisionType:
+		v, ok := value.(appeal.DecisionType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDecisionType(v)
+		return nil
+	case appeal.FieldAppellantID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppellantID(v)
+		return nil
+	case appeal.FieldReportID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReportID(v)
+		return nil
+	case appeal.FieldStrikeID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStrikeID(v)
+		return nil
+	case appeal.FieldTargetType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTargetType(v)
+		return nil
+	case appeal.FieldTargetID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTargetID(v)
+		return nil
+	case appeal.FieldTarget:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTarget(v)
+		return nil
+	case appeal.FieldOriginalDecision:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOriginalDecision(v)
+		return nil
+	case appeal.FieldStatement:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatement(v)
+		return nil
+	case appeal.FieldEvidenceNotes:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvidenceNotes(v)
+		return nil
+	case appeal.FieldStatus:
+		v, ok := value.(appeal.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case appeal.FieldSubmittedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubmittedAt(v)
+		return nil
+	case appeal.FieldSLADueAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSLADueAt(v)
+		return nil
+	case appeal.FieldDecision:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDecision(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Appeal field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AppealMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AppealMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AppealMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Appeal numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AppealMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(appeal.FieldReportID) {
+		fields = append(fields, appeal.FieldReportID)
+	}
+	if m.FieldCleared(appeal.FieldStrikeID) {
+		fields = append(fields, appeal.FieldStrikeID)
+	}
+	if m.FieldCleared(appeal.FieldDecision) {
+		fields = append(fields, appeal.FieldDecision)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AppealMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AppealMutation) ClearField(name string) error {
+	switch name {
+	case appeal.FieldReportID:
+		m.ClearReportID()
+		return nil
+	case appeal.FieldStrikeID:
+		m.ClearStrikeID()
+		return nil
+	case appeal.FieldDecision:
+		m.ClearDecision()
+		return nil
+	}
+	return fmt.Errorf("unknown Appeal nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AppealMutation) ResetField(name string) error {
+	switch name {
+	case appeal.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case appeal.FieldSourceKey:
+		m.ResetSourceKey()
+		return nil
+	case appeal.FieldDecisionType:
+		m.ResetDecisionType()
+		return nil
+	case appeal.FieldAppellantID:
+		m.ResetAppellantID()
+		return nil
+	case appeal.FieldReportID:
+		m.ResetReportID()
+		return nil
+	case appeal.FieldStrikeID:
+		m.ResetStrikeID()
+		return nil
+	case appeal.FieldTargetType:
+		m.ResetTargetType()
+		return nil
+	case appeal.FieldTargetID:
+		m.ResetTargetID()
+		return nil
+	case appeal.FieldTarget:
+		m.ResetTarget()
+		return nil
+	case appeal.FieldOriginalDecision:
+		m.ResetOriginalDecision()
+		return nil
+	case appeal.FieldStatement:
+		m.ResetStatement()
+		return nil
+	case appeal.FieldEvidenceNotes:
+		m.ResetEvidenceNotes()
+		return nil
+	case appeal.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case appeal.FieldSubmittedAt:
+		m.ResetSubmittedAt()
+		return nil
+	case appeal.FieldSLADueAt:
+		m.ResetSLADueAt()
+		return nil
+	case appeal.FieldDecision:
+		m.ResetDecision()
+		return nil
+	}
+	return fmt.Errorf("unknown Appeal field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AppealMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AppealMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AppealMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AppealMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AppealMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AppealMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AppealMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Appeal unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AppealMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Appeal edge %s", name)
+}
+
+// AutomationEventOccurrenceMutation represents an operation that mutates the AutomationEventOccurrence nodes in the graph.
+type AutomationEventOccurrenceMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	event           *string
+	subject_key     *string
+	source_event_id *string
+	occurred_at     *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*AutomationEventOccurrence, error)
+	predicates      []predicate.AutomationEventOccurrence
+}
+
+var _ ent.Mutation = (*AutomationEventOccurrenceMutation)(nil)
+
+// automationeventoccurrenceOption allows management of the mutation configuration using functional options.
+type automationeventoccurrenceOption func(*AutomationEventOccurrenceMutation)
+
+// newAutomationEventOccurrenceMutation creates new mutation for the AutomationEventOccurrence entity.
+func newAutomationEventOccurrenceMutation(c config, op Op, opts ...automationeventoccurrenceOption) *AutomationEventOccurrenceMutation {
+	m := &AutomationEventOccurrenceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAutomationEventOccurrence,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAutomationEventOccurrenceID sets the ID field of the mutation.
+func withAutomationEventOccurrenceID(id uuid.UUID) automationeventoccurrenceOption {
+	return func(m *AutomationEventOccurrenceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AutomationEventOccurrence
+		)
+		m.oldValue = func(ctx context.Context) (*AutomationEventOccurrence, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AutomationEventOccurrence.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAutomationEventOccurrence sets the old AutomationEventOccurrence of the mutation.
+func withAutomationEventOccurrence(node *AutomationEventOccurrence) automationeventoccurrenceOption {
+	return func(m *AutomationEventOccurrenceMutation) {
+		m.oldValue = func(context.Context) (*AutomationEventOccurrence, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AutomationEventOccurrenceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AutomationEventOccurrenceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AutomationEventOccurrence entities.
+func (m *AutomationEventOccurrenceMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AutomationEventOccurrenceMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AutomationEventOccurrenceMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AutomationEventOccurrence.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AutomationEventOccurrenceMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AutomationEventOccurrenceMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AutomationEventOccurrence entity.
+// If the AutomationEventOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationEventOccurrenceMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AutomationEventOccurrenceMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetEvent sets the "event" field.
+func (m *AutomationEventOccurrenceMutation) SetEvent(s string) {
+	m.event = &s
+}
+
+// Event returns the value of the "event" field in the mutation.
+func (m *AutomationEventOccurrenceMutation) Event() (r string, exists bool) {
+	v := m.event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvent returns the old "event" field's value of the AutomationEventOccurrence entity.
+// If the AutomationEventOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationEventOccurrenceMutation) OldEvent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvent: %w", err)
+	}
+	return oldValue.Event, nil
+}
+
+// ResetEvent resets all changes to the "event" field.
+func (m *AutomationEventOccurrenceMutation) ResetEvent() {
+	m.event = nil
+}
+
+// SetSubjectKey sets the "subject_key" field.
+func (m *AutomationEventOccurrenceMutation) SetSubjectKey(s string) {
+	m.subject_key = &s
+}
+
+// SubjectKey returns the value of the "subject_key" field in the mutation.
+func (m *AutomationEventOccurrenceMutation) SubjectKey() (r string, exists bool) {
+	v := m.subject_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubjectKey returns the old "subject_key" field's value of the AutomationEventOccurrence entity.
+// If the AutomationEventOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationEventOccurrenceMutation) OldSubjectKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubjectKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubjectKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubjectKey: %w", err)
+	}
+	return oldValue.SubjectKey, nil
+}
+
+// ResetSubjectKey resets all changes to the "subject_key" field.
+func (m *AutomationEventOccurrenceMutation) ResetSubjectKey() {
+	m.subject_key = nil
+}
+
+// SetSourceEventID sets the "source_event_id" field.
+func (m *AutomationEventOccurrenceMutation) SetSourceEventID(s string) {
+	m.source_event_id = &s
+}
+
+// SourceEventID returns the value of the "source_event_id" field in the mutation.
+func (m *AutomationEventOccurrenceMutation) SourceEventID() (r string, exists bool) {
+	v := m.source_event_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceEventID returns the old "source_event_id" field's value of the AutomationEventOccurrence entity.
+// If the AutomationEventOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationEventOccurrenceMutation) OldSourceEventID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSourceEventID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSourceEventID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceEventID: %w", err)
+	}
+	return oldValue.SourceEventID, nil
+}
+
+// ClearSourceEventID clears the value of the "source_event_id" field.
+func (m *AutomationEventOccurrenceMutation) ClearSourceEventID() {
+	m.source_event_id = nil
+	m.clearedFields[automationeventoccurrence.FieldSourceEventID] = struct{}{}
+}
+
+// SourceEventIDCleared returns if the "source_event_id" field was cleared in this mutation.
+func (m *AutomationEventOccurrenceMutation) SourceEventIDCleared() bool {
+	_, ok := m.clearedFields[automationeventoccurrence.FieldSourceEventID]
+	return ok
+}
+
+// ResetSourceEventID resets all changes to the "source_event_id" field.
+func (m *AutomationEventOccurrenceMutation) ResetSourceEventID() {
+	m.source_event_id = nil
+	delete(m.clearedFields, automationeventoccurrence.FieldSourceEventID)
+}
+
+// SetOccurredAt sets the "occurred_at" field.
+func (m *AutomationEventOccurrenceMutation) SetOccurredAt(t time.Time) {
+	m.occurred_at = &t
+}
+
+// OccurredAt returns the value of the "occurred_at" field in the mutation.
+func (m *AutomationEventOccurrenceMutation) OccurredAt() (r time.Time, exists bool) {
+	v := m.occurred_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOccurredAt returns the old "occurred_at" field's value of the AutomationEventOccurrence entity.
+// If the AutomationEventOccurrence object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationEventOccurrenceMutation) OldOccurredAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOccurredAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOccurredAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOccurredAt: %w", err)
+	}
+	return oldValue.OccurredAt, nil
+}
+
+// ResetOccurredAt resets all changes to the "occurred_at" field.
+func (m *AutomationEventOccurrenceMutation) ResetOccurredAt() {
+	m.occurred_at = nil
+}
+
+// Where appends a list predicates to the AutomationEventOccurrenceMutation builder.
+func (m *AutomationEventOccurrenceMutation) Where(ps ...predicate.AutomationEventOccurrence) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AutomationEventOccurrenceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AutomationEventOccurrenceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AutomationEventOccurrence, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AutomationEventOccurrenceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AutomationEventOccurrenceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AutomationEventOccurrence).
+func (m *AutomationEventOccurrenceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AutomationEventOccurrenceMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.created_at != nil {
+		fields = append(fields, automationeventoccurrence.FieldCreatedAt)
+	}
+	if m.event != nil {
+		fields = append(fields, automationeventoccurrence.FieldEvent)
+	}
+	if m.subject_key != nil {
+		fields = append(fields, automationeventoccurrence.FieldSubjectKey)
+	}
+	if m.source_event_id != nil {
+		fields = append(fields, automationeventoccurrence.FieldSourceEventID)
+	}
+	if m.occurred_at != nil {
+		fields = append(fields, automationeventoccurrence.FieldOccurredAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AutomationEventOccurrenceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case automationeventoccurrence.FieldCreatedAt:
+		return m.CreatedAt()
+	case automationeventoccurrence.FieldEvent:
+		return m.Event()
+	case automationeventoccurrence.FieldSubjectKey:
+		return m.SubjectKey()
+	case automationeventoccurrence.FieldSourceEventID:
+		return m.SourceEventID()
+	case automationeventoccurrence.FieldOccurredAt:
+		return m.OccurredAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AutomationEventOccurrenceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case automationeventoccurrence.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case automationeventoccurrence.FieldEvent:
+		return m.OldEvent(ctx)
+	case automationeventoccurrence.FieldSubjectKey:
+		return m.OldSubjectKey(ctx)
+	case automationeventoccurrence.FieldSourceEventID:
+		return m.OldSourceEventID(ctx)
+	case automationeventoccurrence.FieldOccurredAt:
+		return m.OldOccurredAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AutomationEventOccurrence field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AutomationEventOccurrenceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case automationeventoccurrence.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case automationeventoccurrence.FieldEvent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvent(v)
+		return nil
+	case automationeventoccurrence.FieldSubjectKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubjectKey(v)
+		return nil
+	case automationeventoccurrence.FieldSourceEventID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceEventID(v)
+		return nil
+	case automationeventoccurrence.FieldOccurredAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOccurredAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationEventOccurrence field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AutomationEventOccurrenceMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AutomationEventOccurrenceMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AutomationEventOccurrenceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AutomationEventOccurrence numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AutomationEventOccurrenceMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(automationeventoccurrence.FieldSourceEventID) {
+		fields = append(fields, automationeventoccurrence.FieldSourceEventID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AutomationEventOccurrenceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AutomationEventOccurrenceMutation) ClearField(name string) error {
+	switch name {
+	case automationeventoccurrence.FieldSourceEventID:
+		m.ClearSourceEventID()
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationEventOccurrence nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AutomationEventOccurrenceMutation) ResetField(name string) error {
+	switch name {
+	case automationeventoccurrence.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case automationeventoccurrence.FieldEvent:
+		m.ResetEvent()
+		return nil
+	case automationeventoccurrence.FieldSubjectKey:
+		m.ResetSubjectKey()
+		return nil
+	case automationeventoccurrence.FieldSourceEventID:
+		m.ResetSourceEventID()
+		return nil
+	case automationeventoccurrence.FieldOccurredAt:
+		m.ResetOccurredAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationEventOccurrence field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AutomationEventOccurrenceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AutomationEventOccurrenceMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AutomationEventOccurrenceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AutomationEventOccurrenceMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AutomationEventOccurrenceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AutomationEventOccurrenceMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AutomationEventOccurrenceMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AutomationEventOccurrence unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AutomationEventOccurrenceMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AutomationEventOccurrence edge %s", name)
+}
+
+// AutomationExecutionMutation represents an operation that mutates the AutomationExecution nodes in the graph.
+type AutomationExecutionMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	created_at        *time.Time
+	rule_id           *string
+	rule_version      *int
+	addrule_version   *int
+	rule_name         *string
+	event             *string
+	subject_key       *string
+	subject_label     *string
+	status            *automationexecution.Status
+	steps             *[]byte
+	input             *[]byte
+	actions_run       *[]string
+	appendactions_run []string
+	error             *string
+	started_at        *time.Time
+	finished_at       *time.Time
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*AutomationExecution, error)
+	predicates        []predicate.AutomationExecution
+}
+
+var _ ent.Mutation = (*AutomationExecutionMutation)(nil)
+
+// automationexecutionOption allows management of the mutation configuration using functional options.
+type automationexecutionOption func(*AutomationExecutionMutation)
+
+// newAutomationExecutionMutation creates new mutation for the AutomationExecution entity.
+func newAutomationExecutionMutation(c config, op Op, opts ...automationexecutionOption) *AutomationExecutionMutation {
+	m := &AutomationExecutionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAutomationExecution,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAutomationExecutionID sets the ID field of the mutation.
+func withAutomationExecutionID(id uuid.UUID) automationexecutionOption {
+	return func(m *AutomationExecutionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AutomationExecution
+		)
+		m.oldValue = func(ctx context.Context) (*AutomationExecution, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AutomationExecution.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAutomationExecution sets the old AutomationExecution of the mutation.
+func withAutomationExecution(node *AutomationExecution) automationexecutionOption {
+	return func(m *AutomationExecutionMutation) {
+		m.oldValue = func(context.Context) (*AutomationExecution, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AutomationExecutionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AutomationExecutionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AutomationExecution entities.
+func (m *AutomationExecutionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AutomationExecutionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AutomationExecutionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AutomationExecution.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AutomationExecutionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AutomationExecutionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AutomationExecutionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetRuleID sets the "rule_id" field.
+func (m *AutomationExecutionMutation) SetRuleID(s string) {
+	m.rule_id = &s
+}
+
+// RuleID returns the value of the "rule_id" field in the mutation.
+func (m *AutomationExecutionMutation) RuleID() (r string, exists bool) {
+	v := m.rule_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRuleID returns the old "rule_id" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldRuleID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRuleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRuleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRuleID: %w", err)
+	}
+	return oldValue.RuleID, nil
+}
+
+// ResetRuleID resets all changes to the "rule_id" field.
+func (m *AutomationExecutionMutation) ResetRuleID() {
+	m.rule_id = nil
+}
+
+// SetRuleVersion sets the "rule_version" field.
+func (m *AutomationExecutionMutation) SetRuleVersion(i int) {
+	m.rule_version = &i
+	m.addrule_version = nil
+}
+
+// RuleVersion returns the value of the "rule_version" field in the mutation.
+func (m *AutomationExecutionMutation) RuleVersion() (r int, exists bool) {
+	v := m.rule_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRuleVersion returns the old "rule_version" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldRuleVersion(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRuleVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRuleVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRuleVersion: %w", err)
+	}
+	return oldValue.RuleVersion, nil
+}
+
+// AddRuleVersion adds i to the "rule_version" field.
+func (m *AutomationExecutionMutation) AddRuleVersion(i int) {
+	if m.addrule_version != nil {
+		*m.addrule_version += i
+	} else {
+		m.addrule_version = &i
+	}
+}
+
+// AddedRuleVersion returns the value that was added to the "rule_version" field in this mutation.
+func (m *AutomationExecutionMutation) AddedRuleVersion() (r int, exists bool) {
+	v := m.addrule_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRuleVersion resets all changes to the "rule_version" field.
+func (m *AutomationExecutionMutation) ResetRuleVersion() {
+	m.rule_version = nil
+	m.addrule_version = nil
+}
+
+// SetRuleName sets the "rule_name" field.
+func (m *AutomationExecutionMutation) SetRuleName(s string) {
+	m.rule_name = &s
+}
+
+// RuleName returns the value of the "rule_name" field in the mutation.
+func (m *AutomationExecutionMutation) RuleName() (r string, exists bool) {
+	v := m.rule_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRuleName returns the old "rule_name" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldRuleName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRuleName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRuleName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRuleName: %w", err)
+	}
+	return oldValue.RuleName, nil
+}
+
+// ResetRuleName resets all changes to the "rule_name" field.
+func (m *AutomationExecutionMutation) ResetRuleName() {
+	m.rule_name = nil
+}
+
+// SetEvent sets the "event" field.
+func (m *AutomationExecutionMutation) SetEvent(s string) {
+	m.event = &s
+}
+
+// Event returns the value of the "event" field in the mutation.
+func (m *AutomationExecutionMutation) Event() (r string, exists bool) {
+	v := m.event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvent returns the old "event" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldEvent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvent: %w", err)
+	}
+	return oldValue.Event, nil
+}
+
+// ResetEvent resets all changes to the "event" field.
+func (m *AutomationExecutionMutation) ResetEvent() {
+	m.event = nil
+}
+
+// SetSubjectKey sets the "subject_key" field.
+func (m *AutomationExecutionMutation) SetSubjectKey(s string) {
+	m.subject_key = &s
+}
+
+// SubjectKey returns the value of the "subject_key" field in the mutation.
+func (m *AutomationExecutionMutation) SubjectKey() (r string, exists bool) {
+	v := m.subject_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubjectKey returns the old "subject_key" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldSubjectKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubjectKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubjectKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubjectKey: %w", err)
+	}
+	return oldValue.SubjectKey, nil
+}
+
+// ResetSubjectKey resets all changes to the "subject_key" field.
+func (m *AutomationExecutionMutation) ResetSubjectKey() {
+	m.subject_key = nil
+}
+
+// SetSubjectLabel sets the "subject_label" field.
+func (m *AutomationExecutionMutation) SetSubjectLabel(s string) {
+	m.subject_label = &s
+}
+
+// SubjectLabel returns the value of the "subject_label" field in the mutation.
+func (m *AutomationExecutionMutation) SubjectLabel() (r string, exists bool) {
+	v := m.subject_label
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubjectLabel returns the old "subject_label" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldSubjectLabel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubjectLabel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubjectLabel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubjectLabel: %w", err)
+	}
+	return oldValue.SubjectLabel, nil
+}
+
+// ResetSubjectLabel resets all changes to the "subject_label" field.
+func (m *AutomationExecutionMutation) ResetSubjectLabel() {
+	m.subject_label = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *AutomationExecutionMutation) SetStatus(a automationexecution.Status) {
+	m.status = &a
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *AutomationExecutionMutation) Status() (r automationexecution.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldStatus(ctx context.Context) (v automationexecution.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *AutomationExecutionMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetSteps sets the "steps" field.
+func (m *AutomationExecutionMutation) SetSteps(b []byte) {
+	m.steps = &b
+}
+
+// Steps returns the value of the "steps" field in the mutation.
+func (m *AutomationExecutionMutation) Steps() (r []byte, exists bool) {
+	v := m.steps
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSteps returns the old "steps" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldSteps(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSteps is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSteps requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSteps: %w", err)
+	}
+	return oldValue.Steps, nil
+}
+
+// ResetSteps resets all changes to the "steps" field.
+func (m *AutomationExecutionMutation) ResetSteps() {
+	m.steps = nil
+}
+
+// SetInput sets the "input" field.
+func (m *AutomationExecutionMutation) SetInput(b []byte) {
+	m.input = &b
+}
+
+// Input returns the value of the "input" field in the mutation.
+func (m *AutomationExecutionMutation) Input() (r []byte, exists bool) {
+	v := m.input
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInput returns the old "input" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldInput(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInput is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInput requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInput: %w", err)
+	}
+	return oldValue.Input, nil
+}
+
+// ResetInput resets all changes to the "input" field.
+func (m *AutomationExecutionMutation) ResetInput() {
+	m.input = nil
+}
+
+// SetActionsRun sets the "actions_run" field.
+func (m *AutomationExecutionMutation) SetActionsRun(s []string) {
+	m.actions_run = &s
+	m.appendactions_run = nil
+}
+
+// ActionsRun returns the value of the "actions_run" field in the mutation.
+func (m *AutomationExecutionMutation) ActionsRun() (r []string, exists bool) {
+	v := m.actions_run
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActionsRun returns the old "actions_run" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldActionsRun(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActionsRun is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActionsRun requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActionsRun: %w", err)
+	}
+	return oldValue.ActionsRun, nil
+}
+
+// AppendActionsRun adds s to the "actions_run" field.
+func (m *AutomationExecutionMutation) AppendActionsRun(s []string) {
+	m.appendactions_run = append(m.appendactions_run, s...)
+}
+
+// AppendedActionsRun returns the list of values that were appended to the "actions_run" field in this mutation.
+func (m *AutomationExecutionMutation) AppendedActionsRun() ([]string, bool) {
+	if len(m.appendactions_run) == 0 {
+		return nil, false
+	}
+	return m.appendactions_run, true
+}
+
+// ResetActionsRun resets all changes to the "actions_run" field.
+func (m *AutomationExecutionMutation) ResetActionsRun() {
+	m.actions_run = nil
+	m.appendactions_run = nil
+}
+
+// SetError sets the "error" field.
+func (m *AutomationExecutionMutation) SetError(s string) {
+	m.error = &s
+}
+
+// Error returns the value of the "error" field in the mutation.
+func (m *AutomationExecutionMutation) Error() (r string, exists bool) {
+	v := m.error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldError returns the old "error" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldError(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldError: %w", err)
+	}
+	return oldValue.Error, nil
+}
+
+// ClearError clears the value of the "error" field.
+func (m *AutomationExecutionMutation) ClearError() {
+	m.error = nil
+	m.clearedFields[automationexecution.FieldError] = struct{}{}
+}
+
+// ErrorCleared returns if the "error" field was cleared in this mutation.
+func (m *AutomationExecutionMutation) ErrorCleared() bool {
+	_, ok := m.clearedFields[automationexecution.FieldError]
+	return ok
+}
+
+// ResetError resets all changes to the "error" field.
+func (m *AutomationExecutionMutation) ResetError() {
+	m.error = nil
+	delete(m.clearedFields, automationexecution.FieldError)
+}
+
+// SetStartedAt sets the "started_at" field.
+func (m *AutomationExecutionMutation) SetStartedAt(t time.Time) {
+	m.started_at = &t
+}
+
+// StartedAt returns the value of the "started_at" field in the mutation.
+func (m *AutomationExecutionMutation) StartedAt() (r time.Time, exists bool) {
+	v := m.started_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartedAt returns the old "started_at" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldStartedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartedAt: %w", err)
+	}
+	return oldValue.StartedAt, nil
+}
+
+// ResetStartedAt resets all changes to the "started_at" field.
+func (m *AutomationExecutionMutation) ResetStartedAt() {
+	m.started_at = nil
+}
+
+// SetFinishedAt sets the "finished_at" field.
+func (m *AutomationExecutionMutation) SetFinishedAt(t time.Time) {
+	m.finished_at = &t
+}
+
+// FinishedAt returns the value of the "finished_at" field in the mutation.
+func (m *AutomationExecutionMutation) FinishedAt() (r time.Time, exists bool) {
+	v := m.finished_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFinishedAt returns the old "finished_at" field's value of the AutomationExecution entity.
+// If the AutomationExecution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationExecutionMutation) OldFinishedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFinishedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFinishedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFinishedAt: %w", err)
+	}
+	return oldValue.FinishedAt, nil
+}
+
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (m *AutomationExecutionMutation) ClearFinishedAt() {
+	m.finished_at = nil
+	m.clearedFields[automationexecution.FieldFinishedAt] = struct{}{}
+}
+
+// FinishedAtCleared returns if the "finished_at" field was cleared in this mutation.
+func (m *AutomationExecutionMutation) FinishedAtCleared() bool {
+	_, ok := m.clearedFields[automationexecution.FieldFinishedAt]
+	return ok
+}
+
+// ResetFinishedAt resets all changes to the "finished_at" field.
+func (m *AutomationExecutionMutation) ResetFinishedAt() {
+	m.finished_at = nil
+	delete(m.clearedFields, automationexecution.FieldFinishedAt)
+}
+
+// Where appends a list predicates to the AutomationExecutionMutation builder.
+func (m *AutomationExecutionMutation) Where(ps ...predicate.AutomationExecution) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AutomationExecutionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AutomationExecutionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AutomationExecution, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AutomationExecutionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AutomationExecutionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AutomationExecution).
+func (m *AutomationExecutionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AutomationExecutionMutation) Fields() []string {
+	fields := make([]string, 0, 14)
+	if m.created_at != nil {
+		fields = append(fields, automationexecution.FieldCreatedAt)
+	}
+	if m.rule_id != nil {
+		fields = append(fields, automationexecution.FieldRuleID)
+	}
+	if m.rule_version != nil {
+		fields = append(fields, automationexecution.FieldRuleVersion)
+	}
+	if m.rule_name != nil {
+		fields = append(fields, automationexecution.FieldRuleName)
+	}
+	if m.event != nil {
+		fields = append(fields, automationexecution.FieldEvent)
+	}
+	if m.subject_key != nil {
+		fields = append(fields, automationexecution.FieldSubjectKey)
+	}
+	if m.subject_label != nil {
+		fields = append(fields, automationexecution.FieldSubjectLabel)
+	}
+	if m.status != nil {
+		fields = append(fields, automationexecution.FieldStatus)
+	}
+	if m.steps != nil {
+		fields = append(fields, automationexecution.FieldSteps)
+	}
+	if m.input != nil {
+		fields = append(fields, automationexecution.FieldInput)
+	}
+	if m.actions_run != nil {
+		fields = append(fields, automationexecution.FieldActionsRun)
+	}
+	if m.error != nil {
+		fields = append(fields, automationexecution.FieldError)
+	}
+	if m.started_at != nil {
+		fields = append(fields, automationexecution.FieldStartedAt)
+	}
+	if m.finished_at != nil {
+		fields = append(fields, automationexecution.FieldFinishedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AutomationExecutionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case automationexecution.FieldCreatedAt:
+		return m.CreatedAt()
+	case automationexecution.FieldRuleID:
+		return m.RuleID()
+	case automationexecution.FieldRuleVersion:
+		return m.RuleVersion()
+	case automationexecution.FieldRuleName:
+		return m.RuleName()
+	case automationexecution.FieldEvent:
+		return m.Event()
+	case automationexecution.FieldSubjectKey:
+		return m.SubjectKey()
+	case automationexecution.FieldSubjectLabel:
+		return m.SubjectLabel()
+	case automationexecution.FieldStatus:
+		return m.Status()
+	case automationexecution.FieldSteps:
+		return m.Steps()
+	case automationexecution.FieldInput:
+		return m.Input()
+	case automationexecution.FieldActionsRun:
+		return m.ActionsRun()
+	case automationexecution.FieldError:
+		return m.Error()
+	case automationexecution.FieldStartedAt:
+		return m.StartedAt()
+	case automationexecution.FieldFinishedAt:
+		return m.FinishedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AutomationExecutionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case automationexecution.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case automationexecution.FieldRuleID:
+		return m.OldRuleID(ctx)
+	case automationexecution.FieldRuleVersion:
+		return m.OldRuleVersion(ctx)
+	case automationexecution.FieldRuleName:
+		return m.OldRuleName(ctx)
+	case automationexecution.FieldEvent:
+		return m.OldEvent(ctx)
+	case automationexecution.FieldSubjectKey:
+		return m.OldSubjectKey(ctx)
+	case automationexecution.FieldSubjectLabel:
+		return m.OldSubjectLabel(ctx)
+	case automationexecution.FieldStatus:
+		return m.OldStatus(ctx)
+	case automationexecution.FieldSteps:
+		return m.OldSteps(ctx)
+	case automationexecution.FieldInput:
+		return m.OldInput(ctx)
+	case automationexecution.FieldActionsRun:
+		return m.OldActionsRun(ctx)
+	case automationexecution.FieldError:
+		return m.OldError(ctx)
+	case automationexecution.FieldStartedAt:
+		return m.OldStartedAt(ctx)
+	case automationexecution.FieldFinishedAt:
+		return m.OldFinishedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AutomationExecution field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AutomationExecutionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case automationexecution.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case automationexecution.FieldRuleID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRuleID(v)
+		return nil
+	case automationexecution.FieldRuleVersion:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRuleVersion(v)
+		return nil
+	case automationexecution.FieldRuleName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRuleName(v)
+		return nil
+	case automationexecution.FieldEvent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvent(v)
+		return nil
+	case automationexecution.FieldSubjectKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubjectKey(v)
+		return nil
+	case automationexecution.FieldSubjectLabel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubjectLabel(v)
+		return nil
+	case automationexecution.FieldStatus:
+		v, ok := value.(automationexecution.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case automationexecution.FieldSteps:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSteps(v)
+		return nil
+	case automationexecution.FieldInput:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInput(v)
+		return nil
+	case automationexecution.FieldActionsRun:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActionsRun(v)
+		return nil
+	case automationexecution.FieldError:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetError(v)
+		return nil
+	case automationexecution.FieldStartedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartedAt(v)
+		return nil
+	case automationexecution.FieldFinishedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFinishedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationExecution field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AutomationExecutionMutation) AddedFields() []string {
+	var fields []string
+	if m.addrule_version != nil {
+		fields = append(fields, automationexecution.FieldRuleVersion)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AutomationExecutionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case automationexecution.FieldRuleVersion:
+		return m.AddedRuleVersion()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AutomationExecutionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case automationexecution.FieldRuleVersion:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRuleVersion(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationExecution numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AutomationExecutionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(automationexecution.FieldError) {
+		fields = append(fields, automationexecution.FieldError)
+	}
+	if m.FieldCleared(automationexecution.FieldFinishedAt) {
+		fields = append(fields, automationexecution.FieldFinishedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AutomationExecutionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AutomationExecutionMutation) ClearField(name string) error {
+	switch name {
+	case automationexecution.FieldError:
+		m.ClearError()
+		return nil
+	case automationexecution.FieldFinishedAt:
+		m.ClearFinishedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationExecution nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AutomationExecutionMutation) ResetField(name string) error {
+	switch name {
+	case automationexecution.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case automationexecution.FieldRuleID:
+		m.ResetRuleID()
+		return nil
+	case automationexecution.FieldRuleVersion:
+		m.ResetRuleVersion()
+		return nil
+	case automationexecution.FieldRuleName:
+		m.ResetRuleName()
+		return nil
+	case automationexecution.FieldEvent:
+		m.ResetEvent()
+		return nil
+	case automationexecution.FieldSubjectKey:
+		m.ResetSubjectKey()
+		return nil
+	case automationexecution.FieldSubjectLabel:
+		m.ResetSubjectLabel()
+		return nil
+	case automationexecution.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case automationexecution.FieldSteps:
+		m.ResetSteps()
+		return nil
+	case automationexecution.FieldInput:
+		m.ResetInput()
+		return nil
+	case automationexecution.FieldActionsRun:
+		m.ResetActionsRun()
+		return nil
+	case automationexecution.FieldError:
+		m.ResetError()
+		return nil
+	case automationexecution.FieldStartedAt:
+		m.ResetStartedAt()
+		return nil
+	case automationexecution.FieldFinishedAt:
+		m.ResetFinishedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationExecution field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AutomationExecutionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AutomationExecutionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AutomationExecutionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AutomationExecutionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AutomationExecutionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AutomationExecutionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AutomationExecutionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AutomationExecution unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AutomationExecutionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AutomationExecution edge %s", name)
+}
+
+// AutomationRuleMutation represents an operation that mutates the AutomationRule nodes in the graph.
+type AutomationRuleMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *string
+	version         *int
+	addversion      *int
+	event           *string
+	is_enabled      *bool
+	is_archived     *bool
+	content         *[]byte
+	change_reason   *string
+	updated_by_id   *string
+	updated_by_name *string
+	created_at      *time.Time
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*AutomationRule, error)
+	predicates      []predicate.AutomationRule
+}
+
+var _ ent.Mutation = (*AutomationRuleMutation)(nil)
+
+// automationruleOption allows management of the mutation configuration using functional options.
+type automationruleOption func(*AutomationRuleMutation)
+
+// newAutomationRuleMutation creates new mutation for the AutomationRule entity.
+func newAutomationRuleMutation(c config, op Op, opts ...automationruleOption) *AutomationRuleMutation {
+	m := &AutomationRuleMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAutomationRule,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAutomationRuleID sets the ID field of the mutation.
+func withAutomationRuleID(id string) automationruleOption {
+	return func(m *AutomationRuleMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AutomationRule
+		)
+		m.oldValue = func(ctx context.Context) (*AutomationRule, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AutomationRule.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAutomationRule sets the old AutomationRule of the mutation.
+func withAutomationRule(node *AutomationRule) automationruleOption {
+	return func(m *AutomationRuleMutation) {
+		m.oldValue = func(context.Context) (*AutomationRule, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AutomationRuleMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AutomationRuleMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AutomationRule entities.
+func (m *AutomationRuleMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AutomationRuleMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AutomationRuleMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AutomationRule.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetVersion sets the "version" field.
+func (m *AutomationRuleMutation) SetVersion(i int) {
+	m.version = &i
+	m.addversion = nil
+}
+
+// Version returns the value of the "version" field in the mutation.
+func (m *AutomationRuleMutation) Version() (r int, exists bool) {
+	v := m.version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVersion returns the old "version" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldVersion(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVersion: %w", err)
+	}
+	return oldValue.Version, nil
+}
+
+// AddVersion adds i to the "version" field.
+func (m *AutomationRuleMutation) AddVersion(i int) {
+	if m.addversion != nil {
+		*m.addversion += i
+	} else {
+		m.addversion = &i
+	}
+}
+
+// AddedVersion returns the value that was added to the "version" field in this mutation.
+func (m *AutomationRuleMutation) AddedVersion() (r int, exists bool) {
+	v := m.addversion
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVersion resets all changes to the "version" field.
+func (m *AutomationRuleMutation) ResetVersion() {
+	m.version = nil
+	m.addversion = nil
+}
+
+// SetEvent sets the "event" field.
+func (m *AutomationRuleMutation) SetEvent(s string) {
+	m.event = &s
+}
+
+// Event returns the value of the "event" field in the mutation.
+func (m *AutomationRuleMutation) Event() (r string, exists bool) {
+	v := m.event
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvent returns the old "event" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldEvent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvent: %w", err)
+	}
+	return oldValue.Event, nil
+}
+
+// ResetEvent resets all changes to the "event" field.
+func (m *AutomationRuleMutation) ResetEvent() {
+	m.event = nil
+}
+
+// SetIsEnabled sets the "is_enabled" field.
+func (m *AutomationRuleMutation) SetIsEnabled(b bool) {
+	m.is_enabled = &b
+}
+
+// IsEnabled returns the value of the "is_enabled" field in the mutation.
+func (m *AutomationRuleMutation) IsEnabled() (r bool, exists bool) {
+	v := m.is_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsEnabled returns the old "is_enabled" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldIsEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsEnabled: %w", err)
+	}
+	return oldValue.IsEnabled, nil
+}
+
+// ResetIsEnabled resets all changes to the "is_enabled" field.
+func (m *AutomationRuleMutation) ResetIsEnabled() {
+	m.is_enabled = nil
+}
+
+// SetIsArchived sets the "is_archived" field.
+func (m *AutomationRuleMutation) SetIsArchived(b bool) {
+	m.is_archived = &b
+}
+
+// IsArchived returns the value of the "is_archived" field in the mutation.
+func (m *AutomationRuleMutation) IsArchived() (r bool, exists bool) {
+	v := m.is_archived
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsArchived returns the old "is_archived" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldIsArchived(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsArchived is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsArchived requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsArchived: %w", err)
+	}
+	return oldValue.IsArchived, nil
+}
+
+// ResetIsArchived resets all changes to the "is_archived" field.
+func (m *AutomationRuleMutation) ResetIsArchived() {
+	m.is_archived = nil
+}
+
+// SetContent sets the "content" field.
+func (m *AutomationRuleMutation) SetContent(b []byte) {
+	m.content = &b
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *AutomationRuleMutation) Content() (r []byte, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldContent(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *AutomationRuleMutation) ResetContent() {
+	m.content = nil
+}
+
+// SetChangeReason sets the "change_reason" field.
+func (m *AutomationRuleMutation) SetChangeReason(s string) {
+	m.change_reason = &s
+}
+
+// ChangeReason returns the value of the "change_reason" field in the mutation.
+func (m *AutomationRuleMutation) ChangeReason() (r string, exists bool) {
+	v := m.change_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChangeReason returns the old "change_reason" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldChangeReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChangeReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChangeReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChangeReason: %w", err)
+	}
+	return oldValue.ChangeReason, nil
+}
+
+// ResetChangeReason resets all changes to the "change_reason" field.
+func (m *AutomationRuleMutation) ResetChangeReason() {
+	m.change_reason = nil
+}
+
+// SetUpdatedByID sets the "updated_by_id" field.
+func (m *AutomationRuleMutation) SetUpdatedByID(s string) {
+	m.updated_by_id = &s
+}
+
+// UpdatedByID returns the value of the "updated_by_id" field in the mutation.
+func (m *AutomationRuleMutation) UpdatedByID() (r string, exists bool) {
+	v := m.updated_by_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedByID returns the old "updated_by_id" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldUpdatedByID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedByID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedByID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedByID: %w", err)
+	}
+	return oldValue.UpdatedByID, nil
+}
+
+// ResetUpdatedByID resets all changes to the "updated_by_id" field.
+func (m *AutomationRuleMutation) ResetUpdatedByID() {
+	m.updated_by_id = nil
+}
+
+// SetUpdatedByName sets the "updated_by_name" field.
+func (m *AutomationRuleMutation) SetUpdatedByName(s string) {
+	m.updated_by_name = &s
+}
+
+// UpdatedByName returns the value of the "updated_by_name" field in the mutation.
+func (m *AutomationRuleMutation) UpdatedByName() (r string, exists bool) {
+	v := m.updated_by_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedByName returns the old "updated_by_name" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldUpdatedByName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedByName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedByName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedByName: %w", err)
+	}
+	return oldValue.UpdatedByName, nil
+}
+
+// ResetUpdatedByName resets all changes to the "updated_by_name" field.
+func (m *AutomationRuleMutation) ResetUpdatedByName() {
+	m.updated_by_name = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AutomationRuleMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AutomationRuleMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AutomationRuleMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *AutomationRuleMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *AutomationRuleMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the AutomationRule entity.
+// If the AutomationRule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *AutomationRuleMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the AutomationRuleMutation builder.
+func (m *AutomationRuleMutation) Where(ps ...predicate.AutomationRule) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AutomationRuleMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AutomationRuleMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AutomationRule, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AutomationRuleMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AutomationRuleMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AutomationRule).
+func (m *AutomationRuleMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AutomationRuleMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.version != nil {
+		fields = append(fields, automationrule.FieldVersion)
+	}
+	if m.event != nil {
+		fields = append(fields, automationrule.FieldEvent)
+	}
+	if m.is_enabled != nil {
+		fields = append(fields, automationrule.FieldIsEnabled)
+	}
+	if m.is_archived != nil {
+		fields = append(fields, automationrule.FieldIsArchived)
+	}
+	if m.content != nil {
+		fields = append(fields, automationrule.FieldContent)
+	}
+	if m.change_reason != nil {
+		fields = append(fields, automationrule.FieldChangeReason)
+	}
+	if m.updated_by_id != nil {
+		fields = append(fields, automationrule.FieldUpdatedByID)
+	}
+	if m.updated_by_name != nil {
+		fields = append(fields, automationrule.FieldUpdatedByName)
+	}
+	if m.created_at != nil {
+		fields = append(fields, automationrule.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, automationrule.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AutomationRuleMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case automationrule.FieldVersion:
+		return m.Version()
+	case automationrule.FieldEvent:
+		return m.Event()
+	case automationrule.FieldIsEnabled:
+		return m.IsEnabled()
+	case automationrule.FieldIsArchived:
+		return m.IsArchived()
+	case automationrule.FieldContent:
+		return m.Content()
+	case automationrule.FieldChangeReason:
+		return m.ChangeReason()
+	case automationrule.FieldUpdatedByID:
+		return m.UpdatedByID()
+	case automationrule.FieldUpdatedByName:
+		return m.UpdatedByName()
+	case automationrule.FieldCreatedAt:
+		return m.CreatedAt()
+	case automationrule.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AutomationRuleMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case automationrule.FieldVersion:
+		return m.OldVersion(ctx)
+	case automationrule.FieldEvent:
+		return m.OldEvent(ctx)
+	case automationrule.FieldIsEnabled:
+		return m.OldIsEnabled(ctx)
+	case automationrule.FieldIsArchived:
+		return m.OldIsArchived(ctx)
+	case automationrule.FieldContent:
+		return m.OldContent(ctx)
+	case automationrule.FieldChangeReason:
+		return m.OldChangeReason(ctx)
+	case automationrule.FieldUpdatedByID:
+		return m.OldUpdatedByID(ctx)
+	case automationrule.FieldUpdatedByName:
+		return m.OldUpdatedByName(ctx)
+	case automationrule.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case automationrule.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AutomationRule field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AutomationRuleMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case automationrule.FieldVersion:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVersion(v)
+		return nil
+	case automationrule.FieldEvent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvent(v)
+		return nil
+	case automationrule.FieldIsEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsEnabled(v)
+		return nil
+	case automationrule.FieldIsArchived:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsArchived(v)
+		return nil
+	case automationrule.FieldContent:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	case automationrule.FieldChangeReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChangeReason(v)
+		return nil
+	case automationrule.FieldUpdatedByID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedByID(v)
+		return nil
+	case automationrule.FieldUpdatedByName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedByName(v)
+		return nil
+	case automationrule.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case automationrule.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationRule field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AutomationRuleMutation) AddedFields() []string {
+	var fields []string
+	if m.addversion != nil {
+		fields = append(fields, automationrule.FieldVersion)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AutomationRuleMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case automationrule.FieldVersion:
+		return m.AddedVersion()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AutomationRuleMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case automationrule.FieldVersion:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVersion(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationRule numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AutomationRuleMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AutomationRuleMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AutomationRuleMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AutomationRule nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AutomationRuleMutation) ResetField(name string) error {
+	switch name {
+	case automationrule.FieldVersion:
+		m.ResetVersion()
+		return nil
+	case automationrule.FieldEvent:
+		m.ResetEvent()
+		return nil
+	case automationrule.FieldIsEnabled:
+		m.ResetIsEnabled()
+		return nil
+	case automationrule.FieldIsArchived:
+		m.ResetIsArchived()
+		return nil
+	case automationrule.FieldContent:
+		m.ResetContent()
+		return nil
+	case automationrule.FieldChangeReason:
+		m.ResetChangeReason()
+		return nil
+	case automationrule.FieldUpdatedByID:
+		m.ResetUpdatedByID()
+		return nil
+	case automationrule.FieldUpdatedByName:
+		m.ResetUpdatedByName()
+		return nil
+	case automationrule.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case automationrule.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationRule field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AutomationRuleMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AutomationRuleMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AutomationRuleMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AutomationRuleMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AutomationRuleMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AutomationRuleMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AutomationRuleMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AutomationRule unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AutomationRuleMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AutomationRule edge %s", name)
+}
+
+// AutomationRuleVersionMutation represents an operation that mutates the AutomationRuleVersion nodes in the graph.
+type AutomationRuleVersionMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	rule_id         *string
+	version         *int
+	addversion      *int
+	content         *[]byte
+	change_reason   *string
+	updated_by_id   *string
+	updated_by_name *string
+	is_archived     *bool
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*AutomationRuleVersion, error)
+	predicates      []predicate.AutomationRuleVersion
+}
+
+var _ ent.Mutation = (*AutomationRuleVersionMutation)(nil)
+
+// automationruleversionOption allows management of the mutation configuration using functional options.
+type automationruleversionOption func(*AutomationRuleVersionMutation)
+
+// newAutomationRuleVersionMutation creates new mutation for the AutomationRuleVersion entity.
+func newAutomationRuleVersionMutation(c config, op Op, opts ...automationruleversionOption) *AutomationRuleVersionMutation {
+	m := &AutomationRuleVersionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAutomationRuleVersion,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAutomationRuleVersionID sets the ID field of the mutation.
+func withAutomationRuleVersionID(id uuid.UUID) automationruleversionOption {
+	return func(m *AutomationRuleVersionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AutomationRuleVersion
+		)
+		m.oldValue = func(ctx context.Context) (*AutomationRuleVersion, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AutomationRuleVersion.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAutomationRuleVersion sets the old AutomationRuleVersion of the mutation.
+func withAutomationRuleVersion(node *AutomationRuleVersion) automationruleversionOption {
+	return func(m *AutomationRuleVersionMutation) {
+		m.oldValue = func(context.Context) (*AutomationRuleVersion, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AutomationRuleVersionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AutomationRuleVersionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AutomationRuleVersion entities.
+func (m *AutomationRuleVersionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AutomationRuleVersionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AutomationRuleVersionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AutomationRuleVersion.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AutomationRuleVersionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AutomationRuleVersionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AutomationRuleVersion entity.
+// If the AutomationRuleVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleVersionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AutomationRuleVersionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetRuleID sets the "rule_id" field.
+func (m *AutomationRuleVersionMutation) SetRuleID(s string) {
+	m.rule_id = &s
+}
+
+// RuleID returns the value of the "rule_id" field in the mutation.
+func (m *AutomationRuleVersionMutation) RuleID() (r string, exists bool) {
+	v := m.rule_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRuleID returns the old "rule_id" field's value of the AutomationRuleVersion entity.
+// If the AutomationRuleVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleVersionMutation) OldRuleID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRuleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRuleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRuleID: %w", err)
+	}
+	return oldValue.RuleID, nil
+}
+
+// ResetRuleID resets all changes to the "rule_id" field.
+func (m *AutomationRuleVersionMutation) ResetRuleID() {
+	m.rule_id = nil
+}
+
+// SetVersion sets the "version" field.
+func (m *AutomationRuleVersionMutation) SetVersion(i int) {
+	m.version = &i
+	m.addversion = nil
+}
+
+// Version returns the value of the "version" field in the mutation.
+func (m *AutomationRuleVersionMutation) Version() (r int, exists bool) {
+	v := m.version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVersion returns the old "version" field's value of the AutomationRuleVersion entity.
+// If the AutomationRuleVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleVersionMutation) OldVersion(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVersion: %w", err)
+	}
+	return oldValue.Version, nil
+}
+
+// AddVersion adds i to the "version" field.
+func (m *AutomationRuleVersionMutation) AddVersion(i int) {
+	if m.addversion != nil {
+		*m.addversion += i
+	} else {
+		m.addversion = &i
+	}
+}
+
+// AddedVersion returns the value that was added to the "version" field in this mutation.
+func (m *AutomationRuleVersionMutation) AddedVersion() (r int, exists bool) {
+	v := m.addversion
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVersion resets all changes to the "version" field.
+func (m *AutomationRuleVersionMutation) ResetVersion() {
+	m.version = nil
+	m.addversion = nil
+}
+
+// SetContent sets the "content" field.
+func (m *AutomationRuleVersionMutation) SetContent(b []byte) {
+	m.content = &b
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *AutomationRuleVersionMutation) Content() (r []byte, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the AutomationRuleVersion entity.
+// If the AutomationRuleVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleVersionMutation) OldContent(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *AutomationRuleVersionMutation) ResetContent() {
+	m.content = nil
+}
+
+// SetChangeReason sets the "change_reason" field.
+func (m *AutomationRuleVersionMutation) SetChangeReason(s string) {
+	m.change_reason = &s
+}
+
+// ChangeReason returns the value of the "change_reason" field in the mutation.
+func (m *AutomationRuleVersionMutation) ChangeReason() (r string, exists bool) {
+	v := m.change_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChangeReason returns the old "change_reason" field's value of the AutomationRuleVersion entity.
+// If the AutomationRuleVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleVersionMutation) OldChangeReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChangeReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChangeReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChangeReason: %w", err)
+	}
+	return oldValue.ChangeReason, nil
+}
+
+// ResetChangeReason resets all changes to the "change_reason" field.
+func (m *AutomationRuleVersionMutation) ResetChangeReason() {
+	m.change_reason = nil
+}
+
+// SetUpdatedByID sets the "updated_by_id" field.
+func (m *AutomationRuleVersionMutation) SetUpdatedByID(s string) {
+	m.updated_by_id = &s
+}
+
+// UpdatedByID returns the value of the "updated_by_id" field in the mutation.
+func (m *AutomationRuleVersionMutation) UpdatedByID() (r string, exists bool) {
+	v := m.updated_by_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedByID returns the old "updated_by_id" field's value of the AutomationRuleVersion entity.
+// If the AutomationRuleVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleVersionMutation) OldUpdatedByID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedByID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedByID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedByID: %w", err)
+	}
+	return oldValue.UpdatedByID, nil
+}
+
+// ResetUpdatedByID resets all changes to the "updated_by_id" field.
+func (m *AutomationRuleVersionMutation) ResetUpdatedByID() {
+	m.updated_by_id = nil
+}
+
+// SetUpdatedByName sets the "updated_by_name" field.
+func (m *AutomationRuleVersionMutation) SetUpdatedByName(s string) {
+	m.updated_by_name = &s
+}
+
+// UpdatedByName returns the value of the "updated_by_name" field in the mutation.
+func (m *AutomationRuleVersionMutation) UpdatedByName() (r string, exists bool) {
+	v := m.updated_by_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedByName returns the old "updated_by_name" field's value of the AutomationRuleVersion entity.
+// If the AutomationRuleVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleVersionMutation) OldUpdatedByName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedByName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedByName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedByName: %w", err)
+	}
+	return oldValue.UpdatedByName, nil
+}
+
+// ResetUpdatedByName resets all changes to the "updated_by_name" field.
+func (m *AutomationRuleVersionMutation) ResetUpdatedByName() {
+	m.updated_by_name = nil
+}
+
+// SetIsArchived sets the "is_archived" field.
+func (m *AutomationRuleVersionMutation) SetIsArchived(b bool) {
+	m.is_archived = &b
+}
+
+// IsArchived returns the value of the "is_archived" field in the mutation.
+func (m *AutomationRuleVersionMutation) IsArchived() (r bool, exists bool) {
+	v := m.is_archived
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsArchived returns the old "is_archived" field's value of the AutomationRuleVersion entity.
+// If the AutomationRuleVersion object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AutomationRuleVersionMutation) OldIsArchived(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsArchived is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsArchived requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsArchived: %w", err)
+	}
+	return oldValue.IsArchived, nil
+}
+
+// ResetIsArchived resets all changes to the "is_archived" field.
+func (m *AutomationRuleVersionMutation) ResetIsArchived() {
+	m.is_archived = nil
+}
+
+// Where appends a list predicates to the AutomationRuleVersionMutation builder.
+func (m *AutomationRuleVersionMutation) Where(ps ...predicate.AutomationRuleVersion) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AutomationRuleVersionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AutomationRuleVersionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AutomationRuleVersion, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AutomationRuleVersionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AutomationRuleVersionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AutomationRuleVersion).
+func (m *AutomationRuleVersionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AutomationRuleVersionMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, automationruleversion.FieldCreatedAt)
+	}
+	if m.rule_id != nil {
+		fields = append(fields, automationruleversion.FieldRuleID)
+	}
+	if m.version != nil {
+		fields = append(fields, automationruleversion.FieldVersion)
+	}
+	if m.content != nil {
+		fields = append(fields, automationruleversion.FieldContent)
+	}
+	if m.change_reason != nil {
+		fields = append(fields, automationruleversion.FieldChangeReason)
+	}
+	if m.updated_by_id != nil {
+		fields = append(fields, automationruleversion.FieldUpdatedByID)
+	}
+	if m.updated_by_name != nil {
+		fields = append(fields, automationruleversion.FieldUpdatedByName)
+	}
+	if m.is_archived != nil {
+		fields = append(fields, automationruleversion.FieldIsArchived)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AutomationRuleVersionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case automationruleversion.FieldCreatedAt:
+		return m.CreatedAt()
+	case automationruleversion.FieldRuleID:
+		return m.RuleID()
+	case automationruleversion.FieldVersion:
+		return m.Version()
+	case automationruleversion.FieldContent:
+		return m.Content()
+	case automationruleversion.FieldChangeReason:
+		return m.ChangeReason()
+	case automationruleversion.FieldUpdatedByID:
+		return m.UpdatedByID()
+	case automationruleversion.FieldUpdatedByName:
+		return m.UpdatedByName()
+	case automationruleversion.FieldIsArchived:
+		return m.IsArchived()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AutomationRuleVersionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case automationruleversion.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case automationruleversion.FieldRuleID:
+		return m.OldRuleID(ctx)
+	case automationruleversion.FieldVersion:
+		return m.OldVersion(ctx)
+	case automationruleversion.FieldContent:
+		return m.OldContent(ctx)
+	case automationruleversion.FieldChangeReason:
+		return m.OldChangeReason(ctx)
+	case automationruleversion.FieldUpdatedByID:
+		return m.OldUpdatedByID(ctx)
+	case automationruleversion.FieldUpdatedByName:
+		return m.OldUpdatedByName(ctx)
+	case automationruleversion.FieldIsArchived:
+		return m.OldIsArchived(ctx)
+	}
+	return nil, fmt.Errorf("unknown AutomationRuleVersion field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AutomationRuleVersionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case automationruleversion.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case automationruleversion.FieldRuleID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRuleID(v)
+		return nil
+	case automationruleversion.FieldVersion:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVersion(v)
+		return nil
+	case automationruleversion.FieldContent:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	case automationruleversion.FieldChangeReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChangeReason(v)
+		return nil
+	case automationruleversion.FieldUpdatedByID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedByID(v)
+		return nil
+	case automationruleversion.FieldUpdatedByName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedByName(v)
+		return nil
+	case automationruleversion.FieldIsArchived:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsArchived(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationRuleVersion field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AutomationRuleVersionMutation) AddedFields() []string {
+	var fields []string
+	if m.addversion != nil {
+		fields = append(fields, automationruleversion.FieldVersion)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AutomationRuleVersionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case automationruleversion.FieldVersion:
+		return m.AddedVersion()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AutomationRuleVersionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case automationruleversion.FieldVersion:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVersion(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationRuleVersion numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AutomationRuleVersionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AutomationRuleVersionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AutomationRuleVersionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AutomationRuleVersion nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AutomationRuleVersionMutation) ResetField(name string) error {
+	switch name {
+	case automationruleversion.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case automationruleversion.FieldRuleID:
+		m.ResetRuleID()
+		return nil
+	case automationruleversion.FieldVersion:
+		m.ResetVersion()
+		return nil
+	case automationruleversion.FieldContent:
+		m.ResetContent()
+		return nil
+	case automationruleversion.FieldChangeReason:
+		m.ResetChangeReason()
+		return nil
+	case automationruleversion.FieldUpdatedByID:
+		m.ResetUpdatedByID()
+		return nil
+	case automationruleversion.FieldUpdatedByName:
+		m.ResetUpdatedByName()
+		return nil
+	case automationruleversion.FieldIsArchived:
+		m.ResetIsArchived()
+		return nil
+	}
+	return fmt.Errorf("unknown AutomationRuleVersion field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AutomationRuleVersionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AutomationRuleVersionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AutomationRuleVersionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AutomationRuleVersionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AutomationRuleVersionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AutomationRuleVersionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AutomationRuleVersionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AutomationRuleVersion unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AutomationRuleVersionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AutomationRuleVersion edge %s", name)
+}
 
 // ChatReportMutation represents an operation that mutates the ChatReport nodes in the graph.
 type ChatReportMutation struct {

@@ -14,6 +14,16 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Appeal is the client for interacting with the Appeal builders.
+	Appeal *AppealClient
+	// AutomationEventOccurrence is the client for interacting with the AutomationEventOccurrence builders.
+	AutomationEventOccurrence *AutomationEventOccurrenceClient
+	// AutomationExecution is the client for interacting with the AutomationExecution builders.
+	AutomationExecution *AutomationExecutionClient
+	// AutomationRule is the client for interacting with the AutomationRule builders.
+	AutomationRule *AutomationRuleClient
+	// AutomationRuleVersion is the client for interacting with the AutomationRuleVersion builders.
+	AutomationRuleVersion *AutomationRuleVersionClient
 	// ChatReport is the client for interacting with the ChatReport builders.
 	ChatReport *ChatReportClient
 	// ContentReport is the client for interacting with the ContentReport builders.
@@ -179,6 +189,11 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Appeal = NewAppealClient(tx.config)
+	tx.AutomationEventOccurrence = NewAutomationEventOccurrenceClient(tx.config)
+	tx.AutomationExecution = NewAutomationExecutionClient(tx.config)
+	tx.AutomationRule = NewAutomationRuleClient(tx.config)
+	tx.AutomationRuleVersion = NewAutomationRuleVersionClient(tx.config)
 	tx.ChatReport = NewChatReportClient(tx.config)
 	tx.ContentReport = NewContentReportClient(tx.config)
 	tx.ContentReportEntry = NewContentReportEntryClient(tx.config)
@@ -205,7 +220,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: ChatReport.QueryXXX(), the query will be executed
+// applies a query, for example: Appeal.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

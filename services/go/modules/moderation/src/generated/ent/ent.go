@@ -8,6 +8,11 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/moderation/src/generated/ent/appeal"
+	"zudomart/modules/moderation/src/generated/ent/automationeventoccurrence"
+	"zudomart/modules/moderation/src/generated/ent/automationexecution"
+	"zudomart/modules/moderation/src/generated/ent/automationrule"
+	"zudomart/modules/moderation/src/generated/ent/automationruleversion"
 	"zudomart/modules/moderation/src/generated/ent/chatreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreport"
 	"zudomart/modules/moderation/src/generated/ent/contentreportentry"
@@ -89,23 +94,28 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			chatreport.Table:               chatreport.ValidColumn,
-			contentreport.Table:            contentreport.ValidColumn,
-			contentreportentry.Table:       contentreportentry.ValidColumn,
-			copyrightclaim.Table:           copyrightclaim.ValidColumn,
-			copyrightpolicysetting.Table:   copyrightpolicysetting.ValidColumn,
-			counternotice.Table:            counternotice.ValidColumn,
-			evidenceretentionsetting.Table: evidenceretentionsetting.ValidColumn,
-			ipclaim.Table:                  ipclaim.ValidColumn,
-			legalreport.Table:              legalreport.ValidColumn,
-			livesafetyincident.Table:       livesafetyincident.ValidColumn,
-			livesafetysignal.Table:         livesafetysignal.ValidColumn,
-			outboxevent.Table:              outboxevent.ValidColumn,
-			securityaccountstate.Table:     securityaccountstate.ValidColumn,
-			securitycase.Table:             securitycase.ValidColumn,
-			securityevent.Table:            securityevent.ValidColumn,
-			strike.Table:                   strike.ValidColumn,
-			suspensioncase.Table:           suspensioncase.ValidColumn,
+			appeal.Table:                    appeal.ValidColumn,
+			automationeventoccurrence.Table: automationeventoccurrence.ValidColumn,
+			automationexecution.Table:       automationexecution.ValidColumn,
+			automationrule.Table:            automationrule.ValidColumn,
+			automationruleversion.Table:     automationruleversion.ValidColumn,
+			chatreport.Table:                chatreport.ValidColumn,
+			contentreport.Table:             contentreport.ValidColumn,
+			contentreportentry.Table:        contentreportentry.ValidColumn,
+			copyrightclaim.Table:            copyrightclaim.ValidColumn,
+			copyrightpolicysetting.Table:    copyrightpolicysetting.ValidColumn,
+			counternotice.Table:             counternotice.ValidColumn,
+			evidenceretentionsetting.Table:  evidenceretentionsetting.ValidColumn,
+			ipclaim.Table:                   ipclaim.ValidColumn,
+			legalreport.Table:               legalreport.ValidColumn,
+			livesafetyincident.Table:        livesafetyincident.ValidColumn,
+			livesafetysignal.Table:          livesafetysignal.ValidColumn,
+			outboxevent.Table:               outboxevent.ValidColumn,
+			securityaccountstate.Table:      securityaccountstate.ValidColumn,
+			securitycase.Table:              securitycase.ValidColumn,
+			securityevent.Table:             securityevent.ValidColumn,
+			strike.Table:                    strike.ValidColumn,
+			suspensioncase.Table:            suspensioncase.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)
