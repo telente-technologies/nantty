@@ -24,6 +24,7 @@ func (StaffLoginChallenge) Fields() []ent.Field {
 		field.Time("expires_at").Immutable(),
 		field.Time("consumed_at").Optional().Nillable(),
 		field.Int("attempts").Default(0).NonNegative(),
+		field.Bytes("webauthn_session").Optional().Sensitive(),
 	}
 }
 

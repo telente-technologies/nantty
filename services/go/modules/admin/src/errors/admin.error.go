@@ -19,8 +19,17 @@ var (
 	SuperadminRequired  = httpserver.NewApiError(http.StatusForbidden, "SUPERADMIN_REQUIRED", "Only a superadmin can do that.")
 	MfaNotEnrolled      = httpserver.NewApiError(http.StatusConflict, "MFA_NOT_ENROLLED", "Set up multi-factor authentication first.")
 	SettingNotFound     = httpserver.NewApiError(http.StatusNotFound, "SETTING_NOT_FOUND", "That setting does not exist.")
+	VersionNotFound     = httpserver.NewApiError(http.StatusNotFound, "VERSION_NOT_FOUND", "That version of the setting does not exist.")
 	VersionConflict     = httpserver.NewApiError(http.StatusConflict, "VERSION_CONFLICT", "This setting changed since you loaded it. Reload and try again.")
 	TooManyRequests     = httpserver.NewApiError(http.StatusTooManyRequests, "RATE_LIMITED", "Too many attempts. Try again shortly.")
+	IpNotAllowed        = httpserver.NewApiError(http.StatusForbidden, "IP_NOT_ALLOWED", "The admin console cannot be used from this network.")
+	PasskeysUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "PASSKEYS_UNAVAILABLE", "Passkeys are not available right now.")
+	NoPasskeys          = httpserver.NewApiError(http.StatusNotFound, "NO_PASSKEYS", "No passkeys are registered for this admin.")
+	PasskeyNotFound     = httpserver.NewApiError(http.StatusNotFound, "PASSKEY_NOT_FOUND", "That passkey was not found.")
+	PasskeyExpired      = httpserver.NewApiError(http.StatusConflict, "PASSKEY_CHALLENGE_EXPIRED", "Start adding the passkey again.")
+	PasskeyNotVerified  = httpserver.NewApiError(http.StatusBadRequest, "PASSKEY_NOT_VERIFIED", "The passkey could not be verified.")
+	PasskeyExists       = httpserver.NewApiError(http.StatusConflict, "PASSKEY_EXISTS", "This passkey is already registered.")
+	SessionNotFound     = httpserver.NewApiError(http.StatusNotFound, "SESSION_NOT_FOUND", "That session was not found.")
 )
 
 func ValidationFailedFor(path, message string) *httpserver.ApiError {

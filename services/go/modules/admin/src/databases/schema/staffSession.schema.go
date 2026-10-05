@@ -26,6 +26,9 @@ func (StaffSession) Fields() []ent.Field {
 		field.Time("last_used_at"),
 		field.Time("expires_at"),
 		field.Time("revoked_at").Optional().Nillable(),
+		field.Bytes("webauthn_session").Optional().Sensitive(),
+		field.Enum("webauthn_ceremony").Values("register", "step_up").Optional().Nillable(),
+		field.Time("webauthn_expires_at").Optional().Nillable(),
 	}
 }
 

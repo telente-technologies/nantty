@@ -32,6 +32,9 @@ func (StaffAccount) Fields() []ent.Field {
 		field.Int64("totp_last_used_step").Default(0),
 		field.Int("failed_attempts").Default(0).NonNegative(),
 		field.Time("locked_until").Optional().Nillable(),
+		field.Strings("recovery_code_hashes").Default([]string{}).Sensitive(),
+		field.Strings("ip_allow_list").Default([]string{}),
+		field.Enum("theme_preference").Values("light", "dark", "system").Default("system"),
 		field.UUID("created_by", uuid.UUID{}).Optional().Nillable().Immutable(),
 		field.UUID("approved_by", uuid.UUID{}).Optional().Nillable(),
 		field.Time("approved_at").Optional().Nillable(),
@@ -44,6 +47,8 @@ func (StaffAccount) Edges() []ent.Edge {
 		edge.To("sessions", StaffSession.Type),
 		edge.To("challenges", StaffLoginChallenge.Type),
 		edge.To("invitations", StaffInvitation.Type),
+		edge.To("passkeys", StaffWebauthnCredential.Type),
+		edge.To("consents", StaffConsent.Type),
 	}
 }
 
