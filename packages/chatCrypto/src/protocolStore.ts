@@ -19,6 +19,7 @@ export interface PreKeyCounters {
 export interface CachedPlaintext {
   readonly payload: ChatPayload | null;
   readonly failure: string | null;
+  readonly expiresAt?: string | null;
 }
 
 export interface ChatCryptoStorage {
@@ -75,6 +76,7 @@ export class ProtocolStore {
   public loadPlaintext = (messageId: string) => this.read<CachedPlaintext>(this.storage.records, `plain:${messageId}`);
   public savePlaintext = (messageId: string, cached: CachedPlaintext) => this.write(this.storage.records, `plain:${messageId}`, cached);
   public deletePlaintext = (messageId: string) => this.storage.records.delete(`plain:${messageId}`);
+  public plaintextMessageIds = async () => (await this.storage.records.keys("plain:")).map((key) => key.slice("plain:".length));
 
   public async clearEverything(): Promise<void> {
     for (const store of [this.storage.secrets, this.storage.records]) {

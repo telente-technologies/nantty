@@ -35,11 +35,17 @@ describe("ChatCryptoClient", () => {
     const bob = await world.device("bob", "c2c");
     const bobLaptop = await world.device("bob", "c2d");
     const sent = await alice.client.encryptMessage({ kind: "direct", conversationId: direct, memberUserIds: ["bob"] }, { text: "hi bob", linkPreview: { url: "https://example.com", domain: "example.com", title: "Example", description: null, imageUrl: null } });
-    const message = world.deliver("alice", direct, sent.encryption);
+    expect(sent.linkPreview).toEqual(expect.any(String));
+    expect(sent.encryption.ciphertext).not.toContain("example.com");
+    const message = { ...world.deliver("alice", direct, sent.encryption), linkPreview: sent.linkPreview };
     await sent.confirmSent(message.id);
+    const viaRealtime = await bobLaptop.client.decryptMessage({ ...message, linkPreview: undefined });
+    expect(viaRealtime.status === "decrypted" && viaRealtime.payload.linkPreview).toBeNull();
     for (const reader of [bob, bobLaptop, alicePhone]) expect(textOf(await reader.client.decryptMessage(message))).toBe("hi bob");
     const read = await bob.client.decryptMessage(message);
     expect(read.status === "decrypted" && read.payload.linkPreview?.domain).toBe("example.com");
+    const tampered = await bob.client.decryptMessage({ ...message, linkPreview: `${(sent.linkPreview as string).slice(0, -4)}AAA=` });
+    expect(tampered.status === "decrypted" && tampered.payload.linkPreview).toBeNull();
     expect(textOf(await alice.client.decryptMessage(message))).toBe("hi bob");
     const reply = await bob.client.encryptMessage({ kind: "direct", conversationId: direct, memberUserIds: ["alice"] }, { text: "hello alice" });
     const replyMessage = world.deliver("bob", direct, reply.encryption);
@@ -91,8 +97,9 @@ describe("ChatCryptoClient", () => {
     const secondMessage = world.deliver("alice", group, second.encryption);
     await second.confirmSent(secondMessage.id);
     for (const reader of [bob, carol]) {
-      expect(textOf(await reader.client.decryptMessage(secondMessage))).toBe("second");
+      expect(textOf(await reader.client.decryptMessage(secondMessage))).toBe("failed:NO_SENDER_KEY");
       expect(textOf(await reader.client.decryptMessage(firstMessage))).toBe("hello group");
+      expect(textOf(await reader.client.decryptMessage(secondMessage))).toBe("second");
     }
     const afterLeave = await alice.client.encryptMessage({ kind: "group", conversationId: group, memberUserIds: ["alice", "bob"] }, { text: "carol left" });
     const leaveMessage = world.deliver("alice", group, afterLeave.encryption);
@@ -165,7 +172,7 @@ describe("ChatCryptoClient", () => {
     const alice = await world.device("alice", "c12a");
     const bob = await world.device("bob", "c12b");
     const sent = await alice.client.encryptMessage({ kind: "direct", conversationId: null, memberUserIds: ["bob"] }, { text: "nice story", storyId: "story-1" });
-    const result = await bob.client.decryptMessage(world.deliver("alice", direct, sent.encryption));
+    const result = await bob.client.decryptMessage({ ...world.deliver("alice", direct, sent.encryption), sharedContent: { reference: { kind: "story", id: "story-1" } } });
     expect(result.status === "decrypted" && [result.payload.text, result.payload.storyId]).toEqual(["nice story", "story-1"]);
   });
 });

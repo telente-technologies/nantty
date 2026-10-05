@@ -97,6 +97,7 @@ describe("X3DH and Double Ratchet sessions", () => {
     const bob = createTestDevice("bob", "b7");
     await connect(alice, bob);
     await receive(bob, alice, await send(alice, bob, "setup"));
+    await receive(alice, bob, await send(bob, alice, "ack"));
     const message = await send(alice, bob, "genuine");
     const tampered = message.slice();
     tampered[tampered.length - 1] = (tampered[tampered.length - 1] as number) ^ 1;
@@ -113,6 +114,7 @@ describe("X3DH and Double Ratchet sessions", () => {
     const bob = createTestDevice("bob", "b8");
     await connect(alice, bob);
     await receive(bob, alice, await send(alice, bob, "setup"));
+    await receive(alice, bob, await send(bob, alice, "ack"));
     const message = decodePairwiseMessage(await send(alice, bob, "far"));
     if (message.type !== "message") throw new Error("expected a ratchet message");
     const farAhead = encodePairwiseMessage({ ...message, header: { ...message.header, index: maximumSkippedPerChain + 5 } });
@@ -157,7 +159,9 @@ describe("X3DH and Double Ratchet sessions", () => {
     await connect(alice, bob);
     const first = await send(alice, bob, "vector");
     expect(read(await bob.cipher.decrypt("alice", alice.identity.deviceId, first, async () => true))).toBe("vector");
-    expect(hex(first)).toMatchSnapshot();
+    expect(hex(first)).toBe(
+      "3200002ef73f02845497983242c8980441c40146fb431d3b38aaa0b1bc7190063fa8cd47e79c9e47e840a70eea65710fe81d14cb3616259e675625401d94a69715075c755d0000000b000001f431fbcd555d85c93954cd96b2aefa79717663f2ba5e61a364a62c904c67ce57e01a00000000000000005860010d285d16dc95ce72abc0b0b4618619ef3d87c6",
+    );
     expect(hex(text("x"))).toBe("78");
   });
 });
