@@ -3,18 +3,26 @@ defmodule RealtimeWeb.ClientSocket do
 
   alias Phoenix.PubSub
   alias Realtime.Auth.AccessTokenVerifier
+  alias Realtime.Connections.ConnectionLimiter
+  alias Realtime.Events.ConversationEventRouter
   alias Realtime.Presence
   alias Realtime.Topics.SubscriptionGuard
   alias Realtime.Topics.TopicAuthorizer
 
   @authentication_deadline_ms 10_000
   @maximum_subscriptions 50
+  @close_unauthenticated 4401
+  @close_forbidden 4403
+  @close_replaced 4409
+  @close_too_many_messages 4429
 
   @impl true
   def child_spec(_options), do: :ignore
 
   @impl true
-  def connect(_transport_info), do: {:ok, %{principal: nil, topics: MapSet.new()}}
+  def connect(_transport_info),
+    do:
+      {:ok, %{principal: nil, topics: MapSet.new(), frames: ConnectionLimiter.new_frame_window()}}
 
   @impl true
   def init(state) do
@@ -25,6 +33,19 @@ defmodule RealtimeWeb.ClientSocket do
 
   @impl true
   def handle_in({text, _options}, state) do
+    case ConnectionLimiter.count_frame(state.frames) do
+      {:ok, frames} ->
+        decode_and_handle(text, %{state | frames: frames})
+
+      {:limited, frames} ->
+        close(@close_too_many_messages, %{type: "error", code: "TOO_MANY_MESSAGES"}, %{
+          state
+          | frames: frames
+        })
+    end
+  end
+
+  defp decode_and_handle(text, state) do
     case Jason.decode(text) do
       {:ok, %{"type" => type} = frame} -> handle_client_frame(type, frame, state)
       _ -> reply(%{type: "error", code: "INVALID_FRAME"}, state)
@@ -43,6 +64,14 @@ defmodule RealtimeWeb.ClientSocket do
   end
 
   def handle_info(
+        {:membership_changed, "conversation:" <> conversation_id = topic, account_id},
+        %{principal: %{account_id: account_id}} = state
+      ) do
+    TopicAuthorizer.forget_conversation_membership(account_id, conversation_id)
+    revoke(state, [topic])
+  end
+
+  def handle_info(
         {:membership_changed, topic, account_id},
         %{principal: %{account_id: account_id}} = state
       ),
@@ -50,14 +79,29 @@ defmodule RealtimeWeb.ClientSocket do
 
   def handle_info({:membership_changed, _topic, _account_id}, state), do: {:ok, state}
 
-  def handle_info({:realtime_event, _topic, payload}, state),
-    do: {:push, {:text, Jason.encode!(payload)}, state}
+  def handle_info({:realtime_event, _topic, payload}, state), do: push(payload, state)
+
+  def handle_info({:conversation_fanout, conversation_id, payload}, state) do
+    if MapSet.member?(state.topics, "conversation:#{conversation_id}"),
+      do: {:ok, state},
+      else: push(payload, state)
+  end
+
+  def handle_info({:disconnect, scope, reason}, %{principal: principal} = state)
+      when principal != nil do
+    if scope == :all or scope == {:session, principal.session_id},
+      do: close(@close_forbidden, %{type: "session.ended", reason: reason}, state),
+      else: {:ok, state}
+  end
+
+  def handle_info(:connection_replaced, state),
+    do: close(@close_replaced, %{type: "error", code: "CONNECTION_REPLACED"}, state)
 
   def handle_info(%Phoenix.Socket.Broadcast{payload: payload}, state),
     do: {:push, {:text, Jason.encode!(payload)}, state}
 
   def handle_info(:authentication_deadline, %{principal: nil} = state),
-    do: {:stop, :authentication_timeout, state}
+    do: close(@close_unauthenticated, %{type: "error", code: "UNAUTHENTICATED"}, state)
 
   def handle_info(_message, state), do: {:ok, state}
 
@@ -68,14 +112,8 @@ defmodule RealtimeWeb.ClientSocket do
 
   defp handle_client_frame("auth", %{"accessToken" => token}, state) do
     case AccessTokenVerifier.verify_access_token_and_extract_principal(token) do
-      {:ok, principal} ->
-        state =
-          subscribe_to_topic(%{state | principal: principal}, "user:#{principal.account_id}")
-
-        reply(%{type: "auth.ok"}, state)
-
-      {:error, _reason} ->
-        {:stop, :invalid_access_token, {:text, Jason.encode!(%{type: "auth.failed"})}, state}
+      {:ok, principal} -> authenticated(principal, state)
+      {:error, _reason} -> close(@close_unauthenticated, %{type: "auth.failed"}, state)
     end
   end
 
@@ -115,7 +153,7 @@ defmodule RealtimeWeb.ClientSocket do
       event = %{
         type: "typing",
         conversationId: conversation_id,
-        user: %{id: state.principal.account_id},
+        user: TopicAuthorizer.conversation_member_summary(state.principal, conversation_id),
         isTyping: typing? == true
       }
 
@@ -127,6 +165,21 @@ defmodule RealtimeWeb.ClientSocket do
 
   defp handle_client_frame(_type, _frame, state),
     do: reply(%{type: "error", code: "UNKNOWN_FRAME_TYPE"}, state)
+
+  defp authenticated(principal, %{principal: nil} = state) do
+    ConnectionLimiter.register(principal.account_id)
+    state = subscribe_to_topic(%{state | principal: principal}, "user:#{principal.account_id}")
+    reply(%{type: "auth.ok"}, state)
+  end
+
+  defp authenticated(
+         %{account_id: account_id} = principal,
+         %{principal: %{account_id: account_id}} = state
+       ),
+       do: reply(%{type: "auth.ok"}, %{state | principal: principal})
+
+  defp authenticated(_principal, state),
+    do: close(@close_forbidden, %{type: "auth.failed"}, state)
 
   defp subscribe_to_topic(state, topic) do
     if MapSet.member?(state.topics, topic) do
@@ -168,4 +221,14 @@ defmodule RealtimeWeb.ClientSocket do
   end
 
   defp reply(payload, state), do: {:reply, :ok, {:text, Jason.encode!(payload)}, state}
+
+  defp push(payload, state) do
+    personal =
+      ConversationEventRouter.personalize(payload, state.principal && state.principal.account_id)
+
+    {:push, {:text, Jason.encode!(personal)}, state}
+  end
+
+  defp close(code, payload, state),
+    do: {:stop, :normal, code, [{:text, Jason.encode!(payload)}], state}
 end

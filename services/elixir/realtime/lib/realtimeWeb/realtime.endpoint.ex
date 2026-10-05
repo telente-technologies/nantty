@@ -5,7 +5,7 @@ defmodule RealtimeWeb.Endpoint do
     websocket: [
       path: "",
       timeout: 60_000,
-      max_frame_size: 64_000,
+      max_frame_size: 16_384,
       check_origin: {RealtimeWeb.OriginPolicy, :allowed_origin?, []}
     ],
     longpoll: false
