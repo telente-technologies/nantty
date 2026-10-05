@@ -1,4 +1,4 @@
-h1:uQ+PSTVbIxddT6mZckZXPs3g7yGN5Mrda9ILjLSAFpM=
+h1:UmLIO9x785TTTO06mMiIUECJd2RY2Nqi/H7TShsFL2g=
 20261003101347_create_users_core_tables.up.sql h1:dNCI103B0TCx9zazGKCl3Ln/N+7bPYPmbcR+7djUkCU=
 20261003101400_grant_read_access_to_other_services.up.sql h1:ZvBT+vvQCm5NqTGPiEhOB1osuqSwgQFgMAX7+BBdFH8=
 20261003101713_add_privacy_geo_and_address_tables.up.sql h1:yqWZ0zBt6NwAbqkN3ptPBIu0qjIFptu66IDacpojKwU=
@@ -19,3 +19,4 @@ h1:uQ+PSTVbIxddT6mZckZXPs3g7yGN5Mrda9ILjLSAFpM=
 20261004200100_grant_read_access_to_verification_eligibility.up.sql h1:iWBjumVFTUa7ZooZfb2fri9tQdyKo+0dFFQFX0oFBGU=
 20261004210000_restrict_shipping_address_reads_to_orders.up.sql h1:81Qiq8abKR5R+rQT+RvKLRiKY90+6wkFb0DgBTmIzOc=
 20261005022135_add_profile_theme.up.sql h1:8bIIlFd+GU54D63Ezc6xV3FBaX8ng/jU1RK3wseUIDQ=
+20261005160807_add_topics_settings_and_username_staff_fields.up.sql h1:ossKzd4DYeHc7UZfRnvFSMr81m53vYsFGAeFfXWEnQI=

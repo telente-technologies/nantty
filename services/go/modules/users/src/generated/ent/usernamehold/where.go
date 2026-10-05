@@ -85,6 +85,11 @@ func CreatedBy(v string) predicate.UsernameHold {
 	return predicate.UsernameHold(sql.FieldEQ(FieldCreatedBy, v))
 }
 
+// CreatedByName applies equality check predicate on the "created_by_name" field. It's identical to CreatedByNameEQ.
+func CreatedByName(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldEQ(FieldCreatedByName, v))
+}
+
 // ExpiresAt applies equality check predicate on the "expires_at" field. It's identical to ExpiresAtEQ.
 func ExpiresAt(v time.Time) predicate.UsernameHold {
 	return predicate.UsernameHold(sql.FieldEQ(FieldExpiresAt, v))
@@ -458,6 +463,71 @@ func CreatedByEqualFold(v string) predicate.UsernameHold {
 // CreatedByContainsFold applies the ContainsFold predicate on the "created_by" field.
 func CreatedByContainsFold(v string) predicate.UsernameHold {
 	return predicate.UsernameHold(sql.FieldContainsFold(FieldCreatedBy, v))
+}
+
+// CreatedByNameEQ applies the EQ predicate on the "created_by_name" field.
+func CreatedByNameEQ(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldEQ(FieldCreatedByName, v))
+}
+
+// CreatedByNameNEQ applies the NEQ predicate on the "created_by_name" field.
+func CreatedByNameNEQ(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldNEQ(FieldCreatedByName, v))
+}
+
+// CreatedByNameIn applies the In predicate on the "created_by_name" field.
+func CreatedByNameIn(vs ...string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldIn(FieldCreatedByName, vs...))
+}
+
+// CreatedByNameNotIn applies the NotIn predicate on the "created_by_name" field.
+func CreatedByNameNotIn(vs ...string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldNotIn(FieldCreatedByName, vs...))
+}
+
+// CreatedByNameGT applies the GT predicate on the "created_by_name" field.
+func CreatedByNameGT(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldGT(FieldCreatedByName, v))
+}
+
+// CreatedByNameGTE applies the GTE predicate on the "created_by_name" field.
+func CreatedByNameGTE(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldGTE(FieldCreatedByName, v))
+}
+
+// CreatedByNameLT applies the LT predicate on the "created_by_name" field.
+func CreatedByNameLT(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldLT(FieldCreatedByName, v))
+}
+
+// CreatedByNameLTE applies the LTE predicate on the "created_by_name" field.
+func CreatedByNameLTE(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldLTE(FieldCreatedByName, v))
+}
+
+// CreatedByNameContains applies the Contains predicate on the "created_by_name" field.
+func CreatedByNameContains(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldContains(FieldCreatedByName, v))
+}
+
+// CreatedByNameHasPrefix applies the HasPrefix predicate on the "created_by_name" field.
+func CreatedByNameHasPrefix(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldHasPrefix(FieldCreatedByName, v))
+}
+
+// CreatedByNameHasSuffix applies the HasSuffix predicate on the "created_by_name" field.
+func CreatedByNameHasSuffix(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldHasSuffix(FieldCreatedByName, v))
+}
+
+// CreatedByNameEqualFold applies the EqualFold predicate on the "created_by_name" field.
+func CreatedByNameEqualFold(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldEqualFold(FieldCreatedByName, v))
+}
+
+// CreatedByNameContainsFold applies the ContainsFold predicate on the "created_by_name" field.
+func CreatedByNameContainsFold(v string) predicate.UsernameHold {
+	return predicate.UsernameHold(sql.FieldContainsFold(FieldCreatedByName, v))
 }
 
 // ExpiresAtEQ applies the EQ predicate on the "expires_at" field.

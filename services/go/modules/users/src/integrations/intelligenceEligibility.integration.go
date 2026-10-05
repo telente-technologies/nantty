@@ -37,7 +37,6 @@ type EligibilitySignals struct {
 	FraudScore                int                   `json:"fraudScore"`
 	RiskScore                 int                   `json:"riskScore"`
 	BorderlineContent         bool                  `json:"borderlineContent"`
-	PhoneVerified             bool                  `json:"phoneVerified"`
 	EmailVerified             bool                  `json:"emailVerified"`
 	AccountRestricted         bool                  `json:"accountRestricted"`
 	CompletedOrders           int                   `json:"completedOrders"`

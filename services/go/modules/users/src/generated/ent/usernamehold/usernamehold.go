@@ -29,6 +29,8 @@ const (
 	FieldNote = "note"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
+	// FieldCreatedByName holds the string denoting the created_by_name field in the database.
+	FieldCreatedByName = "created_by_name"
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
 	FieldExpiresAt = "expires_at"
 	// Table holds the table name of the usernamehold in the database.
@@ -45,6 +47,7 @@ var Columns = []string{
 	FieldReason,
 	FieldNote,
 	FieldCreatedBy,
+	FieldCreatedByName,
 	FieldExpiresAt,
 }
 
@@ -75,6 +78,10 @@ var (
 	DefaultCreatedBy string
 	// CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
 	CreatedByValidator func(string) error
+	// DefaultCreatedByName holds the default value on creation for the "created_by_name" field.
+	DefaultCreatedByName string
+	// CreatedByNameValidator is a validator for the "created_by_name" field. It is called by the builders before save.
+	CreatedByNameValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -144,6 +151,11 @@ func ByNote(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedBy orders the results by the created_by field.
 func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByCreatedByName orders the results by the created_by_name field.
+func ByCreatedByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedByName, opts...).ToFunc()
 }
 
 // ByExpiresAt orders the results by the expires_at field.
