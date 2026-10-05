@@ -68,7 +68,7 @@ export interface SavedCardDisplay {
 }
 
 export interface SavedCardOffer extends SavedCardDisplay {
-  readonly authorizationCode: string;
+  readonly savedCardId: string;
 }
 
 export interface PaymentVerification {

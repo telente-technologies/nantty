@@ -169,6 +169,7 @@ export interface Post {
   readonly quotes?: number;
   readonly replyPolicy?: ReplyPolicy;
   readonly viewerCanReply?: boolean;
+  readonly viewerCanDownload?: boolean;
   readonly replyRestriction?: ReplyRestriction | null;
   readonly sensitive?: SensitiveContent | null;
   readonly isAiGenerated?: boolean;
@@ -277,35 +278,6 @@ export interface AppNotification {
   readonly createdAt: ISODate;
   readonly read: boolean;
   readonly actor: UserSummary | null;
-}
-
-export interface WalletSummary {
-  readonly available: Money;
-  readonly pending: Money;
-}
-
-export interface WalletTransaction {
-  readonly id: ID;
-  readonly kind: "credit" | "debit";
-  readonly amount: Money;
-  readonly description: string;
-  readonly createdAt: ISODate;
-  readonly status: "pending" | "completed" | "failed";
-}
-
-export interface PayoutAccount {
-  readonly id: ID;
-  readonly bankName: string;
-  readonly accountNumberMasked: string;
-  readonly accountName: string;
-}
-
-export interface SellerDashboard {
-  readonly totalSales: Money;
-  readonly orders: number;
-  readonly series: readonly { readonly label: string; readonly value: number }[];
-  readonly recentOrders: readonly Order[];
-  readonly inventory: readonly ProductSummary[];
 }
 
 export interface Page<T> {

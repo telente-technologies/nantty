@@ -7,6 +7,8 @@ export type ConnectionTab = "followers" | "following" | "shopped" | "suggested" 
 export interface ConnectionEntry extends UserSummary {
   readonly isFollowing: boolean;
   readonly followState?: FollowState;
+  readonly followsYou?: boolean;
+  readonly mutualConnections?: number;
 }
 
 export interface AccountSettings {
