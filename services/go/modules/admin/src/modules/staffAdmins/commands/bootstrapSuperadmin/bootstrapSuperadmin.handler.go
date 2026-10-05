@@ -23,7 +23,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (string, er
 	if !valid {
 		return "", adminerrors.Unprocessable("Enter a valid email address.")
 	}
-	if err := secrettokens.AssertStaffPasswordMeetsPolicy(command.Password); err != nil {
+	if err := secrettokens.AssertStaffPasswordMeetsPolicy(command.Password, email, command.DisplayName); err != nil {
 		return "", err
 	}
 	passwordHash, err := handler.Container.Passwords.HashPasswordWithArgon2id(command.Password)

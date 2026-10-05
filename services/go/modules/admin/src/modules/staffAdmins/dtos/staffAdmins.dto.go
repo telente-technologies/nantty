@@ -30,3 +30,8 @@ type UpdateStaffSettingsRequest struct {
 	RequireSecondSuperadminApproval *bool  `json:"requireSecondSuperadminApproval"`
 	Reason                          string `json:"reason"`
 }
+
+type UpdateAdminRequest struct {
+	IpAllowList *[]string `json:"ipAllowList"`
+	Reason      string    `json:"reason"`
+}

@@ -11,6 +11,7 @@ import (
 
 	"zudomart/modules/admin/src/container"
 	approvesuperadmin "zudomart/modules/admin/src/modules/staffAdmins/commands/approveSuperadmin"
+	changeadminipallowlist "zudomart/modules/admin/src/modules/staffAdmins/commands/changeAdminIpAllowList"
 	changeadminpermissions "zudomart/modules/admin/src/modules/staffAdmins/commands/changeAdminPermissions"
 	createadmin "zudomart/modules/admin/src/modules/staffAdmins/commands/createAdmin"
 	createstaffrole "zudomart/modules/admin/src/modules/staffAdmins/commands/createStaffRole"
@@ -78,6 +79,19 @@ func (controller StaffAdminsController) ChangePermissions(writer http.ResponseWr
 	actor, _ := staffauth.StaffFromContext(request.Context())
 	result, err := changeadminpermissions.Handler{Container: controller.Container}.Execute(request.Context(), changeadminpermissions.Command{
 		Actor: actor, TargetId: request.PathValue("staffId"), Role: body.Role, RoleIds: body.RoleIds, Permissions: body.Permissions, Reason: body.Reason,
+	})
+	controller.respond(writer, request, http.StatusOK, map[string]any{"admin": result}, err)
+}
+
+func (controller StaffAdminsController) Update(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateUpdateAdminRequest)
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	actor, _ := staffauth.StaffFromContext(request.Context())
+	result, err := changeadminipallowlist.Handler{Container: controller.Container}.Execute(request.Context(), changeadminipallowlist.Command{
+		Actor: actor, TargetId: request.PathValue("staffId"), IpAllowList: *body.IpAllowList, Reason: body.Reason,
 	})
 	controller.respond(writer, request, http.StatusOK, map[string]any{"admin": result}, err)
 }
