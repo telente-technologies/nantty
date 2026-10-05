@@ -75,6 +75,11 @@ func Phone(v string) predicate.ShippingAddress {
 	return predicate.ShippingAddress(sql.FieldEQ(FieldPhone, v))
 }
 
+// PhoneSealed applies equality check predicate on the "phone_sealed" field. It's identical to PhoneSealedEQ.
+func PhoneSealed(v []byte) predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldEQ(FieldPhoneSealed, v))
+}
+
 // Line1 applies equality check predicate on the "line1" field. It's identical to Line1EQ.
 func Line1(v string) predicate.ShippingAddress {
 	return predicate.ShippingAddress(sql.FieldEQ(FieldLine1, v))
@@ -408,6 +413,56 @@ func PhoneEqualFold(v string) predicate.ShippingAddress {
 // PhoneContainsFold applies the ContainsFold predicate on the "phone" field.
 func PhoneContainsFold(v string) predicate.ShippingAddress {
 	return predicate.ShippingAddress(sql.FieldContainsFold(FieldPhone, v))
+}
+
+// PhoneSealedEQ applies the EQ predicate on the "phone_sealed" field.
+func PhoneSealedEQ(v []byte) predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldEQ(FieldPhoneSealed, v))
+}
+
+// PhoneSealedNEQ applies the NEQ predicate on the "phone_sealed" field.
+func PhoneSealedNEQ(v []byte) predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldNEQ(FieldPhoneSealed, v))
+}
+
+// PhoneSealedIn applies the In predicate on the "phone_sealed" field.
+func PhoneSealedIn(vs ...[]byte) predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldIn(FieldPhoneSealed, vs...))
+}
+
+// PhoneSealedNotIn applies the NotIn predicate on the "phone_sealed" field.
+func PhoneSealedNotIn(vs ...[]byte) predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldNotIn(FieldPhoneSealed, vs...))
+}
+
+// PhoneSealedGT applies the GT predicate on the "phone_sealed" field.
+func PhoneSealedGT(v []byte) predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldGT(FieldPhoneSealed, v))
+}
+
+// PhoneSealedGTE applies the GTE predicate on the "phone_sealed" field.
+func PhoneSealedGTE(v []byte) predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldGTE(FieldPhoneSealed, v))
+}
+
+// PhoneSealedLT applies the LT predicate on the "phone_sealed" field.
+func PhoneSealedLT(v []byte) predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldLT(FieldPhoneSealed, v))
+}
+
+// PhoneSealedLTE applies the LTE predicate on the "phone_sealed" field.
+func PhoneSealedLTE(v []byte) predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldLTE(FieldPhoneSealed, v))
+}
+
+// PhoneSealedIsNil applies the IsNil predicate on the "phone_sealed" field.
+func PhoneSealedIsNil() predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldIsNull(FieldPhoneSealed))
+}
+
+// PhoneSealedNotNil applies the NotNil predicate on the "phone_sealed" field.
+func PhoneSealedNotNil() predicate.ShippingAddress {
+	return predicate.ShippingAddress(sql.FieldNotNull(FieldPhoneSealed))
 }
 
 // Line1EQ applies the EQ predicate on the "line1" field.

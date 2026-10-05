@@ -3,6 +3,7 @@
 package topic
 
 import (
+	"time"
 	"zudomart/modules/users/src/generated/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
@@ -76,6 +77,16 @@ func Position(v int) predicate.Topic {
 // Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
 func Active(v bool) predicate.Topic {
 	return predicate.Topic(sql.FieldEQ(FieldActive, v))
+}
+
+// IsTrending applies equality check predicate on the "is_trending" field. It's identical to IsTrendingEQ.
+func IsTrending(v bool) predicate.Topic {
+	return predicate.Topic(sql.FieldEQ(FieldIsTrending, v))
+}
+
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Topic {
+	return predicate.Topic(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -191,6 +202,56 @@ func ActiveEQ(v bool) predicate.Topic {
 // ActiveNEQ applies the NEQ predicate on the "active" field.
 func ActiveNEQ(v bool) predicate.Topic {
 	return predicate.Topic(sql.FieldNEQ(FieldActive, v))
+}
+
+// IsTrendingEQ applies the EQ predicate on the "is_trending" field.
+func IsTrendingEQ(v bool) predicate.Topic {
+	return predicate.Topic(sql.FieldEQ(FieldIsTrending, v))
+}
+
+// IsTrendingNEQ applies the NEQ predicate on the "is_trending" field.
+func IsTrendingNEQ(v bool) predicate.Topic {
+	return predicate.Topic(sql.FieldNEQ(FieldIsTrending, v))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Topic {
+	return predicate.Topic(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Topic {
+	return predicate.Topic(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Topic {
+	return predicate.Topic(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Topic {
+	return predicate.Topic(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Topic {
+	return predicate.Topic(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Topic {
+	return predicate.Topic(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Topic {
+	return predicate.Topic(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Topic {
+	return predicate.Topic(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
 // And groups predicates with the AND operator between them.

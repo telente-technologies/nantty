@@ -24,6 +24,8 @@ const (
 	FieldRecipientName = "recipient_name"
 	// FieldPhone holds the string denoting the phone field in the database.
 	FieldPhone = "phone"
+	// FieldPhoneSealed holds the string denoting the phone_sealed field in the database.
+	FieldPhoneSealed = "phone_sealed"
 	// FieldLine1 holds the string denoting the line1 field in the database.
 	FieldLine1 = "line1"
 	// FieldLine2 holds the string denoting the line2 field in the database.
@@ -60,6 +62,7 @@ var Columns = []string{
 	FieldLabel,
 	FieldRecipientName,
 	FieldPhone,
+	FieldPhoneSealed,
 	FieldLine1,
 	FieldLine2,
 	FieldPostalCode,
@@ -93,6 +96,8 @@ var (
 	LabelValidator func(string) error
 	// RecipientNameValidator is a validator for the "recipient_name" field. It is called by the builders before save.
 	RecipientNameValidator func(string) error
+	// DefaultPhone holds the default value on creation for the "phone" field.
+	DefaultPhone string
 	// PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
 	PhoneValidator func(string) error
 	// Line1Validator is a validator for the "line1" field. It is called by the builders before save.

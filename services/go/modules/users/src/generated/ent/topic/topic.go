@@ -3,6 +3,8 @@
 package topic
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -17,6 +19,10 @@ const (
 	FieldPosition = "position"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
+	// FieldIsTrending holds the string denoting the is_trending field in the database.
+	FieldIsTrending = "is_trending"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the topic in the database.
 	Table = "topics"
 )
@@ -27,6 +33,8 @@ var Columns = []string{
 	FieldName,
 	FieldPosition,
 	FieldActive,
+	FieldIsTrending,
+	FieldUpdatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -46,6 +54,12 @@ var (
 	DefaultPosition int
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
+	// DefaultIsTrending holds the default value on creation for the "is_trending" field.
+	DefaultIsTrending bool
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -71,4 +85,14 @@ func ByPosition(opts ...sql.OrderTermOption) OrderOption {
 // ByActive orders the results by the active field.
 func ByActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActive, opts...).ToFunc()
+}
+
+// ByIsTrending orders the results by the is_trending field.
+func ByIsTrending(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsTrending, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
