@@ -12,13 +12,14 @@ import { headlinesQuerySchema, postsForYouQuerySchema, trendsQuerySchema, whoToF
 
 export function createExploreController(route: RouteFactory, context: HandlerContext) {
   return {
-    categories: route({ authentication: "optional" }, async () => ({ data: trendCategories.map((id) => ({ id, label: trendCategoryLabels[id] ?? id })) })),
+    categories: route({ authentication: "optional" }, async () => ({ data: trendCategories.map((id) => ({ id, label: trendCategoryLabels[id] ?? id })), nextCursor: null })),
     trends: route({ authentication: "optional", query: trendsQuerySchema }, async ({ principal, query }) =>
       computeTrends(context, { country: await resolveViewerCountry(context, principal?.accountId, query.country), category: query.category ?? null, limit: query.limit ?? 10 })),
     headlines: route({ authentication: "optional", query: headlinesQuerySchema }, async ({ principal, query }) =>
       computeHeadlines(context, { country: await resolveViewerCountry(context, principal?.accountId, query.country), category: query.category ?? null, limit: query.limit ?? 6 })),
     whoToFollow: route({ authentication: "optional", query: whoToFollowQuerySchema }, async ({ principal, query }) => ({
       data: await suggestAccountsToFollow(context, { viewerId: principal?.accountId, country: await resolveViewerCountry(context, principal?.accountId, query.country), limit: query.limit ?? 5 }),
+      nextCursor: null,
     })),
     postsForYou: route({ authentication: "optional", query: postsForYouQuerySchema }, async ({ principal, query }) => {
       const personalized = principal !== undefined && (await context.directory.hasPersonalizationConsent(principal.accountId));
