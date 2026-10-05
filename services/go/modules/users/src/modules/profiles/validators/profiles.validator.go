@@ -26,8 +26,16 @@ func ValidateUploadIntentRequest(request dtos.UploadIntentRequest) error {
 	return collector.Result()
 }
 
-func ValidateCountryPreferenceRequest(request dtos.CountryPreferenceRequest) error {
+func ValidatePreferencesRequest(request dtos.PreferencesRequest) error {
 	collector := &utils.IssueCollector{}
-	collector.RequireLength("countryCode", request.CountryCode, 2, 2)
+	if request.CountryCode == nil && request.Theme == nil {
+		collector.Add("theme", "Send a countryCode or a theme to change.")
+	}
+	if request.CountryCode != nil {
+		collector.RequireLength("countryCode", *request.CountryCode, 2, 2)
+	}
+	if request.Theme != nil {
+		collector.RequireOneOf("theme", *request.Theme, []string{"system", "light", "dark"})
+	}
 	return collector.Result()
 }

@@ -9,17 +9,13 @@ import (
 	"zudomart/modules/users/src/container"
 	createlegalversion "zudomart/modules/users/src/modules/legal/commands/createLegalVersion"
 	publishlegalversion "zudomart/modules/users/src/modules/legal/commands/publishLegalVersion"
-	queuelegalnotice "zudomart/modules/users/src/modules/legal/commands/queueLegalNotice"
 	recordnoticeprogress "zudomart/modules/users/src/modules/legal/commands/recordNoticeProgress"
 	rollbacklegaldocument "zudomart/modules/users/src/modules/legal/commands/rollbackLegalDocument"
-	testsendnoticedraft "zudomart/modules/users/src/modules/legal/commands/testSendNoticeDraft"
 	transitionlegalversion "zudomart/modules/users/src/modules/legal/commands/transitionLegalVersion"
 	updatelegalversion "zudomart/modules/users/src/modules/legal/commands/updateLegalVersion"
-	updatenoticedraft "zudomart/modules/users/src/modules/legal/commands/updateNoticeDraft"
 	"zudomart/modules/users/src/modules/legal/dtos"
 	getlegaldocument "zudomart/modules/users/src/modules/legal/queries/getLegalDocument"
 	getlegalversion "zudomart/modules/users/src/modules/legal/queries/getLegalVersion"
-	getnotice "zudomart/modules/users/src/modules/legal/queries/getNotice"
 	listcurrentpolicyversions "zudomart/modules/users/src/modules/legal/queries/listCurrentPolicyVersions"
 	listlegaldocuments "zudomart/modules/users/src/modules/legal/queries/listLegalDocuments"
 	"zudomart/modules/users/src/modules/legal/services"
@@ -126,53 +122,6 @@ func (controller LegalController) GetVersion(writer http.ResponseWriter, request
 func (controller LegalController) GetAcceptance(writer http.ResponseWriter, request *http.Request) {
 	result, err := getlegalversion.Handler{Container: controller.Container}.Acceptance(request.Context(), request.PathValue("versionId"))
 	controller.respond(writer, request, http.StatusOK, result, err)
-}
-
-func (controller LegalController) GetNoticeDraft(writer http.ResponseWriter, request *http.Request) {
-	result, err := getnotice.Handler{Container: controller.Container}.Draft(request.Context(), request.PathValue("versionId"))
-	controller.respond(writer, request, http.StatusOK, result, err)
-}
-
-func (controller LegalController) UpdateNoticeDraft(writer http.ResponseWriter, request *http.Request) {
-	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.NoticeDraftRequest])
-	if err != nil {
-		controller.respond(writer, request, 0, nil, err)
-		return
-	}
-	result, err := updatenoticedraft.Handler{Container: controller.Container}.Execute(request.Context(), updatenoticedraft.Command{
-		Actor: utils.StaffActorFromRequest(request), VersionId: request.PathValue("versionId"), Subject: body.Subject, SummaryText: body.SummaryText, WhatChanged: body.WhatChanged, ReacceptNote: body.ReacceptNote,
-	})
-	controller.respond(writer, request, http.StatusOK, result, err)
-}
-
-func (controller LegalController) TestSend(writer http.ResponseWriter, request *http.Request) {
-	result, err := testsendnoticedraft.Handler{Container: controller.Container}.Execute(request.Context(), testsendnoticedraft.Command{Actor: utils.StaffActorFromRequest(request), VersionId: request.PathValue("versionId")})
-	controller.respond(writer, request, http.StatusOK, result, err)
-}
-
-func (controller LegalController) NoticePreview(writer http.ResponseWriter, request *http.Request) {
-	result, err := getnotice.Handler{Container: controller.Container}.Preview(request.Context(), request.PathValue("versionId"))
-	controller.respond(writer, request, http.StatusOK, result, err)
-}
-
-func (controller LegalController) ListNotices(writer http.ResponseWriter, request *http.Request) {
-	result, err := getnotice.Handler{Container: controller.Container}.List(request.Context())
-	controller.respond(writer, request, http.StatusOK, map[string]any{"items": result, "data": result, "nextCursor": nil}, err)
-}
-
-func (controller LegalController) GetNotice(writer http.ResponseWriter, request *http.Request) {
-	result, err := getnotice.Handler{Container: controller.Container}.Get(request.Context(), request.PathValue("noticeId"))
-	controller.respond(writer, request, http.StatusOK, result, err)
-}
-
-func (controller LegalController) QueueNotice(writer http.ResponseWriter, request *http.Request) {
-	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.QueueNoticeRequest])
-	if err != nil {
-		controller.respond(writer, request, 0, nil, err)
-		return
-	}
-	result, err := queuelegalnotice.Handler{Container: controller.Container}.Execute(request.Context(), queuelegalnotice.Command{Actor: utils.StaffActorFromRequest(request), VersionId: body.VersionId, Reason: body.Reason})
-	controller.respond(writer, request, http.StatusCreated, result, err)
 }
 
 func (controller LegalController) CurrentPolicyVersions(writer http.ResponseWriter, request *http.Request) {

@@ -19,6 +19,7 @@ type UploadIntentRequest struct {
 	SizeBytes   int64  `json:"sizeBytes"`
 }
 
-type CountryPreferenceRequest struct {
-	CountryCode string `json:"countryCode"`
+type PreferencesRequest struct {
+	CountryCode *string `json:"countryCode"`
+	Theme       *string `json:"theme"`
 }

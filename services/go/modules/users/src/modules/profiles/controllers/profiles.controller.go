@@ -67,9 +67,9 @@ func (controller ProfilesController) CreateUploadIntent(writer http.ResponseWrit
 }
 
 func (controller ProfilesController) UpdateCountryPreference(writer http.ResponseWriter, request *http.Request) {
-	body, err := utils.DecodeAndValidate[dtos.CountryPreferenceRequest](writer, request, validators.ValidateCountryPreferenceRequest)
+	body, err := utils.DecodeAndValidate[dtos.PreferencesRequest](writer, request, validators.ValidatePreferencesRequest)
 	if err == nil {
-		err = updatecountrypreference.Handler{Container: controller.Container}.Execute(request.Context(), updatecountrypreference.Command{AccountId: utils.AccountIdFromRequest(request), CountryCode: body.CountryCode})
+		err = updatecountrypreference.Handler{Container: controller.Container}.Execute(request.Context(), updatecountrypreference.Command{AccountId: utils.AccountIdFromRequest(request), CountryCode: body.CountryCode, Theme: body.Theme})
 	}
 	controller.respondNoContent(writer, request, err)
 }

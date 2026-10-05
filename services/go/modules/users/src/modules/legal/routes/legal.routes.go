@@ -14,7 +14,6 @@ const (
 	view    = "legal.documents.view"
 	edit    = "legal.documents.edit"
 	publish = "legal.documents.publish"
-	send    = "legal.notices.send"
 )
 
 func MountLegalRoutes(mux *http.ServeMux, container *container.Container) {
@@ -33,13 +32,6 @@ func MountLegalRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("POST /api/v1/admin/legal/versions/{versionId}/return", allowed(false, publish)(controller.Return()))
 	mux.Handle("POST /api/v1/admin/legal/versions/{versionId}/publish", allowed(true, publish)(http.HandlerFunc(controller.Publish)))
 	mux.Handle("GET /api/v1/admin/legal/versions/{versionId}/acceptance", allowed(false, view)(http.HandlerFunc(controller.GetAcceptance)))
-	mux.Handle("GET /api/v1/admin/legal/versions/{versionId}/notice-draft", allowed(false, view)(http.HandlerFunc(controller.GetNoticeDraft)))
-	mux.Handle("PUT /api/v1/admin/legal/versions/{versionId}/notice-draft", allowed(false, edit, send)(http.HandlerFunc(controller.UpdateNoticeDraft)))
-	mux.Handle("POST /api/v1/admin/legal/versions/{versionId}/notice-draft/test-send", allowed(false, send, edit)(http.HandlerFunc(controller.TestSend)))
-	mux.Handle("GET /api/v1/admin/legal/versions/{versionId}/notice-preview", allowed(false, view)(http.HandlerFunc(controller.NoticePreview)))
-	mux.Handle("GET /api/v1/admin/legal/notices", allowed(false, view)(http.HandlerFunc(controller.ListNotices)))
-	mux.Handle("GET /api/v1/admin/legal/notices/{noticeId}", allowed(false, view)(http.HandlerFunc(controller.GetNotice)))
-	mux.Handle("POST /api/v1/admin/legal/notices", allowed(true, send)(http.HandlerFunc(controller.QueueNotice)))
 	mux.HandleFunc("GET /api/v1/legal/policy-versions/current", controller.CurrentPolicyVersions)
 	mux.Handle("GET /api/v1/users/me/policy-acceptances", jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)(http.HandlerFunc(controller.MyAcceptances)))
 	mux.HandleFunc("GET /api/v1/internal/accounts/{accountId}/policy-gate", controller.PolicyGate)

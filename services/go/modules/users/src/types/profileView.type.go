@@ -38,6 +38,7 @@ type UserView struct {
 	BirthdayToday    bool     `json:"birthdayToday"`
 	AnniversaryToday bool     `json:"anniversaryToday"`
 	EmailVerified    *bool    `json:"emailVerified,omitempty"`
+	Theme            *string  `json:"theme,omitempty"`
 }
 
 type ActingProfileView struct {
@@ -65,6 +66,8 @@ func BuildUserView(row *ent.Profile, summary identityports.AccountSummary, inclu
 	}
 	if includePrivateFields {
 		view.Email, view.Roles = summary.Email, summary.Roles
+		theme := string(row.Theme)
+		view.Theme = &theme
 		verified := summary.EmailVerified
 		view.EmailVerified = &verified
 		if summary.Birthday != nil {
