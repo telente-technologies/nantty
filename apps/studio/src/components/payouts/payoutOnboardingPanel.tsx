@@ -5,13 +5,15 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/feedback";
+import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { payoutOnboardingService } from "@/services/payoutOnboarding.service";
 import { PayoutBankForm } from "./payoutBankForm";
 import { PayoutDocumentStep, PAYOUT_VERIFICATION_CHANNEL } from "./payoutDocumentStep";
 import { PayoutIdentityForm } from "./payoutIdentityForm";
 import { PayoutSyncList, PayoutStatusSummary } from "./payoutStatusSummary";
 import { payoutStateQueryKey } from "./payoutStateQuery.hook";
+
+import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 
 import styles from "./payoutOnboarding.module.css";
 
@@ -42,13 +44,13 @@ export function PayoutOnboardingPanel() {
 
   const state = query.data;
   if (verification === "mock" || verification === "returned") return <p className={`${styles.notice} ${styles.noticeSuccess}`}>Thanks, we've got your documents. You can close this window and go back to Studio.</p>;
-  if (!state) return query.isError ? <p className={`${styles.notice} ${styles.noticeError}`} role="alert">{query.error.message}</p> : <Spinner label="Loading payout setup" />;
+  if (!state) return query.isError ? <ErrorState title="Payout setup didn't load" description={readErrorMessageForDisplay(query.error)} onRetry={() => void query.refetch()} /> : <Skeleton height={180} />;
 
   const showStatus = state.status === "pending_review" || state.status === "verified" || (state.status === "action_needed" && !isEditing);
   if (showStatus) return <PayoutStatusSummary state={state} onFix={() => setIsEditing(true)} onChanged={() => void refresh()} />;
 
   const stepCount = 2 + (state.requiresBusinessStep ? 1 : 0) + (state.requiresDocumentStep ? 1 : 0);
-  const stepNumber = { identity: 1, business: 2, bank: state.requiresBusinessStep ? 3 : 2, document: stepCount }[state.currentStep];
+  const stepNumber = { identity: 1, business: 2, bank: state.requiresBusinessStep ? 3 : 2, document: stepCount, done: stepCount }[state.currentStep];
   return (
     <div className={styles.stack}>
       <PayoutSyncList state={state} />
@@ -61,6 +63,7 @@ export function PayoutOnboardingPanel() {
       {state.currentStep === "identity" ? <PayoutIdentityForm state={state} stepCount={stepCount} onSaved={() => void refresh()} /> : null}
       {state.currentStep === "business" ? <p className={styles.notice}>Add your CAC business details in the Zudomart app or the seller dashboard under Payouts. Your creator payouts follow the same account.</p> : null}
       {state.currentStep === "bank" ? <PayoutBankForm state={state} stepNumber={stepNumber} stepCount={stepCount} onSaved={() => void refresh()} /> : null}
+      {state.currentStep === "done" ? <p className={styles.notice} role="status">Your payout details are saved. We'll let you know if anything else is needed.</p> : null}
       {state.currentStep === "document" ? <PayoutDocumentStep state={state} stepNumber={stepNumber} stepCount={stepCount} onChanged={refresh} /> : null}
     </div>
   );

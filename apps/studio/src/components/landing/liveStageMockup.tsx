@@ -1,7 +1,10 @@
 import Image from "next/image";
 
 import { LandingIcon, type LandingIconName } from "./landingIcons";
-import styles from "./liveStageMockup.module.css";
+import baseStyles from "./liveStageMockup.module.css";
+import partStyles from "./liveStageMockupParts.module.css";
+
+const styles = { ...baseStyles, ...partStyles };
 
 const giftCombos: readonly { sender: string; gift: string; icon: LandingIconName; combo: number }[] = [
   { sender: "Kemi", gift: "Talking Drum", icon: "drum", combo: 12 },

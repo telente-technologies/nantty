@@ -10,7 +10,7 @@
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
   gap: var(--space-3);
   margin: 0;
   padding: 0;
@@ -20,7 +20,7 @@
 .metric {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .metricLabel {
@@ -35,7 +35,7 @@
 
 .columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: var(--space-5);
 }
 

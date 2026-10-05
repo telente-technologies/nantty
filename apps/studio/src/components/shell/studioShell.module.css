@@ -123,12 +123,38 @@
 }
 
 .navLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-sm);
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--ink-muted);
   text-decoration: none;
 }
 
-.navLink:hover {
+.navLink:hover,
+.navLink[aria-current="page"] {
   color: var(--ink-strong);
+}
+
+.navLink[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-color: var(--color-brand);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+@media (max-width: 640px) {
+  .topBar {
+    flex-wrap: wrap;
+    row-gap: var(--space-1);
+  }
+
+  .navLinks {
+    order: 3;
+    width: 100%;
+    margin: 0;
+    padding-block: var(--space-1);
+    overflow-x: auto;
+  }
 }
