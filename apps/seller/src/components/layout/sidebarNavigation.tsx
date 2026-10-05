@@ -12,8 +12,8 @@ import type { NavigationGroup } from "@/config/navigation.config";
 
 import styles from "./sidebarNavigation.module.css";
 
-export function DashboardWordmark({ height = 22 }: { readonly height?: number }) {
-  return <ZudomartWordmark productLabel="Dashboard" tone="onDark" height={height} />;
+export function DashboardWordmark({ height = 22, withSymbol = true }: { readonly height?: number; readonly withSymbol?: boolean }) {
+  return <ZudomartWordmark productLabel="Dashboard" tone="onDark" height={height} withSymbol={withSymbol} />;
 }
 
 export function SidebarNavigation({ groups, isOpenOnSmallScreens, onNavigate }: { readonly groups: NavigationGroup[]; readonly isOpenOnSmallScreens: boolean; readonly onNavigate: () => void }) {

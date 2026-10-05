@@ -72,7 +72,7 @@
 }
 
 .externalHint {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-faint);
 }
 

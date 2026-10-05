@@ -5,7 +5,7 @@
   flex-direction: column;
   width: var(--sidebar-width);
   height: 100dvh;
-  padding: 14px 12px;
+  padding: 14px var(--space-3);
   background: var(--rail-surface);
   color: var(--rail-ink);
   overflow-y: auto;
@@ -14,7 +14,7 @@
 
 .brandLink {
   display: block;
-  padding: 6px 8px 18px;
+  padding: 6px var(--space-2) 18px;
   color: var(--rail-ink-strong);
 }
 

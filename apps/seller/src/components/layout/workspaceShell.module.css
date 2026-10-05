@@ -15,7 +15,7 @@
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 24px clamp(16px, 3vw, 32px) 48px;
+  padding: var(--space-6) clamp(var(--space-4), 3vw, var(--space-7)) 48px;
   outline: none;
 }
 
