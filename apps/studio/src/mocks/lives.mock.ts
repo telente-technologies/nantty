@@ -25,8 +25,8 @@ const LIVE_CATEGORY_VALUES: readonly LiveCategory[] = ["justChatting", "gaming",
 const EMPTY_EARNINGS: LiveEarnings = { coins: 0, giftCount: 0, newSubscribers: 0, topGifters: [], battles: [] };
 
 const DEFAULT_LAYERS: readonly OverlayLayer[] = [
-  { id: "layer_lower_third", type: "text", name: "Lower third", x: 64, y: 900, width: 720, height: 96, zIndex: 10, opacity: 0.95, text: "Temitope Adeyemi", fontSize: 44, color: "#ffffff", background: "#0b1752", radius: 8 },
-  { id: "layer_logo_badge", type: "shape", name: "Logo plate", x: 1690, y: 48, width: 180, height: 180, zIndex: 20, opacity: 0.9, background: "#2043f5", radius: 90 },
+  { id: "layer_lower_third", type: "text", name: "Lower third", x: 64, y: 900, width: 720, height: 96, zIndex: 10, opacity: 0.95, text: "Temitope Adeyemi", fontSize: 44, color: "#ffffff", background: "#181263", radius: 8 },
+  { id: "layer_logo_badge", type: "shape", name: "Logo plate", x: 1690, y: 48, width: 180, height: 180, zIndex: 20, opacity: 0.9, background: "#3a2bff", radius: 90 },
 ];
 
 const buildScene = (liveId: ID): OverlayScene => ({

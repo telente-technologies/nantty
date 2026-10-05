@@ -12,11 +12,10 @@ interface RecordedBannerConsent {
 let latestBannerConsent: RecordedBannerConsent | null = null;
 
 export const consentsMocks: MockRoute[] = [
-  createMockRoute("POST", "/api/v1/consents", ({ body }) => {
-    const { policyVersion, decidedAt, categories, source } = (body ?? {}) as Partial<RecordedBannerConsent>;
-    if (!policyVersion || !decidedAt || !categories) throw new ApiError(422, "policyVersion, decidedAt and categories are required");
-    latestBannerConsent = { policyVersion, decidedAt, categories, source: source ?? "web_banner" };
-    return latestBannerConsent;
+  createMockRoute("PUT", "/api/v1/users/me/consents", ({ body }) => {
+    const { policyVersion, consents } = (body ?? {}) as { policyVersion?: string; consents?: Record<string, boolean> };
+    if (!policyVersion || !consents) throw new ApiError(422, "policyVersion and consents are required");
+    latestBannerConsent = { policyVersion, decidedAt: new Date().toISOString(), categories: consents, source: "web_banner" };
+    return { data: Object.entries(consents).map(([consentType, granted]) => ({ consentType, status: granted ? "granted" : "withdrawn", policyVersion, decidedAt: latestBannerConsent?.decidedAt ?? null })), nextCursor: null, policyVersion, needsRenewal: false };
   }),
-  createMockRoute("GET", "/api/v1/consents", () => latestBannerConsent ?? { policyVersion: null, decidedAt: null, categories: {}, source: null }),
 ];

@@ -77,7 +77,7 @@ export async function sendRequestToStudioServer<Payload>(apiPath: string, option
 
   if (response.status === 401) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    if (errorBody?.code === "SESSION_EXPIRED" || errorBody?.code === "UNAUTHENTICATED") redirectToLoginAfterSessionEnded();
+    if (errorBody?.code === "SESSION_EXPIRED" || errorBody?.code === "UNAUTHENTICATED" || errorBody?.code === "UNAUTHORIZED") redirectToLoginAfterSessionEnded();
     throw new StudioRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.");
   }
   if (!response.ok) {
@@ -93,9 +93,14 @@ export function createIdempotencyKey(prefix = "idem"): string {
 }
 
 export function readErrorMessageForDisplay(error: unknown): string {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline. Check your connection and we'll retry when you're back.";
   if (error instanceof StudioRequestError) return error.message;
   if (error instanceof Error && error.name !== "AbortError") return "Something went wrong. Try again.";
   return "Something went wrong. Try again.";
+}
+
+export function isNotFoundError(error: unknown): boolean {
+  return error instanceof StudioRequestError && error.status === 404;
 }
 
 export function isNetworkFailureError(error: unknown): boolean {

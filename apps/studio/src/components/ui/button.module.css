@@ -30,7 +30,7 @@
 
 .md {
   min-height: 42px;
-  padding-inline: 20px;
+  padding-inline: var(--space-5);
   font-size: var(--text-base);
 }
 
