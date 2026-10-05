@@ -1,5 +1,6 @@
 defmodule Realtime.Auth.AccessTokenVerifier do
   alias Realtime.Auth.JwksKeyCache
+  alias Realtime.Auth.RevocationList
 
   @clock_skew_seconds 30
 
@@ -9,14 +10,25 @@ defmodule Realtime.Auth.AccessTokenVerifier do
     with {:ok, key_id} <- read_key_id(token),
          {:ok, jwk} <- JwksKeyCache.find_signing_key_by_id(key_id),
          {true, %JOSE.JWT{fields: claims}, _jws} <- JOSE.JWT.verify_strict(jwk, ["EdDSA"], token),
-         :ok <- validate_standard_claims(claims, config) do
-      {:ok, %{account_id: claims["sub"], session_id: claims["sid"], roles: claims["roles"] || []}}
+         :ok <- validate_standard_claims(claims, config),
+         principal = principal_from_claims(claims),
+         false <- RevocationList.revoked?(principal) do
+      {:ok, principal}
     else
       _ -> {:error, :invalid_access_token}
     end
   end
 
   def verify_access_token_and_extract_principal(_), do: {:error, :invalid_access_token}
+
+  defp principal_from_claims(claims) do
+    %{
+      account_id: claims["sub"],
+      session_id: claims["sid"],
+      roles: claims["roles"] || [],
+      issued_at: if(is_integer(claims["iat"]), do: claims["iat"], else: 0)
+    }
+  end
 
   defp read_key_id(token) do
     with [encoded_header | _] <- String.split(token, "."),

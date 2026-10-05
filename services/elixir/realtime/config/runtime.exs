@@ -24,6 +24,18 @@ if config_env() != :test do
 end
 
 if config_env() != :test do
+  config :realtime, :social_internal,
+    url: System.get_env("SOCIAL_INTERNAL_URL", "http://localhost:8105"),
+    token: System.get_env("SOCIAL_INTERNAL_TOKEN", "")
+
+  config :realtime,
+    max_connections_per_user:
+      String.to_integer(System.get_env("REALTIME_MAX_CONNECTIONS_PER_USER", "5")),
+    client_frames_per_minute:
+      String.to_integer(System.get_env("REALTIME_CLIENT_FRAMES_PER_MINUTE", "120"))
+end
+
+if config_env() != :test do
   local_rabbitmq_url = "amqp://realtime:realtime-local-only@localhost:5672/zudomart"
 
   config :realtime, :amqp,

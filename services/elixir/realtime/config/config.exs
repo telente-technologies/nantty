@@ -12,6 +12,7 @@ config :realtime, :access_token,
   audience: "zudomart-api"
 
 config :realtime, :live_internal, url: "", token: ""
+config :realtime, :social_internal, url: "", token: ""
 
 config :realtime, :allowed_origins, ["http://localhost:3000"]
 
