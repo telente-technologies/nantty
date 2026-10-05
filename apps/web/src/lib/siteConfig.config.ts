@@ -42,6 +42,11 @@ export const businessAppLinks = {
   },
 } as const;
 
+export const webAppLink = {
+  label: "Open the web app",
+  href: readBusinessAppUrl(process.env.NEXT_PUBLIC_WEBAPP_URL, "https://app.zudomart.com", "http://localhost:3500"),
+} as const;
+
 export const emailAddresses = buildZudomartEmailAddresses({
   domain: process.env.NEXT_PUBLIC_MAIL_DOMAIN,
   overrides: { support: process.env.NEXT_PUBLIC_SUPPORT_EMAIL, privacy: process.env.NEXT_PUBLIC_PRIVACY_EMAIL, legal: process.env.NEXT_PUBLIC_LEGAL_EMAIL },
