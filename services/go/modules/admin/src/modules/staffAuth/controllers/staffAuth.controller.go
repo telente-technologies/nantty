@@ -7,6 +7,8 @@ import (
 	adminerrors "zudomart/modules/admin/src/errors"
 	"zudomart/modules/admin/src/middlewares"
 	acceptstaffinvitation "zudomart/modules/admin/src/modules/staffAuth/commands/acceptStaffInvitation"
+	beginpasskeysignin "zudomart/modules/admin/src/modules/staffAuth/commands/beginPasskeySignIn"
+	beginpasskeystepup "zudomart/modules/admin/src/modules/staffAuth/commands/beginPasskeyStepUp"
 	completemfalogin "zudomart/modules/admin/src/modules/staffAuth/commands/completeMfaLogin"
 	confirmtotpenrollment "zudomart/modules/admin/src/modules/staffAuth/commands/confirmTotpEnrollment"
 	grantstepup "zudomart/modules/admin/src/modules/staffAuth/commands/grantStepUp"
@@ -14,6 +16,7 @@ import (
 	logoutstaffsession "zudomart/modules/admin/src/modules/staffAuth/commands/logOutStaffSession"
 	rotatestaffrefreshtoken "zudomart/modules/admin/src/modules/staffAuth/commands/rotateStaffRefreshToken"
 	starttotpenrollment "zudomart/modules/admin/src/modules/staffAuth/commands/startTotpEnrollment"
+	updatestaffpreferences "zudomart/modules/admin/src/modules/staffAuth/commands/updateStaffPreferences"
 	getcurrentstaff "zudomart/modules/admin/src/modules/staffAuth/queries/getCurrentStaff"
 	"zudomart/modules/admin/src/modules/staffAuth/validators"
 	httprequests "zudomart/modules/admin/src/utils/httpRequests"
@@ -67,7 +70,7 @@ func (controller StaffAuthController) StartTotpEnrollment(writer http.ResponseWr
 }
 
 func (controller StaffAuthController) ConfirmTotpEnrollment(writer http.ResponseWriter, request *http.Request) {
-	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateChallengeCodeRequest)
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidateEnrollmentConfirmRequest)
 	if err != nil || controller.refuseWhenRateLimited(writer, request) {
 		if err != nil {
 			controller.fail(writer, request, err)
@@ -86,7 +89,9 @@ func (controller StaffAuthController) VerifyMfa(writer http.ResponseWriter, requ
 		}
 		return
 	}
-	result, err := completemfalogin.Handler{Container: controller.Container}.Execute(request.Context(), completemfalogin.Command{ChallengeToken: body.ChallengeToken, Code: body.Code})
+	result, err := completemfalogin.Handler{Container: controller.Container}.Execute(request.Context(), completemfalogin.Command{
+		ChallengeToken: body.ChallengeToken, Method: validators.ResolveSecondFactorMethod(body.Method, body.Code), Code: body.Code, Credential: body.Credential,
+	})
 	controller.respond(writer, request, http.StatusOK, result, err)
 }
 
@@ -135,8 +140,42 @@ func (controller StaffAuthController) StepUp(writer http.ResponseWriter, request
 		}
 		return
 	}
-	result, err := grantstepup.Handler{Container: controller.Container}.Execute(request.Context(), grantstepup.Command{StaffId: staff.Id, SessionId: staff.SessionId, Code: body.Code})
+	result, err := grantstepup.Handler{Container: controller.Container}.Execute(request.Context(), grantstepup.Command{
+		StaffId: staff.Id, SessionId: staff.SessionId, Method: validators.ResolveSecondFactorMethod(body.Method, body.Code), Code: body.Code, Credential: body.Credential,
+	})
 	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) PasskeySignInOptions(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidatePasskeyOptionsRequest)
+	if err != nil || controller.refuseWhenRateLimited(writer, request) {
+		if err != nil {
+			controller.fail(writer, request, err)
+		}
+		return
+	}
+	result, err := beginpasskeysignin.Handler{Container: controller.Container}.Execute(request.Context(), beginpasskeysignin.Command{ChallengeToken: body.Token()})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) PasskeyStepUpOptions(writer http.ResponseWriter, request *http.Request) {
+	staff, _ := staffauth.StaffFromContext(request.Context())
+	if controller.refuseWhenRateLimited(writer, request, staff.Id) {
+		return
+	}
+	result, err := beginpasskeystepup.Handler{Container: controller.Container}.Execute(request.Context(), beginpasskeystepup.Command{StaffId: staff.Id, SessionId: staff.SessionId})
+	controller.respond(writer, request, http.StatusOK, result, err)
+}
+
+func (controller StaffAuthController) UpdatePreferences(writer http.ResponseWriter, request *http.Request) {
+	body, err := httprequests.DecodeAndValidate(writer, request, validators.ValidatePreferencesRequest)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	staff, _ := staffauth.StaffFromContext(request.Context())
+	err = updatestaffpreferences.Handler{Container: controller.Container}.Execute(request.Context(), updatestaffpreferences.Command{StaffId: staff.Id, Theme: body.Theme})
+	httprequests.RespondNoContentOrError(writer, request, controller.Container.Logger, err)
 }
 
 func (controller StaffAuthController) respond(writer http.ResponseWriter, request *http.Request, status int, result any, err error) {

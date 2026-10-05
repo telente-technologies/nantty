@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/admin/src/modules/staffAuth/models"
 	"zudomart/modules/admin/src/modules/staffAuth/services"
 	"zudomart/modules/admin/src/repositories"
+	"zudomart/modules/admin/src/types"
 	secrettokens "zudomart/modules/admin/src/utils/secretTokens"
 	"zudomart/platform/identityports"
 )
@@ -49,6 +50,10 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Sta
 		}
 		if err != nil {
 			return err
+		}
+		if !(services.StaffAuthService{Container: handler.Container}).StaffAddressAllowed(staff, types.ClientDetailsFromContext(ctx).IpAddress) {
+			rejection = adminerrors.IpNotAllowed
+			return nil
 		}
 		if nextRefreshToken, err = secrettokens.GenerateOpaqueUrlSafeToken(); err != nil {
 			return err
