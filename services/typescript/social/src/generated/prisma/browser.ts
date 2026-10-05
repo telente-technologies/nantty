@@ -143,6 +143,11 @@ export type Follow = Prisma.FollowModel
  */
 export type Block = Prisma.BlockModel
 /**
+ * Model StoreFollow
+ * 
+ */
+export type StoreFollow = Prisma.StoreFollowModel
+/**
  * Model LinkPreviewCache
  * 
  */

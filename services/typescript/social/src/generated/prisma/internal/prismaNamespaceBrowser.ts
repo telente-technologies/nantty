@@ -76,6 +76,7 @@ export const ModelName = {
   DownloadSetting: 'DownloadSetting',
   Follow: 'Follow',
   Block: 'Block',
+  StoreFollow: 'StoreFollow',
   LinkPreviewCache: 'LinkPreviewCache',
   OutboxEvent: 'OutboxEvent',
   IdempotencyRecord: 'IdempotencyRecord',
@@ -112,6 +113,7 @@ export const ConversationScalarFieldEnum = {
   kind: 'kind',
   directKey: 'directKey',
   title: 'title',
+  description: 'description',
   photoMediaId: 'photoMediaId',
   createdById: 'createdById',
   storeId: 'storeId',
@@ -168,6 +170,7 @@ export const MessageScalarFieldEnum = {
   expiresAt: 'expiresAt',
   mediaExpiresAt: 'mediaExpiresAt',
   mediaPurgedAt: 'mediaPurgedAt',
+  hiddenAt: 'hiddenAt',
   createdAt: 'createdAt',
   pollQuestion: 'pollQuestion',
   pollAllowMultiple: 'pollAllowMultiple',
@@ -274,6 +277,10 @@ export const PostScalarFieldEnum = {
   advisorySensitiveLabels: 'advisorySensitiveLabels',
   sensitiveLabelsReviewed: 'sensitiveLabelsReviewed',
   moderationVisibility: 'moderationVisibility',
+  topics: 'topics',
+  productIds: 'productIds',
+  clipEdit: 'clipEdit',
+  location: 'location',
   expiresAt: 'expiresAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt'
@@ -382,7 +389,11 @@ export type PostViewerScalarFieldEnum = (typeof PostViewerScalarFieldEnum)[keyof
 export const PostDailyStatScalarFieldEnum = {
   postId: 'postId',
   day: 'day',
-  impressions: 'impressions'
+  impressions: 'impressions',
+  videoViews: 'videoViews',
+  watchTimeSeconds: 'watchTimeSeconds',
+  linkClicks: 'linkClicks',
+  newFollows: 'newFollows'
 } as const
 
 export type PostDailyStatScalarFieldEnum = (typeof PostDailyStatScalarFieldEnum)[keyof typeof PostDailyStatScalarFieldEnum]
@@ -453,6 +464,15 @@ export const BlockScalarFieldEnum = {
 export type BlockScalarFieldEnum = (typeof BlockScalarFieldEnum)[keyof typeof BlockScalarFieldEnum]
 
 
+export const StoreFollowScalarFieldEnum = {
+  followerId: 'followerId',
+  storeId: 'storeId',
+  createdAt: 'createdAt'
+} as const
+
+export type StoreFollowScalarFieldEnum = (typeof StoreFollowScalarFieldEnum)[keyof typeof StoreFollowScalarFieldEnum]
+
+
 export const LinkPreviewCacheScalarFieldEnum = {
   normalizedUrl: 'normalizedUrl',
   url: 'url',
@@ -488,8 +508,11 @@ export const IdempotencyRecordScalarFieldEnum = {
   accountId: 'accountId',
   key: 'key',
   requestPath: 'requestPath',
+  requestHash: 'requestHash',
   responseStatus: 'responseStatus',
   responseBody: 'responseBody',
+  lockedUntil: 'lockedUntil',
+  completedAt: 'completedAt',
   createdAt: 'createdAt'
 } as const
 

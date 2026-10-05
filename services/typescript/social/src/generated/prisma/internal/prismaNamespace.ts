@@ -422,6 +422,7 @@ export const ModelName = {
   DownloadSetting: 'DownloadSetting',
   Follow: 'Follow',
   Block: 'Block',
+  StoreFollow: 'StoreFollow',
   LinkPreviewCache: 'LinkPreviewCache',
   OutboxEvent: 'OutboxEvent',
   IdempotencyRecord: 'IdempotencyRecord',
@@ -450,7 +451,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "downloadSetting" | "follow" | "block" | "linkPreviewCache" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration" | "postTag" | "taggingSetting"
+    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "downloadSetting" | "follow" | "block" | "storeFollow" | "linkPreviewCache" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration" | "postTag" | "taggingSetting"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2304,6 +2305,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    StoreFollow: {
+      payload: Prisma.$StoreFollowPayload<ExtArgs>
+      fields: Prisma.StoreFollowFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StoreFollowFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StoreFollowFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload>
+        }
+        findFirst: {
+          args: Prisma.StoreFollowFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StoreFollowFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload>
+        }
+        findMany: {
+          args: Prisma.StoreFollowFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload>[]
+        }
+        create: {
+          args: Prisma.StoreFollowCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload>
+        }
+        createMany: {
+          args: Prisma.StoreFollowCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StoreFollowCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload>[]
+        }
+        delete: {
+          args: Prisma.StoreFollowDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload>
+        }
+        update: {
+          args: Prisma.StoreFollowUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload>
+        }
+        deleteMany: {
+          args: Prisma.StoreFollowDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StoreFollowUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StoreFollowUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload>[]
+        }
+        upsert: {
+          args: Prisma.StoreFollowUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoreFollowPayload>
+        }
+        aggregate: {
+          args: Prisma.StoreFollowAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStoreFollow>
+        }
+        groupBy: {
+          args: Prisma.StoreFollowGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StoreFollowGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StoreFollowCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StoreFollowCountAggregateOutputType> | number
+        }
+      }
+    }
     LinkPreviewCache: {
       payload: Prisma.$LinkPreviewCachePayload<ExtArgs>
       fields: Prisma.LinkPreviewCacheFieldRefs
@@ -3310,6 +3385,7 @@ export const ConversationScalarFieldEnum = {
   kind: 'kind',
   directKey: 'directKey',
   title: 'title',
+  description: 'description',
   photoMediaId: 'photoMediaId',
   createdById: 'createdById',
   storeId: 'storeId',
@@ -3366,6 +3442,7 @@ export const MessageScalarFieldEnum = {
   expiresAt: 'expiresAt',
   mediaExpiresAt: 'mediaExpiresAt',
   mediaPurgedAt: 'mediaPurgedAt',
+  hiddenAt: 'hiddenAt',
   createdAt: 'createdAt',
   pollQuestion: 'pollQuestion',
   pollAllowMultiple: 'pollAllowMultiple',
@@ -3472,6 +3549,10 @@ export const PostScalarFieldEnum = {
   advisorySensitiveLabels: 'advisorySensitiveLabels',
   sensitiveLabelsReviewed: 'sensitiveLabelsReviewed',
   moderationVisibility: 'moderationVisibility',
+  topics: 'topics',
+  productIds: 'productIds',
+  clipEdit: 'clipEdit',
+  location: 'location',
   expiresAt: 'expiresAt',
   deletedAt: 'deletedAt',
   createdAt: 'createdAt'
@@ -3580,7 +3661,11 @@ export type PostViewerScalarFieldEnum = (typeof PostViewerScalarFieldEnum)[keyof
 export const PostDailyStatScalarFieldEnum = {
   postId: 'postId',
   day: 'day',
-  impressions: 'impressions'
+  impressions: 'impressions',
+  videoViews: 'videoViews',
+  watchTimeSeconds: 'watchTimeSeconds',
+  linkClicks: 'linkClicks',
+  newFollows: 'newFollows'
 } as const
 
 export type PostDailyStatScalarFieldEnum = (typeof PostDailyStatScalarFieldEnum)[keyof typeof PostDailyStatScalarFieldEnum]
@@ -3651,6 +3736,15 @@ export const BlockScalarFieldEnum = {
 export type BlockScalarFieldEnum = (typeof BlockScalarFieldEnum)[keyof typeof BlockScalarFieldEnum]
 
 
+export const StoreFollowScalarFieldEnum = {
+  followerId: 'followerId',
+  storeId: 'storeId',
+  createdAt: 'createdAt'
+} as const
+
+export type StoreFollowScalarFieldEnum = (typeof StoreFollowScalarFieldEnum)[keyof typeof StoreFollowScalarFieldEnum]
+
+
 export const LinkPreviewCacheScalarFieldEnum = {
   normalizedUrl: 'normalizedUrl',
   url: 'url',
@@ -3686,8 +3780,11 @@ export const IdempotencyRecordScalarFieldEnum = {
   accountId: 'accountId',
   key: 'key',
   requestPath: 'requestPath',
+  requestHash: 'requestHash',
   responseStatus: 'responseStatus',
   responseBody: 'responseBody',
+  lockedUntil: 'lockedUntil',
+  completedAt: 'completedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -4351,6 +4448,7 @@ export type GlobalOmitConfig = {
   downloadSetting?: Prisma.DownloadSettingOmit
   follow?: Prisma.FollowOmit
   block?: Prisma.BlockOmit
+  storeFollow?: Prisma.StoreFollowOmit
   linkPreviewCache?: Prisma.LinkPreviewCacheOmit
   outboxEvent?: Prisma.OutboxEventOmit
   idempotencyRecord?: Prisma.IdempotencyRecordOmit
