@@ -31,7 +31,27 @@ type Brand struct {
 	// Official holds the value of the "official" field.
 	Official bool `json:"official,omitempty"`
 	// Active holds the value of the "active" field.
-	Active       bool `json:"active,omitempty"`
+	Active bool `json:"active,omitempty"`
+	// OwnerAccountID holds the value of the "owner_account_id" field.
+	OwnerAccountID *uuid.UUID `json:"owner_account_id,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
+	// CoverURL holds the value of the "cover_url" field.
+	CoverURL *string `json:"cover_url,omitempty"`
+	// Website holds the value of the "website" field.
+	Website *string `json:"website,omitempty"`
+	// CategoryID holds the value of the "category_id" field.
+	CategoryID *uuid.UUID `json:"category_id,omitempty"`
+	// CategoryName holds the value of the "category_name" field.
+	CategoryName string `json:"category_name,omitempty"`
+	// CountryCode holds the value of the "country_code" field.
+	CountryCode string `json:"country_code,omitempty"`
+	// OfficialStatus holds the value of the "official_status" field.
+	OfficialStatus string `json:"official_status,omitempty"`
+	// FollowerCount holds the value of the "follower_count" field.
+	FollowerCount int `json:"follower_count,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -40,13 +60,15 @@ func (*Brand) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case brand.FieldOwnerProfileID:
+		case brand.FieldOwnerProfileID, brand.FieldOwnerAccountID, brand.FieldCategoryID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case brand.FieldOfficial, brand.FieldActive:
 			values[i] = new(sql.NullBool)
-		case brand.FieldName, brand.FieldSlug, brand.FieldLogoURL:
+		case brand.FieldFollowerCount:
+			values[i] = new(sql.NullInt64)
+		case brand.FieldName, brand.FieldSlug, brand.FieldLogoURL, brand.FieldDescription, brand.FieldCoverURL, brand.FieldWebsite, brand.FieldCategoryName, brand.FieldCountryCode, brand.FieldOfficialStatus:
 			values[i] = new(sql.NullString)
-		case brand.FieldCreatedAt:
+		case brand.FieldCreatedAt, brand.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case brand.FieldID:
 			values[i] = new(uuid.UUID)
@@ -115,6 +137,70 @@ func (_m *Brand) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Active = value.Bool
 			}
+		case brand.FieldOwnerAccountID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field owner_account_id", values[i])
+			} else if value.Valid {
+				_m.OwnerAccountID = new(uuid.UUID)
+				*_m.OwnerAccountID = *value.S.(*uuid.UUID)
+			}
+		case brand.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
+			}
+		case brand.FieldCoverURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cover_url", values[i])
+			} else if value.Valid {
+				_m.CoverURL = new(string)
+				*_m.CoverURL = value.String
+			}
+		case brand.FieldWebsite:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field website", values[i])
+			} else if value.Valid {
+				_m.Website = new(string)
+				*_m.Website = value.String
+			}
+		case brand.FieldCategoryID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field category_id", values[i])
+			} else if value.Valid {
+				_m.CategoryID = new(uuid.UUID)
+				*_m.CategoryID = *value.S.(*uuid.UUID)
+			}
+		case brand.FieldCategoryName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field category_name", values[i])
+			} else if value.Valid {
+				_m.CategoryName = value.String
+			}
+		case brand.FieldCountryCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field country_code", values[i])
+			} else if value.Valid {
+				_m.CountryCode = value.String
+			}
+		case brand.FieldOfficialStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field official_status", values[i])
+			} else if value.Valid {
+				_m.OfficialStatus = value.String
+			}
+		case brand.FieldFollowerCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field follower_count", values[i])
+			} else if value.Valid {
+				_m.FollowerCount = int(value.Int64)
+			}
+		case brand.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				_m.UpdatedAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -175,6 +261,44 @@ func (_m *Brand) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("active=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Active))
+	builder.WriteString(", ")
+	if v := _m.OwnerAccountID; v != nil {
+		builder.WriteString("owner_account_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	if v := _m.CoverURL; v != nil {
+		builder.WriteString("cover_url=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.Website; v != nil {
+		builder.WriteString("website=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.CategoryID; v != nil {
+		builder.WriteString("category_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("category_name=")
+	builder.WriteString(_m.CategoryName)
+	builder.WriteString(", ")
+	builder.WriteString("country_code=")
+	builder.WriteString(_m.CountryCode)
+	builder.WriteString(", ")
+	builder.WriteString("official_status=")
+	builder.WriteString(_m.OfficialStatus)
+	builder.WriteString(", ")
+	builder.WriteString("follower_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FollowerCount))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

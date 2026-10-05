@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"zudomart/modules/catalog/src/generated/ent/brand"
 	"zudomart/modules/catalog/src/generated/ent/predicate"
 
@@ -124,6 +125,169 @@ func (_u *BrandUpdate) SetNillableActive(v *bool) *BrandUpdate {
 	return _u
 }
 
+// SetOwnerAccountID sets the "owner_account_id" field.
+func (_u *BrandUpdate) SetOwnerAccountID(v uuid.UUID) *BrandUpdate {
+	_u.mutation.SetOwnerAccountID(v)
+	return _u
+}
+
+// SetNillableOwnerAccountID sets the "owner_account_id" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableOwnerAccountID(v *uuid.UUID) *BrandUpdate {
+	if v != nil {
+		_u.SetOwnerAccountID(*v)
+	}
+	return _u
+}
+
+// ClearOwnerAccountID clears the value of the "owner_account_id" field.
+func (_u *BrandUpdate) ClearOwnerAccountID() *BrandUpdate {
+	_u.mutation.ClearOwnerAccountID()
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *BrandUpdate) SetDescription(v string) *BrandUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableDescription(v *string) *BrandUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// SetCoverURL sets the "cover_url" field.
+func (_u *BrandUpdate) SetCoverURL(v string) *BrandUpdate {
+	_u.mutation.SetCoverURL(v)
+	return _u
+}
+
+// SetNillableCoverURL sets the "cover_url" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableCoverURL(v *string) *BrandUpdate {
+	if v != nil {
+		_u.SetCoverURL(*v)
+	}
+	return _u
+}
+
+// ClearCoverURL clears the value of the "cover_url" field.
+func (_u *BrandUpdate) ClearCoverURL() *BrandUpdate {
+	_u.mutation.ClearCoverURL()
+	return _u
+}
+
+// SetWebsite sets the "website" field.
+func (_u *BrandUpdate) SetWebsite(v string) *BrandUpdate {
+	_u.mutation.SetWebsite(v)
+	return _u
+}
+
+// SetNillableWebsite sets the "website" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableWebsite(v *string) *BrandUpdate {
+	if v != nil {
+		_u.SetWebsite(*v)
+	}
+	return _u
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (_u *BrandUpdate) ClearWebsite() *BrandUpdate {
+	_u.mutation.ClearWebsite()
+	return _u
+}
+
+// SetCategoryID sets the "category_id" field.
+func (_u *BrandUpdate) SetCategoryID(v uuid.UUID) *BrandUpdate {
+	_u.mutation.SetCategoryID(v)
+	return _u
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableCategoryID(v *uuid.UUID) *BrandUpdate {
+	if v != nil {
+		_u.SetCategoryID(*v)
+	}
+	return _u
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (_u *BrandUpdate) ClearCategoryID() *BrandUpdate {
+	_u.mutation.ClearCategoryID()
+	return _u
+}
+
+// SetCategoryName sets the "category_name" field.
+func (_u *BrandUpdate) SetCategoryName(v string) *BrandUpdate {
+	_u.mutation.SetCategoryName(v)
+	return _u
+}
+
+// SetNillableCategoryName sets the "category_name" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableCategoryName(v *string) *BrandUpdate {
+	if v != nil {
+		_u.SetCategoryName(*v)
+	}
+	return _u
+}
+
+// SetCountryCode sets the "country_code" field.
+func (_u *BrandUpdate) SetCountryCode(v string) *BrandUpdate {
+	_u.mutation.SetCountryCode(v)
+	return _u
+}
+
+// SetNillableCountryCode sets the "country_code" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableCountryCode(v *string) *BrandUpdate {
+	if v != nil {
+		_u.SetCountryCode(*v)
+	}
+	return _u
+}
+
+// SetOfficialStatus sets the "official_status" field.
+func (_u *BrandUpdate) SetOfficialStatus(v string) *BrandUpdate {
+	_u.mutation.SetOfficialStatus(v)
+	return _u
+}
+
+// SetNillableOfficialStatus sets the "official_status" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableOfficialStatus(v *string) *BrandUpdate {
+	if v != nil {
+		_u.SetOfficialStatus(*v)
+	}
+	return _u
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (_u *BrandUpdate) SetFollowerCount(v int) *BrandUpdate {
+	_u.mutation.ResetFollowerCount()
+	_u.mutation.SetFollowerCount(v)
+	return _u
+}
+
+// SetNillableFollowerCount sets the "follower_count" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableFollowerCount(v *int) *BrandUpdate {
+	if v != nil {
+		_u.SetFollowerCount(*v)
+	}
+	return _u
+}
+
+// AddFollowerCount adds value to the "follower_count" field.
+func (_u *BrandUpdate) AddFollowerCount(v int) *BrandUpdate {
+	_u.mutation.AddFollowerCount(v)
+	return _u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *BrandUpdate) SetUpdatedAt(v time.Time) *BrandUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // Mutation returns the BrandMutation object of the builder.
 func (_u *BrandUpdate) Mutation() *BrandMutation {
 	return _u.mutation
@@ -131,6 +295,7 @@ func (_u *BrandUpdate) Mutation() *BrandMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BrandUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -156,6 +321,14 @@ func (_u *BrandUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *BrandUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := brand.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *BrandUpdate) check() error {
 	if v, ok := _u.mutation.Name(); ok {
@@ -171,6 +344,36 @@ func (_u *BrandUpdate) check() error {
 	if v, ok := _u.mutation.LogoURL(); ok {
 		if err := brand.LogoURLValidator(v); err != nil {
 			return &ValidationError{Name: "logo_url", err: fmt.Errorf(`ent: validator failed for field "Brand.logo_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Description(); ok {
+		if err := brand.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Brand.description": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CoverURL(); ok {
+		if err := brand.CoverURLValidator(v); err != nil {
+			return &ValidationError{Name: "cover_url", err: fmt.Errorf(`ent: validator failed for field "Brand.cover_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Website(); ok {
+		if err := brand.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Brand.website": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CategoryName(); ok {
+		if err := brand.CategoryNameValidator(v); err != nil {
+			return &ValidationError{Name: "category_name", err: fmt.Errorf(`ent: validator failed for field "Brand.category_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CountryCode(); ok {
+		if err := brand.CountryCodeValidator(v); err != nil {
+			return &ValidationError{Name: "country_code", err: fmt.Errorf(`ent: validator failed for field "Brand.country_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.OfficialStatus(); ok {
+		if err := brand.OfficialStatusValidator(v); err != nil {
+			return &ValidationError{Name: "official_status", err: fmt.Errorf(`ent: validator failed for field "Brand.official_status": %w`, err)}
 		}
 	}
 	return nil
@@ -211,6 +414,51 @@ func (_u *BrandUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(brand.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.OwnerAccountID(); ok {
+		_spec.SetField(brand.FieldOwnerAccountID, field.TypeUUID, value)
+	}
+	if _u.mutation.OwnerAccountIDCleared() {
+		_spec.ClearField(brand.FieldOwnerAccountID, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(brand.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CoverURL(); ok {
+		_spec.SetField(brand.FieldCoverURL, field.TypeString, value)
+	}
+	if _u.mutation.CoverURLCleared() {
+		_spec.ClearField(brand.FieldCoverURL, field.TypeString)
+	}
+	if value, ok := _u.mutation.Website(); ok {
+		_spec.SetField(brand.FieldWebsite, field.TypeString, value)
+	}
+	if _u.mutation.WebsiteCleared() {
+		_spec.ClearField(brand.FieldWebsite, field.TypeString)
+	}
+	if value, ok := _u.mutation.CategoryID(); ok {
+		_spec.SetField(brand.FieldCategoryID, field.TypeUUID, value)
+	}
+	if _u.mutation.CategoryIDCleared() {
+		_spec.ClearField(brand.FieldCategoryID, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.CategoryName(); ok {
+		_spec.SetField(brand.FieldCategoryName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CountryCode(); ok {
+		_spec.SetField(brand.FieldCountryCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OfficialStatus(); ok {
+		_spec.SetField(brand.FieldOfficialStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.FollowerCount(); ok {
+		_spec.SetField(brand.FieldFollowerCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedFollowerCount(); ok {
+		_spec.AddField(brand.FieldFollowerCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(brand.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -328,6 +576,169 @@ func (_u *BrandUpdateOne) SetNillableActive(v *bool) *BrandUpdateOne {
 	return _u
 }
 
+// SetOwnerAccountID sets the "owner_account_id" field.
+func (_u *BrandUpdateOne) SetOwnerAccountID(v uuid.UUID) *BrandUpdateOne {
+	_u.mutation.SetOwnerAccountID(v)
+	return _u
+}
+
+// SetNillableOwnerAccountID sets the "owner_account_id" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableOwnerAccountID(v *uuid.UUID) *BrandUpdateOne {
+	if v != nil {
+		_u.SetOwnerAccountID(*v)
+	}
+	return _u
+}
+
+// ClearOwnerAccountID clears the value of the "owner_account_id" field.
+func (_u *BrandUpdateOne) ClearOwnerAccountID() *BrandUpdateOne {
+	_u.mutation.ClearOwnerAccountID()
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *BrandUpdateOne) SetDescription(v string) *BrandUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableDescription(v *string) *BrandUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// SetCoverURL sets the "cover_url" field.
+func (_u *BrandUpdateOne) SetCoverURL(v string) *BrandUpdateOne {
+	_u.mutation.SetCoverURL(v)
+	return _u
+}
+
+// SetNillableCoverURL sets the "cover_url" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableCoverURL(v *string) *BrandUpdateOne {
+	if v != nil {
+		_u.SetCoverURL(*v)
+	}
+	return _u
+}
+
+// ClearCoverURL clears the value of the "cover_url" field.
+func (_u *BrandUpdateOne) ClearCoverURL() *BrandUpdateOne {
+	_u.mutation.ClearCoverURL()
+	return _u
+}
+
+// SetWebsite sets the "website" field.
+func (_u *BrandUpdateOne) SetWebsite(v string) *BrandUpdateOne {
+	_u.mutation.SetWebsite(v)
+	return _u
+}
+
+// SetNillableWebsite sets the "website" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableWebsite(v *string) *BrandUpdateOne {
+	if v != nil {
+		_u.SetWebsite(*v)
+	}
+	return _u
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (_u *BrandUpdateOne) ClearWebsite() *BrandUpdateOne {
+	_u.mutation.ClearWebsite()
+	return _u
+}
+
+// SetCategoryID sets the "category_id" field.
+func (_u *BrandUpdateOne) SetCategoryID(v uuid.UUID) *BrandUpdateOne {
+	_u.mutation.SetCategoryID(v)
+	return _u
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableCategoryID(v *uuid.UUID) *BrandUpdateOne {
+	if v != nil {
+		_u.SetCategoryID(*v)
+	}
+	return _u
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (_u *BrandUpdateOne) ClearCategoryID() *BrandUpdateOne {
+	_u.mutation.ClearCategoryID()
+	return _u
+}
+
+// SetCategoryName sets the "category_name" field.
+func (_u *BrandUpdateOne) SetCategoryName(v string) *BrandUpdateOne {
+	_u.mutation.SetCategoryName(v)
+	return _u
+}
+
+// SetNillableCategoryName sets the "category_name" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableCategoryName(v *string) *BrandUpdateOne {
+	if v != nil {
+		_u.SetCategoryName(*v)
+	}
+	return _u
+}
+
+// SetCountryCode sets the "country_code" field.
+func (_u *BrandUpdateOne) SetCountryCode(v string) *BrandUpdateOne {
+	_u.mutation.SetCountryCode(v)
+	return _u
+}
+
+// SetNillableCountryCode sets the "country_code" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableCountryCode(v *string) *BrandUpdateOne {
+	if v != nil {
+		_u.SetCountryCode(*v)
+	}
+	return _u
+}
+
+// SetOfficialStatus sets the "official_status" field.
+func (_u *BrandUpdateOne) SetOfficialStatus(v string) *BrandUpdateOne {
+	_u.mutation.SetOfficialStatus(v)
+	return _u
+}
+
+// SetNillableOfficialStatus sets the "official_status" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableOfficialStatus(v *string) *BrandUpdateOne {
+	if v != nil {
+		_u.SetOfficialStatus(*v)
+	}
+	return _u
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (_u *BrandUpdateOne) SetFollowerCount(v int) *BrandUpdateOne {
+	_u.mutation.ResetFollowerCount()
+	_u.mutation.SetFollowerCount(v)
+	return _u
+}
+
+// SetNillableFollowerCount sets the "follower_count" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableFollowerCount(v *int) *BrandUpdateOne {
+	if v != nil {
+		_u.SetFollowerCount(*v)
+	}
+	return _u
+}
+
+// AddFollowerCount adds value to the "follower_count" field.
+func (_u *BrandUpdateOne) AddFollowerCount(v int) *BrandUpdateOne {
+	_u.mutation.AddFollowerCount(v)
+	return _u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *BrandUpdateOne) SetUpdatedAt(v time.Time) *BrandUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
 // Mutation returns the BrandMutation object of the builder.
 func (_u *BrandUpdateOne) Mutation() *BrandMutation {
 	return _u.mutation
@@ -348,6 +759,7 @@ func (_u *BrandUpdateOne) Select(field string, fields ...string) *BrandUpdateOne
 
 // Save executes the query and returns the updated Brand entity.
 func (_u *BrandUpdateOne) Save(ctx context.Context) (*Brand, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -373,6 +785,14 @@ func (_u *BrandUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *BrandUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		v := brand.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *BrandUpdateOne) check() error {
 	if v, ok := _u.mutation.Name(); ok {
@@ -388,6 +808,36 @@ func (_u *BrandUpdateOne) check() error {
 	if v, ok := _u.mutation.LogoURL(); ok {
 		if err := brand.LogoURLValidator(v); err != nil {
 			return &ValidationError{Name: "logo_url", err: fmt.Errorf(`ent: validator failed for field "Brand.logo_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Description(); ok {
+		if err := brand.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Brand.description": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CoverURL(); ok {
+		if err := brand.CoverURLValidator(v); err != nil {
+			return &ValidationError{Name: "cover_url", err: fmt.Errorf(`ent: validator failed for field "Brand.cover_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Website(); ok {
+		if err := brand.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Brand.website": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CategoryName(); ok {
+		if err := brand.CategoryNameValidator(v); err != nil {
+			return &ValidationError{Name: "category_name", err: fmt.Errorf(`ent: validator failed for field "Brand.category_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CountryCode(); ok {
+		if err := brand.CountryCodeValidator(v); err != nil {
+			return &ValidationError{Name: "country_code", err: fmt.Errorf(`ent: validator failed for field "Brand.country_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.OfficialStatus(); ok {
+		if err := brand.OfficialStatusValidator(v); err != nil {
+			return &ValidationError{Name: "official_status", err: fmt.Errorf(`ent: validator failed for field "Brand.official_status": %w`, err)}
 		}
 	}
 	return nil
@@ -445,6 +895,51 @@ func (_u *BrandUpdateOne) sqlSave(ctx context.Context) (_node *Brand, err error)
 	}
 	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(brand.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.OwnerAccountID(); ok {
+		_spec.SetField(brand.FieldOwnerAccountID, field.TypeUUID, value)
+	}
+	if _u.mutation.OwnerAccountIDCleared() {
+		_spec.ClearField(brand.FieldOwnerAccountID, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(brand.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CoverURL(); ok {
+		_spec.SetField(brand.FieldCoverURL, field.TypeString, value)
+	}
+	if _u.mutation.CoverURLCleared() {
+		_spec.ClearField(brand.FieldCoverURL, field.TypeString)
+	}
+	if value, ok := _u.mutation.Website(); ok {
+		_spec.SetField(brand.FieldWebsite, field.TypeString, value)
+	}
+	if _u.mutation.WebsiteCleared() {
+		_spec.ClearField(brand.FieldWebsite, field.TypeString)
+	}
+	if value, ok := _u.mutation.CategoryID(); ok {
+		_spec.SetField(brand.FieldCategoryID, field.TypeUUID, value)
+	}
+	if _u.mutation.CategoryIDCleared() {
+		_spec.ClearField(brand.FieldCategoryID, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.CategoryName(); ok {
+		_spec.SetField(brand.FieldCategoryName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CountryCode(); ok {
+		_spec.SetField(brand.FieldCountryCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OfficialStatus(); ok {
+		_spec.SetField(brand.FieldOfficialStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.FollowerCount(); ok {
+		_spec.SetField(brand.FieldFollowerCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedFollowerCount(); ok {
+		_spec.AddField(brand.FieldFollowerCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(brand.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &Brand{config: _u.config}
 	_spec.Assign = _node.assignValues

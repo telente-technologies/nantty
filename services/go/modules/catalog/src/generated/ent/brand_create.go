@@ -106,6 +106,146 @@ func (_c *BrandCreate) SetNillableActive(v *bool) *BrandCreate {
 	return _c
 }
 
+// SetOwnerAccountID sets the "owner_account_id" field.
+func (_c *BrandCreate) SetOwnerAccountID(v uuid.UUID) *BrandCreate {
+	_c.mutation.SetOwnerAccountID(v)
+	return _c
+}
+
+// SetNillableOwnerAccountID sets the "owner_account_id" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableOwnerAccountID(v *uuid.UUID) *BrandCreate {
+	if v != nil {
+		_c.SetOwnerAccountID(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *BrandCreate) SetDescription(v string) *BrandCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableDescription(v *string) *BrandCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
+// SetCoverURL sets the "cover_url" field.
+func (_c *BrandCreate) SetCoverURL(v string) *BrandCreate {
+	_c.mutation.SetCoverURL(v)
+	return _c
+}
+
+// SetNillableCoverURL sets the "cover_url" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableCoverURL(v *string) *BrandCreate {
+	if v != nil {
+		_c.SetCoverURL(*v)
+	}
+	return _c
+}
+
+// SetWebsite sets the "website" field.
+func (_c *BrandCreate) SetWebsite(v string) *BrandCreate {
+	_c.mutation.SetWebsite(v)
+	return _c
+}
+
+// SetNillableWebsite sets the "website" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableWebsite(v *string) *BrandCreate {
+	if v != nil {
+		_c.SetWebsite(*v)
+	}
+	return _c
+}
+
+// SetCategoryID sets the "category_id" field.
+func (_c *BrandCreate) SetCategoryID(v uuid.UUID) *BrandCreate {
+	_c.mutation.SetCategoryID(v)
+	return _c
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableCategoryID(v *uuid.UUID) *BrandCreate {
+	if v != nil {
+		_c.SetCategoryID(*v)
+	}
+	return _c
+}
+
+// SetCategoryName sets the "category_name" field.
+func (_c *BrandCreate) SetCategoryName(v string) *BrandCreate {
+	_c.mutation.SetCategoryName(v)
+	return _c
+}
+
+// SetNillableCategoryName sets the "category_name" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableCategoryName(v *string) *BrandCreate {
+	if v != nil {
+		_c.SetCategoryName(*v)
+	}
+	return _c
+}
+
+// SetCountryCode sets the "country_code" field.
+func (_c *BrandCreate) SetCountryCode(v string) *BrandCreate {
+	_c.mutation.SetCountryCode(v)
+	return _c
+}
+
+// SetNillableCountryCode sets the "country_code" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableCountryCode(v *string) *BrandCreate {
+	if v != nil {
+		_c.SetCountryCode(*v)
+	}
+	return _c
+}
+
+// SetOfficialStatus sets the "official_status" field.
+func (_c *BrandCreate) SetOfficialStatus(v string) *BrandCreate {
+	_c.mutation.SetOfficialStatus(v)
+	return _c
+}
+
+// SetNillableOfficialStatus sets the "official_status" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableOfficialStatus(v *string) *BrandCreate {
+	if v != nil {
+		_c.SetOfficialStatus(*v)
+	}
+	return _c
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (_c *BrandCreate) SetFollowerCount(v int) *BrandCreate {
+	_c.mutation.SetFollowerCount(v)
+	return _c
+}
+
+// SetNillableFollowerCount sets the "follower_count" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableFollowerCount(v *int) *BrandCreate {
+	if v != nil {
+		_c.SetFollowerCount(*v)
+	}
+	return _c
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_c *BrandCreate) SetUpdatedAt(v time.Time) *BrandCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableUpdatedAt(v *time.Time) *BrandCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *BrandCreate) SetID(v uuid.UUID) *BrandCreate {
 	_c.mutation.SetID(v)
@@ -167,6 +307,30 @@ func (_c *BrandCreate) defaults() {
 		v := brand.DefaultActive
 		_c.mutation.SetActive(v)
 	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := brand.DefaultDescription
+		_c.mutation.SetDescription(v)
+	}
+	if _, ok := _c.mutation.CategoryName(); !ok {
+		v := brand.DefaultCategoryName
+		_c.mutation.SetCategoryName(v)
+	}
+	if _, ok := _c.mutation.CountryCode(); !ok {
+		v := brand.DefaultCountryCode
+		_c.mutation.SetCountryCode(v)
+	}
+	if _, ok := _c.mutation.OfficialStatus(); !ok {
+		v := brand.DefaultOfficialStatus
+		_c.mutation.SetOfficialStatus(v)
+	}
+	if _, ok := _c.mutation.FollowerCount(); !ok {
+		v := brand.DefaultFollowerCount
+		_c.mutation.SetFollowerCount(v)
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		v := brand.DefaultUpdatedAt()
+		_c.mutation.SetUpdatedAt(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := brand.DefaultID()
 		_c.mutation.SetID(v)
@@ -204,6 +368,54 @@ func (_c *BrandCreate) check() error {
 	}
 	if _, ok := _c.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Brand.active"`)}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Brand.description"`)}
+	}
+	if v, ok := _c.mutation.Description(); ok {
+		if err := brand.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "Brand.description": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.CoverURL(); ok {
+		if err := brand.CoverURLValidator(v); err != nil {
+			return &ValidationError{Name: "cover_url", err: fmt.Errorf(`ent: validator failed for field "Brand.cover_url": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.Website(); ok {
+		if err := brand.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Brand.website": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CategoryName(); !ok {
+		return &ValidationError{Name: "category_name", err: errors.New(`ent: missing required field "Brand.category_name"`)}
+	}
+	if v, ok := _c.mutation.CategoryName(); ok {
+		if err := brand.CategoryNameValidator(v); err != nil {
+			return &ValidationError{Name: "category_name", err: fmt.Errorf(`ent: validator failed for field "Brand.category_name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CountryCode(); !ok {
+		return &ValidationError{Name: "country_code", err: errors.New(`ent: missing required field "Brand.country_code"`)}
+	}
+	if v, ok := _c.mutation.CountryCode(); ok {
+		if err := brand.CountryCodeValidator(v); err != nil {
+			return &ValidationError{Name: "country_code", err: fmt.Errorf(`ent: validator failed for field "Brand.country_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.OfficialStatus(); !ok {
+		return &ValidationError{Name: "official_status", err: errors.New(`ent: missing required field "Brand.official_status"`)}
+	}
+	if v, ok := _c.mutation.OfficialStatus(); ok {
+		if err := brand.OfficialStatusValidator(v); err != nil {
+			return &ValidationError{Name: "official_status", err: fmt.Errorf(`ent: validator failed for field "Brand.official_status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.FollowerCount(); !ok {
+		return &ValidationError{Name: "follower_count", err: errors.New(`ent: missing required field "Brand.follower_count"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Brand.updated_at"`)}
 	}
 	return nil
 }
@@ -268,6 +480,46 @@ func (_c *BrandCreate) createSpec() (*Brand, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Active(); ok {
 		_spec.SetField(brand.FieldActive, field.TypeBool, value)
 		_node.Active = value
+	}
+	if value, ok := _c.mutation.OwnerAccountID(); ok {
+		_spec.SetField(brand.FieldOwnerAccountID, field.TypeUUID, value)
+		_node.OwnerAccountID = &value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(brand.FieldDescription, field.TypeString, value)
+		_node.Description = value
+	}
+	if value, ok := _c.mutation.CoverURL(); ok {
+		_spec.SetField(brand.FieldCoverURL, field.TypeString, value)
+		_node.CoverURL = &value
+	}
+	if value, ok := _c.mutation.Website(); ok {
+		_spec.SetField(brand.FieldWebsite, field.TypeString, value)
+		_node.Website = &value
+	}
+	if value, ok := _c.mutation.CategoryID(); ok {
+		_spec.SetField(brand.FieldCategoryID, field.TypeUUID, value)
+		_node.CategoryID = &value
+	}
+	if value, ok := _c.mutation.CategoryName(); ok {
+		_spec.SetField(brand.FieldCategoryName, field.TypeString, value)
+		_node.CategoryName = value
+	}
+	if value, ok := _c.mutation.CountryCode(); ok {
+		_spec.SetField(brand.FieldCountryCode, field.TypeString, value)
+		_node.CountryCode = value
+	}
+	if value, ok := _c.mutation.OfficialStatus(); ok {
+		_spec.SetField(brand.FieldOfficialStatus, field.TypeString, value)
+		_node.OfficialStatus = value
+	}
+	if value, ok := _c.mutation.FollowerCount(); ok {
+		_spec.SetField(brand.FieldFollowerCount, field.TypeInt, value)
+		_node.FollowerCount = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(brand.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	return _node, _spec
 }
@@ -402,6 +654,156 @@ func (u *BrandUpsert) SetActive(v bool) *BrandUpsert {
 // UpdateActive sets the "active" field to the value that was provided on create.
 func (u *BrandUpsert) UpdateActive() *BrandUpsert {
 	u.SetExcluded(brand.FieldActive)
+	return u
+}
+
+// SetOwnerAccountID sets the "owner_account_id" field.
+func (u *BrandUpsert) SetOwnerAccountID(v uuid.UUID) *BrandUpsert {
+	u.Set(brand.FieldOwnerAccountID, v)
+	return u
+}
+
+// UpdateOwnerAccountID sets the "owner_account_id" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateOwnerAccountID() *BrandUpsert {
+	u.SetExcluded(brand.FieldOwnerAccountID)
+	return u
+}
+
+// ClearOwnerAccountID clears the value of the "owner_account_id" field.
+func (u *BrandUpsert) ClearOwnerAccountID() *BrandUpsert {
+	u.SetNull(brand.FieldOwnerAccountID)
+	return u
+}
+
+// SetDescription sets the "description" field.
+func (u *BrandUpsert) SetDescription(v string) *BrandUpsert {
+	u.Set(brand.FieldDescription, v)
+	return u
+}
+
+// UpdateDescription sets the "description" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateDescription() *BrandUpsert {
+	u.SetExcluded(brand.FieldDescription)
+	return u
+}
+
+// SetCoverURL sets the "cover_url" field.
+func (u *BrandUpsert) SetCoverURL(v string) *BrandUpsert {
+	u.Set(brand.FieldCoverURL, v)
+	return u
+}
+
+// UpdateCoverURL sets the "cover_url" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateCoverURL() *BrandUpsert {
+	u.SetExcluded(brand.FieldCoverURL)
+	return u
+}
+
+// ClearCoverURL clears the value of the "cover_url" field.
+func (u *BrandUpsert) ClearCoverURL() *BrandUpsert {
+	u.SetNull(brand.FieldCoverURL)
+	return u
+}
+
+// SetWebsite sets the "website" field.
+func (u *BrandUpsert) SetWebsite(v string) *BrandUpsert {
+	u.Set(brand.FieldWebsite, v)
+	return u
+}
+
+// UpdateWebsite sets the "website" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateWebsite() *BrandUpsert {
+	u.SetExcluded(brand.FieldWebsite)
+	return u
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (u *BrandUpsert) ClearWebsite() *BrandUpsert {
+	u.SetNull(brand.FieldWebsite)
+	return u
+}
+
+// SetCategoryID sets the "category_id" field.
+func (u *BrandUpsert) SetCategoryID(v uuid.UUID) *BrandUpsert {
+	u.Set(brand.FieldCategoryID, v)
+	return u
+}
+
+// UpdateCategoryID sets the "category_id" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateCategoryID() *BrandUpsert {
+	u.SetExcluded(brand.FieldCategoryID)
+	return u
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (u *BrandUpsert) ClearCategoryID() *BrandUpsert {
+	u.SetNull(brand.FieldCategoryID)
+	return u
+}
+
+// SetCategoryName sets the "category_name" field.
+func (u *BrandUpsert) SetCategoryName(v string) *BrandUpsert {
+	u.Set(brand.FieldCategoryName, v)
+	return u
+}
+
+// UpdateCategoryName sets the "category_name" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateCategoryName() *BrandUpsert {
+	u.SetExcluded(brand.FieldCategoryName)
+	return u
+}
+
+// SetCountryCode sets the "country_code" field.
+func (u *BrandUpsert) SetCountryCode(v string) *BrandUpsert {
+	u.Set(brand.FieldCountryCode, v)
+	return u
+}
+
+// UpdateCountryCode sets the "country_code" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateCountryCode() *BrandUpsert {
+	u.SetExcluded(brand.FieldCountryCode)
+	return u
+}
+
+// SetOfficialStatus sets the "official_status" field.
+func (u *BrandUpsert) SetOfficialStatus(v string) *BrandUpsert {
+	u.Set(brand.FieldOfficialStatus, v)
+	return u
+}
+
+// UpdateOfficialStatus sets the "official_status" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateOfficialStatus() *BrandUpsert {
+	u.SetExcluded(brand.FieldOfficialStatus)
+	return u
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (u *BrandUpsert) SetFollowerCount(v int) *BrandUpsert {
+	u.Set(brand.FieldFollowerCount, v)
+	return u
+}
+
+// UpdateFollowerCount sets the "follower_count" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateFollowerCount() *BrandUpsert {
+	u.SetExcluded(brand.FieldFollowerCount)
+	return u
+}
+
+// AddFollowerCount adds v to the "follower_count" field.
+func (u *BrandUpsert) AddFollowerCount(v int) *BrandUpsert {
+	u.Add(brand.FieldFollowerCount, v)
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BrandUpsert) SetUpdatedAt(v time.Time) *BrandUpsert {
+	u.Set(brand.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateUpdatedAt() *BrandUpsert {
+	u.SetExcluded(brand.FieldUpdatedAt)
 	return u
 }
 
@@ -551,6 +953,181 @@ func (u *BrandUpsertOne) SetActive(v bool) *BrandUpsertOne {
 func (u *BrandUpsertOne) UpdateActive() *BrandUpsertOne {
 	return u.Update(func(s *BrandUpsert) {
 		s.UpdateActive()
+	})
+}
+
+// SetOwnerAccountID sets the "owner_account_id" field.
+func (u *BrandUpsertOne) SetOwnerAccountID(v uuid.UUID) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetOwnerAccountID(v)
+	})
+}
+
+// UpdateOwnerAccountID sets the "owner_account_id" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateOwnerAccountID() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateOwnerAccountID()
+	})
+}
+
+// ClearOwnerAccountID clears the value of the "owner_account_id" field.
+func (u *BrandUpsertOne) ClearOwnerAccountID() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.ClearOwnerAccountID()
+	})
+}
+
+// SetDescription sets the "description" field.
+func (u *BrandUpsertOne) SetDescription(v string) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetDescription(v)
+	})
+}
+
+// UpdateDescription sets the "description" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateDescription() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateDescription()
+	})
+}
+
+// SetCoverURL sets the "cover_url" field.
+func (u *BrandUpsertOne) SetCoverURL(v string) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetCoverURL(v)
+	})
+}
+
+// UpdateCoverURL sets the "cover_url" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateCoverURL() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateCoverURL()
+	})
+}
+
+// ClearCoverURL clears the value of the "cover_url" field.
+func (u *BrandUpsertOne) ClearCoverURL() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.ClearCoverURL()
+	})
+}
+
+// SetWebsite sets the "website" field.
+func (u *BrandUpsertOne) SetWebsite(v string) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetWebsite(v)
+	})
+}
+
+// UpdateWebsite sets the "website" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateWebsite() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateWebsite()
+	})
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (u *BrandUpsertOne) ClearWebsite() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.ClearWebsite()
+	})
+}
+
+// SetCategoryID sets the "category_id" field.
+func (u *BrandUpsertOne) SetCategoryID(v uuid.UUID) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetCategoryID(v)
+	})
+}
+
+// UpdateCategoryID sets the "category_id" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateCategoryID() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateCategoryID()
+	})
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (u *BrandUpsertOne) ClearCategoryID() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.ClearCategoryID()
+	})
+}
+
+// SetCategoryName sets the "category_name" field.
+func (u *BrandUpsertOne) SetCategoryName(v string) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetCategoryName(v)
+	})
+}
+
+// UpdateCategoryName sets the "category_name" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateCategoryName() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateCategoryName()
+	})
+}
+
+// SetCountryCode sets the "country_code" field.
+func (u *BrandUpsertOne) SetCountryCode(v string) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetCountryCode(v)
+	})
+}
+
+// UpdateCountryCode sets the "country_code" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateCountryCode() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateCountryCode()
+	})
+}
+
+// SetOfficialStatus sets the "official_status" field.
+func (u *BrandUpsertOne) SetOfficialStatus(v string) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetOfficialStatus(v)
+	})
+}
+
+// UpdateOfficialStatus sets the "official_status" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateOfficialStatus() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateOfficialStatus()
+	})
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (u *BrandUpsertOne) SetFollowerCount(v int) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetFollowerCount(v)
+	})
+}
+
+// AddFollowerCount adds v to the "follower_count" field.
+func (u *BrandUpsertOne) AddFollowerCount(v int) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.AddFollowerCount(v)
+	})
+}
+
+// UpdateFollowerCount sets the "follower_count" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateFollowerCount() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateFollowerCount()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BrandUpsertOne) SetUpdatedAt(v time.Time) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateUpdatedAt() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 
@@ -867,6 +1444,181 @@ func (u *BrandUpsertBulk) SetActive(v bool) *BrandUpsertBulk {
 func (u *BrandUpsertBulk) UpdateActive() *BrandUpsertBulk {
 	return u.Update(func(s *BrandUpsert) {
 		s.UpdateActive()
+	})
+}
+
+// SetOwnerAccountID sets the "owner_account_id" field.
+func (u *BrandUpsertBulk) SetOwnerAccountID(v uuid.UUID) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetOwnerAccountID(v)
+	})
+}
+
+// UpdateOwnerAccountID sets the "owner_account_id" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateOwnerAccountID() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateOwnerAccountID()
+	})
+}
+
+// ClearOwnerAccountID clears the value of the "owner_account_id" field.
+func (u *BrandUpsertBulk) ClearOwnerAccountID() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.ClearOwnerAccountID()
+	})
+}
+
+// SetDescription sets the "description" field.
+func (u *BrandUpsertBulk) SetDescription(v string) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetDescription(v)
+	})
+}
+
+// UpdateDescription sets the "description" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateDescription() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateDescription()
+	})
+}
+
+// SetCoverURL sets the "cover_url" field.
+func (u *BrandUpsertBulk) SetCoverURL(v string) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetCoverURL(v)
+	})
+}
+
+// UpdateCoverURL sets the "cover_url" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateCoverURL() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateCoverURL()
+	})
+}
+
+// ClearCoverURL clears the value of the "cover_url" field.
+func (u *BrandUpsertBulk) ClearCoverURL() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.ClearCoverURL()
+	})
+}
+
+// SetWebsite sets the "website" field.
+func (u *BrandUpsertBulk) SetWebsite(v string) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetWebsite(v)
+	})
+}
+
+// UpdateWebsite sets the "website" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateWebsite() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateWebsite()
+	})
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (u *BrandUpsertBulk) ClearWebsite() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.ClearWebsite()
+	})
+}
+
+// SetCategoryID sets the "category_id" field.
+func (u *BrandUpsertBulk) SetCategoryID(v uuid.UUID) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetCategoryID(v)
+	})
+}
+
+// UpdateCategoryID sets the "category_id" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateCategoryID() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateCategoryID()
+	})
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (u *BrandUpsertBulk) ClearCategoryID() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.ClearCategoryID()
+	})
+}
+
+// SetCategoryName sets the "category_name" field.
+func (u *BrandUpsertBulk) SetCategoryName(v string) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetCategoryName(v)
+	})
+}
+
+// UpdateCategoryName sets the "category_name" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateCategoryName() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateCategoryName()
+	})
+}
+
+// SetCountryCode sets the "country_code" field.
+func (u *BrandUpsertBulk) SetCountryCode(v string) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetCountryCode(v)
+	})
+}
+
+// UpdateCountryCode sets the "country_code" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateCountryCode() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateCountryCode()
+	})
+}
+
+// SetOfficialStatus sets the "official_status" field.
+func (u *BrandUpsertBulk) SetOfficialStatus(v string) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetOfficialStatus(v)
+	})
+}
+
+// UpdateOfficialStatus sets the "official_status" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateOfficialStatus() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateOfficialStatus()
+	})
+}
+
+// SetFollowerCount sets the "follower_count" field.
+func (u *BrandUpsertBulk) SetFollowerCount(v int) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetFollowerCount(v)
+	})
+}
+
+// AddFollowerCount adds v to the "follower_count" field.
+func (u *BrandUpsertBulk) AddFollowerCount(v int) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.AddFollowerCount(v)
+	})
+}
+
+// UpdateFollowerCount sets the "follower_count" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateFollowerCount() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateFollowerCount()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BrandUpsertBulk) SetUpdatedAt(v time.Time) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateUpdatedAt() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 
