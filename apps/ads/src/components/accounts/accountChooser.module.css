@@ -1,16 +1,16 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 14px;
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
 .card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   height: 100%;
-  padding: 16px;
+  padding: var(--space-4);
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-large);
   background: var(--surface-card);
@@ -28,7 +28,7 @@
 .cardTop {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .initial {
@@ -74,7 +74,7 @@
 .stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--space-2);
   padding-top: 10px;
   border-top: 1px solid var(--divider-soft);
 }

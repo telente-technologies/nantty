@@ -9,7 +9,7 @@ export function LoginBrandPanelWithAdComposition() {
   return (
     <section className={styles.panel} aria-labelledby="login-brand-heading">
       <Link href="/" className={styles.wordmarkLink} aria-label="Zudomart Ads home">
-        <ZudomartWordmark productLabel="Ads" tone="onDark" />
+        <ZudomartWordmark productLabel="Ads" tone="onDark" withSymbol />
       </Link>
       <div className={styles.statement}>
         <h2 id="login-brand-heading" className={styles.heading}>

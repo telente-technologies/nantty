@@ -35,7 +35,7 @@ export function InviteAcceptance({ token }: { readonly token: string }) {
     <>
       <PageHeader title="Join an ad account" />
       {inviteQuery.isLoading ? <LoadingBlock /> : null}
-      {inviteQuery.errorMessage ? <ErrorState message={inviteQuery.errorMessage} /> : null}
+      {inviteQuery.errorMessage ? <ErrorState message={inviteQuery.errorMessage} onRetry={inviteQuery.reload} /> : null}
       {invite ? (
         <Card title={invite.accountName} description={`${invite.invitedBy} invited you.`}>
           <KeyValueList
