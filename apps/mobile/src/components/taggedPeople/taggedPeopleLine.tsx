@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 
 import { PersonTag24Icon } from "@/components/icons";
-import { Dialog } from "@/components/ui/dialog";
+import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { Post } from "@/types";
@@ -33,9 +33,9 @@ export function TaggedPeopleLine({ post }: { readonly post: Pick<Post, "id" | "t
           {summary}
         </Text>
       </Pressable>
-      <Dialog visible={isOpen} onClose={() => setIsOpen(false)} title="Tagged in this post" actions={[{ label: "Close", style: "secondary", onPress: () => setIsOpen(false) }]}>
+      <BottomSheet visible={isOpen} onClose={() => setIsOpen(false)} title="Tagged in this post" subtitle={summary} scrollable>
         <TaggedPeopleList post={post} visible={isOpen} onClose={() => setIsOpen(false)} />
-      </Dialog>
+      </BottomSheet>
     </>
   );
 }

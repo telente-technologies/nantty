@@ -45,7 +45,7 @@ export function ClipSoundRow({ sound, isActive, foregroundColor, onPress }: Clip
       accessibilityRole="link"
       accessibilityLabel={`Sound: ${label}${isUnderReview ? ". Unavailable while under copyright review" : ""}`}
       onPress={onPress}
-      hitSlop={6}
+      hitSlop={14}
       style={styles.row}
     >
       <SpeakerHigh24Icon size={14} color={foregroundColor} />
