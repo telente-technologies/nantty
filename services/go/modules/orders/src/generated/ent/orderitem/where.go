@@ -145,6 +145,21 @@ func TracksStock(v bool) predicate.OrderItem {
 	return predicate.OrderItem(sql.FieldEQ(FieldTracksStock, v))
 }
 
+// Taxable applies equality check predicate on the "taxable" field. It's identical to TaxableEQ.
+func Taxable(v bool) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldTaxable, v))
+}
+
+// AttributionSource applies equality check predicate on the "attribution_source" field. It's identical to AttributionSourceEQ.
+func AttributionSource(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldAttributionSource, v))
+}
+
+// AttributionID applies equality check predicate on the "attribution_id" field. It's identical to AttributionIDEQ.
+func AttributionID(v uuid.UUID) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldAttributionID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.OrderItem {
 	return predicate.OrderItem(sql.FieldEQ(FieldCreatedAt, v))
@@ -1038,6 +1053,141 @@ func TracksStockEQ(v bool) predicate.OrderItem {
 // TracksStockNEQ applies the NEQ predicate on the "tracks_stock" field.
 func TracksStockNEQ(v bool) predicate.OrderItem {
 	return predicate.OrderItem(sql.FieldNEQ(FieldTracksStock, v))
+}
+
+// TaxableEQ applies the EQ predicate on the "taxable" field.
+func TaxableEQ(v bool) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldTaxable, v))
+}
+
+// TaxableNEQ applies the NEQ predicate on the "taxable" field.
+func TaxableNEQ(v bool) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNEQ(FieldTaxable, v))
+}
+
+// AttributionSourceEQ applies the EQ predicate on the "attribution_source" field.
+func AttributionSourceEQ(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldAttributionSource, v))
+}
+
+// AttributionSourceNEQ applies the NEQ predicate on the "attribution_source" field.
+func AttributionSourceNEQ(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNEQ(FieldAttributionSource, v))
+}
+
+// AttributionSourceIn applies the In predicate on the "attribution_source" field.
+func AttributionSourceIn(vs ...string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldIn(FieldAttributionSource, vs...))
+}
+
+// AttributionSourceNotIn applies the NotIn predicate on the "attribution_source" field.
+func AttributionSourceNotIn(vs ...string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNotIn(FieldAttributionSource, vs...))
+}
+
+// AttributionSourceGT applies the GT predicate on the "attribution_source" field.
+func AttributionSourceGT(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldGT(FieldAttributionSource, v))
+}
+
+// AttributionSourceGTE applies the GTE predicate on the "attribution_source" field.
+func AttributionSourceGTE(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldGTE(FieldAttributionSource, v))
+}
+
+// AttributionSourceLT applies the LT predicate on the "attribution_source" field.
+func AttributionSourceLT(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldLT(FieldAttributionSource, v))
+}
+
+// AttributionSourceLTE applies the LTE predicate on the "attribution_source" field.
+func AttributionSourceLTE(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldLTE(FieldAttributionSource, v))
+}
+
+// AttributionSourceContains applies the Contains predicate on the "attribution_source" field.
+func AttributionSourceContains(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldContains(FieldAttributionSource, v))
+}
+
+// AttributionSourceHasPrefix applies the HasPrefix predicate on the "attribution_source" field.
+func AttributionSourceHasPrefix(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldHasPrefix(FieldAttributionSource, v))
+}
+
+// AttributionSourceHasSuffix applies the HasSuffix predicate on the "attribution_source" field.
+func AttributionSourceHasSuffix(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldHasSuffix(FieldAttributionSource, v))
+}
+
+// AttributionSourceIsNil applies the IsNil predicate on the "attribution_source" field.
+func AttributionSourceIsNil() predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldIsNull(FieldAttributionSource))
+}
+
+// AttributionSourceNotNil applies the NotNil predicate on the "attribution_source" field.
+func AttributionSourceNotNil() predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNotNull(FieldAttributionSource))
+}
+
+// AttributionSourceEqualFold applies the EqualFold predicate on the "attribution_source" field.
+func AttributionSourceEqualFold(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEqualFold(FieldAttributionSource, v))
+}
+
+// AttributionSourceContainsFold applies the ContainsFold predicate on the "attribution_source" field.
+func AttributionSourceContainsFold(v string) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldContainsFold(FieldAttributionSource, v))
+}
+
+// AttributionIDEQ applies the EQ predicate on the "attribution_id" field.
+func AttributionIDEQ(v uuid.UUID) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldEQ(FieldAttributionID, v))
+}
+
+// AttributionIDNEQ applies the NEQ predicate on the "attribution_id" field.
+func AttributionIDNEQ(v uuid.UUID) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNEQ(FieldAttributionID, v))
+}
+
+// AttributionIDIn applies the In predicate on the "attribution_id" field.
+func AttributionIDIn(vs ...uuid.UUID) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldIn(FieldAttributionID, vs...))
+}
+
+// AttributionIDNotIn applies the NotIn predicate on the "attribution_id" field.
+func AttributionIDNotIn(vs ...uuid.UUID) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNotIn(FieldAttributionID, vs...))
+}
+
+// AttributionIDGT applies the GT predicate on the "attribution_id" field.
+func AttributionIDGT(v uuid.UUID) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldGT(FieldAttributionID, v))
+}
+
+// AttributionIDGTE applies the GTE predicate on the "attribution_id" field.
+func AttributionIDGTE(v uuid.UUID) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldGTE(FieldAttributionID, v))
+}
+
+// AttributionIDLT applies the LT predicate on the "attribution_id" field.
+func AttributionIDLT(v uuid.UUID) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldLT(FieldAttributionID, v))
+}
+
+// AttributionIDLTE applies the LTE predicate on the "attribution_id" field.
+func AttributionIDLTE(v uuid.UUID) predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldLTE(FieldAttributionID, v))
+}
+
+// AttributionIDIsNil applies the IsNil predicate on the "attribution_id" field.
+func AttributionIDIsNil() predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldIsNull(FieldAttributionID))
+}
+
+// AttributionIDNotNil applies the NotNil predicate on the "attribution_id" field.
+func AttributionIDNotNil() predicate.OrderItem {
+	return predicate.OrderItem(sql.FieldNotNull(FieldAttributionID))
 }
 
 // And groups predicates with the AND operator between them.

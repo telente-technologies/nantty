@@ -260,6 +260,18 @@ func (f PromotionRedemptionFunc) Mutate(ctx context.Context, m ent.Mutation) (en
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PromotionRedemptionMutation", m)
 }
 
+// The RefundRecordFunc type is an adapter to allow the use of ordinary
+// function as RefundRecord mutator.
+type RefundRecordFunc func(context.Context, *ent.RefundRecordMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RefundRecordFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RefundRecordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RefundRecordMutation", m)
+}
+
 // The ReportExportJobFunc type is an adapter to allow the use of ordinary
 // function as ReportExportJob mutator.
 type ReportExportJobFunc func(context.Context, *ent.ReportExportJobMutation) (ent.Value, error)

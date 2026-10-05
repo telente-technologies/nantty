@@ -69,6 +69,9 @@ type Promotion func(*sql.Selector)
 // PromotionRedemption is the predicate function for promotionredemption builders.
 type PromotionRedemption func(*sql.Selector)
 
+// RefundRecord is the predicate function for refundrecord builders.
+type RefundRecord func(*sql.Selector)
+
 // ReportExportJob is the predicate function for reportexportjob builders.
 type ReportExportJob func(*sql.Selector)
 

@@ -74,6 +74,8 @@ var (
 		{Name: "variant_id", Type: field.TypeUUID},
 		{Name: "store_id", Type: field.TypeUUID},
 		{Name: "quantity", Type: field.TypeInt},
+		{Name: "attribution_source", Type: field.TypeString, Nullable: true, Size: 10},
+		{Name: "attribution_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// CartItemsTable holds the schema information for the "cart_items" table.
@@ -463,6 +465,9 @@ var (
 		{Name: "category_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "category_name", Type: field.TypeString, Size: 60, Default: ""},
 		{Name: "tracks_stock", Type: field.TypeBool, Default: true},
+		{Name: "taxable", Type: field.TypeBool, Default: true},
+		{Name: "attribution_source", Type: field.TypeString, Nullable: true, Size: 10},
+		{Name: "attribution_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// OrderItemsTable holds the schema information for the "order_items" table.
 	OrderItemsTable = &schema.Table{
@@ -681,6 +686,57 @@ var (
 				Name:    "promotionredemption_promotion_id_buyer_account_id",
 				Unique:  false,
 				Columns: []*schema.Column{PromotionRedemptionsColumns[2], PromotionRedemptionsColumns[4]},
+			},
+		},
+	}
+	// RefundRecordsColumns holds the columns for the "refund_records" table.
+	RefundRecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "order_group_id", Type: field.TypeUUID},
+		{Name: "store_id", Type: field.TypeUUID},
+		{Name: "buyer_account_id", Type: field.TypeUUID},
+		{Name: "order_reference", Type: field.TypeString, Size: 24},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "source", Type: field.TypeString, Size: 20},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "processing"},
+		{Name: "reason", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "created_by_account_id", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "created_by_name", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "idempotency_key", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "request_hash", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// RefundRecordsTable holds the schema information for the "refund_records" table.
+	RefundRecordsTable = &schema.Table{
+		Name:       "refund_records",
+		Columns:    RefundRecordsColumns,
+		PrimaryKey: []*schema.Column{RefundRecordsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "refundrecord_order_group_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{RefundRecordsColumns[2], RefundRecordsColumns[0]},
+			},
+			{
+				Name:    "refundrecord_source_id",
+				Unique:  false,
+				Columns: []*schema.Column{RefundRecordsColumns[8], RefundRecordsColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						RefundRecordsColumns[0].Name: true,
+					},
+				},
+			},
+			{
+				Name:    "refundrecord_idempotency",
+				Unique:  true,
+				Columns: []*schema.Column{RefundRecordsColumns[11], RefundRecordsColumns[13]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "idempotency_key IS NOT NULL",
+				},
 			},
 		},
 	}
@@ -1060,6 +1116,7 @@ var (
 		ProductBundleItemsTable,
 		PromotionsTable,
 		PromotionRedemptionsTable,
+		RefundRecordsTable,
 		ReportExportJobsTable,
 		ReturnRequestsTable,
 		ShippingCalculationsTable,

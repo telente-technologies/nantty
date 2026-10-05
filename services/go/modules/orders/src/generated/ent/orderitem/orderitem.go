@@ -50,6 +50,12 @@ const (
 	FieldCategoryName = "category_name"
 	// FieldTracksStock holds the string denoting the tracks_stock field in the database.
 	FieldTracksStock = "tracks_stock"
+	// FieldTaxable holds the string denoting the taxable field in the database.
+	FieldTaxable = "taxable"
+	// FieldAttributionSource holds the string denoting the attribution_source field in the database.
+	FieldAttributionSource = "attribution_source"
+	// FieldAttributionID holds the string denoting the attribution_id field in the database.
+	FieldAttributionID = "attribution_id"
 	// Table holds the table name of the orderitem in the database.
 	Table = "order_items"
 )
@@ -75,6 +81,9 @@ var Columns = []string{
 	FieldCategoryID,
 	FieldCategoryName,
 	FieldTracksStock,
+	FieldTaxable,
+	FieldAttributionSource,
+	FieldAttributionID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -118,6 +127,10 @@ var (
 	CategoryNameValidator func(string) error
 	// DefaultTracksStock holds the default value on creation for the "tracks_stock" field.
 	DefaultTracksStock bool
+	// DefaultTaxable holds the default value on creation for the "taxable" field.
+	DefaultTaxable bool
+	// AttributionSourceValidator is a validator for the "attribution_source" field. It is called by the builders before save.
+	AttributionSourceValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -218,4 +231,19 @@ func ByCategoryName(opts ...sql.OrderTermOption) OrderOption {
 // ByTracksStock orders the results by the tracks_stock field.
 func ByTracksStock(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTracksStock, opts...).ToFunc()
+}
+
+// ByTaxable orders the results by the taxable field.
+func ByTaxable(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTaxable, opts...).ToFunc()
+}
+
+// ByAttributionSource orders the results by the attribution_source field.
+func ByAttributionSource(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAttributionSource, opts...).ToFunc()
+}
+
+// ByAttributionID orders the results by the attribution_id field.
+func ByAttributionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAttributionID, opts...).ToFunc()
 }
