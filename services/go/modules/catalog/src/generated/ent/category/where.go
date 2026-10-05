@@ -105,6 +105,11 @@ func Active(v bool) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldActive, v))
 }
 
+// IconName applies equality check predicate on the "icon_name" field. It's identical to IconNameEQ.
+func IconName(v string) predicate.Category {
+	return predicate.Category(sql.FieldEQ(FieldIconName, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Category {
 	return predicate.Category(sql.FieldEQ(FieldUpdatedAt, v))
@@ -608,6 +613,81 @@ func ActiveEQ(v bool) predicate.Category {
 // ActiveNEQ applies the NEQ predicate on the "active" field.
 func ActiveNEQ(v bool) predicate.Category {
 	return predicate.Category(sql.FieldNEQ(FieldActive, v))
+}
+
+// IconNameEQ applies the EQ predicate on the "icon_name" field.
+func IconNameEQ(v string) predicate.Category {
+	return predicate.Category(sql.FieldEQ(FieldIconName, v))
+}
+
+// IconNameNEQ applies the NEQ predicate on the "icon_name" field.
+func IconNameNEQ(v string) predicate.Category {
+	return predicate.Category(sql.FieldNEQ(FieldIconName, v))
+}
+
+// IconNameIn applies the In predicate on the "icon_name" field.
+func IconNameIn(vs ...string) predicate.Category {
+	return predicate.Category(sql.FieldIn(FieldIconName, vs...))
+}
+
+// IconNameNotIn applies the NotIn predicate on the "icon_name" field.
+func IconNameNotIn(vs ...string) predicate.Category {
+	return predicate.Category(sql.FieldNotIn(FieldIconName, vs...))
+}
+
+// IconNameGT applies the GT predicate on the "icon_name" field.
+func IconNameGT(v string) predicate.Category {
+	return predicate.Category(sql.FieldGT(FieldIconName, v))
+}
+
+// IconNameGTE applies the GTE predicate on the "icon_name" field.
+func IconNameGTE(v string) predicate.Category {
+	return predicate.Category(sql.FieldGTE(FieldIconName, v))
+}
+
+// IconNameLT applies the LT predicate on the "icon_name" field.
+func IconNameLT(v string) predicate.Category {
+	return predicate.Category(sql.FieldLT(FieldIconName, v))
+}
+
+// IconNameLTE applies the LTE predicate on the "icon_name" field.
+func IconNameLTE(v string) predicate.Category {
+	return predicate.Category(sql.FieldLTE(FieldIconName, v))
+}
+
+// IconNameContains applies the Contains predicate on the "icon_name" field.
+func IconNameContains(v string) predicate.Category {
+	return predicate.Category(sql.FieldContains(FieldIconName, v))
+}
+
+// IconNameHasPrefix applies the HasPrefix predicate on the "icon_name" field.
+func IconNameHasPrefix(v string) predicate.Category {
+	return predicate.Category(sql.FieldHasPrefix(FieldIconName, v))
+}
+
+// IconNameHasSuffix applies the HasSuffix predicate on the "icon_name" field.
+func IconNameHasSuffix(v string) predicate.Category {
+	return predicate.Category(sql.FieldHasSuffix(FieldIconName, v))
+}
+
+// IconNameIsNil applies the IsNil predicate on the "icon_name" field.
+func IconNameIsNil() predicate.Category {
+	return predicate.Category(sql.FieldIsNull(FieldIconName))
+}
+
+// IconNameNotNil applies the NotNil predicate on the "icon_name" field.
+func IconNameNotNil() predicate.Category {
+	return predicate.Category(sql.FieldNotNull(FieldIconName))
+}
+
+// IconNameEqualFold applies the EqualFold predicate on the "icon_name" field.
+func IconNameEqualFold(v string) predicate.Category {
+	return predicate.Category(sql.FieldEqualFold(FieldIconName, v))
+}
+
+// IconNameContainsFold applies the ContainsFold predicate on the "icon_name" field.
+func IconNameContainsFold(v string) predicate.Category {
+	return predicate.Category(sql.FieldContainsFold(FieldIconName, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

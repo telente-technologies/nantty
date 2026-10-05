@@ -36,6 +36,8 @@ const (
 	FieldSortOrder = "sort_order"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
+	// FieldIconName holds the string denoting the icon_name field in the database.
+	FieldIconName = "icon_name"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the category in the database.
@@ -56,6 +58,7 @@ var Columns = []string{
 	FieldAttributeDefinitions,
 	FieldSortOrder,
 	FieldActive,
+	FieldIconName,
 	FieldUpdatedAt,
 }
 
@@ -90,6 +93,8 @@ var (
 	DefaultSortOrder int
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
+	// IconNameValidator is a validator for the "icon_name" field. It is called by the builders before save.
+	IconNameValidator func(string) error
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -154,6 +159,11 @@ func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
 // ByActive orders the results by the active field.
 func ByActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActive, opts...).ToFunc()
+}
+
+// ByIconName orders the results by the icon_name field.
+func ByIconName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIconName, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.
