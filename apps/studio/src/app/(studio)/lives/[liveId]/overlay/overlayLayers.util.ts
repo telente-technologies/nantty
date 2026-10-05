@@ -27,11 +27,11 @@ export function buildLayer(type: OverlayLayerType, index: number): OverlayLayer 
   } as const;
   switch (type) {
     case "text":
-      return { ...base, text: "Your headline here", fontSize: 56, color: "#ffffff", background: "#0b1752", radius: 8 };
+      return { ...base, text: "Your headline here", fontSize: 56, color: "#ffffff", background: "#181263", radius: 8 };
     case "image":
       return { ...base, text: "Logo image URL", src: "", width: 220, height: 220, radius: 12 };
     case "shape":
-      return { ...base, background: "#2043f5", radius: 16, x: 1600, y: 80 };
+      return { ...base, background: "#3a2bff", radius: 16, x: 1600, y: 80 };
     case "countdown":
       return { ...base, text: "00:10:00", fontSize: 72, color: "#ffffff", background: "#0a0a14", radius: 12 };
     case "ticker":

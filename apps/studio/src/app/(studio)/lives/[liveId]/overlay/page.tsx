@@ -4,21 +4,28 @@ import Link from "next/link";
 import { use, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ErrorState, Spinner } from "@/components/ui/feedback";
+import { ErrorState } from "@/components/ui/feedback";
+import { ControlRoomSkeleton } from "@/components/ui/pageSkeletons";
 import { RetryButton } from "@/components/ui/controls";
 import { readPublicSiteUrl } from "@/config/studioEnvironment.config";
+import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { livesService } from "@/services/lives.service";
 import type { OverlayLayer, OverlayLayerType } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { OverlayCanvas } from "./overlayCanvas";
 import { OverlayInspector } from "./overlayInspector";
 import { ADDABLE, buildLayer } from "./overlayLayers.util";
-import styles from "./page.module.css";
+import partStyles from "./editorParts.module.css";
+import baseStyles from "./page.module.css";
+
+const styles = { ...baseStyles, ...partStyles };
 
 export default function OverlayEditorPage({ params }: { readonly params: Promise<{ readonly liveId: string }> }) {
   const { liveId } = use(params);
+  const queryClient = useQueryClient();
   const scene = useQuery({ queryKey: ["overlay-scene", liveId], queryFn: () => livesService.fetchOverlays(liveId) });
+  const [isSaving, setIsSaving] = useState(false);
 
   const [layers, setLayers] = useState<OverlayLayer[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -63,19 +70,30 @@ export default function OverlayEditorPage({ params }: { readonly params: Promise
   };
 
   async function save() {
+    if (!scene.data) return;
     setSaveError(null);
+    setIsSaving(true);
     try {
-      await livesService.saveOverlays(liveId, { name: scene.data?.name ?? "Main scene", layers });
+      const updatedScene = await livesService.saveOverlays(liveId, { name: scene.data.name ?? "Main scene", layers });
+      queryClient.setQueryData(["overlay-scene", liveId], updatedScene);
       setDirty(false);
       setSaved(true);
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Couldn't save the overlay.");
+      setSaveError(readErrorMessageForDisplay(error));
+    } finally {
+      setIsSaving(false);
     }
   }
 
-  if (scene.isLoading) return <Spinner label="Loading overlay" />;
+  function discardChanges() {
+    setSelectedId(null);
+    setSaveError(null);
+    setDirty(false);
+  }
+
+  if (scene.isLoading) return <ControlRoomSkeleton label="Loading overlay" />;
   if (scene.isError || !scene.data) {
-    return <ErrorState title="Overlay unavailable" description="We couldn't load this scene." action={<RetryButton onRetry={() => scene.refetch()} />} />;
+    return <ErrorState title="We couldn't load this overlay" description={readErrorMessageForDisplay(scene.error)} action={<RetryButton onRetry={() => scene.refetch()} />} />;
   }
 
   const overlayUrl = `${readPublicSiteUrl()}/overlay/${scene.data.id}`;
@@ -91,10 +109,10 @@ export default function OverlayEditorPage({ params }: { readonly params: Promise
           <p className={styles.subtitle}>Add text, your logo or shapes. They render on top of your stream at 1920 × 1080.</p>
         </div>
         <div className={styles.headerActions}>
-          <Button variant="secondary" onClick={() => setDirty(false)} disabled={!dirty}>
+          <Button variant="secondary" onClick={discardChanges} disabled={!dirty || isSaving}>
             Discard changes
           </Button>
-          <Button busy={false} onClick={save} disabled={!dirty}>
+          <Button busy={isSaving} onClick={save} disabled={!dirty}>
             Save overlay
           </Button>
         </div>
@@ -121,7 +139,7 @@ export default function OverlayEditorPage({ params }: { readonly params: Promise
       </div>
 
       <div className={styles.workspace}>
-          <OverlayCanvas layers={layers} selectedId={selectedId} overlayUrl={overlayUrl} onSelect={setSelectedId} />
+        <OverlayCanvas layers={layers} selectedId={selectedId} overlayUrl={overlayUrl} onSelect={setSelectedId} />
 
         <aside className={styles.sidePanel}>
           <h2 className={styles.panelTitle}>Layers</h2>

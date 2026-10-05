@@ -2,7 +2,10 @@
 
 import type { OverlayLayer } from "@/types";
 
-import styles from "./page.module.css";
+import partStyles from "./editorParts.module.css";
+import baseStyles from "./page.module.css";
+
+const styles = { ...baseStyles, ...partStyles };
 
 interface OverlayInspectorProps {
   readonly selected: OverlayLayer;

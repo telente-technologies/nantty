@@ -76,7 +76,7 @@
 .demoHint {
   width: 100%;
   max-width: 430px;
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border: 1px solid color-mix(in srgb, var(--color-warn) 40%, transparent);
   border-radius: var(--radius-medium);
   background: var(--color-warn-tint);

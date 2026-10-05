@@ -1,16 +1,3 @@
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-5);
-}
-
 .headerMain {
   display: flex;
   flex-direction: column;
@@ -18,49 +5,10 @@
   min-width: 0;
 }
 
-.back {
-  width: fit-content;
-  font-size: var(--text-sm);
-  font-weight: 700;
-  color: var(--ink-muted);
-}
-
-.back:hover {
-  color: var(--color-brand);
-}
-
-.title {
-  font-size: var(--text-2xl);
-}
-
-.subtitle {
-  font-size: var(--text-sm);
-  color: var(--ink-muted);
-}
-
 .headerActions {
   display: flex;
   flex-shrink: 0;
   gap: var(--space-3);
-}
-
-.savedNote,
-.errorNote {
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-small);
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-
-.savedNote {
-  background: var(--success-soft);
-  color: var(--color-success-text);
-}
-
-.errorNote {
-  background: var(--error-soft);
-  color: var(--color-danger-text);
 }
 
 .toolbar {
@@ -74,64 +22,11 @@
   border-radius: var(--radius-medium);
 }
 
-.toolbarLabel {
-  margin-right: var(--space-2);
-  font-size: var(--text-2xs);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
-}
-
-.toolButton {
-  padding: 6px var(--space-4);
-  border: 1px solid var(--divider-strong);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  font-size: var(--text-sm);
-  font-weight: 700;
-}
-
-.toolButton:hover {
-  background: var(--surface-brand-tint);
-  border-color: var(--color-brand);
-}
-
-.workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: var(--space-5);
-  align-items: start;
-}
-
 .canvasWrap {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   min-width: 0;
-}
-
-.canvas {
-  position: relative;
-  container-type: inline-size;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  background:
-    repeating-conic-gradient(var(--stage-tile-light) 0% 25%, var(--stage-tile-dark) 0% 50%) 50% / 40px 40px;
-  border: 1px solid var(--divider-strong);
-  border-radius: var(--radius-medium);
-}
-
-.canvasEmpty {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-6);
-  color: var(--stage-text-faint);
-  font-size: var(--text-sm);
-  text-align: center;
 }
 
 .layer {
@@ -173,14 +68,6 @@
   background: var(--surface-card);
   border: 1px solid var(--divider);
   border-radius: var(--radius-medium);
-}
-
-.browserSourceLabel {
-  font-size: var(--text-2xs);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
 }
 
 .browserSourceUrl {
@@ -245,31 +132,10 @@
   color: var(--color-brand);
 }
 
-.inspector {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--divider);
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
 .fieldLabel {
   font-size: var(--text-2xs);
   font-weight: 700;
   color: var(--ink-faint);
-}
-
-.fieldRow {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
 }
 
 .input,
@@ -306,48 +172,4 @@
 .range:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
-}
-
-.inspectorActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.smallButton,
-.smallButtonDanger {
-  padding: 6px var(--space-3);
-  border: 1px solid var(--divider-strong);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  font-size: var(--text-xs);
-  font-weight: 700;
-}
-
-.smallButton:hover {
-  background: var(--surface-sunken);
-}
-
-.smallButtonDanger {
-  border-color: var(--error);
-  color: var(--color-danger-text);
-}
-
-.smallButtonDanger:hover {
-  background: var(--error-soft);
-}
-
-.muted {
-  font-size: var(--text-sm);
-  color: var(--ink-faint);
-}
-
-@media (max-width: 1000px) {
-  .workspace {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .header {
-    flex-direction: column;
-  }
 }

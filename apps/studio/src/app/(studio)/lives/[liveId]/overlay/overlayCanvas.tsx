@@ -3,7 +3,10 @@
 import type { OverlayLayer } from "@/types";
 
 import { layerStyle } from "./overlayLayers.util";
-import styles from "./page.module.css";
+import partStyles from "./editorParts.module.css";
+import baseStyles from "./page.module.css";
+
+const styles = { ...baseStyles, ...partStyles };
 
 interface OverlayCanvasProps {
   readonly layers: readonly OverlayLayer[];

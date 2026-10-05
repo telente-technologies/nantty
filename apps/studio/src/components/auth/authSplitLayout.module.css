@@ -6,7 +6,7 @@
 
 .aside {
   display: flex;
-  padding: clamp(32px, 5vw, 72px);
+  padding: clamp(var(--space-7), 5vw, 72px);
   background:
     radial-gradient(90% 70% at 85% 10%, var(--brand-panel-glow) 0%, transparent 60%),
     linear-gradient(165deg, var(--brand-panel-start) 0%, var(--brand-panel-middle) 58%, var(--brand-panel-end) 100%);
@@ -99,7 +99,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: var(--space-1) 10px;
   border-radius: var(--radius-pill);
   background: var(--stage-live);
   color: var(--stage-text);
@@ -119,7 +119,7 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 4px 10px;
+  padding: var(--space-1) 10px;
   border-radius: var(--radius-pill);
   background: var(--stage-scrim);
   border: 1px solid var(--stage-line);
@@ -170,7 +170,7 @@
   position: absolute;
   right: 16px;
   bottom: 20px;
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--yellow-500);
   color: var(--blue-900);
@@ -183,7 +183,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(24px, 5vw, 64px);
+  padding: clamp(var(--space-6), 5vw, 64px);
   background: var(--surface-app);
 }
 
