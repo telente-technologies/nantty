@@ -13,7 +13,30 @@ const (
 	AdBoostCreated          = "adBoost.created"
 	AdMediaUploaded         = "adMedia.uploaded"
 	AdReportReady           = "adReport.ready"
+	AdInviteCreated         = "adInvite.created"
+	AdRuleTriggered         = "adRule.triggered"
 )
+
+type AdInviteCreatedEventData struct {
+	InviteId        string `json:"inviteId"`
+	AccountId       string `json:"accountId"`
+	AccountName     string `json:"accountName"`
+	Role            string `json:"role"`
+	InvitedBy       string `json:"invitedBy"`
+	InvitedByUserId string `json:"invitedByUserId"`
+	InviteeUserId   string `json:"inviteeUserId"`
+	ExpiresAt       string `json:"expiresAt"`
+	InviteUrl       string `json:"inviteUrl"`
+}
+
+type AdRuleTriggeredEventData struct {
+	RuleId      string   `json:"ruleId"`
+	AccountId   string   `json:"accountId"`
+	RuleName    string   `json:"ruleName"`
+	Action      string   `json:"action"`
+	TargetIds   []string `json:"targetIds"`
+	TriggeredAt string   `json:"triggeredAt"`
+}
 
 type AdImpressionRecordedEventData struct {
 	ImpressionId  string    `json:"impressionId"`

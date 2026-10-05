@@ -65,6 +65,11 @@ type AdsSettings struct {
 	MoneyGrpcAddress       string
 	MoneyInternalToken     string
 	MoneyHttpUrl           string
+	AdsAppUrl              string
+	AdminInternalUrl       string
+	AdminInternalToken     string
+	AssetsCorsOrigins      []string
+	CreateAssetsBucket     bool
 }
 
 func (settings AdsSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -127,6 +132,11 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 	settings.MoneyGrpcAddress = reader.ReadStringOrDefault("ADS_MONEY_GRPC_ADDRESS", "")
 	settings.MoneyInternalToken = reader.ReadStringOrDefault("ADS_MONEY_INTERNAL_TOKEN", "")
 	settings.MoneyHttpUrl = reader.ReadStringOrDefault("ADS_MONEY_HTTP_URL", "")
+	settings.AdsAppUrl = reader.ReadStringOrDefault("ADS_APP_URL", "https://ads.zudomart.com")
+	settings.AdminInternalUrl = reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", "")
+	settings.AdminInternalToken = reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", "")
+	settings.AssetsCorsOrigins = reader.ReadCommaSeparatedListOrDefault("ADS_ASSETS_CORS_ORIGINS", []string{})
+	settings.CreateAssetsBucket = reader.ReadStringOrDefault("ADS_ASSETS_CREATE_BUCKET", "false") == "true"
 	settings.AllowInMemoryFunding = !settings.IsProduction()
 	if settings.IsProduction() {
 		settings.AssetsBucket = reader.ReadRequiredString("ADS_ASSETS_BUCKET")

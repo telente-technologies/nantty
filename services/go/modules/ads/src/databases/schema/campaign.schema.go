@@ -62,12 +62,13 @@ func (AdGroup) Fields() []ent.Field {
 		field.Int("frequency_cap_impressions").Optional().Nillable(),
 		field.Int("frequency_cap_per_days").Optional().Nillable(),
 		field.String("conversion_event_id").MaxLen(80).Default(""),
+		field.UUID("experiment_id", uuid.UUID{}).Optional().Nillable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
 func (AdGroup) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("campaign_id"), index.Fields("account_id", "status"), index.Fields("status", "start_at")}
+	return []ent.Index{index.Fields("campaign_id"), index.Fields("account_id", "status"), index.Fields("status", "start_at"), index.Fields("experiment_id")}
 }
 
 type Ad struct{ ent.Schema }

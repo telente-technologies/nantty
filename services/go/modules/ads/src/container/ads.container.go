@@ -15,6 +15,7 @@ import (
 	platformevents "zudomart/platform/events"
 	"zudomart/platform/idempotency"
 	"zudomart/platform/jwtauth"
+	"zudomart/platform/staffaudit"
 )
 
 type QueueConsumer = platformevents.QueueConsumer
@@ -47,6 +48,10 @@ type Container struct {
 	ContentSources   interfaces.ContentSourceDirectory
 	Ownership        interfaces.DestinationOwnership
 	Storage          interfaces.ObjectStorage
+	TopUps           interfaces.TopUpGateway
+	AuditHistory     interfaces.AuditHistoryReader
+	UserSummaries    interfaces.PlatformUserSummaries
+	Audit            staffaudit.Recorder
 	Jobs             platformevents.JobQueue
 	QueueConsumer    QueueConsumer
 }
