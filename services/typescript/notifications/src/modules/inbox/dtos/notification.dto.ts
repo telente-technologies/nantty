@@ -1,6 +1,6 @@
 import type { StoredNotification } from "../../../interfaces/repositories.interface.js";
 
-const linkDataKeys = ["ticketId", "screen", "caseId", "orderId", "disputeId", "postId", "liveId", "conversationId"] as const;
+const linkDataKeys = ["ticketId", "screen", "caseId", "orderId", "disputeId", "postId", "liveId", "conversationId", "inviteId"] as const;
 
 export type NotificationLinkData = Partial<Record<(typeof linkDataKeys)[number], string>>;
 
