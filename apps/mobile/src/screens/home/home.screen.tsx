@@ -18,7 +18,7 @@ export function HomeScreen() {
       <HomeHeader
         activeSection={activeSection}
         onChangeSection={setActiveSection}
-        onPressSearch={() => navigation.navigate("Search", { scope: activeSection === "mart" ? "mart" : "all" })}
+        onPressSearch={() => navigation.navigate("Search", { scope: activeSection === "mart" ? "mart" : "global" })}
         onPressNotifications={() => requireAuthThen(() => navigation.navigate("Notifications"), undefined, "see your notifications")}
       />
       {activeSection === "feed" ? <FeedTab /> : <MartTab />}

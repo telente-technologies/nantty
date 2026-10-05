@@ -12,11 +12,14 @@ import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import { ArrowLeft24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/errorState";
+import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
+import { calculateDefaultLetterSpacing, fontFamily, typeScale } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { channelsService } from "@/services/channels.service";
 import { groupsService } from "@/services/groups.service";
@@ -25,6 +28,7 @@ import { useAuthStore } from "@/store/auth.store";
 import type { Conversation, ConversationSettingsUpdate, UserSummary } from "@/types";
 import { LockSimple24Icon } from "@/components/icons";
 import { IconRow } from "@/components/ui/iconRow";
+import { spacing } from "@/constants/spacing.constant";
 
 export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"ConversationInfo">) {
   const { colors } = useTheme();
@@ -45,6 +49,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
     enabled: !!display?.isGroup,
   });
 
+  const refreshControl = usePullToRefresh(conversation.refetch, () => (display?.isGroup ? members.refetch() : undefined));
   const refreshConversationEverywhere = () => {
     queryClient.invalidateQueries({ queryKey: ["conversation", conversationId] });
     queryClient.invalidateQueries({ queryKey: ["conversation-members", conversationId] });
@@ -91,17 +96,22 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
   return (
     <Screen background={colors.surface}>
       <View style={styles.header}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={12} onPress={() => navigation.goBack()}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={10} onPress={() => navigation.goBack()}>
           <ArrowLeft24Icon />
         </Pressable>
         <Text size={18} weight={500} lineHeight={21.6} accessibilityRole="header">
           {display?.isChannel ? "Channel info" : display?.isGroup ? "Group info" : "Chat info"}
         </Text>
       </View>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      {conversation.isError && !conversation.data ? (
+        <ErrorState message="Couldn't load chat info." onRetry={() => conversation.refetch()} retrying={conversation.isRefetching} />
+      ) : conversation.isPending ? (
+        <ListSkeleton rows={5} />
+      ) : (
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" refreshControl={refreshControl}>
         <View style={styles.encryptionNotice} accessibilityRole="text">
           <IconRow icon={<LockSimple24Icon size={14} color={colors.textMuted} />} justify="center" gap={6}>
-            <Text size={12} lineHeight={17} color={colors.textMuted} align="center" style={{ flexShrink: 1 }}>
+            <Text size={typeScale.xs} lineHeight={17} color={colors.textMuted} align="center" style={{ flexShrink: 1 }}>
               Messages are end-to-end encrypted. Only people in this chat can read them.
             </Text>
           </IconRow>
@@ -115,7 +125,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
             {display?.isBusiness ? <BusinessLabel /> : null}
           </View>
           {display?.subtitle ? (
-            <Text size={13} lineHeight={16.9} color={colors.textMuted}>
+            <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>
               {display.subtitle}
             </Text>
           ) : null}
@@ -161,11 +171,11 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
         {display?.isGroup ? (
           <View style={styles.section}>
             <View style={styles.sectionTitleRow}>
-              <Text size={14} weight={600} lineHeight={16.8}>
+              <Text size={typeScale.md} weight={600} lineHeight={16.8}>
                 {(members.data ?? []).length} members
               </Text>
               {canEditGroup ? (
-                <Text size={13} weight={500} lineHeight={16.9} color={colors.primary} accessibilityRole="button" onPress={() => setIsAddingMembers((adding) => !adding)}>
+                <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={colors.primary} accessibilityRole="button" onPress={() => setIsAddingMembers((adding) => !adding)}>
                   {isAddingMembers ? "Cancel" : "Add members"}
                 </Text>
               ) : null}
@@ -202,7 +212,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
         ) : null}
 
         {errorMessage ? (
-          <Text size={13} lineHeight={16.9} color={colors.error}>
+          <Text size={typeScale.sm} lineHeight={16.9} color={colors.error}>
             {errorMessage}
           </Text>
         ) : null}
@@ -225,26 +235,27 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
           <Button title={display.isChannel ? "Report channel" : "Report group"} variant="outline" onPress={report.reportGroup} />
         ) : null}
       </ScrollView>
+      )}
       {report.reportSheet}
     </Screen>
   );
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  encryptionNotice: { paddingHorizontal: 24, paddingVertical: 12 },
-  header: { height: 49, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 18 },
-  content: { paddingHorizontal: 16, paddingBottom: 40, gap: 24 },
-  identity: { alignItems: "center", gap: 8, paddingTop: 8 },
+  encryptionNotice: { paddingHorizontal: spacing[6], paddingVertical: spacing[3] },
+  header: { height: 49, paddingHorizontal: spacing[4], flexDirection: "row", alignItems: "center", gap: spacing[5] },
+  content: { paddingHorizontal: spacing[4], paddingBottom: spacing[8], gap: spacing[6] },
+  identity: { alignItems: "center", gap: spacing[2], paddingTop: spacing[2] },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   section: { gap: 10 },
   sectionTitleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  addMembers: { gap: 12 },
+  addMembers: { gap: spacing[3] },
   nameInput: {
     height: 44,
     borderWidth: 1,
     borderColor: colors.divider,
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing[3],
     fontFamily: fontFamily[500],
     fontSize: 15,
     letterSpacing: calculateDefaultLetterSpacing(15),

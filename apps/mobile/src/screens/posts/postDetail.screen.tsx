@@ -1,3 +1,4 @@
+import { useIsFocused } from "@react-navigation/native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { FlatList, Platform, RefreshControl, Share, StyleSheet, View, type TextInput } from "react-native";
@@ -18,6 +19,7 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
+import { useScreenshotSharePrompt } from "@/hooks/useScreenshotSharePrompt.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { postsService } from "@/services/posts.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -44,6 +46,8 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const composerRef = useRef<TextInput>(null);
   const isGuest = useAuthStore((s) => s.status !== "signedIn");
   const post = useQuery({ queryKey: ["post", postId], queryFn: () => postsService.fetchPostById(postId) });
+  const isScreenFocused = useIsFocused();
+  useScreenshotSharePrompt(post.data, isScreenFocused);
   const [sort, setSort] = useState<ThreadSort>("top");
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const commentThread = useCommentThreadController(postId);

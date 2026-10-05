@@ -1,9 +1,9 @@
 import { MentionText } from "@/components/mentions/mentionText";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
-import { BellRinging24Icon } from "@/components/icons";
+import { Bell24Icon, BellRinging24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Chip } from "@/components/ui/chip";
 import { Header, HeaderAction } from "@/components/ui/header";
@@ -15,6 +15,13 @@ import { notificationsService } from "@/services/notifications.service";
 import type { CategorizedNotification } from "@/types/commerce.type";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { EmptyState } from "@/components/ui/emptyState";
+import { ErrorState } from "@/components/ui/errorState";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
+import { buildInternalRoute, readInternalReferenceFromUrl } from "@/components/chat/chatLinks.util";
+import { inAppBrowserColorsFromTheme, openUserSuppliedWebLink } from "@/components/links/openLink.util";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 const notificationsQueryKey = ["notifications"] as const;
 const NOTIFICATION_FILTERS = [{ value: "all", label: "All" }, { value: "mentions", label: "Mentions" }] as const;
@@ -31,11 +38,17 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
 
   const openNotification = (notification: CategorizedNotification) => {
     if (!notification.read) markOneRead.mutate(notification.id);
+    const reference = notification.data?.url ? readInternalReferenceFromUrl(notification.data.url) : null;
     if (notification.data?.ticketId) navigation.navigate("SupportTicketDetail", { ticketId: notification.data.ticketId });
+    else if (reference) {
+      const route = buildInternalRoute(reference);
+      navigation.navigate(route.name, route.params as never);
+    } else if (notification.data?.url) openUserSuppliedWebLink(notification.data.url, inAppBrowserColorsFromTheme(colors));
     else if (notification.category === "orders") navigation.navigate("Orders");
     else if (notification.actor) navigation.navigate("UserProfile", { userId: notification.actor.id });
   };
 
+  const refreshControl = usePullToRefresh(notifications.refetch);
   const hasUnread = (notifications.data ?? []).some((n) => !n.read);
   return (
     <Screen>
@@ -44,7 +57,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
         right={
           hasUnread ? (
             <HeaderAction label="Mark all as read" onPress={() => markAllRead.mutate()}>
-              <Text size={13} weight={500} lineHeight={16.9} color={colors.primary}>Mark all read</Text>
+              <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={colors.primary}>Mark all read</Text>
             </HeaderAction>
           ) : null
         }
@@ -57,7 +70,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
       <FlatList
         data={notifications.data ?? []}
         keyExtractor={(n) => n.id}
-        refreshControl={<RefreshControl refreshing={notifications.isRefetching} onRefresh={() => notifications.refetch()} tintColor={colors.primary} />}
+        refreshControl={refreshControl}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <Pressable
@@ -74,11 +87,11 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
               </View>
             )}
             <View style={styles.text}>
-              <Text size={13} lineHeight={16.9}>
-                <Text size={13} weight={600} lineHeight={16.9}>{item.title} </Text>
+              <Text size={typeScale.sm} lineHeight={16.9}>
+                <Text size={typeScale.sm} weight={600} lineHeight={16.9}>{item.title} </Text>
                 <MentionText text={item.body} size={13} lineHeight={16.9} />
               </Text>
-              <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{formatTimeSincePosted(item.createdAt)} ago</Text>
+              <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>{formatTimeSincePosted(item.createdAt)} ago</Text>
             </View>
             {!item.read ? <View style={styles.unreadDot} /> : null}
           </Pressable>
@@ -86,8 +99,15 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
         ListEmptyComponent={
           notifications.isLoading ? (
             <ListSkeleton />
+          ) : notifications.isError ? (
+            <ErrorState compact message="Couldn't load notifications." onRetry={() => notifications.refetch()} retrying={notifications.isRefetching} />
           ) : (
-            <Text align="center" color={colors.textSubtle} style={styles.state}>{filter === "mentions" ? "No mentions yet." : "You're all caught up."}</Text>
+            <EmptyState
+              compact
+              icon={<Bell24Icon color={colors.textMuted} />}
+              title={filter === "mentions" ? "No mentions yet" : "You're all caught up"}
+              body={filter === "mentions" ? "When someone tags you, it shows up here." : "New activity on your posts and orders will appear here."}
+            />
           )
         }
       />
@@ -96,12 +116,11 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  tabs: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
-  list: { paddingVertical: 8 },
-  row: { paddingHorizontal: 16, paddingVertical: 12, flexDirection: "row", alignItems: "center", gap: 12 },
+  tabs: { flexDirection: "row", gap: spacing[2], paddingHorizontal: spacing[4], paddingVertical: spacing[2] },
+  list: { paddingVertical: spacing[2] },
+  row: { paddingHorizontal: spacing[4], paddingVertical: spacing[3], flexDirection: "row", alignItems: "center", gap: spacing[3] },
   unreadRow: { backgroundColor: colors.surface },
   iconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryTint, alignItems: "center", justifyContent: "center" },
   text: { flex: 1, gap: 2 },
   unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primarySolid },
-  state: { marginTop: 64 },
 }));
