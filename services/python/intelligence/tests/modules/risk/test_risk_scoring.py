@@ -15,7 +15,6 @@ def build_risk_request(subject_type: str, signals: dict[str, Any], actor_id: str
         "account_event": "accountEvent",
         "coin_purchase": "coinPurchase",
         "coin_transfer": "coinTransfer",
-        "referral_reward": "referralReward",
     }.get(subject_type, subject_type)
     return {
         "subjectType": subject_type,
@@ -224,37 +223,26 @@ async def test_gift_to_creator_who_sent_coins_to_the_sender_is_laundering(
     assert body["level"] == "high"
 
 
-async def test_self_referral_ring_and_cashback_self_purchase_are_flagged(
+async def test_removed_referral_and_cashback_subjects_are_rejected(
     signed_client: SignedIntelligenceClient,
 ) -> None:
-    referral = await score(
-        signed_client,
-        build_risk_request(
-            "referral_reward",
-            {
-                "refereeId": "referee_1",
-                "referrerAccountAgeHours": 800,
-                "refereeAccountAgeHours": 1,
-                "sharePaymentInstrument": True,
-                "linkedAccountClusterSize": 4,
-            },
-        ),
-    )
-    cashback = await score(
-        signed_client,
-        build_risk_request(
-            "cashback", {"amount": naira(100_000), "buyerLinkedToSellerAccount": True, "accountAgeHours": 800}
-        ),
-    )
-    assert {"self_referral_ring", "referrer_and_referee_share_payment_instrument"} <= reason_codes(referral)
-    assert "buyer_linked_to_seller" in reason_codes(cashback)
+    for subject_type, field, signals in (
+        ("referral_reward", "referralReward", {"refereeId": "referee_1"}),
+        ("cashback", "cashback", {"amount": naira(100_000), "accountAgeHours": 800}),
+    ):
+        payload = build_risk_request("gift", {})
+        payload.pop("gift")
+        payload["subjectType"] = subject_type
+        payload[field] = signals
+        response = await signed_client.post("/v1/risk/score", payload)
+        assert response.status_code == 422
 
 
 async def test_signals_block_must_match_subject_type_exactly(signed_client: SignedIntelligenceClient) -> None:
     mismatched = build_risk_request("payout", {"eventKind": "login"})
     mismatched["accountEvent"] = mismatched.pop("payout")
     two_blocks = build_risk_request("account_event", {"eventKind": "login"})
-    two_blocks["cashback"] = {"amount": naira(1), "accountAgeHours": 1}
+    two_blocks["payout"] = {"amount": naira(1), "lifetimeEarnings": naira(1), "sellerAccountAgeHours": 1}
     for payload in (mismatched, two_blocks):
         response = await signed_client.post("/v1/risk/score", payload)
         assert response.status_code == 422

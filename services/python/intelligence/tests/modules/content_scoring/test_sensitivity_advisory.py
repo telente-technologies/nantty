@@ -2,11 +2,8 @@ import json
 from datetime import UTC, datetime
 
 from src.databases.in_memory_feature_database import InMemoryFeatureBackend
-from src.events.domain_event_dto import (
-    MediaProcessedDomainEvent,
-    domain_event_type_adapter,
-    normalize_contract_envelope,
-)
+from src.events.contract_envelope_normalizer import normalize_contract_envelope
+from src.events.domain_event_dto import MediaProcessedDomainEvent, domain_event_type_adapter
 from src.modules.content_scoring.dtos.content_score_dto import ContentScoreMessage, ImageModerationRequest
 from src.modules.content_scoring.dtos.sensitivity_advisory_dto import SensitivityAdvisedEvent
 from src.modules.content_scoring.services.content_scoring_service import ContentScoringService

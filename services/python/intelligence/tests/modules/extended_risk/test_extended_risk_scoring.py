@@ -68,18 +68,6 @@ CLEAN_AND_RISKY_CASES: list[tuple[str, str, dict[str, Any], dict[str, Any], set[
         {"click_velocity_actor", "datacenter_ip", "clicker_shares_device_with_advertiser"},
     ),
     (
-        "referral_removed",
-        "referralRemoved",
-        {"removalReason": "referee_deleted", "referralsTotalLast30Days": 2},
-        {
-            "removalReason": "self_referral",
-            "referralsRemovedLast30Days": 8,
-            "referralsTotalLast30Days": 10,
-            "refereeSharesDeviceWithReferrer": True,
-        },
-        {"self_referral_removed", "high_removal_rate", "referee_shares_device"},
-    ),
-    (
         "refund",
         "refund",
         {

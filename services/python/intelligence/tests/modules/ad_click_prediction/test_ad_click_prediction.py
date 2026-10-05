@@ -56,8 +56,9 @@ async def test_opted_out_viewer_is_not_personalized(
         )
     )
     service = application_container.ad_click_prediction_service
+    hashed_viewer = consumer.identifier_hasher.hash_user_id("viewer_ctr")
     request = AdClickPredictionRequest.model_validate(
-        {**prediction_payload("viewer_ctr"), "now": reference_now.isoformat()}
+        {**prediction_payload(hashed_viewer), "now": reference_now.isoformat()}
     )
     assert (await service.predict_ad_click_rate(request)).personalized is True
     await consumer.process_message_body(

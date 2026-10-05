@@ -32,9 +32,13 @@ def product_viewed(event_id: str, actor_id: str, occurred_at: datetime) -> str:
     )
 
 
+def hashed(container: ApplicationContainer, user_id: str) -> str:
+    return container.domain_event_consumer_service.identifier_hasher.hash_user_id(user_id)
+
+
 async def read_topic_affinity(backend: InMemoryFeatureBackend, container: ApplicationContainer, user_id: str) -> int:
     generation = find_forward_decay_generation(time.time(), AFFINITY_HALF_LIFE_SECONDS).generation_index
-    base = container.feature_store.keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, user_id)
+    base = container.feature_store.keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, hashed(container, user_id))
     rows = await backend.read_sorted_set_highest_members([f"{base}:g{generation}"], 10)
     return len(rows[0])
 
@@ -79,9 +83,10 @@ async def test_opted_out_user_gets_no_personalization_features(
     await consumer.process_message_body(product_viewed("evt_pv_b", "user_2", reference_now))
     assert await read_topic_affinity(feature_backend, application_container, "user_2") == 0
     store = application_container.feature_store
-    online = await store.read_viewer_online_features("user_2", [], ["fashion"], [], reference_now)
+    viewer = hashed(application_container, "user_2")
+    online = await store.read_viewer_online_features(viewer, [], ["fashion"], [], reference_now)
     assert online.topic_affinity_by_topic == {}
-    assert await store.read_viewer_top_topic_affinities("user_2", 5, reference_now) == []
+    assert await store.read_viewer_top_topic_affinities(viewer, 5, reference_now) == []
 
 
 async def test_opt_back_in_resumes_personalization(
@@ -217,6 +222,9 @@ async def test_contract_envelope_shape_and_deletion_request_stops_personalizatio
     assert (await consumer.process_message_body(json.dumps(envelope))).status == "processed"
     assert await read_topic_affinity(feature_backend, application_container, "user_5") == 0
     assert not await application_container.feature_store.is_personalization_allowed("user_5")
+    assert not await application_container.feature_store.is_personalization_allowed(
+        hashed(application_container, "user_5")
+    )
 
 
 async def test_contract_post_created_and_media_processed_reach_content_scoring(
