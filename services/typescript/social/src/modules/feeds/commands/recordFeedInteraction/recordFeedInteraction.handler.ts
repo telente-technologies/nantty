@@ -19,7 +19,7 @@ export function statIncrementsFor(command: RecordFeedInteractionCommand): Prisma
 
 export function interactionEventFor(command: RecordFeedInteractionCommand, post: PostRow, occurredAt: Date): DomainEventInput | null {
   if (command.viewerId === undefined || command.viewerId === post.authorId) return null;
-  const base = { actorId: command.viewerId, postId: post.id, authorId: post.authorId, kind: post.kind, topics: post.topics, hashtags: extractHashtags(post.text).slice(0, 20), surface: command.surface ?? null, rankingRequestId: command.rankingRequestId ?? null };
+  const base = { actorId: command.viewerId, postId: post.id, postAuthorId: post.authorId, authorId: post.authorId, kind: post.kind, topics: post.topics, hashtags: extractHashtags(post.text).slice(0, 20), surface: command.surface ?? null, rankingRequestId: command.rankingRequestId ?? null };
   if (command.kind === "view" || command.kind === "dwell") {
     return { eventType: socialEventTypes.postViewed, subject: post.id, occurredAt, data: { ...base, dwellMs: clamp(command.dwellMs, maximumMilliseconds), position: command.position ?? null, isProductPost: post.productIds.length > 0 } };
   }
