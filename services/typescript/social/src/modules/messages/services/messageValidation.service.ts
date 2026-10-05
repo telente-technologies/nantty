@@ -90,8 +90,8 @@ function validateDocument(input: OutgoingMessageInput): MessageDocument | null {
   if (input.kind !== "document") return null;
   const document = input.document;
   if (document === undefined) throw unprocessable("DOCUMENT_REQUIRED", "A document message needs file details.");
-  if (input.media === undefined) throw unprocessable("MEDIA_REQUIRED", "Upload the document first and send its media id.");
   if (document.sizeBytes <= 0 || document.sizeBytes > maximumDocumentBytes) throw unprocessable("DOCUMENT_TOO_LARGE", "Documents can be up to 100 MB.");
+  if (input.media === undefined) throw unprocessable("MEDIA_REQUIRED", "Upload the document first and send its media id.");
   return { fileName: document.fileName.slice(0, 200), mimeType: document.mimeType, sizeBytes: document.sizeBytes, pageCount: document.pageCount ?? null, url: null };
 }
 
