@@ -133,11 +133,11 @@ export interface ContentSource {
   readonly ineligibleReason: string | null;
 }
 
-export interface UploadSession {
-  readonly uploadId: string;
-  readonly chunkSizeBytes: number;
-  readonly totalChunks: number;
-  readonly uploadedChunks: readonly number[];
+export interface MediaUploadIntent {
+  readonly mediaId: string;
+  readonly uploadUrl: string;
+  readonly uploadHeaders: Readonly<Record<string, string>>;
+  readonly expiresAt: string;
 }
 
 export interface UploadedMedia {

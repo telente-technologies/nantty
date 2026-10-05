@@ -23,8 +23,4 @@ export interface MessageHistoryStore {
 
 export const buildMessageSyncCursor = (message: Pick<Message, "createdAt" | "id">) => `${message.createdAt}|${message.id}`;
 
-export const isMessageAfterSyncCursor = (message: Pick<Message, "createdAt" | "id">, cursor: string) => {
-  const [cursorCreatedAt = "", cursorMessageId = ""] = cursor.split("|");
-  if (message.createdAt !== cursorCreatedAt) return message.createdAt > cursorCreatedAt;
-  return message.id > cursorMessageId;
-};
+export const readMessageIdFromSyncCursor = (cursor: string) => cursor.split("|")[1] ?? cursor;

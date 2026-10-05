@@ -96,6 +96,16 @@ export interface ActivityChange {
 
 export type ActivityObjectType = "account" | "campaign" | "ad_set" | "ad" | "audience" | "billing" | "member" | "rule" | "experiment" | "conversion_event";
 
+export interface ActivityEntryResponse {
+  readonly id: string;
+  readonly objectType: ActivityObjectType;
+  readonly objectId: string;
+  readonly actor: string;
+  readonly summary: string;
+  readonly changes: unknown;
+  readonly createdAt: string;
+}
+
 export interface ActivityEntry {
   readonly id: string;
   readonly actor: { readonly id: string; readonly name: string; readonly isSystem: boolean };

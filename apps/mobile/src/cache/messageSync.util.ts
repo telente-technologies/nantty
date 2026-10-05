@@ -3,7 +3,7 @@ import { messagesService } from "@/services/messages.service";
 import type { Conversation, ConversationFilter } from "@/types";
 
 import { messageHistoryStore } from "./messageHistory.database";
-import type { LocallyStoredMessage } from "./messageHistory.type";
+import { readMessageIdFromSyncCursor, type LocallyStoredMessage } from "./messageHistory.type";
 
 const MAXIMUM_SYNC_PAGES_PER_OPEN = 10;
 
@@ -18,7 +18,7 @@ async function downloadMessagesNewerThanLocalHistory(conversationId: string) {
   let pageCursor: string | undefined;
   for (let pageNumber = 0; pageNumber < MAXIMUM_SYNC_PAGES_PER_OPEN; pageNumber++) {
     const page = await messagesService.fetchMessagesInConversation(conversationId, {
-      after: latestSyncCursor ?? undefined,
+      after: latestSyncCursor ? readMessageIdFromSyncCursor(latestSyncCursor) : undefined,
       cursor: pageCursor,
     });
     messageHistoryStore.saveDeliveredMessages(page.data);
@@ -41,7 +41,7 @@ export async function fetchConversationListAndSaveLocally(filter: ConversationFi
   try {
     const conversations = await messagesService.fetchConversationList(filter);
     messageHistoryStore.saveConversations(conversations);
-    return conversations;
+    return [...conversations];
   } catch (error) {
     const savedConversations = messageHistoryStore.readSavedConversations(filter);
     if (!isNetworkFailureError(error) || savedConversations.length === 0) throw error;
