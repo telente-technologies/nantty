@@ -57,6 +57,7 @@ type PayoutOnboardingInputs struct {
 	PayoutsActive       bool
 	AccountRoles        []string
 	LatestJobs          []OnboardingJobSnapshot
+	DocumentStatus      string
 }
 
 func MapPayoutAccountStatus(rowStatus, verificationStatus string) string {
@@ -67,6 +68,8 @@ func MapPayoutAccountStatus(rowStatus, verificationStatus string) string {
 		return "failed"
 	case verificationStatus == "actionNeeded":
 		return "actionRequired"
+	case verificationStatus == "documentsRequired":
+		return "documentsRequired"
 	case verificationStatus == "verified":
 		return "verified"
 	}
@@ -121,7 +124,13 @@ func BuildPayoutOnboardingState(inputs PayoutOnboardingInputs) PayoutOnboardingS
 	}
 	state.CurrentStep = nextOnboardingStep(state.CompletedSteps, inputs.RegisteredBusiness, accountStatus)
 	state.DocumentStatus = documentStatusFor(accountStatus)
-	state.RequiresDocumentStep = false
+	state.RequiresDocumentStep = accountStatus == "documentsRequired"
+	if state.RequiresDocumentStep {
+		state.DocumentStatus = firstNonEmpty(inputs.DocumentStatus, "not_started")
+		if state.DocumentStatus == "approved" || state.DocumentStatus == "in_review" {
+			state.DocumentStatus = "not_started"
+		}
+	}
 	verified := accountStatus == "verified"
 	state.WithdrawalsEnabled = verified && inputs.PayoutsActive
 	if verified && len(inputs.AccountRoles) > 0 {
@@ -133,7 +142,7 @@ func BuildPayoutOnboardingState(inputs PayoutOnboardingInputs) PayoutOnboardingS
 		state.Status = "not_started"
 	case verified:
 		state.Status = "verified"
-	case needsAttention || accountStatus == "actionRequired":
+	case needsAttention || accountStatus == "actionRequired" || accountStatus == "documentsRequired":
 		state.Status = "action_needed"
 	case state.CurrentStep == "done" || state.CurrentStep == "verify" && accountStatus == "underReview":
 		state.Status = "pending_review"
@@ -152,8 +161,8 @@ func nextOnboardingStep(completed []string, registeredBusiness bool, accountStat
 			return step
 		}
 	}
-	if accountStatus == "verified" {
-		return "done"
+	if accountStatus == "documentsRequired" {
+		return "document"
 	}
 	return "done"
 }
@@ -178,4 +187,13 @@ func NamesMatchIgnoringOrderAndCase(first, second string) bool {
 	}
 	left, right := normalize(first), normalize(second)
 	return len(left) > 0 && slices.Equal(left, right)
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if value != "" {
+			return value
+		}
+	}
+	return ""
 }

@@ -79,11 +79,27 @@ func TestBankNameMustMatchTheLegalNameIgnoringOrderAndCase(t *testing.T) {
 	}
 }
 
-func TestPaystackOnboardingNeverAsksForAnIdDocument(t *testing.T) {
-	for _, verification := range []string{"not_started", "documentsRequired", "inProgress", "underReview", "verified"} {
+func TestOnboardingAsksForAnIdDocumentOnlyWhenTheAccountRequiresOne(t *testing.T) {
+	for _, verification := range []string{"not_started", "inProgress", "underReview", "verified"} {
 		state := BuildPayoutOnboardingState(PayoutOnboardingInputs{CompletedSteps: []string{"identity", "bank"}, AccountRowStatus: "created", VerificationStatus: verification, PayoutsActive: true})
 		if state.RequiresDocumentStep || state.AccountStatus == "documentsRequired" || state.CurrentStep == "verify" || state.DocumentStatus == "required" {
 			t.Fatalf("%s: %+v", verification, state)
 		}
+	}
+}
+
+func TestDocumentsRequiredAccountsShowTheDocumentStep(t *testing.T) {
+	inputs := PayoutOnboardingInputs{CompletedSteps: []string{"identity", "bank"}, AccountRowStatus: "created", VerificationStatus: "documentsRequired"}
+	state := BuildPayoutOnboardingState(inputs)
+	if !state.RequiresDocumentStep || state.AccountStatus != "documentsRequired" || state.CurrentStep != "document" || state.DocumentStatus != "not_started" || state.Status != "action_needed" {
+		t.Fatalf("documents required: %+v", state)
+	}
+	inputs.DocumentStatus = "link_issued"
+	if state := BuildPayoutOnboardingState(inputs); state.DocumentStatus != "link_issued" {
+		t.Fatalf("issued link: %+v", state)
+	}
+	inputs.VerificationStatus, inputs.DocumentStatus = "underReview", "in_review"
+	if state := BuildPayoutOnboardingState(inputs); state.RequiresDocumentStep || state.DocumentStatus != "in_review" || state.Status != "pending_review" {
+		t.Fatalf("submitted documents: %+v", state)
 	}
 }

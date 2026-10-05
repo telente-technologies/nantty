@@ -59,7 +59,12 @@ func (controller ConnectedAccountsController) CreateMyOnboardingLink(writer http
 		controller.fail(writer, request, err)
 		return
 	}
-	controller.fail(writer, request, controller.Application.Gateway.CreatePayoutVerificationLink(request.Context(), principal.UserId))
+	link, err := controller.Application.Gateway.CreatePayoutVerificationLink(request.Context(), principal.UserId)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, dtos.OnboardingLinkDto{Url: link.Url, ExpiresAt: link.ExpiresAt})
 }
 
 func (controller ConnectedAccountsController) StartWebSubscriptionCheckout(writer http.ResponseWriter, request *http.Request) {
