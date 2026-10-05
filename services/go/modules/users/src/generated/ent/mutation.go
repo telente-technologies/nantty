@@ -27310,6 +27310,7 @@ type ShippingAddressMutation struct {
 	label           *string
 	recipient_name  *string
 	phone           *string
+	phone_sealed    *[]byte
 	line1           *string
 	line2           *string
 	postal_code     *string
@@ -27610,6 +27611,55 @@ func (m *ShippingAddressMutation) OldPhone(ctx context.Context) (v string, err e
 // ResetPhone resets all changes to the "phone" field.
 func (m *ShippingAddressMutation) ResetPhone() {
 	m.phone = nil
+}
+
+// SetPhoneSealed sets the "phone_sealed" field.
+func (m *ShippingAddressMutation) SetPhoneSealed(b []byte) {
+	m.phone_sealed = &b
+}
+
+// PhoneSealed returns the value of the "phone_sealed" field in the mutation.
+func (m *ShippingAddressMutation) PhoneSealed() (r []byte, exists bool) {
+	v := m.phone_sealed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhoneSealed returns the old "phone_sealed" field's value of the ShippingAddress entity.
+// If the ShippingAddress object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ShippingAddressMutation) OldPhoneSealed(ctx context.Context) (v *[]byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhoneSealed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhoneSealed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhoneSealed: %w", err)
+	}
+	return oldValue.PhoneSealed, nil
+}
+
+// ClearPhoneSealed clears the value of the "phone_sealed" field.
+func (m *ShippingAddressMutation) ClearPhoneSealed() {
+	m.phone_sealed = nil
+	m.clearedFields[shippingaddress.FieldPhoneSealed] = struct{}{}
+}
+
+// PhoneSealedCleared returns if the "phone_sealed" field was cleared in this mutation.
+func (m *ShippingAddressMutation) PhoneSealedCleared() bool {
+	_, ok := m.clearedFields[shippingaddress.FieldPhoneSealed]
+	return ok
+}
+
+// ResetPhoneSealed resets all changes to the "phone_sealed" field.
+func (m *ShippingAddressMutation) ResetPhoneSealed() {
+	m.phone_sealed = nil
+	delete(m.clearedFields, shippingaddress.FieldPhoneSealed)
 }
 
 // SetLine1 sets the "line1" field.
@@ -28117,7 +28167,7 @@ func (m *ShippingAddressMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ShippingAddressMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.created_at != nil {
 		fields = append(fields, shippingaddress.FieldCreatedAt)
 	}
@@ -28132,6 +28182,9 @@ func (m *ShippingAddressMutation) Fields() []string {
 	}
 	if m.phone != nil {
 		fields = append(fields, shippingaddress.FieldPhone)
+	}
+	if m.phone_sealed != nil {
+		fields = append(fields, shippingaddress.FieldPhoneSealed)
 	}
 	if m.line1 != nil {
 		fields = append(fields, shippingaddress.FieldLine1)
@@ -28187,6 +28240,8 @@ func (m *ShippingAddressMutation) Field(name string) (ent.Value, bool) {
 		return m.RecipientName()
 	case shippingaddress.FieldPhone:
 		return m.Phone()
+	case shippingaddress.FieldPhoneSealed:
+		return m.PhoneSealed()
 	case shippingaddress.FieldLine1:
 		return m.Line1()
 	case shippingaddress.FieldLine2:
@@ -28230,6 +28285,8 @@ func (m *ShippingAddressMutation) OldField(ctx context.Context, name string) (en
 		return m.OldRecipientName(ctx)
 	case shippingaddress.FieldPhone:
 		return m.OldPhone(ctx)
+	case shippingaddress.FieldPhoneSealed:
+		return m.OldPhoneSealed(ctx)
 	case shippingaddress.FieldLine1:
 		return m.OldLine1(ctx)
 	case shippingaddress.FieldLine2:
@@ -28297,6 +28354,13 @@ func (m *ShippingAddressMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPhone(v)
+		return nil
+	case shippingaddress.FieldPhoneSealed:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhoneSealed(v)
 		return nil
 	case shippingaddress.FieldLine1:
 		v, ok := value.(string)
@@ -28412,6 +28476,9 @@ func (m *ShippingAddressMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *ShippingAddressMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(shippingaddress.FieldPhoneSealed) {
+		fields = append(fields, shippingaddress.FieldPhoneSealed)
+	}
 	if m.FieldCleared(shippingaddress.FieldRegionID) {
 		fields = append(fields, shippingaddress.FieldRegionID)
 	}
@@ -28435,6 +28502,9 @@ func (m *ShippingAddressMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *ShippingAddressMutation) ClearField(name string) error {
 	switch name {
+	case shippingaddress.FieldPhoneSealed:
+		m.ClearPhoneSealed()
+		return nil
 	case shippingaddress.FieldRegionID:
 		m.ClearRegionID()
 		return nil
@@ -28466,6 +28536,9 @@ func (m *ShippingAddressMutation) ResetField(name string) error {
 		return nil
 	case shippingaddress.FieldPhone:
 		m.ResetPhone()
+		return nil
+	case shippingaddress.FieldPhoneSealed:
+		m.ResetPhoneSealed()
 		return nil
 	case shippingaddress.FieldLine1:
 		m.ResetLine1()
@@ -29683,6 +29756,8 @@ type TopicMutation struct {
 	position      *int
 	addposition   *int
 	active        *bool
+	is_trending   *bool
+	updated_at    *time.Time
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Topic, error)
@@ -29921,6 +29996,78 @@ func (m *TopicMutation) ResetActive() {
 	m.active = nil
 }
 
+// SetIsTrending sets the "is_trending" field.
+func (m *TopicMutation) SetIsTrending(b bool) {
+	m.is_trending = &b
+}
+
+// IsTrending returns the value of the "is_trending" field in the mutation.
+func (m *TopicMutation) IsTrending() (r bool, exists bool) {
+	v := m.is_trending
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsTrending returns the old "is_trending" field's value of the Topic entity.
+// If the Topic object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TopicMutation) OldIsTrending(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsTrending is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsTrending requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsTrending: %w", err)
+	}
+	return oldValue.IsTrending, nil
+}
+
+// ResetIsTrending resets all changes to the "is_trending" field.
+func (m *TopicMutation) ResetIsTrending() {
+	m.is_trending = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *TopicMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *TopicMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Topic entity.
+// If the Topic object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TopicMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *TopicMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 // Where appends a list predicates to the TopicMutation builder.
 func (m *TopicMutation) Where(ps ...predicate.Topic) {
 	m.predicates = append(m.predicates, ps...)
@@ -29955,7 +30102,7 @@ func (m *TopicMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TopicMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 5)
 	if m.name != nil {
 		fields = append(fields, topic.FieldName)
 	}
@@ -29964,6 +30111,12 @@ func (m *TopicMutation) Fields() []string {
 	}
 	if m.active != nil {
 		fields = append(fields, topic.FieldActive)
+	}
+	if m.is_trending != nil {
+		fields = append(fields, topic.FieldIsTrending)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, topic.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -29979,6 +30132,10 @@ func (m *TopicMutation) Field(name string) (ent.Value, bool) {
 		return m.Position()
 	case topic.FieldActive:
 		return m.Active()
+	case topic.FieldIsTrending:
+		return m.IsTrending()
+	case topic.FieldUpdatedAt:
+		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -29994,6 +30151,10 @@ func (m *TopicMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldPosition(ctx)
 	case topic.FieldActive:
 		return m.OldActive(ctx)
+	case topic.FieldIsTrending:
+		return m.OldIsTrending(ctx)
+	case topic.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Topic field %s", name)
 }
@@ -30023,6 +30184,20 @@ func (m *TopicMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetActive(v)
+		return nil
+	case topic.FieldIsTrending:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsTrending(v)
+		return nil
+	case topic.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Topic field %s", name)
@@ -30096,6 +30271,12 @@ func (m *TopicMutation) ResetField(name string) error {
 		return nil
 	case topic.FieldActive:
 		m.ResetActive()
+		return nil
+	case topic.FieldIsTrending:
+		m.ResetIsTrending()
+		return nil
+	case topic.FieldUpdatedAt:
+		m.ResetUpdatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Topic field %s", name)

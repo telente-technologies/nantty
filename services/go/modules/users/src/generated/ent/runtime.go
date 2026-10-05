@@ -1444,24 +1444,12 @@ func init() {
 	}()
 	// shippingaddressDescPhone is the schema descriptor for phone field.
 	shippingaddressDescPhone := shippingaddressFields[3].Descriptor()
+	// shippingaddress.DefaultPhone holds the default value on creation for the phone field.
+	shippingaddress.DefaultPhone = shippingaddressDescPhone.Default.(string)
 	// shippingaddress.PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
-	shippingaddress.PhoneValidator = func() func(string) error {
-		validators := shippingaddressDescPhone.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(phone string) error {
-			for _, fn := range fns {
-				if err := fn(phone); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
+	shippingaddress.PhoneValidator = shippingaddressDescPhone.Validators[0].(func(string) error)
 	// shippingaddressDescLine1 is the schema descriptor for line1 field.
-	shippingaddressDescLine1 := shippingaddressFields[4].Descriptor()
+	shippingaddressDescLine1 := shippingaddressFields[5].Descriptor()
 	// shippingaddress.Line1Validator is a validator for the "line1" field. It is called by the builders before save.
 	shippingaddress.Line1Validator = func() func(string) error {
 		validators := shippingaddressDescLine1.Validators
@@ -1479,25 +1467,25 @@ func init() {
 		}
 	}()
 	// shippingaddressDescLine2 is the schema descriptor for line2 field.
-	shippingaddressDescLine2 := shippingaddressFields[5].Descriptor()
+	shippingaddressDescLine2 := shippingaddressFields[6].Descriptor()
 	// shippingaddress.DefaultLine2 holds the default value on creation for the line2 field.
 	shippingaddress.DefaultLine2 = shippingaddressDescLine2.Default.(string)
 	// shippingaddress.Line2Validator is a validator for the "line2" field. It is called by the builders before save.
 	shippingaddress.Line2Validator = shippingaddressDescLine2.Validators[0].(func(string) error)
 	// shippingaddressDescPostalCode is the schema descriptor for postal_code field.
-	shippingaddressDescPostalCode := shippingaddressFields[6].Descriptor()
+	shippingaddressDescPostalCode := shippingaddressFields[7].Descriptor()
 	// shippingaddress.DefaultPostalCode holds the default value on creation for the postal_code field.
 	shippingaddress.DefaultPostalCode = shippingaddressDescPostalCode.Default.(string)
 	// shippingaddress.PostalCodeValidator is a validator for the "postal_code" field. It is called by the builders before save.
 	shippingaddress.PostalCodeValidator = shippingaddressDescPostalCode.Validators[0].(func(string) error)
 	// shippingaddressDescDetails is the schema descriptor for details field.
-	shippingaddressDescDetails := shippingaddressFields[7].Descriptor()
+	shippingaddressDescDetails := shippingaddressFields[8].Descriptor()
 	// shippingaddress.DefaultDetails holds the default value on creation for the details field.
 	shippingaddress.DefaultDetails = shippingaddressDescDetails.Default.(string)
 	// shippingaddress.DetailsValidator is a validator for the "details" field. It is called by the builders before save.
 	shippingaddress.DetailsValidator = shippingaddressDescDetails.Validators[0].(func(string) error)
 	// shippingaddressDescCountryCode is the schema descriptor for country_code field.
-	shippingaddressDescCountryCode := shippingaddressFields[8].Descriptor()
+	shippingaddressDescCountryCode := shippingaddressFields[9].Descriptor()
 	// shippingaddress.CountryCodeValidator is a validator for the "country_code" field. It is called by the builders before save.
 	shippingaddress.CountryCodeValidator = func() func(string) error {
 		validators := shippingaddressDescCountryCode.Validators
@@ -1515,23 +1503,23 @@ func init() {
 		}
 	}()
 	// shippingaddressDescFreeTextCity is the schema descriptor for free_text_city field.
-	shippingaddressDescFreeTextCity := shippingaddressFields[12].Descriptor()
+	shippingaddressDescFreeTextCity := shippingaddressFields[13].Descriptor()
 	// shippingaddress.DefaultFreeTextCity holds the default value on creation for the free_text_city field.
 	shippingaddress.DefaultFreeTextCity = shippingaddressDescFreeTextCity.Default.(string)
 	// shippingaddress.FreeTextCityValidator is a validator for the "free_text_city" field. It is called by the builders before save.
 	shippingaddress.FreeTextCityValidator = shippingaddressDescFreeTextCity.Validators[0].(func(string) error)
 	// shippingaddressDescFreeTextState is the schema descriptor for free_text_state field.
-	shippingaddressDescFreeTextState := shippingaddressFields[13].Descriptor()
+	shippingaddressDescFreeTextState := shippingaddressFields[14].Descriptor()
 	// shippingaddress.DefaultFreeTextState holds the default value on creation for the free_text_state field.
 	shippingaddress.DefaultFreeTextState = shippingaddressDescFreeTextState.Default.(string)
 	// shippingaddress.FreeTextStateValidator is a validator for the "free_text_state" field. It is called by the builders before save.
 	shippingaddress.FreeTextStateValidator = shippingaddressDescFreeTextState.Validators[0].(func(string) error)
 	// shippingaddressDescIsDefault is the schema descriptor for is_default field.
-	shippingaddressDescIsDefault := shippingaddressFields[14].Descriptor()
+	shippingaddressDescIsDefault := shippingaddressFields[15].Descriptor()
 	// shippingaddress.DefaultIsDefault holds the default value on creation for the is_default field.
 	shippingaddress.DefaultIsDefault = shippingaddressDescIsDefault.Default.(bool)
 	// shippingaddressDescUpdatedAt is the schema descriptor for updated_at field.
-	shippingaddressDescUpdatedAt := shippingaddressFields[15].Descriptor()
+	shippingaddressDescUpdatedAt := shippingaddressFields[16].Descriptor()
 	// shippingaddress.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	shippingaddress.DefaultUpdatedAt = shippingaddressDescUpdatedAt.Default.(func() time.Time)
 	// shippingaddress.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -1624,6 +1612,16 @@ func init() {
 	topicDescActive := topicFields[3].Descriptor()
 	// topic.DefaultActive holds the default value on creation for the active field.
 	topic.DefaultActive = topicDescActive.Default.(bool)
+	// topicDescIsTrending is the schema descriptor for is_trending field.
+	topicDescIsTrending := topicFields[4].Descriptor()
+	// topic.DefaultIsTrending holds the default value on creation for the is_trending field.
+	topic.DefaultIsTrending = topicDescIsTrending.Default.(bool)
+	// topicDescUpdatedAt is the schema descriptor for updated_at field.
+	topicDescUpdatedAt := topicFields[5].Descriptor()
+	// topic.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	topic.DefaultUpdatedAt = topicDescUpdatedAt.Default.(func() time.Time)
+	// topic.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	topic.UpdateDefaultUpdatedAt = topicDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// topicDescID is the schema descriptor for id field.
 	topicDescID := topicFields[0].Descriptor()
 	// topic.IDValidator is a validator for the "id" field. It is called by the builders before save.

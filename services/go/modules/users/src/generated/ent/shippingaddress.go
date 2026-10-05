@@ -28,6 +28,8 @@ type ShippingAddress struct {
 	RecipientName string `json:"recipient_name,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
+	// PhoneSealed holds the value of the "phone_sealed" field.
+	PhoneSealed *[]byte `json:"-"`
 	// Line1 holds the value of the "line1" field.
 	Line1 string `json:"line1,omitempty"`
 	// Line2 holds the value of the "line2" field.
@@ -62,6 +64,8 @@ func (*ShippingAddress) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case shippingaddress.FieldRegionID, shippingaddress.FieldAdminAreaID, shippingaddress.FieldCityID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case shippingaddress.FieldPhoneSealed:
+			values[i] = new([]byte)
 		case shippingaddress.FieldIsDefault:
 			values[i] = new(sql.NullBool)
 		case shippingaddress.FieldLabel, shippingaddress.FieldRecipientName, shippingaddress.FieldPhone, shippingaddress.FieldLine1, shippingaddress.FieldLine2, shippingaddress.FieldPostalCode, shippingaddress.FieldDetails, shippingaddress.FieldCountryCode, shippingaddress.FieldFreeTextCity, shippingaddress.FieldFreeTextState:
@@ -120,6 +124,12 @@ func (_m *ShippingAddress) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field phone", values[i])
 			} else if value.Valid {
 				_m.Phone = value.String
+			}
+		case shippingaddress.FieldPhoneSealed:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field phone_sealed", values[i])
+			} else if value != nil {
+				_m.PhoneSealed = value
 			}
 		case shippingaddress.FieldLine1:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -246,6 +256,8 @@ func (_m *ShippingAddress) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("phone=")
 	builder.WriteString(_m.Phone)
+	builder.WriteString(", ")
+	builder.WriteString("phone_sealed=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("line1=")
 	builder.WriteString(_m.Line1)

@@ -67,6 +67,20 @@ func (_c *ShippingAddressCreate) SetPhone(v string) *ShippingAddressCreate {
 	return _c
 }
 
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (_c *ShippingAddressCreate) SetNillablePhone(v *string) *ShippingAddressCreate {
+	if v != nil {
+		_c.SetPhone(*v)
+	}
+	return _c
+}
+
+// SetPhoneSealed sets the "phone_sealed" field.
+func (_c *ShippingAddressCreate) SetPhoneSealed(v []byte) *ShippingAddressCreate {
+	_c.mutation.SetPhoneSealed(v)
+	return _c
+}
+
 // SetLine1 sets the "line1" field.
 func (_c *ShippingAddressCreate) SetLine1(v string) *ShippingAddressCreate {
 	_c.mutation.SetLine1(v)
@@ -276,6 +290,10 @@ func (_c *ShippingAddressCreate) defaults() {
 		v := shippingaddress.DefaultLabel
 		_c.mutation.SetLabel(v)
 	}
+	if _, ok := _c.mutation.Phone(); !ok {
+		v := shippingaddress.DefaultPhone
+		_c.mutation.SetPhone(v)
+	}
 	if _, ok := _c.mutation.Line2(); !ok {
 		v := shippingaddress.DefaultLine2
 		_c.mutation.SetLine2(v)
@@ -458,6 +476,10 @@ func (_c *ShippingAddressCreate) createSpec() (*ShippingAddress, *sqlgraph.Creat
 	if value, ok := _c.mutation.Phone(); ok {
 		_spec.SetField(shippingaddress.FieldPhone, field.TypeString, value)
 		_node.Phone = value
+	}
+	if value, ok := _c.mutation.PhoneSealed(); ok {
+		_spec.SetField(shippingaddress.FieldPhoneSealed, field.TypeBytes, value)
+		_node.PhoneSealed = &value
 	}
 	if value, ok := _c.mutation.Line1(); ok {
 		_spec.SetField(shippingaddress.FieldLine1, field.TypeString, value)

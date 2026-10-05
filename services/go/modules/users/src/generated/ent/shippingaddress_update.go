@@ -71,6 +71,18 @@ func (_u *ShippingAddressUpdate) SetNillablePhone(v *string) *ShippingAddressUpd
 	return _u
 }
 
+// SetPhoneSealed sets the "phone_sealed" field.
+func (_u *ShippingAddressUpdate) SetPhoneSealed(v []byte) *ShippingAddressUpdate {
+	_u.mutation.SetPhoneSealed(v)
+	return _u
+}
+
+// ClearPhoneSealed clears the value of the "phone_sealed" field.
+func (_u *ShippingAddressUpdate) ClearPhoneSealed() *ShippingAddressUpdate {
+	_u.mutation.ClearPhoneSealed()
+	return _u
+}
+
 // SetLine1 sets the "line1" field.
 func (_u *ShippingAddressUpdate) SetLine1(v string) *ShippingAddressUpdate {
 	_u.mutation.SetLine1(v)
@@ -366,6 +378,12 @@ func (_u *ShippingAddressUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if value, ok := _u.mutation.Phone(); ok {
 		_spec.SetField(shippingaddress.FieldPhone, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.PhoneSealed(); ok {
+		_spec.SetField(shippingaddress.FieldPhoneSealed, field.TypeBytes, value)
+	}
+	if _u.mutation.PhoneSealedCleared() {
+		_spec.ClearField(shippingaddress.FieldPhoneSealed, field.TypeBytes)
+	}
 	if value, ok := _u.mutation.Line1(); ok {
 		_spec.SetField(shippingaddress.FieldLine1, field.TypeString, value)
 	}
@@ -470,6 +488,18 @@ func (_u *ShippingAddressUpdateOne) SetNillablePhone(v *string) *ShippingAddress
 	if v != nil {
 		_u.SetPhone(*v)
 	}
+	return _u
+}
+
+// SetPhoneSealed sets the "phone_sealed" field.
+func (_u *ShippingAddressUpdateOne) SetPhoneSealed(v []byte) *ShippingAddressUpdateOne {
+	_u.mutation.SetPhoneSealed(v)
+	return _u
+}
+
+// ClearPhoneSealed clears the value of the "phone_sealed" field.
+func (_u *ShippingAddressUpdateOne) ClearPhoneSealed() *ShippingAddressUpdateOne {
+	_u.mutation.ClearPhoneSealed()
 	return _u
 }
 
@@ -797,6 +827,12 @@ func (_u *ShippingAddressUpdateOne) sqlSave(ctx context.Context) (_node *Shippin
 	}
 	if value, ok := _u.mutation.Phone(); ok {
 		_spec.SetField(shippingaddress.FieldPhone, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PhoneSealed(); ok {
+		_spec.SetField(shippingaddress.FieldPhoneSealed, field.TypeBytes, value)
+	}
+	if _u.mutation.PhoneSealedCleared() {
+		_spec.ClearField(shippingaddress.FieldPhoneSealed, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.Line1(); ok {
 		_spec.SetField(shippingaddress.FieldLine1, field.TypeString, value)
