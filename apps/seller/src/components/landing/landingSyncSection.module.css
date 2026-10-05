@@ -4,7 +4,7 @@
 
 .inner {
   display: grid;
-  gap: 40px;
+  gap: var(--space-8);
   align-items: center;
   max-width: var(--landing-width);
   margin: 0 auto;
@@ -55,14 +55,14 @@
 
 .list {
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
   border-top: 1px solid var(--divider);
 }
 
 .list li {
   display: grid;
-  gap: 4px;
-  padding: 16px 0;
+  gap: var(--space-1);
+  padding: var(--space-4) 0;
   border-bottom: 1px solid var(--divider);
 }
 
