@@ -17,7 +17,7 @@
 }
 
 .heading {
-  margin-top: 12px;
+  margin-top: var(--space-3);
   max-width: 18ch;
   font-size: clamp(2rem, 4.6vw, 3.4rem);
   line-height: 1.05;
@@ -26,8 +26,8 @@
 
 .steps {
   display: grid;
-  gap: 16px;
-  margin-top: clamp(36px, 5vw, 56px);
+  gap: var(--space-4);
+  margin-top: clamp(36px, 5vw, var(--space-9));
 }
 
 .stepCard {
@@ -41,9 +41,9 @@
 
 .stepText {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   align-content: start;
-  padding: 24px 24px 20px;
+  padding: var(--space-6) var(--space-6) var(--space-5);
 }
 
 .stepNumber {

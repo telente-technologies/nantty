@@ -1,11 +1,11 @@
 .hero {
-  padding: clamp(40px, 7vw, 88px) var(--landing-gutter) 0;
+  padding: clamp(var(--space-8), 7vw, 88px) var(--landing-gutter) 0;
   overflow: hidden;
 }
 
 .layout {
   display: grid;
-  gap: 56px;
+  gap: var(--space-9);
   max-width: var(--landing-width);
   margin: 0 auto;
 }
@@ -73,7 +73,7 @@
   flex: 1;
   min-width: 0;
   height: 48px;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   border: 0;
   outline: none;
   background: transparent;
@@ -87,7 +87,7 @@
 .signInButton {
   flex: none;
   height: 48px;
-  padding: 0 20px;
+  padding: 0 var(--space-5);
   border: 0;
   border-radius: var(--radius-pill);
   background: var(--color-brand-solid);
@@ -102,7 +102,7 @@
 .proofList {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 20px;
+  gap: var(--space-2) var(--space-5);
   color: var(--ink-muted);
   font-size: var(--fs-14);
 }
@@ -117,7 +117,7 @@
 .stage {
   position: relative;
   min-height: 380px;
-  padding: 40px 0 0 4%;
+  padding: var(--space-8) 0 0 4%;
 }
 
 .stagePanel {
@@ -143,7 +143,7 @@
   align-items: center;
   gap: 6px;
   height: 30px;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   background: var(--surface-sunken);
 }
 
@@ -155,8 +155,8 @@
 }
 
 .browserBar p {
-  margin-left: 12px;
-  padding: 2px 12px;
+  margin-left: var(--space-3);
+  padding: 2px var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--ink-faint);
@@ -174,7 +174,7 @@
   left: -6%;
   bottom: -40px;
   width: 46%;
-  padding: 8px;
+  padding: var(--space-2);
   border-radius: 18px;
   background: var(--deep-surface);
   box-shadow: var(--landing-stage-shadow);
@@ -192,7 +192,7 @@
   z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   max-width: 260px;
   padding: 10px 14px;
   border-radius: 14px;
@@ -261,7 +261,7 @@
   .layout {
     grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
     align-items: center;
-    gap: 40px;
+    gap: var(--space-8);
   }
 
   .stage {
