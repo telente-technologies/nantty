@@ -13,7 +13,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/storecreditentry"
 )
 
-func RecordOrderRefund(ctx context.Context, deployed *container.Container, orderId uuid.UUID, refundedMinor int64) error {
+func RecordOrderRefund(ctx context.Context, deployed *container.Container, orderId uuid.UUID, refundedMinor int64, disputeId string) error {
 	released := false
 	err := deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		group, err := LockOrderGroup(ctx, tx, orderId)
@@ -21,6 +21,9 @@ func RecordOrderRefund(ctx context.Context, deployed *container.Container, order
 			return err
 		}
 		now := deployed.Now()
+		if err := settleRefundRecords(ctx, tx, group, refundedMinor, disputeId, now); err != nil {
+			return err
+		}
 		full := refundedMinor >= group.TotalMinor
 		paymentStatus := enums.PaymentPartiallyRefunded
 		if full {

@@ -8,6 +8,7 @@ import (
 
 	"zudomart/modules/orders/src/enums"
 	"zudomart/modules/orders/src/generated/ent"
+	"zudomart/platform/commerceports"
 	"zudomart/platform/money"
 )
 
@@ -29,15 +30,24 @@ type ReportResult struct {
 }
 
 type ReportData struct {
-	Currency money.CurrencyCode
-	From     time.Time
-	To       time.Time
-	Groups   []*ent.OrderGroup
-	Items    map[uuid.UUID][]*ent.OrderItem
-	Now      time.Time
+	Currency     money.CurrencyCode
+	From         time.Time
+	To           time.Time
+	Groups       []*ent.OrderGroup
+	Items        map[uuid.UUID][]*ent.OrderItem
+	Now          time.Time
+	FirstOrderAt map[uuid.UUID]time.Time
+	Tax          *commerceports.StoreTaxSettings
 }
 
-var ReportKinds = []string{"sales-by-day", "sales-by-product", "sales-by-category", "orders-by-status", "top-customers", "best-sellers"}
+var OrderReportKinds = []string{"sales-by-day", "sales-by-product", "sales-by-category", "sales-by-location", "tax", "orders-by-status", "order-fulfilment-time",
+	"customers-new-vs-returning", "top-customers", "best-sellers"}
+
+var SourcedReportKinds = []string{"inventory-valuation", "low-stock", "slow-sellers", "settlements", "fees", "refunds", "payouts", "ads-campaigns"}
+
+var ReportKinds = append(append([]string{}, OrderReportKinds...), SourcedReportKinds...)
+
+var LocationReportKinds = []string{"sales-by-day", "sales-by-product", "sales-by-category", "inventory-valuation", "low-stock"}
 
 func isSale(group *ent.OrderGroup) bool {
 	switch group.Status {
@@ -69,6 +79,14 @@ func BuildReport(kind string, data ReportData) (ReportResult, bool) {
 		return ordersByStatus(data), true
 	case "top-customers":
 		return topCustomers(data), true
+	case "sales-by-location":
+		return salesByLocation(data), true
+	case "tax":
+		return taxReport(data), true
+	case "order-fulfilment-time":
+		return orderFulfilmentTime(data), true
+	case "customers-new-vs-returning":
+		return customersNewVsReturning(data), true
 	}
 	return ReportResult{}, false
 }

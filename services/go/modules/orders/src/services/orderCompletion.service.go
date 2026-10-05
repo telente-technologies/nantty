@@ -32,6 +32,9 @@ func CompleteOrderGroup(ctx context.Context, deployed *container.Container, orde
 		if err != nil {
 			return err
 		}
+		if err := enqueueOrderCompleted(ctx, tx, completed, now); err != nil {
+			return err
+		}
 		return earnStoreCredit(ctx, tx, completed, now)
 	})
 }

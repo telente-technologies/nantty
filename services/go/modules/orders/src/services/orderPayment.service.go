@@ -47,9 +47,8 @@ func RecordOrderPaid(ctx context.Context, deployed *container.Container, orderId
 			if err := AppendTimelineEvent(ctx, tx, locked.ID, "note", "Payment arrived after the order was cancelled; a refund was requested", SystemActor); err != nil {
 				return err
 			}
-			return events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.refundRequested", locked.ID.String(), now, map[string]any{
-				"orderGroupId": locked.ID, "storeId": locked.StoreID, "buyerAccountId": locked.BuyerAccountID, "amountMinor": locked.TotalMinor, "currency": locked.Currency, "reason": "paid after cancellation",
-			})
+			_, err := EnqueueRefundRequest(ctx, tx, locked, RefundRequestRecord{AmountMinor: locked.TotalMinor, Currency: locked.Currency, Reason: "paid after cancellation", Source: RefundSourceCancellation}, now)
+			return err
 		}
 		return nil
 	})
@@ -102,8 +101,13 @@ func markGroupPaid(ctx context.Context, deployed *container.Container, tx *ent.T
 			return err
 		}
 	}
+	attributed, err := loadAttributedSaleItems(ctx, tx, group)
+	if err != nil {
+		return err
+	}
 	if err := events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.paid", group.ID.String(), now, map[string]any{
-		"orderGroupId": group.ID, "checkoutId": group.CheckoutID, "storeId": group.StoreID, "buyerAccountId": group.BuyerAccountID, "totalMinor": group.TotalMinor, "currency": group.Currency,
+		"orderGroupId": group.ID, "checkoutId": group.CheckoutID, "storeId": group.StoreID, "sellerAccountId": group.SellerAccountID, "buyerAccountId": group.BuyerAccountID,
+		"totalMinor": group.TotalMinor, "currency": group.Currency, "attributedItems": attributed,
 	}); err != nil {
 		return err
 	}

@@ -33,6 +33,9 @@ func orderItemView(item *ent.OrderItem, currency string) types.CartItemView {
 		title := item.VariantTitle
 		view.Variant = &title
 	}
+	if item.AttributionSource != nil && item.AttributionID != nil {
+		view.Attribution = &types.SaleAttributionView{Source: *item.AttributionSource, Id: item.AttributionID.String()}
+	}
 	return view
 }
 
