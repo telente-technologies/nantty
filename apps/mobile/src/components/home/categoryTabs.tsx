@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 
 import { Text } from "@/components/ui/text";
@@ -16,8 +17,22 @@ export function CategoryTabs({ categories, selectedCategoryId, onSelectCategory,
   const { colors } = useTheme();
   const background = requestedBackground ?? colors.surface;
   const tabs = [{ id: null, name: "All" }, ...categories.filter((c) => c.name !== "All")];
+  const scrollRef = useRef<ScrollView>(null);
+  const rowWidth = useRef(0);
+  const tabFrames = useRef(new Map<string, { x: number; width: number }>());
+  const selectedKey = selectedCategoryId ?? "all";
+
+  useEffect(() => {
+    const frame = tabFrames.current.get(selectedKey);
+    if (frame && rowWidth.current > 0) scrollRef.current?.scrollTo({ x: Math.max(0, frame.x + frame.width / 2 - rowWidth.current / 2), animated: true });
+  }, [selectedKey]);
+
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, backgroundColor: background }} contentContainerStyle={styles.row}>
+    <ScrollView
+      ref={scrollRef}
+      onLayout={(event) => { rowWidth.current = event.nativeEvent.layout.width; }}
+      accessibilityRole="tablist"
+      horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, backgroundColor: background }} contentContainerStyle={styles.row}>
       {tabs.map((category) => {
         const selected = category.id === selectedCategoryId;
         const selectedBackground = tone === "primary" ? colors.primaryTint : colors.chip;
@@ -27,7 +42,9 @@ export function CategoryTabs({ categories, selectedCategoryId, onSelectCategory,
             key={category.id ?? "all"}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
+            hitSlop={{ top: 10, bottom: 10 }}
             onPress={() => onSelectCategory(category.id)}
+            onLayout={(event) => { tabFrames.current.set(category.id ?? "all", { x: event.nativeEvent.layout.x, width: event.nativeEvent.layout.width }); }}
             style={[styles.tab, { backgroundColor: selected ? selectedBackground : background }]}
           >
             <Text size={13} weight={500} lineHeight={16.9} color={selected ? selectedText : colors.textMuted}>

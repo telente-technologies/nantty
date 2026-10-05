@@ -6,13 +6,16 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MartHome } from "@/types/commerce.type";
 
+import { MartHighlightsCarousel, type MartHighlightsCarouselProps } from "./martHighlightsCarousel";
+
 export interface MartShowcaseProps {
   readonly martHome: MartHome | undefined;
   readonly onPressSearch: () => void;
   readonly onPressTile: (tile: "sales" | "brands" | "arrivals") => void;
+  readonly carousel: MartHighlightsCarouselProps;
 }
 
-export function MartShowcase({ martHome, onPressSearch, onPressTile }: MartShowcaseProps) {
+export function MartShowcase({ martHome, onPressSearch, onPressTile, carousel }: MartShowcaseProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const tile = (kind: "sales" | "brands" | "arrivals", label: string, imageUrl: string | null | undefined, style: object) => (
@@ -32,11 +35,7 @@ export function MartShowcase({ martHome, onPressSearch, onPressTile }: MartShowc
           Search for anything...
         </Text>
       </Pressable>
-      <View style={styles.hero}>
-        {martHome?.banners[0]?.imageUrl ? (
-          <Image source={{ uri: martHome.banners[0].imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
-        ) : null}
-      </View>
+      <MartHighlightsCarousel {...carousel} />
       <View style={styles.tiles}>
         {tile("sales", "Sales of the Day", martHome?.salesOfTheDayImageUrl, styles.salesTile)}
         <View style={styles.tileColumn}>
@@ -61,7 +60,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
-  hero: { height: 120, borderRadius: 4, backgroundColor: colors.placeholder, overflow: "hidden" },
   tiles: { height: 240, flexDirection: "row", gap: 7 },
   tile: { borderRadius: 4, backgroundColor: colors.placeholder, overflow: "hidden" },
   salesTile: { flex: 181 },

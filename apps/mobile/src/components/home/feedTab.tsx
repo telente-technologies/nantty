@@ -1,13 +1,12 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 
 import { GuestFeedBanner } from "@/components/auth/guestFeedBanner";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { SwipeablePostCard } from "@/components/feed/swipeablePostCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
-import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useCartActions } from "@/hooks/useCart.hook";
 import { feedQueryKeyPrefix, usePostInteractions } from "@/hooks/usePostInteractions.hook";
@@ -19,6 +18,10 @@ import { PostProductsSheet } from "./postProductsSheet";
 import { SuggestedClipsRow } from "./suggestedClipsRow";
 import { TopicFilterRow } from "./topicFilterRow";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { EmptyState } from "@/components/ui/emptyState";
+import { ErrorState } from "@/components/ui/errorState";
+import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
+import { spacing } from "@/constants/spacing.constant";
 
 type FeedRow = { type: "post"; post: Post } | { type: "suggestedClips" };
 type FeedMode = "for-you" | "following";
@@ -49,6 +52,7 @@ export function FeedTab() {
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
+  const refreshControl = usePullToRefresh(feed.refetch);
 
   const rows = useMemo<FeedRow[]>(() => {
     const seenPostIds = new Set<string>();
@@ -132,14 +136,14 @@ export function FeedTab() {
         }
         onEndReachedThreshold={0.5}
         onEndReached={() => feed.hasNextPage && !feed.isFetchingNextPage && feed.fetchNextPage()}
-        refreshControl={<RefreshControl refreshing={feed.isRefetching} onRefresh={() => feed.refetch()} tintColor={colors.primary} />}
+        refreshControl={refreshControl}
         ListEmptyComponent={
           feed.isLoading ? (
             <ListSkeleton />
+          ) : feed.isError ? (
+            <ErrorState compact message="Couldn't load your feed." onRetry={() => feed.refetch()} retrying={feed.isRefetching} />
           ) : (
-            <Text style={styles.state} align="center" color={colors.textSubtle}>
-              {feed.isError ? "Couldn't load your feed. Pull to try again." : "No posts yet. Follow people to fill your feed."}
-            </Text>
+            <EmptyState compact title="No posts yet" body="Follow people and stores to fill your feed." actionLabel="Find people" onAction={() => navigation.navigate("Search", { scope: "global" })} />
           )
         }
         ListFooterComponent={feed.isFetchingNextPage ? <ActivityIndicator style={styles.footer} color={colors.primary} /> : null}
@@ -162,6 +166,5 @@ export function FeedTab() {
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.surface },
-  state: { marginTop: 48, paddingHorizontal: 32 },
-  footer: { paddingVertical: 16 },
+  footer: { paddingVertical: spacing[4] },
 }));

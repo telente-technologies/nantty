@@ -49,7 +49,7 @@ export function TopicFilterRow({ topics, selectedTopicId, feedMode, onSelectTopi
         ))}
       </ScrollView>
       <FrameAwareModal visible={isModeMenuOpen} transparent animationType="fade" onRequestClose={() => setIsModeMenuOpen(false)}>
-        <Pressable accessibilityLabel="Close menu" style={styles.menuBackdrop} onPress={() => setIsModeMenuOpen(false)}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Close menu" style={styles.menuBackdrop} onPress={() => setIsModeMenuOpen(false)}>
           <View style={[styles.menu, { marginTop: insets.top + 89 }]} accessibilityRole="menu">
             <ModeMenuItem label="For you" selected={feedMode === "for-you"} onPress={() => selectMode("for-you")} />
             <ModeMenuItem label="Following" selected={feedMode === "following"} onPress={() => selectMode("following")} />
