@@ -46,6 +46,8 @@ model Conversation {
   photoMediaId                 String?          @db.Uuid
   createdById                  String           @db.Uuid
   storeId                      String?
+  orderId                      String?          @db.Uuid
+  orderNumber                  String?
   disappearingMessagesSeconds  Int?
   onlyAdminsCanMentionAll      Boolean          @default(false)
   lastMessageKind              MessageKind?
@@ -57,6 +59,7 @@ model Conversation {
   streak   ChatStreak?
 
   @@index([lastMessageAt])
+  @@index([storeId, lastMessageAt])
   @@map("conversations")
 }
 
@@ -112,6 +115,7 @@ model Message {
 
   pollQuestion          String?
   pollAllowMultiple     Boolean @default(false)
+  senderLabel           String?
 
   @@unique([conversationId, senderId, clientMessageId])
   @@index([conversationId, id])

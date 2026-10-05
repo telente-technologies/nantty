@@ -1,0 +1,21 @@
+model PostTag {
+  postId         String   @db.Uuid
+  taggedUserId   String   @db.Uuid
+  taggedByUserId String   @db.Uuid
+  createdAt      DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([postId, taggedUserId])
+  @@index([postId, createdAt, taggedUserId])
+  @@index([taggedUserId, createdAt])
+  @@map("post_tags")
+}
+
+model TaggingSetting {
+  accountId    String   @id @db.Uuid
+  allowTagging Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+
+  @@map("tagging_settings")
+}

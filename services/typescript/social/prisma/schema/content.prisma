@@ -86,6 +86,7 @@ model Post {
   media      PostMedia[]
   comments   Comment[]
   likes      PostLike[]
+  tags       PostTag[]
   resharedFrom Post?  @relation("Reshares", fields: [resharedFromId], references: [id])
   reshares   Post[]   @relation("Reshares")
 

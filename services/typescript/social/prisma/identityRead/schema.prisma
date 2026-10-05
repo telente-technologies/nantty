@@ -27,6 +27,16 @@ model IdentityProfile {
   @@schema("users")
 }
 
+model IdentityProfileCheckmark {
+  profileId String @id @map("profile_id") @db.Uuid
+  accountId String @map("account_id") @db.Uuid
+  color     String
+  status    String
+
+  @@map("profile_checkmarks")
+  @@schema("users")
+}
+
 model IdentityPrivacySetting {
   accountId       String @id @map("account_id") @db.Uuid
   personalization Boolean

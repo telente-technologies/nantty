@@ -1,0 +1,7 @@
+model DownloadSetting {
+  accountId      String   @id @db.Uuid
+  allowDownloads Boolean  @default(true)
+  updatedAt      DateTime @updatedAt
+
+  @@map("download_settings")
+}
