@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const adminPassword = "ops-passphrase-92-xyz"
+const adminPassword = "Ops-Passphrase-92-xyz"
 
 func TestSuperadminEnrollsMfaSteppingUpInvitesAdminAndAdminCannotInvite(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
@@ -47,7 +47,7 @@ func TestSuperadminEnrollsMfaSteppingUpInvitesAdminAndAdminCannotInvite(t *testi
 	harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "ops@zudomart.com", "password": adminPassword}, nil, http.StatusUnauthorized)
 
 	invitationToken := harness.lastLoggedInvitationToken()
-	harness.expect("POST", "/api/v1/admin/auth/accept-invitation", map[string]string{"token": invitationToken, "password": "short1"}, nil, http.StatusUnprocessableEntity)
+	harness.expect("POST", "/api/v1/admin/auth/accept-invitation", map[string]string{"token": invitationToken, "password": "short1"}, nil, http.StatusBadRequest)
 	harness.expect("POST", "/api/v1/admin/auth/accept-invitation", map[string]string{"token": invitationToken, "password": adminPassword}, nil, http.StatusNoContent)
 	harness.expect("POST", "/api/v1/admin/auth/accept-invitation", map[string]string{"token": invitationToken, "password": adminPassword}, nil, http.StatusBadRequest)
 

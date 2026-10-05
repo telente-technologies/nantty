@@ -35,7 +35,7 @@ import (
 	"zudomart/platform/servicemodule"
 )
 
-const strongPassword = "correct-horse-battery-7"
+const strongPassword = "Correct-Horse-Battery-7"
 
 type lockedBuffer struct {
 	mutex  sync.Mutex
@@ -86,6 +86,7 @@ func startAdminModuleAgainstFreshSchema(t *testing.T) *adminHarness {
 		Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema, TotpEncryptionKey: bytes.Repeat([]byte{3}, 32), TotpIssuerLabel: "Zudomart",
 		StaffRefreshTokenTtl: 12 * time.Hour, InvitationTtl: 72 * time.Hour, StepUpTtl: 5 * time.Minute, LoginChallengeTtl: 5 * time.Minute,
 		MaximumFailedPasswords: 5, LockoutDuration: 15 * time.Minute, InternalApiToken: strings.Repeat("i", 32), DeliveryMode: "log",
+		WebAuthn: configs.WebAuthnSettings{RelyingPartyId: "localhost", RelyingPartyName: "Zudomart Admin", Origins: []string{"http://localhost:3400"}},
 	}
 	logs, publisher := &lockedBuffer{}, &events.RecordingPublisher{}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(logs, nil)), Health: health.NewRegistryForService("admin-test")}

@@ -43,8 +43,8 @@ func TestSettingsWritesNeedStepUpVersionAndValidValues(t *testing.T) {
 	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("config@zudomart.com")
 
 	listed := harness.expect("GET", "/api/v1/admin/config", nil, bearer(accessToken), http.StatusOK)
-	if len(listed["data"].([]any)) != 12 {
-		t.Fatalf("expected the twelve seeded settings, got %v", listed)
+	if len(listed["data"].([]any)) != 16 {
+		t.Fatalf("expected the sixteen seeded settings, got %v", listed)
 	}
 	tiers := map[string]any{"tiers": []map[string]any{{"minimumMonthlyGiftCoins": 0, "creatorShareBps": 5500}, {"minimumMonthlyGiftCoins": 1000, "creatorShareBps": 7000}}}
 	update := func(value any, version int, reason string) map[string]any {
@@ -67,7 +67,7 @@ func TestSettingsWritesNeedStepUpVersionAndValidValues(t *testing.T) {
 		t.Fatalf("unexpected %v", conflict)
 	}
 	fetched := harness.expect("GET", path, nil, bearer(accessToken), http.StatusOK)
-	if fetched["version"] != float64(2) || fetched["updatedBy"] == "system" {
+	if author, _ := fetched["updatedBy"].(map[string]any); fetched["version"] != float64(2) || author["name"] != "Root" || fetched["changeReason"] != "raise the tiers" {
 		t.Fatalf("unexpected %v", fetched)
 	}
 	waitForEventTypes(t, harness, "platformSetting.changed")
