@@ -15,6 +15,7 @@ export interface User {
 export interface AuthSession {
   readonly accessToken: string;
   readonly refreshToken: string;
+  readonly expiresIn?: number;
   readonly user: User;
 }
 
@@ -86,11 +87,75 @@ export interface LiveSession {
   readonly endedAt: ISODate | null;
   readonly viewers: number;
   readonly peakViewers: number;
-  readonly streamKey: string;
-  readonly ingestUrl: string;
   readonly hlsUrl: string | null;
-  readonly products: readonly LiveProduct[];
-  readonly comments: readonly LiveComment[];
+}
+
+export type LiveDetail = Omit<LiveSession, "createdAt">;
+
+export interface StreamKey {
+  readonly ingestUrl: string;
+  readonly streamKey: string;
+}
+
+export interface LiveProductPinWire {
+  readonly productId: ID;
+  readonly pinned: boolean;
+}
+
+export interface StudioLiveWire {
+  readonly id: ID;
+  readonly title: string;
+  readonly category: LiveCategory;
+  readonly state: LiveState;
+  readonly createdAt: ISODate;
+  readonly startedAt: ISODate | null;
+  readonly endedAt: ISODate | null;
+  readonly viewers: number;
+  readonly peakViewers: number;
+  readonly streamKeyHint: string | null;
+  readonly ingestProtocol: string | null;
+  readonly hlsUrl: string | null;
+  readonly earnings: { readonly coins: number; readonly giftCount: number };
+  readonly recordEnabled: boolean;
+  readonly visibility: string;
+  readonly products: readonly LiveProductPinWire[];
+}
+
+export interface LiveSessionWire {
+  readonly id: ID;
+  readonly title: string;
+  readonly category: LiveCategory;
+  readonly state: LiveState;
+  readonly viewers: number;
+  readonly peakViewers: number;
+  readonly startedAt: ISODate | null;
+  readonly endedAt: ISODate | null;
+  readonly playbackUrl: string | null;
+}
+
+export interface StreamKeyWire {
+  readonly liveId: ID;
+  readonly protocol: string;
+  readonly ingestUrl: string;
+  readonly streamKey: string;
+  readonly streamKeyHint: string;
+  readonly issuedAt: ISODate;
+}
+
+export interface StreamStatsWire {
+  readonly liveId: ID;
+  readonly giftCount: number;
+  readonly totalCoins: number;
+  readonly creatorCoins: number;
+  readonly topSupporters: readonly { readonly rank: number; readonly user: { readonly id: ID; readonly name: string; readonly username: string }; readonly coins: number }[];
+}
+
+export interface SellerProductWire {
+  readonly id: ID;
+  readonly name: string;
+  readonly status: string;
+  readonly images: readonly { readonly url: string }[];
+  readonly variants: readonly { readonly price: Money }[];
 }
 
 export type OverlayLayerType = "text" | "image" | "shape" | "countdown" | "ticker";
