@@ -1,8 +1,12 @@
+import { OfficialStoreBadges } from "@zudomart/web-kit";
+
+import { storeLinks, webAppLink } from "@/lib/siteConfig.config";
+
+import { ActionLinkStyledAsButton } from "../ui/actionLink";
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import { LocalCurrencySymbol } from "../ui/localCurrencySymbol";
 import { PhoneFrameWithAppScreen } from "../ui/phoneFrame";
 import styles from "./heroSection.module.css";
-import { WaitlistEmailSignupForm } from "./waitlistForm";
 
 export function HomeHeroSectionWithPhoneStage() {
   return (
@@ -16,7 +20,12 @@ export function HomeHeroSectionWithPhoneStage() {
           <p className={styles.lede}>
             Find real sellers through posts, clips, stories and live streams. Pay in your local currency, and your money stays in escrow until you confirm your order arrived.
           </p>
-          <WaitlistEmailSignupForm source="web-hero" submitLabel="Get early access" />
+          <div className={styles.actions}>
+            <ActionLinkStyledAsButton href={webAppLink.href} opensInNewTab>
+              {webAppLink.label}
+            </ActionLinkStyledAsButton>
+            <OfficialStoreBadges links={storeLinks} />
+          </div>
           <ul className={styles.proofList}>
             <li>
               <FigmaIconTintedWithCurrentColor name="shield24" size={18} />

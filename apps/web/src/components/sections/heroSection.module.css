@@ -52,6 +52,13 @@
   color: var(--ink-muted);
 }
 
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
 .proofList {
   display: flex;
   flex-wrap: wrap;

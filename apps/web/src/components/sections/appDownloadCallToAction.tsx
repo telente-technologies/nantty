@@ -1,28 +1,27 @@
 import { OfficialStoreBadges } from "@zudomart/web-kit";
 
-import { storeLinks } from "@/lib/siteConfig.config";
-import type { WaitlistRole } from "@/types/waitlist.types";
+import { storeLinks, webAppLink } from "@/lib/siteConfig.config";
 
+import { ActionLinkStyledAsButton } from "../ui/actionLink";
 import { PhoneFrameWithAppScreen } from "../ui/phoneFrame";
 import styles from "./appDownloadCallToAction.module.css";
-import { WaitlistEmailSignupForm } from "./waitlistForm";
 
 interface AppDownloadCallToActionProps {
   readonly headingId?: string;
   readonly heading?: string;
   readonly description?: string;
-  readonly defaultRole?: WaitlistRole;
-  readonly source?: string;
+  readonly actionLabel?: string;
+  readonly actionHref?: string;
   readonly sectionId?: string;
 }
 
 export function AppDownloadCallToActionPanel({
-  headingId = "waitlist-heading",
-  heading = "Be first in when the doors open.",
-  description = "Zudomart is coming to iPhone and Android. Join the waitlist and we'll send one email with your download link when we launch in your city.",
-  defaultRole = "buyer",
-  source = "web-cta",
-  sectionId = "waitlist",
+  headingId = "download-heading",
+  heading = "Shop the sellers you already watch.",
+  description = "Get Zudomart on iPhone and Android, or open the web app and start shopping in your browser.",
+  actionLabel = webAppLink.label,
+  actionHref = webAppLink.href,
+  sectionId = "download",
 }: AppDownloadCallToActionProps) {
   return (
     <section id={sectionId} className={styles.section} aria-labelledby={headingId}>
@@ -33,7 +32,9 @@ export function AppDownloadCallToActionPanel({
               {heading}
             </h2>
             <p className={styles.description}>{description}</p>
-            <WaitlistEmailSignupForm source={source} defaultRole={defaultRole} showRolePicker tone="dark" />
+            <ActionLinkStyledAsButton href={actionHref} appearance="onDark" opensInNewTab>
+              {actionLabel}
+            </ActionLinkStyledAsButton>
             <OfficialStoreBadges links={storeLinks} className={styles.storeBadges} />
           </div>
           <div className={styles.phoneColumn}>
