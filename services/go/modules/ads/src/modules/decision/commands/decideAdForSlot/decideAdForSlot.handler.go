@@ -37,12 +37,15 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	if reason, err := handler.checkContentEligibility(ctx, slot); reason != "" || err != nil {
 		return decline(reason), err
 	}
+	if reason, err := handler.checkCommentThreadSpacing(ctx, slot); reason != "" || err != nil {
+		return decline(reason), err
+	}
 	if reason, err := handler.checkUserExperienceGuard(ctx, slot); reason != "" || err != nil {
 		return decline(reason), err
 	}
 	eligible, err := handler.collectEligibleCandidates(ctx, slot)
 	if err != nil || len(eligible) == 0 {
-		return decline("no_eligible_ad"), err
+		return decline(noEligibleAdReason(slot)), err
 	}
 	return handler.runAuctionAndIssueToken(ctx, slot, eligible)
 }
@@ -71,7 +74,7 @@ func (handler Handler) runAuctionAndIssueToken(ctx context.Context, slot *slotCo
 	}
 	return Result{Ad: &dtos.DecidedAd{ClickLinks: clickLinks,
 		AdId: winner.AdId, ImpressionToken: token, ExpiresAt: deployed.Now().Add(deployed.Settings.AdTokenTimeToLive).UTC().Format(time.RFC3339),
-		Placement: slot.placement, SlotKind: slot.command.Slot.Kind, Format: winner.Format, Label: "Ad", Creative: winner.Creative, SkipAfterSeconds: skipAfter(slot, deployed.Settings.SkipAfterSeconds),
+		Placement: slot.placement, SlotKind: slot.command.Slot.Kind, Format: winner.Format, Label: labelForSlot(slot), Creative: winner.Creative, SkipAfterSeconds: skipAfter(slot, deployed.Settings.SkipAfterSeconds),
 	}}, nil
 }
 

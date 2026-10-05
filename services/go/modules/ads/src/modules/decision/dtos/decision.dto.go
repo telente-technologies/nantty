@@ -7,6 +7,7 @@ type SlotRequest struct {
 	ContentId           string   `json:"contentId"`
 	NeighbourContentIds []string `json:"neighbourContentIds"`
 	SlotsSinceLastAd    *int     `json:"slotsSinceLastAd"`
+	SlotIndex           *int     `json:"slotIndex"`
 }
 
 type ViewerHints struct {

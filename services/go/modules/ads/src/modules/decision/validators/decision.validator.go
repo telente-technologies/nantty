@@ -24,6 +24,15 @@ func ValidateSlot(slot dtos.SlotRequest, sessionId string) error {
 	if services.IsContentAdjacentSlot(slot.Kind) && slot.ContentId == "" {
 		issues = append(issues, httpserver.ValidationIssue{Path: "slot.contentId", Message: "is required for pre-roll and post-roll"})
 	}
+	if slot.Kind == services.SlotFeedCommentThread && slot.ContentId == "" {
+		issues = append(issues, httpserver.ValidationIssue{Path: "slot.contentId", Message: "is required for comment threads"})
+	}
+	if slot.Kind == services.SlotFeedCommentThread && slot.SlotIndex == nil {
+		issues = append(issues, httpserver.ValidationIssue{Path: "slot.slotIndex", Message: "is required for comment threads"})
+	}
+	if slot.SlotIndex != nil && (*slot.SlotIndex < 0 || *slot.SlotIndex > 10_000) {
+		issues = append(issues, httpserver.ValidationIssue{Path: "slot.slotIndex", Message: "must be 0-10000"})
+	}
 	if len(slot.NeighbourContentIds) > 10 {
 		issues = append(issues, httpserver.ValidationIssue{Path: "slot.neighbourContentIds", Message: "allows at most 10 ids"})
 	}
