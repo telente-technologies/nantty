@@ -93,7 +93,7 @@ export function registerPeopleVerificationMockHandlers(): void {
     const color = request.query.get("color");
     const search = request.query.get("search");
     const records = readPeopleMockStore()
-      .verifications.filter((record) => (!status || record.status === status) && (!color || record.color === color))
+      .verifications.filter((record) => (!status || status === "ALL" || record.status === status) && (!color || record.color === color))
       .map(presentVerificationApplication)
       .filter((application) => matchesSearchText(search, application.user.username, application.user.displayName, application.applicant.legalName, application.applicant.businessName, application.id))
       .sort((first, second) => (first.status === "PENDING" ? 0 : 1) - (second.status === "PENDING" ? 0 : 1) || first.submittedAt.localeCompare(second.submittedAt));

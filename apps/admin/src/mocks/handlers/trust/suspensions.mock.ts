@@ -46,7 +46,7 @@ function presentSuspendedAccount(record: MockSuspensionCaseRecord): SuspendedAcc
     caseId: record.id,
     user: presentModeratedUser(record.userId),
     reasonCode: suspension.reasonCode,
-    note: record.decision?.note ?? "",
+    note: record.decision?.reason ?? "",
     suspendedAt: suspension.suspendedAt,
     suspendedByName: suspension.suspendedByName,
     deletionDueAt,
@@ -78,13 +78,13 @@ function auditCase(request: MockRequest, record: MockSuspensionCaseRecord, actio
 function decideCase(request: MockRequest, outcome: "SUSPENDED" | "DISMISSED" | "ESCALATED") {
   const principal = authorizeAction(request);
   const body = readJsonObjectBody(request);
-  const note = readRequiredReason(body);
+  const reason = readRequiredReason(body);
   const reasonCode = outcome === "SUSPENDED" ? readEnumValue(body, "reasonCode", reasonCodes) : null;
   const record = readOpenCaseOrFail(request);
   const user = findPlatformUserRecordOrFail(record.userId);
   const before = { caseStatus: record.status, userStatus: user.status };
   const decidedAt = readIsoNow();
-  record.decision = { outcome, reasonCode, note, decidedByName: principal.name, decidedAt };
+  record.decision = { outcome, reasonCode, reason, decidedByName: principal.name, decidedAt };
   if (outcome === "SUSPENDED" && reasonCode) {
     record.status = "SUSPENDED";
     record.suspension = { reasonCode, suspendedAt: decidedAt, suspendedByName: principal.name };
@@ -92,7 +92,7 @@ function decideCase(request: MockRequest, outcome: "SUSPENDED" | "DISMISSED" | "
   } else {
     record.status = outcome === "DISMISSED" ? "DISMISSED" : "ESCALATED";
   }
-  auditCase(request, record, outcome === "SUSPENDED" ? "approved" : outcome.toLowerCase(), note, before, { caseStatus: record.status, userStatus: findPlatformUserRecordOrFail(record.userId).status, reasonCode, deletionDueInDays: outcome === "SUSPENDED" ? deletionWindowDays : null });
+  auditCase(request, record, outcome === "SUSPENDED" ? "approved" : outcome.toLowerCase(), reason, before, { caseStatus: record.status, userStatus: findPlatformUserRecordOrFail(record.userId).status, reasonCode, deletionDueInDays: outcome === "SUSPENDED" ? deletionWindowDays : null });
   return respondWithJson(200, presentDetail(record));
 }
 

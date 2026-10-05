@@ -1,18 +1,30 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, createMockId, failConflict, failNotFound, failValidation, matchesSearchText, readEnumValue, readIsoNow, readJsonObjectBody, readOptionalTrimmedString, readRequiredReason, readRequiredTrimmedString, respondWithJson, respondWithNoContent } from "@/mocks/mockResponses.mock";
+import { MockHttpError, createMockId, failConflict, failNotFound, failValidation, readEnumValue, readIsoNow, readJsonObjectBody, readRequiredReason, readRequiredTrimmedString, respondWithJson, respondWithNoContent } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import { presentPlatformUserSummary } from "@/mocks/seed/demoPlatformUsers.mock";
 import type { UsernameWithholdResult } from "@/types/peopleUsers.type";
-import type { ConfusableCollision, ConfusablePreview, ReservedUsernameCategory, ReservedUsernameEntry, ReservedUsernameKind } from "@/types/usernames.type";
+import type { ConfusableCollision, ConfusablePreview, ReservedUsernameEntry, ReservedUsernameKind, ReservedUsernameMatchKind, ReservedUsernameRule } from "@/types/usernames.type";
 import { computeConfusableSkeletonForUsername, convertGlobPatternToSafeRegularExpression, generateReplacementUsername, normalizeUsernameForComparison } from "@/utils/usernameConfusables.util";
 
 import { buildUserDetailResponse } from "./peopleUsers.mock";
 import { asMutablePlatformUser, findPlatformUserForPeopleOrFail, readPeopleMockStore, readUserExtrasForPeople } from "./peopleStore.mock";
 
-const reservedKinds: readonly ReservedUsernameKind[] = ["EXACT", "PREFIX", "PATTERN"];
-const reservedCategories: readonly ReservedUsernameCategory[] = ["BRAND", "GOVERNMENT", "SYSTEM", "OFFENSIVE", "PUBLIC_FIGURE"];
+const reservedMatchKinds: readonly ReservedUsernameMatchKind[] = ["exact", "prefix", "contains", "brand"];
+const reservedPageSize = 50;
+
+function presentReservedRule(entry: ReservedUsernameEntry): ReservedUsernameRule {
+  const term = entry.value.replace(/\*/g, "");
+  const matchKind: ReservedUsernameMatchKind = entry.kind === "PREFIX" ? "prefix" : entry.kind === "PATTERN" ? "contains" : entry.category === "BRAND" ? "brand" : "exact";
+  return { id: entry.id, term, matchKind, createdAt: entry.addedAt };
+}
+
+function convertRuleToStoreEntry(term: string, matchKind: ReservedUsernameMatchKind, addedByName: string): ReservedUsernameEntry {
+  const kind: ReservedUsernameKind = matchKind === "prefix" ? "PREFIX" : matchKind === "contains" ? "PATTERN" : "EXACT";
+  const value = kind === "PREFIX" ? `${term}*` : kind === "PATTERN" ? `*${term}*` : term;
+  return { id: createMockId("rsv"), value, kind, category: matchKind === "brand" ? "BRAND" : "SYSTEM", note: null, addedAt: readIsoNow(), addedByName };
+}
 
 export function createUnusedReplacementUsername(): string {
   const takenUsernames = new Set(readMockDatabase().platformUsers.map((user) => user.username));
@@ -109,42 +121,38 @@ export function registerPeopleUsernameMockHandlers(): void {
     return respondWithJson(200, preview);
   });
 
-  registerMockRoute("GET", "/admin/reserved-usernames", (request) => {
+  registerMockRoute("GET", "/admin/usernames/reserved", (request) => {
     requireMockPermission(request, "reserved-usernames:manage");
-    const kind = request.query.get("kind");
-    const category = request.query.get("category");
-    const items = readPeopleMockStore().reservedUsernames.filter((entry) => matchesSearchText(request.query.get("search"), entry.value, entry.note) && (!kind || entry.kind === kind) && (!category || entry.category === category));
-    return respondWithJson(200, { items });
+    const offset = Math.max(0, Number(request.query.get("cursor") ?? 0) || 0);
+    const rules = readPeopleMockStore().reservedUsernames.map(presentReservedRule);
+    const page = rules.slice(offset, offset + reservedPageSize);
+    return respondWithJson(200, { data: page, nextCursor: offset + reservedPageSize < rules.length ? String(offset + reservedPageSize) : null });
   });
 
-  registerMockRoute("POST", "/admin/reserved-usernames", (request) => {
+  registerMockRoute("POST", "/admin/usernames/reserved", (request) => {
     const principal = requireMockPermission(request, "reserved-usernames:manage");
+    requireMockStepUp(request);
     const body = readJsonObjectBody(request);
-    const kind = readEnumValue(body, "kind", reservedKinds);
-    const category = readEnumValue(body, "category", reservedCategories);
-    const value = normalizeUsernameForComparison(readRequiredTrimmedString(body, "value", 40, 2));
-    const allowedShape = kind === "EXACT" ? /^[a-z0-9._]{2,30}$/ : /^[a-z0-9._*]{2,40}$/;
-    if (!allowedShape.test(value)) failValidation("value", kind === "EXACT" ? "Use 2–30 letters, numbers, dots or underscores." : "Use letters, numbers, dots, underscores and * wildcards only.");
-    if (kind !== "EXACT" && !value.includes("*")) failValidation("value", "Prefix and pattern entries need a * wildcard.");
-    const note = readOptionalTrimmedString(body, "note", 200);
-    const reason = readRequiredReason(body);
+    const matchKind = readEnumValue(body, "matchKind", reservedMatchKinds);
+    const term = readRequiredTrimmedString(body, "term", 30, 2).toLowerCase();
+    if (!/^[a-z0-9._]{2,30}$/.test(term)) failValidation("term", "Use 2–30 letters, numbers, dots or underscores.");
     const store = readPeopleMockStore();
-    if (store.reservedUsernames.some((entry) => entry.value === value && entry.kind === kind)) failConflict("ALREADY_RESERVED", "That entry is already on the list.");
-    const entry: ReservedUsernameEntry = { id: createMockId("rsv"), value, kind, category, note, addedAt: readIsoNow(), addedByName: principal.name };
+    const entry = convertRuleToStoreEntry(term, matchKind, principal.name);
+    if (store.reservedUsernames.some((existing) => existing.value === entry.value && existing.kind === entry.kind)) throw new MockHttpError(422, "RULE_EXISTS", "That name is already reserved.");
     store.reservedUsernames.unshift(entry);
-    const affectedUsers = readMockDatabase().platformUsers.filter((user) => findReservedCollisionsForCandidate(user.username).some((collision) => collision.entryId === entry.id)).map((user) => `@${user.username}`);
-    recordMockAuditEntry(request, { action: "reserved_username.added", area: "usernames", target: { type: "reservedUsername", id: entry.id, label: value }, reason, before: null, after: { value, kind, category, note } });
-    return respondWithJson(201, { entry, existingAccountsMatching: affectedUsers });
+    recordMockAuditEntry(request, { action: "reserved_username.added", area: "usernames", target: { type: "reservedUsername", id: entry.id, label: term }, reason: null, before: null, after: { term, matchKind } });
+    const { createdAt: _createdAt, ...created } = presentReservedRule(entry);
+    return respondWithJson(201, created);
   });
 
-  registerMockRoute("POST", "/admin/reserved-usernames/:entryId/remove", (request) => {
+  registerMockRoute("DELETE", "/admin/usernames/reserved/:ruleId", (request) => {
     requireMockPermission(request, "reserved-usernames:manage");
-    const reason = readRequiredReason(readJsonObjectBody(request));
+    requireMockStepUp(request);
     const store = readPeopleMockStore();
-    const index = store.reservedUsernames.findIndex((entry) => entry.id === request.params.entryId);
+    const index = store.reservedUsernames.findIndex((entry) => entry.id === request.params.ruleId);
     if (index < 0) throw new MockHttpError(404, "NOT_FOUND", "Reserved entry was not found.");
     const [removed] = store.reservedUsernames.splice(index, 1);
-    recordMockAuditEntry(request, { action: "reserved_username.removed", area: "usernames", target: { type: "reservedUsername", id: removed!.id, label: removed!.value }, reason, before: { value: removed!.value, kind: removed!.kind, category: removed!.category }, after: null });
+    recordMockAuditEntry(request, { action: "reserved_username.removed", area: "usernames", target: { type: "reservedUsername", id: removed!.id, label: removed!.value }, reason: null, before: { value: removed!.value, kind: removed!.kind }, after: null });
     return respondWithNoContent();
   });
 }

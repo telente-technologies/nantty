@@ -29,8 +29,8 @@ function buildSeed(): BlackRecord[] {
   const approved = { name: "Tolu Adeyemi", at: isoMinutesAgo(300 * dayMinutes) };
   return [
     { ...base, id: "blk_0001", userId: "usr_0011", agencyName: "Federal Ministry of Arts", handle: "fmarts.gov", representativeName: "Ifeoma Uche", representativeRole: "Director, Communications", status: "IN_REVIEW", submittedAt: isoMinutesAgo(3 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER"]) },
-    { ...base, id: "blk_0002", userId: "usr_0022", agencyName: "Ogun State Tourism Board", handle: "ogun.tourism.gov", representativeName: "Tomisin Ajayi", representativeRole: "General Manager", status: "AWAITING_SECOND_APPROVAL", submittedAt: isoMinutesAgo(9 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER", "OFFICIAL_CHANNEL", "REPRESENTATIVE", "ENTITY_PROOF"]), firstApproval: { adminName: "Chidi Okafor", approvedAt: isoMinutesAgo(dayMinutes) } },
-    { ...base, id: "blk_0003", userId: "usr_0010", agencyName: "Lagos State Government", handle: "lagosstate.gov", representativeName: "Biodun Salami", representativeRole: "Head of Digital", status: "APPROVED", submittedAt: isoMinutesAgo(320 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER", "OFFICIAL_CHANNEL", "REPRESENTATIVE", "ENTITY_PROOF"]), firstApproval: { adminName: "Chidi Okafor", approvedAt: isoMinutesAgo(301 * dayMinutes) }, secondApproval: { adminName: approved.name, approvedAt: approved.at }, reverificationDueAt: isoMinutesFromNow(20 * dayMinutes), reverificationRemindedAt: null, handleReserved: true },
+    { ...base, id: "blk_0002", userId: "usr_0022", agencyName: "Ogun State Tourism Board", handle: "ogun.tourism.gov", representativeName: "Tomisin Ajayi", representativeRole: "General Manager", status: "AWAITING_SECOND_APPROVAL", submittedAt: isoMinutesAgo(9 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER", "OFFICIAL_CHANNEL", "REPRESENTATIVE", "ENTITY_PROOF"]), firstApproval: { adminId: "adm_0002", name: "Chidi Okafor", at: isoMinutesAgo(dayMinutes) } },
+    { ...base, id: "blk_0003", userId: "usr_0010", agencyName: "Lagos State Government", handle: "lagosstate.gov", representativeName: "Biodun Salami", representativeRole: "Head of Digital", status: "APPROVED", submittedAt: isoMinutesAgo(320 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER", "OFFICIAL_CHANNEL", "REPRESENTATIVE", "ENTITY_PROOF"]), firstApproval: { adminId: "adm_0002", name: "Chidi Okafor", at: isoMinutesAgo(301 * dayMinutes) }, secondApproval: { adminId: "adm_0001", name: approved.name, at: approved.at }, reverificationDueAt: isoMinutesFromNow(20 * dayMinutes), reverificationRemindedAt: null, handleReserved: true },
   ];
 }
 
@@ -95,7 +95,7 @@ export function registerPeopleBlackApplicationMockHandlers(): void {
     const record = findOrFail(request);
     if (record.status !== "IN_REVIEW" && record.status !== "AWAITING_SECOND_APPROVAL") throw new MockHttpError(409, "NOT_OPEN", "This application is no longer open.");
     if (!record.checklist.every((item) => item.isVerified)) throw new MockHttpError(409, "CHECKLIST_INCOMPLETE", "Finish the vetting checklist before approving.");
-    const approval = { adminName: principal.name, approvedAt: readIsoNow() };
+    const approval = { adminId: principal.adminId, name: principal.name, at: readIsoNow() };
     const before = { status: record.status };
     if (!record.firstApproval) {
       record.firstApproval = approval;
@@ -103,13 +103,13 @@ export function registerPeopleBlackApplicationMockHandlers(): void {
       audit(request, record, "first_approval", reason, before, { status: record.status });
       return respondWithJson(200, present(record));
     }
-    if (record.firstApproval.adminName === principal.name) throw new MockHttpError(409, "SAME_ADMIN", "A different admin must give the second approval.");
+    if (record.firstApproval.adminId === principal.adminId) throw new MockHttpError(409, "SAME_ADMIN", "A different admin must give the second approval.");
     record.secondApproval = approval;
     record.status = "APPROVED";
     record.reverificationDueAt = isoMinutesFromNow(365 * dayMinutes);
     asMutablePlatformUser(findPlatformUserForPeopleOrFail(record.userId)).verification = { color: "BLACK", tier: "OFFICIAL", status: "VERIFIED", badgeVisible: true };
     reserveHandle(request, record);
-    audit(request, record, "approved", reason, before, { status: record.status, makers: [record.firstApproval.adminName, principal.name], handleReserved: true, reverificationDueAt: record.reverificationDueAt });
+    audit(request, record, "approved", reason, before, { status: record.status, makers: [record.firstApproval.name, principal.name], handleReserved: true, reverificationDueAt: record.reverificationDueAt });
     return respondWithJson(200, present(record));
   });
 

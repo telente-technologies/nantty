@@ -61,7 +61,7 @@ export function registerPeopleApplicationMockHandlers(): void {
       requireMockPermission(request, permissionByKind[kind]);
       const status = request.query.get("status");
       const items = readPeopleMockStore()
-        .applications.filter((record) => record.kind === kind && (!status || record.status === status))
+        .applications.filter((record) => record.kind === kind && (!status || status === "ALL" || record.status === status))
         .map(presentProgramApplication)
         .filter((application) => matchesSearchText(request.query.get("search"), application.user.username, application.user.displayName, application.storeName, application.id))
         .sort((first, second) => first.submittedAt.localeCompare(second.submittedAt));

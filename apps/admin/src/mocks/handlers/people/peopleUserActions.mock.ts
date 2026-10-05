@@ -14,7 +14,7 @@ const legalRetentionYears = 7;
 
 interface UserActionStore {
   readonly notices: { id: string; userId: string; title: string; body: string; sentAt: string }[];
-  readonly blockedSignups: { id: string; userId: string; kind: "EMAIL" | "PHONE" | "DEVICE"; fingerprint: string; blockedAt: string }[];
+  readonly blockedSignups: { id: string; userId: string; kind: "EMAIL" | "DEVICE"; fingerprint: string; blockedAt: string }[];
   readonly heldUsernames: { username: string; releasedAt: string; availableAt: string }[];
   readonly deletions: { userId: string; deletedAt: string; deletedByName: string; anonymizedRecords: Record<string, number>; retainedUntil: string }[];
 }
@@ -47,7 +47,7 @@ function fingerprintOf(value: string): string {
 
 export function blockSignupIdentifiers(user: MockPlatformUserRecord): string[] {
   const store = readStore();
-  const identifiers = [{ kind: "EMAIL" as const, value: user.personalData.email }, { kind: "PHONE" as const, value: user.personalData.phone }, { kind: "DEVICE" as const, value: `device-of-${user.id}` }].filter((item) => item.value);
+  const identifiers = [{ kind: "EMAIL" as const, value: user.personalData.email }, { kind: "DEVICE" as const, value: `device-of-${user.id}` }].filter((item) => item.value);
   for (const item of identifiers) store.blockedSignups.unshift({ id: createMockId("blk"), userId: user.id, kind: item.kind, fingerprint: fingerprintOf(item.value), blockedAt: readIsoNow() });
   return identifiers.map((item) => item.kind);
 }
