@@ -29,5 +29,5 @@ export function buildDemoEmailTemplates(): EmailTemplate[] {
 }
 
 export function buildDemoEmailSends(): EmailSendRecord[] {
-  return [{ id: "esnd_0001", kind: "MARKETING", subject: "Seller tips newsletter", audienceLabel: "Segment: All sellers", recipientCount: 9, skippedNoMarketingConsent: 4, sentByName: "Chidi Okafor", sentAt: isoMinutesAgo(6000), provider: "AWS_SES_MOCK" }];
+  return [{ id: "esnd_0001", kind: "MARKETING", subject: "Seller tips newsletter", audienceLabel: "Segment: All sellers", recipientCount: 9, skippedNoMarketingConsent: 4, sentByName: "Chidi Okafor", sentAt: isoMinutesAgo(6000), provider: "AWS_SES" }];
 }

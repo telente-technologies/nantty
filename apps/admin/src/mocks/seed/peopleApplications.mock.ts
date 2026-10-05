@@ -15,8 +15,8 @@ export interface MockProgramApplicationRecord {
   categories: string[];
   expectedMonthlySalesMajor: number | null;
   contentNiche: string | null;
-  sellerSignals: { kycVerified: boolean; bankAccountVerified: boolean; businessDocumentsProvided: boolean; prohibitedCategoryHits: string[]; phoneVerified: boolean } | null;
-  creatorSignals: { postsLast30Days: number; averageViewsPerClip: number; phoneVerified: boolean } | null;
+  sellerSignals: { kycVerified: boolean; bankAccountVerified: boolean; businessDocumentsProvided: boolean; prohibitedCategoryHits: string[] } | null;
+  creatorSignals: { postsLast30Days: number; averageViewsPerClip: number } | null;
 }
 
 export const creatorProgramThresholds = { minimumFollowers: 1_000, minimumPostsLast30Days: 8, maximumActiveStrikes: 0, minimumAccountAgeDays: 30 } as const;
@@ -81,7 +81,7 @@ export function buildDemoProgramApplications(users: readonly MockPlatformUserRec
       id: `sap_${String(index + 1).padStart(4, "0")}`, kind: "sellers", userId: user.id, status: seed.status, submittedAt: daysAgoIso(seed.daysAgo),
       reviewedAt: isReviewed ? daysAgoIso(seed.daysAgo - 1) : null, reviewedByName: isReviewed ? "Chidi Okafor" : null, decisionReason: isReviewed ? "Impersonation of a registered brand; KYC failed." : null,
       pitch: seed.pitch, storeName: seed.storeName, categories: [...seed.categories], expectedMonthlySalesMajor: convertMajorAmountForCurrency(seed.volume, user.currency), contentNiche: null,
-      sellerSignals: { kycVerified: seed.kyc ?? true, bankAccountVerified: seed.bank ?? true, businessDocumentsProvided: seed.documents ?? true, prohibitedCategoryHits: seed.prohibited ?? [], phoneVerified: true },
+      sellerSignals: { kycVerified: seed.kyc ?? true, bankAccountVerified: seed.bank ?? true, businessDocumentsProvided: seed.documents ?? true, prohibitedCategoryHits: seed.prohibited ?? [] },
       creatorSignals: null,
     });
   });
@@ -91,7 +91,7 @@ export function buildDemoProgramApplications(users: readonly MockPlatformUserRec
     records.push({
       id: `cap_${String(index + 1).padStart(4, "0")}`, kind: "creators", userId: user.id, status: seed.status, submittedAt: daysAgoIso(seed.daysAgo),
       reviewedAt: null, reviewedByName: null, decisionReason: null, pitch: seed.pitch, storeName: null, categories: [], expectedMonthlySalesMajor: null, contentNiche: seed.niche,
-      sellerSignals: null, creatorSignals: { postsLast30Days: seed.posts, averageViewsPerClip: seed.views, phoneVerified: true },
+      sellerSignals: null, creatorSignals: { postsLast30Days: seed.posts, averageViewsPerClip: seed.views },
     });
   });
   return records;
@@ -108,13 +108,12 @@ export function evaluateApplicationEligibility(record: MockProgramApplicationRec
       { key: "standing", label: "Account standing", isMet: user.status === "ACTIVE", actual: user.status, required: "ACTIVE" },
     ];
   }
-  const signals = record.creatorSignals ?? { postsLast30Days: 0, averageViewsPerClip: 0, phoneVerified: false };
+  const signals = record.creatorSignals ?? { postsLast30Days: 0, averageViewsPerClip: 0 };
   const accountAgeDays = Math.floor((Date.now() - Date.parse(user.joinedAt)) / 86_400_000);
   return [
     { key: "followers", label: "Followers", isMet: user.followerCount >= creatorProgramThresholds.minimumFollowers, actual: user.followerCount.toLocaleString("en-NG"), required: `≥ ${creatorProgramThresholds.minimumFollowers.toLocaleString("en-NG")}` },
     { key: "posts", label: "Posts in last 30 days", isMet: signals.postsLast30Days >= creatorProgramThresholds.minimumPostsLast30Days, actual: String(signals.postsLast30Days), required: `≥ ${creatorProgramThresholds.minimumPostsLast30Days}` },
     { key: "strikes", label: "Active strikes", isMet: user.strikeCount <= creatorProgramThresholds.maximumActiveStrikes, actual: String(user.strikeCount), required: `≤ ${creatorProgramThresholds.maximumActiveStrikes}` },
     { key: "age", label: "Account age", isMet: accountAgeDays >= creatorProgramThresholds.minimumAccountAgeDays, actual: `${accountAgeDays} days`, required: `≥ ${creatorProgramThresholds.minimumAccountAgeDays} days` },
-    { key: "phone", label: "Phone verified", isMet: signals.phoneVerified, actual: signals.phoneVerified ? "Yes" : "No", required: "Yes" },
   ];
 }

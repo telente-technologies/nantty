@@ -23,7 +23,7 @@ export function buildInitialRevenueRules(): RevenueRulesConfiguration {
 }
 
 export function buildInitialCreatorEligibilityRules(): CreatorEligibilityRules {
-  return { minimumFollowers: 1_000, minimumPostsInLast30Days: 8, maximumActiveStrikes: 0, minimumAccountAgeDays: 30, requiresVerifiedPhone: true, requiresIdentityVerification: true, allowedCountries: ["NG", "GH", "KE", "ZA"] };
+  return { minimumFollowers: 1_000, minimumPostsInLast30Days: 8, maximumActiveStrikes: 0, minimumAccountAgeDays: 30, requiresIdentityVerification: true, allowedCountries: ["NG", "GH", "KE", "ZA"] };
 }
 
 export function buildInitialUsernameRules(): UsernameRules {
