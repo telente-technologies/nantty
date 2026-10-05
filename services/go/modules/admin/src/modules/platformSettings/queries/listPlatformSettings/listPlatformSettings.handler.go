@@ -7,6 +7,7 @@ import (
 	"zudomart/modules/admin/src/generated/ent"
 	"zudomart/modules/admin/src/generated/ent/platformsetting"
 	"zudomart/modules/admin/src/modules/platformSettings/models"
+	"zudomart/modules/admin/src/modules/platformSettings/services"
 )
 
 type Handler struct {
@@ -18,9 +19,5 @@ func (handler Handler) Execute(ctx context.Context, _ Query) ([]models.PlatformS
 	if err != nil {
 		return nil, err
 	}
-	views := make([]models.PlatformSettingView, 0, len(rows))
-	for _, row := range rows {
-		views = append(views, models.ConvertSettingToView(row))
-	}
-	return views, nil
+	return services.BuildSettingViews(ctx, handler.Container.Client, rows)
 }
