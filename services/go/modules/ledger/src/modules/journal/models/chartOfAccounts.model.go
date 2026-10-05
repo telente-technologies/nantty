@@ -214,6 +214,10 @@ func CreatorSubscriptionRevenueAccount(currency string) AccountRef {
 	return platformAccount("revenue:creatorSubscriptions", currency, AccountKindRevenue)
 }
 
+func PlatformSubscriptionRevenueAccount(currency string) AccountRef {
+	return platformAccount("revenue:planSubscriptions", currency, AccountKindRevenue)
+}
+
 func UserCoinDebtAccount(userId string) AccountRef {
 	return AccountRef{Code: "user:" + userId + ":coinDebt", Currency: CoinUnit, Kind: AccountKindAsset, OwnerType: "user", OwnerId: userId, AllowNegativeBalance: false}
 }

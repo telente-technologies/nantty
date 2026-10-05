@@ -82,6 +82,7 @@ func StartInventoryModuleWithSettings(ctx context.Context, settings configs.Inve
 		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger),
 	}
 	commerceports.Default.RegisterInventoryStock(integrations.CommerceStock{Container: module.Container})
+	commerceports.Default.RegisterStoreStockAlertsReader(integrations.StoreStockAlerts{Container: module.Container})
 	dependencies.Health.AddReadinessCheck("inventory-postgres", postgres.ReadinessCheckForDatabase(database))
 	return module, nil
 }

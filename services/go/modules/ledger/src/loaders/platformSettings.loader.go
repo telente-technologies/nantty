@@ -34,7 +34,6 @@ func NewPlatformSettingsSource(database *sql.DB, adminSchema string, timeToLive 
 	return &PlatformSettingsSource{database: database, schema: adminSchema, timeToLive: timeToLive, now: time.Now, logger: logger, entries: map[string]cachedPlatformSetting{}}
 }
 
-// Reads only the columns that admin grants to zudomart_readers; a failure serves the last good value, else reports "not found" so callers use their env fallback.
 func (source *PlatformSettingsSource) ReadValue(ctx context.Context, key string) (json.RawMessage, bool) {
 	if source == nil || source.schema == "" {
 		return nil, false
