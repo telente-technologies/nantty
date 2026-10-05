@@ -1,5 +1,7 @@
 import { socialEventTypes } from "../../../../events/eventTypes.event.js";
 import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
+import { messageRepository } from "../../../messages/repositories/message.repository.js";
+import { activeMemberIds, messageRemovedEvent, messageUpdatedEvent } from "../../../messages/services/chatRealtimeEvents.service.js";
 import type { SoundStatus } from "../../../../generated/prisma/client.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import type { ApplyContentVisibilityCommand, ModerationVisibilityValue } from "./applyContentVisibility.command.js";
@@ -26,7 +28,12 @@ export function createApplyContentVisibilityHandler(context: HandlerContext): Ha
       }
       if (targetType === "message") {
         const hiddenAt = visibility === "hidden" || visibility === "removed" ? occurredAt : null;
-        return (await db.message.updateMany({ where: { id: targetId }, data: { hiddenAt } })).count > 0;
+        if ((await db.message.updateMany({ where: { id: targetId }, data: { hiddenAt } })).count === 0) return false;
+        const row = await messageRepository.findById(db, targetId, targetId);
+        if (row === null) return true;
+        const memberIds = await activeMemberIds(db, row.conversationId);
+        await appendDomainEventsToOutbox(db, [hiddenAt === null ? messageUpdatedEvent(row, memberIds, occurredAt) : messageRemovedEvent(row.conversationId, row.id, "moderation", memberIds, occurredAt)]);
+        return true;
       }
       if (targetType === "sound") {
         const updated = await db.sound.updateMany({ where: { id: targetId, status: { not: "under_copyright_review" } }, data: { status: soundStatusForVisibility(visibility) } });

@@ -27,8 +27,12 @@ import { createSubscribeToChannelHandler } from "./commands/subscribeToChannel/s
 import { createUnsubscribeFromChannelHandler } from "./commands/unsubscribeFromChannel/unsubscribeFromChannel.handler.js";
 import { createChannelsController } from "./controllers/channels.controller.js";
 import { registerChannelsRoutes } from "./routes/channels.routes.js";
+import { createInternalMembershipController } from "./controllers/internalMembership.controller.js";
+import { createGetInternalMembershipHandler } from "./queries/getInternalMembership/getInternalMembership.handler.js";
 
-export function mountConversationsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
+export function mountConversationsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext, internalToken = ""): void {
+  const internal = createInternalMembershipController(route, createGetInternalMembershipHandler(context), internalToken);
+  router.get("/api/v1/internal/conversations/:conversationId/members/:accountId", internal.membership);
   registerConversationsRoutes(router, createConversationsController(route, {
     startDirectConversation: createStartDirectConversationHandler(context),
     createGroupConversation: createCreateGroupConversationHandler(context),

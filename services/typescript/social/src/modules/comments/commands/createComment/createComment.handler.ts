@@ -45,7 +45,7 @@ export function createCreateCommentHandler(context: HandlerContext): Handler<Cre
       const recipients = new Set<string>([post.authorId, ...(parent === null ? [] : [parent.authorId])]);
       recipients.delete(command.authorId);
       for (const recipientUserId of recipients) {
-        events.push({ eventType: socialEventTypes.commentCreated, subject: comment.id, occurredAt: now, data: { recipientUserId, actor, target: parent !== null && recipientUserId === parent.authorId ? "reply" : "post", excerpt, url, commentId: comment.id, postId: post.id, authorId: command.authorId, parentCommentId: parent?.id ?? null } });
+        events.push({ eventType: socialEventTypes.commentCreated, subject: comment.id, occurredAt: now, data: { recipientUserId, actor, target: parent !== null && recipientUserId === parent.authorId ? "reply" : "post", excerpt, url, commentId: comment.id, postId: post.id, postAuthorId: post.authorId, topics: post.topics, actorId: command.authorId, authorId: command.authorId, parentCommentId: parent?.id ?? null } });
       }
       for (const userId of mentionResult.userIdsToNotify) events.push({ eventType: socialEventTypes.mentionCreated, subject: comment.id, occurredAt: now, data: { recipientUserId: userId, mentionedUserId: userId, actor, authorId: command.authorId, surface: "comment", postId: post.id, commentId: comment.id, excerpt, url } });
       await appendDomainEventsToOutbox(transaction, events);
