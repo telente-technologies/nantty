@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { RefreshControl, ScrollView, SectionList, StyleSheet, View } from "react-native";
 
 import { OrderListItem } from "@/components/order/orderListItem";
+import { RatePurchaseLink } from "@/components/reviews/ratePurchaseCard";
 import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -76,6 +77,10 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
         renderItem={({ item, index, section }) => (
           <View style={[styles.row, index === 0 && styles.firstRow, index === section.data.length - 1 && styles.lastRow]}>
             <OrderListItem order={item} subtitle={describeOrderForList(item)} onPress={() => navigation.navigate("OrderDetail", { orderId: item.id })} />
+            <RatePurchaseLink
+              order={item}
+              onRate={(product) => navigation.navigate("WriteReview", { productId: product.id, productName: product.name, imageUrl: product.imageUrl })}
+            />
           </View>
         )}
         ListEmptyComponent={

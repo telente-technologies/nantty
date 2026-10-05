@@ -8,6 +8,7 @@ import { ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from "@/components/escrow
 import { StatusPill } from "@/components/escrow/statusPill";
 import { CaretRight24Icon, Shield24Icon } from "@/components/icons";
 import { CartItemSummary } from "@/components/order/cartItemSummary";
+import { RatePurchaseCard } from "@/components/reviews/ratePurchaseCard";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -94,6 +95,10 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
           </View>
           <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Placed {formatFriendlyDate(detail.createdAt)} · includes delivery</Text>
         </View>
+        <RatePurchaseCard
+          order={detail}
+          onRate={(product) => navigation.navigate("WriteReview", { productId: product.id, productName: product.name, imageUrl: product.imageUrl })}
+        />
       </ScrollView>
       <View style={styles.footer}>
         {canConfirm ? <Button title="Confirm receipt" onPress={() => setConfirmSheetVisible(true)} /> : null}
