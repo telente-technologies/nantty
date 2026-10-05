@@ -5,7 +5,7 @@ import { useThemedIconInk } from "@/theme/makeThemedStyles.util";
 import type { IconProps } from "../icon.types";
 
 export function Plus16AltIcon({ size, color, style }: IconProps) {
-  const ink = useThemedIconInk("#2043F5");
+  const ink = useThemedIconInk("#3A2BFF");
   const scale = size === undefined ? 1 : size / 16;
   return (
     <Svg width={16 * scale} height={16 * scale} viewBox="0 0 16 16" fill="none" style={style}>

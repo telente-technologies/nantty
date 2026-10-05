@@ -5,7 +5,7 @@ import { useThemedIconInk } from "@/theme/makeThemedStyles.util";
 import type { IconProps } from "../icon.types";
 
 export function Frame30132Icon({ size, color, style }: IconProps) {
-  const ink = useThemedIconInk("#2043F5");
+  const ink = useThemedIconInk("#3A2BFF");
   const scale = size === undefined ? 1 : size / 32;
   return (
     <Svg width={32 * scale} height={32 * scale} viewBox="0 0 32 32" fill="none" style={style}>

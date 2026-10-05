@@ -5,7 +5,7 @@ import { useThemedIconInk } from "@/theme/makeThemedStyles.util";
 import type { IconProps } from "../icon.types";
 
 export function ShoppingCart48Icon({ size, color, style }: IconProps) {
-  const ink = useThemedIconInk("#2043F5");
+  const ink = useThemedIconInk("#3A2BFF");
   const scale = size === undefined ? 1 : size / 48;
   return (
     <Svg width={48 * scale} height={48 * scale} viewBox="0 0 48 48" fill="none" style={style}>

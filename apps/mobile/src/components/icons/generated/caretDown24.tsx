@@ -5,7 +5,7 @@ import { useThemedIconInk } from "@/theme/makeThemedStyles.util";
 import type { IconProps } from "../icon.types";
 
 export function CaretDown24Icon({ size, color, style }: IconProps) {
-  const ink = useThemedIconInk("#2043F5");
+  const ink = useThemedIconInk("#3A2BFF");
   const scale = size === undefined ? 1 : size / 24;
   return (
     <Svg width={24 * scale} height={24 * scale} viewBox="0 0 24 24" fill="none" style={style}>

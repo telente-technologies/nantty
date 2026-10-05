@@ -52,7 +52,7 @@ export function PolicyDocumentCard({ version }: { readonly version: PolicyVersio
         accessibilityHint="Opens in the in-app browser"
         onPress={() => void openPolicyDocumentInApp(version.documentUrl)}
         style={({ pressed }) => [styles.readLink, pressed ? { opacity: 0.7 } : null]}
-        hitSlop={6}
+        hitSlop={14}
       >
         <Text size={14} weight={600} lineHeight={20} color={palette.link} maxFontSizeMultiplier={LARGE_TEXT_MULTIPLIER}>Read full {version.title}</Text>
         <ArrowUpRight24Icon size={16} color={palette.link} />
