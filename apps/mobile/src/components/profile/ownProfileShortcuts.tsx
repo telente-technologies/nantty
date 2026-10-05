@@ -9,6 +9,8 @@ import type { User } from "@/types";
 import { CheckmarkSuggestionCards } from "./checkmarkSuggestionCards";
 import { ProfileSwitcher } from "./profileSwitcher";
 import { StartSellingCard } from "./startSellingCard";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 type ShortcutRoute = "SellerDashboard" | "CreatorDashboard" | "CreatorApplicationStatus" | "CreatorProgram" | "Orders" | "Wallet" | "Verification" | "Settings" | "FollowRequests" | "Rankings" | "Saved";
 
@@ -41,7 +43,7 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
             onPress={() => navigation.navigate(shortcut.route)}
             style={styles.shortcut}
           >
-            <Text size={13} weight={500} lineHeight={16.9} color={colors.primary}>{shortcut.label}</Text>
+            <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={colors.primary}>{shortcut.label}</Text>
           </Pressable>
         ))}
       </ScrollView>
@@ -51,7 +53,7 @@ export function OwnProfileShortcuts({ profile }: { profile: User }) {
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  row: { paddingHorizontal: 12, gap: 8 },
-  suggestions: { paddingHorizontal: 12, gap: 8 },
-  shortcut: { height: 32, paddingHorizontal: 12, borderRadius: 16, backgroundColor: colors.primaryTint, justifyContent: "center" },
+  row: { paddingHorizontal: spacing[3], gap: spacing[2] },
+  suggestions: { paddingHorizontal: spacing[3], gap: spacing[2] },
+  shortcut: { height: 32, paddingHorizontal: spacing[3], borderRadius: 16, backgroundColor: colors.primaryTint, justifyContent: "center" },
 }));

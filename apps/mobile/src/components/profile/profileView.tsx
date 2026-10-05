@@ -10,6 +10,8 @@ import type { Post, User } from "@/types";
 import { ProfileSoundsList } from "./profileSoundsList";
 import { ProfileSummary, type ProfileAction } from "./profileSummary";
 import { ProfileTabs, type ProfileTabKey } from "./profileTabs";
+import { spacing } from "@/constants/spacing.constant";
+import { typeScale } from "@/constants/typography.constant";
 
 export interface ProfileViewProps {
   readonly profile: User | undefined;
@@ -85,10 +87,10 @@ export function ProfileView(props: ProfileViewProps) {
       ListEmptyComponent={
         props.isLocked ? (
           <View style={styles.privateState} accessibilityRole="summary">
-            <Text size={16} weight={600} lineHeight={20} align="center">
+            <Text size={typeScale.base} weight={600} lineHeight={20} align="center">
               This account is private
             </Text>
-            <Text size={14} lineHeight={18} color={colors.textSubtle} align="center">
+            <Text size={typeScale.md} lineHeight={18} color={colors.textSubtle} align="center">
               Follow this account to see their posts.
             </Text>
           </View>
@@ -97,7 +99,7 @@ export function ProfileView(props: ProfileViewProps) {
         ) : props.loading ? (
           <ActivityIndicator style={styles.empty} color={colors.primary} />
         ) : (
-          <Text size={14} lineHeight={16.8} color={colors.textSubtle} align="center" style={styles.empty}>
+          <Text size={typeScale.md} lineHeight={16.8} color={colors.textSubtle} align="center" style={styles.empty}>
             {EMPTY_TAB_MESSAGES[activeTab]}
           </Text>
         )
@@ -109,8 +111,8 @@ export function ProfileView(props: ProfileViewProps) {
 
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: "center", justifyContent: "center" },
-  header: { gap: 24 },
-  content: { paddingBottom: 40 },
+  header: { gap: spacing[6] },
+  content: { paddingBottom: spacing[8] },
   empty: { marginTop: 48 },
-  privateState: { marginTop: 48, paddingHorizontal: 32, gap: 6 },
+  privateState: { marginTop: 48, paddingHorizontal: spacing[7], gap: 6 },
 });
