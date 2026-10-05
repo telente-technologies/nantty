@@ -64,7 +64,6 @@ func EvaluateCreatorEligibility(ctx context.Context, application *container.Cont
 	requirements := []Requirement{
 		{Key: "followers", Label: fmt.Sprintf("At least %s real followers", formatThousands(auto.MinimumRealFollowers)), CurrentValue: signals.RealFollowers, RequiredValue: auto.MinimumRealFollowers},
 		{Key: "account_age", Label: fmt.Sprintf("Account at least %d days old", auto.MinimumAccountAgeDays), CurrentValue: ageDays, RequiredValue: auto.MinimumAccountAgeDays},
-		{Key: "verified_phone", Label: "Verified phone number", CurrentValue: flag(account.PhoneVerified), RequiredValue: flag(auto.RequiresVerifiedPhone)},
 		{Key: "original_posts", Label: fmt.Sprintf("%d original posts in the last 60 days", auto.MinimumOriginalPostsInLast60Days), CurrentValue: signals.OriginalPostsLast60Days, RequiredValue: auto.MinimumOriginalPostsInLast60Days},
 		{Key: "no_violations", Label: fmt.Sprintf("No violations in the last %d days", auto.NoViolationsInDays), CurrentValue: flag(signals.DaysSinceLastViolation >= auto.NoViolationsInDays), RequiredValue: 1},
 	}

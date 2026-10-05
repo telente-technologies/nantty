@@ -10,7 +10,6 @@ import (
 type AutoApproveRules struct {
 	MinimumAccountAgeDays            int  `json:"minimumAccountAgeDays"`
 	RequiresVerifiedEmail            bool `json:"requiresVerifiedEmail"`
-	RequiresVerifiedPhone            bool `json:"requiresVerifiedPhone"`
 	MinimumRealFollowers             int  `json:"minimumRealFollowers"`
 	MinimumOriginalPostsInLast60Days int  `json:"minimumOriginalPostsInLast60Days"`
 	NoViolationsInDays               int  `json:"noViolationsInDays"`
@@ -31,7 +30,7 @@ type CreatorThresholds struct {
 
 func DefaultCreatorThresholds() CreatorThresholds {
 	thresholds := CreatorThresholds{}
-	thresholds.AutoApprove.MinimumAccountAgeDays, thresholds.AutoApprove.RequiresVerifiedEmail, thresholds.AutoApprove.RequiresVerifiedPhone = 30, true, true
+	thresholds.AutoApprove.MinimumAccountAgeDays, thresholds.AutoApprove.RequiresVerifiedEmail = 30, true
 	thresholds.AutoApprove.MinimumRealFollowers, thresholds.AutoApprove.MinimumOriginalPostsInLast60Days = 1000, 10
 	thresholds.AutoApprove.NoViolationsInDays, thresholds.AutoApprove.MaximumFraudScore = 90, 30
 	thresholds.ManualReview.MinimumRealFollowers, thresholds.ManualReview.AllowsPastViolation = 500, true
