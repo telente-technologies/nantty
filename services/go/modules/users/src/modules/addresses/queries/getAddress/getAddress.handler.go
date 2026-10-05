@@ -21,7 +21,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (services.Addre
 	if err != nil {
 		return services.AddressView{}, err
 	}
-	views, err := services.BuildAddressViews(ctx, handler.Container.Client, []*ent.ShippingAddress{address})
+	views, err := services.BuildAddressViews(ctx, handler.Container.Client, handler.Container.Settings.AddressPhoneKey, []*ent.ShippingAddress{address})
 	if err != nil {
 		return services.AddressView{}, err
 	}

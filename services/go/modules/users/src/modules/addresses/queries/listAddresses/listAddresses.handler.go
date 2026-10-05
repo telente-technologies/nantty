@@ -20,5 +20,5 @@ func (handler Handler) Execute(ctx context.Context, query Query) ([]services.Add
 	if err != nil {
 		return nil, err
 	}
-	return services.BuildAddressViews(ctx, handler.Container.Client, addresses)
+	return services.BuildAddressViews(ctx, handler.Container.Client, handler.Container.Settings.AddressPhoneKey, addresses)
 }

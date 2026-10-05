@@ -19,6 +19,7 @@ type AddressView struct {
 	Region  *ent.GeoRegion
 	Area    *ent.GeoAdminArea
 	City    *ent.GeoCity
+	Phone   string
 }
 
 func (view AddressView) StateName() string {
@@ -53,7 +54,7 @@ func (view AddressView) DisplayLine() string {
 	return strings.Join(kept, ", ")
 }
 
-func BuildAddressViews(ctx context.Context, client *ent.Client, addresses []*ent.ShippingAddress) ([]AddressView, error) {
+func BuildAddressViews(ctx context.Context, client *ent.Client, phoneKey []byte, addresses []*ent.ShippingAddress) ([]AddressView, error) {
 	regionIds, areaIds, cityIds, countryCodes := collectGeoIdentifiers(addresses)
 	countries, err := client.GeoCountry.Query().Where(geocountry.CodeIn(countryCodes...)).All(ctx)
 	if err != nil {
@@ -74,6 +75,9 @@ func BuildAddressViews(ctx context.Context, client *ent.Client, addresses []*ent
 	views := make([]AddressView, 0, len(addresses))
 	for _, address := range addresses {
 		view := AddressView{Address: address}
+		if view.Phone, err = OpenPhone(phoneKey, address); err != nil {
+			return nil, err
+		}
 		for _, country := range countries {
 			if country.Code == address.CountryCode {
 				view.Country = country
