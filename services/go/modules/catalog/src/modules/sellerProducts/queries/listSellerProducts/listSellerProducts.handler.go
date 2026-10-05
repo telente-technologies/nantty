@@ -17,6 +17,7 @@ import (
 	"zudomart/modules/catalog/src/services"
 	"zudomart/modules/catalog/src/types"
 	"zudomart/modules/catalog/src/utils"
+	"zudomart/platform/commerceports"
 	"zudomart/platform/httpserver"
 )
 
@@ -92,6 +93,17 @@ func (handler Handler) conditions(ctx context.Context, query Query, spec sortSpe
 	}
 	if query.SupplierId != nil {
 		conditions = append(conditions, product.SupplierID(*query.SupplierId))
+	}
+	if query.Stock != "" || query.LocationId != nil {
+		stock, err := commerceports.Default.InventoryStock()
+		if err != nil {
+			return nil, err
+		}
+		matching, err := stock.ProductIdsMatchingStock(ctx, query.StoreId, commerceports.StockFilter{Level: query.Stock, LocationId: query.LocationId})
+		if err != nil {
+			return nil, err
+		}
+		conditions = append(conditions, product.IDIn(matching...))
 	}
 	if query.VariantId != nil {
 		owner, err := handler.Container.Client.ProductVariant.Query().Where(productvariant.ID(*query.VariantId), productvariant.StoreID(query.StoreId)).Only(ctx)

@@ -39,8 +39,17 @@ func (controller SellerProductsController) ListProducts(writer http.ResponseWrit
 	category, categoryError := utils.OptionalQueryIdentifier(request, "categoryId")
 	variant, variantError := utils.OptionalQueryIdentifier(request, "variantId")
 	supplier, supplierError := utils.OptionalQueryIdentifier(request, "supplierId")
+	location, locationError := utils.OptionalQueryIdentifier(request, "locationId")
 	limit, limitError := utils.ReadPageLimit(request, 25, 200)
-	for _, failure := range []error{variantError, supplierError, limitError} {
+	stock := request.URL.Query().Get("stock")
+	var stockError error
+	if stock != "" && stock != "low" && stock != "out" && stock != "all" {
+		stockError = httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "stock", Message: "must be low, out or all"}})
+	}
+	if stock == "all" {
+		stock = ""
+	}
+	for _, failure := range []error{variantError, supplierError, locationError, limitError, stockError} {
 		if categoryError == nil {
 			categoryError = failure
 		}
@@ -52,7 +61,7 @@ func (controller SellerProductsController) ListProducts(writer http.ResponseWrit
 	query := request.URL.Query()
 	page, err := (listsellerproducts.Handler{Container: controller.Container}).Execute(request.Context(), listsellerproducts.Query{
 		StoreId: middlewares.StoreAccessFrom(request.Context()).StoreId, Text: query.Get("q"), CategoryId: category, VariantId: variant, Status: query.Get("status"),
-		Online: query.Get("online"), Visibility: query.Get("visibility"), SupplierId: supplier, Sort: query.Get("sort"), Cursor: query.Get("cursor"), Limit: limit,
+		Online: query.Get("online"), Visibility: query.Get("visibility"), SupplierId: supplier, Stock: stock, LocationId: location, Sort: query.Get("sort"), Cursor: query.Get("cursor"), Limit: limit,
 	})
 	controller.respond(writer, request, http.StatusOK, page, err)
 }

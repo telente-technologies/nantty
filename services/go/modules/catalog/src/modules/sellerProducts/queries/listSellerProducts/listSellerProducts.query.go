@@ -11,6 +11,8 @@ type Query struct {
 	Online     string
 	Visibility string
 	SupplierId *uuid.UUID
+	Stock      string
+	LocationId *uuid.UUID
 	Sort       string
 	Cursor     string
 	Limit      int
