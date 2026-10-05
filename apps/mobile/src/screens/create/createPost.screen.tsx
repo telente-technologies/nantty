@@ -94,7 +94,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     mutationFn: async (capturedFile: LocalMediaFile) => {
       const jobId = await enqueueLocalMediaForUpload(capturedFile, "story");
       const mediaId = await waitForUploadedMediaId(jobId);
-      return storiesService.publishStory({ mediaId, media: { id: mediaId, type: capturedFile.mediaType === "video" ? "video" : "image", url: capturedFile.uri } });
+      return storiesService.publishStory({ mediaId, media: { id: mediaId, type: capturedFile.mediaType === "video" ? "video" : "image", url: null } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["story-tray"] });

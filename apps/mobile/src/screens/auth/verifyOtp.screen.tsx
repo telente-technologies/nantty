@@ -12,12 +12,6 @@ import { useSignUpStore } from "@/store/signup.store";
 
 const SECONDS_BEFORE_CODE_CAN_BE_RESENT = 60;
 
-function describeCodeDestination(destination: string): string {
-  if (!destination.startsWith("+234")) return destination;
-  const digits = destination.slice(4);
-  return `+234 ${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
-}
-
 export function VerifyOtpScreen({ navigation, route }: AuthScreenProps<"VerifyOtp">) {
   const { colors } = useTheme();
   const { destination, purpose } = route.params;
@@ -44,12 +38,12 @@ export function VerifyOtpScreen({ navigation, route }: AuthScreenProps<"VerifyOt
     }
   };
 
-  const resendVerificationCode = async (deliveryDescription: string) => {
+  const resendVerificationCode = async () => {
     setMessage(null);
     try {
       await authService.sendOneTimeCode(destination, purpose);
       setResendTimerRestartKey((key) => key + 1);
-      setMessage({ text: deliveryDescription, isError: false });
+      setMessage({ text: "We sent you a new code.", isError: false });
     } catch {
       setMessage({ text: "We couldn't resend the code. Please try again.", isError: true });
     }
@@ -58,7 +52,7 @@ export function VerifyOtpScreen({ navigation, route }: AuthScreenProps<"VerifyOt
   return (
     <AuthStep
       title="Enter 6-digit code"
-      subtitle={`Your code was sent to ${describeCodeDestination(destination)}`}
+      subtitle={`Your code was sent to ${destination}`}
       actionTitle="Next"
       actionDisabled={code.length !== OTP_CODE_LENGTH}
       loading={verifying}
@@ -68,8 +62,7 @@ export function VerifyOtpScreen({ navigation, route }: AuthScreenProps<"VerifyOt
       <ResendCodeTimer
         secondsUntilResendAllowed={SECONDS_BEFORE_CODE_CAN_BE_RESENT}
         restartKey={resendTimerRestartKey}
-        onPressResendCode={() => resendVerificationCode("We sent you a new code.")}
-        onPressRequestCall={() => resendVerificationCode("You'll get a call with your code shortly.")}
+        onPressResendCode={resendVerificationCode}
       />
       {message ? (
         <Text size={12} weight={500} lineHeight={14.4} color={message.isError ? colors.error : colors.success} accessibilityRole="alert">

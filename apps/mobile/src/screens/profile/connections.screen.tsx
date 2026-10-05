@@ -53,6 +53,7 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
     queryFn: async () => {
       if (tab === "followers") return (await followsService.listFollowersOfUser(userId, deferredSearch)).data;
       if (tab === "following") return (await followsService.listFollowingOfUser(userId, deferredSearch)).data;
+      if (tab === "blocked") return followsService.listMyBlockedUsers();
       return followsService.listConnectionsOfUser(userId, tab);
     },
     retry: (failureCount, failure) => !(failure instanceof ApiError && failure.status === 403) && failureCount < 2,

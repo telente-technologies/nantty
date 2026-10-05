@@ -23,7 +23,7 @@ import { useDeliveryAddressStore } from "@/store/deliveryAddress.store";
 import type { PaymentChannel, SavedCardDisplay } from "@/types/commerce.type";
 import type { PaymentMode } from "@/types";
 import { directChoicesFor } from "@/utils/paymentMode.util";
-import { readSavedCardDisplay, unlockSavedCardId } from "@/utils/savedCard.util";
+import { readSavedCardDisplay, saveCardOnThisDevice, unlockSavedCardId } from "@/utils/savedCard.util";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { spacing } from "@/constants/spacing.constant";
@@ -68,6 +68,12 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
         const charge = await paymentsService.chargeSavedCard(result.payableOrderId, code, `${checkoutKey.current}-saved`);
         if (charge.status !== "action_required") return { orderId: result.payableOrderId, authorizationUrl: undefined };
         return { orderId: result.payableOrderId, authorizationUrl: charge.authorizationUrl };
+      }
+      const newCard = saveNewCard ? await paymentsService.setUpCardOnThisDevice(`${checkoutKey.current}-card`).catch(() => null) : null;
+      if (newCard) {
+        await saveCardOnThisDevice(newCard).catch(() => undefined);
+        const charge = await paymentsService.chargeSavedCard(result.payableOrderId, newCard.savedCardId, `${checkoutKey.current}-saved`);
+        return { orderId: result.payableOrderId, authorizationUrl: charge.status === "action_required" ? charge.authorizationUrl : undefined };
       }
       const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, "paystack", `${checkoutKey.current}-pay`);
       return { orderId: payment.orderId, authorizationUrl: payment.authorizationUrl };

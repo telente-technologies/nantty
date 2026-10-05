@@ -38,12 +38,13 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
 
   const openNotification = (notification: CategorizedNotification) => {
     if (!notification.read) markOneRead.mutate(notification.id);
-    const reference = notification.data?.url ? readInternalReferenceFromUrl(notification.data.url) : null;
+    const url = notification.url ?? notification.data?.url;
+    const reference = url ? readInternalReferenceFromUrl(url) : null;
     if (notification.data?.ticketId) navigation.navigate("SupportTicketDetail", { ticketId: notification.data.ticketId });
     else if (reference) {
       const route = buildInternalRoute(reference);
       navigation.navigate(route.name, route.params as never);
-    } else if (notification.data?.url) openUserSuppliedWebLink(notification.data.url, inAppBrowserColorsFromTheme(colors));
+    } else if (url) openUserSuppliedWebLink(url, inAppBrowserColorsFromTheme(colors));
     else if (notification.category === "orders") navigation.navigate("Orders");
     else if (notification.actor) navigation.navigate("UserProfile", { userId: notification.actor.id });
   };

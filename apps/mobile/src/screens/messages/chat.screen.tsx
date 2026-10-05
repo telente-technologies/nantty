@@ -89,6 +89,8 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
     }
   }, [conversationId, conversation.data?.inboxFolder]);
 
+  useEffect(() => (conversationId ? realtimeService.subscribeToTopic(`conversation:${conversationId}`) : undefined), [conversationId]);
+
   useEffect(() => {
     if (!conversationId) return;
     const sweepTimer = setInterval(() => removeExpiredMessagesFromCaches(queryClient, conversationId), EXPIRED_MESSAGE_SWEEP_INTERVAL_MS);
