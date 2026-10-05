@@ -12,6 +12,7 @@ import { ProductInfoSection } from "@/components/product/productInfoSection";
 import { ProductBrandRow } from "@/components/product/productBrandRow";
 import { ProductPriceBlock } from "@/components/product/productPriceBlock";
 import { ReportProductSheet } from "@/components/product/reportProductSheet";
+import { ProductReviewsSection } from "@/components/reviews/productReviewsSection";
 import { Button } from "@/components/ui/button";
 import { Header, HeaderAction } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
@@ -141,6 +142,8 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
           <ProductInfoSection title="Shipping & returns" body={detail.shippingInfo} />
           <ProductInfoSection title="Description" body={detail.description} collapsible />
         </View>
+        <View style={styles.divider} />
+        <ProductReviewsSection productId={productId} onSeeAll={() => navigation.navigate("ProductReviews", { productId })} />
         <View style={styles.divider} />
         <View style={styles.shop}>
           <AboutShopCard
