@@ -7,20 +7,22 @@ import (
 
 	"zudomart/modules/catalog/src/configs"
 	"zudomart/modules/catalog/src/generated/ent"
+	"zudomart/modules/catalog/src/interfaces"
+	platformevents "zudomart/platform/events"
 	"zudomart/platform/idempotency"
 	"zudomart/platform/jwtauth"
-	"zudomart/platform/usersdirectory"
 	"zudomart/platform/viewerregion"
 )
 
 type Container struct {
 	Client           *ent.Client
 	Database         *sql.DB
-	Users            usersdirectory.Reader
+	Users            interfaces.UserDirectory
 	Rates            *viewerregion.RateReader
 	Settings         configs.CatalogSettings
 	Logger           *slog.Logger
 	Now              func() time.Time
 	AccessVerifier   *jwtauth.AccessTokenVerifier
 	IdempotencyStore *idempotency.RedisStore
+	Jobs             platformevents.JobQueue
 }

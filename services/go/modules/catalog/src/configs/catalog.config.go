@@ -22,6 +22,8 @@ type CatalogSettings struct {
 	EventsQueueName        string
 	SocialInternalUrl      string
 	SocialInternalToken    string
+	PublicWebBaseUrl       string
+	ImportJobsQueue        string
 }
 
 func (settings CatalogSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -41,6 +43,8 @@ func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		EventsQueueName:        reader.ReadStringOrDefault("CATALOG_EVENTS_QUEUE", ""),
 		SocialInternalUrl:      reader.ReadStringOrDefault("CATALOG_SOCIAL_INTERNAL_URL", ""),
 		SocialInternalToken:    reader.ReadStringOrDefault("CATALOG_SOCIAL_INTERNAL_TOKEN", ""),
+		PublicWebBaseUrl:       reader.ReadStringOrDefault("PUBLIC_WEB_BASE_URL", "https://zudomart.com"),
+		ImportJobsQueue:        reader.ReadStringOrDefault("CATALOG_IMPORT_JOBS_QUEUE", "jobs-catalog-import"),
 		ScheduledPublishPeriod: reader.ReadDurationOrDefault("CATALOG_SCHEDULED_PUBLISH_INTERVAL", 30*time.Second),
 	}
 }

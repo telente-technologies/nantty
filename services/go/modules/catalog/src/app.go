@@ -27,6 +27,8 @@ import (
 	"zudomart/modules/catalog/src/modules/reviews"
 	"zudomart/modules/catalog/src/modules/sellerProducts"
 	"zudomart/modules/catalog/src/modules/shareCards"
+	storesettings "zudomart/modules/catalog/src/modules/storeSettings"
+	storeteam "zudomart/modules/catalog/src/modules/storeTeam"
 	"zudomart/modules/catalog/src/modules/stores"
 	"zudomart/modules/catalog/src/services"
 	"zudomart/platform/commerceports"
@@ -91,6 +93,9 @@ func StartCatalogModuleWithSettings(ctx context.Context, settings configs.Catalo
 	}
 	commerceports.Default.RegisterCatalogReader(integrations.CommerceCatalog{Container: module.Container})
 	commerceports.Default.RegisterStoreShippingCountries(integrations.CommerceCatalog{Container: module.Container})
+	commerceports.Default.RegisterStoreAuditTrail(services.StoreAuditTrailPort{Container: module.Container})
+	commerceports.Default.RegisterStoreAuditReader(services.StoreAuditTrailPort{Container: module.Container})
+	commerceports.Default.RegisterStoreInsightsReader(integrations.StoreInsights{Container: module.Container})
 	if err := services.SeedStarterTaxonomyWhenEmpty(ctx, module.Container); err != nil {
 		_ = database.Close()
 		return nil, err
@@ -126,6 +131,8 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	sharecards.Mount(mux, module.Container)
 	internalsources.Mount(mux, module.Container)
 	featuredproducts.Mount(mux, module.Container)
+	storesettings.Mount(mux, module.Container)
+	storeteam.Mount(mux, module.Container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

@@ -36,3 +36,15 @@ var (
 	AlreadyReported        = Api(http.StatusConflict, "ALREADY_REPORTED", "That review was already reported.")
 	CannotReviewOwnStore   = Api(http.StatusForbidden, "CANNOT_REVIEW_OWN_STORE", "You cannot review your own store.")
 )
+
+var (
+	StaffNotFound       = Api(http.StatusNotFound, "STAFF_NOT_FOUND", "That team member could not be found.")
+	StaffExists         = Api(http.StatusConflict, "STAFF_EXISTS", "That person is already on this team.")
+	SeatLimitReached    = Api(http.StatusConflict, "SEAT_LIMIT_REACHED", "Your plan has no free team seats. Upgrade or remove someone first.")
+	OwnerRoleReserved   = Api(http.StatusForbidden, "OWNER_ROLE_RESERVED", "The owner role cannot be given to someone else.")
+	OwnerOnly           = Api(http.StatusForbidden, "OWNER_ONLY", "Only the store owner can do that.")
+	OwnerProtected      = Api(http.StatusForbidden, "OWNER_PROTECTED", "The store owner cannot be changed or removed.")
+	CannotEditSelf      = Api(http.StatusForbidden, "CANNOT_EDIT_SELF", "You cannot change your own access.")
+	CannotRemoveSelf    = Api(http.StatusForbidden, "CANNOT_REMOVE_SELF", "You cannot remove yourself from the team.")
+	TeamRequestNotFound = Api(http.StatusNotFound, "TEAM_REQUEST_NOT_FOUND", "That team request could not be found.")
+)

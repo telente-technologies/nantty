@@ -35,8 +35,40 @@ func (Store) Fields() []ent.Field {
 		field.Int("rating_count").Default(0),
 		field.String("moderation_visibility").Default("visible"),
 		field.JSON("shipping_country_codes", []string{}).Optional(),
+		field.String("locale").Default("en-NG").MaxLen(12),
+		field.String("contact_phone").Default("").MaxLen(20),
+		field.String("contact_email").Default("").MaxLen(120),
+		field.String("contact_address").Default("").MaxLen(200),
+		field.JSON("tax_rates", []StoreTaxRate{}).Optional(),
+		field.Bool("prices_include_tax").Default(false),
+		field.JSON("policies", StorePolicies{}).Optional(),
+		field.JSON("notification_preferences", map[string]bool{}).Optional(),
+		field.String("tagline").Default("").MaxLen(120),
+		field.JSON("opening_hours", []StoreOpeningHours{}).Optional(),
+		field.JSON("social_links", map[string]string{}).Optional(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
+}
+
+type StoreTaxRate struct {
+	Id                   string   `json:"id"`
+	Name                 string   `json:"name"`
+	RateBasisPoints      int      `json:"rateBasisPoints"`
+	IsDefault            bool     `json:"isDefault"`
+	AppliesToCategoryIds []string `json:"appliesToCategoryIds"`
+}
+
+type StorePolicies struct {
+	Returns  string `json:"returns"`
+	Shipping string `json:"shipping"`
+	Privacy  string `json:"privacy"`
+}
+
+type StoreOpeningHours struct {
+	Weekday  string `json:"weekday"`
+	IsOpen   bool   `json:"isOpen"`
+	OpensAt  string `json:"opensAt"`
+	ClosesAt string `json:"closesAt"`
 }
 
 func (Store) Indexes() []ent.Index {
@@ -62,6 +94,10 @@ func (StoreMember) Fields() []ent.Field {
 		field.String("role").NotEmpty(),
 		field.JSON("permissions", []string{}).Optional(),
 		field.String("status").Default("active"),
+		field.JSON("location_ids", []string{}).Optional(),
+		field.UUID("invited_by_account_id", uuid.UUID{}).Optional().Nillable(),
+		field.Time("accepted_at").Optional().Nillable(),
+		field.Time("last_active_at").Optional().Nillable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
