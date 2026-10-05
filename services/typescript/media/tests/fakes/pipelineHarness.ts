@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { loadMediaConfigFromEnvironment, type MediaConfig } from "../../src/configs/media.config.js";
 import type { MalwareScanner } from "../../src/interfaces/malwareScanner.interface.js";
 import type { ImageProcessor, MediaTranscoder } from "../../src/interfaces/mediaProcessors.interface.js";
+import type { BrandedDownloadRenderer } from "../../src/interfaces/brandedDownloadRenderer.interface.js";
 import type { ModerationClient } from "../../src/interfaces/moderationClient.interface.js";
 import { createSharpImageProcessor } from "../../src/integrations/sharpImageProcessor.integration.js";
 import type { HandlerContext } from "../../src/types/handlerContext.type.js";
@@ -15,6 +16,7 @@ export const finalAttempt: JobAttempt = { attempt: 5, maximumAttempts: 5, isFina
 
 export function testConfig(overrides: Partial<MediaConfig> = {}): MediaConfig {
   process.env["DATABASE_URL"] = "postgres://test:test@localhost:5432/test?schema=media";
+  process.env["GATEWAY_IDENTITY_SECRET"] ??= "test-gateway-identity-secret-0123456789abcdef";
   return { ...loadMediaConfigFromEnvironment(), ...overrides };
 }
 
@@ -26,6 +28,11 @@ export const unavailableTranscoder: MediaTranscoder = {
   computeAudioFingerprint: async () => null,
 };
 
+export const unavailableBranding: BrandedDownloadRenderer = {
+  renderBrandedImage: async () => { throw new (await import("../../src/errors/media.error.js")).ProcessorUnavailableError("no renderer"); },
+  renderBrandedVideo: async () => { throw new (await import("../../src/errors/media.error.js")).ProcessorUnavailableError("no ffmpeg"); },
+};
+
 export interface Harness {
   readonly context: HandlerContext;
   readonly db: FakeMediaDatabase;
@@ -35,7 +42,7 @@ export interface Harness {
   seedUpload(options: { purpose: string; mimeType: string; bytes: Uint8Array; kind?: string; isPrivate?: boolean; sha256?: string | null; expiresAt?: Date | null }): string;
 }
 
-export function createHarness(options: { scanner?: MalwareScanner; moderation?: ModerationClient; images?: ImageProcessor; transcoder?: MediaTranscoder; config?: Partial<MediaConfig> } = {}): Harness {
+export function createHarness(options: { scanner?: MalwareScanner; moderation?: ModerationClient; images?: ImageProcessor; transcoder?: MediaTranscoder; branding?: BrandedDownloadRenderer; config?: Partial<MediaConfig> } = {}): Harness {
   const db = new FakeMediaDatabase();
   const storage = new FakeObjectStorage();
   const enqueued: Harness["enqueued"] = [];
@@ -49,6 +56,7 @@ export function createHarness(options: { scanner?: MalwareScanner; moderation?: 
     moderation: options.moderation,
     images: options.images ?? createSharpImageProcessor(),
     transcoder: options.transcoder ?? unavailableTranscoder,
+    branding: options.branding ?? unavailableBranding,
   };
   return {
     context, db, storage, enqueued, clock,
