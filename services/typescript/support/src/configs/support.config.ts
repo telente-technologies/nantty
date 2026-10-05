@@ -21,6 +21,7 @@ export interface SupportConfig {
   readonly jobsEnabled: boolean;
   readonly seedHelpContent: boolean;
   readonly identity: InternalSource | undefined;
+  readonly media: InternalSource | undefined;
   readonly intelligence: { readonly baseUrl: string; readonly sharedSecret: string; readonly timeoutMs: number } | undefined;
 }
 
@@ -38,6 +39,7 @@ export function loadSupportConfigFromEnvironment(): SupportConfig {
   const jwksUrl = readOrDefault("AUTH_JWKS_URL", "");
   const identityUrl = readOrDefault("IDENTITY_INTERNAL_URL", "");
   const intelligenceUrl = readOrDefault("INTELLIGENCE_URL", "");
+  const mediaUrl = readOrDefault("MEDIA_INTERNAL_URL", "");
   const rabbitUrl = readOrDefault("RABBITMQ_URL", "");
   const config: SupportConfig = {
     gatewayIdentitySecrets: readGatewayIdentitySecretsFromEnvironment(problems),
@@ -55,11 +57,13 @@ export function loadSupportConfigFromEnvironment(): SupportConfig {
     jobsEnabled: readOrDefault("JOBS_ENABLED", "true") === "true",
     seedHelpContent: readOrDefault("SEED_HELP_CONTENT", "true") === "true",
     identity: identityUrl === "" ? undefined : { baseUrl: identityUrl, internalToken: readOrDefault("IDENTITY_INTERNAL_TOKEN", "") },
+    media: mediaUrl === "" ? undefined : { baseUrl: mediaUrl, internalToken: readOrDefault("MEDIA_INTERNAL_TOKEN", "") },
     intelligence: intelligenceUrl === "" ? undefined : { baseUrl: intelligenceUrl, sharedSecret: readOrDefault("INTELLIGENCE_SHARED_SECRET", ""), timeoutMs: Number(readOrDefault("INTELLIGENCE_TIMEOUT_MS", "3000")) },
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
   if (config.staffAuth !== undefined && config.staffAuth.issuer === "") problems.push("AUTH_TOKEN_ISSUER is required when AUTH_JWKS_URL is set");
   if (config.intelligence !== undefined && config.intelligence.sharedSecret === "") problems.push("INTELLIGENCE_SHARED_SECRET is required when INTELLIGENCE_URL is set");
+  if (config.media !== undefined && config.media.internalToken.length < 24) problems.push("MEDIA_INTERNAL_TOKEN must be at least 24 characters when MEDIA_INTERNAL_URL is set");
   if (process.env["NODE_ENV"] === "production" && config.staffAuth === undefined) problems.push("AUTH_JWKS_URL is required in production");
   if (problems.length > 0) throw new Error(`Invalid support configuration: ${problems.join("; ")}`);
   return config;

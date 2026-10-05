@@ -7,6 +7,7 @@ import type { SupportConfig } from "./configs/support.config.js";
 import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
 import { autoCloseResolvedAfterDays } from "./constants/support.constant.js";
 import { createSupportPrisma } from "./databases/prisma.database.js";
+import { createMediaHttpDirectory } from "./integrations/mediaDirectory.integration.js";
 import { createIdentityHttpDirectory } from "./integrations/identityDirectory.integration.js";
 import { createIntelligenceHelpWriter } from "./integrations/intelligenceHelpWriter.integration.js";
 import { systemClock } from "./interfaces/clock.interface.js";
@@ -42,6 +43,7 @@ export function createSupportApp(config: SupportConfig, infrastructure: { readon
   const runAutoFaqNow = () => processQueuedAutoFaqTickets(ticketStore, publisher, systemClock, logger);
   const router = buildSupportRouter({
     ticketStore, helpStore, identity, clock: systemClock, internalToken: config.internalToken, mediaPublicBaseUrls: config.mediaPublicBaseUrls, runAutoFaqNow,
+    ...(config.media === undefined ? {} : { media: createMediaHttpDirectory(config.media.baseUrl, config.media.internalToken) }),
     staffAuthenticator: config.staffAuth === undefined ? unavailableStaffAuthenticator : createJwtStaffAuthenticator(config.staffAuth),
     probeDatabase: async () => void (await prisma.supportSetting.count({ take: 1 })),
   });
