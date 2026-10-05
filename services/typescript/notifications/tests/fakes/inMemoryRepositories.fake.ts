@@ -156,6 +156,13 @@ export class InMemoryNoticeDraftRepository implements NoticeDraftRepository {
     this.rows.set(versionId, next);
     return next;
   }
+  public async refreshVersionFacts(versionId: string, facts: Parameters<NoticeDraftRepository["refreshVersionFacts"]>[1]) {
+    const existing = this.rows.get(versionId);
+    if (existing === undefined) return null;
+    const next = { ...existing, ...facts };
+    this.rows.set(versionId, next);
+    return next;
+  }
   public async appendTestSend(versionId: string, testSend: { sentToEmail: string; sentByName: string; sentAt: string }) {
     const existing = this.rows.get(versionId);
     if (existing === undefined) return null;
