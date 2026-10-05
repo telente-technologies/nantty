@@ -141,10 +141,9 @@ func ReceiveReturn(ctx context.Context, deployed *container.Container, seller Se
 		if err := tx.ReturnRequest.UpdateOneID(row.ID).SetStatus("refunded").SetRestocked(restockLocation != nil).Exec(ctx); err != nil {
 			return err
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.refundRequested", group.ID.String(), now, map[string]any{
-			"orderGroupId": group.ID, "storeId": group.StoreID, "buyerAccountId": group.BuyerAccountID, "amountMinor": row.RefundAmountMinor, "currency": row.Currency,
-			"reason": fmt.Sprintf("return:%s", row.ID),
-		})
+		_, err = EnqueueRefundRequest(ctx, tx, group, RefundRequestRecord{AmountMinor: row.RefundAmountMinor, Currency: row.Currency, Reason: "Approved return",
+			EventReason: fmt.Sprintf("return:%s", row.ID), Source: RefundSourceReturn, CreatedById: seller.ActorId.String(), CreatedByName: seller.Name}, now)
+		return err
 	})
 	if err != nil || restockLocation == nil || len(restock) == 0 {
 		return err

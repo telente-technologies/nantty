@@ -10,7 +10,6 @@ import (
 	"zudomart/modules/orders/src/container"
 	"zudomart/modules/orders/src/enums"
 	ordererrors "zudomart/modules/orders/src/errors"
-	"zudomart/modules/orders/src/events"
 	"zudomart/modules/orders/src/generated/ent"
 	"zudomart/platform/httpserver"
 )
@@ -73,9 +72,8 @@ func RefundSellerOrder(ctx context.Context, deployed *container.Container, selle
 		if err := AppendTimelineEvent(ctx, tx, locked.ID, "note", summary, seller.actor()); err != nil {
 			return err
 		}
-		return events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.refundRequested", locked.ID.String(), now, map[string]any{
-			"orderGroupId": locked.ID, "storeId": locked.StoreID, "buyerAccountId": locked.BuyerAccountID, "amountMinor": request.AmountMinor, "currency": locked.Currency,
-			"reason": "Seller refund: " + request.Reason,
-		})
+		_, err = EnqueueRefundRequest(ctx, tx, locked, RefundRequestRecord{AmountMinor: request.AmountMinor, Currency: locked.Currency, Reason: request.Reason,
+			EventReason: "Seller refund: " + request.Reason, Source: RefundSourceSeller, CreatedById: seller.ActorId.String(), CreatedByName: seller.Name}, now)
+		return err
 	})
 }
