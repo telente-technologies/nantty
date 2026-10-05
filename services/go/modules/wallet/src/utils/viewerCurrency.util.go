@@ -22,7 +22,6 @@ type RegionHeaderCurrencyResolver struct {
 	ProfileCountry       ProfileCountryLookup
 }
 
-// ResolveViewerCurrency is for display only (wallet balances), so an explicit ?currency choice is honoured.
 func (resolver RegionHeaderCurrencyResolver) ResolveViewerCurrency(request *http.Request) string {
 	if requested := strings.ToUpper(request.URL.Query().Get("currency")); regionpricing.IsSupportedCurrency(requested) {
 		return requested
@@ -30,8 +29,6 @@ func (resolver RegionHeaderCurrencyResolver) ResolveViewerCurrency(request *http
 	return resolver.ResolvePricingRegion(request).Currency
 }
 
-// ResolvePricingRegion decides what the viewer pays: storefront (apps) > profile country > CDN country > client hint > US/USD.
-// It never reads ?currency, so a buyer can't pick a cheaper region's prices.
 func (resolver RegionHeaderCurrencyResolver) ResolvePricingRegion(request *http.Request) regionpricing.Resolution {
 	profileCountry := ""
 	if userId := ledgerutils.ReadOptionalPrincipalUserId(request, resolver.AccessVerifier); userId != "" && resolver.ProfileCountry != nil {
