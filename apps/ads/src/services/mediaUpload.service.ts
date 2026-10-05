@@ -1,6 +1,5 @@
-import { sendAdsApiRequest, buildAccountApiPath, AdsApiRequestError } from "@/services/adsApiClient.service";
-import { calculateSha256HexOfBytes } from "@/services/sha256Hashing.service";
-import type { UploadedMedia, UploadSession } from "@/types/creative.type";
+import { AdsApiRequestError, buildAccountApiPath, readCsrfTokenForRequests, sendAdsApiRequest } from "@/services/adsApiClient.service";
+import type { MediaUploadIntent, UploadedMedia } from "@/types/creative.type";
 
 export const acceptedCreativeMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/avif", "video/mp4", "video/quicktime"];
 export const maximumCreativeFileBytes = 500 * 1024 * 1024;
@@ -41,41 +40,51 @@ export async function readMediaMetadataInBrowser(file: File): Promise<BrowserMed
   }
 }
 
-async function sendChunkWithOneRetry(uploadId: string, chunkIndex: number, chunkBytes: Uint8Array, chunkSha256: string): Promise<void> {
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    try {
-      await sendAdsApiRequest(`/media/uploads/${encodeURIComponent(uploadId)}/chunks/${chunkIndex}`, {
-        method: "PUT",
-        rawBody: chunkBytes as Uint8Array<ArrayBuffer>,
-        headers: { "Content-Type": "application/octet-stream", "X-Chunk-Sha256": chunkSha256 },
-      });
-      return;
-    } catch (error) {
-      if (attempt === 1 || (error instanceof AdsApiRequestError && error.status >= 400 && error.status < 500)) throw error;
-    }
+const headersTheBrowserSetsItself = new Set(["host", "content-length"]);
+
+function isUploadUrlUsable(uploadUrl: string): boolean {
+  if (uploadUrl.startsWith("/") && !uploadUrl.startsWith("//")) return true;
+  try {
+    const { protocol } = new URL(uploadUrl);
+    return protocol === "https:" || protocol === "http:";
+  } catch {
+    return false;
   }
 }
 
-export async function uploadCreativeFileInChunks(accountId: string, file: File, onProgress: (fractionComplete: number) => void): Promise<UploadedMedia> {
-  const metadata = await readMediaMetadataInBrowser(file);
-  const session = await sendAdsApiRequest<UploadSession>("/media/uploads", {
-    method: "POST",
-    body: { fileName: file.name.slice(0, 200), mimeType: file.type, sizeBytes: file.size, purpose: "ad_creative", adAccountId: accountId, clientMetadata: metadata },
+function sendFileToUploadUrl(intent: MediaUploadIntent, file: File, onProgress: (fractionComplete: number) => void): Promise<void> {
+  if (!isUploadUrlUsable(intent.uploadUrl)) return Promise.reject(new AdsApiRequestError(503, "STORAGE_UNAVAILABLE", "Uploads are not available right now. Try again later."));
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("PUT", intent.uploadUrl);
+    const headerNames = Object.keys(intent.uploadHeaders).map((name) => name.toLowerCase());
+    for (const [name, value] of Object.entries(intent.uploadHeaders)) if (!headersTheBrowserSetsItself.has(name.toLowerCase())) request.setRequestHeader(name, value);
+    if (!headerNames.includes("content-type")) request.setRequestHeader("Content-Type", file.type);
+    const csrfToken = readCsrfTokenForRequests();
+    if (intent.uploadUrl.startsWith("/") && csrfToken) request.setRequestHeader("X-CSRF-Token", csrfToken);
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total);
+    };
+    request.onload = () => (request.status >= 200 && request.status < 300 ? resolve() : reject(new AdsApiRequestError(request.status, "UPLOAD_FAILED", "The file could not be uploaded. Try again.")));
+    request.onerror = () => reject(new AdsApiRequestError(0, "NETWORK_UNAVAILABLE", "The upload was interrupted. Check your connection and try again."));
+    request.send(file);
   });
-  const alreadyUploaded = new Set(session.uploadedChunks);
-  for (let chunkIndex = 0; chunkIndex < session.totalChunks; chunkIndex += 1) {
-    if (!alreadyUploaded.has(chunkIndex)) {
-      const chunkStart = chunkIndex * session.chunkSizeBytes;
-      const chunkBytes = new Uint8Array(await file.slice(chunkStart, chunkStart + session.chunkSizeBytes).arrayBuffer());
-      await sendChunkWithOneRetry(session.uploadId, chunkIndex, chunkBytes, await calculateSha256HexOfBytes(chunkBytes));
-    }
-    onProgress((chunkIndex + 1) / session.totalChunks);
-  }
-  const completed = await sendAdsApiRequest<{ mediaId: string }>(`/media/uploads/${encodeURIComponent(session.uploadId)}/complete`, { method: "POST" });
+}
+
+export async function uploadCreativeFile(accountId: string, file: File, onProgress: (fractionComplete: number) => void): Promise<UploadedMedia> {
+  const metadata = await readMediaMetadataInBrowser(file);
+  const clientMetadata = metadata ? { width: metadata.width, height: metadata.height, durationSeconds: metadata.durationSeconds === null ? null : Math.round(metadata.durationSeconds) } : null;
+  const intent = await sendAdsApiRequest<MediaUploadIntent>(buildAccountApiPath(accountId, "/creatives/media/uploads"), {
+    method: "POST",
+    body: { fileName: file.name.slice(0, 200), mimeType: file.type, sizeBytes: file.size, clientMetadata },
+  });
+  await sendFileToUploadUrl(intent, file, onProgress);
+  const mediaPath = buildAccountApiPath(accountId, `/creatives/media/${encodeURIComponent(intent.mediaId)}`);
+  await sendAdsApiRequest<{ mediaId: string; status: string }>(`${mediaPath}/complete`, { method: "POST" });
   for (let attempt = 0; attempt < 20; attempt += 1) {
-    const media = await sendAdsApiRequest<UploadedMedia>(buildAccountApiPath(accountId, `/creatives/media/${encodeURIComponent(completed.mediaId)}`));
+    const media = await sendAdsApiRequest<UploadedMedia>(mediaPath);
     if (media.status !== "processing") return media;
     await new Promise((resolve) => setTimeout(resolve, 1500));
   }
-  return { mediaId: completed.mediaId, status: "processing", media: null };
+  return { mediaId: intent.mediaId, status: "processing", media: null };
 }

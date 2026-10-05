@@ -5,15 +5,14 @@ export interface MockUserRecord {
   readonly name: string;
   readonly username: string;
   readonly email: string;
-  readonly phone: string;
   readonly avatarUrl: string | null;
 }
 
 export const demoUsers: readonly MockUserRecord[] = [
-  { id: "usr_adaeze", name: "Adaeze Okafor", username: "adaeze.okafor", email: "adaeze@ifelifestyle.ng", phone: "+2348035550142", avatarUrl: null },
-  { id: "usr_tunde", name: "Tunde Bakare", username: "tunde.bakare", email: "tunde@ifelifestyle.ng", phone: "+2348095550177", avatarUrl: null },
-  { id: "usr_blessing", name: "Blessing Eze", username: "blessing.eze", email: "blessing@ifelifestyle.ng", phone: "+2348125550190", avatarUrl: null },
-  { id: "usr_ibrahim", name: "Ibrahim Musa", username: "ibrahim.musa", email: "ibrahim@ifelifestyle.ng", phone: "+2348025550111", avatarUrl: null },
-  { id: "usr_kelechi", name: "Kelechi Obi", username: "kelechi.kicks", email: "kelechi@kelechikicks.ng", phone: "+2348075550155", avatarUrl: null },
-  { id: "usr_ama", name: "Ama Mensah", username: "ama.kente", email: "ama@kenteheritage.com.gh", phone: "+233245550188", avatarUrl: null },
+  { id: "usr_adaeze", name: "Adaeze Okafor", username: "adaeze.okafor", email: "adaeze@ifelifestyle.ng", avatarUrl: null },
+  { id: "usr_tunde", name: "Tunde Bakare", username: "tunde.bakare", email: "tunde@ifelifestyle.ng", avatarUrl: null },
+  { id: "usr_blessing", name: "Blessing Eze", username: "blessing.eze", email: "blessing@ifelifestyle.ng", avatarUrl: null },
+  { id: "usr_ibrahim", name: "Ibrahim Musa", username: "ibrahim.musa", email: "ibrahim@ifelifestyle.ng", avatarUrl: null },
+  { id: "usr_kelechi", name: "Kelechi Obi", username: "kelechi.kicks", email: "kelechi@kelechikicks.ng", avatarUrl: null },
+  { id: "usr_ama", name: "Ama Mensah", username: "ama.kente", email: "ama@kenteheritage.com.gh", avatarUrl: null },
 ];

@@ -12,7 +12,39 @@ import type {
   UpdateAdAccountRequest,
 } from "@/types/adAccount.type";
 import type { Page } from "@/types/api.type";
-import type { ActivityEntry, ActivityObjectType } from "@/types/tools.type";
+import type { Money } from "@/types/money.type";
+import type { ActivityChange, ActivityEntry, ActivityEntryResponse, ActivityObjectType } from "@/types/tools.type";
+import { formatMoneyForDisplay } from "@/utils/money.util";
+
+const systemActorName = "System";
+
+function describeChangedValue(value: unknown): string | null {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
+  if (typeof value === "object" && value !== null && "amountMinor" in value && "currency" in value) return formatMoneyForDisplay(value as Money);
+  return null;
+}
+
+function convertActivityChanges(changes: unknown): ActivityChange[] {
+  if (typeof changes !== "object" || changes === null || Array.isArray(changes)) return [];
+  return Object.entries(changes).flatMap(([field, value]) => {
+    const described = describeChangedValue(value);
+    return described === null ? [] : [{ field, from: null, to: described }];
+  });
+}
+
+function convertActivityEntry(entry: ActivityEntryResponse): ActivityEntry {
+  return {
+    id: entry.id,
+    actor: { id: "", name: entry.actor, isSystem: entry.actor === systemActorName },
+    action: "",
+    objectType: entry.objectType,
+    objectId: entry.objectId,
+    objectName: "",
+    summary: entry.summary,
+    changes: convertActivityChanges(entry.changes),
+    createdAt: entry.createdAt,
+  };
+}
 
 export const accountsApi = {
   signInWithPassword: (identifier: string, password: string, nextPath: string | null) =>
@@ -33,6 +65,8 @@ export const accountsApi = {
   revokeInvite: (accountId: string, inviteId: string) => sendAdsApiRequest<void>(buildAccountApiPath(accountId, `/invites/${encodeURIComponent(inviteId)}`), { method: "DELETE" }),
   previewInvite: (token: string) => sendAdsApiRequest<InvitePreview>(`/ads/invites/${encodeURIComponent(token)}`),
   acceptInvite: (token: string) => sendAdsApiRequest<{ accountId: string }>(`/ads/invites/${encodeURIComponent(token)}/accept`, { method: "POST" }),
-  listActivity: (accountId: string, filters: { objectType?: ActivityObjectType | ""; cursor?: string | null }) =>
-    sendAdsApiRequest<Page<ActivityEntry>>(buildAccountApiPath(accountId, "/activity"), { query: { objectType: filters.objectType, cursor: filters.cursor, limit: 30 } }),
+  listActivity: async (accountId: string, filters: { objectType?: ActivityObjectType | ""; cursor?: string | null }): Promise<Page<ActivityEntry>> => {
+    const page = await sendAdsApiRequest<Page<ActivityEntryResponse>>(buildAccountApiPath(accountId, "/activity"), { query: { objectType: filters.objectType, cursor: filters.cursor, limit: 30 } });
+    return { ...page, items: page.items.map(convertActivityEntry) };
+  },
 };

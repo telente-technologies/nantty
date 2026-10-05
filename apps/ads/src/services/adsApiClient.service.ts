@@ -50,6 +50,9 @@ export function buildQueryString(query: AdsApiRequestOptions["query"]): string {
   return queryText ? `?${queryText}` : "";
 }
 
+const sessionEndedErrorCodes = new Set(["SESSION_EXPIRED", "UNAUTHENTICATED", "UNAUTHORIZED"]);
+const genericValidationMessage = "Validation failed";
+
 function redirectToLoginAfterSessionEnded(): void {
   if (typeof window === "undefined") return;
   const nextPath = `${window.location.pathname}${window.location.search}`;
@@ -75,7 +78,7 @@ export async function sendRequestToAdsManagerServer<Payload>(bffPath: string, op
   }
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    if (response.status === 401 && (errorBody?.code === "SESSION_EXPIRED" || errorBody?.code === "UNAUTHENTICATED")) redirectToLoginAfterSessionEnded();
+    if (response.status === 401 && sessionEndedErrorCodes.has(errorBody?.code ?? "")) redirectToLoginAfterSessionEnded();
     throw new AdsApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.issues ?? []);
   }
   if (response.status === 204) return undefined as Payload;
@@ -94,7 +97,7 @@ export function buildAccountApiPath(accountId: string, resourcePath = ""): strin
 
 export function readErrorMessageForDisplay(error: unknown): string {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline. Check your connection and we'll retry when you're back.";
-  if (error instanceof AdsApiRequestError) return error.message;
+  if (error instanceof AdsApiRequestError) return error.message === genericValidationMessage && error.issues[0] ? error.issues[0].message : error.message;
   return "Something went wrong. Try again.";
 }
 

@@ -7,9 +7,9 @@ import { clearEverySessionCookie, readApiTokensFromCookies, readCachedSessionVie
 import { isMutationProtectedAgainstCsrf, isSafeHttpMethod } from "@/server/requestOriginGuard.service";
 
 const maximumForwardedBodyBytes = 12 * 1024 * 1024;
-const forwardedRequestHeaderNames = ["idempotency-key", "x-chunk-sha256", "if-match"];
+const forwardedRequestHeaderNames = ["idempotency-key", "if-match"];
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
-const allowedApiPathPattern = /^\/(ads|media|topics)(\/[A-Za-z0-9._~:@%-]+)*$/;
+const allowedApiPathPattern = /^\/(ads|media|topics|users)(\/[A-Za-z0-9._~:@%-]+)*$/;
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
   return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store" } });
