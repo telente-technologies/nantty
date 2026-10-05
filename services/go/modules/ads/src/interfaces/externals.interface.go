@@ -37,6 +37,7 @@ type UserSummary struct {
 type UserDirectory interface {
 	LookupUsers(ctx context.Context, ids []string) (map[string]UserSummary, error)
 	FindUserByUsername(ctx context.Context, username string) (UserSummary, bool, error)
+	FindUserByEmail(ctx context.Context, email string) (UserSummary, bool, error)
 }
 
 type ManagedStore struct {
@@ -52,14 +53,12 @@ type StoreDirectory interface {
 	ListStoresManagedBy(ctx context.Context, userId string) ([]ManagedStore, error)
 }
 
-// AudienceMemberSource resolves the user ids behind engagement-based audiences from the services that own that data.
 type AudienceMemberSource interface {
 	StoreCustomers(ctx context.Context, storeId string, retentionDays, minimumOrders int) ([]string, error)
 	Engagers(ctx context.Context, ownerUserId, engagementSource string, retentionDays int) ([]string, error)
 	Followers(ctx context.Context, ownerUserId string) ([]string, error)
 }
 
-// IdentityMatcher matches SHA-256 hashes of normalized identifiers to user ids; unmatched hashes are discarded by the caller.
 type IdentityMatcher interface {
 	MatchEmailHashes(ctx context.Context, hashes []string) ([]string, error)
 	MatchPhoneHashes(ctx context.Context, hashes []string) ([]string, error)
@@ -74,7 +73,6 @@ type ContentSourceQuery struct {
 	Limit       int
 }
 
-// ContentSourceDirectory lists boostable social posts, clips, products, live sessions and stores of an advertiser.
 type ContentSourceDirectory interface {
 	ListContentSources(ctx context.Context, query ContentSourceQuery) (items []map[string]any, nextCursor string, err error)
 }
@@ -84,7 +82,6 @@ type ObjectUploadTicket struct {
 	Headers map[string]string
 }
 
-// ObjectStorage issues presigned S3 URLs; objects are never proxied through the ads service.
 type ObjectStorage interface {
 	PresignUpload(ctx context.Context, key, contentType string, sizeBytes int64, timeToLive time.Duration) (ObjectUploadTicket, error)
 	PresignDownload(ctx context.Context, key string, timeToLive time.Duration) (string, error)
@@ -99,8 +96,6 @@ type OwnershipQuery struct {
 	StoreId     string
 }
 
-// DestinationOwnership asks the owning service (social for posts and clips, commerce for products and stores, identity for profiles)
-// whether the advertiser owns the target or is on the team that manages it.
 type DestinationOwnership interface {
 	Owns(ctx context.Context, query OwnershipQuery) (bool, error)
 }

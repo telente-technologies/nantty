@@ -10,8 +10,6 @@ import (
 
 const pruneBatchSize = 5_000
 
-// Raw impressions are an operational buffer; the durable record is ad_stats_daily plus billed batches.
-// Once a RANGE(id) partition scheme or the ClickHouse export is live, this becomes a partition drop.
 func PruneSettledRawImpressions(ctx context.Context, deployed *container.Container) (int, error) {
 	cutoff := deployed.Now().Add(-deployed.Settings.RawImpressionRetention)
 	removed := 0
