@@ -9,6 +9,12 @@ import (
 // Brand is the predicate function for brand builders.
 type Brand func(*sql.Selector)
 
+// BrandOfficialRequest is the predicate function for brandofficialrequest builders.
+type BrandOfficialRequest func(*sql.Selector)
+
+// CatalogFollow is the predicate function for catalogfollow builders.
+type CatalogFollow func(*sql.Selector)
+
 // Category is the predicate function for category builders.
 type Category func(*sql.Selector)
 
@@ -17,6 +23,9 @@ type FeaturedProduct func(*sql.Selector)
 
 // IdempotentRequest is the predicate function for idempotentrequest builders.
 type IdempotentRequest func(*sql.Selector)
+
+// MartFeature is the predicate function for martfeature builders.
+type MartFeature func(*sql.Selector)
 
 // OutboxEvent is the predicate function for outboxevent builders.
 type OutboxEvent func(*sql.Selector)
@@ -41,6 +50,9 @@ type ProductVariant func(*sql.Selector)
 
 // Review is the predicate function for review builders.
 type Review func(*sql.Selector)
+
+// SellerApplication is the predicate function for sellerapplication builders.
+type SellerApplication func(*sql.Selector)
 
 // Store is the predicate function for store builders.
 type Store func(*sql.Selector)

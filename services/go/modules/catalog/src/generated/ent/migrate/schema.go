@@ -19,6 +19,16 @@ var (
 		{Name: "owner_profile_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "official", Type: field.TypeBool, Default: false},
 		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "owner_account_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "description", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "cover_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "website", Type: field.TypeString, Nullable: true, Size: 200},
+		{Name: "category_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "category_name", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "country_code", Type: field.TypeString, Size: 2, Default: ""},
+		{Name: "official_status", Type: field.TypeString, Size: 12, Default: "NONE"},
+		{Name: "follower_count", Type: field.TypeInt, Default: 0},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// BrandsTable holds the schema information for the "brands" table.
 	BrandsTable = &schema.Table{
@@ -36,6 +46,76 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{BrandsColumns[7], BrandsColumns[2]},
 			},
+			{
+				Name:    "brand_official_status_id",
+				Unique:  false,
+				Columns: []*schema.Column{BrandsColumns[15], BrandsColumns[0]},
+			},
+			{
+				Name:    "brand_owner_account_id",
+				Unique:  false,
+				Columns: []*schema.Column{BrandsColumns[8]},
+			},
+		},
+	}
+	// BrandOfficialRequestsColumns holds the columns for the "brand_official_requests" table.
+	BrandOfficialRequestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "brand_id", Type: field.TypeUUID},
+		{Name: "submitted_by_account_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "trademark", Type: field.TypeJSON},
+		{Name: "cac_registration_number", Type: field.TypeString, Size: 40, Default: ""},
+		{Name: "cac_company_name", Type: field.TypeString, Size: 160, Default: ""},
+		{Name: "contact_email", Type: field.TypeString, Size: 160, Default: ""},
+		{Name: "documents", Type: field.TypeJSON, Nullable: true},
+		{Name: "last_decision_reason", Type: field.TypeString, Nullable: true, Size: 1000},
+		{Name: "decided_at", Type: field.TypeTime, Nullable: true},
+		{Name: "decided_by_name", Type: field.TypeString, Nullable: true, Size: 120},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// BrandOfficialRequestsTable holds the schema information for the "brand_official_requests" table.
+	BrandOfficialRequestsTable = &schema.Table{
+		Name:       "brand_official_requests",
+		Columns:    BrandOfficialRequestsColumns,
+		PrimaryKey: []*schema.Column{BrandOfficialRequestsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "brandofficialrequest_brand_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{BrandOfficialRequestsColumns[2], BrandOfficialRequestsColumns[0]},
+			},
+		},
+	}
+	// CatalogFollowsColumns holds the columns for the "catalog_follows" table.
+	CatalogFollowsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "target_kind", Type: field.TypeString, Size: 10},
+		{Name: "target_id", Type: field.TypeUUID},
+		{Name: "account_id", Type: field.TypeUUID},
+	}
+	// CatalogFollowsTable holds the schema information for the "catalog_follows" table.
+	CatalogFollowsTable = &schema.Table{
+		Name:       "catalog_follows",
+		Columns:    CatalogFollowsColumns,
+		PrimaryKey: []*schema.Column{CatalogFollowsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "catalogfollow_target_kind_target_id_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{CatalogFollowsColumns[2], CatalogFollowsColumns[3], CatalogFollowsColumns[4]},
+			},
+			{
+				Name:    "catalogfollow_account_id_target_kind_id",
+				Unique:  false,
+				Columns: []*schema.Column{CatalogFollowsColumns[4], CatalogFollowsColumns[2], CatalogFollowsColumns[0]},
+				Annotation: &entsql.IndexAnnotation{
+					DescColumns: map[string]bool{
+						CatalogFollowsColumns[0].Name: true,
+					},
+				},
+			},
 		},
 	}
 	// CategoriesColumns holds the columns for the "categories" table.
@@ -52,6 +132,7 @@ var (
 		{Name: "attribute_definitions", Type: field.TypeJSON, Nullable: true},
 		{Name: "sort_order", Type: field.TypeInt, Default: 0},
 		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "icon_name", Type: field.TypeString, Nullable: true, Size: 40},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// CategoriesTable holds the schema information for the "categories" table.
@@ -64,6 +145,14 @@ var (
 				Name:    "category_store_id_slug",
 				Unique:  true,
 				Columns: []*schema.Column{CategoriesColumns[2], CategoriesColumns[5]},
+			},
+			{
+				Name:    "category_platform_slug_unique",
+				Unique:  true,
+				Columns: []*schema.Column{CategoriesColumns[5]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "store_id IS NULL",
+				},
 			},
 			{
 				Name:    "category_parent_id_sort_order",
@@ -131,6 +220,41 @@ var (
 				Name:    "idempotentrequest_scope_key",
 				Unique:  true,
 				Columns: []*schema.Column{IdempotentRequestsColumns[2], IdempotentRequestsColumns[3]},
+			},
+		},
+	}
+	// MartFeaturesColumns holds the columns for the "mart_features" table.
+	MartFeaturesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "title", Type: field.TypeString, Size: 60},
+		{Name: "subtitle", Type: field.TypeString, Nullable: true, Size: 90},
+		{Name: "kind", Type: field.TypeString, Size: 30},
+		{Name: "image_id", Type: field.TypeString, Size: 60},
+		{Name: "target_type", Type: field.TypeString, Size: 20},
+		{Name: "target_value", Type: field.TypeString, Size: 200},
+		{Name: "countries", Type: field.TypeJSON},
+		{Name: "starts_at", Type: field.TypeTime},
+		{Name: "ends_at", Type: field.TypeTime, Nullable: true},
+		{Name: "priority", Type: field.TypeInt},
+		{Name: "is_published", Type: field.TypeBool, Default: false},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// MartFeaturesTable holds the schema information for the "mart_features" table.
+	MartFeaturesTable = &schema.Table{
+		Name:       "mart_features",
+		Columns:    MartFeaturesColumns,
+		PrimaryKey: []*schema.Column{MartFeaturesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "martfeature_priority",
+				Unique:  false,
+				Columns: []*schema.Column{MartFeaturesColumns[11]},
+			},
+			{
+				Name:    "martfeature_is_published_starts_at",
+				Unique:  false,
+				Columns: []*schema.Column{MartFeaturesColumns[12], MartFeaturesColumns[9]},
 			},
 		},
 	}
@@ -501,6 +625,60 @@ var (
 			},
 		},
 	}
+	// SellerApplicationsColumns holds the columns for the "seller_applications" table.
+	SellerApplicationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "status", Type: field.TypeString, Size: 10, Default: "pending"},
+		{Name: "store_name", Type: field.TypeString, Size: 80},
+		{Name: "category_id", Type: field.TypeUUID},
+		{Name: "category_name", Type: field.TypeString, Size: 60, Default: ""},
+		{Name: "description", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "phone_sealed", Type: field.TypeBytes},
+		{Name: "address_line", Type: field.TypeString, Size: 200},
+		{Name: "city", Type: field.TypeString, Size: 80},
+		{Name: "state", Type: field.TypeString, Size: 80},
+		{Name: "identity_document_type", Type: field.TypeString, Size: 30},
+		{Name: "identity_document_number_sealed", Type: field.TypeBytes},
+		{Name: "identity_document_last4", Type: field.TypeString, Size: 4},
+		{Name: "identity_document_photo_url", Type: field.TypeString, Size: 2048},
+		{Name: "payout_bank_code", Type: field.TypeString, Size: 10},
+		{Name: "payout_bank_name", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "payout_account_number_sealed", Type: field.TypeBytes},
+		{Name: "payout_account_last4", Type: field.TypeString, Size: 4},
+		{Name: "reviewed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "reviewed_by_id", Type: field.TypeString, Nullable: true, Size: 80},
+		{Name: "reviewed_by_name", Type: field.TypeString, Nullable: true, Size: 120},
+		{Name: "decision_reason", Type: field.TypeString, Nullable: true, Size: 1000},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SellerApplicationsTable holds the schema information for the "seller_applications" table.
+	SellerApplicationsTable = &schema.Table{
+		Name:       "seller_applications",
+		Columns:    SellerApplicationsColumns,
+		PrimaryKey: []*schema.Column{SellerApplicationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "sellerapplication_account_id_id",
+				Unique:  false,
+				Columns: []*schema.Column{SellerApplicationsColumns[2], SellerApplicationsColumns[0]},
+			},
+			{
+				Name:    "sellerapplication_status_id",
+				Unique:  false,
+				Columns: []*schema.Column{SellerApplicationsColumns[3], SellerApplicationsColumns[0]},
+			},
+			{
+				Name:    "sellerapplication_one_pending_per_account",
+				Unique:  true,
+				Columns: []*schema.Column{SellerApplicationsColumns[2]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'pending'",
+				},
+			},
+		},
+	}
 	// StoresColumns holds the columns for the "stores" table.
 	StoresColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -516,6 +694,11 @@ var (
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "timezone", Type: field.TypeString, Size: 60, Default: "Africa/Lagos"},
 		{Name: "status", Type: field.TypeString, Default: "active"},
+		{Name: "status_reason", Type: field.TypeString, Nullable: true, Size: 1000},
+		{Name: "status_changed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "brand_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "has_official_badge", Type: field.TypeBool, Default: false},
+		{Name: "follower_count", Type: field.TypeInt, Default: 0},
 		{Name: "verified", Type: field.TypeBool, Default: false},
 		{Name: "rating_sum", Type: field.TypeInt64, Default: 0},
 		{Name: "rating_count", Type: field.TypeInt, Default: 0},
@@ -554,6 +737,16 @@ var (
 				Name:    "store_owner_account_id",
 				Unique:  false,
 				Columns: []*schema.Column{StoresColumns[2]},
+			},
+			{
+				Name:    "store_brand_id",
+				Unique:  false,
+				Columns: []*schema.Column{StoresColumns[15]},
+			},
+			{
+				Name:    "store_status_id",
+				Unique:  false,
+				Columns: []*schema.Column{StoresColumns[12], StoresColumns[0]},
 			},
 		},
 	}
@@ -685,9 +878,12 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BrandsTable,
+		BrandOfficialRequestsTable,
+		CatalogFollowsTable,
 		CategoriesTable,
 		FeaturedProductsTable,
 		IdempotentRequestsTable,
+		MartFeaturesTable,
 		OutboxEventsTable,
 		ProductsTable,
 		ProductDailyViewsTable,
@@ -696,6 +892,7 @@ var (
 		ProductReactionsTable,
 		ProductVariantsTable,
 		ReviewsTable,
+		SellerApplicationsTable,
 		StoresTable,
 		StoreAuditEntriesTable,
 		StoreDailyTrafficsTable,
