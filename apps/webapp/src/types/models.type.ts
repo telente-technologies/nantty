@@ -149,6 +149,7 @@ export interface Post {
   readonly quotes?: number;
   readonly replyPolicy?: import("./postAudience.type").ReplyPolicy;
   readonly viewerCanReply?: boolean;
+  readonly viewerCanDownload?: boolean;
   readonly replyRestriction?: import("./postAudience.type").ReplyRestriction | null;
   readonly sensitive?: import("./postAudience.type").SensitiveContent | null;
   readonly taggedUsers?: readonly import("./taggedUser.type").TaggedUser[];
