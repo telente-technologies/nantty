@@ -36,6 +36,12 @@ type OutboxEvent func(*sql.Selector)
 // PayoutAccount is the predicate function for payoutaccount builders.
 type PayoutAccount func(*sql.Selector)
 
+// PayoutAccountResolution is the predicate function for payoutaccountresolution builders.
+type PayoutAccountResolution func(*sql.Selector)
+
+// SellerPayoutSchedule is the predicate function for sellerpayoutschedule builders.
+type SellerPayoutSchedule func(*sql.Selector)
+
 // SellerReserveFlag is the predicate function for sellerreserveflag builders.
 type SellerReserveFlag func(*sql.Selector)
 
