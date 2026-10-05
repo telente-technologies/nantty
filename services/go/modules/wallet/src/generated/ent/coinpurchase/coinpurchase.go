@@ -51,6 +51,8 @@ const (
 	FieldClawbackShortfallCoins = "clawback_shortfall_coins"
 	// FieldReviewStatus holds the string denoting the review_status field in the database.
 	FieldReviewStatus = "review_status"
+	// FieldReviewFlags holds the string denoting the review_flags field in the database.
+	FieldReviewFlags = "review_flags"
 	// FieldReviewedByStaffID holds the string denoting the reviewed_by_staff_id field in the database.
 	FieldReviewedByStaffID = "reviewed_by_staff_id"
 	// FieldReviewedAt holds the string denoting the reviewed_at field in the database.
@@ -84,6 +86,7 @@ var Columns = []string{
 	FieldRefundedAt,
 	FieldClawbackShortfallCoins,
 	FieldReviewStatus,
+	FieldReviewFlags,
 	FieldReviewedByStaffID,
 	FieldReviewedAt,
 	FieldReviewNote,
@@ -215,11 +218,12 @@ func StatusValidator(s Status) error {
 // ReviewStatus defines the type for the "review_status" enum field.
 type ReviewStatus string
 
-// ReviewStatusPendingReview is the default value of the ReviewStatus enum.
-const DefaultReviewStatus = ReviewStatusPendingReview
+// ReviewStatusNotRequired is the default value of the ReviewStatus enum.
+const DefaultReviewStatus = ReviewStatusNotRequired
 
 // ReviewStatus values.
 const (
+	ReviewStatusNotRequired   ReviewStatus = "not_required"
 	ReviewStatusPendingReview ReviewStatus = "pending_review"
 	ReviewStatusReviewed      ReviewStatus = "reviewed"
 	ReviewStatusReversed      ReviewStatus = "reversed"
@@ -232,7 +236,7 @@ func (rs ReviewStatus) String() string {
 // ReviewStatusValidator is a validator for the "review_status" field enum values. It is called by the builders before save.
 func ReviewStatusValidator(rs ReviewStatus) error {
 	switch rs {
-	case ReviewStatusPendingReview, ReviewStatusReviewed, ReviewStatusReversed:
+	case ReviewStatusNotRequired, ReviewStatusPendingReview, ReviewStatusReviewed, ReviewStatusReversed:
 		return nil
 	default:
 		return fmt.Errorf("coinpurchase: invalid enum value for review_status field: %q", rs)

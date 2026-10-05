@@ -437,19 +437,19 @@ func init() {
 	// coinpurchase.DefaultClawbackShortfallCoins holds the default value on creation for the clawback_shortfall_coins field.
 	coinpurchase.DefaultClawbackShortfallCoins = coinpurchaseDescClawbackShortfallCoins.Default.(int64)
 	// coinpurchaseDescReviewedByStaffID is the schema descriptor for reviewed_by_staff_id field.
-	coinpurchaseDescReviewedByStaffID := coinpurchaseFields[17].Descriptor()
+	coinpurchaseDescReviewedByStaffID := coinpurchaseFields[18].Descriptor()
 	// coinpurchase.DefaultReviewedByStaffID holds the default value on creation for the reviewed_by_staff_id field.
 	coinpurchase.DefaultReviewedByStaffID = coinpurchaseDescReviewedByStaffID.Default.(string)
 	// coinpurchase.ReviewedByStaffIDValidator is a validator for the "reviewed_by_staff_id" field. It is called by the builders before save.
 	coinpurchase.ReviewedByStaffIDValidator = coinpurchaseDescReviewedByStaffID.Validators[0].(func(string) error)
 	// coinpurchaseDescReviewNote is the schema descriptor for review_note field.
-	coinpurchaseDescReviewNote := coinpurchaseFields[19].Descriptor()
+	coinpurchaseDescReviewNote := coinpurchaseFields[20].Descriptor()
 	// coinpurchase.DefaultReviewNote holds the default value on creation for the review_note field.
 	coinpurchase.DefaultReviewNote = coinpurchaseDescReviewNote.Default.(string)
 	// coinpurchase.ReviewNoteValidator is a validator for the "review_note" field. It is called by the builders before save.
 	coinpurchase.ReviewNoteValidator = coinpurchaseDescReviewNote.Validators[0].(func(string) error)
 	// coinpurchaseDescUpdatedAt is the schema descriptor for updated_at field.
-	coinpurchaseDescUpdatedAt := coinpurchaseFields[20].Descriptor()
+	coinpurchaseDescUpdatedAt := coinpurchaseFields[21].Descriptor()
 	// coinpurchase.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	coinpurchase.DefaultUpdatedAt = coinpurchaseDescUpdatedAt.Default.(func() time.Time)
 	// coinpurchase.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -514,13 +514,13 @@ func init() {
 	// cointransfer.DefaultClawbackShortfallCoins holds the default value on creation for the clawback_shortfall_coins field.
 	cointransfer.DefaultClawbackShortfallCoins = cointransferDescClawbackShortfallCoins.Default.(int64)
 	// cointransferDescReviewedByStaffID is the schema descriptor for reviewed_by_staff_id field.
-	cointransferDescReviewedByStaffID := cointransferFields[10].Descriptor()
+	cointransferDescReviewedByStaffID := cointransferFields[11].Descriptor()
 	// cointransfer.DefaultReviewedByStaffID holds the default value on creation for the reviewed_by_staff_id field.
 	cointransfer.DefaultReviewedByStaffID = cointransferDescReviewedByStaffID.Default.(string)
 	// cointransfer.ReviewedByStaffIDValidator is a validator for the "reviewed_by_staff_id" field. It is called by the builders before save.
 	cointransfer.ReviewedByStaffIDValidator = cointransferDescReviewedByStaffID.Validators[0].(func(string) error)
 	// cointransferDescReviewNote is the schema descriptor for review_note field.
-	cointransferDescReviewNote := cointransferFields[12].Descriptor()
+	cointransferDescReviewNote := cointransferFields[13].Descriptor()
 	// cointransfer.DefaultReviewNote holds the default value on creation for the review_note field.
 	cointransfer.DefaultReviewNote = cointransferDescReviewNote.Default.(string)
 	// cointransfer.ReviewNoteValidator is a validator for the "review_note" field. It is called by the builders before save.

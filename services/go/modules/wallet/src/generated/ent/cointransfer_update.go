@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 )
 
@@ -81,6 +82,24 @@ func (_u *CoinTransferUpdate) SetNillableReviewStatus(v *cointransfer.ReviewStat
 	if v != nil {
 		_u.SetReviewStatus(*v)
 	}
+	return _u
+}
+
+// SetReviewFlags sets the "review_flags" field.
+func (_u *CoinTransferUpdate) SetReviewFlags(v []string) *CoinTransferUpdate {
+	_u.mutation.SetReviewFlags(v)
+	return _u
+}
+
+// AppendReviewFlags appends value to the "review_flags" field.
+func (_u *CoinTransferUpdate) AppendReviewFlags(v []string) *CoinTransferUpdate {
+	_u.mutation.AppendReviewFlags(v)
+	return _u
+}
+
+// ClearReviewFlags clears the value of the "review_flags" field.
+func (_u *CoinTransferUpdate) ClearReviewFlags() *CoinTransferUpdate {
+	_u.mutation.ClearReviewFlags()
 	return _u
 }
 
@@ -211,6 +230,17 @@ func (_u *CoinTransferUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.ReviewStatus(); ok {
 		_spec.SetField(cointransfer.FieldReviewStatus, field.TypeEnum, value)
 	}
+	if value, ok := _u.mutation.ReviewFlags(); ok {
+		_spec.SetField(cointransfer.FieldReviewFlags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedReviewFlags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, cointransfer.FieldReviewFlags, value)
+		})
+	}
+	if _u.mutation.ReviewFlagsCleared() {
+		_spec.ClearField(cointransfer.FieldReviewFlags, field.TypeJSON)
+	}
 	if value, ok := _u.mutation.ReviewedByStaffID(); ok {
 		_spec.SetField(cointransfer.FieldReviewedByStaffID, field.TypeString, value)
 	}
@@ -297,6 +327,24 @@ func (_u *CoinTransferUpdateOne) SetNillableReviewStatus(v *cointransfer.ReviewS
 	if v != nil {
 		_u.SetReviewStatus(*v)
 	}
+	return _u
+}
+
+// SetReviewFlags sets the "review_flags" field.
+func (_u *CoinTransferUpdateOne) SetReviewFlags(v []string) *CoinTransferUpdateOne {
+	_u.mutation.SetReviewFlags(v)
+	return _u
+}
+
+// AppendReviewFlags appends value to the "review_flags" field.
+func (_u *CoinTransferUpdateOne) AppendReviewFlags(v []string) *CoinTransferUpdateOne {
+	_u.mutation.AppendReviewFlags(v)
+	return _u
+}
+
+// ClearReviewFlags clears the value of the "review_flags" field.
+func (_u *CoinTransferUpdateOne) ClearReviewFlags() *CoinTransferUpdateOne {
+	_u.mutation.ClearReviewFlags()
 	return _u
 }
 
@@ -456,6 +504,17 @@ func (_u *CoinTransferUpdateOne) sqlSave(ctx context.Context) (_node *CoinTransf
 	}
 	if value, ok := _u.mutation.ReviewStatus(); ok {
 		_spec.SetField(cointransfer.FieldReviewStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ReviewFlags(); ok {
+		_spec.SetField(cointransfer.FieldReviewFlags, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedReviewFlags(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, cointransfer.FieldReviewFlags, value)
+		})
+	}
+	if _u.mutation.ReviewFlagsCleared() {
+		_spec.ClearField(cointransfer.FieldReviewFlags, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.ReviewedByStaffID(); ok {
 		_spec.SetField(cointransfer.FieldReviewedByStaffID, field.TypeString, value)

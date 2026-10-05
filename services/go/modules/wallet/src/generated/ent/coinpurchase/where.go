@@ -965,6 +965,16 @@ func ReviewStatusNotIn(vs ...ReviewStatus) predicate.CoinPurchase {
 	return predicate.CoinPurchase(sql.FieldNotIn(FieldReviewStatus, vs...))
 }
 
+// ReviewFlagsIsNil applies the IsNil predicate on the "review_flags" field.
+func ReviewFlagsIsNil() predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldIsNull(FieldReviewFlags))
+}
+
+// ReviewFlagsNotNil applies the NotNil predicate on the "review_flags" field.
+func ReviewFlagsNotNil() predicate.CoinPurchase {
+	return predicate.CoinPurchase(sql.FieldNotNull(FieldReviewFlags))
+}
+
 // ReviewedByStaffIDEQ applies the EQ predicate on the "reviewed_by_staff_id" field.
 func ReviewedByStaffIDEQ(v string) predicate.CoinPurchase {
 	return predicate.CoinPurchase(sql.FieldEQ(FieldReviewedByStaffID, v))

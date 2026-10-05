@@ -3570,6 +3570,8 @@ type CoinPurchaseMutation struct {
 	clawback_shortfall_coins    *int64
 	addclawback_shortfall_coins *int64
 	review_status               *coinpurchase.ReviewStatus
+	review_flags                *[]string
+	appendreview_flags          []string
 	reviewed_by_staff_id        *string
 	reviewed_at                 *time.Time
 	review_note                 *string
@@ -4451,6 +4453,71 @@ func (m *CoinPurchaseMutation) ResetReviewStatus() {
 	m.review_status = nil
 }
 
+// SetReviewFlags sets the "review_flags" field.
+func (m *CoinPurchaseMutation) SetReviewFlags(s []string) {
+	m.review_flags = &s
+	m.appendreview_flags = nil
+}
+
+// ReviewFlags returns the value of the "review_flags" field in the mutation.
+func (m *CoinPurchaseMutation) ReviewFlags() (r []string, exists bool) {
+	v := m.review_flags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReviewFlags returns the old "review_flags" field's value of the CoinPurchase entity.
+// If the CoinPurchase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinPurchaseMutation) OldReviewFlags(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReviewFlags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReviewFlags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReviewFlags: %w", err)
+	}
+	return oldValue.ReviewFlags, nil
+}
+
+// AppendReviewFlags adds s to the "review_flags" field.
+func (m *CoinPurchaseMutation) AppendReviewFlags(s []string) {
+	m.appendreview_flags = append(m.appendreview_flags, s...)
+}
+
+// AppendedReviewFlags returns the list of values that were appended to the "review_flags" field in this mutation.
+func (m *CoinPurchaseMutation) AppendedReviewFlags() ([]string, bool) {
+	if len(m.appendreview_flags) == 0 {
+		return nil, false
+	}
+	return m.appendreview_flags, true
+}
+
+// ClearReviewFlags clears the value of the "review_flags" field.
+func (m *CoinPurchaseMutation) ClearReviewFlags() {
+	m.review_flags = nil
+	m.appendreview_flags = nil
+	m.clearedFields[coinpurchase.FieldReviewFlags] = struct{}{}
+}
+
+// ReviewFlagsCleared returns if the "review_flags" field was cleared in this mutation.
+func (m *CoinPurchaseMutation) ReviewFlagsCleared() bool {
+	_, ok := m.clearedFields[coinpurchase.FieldReviewFlags]
+	return ok
+}
+
+// ResetReviewFlags resets all changes to the "review_flags" field.
+func (m *CoinPurchaseMutation) ResetReviewFlags() {
+	m.review_flags = nil
+	m.appendreview_flags = nil
+	delete(m.clearedFields, coinpurchase.FieldReviewFlags)
+}
+
 // SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
 func (m *CoinPurchaseMutation) SetReviewedByStaffID(s string) {
 	m.reviewed_by_staff_id = &s
@@ -4642,7 +4709,7 @@ func (m *CoinPurchaseMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoinPurchaseMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 23)
 	if m.created_at != nil {
 		fields = append(fields, coinpurchase.FieldCreatedAt)
 	}
@@ -4696,6 +4763,9 @@ func (m *CoinPurchaseMutation) Fields() []string {
 	}
 	if m.review_status != nil {
 		fields = append(fields, coinpurchase.FieldReviewStatus)
+	}
+	if m.review_flags != nil {
+		fields = append(fields, coinpurchase.FieldReviewFlags)
 	}
 	if m.reviewed_by_staff_id != nil {
 		fields = append(fields, coinpurchase.FieldReviewedByStaffID)
@@ -4753,6 +4823,8 @@ func (m *CoinPurchaseMutation) Field(name string) (ent.Value, bool) {
 		return m.ClawbackShortfallCoins()
 	case coinpurchase.FieldReviewStatus:
 		return m.ReviewStatus()
+	case coinpurchase.FieldReviewFlags:
+		return m.ReviewFlags()
 	case coinpurchase.FieldReviewedByStaffID:
 		return m.ReviewedByStaffID()
 	case coinpurchase.FieldReviewedAt:
@@ -4806,6 +4878,8 @@ func (m *CoinPurchaseMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldClawbackShortfallCoins(ctx)
 	case coinpurchase.FieldReviewStatus:
 		return m.OldReviewStatus(ctx)
+	case coinpurchase.FieldReviewFlags:
+		return m.OldReviewFlags(ctx)
 	case coinpurchase.FieldReviewedByStaffID:
 		return m.OldReviewedByStaffID(ctx)
 	case coinpurchase.FieldReviewedAt:
@@ -4949,6 +5023,13 @@ func (m *CoinPurchaseMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetReviewStatus(v)
 		return nil
+	case coinpurchase.FieldReviewFlags:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReviewFlags(v)
+		return nil
 	case coinpurchase.FieldReviewedByStaffID:
 		v, ok := value.(string)
 		if !ok {
@@ -5067,6 +5148,9 @@ func (m *CoinPurchaseMutation) ClearedFields() []string {
 	if m.FieldCleared(coinpurchase.FieldRefundedAt) {
 		fields = append(fields, coinpurchase.FieldRefundedAt)
 	}
+	if m.FieldCleared(coinpurchase.FieldReviewFlags) {
+		fields = append(fields, coinpurchase.FieldReviewFlags)
+	}
 	if m.FieldCleared(coinpurchase.FieldReviewedAt) {
 		fields = append(fields, coinpurchase.FieldReviewedAt)
 	}
@@ -5092,6 +5176,9 @@ func (m *CoinPurchaseMutation) ClearField(name string) error {
 		return nil
 	case coinpurchase.FieldRefundedAt:
 		m.ClearRefundedAt()
+		return nil
+	case coinpurchase.FieldReviewFlags:
+		m.ClearReviewFlags()
 		return nil
 	case coinpurchase.FieldReviewedAt:
 		m.ClearReviewedAt()
@@ -5157,6 +5244,9 @@ func (m *CoinPurchaseMutation) ResetField(name string) error {
 		return nil
 	case coinpurchase.FieldReviewStatus:
 		m.ResetReviewStatus()
+		return nil
+	case coinpurchase.FieldReviewFlags:
+		m.ResetReviewFlags()
 		return nil
 	case coinpurchase.FieldReviewedByStaffID:
 		m.ResetReviewedByStaffID()
@@ -5244,6 +5334,8 @@ type CoinTransferMutation struct {
 	addclawback_shortfall_coins *int64
 	reversed_at                 *time.Time
 	review_status               *cointransfer.ReviewStatus
+	review_flags                *[]string
+	appendreview_flags          []string
 	reviewed_by_staff_id        *string
 	reviewed_at                 *time.Time
 	review_note                 *string
@@ -5866,6 +5958,71 @@ func (m *CoinTransferMutation) ResetReviewStatus() {
 	m.review_status = nil
 }
 
+// SetReviewFlags sets the "review_flags" field.
+func (m *CoinTransferMutation) SetReviewFlags(s []string) {
+	m.review_flags = &s
+	m.appendreview_flags = nil
+}
+
+// ReviewFlags returns the value of the "review_flags" field in the mutation.
+func (m *CoinTransferMutation) ReviewFlags() (r []string, exists bool) {
+	v := m.review_flags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReviewFlags returns the old "review_flags" field's value of the CoinTransfer entity.
+// If the CoinTransfer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinTransferMutation) OldReviewFlags(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReviewFlags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReviewFlags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReviewFlags: %w", err)
+	}
+	return oldValue.ReviewFlags, nil
+}
+
+// AppendReviewFlags adds s to the "review_flags" field.
+func (m *CoinTransferMutation) AppendReviewFlags(s []string) {
+	m.appendreview_flags = append(m.appendreview_flags, s...)
+}
+
+// AppendedReviewFlags returns the list of values that were appended to the "review_flags" field in this mutation.
+func (m *CoinTransferMutation) AppendedReviewFlags() ([]string, bool) {
+	if len(m.appendreview_flags) == 0 {
+		return nil, false
+	}
+	return m.appendreview_flags, true
+}
+
+// ClearReviewFlags clears the value of the "review_flags" field.
+func (m *CoinTransferMutation) ClearReviewFlags() {
+	m.review_flags = nil
+	m.appendreview_flags = nil
+	m.clearedFields[cointransfer.FieldReviewFlags] = struct{}{}
+}
+
+// ReviewFlagsCleared returns if the "review_flags" field was cleared in this mutation.
+func (m *CoinTransferMutation) ReviewFlagsCleared() bool {
+	_, ok := m.clearedFields[cointransfer.FieldReviewFlags]
+	return ok
+}
+
+// ResetReviewFlags resets all changes to the "review_flags" field.
+func (m *CoinTransferMutation) ResetReviewFlags() {
+	m.review_flags = nil
+	m.appendreview_flags = nil
+	delete(m.clearedFields, cointransfer.FieldReviewFlags)
+}
+
 // SetReviewedByStaffID sets the "reviewed_by_staff_id" field.
 func (m *CoinTransferMutation) SetReviewedByStaffID(s string) {
 	m.reviewed_by_staff_id = &s
@@ -6021,7 +6178,7 @@ func (m *CoinTransferMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoinTransferMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 15)
 	if m.created_at != nil {
 		fields = append(fields, cointransfer.FieldCreatedAt)
 	}
@@ -6054,6 +6211,9 @@ func (m *CoinTransferMutation) Fields() []string {
 	}
 	if m.review_status != nil {
 		fields = append(fields, cointransfer.FieldReviewStatus)
+	}
+	if m.review_flags != nil {
+		fields = append(fields, cointransfer.FieldReviewFlags)
 	}
 	if m.reviewed_by_staff_id != nil {
 		fields = append(fields, cointransfer.FieldReviewedByStaffID)
@@ -6094,6 +6254,8 @@ func (m *CoinTransferMutation) Field(name string) (ent.Value, bool) {
 		return m.ReversedAt()
 	case cointransfer.FieldReviewStatus:
 		return m.ReviewStatus()
+	case cointransfer.FieldReviewFlags:
+		return m.ReviewFlags()
 	case cointransfer.FieldReviewedByStaffID:
 		return m.ReviewedByStaffID()
 	case cointransfer.FieldReviewedAt:
@@ -6131,6 +6293,8 @@ func (m *CoinTransferMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldReversedAt(ctx)
 	case cointransfer.FieldReviewStatus:
 		return m.OldReviewStatus(ctx)
+	case cointransfer.FieldReviewFlags:
+		return m.OldReviewFlags(ctx)
 	case cointransfer.FieldReviewedByStaffID:
 		return m.OldReviewedByStaffID(ctx)
 	case cointransfer.FieldReviewedAt:
@@ -6222,6 +6386,13 @@ func (m *CoinTransferMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetReviewStatus(v)
+		return nil
+	case cointransfer.FieldReviewFlags:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReviewFlags(v)
 		return nil
 	case cointransfer.FieldReviewedByStaffID:
 		v, ok := value.(string)
@@ -6340,6 +6511,9 @@ func (m *CoinTransferMutation) ClearedFields() []string {
 	if m.FieldCleared(cointransfer.FieldReversedAt) {
 		fields = append(fields, cointransfer.FieldReversedAt)
 	}
+	if m.FieldCleared(cointransfer.FieldReviewFlags) {
+		fields = append(fields, cointransfer.FieldReviewFlags)
+	}
 	if m.FieldCleared(cointransfer.FieldReviewedAt) {
 		fields = append(fields, cointransfer.FieldReviewedAt)
 	}
@@ -6359,6 +6533,9 @@ func (m *CoinTransferMutation) ClearField(name string) error {
 	switch name {
 	case cointransfer.FieldReversedAt:
 		m.ClearReversedAt()
+		return nil
+	case cointransfer.FieldReviewFlags:
+		m.ClearReviewFlags()
 		return nil
 	case cointransfer.FieldReviewedAt:
 		m.ClearReviewedAt()
@@ -6403,6 +6580,9 @@ func (m *CoinTransferMutation) ResetField(name string) error {
 		return nil
 	case cointransfer.FieldReviewStatus:
 		m.ResetReviewStatus()
+		return nil
+	case cointransfer.FieldReviewFlags:
+		m.ResetReviewFlags()
 		return nil
 	case cointransfer.FieldReviewedByStaffID:
 		m.ResetReviewedByStaffID()
