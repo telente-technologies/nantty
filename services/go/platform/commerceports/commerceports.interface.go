@@ -82,6 +82,8 @@ type StoreAccess struct {
 	Currency       money.CurrencyCode
 	CountryCode    string
 	StoreStatus    string
+	StoreName      string
+	Timezone       string
 }
 
 func (access StoreAccess) CanSell() bool {
@@ -185,7 +187,6 @@ type StoreRewardsLookup interface {
 	EarnBackBasisPointsByStore(ctx context.Context, storeIds []uuid.UUID) (map[uuid.UUID]int, error)
 }
 
-// StoreSuccessRates holds only stores with enough recent orders; rates are 0..1.
 type StoreSuccessRates interface {
 	SuccessRatesByStore(ctx context.Context, storeIds []uuid.UUID) (map[uuid.UUID]float64, error)
 }
@@ -197,4 +198,49 @@ type PurchaseVerifier interface {
 
 type StoreShippingCountries interface {
 	SetStoreShippingCountries(ctx context.Context, storeId uuid.UUID, countryCodes []string) error
+}
+
+type StoreRewardRules struct {
+	Enabled                bool
+	PercentBackBasisPoints int
+	MinimumOrderMinor      int64
+	MaxPerOrderMinor       int64
+	ExpiryDays             int
+	Found                  bool
+}
+
+type StoreRewardRulesReader interface {
+	RewardRulesForStore(ctx context.Context, storeId uuid.UUID) (StoreRewardRules, error)
+}
+
+type StoreAuditRecord struct {
+	StoreId    uuid.UUID
+	ActorId    string
+	ActorName  string
+	ActorRole  string
+	Action     string
+	TargetType string
+	TargetId   string
+	Summary    string
+	IpAddress  string
+}
+
+type StoreAuditTrail interface {
+	RecordStoreAudit(ctx context.Context, record StoreAuditRecord) error
+}
+
+type DeliveryAreaNamesReader interface {
+	DeliveryAreaNamesForStore(ctx context.Context, storeId uuid.UUID) ([]string, error)
+}
+
+type StoreAuditEntryView struct {
+	Id        string
+	ActorName string
+	Action    string
+	Summary   string
+	CreatedAt time.Time
+}
+
+type StoreAuditReader interface {
+	RecentStoreAudit(ctx context.Context, storeId uuid.UUID, limit int) ([]StoreAuditEntryView, error)
 }

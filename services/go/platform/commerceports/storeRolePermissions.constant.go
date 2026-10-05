@@ -38,3 +38,11 @@ func RoleAllows(role string, customPermissions []string, permission string) bool
 	}
 	return slices.Contains(PermissionsForRole(role), permission)
 }
+
+func IsKnownSellerPermission(permission string) bool {
+	return slices.Contains(allSellerPermissions, permission)
+}
+
+func IsOwnerOnlyPermission(permission string) bool {
+	return slices.Contains(ownerOnlyPermissions, permission)
+}

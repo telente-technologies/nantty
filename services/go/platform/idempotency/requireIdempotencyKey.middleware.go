@@ -100,3 +100,16 @@ func hashParts(parts ...string) string {
 	}
 	return hex.EncodeToString(hasher.Sum(nil))
 }
+
+func ReplayWhenIdempotencyKeyPresent(store *RedisStore, ttl time.Duration, logger *slog.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		replaying := RequireIdempotencyKeyAndReplayCompletedResponses(store, ttl, logger)(next)
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			if request.Header.Get("Idempotency-Key") == "" || store == nil {
+				next.ServeHTTP(writer, request)
+				return
+			}
+			replaying.ServeHTTP(writer, request)
+		})
+	}
+}

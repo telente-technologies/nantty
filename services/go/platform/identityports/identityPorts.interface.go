@@ -141,4 +141,5 @@ type AuditHistoryReader interface {
 
 type DeletionGraceCanceller interface {
 	CancelPendingDeletionOnLogin(ctx context.Context, accountId uuid.UUID) (bool, error)
+	AccountDeletionExecuted(ctx context.Context, accountId uuid.UUID) (bool, error)
 }
