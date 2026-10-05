@@ -9,7 +9,7 @@ import { NewStockAdjustmentDialog, stockAdjustmentReasonLabels } from "@/compone
 import type { PickedVariant } from "@/components/inventory/variantLinePicker";
 import { Button } from "@/components/ui/button";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
-import { Callout, EmptyState } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout } from "@/components/ui/feedback";
 import { FilterBar } from "@/components/ui/filterControls";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { useCursorPagedList } from "@/hooks/useCursorPagedList.hook";
@@ -70,7 +70,7 @@ export function StockAdjustmentsView({ initialVariantId, initialLocationId, shou
             </label>
           </FilterBar>
         </div>
-        {adjustments.errorMessage ? <div className={styles.toolbar}><Callout tone="error">{adjustments.errorMessage}</Callout></div> : null}
+        {adjustments.errorMessage ? <div className={styles.toolbar}><ErrorCallout message={adjustments.errorMessage} onRetry={adjustments.reload} /></div> : null}
         <DataTable caption="Stock adjustments" columns={columns} rows={adjustments.items} readRowKey={(adjustment) => adjustment.id} isLoading={adjustments.isLoading} hasMore={adjustments.hasMore} onLoadMore={adjustments.loadMore} isLoadingMore={adjustments.isLoadingMore} emptyState={<EmptyState iconName="boxArrowDown24" title="No adjustments at this location yet" description="Record a delivery or a stock count to get started." />} />
       </Panel>
       <NewStockAdjustmentDialog

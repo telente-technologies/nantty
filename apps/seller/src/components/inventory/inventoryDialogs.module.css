@@ -7,7 +7,7 @@
 .twoColumns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .picker {
@@ -32,9 +32,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
-  padding: 8px 10px;
+  padding: var(--space-2) 10px;
   border: 0;
   border-bottom: 1px solid var(--divider-soft);
   background: var(--surface-card);
@@ -49,7 +49,7 @@
 .pickerOption small {
   display: block;
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .pickerEmpty {
@@ -58,14 +58,14 @@
 }
 
 .lineTable {
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-variant-numeric: tabular-nums;
 }
 
 .lineTable th {
   text-align: left;
   padding: 6px;
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
   background: var(--surface-sunken);
 }
@@ -78,7 +78,7 @@
 .quantityInput {
   width: 90px;
   height: 32px;
-  padding: 0 8px;
+  padding: 0 var(--space-2);
   border: 1px solid var(--divider);
   border-radius: var(--radius-small);
   text-align: right;
@@ -107,7 +107,7 @@
 .formGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .fullRow {

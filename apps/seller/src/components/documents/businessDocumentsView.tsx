@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { GoldCheckmarkPreview } from "@/components/documents/goldCheckmarkPreview";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { Button } from "@/components/ui/button";
-import { Callout, LoadingBlock } from "@/components/ui/feedback";
+import { Callout, ErrorCallout, LoadingBlock } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { StatusBadge, type StatusTone } from "@/components/ui/statusBadge";
 import { useToast } from "@/components/ui/toastProvider";
@@ -58,7 +58,7 @@ export function BusinessDocumentsView() {
   }
 
   if (query.isLoading && !query.data) return <LoadingBlock label="Loading your documents" />;
-  if (!query.data) return <Callout tone="error">{query.errorMessage ?? "Your documents could not be loaded."}</Callout>;
+  if (!query.data) return <ErrorCallout message={query.errorMessage ?? "Your documents could not be loaded."} onRetry={query.reload} />;
   return (
     <>
       <Callout tone="info" title="Selling never waits for this">You can create your store, list products and take orders without these documents. They unlock the Gold checkmark.</Callout>

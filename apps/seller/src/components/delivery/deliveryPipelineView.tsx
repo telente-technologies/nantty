@@ -6,7 +6,7 @@ import { DeliveryShipmentDialog } from "@/components/delivery/deliveryShipmentDi
 import { deliveryPipelineDescriptions, deliveryPipelineOrder, deliverySectionTabs } from "@/components/delivery/deliveryPresentation.constant";
 import { deliveryStatusPresentation } from "@/components/orders/orderPresentation.constant";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
-import { Callout, EmptyState, StatTile } from "@/components/ui/feedback";
+import { EmptyState, ErrorCallout, StatTile } from "@/components/ui/feedback";
 import { FilterBar, SearchInput } from "@/components/ui/filterControls";
 import { LinkTabs } from "@/components/ui/navigationTabs";
 import { PageHeader, PageStack, Panel, ResponsiveGrid } from "@/components/ui/panel";
@@ -60,7 +60,7 @@ export function DeliveryPipelineView() {
     <PageStack>
       <PageHeader title="Delivery" description="Track every app order from packing to the customer's door. Assign riders, record delivery attempts and follow up on failed ones." />
       <LinkTabs label="Delivery sections" tabs={deliverySectionTabs} />
-      {summaryQuery.errorMessage && !summary ? <Callout tone="error">{summaryQuery.errorMessage}</Callout> : null}
+      {summaryQuery.errorMessage && !summary ? <ErrorCallout message={summaryQuery.errorMessage} onRetry={summaryQuery.reload} /> : null}
       <ResponsiveGrid minimumColumnWidth={200}>
         <StatTile label="In transit" value={summary ? summary.countsByStatus.in_transit : "—"} detail={summary ? `${summary.countsByStatus.ready_for_pickup} ready for pickup` : undefined} />
         <StatTile label="Failed attempts" value={summary ? summary.countsByStatus.failed : "—"} tone={summary && summary.countsByStatus.failed > 0 ? "negative" : "neutral"} detail={summary ? `${formatBasisPointsAsPercent(summary.failedDeliveryRateBasisPoints)} of attempts` : undefined} />

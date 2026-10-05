@@ -7,7 +7,7 @@ import { InventoryTabs } from "@/components/inventory/inventoryTabs";
 import { NewStockTransferDialog } from "@/components/inventory/newStockTransferDialog";
 import { Button } from "@/components/ui/button";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
-import { Callout, EmptyState } from "@/components/ui/feedback";
+import { Callout, EmptyState, ErrorCallout } from "@/components/ui/feedback";
 import { SegmentedControl } from "@/components/ui/navigationTabs";
 import { PageHeader, PageStack, Panel } from "@/components/ui/panel";
 import { StatusBadge, type StatusTone } from "@/components/ui/statusBadge";
@@ -72,7 +72,7 @@ function StockTransfersPanel({ isDialogOpen, onDialogClose }: { readonly isDialo
         <div className={styles.toolbar}>
           <SegmentedControl label="Transfer status" value={statusFilter} onValueChange={setStatusFilter} options={[{ value: "", label: "All" }, { value: "in_transit", label: "In transit" }, { value: "received", label: "Received" }, { value: "cancelled", label: "Cancelled" }]} />
         </div>
-        {transfers.errorMessage ? <div className={styles.toolbar}><Callout tone="error">{transfers.errorMessage}</Callout></div> : null}
+        {transfers.errorMessage ? <div className={styles.toolbar}><ErrorCallout message={transfers.errorMessage} onRetry={transfers.reload} /></div> : null}
         <DataTable caption="Stock transfers" columns={columns} rows={transfers.items} readRowKey={(transfer) => transfer.id} isLoading={transfers.isLoading} hasMore={transfers.hasMore} onLoadMore={transfers.loadMore} isLoadingMore={transfers.isLoadingMore} emptyState={<EmptyState iconName="repeat24" title="No transfers yet" description="Send stock from your warehouse to a shop when it runs low." />} />
       </Panel>
       <NewStockTransferDialog isOpen={isDialogOpen} onClose={onDialogClose} onSaved={() => { onDialogClose(); transfers.reload(); }} />
