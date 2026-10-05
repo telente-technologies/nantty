@@ -30,6 +30,7 @@ type WalletSettings struct {
 	CoinChannelFeeBps            map[string]int64
 	UsersSchema                  string
 	EscrowSchema                 string
+	SocialSchema                 string
 	TrustedCountryHeader         string
 	AdminInternalUrl             string
 	AdminInternalToken           string
@@ -58,6 +59,7 @@ func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		CoinChannelFeeBps:            ParseChannelFees(reader.ReadStringOrDefault("COIN_CHANNEL_FEE_BPS", "web:300,ios:3000,android:1500")),
 		UsersSchema:                  reader.ReadStringOrDefault("WALLET_USERS_SCHEMA", "users"),
 		EscrowSchema:                 reader.ReadStringOrDefault("ESCROW_DATABASE_SCHEMA", "escrow"),
+		SocialSchema:                 reader.ReadStringOrDefault("WALLET_SOCIAL_SCHEMA", "social"),
 		TrustedCountryHeader:         reader.ReadStringOrDefault("PRICING_TRUSTED_COUNTRY_HEADER", "CloudFront-Viewer-Country"),
 		AdminInternalUrl:             reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
 		AdminInternalToken:           reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),

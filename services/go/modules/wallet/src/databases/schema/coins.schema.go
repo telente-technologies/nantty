@@ -72,12 +72,16 @@ func (CoinPurchase) Fields() []ent.Field {
 		field.Time("credited_at").Optional().Nillable(),
 		field.Time("refunded_at").Optional().Nillable(),
 		field.Int64("clawback_shortfall_coins").Default(0),
+		field.Enum("review_status").Values("pending_review", "reviewed", "reversed").Default("pending_review"),
+		field.String("reviewed_by_staff_id").MaxLen(80).Default(""),
+		field.Time("reviewed_at").Optional().Nillable(),
+		field.String("review_note").MaxLen(1000).Default(""),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
 func (CoinPurchase) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("reference").Unique(), index.Fields("user_id", "created_at")}
+	return []ent.Index{index.Fields("reference").Unique(), index.Fields("user_id", "created_at"), index.Fields("review_status", "id").Annotations(entsql.DescColumns("id"))}
 }
 
 type CoinTransfer struct {
@@ -101,11 +105,17 @@ func (CoinTransfer) Fields() []ent.Field {
 		field.Int64("net_coins").Immutable(),
 		field.Int64("fee_bps").Immutable(),
 		field.String("note").MaxLen(140).Default("").Immutable(),
+		field.Int64("clawback_shortfall_coins").Default(0),
+		field.Time("reversed_at").Optional().Nillable(),
+		field.Enum("review_status").Values("pending_review", "reviewed", "reversed").Default("pending_review"),
+		field.String("reviewed_by_staff_id").MaxLen(80).Default(""),
+		field.Time("reviewed_at").Optional().Nillable(),
+		field.String("review_note").MaxLen(1000).Default(""),
 	}
 }
 
 func (CoinTransfer) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("sender_user_id", "created_at"), index.Fields("recipient_user_id", "created_at")}
+	return []ent.Index{index.Fields("sender_user_id", "created_at"), index.Fields("recipient_user_id", "created_at"), index.Fields("review_status", "id").Annotations(entsql.DescColumns("id"))}
 }
 
 type CoinConversion struct {

@@ -8,6 +8,7 @@ import (
 	"zudomart/modules/ledger/src/loaders"
 	ledgerservices "zudomart/modules/ledger/src/modules/journal/services"
 	sellerbalances "zudomart/modules/ledger/src/modules/sellerBalances/services"
+	ledgerrepositories "zudomart/modules/ledger/src/repositories"
 	ledgerutils "zudomart/modules/ledger/src/utils"
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
 	"zudomart/modules/wallet/src/configs"
@@ -15,6 +16,7 @@ import (
 	_ "zudomart/modules/wallet/src/generated/ent/runtime"
 	"zudomart/modules/wallet/src/integrations"
 	"zudomart/modules/wallet/src/interfaces"
+	"zudomart/modules/wallet/src/repositories"
 	"zudomart/modules/wallet/src/utils"
 	"zudomart/platform/staffaudit"
 )
@@ -31,6 +33,8 @@ type Container struct {
 	Currency     interfaces.ViewerCurrencyResolver
 	Settlement   interfaces.SellerSettlementAdapter
 	Audit        staffaudit.Recorder
+	Parties      ledgerrepositories.PartyDirectory
+	Blocks       repositories.SocialBlocks
 	Now          func() time.Time
 	schemaConfig ent.SchemaConfig
 }
@@ -57,6 +61,8 @@ func NewWalletContainer(resources loaders.MoneyModuleResources, settings configs
 			ProfileCountry: utils.ProfileCountryFromUsersSchema(resources.Database, settings.UsersSchema),
 		},
 		Settlement: selectSellerSettlementAdapter(settings.SellerSettlementAdapter, payments),
+		Parties:    ledgerrepositories.PartyDirectory{Database: resources.Database, AccountSchema: settings.Money.AccountSchema, CatalogSchema: settings.Money.CatalogSchema, Logger: resources.Logger},
+		Blocks:     repositories.SocialBlocks{Database: resources.Database, SocialSchema: settings.SocialSchema},
 		Now:        time.Now,
 		schemaConfig: ent.SchemaConfig{
 			CoinConversion: schema, CoinPackage: schema, CoinPurchase: schema, CoinTransfer: schema, IdempotentRequest: schema,
