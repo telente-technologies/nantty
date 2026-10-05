@@ -9,7 +9,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .table th {
@@ -17,7 +17,7 @@
   top: 0;
   z-index: 1;
   height: 34px;
-  padding: 0 12px;
+  padding: 0 var(--space-3);
   background: var(--surface-sunken);
   border-bottom: 1px solid var(--divider);
   color: var(--ink-muted);
@@ -38,7 +38,7 @@
 
 .table td {
   height: 42px;
-  padding: 6px 12px;
+  padding: 6px var(--space-3);
   border-bottom: 1px solid var(--divider-soft);
   vertical-align: middle;
 }
@@ -49,7 +49,7 @@
 
 .monoCell {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-12);
   white-space: nowrap;
 }
 
@@ -84,7 +84,7 @@
 }
 
 .empty {
-  padding: 36px 12px !important;
+  padding: 36px var(--space-3) !important;
   text-align: center;
   color: var(--ink-muted);
 }

@@ -8,7 +8,7 @@
 
 .diff th,
 .diff td {
-  padding: 5px 8px;
+  padding: 5px var(--space-2);
   border-bottom: 1px solid var(--divider-soft);
   text-align: left;
   vertical-align: top;
