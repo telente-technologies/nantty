@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
 	"zudomart/modules/ads/src/modules/billing/dtos"
+	billingservices "zudomart/modules/ads/src/modules/billing/services"
 	adsservices "zudomart/modules/ads/src/services"
 	"zudomart/modules/ads/src/types"
 	"zudomart/modules/ads/src/utils"
@@ -37,7 +38,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) ([]dtos.Billing
 	}
 	items := make([]dtos.BillingTransaction, 0, len(rows))
 	for _, row := range rows {
-		items = append(items, dtos.BillingTransaction{Id: row.ID.String(), Type: string(row.Type), Amount: types.Money{AmountMinor: row.AmountMinor, Currency: row.Currency}, Description: row.Description, Reference: row.Reference, CreatedAt: row.CreatedAt.UTC().Format(time.RFC3339)})
+		items = append(items, dtos.BillingTransaction{Id: row.ID.String(), Type: string(row.Type), Amount: types.Money{AmountMinor: row.AmountMinor, Currency: row.Currency}, Description: row.Description, Reference: row.Reference, CreatedAt: row.CreatedAt.UTC().Format(time.RFC3339), ReceiptAvailable: billingservices.ReceiptedTransactionTypes[string(row.Type)]})
 	}
 	return items, next, nil
 }
