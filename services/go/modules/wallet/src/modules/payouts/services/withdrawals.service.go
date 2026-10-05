@@ -110,22 +110,31 @@ func (withdrawals Withdrawals) CancelWithdrawalInTransaction(ctx context.Context
 	return withdrawals.reverseWithdrawalInTransaction(ctx, transaction, locked, withdrawal.StatusCancelled, "cancelled by the requester", "")
 }
 
-func (withdrawals Withdrawals) ReviewWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, staffId string, withdrawalId uuid.UUID, approve bool, reason string) (dtos.WithdrawalDto, error) {
+func (withdrawals Withdrawals) ReviewWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, staffId string, withdrawalId uuid.UUID, decision, reason string) (dtos.WithdrawalDto, error) {
 	locked, err := withdrawals.lockWithdrawal(ctx, transaction, withdrawalId)
 	if err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
-	if locked.Status != withdrawal.StatusPendingReview {
+	allowed := []withdrawal.Status{withdrawal.StatusPendingReview, withdrawal.StatusOnHold}
+	if decision == "hold" {
+		allowed = []withdrawal.Status{withdrawal.StatusPendingReview, withdrawal.StatusQueued}
+	}
+	if !slices.Contains(allowed, locked.Status) {
 		return dtos.WithdrawalDto{}, ErrWithdrawalNotChangeable
 	}
-	if !approve {
+	if decision == "reject" {
 		return withdrawals.reverseWithdrawalInTransaction(ctx, transaction, locked, withdrawal.StatusFailed, "rejected: "+reason, staffId)
 	}
-	approved, err := locked.Update().AddVersion(1).SetStatus(withdrawal.StatusQueued).SetReviewedByStaffID(staffId).SetReviewedAt(withdrawals.Container.Now().UTC()).Save(ctx)
+	now := withdrawals.Container.Now().UTC()
+	status, event := withdrawal.StatusQueued, "withdrawal.approved"
+	if decision == "hold" {
+		status, event = withdrawal.StatusOnHold, "withdrawal.held"
+	}
+	reviewed, err := locked.Update().AddVersion(1).SetStatus(status).SetReviewedByStaffID(staffId).SetReviewedAt(now).SetReviewNote(truncate(reason, 1000)).Save(ctx)
 	if err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
-	return ConvertWithdrawal(approved), withdrawals.Container.Outbox.EnqueueInTransaction(ctx, transaction, "withdrawal.approved", approved.ID.String(), withdrawals.Container.Now().UTC(), withdrawalEventData(approved))
+	return ConvertWithdrawal(reviewed), withdrawals.Container.Outbox.EnqueueInTransaction(ctx, transaction, event, reviewed.ID.String(), now, withdrawalEventData(reviewed))
 }
 
 func (withdrawals Withdrawals) reverseWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, locked *ent.Withdrawal, status withdrawal.Status, reason, staffId string) (dtos.WithdrawalDto, error) {
@@ -203,7 +212,7 @@ func (withdrawals Withdrawals) sumWithdrawalsNotYetSentToProvider(ctx context.Co
 		Sum *int64 `json:"sum"`
 	}
 	err := withdrawals.Container.Client(transaction).Withdrawal.Query().
-		Where(withdrawal.UserID(userId), withdrawal.Currency(currency), withdrawal.StatusIn(withdrawal.StatusPendingReview, withdrawal.StatusQueued)).
+		Where(withdrawal.UserID(userId), withdrawal.Currency(currency), withdrawal.StatusIn(withdrawal.StatusPendingReview, withdrawal.StatusOnHold, withdrawal.StatusQueued)).
 		Aggregate(ent.Sum(withdrawal.FieldAmountMinor)).Scan(ctx, &sums)
 	if err != nil || len(sums) == 0 || sums[0].Sum == nil {
 		return 0, err

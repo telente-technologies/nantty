@@ -59,9 +59,11 @@ func ValidateWithdrawalRequest(request dtos.WithdrawalRequestDto) error {
 
 func ValidateReviewWithdrawalRequest(request dtos.ReviewWithdrawalRequestDto) error {
 	collector := &ledgerutils.IssueCollector{}
-	collector.RequireOneOf("decision", request.Decision, "approve", "reject")
-	if request.Decision == "reject" {
+	collector.RequireOneOf("decision", request.Decision, "approve", "reject", "hold")
+	if request.Decision == "reject" || request.Decision == "hold" {
 		collector.RequireLength("reason", strings.TrimSpace(request.Reason), 3, 300)
+	} else {
+		collector.RequireLength("reason", strings.TrimSpace(request.Reason), 0, 300)
 	}
 	return collector.Result()
 }
