@@ -74,6 +74,11 @@ const convertMediaAssetToPostMedia = (asset: MediaAsset & { readonly type: Media
   blurhash: asset.blurhash ?? null,
 });
 
+export const findMockPostMediaById = (mediaId: string): Media | null => {
+  const asset = currentMediaAsset(mediaId);
+  return asset && asset.type !== "audio" && asset.type !== "document" ? convertMediaAssetToPostMedia({ ...asset, type: asset.type }) : null;
+};
+
 export const mediaMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/media/uploads", ({ body }) => {
     const request = body as CreateUploadSessionRequest;

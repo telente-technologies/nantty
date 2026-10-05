@@ -1,6 +1,7 @@
 import type { Story, StoryTrayItem } from "@/types";
 
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
+import { findMockPostMediaById } from "./media.mock";
 import { postImageUrlsForPhotoKey, productImageUrlsForProduct } from "./mockImages.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { findDirectoryUserById, summariseUser, userSummaryById } from "./userDirectory.mock";
@@ -42,7 +43,7 @@ export const storiesMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/stories", ({ body }) => ({
     id: `st_${Date.now()}`,
     author: summariseUser(getSignedInMockUser()),
-    media: (body as { media: Story["media"] }).media,
+    media: findMockPostMediaById((body as { mediaId: string }).mediaId) ?? (body as { media: Story["media"] }).media,
     createdAt: new Date().toISOString(),
     seen: true,
   })),

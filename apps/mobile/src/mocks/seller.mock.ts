@@ -1,6 +1,5 @@
 import { ApiError } from "@/errors/api.error";
 import type { SellerApplication, SellerApplicationInput, SellerDashboardPeriod, StoreProduct, StoreProductInput } from "@/types/account.type";
-import type { MarkOrderShippedInput } from "@/types/commerce.type";
 import type { SellerDashboard } from "@/types";
 
 import { bankNameForCode } from "./banks.mock";
@@ -130,13 +129,17 @@ export const sellerMocks: MockRoute[] = [
   }),
   createMockRoute("GET", "/api/v1/seller/orders", () => listSignedInStoreOrderRecords().map(buildOrderFromRecord)),
   createMockRoute("GET", "/api/v1/seller/orders/:orderId", ({ params }) => buildOrderFromRecord(findStoreOrderRecordOrThrow(params.orderId!))),
-  createMockRoute("POST", "/api/v1/seller/orders/:orderId/ship", ({ params, body }) => {
+  createMockRoute("GET", "/api/v1/seller/locations", () => ({
+    data: [{ id: "0190f3a2-7b1c-7cde-9f00-0000000000a1", name: "Main store", kind: "store", address: "", city: "Lagos", state: "Lagos", country: "NG", phone: null, isDefault: true, active: true }],
+    nextCursor: null,
+  })),
+  createMockRoute("POST", "/api/v1/seller/orders/:orderId/fulfilment", ({ params, body }) => {
     const record = findStoreOrderRecordOrThrow(params.orderId!);
     if (record.status === "shipped") return buildOrderFromRecord(record);
     if (record.status !== "paid") throw new ApiError(409, "Only paid orders can be marked as shipped");
-    const { courierName, trackingNumber } = body as MarkOrderShippedInput;
-    if (!courierName?.trim() || !trackingNumber?.trim()) throw new ApiError(422, "Add the courier and tracking number");
-    record.shipment = buildShipment(courierName.trim(), trackingNumber.trim().toUpperCase(), new Date().toISOString());
+    const { courier, trackingNumber } = body as { courier?: string; trackingNumber?: string };
+    if (!courier?.trim() || !trackingNumber?.trim()) throw new ApiError(422, "Add the courier and tracking number");
+    record.shipment = buildShipment(courier.trim(), trackingNumber.trim().toUpperCase(), new Date().toISOString());
     record.status = "shipped";
     return buildOrderFromRecord(record);
   }),

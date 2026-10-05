@@ -1,6 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 import { CURRENT_POLICY_VERSION } from "@/config/legalLinks.config";
-import type { ConsentRecord, DataExportRequest, ProductInteractionRecord, UpdateConsentsInput } from "@/types";
+import type { ConsentKey, ConsentRecord, DataExportRequest, ProductInteractionRecord, UpdateConsentsInput } from "@/types";
+import type { ConsentsWire } from "@/services/consents.service";
 
 import { recordMockPolicyAcceptance } from "./legal.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -33,14 +34,18 @@ const describeDataExport = (): DataExportRequest => {
   };
 };
 
+const toConsentsWire = (record: ConsentRecord): ConsentsWire => ({
+  data: (Object.keys(record.consents) as ConsentKey[]).map((consentType) => ({ consentType, status: record.consents[consentType] ? "granted" : "denied", decidedAt: record.updatedAt })),
+  policyVersion: record.policyVersionId,
+});
+
 export const privacyMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/users/me/consents", () => consentRecord),
+  createMockRoute("GET", "/api/v1/users/me/consents", () => toConsentsWire(consentRecord)),
   createMockRoute("PUT", "/api/v1/users/me/consents", ({ body }) => {
     const { policyVersionId, consents } = body as UpdateConsentsInput;
-    if (!policyVersionId) throw new ApiError(422, "policyVersionId is required");
-    recordMockPolicyAcceptance(policyVersionId);
-    consentRecord = { policyVersionId, consents: { ...consentRecord.consents, ...consents }, updatedAt: new Date().toISOString() };
-    return consentRecord;
+    if (policyVersionId) recordMockPolicyAcceptance(policyVersionId);
+    consentRecord = { policyVersionId: policyVersionId ?? consentRecord.policyVersionId, consents: { ...consentRecord.consents, ...consents }, updatedAt: new Date().toISOString() };
+    return toConsentsWire(consentRecord);
   }),
   createMockRoute("GET", "/api/v1/users/me/data-exports", () => {
     const current = describeDataExport();

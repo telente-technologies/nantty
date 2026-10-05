@@ -5,7 +5,7 @@ import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const VALID_REPORT_TARGET_TYPES = ["post", "clip", "comment", "live", "user", "product", "message"];
 const receivedReports: { id: string; targetType: string; targetId: string; reason: string; details: string }[] = [];
-export const receivedMockFeedFeedback: { postId: string; type: string }[] = [];
+export const receivedMockFeedFeedback: { postId: string; kind: string }[] = [];
 
 export const reportsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/reports", ({ body }) => {
@@ -19,8 +19,8 @@ export const reportsMocks: MockRoute[] = [
     return { id: report.id, status: "received" };
   }),
   createMockRoute("POST", "/api/v1/feeds/feedback", ({ body }) => {
-    const input = body as { postId: string; type: string };
-    if (input.type !== "hide" && input.type !== "not_interested") throw new ApiError(422, "Unknown feedback type", "INVALID_FEEDBACK");
+    const input = body as { postId: string; kind: string };
+    if (input.kind !== "hide" && input.kind !== "notInterested") throw new ApiError(422, "Unknown feedback type", "INVALID_FEEDBACK");
     receivedMockFeedFeedback.push(input);
   }),
 ];
