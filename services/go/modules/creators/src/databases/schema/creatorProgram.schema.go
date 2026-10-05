@@ -42,6 +42,8 @@ func (CreatorProgramMember) Fields() []ent.Field {
 		field.String("user_id").NotEmpty().MaxLen(80).Immutable(),
 		field.String("tier_id").NotEmpty().MaxLen(40),
 		field.Enum("status").Values("approved", "suspended").Default("approved"),
+		field.String("suspension_reason").MaxLen(500).Default(""),
+		field.Time("suspended_at").Optional().Nillable(),
 		field.String("updated_by_staff_id").MaxLen(80).Default(""),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
