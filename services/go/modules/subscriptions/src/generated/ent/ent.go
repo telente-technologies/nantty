@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptionplan"
 	"zudomart/modules/subscriptions/src/generated/ent/idempotentrequest"
 	"zudomart/modules/subscriptions/src/generated/ent/outboxevent"
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
@@ -80,14 +83,17 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			idempotentrequest.Table:    idempotentrequest.ValidColumn,
-			outboxevent.Table:          outboxevent.ValidColumn,
-			planprice.Table:            planprice.ValidColumn,
-			providerplan.Table:         providerplan.ValidColumn,
-			subscription.Table:         subscription.ValidColumn,
-			subscriptionperiod.Table:   subscriptionperiod.ValidColumn,
-			subscriptionreminder.Table: subscriptionreminder.ValidColumn,
-			trialclaim.Table:           trialclaim.ValidColumn,
+			creatorsubscription.Table:       creatorsubscription.ValidColumn,
+			creatorsubscriptioncharge.Table: creatorsubscriptioncharge.ValidColumn,
+			creatorsubscriptionplan.Table:   creatorsubscriptionplan.ValidColumn,
+			idempotentrequest.Table:         idempotentrequest.ValidColumn,
+			outboxevent.Table:               outboxevent.ValidColumn,
+			planprice.Table:                 planprice.ValidColumn,
+			providerplan.Table:              providerplan.ValidColumn,
+			subscription.Table:              subscription.ValidColumn,
+			subscriptionperiod.Table:        subscriptionperiod.ValidColumn,
+			subscriptionreminder.Table:      subscriptionreminder.ValidColumn,
+			trialclaim.Table:                trialclaim.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptioncharge"
+	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptionplan"
 	"zudomart/modules/subscriptions/src/generated/ent/idempotentrequest"
 	"zudomart/modules/subscriptions/src/generated/ent/outboxevent"
 	"zudomart/modules/subscriptions/src/generated/ent/planprice"
@@ -33,15 +36,3564 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeIdempotentRequest    = "IdempotentRequest"
-	TypeOutboxEvent          = "OutboxEvent"
-	TypePlanPrice            = "PlanPrice"
-	TypeProviderPlan         = "ProviderPlan"
-	TypeSubscription         = "Subscription"
-	TypeSubscriptionPeriod   = "SubscriptionPeriod"
-	TypeSubscriptionReminder = "SubscriptionReminder"
-	TypeTrialClaim           = "TrialClaim"
+	TypeCreatorSubscription       = "CreatorSubscription"
+	TypeCreatorSubscriptionCharge = "CreatorSubscriptionCharge"
+	TypeCreatorSubscriptionPlan   = "CreatorSubscriptionPlan"
+	TypeIdempotentRequest         = "IdempotentRequest"
+	TypeOutboxEvent               = "OutboxEvent"
+	TypePlanPrice                 = "PlanPrice"
+	TypeProviderPlan              = "ProviderPlan"
+	TypeSubscription              = "Subscription"
+	TypeSubscriptionPeriod        = "SubscriptionPeriod"
+	TypeSubscriptionReminder      = "SubscriptionReminder"
+	TypeTrialClaim                = "TrialClaim"
 )
+
+// CreatorSubscriptionMutation represents an operation that mutates the CreatorSubscription nodes in the graph.
+type CreatorSubscriptionMutation struct {
+	config
+	op                       Op
+	typ                      string
+	id                       *uuid.UUID
+	created_at               *time.Time
+	subscriber_id            *string
+	creator_id               *string
+	plan_id                  *string
+	status                   *creatorsubscription.Status
+	amount_minor             *int64
+	addamount_minor          *int64
+	currency                 *string
+	interval                 *creatorsubscription.Interval
+	billing_authorization_id *string
+	current_period_start     *time.Time
+	current_period_end       *time.Time
+	next_charge_at           *time.Time
+	renewal_attempts         *int
+	addrenewal_attempts      *int
+	last_error               *string
+	updated_at               *time.Time
+	clearedFields            map[string]struct{}
+	done                     bool
+	oldValue                 func(context.Context) (*CreatorSubscription, error)
+	predicates               []predicate.CreatorSubscription
+}
+
+var _ ent.Mutation = (*CreatorSubscriptionMutation)(nil)
+
+// creatorsubscriptionOption allows management of the mutation configuration using functional options.
+type creatorsubscriptionOption func(*CreatorSubscriptionMutation)
+
+// newCreatorSubscriptionMutation creates new mutation for the CreatorSubscription entity.
+func newCreatorSubscriptionMutation(c config, op Op, opts ...creatorsubscriptionOption) *CreatorSubscriptionMutation {
+	m := &CreatorSubscriptionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCreatorSubscription,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCreatorSubscriptionID sets the ID field of the mutation.
+func withCreatorSubscriptionID(id uuid.UUID) creatorsubscriptionOption {
+	return func(m *CreatorSubscriptionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CreatorSubscription
+		)
+		m.oldValue = func(ctx context.Context) (*CreatorSubscription, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CreatorSubscription.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCreatorSubscription sets the old CreatorSubscription of the mutation.
+func withCreatorSubscription(node *CreatorSubscription) creatorsubscriptionOption {
+	return func(m *CreatorSubscriptionMutation) {
+		m.oldValue = func(context.Context) (*CreatorSubscription, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CreatorSubscriptionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CreatorSubscriptionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CreatorSubscription entities.
+func (m *CreatorSubscriptionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CreatorSubscriptionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CreatorSubscriptionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CreatorSubscription.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CreatorSubscriptionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CreatorSubscriptionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CreatorSubscriptionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetSubscriberID sets the "subscriber_id" field.
+func (m *CreatorSubscriptionMutation) SetSubscriberID(s string) {
+	m.subscriber_id = &s
+}
+
+// SubscriberID returns the value of the "subscriber_id" field in the mutation.
+func (m *CreatorSubscriptionMutation) SubscriberID() (r string, exists bool) {
+	v := m.subscriber_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubscriberID returns the old "subscriber_id" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldSubscriberID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubscriberID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubscriberID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubscriberID: %w", err)
+	}
+	return oldValue.SubscriberID, nil
+}
+
+// ResetSubscriberID resets all changes to the "subscriber_id" field.
+func (m *CreatorSubscriptionMutation) ResetSubscriberID() {
+	m.subscriber_id = nil
+}
+
+// SetCreatorID sets the "creator_id" field.
+func (m *CreatorSubscriptionMutation) SetCreatorID(s string) {
+	m.creator_id = &s
+}
+
+// CreatorID returns the value of the "creator_id" field in the mutation.
+func (m *CreatorSubscriptionMutation) CreatorID() (r string, exists bool) {
+	v := m.creator_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorID returns the old "creator_id" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldCreatorID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorID: %w", err)
+	}
+	return oldValue.CreatorID, nil
+}
+
+// ResetCreatorID resets all changes to the "creator_id" field.
+func (m *CreatorSubscriptionMutation) ResetCreatorID() {
+	m.creator_id = nil
+}
+
+// SetPlanID sets the "plan_id" field.
+func (m *CreatorSubscriptionMutation) SetPlanID(s string) {
+	m.plan_id = &s
+}
+
+// PlanID returns the value of the "plan_id" field in the mutation.
+func (m *CreatorSubscriptionMutation) PlanID() (r string, exists bool) {
+	v := m.plan_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlanID returns the old "plan_id" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldPlanID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlanID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlanID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlanID: %w", err)
+	}
+	return oldValue.PlanID, nil
+}
+
+// ResetPlanID resets all changes to the "plan_id" field.
+func (m *CreatorSubscriptionMutation) ResetPlanID() {
+	m.plan_id = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *CreatorSubscriptionMutation) SetStatus(c creatorsubscription.Status) {
+	m.status = &c
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CreatorSubscriptionMutation) Status() (r creatorsubscription.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldStatus(ctx context.Context) (v creatorsubscription.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CreatorSubscriptionMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetAmountMinor sets the "amount_minor" field.
+func (m *CreatorSubscriptionMutation) SetAmountMinor(i int64) {
+	m.amount_minor = &i
+	m.addamount_minor = nil
+}
+
+// AmountMinor returns the value of the "amount_minor" field in the mutation.
+func (m *CreatorSubscriptionMutation) AmountMinor() (r int64, exists bool) {
+	v := m.amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountMinor returns the old "amount_minor" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountMinor: %w", err)
+	}
+	return oldValue.AmountMinor, nil
+}
+
+// AddAmountMinor adds i to the "amount_minor" field.
+func (m *CreatorSubscriptionMutation) AddAmountMinor(i int64) {
+	if m.addamount_minor != nil {
+		*m.addamount_minor += i
+	} else {
+		m.addamount_minor = &i
+	}
+}
+
+// AddedAmountMinor returns the value that was added to the "amount_minor" field in this mutation.
+func (m *CreatorSubscriptionMutation) AddedAmountMinor() (r int64, exists bool) {
+	v := m.addamount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmountMinor resets all changes to the "amount_minor" field.
+func (m *CreatorSubscriptionMutation) ResetAmountMinor() {
+	m.amount_minor = nil
+	m.addamount_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *CreatorSubscriptionMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *CreatorSubscriptionMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *CreatorSubscriptionMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetInterval sets the "interval" field.
+func (m *CreatorSubscriptionMutation) SetInterval(c creatorsubscription.Interval) {
+	m.interval = &c
+}
+
+// Interval returns the value of the "interval" field in the mutation.
+func (m *CreatorSubscriptionMutation) Interval() (r creatorsubscription.Interval, exists bool) {
+	v := m.interval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInterval returns the old "interval" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldInterval(ctx context.Context) (v creatorsubscription.Interval, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInterval is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInterval requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInterval: %w", err)
+	}
+	return oldValue.Interval, nil
+}
+
+// ResetInterval resets all changes to the "interval" field.
+func (m *CreatorSubscriptionMutation) ResetInterval() {
+	m.interval = nil
+}
+
+// SetBillingAuthorizationID sets the "billing_authorization_id" field.
+func (m *CreatorSubscriptionMutation) SetBillingAuthorizationID(s string) {
+	m.billing_authorization_id = &s
+}
+
+// BillingAuthorizationID returns the value of the "billing_authorization_id" field in the mutation.
+func (m *CreatorSubscriptionMutation) BillingAuthorizationID() (r string, exists bool) {
+	v := m.billing_authorization_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBillingAuthorizationID returns the old "billing_authorization_id" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldBillingAuthorizationID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBillingAuthorizationID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBillingAuthorizationID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBillingAuthorizationID: %w", err)
+	}
+	return oldValue.BillingAuthorizationID, nil
+}
+
+// ResetBillingAuthorizationID resets all changes to the "billing_authorization_id" field.
+func (m *CreatorSubscriptionMutation) ResetBillingAuthorizationID() {
+	m.billing_authorization_id = nil
+}
+
+// SetCurrentPeriodStart sets the "current_period_start" field.
+func (m *CreatorSubscriptionMutation) SetCurrentPeriodStart(t time.Time) {
+	m.current_period_start = &t
+}
+
+// CurrentPeriodStart returns the value of the "current_period_start" field in the mutation.
+func (m *CreatorSubscriptionMutation) CurrentPeriodStart() (r time.Time, exists bool) {
+	v := m.current_period_start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrentPeriodStart returns the old "current_period_start" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldCurrentPeriodStart(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrentPeriodStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrentPeriodStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrentPeriodStart: %w", err)
+	}
+	return oldValue.CurrentPeriodStart, nil
+}
+
+// ClearCurrentPeriodStart clears the value of the "current_period_start" field.
+func (m *CreatorSubscriptionMutation) ClearCurrentPeriodStart() {
+	m.current_period_start = nil
+	m.clearedFields[creatorsubscription.FieldCurrentPeriodStart] = struct{}{}
+}
+
+// CurrentPeriodStartCleared returns if the "current_period_start" field was cleared in this mutation.
+func (m *CreatorSubscriptionMutation) CurrentPeriodStartCleared() bool {
+	_, ok := m.clearedFields[creatorsubscription.FieldCurrentPeriodStart]
+	return ok
+}
+
+// ResetCurrentPeriodStart resets all changes to the "current_period_start" field.
+func (m *CreatorSubscriptionMutation) ResetCurrentPeriodStart() {
+	m.current_period_start = nil
+	delete(m.clearedFields, creatorsubscription.FieldCurrentPeriodStart)
+}
+
+// SetCurrentPeriodEnd sets the "current_period_end" field.
+func (m *CreatorSubscriptionMutation) SetCurrentPeriodEnd(t time.Time) {
+	m.current_period_end = &t
+}
+
+// CurrentPeriodEnd returns the value of the "current_period_end" field in the mutation.
+func (m *CreatorSubscriptionMutation) CurrentPeriodEnd() (r time.Time, exists bool) {
+	v := m.current_period_end
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrentPeriodEnd returns the old "current_period_end" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldCurrentPeriodEnd(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrentPeriodEnd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrentPeriodEnd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrentPeriodEnd: %w", err)
+	}
+	return oldValue.CurrentPeriodEnd, nil
+}
+
+// ClearCurrentPeriodEnd clears the value of the "current_period_end" field.
+func (m *CreatorSubscriptionMutation) ClearCurrentPeriodEnd() {
+	m.current_period_end = nil
+	m.clearedFields[creatorsubscription.FieldCurrentPeriodEnd] = struct{}{}
+}
+
+// CurrentPeriodEndCleared returns if the "current_period_end" field was cleared in this mutation.
+func (m *CreatorSubscriptionMutation) CurrentPeriodEndCleared() bool {
+	_, ok := m.clearedFields[creatorsubscription.FieldCurrentPeriodEnd]
+	return ok
+}
+
+// ResetCurrentPeriodEnd resets all changes to the "current_period_end" field.
+func (m *CreatorSubscriptionMutation) ResetCurrentPeriodEnd() {
+	m.current_period_end = nil
+	delete(m.clearedFields, creatorsubscription.FieldCurrentPeriodEnd)
+}
+
+// SetNextChargeAt sets the "next_charge_at" field.
+func (m *CreatorSubscriptionMutation) SetNextChargeAt(t time.Time) {
+	m.next_charge_at = &t
+}
+
+// NextChargeAt returns the value of the "next_charge_at" field in the mutation.
+func (m *CreatorSubscriptionMutation) NextChargeAt() (r time.Time, exists bool) {
+	v := m.next_charge_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextChargeAt returns the old "next_charge_at" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldNextChargeAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNextChargeAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNextChargeAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextChargeAt: %w", err)
+	}
+	return oldValue.NextChargeAt, nil
+}
+
+// ClearNextChargeAt clears the value of the "next_charge_at" field.
+func (m *CreatorSubscriptionMutation) ClearNextChargeAt() {
+	m.next_charge_at = nil
+	m.clearedFields[creatorsubscription.FieldNextChargeAt] = struct{}{}
+}
+
+// NextChargeAtCleared returns if the "next_charge_at" field was cleared in this mutation.
+func (m *CreatorSubscriptionMutation) NextChargeAtCleared() bool {
+	_, ok := m.clearedFields[creatorsubscription.FieldNextChargeAt]
+	return ok
+}
+
+// ResetNextChargeAt resets all changes to the "next_charge_at" field.
+func (m *CreatorSubscriptionMutation) ResetNextChargeAt() {
+	m.next_charge_at = nil
+	delete(m.clearedFields, creatorsubscription.FieldNextChargeAt)
+}
+
+// SetRenewalAttempts sets the "renewal_attempts" field.
+func (m *CreatorSubscriptionMutation) SetRenewalAttempts(i int) {
+	m.renewal_attempts = &i
+	m.addrenewal_attempts = nil
+}
+
+// RenewalAttempts returns the value of the "renewal_attempts" field in the mutation.
+func (m *CreatorSubscriptionMutation) RenewalAttempts() (r int, exists bool) {
+	v := m.renewal_attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRenewalAttempts returns the old "renewal_attempts" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldRenewalAttempts(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRenewalAttempts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRenewalAttempts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRenewalAttempts: %w", err)
+	}
+	return oldValue.RenewalAttempts, nil
+}
+
+// AddRenewalAttempts adds i to the "renewal_attempts" field.
+func (m *CreatorSubscriptionMutation) AddRenewalAttempts(i int) {
+	if m.addrenewal_attempts != nil {
+		*m.addrenewal_attempts += i
+	} else {
+		m.addrenewal_attempts = &i
+	}
+}
+
+// AddedRenewalAttempts returns the value that was added to the "renewal_attempts" field in this mutation.
+func (m *CreatorSubscriptionMutation) AddedRenewalAttempts() (r int, exists bool) {
+	v := m.addrenewal_attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRenewalAttempts resets all changes to the "renewal_attempts" field.
+func (m *CreatorSubscriptionMutation) ResetRenewalAttempts() {
+	m.renewal_attempts = nil
+	m.addrenewal_attempts = nil
+}
+
+// SetLastError sets the "last_error" field.
+func (m *CreatorSubscriptionMutation) SetLastError(s string) {
+	m.last_error = &s
+}
+
+// LastError returns the value of the "last_error" field in the mutation.
+func (m *CreatorSubscriptionMutation) LastError() (r string, exists bool) {
+	v := m.last_error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastError returns the old "last_error" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldLastError(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastError: %w", err)
+	}
+	return oldValue.LastError, nil
+}
+
+// ResetLastError resets all changes to the "last_error" field.
+func (m *CreatorSubscriptionMutation) ResetLastError() {
+	m.last_error = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CreatorSubscriptionMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CreatorSubscriptionMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CreatorSubscriptionMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the CreatorSubscriptionMutation builder.
+func (m *CreatorSubscriptionMutation) Where(ps ...predicate.CreatorSubscription) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CreatorSubscriptionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CreatorSubscriptionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CreatorSubscription, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CreatorSubscriptionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CreatorSubscriptionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CreatorSubscription).
+func (m *CreatorSubscriptionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CreatorSubscriptionMutation) Fields() []string {
+	fields := make([]string, 0, 15)
+	if m.created_at != nil {
+		fields = append(fields, creatorsubscription.FieldCreatedAt)
+	}
+	if m.subscriber_id != nil {
+		fields = append(fields, creatorsubscription.FieldSubscriberID)
+	}
+	if m.creator_id != nil {
+		fields = append(fields, creatorsubscription.FieldCreatorID)
+	}
+	if m.plan_id != nil {
+		fields = append(fields, creatorsubscription.FieldPlanID)
+	}
+	if m.status != nil {
+		fields = append(fields, creatorsubscription.FieldStatus)
+	}
+	if m.amount_minor != nil {
+		fields = append(fields, creatorsubscription.FieldAmountMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, creatorsubscription.FieldCurrency)
+	}
+	if m.interval != nil {
+		fields = append(fields, creatorsubscription.FieldInterval)
+	}
+	if m.billing_authorization_id != nil {
+		fields = append(fields, creatorsubscription.FieldBillingAuthorizationID)
+	}
+	if m.current_period_start != nil {
+		fields = append(fields, creatorsubscription.FieldCurrentPeriodStart)
+	}
+	if m.current_period_end != nil {
+		fields = append(fields, creatorsubscription.FieldCurrentPeriodEnd)
+	}
+	if m.next_charge_at != nil {
+		fields = append(fields, creatorsubscription.FieldNextChargeAt)
+	}
+	if m.renewal_attempts != nil {
+		fields = append(fields, creatorsubscription.FieldRenewalAttempts)
+	}
+	if m.last_error != nil {
+		fields = append(fields, creatorsubscription.FieldLastError)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, creatorsubscription.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CreatorSubscriptionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case creatorsubscription.FieldCreatedAt:
+		return m.CreatedAt()
+	case creatorsubscription.FieldSubscriberID:
+		return m.SubscriberID()
+	case creatorsubscription.FieldCreatorID:
+		return m.CreatorID()
+	case creatorsubscription.FieldPlanID:
+		return m.PlanID()
+	case creatorsubscription.FieldStatus:
+		return m.Status()
+	case creatorsubscription.FieldAmountMinor:
+		return m.AmountMinor()
+	case creatorsubscription.FieldCurrency:
+		return m.Currency()
+	case creatorsubscription.FieldInterval:
+		return m.Interval()
+	case creatorsubscription.FieldBillingAuthorizationID:
+		return m.BillingAuthorizationID()
+	case creatorsubscription.FieldCurrentPeriodStart:
+		return m.CurrentPeriodStart()
+	case creatorsubscription.FieldCurrentPeriodEnd:
+		return m.CurrentPeriodEnd()
+	case creatorsubscription.FieldNextChargeAt:
+		return m.NextChargeAt()
+	case creatorsubscription.FieldRenewalAttempts:
+		return m.RenewalAttempts()
+	case creatorsubscription.FieldLastError:
+		return m.LastError()
+	case creatorsubscription.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CreatorSubscriptionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case creatorsubscription.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case creatorsubscription.FieldSubscriberID:
+		return m.OldSubscriberID(ctx)
+	case creatorsubscription.FieldCreatorID:
+		return m.OldCreatorID(ctx)
+	case creatorsubscription.FieldPlanID:
+		return m.OldPlanID(ctx)
+	case creatorsubscription.FieldStatus:
+		return m.OldStatus(ctx)
+	case creatorsubscription.FieldAmountMinor:
+		return m.OldAmountMinor(ctx)
+	case creatorsubscription.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case creatorsubscription.FieldInterval:
+		return m.OldInterval(ctx)
+	case creatorsubscription.FieldBillingAuthorizationID:
+		return m.OldBillingAuthorizationID(ctx)
+	case creatorsubscription.FieldCurrentPeriodStart:
+		return m.OldCurrentPeriodStart(ctx)
+	case creatorsubscription.FieldCurrentPeriodEnd:
+		return m.OldCurrentPeriodEnd(ctx)
+	case creatorsubscription.FieldNextChargeAt:
+		return m.OldNextChargeAt(ctx)
+	case creatorsubscription.FieldRenewalAttempts:
+		return m.OldRenewalAttempts(ctx)
+	case creatorsubscription.FieldLastError:
+		return m.OldLastError(ctx)
+	case creatorsubscription.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown CreatorSubscription field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CreatorSubscriptionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case creatorsubscription.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case creatorsubscription.FieldSubscriberID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubscriberID(v)
+		return nil
+	case creatorsubscription.FieldCreatorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorID(v)
+		return nil
+	case creatorsubscription.FieldPlanID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlanID(v)
+		return nil
+	case creatorsubscription.FieldStatus:
+		v, ok := value.(creatorsubscription.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case creatorsubscription.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountMinor(v)
+		return nil
+	case creatorsubscription.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case creatorsubscription.FieldInterval:
+		v, ok := value.(creatorsubscription.Interval)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInterval(v)
+		return nil
+	case creatorsubscription.FieldBillingAuthorizationID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBillingAuthorizationID(v)
+		return nil
+	case creatorsubscription.FieldCurrentPeriodStart:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrentPeriodStart(v)
+		return nil
+	case creatorsubscription.FieldCurrentPeriodEnd:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrentPeriodEnd(v)
+		return nil
+	case creatorsubscription.FieldNextChargeAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextChargeAt(v)
+		return nil
+	case creatorsubscription.FieldRenewalAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRenewalAttempts(v)
+		return nil
+	case creatorsubscription.FieldLastError:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastError(v)
+		return nil
+	case creatorsubscription.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscription field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CreatorSubscriptionMutation) AddedFields() []string {
+	var fields []string
+	if m.addamount_minor != nil {
+		fields = append(fields, creatorsubscription.FieldAmountMinor)
+	}
+	if m.addrenewal_attempts != nil {
+		fields = append(fields, creatorsubscription.FieldRenewalAttempts)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CreatorSubscriptionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case creatorsubscription.FieldAmountMinor:
+		return m.AddedAmountMinor()
+	case creatorsubscription.FieldRenewalAttempts:
+		return m.AddedRenewalAttempts()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CreatorSubscriptionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case creatorsubscription.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmountMinor(v)
+		return nil
+	case creatorsubscription.FieldRenewalAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRenewalAttempts(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscription numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CreatorSubscriptionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(creatorsubscription.FieldCurrentPeriodStart) {
+		fields = append(fields, creatorsubscription.FieldCurrentPeriodStart)
+	}
+	if m.FieldCleared(creatorsubscription.FieldCurrentPeriodEnd) {
+		fields = append(fields, creatorsubscription.FieldCurrentPeriodEnd)
+	}
+	if m.FieldCleared(creatorsubscription.FieldNextChargeAt) {
+		fields = append(fields, creatorsubscription.FieldNextChargeAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CreatorSubscriptionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CreatorSubscriptionMutation) ClearField(name string) error {
+	switch name {
+	case creatorsubscription.FieldCurrentPeriodStart:
+		m.ClearCurrentPeriodStart()
+		return nil
+	case creatorsubscription.FieldCurrentPeriodEnd:
+		m.ClearCurrentPeriodEnd()
+		return nil
+	case creatorsubscription.FieldNextChargeAt:
+		m.ClearNextChargeAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscription nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CreatorSubscriptionMutation) ResetField(name string) error {
+	switch name {
+	case creatorsubscription.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case creatorsubscription.FieldSubscriberID:
+		m.ResetSubscriberID()
+		return nil
+	case creatorsubscription.FieldCreatorID:
+		m.ResetCreatorID()
+		return nil
+	case creatorsubscription.FieldPlanID:
+		m.ResetPlanID()
+		return nil
+	case creatorsubscription.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case creatorsubscription.FieldAmountMinor:
+		m.ResetAmountMinor()
+		return nil
+	case creatorsubscription.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case creatorsubscription.FieldInterval:
+		m.ResetInterval()
+		return nil
+	case creatorsubscription.FieldBillingAuthorizationID:
+		m.ResetBillingAuthorizationID()
+		return nil
+	case creatorsubscription.FieldCurrentPeriodStart:
+		m.ResetCurrentPeriodStart()
+		return nil
+	case creatorsubscription.FieldCurrentPeriodEnd:
+		m.ResetCurrentPeriodEnd()
+		return nil
+	case creatorsubscription.FieldNextChargeAt:
+		m.ResetNextChargeAt()
+		return nil
+	case creatorsubscription.FieldRenewalAttempts:
+		m.ResetRenewalAttempts()
+		return nil
+	case creatorsubscription.FieldLastError:
+		m.ResetLastError()
+		return nil
+	case creatorsubscription.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscription field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CreatorSubscriptionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CreatorSubscriptionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CreatorSubscriptionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CreatorSubscriptionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CreatorSubscriptionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CreatorSubscriptionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CreatorSubscriptionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CreatorSubscription unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CreatorSubscriptionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CreatorSubscription edge %s", name)
+}
+
+// CreatorSubscriptionChargeMutation represents an operation that mutates the CreatorSubscriptionCharge nodes in the graph.
+type CreatorSubscriptionChargeMutation struct {
+	config
+	op                      Op
+	typ                     string
+	id                      *uuid.UUID
+	created_at              *time.Time
+	subscription_id         *string
+	subscriber_id           *string
+	creator_id              *string
+	kind                    *creatorsubscriptioncharge.Kind
+	idempotency_key         *string
+	payment_reference       *string
+	attempt_count           *int
+	addattempt_count        *int
+	amount_minor            *int64
+	addamount_minor         *int64
+	currency                *string
+	status                  *creatorsubscriptioncharge.Status
+	provider_fee_minor      *int64
+	addprovider_fee_minor   *int64
+	creator_share_minor     *int64
+	addcreator_share_minor  *int64
+	platform_share_minor    *int64
+	addplatform_share_minor *int64
+	period_start            *time.Time
+	failure_reason          *string
+	paid_at                 *time.Time
+	updated_at              *time.Time
+	clearedFields           map[string]struct{}
+	done                    bool
+	oldValue                func(context.Context) (*CreatorSubscriptionCharge, error)
+	predicates              []predicate.CreatorSubscriptionCharge
+}
+
+var _ ent.Mutation = (*CreatorSubscriptionChargeMutation)(nil)
+
+// creatorsubscriptionchargeOption allows management of the mutation configuration using functional options.
+type creatorsubscriptionchargeOption func(*CreatorSubscriptionChargeMutation)
+
+// newCreatorSubscriptionChargeMutation creates new mutation for the CreatorSubscriptionCharge entity.
+func newCreatorSubscriptionChargeMutation(c config, op Op, opts ...creatorsubscriptionchargeOption) *CreatorSubscriptionChargeMutation {
+	m := &CreatorSubscriptionChargeMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCreatorSubscriptionCharge,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCreatorSubscriptionChargeID sets the ID field of the mutation.
+func withCreatorSubscriptionChargeID(id uuid.UUID) creatorsubscriptionchargeOption {
+	return func(m *CreatorSubscriptionChargeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CreatorSubscriptionCharge
+		)
+		m.oldValue = func(ctx context.Context) (*CreatorSubscriptionCharge, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CreatorSubscriptionCharge.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCreatorSubscriptionCharge sets the old CreatorSubscriptionCharge of the mutation.
+func withCreatorSubscriptionCharge(node *CreatorSubscriptionCharge) creatorsubscriptionchargeOption {
+	return func(m *CreatorSubscriptionChargeMutation) {
+		m.oldValue = func(context.Context) (*CreatorSubscriptionCharge, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CreatorSubscriptionChargeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CreatorSubscriptionChargeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CreatorSubscriptionCharge entities.
+func (m *CreatorSubscriptionChargeMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CreatorSubscriptionChargeMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CreatorSubscriptionChargeMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CreatorSubscriptionCharge.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CreatorSubscriptionChargeMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CreatorSubscriptionChargeMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetSubscriptionID sets the "subscription_id" field.
+func (m *CreatorSubscriptionChargeMutation) SetSubscriptionID(s string) {
+	m.subscription_id = &s
+}
+
+// SubscriptionID returns the value of the "subscription_id" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) SubscriptionID() (r string, exists bool) {
+	v := m.subscription_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubscriptionID returns the old "subscription_id" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldSubscriptionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubscriptionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubscriptionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubscriptionID: %w", err)
+	}
+	return oldValue.SubscriptionID, nil
+}
+
+// ResetSubscriptionID resets all changes to the "subscription_id" field.
+func (m *CreatorSubscriptionChargeMutation) ResetSubscriptionID() {
+	m.subscription_id = nil
+}
+
+// SetSubscriberID sets the "subscriber_id" field.
+func (m *CreatorSubscriptionChargeMutation) SetSubscriberID(s string) {
+	m.subscriber_id = &s
+}
+
+// SubscriberID returns the value of the "subscriber_id" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) SubscriberID() (r string, exists bool) {
+	v := m.subscriber_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubscriberID returns the old "subscriber_id" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldSubscriberID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubscriberID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubscriberID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubscriberID: %w", err)
+	}
+	return oldValue.SubscriberID, nil
+}
+
+// ResetSubscriberID resets all changes to the "subscriber_id" field.
+func (m *CreatorSubscriptionChargeMutation) ResetSubscriberID() {
+	m.subscriber_id = nil
+}
+
+// SetCreatorID sets the "creator_id" field.
+func (m *CreatorSubscriptionChargeMutation) SetCreatorID(s string) {
+	m.creator_id = &s
+}
+
+// CreatorID returns the value of the "creator_id" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) CreatorID() (r string, exists bool) {
+	v := m.creator_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorID returns the old "creator_id" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldCreatorID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorID: %w", err)
+	}
+	return oldValue.CreatorID, nil
+}
+
+// ResetCreatorID resets all changes to the "creator_id" field.
+func (m *CreatorSubscriptionChargeMutation) ResetCreatorID() {
+	m.creator_id = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *CreatorSubscriptionChargeMutation) SetKind(c creatorsubscriptioncharge.Kind) {
+	m.kind = &c
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) Kind() (r creatorsubscriptioncharge.Kind, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldKind(ctx context.Context) (v creatorsubscriptioncharge.Kind, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *CreatorSubscriptionChargeMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetIdempotencyKey sets the "idempotency_key" field.
+func (m *CreatorSubscriptionChargeMutation) SetIdempotencyKey(s string) {
+	m.idempotency_key = &s
+}
+
+// IdempotencyKey returns the value of the "idempotency_key" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) IdempotencyKey() (r string, exists bool) {
+	v := m.idempotency_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdempotencyKey returns the old "idempotency_key" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldIdempotencyKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdempotencyKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdempotencyKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdempotencyKey: %w", err)
+	}
+	return oldValue.IdempotencyKey, nil
+}
+
+// ResetIdempotencyKey resets all changes to the "idempotency_key" field.
+func (m *CreatorSubscriptionChargeMutation) ResetIdempotencyKey() {
+	m.idempotency_key = nil
+}
+
+// SetPaymentReference sets the "payment_reference" field.
+func (m *CreatorSubscriptionChargeMutation) SetPaymentReference(s string) {
+	m.payment_reference = &s
+}
+
+// PaymentReference returns the value of the "payment_reference" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) PaymentReference() (r string, exists bool) {
+	v := m.payment_reference
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaymentReference returns the old "payment_reference" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldPaymentReference(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaymentReference is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaymentReference requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaymentReference: %w", err)
+	}
+	return oldValue.PaymentReference, nil
+}
+
+// ResetPaymentReference resets all changes to the "payment_reference" field.
+func (m *CreatorSubscriptionChargeMutation) ResetPaymentReference() {
+	m.payment_reference = nil
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (m *CreatorSubscriptionChargeMutation) SetAttemptCount(i int) {
+	m.attempt_count = &i
+	m.addattempt_count = nil
+}
+
+// AttemptCount returns the value of the "attempt_count" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) AttemptCount() (r int, exists bool) {
+	v := m.attempt_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttemptCount returns the old "attempt_count" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldAttemptCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttemptCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttemptCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttemptCount: %w", err)
+	}
+	return oldValue.AttemptCount, nil
+}
+
+// AddAttemptCount adds i to the "attempt_count" field.
+func (m *CreatorSubscriptionChargeMutation) AddAttemptCount(i int) {
+	if m.addattempt_count != nil {
+		*m.addattempt_count += i
+	} else {
+		m.addattempt_count = &i
+	}
+}
+
+// AddedAttemptCount returns the value that was added to the "attempt_count" field in this mutation.
+func (m *CreatorSubscriptionChargeMutation) AddedAttemptCount() (r int, exists bool) {
+	v := m.addattempt_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAttemptCount resets all changes to the "attempt_count" field.
+func (m *CreatorSubscriptionChargeMutation) ResetAttemptCount() {
+	m.attempt_count = nil
+	m.addattempt_count = nil
+}
+
+// SetAmountMinor sets the "amount_minor" field.
+func (m *CreatorSubscriptionChargeMutation) SetAmountMinor(i int64) {
+	m.amount_minor = &i
+	m.addamount_minor = nil
+}
+
+// AmountMinor returns the value of the "amount_minor" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) AmountMinor() (r int64, exists bool) {
+	v := m.amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountMinor returns the old "amount_minor" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountMinor: %w", err)
+	}
+	return oldValue.AmountMinor, nil
+}
+
+// AddAmountMinor adds i to the "amount_minor" field.
+func (m *CreatorSubscriptionChargeMutation) AddAmountMinor(i int64) {
+	if m.addamount_minor != nil {
+		*m.addamount_minor += i
+	} else {
+		m.addamount_minor = &i
+	}
+}
+
+// AddedAmountMinor returns the value that was added to the "amount_minor" field in this mutation.
+func (m *CreatorSubscriptionChargeMutation) AddedAmountMinor() (r int64, exists bool) {
+	v := m.addamount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmountMinor resets all changes to the "amount_minor" field.
+func (m *CreatorSubscriptionChargeMutation) ResetAmountMinor() {
+	m.amount_minor = nil
+	m.addamount_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *CreatorSubscriptionChargeMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *CreatorSubscriptionChargeMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *CreatorSubscriptionChargeMutation) SetStatus(c creatorsubscriptioncharge.Status) {
+	m.status = &c
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) Status() (r creatorsubscriptioncharge.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldStatus(ctx context.Context) (v creatorsubscriptioncharge.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CreatorSubscriptionChargeMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetProviderFeeMinor sets the "provider_fee_minor" field.
+func (m *CreatorSubscriptionChargeMutation) SetProviderFeeMinor(i int64) {
+	m.provider_fee_minor = &i
+	m.addprovider_fee_minor = nil
+}
+
+// ProviderFeeMinor returns the value of the "provider_fee_minor" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) ProviderFeeMinor() (r int64, exists bool) {
+	v := m.provider_fee_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProviderFeeMinor returns the old "provider_fee_minor" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldProviderFeeMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProviderFeeMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProviderFeeMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProviderFeeMinor: %w", err)
+	}
+	return oldValue.ProviderFeeMinor, nil
+}
+
+// AddProviderFeeMinor adds i to the "provider_fee_minor" field.
+func (m *CreatorSubscriptionChargeMutation) AddProviderFeeMinor(i int64) {
+	if m.addprovider_fee_minor != nil {
+		*m.addprovider_fee_minor += i
+	} else {
+		m.addprovider_fee_minor = &i
+	}
+}
+
+// AddedProviderFeeMinor returns the value that was added to the "provider_fee_minor" field in this mutation.
+func (m *CreatorSubscriptionChargeMutation) AddedProviderFeeMinor() (r int64, exists bool) {
+	v := m.addprovider_fee_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetProviderFeeMinor resets all changes to the "provider_fee_minor" field.
+func (m *CreatorSubscriptionChargeMutation) ResetProviderFeeMinor() {
+	m.provider_fee_minor = nil
+	m.addprovider_fee_minor = nil
+}
+
+// SetCreatorShareMinor sets the "creator_share_minor" field.
+func (m *CreatorSubscriptionChargeMutation) SetCreatorShareMinor(i int64) {
+	m.creator_share_minor = &i
+	m.addcreator_share_minor = nil
+}
+
+// CreatorShareMinor returns the value of the "creator_share_minor" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) CreatorShareMinor() (r int64, exists bool) {
+	v := m.creator_share_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorShareMinor returns the old "creator_share_minor" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldCreatorShareMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorShareMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorShareMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorShareMinor: %w", err)
+	}
+	return oldValue.CreatorShareMinor, nil
+}
+
+// AddCreatorShareMinor adds i to the "creator_share_minor" field.
+func (m *CreatorSubscriptionChargeMutation) AddCreatorShareMinor(i int64) {
+	if m.addcreator_share_minor != nil {
+		*m.addcreator_share_minor += i
+	} else {
+		m.addcreator_share_minor = &i
+	}
+}
+
+// AddedCreatorShareMinor returns the value that was added to the "creator_share_minor" field in this mutation.
+func (m *CreatorSubscriptionChargeMutation) AddedCreatorShareMinor() (r int64, exists bool) {
+	v := m.addcreator_share_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatorShareMinor resets all changes to the "creator_share_minor" field.
+func (m *CreatorSubscriptionChargeMutation) ResetCreatorShareMinor() {
+	m.creator_share_minor = nil
+	m.addcreator_share_minor = nil
+}
+
+// SetPlatformShareMinor sets the "platform_share_minor" field.
+func (m *CreatorSubscriptionChargeMutation) SetPlatformShareMinor(i int64) {
+	m.platform_share_minor = &i
+	m.addplatform_share_minor = nil
+}
+
+// PlatformShareMinor returns the value of the "platform_share_minor" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) PlatformShareMinor() (r int64, exists bool) {
+	v := m.platform_share_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlatformShareMinor returns the old "platform_share_minor" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldPlatformShareMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlatformShareMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlatformShareMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlatformShareMinor: %w", err)
+	}
+	return oldValue.PlatformShareMinor, nil
+}
+
+// AddPlatformShareMinor adds i to the "platform_share_minor" field.
+func (m *CreatorSubscriptionChargeMutation) AddPlatformShareMinor(i int64) {
+	if m.addplatform_share_minor != nil {
+		*m.addplatform_share_minor += i
+	} else {
+		m.addplatform_share_minor = &i
+	}
+}
+
+// AddedPlatformShareMinor returns the value that was added to the "platform_share_minor" field in this mutation.
+func (m *CreatorSubscriptionChargeMutation) AddedPlatformShareMinor() (r int64, exists bool) {
+	v := m.addplatform_share_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPlatformShareMinor resets all changes to the "platform_share_minor" field.
+func (m *CreatorSubscriptionChargeMutation) ResetPlatformShareMinor() {
+	m.platform_share_minor = nil
+	m.addplatform_share_minor = nil
+}
+
+// SetPeriodStart sets the "period_start" field.
+func (m *CreatorSubscriptionChargeMutation) SetPeriodStart(t time.Time) {
+	m.period_start = &t
+}
+
+// PeriodStart returns the value of the "period_start" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) PeriodStart() (r time.Time, exists bool) {
+	v := m.period_start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPeriodStart returns the old "period_start" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldPeriodStart(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPeriodStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPeriodStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPeriodStart: %w", err)
+	}
+	return oldValue.PeriodStart, nil
+}
+
+// ClearPeriodStart clears the value of the "period_start" field.
+func (m *CreatorSubscriptionChargeMutation) ClearPeriodStart() {
+	m.period_start = nil
+	m.clearedFields[creatorsubscriptioncharge.FieldPeriodStart] = struct{}{}
+}
+
+// PeriodStartCleared returns if the "period_start" field was cleared in this mutation.
+func (m *CreatorSubscriptionChargeMutation) PeriodStartCleared() bool {
+	_, ok := m.clearedFields[creatorsubscriptioncharge.FieldPeriodStart]
+	return ok
+}
+
+// ResetPeriodStart resets all changes to the "period_start" field.
+func (m *CreatorSubscriptionChargeMutation) ResetPeriodStart() {
+	m.period_start = nil
+	delete(m.clearedFields, creatorsubscriptioncharge.FieldPeriodStart)
+}
+
+// SetFailureReason sets the "failure_reason" field.
+func (m *CreatorSubscriptionChargeMutation) SetFailureReason(s string) {
+	m.failure_reason = &s
+}
+
+// FailureReason returns the value of the "failure_reason" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) FailureReason() (r string, exists bool) {
+	v := m.failure_reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFailureReason returns the old "failure_reason" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldFailureReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFailureReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFailureReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFailureReason: %w", err)
+	}
+	return oldValue.FailureReason, nil
+}
+
+// ResetFailureReason resets all changes to the "failure_reason" field.
+func (m *CreatorSubscriptionChargeMutation) ResetFailureReason() {
+	m.failure_reason = nil
+}
+
+// SetPaidAt sets the "paid_at" field.
+func (m *CreatorSubscriptionChargeMutation) SetPaidAt(t time.Time) {
+	m.paid_at = &t
+}
+
+// PaidAt returns the value of the "paid_at" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) PaidAt() (r time.Time, exists bool) {
+	v := m.paid_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaidAt returns the old "paid_at" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldPaidAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaidAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaidAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaidAt: %w", err)
+	}
+	return oldValue.PaidAt, nil
+}
+
+// ClearPaidAt clears the value of the "paid_at" field.
+func (m *CreatorSubscriptionChargeMutation) ClearPaidAt() {
+	m.paid_at = nil
+	m.clearedFields[creatorsubscriptioncharge.FieldPaidAt] = struct{}{}
+}
+
+// PaidAtCleared returns if the "paid_at" field was cleared in this mutation.
+func (m *CreatorSubscriptionChargeMutation) PaidAtCleared() bool {
+	_, ok := m.clearedFields[creatorsubscriptioncharge.FieldPaidAt]
+	return ok
+}
+
+// ResetPaidAt resets all changes to the "paid_at" field.
+func (m *CreatorSubscriptionChargeMutation) ResetPaidAt() {
+	m.paid_at = nil
+	delete(m.clearedFields, creatorsubscriptioncharge.FieldPaidAt)
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CreatorSubscriptionChargeMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CreatorSubscriptionChargeMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the CreatorSubscriptionChargeMutation builder.
+func (m *CreatorSubscriptionChargeMutation) Where(ps ...predicate.CreatorSubscriptionCharge) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CreatorSubscriptionChargeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CreatorSubscriptionChargeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CreatorSubscriptionCharge, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CreatorSubscriptionChargeMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CreatorSubscriptionChargeMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CreatorSubscriptionCharge).
+func (m *CreatorSubscriptionChargeMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CreatorSubscriptionChargeMutation) Fields() []string {
+	fields := make([]string, 0, 18)
+	if m.created_at != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldCreatedAt)
+	}
+	if m.subscription_id != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldSubscriptionID)
+	}
+	if m.subscriber_id != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldSubscriberID)
+	}
+	if m.creator_id != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldCreatorID)
+	}
+	if m.kind != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldKind)
+	}
+	if m.idempotency_key != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldIdempotencyKey)
+	}
+	if m.payment_reference != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldPaymentReference)
+	}
+	if m.attempt_count != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldAttemptCount)
+	}
+	if m.amount_minor != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldAmountMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldCurrency)
+	}
+	if m.status != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldStatus)
+	}
+	if m.provider_fee_minor != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldProviderFeeMinor)
+	}
+	if m.creator_share_minor != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldCreatorShareMinor)
+	}
+	if m.platform_share_minor != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldPlatformShareMinor)
+	}
+	if m.period_start != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldPeriodStart)
+	}
+	if m.failure_reason != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldFailureReason)
+	}
+	if m.paid_at != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldPaidAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CreatorSubscriptionChargeMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case creatorsubscriptioncharge.FieldCreatedAt:
+		return m.CreatedAt()
+	case creatorsubscriptioncharge.FieldSubscriptionID:
+		return m.SubscriptionID()
+	case creatorsubscriptioncharge.FieldSubscriberID:
+		return m.SubscriberID()
+	case creatorsubscriptioncharge.FieldCreatorID:
+		return m.CreatorID()
+	case creatorsubscriptioncharge.FieldKind:
+		return m.Kind()
+	case creatorsubscriptioncharge.FieldIdempotencyKey:
+		return m.IdempotencyKey()
+	case creatorsubscriptioncharge.FieldPaymentReference:
+		return m.PaymentReference()
+	case creatorsubscriptioncharge.FieldAttemptCount:
+		return m.AttemptCount()
+	case creatorsubscriptioncharge.FieldAmountMinor:
+		return m.AmountMinor()
+	case creatorsubscriptioncharge.FieldCurrency:
+		return m.Currency()
+	case creatorsubscriptioncharge.FieldStatus:
+		return m.Status()
+	case creatorsubscriptioncharge.FieldProviderFeeMinor:
+		return m.ProviderFeeMinor()
+	case creatorsubscriptioncharge.FieldCreatorShareMinor:
+		return m.CreatorShareMinor()
+	case creatorsubscriptioncharge.FieldPlatformShareMinor:
+		return m.PlatformShareMinor()
+	case creatorsubscriptioncharge.FieldPeriodStart:
+		return m.PeriodStart()
+	case creatorsubscriptioncharge.FieldFailureReason:
+		return m.FailureReason()
+	case creatorsubscriptioncharge.FieldPaidAt:
+		return m.PaidAt()
+	case creatorsubscriptioncharge.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CreatorSubscriptionChargeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case creatorsubscriptioncharge.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case creatorsubscriptioncharge.FieldSubscriptionID:
+		return m.OldSubscriptionID(ctx)
+	case creatorsubscriptioncharge.FieldSubscriberID:
+		return m.OldSubscriberID(ctx)
+	case creatorsubscriptioncharge.FieldCreatorID:
+		return m.OldCreatorID(ctx)
+	case creatorsubscriptioncharge.FieldKind:
+		return m.OldKind(ctx)
+	case creatorsubscriptioncharge.FieldIdempotencyKey:
+		return m.OldIdempotencyKey(ctx)
+	case creatorsubscriptioncharge.FieldPaymentReference:
+		return m.OldPaymentReference(ctx)
+	case creatorsubscriptioncharge.FieldAttemptCount:
+		return m.OldAttemptCount(ctx)
+	case creatorsubscriptioncharge.FieldAmountMinor:
+		return m.OldAmountMinor(ctx)
+	case creatorsubscriptioncharge.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case creatorsubscriptioncharge.FieldStatus:
+		return m.OldStatus(ctx)
+	case creatorsubscriptioncharge.FieldProviderFeeMinor:
+		return m.OldProviderFeeMinor(ctx)
+	case creatorsubscriptioncharge.FieldCreatorShareMinor:
+		return m.OldCreatorShareMinor(ctx)
+	case creatorsubscriptioncharge.FieldPlatformShareMinor:
+		return m.OldPlatformShareMinor(ctx)
+	case creatorsubscriptioncharge.FieldPeriodStart:
+		return m.OldPeriodStart(ctx)
+	case creatorsubscriptioncharge.FieldFailureReason:
+		return m.OldFailureReason(ctx)
+	case creatorsubscriptioncharge.FieldPaidAt:
+		return m.OldPaidAt(ctx)
+	case creatorsubscriptioncharge.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown CreatorSubscriptionCharge field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CreatorSubscriptionChargeMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case creatorsubscriptioncharge.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case creatorsubscriptioncharge.FieldSubscriptionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubscriptionID(v)
+		return nil
+	case creatorsubscriptioncharge.FieldSubscriberID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubscriberID(v)
+		return nil
+	case creatorsubscriptioncharge.FieldCreatorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorID(v)
+		return nil
+	case creatorsubscriptioncharge.FieldKind:
+		v, ok := value.(creatorsubscriptioncharge.Kind)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case creatorsubscriptioncharge.FieldIdempotencyKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdempotencyKey(v)
+		return nil
+	case creatorsubscriptioncharge.FieldPaymentReference:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaymentReference(v)
+		return nil
+	case creatorsubscriptioncharge.FieldAttemptCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttemptCount(v)
+		return nil
+	case creatorsubscriptioncharge.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountMinor(v)
+		return nil
+	case creatorsubscriptioncharge.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case creatorsubscriptioncharge.FieldStatus:
+		v, ok := value.(creatorsubscriptioncharge.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case creatorsubscriptioncharge.FieldProviderFeeMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProviderFeeMinor(v)
+		return nil
+	case creatorsubscriptioncharge.FieldCreatorShareMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorShareMinor(v)
+		return nil
+	case creatorsubscriptioncharge.FieldPlatformShareMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlatformShareMinor(v)
+		return nil
+	case creatorsubscriptioncharge.FieldPeriodStart:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPeriodStart(v)
+		return nil
+	case creatorsubscriptioncharge.FieldFailureReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFailureReason(v)
+		return nil
+	case creatorsubscriptioncharge.FieldPaidAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaidAt(v)
+		return nil
+	case creatorsubscriptioncharge.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscriptionCharge field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CreatorSubscriptionChargeMutation) AddedFields() []string {
+	var fields []string
+	if m.addattempt_count != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldAttemptCount)
+	}
+	if m.addamount_minor != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldAmountMinor)
+	}
+	if m.addprovider_fee_minor != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldProviderFeeMinor)
+	}
+	if m.addcreator_share_minor != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldCreatorShareMinor)
+	}
+	if m.addplatform_share_minor != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldPlatformShareMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CreatorSubscriptionChargeMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case creatorsubscriptioncharge.FieldAttemptCount:
+		return m.AddedAttemptCount()
+	case creatorsubscriptioncharge.FieldAmountMinor:
+		return m.AddedAmountMinor()
+	case creatorsubscriptioncharge.FieldProviderFeeMinor:
+		return m.AddedProviderFeeMinor()
+	case creatorsubscriptioncharge.FieldCreatorShareMinor:
+		return m.AddedCreatorShareMinor()
+	case creatorsubscriptioncharge.FieldPlatformShareMinor:
+		return m.AddedPlatformShareMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CreatorSubscriptionChargeMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case creatorsubscriptioncharge.FieldAttemptCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAttemptCount(v)
+		return nil
+	case creatorsubscriptioncharge.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmountMinor(v)
+		return nil
+	case creatorsubscriptioncharge.FieldProviderFeeMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddProviderFeeMinor(v)
+		return nil
+	case creatorsubscriptioncharge.FieldCreatorShareMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatorShareMinor(v)
+		return nil
+	case creatorsubscriptioncharge.FieldPlatformShareMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPlatformShareMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscriptionCharge numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CreatorSubscriptionChargeMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(creatorsubscriptioncharge.FieldPeriodStart) {
+		fields = append(fields, creatorsubscriptioncharge.FieldPeriodStart)
+	}
+	if m.FieldCleared(creatorsubscriptioncharge.FieldPaidAt) {
+		fields = append(fields, creatorsubscriptioncharge.FieldPaidAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CreatorSubscriptionChargeMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CreatorSubscriptionChargeMutation) ClearField(name string) error {
+	switch name {
+	case creatorsubscriptioncharge.FieldPeriodStart:
+		m.ClearPeriodStart()
+		return nil
+	case creatorsubscriptioncharge.FieldPaidAt:
+		m.ClearPaidAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscriptionCharge nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CreatorSubscriptionChargeMutation) ResetField(name string) error {
+	switch name {
+	case creatorsubscriptioncharge.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case creatorsubscriptioncharge.FieldSubscriptionID:
+		m.ResetSubscriptionID()
+		return nil
+	case creatorsubscriptioncharge.FieldSubscriberID:
+		m.ResetSubscriberID()
+		return nil
+	case creatorsubscriptioncharge.FieldCreatorID:
+		m.ResetCreatorID()
+		return nil
+	case creatorsubscriptioncharge.FieldKind:
+		m.ResetKind()
+		return nil
+	case creatorsubscriptioncharge.FieldIdempotencyKey:
+		m.ResetIdempotencyKey()
+		return nil
+	case creatorsubscriptioncharge.FieldPaymentReference:
+		m.ResetPaymentReference()
+		return nil
+	case creatorsubscriptioncharge.FieldAttemptCount:
+		m.ResetAttemptCount()
+		return nil
+	case creatorsubscriptioncharge.FieldAmountMinor:
+		m.ResetAmountMinor()
+		return nil
+	case creatorsubscriptioncharge.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case creatorsubscriptioncharge.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case creatorsubscriptioncharge.FieldProviderFeeMinor:
+		m.ResetProviderFeeMinor()
+		return nil
+	case creatorsubscriptioncharge.FieldCreatorShareMinor:
+		m.ResetCreatorShareMinor()
+		return nil
+	case creatorsubscriptioncharge.FieldPlatformShareMinor:
+		m.ResetPlatformShareMinor()
+		return nil
+	case creatorsubscriptioncharge.FieldPeriodStart:
+		m.ResetPeriodStart()
+		return nil
+	case creatorsubscriptioncharge.FieldFailureReason:
+		m.ResetFailureReason()
+		return nil
+	case creatorsubscriptioncharge.FieldPaidAt:
+		m.ResetPaidAt()
+		return nil
+	case creatorsubscriptioncharge.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscriptionCharge field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CreatorSubscriptionChargeMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CreatorSubscriptionChargeMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CreatorSubscriptionChargeMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CreatorSubscriptionChargeMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CreatorSubscriptionChargeMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CreatorSubscriptionChargeMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CreatorSubscriptionChargeMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CreatorSubscriptionCharge unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CreatorSubscriptionChargeMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CreatorSubscriptionCharge edge %s", name)
+}
+
+// CreatorSubscriptionPlanMutation represents an operation that mutates the CreatorSubscriptionPlan nodes in the graph.
+type CreatorSubscriptionPlanMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	creator_id      *string
+	name            *string
+	description     *string
+	amount_minor    *int64
+	addamount_minor *int64
+	currency        *string
+	interval        *creatorsubscriptionplan.Interval
+	benefits        *[]models.CreatorPlanBenefit
+	appendbenefits  []models.CreatorPlanBenefit
+	active          *bool
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*CreatorSubscriptionPlan, error)
+	predicates      []predicate.CreatorSubscriptionPlan
+}
+
+var _ ent.Mutation = (*CreatorSubscriptionPlanMutation)(nil)
+
+// creatorsubscriptionplanOption allows management of the mutation configuration using functional options.
+type creatorsubscriptionplanOption func(*CreatorSubscriptionPlanMutation)
+
+// newCreatorSubscriptionPlanMutation creates new mutation for the CreatorSubscriptionPlan entity.
+func newCreatorSubscriptionPlanMutation(c config, op Op, opts ...creatorsubscriptionplanOption) *CreatorSubscriptionPlanMutation {
+	m := &CreatorSubscriptionPlanMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCreatorSubscriptionPlan,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCreatorSubscriptionPlanID sets the ID field of the mutation.
+func withCreatorSubscriptionPlanID(id uuid.UUID) creatorsubscriptionplanOption {
+	return func(m *CreatorSubscriptionPlanMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CreatorSubscriptionPlan
+		)
+		m.oldValue = func(ctx context.Context) (*CreatorSubscriptionPlan, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CreatorSubscriptionPlan.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCreatorSubscriptionPlan sets the old CreatorSubscriptionPlan of the mutation.
+func withCreatorSubscriptionPlan(node *CreatorSubscriptionPlan) creatorsubscriptionplanOption {
+	return func(m *CreatorSubscriptionPlanMutation) {
+		m.oldValue = func(context.Context) (*CreatorSubscriptionPlan, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CreatorSubscriptionPlanMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CreatorSubscriptionPlanMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CreatorSubscriptionPlan entities.
+func (m *CreatorSubscriptionPlanMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CreatorSubscriptionPlanMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CreatorSubscriptionPlanMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CreatorSubscriptionPlan.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CreatorSubscriptionPlanMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CreatorSubscriptionPlanMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetCreatorID sets the "creator_id" field.
+func (m *CreatorSubscriptionPlanMutation) SetCreatorID(s string) {
+	m.creator_id = &s
+}
+
+// CreatorID returns the value of the "creator_id" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) CreatorID() (r string, exists bool) {
+	v := m.creator_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorID returns the old "creator_id" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldCreatorID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorID: %w", err)
+	}
+	return oldValue.CreatorID, nil
+}
+
+// ResetCreatorID resets all changes to the "creator_id" field.
+func (m *CreatorSubscriptionPlanMutation) ResetCreatorID() {
+	m.creator_id = nil
+}
+
+// SetName sets the "name" field.
+func (m *CreatorSubscriptionPlanMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CreatorSubscriptionPlanMutation) ResetName() {
+	m.name = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *CreatorSubscriptionPlanMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *CreatorSubscriptionPlanMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetAmountMinor sets the "amount_minor" field.
+func (m *CreatorSubscriptionPlanMutation) SetAmountMinor(i int64) {
+	m.amount_minor = &i
+	m.addamount_minor = nil
+}
+
+// AmountMinor returns the value of the "amount_minor" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) AmountMinor() (r int64, exists bool) {
+	v := m.amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountMinor returns the old "amount_minor" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountMinor: %w", err)
+	}
+	return oldValue.AmountMinor, nil
+}
+
+// AddAmountMinor adds i to the "amount_minor" field.
+func (m *CreatorSubscriptionPlanMutation) AddAmountMinor(i int64) {
+	if m.addamount_minor != nil {
+		*m.addamount_minor += i
+	} else {
+		m.addamount_minor = &i
+	}
+}
+
+// AddedAmountMinor returns the value that was added to the "amount_minor" field in this mutation.
+func (m *CreatorSubscriptionPlanMutation) AddedAmountMinor() (r int64, exists bool) {
+	v := m.addamount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmountMinor resets all changes to the "amount_minor" field.
+func (m *CreatorSubscriptionPlanMutation) ResetAmountMinor() {
+	m.amount_minor = nil
+	m.addamount_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *CreatorSubscriptionPlanMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *CreatorSubscriptionPlanMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetInterval sets the "interval" field.
+func (m *CreatorSubscriptionPlanMutation) SetInterval(c creatorsubscriptionplan.Interval) {
+	m.interval = &c
+}
+
+// Interval returns the value of the "interval" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) Interval() (r creatorsubscriptionplan.Interval, exists bool) {
+	v := m.interval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInterval returns the old "interval" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldInterval(ctx context.Context) (v creatorsubscriptionplan.Interval, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInterval is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInterval requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInterval: %w", err)
+	}
+	return oldValue.Interval, nil
+}
+
+// ResetInterval resets all changes to the "interval" field.
+func (m *CreatorSubscriptionPlanMutation) ResetInterval() {
+	m.interval = nil
+}
+
+// SetBenefits sets the "benefits" field.
+func (m *CreatorSubscriptionPlanMutation) SetBenefits(mpb []models.CreatorPlanBenefit) {
+	m.benefits = &mpb
+	m.appendbenefits = nil
+}
+
+// Benefits returns the value of the "benefits" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) Benefits() (r []models.CreatorPlanBenefit, exists bool) {
+	v := m.benefits
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBenefits returns the old "benefits" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldBenefits(ctx context.Context) (v []models.CreatorPlanBenefit, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBenefits is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBenefits requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBenefits: %w", err)
+	}
+	return oldValue.Benefits, nil
+}
+
+// AppendBenefits adds mpb to the "benefits" field.
+func (m *CreatorSubscriptionPlanMutation) AppendBenefits(mpb []models.CreatorPlanBenefit) {
+	m.appendbenefits = append(m.appendbenefits, mpb...)
+}
+
+// AppendedBenefits returns the list of values that were appended to the "benefits" field in this mutation.
+func (m *CreatorSubscriptionPlanMutation) AppendedBenefits() ([]models.CreatorPlanBenefit, bool) {
+	if len(m.appendbenefits) == 0 {
+		return nil, false
+	}
+	return m.appendbenefits, true
+}
+
+// ResetBenefits resets all changes to the "benefits" field.
+func (m *CreatorSubscriptionPlanMutation) ResetBenefits() {
+	m.benefits = nil
+	m.appendbenefits = nil
+}
+
+// SetActive sets the "active" field.
+func (m *CreatorSubscriptionPlanMutation) SetActive(b bool) {
+	m.active = &b
+}
+
+// Active returns the value of the "active" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) Active() (r bool, exists bool) {
+	v := m.active
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActive returns the old "active" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldActive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActive: %w", err)
+	}
+	return oldValue.Active, nil
+}
+
+// ResetActive resets all changes to the "active" field.
+func (m *CreatorSubscriptionPlanMutation) ResetActive() {
+	m.active = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CreatorSubscriptionPlanMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CreatorSubscriptionPlanMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CreatorSubscriptionPlan entity.
+// If the CreatorSubscriptionPlan object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionPlanMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CreatorSubscriptionPlanMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the CreatorSubscriptionPlanMutation builder.
+func (m *CreatorSubscriptionPlanMutation) Where(ps ...predicate.CreatorSubscriptionPlan) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CreatorSubscriptionPlanMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CreatorSubscriptionPlanMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CreatorSubscriptionPlan, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CreatorSubscriptionPlanMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CreatorSubscriptionPlanMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CreatorSubscriptionPlan).
+func (m *CreatorSubscriptionPlanMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CreatorSubscriptionPlanMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.created_at != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldCreatedAt)
+	}
+	if m.creator_id != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldCreatorID)
+	}
+	if m.name != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldDescription)
+	}
+	if m.amount_minor != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldAmountMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldCurrency)
+	}
+	if m.interval != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldInterval)
+	}
+	if m.benefits != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldBenefits)
+	}
+	if m.active != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldActive)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CreatorSubscriptionPlanMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case creatorsubscriptionplan.FieldCreatedAt:
+		return m.CreatedAt()
+	case creatorsubscriptionplan.FieldCreatorID:
+		return m.CreatorID()
+	case creatorsubscriptionplan.FieldName:
+		return m.Name()
+	case creatorsubscriptionplan.FieldDescription:
+		return m.Description()
+	case creatorsubscriptionplan.FieldAmountMinor:
+		return m.AmountMinor()
+	case creatorsubscriptionplan.FieldCurrency:
+		return m.Currency()
+	case creatorsubscriptionplan.FieldInterval:
+		return m.Interval()
+	case creatorsubscriptionplan.FieldBenefits:
+		return m.Benefits()
+	case creatorsubscriptionplan.FieldActive:
+		return m.Active()
+	case creatorsubscriptionplan.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CreatorSubscriptionPlanMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case creatorsubscriptionplan.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case creatorsubscriptionplan.FieldCreatorID:
+		return m.OldCreatorID(ctx)
+	case creatorsubscriptionplan.FieldName:
+		return m.OldName(ctx)
+	case creatorsubscriptionplan.FieldDescription:
+		return m.OldDescription(ctx)
+	case creatorsubscriptionplan.FieldAmountMinor:
+		return m.OldAmountMinor(ctx)
+	case creatorsubscriptionplan.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case creatorsubscriptionplan.FieldInterval:
+		return m.OldInterval(ctx)
+	case creatorsubscriptionplan.FieldBenefits:
+		return m.OldBenefits(ctx)
+	case creatorsubscriptionplan.FieldActive:
+		return m.OldActive(ctx)
+	case creatorsubscriptionplan.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown CreatorSubscriptionPlan field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CreatorSubscriptionPlanMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case creatorsubscriptionplan.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case creatorsubscriptionplan.FieldCreatorID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorID(v)
+		return nil
+	case creatorsubscriptionplan.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case creatorsubscriptionplan.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case creatorsubscriptionplan.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountMinor(v)
+		return nil
+	case creatorsubscriptionplan.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case creatorsubscriptionplan.FieldInterval:
+		v, ok := value.(creatorsubscriptionplan.Interval)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInterval(v)
+		return nil
+	case creatorsubscriptionplan.FieldBenefits:
+		v, ok := value.([]models.CreatorPlanBenefit)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBenefits(v)
+		return nil
+	case creatorsubscriptionplan.FieldActive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActive(v)
+		return nil
+	case creatorsubscriptionplan.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscriptionPlan field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CreatorSubscriptionPlanMutation) AddedFields() []string {
+	var fields []string
+	if m.addamount_minor != nil {
+		fields = append(fields, creatorsubscriptionplan.FieldAmountMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CreatorSubscriptionPlanMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case creatorsubscriptionplan.FieldAmountMinor:
+		return m.AddedAmountMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CreatorSubscriptionPlanMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case creatorsubscriptionplan.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmountMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscriptionPlan numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CreatorSubscriptionPlanMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CreatorSubscriptionPlanMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CreatorSubscriptionPlanMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown CreatorSubscriptionPlan nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CreatorSubscriptionPlanMutation) ResetField(name string) error {
+	switch name {
+	case creatorsubscriptionplan.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case creatorsubscriptionplan.FieldCreatorID:
+		m.ResetCreatorID()
+		return nil
+	case creatorsubscriptionplan.FieldName:
+		m.ResetName()
+		return nil
+	case creatorsubscriptionplan.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case creatorsubscriptionplan.FieldAmountMinor:
+		m.ResetAmountMinor()
+		return nil
+	case creatorsubscriptionplan.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case creatorsubscriptionplan.FieldInterval:
+		m.ResetInterval()
+		return nil
+	case creatorsubscriptionplan.FieldBenefits:
+		m.ResetBenefits()
+		return nil
+	case creatorsubscriptionplan.FieldActive:
+		m.ResetActive()
+		return nil
+	case creatorsubscriptionplan.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorSubscriptionPlan field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CreatorSubscriptionPlanMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CreatorSubscriptionPlanMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CreatorSubscriptionPlanMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CreatorSubscriptionPlanMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CreatorSubscriptionPlanMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CreatorSubscriptionPlanMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CreatorSubscriptionPlanMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CreatorSubscriptionPlan unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CreatorSubscriptionPlanMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CreatorSubscriptionPlan edge %s", name)
+}
 
 // IdempotentRequestMutation represents an operation that mutates the IdempotentRequest nodes in the graph.
 type IdempotentRequestMutation struct {
