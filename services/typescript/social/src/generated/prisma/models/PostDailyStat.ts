@@ -28,56 +28,96 @@ export type AggregatePostDailyStat = {
 
 export type PostDailyStatAvgAggregateOutputType = {
   impressions: number | null
+  videoViews: number | null
+  watchTimeSeconds: number | null
+  linkClicks: number | null
+  newFollows: number | null
 }
 
 export type PostDailyStatSumAggregateOutputType = {
   impressions: number | null
+  videoViews: number | null
+  watchTimeSeconds: number | null
+  linkClicks: number | null
+  newFollows: number | null
 }
 
 export type PostDailyStatMinAggregateOutputType = {
   postId: string | null
   day: string | null
   impressions: number | null
+  videoViews: number | null
+  watchTimeSeconds: number | null
+  linkClicks: number | null
+  newFollows: number | null
 }
 
 export type PostDailyStatMaxAggregateOutputType = {
   postId: string | null
   day: string | null
   impressions: number | null
+  videoViews: number | null
+  watchTimeSeconds: number | null
+  linkClicks: number | null
+  newFollows: number | null
 }
 
 export type PostDailyStatCountAggregateOutputType = {
   postId: number
   day: number
   impressions: number
+  videoViews: number
+  watchTimeSeconds: number
+  linkClicks: number
+  newFollows: number
   _all: number
 }
 
 
 export type PostDailyStatAvgAggregateInputType = {
   impressions?: true
+  videoViews?: true
+  watchTimeSeconds?: true
+  linkClicks?: true
+  newFollows?: true
 }
 
 export type PostDailyStatSumAggregateInputType = {
   impressions?: true
+  videoViews?: true
+  watchTimeSeconds?: true
+  linkClicks?: true
+  newFollows?: true
 }
 
 export type PostDailyStatMinAggregateInputType = {
   postId?: true
   day?: true
   impressions?: true
+  videoViews?: true
+  watchTimeSeconds?: true
+  linkClicks?: true
+  newFollows?: true
 }
 
 export type PostDailyStatMaxAggregateInputType = {
   postId?: true
   day?: true
   impressions?: true
+  videoViews?: true
+  watchTimeSeconds?: true
+  linkClicks?: true
+  newFollows?: true
 }
 
 export type PostDailyStatCountAggregateInputType = {
   postId?: true
   day?: true
   impressions?: true
+  videoViews?: true
+  watchTimeSeconds?: true
+  linkClicks?: true
+  newFollows?: true
   _all?: true
 }
 
@@ -171,6 +211,10 @@ export type PostDailyStatGroupByOutputType = {
   postId: string
   day: string
   impressions: number
+  videoViews: number
+  watchTimeSeconds: number
+  linkClicks: number
+  newFollows: number
   _count: PostDailyStatCountAggregateOutputType | null
   _avg: PostDailyStatAvgAggregateOutputType | null
   _sum: PostDailyStatSumAggregateOutputType | null
@@ -200,12 +244,20 @@ export type PostDailyStatWhereInput = {
   postId?: Prisma.UuidFilter<"PostDailyStat"> | string
   day?: Prisma.StringFilter<"PostDailyStat"> | string
   impressions?: Prisma.IntFilter<"PostDailyStat"> | number
+  videoViews?: Prisma.IntFilter<"PostDailyStat"> | number
+  watchTimeSeconds?: Prisma.IntFilter<"PostDailyStat"> | number
+  linkClicks?: Prisma.IntFilter<"PostDailyStat"> | number
+  newFollows?: Prisma.IntFilter<"PostDailyStat"> | number
 }
 
 export type PostDailyStatOrderByWithRelationInput = {
   postId?: Prisma.SortOrder
   day?: Prisma.SortOrder
   impressions?: Prisma.SortOrder
+  videoViews?: Prisma.SortOrder
+  watchTimeSeconds?: Prisma.SortOrder
+  linkClicks?: Prisma.SortOrder
+  newFollows?: Prisma.SortOrder
 }
 
 export type PostDailyStatWhereUniqueInput = Prisma.AtLeast<{
@@ -216,12 +268,20 @@ export type PostDailyStatWhereUniqueInput = Prisma.AtLeast<{
   postId?: Prisma.UuidFilter<"PostDailyStat"> | string
   day?: Prisma.StringFilter<"PostDailyStat"> | string
   impressions?: Prisma.IntFilter<"PostDailyStat"> | number
+  videoViews?: Prisma.IntFilter<"PostDailyStat"> | number
+  watchTimeSeconds?: Prisma.IntFilter<"PostDailyStat"> | number
+  linkClicks?: Prisma.IntFilter<"PostDailyStat"> | number
+  newFollows?: Prisma.IntFilter<"PostDailyStat"> | number
 }, "postId_day">
 
 export type PostDailyStatOrderByWithAggregationInput = {
   postId?: Prisma.SortOrder
   day?: Prisma.SortOrder
   impressions?: Prisma.SortOrder
+  videoViews?: Prisma.SortOrder
+  watchTimeSeconds?: Prisma.SortOrder
+  linkClicks?: Prisma.SortOrder
+  newFollows?: Prisma.SortOrder
   _count?: Prisma.PostDailyStatCountOrderByAggregateInput
   _avg?: Prisma.PostDailyStatAvgOrderByAggregateInput
   _max?: Prisma.PostDailyStatMaxOrderByAggregateInput
@@ -236,48 +296,80 @@ export type PostDailyStatScalarWhereWithAggregatesInput = {
   postId?: Prisma.UuidWithAggregatesFilter<"PostDailyStat"> | string
   day?: Prisma.StringWithAggregatesFilter<"PostDailyStat"> | string
   impressions?: Prisma.IntWithAggregatesFilter<"PostDailyStat"> | number
+  videoViews?: Prisma.IntWithAggregatesFilter<"PostDailyStat"> | number
+  watchTimeSeconds?: Prisma.IntWithAggregatesFilter<"PostDailyStat"> | number
+  linkClicks?: Prisma.IntWithAggregatesFilter<"PostDailyStat"> | number
+  newFollows?: Prisma.IntWithAggregatesFilter<"PostDailyStat"> | number
 }
 
 export type PostDailyStatCreateInput = {
   postId: string
   day: string
   impressions?: number
+  videoViews?: number
+  watchTimeSeconds?: number
+  linkClicks?: number
+  newFollows?: number
 }
 
 export type PostDailyStatUncheckedCreateInput = {
   postId: string
   day: string
   impressions?: number
+  videoViews?: number
+  watchTimeSeconds?: number
+  linkClicks?: number
+  newFollows?: number
 }
 
 export type PostDailyStatUpdateInput = {
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.StringFieldUpdateOperationsInput | string
   impressions?: Prisma.IntFieldUpdateOperationsInput | number
+  videoViews?: Prisma.IntFieldUpdateOperationsInput | number
+  watchTimeSeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  linkClicks?: Prisma.IntFieldUpdateOperationsInput | number
+  newFollows?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type PostDailyStatUncheckedUpdateInput = {
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.StringFieldUpdateOperationsInput | string
   impressions?: Prisma.IntFieldUpdateOperationsInput | number
+  videoViews?: Prisma.IntFieldUpdateOperationsInput | number
+  watchTimeSeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  linkClicks?: Prisma.IntFieldUpdateOperationsInput | number
+  newFollows?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type PostDailyStatCreateManyInput = {
   postId: string
   day: string
   impressions?: number
+  videoViews?: number
+  watchTimeSeconds?: number
+  linkClicks?: number
+  newFollows?: number
 }
 
 export type PostDailyStatUpdateManyMutationInput = {
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.StringFieldUpdateOperationsInput | string
   impressions?: Prisma.IntFieldUpdateOperationsInput | number
+  videoViews?: Prisma.IntFieldUpdateOperationsInput | number
+  watchTimeSeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  linkClicks?: Prisma.IntFieldUpdateOperationsInput | number
+  newFollows?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type PostDailyStatUncheckedUpdateManyInput = {
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.StringFieldUpdateOperationsInput | string
   impressions?: Prisma.IntFieldUpdateOperationsInput | number
+  videoViews?: Prisma.IntFieldUpdateOperationsInput | number
+  watchTimeSeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  linkClicks?: Prisma.IntFieldUpdateOperationsInput | number
+  newFollows?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type PostDailyStatPostIdDayCompoundUniqueInput = {
@@ -289,26 +381,46 @@ export type PostDailyStatCountOrderByAggregateInput = {
   postId?: Prisma.SortOrder
   day?: Prisma.SortOrder
   impressions?: Prisma.SortOrder
+  videoViews?: Prisma.SortOrder
+  watchTimeSeconds?: Prisma.SortOrder
+  linkClicks?: Prisma.SortOrder
+  newFollows?: Prisma.SortOrder
 }
 
 export type PostDailyStatAvgOrderByAggregateInput = {
   impressions?: Prisma.SortOrder
+  videoViews?: Prisma.SortOrder
+  watchTimeSeconds?: Prisma.SortOrder
+  linkClicks?: Prisma.SortOrder
+  newFollows?: Prisma.SortOrder
 }
 
 export type PostDailyStatMaxOrderByAggregateInput = {
   postId?: Prisma.SortOrder
   day?: Prisma.SortOrder
   impressions?: Prisma.SortOrder
+  videoViews?: Prisma.SortOrder
+  watchTimeSeconds?: Prisma.SortOrder
+  linkClicks?: Prisma.SortOrder
+  newFollows?: Prisma.SortOrder
 }
 
 export type PostDailyStatMinOrderByAggregateInput = {
   postId?: Prisma.SortOrder
   day?: Prisma.SortOrder
   impressions?: Prisma.SortOrder
+  videoViews?: Prisma.SortOrder
+  watchTimeSeconds?: Prisma.SortOrder
+  linkClicks?: Prisma.SortOrder
+  newFollows?: Prisma.SortOrder
 }
 
 export type PostDailyStatSumOrderByAggregateInput = {
   impressions?: Prisma.SortOrder
+  videoViews?: Prisma.SortOrder
+  watchTimeSeconds?: Prisma.SortOrder
+  linkClicks?: Prisma.SortOrder
+  newFollows?: Prisma.SortOrder
 }
 
 
@@ -317,27 +429,43 @@ export type PostDailyStatSelect<ExtArgs extends runtime.Types.Extensions.Interna
   postId?: boolean
   day?: boolean
   impressions?: boolean
+  videoViews?: boolean
+  watchTimeSeconds?: boolean
+  linkClicks?: boolean
+  newFollows?: boolean
 }, ExtArgs["result"]["postDailyStat"]>
 
 export type PostDailyStatSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   postId?: boolean
   day?: boolean
   impressions?: boolean
+  videoViews?: boolean
+  watchTimeSeconds?: boolean
+  linkClicks?: boolean
+  newFollows?: boolean
 }, ExtArgs["result"]["postDailyStat"]>
 
 export type PostDailyStatSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   postId?: boolean
   day?: boolean
   impressions?: boolean
+  videoViews?: boolean
+  watchTimeSeconds?: boolean
+  linkClicks?: boolean
+  newFollows?: boolean
 }, ExtArgs["result"]["postDailyStat"]>
 
 export type PostDailyStatSelectScalar = {
   postId?: boolean
   day?: boolean
   impressions?: boolean
+  videoViews?: boolean
+  watchTimeSeconds?: boolean
+  linkClicks?: boolean
+  newFollows?: boolean
 }
 
-export type PostDailyStatOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"postId" | "day" | "impressions", ExtArgs["result"]["postDailyStat"]>
+export type PostDailyStatOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"postId" | "day" | "impressions" | "videoViews" | "watchTimeSeconds" | "linkClicks" | "newFollows", ExtArgs["result"]["postDailyStat"]>
 
 export type $PostDailyStatPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PostDailyStat"
@@ -346,6 +474,10 @@ export type $PostDailyStatPayload<ExtArgs extends runtime.Types.Extensions.Inter
     postId: string
     day: string
     impressions: number
+    videoViews: number
+    watchTimeSeconds: number
+    linkClicks: number
+    newFollows: number
   }, ExtArgs["result"]["postDailyStat"]>
   composites: {}
 }
@@ -772,6 +904,10 @@ export interface PostDailyStatFieldRefs {
   readonly postId: Prisma.FieldRef<"PostDailyStat", 'String'>
   readonly day: Prisma.FieldRef<"PostDailyStat", 'String'>
   readonly impressions: Prisma.FieldRef<"PostDailyStat", 'Int'>
+  readonly videoViews: Prisma.FieldRef<"PostDailyStat", 'Int'>
+  readonly watchTimeSeconds: Prisma.FieldRef<"PostDailyStat", 'Int'>
+  readonly linkClicks: Prisma.FieldRef<"PostDailyStat", 'Int'>
+  readonly newFollows: Prisma.FieldRef<"PostDailyStat", 'Int'>
 }
     
 

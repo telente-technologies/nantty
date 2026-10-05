@@ -52,6 +52,7 @@ export type MessageMinAggregateOutputType = {
   expiresAt: Date | null
   mediaExpiresAt: Date | null
   mediaPurgedAt: Date | null
+  hiddenAt: Date | null
   createdAt: Date | null
   pollQuestion: string | null
   pollAllowMultiple: boolean | null
@@ -76,6 +77,7 @@ export type MessageMaxAggregateOutputType = {
   expiresAt: Date | null
   mediaExpiresAt: Date | null
   mediaPurgedAt: Date | null
+  hiddenAt: Date | null
   createdAt: Date | null
   pollQuestion: string | null
   pollAllowMultiple: boolean | null
@@ -104,6 +106,7 @@ export type MessageCountAggregateOutputType = {
   expiresAt: number
   mediaExpiresAt: number
   mediaPurgedAt: number
+  hiddenAt: number
   createdAt: number
   pollQuestion: number
   pollAllowMultiple: number
@@ -138,6 +141,7 @@ export type MessageMinAggregateInputType = {
   expiresAt?: true
   mediaExpiresAt?: true
   mediaPurgedAt?: true
+  hiddenAt?: true
   createdAt?: true
   pollQuestion?: true
   pollAllowMultiple?: true
@@ -162,6 +166,7 @@ export type MessageMaxAggregateInputType = {
   expiresAt?: true
   mediaExpiresAt?: true
   mediaPurgedAt?: true
+  hiddenAt?: true
   createdAt?: true
   pollQuestion?: true
   pollAllowMultiple?: true
@@ -190,6 +195,7 @@ export type MessageCountAggregateInputType = {
   expiresAt?: true
   mediaExpiresAt?: true
   mediaPurgedAt?: true
+  hiddenAt?: true
   createdAt?: true
   pollQuestion?: true
   pollAllowMultiple?: true
@@ -305,6 +311,7 @@ export type MessageGroupByOutputType = {
   expiresAt: Date | null
   mediaExpiresAt: Date | null
   mediaPurgedAt: Date | null
+  hiddenAt: Date | null
   createdAt: Date
   pollQuestion: string | null
   pollAllowMultiple: boolean
@@ -356,6 +363,7 @@ export type MessageWhereInput = {
   expiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaExpiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaPurgedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  hiddenAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   pollQuestion?: Prisma.StringNullableFilter<"Message"> | string | null
   pollAllowMultiple?: Prisma.BoolFilter<"Message"> | boolean
@@ -387,6 +395,7 @@ export type MessageOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaPurgedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  hiddenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrderInput | Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
@@ -422,6 +431,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   expiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaExpiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaPurgedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  hiddenAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   pollQuestion?: Prisma.StringNullableFilter<"Message"> | string | null
   pollAllowMultiple?: Prisma.BoolFilter<"Message"> | boolean
@@ -453,6 +463,7 @@ export type MessageOrderByWithAggregationInput = {
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   mediaPurgedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  hiddenAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrderInput | Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
@@ -489,6 +500,7 @@ export type MessageScalarWhereWithAggregatesInput = {
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   mediaExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   mediaPurgedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
+  hiddenAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
   pollQuestion?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
   pollAllowMultiple?: Prisma.BoolWithAggregatesFilter<"Message"> | boolean
@@ -516,6 +528,7 @@ export type MessageCreateInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -547,6 +560,7 @@ export type MessageUncheckedCreateInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -576,6 +590,7 @@ export type MessageUpdateInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -607,6 +622,7 @@ export type MessageUncheckedUpdateInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -637,6 +653,7 @@ export type MessageCreateManyInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -664,6 +681,7 @@ export type MessageUpdateManyMutationInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -692,6 +710,7 @@ export type MessageUncheckedUpdateManyInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -736,6 +755,7 @@ export type MessageCountOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   mediaExpiresAt?: Prisma.SortOrder
   mediaPurgedAt?: Prisma.SortOrder
+  hiddenAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
@@ -764,6 +784,7 @@ export type MessageMaxOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   mediaExpiresAt?: Prisma.SortOrder
   mediaPurgedAt?: Prisma.SortOrder
+  hiddenAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
@@ -788,6 +809,7 @@ export type MessageMinOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   mediaExpiresAt?: Prisma.SortOrder
   mediaPurgedAt?: Prisma.SortOrder
+  hiddenAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   pollQuestion?: Prisma.SortOrder
   pollAllowMultiple?: Prisma.SortOrder
@@ -902,6 +924,7 @@ export type MessageCreateWithoutConversationInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -931,6 +954,7 @@ export type MessageUncheckedCreateWithoutConversationInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -990,6 +1014,7 @@ export type MessageScalarWhereInput = {
   expiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaExpiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   mediaPurgedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  hiddenAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   pollQuestion?: Prisma.StringNullableFilter<"Message"> | string | null
   pollAllowMultiple?: Prisma.BoolFilter<"Message"> | boolean
@@ -1017,6 +1042,7 @@ export type MessageCreateWithoutReactionsInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -1047,6 +1073,7 @@ export type MessageUncheckedCreateWithoutReactionsInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -1091,6 +1118,7 @@ export type MessageUpdateWithoutReactionsInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1121,6 +1149,7 @@ export type MessageUncheckedUpdateWithoutReactionsInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1149,6 +1178,7 @@ export type MessageCreateWithoutPollOptionsInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -1179,6 +1209,7 @@ export type MessageUncheckedCreateWithoutPollOptionsInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -1223,6 +1254,7 @@ export type MessageUpdateWithoutPollOptionsInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1253,6 +1285,7 @@ export type MessageUncheckedUpdateWithoutPollOptionsInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1281,6 +1314,7 @@ export type MessageCreateManyConversationInput = {
   expiresAt?: Date | string | null
   mediaExpiresAt?: Date | string | null
   mediaPurgedAt?: Date | string | null
+  hiddenAt?: Date | string | null
   createdAt?: Date | string
   pollQuestion?: string | null
   pollAllowMultiple?: boolean
@@ -1308,6 +1342,7 @@ export type MessageUpdateWithoutConversationInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1337,6 +1372,7 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1366,6 +1402,7 @@ export type MessageUncheckedUpdateManyWithoutConversationInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   mediaPurgedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hiddenAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pollQuestion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pollAllowMultiple?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1434,6 +1471,7 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   expiresAt?: boolean
   mediaExpiresAt?: boolean
   mediaPurgedAt?: boolean
+  hiddenAt?: boolean
   createdAt?: boolean
   pollQuestion?: boolean
   pollAllowMultiple?: boolean
@@ -1466,6 +1504,7 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   expiresAt?: boolean
   mediaExpiresAt?: boolean
   mediaPurgedAt?: boolean
+  hiddenAt?: boolean
   createdAt?: boolean
   pollQuestion?: boolean
   pollAllowMultiple?: boolean
@@ -1495,6 +1534,7 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   expiresAt?: boolean
   mediaExpiresAt?: boolean
   mediaPurgedAt?: boolean
+  hiddenAt?: boolean
   createdAt?: boolean
   pollQuestion?: boolean
   pollAllowMultiple?: boolean
@@ -1524,13 +1564,14 @@ export type MessageSelectScalar = {
   expiresAt?: boolean
   mediaExpiresAt?: boolean
   mediaPurgedAt?: boolean
+  hiddenAt?: boolean
   createdAt?: boolean
   pollQuestion?: boolean
   pollAllowMultiple?: boolean
   senderLabel?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "kind" | "clientMessageId" | "ciphertext" | "deviceId" | "protocol" | "mediaId" | "mediaType" | "mediaUrl" | "mediaStatus" | "mediaDurationSeconds" | "linkPreviewEnvelope" | "sharedContent" | "location" | "document" | "mentions" | "expiresAt" | "mediaExpiresAt" | "mediaPurgedAt" | "createdAt" | "pollQuestion" | "pollAllowMultiple" | "senderLabel", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "senderId" | "kind" | "clientMessageId" | "ciphertext" | "deviceId" | "protocol" | "mediaId" | "mediaType" | "mediaUrl" | "mediaStatus" | "mediaDurationSeconds" | "linkPreviewEnvelope" | "sharedContent" | "location" | "document" | "mentions" | "expiresAt" | "mediaExpiresAt" | "mediaPurgedAt" | "hiddenAt" | "createdAt" | "pollQuestion" | "pollAllowMultiple" | "senderLabel", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   reactions?: boolean | Prisma.Message$reactionsArgs<ExtArgs>
@@ -1573,6 +1614,7 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     expiresAt: Date | null
     mediaExpiresAt: Date | null
     mediaPurgedAt: Date | null
+    hiddenAt: Date | null
     createdAt: Date
     pollQuestion: string | null
     pollAllowMultiple: boolean
@@ -2024,6 +2066,7 @@ export interface MessageFieldRefs {
   readonly expiresAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly mediaExpiresAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly mediaPurgedAt: Prisma.FieldRef<"Message", 'DateTime'>
+  readonly hiddenAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly pollQuestion: Prisma.FieldRef<"Message", 'String'>
   readonly pollAllowMultiple: Prisma.FieldRef<"Message", 'Boolean'>

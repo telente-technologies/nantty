@@ -140,6 +140,10 @@ export type PostCountAggregateOutputType = {
   advisorySensitiveLabels: number
   sensitiveLabelsReviewed: number
   moderationVisibility: number
+  topics: number
+  productIds: number
+  clipEdit: number
+  location: number
   expiresAt: number
   deletedAt: number
   createdAt: number
@@ -261,6 +265,10 @@ export type PostCountAggregateInputType = {
   advisorySensitiveLabels?: true
   sensitiveLabelsReviewed?: true
   moderationVisibility?: true
+  topics?: true
+  productIds?: true
+  clipEdit?: true
+  location?: true
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
@@ -385,6 +393,10 @@ export type PostGroupByOutputType = {
   advisorySensitiveLabels: $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed: boolean
   moderationVisibility: $Enums.ModerationVisibility
+  topics: string[]
+  productIds: string[]
+  clipEdit: runtime.JsonValue | null
+  location: runtime.JsonValue | null
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date
@@ -445,6 +457,10 @@ export type PostWhereInput = {
   advisorySensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
   sensitiveLabelsReviewed?: Prisma.BoolFilter<"Post"> | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Post"> | $Enums.ModerationVisibility
+  topics?: Prisma.StringNullableListFilter<"Post">
+  productIds?: Prisma.StringNullableListFilter<"Post">
+  clipEdit?: Prisma.JsonNullableFilter<"Post">
+  location?: Prisma.JsonNullableFilter<"Post">
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -488,6 +504,10 @@ export type PostOrderByWithRelationInput = {
   advisorySensitiveLabels?: Prisma.SortOrder
   sensitiveLabelsReviewed?: Prisma.SortOrder
   moderationVisibility?: Prisma.SortOrder
+  topics?: Prisma.SortOrder
+  productIds?: Prisma.SortOrder
+  clipEdit?: Prisma.SortOrderInput | Prisma.SortOrder
+  location?: Prisma.SortOrderInput | Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -534,6 +554,10 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   advisorySensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
   sensitiveLabelsReviewed?: Prisma.BoolFilter<"Post"> | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Post"> | $Enums.ModerationVisibility
+  topics?: Prisma.StringNullableListFilter<"Post">
+  productIds?: Prisma.StringNullableListFilter<"Post">
+  clipEdit?: Prisma.JsonNullableFilter<"Post">
+  location?: Prisma.JsonNullableFilter<"Post">
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -577,6 +601,10 @@ export type PostOrderByWithAggregationInput = {
   advisorySensitiveLabels?: Prisma.SortOrder
   sensitiveLabelsReviewed?: Prisma.SortOrder
   moderationVisibility?: Prisma.SortOrder
+  topics?: Prisma.SortOrder
+  productIds?: Prisma.SortOrder
+  clipEdit?: Prisma.SortOrderInput | Prisma.SortOrder
+  location?: Prisma.SortOrderInput | Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -622,6 +650,10 @@ export type PostScalarWhereWithAggregatesInput = {
   advisorySensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
   sensitiveLabelsReviewed?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityWithAggregatesFilter<"Post"> | $Enums.ModerationVisibility
+  topics?: Prisma.StringNullableListFilter<"Post">
+  productIds?: Prisma.StringNullableListFilter<"Post">
+  clipEdit?: Prisma.JsonNullableWithAggregatesFilter<"Post">
+  location?: Prisma.JsonNullableWithAggregatesFilter<"Post">
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
@@ -658,6 +690,10 @@ export type PostCreateInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -701,6 +737,10 @@ export type PostUncheckedCreateInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -742,6 +782,10 @@ export type PostUpdateInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -785,6 +829,10 @@ export type PostUncheckedUpdateInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -827,6 +875,10 @@ export type PostCreateManyInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -863,6 +915,10 @@ export type PostUpdateManyMutationInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -900,6 +956,10 @@ export type PostUncheckedUpdateManyInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -910,6 +970,14 @@ export type EnumSensitiveLabelNullableListFilter<$PrismaModel = never> = {
   has?: $Enums.SensitiveLabel | Prisma.EnumSensitiveLabelFieldRefInput<$PrismaModel> | null
   hasEvery?: $Enums.SensitiveLabel[] | Prisma.ListEnumSensitiveLabelFieldRefInput<$PrismaModel>
   hasSome?: $Enums.SensitiveLabel[] | Prisma.ListEnumSensitiveLabelFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
   isEmpty?: boolean
 }
 
@@ -960,6 +1028,10 @@ export type PostCountOrderByAggregateInput = {
   advisorySensitiveLabels?: Prisma.SortOrder
   sensitiveLabelsReviewed?: Prisma.SortOrder
   moderationVisibility?: Prisma.SortOrder
+  topics?: Prisma.SortOrder
+  productIds?: Prisma.SortOrder
+  clipEdit?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -1068,6 +1140,14 @@ export type PostCreateadvisorySensitiveLabelsInput = {
   set: $Enums.SensitiveLabel[]
 }
 
+export type PostCreatetopicsInput = {
+  set: string[]
+}
+
+export type PostCreateproductIdsInput = {
+  set: string[]
+}
+
 export type PostCreateNestedOneWithoutResharesInput = {
   create?: Prisma.XOR<Prisma.PostCreateWithoutResharesInput, Prisma.PostUncheckedCreateWithoutResharesInput>
   connectOrCreate?: Prisma.PostCreateOrConnectWithoutResharesInput
@@ -1126,6 +1206,16 @@ export type PostUpdateadvisorySensitiveLabelsInput = {
 
 export type EnumModerationVisibilityFieldUpdateOperationsInput = {
   set?: $Enums.ModerationVisibility
+}
+
+export type PostUpdatetopicsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type PostUpdateproductIdsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type PostUpdateOneWithoutResharesNestedInput = {
@@ -1253,6 +1343,10 @@ export type PostCreateWithoutResharesInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1295,6 +1389,10 @@ export type PostUncheckedCreateWithoutResharesInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1340,6 +1438,10 @@ export type PostCreateWithoutResharedFromInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1381,6 +1483,10 @@ export type PostUncheckedCreateWithoutResharedFromInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1443,6 +1549,10 @@ export type PostUpdateWithoutResharesInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1485,6 +1595,10 @@ export type PostUncheckedUpdateWithoutResharesInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1545,6 +1659,10 @@ export type PostScalarWhereInput = {
   advisorySensitiveLabels?: Prisma.EnumSensitiveLabelNullableListFilter<"Post">
   sensitiveLabelsReviewed?: Prisma.BoolFilter<"Post"> | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Post"> | $Enums.ModerationVisibility
+  topics?: Prisma.StringNullableListFilter<"Post">
+  productIds?: Prisma.StringNullableListFilter<"Post">
+  clipEdit?: Prisma.JsonNullableFilter<"Post">
+  location?: Prisma.JsonNullableFilter<"Post">
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -1581,6 +1699,10 @@ export type PostCreateWithoutMediaInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1623,6 +1745,10 @@ export type PostUncheckedCreateWithoutMediaInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1679,6 +1805,10 @@ export type PostUpdateWithoutMediaInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1721,6 +1851,10 @@ export type PostUncheckedUpdateWithoutMediaInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1761,6 +1895,10 @@ export type PostCreateWithoutLikesInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1803,6 +1941,10 @@ export type PostUncheckedCreateWithoutLikesInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1859,6 +2001,10 @@ export type PostUpdateWithoutLikesInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1901,6 +2047,10 @@ export type PostUncheckedUpdateWithoutLikesInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1941,6 +2091,10 @@ export type PostCreateWithoutCommentsInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -1983,6 +2137,10 @@ export type PostUncheckedCreateWithoutCommentsInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -2039,6 +2197,10 @@ export type PostUpdateWithoutCommentsInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2081,6 +2243,10 @@ export type PostUncheckedUpdateWithoutCommentsInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2121,6 +2287,10 @@ export type PostCreateWithoutTagsInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -2163,6 +2333,10 @@ export type PostUncheckedCreateWithoutTagsInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -2219,6 +2393,10 @@ export type PostUpdateWithoutTagsInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2261,6 +2439,10 @@ export type PostUncheckedUpdateWithoutTagsInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2301,6 +2483,10 @@ export type PostCreateManyResharedFromInput = {
   advisorySensitiveLabels?: Prisma.PostCreateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: $Enums.ModerationVisibility
+  topics?: Prisma.PostCreatetopicsInput | string[]
+  productIds?: Prisma.PostCreateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
@@ -2337,6 +2523,10 @@ export type PostUpdateWithoutResharedFromInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2378,6 +2568,10 @@ export type PostUncheckedUpdateWithoutResharedFromInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2419,6 +2613,10 @@ export type PostUncheckedUpdateManyWithoutResharedFromInput = {
   advisorySensitiveLabels?: Prisma.PostUpdateadvisorySensitiveLabelsInput | $Enums.SensitiveLabel[]
   sensitiveLabelsReviewed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
+  topics?: Prisma.PostUpdatetopicsInput | string[]
+  productIds?: Prisma.PostUpdateproductIdsInput | string[]
+  clipEdit?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  location?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2523,6 +2721,10 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   advisorySensitiveLabels?: boolean
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: boolean
+  topics?: boolean
+  productIds?: boolean
+  clipEdit?: boolean
+  location?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -2567,6 +2769,10 @@ export type PostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   advisorySensitiveLabels?: boolean
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: boolean
+  topics?: boolean
+  productIds?: boolean
+  clipEdit?: boolean
+  location?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -2605,6 +2811,10 @@ export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   advisorySensitiveLabels?: boolean
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: boolean
+  topics?: boolean
+  productIds?: boolean
+  clipEdit?: boolean
+  location?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
@@ -2643,12 +2853,16 @@ export type PostSelectScalar = {
   advisorySensitiveLabels?: boolean
   sensitiveLabelsReviewed?: boolean
   moderationVisibility?: boolean
+  topics?: boolean
+  productIds?: boolean
+  clipEdit?: boolean
+  location?: boolean
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "kind" | "text" | "audience" | "visibility" | "isAiGenerated" | "soundId" | "resharedFromId" | "replyToCommentId" | "replyToClipId" | "replyToCommenterId" | "stickerLayout" | "mentions" | "linkPreview" | "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "profileVisitCount" | "saveCount" | "quoteCount" | "isQuote" | "replyPolicy" | "sensitiveLabels" | "authorSensitiveLabels" | "moderationSensitiveLabels" | "advisorySensitiveLabels" | "sensitiveLabelsReviewed" | "moderationVisibility" | "expiresAt" | "deletedAt" | "createdAt", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "kind" | "text" | "audience" | "visibility" | "isAiGenerated" | "soundId" | "resharedFromId" | "replyToCommentId" | "replyToClipId" | "replyToCommenterId" | "stickerLayout" | "mentions" | "linkPreview" | "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "profileVisitCount" | "saveCount" | "quoteCount" | "isQuote" | "replyPolicy" | "sensitiveLabels" | "authorSensitiveLabels" | "moderationSensitiveLabels" | "advisorySensitiveLabels" | "sensitiveLabelsReviewed" | "moderationVisibility" | "topics" | "productIds" | "clipEdit" | "location" | "expiresAt" | "deletedAt" | "createdAt", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   media?: boolean | Prisma.Post$mediaArgs<ExtArgs>
   comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
@@ -2707,6 +2921,10 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     advisorySensitiveLabels: $Enums.SensitiveLabel[]
     sensitiveLabelsReviewed: boolean
     moderationVisibility: $Enums.ModerationVisibility
+    topics: string[]
+    productIds: string[]
+    clipEdit: runtime.JsonValue | null
+    location: runtime.JsonValue | null
     expiresAt: Date | null
     deletedAt: Date | null
     createdAt: Date
@@ -3170,6 +3388,10 @@ export interface PostFieldRefs {
   readonly advisorySensitiveLabels: Prisma.FieldRef<"Post", 'SensitiveLabel[]'>
   readonly sensitiveLabelsReviewed: Prisma.FieldRef<"Post", 'Boolean'>
   readonly moderationVisibility: Prisma.FieldRef<"Post", 'ModerationVisibility'>
+  readonly topics: Prisma.FieldRef<"Post", 'String[]'>
+  readonly productIds: Prisma.FieldRef<"Post", 'String[]'>
+  readonly clipEdit: Prisma.FieldRef<"Post", 'Json'>
+  readonly location: Prisma.FieldRef<"Post", 'Json'>
   readonly expiresAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>
