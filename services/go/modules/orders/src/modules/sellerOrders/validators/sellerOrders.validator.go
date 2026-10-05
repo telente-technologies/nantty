@@ -19,6 +19,12 @@ func ValidateReason(body dtos.ReasonRequest) error {
 	return collected.AsError()
 }
 
+func ValidateRefund(body dtos.RefundRequest) error {
+	var collected utils.Issues
+	collected.CheckLength("reason", body.Reason, 5, 500)
+	return collected.AsError()
+}
+
 func ValidateStatus(body dtos.StatusRequest) error {
 	var collected utils.Issues
 	if !slices.Contains([]string{"processing", "ready", "delivered"}, body.Status) {

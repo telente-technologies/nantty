@@ -6,6 +6,11 @@ type ReasonRequest struct {
 	Reason string `json:"reason"`
 }
 
+type RefundRequest struct {
+	AmountMinor int64  `json:"amountMinor"`
+	Reason      string `json:"reason"`
+}
+
 type StatusRequest struct {
 	Status string `json:"status"`
 }

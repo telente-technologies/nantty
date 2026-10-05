@@ -8,11 +8,13 @@ import (
 	"github.com/google/uuid"
 
 	"zudomart/modules/orders/src/container"
+	ordererrors "zudomart/modules/orders/src/errors"
 	"zudomart/modules/orders/src/middlewares"
 	acceptorder "zudomart/modules/orders/src/modules/sellerOrders/commands/acceptOrder"
 	addordernote "zudomart/modules/orders/src/modules/sellerOrders/commands/addOrderNote"
 	cancelsellerorder "zudomart/modules/orders/src/modules/sellerOrders/commands/cancelSellerOrder"
 	recorddeliveryattempt "zudomart/modules/orders/src/modules/sellerOrders/commands/recordDeliveryAttempt"
+	refundsellerorder "zudomart/modules/orders/src/modules/sellerOrders/commands/refundSellerOrder"
 	rejectorder "zudomart/modules/orders/src/modules/sellerOrders/commands/rejectOrder"
 	shiporder "zudomart/modules/orders/src/modules/sellerOrders/commands/shipOrder"
 	updateorderstatus "zudomart/modules/orders/src/modules/sellerOrders/commands/updateOrderStatus"
@@ -145,6 +147,24 @@ func (controller SellerOrdersController) Cancel(writer http.ResponseWriter, requ
 	}
 	view, err := (cancelsellerorder.Handler{Container: controller.Container}).Execute(request.Context(), cancelsellerorder.Command{Seller: controller.seller(request), OrderId: orderId, Reason: body.Reason})
 	controller.respond(writer, request, http.StatusOK, view, err)
+}
+
+func (controller SellerOrdersController) Refund(writer http.ResponseWriter, request *http.Request) {
+	orderId, err := utils.PathIdentifier(request, "orderId")
+	var body dtos.RefundRequest
+	if err == nil {
+		body, err = utils.DecodeAndValidate[dtos.RefundRequest](writer, request, validators.ValidateRefund)
+	}
+	if err == nil && body.AmountMinor <= 0 {
+		err = ordererrors.RefundAmountInvalid
+	}
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	command := refundsellerorder.Command{Seller: controller.seller(request), OrderId: orderId, AmountMinor: body.AmountMinor, Reason: strings.TrimSpace(body.Reason)}
+	view, err := (refundsellerorder.Handler{Container: controller.Container}).Execute(request.Context(), command)
+	controller.respond(writer, request, http.StatusCreated, view, err)
 }
 
 func (controller SellerOrdersController) orderAndReason(writer http.ResponseWriter, request *http.Request) (uuid.UUID, dtos.ReasonRequest, error) {
