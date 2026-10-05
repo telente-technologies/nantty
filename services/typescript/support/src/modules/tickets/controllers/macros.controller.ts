@@ -9,6 +9,8 @@ import type { TicketModuleDependencies } from "../tickets.module.js";
 import { macroBodySchema } from "../validators/ticket.validator.js";
 import { readPermissions } from "./staffTickets.controller.js";
 
+const macroReadPermissions = [...readPermissions, "support:chat"] as const;
+
 export const macroVariables = ["user.displayName", "user.username", "ticket.id", "agent.name"] as const;
 
 const presentMacro = (macro: MacroRecord) => ({ id: macro.id, title: macro.title, body: macro.body, category: macro.category?.toUpperCase() ?? null, updatedAt: macro.updatedAt.toISOString(), updatedByName: macro.updatedByName });
@@ -23,7 +25,7 @@ function readMacroInput(raw: unknown, editorName: string) {
 export function createMacrosController(dependencies: TicketModuleDependencies, access: StaffAccess) {
   return {
     list: async (context: HttpRouterContext) => {
-      await access.require(context, readPermissions);
+      await access.require(context, macroReadPermissions);
       return json(200, { items: (await dependencies.store.listMacros()).map(presentMacro), variables: macroVariables.map((name) => `{{${name}}}`) });
     },
     create: async (context: HttpRouterContext) => {

@@ -1,7 +1,7 @@
 import { defaultPriorityByCategory } from "../../../../constants/ticketSla.constant.js";
 import type { TicketWithThread } from "../../../../types/ticket.type.js";
 import type { TicketModuleDependencies } from "../../tickets.module.js";
-import { validateAttachmentUrls } from "../../services/attachmentPolicy.service.js";
+import { validateRequesterAttachments } from "../../services/attachmentPolicy.service.js";
 import { ticketCreatedEvent } from "../../services/ticketEvents.service.js";
 import { calculateSlaDueDates } from "../../services/ticketSla.service.js";
 import type { CreateSupportTicketCommand } from "./createSupportTicket.command.js";
@@ -11,7 +11,7 @@ export async function handleCreateSupportTicket(dependencies: TicketModuleDepend
     const replay = await dependencies.store.findTicketByIdempotencyKey(command.accountId, command.idempotencyKey);
     if (replay !== null) return replay;
   }
-  const attachments = validateAttachmentUrls(command.attachmentUrls, dependencies.mediaPublicBaseUrls);
+  const attachments = await validateRequesterAttachments(command.attachmentUrls, { allowedBaseUrls: dependencies.mediaPublicBaseUrls, media: dependencies.media, requesterId: command.accountId });
   const profile = await dependencies.identity.findRequesterProfile(command.accountId);
   const now = dependencies.clock.now();
   const priority = defaultPriorityByCategory[command.category];

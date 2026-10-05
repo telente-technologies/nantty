@@ -2,7 +2,7 @@ import { reopenWindowDays } from "../../../../constants/support.constant.js";
 import { conflict, notFound } from "../../../../errors/support.error.js";
 import type { TicketWithThread } from "../../../../types/ticket.type.js";
 import type { TicketModuleDependencies } from "../../tickets.module.js";
-import { validateAttachmentUrls } from "../../services/attachmentPolicy.service.js";
+import { validateRequesterAttachments } from "../../services/attachmentPolicy.service.js";
 import { ticketRepliedEvent } from "../../services/ticketEvents.service.js";
 import type { PostCustomerReplyCommand } from "./postCustomerReply.command.js";
 
@@ -15,7 +15,7 @@ export async function handlePostCustomerReply(dependencies: TicketModuleDependen
   if (reopening && ticket.resolvedAt !== null && now.getTime() - ticket.resolvedAt.getTime() > reopenWindowDays * 86_400_000) {
     throw conflict("TICKET_CLOSED", "This ticket was resolved more than 7 days ago. Open a new ticket and we will pick it up.");
   }
-  const attachments = validateAttachmentUrls(command.attachmentUrls, dependencies.mediaPublicBaseUrls);
+  const attachments = await validateRequesterAttachments(command.attachmentUrls, { allowedBaseUrls: dependencies.mediaPublicBaseUrls, media: dependencies.media, requesterId: command.accountId });
   const status = ticket.status === "open" && ticket.firstRespondedAt === null ? "open" : "awaiting_support";
   const updated = { ...ticket, status, updatedAt: now } as const;
   return dependencies.store.writeTicket(ticket.id, {

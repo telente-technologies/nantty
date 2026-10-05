@@ -2,6 +2,7 @@ import { createRouter, type HttpRouter } from "@zudojs/http";
 
 import type { Clock } from "../interfaces/clock.interface.js";
 import type { HelpContentStore } from "../interfaces/helpContentStore.interface.js";
+import type { MediaDirectory } from "../interfaces/mediaDirectory.interface.js";
 import type { IdentityDirectory } from "../interfaces/identityDirectory.interface.js";
 import type { TicketStore } from "../interfaces/ticketStore.interface.js";
 import type { StaffAuthenticator } from "../middlewares/staffAuth.middleware.js";
@@ -25,6 +26,7 @@ export interface RouteDependencies {
   readonly clock: Clock;
   readonly internalToken: string;
   readonly mediaPublicBaseUrls: readonly string[];
+  readonly media?: MediaDirectory;
   readonly probeDatabase: (() => Promise<void>) | undefined;
   readonly runAutoFaqNow: (() => Promise<number>) | undefined;
 }
@@ -48,7 +50,7 @@ export function buildSupportRouter(dependencies: RouteDependencies): HttpRouter 
     assertInternalToken(context, dependencies.internalToken);
     return json(200, { processed: (await dependencies.runAutoFaqNow?.()) ?? 0 });
   });
-  const ticketDependencies = { store: dependencies.ticketStore, clock: dependencies.clock, identity: dependencies.identity, mediaPublicBaseUrls: dependencies.mediaPublicBaseUrls };
+  const ticketDependencies = { store: dependencies.ticketStore, clock: dependencies.clock, identity: dependencies.identity, mediaPublicBaseUrls: dependencies.mediaPublicBaseUrls, ...(dependencies.media === undefined ? {} : { media: dependencies.media }) };
   const access = createStaffAccess(dependencies.staffAuthenticator, dependencies.ticketStore, dependencies.clock);
   registerTicketRoutes(router, {
     mine: createMyTicketsController(ticketDependencies),
