@@ -75,6 +75,17 @@ func (relations SchemaSocialRelations) IsFollowing(ctx context.Context, follower
 	return exists, err
 }
 
+func (relations SchemaSocialRelations) FollowCounts(ctx context.Context, userId uuid.UUID) (int, int, error) {
+	var followers, following int
+	err := relations.Database.QueryRowContext(ctx,
+		`SELECT COUNT(*) FILTER (WHERE "followeeId" = $1), COUNT(*) FILTER (WHERE "followerId" = $1) FROM "`+relations.SocialSchema+`"."follows" WHERE ("followeeId" = $1 OR "followerId" = $1) AND "state" = 'accepted'`,
+		userId.String()).Scan(&followers, &following)
+	if relations.tolerate(err) {
+		return 0, 0, nil
+	}
+	return followers, following, err
+}
+
 func (relations SchemaSocialRelations) IsActiveSubscriber(ctx context.Context, subscriberId, creatorId uuid.UUID) (bool, error) {
 	if relations.Subscribers == nil {
 		return false, nil

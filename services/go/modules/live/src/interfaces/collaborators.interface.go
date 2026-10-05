@@ -75,6 +75,7 @@ const (
 type SocialRelations interface {
 	BlockedEitherWay(ctx context.Context, userId uuid.UUID, others []uuid.UUID) (map[uuid.UUID]bool, error)
 	IsFollowing(ctx context.Context, followerId, followeeId uuid.UUID) (bool, error)
+	FollowCounts(ctx context.Context, userId uuid.UUID) (followers, following int, err error)
 	IsActiveSubscriber(ctx context.Context, subscriberId, creatorId uuid.UUID) (bool, error)
 	MentionPrivacyOf(ctx context.Context, userIds []uuid.UUID) (map[uuid.UUID]MentionPrivacy, error)
 	ListLiveAlertRecipients(ctx context.Context, hostId uuid.UUID, limit int) (recipients []uuid.UUID, truncated bool, err error)

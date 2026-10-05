@@ -19,6 +19,18 @@ func Authenticated(deployed *container.Container) func(http.HandlerFunc) http.Ha
 	}
 }
 
+func OptionallyAuthenticated(deployed *container.Container) func(http.HandlerFunc) http.Handler {
+	return func(handler http.HandlerFunc) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			if jwtauth.ExtractBearerTokenFromAuthorizationHeader(request) == "" {
+				handler(writer, request)
+				return
+			}
+			jwtauth.RequireVerifiedAccessToken(deployed.AccessVerifier)(handler).ServeHTTP(writer, request)
+		})
+	}
+}
+
 func Idempotent(deployed *container.Container) func(http.HandlerFunc) http.Handler {
 	return func(handler http.HandlerFunc) http.Handler {
 		return jwtauth.RequireVerifiedAccessToken(deployed.AccessVerifier)(requireIdempotencyKey(deployed, handler))

@@ -67,6 +67,21 @@ func (relations *InMemorySocialRelations) IsFollowing(_ context.Context, followe
 	return relations.follows[[2]uuid.UUID{followerId, followeeId}], nil
 }
 
+func (relations *InMemorySocialRelations) FollowCounts(_ context.Context, userId uuid.UUID) (int, int, error) {
+	relations.mutex.Lock()
+	defer relations.mutex.Unlock()
+	followers, following := 0, 0
+	for pair := range relations.follows {
+		if pair[1] == userId {
+			followers++
+		}
+		if pair[0] == userId {
+			following++
+		}
+	}
+	return followers, following, nil
+}
+
 func (relations *InMemorySocialRelations) IsActiveSubscriber(_ context.Context, subscriberId, creatorId uuid.UUID) (bool, error) {
 	relations.mutex.Lock()
 	defer relations.mutex.Unlock()
