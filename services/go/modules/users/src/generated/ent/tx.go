@@ -22,6 +22,8 @@ type Tx struct {
 	AccountRestriction *AccountRestrictionClient
 	// AccountSuspension is the client for interacting with the AccountSuspension builders.
 	AccountSuspension *AccountSuspensionClient
+	// AccountTopic is the client for interacting with the AccountTopic builders.
+	AccountTopic *AccountTopicClient
 	// ActingProfile is the client for interacting with the ActingProfile builders.
 	ActingProfile *ActingProfileClient
 	// AdminCreatedAccount is the client for interacting with the AdminCreatedAccount builders.
@@ -82,6 +84,8 @@ type Tx struct {
 	SuggestionDismissal *SuggestionDismissalClient
 	// TermsAcceptance is the client for interacting with the TermsAcceptance builders.
 	TermsAcceptance *TermsAcceptanceClient
+	// Topic is the client for interacting with the Topic builders.
+	Topic *TopicClient
 	// UserConsent is the client for interacting with the UserConsent builders.
 	UserConsent *UserConsentClient
 	// UsernameChange is the client for interacting with the UsernameChange builders.
@@ -229,6 +233,7 @@ func (tx *Tx) init() {
 	tx.AccountRemoval = NewAccountRemovalClient(tx.config)
 	tx.AccountRestriction = NewAccountRestrictionClient(tx.config)
 	tx.AccountSuspension = NewAccountSuspensionClient(tx.config)
+	tx.AccountTopic = NewAccountTopicClient(tx.config)
 	tx.ActingProfile = NewActingProfileClient(tx.config)
 	tx.AdminCreatedAccount = NewAdminCreatedAccountClient(tx.config)
 	tx.BlackApplication = NewBlackApplicationClient(tx.config)
@@ -259,6 +264,7 @@ func (tx *Tx) init() {
 	tx.ShippingAddress = NewShippingAddressClient(tx.config)
 	tx.SuggestionDismissal = NewSuggestionDismissalClient(tx.config)
 	tx.TermsAcceptance = NewTermsAcceptanceClient(tx.config)
+	tx.Topic = NewTopicClient(tx.config)
 	tx.UserConsent = NewUserConsentClient(tx.config)
 	tx.UsernameChange = NewUsernameChangeClient(tx.config)
 	tx.UsernameHold = NewUsernameHoldClient(tx.config)
