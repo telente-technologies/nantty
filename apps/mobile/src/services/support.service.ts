@@ -3,7 +3,7 @@ import type { ContentReport, NewSupportTicketInput, SupportTicketDetail, Support
 import { api } from "./apiClient.service";
 
 export const supportService = {
-  listMySupportTickets: () => api.get<SupportTicketSummary[]>("/api/v1/support/tickets"),
+  listMySupportTickets: () => api.getList<SupportTicketSummary>("/api/v1/support/tickets"),
   fetchUnreadSupportReplies: () => api.get<{ count: number }>("/api/v1/support/tickets/unread-count"),
   createSupportTicket: (input: NewSupportTicketInput, idempotencyKey: string) =>
     api.post<SupportTicketDetail>("/api/v1/support/tickets", input, { idempotencyKey }),
@@ -13,5 +13,5 @@ export const supportService = {
     api.post<SupportTicketSummary>(`/api/v1/support/tickets/${encodeURIComponent(ticketId)}/rating`, { score, comment }),
   replyToSupportTicket: (ticketId: string, text: string, idempotencyKey: string) =>
     api.post<SupportTicketMessage>(`/api/v1/support/tickets/${encodeURIComponent(ticketId)}/messages`, { text, attachmentUrls: [] }, { idempotencyKey }),
-  listMyContentReports: () => api.get<ContentReport[]>("/api/v1/reports/me"),
+  listMyContentReports: () => api.getList<ContentReport>("/api/v1/reports/me"),
 };
