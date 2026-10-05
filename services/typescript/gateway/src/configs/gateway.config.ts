@@ -12,9 +12,11 @@ export interface GatewayConfig {
   readonly accessToken: { readonly jwksUrl: string; readonly issuer: string; readonly audience: string };
   readonly upstreams: Readonly<Record<UpstreamName, string>>;
   readonly maxRequestBodyBytes?: number;
+  readonly trustedProxyHops?: number;
   readonly valkeyUrl?: string | null;
   readonly routeRateLimitsPerMinute?: Readonly<Partial<Record<RouteLimitName, number>>>;
   readonly security?: SecurityConfig | null;
+  readonly identitySigningSecret?: string;
 }
 
 export type UpstreamName = "identity" | "live" | "money" | "notifications" | "social" | "trust" | "commerce" | "media" | "search" | "ads" | "support";
@@ -61,15 +63,19 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
       issuer: readRequiredEnvironmentVariable("AUTH_TOKEN_ISSUER", problems),
       audience: readEnvironmentVariableOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
     },
+    trustedProxyHops: Number(readEnvironmentVariableOrDefault("TRUSTED_PROXY_HOPS", "1")),
     maxRequestBodyBytes: Number(readEnvironmentVariableOrDefault("MAX_REQUEST_BODY_BYTES", String(1024 * 1024))),
     valkeyUrl: process.env["VALKEY_URL"]?.trim() || null,
     routeRateLimitsPerMinute: readRouteRateLimits(),
     security: loadSecurityConfigFromEnvironment(problems),
+    identitySigningSecret: readRequiredEnvironmentVariable("GATEWAY_IDENTITY_SECRET", problems),
     upstreams: { identity: readRequiredEnvironmentVariable("UPSTREAM_IDENTITY_URL", problems), live: readEnvironmentVariableOrDefault("UPSTREAM_LIVE_URL", "http://localhost:8102"), money: readEnvironmentVariableOrDefault("UPSTREAM_MONEY_URL", "http://localhost:8103"), notifications: readEnvironmentVariableOrDefault("UPSTREAM_NOTIFICATIONS_URL", "http://localhost:8104"), social: readEnvironmentVariableOrDefault("UPSTREAM_SOCIAL_URL", "http://localhost:8105"), trust: readEnvironmentVariableOrDefault("UPSTREAM_TRUST_URL", "http://localhost:8106"), commerce: readEnvironmentVariableOrDefault("UPSTREAM_COMMERCE_URL", "http://localhost:8107"), media: readEnvironmentVariableOrDefault("UPSTREAM_MEDIA_URL", "http://localhost:8108"), search: readEnvironmentVariableOrDefault("UPSTREAM_SEARCH_URL", "http://localhost:8109"), ads: readEnvironmentVariableOrDefault("UPSTREAM_ADS_URL", "http://localhost:8110"), support: readEnvironmentVariableOrDefault("UPSTREAM_SUPPORT_URL", "http://localhost:8111") },
   };
   if (config.corsOrigins.includes("*")) problems.push("CORS_ORIGINS must list exact origins, not *");
   if (process.env["NODE_ENV"] === "production" && config.valkeyUrl === null) problems.push("VALKEY_URL is required in production");
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
+  if ((config.identitySigningSecret ?? "").length > 0 && (config.identitySigningSecret ?? "").length < 32) problems.push("GATEWAY_IDENTITY_SECRET must be at least 32 characters");
+  if (!Number.isInteger(config.trustedProxyHops) || (config.trustedProxyHops ?? 0) < 0) problems.push("TRUSTED_PROXY_HOPS must be a non-negative integer");
   if (problems.length > 0) throw new Error(`Invalid gateway configuration: ${problems.join("; ")}`);
   return config;
 }

@@ -100,7 +100,8 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
         principal,
         traceparent: trace.traceparent,
         forwardWebhookSignatureHeaders: route.rawBodyPassthrough === true,
-      }, options.config.upstreamTimeoutMs);
+        allowRedirect: route.redirectPassthrough === true,
+      }, options.config.upstreamTimeoutMs, options.config.identitySigningSecret);
       observeProbeSignalInBackground(security, options.logger, observed(principal), completedRequestSignal(requestUrl.pathname, upstreamResponse.status, principal, upstreamResponse.body));
       return createResponseContext({ status: upstreamResponse.status, headers: { ...upstreamResponse.headers, traceparent: trace.traceparent }, body: upstreamResponse.body });
     } catch (error) {

@@ -1,8 +1,8 @@
-export type RouteLimitName = "login" | "otp" | "reset" | "signup" | "report" | "upload" | "search" | "usernameCheck";
+export type RouteLimitName = "login" | "otp" | "reset" | "signup" | "report" | "upload" | "search" | "usernameCheck" | "postWrite" | "tagSearch" | "verification" | "mediaDownload" | "sellerPeopleSearch" | "sellerTeamWrite" | "sellerMoneyWrite" | "storeMessageSend";
 
-export const defaultRouteLimitsPerMinute: Readonly<Record<RouteLimitName, number>> = { login: 10, otp: 5, reset: 5, signup: 10, report: 20, upload: 30, search: 60, usernameCheck: 30 };
+export const defaultRouteLimitsPerMinute: Readonly<Record<RouteLimitName, number>> = { login: 10, otp: 5, reset: 5, signup: 10, report: 20, upload: 30, search: 60, usernameCheck: 30, postWrite: 30, tagSearch: 60, verification: 10, mediaDownload: 40, sellerPeopleSearch: 30, sellerTeamWrite: 30, sellerMoneyWrite: 10, storeMessageSend: 60 };
 
-const accountScopedLimits: readonly RouteLimitName[] = ["report", "upload", "search"];
+const accountScopedLimits: readonly RouteLimitName[] = ["report", "upload", "search", "postWrite", "tagSearch", "verification", "mediaDownload", "sellerPeopleSearch", "sellerTeamWrite", "sellerMoneyWrite", "storeMessageSend"];
 
 export function classifyRequestForRateLimit(method: string, path: string): RouteLimitName | undefined {
   const verb = method.toUpperCase();
@@ -15,6 +15,14 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if (verb === "POST" && lowered === "/api/v1/reports") return "report";
   if ((verb === "POST" || verb === "PUT") && (lowered.includes("/uploads") || lowered.includes("/upload-intents"))) return "upload";
   if (verb === "GET" && lowered.startsWith("/api/v1/search")) return "search";
+  if (verb === "GET" && lowered.startsWith("/api/v1/tags/candidates")) return "tagSearch";
+  if ((verb === "POST" && lowered === "/api/v1/posts") || (verb === "PUT" && /^\/api\/v1\/posts\/[^/]+\/tags$/.test(lowered)) || (verb === "DELETE" && /^\/api\/v1\/posts\/[^/]+\/tags\/me$/.test(lowered))) return "postWrite";
+  if (verb === "POST" && lowered.startsWith("/api/v1/verification/")) return "verification";
+  if (verb === "POST" && /^\/api\/v1\/posts\/[^/]+\/media\/[^/]+\/download$/.test(lowered)) return "mediaDownload";
+  if (verb === "GET" && (lowered === "/api/v1/seller/zudomart-users" || lowered === "/api/v1/seller/staff/candidates")) return "sellerPeopleSearch";
+  if (verb !== "GET" && (lowered === "/api/v1/seller/staff" || lowered.startsWith("/api/v1/seller/staff/") || lowered.startsWith("/api/v1/stores/team-requests/"))) return "sellerTeamWrite";
+  if (verb !== "GET" && (lowered.startsWith("/api/v1/seller/wallet/payouts") || lowered.startsWith("/api/v1/seller/wallet/payout-accounts"))) return "sellerMoneyWrite";
+  if (verb === "POST" && (/^\/api\/v1\/seller\/conversations\/[^/]+\/messages$/.test(lowered) || /^\/api\/v1\/conversations\/stores\/[^/]+\/messages$/.test(lowered))) return "storeMessageSend";
   return undefined;
 }
 

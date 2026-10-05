@@ -57,7 +57,7 @@ export function createGatewayServer(options: GatewayServerOptions) {
     ],
   });
   return createHttpServer({
-    adapter: createNodeHttpAdapter({ host: options.config.host, port: options.config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: true }),
+    adapter: createNodeHttpAdapter({ host: options.config.host, port: options.config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: options.config.trustedProxyHops ?? 1 }),
     handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
   });
 }

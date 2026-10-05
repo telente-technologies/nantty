@@ -9,6 +9,7 @@ export interface UpstreamRoute {
   readonly methods?: readonly string[];
   readonly exactPathOnly?: boolean;
   readonly rawBodyPassthrough?: boolean;
+  readonly redirectPassthrough?: boolean;
 }
 
 export const upstreamRoutes: readonly UpstreamRoute[] = [
@@ -23,9 +24,14 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/webhooks/smile-id", upstream: "identity", authentication: "optional", methods: ["POST"], exactPathOnly: true, rawBodyPassthrough: true },
   { pathPrefix: "/api/v1/verification/", upstream: "identity", authentication: "required" },
   { pathPrefix: "/api/v1/seller/business-documents", upstream: "identity", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/security", upstream: "identity", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/verification", upstream: "identity", authentication: "required", methods: ["GET"] },
   { pathPrefix: "/api/v1/reports/me", upstream: "trust", authentication: "required", methods: ["GET"] },
   { pathPrefix: "/api/v1/users/by-username/", upstream: "identity", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/me/content-preferences", upstream: "social", authentication: "required", methods: ["GET", "PUT"] },
+  { pathPrefix: "/api/v1/tags/candidates", upstream: "social", authentication: "required", methods: ["GET"] },
+  { pathPrefix: "/api/v1/me/tagging-settings", upstream: "social", authentication: "required", methods: ["GET", "PUT"] },
+  { pathPrefix: "/api/v1/me/download-settings", upstream: "social", authentication: "required", methods: ["GET", "PUT"] },
   { pathPrefix: "/api/v1/users/me/follow-requests", upstream: "social", authentication: "required" },
   { pathPrefix: "/api/v1/users/me/blocked", upstream: "social", authentication: "required" },
   { pathPrefix: "/api/v1/users/*/follow", upstream: "social", authentication: "required" },
@@ -88,6 +94,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/overlay-scenes/", upstream: "live", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/explore", upstream: "commerce", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/products", upstream: "commerce", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/stores/team-requests", upstream: "commerce", authentication: "required" },
   { pathPrefix: "/api/v1/stores", upstream: "commerce", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/battles/", upstream: "live", authentication: "required" },
   { pathPrefix: "/api/v1/live/webhooks/", upstream: "live", authentication: "optional", methods: ["POST"], rawBodyPassthrough: true },
@@ -107,6 +114,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/ads/balance", upstream: "money", authentication: "required" },
   { pathPrefix: "/api/v1/ads/pricing", upstream: "ads", authentication: "optional", methods: ["GET", "POST"] },
   { pathPrefix: "/api/v1/pricing/", upstream: "money", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/ads/r/", upstream: "ads", authentication: "optional", methods: ["GET"], redirectPassthrough: true },
   { pathPrefix: "/api/v1/ads/", upstream: "ads", authentication: "required" },
   { pathPrefix: "/api/v1/subscriptions", upstream: "money", authentication: "required" },
   { pathPrefix: "/api/v1/seller/subscription", upstream: "money", authentication: "required" },
@@ -138,6 +146,16 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/seller/promotions", upstream: "commerce", authentication: "required" },
   { pathPrefix: "/api/v1/seller/disputes", upstream: "commerce", authentication: "required" },
   { pathPrefix: "/api/v1/seller/reports/", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/settings", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/dashboard", upstream: "commerce", authentication: "required", methods: ["GET"] },
+  { pathPrefix: "/api/v1/seller/conversations", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/analytics/", upstream: "commerce", authentication: "required", methods: ["GET"] },
+  { pathPrefix: "/api/v1/seller/wallet/", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/finance/", upstream: "commerce", authentication: "required", methods: ["GET"] },
+  { pathPrefix: "/api/v1/seller/storefront", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/staff", upstream: "commerce", authentication: "required" },
+  { pathPrefix: "/api/v1/seller/audit-log", upstream: "commerce", authentication: "required", methods: ["GET"] },
+  { pathPrefix: "/api/v1/seller/zudomart-users", upstream: "commerce", authentication: "required", methods: ["GET"] },
   { pathPrefix: "/api/v1/creators/earnings/convert", upstream: "money", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/admin/ledger/", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/payments/", upstream: "money", authentication: "optional" },
