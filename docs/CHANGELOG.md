@@ -6,7 +6,7 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
-## Waitlist dropped, phone sign-in removed (5 Oct)
+## Waitlist dropped, phone sign-in removed (5 Oct) - tsc clean in web, webapp, seller, ads, admin, mobile, emailTemplates; contracts webapp 30/30, seller 26/26, ads 8/8, admin 7/7; mobile jest 40/40 (related)
 
 Owner decisions on 2026-10-05: the launch waitlist is dropped, and email is the only sign-in identifier and one-time-code channel. Phone numbers stay where they are contact data (addresses, stores, locations, suppliers, order buyers, admin personal-data reveal, ads customer-list hashing, seller application contact).
 
