@@ -94,6 +94,7 @@ func describeAccountRisk(ctx context.Context, c *container.Container, accountId 
 	if err != nil {
 		return
 	}
+	payload["emailVerified"] = false
 	now := c.Now()
 	if counts, err := strikeservices.ActiveCounts(ctx, c.Client, now, []uuid.UUID{identifier}); err == nil {
 		payload["moderationStrikes"] = float64(counts[identifier].ActiveStrikes)
@@ -114,9 +115,11 @@ func describeAccountRisk(ctx context.Context, c *container.Container, accountId 
 			payload[target] = value
 		}
 	}
+	if emailVerified, isBool := summary["emailVerified"].(bool); isBool {
+		payload["emailVerified"] = emailVerified
+	}
 	if summary != nil {
 		verification, _ := summary["verification"].(map[string]any)
 		payload["isVerified"] = verification != nil
-		payload["hasPhone"] = summary["phoneMasked"] != nil
 	}
 }

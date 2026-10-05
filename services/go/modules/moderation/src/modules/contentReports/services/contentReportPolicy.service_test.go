@@ -6,7 +6,7 @@ import (
 )
 
 func TestClientReasonsMapToTheAdminReasonSet(t *testing.T) {
-	cases := map[string]string{"scam_or_fraud": "scam", "counterfeit_product": "counterfeit", "nudity_or_sexual_content": "nudity", "hate_or_harassment": "harassment", "something_else": "other", "spam": "spam", "violence": "violence"}
+	cases := map[string]string{"scam_or_fraud": "scam", "counterfeit_product": "counterfeit", "nudity_or_sexual_content": "nudity", "hate_or_harassment": "harassment", "something_else": "other", "spam": "spam", "violence": "violence", "prohibited_goods": "other", "prohibited_items": "other"}
 	for raw, want := range cases {
 		if got, known := NormalizeReason(raw); !known || got != want {
 			t.Errorf("%s -> %s %v", raw, got, known)

@@ -55,7 +55,7 @@ var accountRiskFields = []CatalogField{
 	{Key: "accountStatus", Label: "Account status", Type: "text"},
 	{Key: "riskLevel", Label: "Risk level", Type: "text"},
 	{Key: "isVerified", Label: "Has a verification badge", Type: "boolean"},
-	{Key: "hasPhone", Label: "Has a phone number", Type: "boolean"},
+	{Key: "emailVerified", Label: "Has a verified email", Type: "boolean"},
 }
 
 var priorityParameter = []CatalogLabel{{Key: "priority", Label: "Priority (0-100)"}}
@@ -91,8 +91,8 @@ var catalog = Catalog{
 var sampleEvents = []SampleEvent{
 	{Id: "sample_report_scam", Event: EventReportCreated, Label: "Scam report on a product", Payload: map[string]any{"targetType": "product", "targetId": "prd_sample", "targetOwnerId": "usr_seller", "reporterId": "usr_reporter", "reason": "scam"}},
 	{Id: "sample_report_violence", Event: EventReportCreated, Label: "Violence report on a clip", Payload: map[string]any{"targetType": "clip", "targetId": "clp_sample", "targetOwnerId": "usr_creator", "reporterId": "usr_reporter", "reason": "violence"}},
-	{Id: "sample_store_new_account", Event: EventStoreCreated, Label: "Store opened by a 2-day-old account", Payload: map[string]any{"storeId": "str_sample", "ownerId": "usr_new", "countryCode": "NG", "currency": "NGN", "accountAgeDays": 2, "moderationStrikes": 0, "accountStatus": "ACTIVE", "riskLevel": "HIGH", "isVerified": false, "hasPhone": false}},
-	{Id: "sample_verification_struck", Event: EventVerificationSubmitted, Label: "Gold application from an account with 2 strikes", Payload: map[string]any{"applicationId": "app_sample", "userId": "usr_applicant", "color": "GOLD", "accountAgeDays": 400, "moderationStrikes": 2, "accountStatus": "WARNED", "riskLevel": "MEDIUM", "isVerified": false, "hasPhone": true}},
+	{Id: "sample_store_new_account", Event: EventStoreCreated, Label: "Store opened by a 2-day-old account", Payload: map[string]any{"storeId": "str_sample", "ownerId": "usr_new", "countryCode": "NG", "currency": "NGN", "accountAgeDays": 2, "moderationStrikes": 0, "accountStatus": "ACTIVE", "riskLevel": "HIGH", "isVerified": false, "emailVerified": false}},
+	{Id: "sample_verification_struck", Event: EventVerificationSubmitted, Label: "Gold application from an account with 2 strikes", Payload: map[string]any{"applicationId": "app_sample", "userId": "usr_applicant", "color": "GOLD", "accountAgeDays": 400, "moderationStrikes": 2, "accountStatus": "WARNED", "riskLevel": "MEDIUM", "isVerified": false, "emailVerified": true}},
 	{Id: "sample_message_blast", Event: EventMessageSent, Label: "New conversation with 40 recipients", Payload: map[string]any{"senderId": "usr_sender", "conversationId": "cnv_sample", "messageKind": "text", "recipientCount": 40, "isNewConversation": true}},
 }
 

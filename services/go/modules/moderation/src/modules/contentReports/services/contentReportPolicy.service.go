@@ -11,7 +11,7 @@ var contentReasons = []string{"child_safety", "spam", "scam", "harassment", "hat
 
 var reasonAliases = map[string]string{
 	"scam_or_fraud": "scam", "counterfeit_product": "counterfeit", "nudity_or_sexual_content": "nudity", "hate_or_harassment": "harassment",
-	"something_else": "other", "intellectual_property": "counterfeit", "sexual_content": "nudity", "fraud": "scam", "violence_or_threats": "violence", "prohibited_goods": "other", "personal_data": "other",
+	"something_else": "other", "intellectual_property": "counterfeit", "sexual_content": "nudity", "fraud": "scam", "violence_or_threats": "violence", "prohibited_goods": "other", "prohibited_items": "other", "personal_data": "other",
 }
 
 const (

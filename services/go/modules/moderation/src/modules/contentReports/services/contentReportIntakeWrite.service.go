@@ -65,7 +65,7 @@ func (intake Intake) updateReport(ctx context.Context, tx *ent.Tx, report *ent.C
 			primary, best = reason, count
 		}
 	}
-	priority := HigherPriority(PriorityForReason(primary), PriorityForReportCount(total))
+	priority := HigherPriority(string(report.Priority), HigherPriority(PriorityForReason(primary), PriorityForReportCount(total)))
 	encoded, _ := json.Marshal(counts)
 	update := tx.ContentReport.UpdateOne(report).SetReasonCounts(encoded).SetReportCount(total).SetPrimaryReason(primary).SetLastReportedAt(now).
 		SetPriority(contentreport.Priority(priority)).SetSLADueAt(report.FirstReportedAt.Add(SlaFor(priority)))
