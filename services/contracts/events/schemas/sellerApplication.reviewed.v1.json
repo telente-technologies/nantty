@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/sellerApplication.reviewed.v1.json",
+  "title": "SellerApplicationReviewed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "applicationId",
+    "accountId",
+    "decision",
+    "reason"
+  ],
+  "properties": {
+    "applicationId": {
+      "type": "string"
+    },
+    "accountId": {
+      "type": "string"
+    },
+    "decision": {
+      "enum": [
+        "approved",
+        "rejected"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "storeName": {
+      "type": "string"
+    },
+    "categoryId": {
+      "type": "string"
+    }
+  }
+}
