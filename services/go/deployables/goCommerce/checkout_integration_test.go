@@ -117,7 +117,7 @@ func createMinimalUsersTables(t *testing.T, admin *sql.DB, schema string) {
 		"CREATE TABLE " + q + "profiles (id uuid PRIMARY KEY, account_id uuid, kind text, handle text, display_name text, avatar_url text, verified bool, country_code text, status text)",
 		"CREATE TABLE " + q + "privacy_settings (account_id uuid PRIMARY KEY, analytics bool, personalization bool)",
 		"CREATE TABLE " + q + `shipping_addresses (id uuid PRIMARY KEY, account_id uuid, recipient_name text, phone text, line1 text, line2 text, postal_code text, details text,
-			country_code text, region_id uuid, admin_area_id uuid, city_id uuid, free_text_city text, free_text_state text)`,
+			country_code text, region_id uuid, admin_area_id uuid, city_id uuid, free_text_city text, free_text_state text, phone_sealed bytea)`,
 	}
 	for _, statement := range statements {
 		if _, err := admin.Exec(statement); err != nil {

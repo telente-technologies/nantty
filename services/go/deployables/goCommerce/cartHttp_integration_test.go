@@ -136,6 +136,7 @@ func TestSaleAttributionIsKeptFromCartToOrderAndCompletionEvents(t *testing.T) {
 	if err := services.RecordOrderPaid(ctx, harness.orders.Container, orderId); err != nil {
 		t.Fatal(err)
 	}
+	harness.orders.Container.Client.OrderGroup.UpdateOneID(orderId).SetStatus("delivered").ExecX(ctx)
 	if err := services.CompleteOrderGroup(ctx, harness.orders.Container, orderId, services.SystemActor, "Escrow released to the seller"); err != nil {
 		t.Fatal(err)
 	}
