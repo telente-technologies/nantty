@@ -57,6 +57,40 @@ func (_u *CreatorProgramMemberUpdate) SetNillableStatus(v *creatorprogrammember.
 	return _u
 }
 
+// SetSuspensionReason sets the "suspension_reason" field.
+func (_u *CreatorProgramMemberUpdate) SetSuspensionReason(v string) *CreatorProgramMemberUpdate {
+	_u.mutation.SetSuspensionReason(v)
+	return _u
+}
+
+// SetNillableSuspensionReason sets the "suspension_reason" field if the given value is not nil.
+func (_u *CreatorProgramMemberUpdate) SetNillableSuspensionReason(v *string) *CreatorProgramMemberUpdate {
+	if v != nil {
+		_u.SetSuspensionReason(*v)
+	}
+	return _u
+}
+
+// SetSuspendedAt sets the "suspended_at" field.
+func (_u *CreatorProgramMemberUpdate) SetSuspendedAt(v time.Time) *CreatorProgramMemberUpdate {
+	_u.mutation.SetSuspendedAt(v)
+	return _u
+}
+
+// SetNillableSuspendedAt sets the "suspended_at" field if the given value is not nil.
+func (_u *CreatorProgramMemberUpdate) SetNillableSuspendedAt(v *time.Time) *CreatorProgramMemberUpdate {
+	if v != nil {
+		_u.SetSuspendedAt(*v)
+	}
+	return _u
+}
+
+// ClearSuspendedAt clears the value of the "suspended_at" field.
+func (_u *CreatorProgramMemberUpdate) ClearSuspendedAt() *CreatorProgramMemberUpdate {
+	_u.mutation.ClearSuspendedAt()
+	return _u
+}
+
 // SetUpdatedByStaffID sets the "updated_by_staff_id" field.
 func (_u *CreatorProgramMemberUpdate) SetUpdatedByStaffID(v string) *CreatorProgramMemberUpdate {
 	_u.mutation.SetUpdatedByStaffID(v)
@@ -130,6 +164,11 @@ func (_u *CreatorProgramMemberUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "CreatorProgramMember.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SuspensionReason(); ok {
+		if err := creatorprogrammember.SuspensionReasonValidator(v); err != nil {
+			return &ValidationError{Name: "suspension_reason", err: fmt.Errorf(`ent: validator failed for field "CreatorProgramMember.suspension_reason": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.UpdatedByStaffID(); ok {
 		if err := creatorprogrammember.UpdatedByStaffIDValidator(v); err != nil {
 			return &ValidationError{Name: "updated_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "CreatorProgramMember.updated_by_staff_id": %w`, err)}
@@ -155,6 +194,15 @@ func (_u *CreatorProgramMemberUpdate) sqlSave(ctx context.Context) (_node int, e
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(creatorprogrammember.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.SuspensionReason(); ok {
+		_spec.SetField(creatorprogrammember.FieldSuspensionReason, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SuspendedAt(); ok {
+		_spec.SetField(creatorprogrammember.FieldSuspendedAt, field.TypeTime, value)
+	}
+	if _u.mutation.SuspendedAtCleared() {
+		_spec.ClearField(creatorprogrammember.FieldSuspendedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedByStaffID(); ok {
 		_spec.SetField(creatorprogrammember.FieldUpdatedByStaffID, field.TypeString, value)
@@ -209,6 +257,40 @@ func (_u *CreatorProgramMemberUpdateOne) SetNillableStatus(v *creatorprogrammemb
 	if v != nil {
 		_u.SetStatus(*v)
 	}
+	return _u
+}
+
+// SetSuspensionReason sets the "suspension_reason" field.
+func (_u *CreatorProgramMemberUpdateOne) SetSuspensionReason(v string) *CreatorProgramMemberUpdateOne {
+	_u.mutation.SetSuspensionReason(v)
+	return _u
+}
+
+// SetNillableSuspensionReason sets the "suspension_reason" field if the given value is not nil.
+func (_u *CreatorProgramMemberUpdateOne) SetNillableSuspensionReason(v *string) *CreatorProgramMemberUpdateOne {
+	if v != nil {
+		_u.SetSuspensionReason(*v)
+	}
+	return _u
+}
+
+// SetSuspendedAt sets the "suspended_at" field.
+func (_u *CreatorProgramMemberUpdateOne) SetSuspendedAt(v time.Time) *CreatorProgramMemberUpdateOne {
+	_u.mutation.SetSuspendedAt(v)
+	return _u
+}
+
+// SetNillableSuspendedAt sets the "suspended_at" field if the given value is not nil.
+func (_u *CreatorProgramMemberUpdateOne) SetNillableSuspendedAt(v *time.Time) *CreatorProgramMemberUpdateOne {
+	if v != nil {
+		_u.SetSuspendedAt(*v)
+	}
+	return _u
+}
+
+// ClearSuspendedAt clears the value of the "suspended_at" field.
+func (_u *CreatorProgramMemberUpdateOne) ClearSuspendedAt() *CreatorProgramMemberUpdateOne {
+	_u.mutation.ClearSuspendedAt()
 	return _u
 }
 
@@ -298,6 +380,11 @@ func (_u *CreatorProgramMemberUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "CreatorProgramMember.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SuspensionReason(); ok {
+		if err := creatorprogrammember.SuspensionReasonValidator(v); err != nil {
+			return &ValidationError{Name: "suspension_reason", err: fmt.Errorf(`ent: validator failed for field "CreatorProgramMember.suspension_reason": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.UpdatedByStaffID(); ok {
 		if err := creatorprogrammember.UpdatedByStaffIDValidator(v); err != nil {
 			return &ValidationError{Name: "updated_by_staff_id", err: fmt.Errorf(`ent: validator failed for field "CreatorProgramMember.updated_by_staff_id": %w`, err)}
@@ -340,6 +427,15 @@ func (_u *CreatorProgramMemberUpdateOne) sqlSave(ctx context.Context) (_node *Cr
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(creatorprogrammember.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.SuspensionReason(); ok {
+		_spec.SetField(creatorprogrammember.FieldSuspensionReason, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.SuspendedAt(); ok {
+		_spec.SetField(creatorprogrammember.FieldSuspendedAt, field.TypeTime, value)
+	}
+	if _u.mutation.SuspendedAtCleared() {
+		_spec.ClearField(creatorprogrammember.FieldSuspendedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedByStaffID(); ok {
 		_spec.SetField(creatorprogrammember.FieldUpdatedByStaffID, field.TypeString, value)

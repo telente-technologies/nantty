@@ -26,6 +26,10 @@ type CreatorProgramMember struct {
 	TierID string `json:"tier_id,omitempty"`
 	// Status holds the value of the "status" field.
 	Status creatorprogrammember.Status `json:"status,omitempty"`
+	// SuspensionReason holds the value of the "suspension_reason" field.
+	SuspensionReason string `json:"suspension_reason,omitempty"`
+	// SuspendedAt holds the value of the "suspended_at" field.
+	SuspendedAt *time.Time `json:"suspended_at,omitempty"`
 	// UpdatedByStaffID holds the value of the "updated_by_staff_id" field.
 	UpdatedByStaffID string `json:"updated_by_staff_id,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -38,9 +42,9 @@ func (*CreatorProgramMember) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case creatorprogrammember.FieldUserID, creatorprogrammember.FieldTierID, creatorprogrammember.FieldStatus, creatorprogrammember.FieldUpdatedByStaffID:
+		case creatorprogrammember.FieldUserID, creatorprogrammember.FieldTierID, creatorprogrammember.FieldStatus, creatorprogrammember.FieldSuspensionReason, creatorprogrammember.FieldUpdatedByStaffID:
 			values[i] = new(sql.NullString)
-		case creatorprogrammember.FieldCreatedAt, creatorprogrammember.FieldUpdatedAt:
+		case creatorprogrammember.FieldCreatedAt, creatorprogrammember.FieldSuspendedAt, creatorprogrammember.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case creatorprogrammember.FieldID:
 			values[i] = new(uuid.UUID)
@@ -88,6 +92,19 @@ func (_m *CreatorProgramMember) assignValues(columns []string, values []any) err
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = creatorprogrammember.Status(value.String)
+			}
+		case creatorprogrammember.FieldSuspensionReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field suspension_reason", values[i])
+			} else if value.Valid {
+				_m.SuspensionReason = value.String
+			}
+		case creatorprogrammember.FieldSuspendedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field suspended_at", values[i])
+			} else if value.Valid {
+				_m.SuspendedAt = new(time.Time)
+				*_m.SuspendedAt = value.Time
 			}
 		case creatorprogrammember.FieldUpdatedByStaffID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -148,6 +165,14 @@ func (_m *CreatorProgramMember) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("suspension_reason=")
+	builder.WriteString(_m.SuspensionReason)
+	builder.WriteString(", ")
+	if v := _m.SuspendedAt; v != nil {
+		builder.WriteString("suspended_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_by_staff_id=")
 	builder.WriteString(_m.UpdatedByStaffID)

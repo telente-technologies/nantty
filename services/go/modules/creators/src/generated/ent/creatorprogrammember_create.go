@@ -64,6 +64,34 @@ func (_c *CreatorProgramMemberCreate) SetNillableStatus(v *creatorprogrammember.
 	return _c
 }
 
+// SetSuspensionReason sets the "suspension_reason" field.
+func (_c *CreatorProgramMemberCreate) SetSuspensionReason(v string) *CreatorProgramMemberCreate {
+	_c.mutation.SetSuspensionReason(v)
+	return _c
+}
+
+// SetNillableSuspensionReason sets the "suspension_reason" field if the given value is not nil.
+func (_c *CreatorProgramMemberCreate) SetNillableSuspensionReason(v *string) *CreatorProgramMemberCreate {
+	if v != nil {
+		_c.SetSuspensionReason(*v)
+	}
+	return _c
+}
+
+// SetSuspendedAt sets the "suspended_at" field.
+func (_c *CreatorProgramMemberCreate) SetSuspendedAt(v time.Time) *CreatorProgramMemberCreate {
+	_c.mutation.SetSuspendedAt(v)
+	return _c
+}
+
+// SetNillableSuspendedAt sets the "suspended_at" field if the given value is not nil.
+func (_c *CreatorProgramMemberCreate) SetNillableSuspendedAt(v *time.Time) *CreatorProgramMemberCreate {
+	if v != nil {
+		_c.SetSuspendedAt(*v)
+	}
+	return _c
+}
+
 // SetUpdatedByStaffID sets the "updated_by_staff_id" field.
 func (_c *CreatorProgramMemberCreate) SetUpdatedByStaffID(v string) *CreatorProgramMemberCreate {
 	_c.mutation.SetUpdatedByStaffID(v)
@@ -149,6 +177,10 @@ func (_c *CreatorProgramMemberCreate) defaults() {
 		v := creatorprogrammember.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.SuspensionReason(); !ok {
+		v := creatorprogrammember.DefaultSuspensionReason
+		_c.mutation.SetSuspensionReason(v)
+	}
 	if _, ok := _c.mutation.UpdatedByStaffID(); !ok {
 		v := creatorprogrammember.DefaultUpdatedByStaffID
 		_c.mutation.SetUpdatedByStaffID(v)
@@ -190,6 +222,14 @@ func (_c *CreatorProgramMemberCreate) check() error {
 	if v, ok := _c.mutation.Status(); ok {
 		if err := creatorprogrammember.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "CreatorProgramMember.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.SuspensionReason(); !ok {
+		return &ValidationError{Name: "suspension_reason", err: errors.New(`ent: missing required field "CreatorProgramMember.suspension_reason"`)}
+	}
+	if v, ok := _c.mutation.SuspensionReason(); ok {
+		if err := creatorprogrammember.SuspensionReasonValidator(v); err != nil {
+			return &ValidationError{Name: "suspension_reason", err: fmt.Errorf(`ent: validator failed for field "CreatorProgramMember.suspension_reason": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.UpdatedByStaffID(); !ok {
@@ -255,6 +295,14 @@ func (_c *CreatorProgramMemberCreate) createSpec() (*CreatorProgramMember, *sqlg
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(creatorprogrammember.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.SuspensionReason(); ok {
+		_spec.SetField(creatorprogrammember.FieldSuspensionReason, field.TypeString, value)
+		_node.SuspensionReason = value
+	}
+	if value, ok := _c.mutation.SuspendedAt(); ok {
+		_spec.SetField(creatorprogrammember.FieldSuspendedAt, field.TypeTime, value)
+		_node.SuspendedAt = &value
 	}
 	if value, ok := _c.mutation.UpdatedByStaffID(); ok {
 		_spec.SetField(creatorprogrammember.FieldUpdatedByStaffID, field.TypeString, value)
@@ -337,6 +385,36 @@ func (u *CreatorProgramMemberUpsert) SetStatus(v creatorprogrammember.Status) *C
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *CreatorProgramMemberUpsert) UpdateStatus() *CreatorProgramMemberUpsert {
 	u.SetExcluded(creatorprogrammember.FieldStatus)
+	return u
+}
+
+// SetSuspensionReason sets the "suspension_reason" field.
+func (u *CreatorProgramMemberUpsert) SetSuspensionReason(v string) *CreatorProgramMemberUpsert {
+	u.Set(creatorprogrammember.FieldSuspensionReason, v)
+	return u
+}
+
+// UpdateSuspensionReason sets the "suspension_reason" field to the value that was provided on create.
+func (u *CreatorProgramMemberUpsert) UpdateSuspensionReason() *CreatorProgramMemberUpsert {
+	u.SetExcluded(creatorprogrammember.FieldSuspensionReason)
+	return u
+}
+
+// SetSuspendedAt sets the "suspended_at" field.
+func (u *CreatorProgramMemberUpsert) SetSuspendedAt(v time.Time) *CreatorProgramMemberUpsert {
+	u.Set(creatorprogrammember.FieldSuspendedAt, v)
+	return u
+}
+
+// UpdateSuspendedAt sets the "suspended_at" field to the value that was provided on create.
+func (u *CreatorProgramMemberUpsert) UpdateSuspendedAt() *CreatorProgramMemberUpsert {
+	u.SetExcluded(creatorprogrammember.FieldSuspendedAt)
+	return u
+}
+
+// ClearSuspendedAt clears the value of the "suspended_at" field.
+func (u *CreatorProgramMemberUpsert) ClearSuspendedAt() *CreatorProgramMemberUpsert {
+	u.SetNull(creatorprogrammember.FieldSuspendedAt)
 	return u
 }
 
@@ -443,6 +521,41 @@ func (u *CreatorProgramMemberUpsertOne) SetStatus(v creatorprogrammember.Status)
 func (u *CreatorProgramMemberUpsertOne) UpdateStatus() *CreatorProgramMemberUpsertOne {
 	return u.Update(func(s *CreatorProgramMemberUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetSuspensionReason sets the "suspension_reason" field.
+func (u *CreatorProgramMemberUpsertOne) SetSuspensionReason(v string) *CreatorProgramMemberUpsertOne {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.SetSuspensionReason(v)
+	})
+}
+
+// UpdateSuspensionReason sets the "suspension_reason" field to the value that was provided on create.
+func (u *CreatorProgramMemberUpsertOne) UpdateSuspensionReason() *CreatorProgramMemberUpsertOne {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.UpdateSuspensionReason()
+	})
+}
+
+// SetSuspendedAt sets the "suspended_at" field.
+func (u *CreatorProgramMemberUpsertOne) SetSuspendedAt(v time.Time) *CreatorProgramMemberUpsertOne {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.SetSuspendedAt(v)
+	})
+}
+
+// UpdateSuspendedAt sets the "suspended_at" field to the value that was provided on create.
+func (u *CreatorProgramMemberUpsertOne) UpdateSuspendedAt() *CreatorProgramMemberUpsertOne {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.UpdateSuspendedAt()
+	})
+}
+
+// ClearSuspendedAt clears the value of the "suspended_at" field.
+func (u *CreatorProgramMemberUpsertOne) ClearSuspendedAt() *CreatorProgramMemberUpsertOne {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.ClearSuspendedAt()
 	})
 }
 
@@ -720,6 +833,41 @@ func (u *CreatorProgramMemberUpsertBulk) SetStatus(v creatorprogrammember.Status
 func (u *CreatorProgramMemberUpsertBulk) UpdateStatus() *CreatorProgramMemberUpsertBulk {
 	return u.Update(func(s *CreatorProgramMemberUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetSuspensionReason sets the "suspension_reason" field.
+func (u *CreatorProgramMemberUpsertBulk) SetSuspensionReason(v string) *CreatorProgramMemberUpsertBulk {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.SetSuspensionReason(v)
+	})
+}
+
+// UpdateSuspensionReason sets the "suspension_reason" field to the value that was provided on create.
+func (u *CreatorProgramMemberUpsertBulk) UpdateSuspensionReason() *CreatorProgramMemberUpsertBulk {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.UpdateSuspensionReason()
+	})
+}
+
+// SetSuspendedAt sets the "suspended_at" field.
+func (u *CreatorProgramMemberUpsertBulk) SetSuspendedAt(v time.Time) *CreatorProgramMemberUpsertBulk {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.SetSuspendedAt(v)
+	})
+}
+
+// UpdateSuspendedAt sets the "suspended_at" field to the value that was provided on create.
+func (u *CreatorProgramMemberUpsertBulk) UpdateSuspendedAt() *CreatorProgramMemberUpsertBulk {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.UpdateSuspendedAt()
+	})
+}
+
+// ClearSuspendedAt clears the value of the "suspended_at" field.
+func (u *CreatorProgramMemberUpsertBulk) ClearSuspendedAt() *CreatorProgramMemberUpsertBulk {
+	return u.Update(func(s *CreatorProgramMemberUpsert) {
+		s.ClearSuspendedAt()
 	})
 }
 
