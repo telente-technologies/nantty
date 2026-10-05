@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -36,9 +37,10 @@ func FindStoreAccess(ctx context.Context, deployed *container.Container, account
 	if err != nil {
 		return commerceports.StoreAccess{}, false, err
 	}
+	markMemberActive(ctx, deployed, chosen)
 	return commerceports.StoreAccess{
 		StoreId: row.ID, OwnerAccountId: row.OwnerAccountID, Role: chosen.Role, Permissions: chosen.Permissions,
-		Currency: money.CurrencyCode(row.Currency), CountryCode: row.CountryCode, StoreStatus: row.Status,
+		Currency: money.CurrencyCode(row.Currency), CountryCode: row.CountryCode, StoreStatus: row.Status, StoreName: row.Name, Timezone: row.Timezone,
 	}, row.Status != "closed", nil
 }
 
@@ -86,4 +88,12 @@ func CategoryViewOf(row *ent.Category) types.CategoryView {
 	return types.CategoryView{
 		Id: row.ID.String(), Name: row.Name, Description: row.Description, ParentId: idString(row.ParentID), Slug: row.Slug, Depth: row.Depth, StoreId: idString(row.StoreID),
 	}
+}
+
+func markMemberActive(ctx context.Context, deployed *container.Container, member *ent.StoreMember) {
+	now := deployed.Now()
+	if member.LastActiveAt != nil && now.Sub(*member.LastActiveAt) < 10*time.Minute {
+		return
+	}
+	_ = deployed.Client.StoreMember.UpdateOneID(member.ID).SetLastActiveAt(now).Exec(ctx)
 }

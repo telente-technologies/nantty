@@ -10,7 +10,6 @@ import (
 	"zudomart/modules/ledger/src/loaders"
 )
 
-// The admin gift.shareTiers setting is volume based and owns the platform default; a staff-granted member tier can only raise the share.
 func (program CreatorProgram) applyAdminGiftShareTiers(ctx context.Context, executor databases.ExecutorQuerier, userId string, memberTierShareBps int64) (int64, error) {
 	tiers, found := program.Container.Resources.Platform.ReadGiftShareTiers(ctx)
 	if !found {

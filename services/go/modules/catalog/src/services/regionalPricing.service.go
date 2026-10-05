@@ -22,7 +22,6 @@ func MarketCurrencyForCountry(country string) (string, bool) {
 	return viewerregion.CurrencyForCountry(country)
 }
 
-// AllHaveRegionalPrice reports whether every variant carries a price in the currency: a seller's lines in one order must share one currency.
 func AllHaveRegionalPrice(variants []*ent.ProductVariant, currency string) bool {
 	if len(variants) == 0 {
 		return false
