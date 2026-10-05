@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { Avatar } from "@/components/ui/media";
 import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
+import { RetryButton, InlineLink } from "@/components/ui/controls";
 import { messagesService } from "@/services/messages.service";
 import { useQuery } from "@tanstack/react-query";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
@@ -116,7 +116,7 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
           </>
         )
       ) : conversations.length === 0 ? (
-        <EmptyState icon={<AppIcon name="chatCircle24" size={28} />} title="No chats yet" description="Message a seller or a friend to get started." />
+        <EmptyState icon={<AppIcon name="chatCircle24" size={28} />} title="No chats yet" description="Message a seller or a friend to get started." action={<InlineLink href="/explore">Find people</InlineLink>} />
       ) : (
         <ul className={styles.list}>
           {conversations.map((conversation) => (

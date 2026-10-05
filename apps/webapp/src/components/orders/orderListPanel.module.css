@@ -133,7 +133,7 @@
   align-items: center;
   justify-content: center;
   min-height: 42px;
-  padding-inline: 24px;
+  padding-inline: var(--space-6);
   border-radius: var(--radius-pill);
   background: var(--color-brand-solid);
   color: var(--color-on-brand);

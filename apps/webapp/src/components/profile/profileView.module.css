@@ -23,7 +23,7 @@
   position: relative;
   margin-top: -52px;
   width: fit-content;
-  padding: 4px;
+  padding: var(--space-1);
   border-radius: 50%;
   background: var(--surface-app);
 }
@@ -31,7 +31,7 @@
 .identity {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .nameRow {

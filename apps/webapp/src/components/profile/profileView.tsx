@@ -22,6 +22,7 @@ import type { User } from "@/types";
 
 import styles from "./profileView.module.css";
 import { AppIcon } from "@/components/ui/appIcon";
+import { SearchScopeRegistrar } from "@/components/search/searchScopeRegistrar";
 
 function Stat({ label, value }: { readonly label: string; readonly value: number }) {
   return (
@@ -58,6 +59,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
 
   return (
     <div className={styles.page}>
+      <SearchScopeRegistrar scope={`profile:${user.id}`} label={`@${user.username}`} />
       <div className={styles.banner}>
         {user.bannerUrl ? <MediaImage src={user.bannerUrl} alt="" sizes="100vw" priority /> : null}
       </div>
