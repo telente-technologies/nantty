@@ -18,5 +18,7 @@ func MountAudiencesRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("PATCH "+base+"/audiences/{audienceId}", authenticated(controller.Rename))
 	mux.Handle("DELETE "+base+"/audiences/{audienceId}", authenticated(controller.Delete))
 	mux.Handle("POST "+base+"/estimates/audience", authenticated(controller.Estimate))
+	mux.Handle("GET /api/v1/ads/locations", authenticated(controller.SearchLocations))
+	mux.Handle("GET /api/v1/ads/behaviours", authenticated(controller.ListBehaviours))
 	mux.Handle("POST /internal/v1/ads/audiences/membership", middlewares.Internal(deployed)(controller.Membership))
 }
