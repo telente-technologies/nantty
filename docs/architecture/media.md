@@ -86,3 +86,22 @@ Rules: the client uploads **only** to quarantine; nothing in quarantine is ever 
 | M5 | Transcoding in app process | ffmpeg in monolith | does not scale, blocks | SQS-driven Fargate workers (or MediaConvert later). **MVP** workers, MediaConvert **Scale stage** | Medium | Low | P2 |
 | M6 | Live recording and gift asset pipelines undefined | schema columns only | live replay and gift catalogue depend on it | add purposes `live_recording`, `gift_animation`; egress webhook creates asset record. **Near term** | Medium | Low | P2 |
 | M7 | Media cost | none | video storage and egress dominate cost | lifecycle rules (quarantine 1 day, abandoned uploads 7 days), ladder cap, CloudFront cache hit ratio alarm. **Near term** | Low | Low | P3 |
+
+## 7. Branded downloads (4 Oct 2026, [plans.md §57](../plans.md))
+
+Saved copies of posts and clips carry the Zudomart logo and the owner's `@username`, like X and TikTok.
+
+| Step | Detail |
+| --- | --- |
+| Client | `POST /api/v1/posts/:postId/media/:mediaId/download` (auth, gateway `mediaDownload` 40/min per account) → `{ status: ready\|processing, progress, url?, expiresAt?, fileName?, contentType?, sizeBytes?, retryAfterMs? }`. Clients poll while `processing`, then save the signed URL (mobile: expo-file-system download with byte progress, then expo-media-library `Asset.create`, share sheet if photo permission is refused; webapp: anchor download, `Content-Disposition: attachment`) |
+| ts-social | Checks the viewer can see the post (`loadPostVisibleToViewer`: blocks either way → 404, private account, followers-only, age-gated, expired), then `decidePostDownloadPermission`: owner always allowed; others refused for stories, subscriber-only posts, private accounts, moderation-restricted posts and owners with `download_settings.allowDownloads = false` (default on, `GET/PUT /api/v1/me/download-settings`). `PostView.viewerCanDownload` tells clients to hide the button |
+| ts-media | `POST /internal/v1/media/:mediaId/download-variant { requesterId, watermarkHandle, stripAudio? }` (internal token). Only `post`, `clip`, `story` images and videos in `ready` state. Cached in `media_download_variants` per `(assetId, cacheKey)` where `cacheKey = sha256(renderVersion, sourceKey, handle, stripAudio)`, so a username change, a re-render or a copyright mute produces a new copy |
+| Images | Rendered inline with sharp: bottom-right badge (logo + `zudomart` + `@username`), 72% opacity, height 6% of the short side (24–120 px), JPEG q88, original size kept |
+| Videos | Job `media.renderDownloadVariant` on `jobs-media`: one ffmpeg pass, watermark PNG (rendered by sharp from SVG, 7.5% of the short side, 78% opacity) moving TL → TR → BR → BL every 4 s so a single crop can't remove it, then a 1.8 s end card (brand blue, logo fading and rising in, `@username`). H.264 CRF 23 + AAC 128k, metadata stripped, `+faststart`. Up to 3 attempts; a failed copy retries after 15 minutes. Progress is estimated from render start and clip length |
+| Audio | Copyright-muted clips (`muted/` variants) and `stripAudio` requests use a silent track; source audio is never read. Muting discards cached downloads |
+| Storage | Always the private bucket under `p/<mediaId>/download/<cacheKey>.<ext>`, KMS-encrypted, 5-minute signed GET with an attachment file name `zudomart-<handle>-<id8>.<ext>`, every issue written to `media_access_logs` (`reason: branded_download`). Deleting the media deletes the copies |
+| Runtime | Alpine image installs `fontconfig font-dejavu` so SVG text renders. Without ffmpeg the render fails, and after 3 attempts the request returns 422 `DOWNLOAD_RENDER_FAILED` for 15 minutes |
+
+**Screenshots can't be branded.** iOS and Android give apps no way to change the screenshot image the OS saves. On mobile, `expo-screen-capture`'s screenshot listener (iOS, and Android 14+ through `DETECT_SCREEN_CAPTURE`) runs only while a post detail or the active clip is on screen and shows a non-blocking "Share this post?" card that offers the link or a branded copy. The screenshot itself stays unbranded, older Android versions get no event, and the webapp can't detect screenshots at all.
+
+Not built: pre-rendering at publish (copies are made on the first request), real ffmpeg progress (`-progress` needs a streaming runner), and an animated logo asset beyond the fade and slide.

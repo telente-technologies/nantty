@@ -48,7 +48,7 @@ The Blue+Gold bundle (15% off Gold, max 3 businesses, never stacks with yearly, 
 
 ### 2.1 Checkmark share on a rejected verification
 
-When a seller plan (Pro, Business) or Premium is bought and the identity check is rejected, the plan keeps running and only the checkmark's share of the current period's payment is refunded: the standalone checkmark price in the buyer's region, channel and interval (Blue for Premium, Gold-only for Pro and Business), capped at the amount paid (so a discounted bundle tier never refunds more than it cost). Example, Nigeria on web: Pro rejected refunds ₦3,000 of ₦5,000 (monthly); Premium refunds ₦2,500 of ₦4,500. Standalone Blue, Gold-only, Black and bundle tiers get the full refund. Renewals still charge the full plan price until a checkmark-less renewal price exists (follow-up in plans.md §53.6).
+When a seller plan (Pro, Business) or Premium is bought and the identity check is rejected, the plan keeps running and only the checkmark's share of the current period's payment is refunded: the standalone checkmark price in the buyer's region, channel and interval (Blue for Premium, Gold-only for Pro and Business), capped at the amount paid (so a discounted bundle tier never refunds more than it cost). Example, Nigeria on web: Pro rejected refunds ₦3,000 of ₦5,000 (monthly); Premium refunds ₦2,500 of ₦4,500. Standalone Blue, Gold-only, Black and bundle tiers get the full refund. This refund happens once, for the current period. Renewals are always at the full plan price, whatever the verification status (owner, 4 Oct 2026); receipts still list the checkmark line for transparency. Renewal and trial rules: [billing/renewalsAndTrials.md](./billing/renewalsAndTrials.md).
 
 ### 2.2 Price points
 

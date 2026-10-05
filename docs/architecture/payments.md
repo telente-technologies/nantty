@@ -203,6 +203,26 @@ sequenceDiagram
 
 Refund source: Zudomart's Paystack balance (escrow covers escrow groups). A direct share already settled to the seller becomes seller debt, recovered from later escrow payouts, and the store is escrow-only until it is repaid. Whether Paystack reverses a subaccount share on refund or chargeback is UNCONFIRMED. Chargebacks freeze remaining escrow, notify the seller and feed risk signals (fraud.md). Source: `docs/integrations/paystack.md` sections 6.5 and 11.
 
+### 4.2 Fee lines: direct vs escrow (4 Oct 2026)
+
+Product commission is 0%. Buyers pay nothing extra. The seller sees two separate fee lines per order group:
+
+| Line | Escrow group | Direct group (verified store only) |
+|---|---|---|
+| Escrow fee | 1.5% of the group total including shipping (1% for Business plan), deducted from the payout at release, none on refunded amounts | none |
+| Paystack processing fee | allocated pro rata across the checkout and deducted from the payout | borne by the seller: the dynamic split sends `groupTotal - allocatedPaystackFee`, `bearer_type: account` |
+
+Unverified stores are escrow only. All amounts are int64 minor units. Detail: `checkoutPaymentFlowPlan.md` section 2.2.
+
+### 4.3 Verification checkmark share refund
+
+When an identity check is rejected, `subscriptions` emits `verificationCase.refundRequested`; go-money refunds on the original charge:
+
+- Standalone Blue, Gold-only, Black and bundle tiers: the full charge, and the subscription is disabled.
+- Seller Pro, Seller Business and Premium: the plan keeps running and only the checkmark share is refunded, capped at the amount paid. Share = the standalone checkmark price for the buyer's region, channel and interval (Blue for Premium, Gold-only for Pro and Business), `regionpricing.CheckmarkShareMinor`. Example (NG, web, monthly): Pro refunds 300000 of 500000 minor units.
+- The ledger entry is posted first, under idempotency key `verification-share:{caseId}`, then a Paystack partial refund is requested. The Paystack subscription is not cancelled. Google Play and App Store purchases are flagged for manual review (no partial refund API wired).
+- Outcome events carry `refundScope` (`full` or `checkmark_share`) and `refundAmount`. Code: `services/go/modules/subscriptions/src/modules/billing/services/verificationRefunds.service.go`, `checkmarkShare.service.go`. Test: `services/go/modules/payments/payments.checkmarkShareRefund_integration_test.go`. Product rules: `docs/pricing.md` section 2.1.
+
 ## 5. Digital economy flows
 
 ### 5.1 Coin purchase in app (IAP)

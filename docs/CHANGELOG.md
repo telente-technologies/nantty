@@ -6,6 +6,210 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
+## Seller dashboard backend (5 Oct, night) - 56 dashboard calls backed; Go tests, gateway 1,108 tests, seller contracts 26/26, apiSmoke seller journeys 24/24
+
+Report: [verification/apiContractCheck.md](./verification/apiContractCheck.md), section "Seller backend pass".
+
+| app | change |
+|---|---|
+| backend | go-commerce: store settings and storefront, staff (invite by app user, accept in the app via `/stores/team-requests`), store audit log, dashboard, sales analytics (plan-clamped history; breakdowns Pro), delivery areas, manual customers and segments, marketing overview and product options, daily store traffic rollups, a relay for wallet/finance. go-money: seller wallet (balances, transactions, CSV and monthly statements, payouts with fee on top, two-step payout account lookup, payout schedules with a runner) and finance (escrow, weekly settlements, fees, refunds, summary). New commerce ports: store audit trail and reader, reward rules, delivery area names, stock alerts, store insights. Migrations: `catalog/20261005035531_add_store_settings_team_and_audit`, `catalog/20261005044212_add_store_daily_traffic`, `wallet/20261005041401_add_seller_payout_resolutions_and_schedules`, `orders/20261005043336_add_delivery_areas_customer_profiles_and_segments`. Gateway routes and limits `sellerPeopleSearch`, `sellerTeamWrite`, `sellerMoneyWrite` |
+| seller | Payout onboarding calls `/payments/payout-onboarding/me/*` and `/payments/payout-fees` (BFF forwards them, owner only). Store rewards save through `PUT /seller/marketing/rewards/settings`. `.env.example` lists the newly backed domains in `SELLER_REAL_API_PREFIXES`. New contract list `sellerDomains.contract.ts` (22 endpoints) checked against the mocks |
+| tooling | apiSmoke `sellerDashboardJourney` (product, stock, order, fulfil, finance and payout view). The sandbox launcher also relaxes the new seller rate limits |
+
+Still mocked: affiliates, brands workspace, conversations, developers, integrations, security sessions, subscription details/verify and trial verify/cancel, verification, preferences, consents, ads summary, product import; webapp `/videos`, `/trending`, `/topics`, `/mart/highlights`, `/creators/:id/subscription-plans`.
+
+---
+
+## End-to-end QA beyond the happy path (5 Oct, overnight) - apiSmoke 89/89, Go 20/20 modules, all vitest/pytest/mix, tsc clean in 7 apps
+
+Report: [verification/finalCheckReport.md](./verification/finalCheckReport.md) section 0.6.
+
+| app | change |
+|---|---|
+| backend | 10 new apiSmoke journeys (35 tests) for signup, social, checkout, selling, gifts, subscriptions, verification, downloads and deletion, each with the unhappy variants. Fixed: inventory adjustments/transfers 500 (idempotency read), cart stock/availability, paying a cancelled order (`ORDER_CANCELLED`), comment vs post-delete race, deactivated accounts locked out (now reactivated on login; executed deletions get `ACCOUNT_DELETED`), notification `url`, ads invites by email or username, `profiles.theme` on `PATCH /users/me/preferences`. Migrations: `users/20261005022135_add_profile_theme`, `orders/20261005030000_grant_order_status_read_to_money` |
+| webapp | Guests get a sign-in prompt (`SignInRequiredState`) instead of an error on the live list, live chat, gift tray; who-to-follow hidden for guests; auth-only reads removed from the guest allow-list |
+| ads | Pending invites show `@username` (the backend never returns the invitee's email) |
+| tooling | Sandbox launcher starts realtime and intelligence, wires live/ads money gRPC and seller-plan entitlements; SeaweedFS volume limits raised in local compose; fake Paystack can save a declining card |
+
+---
+
+## API contract check (5 Oct) - live contracts + apiSmoke against the sandbox gateway; mobile jest, web contract tests, tsc
+
+Report: [verification/apiContractCheck.md](./verification/apiContractCheck.md). Every frontend call (about 1,050) was matched against the routes the backend actually serves.
+
+| app | change |
+|---|---|
+| mobile | Privacy export and deletion now call `/users/me/data-exports` and `/users/me/deletion-request {confirm, reason}`. Previously they used `/privacy/*` paths the backend does not serve, and the mock POST path did not match the service. Checkout: `initialize` no longer sends `saveCard` (rejected); the saved-card payment now initialises the payment, then calls `POST /payments/saved-cards/charges {paymentReference, savedCardId}`. Upload-intent `maximumSize` and availability `message` are optional in the contracts |
+| webapp | Cookie banner sends `PUT /users/me/consents` (was `POST /consents`, which does not exist). Data export and deletion use the backend paths. Coin purchase drops `channel` |
+| studio | Cookie banner sends `PUT /users/me/consents` |
+| ads | Duplicate campaign, create ad set and create ad send the `Idempotency-Key` go-ads requires |
+| admin | Staff sign-in BFF follows the backend: `challengeToken`, `status`, `/mfa/enroll/start`, `/mfa/enroll/confirm`, `staff`. Step-up and verify send only `{code}`. Mock and `apiContract.md` updated |
+| backend tooling | New `apiSmoke/tests/frontendContracts.smoke.test.ts` runs the mobile, webapp and studio contract lists and the seller, ads and admin envelopes against the real gateway. Sandbox launcher uses the key the fake Paystack accepts |
+
+Open items, listed in the report: ads invites (email vs username), theme preference has no backend field, webapp guest reads that need auth, seller business-documents upload flow, admin reserved usernames/payouts/ledger paths, and the mock-only areas (seller dashboard is the largest).
+
+---
+
+## Seller, Studio, Ads, Admin and web quality pass (5 Oct) - tsc on all five apps, seller/studio/ads/admin contract tests
+
+| app | change |
+|---|---|
+| web-kit | New `OfflineBanner`, `useIsOnline`, `useOnReconnect`, `isBrowserOffline`. Wordmark hides the symbol too when it collapses to the tile under 380 px |
+| seller | Accounting export button links to Settings › Integrations (Business) or plans instead of a toast. Top-bar Help link had no visible content below 1100 px; now has an icon and label. Symbol tile in the compact top bar, symbol in sidebar, auth, gate and footer marks. `LoadingBlock` is a skeleton, new workspace `loading.tsx`, `ErrorCallout` with retry on 38 views, queries refetch on reconnect, offline copy. Modals and store menus are bottom sheets under 768 px. Tables are keyboard-scrollable regions. Removed "till" wording (no POS) |
+| studio | Lives page gets skeleton, error with retry and a real empty state. Control room separates "not found" from network errors and shows start/end/rotate/pin/chat failures. Overlay editor: save shows progress and no longer reverts layers after saving; discard clears selection. Earnings and payout setup get skeletons and retry. Offline banner in shell and sign-in (not the OBS overlay). Nav shows the current page and wraps on phones; symbol in top bar and sign-in. Split three CSS modules over 300 lines |
+| ads | Dialogs, user menu, account switcher and column picker are bottom sheets under 768 px; user menu closes on outside tap and Escape. Account switcher shows a retry when accounts fail to load. Invite error has retry. Queries refetch on reconnect. Symbol in rail, sign-in, standalone frame and 404 |
+| admin | Sign-out failure uses a toast instead of `window.alert`. MFA key load has retry. Modal and side panel are bottom sheets under 768 px (side panel gets a scrim). Phone layouts for trust filters, flags, plans and revenue rules. Symbol in sidebar, auth card and compact top bar. Offline banner, reconnect refetch |
+| web | Dashboard copy no longer says it is for verified Gold businesses: it is free for every seller, staff accounts are Pro and Business. Waitlist form reports offline. Header collapses to the symbol tile under 380 px. Offline banner |
+| all five | Focus ring is a 2 px outline with offset and forced-colours support; reduced motion stops infinite animations; `overflow-x: clip`; auto-fill grids use `min(100%, …)`; on-grid spacing and font sizes moved to `--space-*` and `--fs-*`; leftover old-blue literals replaced with the Ultramarine scale |
+
+---
+
+## Webapp quality pass (5 Oct) - webapp tsc, tsx units + contracts
+
+| area | change |
+|---|---|
+| dead controls | Removed "Request a call" on signup (it only resent the email code; email-only signup, no voice OTP in the auth API). Clip comment links now open (mock post lookup resolves clip ids). Wallet rail link goes to Orders for non-creators instead of the Creator Program wall. Live page no longer says gifts and chat are app-only. Creator Program empty state offers the app store badges |
+| states | Offline banner in the shell; `ErrorState` switches to offline copy and queries refetch on reconnect. Layout-matched skeletons (`ui/pageSkeletons`) replace spinners on profile, order, analytics, creator, store rewards, addresses, reports, data export, privacy choices, verification, chat and support threads. New `loading.tsx` for product, store, profile, help, settings, orders, chats, notifications. Support tickets, account status and notification settings get skeleton, error with retry and empty states. Dead-end empty states get an action |
+| sheets | New `usePopoverMenu` + `popoverMenu.module.css`: content, chat, account and feed-mode menus are bottom sheets under 768 px with scrim, `role="menu"`, arrow/Home/End keys, Escape returns focus |
+| a11y | Focus ring is a 2 px outline with offset (no clipping, forced-colours aware). OTP boxes and reply composer show focus. White-on-brand help buttons and bubbles use `--color-brand-solid` (dark mode AA). Clip stepping respects reduced motion |
+| responsive + tokens | `overflow-x: clip` and `overflow-wrap` on the page; auto-fill grids use `min(100%, …)`. Raw font sizes and on-grid px spacing moved to tokens; top bar wordmark 20 px |
+| structure | Split `thread.module.css` and `policyUpdate.module.css` under 300 lines; extracted `useResendCountdown` from signup |
+
+---
+
+## README brand refresh (5 Oct) - docs only
+
+README header now uses the Call and response symbol and Signature brush lockup from `docs/assets/brand/` (SVG and PNG, light and dark via `<picture>`). Status badge and diagram accent use Ultramarine `#3A2BFF`. Feature lists now cover the composers, tagged people, scoped search, branded downloads, bottom sheets, Mart sticky categories and rotating banners, renewals and trials, verification and the security audit link.
+
+---
+
+## Code rules cleanup (5 Oct) - go build/vet, tsc
+
+Removed full-line comments from 108 hand-written Go and TypeScript files (kept `//go:` directives, eslint/ts directives, copyright legal notice). Deleted stray scratch scripts `apps/mobile/src/m1.py` and `m2.py`. Replaced the text bullet in `accountHealthItems.tsx` with `BulletLine`. Split `apps/mobile/src/types/models.type.ts` (wallet and seller types to `walletSeller.type.ts`) and `apps/webapp/src/types/social.type.ts` (copyright claim types to `copyrightClaim.type.ts`). Verified: go build and go vet on every Go module, tsc on all TS services and apps. pytest for intelligence could not run locally (missing `pyarrow`); mix unavailable.
+
+---
+
+## Brand: Call and response symbol, Signature wordmark, Ultramarine (4 Oct) — media vitest, email vitest, mobile + webapp tsc
+
+Guide: [design/brandWordmark.md](./design/brandWordmark.md). Designer polish and trademark search still pending.
+
+| area | change |
+|---|---|
+| tokens | Brand becomes Ultramarine `#3A2BFF` (scale 50–900, hover, pressed, tint). Dark mode uses `#9C95FF` for links and `#4E40FF` for buttons. AA checked on white and on `#0E0E10`/`#2C2C2C` |
+| web-kit | Default wordmark `signatureBrush` (optical-small cut ≤28 px). `ZudomartLogoMark` is now the symbol tile. New `ZudomartSymbol` and `withSymbol` lockup |
+| mobile | New iOS icon, Android adaptive icon (foreground, background, monochrome), splash and favicon in `app.json`; **needs a new native build**. Theme reads the brand palette from tokens. Home bar wordmark at 20 px, symbol tile below 380 pt |
+| web apps | Favicons, apple-touch, PWA and maskable icons under `public/brand/` for webapp, web, studio, seller, ads and admin. Manifests, metadata and proxy matchers updated. Landing headers use the lockup |
+| media | Download badge is the symbol tile plus the wordmark, rasterised with sharp and cached. The end card ripples the two halves together, then fades in the wordmark |
+| emails | Header lockup `brand/zudomartLockup@2x.png` from the email asset base, with the text fallback |
+| docs | README lockup and brand guide |
+
+## Scoped search (4 Oct) — ts-search vitest + tsc, mobile jest + tsc, webapp tsx + tsc
+
+Plan: [plans.md §58](./plans.md).
+
+| area | change |
+|---|---|
+| ts-search | `scope` = `global\|mart\|store:<uuid>\|profile:<uuid>` and `type` (tab) on `GET /api/v1/search`, filtered server-side with the existing privacy, block, suspension, minor and shipping-region rules; `{data, nextCursor, scope}`; legacy `scope=<tab>`/`all` kept. Recent searches per scope. Migration `20261004170000_search_scoped_search` (`documents.store_id`, `recent_searches.scope`). Tests `tests/search/scopedSearch.test.ts` plus route tests |
+| mobile | Search opens scoped: Feed global, Mart products only, store page that store, profile that user; removable "In: …" chip in the field, scope-specific placeholder and tabs, paged results, recent searches per scope; mocks (`search.mock.ts`) and `types/search.type.ts` |
+| webapp | Top-bar search reads the page's scope (`/mart`, store pages, profiles) with the same chip; `/explore` takes `scope`, `scopeLabel` and `type`, shows paged results and per-scope recents; mocks and contract test |
+| docs | plans §58, backendPlan "Scoped search" |
+
+## Branded downloads and screenshot share prompt (4 Oct) — media + social + gateway vitest, mobile jest + tsc, webapp tsx + tsc
+
+Plan: [plans.md §57](./plans.md).
+
+| area | change |
+|---|---|
+| ts-media | `POST /internal/v1/media/:mediaId/download-variant`; `media_download_variants` table + migration; sharp image badge (logo + @username, bottom-right); job `media.renderDownloadVariant` (ffmpeg watermark moving between corners every 4 s, 1.8 s animated end card, silent track for copyright-muted clips); private-bucket copies with 5-min signed URLs and access log; discarded on delete and mute; Dockerfile adds `fontconfig font-dejavu`; tests `tests/downloads/*` |
+| ts-social | `POST /api/v1/posts/:postId/media/:mediaId/download` (visibility, blocks, stories, subscriber-only, private accounts, owner setting), `GET/PUT /api/v1/me/download-settings`, `download_settings` table + migration, `PostView.viewerCanDownload`; tests `tests/downloads/postMediaDownload.test.ts` |
+| gateway | `/api/v1/me/download-settings` → social; `mediaDownload` rate limit (40/min per account) |
+| mobile | Download in the post and clip `⋯` menus and the image viewer; `MediaDownloadHost` progress card with cancel; saves via expo-media-library (share sheet fallback); screenshot listener (expo-screen-capture) on post detail and the active clip shows a non-blocking "Share this post?" card; Settings → Privacy "Allow downloads"; mocks (mock media now have ids); new deps `expo-media-library`, `expo-screen-capture` (needs a new dev build) |
+| webapp | Download in the post and clip `⋯` menus with a progress card, Settings → Privacy "Allow downloads", service, mocks (mock media now have ids), util tests |
+| mobile | Chat document "Open or save" is a bottom sheet instead of a centred alert |
+| ts-media | Render checked against Alpine ffmpeg 6.1; watermark gets a translucent dark backdrop for legibility on light footage |
+| docs | architecture/media.md §7 (including the screenshot limitation), backendPlan "Branded downloads", plans §57 |
+
+## Contextual sheets and wordmark (4 Oct)
+
+| area | change |
+|---|---|
+| mobile | `BottomSheet`: swipe-down to dismiss on the handle and title, larger handle zone, 90% max height. The tagged-people list, Views explainer, message reaction picker and Share chooser are now bottom sheets instead of centred dialogs |
+| mobile | Home bar shows the Zudomart wordmark beside Feed / Mart, and the logo mark below 380 pt |
+| webapp | `Dialog layout="sheet"` is a bottom sheet below 768 px with drag-to-close and stacked actions. The Views explainer, tagged people and Who can reply now use it. The top bar collapses to the logo mark below 380 px |
+| web-kit | `ZudomartWordmark` draws outlined Bricolage Grotesque paths, adds the `mono` tone, `ZudomartLogoMark` and `collapseToMarkOnSmallScreens` |
+| docs | `design/brandWordmark.md`, plans §56 |
+
+## Mart hero carousel and sticky categories (4 Oct) — mobile jest + tsc, webapp tsx contracts + tsc
+
+Plan: [plans.md §55](./plans.md).
+
+| area | change |
+|---|---|
+| mobile | Mart hero is a ranked highlights carousel (`martHighlightsCarousel.tsx`, `martHighlights.hook.ts`): 5 s auto-advance, pauses on touch, off-screen, unfocused, backgrounded, screen reader; Reduce Motion stops it; dots; reason label per slide; refresh on pull and after 5 min away |
+| mobile | Category tabs pin under the header via `stickyHeaderIndices`; selected tab kept in view |
+| mobile, webapp | `GET /api/v1/mart/highlights` service, type, mocks (re-rank per request), guest access, contract tests |
+| webapp | Mart carousel (scroll-snap, pause button, dots, prefers-reduced-motion) replaces the static banners; sticky category bar (`martCategoryBar.tsx`) under the top bar; `--top-bar-height` token |
+| docs | backendPlan §2.8 / §2.12: go.catalog endpoint, py.intelligence ranker |
+
+## Money fixes after QA (4 Oct) — payments, escrow, subscriptions, orders, moderation integration tests; notifications vitest; apiSmoke moneyJourneys
+
+| area | change |
+|---|---|
+| go-money | Exactly-once Paystack refunds: refund intent state machine keyed by the idempotency reference, lookup by `merchant_note` reference before any resend, also for `payment_refunds` retries; transfers resent only when Paystack says not found; renewal `charge_authorization` confirms the previous attempt before charging again |
+| go-money | Duplicate settlement bank account refused at onboarding (`BANK_ACCOUNT_ALREADY_LINKED`), advisory `payoutAccount.duplicateBankAccount` to trust, no endless retries |
+| go-money | Refund amounts ≤ 0 refused (SEC-0013); saved cards charged by `savedCardId`, the Paystack authorization never leaves the server (SEC-0008) |
+| go-commerce | `POST /api/v1/seller/orders/{orderId}/refunds` |
+| go-trust | Advisory case from `payoutAccount.duplicateBankAccount` |
+| mobile | Saved card stored and charged by `savedCardId` instead of the Paystack authorization code |
+| infra | RabbitMQ: `payoutAccount.duplicateBankAccount` → `trust-domain-events` |
+
+## Security review fixes (4 Oct) — targeted unit tests only (gateway vitest, go test users/payments/admin, webapp tsx, mobile jest)
+
+| area | change |
+|---|---|
+| gateway | `TRUSTED_PROXY_HOPS` (default 1) replaces trust-all proxy headers, so forged `X-Forwarded-For` no longer bypasses per-IP limits; new `verification` limit 10/min per account on `POST /api/v1/verification/*` |
+| go-identity | Smile ID callbacks must be signed within the last hour and echo the case owner's `user_id`; staff invitation tokens are never logged outside local development |
+| go-money | stored Paystack webhook payloads redact `authorization_code` and card `signature` |
+| webapp, mobile | internal links can't become `//host`; the in-app browser only opens http/https |
+| security | `security/` workspace: environment boundary, attack surface inventory (`security/authorization/routeInventory.py`), dependency audit evidence |
+
+## Renewals and free-trial charging (4 Oct) — go test -short (subscriptions models + services, payments), vitest (email templates, notifications mapping); integration tests not run
+
+Guide: [billing/renewalsAndTrials.md](./billing/renewalsAndTrials.md). Plan: [plans.md §54](./plans.md).
+
+| Area | Change |
+| --- | --- |
+| go/subscriptions | Own renewal engine replaces Paystack Plans for new web subscriptions: `subscription_periods` invoices with line items (plan base + checkmark − bundle − credit, always the full plan price), 30-day price-change grandfathering, idempotency key per subscription+period, dunning +1/+3/+5 days → 7-day grace → Free (trials: +1/+3 then Free), cancel at period end, prorated upgrades, downgrades at renewal, yearly 7-day reminder, card-expiring notice, RabbitMQ queue `jobs-subscription-billing`. New endpoints: change-plan, pay-now, periods, upcoming-charge. Store grace notifications mapped. Migration `20261004175850_renewal_engine_and_periods` |
+| go/payments | `billing_authorizations` (Paystack authorization sealed with AES-GCM) saved on trial card checks and plan payments; `ChargeBillingAuthorization`; `RefundSubscriptionPayment` (ledger first); purpose `subscription_renewal` (`ren-` references); Apple/Google grace notification kind. Migration `20261004162402_billing_authorizations` |
+| go/ledger | Account `revenue:planSubscriptions` |
+| Rejected verification | One-time checkmark-share refund now comes from the latest renewal charge. **Owner decision: plans (Pro, Business, Premium) always renew at the full price**; the checkmark line stays on receipts and is always charged |
+| Emails | 8 templates: trial ending, yearly renewal upcoming, receipt with line items, payment failed (per retry), grace ending, downgraded, card expiring, price change notice |
+| notifications, contracts, RabbitMQ | Mappings and fixtures, 8 event schemas, notification bindings and the billing job queue |
+
+## Tagged people backend (4 Oct) - vitest (social posts, gateway hardening, notifications)
+
+ts-social: `PostTag` and `TaggingSetting` models with migration, `taggedUserIds` on create, `PUT /posts/:id/tags`, `DELETE /posts/:id/tags/me`, `GET /posts/:id/tagged-users`, `taggedUsers` and `taggedUsersCount` on posts, `post.tagged` outbox event. Contracts schema, notifications mapping and RabbitMQ binding, gateway `postWrite` rate limit and `/me/tagging-settings` route.
+
+## Final QA and integration pass (4 Oct) — go test all modules with Postgres, apiSmoke 51/51 incl. route sweep, mix test, terraform validate, tsc all apps/services, vitest/jest/pytest
+
+Results, latencies and open items: [verification/finalCheckReport.md §0](./verification/finalCheckReport.md).
+
+| Area | Change |
+| --- | --- |
+| go/wallet | Monetisation holds now use the wallet schema (`MonetisationHold` added to the ent `SchemaConfig`) |
+| go/users | Anniversary scheduler query fixed (Postgres placeholders) |
+| go/subscriptions, go/moderation, go/users, social | `nextCursor: null` on six list responses |
+| go/ads | Invalid ad link returns `{message, code: AD_LINK_INVALID}`; flow test reads the regional reserve |
+| Local config | `ADS_REPORT_QUEUE_NAME` (go `.env.example`), `INTELLIGENCE_RABBITMQ_URL` (intelligence `.env.example`) so both consumers run locally |
+| Tests | New: checkmark-share refund idempotency (payments), success-rate rollup (orders), Business plan 1% fee smoke; direct-order smoke fixed; fake Paystack `subscription.create` and restart-safe ids; smoke client on `node:http`; search keyset, support content and seller contract tests fixed |
+
+## Traceability, ER diagrams, money docs (4 Oct, docs only) — no tests run
+
+- New `docs/verification/requirementsTraceability.md` (rule status, top 15 gaps, code-rule scan).
+- `docs/database/schema.md` section 12: ERD for monetisation holds, live host restrictions, verification cases, username holds, invoice counters, security cases, support tickets, tagged users (planned).
+- `docs/architecture/payments.md` 4.2 and 4.3, `docs/integrations/paystack.md` 6.5a and 6.5b: direct vs escrow fee lines and the verification checkmark-share refund.
+- `packages/emailTemplates` sample data and previews: branded sample photos (sneakers, bag) replaced with neutral placeholders.
+
 ## Checkmark verification with Smile ID (4 Oct) — go test (users, subscriptions, payments, moderation, regionpricing), pytest, vitest (notifications, gateway), tsc (admin, mobile, webapp, seller, notifications, gateway, email templates)
 
 Design: [plans.md §53](./plans.md) and [integrations/smileId.md](./integrations/smileId.md).

@@ -2102,9 +2102,133 @@ Owner rules, 2026-10-04 (asked for as §50, which was already taken by username 
 ### 53.6 Open items
 
 - **[OWNER]** Legal review of the consent text and retention under NDPA 2023 (biometrics are sensitive data); DPA with Smile ID.
-- **[NEXT]** Renewals must not charge for the checkmark until the profile is verified. Billing has no line item for this (a Paystack plan is one amount; store prices are fixed per product), so after a rejection the plan keeps renewing at its full price. Needs a checkmark-less price per seller plan and Premium, switched at the next renewal and restored on approval.
-- **[NEXT]** Refund the latest charge rather than `billing_reference` (the first charge) when a rejection lands after a renewal; Google Play partial refund once the Play API call exists.
+- **[DECIDED: no, §54.1]** ~~Renewals must not charge for the checkmark until the profile is verified.~~ Owner, 4 Oct: plans renew at the full price. Only the one-time checkmark-share refund on rejection applies. Billing has no line item for this (a Paystack plan is one amount; store prices are fixed per product), so after a rejection the plan keeps renewing at its full price. Needs a checkmark-less price per seller plan and Premium, switched at the next renewal and restored on approval.
+- **[DONE → §54 for web card billing; Google Play partial refund still open]** Refund the latest charge rather than `billing_reference` (the first charge) when a rejection lands after a renewal; Google Play partial refund once the Play API call exists.
 - **[NEXT]** Native IAP in the app (dev build). Until then "Buy now" in the app opens the web checkout.
 - **[NEXT]** Confirm Smile ID document `id_type` codes per country and the Google Play `fullRefund` revoke context against the live APIs.
 - **[LATER]** A dedicated `identity_verification` source on go-trust suspension cases (uses `python_suggestion` with model `smile_id_verification` for now, to avoid a moderation schema change).
 - **[LATER]** Name-change re-verification for identity-verified profiles.
+
+## 54. Renewals and free-trial charging **[DONE (go-money subscriptions + payments, notifications, email templates, contracts, RabbitMQ topology); apps UI pending]**
+
+Owner request, 2026-10-04. Plain-language guide with timelines, state diagram and edge cases: [billing/renewalsAndTrials.md](./billing/renewalsAndTrials.md).
+
+### 54.1 Line items
+
+- Every period is an invoice (`subscription_periods`) built from line items: plan base + checkmark (+ bundle discount, − upgrade credit). The checkmark part is the regional standalone checkmark price (Gold-only for Pro/Business, Blue for Premium), capped at the plan price.
+- **Owner decision (4 Oct, later the same day): no renewal discount for an unverified or rejected checkmark.** Pro, Business and Premium always renew at the full plan price. The checkmark line stays on receipts for transparency and is always charged. A rejection still refunds the current period's checkmark share once (§53.4). Standalone checkmarks are unchanged: rejected means cancelled and refunded.
+- Price from the price book at renewal time. Increases wait for a 30-day notice email (legal notice) and apply from the first renewal on or after that date. Decreases apply at once.
+
+### 54.2 Renewal engine (web)
+
+- Our own scheduler + Paystack `charge_authorization` with the saved authorization (sealed in `payments.billing_authorizations`) instead of Paystack Plans, because the amount changes. Older Plans subscriptions keep running as they are.
+- Charged on the period end in the region currency (USD fallback). Idempotency key `renewal:{subscriptionId}:{periodStart}`, a fixed `ren-` Paystack reference per attempt, and a ledger entry per paid period (`subscription.periodBilled`).
+- Dunning: retries at +1, +3 and +5 days, then a 7-day grace with the plan on, then Free. The checkmark comes off unless another live subscription on the profile grants it. A notification and email at each step, plus a card-expiring notice.
+- Cancel any time: the plan stays until the period end, with no partial refunds (verification rule excepted). Upgrades are charged now minus unused time. Downgrades apply at the next renewal.
+- Yearly: one charge at 20% off, with a reminder 7 days before. Monthly: no reminder, except trial conversions.
+- Jobs: queue `jobs-subscription-billing` on `zudomart.jobs`, using the standard retry tiers and DLQ.
+
+### 54.3 Free trials
+
+- Trial start (7 days / 1 month): ₦50 (regional) card check, refunded immediately, and the card saved. Reminders 3 days and 24 hours before the end, with the exact amount, date and cancel link.
+- At trial end the full first period is charged via `charge_authorization`. If it fails, retries run at +1 and +3 days, then Free (features stay at most 3 days).
+- One trial per person: account, device, phone and card fingerprint (Paystack signature). Cancelling during the trial means no charge.
+- Apple and Google run trials and renewals natively. We only map their notifications (renewed, failed, grace, expired, refunded) to the same states. Store product ids and offers are owner to-dos in the guide (§8).
+
+### 54.4 Open items
+
+- **[OWNER]** Create the store introductory offers and turn on grace periods (guide §8). Review the price-change and renewal-reminder wording for UK/EU consumer law.
+- **[NEXT]** Webapp / seller dashboard billing screens: line-item invoices (`GET /subscriptions/{id}/periods`), upcoming charge preview, Pay now, change plan, update card.
+- **[NEXT]** Move existing Paystack-Plans subscriptions onto the engine at their next renewal (needs their authorization; ask for a card re-check).
+- **[LATER]** Google Play partial refund call for the checkmark share.
+
+## 55. Mart: ranked hero carousel and sticky category tabs **[DONE (mobile + webapp, mock UI; backend pending)]**
+
+Owner request, 2026-10-04.
+
+### 55.1 Ranked hero carousel **[DONE]**
+
+- The hero at the top of Mart is a carousel of highlights (deals of the day, featured brands, new arrivals, category spotlights, trending) chosen and ordered per viewer from `GET /api/v1/mart/highlights` → `{data, nextCursor}`, each with `ranking.reason` shown on the slide (for example "Because you browsed Shoes"). Mocks re-rank on every request.
+- Refreshes on pull-to-refresh (mobile), and on return to the screen or app after 5 minutes (mobile focus + AppState; webapp window focus + mount).
+- Auto-advances every 5 s; pauses while touched, hovered or focused, when scrolled off-screen, when the screen or tab is hidden, and with a screen reader on (mobile). Reduce Motion turns auto-advance off. Dots show position; webapp has a pause button and clickable dots, mobile is an adjustable control for screen readers.
+- **[NEXT — backend]** go.catalog serves the endpoint, py.intelligence ranks it (backendPlan §2.8, §2.12).
+
+### 55.2 Sticky category tabs **[DONE]**
+
+- Mobile: the category row is a `stickyHeaderIndices` child of the Mart scroll view, so it pins under the app header and products scroll beneath it, then returns below the banners at the top. A divider appears while pinned. The selected tab scrolls into view, and changing category while pinned keeps the row pinned with results starting under it.
+- Webapp: `position: sticky` at `--top-bar-height` (new token in `globals.css`), with the same divider, selected-chip-in-view and scroll behaviour.
+- **[CHECK]** Not run on a device or browser yet; confirm `--top-bar-height` still matches once the top bar wordmark lands.
+
+## 56. Contextual sheets and the Zudomart wordmark **[DONE (mobile + webapp + web-kit)]**
+
+### 56.1 Bottom sheets instead of centred dialogs
+
+- Mobile `BottomSheet` now supports swipe-down to dismiss on the handle and title row (`components/ui/sheetDragDismiss.hook.ts`; it uses PanResponder because the app has no gesture-handler). The handle has a bigger touch area, max height is 90% of the window, and the backdrop tap, safe-area padding, keyboard spacer and internal scrolling are unchanged.
+- Converted on mobile: tagged people on a post, the Views explainer on someone else's post (the "analytics" sheet for posts that aren't yours), the message reaction and report picker, and the Share chooser (`useShareToChat`, which was a centred alert).
+- Webapp `Dialog layout="sheet"` is a bottom sheet below 768 px (it was 640 px) and a centred modal above that. Sheets cap at 90dvh, stack their footer actions and can be dragged down from the handle or header (`components/ui/sheetDrag.hook.ts`). Converted to sheets: the Views explainer, tagged people, and Who can reply.
+- Kept centred because they are short blocking confirmations or alerts: `DialogHost` / `showAlertWithButtons` (delete post, comment or reply, log out, end live, remove member, errors), the suspicious-link warning, chat Block, escrow `ConfirmActionSheet`, and on web `ConfirmDialog`, Delete account and the celebration dialog. Anchored dropdowns (feed mode, inbox folder, chats options) stay popovers.
+- **[DONE]** `documentBubble` "Open or save" is now a `BottomSheet` (file name, size, Open / Save to device).
+
+### 56.2 Wordmark
+
+- Bricolage Grotesque (OFL), outlined to SVG paths in `packages/webKit/src/brand/zudomartBrand.path.ts`. The rationale is in [design/brandWordmark.md](./design/brandWordmark.md).
+- Mobile home bar: wordmark, divider, Feed / Mart switch. It collapses to the logo mark below 380 pt. Webapp top bar: the logo mark below 380 px. Every web app's `ZudomartWordmark` now draws outlines instead of SVG `<text>`.
+- **[CHECK]** Not yet seen on a device or in a browser.
+
+## 57. Branded downloads and the screenshot share prompt **[DONE (ts-media, ts-social, gateway, mobile + webapp, mock UI)]**
+
+Owner request, 2026-10-04: content saved from Zudomart carries the brand, like X and TikTok.
+
+### 57.1 Photos **[DONE]**
+
+- Download (post `⋯` menu, the image viewer's download button on mobile, the webapp `⋯` menu) saves a copy with a small Zudomart badge and the owner's `@username` in the bottom-right corner: 72% opacity, scaled to 6% of the short side. Rendered server-side with sharp (the media service already had it), so one privacy check covers every client.
+- Mobile saves to the gallery with expo-media-library (write-only photo/video permission); if refused, the share sheet opens instead. Webapp downloads through the signed link.
+
+### 57.2 Videos and clips **[DONE]**
+
+- ffmpeg "download variant" in ts-media: the logo and `@username` move TL → TR → BR → BL every 4 s so a single crop can't remove them, and a 1.8 s end card shows the logo fading and rising in on brand blue. Cached per media id, username and source; made on the first request, served by a 5-minute signed URL.
+- Clients show progress: "Adding the Zudomart tag… n%" while the server renders (polling), then byte progress while saving (mobile). Cancel at any time.
+- Copyright-muted clips stay silent in the download; muting throws away cached copies.
+
+### 57.3 Privacy **[DONE]**
+
+- New owner setting **Allow downloads** (Settings → Privacy, default on). Off hides the button (`PostView.viewerCanDownload`) and the server refuses.
+- Never downloadable by others: stories, subscriber-only posts, posts from private accounts, moderation-restricted posts; blocked users get 404. Owners can always download their own.
+
+### 57.4 Screenshots **[DONE — limited by the OS]**
+
+- Apps can't change the image the OS saves for a screenshot. While a post detail or the active clip is on screen, mobile listens for screenshots (`expo-screen-capture`) and shows a small non-blocking "Share this post?" card with Share link and Save tagged copy. It closes itself after 8 s.
+- Works on iOS and Android 14+ only; the webapp can't detect screenshots.
+
+### 57.5 Next **[LATER]**
+
+- **[CHECK]** Native modules `expo-media-library` and `expo-screen-capture` were added: needs a new dev client / EAS build. Not run on a device. The real renderer was run against Alpine ffmpeg 6.1 (8 s 360p test clip and a 1080x1350 image): the watermark moves corners, the end card fades and rises, and stripped clips measure -91 dB. A dark translucent backdrop was added behind the watermark so it reads on white.
+- Pre-render at publish for popular clips, real ffmpeg progress, a lottie-style animated logo for the end card, branded copies from the webapp image viewer.
+
+## 58. Scoped search: where you open search decides what it searches **[DONE (ts-search, mobile + webapp, mock UI)]**
+
+Owner request, 2026-10-04.
+
+### 58.1 Scopes **[DONE]**
+
+| opened from | searches | placeholder | chip |
+|---|---|---|---|
+| Feed (home bar, clips, settings) | people, posts, clips, products, stores, brands, hashtags | "Search people, posts, products..." | none |
+| Mart (mart tab, product detail, cart, webapp `/mart`) | marketplace products and their categories | "Search Mart" | "In: Mart" |
+| A business store page | that store's products and the owner's posts | "Search <store name>" | "In: <store name>" |
+| A user profile (own or someone else's) | that user's posts, clips and products | "Search @username" | "In: @username" |
+
+- The chip sits inside the search field. Removing it widens the same query to a global search. Scoped searches with no results offer "Search everywhere".
+- Result tabs follow the scope: global Top/People/Posts/Clips/Products/Stores/Brands/Hashtags; store All/Products/Posts; profile All/Posts/Clips/Products; Mart has no tabs.
+- Recent searches are kept per scope (signed-in viewers; 20 per scope). Mobile records on submit and when a result is opened; webapp records on submit from the top bar.
+- Webapp: pages register their scope (`SearchScopeRegistrar` on `/mart`, store pages and profiles) and the top-bar search reads it; `/explore?q=&scope=&scopeLabel=&type=` carries the scope.
+
+### 58.2 API **[DONE]**
+
+- `GET /api/v1/search?q&scope&type&cursor&limit` → `{data:[{type,...summary}], nextCursor, scope}`. `scope` is `global | mart | store:<uuid> | profile:<uuid>`; `type` is the tab (`top` default). The legacy `scope=<tab>` and `scope=all` (grouped `{products,stores,people,brands}`) still work.
+- `GET|POST|DELETE /api/v1/search/recent?scope=`; `DELETE` without `scope` clears every scope.
+
+### 58.3 Next **[LATER]**
+
+- Store-specific posts (posts made "as the store") once social records the store on a post; today the store scope uses posts by the store owner's account.
+- Scope-aware suggestions (`/search/suggest`) and Mart filters (price, rating, ships-to) on the scoped results.
