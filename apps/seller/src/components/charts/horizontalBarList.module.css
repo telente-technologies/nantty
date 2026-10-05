@@ -1,20 +1,20 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .labels {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  font-size: 13px;
+  gap: var(--space-3);
+  font-size: var(--fs-13);
 }
 
 .label {
@@ -46,10 +46,10 @@
 
 .detail {
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .empty {
   color: var(--ink-muted);
-  padding: 12px 0;
+  padding: var(--space-3) 0;
 }

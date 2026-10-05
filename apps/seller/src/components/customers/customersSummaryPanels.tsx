@@ -2,7 +2,7 @@
 
 import { formatMonthKeyAsLongLabel, formatMonthKeyAsShortLabel } from "@/components/customers/customerPresentation.util";
 import { StackedBarChart } from "@/components/charts/stackedBarChart";
-import { Callout, StatTile } from "@/components/ui/feedback";
+import { ErrorCallout, StatTile } from "@/components/ui/feedback";
 import { Panel, ResponsiveGrid } from "@/components/ui/panel";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
@@ -13,7 +13,7 @@ export function CustomersSummaryPanels() {
   const { formatMoney, locale } = useMoneyFormatter();
   const summaryQuery = useSellerQuery<CustomersSummary>("/seller/customers/summary");
   const summary = summaryQuery.data;
-  if (summaryQuery.errorMessage && !summary) return <Callout tone="error">{summaryQuery.errorMessage}</Callout>;
+  if (summaryQuery.errorMessage && !summary) return <ErrorCallout message={summaryQuery.errorMessage} onRetry={summaryQuery.reload} />;
   return (
     <>
       <ResponsiveGrid minimumColumnWidth={170}>

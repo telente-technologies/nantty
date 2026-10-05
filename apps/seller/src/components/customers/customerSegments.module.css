@@ -1,14 +1,14 @@
 .segmentGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .segmentCard {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 16px;
+  padding: var(--space-4);
   background: var(--surface-card);
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-large);
@@ -18,7 +18,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .segmentName {
@@ -28,13 +28,13 @@
 
 .segmentDescription {
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 .segmentStats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: var(--space-2);
   font-variant-numeric: tabular-nums;
 }
 
@@ -51,7 +51,7 @@
 .ruleList {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .segmentActions {
@@ -64,7 +64,7 @@
 .ruleRow {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr) auto;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: start;
 }
 

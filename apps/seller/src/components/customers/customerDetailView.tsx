@@ -9,7 +9,7 @@ import { CustomerNotesPanel } from "@/components/customers/customerNotesPanel";
 import { CustomerPurchasesPanel } from "@/components/customers/customerPurchasesPanel";
 import { customerTypeLabels, customerTypeTones } from "@/components/customers/customerPresentation.util";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Callout, LoadingBlock, StatTile } from "@/components/ui/feedback";
+import { ErrorCallout, LoadingBlock, StatTile } from "@/components/ui/feedback";
 import { KeyValueList, PageHeader, PageStack, Panel, ResponsiveGrid } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
@@ -28,7 +28,7 @@ export function CustomerDetailView({ customerId }: { readonly customerId: string
   const customer = customerQuery.data;
 
   if (customerQuery.isLoading && !customer) return <LoadingBlock label="Loading customer" />;
-  if (!customer) return <Callout tone="error">{customerQuery.errorMessage ?? "This customer could not be loaded."}</Callout>;
+  if (!customer) return <ErrorCallout message={customerQuery.errorMessage ?? "This customer could not be loaded."} onRetry={customerQuery.reload} />;
   const replaceCustomer = (updated: Customer) => customerQuery.replaceData(() => updated);
   const customerType = deriveCustomerTypeFromPurchases(customer);
 

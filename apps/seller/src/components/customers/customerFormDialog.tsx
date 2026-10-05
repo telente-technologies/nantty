@@ -61,7 +61,7 @@ export function CustomerFormDialog({ isOpen, customer, onClose, onSaved }: { rea
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {formError ? <p role="alert" style={{ color: "var(--error-ink)", fontWeight: 500 }}>{formError}</p> : null}
         <TextField label="Full name" value={name} onChange={(event) => setName(event.target.value)} maxLength={80} errorMessage={fieldErrors.name} autoComplete="off" />
-        <TextField label="Phone number" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={20} placeholder="+234 803 555 0142" errorMessage={fieldErrors.phone} hint="Used to find them at the till and send receipts." />
+        <TextField label="Phone number" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} maxLength={20} placeholder="+234 803 555 0142" errorMessage={fieldErrors.phone} hint="Used to match their app orders and send order updates." />
         <TextField label="Email (optional)" type="email" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} errorMessage={fieldErrors.email} />
         <TextField label="Tags (optional)" value={tagsText} onChange={(event) => setTagsText(event.target.value)} maxLength={200} placeholder="vip, wholesale" errorMessage={fieldErrors.tags} hint="Separate tags with commas." />
         <CheckboxField label="They agreed to receive offers and news" checked={marketingOptIn} onCheckedChange={setMarketingOptIn} />

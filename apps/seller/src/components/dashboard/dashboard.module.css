@@ -3,11 +3,11 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 12px 24px;
+  gap: var(--space-3) var(--space-6);
 }
 
 .greeting {
-  font-size: 24px;
+  font-size: var(--fs-24);
   font-weight: 750;
   letter-spacing: -0.025em;
 }
@@ -20,19 +20,19 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .kpiRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .mainGrid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 16px;
+  gap: var(--space-4);
   align-items: start;
 }
 
@@ -40,21 +40,21 @@
 .mainStack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
   min-width: 0;
 }
 
 .statusGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 110px), 1fr));
+  gap: var(--space-2);
 }
 
 .statusCell {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border-radius: var(--radius-medium);
   background: var(--surface-app);
   color: var(--ink-strong);
@@ -66,13 +66,13 @@
 }
 
 .statusCount {
-  font-size: 20px;
+  font-size: var(--fs-20);
   font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
 
 .statusLabel {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
 }
 
@@ -130,7 +130,7 @@
 }
 
 .rowMeta {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-faint);
 }
 
@@ -143,7 +143,7 @@
 .shareBar {
   display: block;
   height: 4px;
-  margin-top: 4px;
+  margin-top: var(--space-1);
   border-radius: 2px;
   background: var(--color-brand-solid);
 }
@@ -151,13 +151,13 @@
 .balanceRows {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .balanceRow {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .balanceAmount {
@@ -220,14 +220,14 @@
 .alertList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .alertCard {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border-radius: var(--radius-medium);
   border: 1px solid var(--divider-soft);
   color: var(--ink-strong);
@@ -256,7 +256,7 @@
 
 @media (max-width: 520px) {
   .greeting {
-    font-size: 20px;
+    font-size: var(--fs-20);
   }
 
   .spark {

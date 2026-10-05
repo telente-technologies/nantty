@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 import { useCommerceCursorList } from "@/components/orders/commerceCursorList.hook";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
-import { Callout } from "@/components/ui/feedback";
+import { ErrorCallout } from "@/components/ui/feedback";
 import { Panel } from "@/components/ui/panel";
 import { convertSnakeCaseToLabel, StatusBadge } from "@/components/ui/statusBadge";
 import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
@@ -26,7 +26,7 @@ export function CustomerPurchasesPanel({ customerId }: { readonly customerId: st
 
   return (
     <Panel title="Order history" description="Orders placed in the Zudomart app" padded={false}>
-      {purchases.errorMessage ? <Callout tone="error">{purchases.errorMessage}</Callout> : null}
+      {purchases.errorMessage ? <ErrorCallout message={purchases.errorMessage} onRetry={purchases.reload} /> : null}
       <DataTable
         caption="Order history"
         columns={columns}

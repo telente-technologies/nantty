@@ -1,7 +1,7 @@
 .figure {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0;
   --chart-series-primary: var(--chart-1);
   --chart-series-secondary: var(--chart-4);
@@ -12,7 +12,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
 }
 
@@ -80,11 +80,11 @@
   top: 0;
   transform: translateX(-50%);
   min-width: 170px;
-  padding: 8px 10px;
+  padding: var(--space-2) 10px;
   border-radius: var(--radius-small);
   background: var(--deep-surface);
   color: var(--rail-ink-strong);
-  font-size: 12px;
+  font-size: var(--fs-12);
   pointer-events: none;
   box-shadow: var(--shadow-float);
   z-index: 2;
@@ -92,7 +92,7 @@
 
 .tooltipTitle {
   font-weight: 650;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .tooltipRow {
@@ -111,7 +111,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 20px;
+  gap: var(--space-5);
   margin: 0;
 }
 
@@ -135,7 +135,7 @@
 
 .donutCenterValue {
   fill: var(--ink-strong);
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-weight: 750;
 }
 
@@ -144,13 +144,13 @@
   min-width: 180px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .donutLegend li {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-variant-numeric: tabular-nums;
 }
 
@@ -167,5 +167,5 @@
   width: 40px;
   text-align: right;
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
