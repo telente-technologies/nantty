@@ -9,6 +9,7 @@ import (
 	"zudomart/modules/catalog/src/generated/ent"
 	"zudomart/modules/catalog/src/generated/ent/predicate"
 	"zudomart/modules/catalog/src/generated/ent/product"
+	"zudomart/modules/catalog/src/generated/ent/store"
 	"zudomart/modules/catalog/src/services"
 	"zudomart/modules/catalog/src/types"
 )
@@ -18,7 +19,11 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, query Query) (types.StoreDetailView, error) {
-	row, err := handler.Container.Client.Store.Get(ctx, query.StoreId)
+	lookup := handler.Container.Client.Store.Query().Where(store.ID(query.StoreId))
+	if query.Slug != "" {
+		lookup = handler.Container.Client.Store.Query().Where(store.Slug(query.Slug))
+	}
+	row, err := lookup.Only(ctx)
 	if ent.IsNotFound(err) || (err == nil && (row.Status != enums.StoreActive || !enums.IsShownToBuyers(row.ModerationVisibility))) {
 		return types.StoreDetailView{}, catalogerrors.StoreNotFound
 	}
@@ -35,9 +40,13 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.StoreDet
 	if err != nil {
 		return types.StoreDetailView{}, err
 	}
+	followers, isFollowing := 0, false
+	if handler.Container.StoreFollows != nil {
+		followers, isFollowing = handler.Container.StoreFollows.StoreFollowStats(ctx, row.ID, query.Viewer)
+	}
 	return types.StoreDetailView{
 		StoreSummaryView: summaries[row.ID], OwnerUserId: row.OwnerAccountID.String(), BannerUrl: row.BannerURL, Handle: row.Slug, Bio: row.Description,
 		ProductsCount: count, Verified: row.Verified, JoinedAt: row.CreatedAt, CountryCode: row.CountryCode, Currency: row.Currency,
-		BusinessProfileId: row.BusinessProfileID.String(), Posts: []any{},
+		BusinessProfileId: row.BusinessProfileID.String(), Posts: []any{}, Followers: followers, IsFollowing: isFollowing,
 	}, nil
 }

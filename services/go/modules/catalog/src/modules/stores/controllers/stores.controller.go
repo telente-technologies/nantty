@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -10,9 +11,12 @@ import (
 	createstore "zudomart/modules/catalog/src/modules/stores/commands/createStore"
 	updatestore "zudomart/modules/catalog/src/modules/stores/commands/updateStore"
 	"zudomart/modules/catalog/src/modules/stores/dtos"
+	setstorestatus "zudomart/modules/catalog/src/modules/stores/commands/setStoreStatus"
+	listmystores "zudomart/modules/catalog/src/modules/stores/queries/listMyStores"
 	getselleraccess "zudomart/modules/catalog/src/modules/stores/queries/getSellerAccess"
 	getstoredetail "zudomart/modules/catalog/src/modules/stores/queries/getStoreDetail"
 	"zudomart/modules/catalog/src/modules/stores/validators"
+	"zudomart/modules/catalog/src/services"
 	"zudomart/modules/catalog/src/utils"
 	"zudomart/platform/httpserver"
 	"zudomart/platform/jwtauth"
@@ -54,12 +58,13 @@ func optionalViewer(request *http.Request) *uuid.UUID {
 }
 
 func (controller StoresController) GetStore(writer http.ResponseWriter, request *http.Request) {
-	storeId, err := utils.PathIdentifier(request, "storeId")
-	if err != nil {
-		controller.responder().Error(writer, request, err)
-		return
+	query := getstoredetail.Query{Viewer: optionalViewer(request)}
+	if storeId, err := uuid.Parse(request.PathValue("storeId")); err == nil {
+		query.StoreId = storeId
+	} else {
+		query.Slug = strings.ToLower(request.PathValue("storeId"))
 	}
-	view, err := (getstoredetail.Handler{Container: controller.Container}).Execute(request.Context(), getstoredetail.Query{StoreId: storeId, Viewer: optionalViewer(request)})
+	view, err := (getstoredetail.Handler{Container: controller.Container}).Execute(request.Context(), query)
 	controller.respond(writer, request, http.StatusOK, view, err)
 }
 
@@ -70,6 +75,32 @@ func (controller StoresController) GetSellerAccess(writer http.ResponseWriter, r
 	}
 	view, err := (getselleraccess.Handler{Container: controller.Container}).Execute(request.Context(),
 		getselleraccess.Query{AccountId: middlewares.AccountIdFrom(request.Context()), RequestedStore: requested})
+	controller.respond(writer, request, http.StatusOK, view, err)
+}
+
+func (controller StoresController) ListMyStores(writer http.ResponseWriter, request *http.Request) {
+	var requested *uuid.UUID
+	if parsed, err := uuid.Parse(request.Header.Get("X-Seller-Store")); err == nil {
+		requested = &parsed
+	}
+	page, err := (listmystores.Handler{Container: controller.Container}).Execute(request.Context(),
+		listmystores.Query{AccountId: middlewares.AccountIdFrom(request.Context()), RequestedStore: requested})
+	controller.respond(writer, request, http.StatusOK, page, err)
+}
+
+func (controller StoresController) SetStoreStatus(writer http.ResponseWriter, request *http.Request) {
+	storeId, err := utils.PathIdentifier(request, "storeId")
+	var body dtos.StoreStatusRequest
+	if err == nil {
+		body, err = utils.DecodeAndValidate(writer, request, validators.ValidateStoreStatus)
+	}
+	if err != nil {
+		controller.responder().Error(writer, request, err)
+		return
+	}
+	view, err := (setstorestatus.Handler{Container: controller.Container}).Execute(request.Context(), setstorestatus.Command{
+		Actor: services.StaffActorFrom(request), StoreId: storeId, Status: body.Status, Reason: strings.TrimSpace(body.Reason),
+	})
 	controller.respond(writer, request, http.StatusOK, view, err)
 }
 

@@ -14,3 +14,8 @@ type UpdateStoreRequest struct {
 	LogoUrl     *string `json:"logoUrl"`
 	BannerUrl   *string `json:"bannerUrl"`
 }
+
+type StoreStatusRequest struct {
+	Status string `json:"status"`
+	Reason string `json:"reason"`
+}
