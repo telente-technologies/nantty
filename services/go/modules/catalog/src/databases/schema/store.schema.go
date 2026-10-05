@@ -30,6 +30,11 @@ func (Store) Fields() []ent.Field {
 		field.String("currency").NotEmpty().MaxLen(3),
 		field.String("timezone").Default("Africa/Lagos").MaxLen(60),
 		field.String("status").Default("active"),
+		field.String("status_reason").Optional().Nillable().MaxLen(1000),
+		field.Time("status_changed_at").Optional().Nillable(),
+		field.UUID("brand_id", uuid.UUID{}).Optional().Nillable(),
+		field.Bool("has_official_badge").Default(false),
+		field.Int("follower_count").Default(0),
 		field.Bool("verified").Default(false),
 		field.Int64("rating_sum").Default(0),
 		field.Int("rating_count").Default(0),
@@ -76,6 +81,8 @@ func (Store) Indexes() []ent.Index {
 		index.Fields("slug").Unique(),
 		index.Fields("business_profile_id").Unique(),
 		index.Fields("owner_account_id"),
+		index.Fields("brand_id"),
+		index.Fields("status", "id"),
 	}
 }
 
