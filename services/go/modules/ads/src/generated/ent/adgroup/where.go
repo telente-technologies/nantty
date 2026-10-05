@@ -110,6 +110,11 @@ func ConversionEventID(v string) predicate.AdGroup {
 	return predicate.AdGroup(sql.FieldEQ(FieldConversionEventID, v))
 }
 
+// ExperimentID applies equality check predicate on the "experiment_id" field. It's identical to ExperimentIDEQ.
+func ExperimentID(v uuid.UUID) predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldEQ(FieldExperimentID, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.AdGroup {
 	return predicate.AdGroup(sql.FieldEQ(FieldUpdatedAt, v))
@@ -743,6 +748,56 @@ func ConversionEventIDEqualFold(v string) predicate.AdGroup {
 // ConversionEventIDContainsFold applies the ContainsFold predicate on the "conversion_event_id" field.
 func ConversionEventIDContainsFold(v string) predicate.AdGroup {
 	return predicate.AdGroup(sql.FieldContainsFold(FieldConversionEventID, v))
+}
+
+// ExperimentIDEQ applies the EQ predicate on the "experiment_id" field.
+func ExperimentIDEQ(v uuid.UUID) predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldEQ(FieldExperimentID, v))
+}
+
+// ExperimentIDNEQ applies the NEQ predicate on the "experiment_id" field.
+func ExperimentIDNEQ(v uuid.UUID) predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldNEQ(FieldExperimentID, v))
+}
+
+// ExperimentIDIn applies the In predicate on the "experiment_id" field.
+func ExperimentIDIn(vs ...uuid.UUID) predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldIn(FieldExperimentID, vs...))
+}
+
+// ExperimentIDNotIn applies the NotIn predicate on the "experiment_id" field.
+func ExperimentIDNotIn(vs ...uuid.UUID) predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldNotIn(FieldExperimentID, vs...))
+}
+
+// ExperimentIDGT applies the GT predicate on the "experiment_id" field.
+func ExperimentIDGT(v uuid.UUID) predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldGT(FieldExperimentID, v))
+}
+
+// ExperimentIDGTE applies the GTE predicate on the "experiment_id" field.
+func ExperimentIDGTE(v uuid.UUID) predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldGTE(FieldExperimentID, v))
+}
+
+// ExperimentIDLT applies the LT predicate on the "experiment_id" field.
+func ExperimentIDLT(v uuid.UUID) predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldLT(FieldExperimentID, v))
+}
+
+// ExperimentIDLTE applies the LTE predicate on the "experiment_id" field.
+func ExperimentIDLTE(v uuid.UUID) predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldLTE(FieldExperimentID, v))
+}
+
+// ExperimentIDIsNil applies the IsNil predicate on the "experiment_id" field.
+func ExperimentIDIsNil() predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldIsNull(FieldExperimentID))
+}
+
+// ExperimentIDNotNil applies the NotNil predicate on the "experiment_id" field.
+func ExperimentIDNotNil() predicate.AdGroup {
+	return predicate.AdGroup(sql.FieldNotNull(FieldExperimentID))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

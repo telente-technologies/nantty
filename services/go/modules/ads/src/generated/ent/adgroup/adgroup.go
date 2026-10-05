@@ -49,6 +49,8 @@ const (
 	FieldFrequencyCapPerDays = "frequency_cap_per_days"
 	// FieldConversionEventID holds the string denoting the conversion_event_id field in the database.
 	FieldConversionEventID = "conversion_event_id"
+	// FieldExperimentID holds the string denoting the experiment_id field in the database.
+	FieldExperimentID = "experiment_id"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the adgroup in the database.
@@ -75,6 +77,7 @@ var Columns = []string{
 	FieldFrequencyCapImpressions,
 	FieldFrequencyCapPerDays,
 	FieldConversionEventID,
+	FieldExperimentID,
 	FieldUpdatedAt,
 }
 
@@ -293,6 +296,11 @@ func ByFrequencyCapPerDays(opts ...sql.OrderTermOption) OrderOption {
 // ByConversionEventID orders the results by the conversion_event_id field.
 func ByConversionEventID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldConversionEventID, opts...).ToFunc()
+}
+
+// ByExperimentID orders the results by the experiment_id field.
+func ByExperimentID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExperimentID, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.
