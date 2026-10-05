@@ -18,8 +18,6 @@ type Handler struct {
 	Container *container.Container
 }
 
-// Execute lets a reviewer approve (including a manual pass before any Smile ID result) or reject an open case.
-// Rejecting queues the automatic refund in the same transaction; both decisions are audited.
 func (handler Handler) Execute(ctx context.Context, command Command) (services.CaseView, error) {
 	reason, err := accountservices.RequireReason(command.Reason)
 	if err != nil {

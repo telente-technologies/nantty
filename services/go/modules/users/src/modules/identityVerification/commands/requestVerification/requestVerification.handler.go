@@ -14,8 +14,6 @@ type Handler struct {
 	Container *container.Container
 }
 
-// Execute queues a "Request verification" and asks Python straight away; if the account already qualifies the
-// response says so and the person can pay immediately.
 func (handler Handler) Execute(ctx context.Context, command Command) (*getverificationjourney.Eligibility, error) {
 	acting, account, err := checkmarkservices.LoadActingProfile(ctx, handler.Container, command.AccountId)
 	if err != nil {

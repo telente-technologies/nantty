@@ -24,8 +24,6 @@ type Handler struct {
 	Container *container.Container
 }
 
-// Execute records how the refund went. For a plan that keeps running the rejection email waits for this event,
-// because only billing knows how much of the payment belonged to the checkmark.
 func (handler Handler) Execute(ctx context.Context, command Command) error {
 	status, known := refundStatusByEvent[command.EventType]
 	caseId, err := uuid.Parse(command.CaseId)

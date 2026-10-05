@@ -23,8 +23,6 @@ type Handler struct {
 	Container *container.Container
 }
 
-// Execute records the explicit biometric consent and only then opens a Smile ID capture session: the web gets a
-// token for Smile's hosted web integration, the apps get a single-use Smile Link to open in a WebView.
 func (handler Handler) Execute(ctx context.Context, command Command) (Result, error) {
 	settings := handler.Container.Settings.Verification
 	if !command.ConsentAccepted || command.ConsentVersion != settings.ConsentVersion {

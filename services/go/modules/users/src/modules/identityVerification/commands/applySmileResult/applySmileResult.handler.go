@@ -38,7 +38,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	if err != nil {
 		return Result{}, ErrCallbackMalformed
 	}
-	if handler.Verify == nil || !handler.Verify(envelope.Timestamp, envelope.Signature) {
+	if handler.Verify == nil || !handler.Verify(envelope.Timestamp, envelope.Signature) || !envelope.IsFresh(handler.Container.Now()) {
 		return Result{}, ErrCallbackSignatureInvalid
 	}
 	row, err := handler.Container.Client.VerificationCase.Query().Where(verificationcase.SmileJobID(envelope.JobId)).Only(ctx)
@@ -47,6 +47,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	}
 	if err != nil {
 		return Result{}, err
+	}
+	if !envelope.BelongsTo(row.AccountID.String()) {
+		return Result{}, ErrCallbackSignatureInvalid
 	}
 	if !awaitingResult(row.Status) {
 		return Result{Outcome: OutcomeReplayed}, handler.Container.Client.VerificationCase.UpdateOneID(row.ID).AddCallbackCount(1).Exec(ctx)

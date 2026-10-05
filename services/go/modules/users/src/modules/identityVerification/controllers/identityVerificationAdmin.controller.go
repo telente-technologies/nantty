@@ -15,7 +15,7 @@ func (controller IdentityVerificationController) ListCases(writer http.ResponseW
 	query := request.URL.Query()
 	limit, _ := strconv.Atoi(query.Get("limit"))
 	items, err := listverificationcases.Handler{Container: controller.Container}.Execute(request.Context(), listverificationcases.Query{Status: query.Get("status"), Limit: limit})
-	controller.respond(writer, request, http.StatusOK, map[string]any{"data": items}, err)
+	controller.respond(writer, request, http.StatusOK, map[string]any{"data": items, "nextCursor": nil}, err)
 }
 
 func (controller IdentityVerificationController) GetCase(writer http.ResponseWriter, request *http.Request) {
