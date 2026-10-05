@@ -6,7 +6,8 @@ import { ButtonLink } from "@/components/ui/button";
 import { Callout } from "@/components/ui/feedback";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import type { BillingOffer } from "@/types/billingOffer.type";
-import type { BusinessDocumentsOverview } from "@/types/businessDocuments.type";
+import type { BusinessDocumentsOverview, BusinessDocumentsResponse } from "@/types/businessDocuments.type";
+import { presentBusinessDocuments } from "@/utils/businessDocuments.util";
 
 const messageByStatus: Record<Exclude<BusinessDocumentsOverview["overallStatus"], "approved">, string> = {
   not_started: "Upload your CAC certificate, ID and proof of address to unlock the Gold checkmark. You can keep selling in the meantime.",
@@ -16,9 +17,9 @@ const messageByStatus: Record<Exclude<BusinessDocumentsOverview["overallStatus"]
 
 export function BusinessDocumentsBanner() {
   const { can } = useSellerSession();
-  const documents = useSellerQuery<BusinessDocumentsOverview>(can("settings:view") ? "/seller/business-documents" : null);
+  const documents = useSellerQuery<BusinessDocumentsResponse>(can("billing:manage") ? "/seller/business-documents" : null);
   const offer = useSellerQuery<BillingOffer>(can("billing:manage") ? "/seller/subscription/trial" : null);
-  const overview = documents.data;
+  const overview = documents.data ? presentBusinessDocuments(documents.data, false) : null;
   return (
     <>
       {offer.data?.activeTrial ? <TrialReminderCallout trial={offer.data.activeTrial} onCancelled={offer.reload} /> : null}

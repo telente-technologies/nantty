@@ -42,7 +42,7 @@ export function PasswordResetForm({ demoCode }: { readonly demoCode: string | nu
   function submitCurrentStep(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (step === "destination") {
-      if (destination.trim().length < 3) return setErrorMessage("Enter the email or phone number on your Zudomart account.");
+      if (destination.trim().length < 3) return setErrorMessage("Enter the email address on your Zudomart account.");
       void runStep(async () => {
         await sendRequestToDashboardServer("/bff/auth/password-reset/code", { method: "POST", body: { destination: destination.trim() } });
         setStep("code");
@@ -82,7 +82,7 @@ export function PasswordResetForm({ demoCode }: { readonly demoCode: string | nu
         </Link>
       ) : (
         <form onSubmit={submitCurrentStep} noValidate className={styles.formStack}>
-          {step === "destination" ? <TextField label="Email or phone number" autoComplete="username" value={destination} onChange={(event) => setDestination(event.target.value)} maxLength={254} autoFocus /> : null}
+          {step === "destination" ? <TextField label="Email address" type="email" autoComplete="email" value={destination} onChange={(event) => setDestination(event.target.value)} maxLength={254} autoFocus /> : null}
           {step === "code" ? <TextField label="6-digit code" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} autoFocus /> : null}
           {step === "password" ? (
             <>
@@ -95,7 +95,7 @@ export function PasswordResetForm({ demoCode }: { readonly demoCode: string | nu
           </Button>
           {step === "code" ? (
             <button type="button" className={styles.textButton} onClick={() => { setStep("destination"); setCode(""); }}>
-              Use a different email or phone
+              Use a different email
             </button>
           ) : null}
         </form>

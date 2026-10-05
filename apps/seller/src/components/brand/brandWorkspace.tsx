@@ -13,6 +13,7 @@ import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import type { Brand, BrandMemberRole, BrandSummary, MyStoreEntry } from "@/types/brand.type";
 import type { CursorPage } from "@/types/pagination.type";
 import { brandRegistrationLabels, officialStoreLabels } from "@/utils/brandPresentation.util";
+import { readMyStoreEntries, type MyStoresResponse } from "@/utils/myStores.util";
 
 interface BrandWorkspaceValue {
   readonly brand: Brand;
@@ -43,10 +44,10 @@ function readRememberedBrandId(): string | null {
 export function BrandWorkspace({ children }: { readonly children: ReactNode }) {
   const { sessionView, can } = useSellerSession();
   const brandsQuery = useSellerQuery<CursorPage<BrandSummary>>("/seller/brands");
-  const storesQuery = useSellerQuery<CursorPage<MyStoreEntry>>("/seller/stores/mine");
+  const storesQuery = useSellerQuery<MyStoresResponse>("/seller/stores/mine");
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
   const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
-  const myStores = useMemo(() => storesQuery.data?.data ?? [], [storesQuery.data]);
+  const myStores = useMemo(() => readMyStoreEntries(storesQuery.data), [storesQuery.data]);
 
   useEffect(() => {
     if (selectedBrandId || brands.length === 0) return;

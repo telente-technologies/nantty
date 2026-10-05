@@ -20,7 +20,7 @@ export function LoginForm({ nextPath, initialIdentifier, getTheAppUrl }: { reado
   async function submitSignInForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (identifier.trim().length < 3 || password.length === 0) {
-      setErrorMessage("Enter your email, username or phone number and your password.");
+      setErrorMessage("Enter your email or username and your password.");
       return;
     }
     setIsSubmitting(true);
@@ -42,7 +42,7 @@ export function LoginForm({ nextPath, initialIdentifier, getTheAppUrl }: { reado
       </div>
       <form onSubmit={submitSignInForm} noValidate className={styles.formStack}>
         {errorMessage ? <Callout tone="error">{errorMessage}</Callout> : null}
-        <TextField label="Email, username or phone number" name="identifier" autoComplete="username" value={identifier} onChange={(event) => setIdentifier(event.target.value)} maxLength={254} required autoFocus={!initialIdentifier} />
+        <TextField label="Email or username" name="identifier" autoComplete="username" value={identifier} onChange={(event) => setIdentifier(event.target.value)} maxLength={254} required autoFocus={!initialIdentifier} />
         <TextField label="Password" name="password" type={isPasswordVisible ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} maxLength={128} required autoFocus={Boolean(initialIdentifier)} />
         <div className={styles.rowBetween}>
           <label className={styles.checkboxLabel}>

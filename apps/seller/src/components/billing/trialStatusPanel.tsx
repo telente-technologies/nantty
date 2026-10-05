@@ -60,7 +60,7 @@ export function TrialStatusPanel({ trial, onChanged }: { readonly trial: ActiveT
         { label: trial.isCancelled ? "Charge after trial" : "First charge", value: trial.isCancelled ? "None" : `${formatMoneyForDisplay(trial.priceAfterTrial)} per ${trial.interval}` },
         { label: "Card", value: trial.cardSummary },
         { label: "Verification charge", value: `${formatMoneyForDisplay(trial.verificationCharge.amount)} ${trial.verificationCharge.status === "REFUNDED" ? "refunded" : "refund on its way"}` },
-        { label: "Reminders", value: trial.reminders.map((reminder) => `${reminder.daysBefore} day${reminder.daysBefore === 1 ? "" : "s"} before (${formatDateForDisplay(reminder.sendsAt)})`).join(" and ") },
+        ...(trial.reminders?.length ? [{ label: "Reminders", value: trial.reminders.map((reminder) => `${reminder.daysBefore} day${reminder.daysBefore === 1 ? "" : "s"} before (${formatDateForDisplay(reminder.sendsAt)})`).join(" and ") }] : []),
       ]} />
       {!trial.isCancelled ? <div style={{ marginTop: 12 }}><Button variant="danger" isBusy={isCancelling} onClick={() => void cancel()}>Cancel my trial</Button></div> : null}
     </Panel>
