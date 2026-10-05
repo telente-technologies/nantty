@@ -1,15 +1,15 @@
 .filters {
   display: grid;
   grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(130px, 1fr));
-  gap: 8px;
+  gap: var(--space-2);
   align-items: end;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .roleTags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .muted {
@@ -18,20 +18,20 @@
 
 .faint {
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .actionBar {
@@ -43,7 +43,7 @@
 .headerIdentity {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .list {
@@ -57,7 +57,7 @@
 .listItem {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   padding: 9px 0;
   border-bottom: 1px solid var(--divider-soft);
 }
@@ -78,7 +78,7 @@
 .check {
   display: grid;
   grid-template-columns: 20px 1fr auto;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: start;
   padding: 7px 9px;
   border-radius: var(--radius-small);
@@ -101,21 +101,21 @@
 }
 
 .checkDetail {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--ink-muted);
 }
 
 .consequenceNote {
-  padding: 8px 10px;
+  padding: var(--space-2) 10px;
   border-left: 3px solid var(--color-accent);
   background: var(--surface-sunken);
   border-radius: 0 var(--radius-small) var(--radius-small) 0;
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .revealed {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 @media (max-width: 1000px) {

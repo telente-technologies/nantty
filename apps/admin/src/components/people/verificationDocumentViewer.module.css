@@ -3,7 +3,7 @@
   overflow: hidden;
   border-radius: var(--radius-medium);
   background: var(--document-backdrop);
-  padding: 24px;
+  padding: var(--space-6);
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -30,7 +30,7 @@
 .watermark span {
   white-space: nowrap;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-weight: 600;
   color: var(--error-watermark);
   letter-spacing: 0.04em;
