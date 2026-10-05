@@ -52,7 +52,7 @@
   --stage-canvas: #10121c;
   --stage-tile-light: #20222e;
   --stage-tile-dark: #171824;
-  --stage-panel: rgb(11 23 82 / 0.95);
+  --stage-panel: rgb(24 18 99 / 0.95);
   --stage-scrim: rgb(0 0 0 / 0.55);
   --stage-line: rgb(255 255 255 / 0.2);
   --stage-text: #ffffff;
@@ -60,7 +60,7 @@
   --stage-text-faint: #9ea3bd;
   --stage-live: #dc2626;
   --stage-shadow: 0 24px 60px -30px rgb(0 0 0 / 0.7);
-  --brand-panel-glow: rgb(69 99 247 / 0.35);
+  --brand-panel-glow: rgb(97 85 255 / 0.35);
   --brand-panel-start: var(--blue-900);
   --brand-panel-middle: var(--blue-800);
   --brand-panel-end: var(--blue-700);
@@ -96,9 +96,11 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
 }
 
 body {
+  overflow-wrap: break-word;
   margin: 0;
   background: var(--surface-app);
   color: var(--ink-strong);
@@ -173,9 +175,14 @@ button {
 }
 
 :focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-  border-radius: var(--radius-small);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
 }
 
 ::selection {
@@ -211,7 +218,7 @@ button {
   top: 8px;
   left: 8px;
   z-index: 100;
-  padding: 10px 16px;
+  padding: 10px var(--space-4);
   border-radius: var(--radius-pill);
   background: var(--color-text);
   color: var(--color-bg);

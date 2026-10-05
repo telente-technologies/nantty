@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   title: { default: "Zudomart Studio", template: "%s · Zudomart Studio" },
   description: "Go live on Zudomart: talk, music, gaming and more, with OBS, overlays, gifts and analytics.",
   applicationName: "Zudomart Studio",
+  manifest: "/manifest.webmanifest",
+  icons: { icon: [{ url: "/brand/favicon.ico", sizes: "48x48" }, { url: "/brand/icon.svg", type: "image/svg+xml" }], apple: "/brand/appleTouchIcon.png" },
   formatDetection: { telephone: false },
   robots: { index: false, follow: false },
 };
