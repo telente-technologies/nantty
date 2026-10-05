@@ -62,7 +62,7 @@
 .note {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   padding: var(--space-3);
   border-radius: var(--radius-large);
   background: var(--color-brand-tint);
@@ -86,7 +86,7 @@
   border-radius: var(--radius-pill);
   background: var(--color-brand-tint);
   color: var(--color-brand);
-  font-size: 0.8125rem;
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
@@ -112,5 +112,5 @@
   align-items: center;
 }
 
-.stat dt { font-size: 0.75rem; color: var(--ink-muted); }
+.stat dt { font-size: var(--text-xs); color: var(--ink-muted); }
 .stat dd { margin: 0; font-weight: 700; color: var(--ink-strong); }

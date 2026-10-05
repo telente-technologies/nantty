@@ -34,7 +34,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 20px;
+  margin-top: var(--space-5);
   padding-top: 14px;
   border-top: 1px solid var(--color-border);
   color: var(--color-text-muted);
@@ -42,6 +42,6 @@
 
 .appPromptText {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   color: var(--color-text-muted);
 }

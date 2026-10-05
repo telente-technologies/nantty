@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { RetryButton } from "@/components/ui/controls";
-import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
+import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { MapPinIcon, PlusIcon } from "@/components/ui/icons";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { usersService } from "@/services/users.service";
@@ -15,6 +15,7 @@ import type { Address, ShippingAddressInput } from "@/types";
 import { AddressForm } from "./addressForm";
 import { addressToInput, emptyAddressInput, formatAddressLocation } from "./addressForm.util";
 import styles from "./addressBook.module.css";
+import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 
 export const addressesQueryKey = ["addresses"] as const;
 
@@ -73,7 +74,7 @@ export function AddressBook() {
     setEditorOpen(true);
   };
 
-  if (query.isLoading) return <Spinner label="Loading your addresses" />;
+  if (query.isLoading) return <ListRowsSkeleton label="Loading your addresses" rows={3} withAvatar={false} />;
   if (query.isError) return <ErrorState description="We couldn't load your addresses." action={<RetryButton onRetry={() => query.refetch()} />} />;
   const addresses = query.data ?? [];
 
