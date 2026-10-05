@@ -51,7 +51,7 @@ These apply to every backend file, whether a person or an agent writes it.
 | stores, products, categories, carts, orders, reviews | go.catalog, go.inventory, go.orders | Reviews go to go.catalog (product engagement) |
 | payments, wallets, escrows, coins, creatorSubscriptions, subscriptions | go.payments, go.wallet, go.ledger, go.escrow, go.subscriptions | Ledger + idempotency + webhook dedupe are the most valuable logic to port carefully |
 | creators (gifts, tips, earnings, affiliations) | go.creators | Gift catalogue and splits move to config tables |
-| posts (incl. live + stories), feeds, follows, media, notifications, search, support, waitlist | ts.social, ts.feed, ts.media, ts.notifications, ts.search, ts.support, ts.campaigns; **live → go.live** | Copy most of the TS code directly |
+| posts (incl. live + stories), feeds, follows, media, notifications, search, support (waitlist dropped by the owner on 2026-10-05) | ts.social, ts.feed, ts.media, ts.notifications, ts.search, ts.support, ts.campaigns; **live → go.live** | Copy most of the TS code directly |
 | messages (+ realtime hub) | elixir.realtime (sockets, presence) + chat persistence in elixir.realtime | The WebSocket JSON envelope is kept (§5.6) |
 | moderation, automation | go.moderation (automation rules live there per JSON) | |
 | ads | go.ads | Rich schema (~30 models) but only account routes exist |
@@ -209,7 +209,7 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | GET /store-rewards/me (per-store credit balances), GET /seller/marketing/rewards/summary | M S | ✅ | **New, seller-funded** (§ Store rewards below). Per-store credit ledger in go-commerce, not go-money cash. Referral and platform loyalty/cashback endpoints removed |
 | GET /notifications (bare array), read, read-all, preferences, device tokens | M W | ✅ | Needs a page envelope; → ts.notifications. **✅ built (ts.notifications):** `GET /notifications?filter=all\|mentions` → `{data,nextCursor}`, `POST /notifications/:id/read`, `/read-all`, `GET /notifications/unread-count`, `GET\|PATCH /notifications/preferences`, `POST\|DELETE /notifications/device-tokens`, `GET\|POST /email/unsubscribe` (one-click), admin `/admin/support/email/*` and `/admin/legal/{notices,versions/:id/notice-draft,notice-preview}`; consumes domain events from RabbitMQ (`notifications-domain-events`, jobs on `jobs-email`) and sends SES email through `@zudomart/email-templates` |
 | Reports, appeals, copyright claims, support tickets | M | ◐ (`/copyright/claims` ✗) | go.moderation / ts.support |
-| POST /waitlist | L | ✅ | ts.campaigns |
+| ~~POST /waitlist~~ | L | — | **Dropped by the owner on 2026-10-05.** Not ported; the website links to the app stores, the web app and seller sign-up instead |
 
 ### 2.9 Seller dashboard — owner mostly **go.catalog / go.inventory / go.orders / go.money**, analytics **ClickHouse**
 

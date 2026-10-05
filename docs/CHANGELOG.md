@@ -6,6 +6,23 @@ Verified: `cd apps/mobile && npx tsc --noEmit` → clean. `cd apps/webapp && npx
 
 ---
 
+## Waitlist dropped, phone sign-in removed (5 Oct)
+
+Owner decisions on 2026-10-05: the launch waitlist is dropped, and email is the only sign-in identifier and one-time-code channel. Phone numbers stay where they are contact data (addresses, stores, locations, suppliers, order buyers, admin personal-data reveal, ads customer-list hashing, seller application contact).
+
+| app | change |
+|---|---|
+| web | Removed `waitlistForm` (+ CSS), `waitlist.service`, `waitlist.types`, `emailValidation.util` and `postJsonToApi`. The hero and the download panel now show "Open the web app" (`NEXT_PUBLIC_WEBAPP_URL`) plus the store badges; the sellers page panel links to the Zudomart Dashboard; header, announcement bar and about page link to `/#download` ("Get the app"). FAQ and terms no longer mention a waitlist. `NEXT_PUBLIC_API_URL` stays (visitor locale) |
+| mobile | OTP screen: no "Request a call", no `+234` formatting. `RegisterInput.email` is required; unused Nigerian phone validators removed; creator requirement `verified_phone` and the `phone_not_verified` copy removed; help-centre and 2FA copy say email only |
+| webapp | Same as mobile for signup rules, register input, validators, creator requirements and help-centre copy |
+| seller | Sign-in is "Email or username"; password reset accepts an email only (`normaliseResetEmailAddress`); mock login/reset no longer match phones; 2-step method `sms` → `email`; contract updated |
+| ads | Sign-in copy and mock say email or username; demo users have no phone |
+| admin | Removed `requiresVerifiedPhone` (creator eligibility and auto-approve), trial `onePerPhone`, application `phoneVerified` signals and the PHONE sign-up block; ban copy says email and device; contract updated |
+| packages | emailTemplates checkmark sample says "email address is verified" |
+| docs | backendPlan, plans, architecture/backend, inventory, microservicesPlan.json and darkModePlan record the waitlist as dropped |
+
+---
+
 ## Seller dashboard backend (5 Oct, night) - 56 dashboard calls backed; Go tests, gateway 1,108 tests, seller contracts 26/26, apiSmoke seller journeys 24/24
 
 Report: [verification/apiContractCheck.md](./verification/apiContractCheck.md), section "Seller backend pass".

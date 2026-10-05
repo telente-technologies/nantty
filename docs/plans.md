@@ -432,6 +432,7 @@ Rules:
 - `components/ui/icons.tsx` full replacement by mobile icons (§6.2), beyond the auth screens.
 - Contract confirmation for the quote-reshare body field `text` (§7.3 step 4).
 - Media ingest provider choice: MediaMTX vs SRS, and whether recording/VOD is required at launch (§8.3.8).
+- **Dropped by the owner on 2026-10-05:** the launch waitlist (web form, `POST /waitlist`, `ts.campaigns` waitlist). The website links to the app stores, the web app and seller sign-up instead. Phone-number sign-in and phone OTP are removed the same day: email is the only sign-in identifier and code channel. (`backInStock` "waitlisted" below means a product restock alert, not the launch waitlist.)
 
 ---
 

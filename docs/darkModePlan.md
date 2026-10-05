@@ -79,7 +79,7 @@ Mobile:
 | 4 | webapp | M | 57 hex. `ui/feedback`, `ui/phoneFrame`, `feed/postCard`, `(auth)/authLayout`. |
 | 5 | studio | S–M | `auth/authSplitLayout` (16), `landing/landingHero` (8), `ui/feedback`. The control room and overlay pages are dark-first already, so tokenise but keep them dark. |
 | 6 | mobile | L (2–3 wk) | 265 static-style files, 185 inline hex in 124 TSX files (mostly generated icons, which should take `color` props). `live/gifts/liveGiftArtwork.tsx` (30) is artwork, so leave it. Needs Figma sign-off (section 5). |
-| 7 | web landing | S, optional | Marketing pages are art-directed; `waitlistForm`, `escrowReceiptDemo`, `siteHeader`. Could stay light-only. |
+| 7 | web landing | S, optional | Marketing pages are art-directed; `appDownloadCallToAction`, `escrowReceiptDemo`, `siteHeader`. Could stay light-only. |
 
 ## 4. Rules
 
