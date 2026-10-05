@@ -71,6 +71,7 @@ type UserDetail struct {
 var usernameChangeKinds = map[usernamechange.Reason]string{
 	usernamechange.ReasonSignup: "SIGNUP", usernamechange.ReasonUserChange: "USER_CHANGE", usernamechange.ReasonAdminChange: "ASSIGNED_TO_CLAIMANT",
 	usernamechange.ReasonAdminReassignedAway: "REASSIGNED_AWAY", usernamechange.ReasonAdminReassignedTo: "REASSIGNED_TO", usernamechange.ReasonAdminAssignedHeld: "ASSIGNED_HELD",
+	usernamechange.ReasonAdminWithheld: "WITHHELD", usernamechange.ReasonAdminRestored: "RESTORED", usernamechange.ReasonAdminReclaimedTo: "RECEIVED_FROM_RECLAIM",
 }
 
 func formatTime(moment time.Time) string { return moment.UTC().Format(time.RFC3339) }
@@ -178,5 +179,5 @@ func withheldUsernameOf(ctx context.Context, application *container.Container, t
 	if err != nil {
 		return nil, err
 	}
-	return &WithheldUsernameView{Username: hold.Username, OriginalOwnerId: target.Account.ID.String(), OriginalOwnerDisplayName: target.Account.Name, WithheldAt: formatTime(hold.CreatedAt), Reason: hold.Reason}, nil
+	return &WithheldUsernameView{Username: hold.Username, OriginalOwnerId: target.Account.ID.String(), OriginalOwnerDisplayName: target.Account.Name, WithheldAt: formatTime(hold.CreatedAt), WithheldByName: hold.CreatedByName, Reason: hold.Reason}, nil
 }

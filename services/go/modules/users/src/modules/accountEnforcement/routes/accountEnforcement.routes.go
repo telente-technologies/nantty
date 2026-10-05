@@ -12,6 +12,7 @@ import (
 
 var readUserPermissions = []string{"users:read", "support:tickets", "verification:review", "moderation:reports"}
 var usernameHoldPermissions = []string{"usernames:reassign", "reserved-usernames:manage"}
+var usernameReadPermissions = []string{"users.usernames.read", "usernames:reassign"}
 
 func MountAccountEnforcementRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.AccountEnforcementController{Container: container}
@@ -32,6 +33,13 @@ func MountAccountEnforcementRoutes(mux *http.ServeMux, container *container.Cont
 	mux.Handle("POST /api/v1/admin/users/{userId}/delete", one("users:delete", true, controller.Delete))
 	mux.Handle("POST /api/v1/admin/users/{userId}/username/reassign", one("usernames:reassign", true, controller.Reassign))
 	mux.Handle("POST /api/v1/admin/users/{userId}/username/assign-held", one("usernames:reassign", true, controller.AssignHeld))
+	mux.Handle("GET /api/v1/admin/users/{userId}/personal-data", one("users:read-pii", false, controller.RevealPersonalData))
+	mux.Handle("POST /api/v1/admin/users/{userId}/warn", one("users:moderate", false, controller.Warn))
+	mux.Handle("POST /api/v1/admin/users/{userId}/force-logout", one("users:moderate", false, controller.ForceLogout))
+	mux.Handle("POST /api/v1/admin/users/{userId}/username/withhold", one("users.usernames.withhold", true, controller.WithholdUsername))
+	mux.Handle("POST /api/v1/admin/users/{userId}/username/reclaim", one("users.usernames.withhold", true, controller.ReclaimUsername))
+	mux.Handle("GET /api/v1/admin/usernames/withheld", any(usernameReadPermissions, controller.ListWithheld))
+	mux.Handle("GET /api/v1/admin/usernames/confusables", any(usernameReadPermissions, controller.PreviewConfusables))
 	mux.Handle("GET /api/v1/admin/usernames/held", any(usernameHoldPermissions, controller.ListHeld))
 	mux.Handle("GET /api/v1/admin/usernames/hold", any(usernameHoldPermissions, controller.GetHold))
 	mux.Handle("GET /api/v1/admin/suspensions/accounts", one("users:suspend", false, controller.ListSuspendedAccounts))
