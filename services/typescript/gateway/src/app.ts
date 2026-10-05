@@ -7,6 +7,7 @@ import {
 } from "@zudojs/http";
 import { createLogger, type Logger } from "@zudojs/logger";
 
+import { createAdminNetworkMiddleware } from "./middlewares/adminNetwork.middleware.js";
 import { createGlobalRateLimitMiddleware } from "./middlewares/routeRateLimit.middleware.js";
 import { createRequestSizeLimitMiddleware } from "./middlewares/requestSizeLimit.middleware.js";
 import { createSecurityHeadersMiddleware } from "./middlewares/securityHeaders.middleware.js";
@@ -52,6 +53,7 @@ export function createGatewayServer(options: GatewayServerOptions) {
         exposeHeaders: "ETag, X-Request-Id, Traceparent, Retry-After, Idempotent-Replayed",
       }),
       createRequestSizeLimitMiddleware(maximumRequestBodyBytes),
+      createAdminNetworkMiddleware(options.config.adminIpAllowList ?? []),
       createGlobalRateLimitMiddleware(rateLimitStore, options.config.rateLimitMaxPerMinute),
       createUpstreamDispatchHandler({ config: options.config, verifier, logger, rateLimitStore, security, ...(policyGate === undefined ? {} : { policyGate }) }),
     ],
