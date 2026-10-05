@@ -33,7 +33,8 @@ export const MediaKind = {
   image: 'image',
   video: 'video',
   audio: 'audio',
-  document: 'document'
+  document: 'document',
+  encrypted: 'encrypted'
 } as const
 
 export type MediaKind = (typeof MediaKind)[keyof typeof MediaKind]

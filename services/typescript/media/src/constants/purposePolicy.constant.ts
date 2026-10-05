@@ -1,7 +1,7 @@
 export type MediaPurposeName =
   | "post" | "clip" | "story" | "avatar" | "banner" | "product" | "chat" | "voice" | "document" | "kyc" | "adCreative"
   | "dispute_evidence" | "identity_document" | "verification_document";
-export type MediaKindName = "image" | "video" | "audio" | "document";
+export type MediaKindName = "image" | "video" | "audio" | "document" | "encrypted";
 
 export const mebibyte = 1024 * 1024;
 
@@ -9,6 +9,7 @@ export const imageMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/h
 export const videoMimeTypes = ["video/mp4", "video/quicktime", "video/webm"] as const;
 export const audioMimeTypes = ["audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/aac", "audio/ogg", "audio/webm", "audio/wav", "audio/x-wav"] as const;
 export const documentMimeTypes = ["application/pdf"] as const;
+export const encryptedChatMimeType = "application/vnd.zudomart.encrypted";
 
 export interface PurposeRule {
   readonly kind: MediaKindName;
@@ -28,6 +29,7 @@ const image = (maximumMebibytes: number): PurposeRule => ({ kind: "image", mimeT
 const video = (maximumMebibytes: number, maximumDurationSeconds: number): PurposeRule => ({ kind: "video", mimeTypes: videoMimeTypes, maximumBytes: maximumMebibytes * mebibyte, maximumDurationSeconds });
 const audio = (maximumMebibytes: number, maximumDurationSeconds: number): PurposeRule => ({ kind: "audio", mimeTypes: audioMimeTypes, maximumBytes: maximumMebibytes * mebibyte, maximumDurationSeconds });
 const document = (maximumMebibytes: number): PurposeRule => ({ kind: "document", mimeTypes: documentMimeTypes, maximumBytes: maximumMebibytes * mebibyte });
+const encrypted = (maximumMebibytes: number): PurposeRule => ({ kind: "encrypted", mimeTypes: [encryptedChatMimeType], maximumBytes: maximumMebibytes * mebibyte + 4096 });
 
 export const purposePolicies: Readonly<Record<MediaPurposeName, PurposePolicy>> = {
   post: { isPrivate: false, moderate: true, rules: [image(20), video(500, 600)] },
@@ -37,8 +39,8 @@ export const purposePolicies: Readonly<Record<MediaPurposeName, PurposePolicy>> 
   banner: { isPrivate: false, moderate: true, rules: [image(10)] },
   product: { isPrivate: false, moderate: true, rules: [image(10), video(200, 120)] },
   adCreative: { isPrivate: false, moderate: false, rules: [image(10), video(200, 120)] },
-  chat: { isPrivate: true, moderate: false, retentionDays: 30, rules: [image(20), video(100, 300), document(25)] },
-  voice: { isPrivate: true, moderate: false, retentionDays: 30, rules: [audio(10, 600)] },
+  chat: { isPrivate: true, moderate: false, retentionDays: 30, rules: [image(20), video(100, 300), document(25), encrypted(100)] },
+  voice: { isPrivate: true, moderate: false, retentionDays: 30, rules: [audio(10, 600), encrypted(10)] },
   document: { isPrivate: true, moderate: false, rules: [document(25), image(10)] },
   dispute_evidence: { isPrivate: true, moderate: false, rules: [document(25), image(10), video(100, 120)] },
   kyc: { isPrivate: true, moderate: false, rules: [document(10), image(10)] },

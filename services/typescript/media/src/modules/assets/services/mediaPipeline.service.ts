@@ -4,7 +4,7 @@ import { mkdtemp, open, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { purposePolicies, type MediaKindName, type MediaPurposeName } from "../../../constants/purposePolicy.constant.js";
+import { encryptedChatMimeType, purposePolicies, type MediaKindName, type MediaPurposeName } from "../../../constants/purposePolicy.constant.js";
 import { MediaRejectedError } from "../../../errors/media.error.js";
 import type { JobAttempt } from "../../../interfaces/jobQueue.interface.js";
 import type { ProcessedMedia } from "../../../interfaces/mediaProcessors.interface.js";
@@ -49,6 +49,7 @@ export async function rejectAsset(context: HandlerContext, asset: MediaAssetWith
 
 async function inspectOriginal(asset: MediaAssetWithVariants, inputPath: string): Promise<{ readonly kind: MediaKindName; readonly sniffedMimeType: string; readonly maximumDurationSeconds: number | undefined }> {
   const purpose = asset.purpose as MediaPurposeName;
+  if (asset.kind === "encrypted") return inspectEncryptedBlob(asset, inputPath);
   const sniffed = sniffMimeType(await readHead(inputPath));
   if (sniffed === undefined) throw new MediaRejectedError("UNRECOGNIZED_FILE_TYPE");
   if (!areMimeTypesCompatible(asset.declaredMimeType, sniffed)) throw new MediaRejectedError("TYPE_MISMATCH");
@@ -61,7 +62,21 @@ async function inspectOriginal(asset: MediaAssetWithVariants, inputPath: string)
   return { kind: rule.kind, sniffedMimeType: sniffed, maximumDurationSeconds: rule.maximumDurationSeconds };
 }
 
+async function inspectEncryptedBlob(asset: MediaAssetWithVariants, inputPath: string): Promise<{ readonly kind: MediaKindName; readonly sniffedMimeType: string; readonly maximumDurationSeconds: undefined }> {
+  const rule = findRuleForMimeType(asset.purpose as MediaPurposeName, asset.declaredMimeType);
+  if (rule?.kind !== "encrypted") throw new MediaRejectedError("TYPE_NOT_ALLOWED");
+  const size = (await stat(inputPath)).size;
+  if (size > rule.maximumBytes) throw new MediaRejectedError("FILE_TOO_LARGE");
+  if (size !== Number(asset.sizeBytes)) throw new MediaRejectedError("SIZE_MISMATCH");
+  if (asset.sha256 !== null && (await sha256OfFile(inputPath)) !== asset.sha256.toLowerCase()) throw new MediaRejectedError("CHECKSUM_MISMATCH");
+  return { kind: "encrypted", sniffedMimeType: encryptedChatMimeType, maximumDurationSeconds: undefined };
+}
+
 async function produceDerivatives(context: HandlerContext, kind: MediaKindName, inputPath: string, workDirectory: string, purpose: MediaPurposeName, maximumDurationSeconds: number | undefined): Promise<ProcessedMedia> {
+  if (kind === "encrypted") {
+    const sizeBytes = (await stat(inputPath)).size;
+    return { width: 0, height: 0, files: [{ name: "original.bin", contentType: "application/octet-stream", format: "bin", width: 0, height: 0, isVariant: true, source: { path: inputPath }, sizeBytes }], moderationFrames: [] };
+  }
   const input = { inputPath, workDirectory, purpose, ...(maximumDurationSeconds === undefined ? {} : { maximumDurationSeconds }) };
   if (kind === "image") return context.images.processImage(input);
   if (kind === "video") return context.transcoder.processVideo(input);

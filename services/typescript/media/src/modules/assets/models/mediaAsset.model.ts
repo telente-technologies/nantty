@@ -12,7 +12,7 @@ export interface MediaVariantView {
 
 export interface MediaAssetView {
   readonly id: string;
-  readonly type: "image" | "video" | "audio" | "document";
+  readonly type: "image" | "video" | "audio" | "document" | "encrypted";
   readonly status: "processing" | "ready" | "failed";
   readonly purpose: string;
   readonly width: number;
