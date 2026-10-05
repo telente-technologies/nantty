@@ -1,15 +1,15 @@
 .form {
   display: grid;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
   max-width: 480px;
 }
 
 .roleFieldset {
   display: inline-flex;
-  gap: 4px;
+  gap: var(--space-1);
   margin: 0;
-  padding: 4px;
+  padding: var(--space-1);
   border: 0;
   border-radius: var(--radius-pill);
   justify-self: start;
@@ -30,7 +30,7 @@
 
 .roleOption span {
   display: inline-block;
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-pill);
   font-size: 0.9rem;
   font-weight: 600;
@@ -99,7 +99,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 20px;
+  padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-medium);
   font-weight: 600;
 }
