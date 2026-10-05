@@ -18,6 +18,8 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
+	"zudomart/modules/wallet/src/generated/ent/payoutaccountresolution"
+	"zudomart/modules/wallet/src/generated/ent/sellerpayoutschedule"
 	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
 	"zudomart/modules/wallet/src/generated/ent/walletriskflag"
 	"zudomart/modules/wallet/src/generated/ent/withdrawal"
@@ -85,19 +87,21 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			adbalancetopup.Table:    adbalancetopup.ValidColumn,
-			adspenddebit.Table:      adspenddebit.ValidColumn,
-			coinconversion.Table:    coinconversion.ValidColumn,
-			coinpackage.Table:       coinpackage.ValidColumn,
-			coinpurchase.Table:      coinpurchase.ValidColumn,
-			cointransfer.Table:      cointransfer.ValidColumn,
-			idempotentrequest.Table: idempotentrequest.ValidColumn,
-			monetisationhold.Table:  monetisationhold.ValidColumn,
-			outboxevent.Table:       outboxevent.ValidColumn,
-			payoutaccount.Table:     payoutaccount.ValidColumn,
-			sellerreserveflag.Table: sellerreserveflag.ValidColumn,
-			walletriskflag.Table:    walletriskflag.ValidColumn,
-			withdrawal.Table:        withdrawal.ValidColumn,
+			adbalancetopup.Table:          adbalancetopup.ValidColumn,
+			adspenddebit.Table:            adspenddebit.ValidColumn,
+			coinconversion.Table:          coinconversion.ValidColumn,
+			coinpackage.Table:             coinpackage.ValidColumn,
+			coinpurchase.Table:            coinpurchase.ValidColumn,
+			cointransfer.Table:            cointransfer.ValidColumn,
+			idempotentrequest.Table:       idempotentrequest.ValidColumn,
+			monetisationhold.Table:        monetisationhold.ValidColumn,
+			outboxevent.Table:             outboxevent.ValidColumn,
+			payoutaccount.Table:           payoutaccount.ValidColumn,
+			payoutaccountresolution.Table: payoutaccountresolution.ValidColumn,
+			sellerpayoutschedule.Table:    sellerpayoutschedule.ValidColumn,
+			sellerreserveflag.Table:       sellerreserveflag.ValidColumn,
+			walletriskflag.Table:          walletriskflag.ValidColumn,
+			withdrawal.Table:              withdrawal.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

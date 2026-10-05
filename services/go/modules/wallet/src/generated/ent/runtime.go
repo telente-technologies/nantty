@@ -15,6 +15,8 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
+	"zudomart/modules/wallet/src/generated/ent/payoutaccountresolution"
+	"zudomart/modules/wallet/src/generated/ent/sellerpayoutschedule"
 	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
 	"zudomart/modules/wallet/src/generated/ent/walletriskflag"
 	"zudomart/modules/wallet/src/generated/ent/withdrawal"
@@ -782,6 +784,206 @@ func init() {
 	payoutaccountDescID := payoutaccountMixinFields0[0].Descriptor()
 	// payoutaccount.DefaultID holds the default value on creation for the id field.
 	payoutaccount.DefaultID = payoutaccountDescID.Default.(func() uuid.UUID)
+	payoutaccountresolutionMixin := schema.PayoutAccountResolution{}.Mixin()
+	payoutaccountresolutionMixinFields0 := payoutaccountresolutionMixin[0].Fields()
+	_ = payoutaccountresolutionMixinFields0
+	payoutaccountresolutionFields := schema.PayoutAccountResolution{}.Fields()
+	_ = payoutaccountresolutionFields
+	// payoutaccountresolutionDescCreatedAt is the schema descriptor for created_at field.
+	payoutaccountresolutionDescCreatedAt := payoutaccountresolutionMixinFields0[1].Descriptor()
+	// payoutaccountresolution.DefaultCreatedAt holds the default value on creation for the created_at field.
+	payoutaccountresolution.DefaultCreatedAt = payoutaccountresolutionDescCreatedAt.Default.(func() time.Time)
+	// payoutaccountresolutionDescUserID is the schema descriptor for user_id field.
+	payoutaccountresolutionDescUserID := payoutaccountresolutionFields[0].Descriptor()
+	// payoutaccountresolution.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	payoutaccountresolution.UserIDValidator = func() func(string) error {
+		validators := payoutaccountresolutionDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// payoutaccountresolutionDescCountryCode is the schema descriptor for country_code field.
+	payoutaccountresolutionDescCountryCode := payoutaccountresolutionFields[1].Descriptor()
+	// payoutaccountresolution.CountryCodeValidator is a validator for the "country_code" field. It is called by the builders before save.
+	payoutaccountresolution.CountryCodeValidator = func() func(string) error {
+		validators := payoutaccountresolutionDescCountryCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(country_code string) error {
+			for _, fn := range fns {
+				if err := fn(country_code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// payoutaccountresolutionDescBankCode is the schema descriptor for bank_code field.
+	payoutaccountresolutionDescBankCode := payoutaccountresolutionFields[2].Descriptor()
+	// payoutaccountresolution.BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
+	payoutaccountresolution.BankCodeValidator = func() func(string) error {
+		validators := payoutaccountresolutionDescBankCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(bank_code string) error {
+			for _, fn := range fns {
+				if err := fn(bank_code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// payoutaccountresolutionDescBankName is the schema descriptor for bank_name field.
+	payoutaccountresolutionDescBankName := payoutaccountresolutionFields[3].Descriptor()
+	// payoutaccountresolution.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
+	payoutaccountresolution.BankNameValidator = func() func(string) error {
+		validators := payoutaccountresolutionDescBankName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(bank_name string) error {
+			for _, fn := range fns {
+				if err := fn(bank_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// payoutaccountresolutionDescAccountNumberLast4 is the schema descriptor for account_number_last4 field.
+	payoutaccountresolutionDescAccountNumberLast4 := payoutaccountresolutionFields[5].Descriptor()
+	// payoutaccountresolution.AccountNumberLast4Validator is a validator for the "account_number_last4" field. It is called by the builders before save.
+	payoutaccountresolution.AccountNumberLast4Validator = func() func(string) error {
+		validators := payoutaccountresolutionDescAccountNumberLast4.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(account_number_last4 string) error {
+			for _, fn := range fns {
+				if err := fn(account_number_last4); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// payoutaccountresolutionDescAccountName is the schema descriptor for account_name field.
+	payoutaccountresolutionDescAccountName := payoutaccountresolutionFields[6].Descriptor()
+	// payoutaccountresolution.AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
+	payoutaccountresolution.AccountNameValidator = func() func(string) error {
+		validators := payoutaccountresolutionDescAccountName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(account_name string) error {
+			for _, fn := range fns {
+				if err := fn(account_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// payoutaccountresolutionDescID is the schema descriptor for id field.
+	payoutaccountresolutionDescID := payoutaccountresolutionMixinFields0[0].Descriptor()
+	// payoutaccountresolution.DefaultID holds the default value on creation for the id field.
+	payoutaccountresolution.DefaultID = payoutaccountresolutionDescID.Default.(func() uuid.UUID)
+	sellerpayoutscheduleMixin := schema.SellerPayoutSchedule{}.Mixin()
+	sellerpayoutscheduleMixinFields0 := sellerpayoutscheduleMixin[0].Fields()
+	_ = sellerpayoutscheduleMixinFields0
+	sellerpayoutscheduleFields := schema.SellerPayoutSchedule{}.Fields()
+	_ = sellerpayoutscheduleFields
+	// sellerpayoutscheduleDescCreatedAt is the schema descriptor for created_at field.
+	sellerpayoutscheduleDescCreatedAt := sellerpayoutscheduleMixinFields0[1].Descriptor()
+	// sellerpayoutschedule.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sellerpayoutschedule.DefaultCreatedAt = sellerpayoutscheduleDescCreatedAt.Default.(func() time.Time)
+	// sellerpayoutscheduleDescUserID is the schema descriptor for user_id field.
+	sellerpayoutscheduleDescUserID := sellerpayoutscheduleFields[0].Descriptor()
+	// sellerpayoutschedule.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	sellerpayoutschedule.UserIDValidator = func() func(string) error {
+		validators := sellerpayoutscheduleDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerpayoutscheduleDescCurrency is the schema descriptor for currency field.
+	sellerpayoutscheduleDescCurrency := sellerpayoutscheduleFields[1].Descriptor()
+	// sellerpayoutschedule.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	sellerpayoutschedule.CurrencyValidator = func() func(string) error {
+		validators := sellerpayoutscheduleDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerpayoutscheduleDescTimezone is the schema descriptor for timezone field.
+	sellerpayoutscheduleDescTimezone := sellerpayoutscheduleFields[2].Descriptor()
+	// sellerpayoutschedule.DefaultTimezone holds the default value on creation for the timezone field.
+	sellerpayoutschedule.DefaultTimezone = sellerpayoutscheduleDescTimezone.Default.(string)
+	// sellerpayoutschedule.TimezoneValidator is a validator for the "timezone" field. It is called by the builders before save.
+	sellerpayoutschedule.TimezoneValidator = sellerpayoutscheduleDescTimezone.Validators[0].(func(string) error)
+	// sellerpayoutscheduleDescWeekday is the schema descriptor for weekday field.
+	sellerpayoutscheduleDescWeekday := sellerpayoutscheduleFields[4].Descriptor()
+	// sellerpayoutschedule.DefaultWeekday holds the default value on creation for the weekday field.
+	sellerpayoutschedule.DefaultWeekday = sellerpayoutscheduleDescWeekday.Default.(int)
+	// sellerpayoutscheduleDescDayOfMonth is the schema descriptor for day_of_month field.
+	sellerpayoutscheduleDescDayOfMonth := sellerpayoutscheduleFields[5].Descriptor()
+	// sellerpayoutschedule.DefaultDayOfMonth holds the default value on creation for the day_of_month field.
+	sellerpayoutschedule.DefaultDayOfMonth = sellerpayoutscheduleDescDayOfMonth.Default.(int)
+	// sellerpayoutscheduleDescKeepMinimumMinor is the schema descriptor for keep_minimum_minor field.
+	sellerpayoutscheduleDescKeepMinimumMinor := sellerpayoutscheduleFields[6].Descriptor()
+	// sellerpayoutschedule.DefaultKeepMinimumMinor holds the default value on creation for the keep_minimum_minor field.
+	sellerpayoutschedule.DefaultKeepMinimumMinor = sellerpayoutscheduleDescKeepMinimumMinor.Default.(int64)
+	// sellerpayoutscheduleDescLastRunOn is the schema descriptor for last_run_on field.
+	sellerpayoutscheduleDescLastRunOn := sellerpayoutscheduleFields[9].Descriptor()
+	// sellerpayoutschedule.DefaultLastRunOn holds the default value on creation for the last_run_on field.
+	sellerpayoutschedule.DefaultLastRunOn = sellerpayoutscheduleDescLastRunOn.Default.(string)
+	// sellerpayoutschedule.LastRunOnValidator is a validator for the "last_run_on" field. It is called by the builders before save.
+	sellerpayoutschedule.LastRunOnValidator = sellerpayoutscheduleDescLastRunOn.Validators[0].(func(string) error)
+	// sellerpayoutscheduleDescUpdatedAt is the schema descriptor for updated_at field.
+	sellerpayoutscheduleDescUpdatedAt := sellerpayoutscheduleFields[10].Descriptor()
+	// sellerpayoutschedule.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	sellerpayoutschedule.DefaultUpdatedAt = sellerpayoutscheduleDescUpdatedAt.Default.(func() time.Time)
+	// sellerpayoutschedule.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	sellerpayoutschedule.UpdateDefaultUpdatedAt = sellerpayoutscheduleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// sellerpayoutscheduleDescID is the schema descriptor for id field.
+	sellerpayoutscheduleDescID := sellerpayoutscheduleMixinFields0[0].Descriptor()
+	// sellerpayoutschedule.DefaultID holds the default value on creation for the id field.
+	sellerpayoutschedule.DefaultID = sellerpayoutscheduleDescID.Default.(func() uuid.UUID)
 	sellerreserveflagMixin := schema.SellerReserveFlag{}.Mixin()
 	sellerreserveflagMixinFields0 := sellerreserveflagMixin[0].Fields()
 	_ = sellerreserveflagMixinFields0

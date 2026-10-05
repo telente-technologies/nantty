@@ -21,6 +21,8 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
+	"zudomart/modules/wallet/src/generated/ent/payoutaccountresolution"
+	"zudomart/modules/wallet/src/generated/ent/sellerpayoutschedule"
 	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
 	"zudomart/modules/wallet/src/generated/ent/walletriskflag"
 	"zudomart/modules/wallet/src/generated/ent/withdrawal"
@@ -59,6 +61,10 @@ type Client struct {
 	OutboxEvent *OutboxEventClient
 	// PayoutAccount is the client for interacting with the PayoutAccount builders.
 	PayoutAccount *PayoutAccountClient
+	// PayoutAccountResolution is the client for interacting with the PayoutAccountResolution builders.
+	PayoutAccountResolution *PayoutAccountResolutionClient
+	// SellerPayoutSchedule is the client for interacting with the SellerPayoutSchedule builders.
+	SellerPayoutSchedule *SellerPayoutScheduleClient
 	// SellerReserveFlag is the client for interacting with the SellerReserveFlag builders.
 	SellerReserveFlag *SellerReserveFlagClient
 	// WalletRiskFlag is the client for interacting with the WalletRiskFlag builders.
@@ -86,6 +92,8 @@ func (c *Client) init() {
 	c.MonetisationHold = NewMonetisationHoldClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.PayoutAccount = NewPayoutAccountClient(c.config)
+	c.PayoutAccountResolution = NewPayoutAccountResolutionClient(c.config)
+	c.SellerPayoutSchedule = NewSellerPayoutScheduleClient(c.config)
 	c.SellerReserveFlag = NewSellerReserveFlagClient(c.config)
 	c.WalletRiskFlag = NewWalletRiskFlagClient(c.config)
 	c.Withdrawal = NewWithdrawalClient(c.config)
@@ -181,21 +189,23 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		AdBalanceTopUp:    NewAdBalanceTopUpClient(cfg),
-		AdSpendDebit:      NewAdSpendDebitClient(cfg),
-		CoinConversion:    NewCoinConversionClient(cfg),
-		CoinPackage:       NewCoinPackageClient(cfg),
-		CoinPurchase:      NewCoinPurchaseClient(cfg),
-		CoinTransfer:      NewCoinTransferClient(cfg),
-		IdempotentRequest: NewIdempotentRequestClient(cfg),
-		MonetisationHold:  NewMonetisationHoldClient(cfg),
-		OutboxEvent:       NewOutboxEventClient(cfg),
-		PayoutAccount:     NewPayoutAccountClient(cfg),
-		SellerReserveFlag: NewSellerReserveFlagClient(cfg),
-		WalletRiskFlag:    NewWalletRiskFlagClient(cfg),
-		Withdrawal:        NewWithdrawalClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		AdBalanceTopUp:          NewAdBalanceTopUpClient(cfg),
+		AdSpendDebit:            NewAdSpendDebitClient(cfg),
+		CoinConversion:          NewCoinConversionClient(cfg),
+		CoinPackage:             NewCoinPackageClient(cfg),
+		CoinPurchase:            NewCoinPurchaseClient(cfg),
+		CoinTransfer:            NewCoinTransferClient(cfg),
+		IdempotentRequest:       NewIdempotentRequestClient(cfg),
+		MonetisationHold:        NewMonetisationHoldClient(cfg),
+		OutboxEvent:             NewOutboxEventClient(cfg),
+		PayoutAccount:           NewPayoutAccountClient(cfg),
+		PayoutAccountResolution: NewPayoutAccountResolutionClient(cfg),
+		SellerPayoutSchedule:    NewSellerPayoutScheduleClient(cfg),
+		SellerReserveFlag:       NewSellerReserveFlagClient(cfg),
+		WalletRiskFlag:          NewWalletRiskFlagClient(cfg),
+		Withdrawal:              NewWithdrawalClient(cfg),
 	}, nil
 }
 
@@ -213,21 +223,23 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		AdBalanceTopUp:    NewAdBalanceTopUpClient(cfg),
-		AdSpendDebit:      NewAdSpendDebitClient(cfg),
-		CoinConversion:    NewCoinConversionClient(cfg),
-		CoinPackage:       NewCoinPackageClient(cfg),
-		CoinPurchase:      NewCoinPurchaseClient(cfg),
-		CoinTransfer:      NewCoinTransferClient(cfg),
-		IdempotentRequest: NewIdempotentRequestClient(cfg),
-		MonetisationHold:  NewMonetisationHoldClient(cfg),
-		OutboxEvent:       NewOutboxEventClient(cfg),
-		PayoutAccount:     NewPayoutAccountClient(cfg),
-		SellerReserveFlag: NewSellerReserveFlagClient(cfg),
-		WalletRiskFlag:    NewWalletRiskFlagClient(cfg),
-		Withdrawal:        NewWithdrawalClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		AdBalanceTopUp:          NewAdBalanceTopUpClient(cfg),
+		AdSpendDebit:            NewAdSpendDebitClient(cfg),
+		CoinConversion:          NewCoinConversionClient(cfg),
+		CoinPackage:             NewCoinPackageClient(cfg),
+		CoinPurchase:            NewCoinPurchaseClient(cfg),
+		CoinTransfer:            NewCoinTransferClient(cfg),
+		IdempotentRequest:       NewIdempotentRequestClient(cfg),
+		MonetisationHold:        NewMonetisationHoldClient(cfg),
+		OutboxEvent:             NewOutboxEventClient(cfg),
+		PayoutAccount:           NewPayoutAccountClient(cfg),
+		PayoutAccountResolution: NewPayoutAccountResolutionClient(cfg),
+		SellerPayoutSchedule:    NewSellerPayoutScheduleClient(cfg),
+		SellerReserveFlag:       NewSellerReserveFlagClient(cfg),
+		WalletRiskFlag:          NewWalletRiskFlagClient(cfg),
+		Withdrawal:              NewWithdrawalClient(cfg),
 	}, nil
 }
 
@@ -259,8 +271,8 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion, c.CoinPackage,
 		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.MonetisationHold,
-		c.OutboxEvent, c.PayoutAccount, c.SellerReserveFlag, c.WalletRiskFlag,
-		c.Withdrawal,
+		c.OutboxEvent, c.PayoutAccount, c.PayoutAccountResolution,
+		c.SellerPayoutSchedule, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
 	} {
 		n.Use(hooks...)
 	}
@@ -272,8 +284,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion, c.CoinPackage,
 		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.MonetisationHold,
-		c.OutboxEvent, c.PayoutAccount, c.SellerReserveFlag, c.WalletRiskFlag,
-		c.Withdrawal,
+		c.OutboxEvent, c.PayoutAccount, c.PayoutAccountResolution,
+		c.SellerPayoutSchedule, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -302,6 +314,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OutboxEvent.mutate(ctx, m)
 	case *PayoutAccountMutation:
 		return c.PayoutAccount.mutate(ctx, m)
+	case *PayoutAccountResolutionMutation:
+		return c.PayoutAccountResolution.mutate(ctx, m)
+	case *SellerPayoutScheduleMutation:
+		return c.SellerPayoutSchedule.mutate(ctx, m)
 	case *SellerReserveFlagMutation:
 		return c.SellerReserveFlag.mutate(ctx, m)
 	case *WalletRiskFlagMutation:
@@ -1643,6 +1659,272 @@ func (c *PayoutAccountClient) mutate(ctx context.Context, m *PayoutAccountMutati
 	}
 }
 
+// PayoutAccountResolutionClient is a client for the PayoutAccountResolution schema.
+type PayoutAccountResolutionClient struct {
+	config
+}
+
+// NewPayoutAccountResolutionClient returns a client for the PayoutAccountResolution from the given config.
+func NewPayoutAccountResolutionClient(c config) *PayoutAccountResolutionClient {
+	return &PayoutAccountResolutionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `payoutaccountresolution.Hooks(f(g(h())))`.
+func (c *PayoutAccountResolutionClient) Use(hooks ...Hook) {
+	c.hooks.PayoutAccountResolution = append(c.hooks.PayoutAccountResolution, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `payoutaccountresolution.Intercept(f(g(h())))`.
+func (c *PayoutAccountResolutionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PayoutAccountResolution = append(c.inters.PayoutAccountResolution, interceptors...)
+}
+
+// Create returns a builder for creating a PayoutAccountResolution entity.
+func (c *PayoutAccountResolutionClient) Create() *PayoutAccountResolutionCreate {
+	mutation := newPayoutAccountResolutionMutation(c.config, OpCreate)
+	return &PayoutAccountResolutionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PayoutAccountResolution entities.
+func (c *PayoutAccountResolutionClient) CreateBulk(builders ...*PayoutAccountResolutionCreate) *PayoutAccountResolutionCreateBulk {
+	return &PayoutAccountResolutionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PayoutAccountResolutionClient) MapCreateBulk(slice any, setFunc func(*PayoutAccountResolutionCreate, int)) *PayoutAccountResolutionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PayoutAccountResolutionCreateBulk{err: fmt.Errorf("calling to PayoutAccountResolutionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PayoutAccountResolutionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PayoutAccountResolutionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PayoutAccountResolution.
+func (c *PayoutAccountResolutionClient) Update() *PayoutAccountResolutionUpdate {
+	mutation := newPayoutAccountResolutionMutation(c.config, OpUpdate)
+	return &PayoutAccountResolutionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PayoutAccountResolutionClient) UpdateOne(_m *PayoutAccountResolution) *PayoutAccountResolutionUpdateOne {
+	mutation := newPayoutAccountResolutionMutation(c.config, OpUpdateOne, withPayoutAccountResolution(_m))
+	return &PayoutAccountResolutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PayoutAccountResolutionClient) UpdateOneID(id uuid.UUID) *PayoutAccountResolutionUpdateOne {
+	mutation := newPayoutAccountResolutionMutation(c.config, OpUpdateOne, withPayoutAccountResolutionID(id))
+	return &PayoutAccountResolutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PayoutAccountResolution.
+func (c *PayoutAccountResolutionClient) Delete() *PayoutAccountResolutionDelete {
+	mutation := newPayoutAccountResolutionMutation(c.config, OpDelete)
+	return &PayoutAccountResolutionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PayoutAccountResolutionClient) DeleteOne(_m *PayoutAccountResolution) *PayoutAccountResolutionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PayoutAccountResolutionClient) DeleteOneID(id uuid.UUID) *PayoutAccountResolutionDeleteOne {
+	builder := c.Delete().Where(payoutaccountresolution.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PayoutAccountResolutionDeleteOne{builder}
+}
+
+// Query returns a query builder for PayoutAccountResolution.
+func (c *PayoutAccountResolutionClient) Query() *PayoutAccountResolutionQuery {
+	return &PayoutAccountResolutionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePayoutAccountResolution},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PayoutAccountResolution entity by its id.
+func (c *PayoutAccountResolutionClient) Get(ctx context.Context, id uuid.UUID) (*PayoutAccountResolution, error) {
+	return c.Query().Where(payoutaccountresolution.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PayoutAccountResolutionClient) GetX(ctx context.Context, id uuid.UUID) *PayoutAccountResolution {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PayoutAccountResolutionClient) Hooks() []Hook {
+	return c.hooks.PayoutAccountResolution
+}
+
+// Interceptors returns the client interceptors.
+func (c *PayoutAccountResolutionClient) Interceptors() []Interceptor {
+	return c.inters.PayoutAccountResolution
+}
+
+func (c *PayoutAccountResolutionClient) mutate(ctx context.Context, m *PayoutAccountResolutionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PayoutAccountResolutionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PayoutAccountResolutionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PayoutAccountResolutionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PayoutAccountResolutionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PayoutAccountResolution mutation op: %q", m.Op())
+	}
+}
+
+// SellerPayoutScheduleClient is a client for the SellerPayoutSchedule schema.
+type SellerPayoutScheduleClient struct {
+	config
+}
+
+// NewSellerPayoutScheduleClient returns a client for the SellerPayoutSchedule from the given config.
+func NewSellerPayoutScheduleClient(c config) *SellerPayoutScheduleClient {
+	return &SellerPayoutScheduleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sellerpayoutschedule.Hooks(f(g(h())))`.
+func (c *SellerPayoutScheduleClient) Use(hooks ...Hook) {
+	c.hooks.SellerPayoutSchedule = append(c.hooks.SellerPayoutSchedule, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sellerpayoutschedule.Intercept(f(g(h())))`.
+func (c *SellerPayoutScheduleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SellerPayoutSchedule = append(c.inters.SellerPayoutSchedule, interceptors...)
+}
+
+// Create returns a builder for creating a SellerPayoutSchedule entity.
+func (c *SellerPayoutScheduleClient) Create() *SellerPayoutScheduleCreate {
+	mutation := newSellerPayoutScheduleMutation(c.config, OpCreate)
+	return &SellerPayoutScheduleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SellerPayoutSchedule entities.
+func (c *SellerPayoutScheduleClient) CreateBulk(builders ...*SellerPayoutScheduleCreate) *SellerPayoutScheduleCreateBulk {
+	return &SellerPayoutScheduleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SellerPayoutScheduleClient) MapCreateBulk(slice any, setFunc func(*SellerPayoutScheduleCreate, int)) *SellerPayoutScheduleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SellerPayoutScheduleCreateBulk{err: fmt.Errorf("calling to SellerPayoutScheduleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SellerPayoutScheduleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SellerPayoutScheduleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SellerPayoutSchedule.
+func (c *SellerPayoutScheduleClient) Update() *SellerPayoutScheduleUpdate {
+	mutation := newSellerPayoutScheduleMutation(c.config, OpUpdate)
+	return &SellerPayoutScheduleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SellerPayoutScheduleClient) UpdateOne(_m *SellerPayoutSchedule) *SellerPayoutScheduleUpdateOne {
+	mutation := newSellerPayoutScheduleMutation(c.config, OpUpdateOne, withSellerPayoutSchedule(_m))
+	return &SellerPayoutScheduleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SellerPayoutScheduleClient) UpdateOneID(id uuid.UUID) *SellerPayoutScheduleUpdateOne {
+	mutation := newSellerPayoutScheduleMutation(c.config, OpUpdateOne, withSellerPayoutScheduleID(id))
+	return &SellerPayoutScheduleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SellerPayoutSchedule.
+func (c *SellerPayoutScheduleClient) Delete() *SellerPayoutScheduleDelete {
+	mutation := newSellerPayoutScheduleMutation(c.config, OpDelete)
+	return &SellerPayoutScheduleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SellerPayoutScheduleClient) DeleteOne(_m *SellerPayoutSchedule) *SellerPayoutScheduleDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SellerPayoutScheduleClient) DeleteOneID(id uuid.UUID) *SellerPayoutScheduleDeleteOne {
+	builder := c.Delete().Where(sellerpayoutschedule.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SellerPayoutScheduleDeleteOne{builder}
+}
+
+// Query returns a query builder for SellerPayoutSchedule.
+func (c *SellerPayoutScheduleClient) Query() *SellerPayoutScheduleQuery {
+	return &SellerPayoutScheduleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSellerPayoutSchedule},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SellerPayoutSchedule entity by its id.
+func (c *SellerPayoutScheduleClient) Get(ctx context.Context, id uuid.UUID) (*SellerPayoutSchedule, error) {
+	return c.Query().Where(sellerpayoutschedule.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SellerPayoutScheduleClient) GetX(ctx context.Context, id uuid.UUID) *SellerPayoutSchedule {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SellerPayoutScheduleClient) Hooks() []Hook {
+	return c.hooks.SellerPayoutSchedule
+}
+
+// Interceptors returns the client interceptors.
+func (c *SellerPayoutScheduleClient) Interceptors() []Interceptor {
+	return c.inters.SellerPayoutSchedule
+}
+
+func (c *SellerPayoutScheduleClient) mutate(ctx context.Context, m *SellerPayoutScheduleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SellerPayoutScheduleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SellerPayoutScheduleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SellerPayoutScheduleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SellerPayoutScheduleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SellerPayoutSchedule mutation op: %q", m.Op())
+	}
+}
+
 // SellerReserveFlagClient is a client for the SellerReserveFlag schema.
 type SellerReserveFlagClient struct {
 	config
@@ -2047,12 +2329,14 @@ type (
 	hooks struct {
 		AdBalanceTopUp, AdSpendDebit, CoinConversion, CoinPackage, CoinPurchase,
 		CoinTransfer, IdempotentRequest, MonetisationHold, OutboxEvent, PayoutAccount,
-		SellerReserveFlag, WalletRiskFlag, Withdrawal []ent.Hook
+		PayoutAccountResolution, SellerPayoutSchedule, SellerReserveFlag,
+		WalletRiskFlag, Withdrawal []ent.Hook
 	}
 	inters struct {
 		AdBalanceTopUp, AdSpendDebit, CoinConversion, CoinPackage, CoinPurchase,
 		CoinTransfer, IdempotentRequest, MonetisationHold, OutboxEvent, PayoutAccount,
-		SellerReserveFlag, WalletRiskFlag, Withdrawal []ent.Interceptor
+		PayoutAccountResolution, SellerPayoutSchedule, SellerReserveFlag,
+		WalletRiskFlag, Withdrawal []ent.Interceptor
 	}
 )
 

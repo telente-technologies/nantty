@@ -18,7 +18,9 @@ import (
 	"zudomart/modules/wallet/src/generated/ent/monetisationhold"
 	"zudomart/modules/wallet/src/generated/ent/outboxevent"
 	"zudomart/modules/wallet/src/generated/ent/payoutaccount"
+	"zudomart/modules/wallet/src/generated/ent/payoutaccountresolution"
 	"zudomart/modules/wallet/src/generated/ent/predicate"
+	"zudomart/modules/wallet/src/generated/ent/sellerpayoutschedule"
 	"zudomart/modules/wallet/src/generated/ent/sellerreserveflag"
 	"zudomart/modules/wallet/src/generated/ent/walletriskflag"
 	"zudomart/modules/wallet/src/generated/ent/withdrawal"
@@ -37,19 +39,21 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAdBalanceTopUp    = "AdBalanceTopUp"
-	TypeAdSpendDebit      = "AdSpendDebit"
-	TypeCoinConversion    = "CoinConversion"
-	TypeCoinPackage       = "CoinPackage"
-	TypeCoinPurchase      = "CoinPurchase"
-	TypeCoinTransfer      = "CoinTransfer"
-	TypeIdempotentRequest = "IdempotentRequest"
-	TypeMonetisationHold  = "MonetisationHold"
-	TypeOutboxEvent       = "OutboxEvent"
-	TypePayoutAccount     = "PayoutAccount"
-	TypeSellerReserveFlag = "SellerReserveFlag"
-	TypeWalletRiskFlag    = "WalletRiskFlag"
-	TypeWithdrawal        = "Withdrawal"
+	TypeAdBalanceTopUp          = "AdBalanceTopUp"
+	TypeAdSpendDebit            = "AdSpendDebit"
+	TypeCoinConversion          = "CoinConversion"
+	TypeCoinPackage             = "CoinPackage"
+	TypeCoinPurchase            = "CoinPurchase"
+	TypeCoinTransfer            = "CoinTransfer"
+	TypeIdempotentRequest       = "IdempotentRequest"
+	TypeMonetisationHold        = "MonetisationHold"
+	TypeOutboxEvent             = "OutboxEvent"
+	TypePayoutAccount           = "PayoutAccount"
+	TypePayoutAccountResolution = "PayoutAccountResolution"
+	TypeSellerPayoutSchedule    = "SellerPayoutSchedule"
+	TypeSellerReserveFlag       = "SellerReserveFlag"
+	TypeWalletRiskFlag          = "WalletRiskFlag"
+	TypeWithdrawal              = "Withdrawal"
 )
 
 // AdBalanceTopUpMutation represents an operation that mutates the AdBalanceTopUp nodes in the graph.
@@ -8822,6 +8826,1915 @@ func (m *PayoutAccountMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PayoutAccountMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown PayoutAccount edge %s", name)
+}
+
+// PayoutAccountResolutionMutation represents an operation that mutates the PayoutAccountResolution nodes in the graph.
+type PayoutAccountResolutionMutation struct {
+	config
+	op                        Op
+	typ                       string
+	id                        *uuid.UUID
+	created_at                *time.Time
+	user_id                   *string
+	country_code              *string
+	bank_code                 *string
+	bank_name                 *string
+	account_number_ciphertext *[]byte
+	account_number_last4      *string
+	account_name              *string
+	expires_at                *time.Time
+	used_at                   *time.Time
+	clearedFields             map[string]struct{}
+	done                      bool
+	oldValue                  func(context.Context) (*PayoutAccountResolution, error)
+	predicates                []predicate.PayoutAccountResolution
+}
+
+var _ ent.Mutation = (*PayoutAccountResolutionMutation)(nil)
+
+// payoutaccountresolutionOption allows management of the mutation configuration using functional options.
+type payoutaccountresolutionOption func(*PayoutAccountResolutionMutation)
+
+// newPayoutAccountResolutionMutation creates new mutation for the PayoutAccountResolution entity.
+func newPayoutAccountResolutionMutation(c config, op Op, opts ...payoutaccountresolutionOption) *PayoutAccountResolutionMutation {
+	m := &PayoutAccountResolutionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePayoutAccountResolution,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPayoutAccountResolutionID sets the ID field of the mutation.
+func withPayoutAccountResolutionID(id uuid.UUID) payoutaccountresolutionOption {
+	return func(m *PayoutAccountResolutionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PayoutAccountResolution
+		)
+		m.oldValue = func(ctx context.Context) (*PayoutAccountResolution, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PayoutAccountResolution.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPayoutAccountResolution sets the old PayoutAccountResolution of the mutation.
+func withPayoutAccountResolution(node *PayoutAccountResolution) payoutaccountresolutionOption {
+	return func(m *PayoutAccountResolutionMutation) {
+		m.oldValue = func(context.Context) (*PayoutAccountResolution, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PayoutAccountResolutionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PayoutAccountResolutionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PayoutAccountResolution entities.
+func (m *PayoutAccountResolutionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PayoutAccountResolutionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PayoutAccountResolutionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PayoutAccountResolution.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *PayoutAccountResolutionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *PayoutAccountResolutionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *PayoutAccountResolutionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *PayoutAccountResolutionMutation) SetUserID(s string) {
+	m.user_id = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *PayoutAccountResolutionMutation) UserID() (r string, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *PayoutAccountResolutionMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetCountryCode sets the "country_code" field.
+func (m *PayoutAccountResolutionMutation) SetCountryCode(s string) {
+	m.country_code = &s
+}
+
+// CountryCode returns the value of the "country_code" field in the mutation.
+func (m *PayoutAccountResolutionMutation) CountryCode() (r string, exists bool) {
+	v := m.country_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCountryCode returns the old "country_code" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldCountryCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCountryCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCountryCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCountryCode: %w", err)
+	}
+	return oldValue.CountryCode, nil
+}
+
+// ResetCountryCode resets all changes to the "country_code" field.
+func (m *PayoutAccountResolutionMutation) ResetCountryCode() {
+	m.country_code = nil
+}
+
+// SetBankCode sets the "bank_code" field.
+func (m *PayoutAccountResolutionMutation) SetBankCode(s string) {
+	m.bank_code = &s
+}
+
+// BankCode returns the value of the "bank_code" field in the mutation.
+func (m *PayoutAccountResolutionMutation) BankCode() (r string, exists bool) {
+	v := m.bank_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBankCode returns the old "bank_code" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldBankCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBankCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBankCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBankCode: %w", err)
+	}
+	return oldValue.BankCode, nil
+}
+
+// ResetBankCode resets all changes to the "bank_code" field.
+func (m *PayoutAccountResolutionMutation) ResetBankCode() {
+	m.bank_code = nil
+}
+
+// SetBankName sets the "bank_name" field.
+func (m *PayoutAccountResolutionMutation) SetBankName(s string) {
+	m.bank_name = &s
+}
+
+// BankName returns the value of the "bank_name" field in the mutation.
+func (m *PayoutAccountResolutionMutation) BankName() (r string, exists bool) {
+	v := m.bank_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBankName returns the old "bank_name" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldBankName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBankName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBankName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBankName: %w", err)
+	}
+	return oldValue.BankName, nil
+}
+
+// ResetBankName resets all changes to the "bank_name" field.
+func (m *PayoutAccountResolutionMutation) ResetBankName() {
+	m.bank_name = nil
+}
+
+// SetAccountNumberCiphertext sets the "account_number_ciphertext" field.
+func (m *PayoutAccountResolutionMutation) SetAccountNumberCiphertext(b []byte) {
+	m.account_number_ciphertext = &b
+}
+
+// AccountNumberCiphertext returns the value of the "account_number_ciphertext" field in the mutation.
+func (m *PayoutAccountResolutionMutation) AccountNumberCiphertext() (r []byte, exists bool) {
+	v := m.account_number_ciphertext
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountNumberCiphertext returns the old "account_number_ciphertext" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldAccountNumberCiphertext(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountNumberCiphertext is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountNumberCiphertext requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountNumberCiphertext: %w", err)
+	}
+	return oldValue.AccountNumberCiphertext, nil
+}
+
+// ResetAccountNumberCiphertext resets all changes to the "account_number_ciphertext" field.
+func (m *PayoutAccountResolutionMutation) ResetAccountNumberCiphertext() {
+	m.account_number_ciphertext = nil
+}
+
+// SetAccountNumberLast4 sets the "account_number_last4" field.
+func (m *PayoutAccountResolutionMutation) SetAccountNumberLast4(s string) {
+	m.account_number_last4 = &s
+}
+
+// AccountNumberLast4 returns the value of the "account_number_last4" field in the mutation.
+func (m *PayoutAccountResolutionMutation) AccountNumberLast4() (r string, exists bool) {
+	v := m.account_number_last4
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountNumberLast4 returns the old "account_number_last4" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldAccountNumberLast4(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountNumberLast4 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountNumberLast4 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountNumberLast4: %w", err)
+	}
+	return oldValue.AccountNumberLast4, nil
+}
+
+// ResetAccountNumberLast4 resets all changes to the "account_number_last4" field.
+func (m *PayoutAccountResolutionMutation) ResetAccountNumberLast4() {
+	m.account_number_last4 = nil
+}
+
+// SetAccountName sets the "account_name" field.
+func (m *PayoutAccountResolutionMutation) SetAccountName(s string) {
+	m.account_name = &s
+}
+
+// AccountName returns the value of the "account_name" field in the mutation.
+func (m *PayoutAccountResolutionMutation) AccountName() (r string, exists bool) {
+	v := m.account_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountName returns the old "account_name" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldAccountName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountName: %w", err)
+	}
+	return oldValue.AccountName, nil
+}
+
+// ResetAccountName resets all changes to the "account_name" field.
+func (m *PayoutAccountResolutionMutation) ResetAccountName() {
+	m.account_name = nil
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (m *PayoutAccountResolutionMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *PayoutAccountResolutionMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldExpiresAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *PayoutAccountResolutionMutation) ResetExpiresAt() {
+	m.expires_at = nil
+}
+
+// SetUsedAt sets the "used_at" field.
+func (m *PayoutAccountResolutionMutation) SetUsedAt(t time.Time) {
+	m.used_at = &t
+}
+
+// UsedAt returns the value of the "used_at" field in the mutation.
+func (m *PayoutAccountResolutionMutation) UsedAt() (r time.Time, exists bool) {
+	v := m.used_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUsedAt returns the old "used_at" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldUsedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUsedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUsedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUsedAt: %w", err)
+	}
+	return oldValue.UsedAt, nil
+}
+
+// ClearUsedAt clears the value of the "used_at" field.
+func (m *PayoutAccountResolutionMutation) ClearUsedAt() {
+	m.used_at = nil
+	m.clearedFields[payoutaccountresolution.FieldUsedAt] = struct{}{}
+}
+
+// UsedAtCleared returns if the "used_at" field was cleared in this mutation.
+func (m *PayoutAccountResolutionMutation) UsedAtCleared() bool {
+	_, ok := m.clearedFields[payoutaccountresolution.FieldUsedAt]
+	return ok
+}
+
+// ResetUsedAt resets all changes to the "used_at" field.
+func (m *PayoutAccountResolutionMutation) ResetUsedAt() {
+	m.used_at = nil
+	delete(m.clearedFields, payoutaccountresolution.FieldUsedAt)
+}
+
+// Where appends a list predicates to the PayoutAccountResolutionMutation builder.
+func (m *PayoutAccountResolutionMutation) Where(ps ...predicate.PayoutAccountResolution) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PayoutAccountResolutionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PayoutAccountResolutionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PayoutAccountResolution, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PayoutAccountResolutionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PayoutAccountResolutionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PayoutAccountResolution).
+func (m *PayoutAccountResolutionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PayoutAccountResolutionMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.created_at != nil {
+		fields = append(fields, payoutaccountresolution.FieldCreatedAt)
+	}
+	if m.user_id != nil {
+		fields = append(fields, payoutaccountresolution.FieldUserID)
+	}
+	if m.country_code != nil {
+		fields = append(fields, payoutaccountresolution.FieldCountryCode)
+	}
+	if m.bank_code != nil {
+		fields = append(fields, payoutaccountresolution.FieldBankCode)
+	}
+	if m.bank_name != nil {
+		fields = append(fields, payoutaccountresolution.FieldBankName)
+	}
+	if m.account_number_ciphertext != nil {
+		fields = append(fields, payoutaccountresolution.FieldAccountNumberCiphertext)
+	}
+	if m.account_number_last4 != nil {
+		fields = append(fields, payoutaccountresolution.FieldAccountNumberLast4)
+	}
+	if m.account_name != nil {
+		fields = append(fields, payoutaccountresolution.FieldAccountName)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, payoutaccountresolution.FieldExpiresAt)
+	}
+	if m.used_at != nil {
+		fields = append(fields, payoutaccountresolution.FieldUsedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PayoutAccountResolutionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case payoutaccountresolution.FieldCreatedAt:
+		return m.CreatedAt()
+	case payoutaccountresolution.FieldUserID:
+		return m.UserID()
+	case payoutaccountresolution.FieldCountryCode:
+		return m.CountryCode()
+	case payoutaccountresolution.FieldBankCode:
+		return m.BankCode()
+	case payoutaccountresolution.FieldBankName:
+		return m.BankName()
+	case payoutaccountresolution.FieldAccountNumberCiphertext:
+		return m.AccountNumberCiphertext()
+	case payoutaccountresolution.FieldAccountNumberLast4:
+		return m.AccountNumberLast4()
+	case payoutaccountresolution.FieldAccountName:
+		return m.AccountName()
+	case payoutaccountresolution.FieldExpiresAt:
+		return m.ExpiresAt()
+	case payoutaccountresolution.FieldUsedAt:
+		return m.UsedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PayoutAccountResolutionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case payoutaccountresolution.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case payoutaccountresolution.FieldUserID:
+		return m.OldUserID(ctx)
+	case payoutaccountresolution.FieldCountryCode:
+		return m.OldCountryCode(ctx)
+	case payoutaccountresolution.FieldBankCode:
+		return m.OldBankCode(ctx)
+	case payoutaccountresolution.FieldBankName:
+		return m.OldBankName(ctx)
+	case payoutaccountresolution.FieldAccountNumberCiphertext:
+		return m.OldAccountNumberCiphertext(ctx)
+	case payoutaccountresolution.FieldAccountNumberLast4:
+		return m.OldAccountNumberLast4(ctx)
+	case payoutaccountresolution.FieldAccountName:
+		return m.OldAccountName(ctx)
+	case payoutaccountresolution.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
+	case payoutaccountresolution.FieldUsedAt:
+		return m.OldUsedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown PayoutAccountResolution field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PayoutAccountResolutionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case payoutaccountresolution.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case payoutaccountresolution.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case payoutaccountresolution.FieldCountryCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCountryCode(v)
+		return nil
+	case payoutaccountresolution.FieldBankCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBankCode(v)
+		return nil
+	case payoutaccountresolution.FieldBankName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBankName(v)
+		return nil
+	case payoutaccountresolution.FieldAccountNumberCiphertext:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountNumberCiphertext(v)
+		return nil
+	case payoutaccountresolution.FieldAccountNumberLast4:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountNumberLast4(v)
+		return nil
+	case payoutaccountresolution.FieldAccountName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountName(v)
+		return nil
+	case payoutaccountresolution.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
+		return nil
+	case payoutaccountresolution.FieldUsedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUsedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PayoutAccountResolution field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PayoutAccountResolutionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PayoutAccountResolutionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PayoutAccountResolutionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PayoutAccountResolution numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PayoutAccountResolutionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(payoutaccountresolution.FieldUsedAt) {
+		fields = append(fields, payoutaccountresolution.FieldUsedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PayoutAccountResolutionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PayoutAccountResolutionMutation) ClearField(name string) error {
+	switch name {
+	case payoutaccountresolution.FieldUsedAt:
+		m.ClearUsedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown PayoutAccountResolution nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PayoutAccountResolutionMutation) ResetField(name string) error {
+	switch name {
+	case payoutaccountresolution.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case payoutaccountresolution.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case payoutaccountresolution.FieldCountryCode:
+		m.ResetCountryCode()
+		return nil
+	case payoutaccountresolution.FieldBankCode:
+		m.ResetBankCode()
+		return nil
+	case payoutaccountresolution.FieldBankName:
+		m.ResetBankName()
+		return nil
+	case payoutaccountresolution.FieldAccountNumberCiphertext:
+		m.ResetAccountNumberCiphertext()
+		return nil
+	case payoutaccountresolution.FieldAccountNumberLast4:
+		m.ResetAccountNumberLast4()
+		return nil
+	case payoutaccountresolution.FieldAccountName:
+		m.ResetAccountName()
+		return nil
+	case payoutaccountresolution.FieldExpiresAt:
+		m.ResetExpiresAt()
+		return nil
+	case payoutaccountresolution.FieldUsedAt:
+		m.ResetUsedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown PayoutAccountResolution field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PayoutAccountResolutionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PayoutAccountResolutionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PayoutAccountResolutionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PayoutAccountResolutionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PayoutAccountResolutionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PayoutAccountResolutionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PayoutAccountResolutionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown PayoutAccountResolution unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PayoutAccountResolutionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown PayoutAccountResolution edge %s", name)
+}
+
+// SellerPayoutScheduleMutation represents an operation that mutates the SellerPayoutSchedule nodes in the graph.
+type SellerPayoutScheduleMutation struct {
+	config
+	op                    Op
+	typ                   string
+	id                    *uuid.UUID
+	created_at            *time.Time
+	user_id               *string
+	currency              *string
+	timezone              *string
+	mode                  *sellerpayoutschedule.Mode
+	weekday               *int
+	addweekday            *int
+	day_of_month          *int
+	addday_of_month       *int
+	keep_minimum_minor    *int64
+	addkeep_minimum_minor *int64
+	payout_account_id     *uuid.UUID
+	next_run_at           *time.Time
+	last_run_on           *string
+	updated_at            *time.Time
+	clearedFields         map[string]struct{}
+	done                  bool
+	oldValue              func(context.Context) (*SellerPayoutSchedule, error)
+	predicates            []predicate.SellerPayoutSchedule
+}
+
+var _ ent.Mutation = (*SellerPayoutScheduleMutation)(nil)
+
+// sellerpayoutscheduleOption allows management of the mutation configuration using functional options.
+type sellerpayoutscheduleOption func(*SellerPayoutScheduleMutation)
+
+// newSellerPayoutScheduleMutation creates new mutation for the SellerPayoutSchedule entity.
+func newSellerPayoutScheduleMutation(c config, op Op, opts ...sellerpayoutscheduleOption) *SellerPayoutScheduleMutation {
+	m := &SellerPayoutScheduleMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSellerPayoutSchedule,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSellerPayoutScheduleID sets the ID field of the mutation.
+func withSellerPayoutScheduleID(id uuid.UUID) sellerpayoutscheduleOption {
+	return func(m *SellerPayoutScheduleMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SellerPayoutSchedule
+		)
+		m.oldValue = func(ctx context.Context) (*SellerPayoutSchedule, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SellerPayoutSchedule.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSellerPayoutSchedule sets the old SellerPayoutSchedule of the mutation.
+func withSellerPayoutSchedule(node *SellerPayoutSchedule) sellerpayoutscheduleOption {
+	return func(m *SellerPayoutScheduleMutation) {
+		m.oldValue = func(context.Context) (*SellerPayoutSchedule, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SellerPayoutScheduleMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SellerPayoutScheduleMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SellerPayoutSchedule entities.
+func (m *SellerPayoutScheduleMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SellerPayoutScheduleMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SellerPayoutScheduleMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SellerPayoutSchedule.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SellerPayoutScheduleMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SellerPayoutScheduleMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SellerPayoutScheduleMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *SellerPayoutScheduleMutation) SetUserID(s string) {
+	m.user_id = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *SellerPayoutScheduleMutation) UserID() (r string, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *SellerPayoutScheduleMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *SellerPayoutScheduleMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *SellerPayoutScheduleMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *SellerPayoutScheduleMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetTimezone sets the "timezone" field.
+func (m *SellerPayoutScheduleMutation) SetTimezone(s string) {
+	m.timezone = &s
+}
+
+// Timezone returns the value of the "timezone" field in the mutation.
+func (m *SellerPayoutScheduleMutation) Timezone() (r string, exists bool) {
+	v := m.timezone
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimezone returns the old "timezone" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldTimezone(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTimezone is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTimezone requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimezone: %w", err)
+	}
+	return oldValue.Timezone, nil
+}
+
+// ResetTimezone resets all changes to the "timezone" field.
+func (m *SellerPayoutScheduleMutation) ResetTimezone() {
+	m.timezone = nil
+}
+
+// SetMode sets the "mode" field.
+func (m *SellerPayoutScheduleMutation) SetMode(s sellerpayoutschedule.Mode) {
+	m.mode = &s
+}
+
+// Mode returns the value of the "mode" field in the mutation.
+func (m *SellerPayoutScheduleMutation) Mode() (r sellerpayoutschedule.Mode, exists bool) {
+	v := m.mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMode returns the old "mode" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldMode(ctx context.Context) (v sellerpayoutschedule.Mode, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMode: %w", err)
+	}
+	return oldValue.Mode, nil
+}
+
+// ResetMode resets all changes to the "mode" field.
+func (m *SellerPayoutScheduleMutation) ResetMode() {
+	m.mode = nil
+}
+
+// SetWeekday sets the "weekday" field.
+func (m *SellerPayoutScheduleMutation) SetWeekday(i int) {
+	m.weekday = &i
+	m.addweekday = nil
+}
+
+// Weekday returns the value of the "weekday" field in the mutation.
+func (m *SellerPayoutScheduleMutation) Weekday() (r int, exists bool) {
+	v := m.weekday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWeekday returns the old "weekday" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldWeekday(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWeekday is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWeekday requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWeekday: %w", err)
+	}
+	return oldValue.Weekday, nil
+}
+
+// AddWeekday adds i to the "weekday" field.
+func (m *SellerPayoutScheduleMutation) AddWeekday(i int) {
+	if m.addweekday != nil {
+		*m.addweekday += i
+	} else {
+		m.addweekday = &i
+	}
+}
+
+// AddedWeekday returns the value that was added to the "weekday" field in this mutation.
+func (m *SellerPayoutScheduleMutation) AddedWeekday() (r int, exists bool) {
+	v := m.addweekday
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetWeekday resets all changes to the "weekday" field.
+func (m *SellerPayoutScheduleMutation) ResetWeekday() {
+	m.weekday = nil
+	m.addweekday = nil
+}
+
+// SetDayOfMonth sets the "day_of_month" field.
+func (m *SellerPayoutScheduleMutation) SetDayOfMonth(i int) {
+	m.day_of_month = &i
+	m.addday_of_month = nil
+}
+
+// DayOfMonth returns the value of the "day_of_month" field in the mutation.
+func (m *SellerPayoutScheduleMutation) DayOfMonth() (r int, exists bool) {
+	v := m.day_of_month
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDayOfMonth returns the old "day_of_month" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldDayOfMonth(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDayOfMonth is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDayOfMonth requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDayOfMonth: %w", err)
+	}
+	return oldValue.DayOfMonth, nil
+}
+
+// AddDayOfMonth adds i to the "day_of_month" field.
+func (m *SellerPayoutScheduleMutation) AddDayOfMonth(i int) {
+	if m.addday_of_month != nil {
+		*m.addday_of_month += i
+	} else {
+		m.addday_of_month = &i
+	}
+}
+
+// AddedDayOfMonth returns the value that was added to the "day_of_month" field in this mutation.
+func (m *SellerPayoutScheduleMutation) AddedDayOfMonth() (r int, exists bool) {
+	v := m.addday_of_month
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDayOfMonth resets all changes to the "day_of_month" field.
+func (m *SellerPayoutScheduleMutation) ResetDayOfMonth() {
+	m.day_of_month = nil
+	m.addday_of_month = nil
+}
+
+// SetKeepMinimumMinor sets the "keep_minimum_minor" field.
+func (m *SellerPayoutScheduleMutation) SetKeepMinimumMinor(i int64) {
+	m.keep_minimum_minor = &i
+	m.addkeep_minimum_minor = nil
+}
+
+// KeepMinimumMinor returns the value of the "keep_minimum_minor" field in the mutation.
+func (m *SellerPayoutScheduleMutation) KeepMinimumMinor() (r int64, exists bool) {
+	v := m.keep_minimum_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKeepMinimumMinor returns the old "keep_minimum_minor" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldKeepMinimumMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKeepMinimumMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKeepMinimumMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKeepMinimumMinor: %w", err)
+	}
+	return oldValue.KeepMinimumMinor, nil
+}
+
+// AddKeepMinimumMinor adds i to the "keep_minimum_minor" field.
+func (m *SellerPayoutScheduleMutation) AddKeepMinimumMinor(i int64) {
+	if m.addkeep_minimum_minor != nil {
+		*m.addkeep_minimum_minor += i
+	} else {
+		m.addkeep_minimum_minor = &i
+	}
+}
+
+// AddedKeepMinimumMinor returns the value that was added to the "keep_minimum_minor" field in this mutation.
+func (m *SellerPayoutScheduleMutation) AddedKeepMinimumMinor() (r int64, exists bool) {
+	v := m.addkeep_minimum_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetKeepMinimumMinor resets all changes to the "keep_minimum_minor" field.
+func (m *SellerPayoutScheduleMutation) ResetKeepMinimumMinor() {
+	m.keep_minimum_minor = nil
+	m.addkeep_minimum_minor = nil
+}
+
+// SetPayoutAccountID sets the "payout_account_id" field.
+func (m *SellerPayoutScheduleMutation) SetPayoutAccountID(u uuid.UUID) {
+	m.payout_account_id = &u
+}
+
+// PayoutAccountID returns the value of the "payout_account_id" field in the mutation.
+func (m *SellerPayoutScheduleMutation) PayoutAccountID() (r uuid.UUID, exists bool) {
+	v := m.payout_account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPayoutAccountID returns the old "payout_account_id" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldPayoutAccountID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPayoutAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPayoutAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPayoutAccountID: %w", err)
+	}
+	return oldValue.PayoutAccountID, nil
+}
+
+// ClearPayoutAccountID clears the value of the "payout_account_id" field.
+func (m *SellerPayoutScheduleMutation) ClearPayoutAccountID() {
+	m.payout_account_id = nil
+	m.clearedFields[sellerpayoutschedule.FieldPayoutAccountID] = struct{}{}
+}
+
+// PayoutAccountIDCleared returns if the "payout_account_id" field was cleared in this mutation.
+func (m *SellerPayoutScheduleMutation) PayoutAccountIDCleared() bool {
+	_, ok := m.clearedFields[sellerpayoutschedule.FieldPayoutAccountID]
+	return ok
+}
+
+// ResetPayoutAccountID resets all changes to the "payout_account_id" field.
+func (m *SellerPayoutScheduleMutation) ResetPayoutAccountID() {
+	m.payout_account_id = nil
+	delete(m.clearedFields, sellerpayoutschedule.FieldPayoutAccountID)
+}
+
+// SetNextRunAt sets the "next_run_at" field.
+func (m *SellerPayoutScheduleMutation) SetNextRunAt(t time.Time) {
+	m.next_run_at = &t
+}
+
+// NextRunAt returns the value of the "next_run_at" field in the mutation.
+func (m *SellerPayoutScheduleMutation) NextRunAt() (r time.Time, exists bool) {
+	v := m.next_run_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextRunAt returns the old "next_run_at" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldNextRunAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNextRunAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNextRunAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextRunAt: %w", err)
+	}
+	return oldValue.NextRunAt, nil
+}
+
+// ClearNextRunAt clears the value of the "next_run_at" field.
+func (m *SellerPayoutScheduleMutation) ClearNextRunAt() {
+	m.next_run_at = nil
+	m.clearedFields[sellerpayoutschedule.FieldNextRunAt] = struct{}{}
+}
+
+// NextRunAtCleared returns if the "next_run_at" field was cleared in this mutation.
+func (m *SellerPayoutScheduleMutation) NextRunAtCleared() bool {
+	_, ok := m.clearedFields[sellerpayoutschedule.FieldNextRunAt]
+	return ok
+}
+
+// ResetNextRunAt resets all changes to the "next_run_at" field.
+func (m *SellerPayoutScheduleMutation) ResetNextRunAt() {
+	m.next_run_at = nil
+	delete(m.clearedFields, sellerpayoutschedule.FieldNextRunAt)
+}
+
+// SetLastRunOn sets the "last_run_on" field.
+func (m *SellerPayoutScheduleMutation) SetLastRunOn(s string) {
+	m.last_run_on = &s
+}
+
+// LastRunOn returns the value of the "last_run_on" field in the mutation.
+func (m *SellerPayoutScheduleMutation) LastRunOn() (r string, exists bool) {
+	v := m.last_run_on
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastRunOn returns the old "last_run_on" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldLastRunOn(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastRunOn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastRunOn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastRunOn: %w", err)
+	}
+	return oldValue.LastRunOn, nil
+}
+
+// ResetLastRunOn resets all changes to the "last_run_on" field.
+func (m *SellerPayoutScheduleMutation) ResetLastRunOn() {
+	m.last_run_on = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *SellerPayoutScheduleMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *SellerPayoutScheduleMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the SellerPayoutSchedule entity.
+// If the SellerPayoutSchedule object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerPayoutScheduleMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *SellerPayoutScheduleMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the SellerPayoutScheduleMutation builder.
+func (m *SellerPayoutScheduleMutation) Where(ps ...predicate.SellerPayoutSchedule) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SellerPayoutScheduleMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SellerPayoutScheduleMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SellerPayoutSchedule, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SellerPayoutScheduleMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SellerPayoutScheduleMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SellerPayoutSchedule).
+func (m *SellerPayoutScheduleMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SellerPayoutScheduleMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, sellerpayoutschedule.FieldCreatedAt)
+	}
+	if m.user_id != nil {
+		fields = append(fields, sellerpayoutschedule.FieldUserID)
+	}
+	if m.currency != nil {
+		fields = append(fields, sellerpayoutschedule.FieldCurrency)
+	}
+	if m.timezone != nil {
+		fields = append(fields, sellerpayoutschedule.FieldTimezone)
+	}
+	if m.mode != nil {
+		fields = append(fields, sellerpayoutschedule.FieldMode)
+	}
+	if m.weekday != nil {
+		fields = append(fields, sellerpayoutschedule.FieldWeekday)
+	}
+	if m.day_of_month != nil {
+		fields = append(fields, sellerpayoutschedule.FieldDayOfMonth)
+	}
+	if m.keep_minimum_minor != nil {
+		fields = append(fields, sellerpayoutschedule.FieldKeepMinimumMinor)
+	}
+	if m.payout_account_id != nil {
+		fields = append(fields, sellerpayoutschedule.FieldPayoutAccountID)
+	}
+	if m.next_run_at != nil {
+		fields = append(fields, sellerpayoutschedule.FieldNextRunAt)
+	}
+	if m.last_run_on != nil {
+		fields = append(fields, sellerpayoutschedule.FieldLastRunOn)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, sellerpayoutschedule.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SellerPayoutScheduleMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case sellerpayoutschedule.FieldCreatedAt:
+		return m.CreatedAt()
+	case sellerpayoutschedule.FieldUserID:
+		return m.UserID()
+	case sellerpayoutschedule.FieldCurrency:
+		return m.Currency()
+	case sellerpayoutschedule.FieldTimezone:
+		return m.Timezone()
+	case sellerpayoutschedule.FieldMode:
+		return m.Mode()
+	case sellerpayoutschedule.FieldWeekday:
+		return m.Weekday()
+	case sellerpayoutschedule.FieldDayOfMonth:
+		return m.DayOfMonth()
+	case sellerpayoutschedule.FieldKeepMinimumMinor:
+		return m.KeepMinimumMinor()
+	case sellerpayoutschedule.FieldPayoutAccountID:
+		return m.PayoutAccountID()
+	case sellerpayoutschedule.FieldNextRunAt:
+		return m.NextRunAt()
+	case sellerpayoutschedule.FieldLastRunOn:
+		return m.LastRunOn()
+	case sellerpayoutschedule.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SellerPayoutScheduleMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case sellerpayoutschedule.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case sellerpayoutschedule.FieldUserID:
+		return m.OldUserID(ctx)
+	case sellerpayoutschedule.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case sellerpayoutschedule.FieldTimezone:
+		return m.OldTimezone(ctx)
+	case sellerpayoutschedule.FieldMode:
+		return m.OldMode(ctx)
+	case sellerpayoutschedule.FieldWeekday:
+		return m.OldWeekday(ctx)
+	case sellerpayoutschedule.FieldDayOfMonth:
+		return m.OldDayOfMonth(ctx)
+	case sellerpayoutschedule.FieldKeepMinimumMinor:
+		return m.OldKeepMinimumMinor(ctx)
+	case sellerpayoutschedule.FieldPayoutAccountID:
+		return m.OldPayoutAccountID(ctx)
+	case sellerpayoutschedule.FieldNextRunAt:
+		return m.OldNextRunAt(ctx)
+	case sellerpayoutschedule.FieldLastRunOn:
+		return m.OldLastRunOn(ctx)
+	case sellerpayoutschedule.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown SellerPayoutSchedule field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SellerPayoutScheduleMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case sellerpayoutschedule.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case sellerpayoutschedule.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case sellerpayoutschedule.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case sellerpayoutschedule.FieldTimezone:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimezone(v)
+		return nil
+	case sellerpayoutschedule.FieldMode:
+		v, ok := value.(sellerpayoutschedule.Mode)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMode(v)
+		return nil
+	case sellerpayoutschedule.FieldWeekday:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWeekday(v)
+		return nil
+	case sellerpayoutschedule.FieldDayOfMonth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDayOfMonth(v)
+		return nil
+	case sellerpayoutschedule.FieldKeepMinimumMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKeepMinimumMinor(v)
+		return nil
+	case sellerpayoutschedule.FieldPayoutAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPayoutAccountID(v)
+		return nil
+	case sellerpayoutschedule.FieldNextRunAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextRunAt(v)
+		return nil
+	case sellerpayoutschedule.FieldLastRunOn:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastRunOn(v)
+		return nil
+	case sellerpayoutschedule.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SellerPayoutSchedule field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SellerPayoutScheduleMutation) AddedFields() []string {
+	var fields []string
+	if m.addweekday != nil {
+		fields = append(fields, sellerpayoutschedule.FieldWeekday)
+	}
+	if m.addday_of_month != nil {
+		fields = append(fields, sellerpayoutschedule.FieldDayOfMonth)
+	}
+	if m.addkeep_minimum_minor != nil {
+		fields = append(fields, sellerpayoutschedule.FieldKeepMinimumMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SellerPayoutScheduleMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case sellerpayoutschedule.FieldWeekday:
+		return m.AddedWeekday()
+	case sellerpayoutschedule.FieldDayOfMonth:
+		return m.AddedDayOfMonth()
+	case sellerpayoutschedule.FieldKeepMinimumMinor:
+		return m.AddedKeepMinimumMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SellerPayoutScheduleMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case sellerpayoutschedule.FieldWeekday:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWeekday(v)
+		return nil
+	case sellerpayoutschedule.FieldDayOfMonth:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDayOfMonth(v)
+		return nil
+	case sellerpayoutschedule.FieldKeepMinimumMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddKeepMinimumMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SellerPayoutSchedule numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SellerPayoutScheduleMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(sellerpayoutschedule.FieldPayoutAccountID) {
+		fields = append(fields, sellerpayoutschedule.FieldPayoutAccountID)
+	}
+	if m.FieldCleared(sellerpayoutschedule.FieldNextRunAt) {
+		fields = append(fields, sellerpayoutschedule.FieldNextRunAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SellerPayoutScheduleMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SellerPayoutScheduleMutation) ClearField(name string) error {
+	switch name {
+	case sellerpayoutschedule.FieldPayoutAccountID:
+		m.ClearPayoutAccountID()
+		return nil
+	case sellerpayoutschedule.FieldNextRunAt:
+		m.ClearNextRunAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SellerPayoutSchedule nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SellerPayoutScheduleMutation) ResetField(name string) error {
+	switch name {
+	case sellerpayoutschedule.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case sellerpayoutschedule.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case sellerpayoutschedule.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case sellerpayoutschedule.FieldTimezone:
+		m.ResetTimezone()
+		return nil
+	case sellerpayoutschedule.FieldMode:
+		m.ResetMode()
+		return nil
+	case sellerpayoutschedule.FieldWeekday:
+		m.ResetWeekday()
+		return nil
+	case sellerpayoutschedule.FieldDayOfMonth:
+		m.ResetDayOfMonth()
+		return nil
+	case sellerpayoutschedule.FieldKeepMinimumMinor:
+		m.ResetKeepMinimumMinor()
+		return nil
+	case sellerpayoutschedule.FieldPayoutAccountID:
+		m.ResetPayoutAccountID()
+		return nil
+	case sellerpayoutschedule.FieldNextRunAt:
+		m.ResetNextRunAt()
+		return nil
+	case sellerpayoutschedule.FieldLastRunOn:
+		m.ResetLastRunOn()
+		return nil
+	case sellerpayoutschedule.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SellerPayoutSchedule field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SellerPayoutScheduleMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SellerPayoutScheduleMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SellerPayoutScheduleMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SellerPayoutScheduleMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SellerPayoutScheduleMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SellerPayoutScheduleMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SellerPayoutScheduleMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SellerPayoutSchedule unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SellerPayoutScheduleMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SellerPayoutSchedule edge %s", name)
 }
 
 // SellerReserveFlagMutation represents an operation that mutates the SellerReserveFlag nodes in the graph.
