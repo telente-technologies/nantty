@@ -48,6 +48,7 @@ export async function buildConversationViews(context: HandlerContext, viewerId: 
       isFriend: peerId !== undefined && followedByViewer.has(peerId) && followers.has(peerId),
       kind: conversation.kind,
       title: conversation.title,
+      description: conversation.description,
       photoUrl: null,
       photoMediaId: conversation.photoMediaId,
       memberCount: conversation.members.length,

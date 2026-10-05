@@ -15,6 +15,7 @@ export interface ConversationView {
   readonly isFriend: boolean;
   readonly kind: ConversationKindName;
   readonly title: string | null;
+  readonly description: string | null;
   readonly photoUrl: string | null;
   readonly photoMediaId: string | null;
   readonly memberCount: number;
