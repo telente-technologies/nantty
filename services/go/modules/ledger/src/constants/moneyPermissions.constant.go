@@ -9,4 +9,5 @@ const (
 	PermissionResolveDisputes     = "money.disputes.resolve"
 	PermissionManageMonetization  = "money.monetization.manage"
 	PermissionManageCreators      = "money.creators.manage"
+	PermissionReviewCoins         = "money.coins.review"
 )

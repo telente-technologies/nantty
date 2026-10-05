@@ -32,6 +32,8 @@ type MoneyModuleSettings struct {
 	TokenIssuer          string
 	TokenAudience        string
 	AdminSchema          string
+	AccountSchema        string
+	CatalogSchema        string
 	PlatformSettingsTtl  time.Duration
 }
 
@@ -51,6 +53,8 @@ func ReadMoneyModuleSettingsFromEnvironment(reader *platformconfig.EnvironmentRe
 		TokenIssuer:          reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
 		TokenAudience:        reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
 		AdminSchema:          reader.ReadStringOrDefault("ADMIN_DATABASE_SCHEMA", "admin"),
+		AccountSchema:        reader.ReadStringOrDefault("MONEY_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
+		CatalogSchema:        reader.ReadStringOrDefault("MONEY_CATALOG_SCHEMA", "catalog"),
 		PlatformSettingsTtl:  reader.ReadDurationOrDefault("MONEY_PLATFORM_SETTINGS_TTL", 30*time.Second),
 	}
 }
