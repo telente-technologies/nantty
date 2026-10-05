@@ -43,6 +43,8 @@ const (
 	FieldReviewedByStaffID = "reviewed_by_staff_id"
 	// FieldReviewedAt holds the string denoting the reviewed_at field in the database.
 	FieldReviewedAt = "reviewed_at"
+	// FieldReviewNote holds the string denoting the review_note field in the database.
+	FieldReviewNote = "review_note"
 	// FieldProcessedAt holds the string denoting the processed_at field in the database.
 	FieldProcessedAt = "processed_at"
 	// FieldVersion holds the string denoting the version field in the database.
@@ -70,6 +72,7 @@ var Columns = []string{
 	FieldFailureReason,
 	FieldReviewedByStaffID,
 	FieldReviewedAt,
+	FieldReviewNote,
 	FieldProcessedAt,
 	FieldVersion,
 	FieldUpdatedAt,
@@ -108,6 +111,10 @@ var (
 	DefaultReviewedByStaffID string
 	// ReviewedByStaffIDValidator is a validator for the "reviewed_by_staff_id" field. It is called by the builders before save.
 	ReviewedByStaffIDValidator func(string) error
+	// DefaultReviewNote holds the default value on creation for the "review_note" field.
+	DefaultReviewNote string
+	// ReviewNoteValidator is a validator for the "review_note" field. It is called by the builders before save.
+	ReviewNoteValidator func(string) error
 	// DefaultVersion holds the default value on creation for the "version" field.
 	DefaultVersion int64
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -127,6 +134,7 @@ const DefaultStatus = StatusPendingReview
 // Status values.
 const (
 	StatusPendingReview Status = "pending_review"
+	StatusOnHold        Status = "on_hold"
 	StatusQueued        Status = "queued"
 	StatusProcessing    Status = "processing"
 	StatusPaid          Status = "paid"
@@ -141,7 +149,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPendingReview, StatusQueued, StatusProcessing, StatusPaid, StatusFailed, StatusCancelled:
+	case StatusPendingReview, StatusOnHold, StatusQueued, StatusProcessing, StatusPaid, StatusFailed, StatusCancelled:
 		return nil
 	default:
 		return fmt.Errorf("withdrawal: invalid enum value for status field: %q", s)
@@ -224,6 +232,11 @@ func ByReviewedByStaffID(opts ...sql.OrderTermOption) OrderOption {
 // ByReviewedAt orders the results by the reviewed_at field.
 func ByReviewedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldReviewedAt, opts...).ToFunc()
+}
+
+// ByReviewNote orders the results by the review_note field.
+func ByReviewNote(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewNote, opts...).ToFunc()
 }
 
 // ByProcessedAt orders the results by the processed_at field.

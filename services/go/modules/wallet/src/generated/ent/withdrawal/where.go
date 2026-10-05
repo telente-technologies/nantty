@@ -120,6 +120,11 @@ func ReviewedAt(v time.Time) predicate.Withdrawal {
 	return predicate.Withdrawal(sql.FieldEQ(FieldReviewedAt, v))
 }
 
+// ReviewNote applies equality check predicate on the "review_note" field. It's identical to ReviewNoteEQ.
+func ReviewNote(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldEQ(FieldReviewNote, v))
+}
+
 // ProcessedAt applies equality check predicate on the "processed_at" field. It's identical to ProcessedAtEQ.
 func ProcessedAt(v time.Time) predicate.Withdrawal {
 	return predicate.Withdrawal(sql.FieldEQ(FieldProcessedAt, v))
@@ -858,6 +863,71 @@ func ReviewedAtIsNil() predicate.Withdrawal {
 // ReviewedAtNotNil applies the NotNil predicate on the "reviewed_at" field.
 func ReviewedAtNotNil() predicate.Withdrawal {
 	return predicate.Withdrawal(sql.FieldNotNull(FieldReviewedAt))
+}
+
+// ReviewNoteEQ applies the EQ predicate on the "review_note" field.
+func ReviewNoteEQ(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldEQ(FieldReviewNote, v))
+}
+
+// ReviewNoteNEQ applies the NEQ predicate on the "review_note" field.
+func ReviewNoteNEQ(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldNEQ(FieldReviewNote, v))
+}
+
+// ReviewNoteIn applies the In predicate on the "review_note" field.
+func ReviewNoteIn(vs ...string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldIn(FieldReviewNote, vs...))
+}
+
+// ReviewNoteNotIn applies the NotIn predicate on the "review_note" field.
+func ReviewNoteNotIn(vs ...string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldNotIn(FieldReviewNote, vs...))
+}
+
+// ReviewNoteGT applies the GT predicate on the "review_note" field.
+func ReviewNoteGT(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldGT(FieldReviewNote, v))
+}
+
+// ReviewNoteGTE applies the GTE predicate on the "review_note" field.
+func ReviewNoteGTE(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldGTE(FieldReviewNote, v))
+}
+
+// ReviewNoteLT applies the LT predicate on the "review_note" field.
+func ReviewNoteLT(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldLT(FieldReviewNote, v))
+}
+
+// ReviewNoteLTE applies the LTE predicate on the "review_note" field.
+func ReviewNoteLTE(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldLTE(FieldReviewNote, v))
+}
+
+// ReviewNoteContains applies the Contains predicate on the "review_note" field.
+func ReviewNoteContains(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldContains(FieldReviewNote, v))
+}
+
+// ReviewNoteHasPrefix applies the HasPrefix predicate on the "review_note" field.
+func ReviewNoteHasPrefix(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldHasPrefix(FieldReviewNote, v))
+}
+
+// ReviewNoteHasSuffix applies the HasSuffix predicate on the "review_note" field.
+func ReviewNoteHasSuffix(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldHasSuffix(FieldReviewNote, v))
+}
+
+// ReviewNoteEqualFold applies the EqualFold predicate on the "review_note" field.
+func ReviewNoteEqualFold(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldEqualFold(FieldReviewNote, v))
+}
+
+// ReviewNoteContainsFold applies the ContainsFold predicate on the "review_note" field.
+func ReviewNoteContainsFold(v string) predicate.Withdrawal {
+	return predicate.Withdrawal(sql.FieldContainsFold(FieldReviewNote, v))
 }
 
 // ProcessedAtEQ applies the EQ predicate on the "processed_at" field.
