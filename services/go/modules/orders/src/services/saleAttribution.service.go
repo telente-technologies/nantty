@@ -20,6 +20,7 @@ type AttributedSaleItem struct {
 	Currency          string    `json:"currency"`
 	AttributionSource string    `json:"attributionSource"`
 	AttributionId     uuid.UUID `json:"attributionId"`
+	CommissionBps     *int64    `json:"commissionBasisPoints"`
 }
 
 func AttributedSaleItemsOf(group *ent.OrderGroup, items []*ent.OrderItem) []AttributedSaleItem {
@@ -29,7 +30,8 @@ func AttributedSaleItemsOf(group *ent.OrderGroup, items []*ent.OrderItem) []Attr
 			continue
 		}
 		attributed = append(attributed, AttributedSaleItem{OrderItemId: item.ID, ProductId: item.ProductID, VariantId: item.VariantID, Quantity: item.Quantity,
-			LineTotalMinor: item.LineTotalMinor, Currency: group.Currency, AttributionSource: *item.AttributionSource, AttributionId: *item.AttributionID})
+			LineTotalMinor: item.LineTotalMinor, Currency: group.Currency, AttributionSource: *item.AttributionSource, AttributionId: *item.AttributionID,
+			CommissionBps: item.AffiliateCommissionBps})
 	}
 	return attributed
 }

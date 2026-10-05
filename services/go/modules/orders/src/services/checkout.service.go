@@ -52,6 +52,9 @@ func (service CheckoutService) Checkout(ctx context.Context, request CheckoutReq
 	if err == nil {
 		err = ResolvePaymentModes(&plan, request.PaymentModes)
 	}
+	if err == nil {
+		LockAffiliateCommissionRates(ctx, service.Container, &plan)
+	}
 	if err != nil {
 		return types.CheckoutResultView{}, err
 	}

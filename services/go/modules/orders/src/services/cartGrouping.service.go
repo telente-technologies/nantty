@@ -15,6 +15,7 @@ type PricedCartLine struct {
 	Product           commerceports.ProductSnapshot
 	AttributionSource *string
 	AttributionId     *uuid.UUID
+	CommissionBps     *int64
 }
 
 type SellerGroup struct {
