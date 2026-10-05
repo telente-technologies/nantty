@@ -21,6 +21,7 @@ import (
 	"zudomart/modules/admin/src/migrations"
 	auditlog "zudomart/modules/admin/src/modules/auditLog"
 	auditlogservices "zudomart/modules/admin/src/modules/auditLog/services"
+	platformmetrics "zudomart/modules/admin/src/modules/platformMetrics"
 	platformsettings "zudomart/modules/admin/src/modules/platformSettings"
 	seeddefaultsettings "zudomart/modules/admin/src/modules/platformSettings/commands/seedDefaultSettings"
 	staffaccount "zudomart/modules/admin/src/modules/staffAccount"
@@ -72,7 +73,7 @@ func StartAdminModuleWithSettings(ctx context.Context, settings configs.AdminSet
 		return nil, err
 	}
 	adminContainer := &container.Container{
-		Client: client, Settings: settings, Logger: logger, Now: time.Now,
+		Client: client, Database: database, Settings: settings, Logger: logger, Now: time.Now,
 		Passwords: passwordhash.NewPasswordHasher(passwordhash.RecommendedArgon2idParameters),
 		Tokens:    identityports.Default.StaffTokenService,
 		Delivery:  integrations.DevelopmentLogInvitationDelivery{Logger: logger, LoggingAllowed: !settings.IsProduction() && settings.DeliveryMode == "log"},
@@ -103,6 +104,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	routes := http.NewServeMux()
 	staffauthmodule.MountRoutes(routes, module.container)
 	staffaccount.MountRoutes(routes, module.container)
+	platformmetrics.MountRoutes(routes, module.container)
 	staffadmins.MountRoutes(routes, module.container)
 	platformsettings.MountRoutes(routes, module.container)
 	auditlog.MountRoutes(routes, module.container)

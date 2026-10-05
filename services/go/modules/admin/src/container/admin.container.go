@@ -2,6 +2,7 @@ package container
 
 import (
 	"context"
+	"database/sql"
 	stderrors "errors"
 	"fmt"
 	"log/slog"
@@ -21,6 +22,7 @@ import (
 
 type Container struct {
 	Client    *ent.Client
+	Database  *sql.DB
 	Settings  configs.AdminSettings
 	Passwords *passwordhash.PasswordHasher
 	Tokens    func() (identityports.StaffTokenService, error)
