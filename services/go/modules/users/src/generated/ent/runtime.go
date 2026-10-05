@@ -9,6 +9,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/accountremoval"
 	"zudomart/modules/users/src/generated/ent/accountrestriction"
 	"zudomart/modules/users/src/generated/ent/accountsuspension"
+	"zudomart/modules/users/src/generated/ent/accounttopic"
 	"zudomart/modules/users/src/generated/ent/actingprofile"
 	"zudomart/modules/users/src/generated/ent/admincreatedaccount"
 	"zudomart/modules/users/src/generated/ent/blackapplication"
@@ -39,6 +40,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/shippingaddress"
 	"zudomart/modules/users/src/generated/ent/suggestiondismissal"
 	"zudomart/modules/users/src/generated/ent/termsacceptance"
+	"zudomart/modules/users/src/generated/ent/topic"
 	"zudomart/modules/users/src/generated/ent/userconsent"
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/modules/users/src/generated/ent/usernamehold"
@@ -197,6 +199,37 @@ func init() {
 	accountsuspensionDescID := accountsuspensionMixinFields0[0].Descriptor()
 	// accountsuspension.DefaultID holds the default value on creation for the id field.
 	accountsuspension.DefaultID = accountsuspensionDescID.Default.(func() uuid.UUID)
+	accounttopicMixin := schema.AccountTopic{}.Mixin()
+	accounttopicMixinFields0 := accounttopicMixin[0].Fields()
+	_ = accounttopicMixinFields0
+	accounttopicFields := schema.AccountTopic{}.Fields()
+	_ = accounttopicFields
+	// accounttopicDescCreatedAt is the schema descriptor for created_at field.
+	accounttopicDescCreatedAt := accounttopicMixinFields0[1].Descriptor()
+	// accounttopic.DefaultCreatedAt holds the default value on creation for the created_at field.
+	accounttopic.DefaultCreatedAt = accounttopicDescCreatedAt.Default.(func() time.Time)
+	// accounttopicDescTopicID is the schema descriptor for topic_id field.
+	accounttopicDescTopicID := accounttopicFields[1].Descriptor()
+	// accounttopic.TopicIDValidator is a validator for the "topic_id" field. It is called by the builders before save.
+	accounttopic.TopicIDValidator = func() func(string) error {
+		validators := accounttopicDescTopicID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(topic_id string) error {
+			for _, fn := range fns {
+				if err := fn(topic_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// accounttopicDescID is the schema descriptor for id field.
+	accounttopicDescID := accounttopicMixinFields0[0].Descriptor()
+	// accounttopic.DefaultID holds the default value on creation for the id field.
+	accounttopic.DefaultID = accounttopicDescID.Default.(func() uuid.UUID)
 	actingprofileFields := schema.ActingProfile{}.Fields()
 	_ = actingprofileFields
 	// actingprofileDescUpdatedAt is the schema descriptor for updated_at field.
@@ -1056,13 +1089,13 @@ func init() {
 	// privacysetting.DefaultMarketing holds the default value on creation for the marketing field.
 	privacysetting.DefaultMarketing = privacysettingDescMarketing.Default.(bool)
 	// privacysettingDescPolicyVersion is the schema descriptor for policy_version field.
-	privacysettingDescPolicyVersion := privacysettingFields[7].Descriptor()
+	privacysettingDescPolicyVersion := privacysettingFields[8].Descriptor()
 	// privacysetting.DefaultPolicyVersion holds the default value on creation for the policy_version field.
 	privacysetting.DefaultPolicyVersion = privacysettingDescPolicyVersion.Default.(string)
 	// privacysetting.PolicyVersionValidator is a validator for the "policy_version" field. It is called by the builders before save.
 	privacysetting.PolicyVersionValidator = privacysettingDescPolicyVersion.Validators[0].(func(string) error)
 	// privacysettingDescUpdatedAt is the schema descriptor for updated_at field.
-	privacysettingDescUpdatedAt := privacysettingFields[8].Descriptor()
+	privacysettingDescUpdatedAt := privacysettingFields[9].Descriptor()
 	// privacysetting.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	privacysetting.DefaultUpdatedAt = privacysettingDescUpdatedAt.Default.(func() time.Time)
 	// privacysetting.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -1134,12 +1167,16 @@ func init() {
 	profileDescCountryCode := profileFields[12].Descriptor()
 	// profile.CountryCodeValidator is a validator for the "country_code" field. It is called by the builders before save.
 	profile.CountryCodeValidator = profileDescCountryCode.Validators[0].(func(string) error)
+	// profileDescPushNotificationsEnabled is the schema descriptor for push_notifications_enabled field.
+	profileDescPushNotificationsEnabled := profileFields[15].Descriptor()
+	// profile.DefaultPushNotificationsEnabled holds the default value on creation for the push_notifications_enabled field.
+	profile.DefaultPushNotificationsEnabled = profileDescPushNotificationsEnabled.Default.(bool)
 	// profileDescVerified is the schema descriptor for verified field.
-	profileDescVerified := profileFields[14].Descriptor()
+	profileDescVerified := profileFields[16].Descriptor()
 	// profile.DefaultVerified holds the default value on creation for the verified field.
 	profile.DefaultVerified = profileDescVerified.Default.(bool)
 	// profileDescUpdatedAt is the schema descriptor for updated_at field.
-	profileDescUpdatedAt := profileFields[17].Descriptor()
+	profileDescUpdatedAt := profileFields[19].Descriptor()
 	// profile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	profile.DefaultUpdatedAt = profileDescUpdatedAt.Default.(func() time.Time)
 	// profile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -1318,6 +1355,30 @@ func init() {
 	reservedusernamerule.DefaultCreatedBy = reservedusernameruleDescCreatedBy.Default.(string)
 	// reservedusernamerule.CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
 	reservedusernamerule.CreatedByValidator = reservedusernameruleDescCreatedBy.Validators[0].(func(string) error)
+	// reservedusernameruleDescCreatedByName is the schema descriptor for created_by_name field.
+	reservedusernameruleDescCreatedByName := reservedusernameruleFields[3].Descriptor()
+	// reservedusernamerule.DefaultCreatedByName holds the default value on creation for the created_by_name field.
+	reservedusernamerule.DefaultCreatedByName = reservedusernameruleDescCreatedByName.Default.(string)
+	// reservedusernamerule.CreatedByNameValidator is a validator for the "created_by_name" field. It is called by the builders before save.
+	reservedusernamerule.CreatedByNameValidator = reservedusernameruleDescCreatedByName.Validators[0].(func(string) error)
+	// reservedusernameruleDescCategory is the schema descriptor for category field.
+	reservedusernameruleDescCategory := reservedusernameruleFields[4].Descriptor()
+	// reservedusernamerule.DefaultCategory holds the default value on creation for the category field.
+	reservedusernamerule.DefaultCategory = reservedusernameruleDescCategory.Default.(string)
+	// reservedusernamerule.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	reservedusernamerule.CategoryValidator = reservedusernameruleDescCategory.Validators[0].(func(string) error)
+	// reservedusernameruleDescNote is the schema descriptor for note field.
+	reservedusernameruleDescNote := reservedusernameruleFields[5].Descriptor()
+	// reservedusernamerule.DefaultNote holds the default value on creation for the note field.
+	reservedusernamerule.DefaultNote = reservedusernameruleDescNote.Default.(string)
+	// reservedusernamerule.NoteValidator is a validator for the "note" field. It is called by the builders before save.
+	reservedusernamerule.NoteValidator = reservedusernameruleDescNote.Validators[0].(func(string) error)
+	// reservedusernameruleDescReason is the schema descriptor for reason field.
+	reservedusernameruleDescReason := reservedusernameruleFields[6].Descriptor()
+	// reservedusernamerule.DefaultReason holds the default value on creation for the reason field.
+	reservedusernamerule.DefaultReason = reservedusernameruleDescReason.Default.(string)
+	// reservedusernamerule.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	reservedusernamerule.ReasonValidator = reservedusernameruleDescReason.Validators[0].(func(string) error)
 	// reservedusernameruleDescID is the schema descriptor for id field.
 	reservedusernameruleDescID := reservedusernameruleMixinFields0[0].Descriptor()
 	// reservedusernamerule.DefaultID holds the default value on creation for the id field.
@@ -1535,6 +1596,52 @@ func init() {
 	termsacceptanceDescID := termsacceptanceMixinFields0[0].Descriptor()
 	// termsacceptance.DefaultID holds the default value on creation for the id field.
 	termsacceptance.DefaultID = termsacceptanceDescID.Default.(func() uuid.UUID)
+	topicFields := schema.Topic{}.Fields()
+	_ = topicFields
+	// topicDescName is the schema descriptor for name field.
+	topicDescName := topicFields[1].Descriptor()
+	// topic.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	topic.NameValidator = func() func(string) error {
+		validators := topicDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// topicDescPosition is the schema descriptor for position field.
+	topicDescPosition := topicFields[2].Descriptor()
+	// topic.DefaultPosition holds the default value on creation for the position field.
+	topic.DefaultPosition = topicDescPosition.Default.(int)
+	// topicDescActive is the schema descriptor for active field.
+	topicDescActive := topicFields[3].Descriptor()
+	// topic.DefaultActive holds the default value on creation for the active field.
+	topic.DefaultActive = topicDescActive.Default.(bool)
+	// topicDescID is the schema descriptor for id field.
+	topicDescID := topicFields[0].Descriptor()
+	// topic.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	topic.IDValidator = func() func(string) error {
+		validators := topicDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	userconsentMixin := schema.UserConsent{}.Mixin()
 	userconsentMixinFields0 := userconsentMixin[0].Fields()
 	_ = userconsentMixinFields0
@@ -1654,6 +1761,12 @@ func init() {
 	usernamehold.DefaultCreatedBy = usernameholdDescCreatedBy.Default.(string)
 	// usernamehold.CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
 	usernamehold.CreatedByValidator = usernameholdDescCreatedBy.Validators[0].(func(string) error)
+	// usernameholdDescCreatedByName is the schema descriptor for created_by_name field.
+	usernameholdDescCreatedByName := usernameholdFields[6].Descriptor()
+	// usernamehold.DefaultCreatedByName holds the default value on creation for the created_by_name field.
+	usernamehold.DefaultCreatedByName = usernameholdDescCreatedByName.Default.(string)
+	// usernamehold.CreatedByNameValidator is a validator for the "created_by_name" field. It is called by the builders before save.
+	usernamehold.CreatedByNameValidator = usernameholdDescCreatedByName.Validators[0].(func(string) error)
 	// usernameholdDescID is the schema descriptor for id field.
 	usernameholdDescID := usernameholdMixinFields0[0].Descriptor()
 	// usernamehold.DefaultID holds the default value on creation for the id field.

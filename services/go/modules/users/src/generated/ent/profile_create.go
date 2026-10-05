@@ -208,6 +208,34 @@ func (_c *ProfileCreate) SetNillableTheme(v *profile.Theme) *ProfileCreate {
 	return _c
 }
 
+// SetLanguage sets the "language" field.
+func (_c *ProfileCreate) SetLanguage(v profile.Language) *ProfileCreate {
+	_c.mutation.SetLanguage(v)
+	return _c
+}
+
+// SetNillableLanguage sets the "language" field if the given value is not nil.
+func (_c *ProfileCreate) SetNillableLanguage(v *profile.Language) *ProfileCreate {
+	if v != nil {
+		_c.SetLanguage(*v)
+	}
+	return _c
+}
+
+// SetPushNotificationsEnabled sets the "push_notifications_enabled" field.
+func (_c *ProfileCreate) SetPushNotificationsEnabled(v bool) *ProfileCreate {
+	_c.mutation.SetPushNotificationsEnabled(v)
+	return _c
+}
+
+// SetNillablePushNotificationsEnabled sets the "push_notifications_enabled" field if the given value is not nil.
+func (_c *ProfileCreate) SetNillablePushNotificationsEnabled(v *bool) *ProfileCreate {
+	if v != nil {
+		_c.SetPushNotificationsEnabled(*v)
+	}
+	return _c
+}
+
 // SetVerified sets the "verified" field.
 func (_c *ProfileCreate) SetVerified(v bool) *ProfileCreate {
 	_c.mutation.SetVerified(v)
@@ -352,6 +380,14 @@ func (_c *ProfileCreate) defaults() {
 		v := profile.DefaultTheme
 		_c.mutation.SetTheme(v)
 	}
+	if _, ok := _c.mutation.Language(); !ok {
+		v := profile.DefaultLanguage
+		_c.mutation.SetLanguage(v)
+	}
+	if _, ok := _c.mutation.PushNotificationsEnabled(); !ok {
+		v := profile.DefaultPushNotificationsEnabled
+		_c.mutation.SetPushNotificationsEnabled(v)
+	}
 	if _, ok := _c.mutation.Verified(); !ok {
 		v := profile.DefaultVerified
 		_c.mutation.SetVerified(v)
@@ -462,6 +498,17 @@ func (_c *ProfileCreate) check() error {
 		if err := profile.ThemeValidator(v); err != nil {
 			return &ValidationError{Name: "theme", err: fmt.Errorf(`ent: validator failed for field "Profile.theme": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Language(); !ok {
+		return &ValidationError{Name: "language", err: errors.New(`ent: missing required field "Profile.language"`)}
+	}
+	if v, ok := _c.mutation.Language(); ok {
+		if err := profile.LanguageValidator(v); err != nil {
+			return &ValidationError{Name: "language", err: fmt.Errorf(`ent: validator failed for field "Profile.language": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PushNotificationsEnabled(); !ok {
+		return &ValidationError{Name: "push_notifications_enabled", err: errors.New(`ent: missing required field "Profile.push_notifications_enabled"`)}
 	}
 	if _, ok := _c.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Profile.verified"`)}
@@ -579,6 +626,14 @@ func (_c *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Theme(); ok {
 		_spec.SetField(profile.FieldTheme, field.TypeEnum, value)
 		_node.Theme = value
+	}
+	if value, ok := _c.mutation.Language(); ok {
+		_spec.SetField(profile.FieldLanguage, field.TypeEnum, value)
+		_node.Language = value
+	}
+	if value, ok := _c.mutation.PushNotificationsEnabled(); ok {
+		_spec.SetField(profile.FieldPushNotificationsEnabled, field.TypeBool, value)
+		_node.PushNotificationsEnabled = value
 	}
 	if value, ok := _c.mutation.Verified(); ok {
 		_spec.SetField(profile.FieldVerified, field.TypeBool, value)

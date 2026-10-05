@@ -69,6 +69,62 @@ func (_u *ReservedUsernameRuleUpdate) SetNillableCreatedBy(v *string) *ReservedU
 	return _u
 }
 
+// SetCreatedByName sets the "created_by_name" field.
+func (_u *ReservedUsernameRuleUpdate) SetCreatedByName(v string) *ReservedUsernameRuleUpdate {
+	_u.mutation.SetCreatedByName(v)
+	return _u
+}
+
+// SetNillableCreatedByName sets the "created_by_name" field if the given value is not nil.
+func (_u *ReservedUsernameRuleUpdate) SetNillableCreatedByName(v *string) *ReservedUsernameRuleUpdate {
+	if v != nil {
+		_u.SetCreatedByName(*v)
+	}
+	return _u
+}
+
+// SetCategory sets the "category" field.
+func (_u *ReservedUsernameRuleUpdate) SetCategory(v string) *ReservedUsernameRuleUpdate {
+	_u.mutation.SetCategory(v)
+	return _u
+}
+
+// SetNillableCategory sets the "category" field if the given value is not nil.
+func (_u *ReservedUsernameRuleUpdate) SetNillableCategory(v *string) *ReservedUsernameRuleUpdate {
+	if v != nil {
+		_u.SetCategory(*v)
+	}
+	return _u
+}
+
+// SetNote sets the "note" field.
+func (_u *ReservedUsernameRuleUpdate) SetNote(v string) *ReservedUsernameRuleUpdate {
+	_u.mutation.SetNote(v)
+	return _u
+}
+
+// SetNillableNote sets the "note" field if the given value is not nil.
+func (_u *ReservedUsernameRuleUpdate) SetNillableNote(v *string) *ReservedUsernameRuleUpdate {
+	if v != nil {
+		_u.SetNote(*v)
+	}
+	return _u
+}
+
+// SetReason sets the "reason" field.
+func (_u *ReservedUsernameRuleUpdate) SetReason(v string) *ReservedUsernameRuleUpdate {
+	_u.mutation.SetReason(v)
+	return _u
+}
+
+// SetNillableReason sets the "reason" field if the given value is not nil.
+func (_u *ReservedUsernameRuleUpdate) SetNillableReason(v *string) *ReservedUsernameRuleUpdate {
+	if v != nil {
+		_u.SetReason(*v)
+	}
+	return _u
+}
+
 // Mutation returns the ReservedUsernameRuleMutation object of the builder.
 func (_u *ReservedUsernameRuleUpdate) Mutation() *ReservedUsernameRuleMutation {
 	return _u.mutation
@@ -118,6 +174,26 @@ func (_u *ReservedUsernameRuleUpdate) check() error {
 			return &ValidationError{Name: "created_by", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.created_by": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.CreatedByName(); ok {
+		if err := reservedusernamerule.CreatedByNameValidator(v); err != nil {
+			return &ValidationError{Name: "created_by_name", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.created_by_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Category(); ok {
+		if err := reservedusernamerule.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.category": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Note(); ok {
+		if err := reservedusernamerule.NoteValidator(v); err != nil {
+			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.note": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Reason(); ok {
+		if err := reservedusernamerule.ReasonValidator(v); err != nil {
+			return &ValidationError{Name: "reason", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.reason": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -141,6 +217,18 @@ func (_u *ReservedUsernameRuleUpdate) sqlSave(ctx context.Context) (_node int, e
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(reservedusernamerule.FieldCreatedBy, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CreatedByName(); ok {
+		_spec.SetField(reservedusernamerule.FieldCreatedByName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Category(); ok {
+		_spec.SetField(reservedusernamerule.FieldCategory, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Note(); ok {
+		_spec.SetField(reservedusernamerule.FieldNote, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Reason(); ok {
+		_spec.SetField(reservedusernamerule.FieldReason, field.TypeString, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -200,6 +288,62 @@ func (_u *ReservedUsernameRuleUpdateOne) SetCreatedBy(v string) *ReservedUsernam
 func (_u *ReservedUsernameRuleUpdateOne) SetNillableCreatedBy(v *string) *ReservedUsernameRuleUpdateOne {
 	if v != nil {
 		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// SetCreatedByName sets the "created_by_name" field.
+func (_u *ReservedUsernameRuleUpdateOne) SetCreatedByName(v string) *ReservedUsernameRuleUpdateOne {
+	_u.mutation.SetCreatedByName(v)
+	return _u
+}
+
+// SetNillableCreatedByName sets the "created_by_name" field if the given value is not nil.
+func (_u *ReservedUsernameRuleUpdateOne) SetNillableCreatedByName(v *string) *ReservedUsernameRuleUpdateOne {
+	if v != nil {
+		_u.SetCreatedByName(*v)
+	}
+	return _u
+}
+
+// SetCategory sets the "category" field.
+func (_u *ReservedUsernameRuleUpdateOne) SetCategory(v string) *ReservedUsernameRuleUpdateOne {
+	_u.mutation.SetCategory(v)
+	return _u
+}
+
+// SetNillableCategory sets the "category" field if the given value is not nil.
+func (_u *ReservedUsernameRuleUpdateOne) SetNillableCategory(v *string) *ReservedUsernameRuleUpdateOne {
+	if v != nil {
+		_u.SetCategory(*v)
+	}
+	return _u
+}
+
+// SetNote sets the "note" field.
+func (_u *ReservedUsernameRuleUpdateOne) SetNote(v string) *ReservedUsernameRuleUpdateOne {
+	_u.mutation.SetNote(v)
+	return _u
+}
+
+// SetNillableNote sets the "note" field if the given value is not nil.
+func (_u *ReservedUsernameRuleUpdateOne) SetNillableNote(v *string) *ReservedUsernameRuleUpdateOne {
+	if v != nil {
+		_u.SetNote(*v)
+	}
+	return _u
+}
+
+// SetReason sets the "reason" field.
+func (_u *ReservedUsernameRuleUpdateOne) SetReason(v string) *ReservedUsernameRuleUpdateOne {
+	_u.mutation.SetReason(v)
+	return _u
+}
+
+// SetNillableReason sets the "reason" field if the given value is not nil.
+func (_u *ReservedUsernameRuleUpdateOne) SetNillableReason(v *string) *ReservedUsernameRuleUpdateOne {
+	if v != nil {
+		_u.SetReason(*v)
 	}
 	return _u
 }
@@ -266,6 +410,26 @@ func (_u *ReservedUsernameRuleUpdateOne) check() error {
 			return &ValidationError{Name: "created_by", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.created_by": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.CreatedByName(); ok {
+		if err := reservedusernamerule.CreatedByNameValidator(v); err != nil {
+			return &ValidationError{Name: "created_by_name", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.created_by_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Category(); ok {
+		if err := reservedusernamerule.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.category": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Note(); ok {
+		if err := reservedusernamerule.NoteValidator(v); err != nil {
+			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.note": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Reason(); ok {
+		if err := reservedusernamerule.ReasonValidator(v); err != nil {
+			return &ValidationError{Name: "reason", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.reason": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -306,6 +470,18 @@ func (_u *ReservedUsernameRuleUpdateOne) sqlSave(ctx context.Context) (_node *Re
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(reservedusernamerule.FieldCreatedBy, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CreatedByName(); ok {
+		_spec.SetField(reservedusernamerule.FieldCreatedByName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Category(); ok {
+		_spec.SetField(reservedusernamerule.FieldCategory, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Note(); ok {
+		_spec.SetField(reservedusernamerule.FieldNote, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Reason(); ok {
+		_spec.SetField(reservedusernamerule.FieldReason, field.TypeString, value)
 	}
 	_node = &ReservedUsernameRule{config: _u.config}
 	_spec.Assign = _node.assignValues

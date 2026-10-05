@@ -25,7 +25,15 @@ type ReservedUsernameRule struct {
 	// MatchKind holds the value of the "match_kind" field.
 	MatchKind reservedusernamerule.MatchKind `json:"match_kind,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
-	CreatedBy    string `json:"created_by,omitempty"`
+	CreatedBy string `json:"created_by,omitempty"`
+	// CreatedByName holds the value of the "created_by_name" field.
+	CreatedByName string `json:"created_by_name,omitempty"`
+	// Category holds the value of the "category" field.
+	Category string `json:"category,omitempty"`
+	// Note holds the value of the "note" field.
+	Note string `json:"note,omitempty"`
+	// Reason holds the value of the "reason" field.
+	Reason       string `json:"reason,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -34,7 +42,7 @@ func (*ReservedUsernameRule) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case reservedusernamerule.FieldTerm, reservedusernamerule.FieldMatchKind, reservedusernamerule.FieldCreatedBy:
+		case reservedusernamerule.FieldTerm, reservedusernamerule.FieldMatchKind, reservedusernamerule.FieldCreatedBy, reservedusernamerule.FieldCreatedByName, reservedusernamerule.FieldCategory, reservedusernamerule.FieldNote, reservedusernamerule.FieldReason:
 			values[i] = new(sql.NullString)
 		case reservedusernamerule.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -85,6 +93,30 @@ func (_m *ReservedUsernameRule) assignValues(columns []string, values []any) err
 			} else if value.Valid {
 				_m.CreatedBy = value.String
 			}
+		case reservedusernamerule.FieldCreatedByName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by_name", values[i])
+			} else if value.Valid {
+				_m.CreatedByName = value.String
+			}
+		case reservedusernamerule.FieldCategory:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field category", values[i])
+			} else if value.Valid {
+				_m.Category = value.String
+			}
+		case reservedusernamerule.FieldNote:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field note", values[i])
+			} else if value.Valid {
+				_m.Note = value.String
+			}
+		case reservedusernamerule.FieldReason:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field reason", values[i])
+			} else if value.Valid {
+				_m.Reason = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -132,6 +164,18 @@ func (_m *ReservedUsernameRule) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_by=")
 	builder.WriteString(_m.CreatedBy)
+	builder.WriteString(", ")
+	builder.WriteString("created_by_name=")
+	builder.WriteString(_m.CreatedByName)
+	builder.WriteString(", ")
+	builder.WriteString("category=")
+	builder.WriteString(_m.Category)
+	builder.WriteString(", ")
+	builder.WriteString("note=")
+	builder.WriteString(_m.Note)
+	builder.WriteString(", ")
+	builder.WriteString("reason=")
+	builder.WriteString(_m.Reason)
 	builder.WriteByte(')')
 	return builder.String()
 }

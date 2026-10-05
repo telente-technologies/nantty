@@ -234,6 +234,34 @@ func (_u *ProfileUpdate) SetNillableTheme(v *profile.Theme) *ProfileUpdate {
 	return _u
 }
 
+// SetLanguage sets the "language" field.
+func (_u *ProfileUpdate) SetLanguage(v profile.Language) *ProfileUpdate {
+	_u.mutation.SetLanguage(v)
+	return _u
+}
+
+// SetNillableLanguage sets the "language" field if the given value is not nil.
+func (_u *ProfileUpdate) SetNillableLanguage(v *profile.Language) *ProfileUpdate {
+	if v != nil {
+		_u.SetLanguage(*v)
+	}
+	return _u
+}
+
+// SetPushNotificationsEnabled sets the "push_notifications_enabled" field.
+func (_u *ProfileUpdate) SetPushNotificationsEnabled(v bool) *ProfileUpdate {
+	_u.mutation.SetPushNotificationsEnabled(v)
+	return _u
+}
+
+// SetNillablePushNotificationsEnabled sets the "push_notifications_enabled" field if the given value is not nil.
+func (_u *ProfileUpdate) SetNillablePushNotificationsEnabled(v *bool) *ProfileUpdate {
+	if v != nil {
+		_u.SetPushNotificationsEnabled(*v)
+	}
+	return _u
+}
+
 // SetVerified sets the "verified" field.
 func (_u *ProfileUpdate) SetVerified(v bool) *ProfileUpdate {
 	_u.mutation.SetVerified(v)
@@ -416,6 +444,11 @@ func (_u *ProfileUpdate) check() error {
 			return &ValidationError{Name: "theme", err: fmt.Errorf(`ent: validator failed for field "Profile.theme": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Language(); ok {
+		if err := profile.LanguageValidator(v); err != nil {
+			return &ValidationError{Name: "language", err: fmt.Errorf(`ent: validator failed for field "Profile.language": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ProfileType(); ok {
 		if err := profile.ProfileTypeValidator(v); err != nil {
 			return &ValidationError{Name: "profile_type", err: fmt.Errorf(`ent: validator failed for field "Profile.profile_type": %w`, err)}
@@ -494,6 +527,12 @@ func (_u *ProfileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Theme(); ok {
 		_spec.SetField(profile.FieldTheme, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Language(); ok {
+		_spec.SetField(profile.FieldLanguage, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PushNotificationsEnabled(); ok {
+		_spec.SetField(profile.FieldPushNotificationsEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(profile.FieldVerified, field.TypeBool, value)
@@ -776,6 +815,34 @@ func (_u *ProfileUpdateOne) SetNillableTheme(v *profile.Theme) *ProfileUpdateOne
 	return _u
 }
 
+// SetLanguage sets the "language" field.
+func (_u *ProfileUpdateOne) SetLanguage(v profile.Language) *ProfileUpdateOne {
+	_u.mutation.SetLanguage(v)
+	return _u
+}
+
+// SetNillableLanguage sets the "language" field if the given value is not nil.
+func (_u *ProfileUpdateOne) SetNillableLanguage(v *profile.Language) *ProfileUpdateOne {
+	if v != nil {
+		_u.SetLanguage(*v)
+	}
+	return _u
+}
+
+// SetPushNotificationsEnabled sets the "push_notifications_enabled" field.
+func (_u *ProfileUpdateOne) SetPushNotificationsEnabled(v bool) *ProfileUpdateOne {
+	_u.mutation.SetPushNotificationsEnabled(v)
+	return _u
+}
+
+// SetNillablePushNotificationsEnabled sets the "push_notifications_enabled" field if the given value is not nil.
+func (_u *ProfileUpdateOne) SetNillablePushNotificationsEnabled(v *bool) *ProfileUpdateOne {
+	if v != nil {
+		_u.SetPushNotificationsEnabled(*v)
+	}
+	return _u
+}
+
 // SetVerified sets the "verified" field.
 func (_u *ProfileUpdateOne) SetVerified(v bool) *ProfileUpdateOne {
 	_u.mutation.SetVerified(v)
@@ -971,6 +1038,11 @@ func (_u *ProfileUpdateOne) check() error {
 			return &ValidationError{Name: "theme", err: fmt.Errorf(`ent: validator failed for field "Profile.theme": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Language(); ok {
+		if err := profile.LanguageValidator(v); err != nil {
+			return &ValidationError{Name: "language", err: fmt.Errorf(`ent: validator failed for field "Profile.language": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ProfileType(); ok {
 		if err := profile.ProfileTypeValidator(v); err != nil {
 			return &ValidationError{Name: "profile_type", err: fmt.Errorf(`ent: validator failed for field "Profile.profile_type": %w`, err)}
@@ -1066,6 +1138,12 @@ func (_u *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err er
 	}
 	if value, ok := _u.mutation.Theme(); ok {
 		_spec.SetField(profile.FieldTheme, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Language(); ok {
+		_spec.SetField(profile.FieldLanguage, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PushNotificationsEnabled(); ok {
+		_spec.SetField(profile.FieldPushNotificationsEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Verified(); ok {
 		_spec.SetField(profile.FieldVerified, field.TypeBool, value)

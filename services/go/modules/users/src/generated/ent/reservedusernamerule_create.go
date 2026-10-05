@@ -61,6 +61,62 @@ func (_c *ReservedUsernameRuleCreate) SetNillableCreatedBy(v *string) *ReservedU
 	return _c
 }
 
+// SetCreatedByName sets the "created_by_name" field.
+func (_c *ReservedUsernameRuleCreate) SetCreatedByName(v string) *ReservedUsernameRuleCreate {
+	_c.mutation.SetCreatedByName(v)
+	return _c
+}
+
+// SetNillableCreatedByName sets the "created_by_name" field if the given value is not nil.
+func (_c *ReservedUsernameRuleCreate) SetNillableCreatedByName(v *string) *ReservedUsernameRuleCreate {
+	if v != nil {
+		_c.SetCreatedByName(*v)
+	}
+	return _c
+}
+
+// SetCategory sets the "category" field.
+func (_c *ReservedUsernameRuleCreate) SetCategory(v string) *ReservedUsernameRuleCreate {
+	_c.mutation.SetCategory(v)
+	return _c
+}
+
+// SetNillableCategory sets the "category" field if the given value is not nil.
+func (_c *ReservedUsernameRuleCreate) SetNillableCategory(v *string) *ReservedUsernameRuleCreate {
+	if v != nil {
+		_c.SetCategory(*v)
+	}
+	return _c
+}
+
+// SetNote sets the "note" field.
+func (_c *ReservedUsernameRuleCreate) SetNote(v string) *ReservedUsernameRuleCreate {
+	_c.mutation.SetNote(v)
+	return _c
+}
+
+// SetNillableNote sets the "note" field if the given value is not nil.
+func (_c *ReservedUsernameRuleCreate) SetNillableNote(v *string) *ReservedUsernameRuleCreate {
+	if v != nil {
+		_c.SetNote(*v)
+	}
+	return _c
+}
+
+// SetReason sets the "reason" field.
+func (_c *ReservedUsernameRuleCreate) SetReason(v string) *ReservedUsernameRuleCreate {
+	_c.mutation.SetReason(v)
+	return _c
+}
+
+// SetNillableReason sets the "reason" field if the given value is not nil.
+func (_c *ReservedUsernameRuleCreate) SetNillableReason(v *string) *ReservedUsernameRuleCreate {
+	if v != nil {
+		_c.SetReason(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *ReservedUsernameRuleCreate) SetID(v uuid.UUID) *ReservedUsernameRuleCreate {
 	_c.mutation.SetID(v)
@@ -118,6 +174,22 @@ func (_c *ReservedUsernameRuleCreate) defaults() {
 		v := reservedusernamerule.DefaultCreatedBy
 		_c.mutation.SetCreatedBy(v)
 	}
+	if _, ok := _c.mutation.CreatedByName(); !ok {
+		v := reservedusernamerule.DefaultCreatedByName
+		_c.mutation.SetCreatedByName(v)
+	}
+	if _, ok := _c.mutation.Category(); !ok {
+		v := reservedusernamerule.DefaultCategory
+		_c.mutation.SetCategory(v)
+	}
+	if _, ok := _c.mutation.Note(); !ok {
+		v := reservedusernamerule.DefaultNote
+		_c.mutation.SetNote(v)
+	}
+	if _, ok := _c.mutation.Reason(); !ok {
+		v := reservedusernamerule.DefaultReason
+		_c.mutation.SetReason(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := reservedusernamerule.DefaultID()
 		_c.mutation.SetID(v)
@@ -151,6 +223,38 @@ func (_c *ReservedUsernameRuleCreate) check() error {
 	if v, ok := _c.mutation.CreatedBy(); ok {
 		if err := reservedusernamerule.CreatedByValidator(v); err != nil {
 			return &ValidationError{Name: "created_by", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.created_by": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreatedByName(); !ok {
+		return &ValidationError{Name: "created_by_name", err: errors.New(`ent: missing required field "ReservedUsernameRule.created_by_name"`)}
+	}
+	if v, ok := _c.mutation.CreatedByName(); ok {
+		if err := reservedusernamerule.CreatedByNameValidator(v); err != nil {
+			return &ValidationError{Name: "created_by_name", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.created_by_name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Category(); !ok {
+		return &ValidationError{Name: "category", err: errors.New(`ent: missing required field "ReservedUsernameRule.category"`)}
+	}
+	if v, ok := _c.mutation.Category(); ok {
+		if err := reservedusernamerule.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.category": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Note(); !ok {
+		return &ValidationError{Name: "note", err: errors.New(`ent: missing required field "ReservedUsernameRule.note"`)}
+	}
+	if v, ok := _c.mutation.Note(); ok {
+		if err := reservedusernamerule.NoteValidator(v); err != nil {
+			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.note": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Reason(); !ok {
+		return &ValidationError{Name: "reason", err: errors.New(`ent: missing required field "ReservedUsernameRule.reason"`)}
+	}
+	if v, ok := _c.mutation.Reason(); ok {
+		if err := reservedusernamerule.ReasonValidator(v); err != nil {
+			return &ValidationError{Name: "reason", err: fmt.Errorf(`ent: validator failed for field "ReservedUsernameRule.reason": %w`, err)}
 		}
 	}
 	return nil
@@ -203,6 +307,22 @@ func (_c *ReservedUsernameRuleCreate) createSpec() (*ReservedUsernameRule, *sqlg
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(reservedusernamerule.FieldCreatedBy, field.TypeString, value)
 		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.CreatedByName(); ok {
+		_spec.SetField(reservedusernamerule.FieldCreatedByName, field.TypeString, value)
+		_node.CreatedByName = value
+	}
+	if value, ok := _c.mutation.Category(); ok {
+		_spec.SetField(reservedusernamerule.FieldCategory, field.TypeString, value)
+		_node.Category = value
+	}
+	if value, ok := _c.mutation.Note(); ok {
+		_spec.SetField(reservedusernamerule.FieldNote, field.TypeString, value)
+		_node.Note = value
+	}
+	if value, ok := _c.mutation.Reason(); ok {
+		_spec.SetField(reservedusernamerule.FieldReason, field.TypeString, value)
+		_node.Reason = value
 	}
 	return _node, _spec
 }
