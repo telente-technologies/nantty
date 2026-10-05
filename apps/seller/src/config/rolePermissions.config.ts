@@ -82,6 +82,7 @@ const pagePermissionRules: { readonly pathPrefix: string; readonly permission: S
   { pathPrefix: "/staff", permission: "staff:manage" },
   { pathPrefix: "/brand", permission: "settings:view" },
   { pathPrefix: "/settings/billing", permission: "billing:manage" },
+  { pathPrefix: "/settings/business-documents", permission: "billing:manage" },
   { pathPrefix: "/settings/developers", permission: "developer:manage" },
   { pathPrefix: "/settings", permission: "settings:view" },
 ];
@@ -109,6 +110,7 @@ interface ApiPermissionRule {
 const apiPermissionRules: ApiPermissionRule[] = [
   { method: "ANY", pathPattern: /^\/seller\/access$/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/subscription(\/plans)?$/, permission: "signed_in" },
+  { method: "GET", pathPattern: /^\/seller\/subscription\/trial$/, permission: "billing:manage" },
   { method: "WRITE", pathPattern: /^\/seller\/subscription\//, permission: "billing:manage" },
   { method: "GET", pathPattern: /^\/seller\/verification$/, permission: "signed_in" },
   { method: "GET", pathPattern: /^\/seller\/zudomart-users$/, permission: "signed_in" },
@@ -139,6 +141,7 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "ANY", pathPattern: /^\/seller\/(wallet|finance)\//, permission: "wallet:view" },
   { method: "ANY", pathPattern: /^\/seller\/developers/, permission: "developer:manage" },
   { method: "ANY", pathPattern: /^\/seller\/security/, permission: "signed_in" },
+  { method: "ANY", pathPattern: /^\/seller\/business-documents(\/|$)/, permission: "billing:manage" },
   { method: "GET", pathPattern: /^\/seller\/(settings|locations|integrations)/, permission: "settings:view" },
   { method: "ANY", pathPattern: /^\/seller\/(settings|locations|integrations)/, permission: "settings:manage" },
   { method: "ANY", pathPattern: /^\/seller\/affiliates\//, permission: "affiliates:manage" },

@@ -77,7 +77,7 @@ export function StaffActivityView() {
       <PageHeader title="Staff activity" description="Every sensitive change in your store: refunds, discounts, stock, staff, settings and payouts." actions={<ButtonLink href="/staff">Back to staff</ButtonLink>} />
       <FilterBar>
         <DateRangeControl value={dateRange} onValueChange={setDateRange} />
-        <SelectField label="Person" hideLabel value={actorId} onChange={(event) => setActorId(event.target.value)} options={[{ value: "", label: "Everyone" }, ...(staffQuery.data?.data ?? []).map((member) => ({ value: member.id, label: member.name }))]} />
+        <SelectField label="Person" hideLabel value={actorId} onChange={(event) => setActorId(event.target.value)} options={[{ value: "", label: "Everyone" }, ...(staffQuery.data?.data ?? []).map((member) => ({ value: member.userId, label: member.name }))]} />
         <SelectField label="Area" hideLabel value={actionArea} onChange={(event) => setActionArea(event.target.value)} options={actionAreaOptions} />
         <Button iconName="export24" onClick={exportVisibleEntriesAsCsv} disabled={entries.length === 0}>
           Export CSV

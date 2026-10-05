@@ -61,10 +61,10 @@ export function SecuritySettingsView() {
     <>
       <Panel title="Sign-in protection" description="These settings belong to your Zudomart account and also protect the app. Change them in the Zudomart app under Profile › Security.">
         <div className={styles.formStack}>
-          {security.twoStepVerification.enabled ? null : <Callout tone="caution" title="Turn on 2-step verification">Anyone with your password could get into your store and withdraw money. Add an authenticator app or SMS code in the Zudomart app.</Callout>}
+          {security.twoStepVerification.enabled ? null : <Callout tone="caution" title="Turn on 2-step verification">Anyone with your password could get into your store and withdraw money. Add an authenticator app or email code in the Zudomart app.</Callout>}
           <KeyValueList
             items={[
-              { label: "2-step verification", value: security.twoStepVerification.enabled ? <StatusBadge tone="success">On · {security.twoStepVerification.method === "sms" ? "SMS code" : "Authenticator app"}</StatusBadge> : <StatusBadge tone="caution">Off</StatusBadge> },
+              { label: "2-step verification", value: security.twoStepVerification.enabled ? <StatusBadge tone="success">On · {security.twoStepVerification.method === "email" ? "Email code" : "Authenticator app"}</StatusBadge> : <StatusBadge tone="caution">Off</StatusBadge> },
               { label: "Password last changed", value: formatDateForDisplay(security.passwordChangedAt) },
             ]}
           />

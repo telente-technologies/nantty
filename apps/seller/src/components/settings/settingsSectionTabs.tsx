@@ -18,7 +18,7 @@ const settingsSections: { href: string; label: string; exact?: boolean; permissi
   { href: "/settings/developers", label: "API keys & webhooks", permission: "developer:manage" },
   { href: "/settings/integrations", label: "Integrations", permission: "settings:view" },
   { href: "/settings/billing", label: "Plan & billing", permission: "billing:manage" },
-  { href: "/settings/business-documents", label: "Business documents", permission: "settings:view" },
+  { href: "/settings/business-documents", label: "Business documents", permission: "billing:manage" },
   { href: "/settings/verification", label: "Verification", permission: "settings:view" },
 ];
 
