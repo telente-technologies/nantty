@@ -39,7 +39,11 @@ func (purchases CoinPurchases) RedeemVerifiedStorePurchaseInTransaction(ctx cont
 		return purchases.receiptForPurchase(ctx, transaction, existing.UserID, ConvertCoinPurchase(existing))
 	}
 	now := purchases.Container.Now().UTC()
-	purchase, err := client.CoinPurchase.Create().SetID(purchaseId).SetUserID(userId).SetPackageID(pack.ID).SetCoins(pack.Coins + pack.BonusCoins).
+	flags, err := CoinRiskRules{Container: purchases.Container}.FlagsForPurchase(ctx, transaction, userId, purchaseId)
+	if err != nil {
+		return dtos.VerifiedCoinPurchaseDto{}, err
+	}
+	purchase, err := client.CoinPurchase.Create().SetReviewStatus(ReviewStateForPurchaseFlags(flags)).SetReviewFlags(flags).SetID(purchaseId).SetUserID(userId).SetPackageID(pack.ID).SetCoins(pack.Coins + pack.BonusCoins).
 		SetChannel(coinpurchase.ChannelStoreIap).SetSource(sourceByStore[store]).SetProvider(store).
 		SetReference(store + ":" + verified.StoreTransactionId).SetAmountMinor(recorded.PriceMinor).SetCurrency(recorded.Currency).
 		SetStoreFeeMinor(recorded.StoreFeeMinor).SetStatus(coinpurchase.StatusSucceeded).SetCreditedAt(now).SetCreatedAt(now).Save(ctx)
@@ -87,7 +91,11 @@ func (purchases CoinPurchases) HandleStorePurchaseRefunded(ctx context.Context, 
 	}
 	clawback := models.SplitCoinClawback(balance, purchase.Coins)
 	now := purchases.Container.Now().UTC()
-	if err := purchase.Update().SetStatus(coinpurchase.StatusRefunded).SetRefundedAt(now).SetClawbackShortfallCoins(clawback.ShortfallCoins).Exec(ctx); err != nil {
+	refundUpdate := purchase.Update().SetStatus(coinpurchase.StatusRefunded).SetRefundedAt(now).SetClawbackShortfallCoins(clawback.ShortfallCoins)
+	if clawback.ShortfallCoins > 0 && (purchase.ReviewStatus == coinpurchase.ReviewStatusNotRequired || purchase.ReviewStatus == coinpurchase.ReviewStatusReviewed) {
+		refundUpdate.SetReviewStatus(coinpurchase.ReviewStatusPendingReview).SetReviewFlags(append(append([]string{}, purchase.ReviewFlags...), RuleStoreRefundAfterSpend))
+	}
+	if err := refundUpdate.Exec(ctx); err != nil {
 		return err
 	}
 	lines := []ledgermodels.JournalLineRequest{

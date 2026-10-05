@@ -6,7 +6,7 @@ import (
 )
 
 func convertCoinRecord(record CoinTransactionRecord, parties map[string]ledgerrepositories.PartySummary, flags map[string][]string) dtos.CoinTransactionDto {
-	view := dtos.CoinTransactionDto{Flags: []string{}, ChargebackRisk: "low"}
+	view := dtos.CoinTransactionDto{Flags: []string{}, ReviewFlags: []string{}, ChargebackRisk: "low"}
 	involved := []string{}
 	if purchase := record.Purchase; purchase != nil {
 		reference, provider, channel := purchase.Reference, purchase.Provider, string(purchase.Channel)
@@ -15,6 +15,7 @@ func convertCoinRecord(record CoinTransactionRecord, parties map[string]ledgerre
 		view.PaymentProvider, view.Channel, view.TransactionStatus = &provider, &channel, string(purchase.Status)
 		view.ReviewStatus, view.ClawbackShortfallCoins, view.CreatedAt, view.ReviewedAt = string(purchase.ReviewStatus), purchase.ClawbackShortfallCoins, purchase.CreatedAt, purchase.ReviewedAt
 		view.ReviewedByStaffId, view.ReviewNote = optionalText(purchase.ReviewedByStaffID), optionalText(purchase.ReviewNote)
+		view.ReviewFlags = append(view.ReviewFlags, purchase.ReviewFlags...)
 		involved = append(involved, purchase.UserID)
 	} else {
 		transfer := record.Transfer
@@ -27,14 +28,13 @@ func convertCoinRecord(record CoinTransactionRecord, parties map[string]ledgerre
 		}
 		view.ReviewStatus, view.ClawbackShortfallCoins, view.CreatedAt, view.ReviewedAt = string(transfer.ReviewStatus), transfer.ClawbackShortfallCoins, transfer.CreatedAt, transfer.ReviewedAt
 		view.ReviewedByStaffId, view.ReviewNote = optionalText(transfer.ReviewedByStaffID), optionalText(transfer.ReviewNote)
+		view.ReviewFlags = append(view.ReviewFlags, transfer.ReviewFlags...)
 		involved = append(involved, transfer.SenderUserID, transfer.RecipientUserID)
 	}
 	for _, userId := range involved {
 		view.Flags = append(view.Flags, flags[userId]...)
 	}
-	if len(view.Flags) > 0 {
-		view.ChargebackRisk = "high"
-	}
+	view.ChargebackRisk = chargebackRiskFor(view.Flags, view.ReviewFlags)
 	return view
 }
 
@@ -43,4 +43,20 @@ func optionalText(value string) *string {
 		return nil
 	}
 	return &value
+}
+
+var velocityRules = map[string]bool{RuleCoinPurchaseVelocity: true, RuleTransferBurst: true, RuleTransferFanOut: true}
+
+func chargebackRiskFor(openFlags, reviewFlags []string) string {
+	risk := "low"
+	if len(openFlags) > 0 {
+		return "high"
+	}
+	for _, rule := range reviewFlags {
+		if !velocityRules[rule] {
+			return "high"
+		}
+		risk = "medium"
+	}
+	return risk
 }

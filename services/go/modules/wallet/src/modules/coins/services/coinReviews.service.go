@@ -141,6 +141,10 @@ func (reviews CoinReviews) GetForStaff(ctx context.Context, transactionId uuid.U
 	}
 	view := views[0]
 	history := []dtos.CoinTransactionHistoryDto{{Action: "created", OccurredAt: view.CreatedAt}}
+	if len(view.ReviewFlags) > 0 {
+		rules := strings.Join(view.ReviewFlags, ", ")
+		history = append(history, dtos.CoinTransactionHistoryDto{Action: "flagged", OccurredAt: view.CreatedAt, Note: &rules})
+	}
 	if view.ReviewedAt != nil {
 		history = append(history, dtos.CoinTransactionHistoryDto{Action: view.ReviewStatus, OccurredAt: *view.ReviewedAt, StaffId: view.ReviewedByStaffId, Note: view.ReviewNote})
 	}
@@ -206,7 +210,7 @@ func (reviews CoinReviews) openRiskFlags(ctx context.Context, userIds []string) 
 }
 
 func (reviews CoinReviews) countByReviewStatus(ctx context.Context, client *ent.Client) (map[string]int, error) {
-	counts := map[string]int{"pending_review": 0, "reviewed": 0, "reversed": 0}
+	counts := map[string]int{"not_required": 0, "pending_review": 0, "reviewed": 0, "reversed": 0}
 	var rows []struct {
 		ReviewStatus string `json:"review_status"`
 		Count        int    `json:"count"`

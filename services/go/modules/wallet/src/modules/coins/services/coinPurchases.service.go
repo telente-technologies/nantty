@@ -95,7 +95,11 @@ func (purchases CoinPurchases) HandleSucceededPayment(ctx context.Context, trans
 		return fmt.Errorf("coin purchase %s expects %d %s but %d %s settled", purchase.ID, purchase.AmountMinor, purchase.Currency, payment.AmountMinor, payment.Currency)
 	}
 	now := purchases.Container.Now().UTC()
-	if err := purchase.Update().SetStatus(coinpurchase.StatusSucceeded).SetCreditedAt(now).Exec(ctx); err != nil {
+	flags, err := CoinRiskRules{Container: purchases.Container}.FlagsForPurchase(ctx, transaction, purchase.UserID, purchase.ID)
+	if err != nil {
+		return err
+	}
+	if err := purchase.Update().SetStatus(coinpurchase.StatusSucceeded).SetCreditedAt(now).SetReviewStatus(ReviewStateForPurchaseFlags(flags)).SetReviewFlags(flags).Exec(ctx); err != nil {
 		return err
 	}
 	_, err = purchases.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
