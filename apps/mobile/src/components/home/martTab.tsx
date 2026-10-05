@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View, type NativeScrollEvent } from "react-native";
 
 import { makeThemedStyles, useTheme } from "@/theme";
+import { adEventsService } from "@/services/adEvents.service";
 import { productsService } from "@/services/products.service";
 import type { MartHighlight } from "@/types/martHighlight.type";
 
@@ -53,7 +54,10 @@ export function MartTab() {
 
   const openHighlight = (highlight: MartHighlight) => {
     const { target } = highlight;
-    if (target.type === "collection") navigation.navigate("Category", { categoryId: target.collection, name: target.name, collection: target.collection });
+    if (target.type === "product") {
+      if (highlight.sponsored) adEventsService.recordSponsoredClick(highlight.sponsored, "mart", target.productId);
+      navigation.navigate("ProductDetail", { productId: target.productId });
+    } else if (target.type === "collection") navigation.navigate("Category", { categoryId: target.collection, name: target.name, collection: target.collection });
     else navigation.navigate("Category", { categoryId: target.categoryId, name: target.name });
   };
 
