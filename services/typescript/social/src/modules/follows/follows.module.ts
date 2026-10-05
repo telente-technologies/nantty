@@ -10,6 +10,8 @@ import { createGetFollowStatusHandler } from "./queries/getFollowStatus/getFollo
 import { createListFollowRequestsHandler } from "./queries/listFollowRequests/listFollowRequests.handler.js";
 import { createListFollowersHandler } from "./queries/listFollowers/listFollowers.handler.js";
 import { createListFollowingHandler } from "./queries/listFollowing/listFollowing.handler.js";
+import { createListFollowedStoresHandler } from "../storeFollows/queries/listFollowedStores/listFollowedStores.handler.js";
+import { createListConnectionsHandler } from "./queries/listConnections/listConnections.handler.js";
 import { registerFollowsRoutes } from "./routes/follows.routes.js";
 
 export function mountFollowsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
@@ -19,6 +21,8 @@ export function mountFollowsModule(router: HttpRouter, route: RouteFactory, cont
     respondToFollowRequest: createRespondToFollowRequestHandler(context),
     listFollowers: createListFollowersHandler(context),
     listFollowing: createListFollowingHandler(context),
+    listFollowedStores: createListFollowedStoresHandler(context),
+    listConnections: createListConnectionsHandler(context),
     listFollowRequests: createListFollowRequestsHandler(context),
     getFollowStatus: createGetFollowStatusHandler(context),
   });
