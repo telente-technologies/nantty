@@ -152,5 +152,25 @@ func (billing Billing) HandleSavedCardFingerprint(ctx context.Context, transacti
 			return err
 		}
 	}
-	return row.Update().SetProviderCustomerID(card.ProviderCustomerId).SetCardLabel(truncate(card.CardLabel, 60)).SetActivationPending(true).Exec(ctx)
+	if card.BillingAuthorizationId == "" {
+		if err := row.Update().SetStatus(subscription.StatusTrialRejected).SetLastError("CARD_NOT_REUSABLE").Exec(ctx); err != nil {
+			return err
+		}
+		return billing.emit(ctx, transaction, "subscription.trialRejected", row.ID.String(), map[string]any{"subscriptionId": row.ID.String(), "ownerUserId": row.OwnerUserID, "reason": "CARD_NOT_REUSABLE"})
+	}
+	return billing.startTrialInTransaction(ctx, transaction, row, card)
+}
+
+func (billing Billing) startTrialInTransaction(ctx context.Context, transaction *sql.Tx, row *ent.Subscription, card paymentmodels.SavedCardFingerprint) error {
+	trialEndsAt := billing.Container.Now().UTC().Add(time.Duration(max(row.TrialDays, 1)) * 24 * time.Hour)
+	row, err := row.Update().SetStatus(subscription.StatusTrialing).SetTrialEndsAt(trialEndsAt).SetCurrentPeriodEndsAt(trialEndsAt).SetNextChargeAt(trialEndsAt).
+		SetBillingAnchorAt(trialEndsAt).SetBillingAuthorizationID(card.BillingAuthorizationId).SetProviderCustomerID(card.ProviderCustomerId).
+		SetCardLabel(truncate(card.CardLabel, 60)).SetCardExpiryMonth(card.CardExpiryMonth).SetCardExpiryYear(card.CardExpiryYear).SetActivationPending(false).AddVersion(1).Save(ctx)
+	if err != nil {
+		return err
+	}
+	if err := billing.scheduleTrialRemindersInTransaction(ctx, billing.Container.Client(transaction), row.ID.String(), trialEndsAt); err != nil {
+		return err
+	}
+	return billing.emitLifecycleEvents(ctx, transaction, row, models.LifecycleOutcome{Status: "trialing", Entitlement: "granted", Events: []string{"planTrial.started"}})
 }

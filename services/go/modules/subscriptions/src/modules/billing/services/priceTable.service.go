@@ -27,8 +27,6 @@ type PlanPriceRow struct {
 	UpdatedByStaffId    string            `json:"updatedByStaffId,omitempty"`
 }
 
-// SeedDefaultPricesWhenMissing writes the research price book for every region and fills the regional columns on rows
-// that predate them, but never overwrites a row a staff member has edited.
 func (billing Billing) SeedDefaultPricesWhenMissing(ctx context.Context) error {
 	client := billing.Container.Client(billing.Container.Resources.Database)
 	for _, price := range regionpricing.DefaultPlanPrices() {
@@ -82,9 +80,6 @@ func (billing Billing) findActivePrice(ctx context.Context, client *ent.Client, 
 	return client.PlanPrice.Query().Where(planprice.PlanCode(planCode), planprice.CountryCode(region), planprice.Active(true)).Only(ctx)
 }
 
-// RegionalPriceFor resolves a country (or pricing region) to its price row. Unknown countries, and regions without an
-// active row, use the US price in USD. On the web a currency Paystack can't charge (GBP, EUR, or a currency not enabled
-// on the account) also uses the US price, so the price shown is always the price charged.
 func (billing Billing) RegionalPriceFor(ctx context.Context, client *ent.Client, planCode, countryOrRegion, channel string) (regionpricing.PlanRegionalPrice, error) {
 	region, found := regionpricing.FindRegion(countryOrRegion)
 	if !found {

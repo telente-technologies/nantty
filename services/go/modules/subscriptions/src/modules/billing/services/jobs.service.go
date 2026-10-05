@@ -9,7 +9,6 @@ import (
 	"zudomart/modules/ledger/src/databases"
 	paymentservices "zudomart/modules/payments/src/modules/gateway/services"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
-	"zudomart/modules/subscriptions/src/generated/ent/subscriptionreminder"
 	"zudomart/modules/subscriptions/src/models"
 )
 
@@ -19,6 +18,8 @@ type JobReport struct {
 	GracesExpired   int `json:"gracesExpired"`
 	BundlesLapsed   int `json:"bundlesLapsed"`
 	BundlesRepriced int `json:"bundlesRepriced"`
+	RenewalsQueued  int `json:"renewalsQueued"`
+	NoticesSent     int `json:"noticesSent"`
 }
 
 func (billing Billing) RunDueJobs(ctx context.Context) JobReport {
@@ -28,6 +29,11 @@ func (billing Billing) RunDueJobs(ctx context.Context) JobReport {
 	report.GracesExpired = billing.ExpireGracePeriods(ctx, 200)
 	report.BundlesLapsed = billing.LapseBundlesWithoutBlue(ctx, 200)
 	report.BundlesRepriced = billing.RepriceLapsedBundles(ctx, 50)
+	report.RenewalsQueued = billing.SweepDueSubscriptions(ctx, 200)
+	report.NoticesSent = billing.SendCardExpiryNotices(ctx, 100)
+	if billing.Container.Now().UTC().Minute() == 0 {
+		report.NoticesSent += billing.SendPriceChangeNotices(ctx, 500)
+	}
 	return report
 }
 
@@ -56,43 +62,9 @@ func (billing Billing) ActivatePendingTrials(ctx context.Context, limit int) int
 	return activated
 }
 
-func (billing Billing) SendDueReminders(ctx context.Context, limit int) int {
-	client := billing.Container.Client(billing.Container.Resources.Database)
-	due, err := client.SubscriptionReminder.Query().Where(subscriptionreminder.SentAtIsNil(), subscriptionreminder.DueAtLTE(billing.Container.Now().UTC())).Limit(limit).All(ctx)
-	if err != nil {
-		return 0
-	}
-	sent := 0
-	for _, reminder := range due {
-		err := databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-			tx := billing.Container.Client(transaction)
-			claimed, err := tx.SubscriptionReminder.Update().Where(subscriptionreminder.ID(reminder.ID), subscriptionreminder.SentAtIsNil()).SetSentAt(billing.Container.Now().UTC()).Save(ctx)
-			if err != nil || claimed == 0 {
-				return err
-			}
-			row, err := tx.Subscription.Get(ctx, mustParseUuid(reminder.SubscriptionID))
-			if err != nil || row.Status != subscription.StatusTrialing || row.CancelAtPeriodEnd {
-				return err
-			}
-			profile, _, err := billing.Container.Identity.FindProfile(ctx, row.ProfileID)
-			if err != nil {
-				return err
-			}
-			return billing.emit(ctx, transaction, "planTrial.ending", row.ID.String(), map[string]any{
-				"accountId": row.OwnerUserID, "storeName": profile.DisplayName, "plan": row.PlanCode, "price": money(row.AmountMinor, row.Currency), "interval": row.Interval.String(),
-				"daysLeft": reminder.DaysBefore, "trialEndsAt": isoTime(row.TrialEndsAt), "cardLabel": row.CardLabel,
-			})
-		})
-		if err == nil {
-			sent++
-		}
-	}
-	return sent
-}
-
 func (billing Billing) ExpireGracePeriods(ctx context.Context, limit int) int {
 	client := billing.Container.Client(billing.Container.Resources.Database)
-	rows, err := client.Subscription.Query().Where(subscription.StatusEQ(subscription.StatusGrace), subscription.GraceEndsAtLTE(billing.Container.Now().UTC())).Limit(limit).All(ctx)
+	rows, err := client.Subscription.Query().Where(subscription.StatusEQ(subscription.StatusGrace), subscription.BillingAuthorizationIDEQ(""), subscription.GraceEndsAtLTE(billing.Container.Now().UTC())).Limit(limit).All(ctx)
 	if err != nil {
 		return 0
 	}
