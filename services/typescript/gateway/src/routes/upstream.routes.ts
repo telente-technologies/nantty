@@ -161,6 +161,8 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/admin/payments/", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/orders/*/escrow", upstream: "money", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/admin/orders/*/escrow/refund", upstream: "money", authentication: "optional", methods: ["POST"] },
+  { pathPrefix: "/api/v1/admin/orders", upstream: "commerce", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/admin/refunds", upstream: "commerce", authentication: "optional", methods: ["GET", "POST"] },
   { pathPrefix: "/api/v1/admin/disputes", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/withdrawals", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/payouts/", upstream: "money", authentication: "optional" },
