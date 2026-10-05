@@ -1,5 +1,6 @@
 "use client";
 
+import { ExclamationMark } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
 import styles from "./feedback.module.css";
@@ -16,7 +17,7 @@ export function ErrorState({ title = "Something went wrong", description, action
   return (
     <div className={styles.errorState} role="alert">
       <div className={styles.errorMark} aria-hidden="true">
-        !
+        <ExclamationMark size={16} weight="bold" />
       </div>
       <div className={styles.errorBody}>
         <p className={styles.errorTitle}>{title}</p>
