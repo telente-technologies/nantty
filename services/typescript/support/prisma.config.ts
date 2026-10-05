@@ -3,7 +3,6 @@ import { defineConfig } from "prisma/config";
 try {
   process.loadEnvFile(".env");
 } catch {
-  // No .env: DATABASE_URL comes from the environment.
 }
 
 function withSchemaParameter(url: string, schema: string | undefined): string {

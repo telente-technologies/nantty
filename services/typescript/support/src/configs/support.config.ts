@@ -1,9 +1,12 @@
+import { readGatewayIdentitySecretsFromEnvironment } from "../middlewares/gatewayIdentity.middleware.js";
+
 export interface InternalSource {
   readonly baseUrl: string;
   readonly internalToken: string;
 }
 
 export interface SupportConfig {
+  readonly gatewayIdentitySecrets?: readonly string[];
   readonly host: string;
   readonly port: number;
   readonly databaseUrl: string;
@@ -37,6 +40,7 @@ export function loadSupportConfigFromEnvironment(): SupportConfig {
   const intelligenceUrl = readOrDefault("INTELLIGENCE_URL", "");
   const rabbitUrl = readOrDefault("RABBITMQ_URL", "");
   const config: SupportConfig = {
+    gatewayIdentitySecrets: readGatewayIdentitySecretsFromEnvironment(problems),
     host: readOrDefault("HOST", "0.0.0.0"),
     port: Number(readOrDefault("PORT", "8111")),
     databaseUrl,

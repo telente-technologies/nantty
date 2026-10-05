@@ -4,6 +4,7 @@ import { HttpMiddlewarePipeline, createHttpServer, createNodeHttpAdapter, create
 import { createLogger, type Logger } from "@zudojs/logger";
 
 import type { SupportConfig } from "./configs/support.config.js";
+import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
 import { autoCloseResolvedAfterDays } from "./constants/support.constant.js";
 import { createSupportPrisma } from "./databases/prisma.database.js";
 import { createIdentityHttpDirectory } from "./integrations/identityDirectory.integration.js";
@@ -52,7 +53,7 @@ export function createSupportApp(config: SupportConfig, infrastructure: { readon
       return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
     }
   };
-  const pipeline = new HttpMiddlewarePipeline({ middlewares: [dispatch] });
+  const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
   const server = createHttpServer({
     adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: 256 * 1024, trustProxy: true }),
     handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),

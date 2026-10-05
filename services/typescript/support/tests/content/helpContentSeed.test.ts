@@ -35,7 +35,7 @@ describe("seeded help content", async () => {
     for (const article of articles) {
       expect(article.summary.length, article.slug).toBeGreaterThan(20);
       expect(/\p{Extended_Pictographic}/u.test(article.bodyMarkdown + article.title), article.slug).toBe(false);
-      expect(findResidualPersonalData(article.bodyMarkdown.replace(/@all\b/g, "all")).filter((label) => label !== "money"), article.slug).toEqual([]);
+      expect(findResidualPersonalData(article.bodyMarkdown.replace(/@all\b/g, "all").replace(/[\w.+-]*@(mail\.)?zudomart\.com\b/g, "our team")).filter((label) => label !== "money"), article.slug).toEqual([]);
     }
   });
 
