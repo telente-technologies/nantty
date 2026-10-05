@@ -14,6 +14,9 @@ export const postRepository = {
 
   softDelete: (db: Db, id: string, at: Date) => db.post.update({ where: { id }, data: { deletedAt: at } }),
 
+  incrementCounterIfNotDeleted: async (db: Db, id: string, counter: "commentCount", by: number): Promise<boolean> =>
+    (await db.post.updateMany({ where: { id, deletedAt: null }, data: { [counter]: { increment: by } } })).count === 1,
+
   incrementCounter: (db: Db, id: string, counter: "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "quoteCount", by: number) =>
     db.post.update({ where: { id }, data: { [counter]: { increment: by } } }),
 

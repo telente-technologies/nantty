@@ -26,6 +26,8 @@ const stickerLayoutSchema = schema.object({
 const replyPolicySchema = schema.enum(["everyone", "following", "followers", "mentioned", "off"]);
 const sensitiveLabelSchema = schema.enum(["nudity", "graphic_violence", "dangerous_acts", "self_harm"]);
 
+const taggedUserIdsSchema = schema.array(schema.string().uuid()).max(40);
+
 const replyToCommentSchema = schema.object({ commentId: schema.string().uuid(), clipId: schema.string().uuid(), commenterUserId: schema.string().uuid() });
 
 export const createPostBodySchema = schema.object({
@@ -42,7 +44,12 @@ export const createPostBodySchema = schema.object({
   stickerLayout: stickerLayoutSchema.optional(),
   replyPolicy: replyPolicySchema.optional(),
   sensitiveLabels: schema.array(sensitiveLabelSchema).max(4).optional(),
+  taggedUserIds: taggedUserIdsSchema.optional(),
 });
+
+export const setPostTagsBodySchema = schema.object({ taggedUserIds: taggedUserIdsSchema });
+export const taggingSettingsBodySchema = schema.object({ allowTagging: schema.boolean() });
+export const taggedUsersQuerySchema = schema.object({ cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
 
 export const replySettingsBodySchema = schema.object({ replyPolicy: replyPolicySchema });
 export const sensitiveLabelsBodySchema = schema.object({ sensitiveLabels: schema.array(sensitiveLabelSchema).max(4) });
@@ -59,3 +66,4 @@ export const userPostsQuerySchema = schema.object({
   limit: schema.coerce.number().int().min(1).max(100).optional(),
   kind: schema.enum(["post", "clip"]).optional(),
 });
+export const tagCandidatesQuerySchema = schema.object({ q: schema.string().min(1).max(60), cursor: schema.string().max(100).optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });

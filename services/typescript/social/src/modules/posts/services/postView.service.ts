@@ -2,12 +2,15 @@ import type { HandlerContext } from "../../../types/handlerContext.type.js";
 import type { UserSummary } from "../../../interfaces/identityDirectory.interface.js";
 import { followRepository } from "../../follows/repositories/follow.repository.js";
 import type { MentionEntity } from "../../mentions/models/mention.model.js";
+import { downloadSettingRepository } from "../../downloads/repositories/downloadSetting.repository.js";
+import { decidePostDownloadPermission } from "../../downloads/services/downloadPermission.service.js";
 import { savedItemRepository } from "../../saves/repositories/savedItem.repository.js";
 import type { LinkPreviewView } from "../../linkPreviews/models/linkPreview.model.js";
 import type { MediaView, PostView, ReplyToComment, StickerLayout } from "../models/post.model.js";
 import type { SoundView } from "../../sounds/models/sound.model.js";
 import { buildSoundViews } from "../../sounds/services/soundView.service.js";
 import { postRepository, type PostRow } from "../repositories/post.repository.js";
+import { loadTaggedPreviews } from "./postTagView.service.js";
 import { authorsFollowingViewer, decideReplyPermission, mentionedUserIdsFromEntities } from "./replyPolicy.service.js";
 import { buildSensitiveContentView, isPostWithheldFromViewer, resolveCurrentViewerContentPolicy, type ViewerContentPolicy } from "./sensitiveContent.service.js";
 
@@ -41,12 +44,15 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
   const everyRow = [...rows, ...originals];
   const postIds = everyRow.map((row) => row.id);
   const authorIds = [...new Set(everyRow.map((row) => row.authorId))];
-  const [authors, liked, saved, followed, followingViewer] = await Promise.all([
+  const [authors, liked, saved, followed, followingViewer, tagged, downloadsOff, privateAuthors] = await Promise.all([
     context.directory.findUserSummaries(authorIds),
     viewerId === undefined ? new Set<string>() : postRepository.likedPostIds(db, viewerId, postIds),
     viewerId === undefined ? new Set<string>() : savedItemRepository.savedTargetIds(db, viewerId, postIds),
     viewerId === undefined ? new Set<string>() : followRepository.followedAccountIds(db, viewerId, authorIds),
     viewerId === undefined || !rows.some((row) => row.replyPolicy === "following") ? new Set<string>() : authorsFollowingViewer(context, viewerId, authorIds),
+    loadTaggedPreviews(context, viewerId, postIds),
+    viewerId === undefined ? new Set<string>() : downloadSettingRepository.accountIdsWithDownloadsOff(db, authorIds),
+    viewerId === undefined ? new Set<string>() : context.directory.findPrivateAccountIds(authorIds),
   ]);
   const soundIds = [...new Set(rows.flatMap((row) => (row.soundId === null ? [] : [row.soundId])))];
   const soundRows = soundIds.length === 0 ? [] : await db.sound.findMany({ where: { id: { in: soundIds } } });
@@ -94,10 +100,16 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
       replyPolicy: row.replyPolicy,
       viewerCanReply: replyPermission.allowed,
       replyRestriction: replyPermission.allowed ? null : { reason: replyPermission.reason, message: replyPermission.message },
+      viewerCanDownload: hasAccess && decidePostDownloadPermission({
+        viewerId, authorId: row.authorId, kind: row.kind, visibility: row.visibility, moderationVisibility: row.moderationVisibility, hasMedia: row.media.some((media) => media.status === "ready"),
+        authorAllowsDownloads: !downloadsOff.has(row.authorId), authorIsPrivate: privateAuthors.has(row.authorId),
+      }).allowed,
       sensitive: buildSensitiveContentView(row, policy),
       isAiGenerated: row.isAiGenerated,
       ...(row.soundId === null || sounds.get(row.soundId) === undefined ? {} : { sound: sounds.get(row.soundId) as SoundView }),
       mentions: row.mentions as unknown as MentionEntity[],
+      taggedUsers: hasAccess ? (tagged.get(row.id)?.users ?? []) : [],
+      taggedUsersCount: hasAccess ? (tagged.get(row.id)?.count ?? 0) : 0,
       linkPreview: hasAccess && row.media.length === 0 && row.linkPreview !== null ? (row.linkPreview as unknown as LinkPreviewView) : null,
       ...(row.replyToCommentId === null || row.replyToClipId === null || row.replyToCommenterId === null
         ? {}
