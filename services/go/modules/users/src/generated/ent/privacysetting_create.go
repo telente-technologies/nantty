@@ -83,6 +83,20 @@ func (_c *PrivacySettingCreate) SetNillableMarketing(v *bool) *PrivacySettingCre
 	return _c
 }
 
+// SetMarketingFrequency sets the "marketing_frequency" field.
+func (_c *PrivacySettingCreate) SetMarketingFrequency(v privacysetting.MarketingFrequency) *PrivacySettingCreate {
+	_c.mutation.SetMarketingFrequency(v)
+	return _c
+}
+
+// SetNillableMarketingFrequency sets the "marketing_frequency" field if the given value is not nil.
+func (_c *PrivacySettingCreate) SetNillableMarketingFrequency(v *privacysetting.MarketingFrequency) *PrivacySettingCreate {
+	if v != nil {
+		_c.SetMarketingFrequency(*v)
+	}
+	return _c
+}
+
 // SetWhoCanMessageMe sets the "who_can_message_me" field.
 func (_c *PrivacySettingCreate) SetWhoCanMessageMe(v privacysetting.WhoCanMessageMe) *PrivacySettingCreate {
 	_c.mutation.SetWhoCanMessageMe(v)
@@ -190,6 +204,10 @@ func (_c *PrivacySettingCreate) defaults() {
 		v := privacysetting.DefaultMarketing
 		_c.mutation.SetMarketing(v)
 	}
+	if _, ok := _c.mutation.MarketingFrequency(); !ok {
+		v := privacysetting.DefaultMarketingFrequency
+		_c.mutation.SetMarketingFrequency(v)
+	}
 	if _, ok := _c.mutation.WhoCanMessageMe(); !ok {
 		v := privacysetting.DefaultWhoCanMessageMe
 		_c.mutation.SetWhoCanMessageMe(v)
@@ -224,6 +242,14 @@ func (_c *PrivacySettingCreate) check() error {
 	}
 	if _, ok := _c.mutation.Marketing(); !ok {
 		return &ValidationError{Name: "marketing", err: errors.New(`ent: missing required field "PrivacySetting.marketing"`)}
+	}
+	if _, ok := _c.mutation.MarketingFrequency(); !ok {
+		return &ValidationError{Name: "marketing_frequency", err: errors.New(`ent: missing required field "PrivacySetting.marketing_frequency"`)}
+	}
+	if v, ok := _c.mutation.MarketingFrequency(); ok {
+		if err := privacysetting.MarketingFrequencyValidator(v); err != nil {
+			return &ValidationError{Name: "marketing_frequency", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.marketing_frequency": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.WhoCanMessageMe(); !ok {
 		return &ValidationError{Name: "who_can_message_me", err: errors.New(`ent: missing required field "PrivacySetting.who_can_message_me"`)}
@@ -297,6 +323,10 @@ func (_c *PrivacySettingCreate) createSpec() (*PrivacySetting, *sqlgraph.CreateS
 	if value, ok := _c.mutation.Marketing(); ok {
 		_spec.SetField(privacysetting.FieldMarketing, field.TypeBool, value)
 		_node.Marketing = value
+	}
+	if value, ok := _c.mutation.MarketingFrequency(); ok {
+		_spec.SetField(privacysetting.FieldMarketingFrequency, field.TypeEnum, value)
+		_node.MarketingFrequency = value
 	}
 	if value, ok := _c.mutation.WhoCanMessageMe(); ok {
 		_spec.SetField(privacysetting.FieldWhoCanMessageMe, field.TypeEnum, value)

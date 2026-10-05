@@ -48,6 +48,10 @@ type Profile struct {
 	CountryCode *string `json:"country_code,omitempty"`
 	// Theme holds the value of the "theme" field.
 	Theme profile.Theme `json:"theme,omitempty"`
+	// Language holds the value of the "language" field.
+	Language profile.Language `json:"language,omitempty"`
+	// PushNotificationsEnabled holds the value of the "push_notifications_enabled" field.
+	PushNotificationsEnabled bool `json:"push_notifications_enabled,omitempty"`
 	// Verified holds the value of the "verified" field.
 	Verified bool `json:"verified,omitempty"`
 	// ProfileType holds the value of the "profile_type" field.
@@ -85,9 +89,9 @@ func (*Profile) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case profile.FieldIsPrivate, profile.FieldVerified:
+		case profile.FieldIsPrivate, profile.FieldPushNotificationsEnabled, profile.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case profile.FieldKind, profile.FieldCreatorStatus, profile.FieldHandle, profile.FieldDisplayName, profile.FieldBio, profile.FieldWebsite, profile.FieldAvatarMediaKey, profile.FieldAvatarURL, profile.FieldBannerMediaKey, profile.FieldBannerURL, profile.FieldCountryCode, profile.FieldTheme, profile.FieldProfileType, profile.FieldStatus:
+		case profile.FieldKind, profile.FieldCreatorStatus, profile.FieldHandle, profile.FieldDisplayName, profile.FieldBio, profile.FieldWebsite, profile.FieldAvatarMediaKey, profile.FieldAvatarURL, profile.FieldBannerMediaKey, profile.FieldBannerURL, profile.FieldCountryCode, profile.FieldTheme, profile.FieldLanguage, profile.FieldProfileType, profile.FieldStatus:
 			values[i] = new(sql.NullString)
 		case profile.FieldCreatedAt, profile.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -210,6 +214,18 @@ func (_m *Profile) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Theme = profile.Theme(value.String)
 			}
+		case profile.FieldLanguage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field language", values[i])
+			} else if value.Valid {
+				_m.Language = profile.Language(value.String)
+			}
+		case profile.FieldPushNotificationsEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field push_notifications_enabled", values[i])
+			} else if value.Valid {
+				_m.PushNotificationsEnabled = value.Bool
+			}
 		case profile.FieldVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field verified", values[i])
@@ -331,6 +347,12 @@ func (_m *Profile) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("theme=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Theme))
+	builder.WriteString(", ")
+	builder.WriteString("language=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Language))
+	builder.WriteString(", ")
+	builder.WriteString("push_notifications_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PushNotificationsEnabled))
 	builder.WriteString(", ")
 	builder.WriteString("verified=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Verified))

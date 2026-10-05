@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/accountremoval"
 	"zudomart/modules/users/src/generated/ent/accountrestriction"
 	"zudomart/modules/users/src/generated/ent/accountsuspension"
+	"zudomart/modules/users/src/generated/ent/accounttopic"
 	"zudomart/modules/users/src/generated/ent/actingprofile"
 	"zudomart/modules/users/src/generated/ent/admincreatedaccount"
 	"zudomart/modules/users/src/generated/ent/blackapplication"
@@ -42,6 +43,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/shippingaddress"
 	"zudomart/modules/users/src/generated/ent/suggestiondismissal"
 	"zudomart/modules/users/src/generated/ent/termsacceptance"
+	"zudomart/modules/users/src/generated/ent/topic"
 	"zudomart/modules/users/src/generated/ent/userconsent"
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/modules/users/src/generated/ent/usernamehold"
@@ -116,6 +118,7 @@ func checkColumn(t, c string) error {
 			accountremoval.Table:          accountremoval.ValidColumn,
 			accountrestriction.Table:      accountrestriction.ValidColumn,
 			accountsuspension.Table:       accountsuspension.ValidColumn,
+			accounttopic.Table:            accounttopic.ValidColumn,
 			actingprofile.Table:           actingprofile.ValidColumn,
 			admincreatedaccount.Table:     admincreatedaccount.ValidColumn,
 			blackapplication.Table:        blackapplication.ValidColumn,
@@ -146,6 +149,7 @@ func checkColumn(t, c string) error {
 			shippingaddress.Table:         shippingaddress.ValidColumn,
 			suggestiondismissal.Table:     suggestiondismissal.ValidColumn,
 			termsacceptance.Table:         termsacceptance.ValidColumn,
+			topic.Table:                   topic.ValidColumn,
 			userconsent.Table:             userconsent.ValidColumn,
 			usernamechange.Table:          usernamechange.ValidColumn,
 			usernamehold.Table:            usernamehold.ValidColumn,

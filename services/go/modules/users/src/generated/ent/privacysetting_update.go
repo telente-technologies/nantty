@@ -84,6 +84,20 @@ func (_u *PrivacySettingUpdate) SetNillableMarketing(v *bool) *PrivacySettingUpd
 	return _u
 }
 
+// SetMarketingFrequency sets the "marketing_frequency" field.
+func (_u *PrivacySettingUpdate) SetMarketingFrequency(v privacysetting.MarketingFrequency) *PrivacySettingUpdate {
+	_u.mutation.SetMarketingFrequency(v)
+	return _u
+}
+
+// SetNillableMarketingFrequency sets the "marketing_frequency" field if the given value is not nil.
+func (_u *PrivacySettingUpdate) SetNillableMarketingFrequency(v *privacysetting.MarketingFrequency) *PrivacySettingUpdate {
+	if v != nil {
+		_u.SetMarketingFrequency(*v)
+	}
+	return _u
+}
+
 // SetWhoCanMessageMe sets the "who_can_message_me" field.
 func (_u *PrivacySettingUpdate) SetWhoCanMessageMe(v privacysetting.WhoCanMessageMe) *PrivacySettingUpdate {
 	_u.mutation.SetWhoCanMessageMe(v)
@@ -175,6 +189,11 @@ func (_u *PrivacySettingUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PrivacySettingUpdate) check() error {
+	if v, ok := _u.mutation.MarketingFrequency(); ok {
+		if err := privacysetting.MarketingFrequencyValidator(v); err != nil {
+			return &ValidationError{Name: "marketing_frequency", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.marketing_frequency": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.WhoCanMessageMe(); ok {
 		if err := privacysetting.WhoCanMessageMeValidator(v); err != nil {
 			return &ValidationError{Name: "who_can_message_me", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.who_can_message_me": %w`, err)}
@@ -216,6 +235,9 @@ func (_u *PrivacySettingUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if value, ok := _u.mutation.Marketing(); ok {
 		_spec.SetField(privacysetting.FieldMarketing, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.MarketingFrequency(); ok {
+		_spec.SetField(privacysetting.FieldMarketingFrequency, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.WhoCanMessageMe(); ok {
 		_spec.SetField(privacysetting.FieldWhoCanMessageMe, field.TypeEnum, value)
@@ -301,6 +323,20 @@ func (_u *PrivacySettingUpdateOne) SetMarketing(v bool) *PrivacySettingUpdateOne
 func (_u *PrivacySettingUpdateOne) SetNillableMarketing(v *bool) *PrivacySettingUpdateOne {
 	if v != nil {
 		_u.SetMarketing(*v)
+	}
+	return _u
+}
+
+// SetMarketingFrequency sets the "marketing_frequency" field.
+func (_u *PrivacySettingUpdateOne) SetMarketingFrequency(v privacysetting.MarketingFrequency) *PrivacySettingUpdateOne {
+	_u.mutation.SetMarketingFrequency(v)
+	return _u
+}
+
+// SetNillableMarketingFrequency sets the "marketing_frequency" field if the given value is not nil.
+func (_u *PrivacySettingUpdateOne) SetNillableMarketingFrequency(v *privacysetting.MarketingFrequency) *PrivacySettingUpdateOne {
+	if v != nil {
+		_u.SetMarketingFrequency(*v)
 	}
 	return _u
 }
@@ -409,6 +445,11 @@ func (_u *PrivacySettingUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PrivacySettingUpdateOne) check() error {
+	if v, ok := _u.mutation.MarketingFrequency(); ok {
+		if err := privacysetting.MarketingFrequencyValidator(v); err != nil {
+			return &ValidationError{Name: "marketing_frequency", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.marketing_frequency": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.WhoCanMessageMe(); ok {
 		if err := privacysetting.WhoCanMessageMeValidator(v); err != nil {
 			return &ValidationError{Name: "who_can_message_me", err: fmt.Errorf(`ent: validator failed for field "PrivacySetting.who_can_message_me": %w`, err)}
@@ -467,6 +508,9 @@ func (_u *PrivacySettingUpdateOne) sqlSave(ctx context.Context) (_node *PrivacyS
 	}
 	if value, ok := _u.mutation.Marketing(); ok {
 		_spec.SetField(privacysetting.FieldMarketing, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.MarketingFrequency(); ok {
+		_spec.SetField(privacysetting.FieldMarketingFrequency, field.TypeEnum, value)
 	}
 	if value, ok := _u.mutation.WhoCanMessageMe(); ok {
 		_spec.SetField(privacysetting.FieldWhoCanMessageMe, field.TypeEnum, value)

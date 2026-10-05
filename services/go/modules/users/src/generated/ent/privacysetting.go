@@ -28,6 +28,8 @@ type PrivacySetting struct {
 	PersonalizedAds bool `json:"personalized_ads,omitempty"`
 	// Marketing holds the value of the "marketing" field.
 	Marketing bool `json:"marketing,omitempty"`
+	// MarketingFrequency holds the value of the "marketing_frequency" field.
+	MarketingFrequency privacysetting.MarketingFrequency `json:"marketing_frequency,omitempty"`
 	// WhoCanMessageMe holds the value of the "who_can_message_me" field.
 	WhoCanMessageMe privacysetting.WhoCanMessageMe `json:"who_can_message_me,omitempty"`
 	// WhoCanMentionMe holds the value of the "who_can_mention_me" field.
@@ -48,7 +50,7 @@ func (*PrivacySetting) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case privacysetting.FieldID:
 			values[i] = new(sql.NullInt64)
-		case privacysetting.FieldWhoCanMessageMe, privacysetting.FieldWhoCanMentionMe, privacysetting.FieldPolicyVersion:
+		case privacysetting.FieldMarketingFrequency, privacysetting.FieldWhoCanMessageMe, privacysetting.FieldWhoCanMentionMe, privacysetting.FieldPolicyVersion:
 			values[i] = new(sql.NullString)
 		case privacysetting.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -104,6 +106,12 @@ func (_m *PrivacySetting) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field marketing", values[i])
 			} else if value.Valid {
 				_m.Marketing = value.Bool
+			}
+		case privacysetting.FieldMarketingFrequency:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field marketing_frequency", values[i])
+			} else if value.Valid {
+				_m.MarketingFrequency = privacysetting.MarketingFrequency(value.String)
 			}
 		case privacysetting.FieldWhoCanMessageMe:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -179,6 +187,9 @@ func (_m *PrivacySetting) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("marketing=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Marketing))
+	builder.WriteString(", ")
+	builder.WriteString("marketing_frequency=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MarketingFrequency))
 	builder.WriteString(", ")
 	builder.WriteString("who_can_message_me=")
 	builder.WriteString(fmt.Sprintf("%v", _m.WhoCanMessageMe))
