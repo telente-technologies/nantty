@@ -57,18 +57,20 @@ func (clock *fakeClock) Advance(amount time.Duration) {
 }
 
 type liveHarness struct {
-	t         *testing.T
-	server    *httptest.Server
-	module    *Module
-	money     *integrations.InMemoryMoneyGateway
-	directory *integrations.InMemoryParticipantDirectory
-	publisher *events.RecordingPublisher
-	clock     *fakeClock
-	signer    jwk.Key
-	relations *integrations.InMemorySocialRelations
-	ingress   *integrations.InMemoryIngressController
-	recorder  *integrations.InMemoryRecordingController
-	logs      *syncBuffer
+	t           *testing.T
+	server      *httptest.Server
+	module      *Module
+	money       *integrations.InMemoryMoneyGateway
+	directory   *integrations.InMemoryParticipantDirectory
+	publisher   *events.RecordingPublisher
+	clock       *fakeClock
+	signer      jwk.Key
+	relations   *integrations.InMemorySocialRelations
+	catalog     *integrations.InMemoryStoreCatalog
+	subscribers *integrations.InMemoryCreatorSubscriptions
+	ingress     *integrations.InMemoryIngressController
+	recorder    *integrations.InMemoryRecordingController
+	logs        *syncBuffer
 }
 
 type syncBuffer struct {
@@ -113,7 +115,7 @@ func startLiveModuleAgainstFreshSchema(t *testing.T) *liveHarness {
 	harness := &liveHarness{
 		t: t, money: integrations.NewInMemoryMoneyGateway(), directory: integrations.NewInMemoryParticipantDirectory(),
 		publisher: &events.RecordingPublisher{}, clock: &fakeClock{current: time.Now()}, signer: signer,
-		relations: integrations.NewInMemorySocialRelations(), ingress: integrations.NewInMemoryIngressController(),
+		relations: integrations.NewInMemorySocialRelations(), catalog: integrations.NewInMemoryStoreCatalog(), subscribers: &integrations.InMemoryCreatorSubscriptions{}, ingress: integrations.NewInMemoryIngressController(),
 		recorder: integrations.NewInMemoryRecordingController(), logs: &syncBuffer{},
 	}
 	settings := configs.LiveSettings{
@@ -132,6 +134,7 @@ func startLiveModuleAgainstFreshSchema(t *testing.T) *liveHarness {
 	module, err := StartLiveModuleWithSettings(ctx, settings, Collaborators{
 		Money: harness.money, Directory: harness.directory, Media: integrations.NoopRoomController{}, Verifier: verifier, Publisher: harness.publisher,
 		Ingress: harness.ingress, Recorder: harness.recorder, RecordingStorage: integrations.InMemoryRecordingStorage{}, Relations: harness.relations,
+		Catalog: harness.catalog, Subscribers: harness.subscribers,
 	}, dependencies)
 	if err != nil {
 		t.Fatal(err)

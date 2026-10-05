@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/livekit/protocol/auth"
 )
 
@@ -23,7 +24,8 @@ func TestOnlyCreatorsGoLiveAndShoppingNeedsAStore(t *testing.T) {
 	}
 	harness.expect("POST", "/api/v1/lives", &creator, "", map[string]any{"title": "again", "category": "gaming"}, http.StatusConflict)
 	harness.expect("POST", "/api/v1/lives/"+live["id"].(string)+"/pins", &creator, "", map[string]any{"productId": "6f1d3a52-0b0e-4c0e-9d57-1a2b3c4d5e6f"}, http.StatusUnprocessableEntity)
-	shopping := harness.expect("POST", "/api/v1/lives", &seller, "", map[string]any{"title": "Shop", "category": "shopping"}, http.StatusCreated)["id"].(string)
+	storeId := harness.ownStore(seller, uuid.MustParse("6f1d3a52-0b0e-4c0e-9d57-1a2b3c4d5e6f"))
+	shopping := harness.expect("POST", "/api/v1/lives", &seller, "", map[string]any{"title": "Shop", "category": "shopping", "storeId": storeId}, http.StatusCreated)["id"].(string)
 	pinned := harness.expect("POST", "/api/v1/lives/"+shopping+"/pins", &seller, "", map[string]any{"productId": "6f1d3a52-0b0e-4c0e-9d57-1a2b3c4d5e6f"}, http.StatusOK)
 	if len(pinned["data"].([]any)) != 1 {
 		t.Fatalf("expected one pinned product, got %v", pinned)
