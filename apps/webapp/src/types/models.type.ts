@@ -1,3 +1,5 @@
+import type { ChatLinkPreview } from "@zudomart/chat-crypto";
+
 import type { AdAppInstall, AdCard, AdClickLinks, AdCreativeType, AdDestination } from "./adCreative.type";
 import type { Money } from "./money.type";
 
@@ -234,11 +236,20 @@ export interface Message {
   readonly senderId: ID;
   readonly text: string;
   readonly createdAt: ISODate;
-  readonly kind?: "text" | "voice" | "image" | "system";
+  readonly kind?: "text" | "voice" | "image" | "video" | "system" | "shared" | "location" | "liveLocation" | "document" | "poll";
   readonly sender?: UserSummary;
   readonly media?: MessageAttachedMedia | null;
   readonly reactions?: readonly MessageReactionSummary[];
   readonly expiresAt?: ISODate | null;
+  readonly encryption?: MessageEncryptionEnvelope | null;
+  readonly linkPreview?: ChatLinkPreview | null;
+  readonly decryptionNotice?: string | null;
+}
+
+export interface MessageEncryptionEnvelope {
+  readonly deviceId: string;
+  readonly ciphertext: string | null;
+  readonly protocol: string;
 }
 
 export interface Story {

@@ -1,6 +1,7 @@
 import type { ChatSearchResults, Page } from "@/types";
 import type { Conversation, ConversationFilter, Message, UserSummary } from "@/types";
 
+import { chatCryptoService } from "./chatCrypto/chatCrypto.service";
 import { createIdempotencyKey, sendListRequestToWebappServer, sendRequestToWebappServer } from "./clientApi.service";
 
 export const messagesService = {
@@ -12,12 +13,20 @@ export const messagesService = {
       query: { cursor: options.cursor, after: options.after },
     }),
   startConversationWithUser: (userId: string) => sendRequestToWebappServer<Conversation>("/api/v1/conversations", { method: "POST", body: { userId } }),
-  sendChatMessage: (conversationId: string, text: string) =>
-    sendRequestToWebappServer<Message>(`/api/v1/conversations/${conversationId}/messages`, {
+  sendChatMessage: async (conversation: Conversation, viewerId: string, text: string): Promise<Message> => {
+    const encrypted = await chatCryptoService.encryptForConversation(conversation, viewerId, { text });
+    const message = await sendRequestToWebappServer<Message>(`/api/v1/conversations/${conversation.id}/messages`, {
       method: "POST",
-      body: { text },
+      body: { kind: "text", encryption: encrypted.encryption },
       idempotencyKey: createIdempotencyKey("msg"),
-    }),
+    });
+    await encrypted.confirmSent(message.id);
+    return { ...message, text };
+  },
+  fetchDecryptedMessagesInConversation: async (conversationId: string, viewerId: string, options: { readonly cursor?: string; readonly after?: string } = {}): Promise<Page<Message>> => {
+    const page = await messagesService.fetchMessagesInConversation(conversationId, options);
+    return { ...page, data: await chatCryptoService.decryptMessages(page.data, viewerId) };
+  },
   markConversationAsRead: (conversationId: string) => sendRequestToWebappServer<void>(`/api/v1/conversations/${conversationId}/read`, { method: "POST" }),
   searchConversationsAndPeople: (query: string) => sendRequestToWebappServer<ChatSearchResults>("/api/v1/conversations/search", { query: { q: query } }),
   fetchPeopleToMessage: (query: string) => sendListRequestToWebappServer<UserSummary>("/api/v1/search/people", { query: { q: query } }),

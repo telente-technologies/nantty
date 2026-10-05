@@ -17,6 +17,14 @@ import { createIdempotencyKey, sendListRequestToWebappServer, sendRequestToWebap
 export type ReportTargetType = "post" | "clip" | "comment" | "live" | "user" | "product" | "message";
 export type ShareReferenceKind = "post" | "clip" | "video" | "product" | "live" | "store" | "profile";
 
+export interface ShareEncryption {
+  readonly conversationId: ID;
+  readonly deviceId: string;
+  readonly ciphertext: string;
+}
+
+export const toShareReferenceKind = (kind: ShareReferenceKind) => (kind === "video" ? "post" : kind);
+
 export interface CoinPurchaseCheckout {
   readonly reference: string;
   readonly accessCode?: string;
@@ -44,10 +52,10 @@ export const reportsService = {
 };
 
 export const chatSharesService = {
-  shareIntoChats: (conversationIds: readonly ID[], kind: ShareReferenceKind, referenceId: ID) =>
+  shareIntoChats: (conversationIds: readonly ID[], kind: ShareReferenceKind, referenceId: ID, encryptions: readonly ShareEncryption[] = []) =>
     sendRequestToWebappServer<{ sentCount: number; shareCount: number }>("/api/v1/chat/shares", {
       method: "POST",
-      body: { conversationIds, reference: { kind: kind === "video" ? "post" : kind, id: referenceId } },
+      body: { conversationIds, reference: { kind: toShareReferenceKind(kind), id: referenceId }, ...(encryptions.length > 0 ? { encryptions } : {}) },
       idempotencyKey: createIdempotencyKey("share"),
     }),
 };
