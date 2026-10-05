@@ -42,6 +42,8 @@ type Category struct {
 	SortOrder int `json:"sort_order,omitempty"`
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
+	// IconName holds the value of the "icon_name" field.
+	IconName *string `json:"icon_name,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -60,7 +62,7 @@ func (*Category) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case category.FieldDepth, category.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case category.FieldName, category.FieldSlug, category.FieldDescription, category.FieldPath:
+		case category.FieldName, category.FieldSlug, category.FieldDescription, category.FieldPath, category.FieldIconName:
 			values[i] = new(sql.NullString)
 		case category.FieldCreatedAt, category.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -157,6 +159,13 @@ func (_m *Category) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Active = value.Bool
 			}
+		case category.FieldIconName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field icon_name", values[i])
+			} else if value.Valid {
+				_m.IconName = new(string)
+				*_m.IconName = value.String
+			}
 		case category.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -235,6 +244,11 @@ func (_m *Category) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("active=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Active))
+	builder.WriteString(", ")
+	if v := _m.IconName; v != nil {
+		builder.WriteString("icon_name=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

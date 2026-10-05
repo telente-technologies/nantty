@@ -155,6 +155,20 @@ func (_c *CategoryCreate) SetNillableActive(v *bool) *CategoryCreate {
 	return _c
 }
 
+// SetIconName sets the "icon_name" field.
+func (_c *CategoryCreate) SetIconName(v string) *CategoryCreate {
+	_c.mutation.SetIconName(v)
+	return _c
+}
+
+// SetNillableIconName sets the "icon_name" field if the given value is not nil.
+func (_c *CategoryCreate) SetNillableIconName(v *string) *CategoryCreate {
+	if v != nil {
+		_c.SetIconName(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *CategoryCreate) SetUpdatedAt(v time.Time) *CategoryCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -298,6 +312,11 @@ func (_c *CategoryCreate) check() error {
 	if _, ok := _c.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Category.active"`)}
 	}
+	if v, ok := _c.mutation.IconName(); ok {
+		if err := category.IconNameValidator(v); err != nil {
+			return &ValidationError{Name: "icon_name", err: fmt.Errorf(`ent: validator failed for field "Category.icon_name": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Category.updated_at"`)}
 	}
@@ -380,6 +399,10 @@ func (_c *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Active(); ok {
 		_spec.SetField(category.FieldActive, field.TypeBool, value)
 		_node.Active = value
+	}
+	if value, ok := _c.mutation.IconName(); ok {
+		_spec.SetField(category.FieldIconName, field.TypeString, value)
+		_node.IconName = &value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(category.FieldUpdatedAt, field.TypeTime, value)
@@ -566,6 +589,24 @@ func (u *CategoryUpsert) SetActive(v bool) *CategoryUpsert {
 // UpdateActive sets the "active" field to the value that was provided on create.
 func (u *CategoryUpsert) UpdateActive() *CategoryUpsert {
 	u.SetExcluded(category.FieldActive)
+	return u
+}
+
+// SetIconName sets the "icon_name" field.
+func (u *CategoryUpsert) SetIconName(v string) *CategoryUpsert {
+	u.Set(category.FieldIconName, v)
+	return u
+}
+
+// UpdateIconName sets the "icon_name" field to the value that was provided on create.
+func (u *CategoryUpsert) UpdateIconName() *CategoryUpsert {
+	u.SetExcluded(category.FieldIconName)
+	return u
+}
+
+// ClearIconName clears the value of the "icon_name" field.
+func (u *CategoryUpsert) ClearIconName() *CategoryUpsert {
+	u.SetNull(category.FieldIconName)
 	return u
 }
 
@@ -786,6 +827,27 @@ func (u *CategoryUpsertOne) SetActive(v bool) *CategoryUpsertOne {
 func (u *CategoryUpsertOne) UpdateActive() *CategoryUpsertOne {
 	return u.Update(func(s *CategoryUpsert) {
 		s.UpdateActive()
+	})
+}
+
+// SetIconName sets the "icon_name" field.
+func (u *CategoryUpsertOne) SetIconName(v string) *CategoryUpsertOne {
+	return u.Update(func(s *CategoryUpsert) {
+		s.SetIconName(v)
+	})
+}
+
+// UpdateIconName sets the "icon_name" field to the value that was provided on create.
+func (u *CategoryUpsertOne) UpdateIconName() *CategoryUpsertOne {
+	return u.Update(func(s *CategoryUpsert) {
+		s.UpdateIconName()
+	})
+}
+
+// ClearIconName clears the value of the "icon_name" field.
+func (u *CategoryUpsertOne) ClearIconName() *CategoryUpsertOne {
+	return u.Update(func(s *CategoryUpsert) {
+		s.ClearIconName()
 	})
 }
 
@@ -1175,6 +1237,27 @@ func (u *CategoryUpsertBulk) SetActive(v bool) *CategoryUpsertBulk {
 func (u *CategoryUpsertBulk) UpdateActive() *CategoryUpsertBulk {
 	return u.Update(func(s *CategoryUpsert) {
 		s.UpdateActive()
+	})
+}
+
+// SetIconName sets the "icon_name" field.
+func (u *CategoryUpsertBulk) SetIconName(v string) *CategoryUpsertBulk {
+	return u.Update(func(s *CategoryUpsert) {
+		s.SetIconName(v)
+	})
+}
+
+// UpdateIconName sets the "icon_name" field to the value that was provided on create.
+func (u *CategoryUpsertBulk) UpdateIconName() *CategoryUpsertBulk {
+	return u.Update(func(s *CategoryUpsert) {
+		s.UpdateIconName()
+	})
+}
+
+// ClearIconName clears the value of the "icon_name" field.
+func (u *CategoryUpsertBulk) ClearIconName() *CategoryUpsertBulk {
+	return u.Update(func(s *CategoryUpsert) {
+		s.ClearIconName()
 	})
 }
 

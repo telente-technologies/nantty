@@ -9,9 +9,12 @@ import (
 	"reflect"
 	"sync"
 	"zudomart/modules/catalog/src/generated/ent/brand"
+	"zudomart/modules/catalog/src/generated/ent/brandofficialrequest"
+	"zudomart/modules/catalog/src/generated/ent/catalogfollow"
 	"zudomart/modules/catalog/src/generated/ent/category"
 	"zudomart/modules/catalog/src/generated/ent/featuredproduct"
 	"zudomart/modules/catalog/src/generated/ent/idempotentrequest"
+	"zudomart/modules/catalog/src/generated/ent/martfeature"
 	"zudomart/modules/catalog/src/generated/ent/outboxevent"
 	"zudomart/modules/catalog/src/generated/ent/product"
 	"zudomart/modules/catalog/src/generated/ent/productdailyview"
@@ -20,6 +23,7 @@ import (
 	"zudomart/modules/catalog/src/generated/ent/productreaction"
 	"zudomart/modules/catalog/src/generated/ent/productvariant"
 	"zudomart/modules/catalog/src/generated/ent/review"
+	"zudomart/modules/catalog/src/generated/ent/sellerapplication"
 	"zudomart/modules/catalog/src/generated/ent/store"
 	"zudomart/modules/catalog/src/generated/ent/storeauditentry"
 	"zudomart/modules/catalog/src/generated/ent/storedailytraffic"
@@ -89,23 +93,27 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			brand.Table:             brand.ValidColumn,
-			category.Table:          category.ValidColumn,
-			featuredproduct.Table:   featuredproduct.ValidColumn,
-			idempotentrequest.Table: idempotentrequest.ValidColumn,
-			outboxevent.Table:       outboxevent.ValidColumn,
-			product.Table:           product.ValidColumn,
-			productdailyview.Table:  productdailyview.ValidColumn,
-			productimportjob.Table:  productimportjob.ValidColumn,
-			productmedia.Table:      productmedia.ValidColumn,
-			productreaction.Table:   productreaction.ValidColumn,
-			productvariant.Table:    productvariant.ValidColumn,
-			review.Table:            review.ValidColumn,
-			store.Table:             store.ValidColumn,
-			storeauditentry.Table:   storeauditentry.ValidColumn,
-			storedailytraffic.Table: storedailytraffic.ValidColumn,
-			storemember.Table:       storemember.ValidColumn,
-			storevisitor.Table:      storevisitor.ValidColumn,
+			brand.Table:                brand.ValidColumn,
+			brandofficialrequest.Table: brandofficialrequest.ValidColumn,
+			catalogfollow.Table:        catalogfollow.ValidColumn,
+			category.Table:             category.ValidColumn,
+			featuredproduct.Table:      featuredproduct.ValidColumn,
+			idempotentrequest.Table:    idempotentrequest.ValidColumn,
+			martfeature.Table:          martfeature.ValidColumn,
+			outboxevent.Table:          outboxevent.ValidColumn,
+			product.Table:              product.ValidColumn,
+			productdailyview.Table:     productdailyview.ValidColumn,
+			productimportjob.Table:     productimportjob.ValidColumn,
+			productmedia.Table:         productmedia.ValidColumn,
+			productreaction.Table:      productreaction.ValidColumn,
+			productvariant.Table:       productvariant.ValidColumn,
+			review.Table:               review.ValidColumn,
+			sellerapplication.Table:    sellerapplication.ValidColumn,
+			store.Table:                store.ValidColumn,
+			storeauditentry.Table:      storeauditentry.ValidColumn,
+			storedailytraffic.Table:    storedailytraffic.ValidColumn,
+			storemember.Table:          storemember.ValidColumn,
+			storevisitor.Table:         storevisitor.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -181,6 +181,26 @@ func (_u *CategoryUpdate) SetNillableActive(v *bool) *CategoryUpdate {
 	return _u
 }
 
+// SetIconName sets the "icon_name" field.
+func (_u *CategoryUpdate) SetIconName(v string) *CategoryUpdate {
+	_u.mutation.SetIconName(v)
+	return _u
+}
+
+// SetNillableIconName sets the "icon_name" field if the given value is not nil.
+func (_u *CategoryUpdate) SetNillableIconName(v *string) *CategoryUpdate {
+	if v != nil {
+		_u.SetIconName(*v)
+	}
+	return _u
+}
+
+// ClearIconName clears the value of the "icon_name" field.
+func (_u *CategoryUpdate) ClearIconName() *CategoryUpdate {
+	_u.mutation.ClearIconName()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CategoryUpdate) SetUpdatedAt(v time.Time) *CategoryUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -250,6 +270,11 @@ func (_u *CategoryUpdate) check() error {
 			return &ValidationError{Name: "path", err: fmt.Errorf(`ent: validator failed for field "Category.path": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.IconName(); ok {
+		if err := category.IconNameValidator(v); err != nil {
+			return &ValidationError{Name: "icon_name", err: fmt.Errorf(`ent: validator failed for field "Category.icon_name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -311,6 +336,12 @@ func (_u *CategoryUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(category.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.IconName(); ok {
+		_spec.SetField(category.FieldIconName, field.TypeString, value)
+	}
+	if _u.mutation.IconNameCleared() {
+		_spec.ClearField(category.FieldIconName, field.TypeString)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(category.FieldUpdatedAt, field.TypeTime, value)
@@ -485,6 +516,26 @@ func (_u *CategoryUpdateOne) SetNillableActive(v *bool) *CategoryUpdateOne {
 	return _u
 }
 
+// SetIconName sets the "icon_name" field.
+func (_u *CategoryUpdateOne) SetIconName(v string) *CategoryUpdateOne {
+	_u.mutation.SetIconName(v)
+	return _u
+}
+
+// SetNillableIconName sets the "icon_name" field if the given value is not nil.
+func (_u *CategoryUpdateOne) SetNillableIconName(v *string) *CategoryUpdateOne {
+	if v != nil {
+		_u.SetIconName(*v)
+	}
+	return _u
+}
+
+// ClearIconName clears the value of the "icon_name" field.
+func (_u *CategoryUpdateOne) ClearIconName() *CategoryUpdateOne {
+	_u.mutation.ClearIconName()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CategoryUpdateOne) SetUpdatedAt(v time.Time) *CategoryUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -567,6 +618,11 @@ func (_u *CategoryUpdateOne) check() error {
 			return &ValidationError{Name: "path", err: fmt.Errorf(`ent: validator failed for field "Category.path": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.IconName(); ok {
+		if err := category.IconNameValidator(v); err != nil {
+			return &ValidationError{Name: "icon_name", err: fmt.Errorf(`ent: validator failed for field "Category.icon_name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -645,6 +701,12 @@ func (_u *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err 
 	}
 	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(category.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.IconName(); ok {
+		_spec.SetField(category.FieldIconName, field.TypeString, value)
+	}
+	if _u.mutation.IconNameCleared() {
+		_spec.ClearField(category.FieldIconName, field.TypeString)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(category.FieldUpdatedAt, field.TypeTime, value)
