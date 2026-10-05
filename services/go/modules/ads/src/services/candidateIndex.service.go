@@ -58,6 +58,10 @@ func (index *CandidateIndex) ReloadFromDatabase(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	experimentSlices, err := index.loadExperimentSlices(ctx, groups)
+	if err != nil {
+		return err
+	}
 	candidates := make([]types.CandidateAd, 0, len(ads))
 	for _, row := range ads {
 		group, groupFound := groups[row.AdGroupID]
@@ -66,7 +70,9 @@ func (index *CandidateIndex) ReloadFromDatabase(ctx context.Context) error {
 		if !groupFound || !campaignFound || !accountFound || !windowIsOpen(now, group.StartAt, group.EndAt) || !windowIsOpen(now, campaign.StartAt, campaign.EndAt) {
 			continue
 		}
-		candidates = append(candidates, buildCandidate(row, group, campaign, account, history[row.ID]))
+		candidate := buildCandidate(row, group, campaign, account, history[row.ID])
+		applyExperimentSlice(&candidate, experimentSlices)
+		candidates = append(candidates, candidate)
 	}
 	index.seedSpendCounters(ctx, candidates)
 	index.mutex.Lock()

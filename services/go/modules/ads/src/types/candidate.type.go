@@ -29,6 +29,9 @@ type CandidateAd struct {
 	VideoDurationSeconds  int
 	HistoricalImpressions int64
 	HistoricalClicks      int64
+	ExperimentId          string
+	ExperimentBucketFrom  int
+	ExperimentBucketTo    int
 }
 
 type ContentSignal struct {
