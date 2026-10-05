@@ -82,6 +82,7 @@ export interface MessageView {
   readonly document: MessageDocument | null;
   readonly poll: MessagePollView | null;
   readonly readAt: string | null;
+  readonly moderationHidden: boolean;
   readonly encryption: { readonly deviceId: string; readonly ciphertext: string | null; readonly protocol: string } | null;
   readonly mentions: readonly MentionEntity[];
   readonly clientMessageId: string | null;

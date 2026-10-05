@@ -11,6 +11,7 @@ import { prepareMentionsForWrite } from "../../../mentions/services/mentionWrite
 import type { MessageView } from "../../models/message.model.js";
 import { messageRepository } from "../../repositories/message.repository.js";
 import { applyMessageDelivery } from "../../services/messageDelivery.service.js";
+import { verifyChatMediaOwnership } from "../../services/chatMediaOwnership.service.js";
 import { validateOutgoingMessage } from "../../services/messageValidation.service.js";
 import { buildMessageViews } from "../../services/messageView.service.js";
 import type { SendMessageCommand } from "./sendMessage.command.js";
@@ -19,6 +20,7 @@ export function createSendMessageHandler(context: HandlerContext): Handler<SendM
   return async (command) => {
     const db = context.database.client;
     const { conversation, member } = await requireConversationMember(db, command.conversationId, command.senderId);
+    if (conversation.kind === "channel" && member.role !== "owner" && member.role !== "admin") throw forbidden("CHANNEL_READ_ONLY", "Only channel admins can post here.");
     const now = context.clock.now();
     const peerId = findDirectPeerId(conversation, command.senderId);
     if (peerId !== undefined && (await blockRepository.eitherDirection(db, command.senderId, peerId))) throw forbidden("MESSAGE_NOT_ALLOWED", "You can't message this account.");
@@ -27,6 +29,8 @@ export function createSendMessageHandler(context: HandlerContext): Handler<SendM
       if (existing !== null) return (await buildMessageViews(context, command.senderId, [existing], { peerLastReadAt: null, isDirect: peerId !== undefined }))[0] as MessageView;
     }
     const validated = validateOutgoingMessage(command.message, now);
+    const verifiedMedia = validated.media === undefined ? undefined : await verifyChatMediaOwnership(context.chatMedia, command.senderId, validated.kind, validated.media.mediaId);
+    const mediaDuration = verifiedMedia?.durationSeconds ?? validated.media?.durationSeconds;
     const mentions = await prepareMentionsForWrite(context, {
       surface: conversation.kind === "direct" ? "direct" : "group", authorId: command.senderId, text: null, entities: command.mentions,
       group: conversation.kind === "direct" ? undefined : { memberIds: new Set(conversation.members.map((candidate) => candidate.accountId)), authorRole: member.role === "subscriber" ? "member" : member.role, onlyAdminsCanMentionAll: conversation.onlyAdminsCanMentionAll },
@@ -44,11 +48,11 @@ export function createSendMessageHandler(context: HandlerContext): Handler<SendM
           ...(command.idempotencyKey === undefined ? {} : { clientMessageId: command.idempotencyKey }),
           ...(validated.ciphertext === null ? {} : { ciphertext: validated.ciphertext }),
           ...(validated.deviceId === null ? {} : { deviceId: validated.deviceId }),
-          ...(validated.media === undefined ? {} : { mediaId: validated.media.mediaId, mediaUrl: validated.media.url ?? null, mediaStatus: validated.media.url === undefined || validated.media.url === null ? "processing" : "ready", mediaDurationSeconds: validated.media.durationSeconds === undefined ? null : Math.round(validated.media.durationSeconds), mediaType: validated.mediaType }),
+          ...(verifiedMedia === undefined ? {} : { mediaId: verifiedMedia.mediaId, mediaUrl: null, mediaStatus: verifiedMedia.ready ? "ready" : "processing", mediaDurationSeconds: mediaDuration === undefined ? null : Math.round(mediaDuration), mediaType: validated.mediaType }),
           ...(validated.linkPreviewEnvelope === null ? {} : { linkPreviewEnvelope: validated.linkPreviewEnvelope }),
           ...(validated.sharedContent === null ? {} : { sharedContent: validated.sharedContent as unknown as Prisma.InputJsonValue }),
           ...(validated.location === null ? {} : { location: validated.location as unknown as Prisma.InputJsonValue }),
-          ...(validated.document === null ? {} : { document: validated.document as unknown as Prisma.InputJsonValue }),
+          ...(validated.document === null ? {} : { document: { ...validated.document, sizeBytes: verifiedMedia?.sizeBytes ?? validated.document.sizeBytes } as unknown as Prisma.InputJsonValue }),
           ...(validated.mediaExpiresAt === null ? {} : { mediaExpiresAt: validated.mediaExpiresAt }),
           ...(validated.poll === null ? {} : { pollQuestion: validated.poll.question, pollAllowMultiple: validated.poll.allowMultipleAnswers }),
         }, validated.poll?.options ?? []);

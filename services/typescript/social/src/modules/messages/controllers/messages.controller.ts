@@ -39,7 +39,7 @@ export function createMessagesController(route: RouteFactory, handlers: Messages
         senderId: principal.accountId, conversationId: params.conversationId, idempotencyKey, mentions: body.mentions,
         message: {
           kind: body.kind ?? "text", text: body.text, encryption: body.encryption,
-          media: body.mediaId === undefined ? undefined : { mediaId: body.mediaId, url: body.mediaUrl, durationSeconds: body.durationSeconds },
+          media: body.mediaId === undefined ? undefined : { mediaId: body.mediaId, durationSeconds: body.durationSeconds },
           linkPreview: body.linkPreview, sharedContent: body.sharedContent, location: body.location, document: body.document, poll: body.poll,
         },
       })),

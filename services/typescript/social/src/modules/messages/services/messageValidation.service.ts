@@ -12,11 +12,11 @@ export interface OutgoingMessageInput {
   readonly kind: MessageKindName;
   readonly text: string | undefined;
   readonly encryption: { readonly deviceId: string; readonly ciphertext: string; readonly protocol?: string | undefined } | undefined;
-  readonly media: { readonly mediaId: string; readonly url: string | null | undefined; readonly durationSeconds: number | undefined } | undefined;
+  readonly media: { readonly mediaId: string; readonly durationSeconds: number | undefined } | undefined;
   readonly linkPreview: string | null | undefined;
   readonly sharedContent: SharedContentReference | undefined;
   readonly location: { readonly latitude: number; readonly longitude: number; readonly address?: string | null | undefined; readonly liveUntil?: string | null | undefined } | undefined;
-  readonly document: { readonly fileName: string; readonly mimeType: string; readonly sizeBytes: number; readonly pageCount?: number | null | undefined; readonly url?: string | null | undefined } | undefined;
+  readonly document: { readonly fileName: string; readonly mimeType: string; readonly sizeBytes: number; readonly pageCount?: number | null | undefined } | undefined;
   readonly poll: { readonly question: string; readonly allowMultipleAnswers: boolean; readonly options: readonly string[] } | undefined;
 }
 
@@ -90,8 +90,9 @@ function validateDocument(input: OutgoingMessageInput): MessageDocument | null {
   if (input.kind !== "document") return null;
   const document = input.document;
   if (document === undefined) throw unprocessable("DOCUMENT_REQUIRED", "A document message needs file details.");
+  if (input.media === undefined) throw unprocessable("MEDIA_REQUIRED", "Upload the document first and send its media id.");
   if (document.sizeBytes <= 0 || document.sizeBytes > maximumDocumentBytes) throw unprocessable("DOCUMENT_TOO_LARGE", "Documents can be up to 100 MB.");
-  return { fileName: document.fileName.slice(0, 200), mimeType: document.mimeType, sizeBytes: document.sizeBytes, pageCount: document.pageCount ?? null, url: document.url ?? input.media?.url ?? null };
+  return { fileName: document.fileName.slice(0, 200), mimeType: document.mimeType, sizeBytes: document.sizeBytes, pageCount: document.pageCount ?? null, url: null };
 }
 
 function validatePoll(input: OutgoingMessageInput): OutgoingMessageInput["poll"] & object | null {
