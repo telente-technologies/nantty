@@ -30,6 +30,8 @@ const (
 	FieldConsumedAt = "consumed_at"
 	// FieldAttempts holds the string denoting the attempts field in the database.
 	FieldAttempts = "attempts"
+	// FieldWebauthnSession holds the string denoting the webauthn_session field in the database.
+	FieldWebauthnSession = "webauthn_session"
 	// EdgeStaff holds the string denoting the staff edge name in mutations.
 	EdgeStaff = "staff"
 	// Table holds the table name of the staffloginchallenge in the database.
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldExpiresAt,
 	FieldConsumedAt,
 	FieldAttempts,
+	FieldWebauthnSession,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

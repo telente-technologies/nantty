@@ -86,6 +86,11 @@ func Attempts(v int) predicate.StaffLoginChallenge {
 	return predicate.StaffLoginChallenge(sql.FieldEQ(FieldAttempts, v))
 }
 
+// WebauthnSession applies equality check predicate on the "webauthn_session" field. It's identical to WebauthnSessionEQ.
+func WebauthnSession(v []byte) predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldEQ(FieldWebauthnSession, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.StaffLoginChallenge {
 	return predicate.StaffLoginChallenge(sql.FieldEQ(FieldCreatedAt, v))
@@ -359,6 +364,56 @@ func AttemptsLT(v int) predicate.StaffLoginChallenge {
 // AttemptsLTE applies the LTE predicate on the "attempts" field.
 func AttemptsLTE(v int) predicate.StaffLoginChallenge {
 	return predicate.StaffLoginChallenge(sql.FieldLTE(FieldAttempts, v))
+}
+
+// WebauthnSessionEQ applies the EQ predicate on the "webauthn_session" field.
+func WebauthnSessionEQ(v []byte) predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldEQ(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionNEQ applies the NEQ predicate on the "webauthn_session" field.
+func WebauthnSessionNEQ(v []byte) predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldNEQ(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionIn applies the In predicate on the "webauthn_session" field.
+func WebauthnSessionIn(vs ...[]byte) predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldIn(FieldWebauthnSession, vs...))
+}
+
+// WebauthnSessionNotIn applies the NotIn predicate on the "webauthn_session" field.
+func WebauthnSessionNotIn(vs ...[]byte) predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldNotIn(FieldWebauthnSession, vs...))
+}
+
+// WebauthnSessionGT applies the GT predicate on the "webauthn_session" field.
+func WebauthnSessionGT(v []byte) predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldGT(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionGTE applies the GTE predicate on the "webauthn_session" field.
+func WebauthnSessionGTE(v []byte) predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldGTE(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionLT applies the LT predicate on the "webauthn_session" field.
+func WebauthnSessionLT(v []byte) predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldLT(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionLTE applies the LTE predicate on the "webauthn_session" field.
+func WebauthnSessionLTE(v []byte) predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldLTE(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionIsNil applies the IsNil predicate on the "webauthn_session" field.
+func WebauthnSessionIsNil() predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldIsNull(FieldWebauthnSession))
+}
+
+// WebauthnSessionNotNil applies the NotNil predicate on the "webauthn_session" field.
+func WebauthnSessionNotNil() predicate.StaffLoginChallenge {
+	return predicate.StaffLoginChallenge(sql.FieldNotNull(FieldWebauthnSession))
 }
 
 // HasStaff applies the HasEdge predicate on the "staff" edge.

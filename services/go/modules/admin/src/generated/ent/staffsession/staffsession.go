@@ -3,6 +3,7 @@
 package staffsession
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -33,6 +34,12 @@ const (
 	FieldExpiresAt = "expires_at"
 	// FieldRevokedAt holds the string denoting the revoked_at field in the database.
 	FieldRevokedAt = "revoked_at"
+	// FieldWebauthnSession holds the string denoting the webauthn_session field in the database.
+	FieldWebauthnSession = "webauthn_session"
+	// FieldWebauthnCeremony holds the string denoting the webauthn_ceremony field in the database.
+	FieldWebauthnCeremony = "webauthn_ceremony"
+	// FieldWebauthnExpiresAt holds the string denoting the webauthn_expires_at field in the database.
+	FieldWebauthnExpiresAt = "webauthn_expires_at"
 	// EdgeStaff holds the string denoting the staff edge name in mutations.
 	EdgeStaff = "staff"
 	// Table holds the table name of the staffsession in the database.
@@ -58,6 +65,9 @@ var Columns = []string{
 	FieldLastUsedAt,
 	FieldExpiresAt,
 	FieldRevokedAt,
+	FieldWebauthnSession,
+	FieldWebauthnCeremony,
+	FieldWebauthnExpiresAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -86,6 +96,29 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// WebauthnCeremony defines the type for the "webauthn_ceremony" enum field.
+type WebauthnCeremony string
+
+// WebauthnCeremony values.
+const (
+	WebauthnCeremonyRegister WebauthnCeremony = "register"
+	WebauthnCeremonyStepUp   WebauthnCeremony = "step_up"
+)
+
+func (wc WebauthnCeremony) String() string {
+	return string(wc)
+}
+
+// WebauthnCeremonyValidator is a validator for the "webauthn_ceremony" field enum values. It is called by the builders before save.
+func WebauthnCeremonyValidator(wc WebauthnCeremony) error {
+	switch wc {
+	case WebauthnCeremonyRegister, WebauthnCeremonyStepUp:
+		return nil
+	default:
+		return fmt.Errorf("staffsession: invalid enum value for webauthn_ceremony field: %q", wc)
+	}
+}
 
 // OrderOption defines the ordering options for the StaffSession queries.
 type OrderOption func(*sql.Selector)
@@ -138,6 +171,16 @@ func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 // ByRevokedAt orders the results by the revoked_at field.
 func ByRevokedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRevokedAt, opts...).ToFunc()
+}
+
+// ByWebauthnCeremony orders the results by the webauthn_ceremony field.
+func ByWebauthnCeremony(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWebauthnCeremony, opts...).ToFunc()
+}
+
+// ByWebauthnExpiresAt orders the results by the webauthn_expires_at field.
+func ByWebauthnExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWebauthnExpiresAt, opts...).ToFunc()
 }
 
 // ByStaffField orders the results by staff field.

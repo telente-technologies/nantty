@@ -101,6 +101,16 @@ func RevokedAt(v time.Time) predicate.StaffSession {
 	return predicate.StaffSession(sql.FieldEQ(FieldRevokedAt, v))
 }
 
+// WebauthnSession applies equality check predicate on the "webauthn_session" field. It's identical to WebauthnSessionEQ.
+func WebauthnSession(v []byte) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldEQ(FieldWebauthnSession, v))
+}
+
+// WebauthnExpiresAt applies equality check predicate on the "webauthn_expires_at" field. It's identical to WebauthnExpiresAtEQ.
+func WebauthnExpiresAt(v time.Time) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldEQ(FieldWebauthnExpiresAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.StaffSession {
 	return predicate.StaffSession(sql.FieldEQ(FieldCreatedAt, v))
@@ -559,6 +569,136 @@ func RevokedAtIsNil() predicate.StaffSession {
 // RevokedAtNotNil applies the NotNil predicate on the "revoked_at" field.
 func RevokedAtNotNil() predicate.StaffSession {
 	return predicate.StaffSession(sql.FieldNotNull(FieldRevokedAt))
+}
+
+// WebauthnSessionEQ applies the EQ predicate on the "webauthn_session" field.
+func WebauthnSessionEQ(v []byte) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldEQ(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionNEQ applies the NEQ predicate on the "webauthn_session" field.
+func WebauthnSessionNEQ(v []byte) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldNEQ(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionIn applies the In predicate on the "webauthn_session" field.
+func WebauthnSessionIn(vs ...[]byte) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldIn(FieldWebauthnSession, vs...))
+}
+
+// WebauthnSessionNotIn applies the NotIn predicate on the "webauthn_session" field.
+func WebauthnSessionNotIn(vs ...[]byte) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldNotIn(FieldWebauthnSession, vs...))
+}
+
+// WebauthnSessionGT applies the GT predicate on the "webauthn_session" field.
+func WebauthnSessionGT(v []byte) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldGT(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionGTE applies the GTE predicate on the "webauthn_session" field.
+func WebauthnSessionGTE(v []byte) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldGTE(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionLT applies the LT predicate on the "webauthn_session" field.
+func WebauthnSessionLT(v []byte) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldLT(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionLTE applies the LTE predicate on the "webauthn_session" field.
+func WebauthnSessionLTE(v []byte) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldLTE(FieldWebauthnSession, v))
+}
+
+// WebauthnSessionIsNil applies the IsNil predicate on the "webauthn_session" field.
+func WebauthnSessionIsNil() predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldIsNull(FieldWebauthnSession))
+}
+
+// WebauthnSessionNotNil applies the NotNil predicate on the "webauthn_session" field.
+func WebauthnSessionNotNil() predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldNotNull(FieldWebauthnSession))
+}
+
+// WebauthnCeremonyEQ applies the EQ predicate on the "webauthn_ceremony" field.
+func WebauthnCeremonyEQ(v WebauthnCeremony) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldEQ(FieldWebauthnCeremony, v))
+}
+
+// WebauthnCeremonyNEQ applies the NEQ predicate on the "webauthn_ceremony" field.
+func WebauthnCeremonyNEQ(v WebauthnCeremony) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldNEQ(FieldWebauthnCeremony, v))
+}
+
+// WebauthnCeremonyIn applies the In predicate on the "webauthn_ceremony" field.
+func WebauthnCeremonyIn(vs ...WebauthnCeremony) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldIn(FieldWebauthnCeremony, vs...))
+}
+
+// WebauthnCeremonyNotIn applies the NotIn predicate on the "webauthn_ceremony" field.
+func WebauthnCeremonyNotIn(vs ...WebauthnCeremony) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldNotIn(FieldWebauthnCeremony, vs...))
+}
+
+// WebauthnCeremonyIsNil applies the IsNil predicate on the "webauthn_ceremony" field.
+func WebauthnCeremonyIsNil() predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldIsNull(FieldWebauthnCeremony))
+}
+
+// WebauthnCeremonyNotNil applies the NotNil predicate on the "webauthn_ceremony" field.
+func WebauthnCeremonyNotNil() predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldNotNull(FieldWebauthnCeremony))
+}
+
+// WebauthnExpiresAtEQ applies the EQ predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtEQ(v time.Time) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldEQ(FieldWebauthnExpiresAt, v))
+}
+
+// WebauthnExpiresAtNEQ applies the NEQ predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtNEQ(v time.Time) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldNEQ(FieldWebauthnExpiresAt, v))
+}
+
+// WebauthnExpiresAtIn applies the In predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtIn(vs ...time.Time) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldIn(FieldWebauthnExpiresAt, vs...))
+}
+
+// WebauthnExpiresAtNotIn applies the NotIn predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtNotIn(vs ...time.Time) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldNotIn(FieldWebauthnExpiresAt, vs...))
+}
+
+// WebauthnExpiresAtGT applies the GT predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtGT(v time.Time) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldGT(FieldWebauthnExpiresAt, v))
+}
+
+// WebauthnExpiresAtGTE applies the GTE predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtGTE(v time.Time) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldGTE(FieldWebauthnExpiresAt, v))
+}
+
+// WebauthnExpiresAtLT applies the LT predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtLT(v time.Time) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldLT(FieldWebauthnExpiresAt, v))
+}
+
+// WebauthnExpiresAtLTE applies the LTE predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtLTE(v time.Time) predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldLTE(FieldWebauthnExpiresAt, v))
+}
+
+// WebauthnExpiresAtIsNil applies the IsNil predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtIsNil() predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldIsNull(FieldWebauthnExpiresAt))
+}
+
+// WebauthnExpiresAtNotNil applies the NotNil predicate on the "webauthn_expires_at" field.
+func WebauthnExpiresAtNotNil() predicate.StaffSession {
+	return predicate.StaffSession(sql.FieldNotNull(FieldWebauthnExpiresAt))
 }
 
 // HasStaff applies the HasEdge predicate on the "staff" edge.
