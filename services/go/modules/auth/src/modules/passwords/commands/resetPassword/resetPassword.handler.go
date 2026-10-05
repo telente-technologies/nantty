@@ -22,7 +22,8 @@ func (application Handler) Execute(ctx context.Context, command Command) error {
 	if err := utils.AssertPasswordMeetsPolicy(command.NewPassword); err != nil {
 		return err
 	}
-	return application.RunInTransaction(ctx, func(tx *ent.Tx) error {
+	var changed *ent.Account
+	err := application.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		destination, err := services.ConsumeVerifiedDestinationTokenInTransaction(ctx, tx, onetimecode.PurposeResetVerified, command.OtpToken, application.Now)
 		if err != nil {
 			return err
@@ -34,6 +35,11 @@ func (application Handler) Execute(ctx context.Context, command Command) error {
 		if err != nil {
 			return err
 		}
+		changed = existing
 		return services.StoreNewPasswordAndRevokeSessionsInTransaction(ctx, application.Container, tx, existing, command.NewPassword, uuid.Nil, "reset")
 	})
+	if err == nil {
+		services.RecordAccountSecurityEvent(ctx, application.Container, changed.ID, changed.Username, "password.reset", map[string]any{"sessionsRevoked": "all"})
+	}
+	return err
 }

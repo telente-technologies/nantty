@@ -34,5 +34,12 @@ func (application Handler) Execute(ctx context.Context, command Command) (int, e
 			AccountId: owner.String(), SessionId: "*", Reason: "revoke_all",
 		})
 	})
+	if err == nil && revoked > 0 {
+		username := ""
+		if owner, lookupErr := application.Client.Account.Get(ctx, owner); lookupErr == nil {
+			username = owner.Username
+		}
+		services.RecordAccountSecurityEvent(ctx, application.Container, owner, username, "session.revoked_all", map[string]any{"sessionsRevoked": revoked, "keptSessionId": current.String()})
+	}
 	return revoked, err
 }

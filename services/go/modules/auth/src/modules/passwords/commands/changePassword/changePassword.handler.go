@@ -26,7 +26,8 @@ func (application Handler) Execute(ctx context.Context, command Command) error {
 	if err := utils.AssertPasswordMeetsPolicy(command.NewPassword); err != nil {
 		return err
 	}
-	return application.RunInTransaction(ctx, func(tx *ent.Tx) error {
+	var changed *ent.Account
+	err := application.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		existing, err := tx.Account.Query().Where(account.ID(accountId), account.StatusEQ(account.StatusActive)).ForUpdate().Only(ctx)
 		if ent.IsNotFound(err) {
 			return authErrors.ErrInvalidCredentials
@@ -40,6 +41,11 @@ func (application Handler) Execute(ctx context.Context, command Command) error {
 				return authErrors.ErrCurrentPasswordIncorrect
 			}
 		}
+		changed = existing
 		return services.StoreNewPasswordAndRevokeSessionsInTransaction(ctx, application.Container, tx, existing, command.NewPassword, sessionId, "change")
 	})
+	if err == nil {
+		services.RecordAccountSecurityEvent(ctx, application.Container, changed.ID, changed.Username, "password.changed", map[string]any{"keptSessionId": sessionId.String()})
+	}
+	return err
 }
