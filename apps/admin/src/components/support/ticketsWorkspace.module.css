@@ -13,9 +13,9 @@
 
 .muted {
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .search {
-  width: 300px;
+  width: min(300px, 100%);
 }

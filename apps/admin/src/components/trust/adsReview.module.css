@@ -1,8 +1,8 @@
 .creative {
   display: grid;
   grid-template-columns: 200px 1fr;
-  gap: 12px;
-  padding: 12px;
+  gap: var(--space-3);
+  padding: var(--space-3);
   border: 1px solid var(--divider);
   border-radius: var(--radius-medium);
   background: var(--surface-app);
@@ -30,11 +30,11 @@
 
 .callToAction {
   align-self: flex-start;
-  padding: 4px 10px;
+  padding: var(--space-1) 10px;
   border-radius: var(--radius-small);
   background: var(--color-brand-solid);
   color: var(--color-on-brand);
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-weight: 600;
 }
 
@@ -58,7 +58,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 10px;
+  padding: var(--space-2) 10px;
   border-radius: var(--radius-small);
   background: var(--caution-tint);
 }
@@ -69,19 +69,19 @@
 
 .muted {
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .policyForm {
