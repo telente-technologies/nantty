@@ -23,6 +23,7 @@ func (UsernameHold) Fields() []ent.Field {
 		field.String("reason").Default("").MaxLen(120),
 		field.String("note").Default("").MaxLen(500),
 		field.String("created_by").Default("").MaxLen(64),
+		field.String("created_by_name").Default("").MaxLen(120),
 		field.Time("expires_at").Optional().Nillable(),
 	}
 }
