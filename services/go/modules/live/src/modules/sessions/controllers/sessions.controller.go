@@ -11,6 +11,7 @@ import (
 	leaveliveasviewer "zudomart/modules/live/src/modules/sessions/commands/leaveLiveAsViewer"
 	pinproducttolive "zudomart/modules/live/src/modules/sessions/commands/pinProductToLive"
 	startlivesession "zudomart/modules/live/src/modules/sessions/commands/startLiveSession"
+	unpinproductfromlive "zudomart/modules/live/src/modules/sessions/commands/unpinProductFromLive"
 	updatelivemonetization "zudomart/modules/live/src/modules/sessions/commands/updateLiveMonetization"
 	"zudomart/modules/live/src/modules/sessions/dtos"
 	getlivesession "zudomart/modules/live/src/modules/sessions/queries/getLiveSession"
@@ -183,6 +184,16 @@ func (controller SessionsController) PinProduct(writer http.ResponseWriter, requ
 			return err
 		}
 		products, err := (pinproducttolive.Handler{Container: controller.Container}).Execute(request.Context(), pinproducttolive.Command{Actor: actor, LiveId: liveId, ProductId: uuid.MustParse(body.ProductId)})
+		if err == nil {
+			httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(products, ""))
+		}
+		return err
+	})
+}
+
+func (controller SessionsController) UnpinProduct(writer http.ResponseWriter, request *http.Request) {
+	controller.responder().WithActorAndLive(writer, request, func(actor types.Actor, liveId uuid.UUID) error {
+		products, err := (unpinproductfromlive.Handler{Container: controller.Container}).Execute(request.Context(), unpinproductfromlive.Command{Actor: actor, LiveId: liveId})
 		if err == nil {
 			httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(products, ""))
 		}
