@@ -12,6 +12,7 @@ type Application struct {
 	Purchases services.CoinPurchases
 	Transfers services.CoinTransfers
 	Balances  services.CoinBalances
+	Reviews   services.CoinReviews
 }
 
 func NewCoinsApplication(container *container.Container) *Application {
@@ -21,5 +22,6 @@ func NewCoinsApplication(container *container.Container) *Application {
 		Purchases: services.CoinPurchases{Container: container, Catalog: catalog},
 		Transfers: services.CoinTransfers{Container: container, Accounts: repositories.AccountDirectory{Database: container.Resources.Database, AuthSchema: container.Settings.AccountDirectorySchema}},
 		Balances:  services.CoinBalances{Container: container},
+		Reviews:   services.CoinReviews{Container: container},
 	}
 }
