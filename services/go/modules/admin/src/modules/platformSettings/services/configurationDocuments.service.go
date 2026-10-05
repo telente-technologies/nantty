@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"slices"
 
@@ -21,7 +22,7 @@ var (
 	planKeyPattern      = regexp.MustCompile(`^[A-Z][A-Z0-9_]{1,39}$`)
 	entitlementPattern  = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]{1,39}$`)
 	launchCurrencies    = []string{"NGN", "GHS", "KES", "ZAR", "GBP", "EUR", "USD"}
-	planTiersByColor    = map[string][]string{"BLUE": {"ESSENTIAL", "VERIFIED", "PREMIUM"}, "GOLD": {"PRO", "PREMIUM"}, "BLACK": {"OFFICIAL"}}
+	planTiersByColor    = map[string][]string{"BLUE": {"ESSENTIAL", "VERIFIED", "PREMIUM"}, "GOLD": {"ONLY", "PRO", "BUSINESS", "PREMIUM"}, "BLACK": {"OFFICIAL"}}
 	usernameCharacters  = []string{"LOWERCASE_LETTERS", "DIGITS", "DOT", "UNDERSCORE"}
 )
 
@@ -99,32 +100,45 @@ func defaultPlansConfiguration() PlansConfiguration {
 	plan := func(key, color, tier, name string, badge, purchasable bool, perks ...string) VerificationPlan {
 		return VerificationPlan{PlanKey: key, Color: color, Tier: tier, DisplayName: name, BadgeVisible: badge, IsPurchasable: purchasable, Perks: perks, DashboardEntitlements: []DashboardEntitlement{}}
 	}
+	sellerPlan := func(plan VerificationPlan, staffSeats, storeLocations, catalogImport int) VerificationPlan {
+		plan.DashboardEntitlements = []DashboardEntitlement{
+			{Key: "staffSeats", Label: "Staff seats", Limit: &staffSeats},
+			{Key: "storeLocations", Label: "Store locations", Limit: &storeLocations},
+			{Key: "advancedReports", Label: "Advanced sales reports and exports"},
+			{Key: "catalogImport", Label: "Bulk catalog import (CSV)", Limit: &catalogImport},
+		}
+		return plan
+	}
 	return PlansConfiguration{SupportedCurrencies: launchCurrencies, Plans: []VerificationPlan{
-		plan("BLUE_ESSENTIAL", "BLUE", "ESSENTIAL", "Blue Essential", false, true, "Priority account recovery", "Impersonation protection"),
-		plan("BLUE_VERIFIED", "BLUE", "VERIFIED", "Blue Verified", true, true, "Blue badge on profile and posts", "Priority ranking in comments"),
-		plan("BLUE_PREMIUM", "BLUE", "PREMIUM", "Blue Premium", true, true, "Everything in Blue Verified", "Fewer ads in feed", "Priority support"),
-		plan("GOLD_PRO", "GOLD", "PRO", "Gold Pro", true, true, "Gold business badge", "Verified store label on products"),
-		plan("GOLD_PREMIUM", "GOLD", "PREMIUM", "Gold Premium", true, true, "Everything in Gold Pro", "Dedicated account manager"),
-		plan("BLACK_OFFICIAL", "BLACK", "OFFICIAL", "Black Official", true, false, "Government and public institution badge", "Granted only through the manual official process"),
+		plan("BLUE_ESSENTIAL", "BLUE", "ESSENTIAL", "Blue Essential", false, true, "Priority account recovery", "Impersonation protection", "Edit posts within 1 hour"),
+		plan("BLUE_VERIFIED", "BLUE", "VERIFIED", "Blue Verified", true, true, "Blue badge on profile and posts", "Priority ranking in comments", "Longer clips (up to 10 minutes)"),
+		plan("BLUE_PREMIUM", "BLUE", "PREMIUM", "Blue Premium", true, true, "Everything in Blue Verified", "Fewer ads in feed", "Monthly boost credit", "Priority support"),
+		plan("GOLD_ONLY", "GOLD", "ONLY", "Gold", true, true, "Gold business badge", "Verified store label on products"),
+		sellerPlan(plan("GOLD_PRO", "GOLD", "PRO", "Gold Pro", true, true, "Gold business badge", "Zudomart Dashboard access", "Verified store label on products"), 3, 1, 2_000),
+		sellerPlan(plan("GOLD_BUSINESS", "GOLD", "BUSINESS", "Gold Business", true, true, "Everything in Gold Pro", "Dedicated account manager", "Lower escrow fee"), 15, 10, 20_000),
+		plan("BLACK_OFFICIAL", "BLACK", "OFFICIAL", "Black Official", true, false, "Government and public institution badge"),
 	}}
 }
 
 func defaultRevenueRules() RevenueRulesConfiguration {
 	rules := RevenueRulesConfiguration{
 		SupportedCurrencies: launchCurrencies, CreatorAdShareBasisPoints: 4000, GiftCreatorShareBasisPoints: 5000, GiftCreatorShareCeilingBasisPoints: maximumCreatorShareBps,
-		CoinTransferFeeBasisPoints: 0, CoinUnitValues: []MoneyValue{{AmountMinor: 1_000, Currency: "NGN"}},
+		CoinTransferFeeBasisPoints: 2500, CoinUnitValues: []MoneyValue{
+			{AmountMinor: 1000, Currency: "NGN"}, {AmountMinor: 10, Currency: "GHS"}, {AmountMinor: 100, Currency: "KES"}, {AmountMinor: 15, Currency: "ZAR"},
+			{AmountMinor: 1, Currency: "GBP"}, {AmountMinor: 1, Currency: "EUR"}, {AmountMinor: 1, Currency: "USD"},
+		},
 	}
-	rules.WithdrawalFee.Mode, rules.WithdrawalFee.Note = "PASS_THROUGH", "Payout provider transfer fees are passed through at cost with no Zudomart margin."
+	rules.WithdrawalFee.Mode, rules.WithdrawalFee.Note = "PASS_THROUGH", "Daily automatic payouts are free; any provider transfer fee is passed through at cost with no Zudomart margin."
 	rules.EscrowFee.DefaultBasisPoints, rules.EscrowFee.BusinessPlanBasisPoints = 150, 100
 	return rules
 }
 
 func defaultCreatorEligibility() CreatorEligibilityRules {
-	return CreatorEligibilityRules{MinimumFollowers: 1000, MinimumPostsInLast30Days: 8, MaximumActiveStrikes: 0, MinimumAccountAgeDays: 30, AllowedCountries: []string{"NG", "GH", "KE", "ZA"}}
+	return CreatorEligibilityRules{MinimumFollowers: 1000, MinimumPostsInLast30Days: 10, MaximumActiveStrikes: 0, MinimumAccountAgeDays: 30, AllowedCountries: []string{}}
 }
 
 func defaultUsernameRules() UsernameRules {
-	return UsernameRules{ChangesAllowedPerWindow: 1, ChangeWindowDays: 30, MinimumLength: 3, MaximumLength: 30, AllowedCharacterClasses: usernameCharacters, MustStartWithLetter: true, ReleasedUsernameCooldownDays: 120}
+	return UsernameRules{ChangesAllowedPerWindow: 1, ChangeWindowDays: 30, MinimumLength: 3, MaximumLength: 30, AllowedCharacterClasses: usernameCharacters, MustStartWithLetter: false, ReleasedUsernameCooldownDays: 120}
 }
 
 func firstFailure(checks ...error) error {
@@ -138,7 +152,7 @@ func firstFailure(checks ...error) error {
 
 func requireCodes(name string, codes []string, pattern *regexp.Regexp, minimum int) error {
 	if len(codes) < minimum || len(codes) > 50 {
-		return adminerrors.Unprocessable(name + " must list between 1 and 50 codes.")
+		return adminerrors.Unprocessable(fmt.Sprintf("%s must list between %d and 50 codes.", name, minimum))
 	}
 	for index, code := range codes {
 		if !pattern.MatchString(code) || slices.Contains(codes[:index], code) {
@@ -217,7 +231,7 @@ func validateCreatorEligibility(raw json.RawMessage) (json.RawMessage, error) {
 		requireWithin("minimumPostsInLast30Days", value.MinimumPostsInLast30Days, 0, 10_000),
 		requireWithin("maximumActiveStrikes", value.MaximumActiveStrikes, 0, 100),
 		requireWithin("minimumAccountAgeDays", value.MinimumAccountAgeDays, 0, 3650),
-		requireCodes("allowedCountries", value.AllowedCountries, isoCountryPattern, 1),
+		requireCodes("allowedCountries", value.AllowedCountries, isoCountryPattern, 0),
 	); err != nil {
 		return nil, err
 	}

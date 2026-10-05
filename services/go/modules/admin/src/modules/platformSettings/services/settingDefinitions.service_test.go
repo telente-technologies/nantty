@@ -74,3 +74,42 @@ func TestDefaultAiGeneratedMultiplierIsThirtyPercentOfTheNormalCreatorShare(t *t
 		}
 	}
 }
+
+func TestPlansDocumentMatchesWhatMoneyReads(t *testing.T) {
+	definition := PlatformSettingDefinitions[PlansKey]
+	if definition.WritePermission != "config:plans" {
+		t.Fatalf("plans are edited with config:plans, got %q", definition.WritePermission)
+	}
+	raw, _ := json.Marshal(definition.DefaultValue)
+	if _, err := definition.Validate(raw); err != nil {
+		t.Fatalf("the default plans document must validate: %v", err)
+	}
+	var document struct {
+		Plans []struct {
+			PlanKey               string            `json:"planKey"`
+			IsPurchasable         bool              `json:"isPurchasable"`
+			DashboardEntitlements []json.RawMessage `json:"dashboardEntitlements"`
+		} `json:"plans"`
+	}
+	_ = json.Unmarshal(raw, &document)
+	keys := map[string]int{}
+	for _, plan := range document.Plans {
+		keys[plan.PlanKey] = len(plan.DashboardEntitlements)
+	}
+	for _, key := range []string{"BLUE_ESSENTIAL", "BLUE_VERIFIED", "BLUE_PREMIUM", "GOLD_ONLY", "GOLD_PRO", "GOLD_BUSINESS", "BLACK_OFFICIAL"} {
+		if _, found := keys[key]; !found {
+			t.Errorf("missing plan %s", key)
+		}
+	}
+	if keys["GOLD_PRO"] == 0 || keys["GOLD_BUSINESS"] == 0 {
+		t.Fatal("seller plans keep their dashboard entitlements")
+	}
+	purchasableBlack := []byte(`{"supportedCurrencies":["NGN"],"plans":[{"planKey":"BLACK_OFFICIAL","color":"BLACK","tier":"OFFICIAL","displayName":"Black","badgeVisible":true,"isPurchasable":true,"perks":[],"dashboardEntitlements":[]}]}`)
+	if _, err := definition.Validate(purchasableBlack); err == nil {
+		t.Fatal("Black Official can never be purchasable")
+	}
+	wrongTier := []byte(`{"supportedCurrencies":["NGN"],"plans":[{"planKey":"BLUE_PRO","color":"BLUE","tier":"PRO","displayName":"Blue Pro","badgeVisible":true,"isPurchasable":true,"perks":[],"dashboardEntitlements":[]}]}`)
+	if _, err := definition.Validate(wrongTier); err == nil {
+		t.Fatal("tiers must match the color")
+	}
+}
