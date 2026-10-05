@@ -9,10 +9,10 @@ import (
 	"github.com/google/uuid"
 
 	"zudomart/modules/orders/src/container"
-	ordererrors "zudomart/modules/orders/src/errors"
 	"zudomart/modules/orders/src/generated/ent"
 	"zudomart/modules/orders/src/generated/ent/reportexportjob"
 	"zudomart/modules/orders/src/modules/reports/dtos"
+	"zudomart/platform/commerceports"
 	"zudomart/platform/money"
 )
 
@@ -47,15 +47,13 @@ func runOneQueuedExport(ctx context.Context, deployed *container.Container) (boo
 		if err != nil {
 			return err
 		}
-		data, err := LoadReportData(ctx, deployed, job.StoreID, money.CurrencyCode(stores[job.StoreID].Currency), job.FromDate, job.ToDate)
+		snapshot := stores[job.StoreID]
+		store := commerceports.StoreAccess{StoreId: job.StoreID, OwnerAccountId: snapshot.OwnerAccountId, Currency: money.CurrencyCode(snapshot.Currency), CountryCode: snapshot.CountryCode, StoreName: snapshot.Name}
+		result, err := ProduceReport(ctx, deployed, ReportRequest{Store: store, ActorId: job.RequestedByAccountID, Kind: job.Kind, From: job.FromDate, To: job.ToDate})
 		if err != nil {
 			return failExport(ctx, job, err)
 		}
-		result, known := BuildReport(job.Kind, data)
-		if !known {
-			return failExport(ctx, job, errUnknownReport)
-		}
-		content, err := RenderReportCsv(result, data.Currency)
+		content, err := RenderReportCsv(result, store.Currency)
 		if err != nil {
 			return failExport(ctx, job, err)
 		}
@@ -78,8 +76,6 @@ func RunReportExportsUntilContextDone(ctx context.Context, deployed *container.C
 		}
 	}
 }
-
-var errUnknownReport = ordererrors.ReportNotFound
 
 func failExport(ctx context.Context, job *ent.ReportExportJob, cause error) error {
 	message := cause.Error()

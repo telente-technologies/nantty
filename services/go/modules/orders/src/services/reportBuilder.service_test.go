@@ -55,7 +55,7 @@ func TestCsvNeutralisesFormulasAndPutsCurrencyInHeaders(t *testing.T) {
 }
 
 func TestUnknownReportKindIsNotBuilt(t *testing.T) {
-	if _, found := BuildReport("tax", reportFixture()); found {
-		t.Fatal("tax is not built from orders data")
+	if _, found := BuildReport("inventory-valuation", reportFixture()); found {
+		t.Fatal("inventory valuation is not built from orders data")
 	}
 }
