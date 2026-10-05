@@ -41,14 +41,14 @@ function AuthorizationLetterArtwork({ request }: { readonly request: OfficialSto
   return (
     <svg viewBox="0 0 600 420" role="img" aria-label="Authorization letter">
       <rect x="0" y="0" width="600" height="420" fill="#ffffff" stroke="#c9ccd6" strokeWidth="2" />
-      <text x="50" y="60" fontSize="18" fontFamily="sans-serif" fontWeight="700" fill="#10227a">{request.cacCompanyName}</text>
+      <text x="50" y="60" fontSize="18" fontFamily="sans-serif" fontWeight="700" fill="#201884">{request.cacCompanyName}</text>
       <text x="50" y="82" fontSize="12" fontFamily="sans-serif" fill="#5b5b5b">{request.contactEmail}</text>
       <text x="50" y="130" fontSize="14" fontFamily="sans-serif" fill="#000">To: Zudomart Brand Protection</text>
       <text x="50" y="160" fontSize="14" fontFamily="sans-serif" fontWeight="700" fill="#000">Re: Authorisation to operate our Official Store</text>
       <text x="50" y="196" fontSize="13" fontFamily="sans-serif" fill="#000">We confirm that {signatory} is authorised to manage our brand</text>
       <text x="50" y="216" fontSize="13" fontFamily="sans-serif" fill="#000">and sell genuine products under trade mark {request.trademark.registrationNumber}</text>
       <text x="50" y="236" fontSize="13" fontFamily="sans-serif" fill="#000">on Zudomart.</text>
-      <path d="M60 320 C 90 290, 120 340, 150 305 S 210 330, 230 300" fill="none" stroke="#10227a" strokeWidth="2" />
+      <path d="M60 320 C 90 290, 120 340, 150 305 S 210 330, 230 300" fill="none" stroke="#201884" strokeWidth="2" />
       <text x="50" y="350" fontSize="12" fontFamily="sans-serif" fill="#5b5b5b">Director, for and on behalf of {request.cacCompanyName}</text>
     </svg>
   );

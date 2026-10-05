@@ -32,7 +32,7 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 36px 16px 14px;
+  padding: 36px var(--space-4) 14px;
   background: linear-gradient(180deg, transparent, var(--image-scrim));
   color: var(--console-night-strong);
 }
@@ -51,16 +51,16 @@
 }
 
 .subtitle {
-  font-size: 12px;
+  font-size: var(--fs-12);
   opacity: 0.85;
 }
 
 .cta {
   align-self: flex-start;
   margin-top: 6px;
-  padding: 5px 12px;
+  padding: 5px var(--space-3);
   border-radius: var(--radius-pill);
   background: var(--color-brand-solid);
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-weight: 600;
 }

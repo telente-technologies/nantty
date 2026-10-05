@@ -1,14 +1,14 @@
 .parentName {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-weight: 700;
 }
 
 .childName {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   padding-left: 10px;
 }
 
@@ -22,7 +22,7 @@
 
 .muted {
   color: var(--ink-faint);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .search {

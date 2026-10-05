@@ -31,19 +31,19 @@
 
 .muted {
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .headerIdentity {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .layoutStack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .checkList {
@@ -52,7 +52,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .checkList li {
@@ -80,7 +80,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 8px 10px;
+  padding: var(--space-2) 10px;
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);
 }
@@ -88,7 +88,7 @@
 .actionRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .listingPreview {
@@ -114,12 +114,12 @@
 .listingPrice {
   font-size: 18px;
   font-weight: 700;
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .evidenceGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
   gap: 10px;
 }
 
@@ -128,7 +128,7 @@
   flex-direction: column;
   gap: 6px;
   margin: 0;
-  padding: 8px;
+  padding: var(--space-2);
   border: 1px solid var(--divider-soft);
   border-radius: var(--radius-medium);
 }
@@ -141,11 +141,11 @@
 }
 
 .evidenceItem figcaption {
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 
 .quote {
-  padding: 10px 12px;
+  padding: 10px var(--space-3);
   border-left: 3px solid var(--brand-line);
   background: var(--surface-sunken);
   border-radius: 0 var(--radius-small) var(--radius-small) 0;
@@ -161,7 +161,7 @@
   overflow: hidden;
   border-radius: var(--radius-medium);
   background: var(--document-backdrop);
-  padding: 24px;
+  padding: var(--space-6);
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -188,7 +188,7 @@
 .watermark span {
   white-space: nowrap;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-weight: 600;
   color: var(--error-watermark);
 }
