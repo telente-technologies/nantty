@@ -43,6 +43,26 @@ func (service *LiveService) PinProductToLive(ctx context.Context, actor types.Ac
 	return service.ListLiveProducts(ctx, liveId)
 }
 
+func (service *LiveService) UnpinProductFromLive(ctx context.Context, actor types.Actor, liveId uuid.UUID) ([]types.LiveProductView, error) {
+	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		session, err := service.lockLiveSession(ctx, tx, liveId)
+		if err != nil {
+			return err
+		}
+		if session.HostID != actor.UserId {
+			return liveerrors.NotLiveHost
+		}
+		if err := tx.LiveProduct.Update().Where(liveproduct.LiveID(liveId), liveproduct.Pinned(true)).SetPinned(false).Exec(ctx); err != nil {
+			return err
+		}
+		return session.Update().ClearPinnedProductID().Exec(ctx)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return service.ListLiveProducts(ctx, liveId)
+}
+
 func (service *LiveService) ListLiveProducts(ctx context.Context, liveId uuid.UUID) ([]types.LiveProductView, error) {
 	rows, err := service.Client.LiveProduct.Query().Where(liveproduct.LiveID(liveId)).Order(ent.Asc(liveproduct.FieldCreatedAt)).All(ctx)
 	if err != nil {

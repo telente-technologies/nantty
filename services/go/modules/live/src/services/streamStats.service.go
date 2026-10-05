@@ -25,7 +25,11 @@ func (service *LiveService) GetLiveGiftStreamStats(ctx context.Context, actor ty
 	if err != nil {
 		return types.StreamStatsView{}, err
 	}
+	battles, err := service.hostBattleResults(ctx, liveId, session.HostID)
+	if err != nil {
+		return types.StreamStatsView{}, err
+	}
 	return types.StreamStatsView{
-		LiveId: liveId.String(), GiftCount: session.GiftCount, TotalCoins: session.TotalCoins, CreatorCoins: session.CreatorCoins, TopSupporters: board.Data,
+		LiveId: liveId.String(), GiftCount: session.GiftCount, TotalCoins: session.TotalCoins, CreatorCoins: session.CreatorCoins, TopSupporters: board.Data, Battles: battles,
 	}, nil
 }

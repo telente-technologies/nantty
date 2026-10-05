@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"zudomart/modules/live/src/generated/ent"
+	"zudomart/modules/live/src/generated/ent/gift"
 	"zudomart/modules/live/src/generated/ent/giftgoal"
 )
 
@@ -33,7 +34,21 @@ func (service *LiveService) ListGiftGoals(ctx context.Context, liveId uuid.UUID)
 	return views, nil
 }
 
+func (service *LiveService) requireGoalGift(ctx context.Context, input types.GiftGoalInput) error {
+	if input.GiftId == nil {
+		return nil
+	}
+	exists, err := service.Client.Gift.Query().Where(gift.ID(*input.GiftId), gift.IsActive(true)).Exist(ctx)
+	if err == nil && !exists {
+		err = liveerrors.GiftNotFound
+	}
+	return err
+}
+
 func (service *LiveService) CreateGiftGoal(ctx context.Context, actor types.Actor, liveId uuid.UUID, input types.GiftGoalInput) (types.GiftGoalView, error) {
+	if err := service.requireGoalGift(ctx, input); err != nil {
+		return types.GiftGoalView{}, err
+	}
 	var created *ent.GiftGoal
 	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		session, err := service.lockLiveSession(ctx, tx, liveId)
@@ -61,6 +76,9 @@ func (service *LiveService) CreateGiftGoal(ctx context.Context, actor types.Acto
 }
 
 func (service *LiveService) UpdateGiftGoal(ctx context.Context, actor types.Actor, liveId, goalId uuid.UUID, input types.GiftGoalInput) (types.GiftGoalView, error) {
+	if err := service.requireGoalGift(ctx, input); err != nil {
+		return types.GiftGoalView{}, err
+	}
 	var updated *ent.GiftGoal
 	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		goal, err := service.lockHostGoal(ctx, tx, actor, liveId, goalId)
@@ -78,7 +96,14 @@ func (service *LiveService) UpdateGiftGoal(ctx context.Context, actor types.Acto
 			updated, err = goal.Update().SetTitle(title).Save(ctx)
 			return err
 		}
-		if err := goal.Update().SetTitle(title).Exec(ctx); err != nil {
+		update := goal.Update().SetTitle(title)
+		if input.GiftIdPresent {
+			update.SetNillableGiftID(input.GiftId)
+			if input.GiftId == nil {
+				update.ClearGiftID()
+			}
+		}
+		if err := update.Exec(ctx); err != nil {
 			return err
 		}
 		if target != goal.TargetCoins {

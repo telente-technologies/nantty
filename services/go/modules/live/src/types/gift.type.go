@@ -53,9 +53,10 @@ type GiftGoalView struct {
 }
 
 type GiftGoalInput struct {
-	Title       *string
-	TargetCoins *int64
-	GiftId      *string
+	Title         *string
+	TargetCoins   *int64
+	GiftId        *string
+	GiftIdPresent bool
 }
 
 type LeaderboardUser struct {
@@ -107,10 +108,18 @@ type MoneyView struct {
 }
 
 type StreamStatsView struct {
-	LiveId            string                 `json:"liveId"`
-	GiftCount         int64                  `json:"giftCount"`
-	TotalCoins        int64                  `json:"totalCoins"`
-	CreatorCoins      int64                  `json:"creatorCoins"`
-	EstimatedEarnings *MoneyView             `json:"estimatedEarnings"`
-	TopSupporters     []LeaderboardEntryView `json:"topSupporters"`
+	LiveId            string                   `json:"liveId"`
+	GiftCount         int64                    `json:"giftCount"`
+	TotalCoins        int64                    `json:"totalCoins"`
+	CreatorCoins      int64                    `json:"creatorCoins"`
+	EstimatedEarnings *MoneyView               `json:"estimatedEarnings"`
+	TopSupporters     []LeaderboardEntryView   `json:"topSupporters"`
+	Battles           []StreamBattleResultView `json:"battles"`
+}
+
+type StreamBattleResultView struct {
+	Id           string `json:"id"`
+	OpponentName string `json:"opponentName"`
+	CoinsFor     int64  `json:"coinsFor"`
+	CoinsAgainst int64  `json:"coinsAgainst"`
 }

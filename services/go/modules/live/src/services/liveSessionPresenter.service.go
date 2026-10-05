@@ -34,12 +34,16 @@ func (service *LiveService) presentLiveSession(ctx context.Context, session *ent
 	if err != nil {
 		return types.LiveSessionView{}, err
 	}
+	followers, following, err := service.Relations.FollowCounts(ctx, session.HostID)
+	if err != nil {
+		service.Logger.WarnContext(ctx, "host follow counts unavailable", "error", err)
+	}
 	status := "live"
 	if session.State == "ended" {
 		status = "ended"
 	}
 	return types.LiveSessionView{
-		Id: session.ID.String(), Host: types.HostSummary{UserSummary: summarise(participants[session.HostID])},
+		Id: session.ID.String(), Host: types.HostSummary{UserSummary: summarise(participants[session.HostID]), Followers: followers, Following: following},
 		Title: session.Title, Category: string(session.Category), State: string(session.State), Status: status, Visibility: string(session.Visibility),
 		Viewers: session.Viewers, PeakViewers: session.PeakViewers, StartedAt: formatOptionalTime(session.StartedAt), EndedAt: formatOptionalTime(session.EndedAt),
 		CoverUrl: session.CoverURL, Media: types.MediaConnection{LivekitUrl: service.Settings.LiveKitPublicUrl},
