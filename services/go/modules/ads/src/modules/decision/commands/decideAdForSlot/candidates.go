@@ -23,6 +23,9 @@ func (handler Handler) collectEligibleCandidates(ctx context.Context, slot *slot
 		if !slices.Contains(candidate.Placements, slot.placement) || !services.CreativeFitsSlotKind(candidate.Creative.Format, slot.command.Slot.Kind) {
 			continue
 		}
+		if !services.ViewerFallsInExperimentArm(candidate, slot.command.UserId) {
+			continue
+		}
 		if candidate.AvailableFundsMicros <= 0 || candidate.StartAt.After(slot.now) || (candidate.EndAt != nil && !candidate.EndAt.After(slot.now)) {
 			continue
 		}
