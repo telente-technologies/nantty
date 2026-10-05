@@ -145,3 +145,26 @@ func TestAutomationRulesHideReportedContentAndLogEveryRun(t *testing.T) {
 		t.Fatalf("occurrences older than 8 days are deleted: %d %v", deleted, err)
 	}
 }
+
+func TestStoreRulesTreatAMissingEmailVerifiedFlagAsFalse(t *testing.T) {
+	harness := startModerationAgainstFreshSchema(t)
+	manager, stepUp := harness.staff("automation:manage")
+	rule := automationRuleContent("Flag unverified sellers", map[string]any{
+		"event": "store.created", "conditions": []any{map[string]any{"field": "emailVerified", "operator": "EQUALS", "value": "false"}},
+		"actions": []any{map[string]any{"type": "flag_user", "parameters": map[string]any{"priority": "40"}}},
+	})
+	harness.expect("PUT", "/api/v1/admin/automation/rules/rule_unverified_sellers", manager, map[string]any{"expectedVersion": 0, "reason": "Email is the only identifier", "content": rule}, http.StatusCreated, stepUp...)
+	hasPhone := automationRuleContent("Phone rule", map[string]any{"event": "store.created", "conditions": []any{map[string]any{"field": "hasPhone", "operator": "EQUALS", "value": "true"}}, "actions": []any{map[string]any{"type": "flag_user", "parameters": map[string]any{"priority": "40"}}}})
+	harness.expect("PUT", "/api/v1/admin/automation/rules/rule_phone", manager, map[string]any{"expectedVersion": 0, "reason": "Phones are not a signal", "content": hasPhone}, http.StatusBadRequest, stepUp...)
+	owner := uuid.NewString()
+	data, _ := json.Marshal(map[string]any{"storeId": uuid.NewString(), "ownerAccountId": owner, "countryCode": "NG", "currency": "NGN"})
+	envelope, _ := json.Marshal(map[string]any{"id": uuid.NewString(), "type": "store.created", "source": "commerce", "subject": "s", "schemaVersion": 1, "occurredAt": time.Now().UTC().Format(time.RFC3339), "data": json.RawMessage(data)})
+	if err := harness.contentReportHandler()(context.Background(), envelope); err != nil {
+		t.Fatal(err)
+	}
+	viewer, _ := harness.staff("moderation:reports")
+	flagged := harness.expect("GET", "/api/v1/admin/reports?targetType=user&source=automation", viewer, nil, http.StatusOK)["data"].([]any)
+	if len(flagged) != 1 || flagged[0].(map[string]any)["target"].(map[string]any)["id"] != owner {
+		t.Fatalf("a summary without emailVerified counts as unverified: %v", flagged)
+	}
+}

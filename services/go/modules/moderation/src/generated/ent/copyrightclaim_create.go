@@ -715,12 +715,6 @@ func (_c *CopyrightClaimCreate) check() error {
 			return &ValidationError{Name: "original_work_media_id", err: fmt.Errorf(`ent: validator failed for field "CopyrightClaim.original_work_media_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.ProofUrls(); !ok {
-		return &ValidationError{Name: "proof_urls", err: errors.New(`ent: missing required field "CopyrightClaim.proof_urls"`)}
-	}
-	if _, ok := _c.mutation.ProofMediaIds(); !ok {
-		return &ValidationError{Name: "proof_media_ids", err: errors.New(`ent: missing required field "CopyrightClaim.proof_media_ids"`)}
-	}
 	if _, ok := _c.mutation.AccuracyDeclared(); !ok {
 		return &ValidationError{Name: "accuracy_declared", err: errors.New(`ent: missing required field "CopyrightClaim.accuracy_declared"`)}
 	}

@@ -243,3 +243,15 @@ func TestClassifierScoresAreAdvisoryAndStaffDismissalRestoresTheContent(t *testi
 		t.Fatal("malformed scores are poison")
 	}
 }
+
+func TestLegacyProhibitedItemsReasonIsAcceptedNotPoisoned(t *testing.T) {
+	harness := startModerationAgainstFreshSchema(t)
+	harness.targets.own("product", "prd-legacy", uuid.NewString())
+	if err := harness.contentReportHandler()(context.Background(), reportCreatedEnvelope(uuid.NewString(), "product", "prd-legacy", "prohibited_items", "")); err != nil {
+		t.Fatalf("older events with prohibited_items must not be poison: %v", err)
+	}
+	viewer, _ := harness.staff("moderation:reports")
+	if queue := harness.expect("GET", "/api/v1/admin/reports?targetType=product", viewer, nil, http.StatusOK)["data"].([]any); len(queue) != 1 || queue[0].(map[string]any)["primaryReason"] != "OTHER" {
+		t.Fatalf("prohibited_items maps to OTHER: %v", queue)
+	}
+}

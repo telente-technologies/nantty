@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
@@ -44,8 +45,8 @@ func (CopyrightClaim) Fields() []ent.Field {
 		field.String("claimant_address").MaxLen(500).Default("").Immutable(),
 		field.String("original_work_url").MaxLen(2048).Default("").Immutable(),
 		field.String("original_work_media_id").MaxLen(64).Default("").Immutable(),
-		field.Strings("proof_urls").Default([]string{}).Immutable(),
-		field.Strings("proof_media_ids").Default([]string{}).Immutable(),
+		field.Strings("proof_urls").Default([]string{}).Annotations(entsql.DefaultExpr("'[]'::jsonb")).Immutable(),
+		field.Strings("proof_media_ids").Default([]string{}).Annotations(entsql.DefaultExpr("'[]'::jsonb")).Immutable(),
 		field.Bytes("infringing_segments").Optional().SchemaType(map[string]string{dialect.Postgres: "jsonb"}).Immutable(),
 		field.Bool("accuracy_declared").Default(false).Immutable(),
 		field.String("signature_name").MaxLen(160).Default("").Immutable(),
