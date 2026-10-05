@@ -11,7 +11,7 @@ test("every icon renders", async () => {
     await result.unmount();
     count += 1;
   }
-  expect(count).toBe(133);
+  expect(count).toBe(137);
 });
 
 test("padded tab icon keeps footprint", async () => {

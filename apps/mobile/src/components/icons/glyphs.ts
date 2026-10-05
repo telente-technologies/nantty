@@ -34,6 +34,7 @@ import {
   FlameIcon,
   GaugeIcon,
   GifIcon,
+  GearSixIcon,
   GiftIcon,
   HandPalmIcon,
   HandshakeIcon,
@@ -53,6 +54,7 @@ import {
   MicrophoneSlashIcon,
   MinusIcon,
   MusicNotesIcon,
+  PackageIcon,
   PaperPlaneTiltIcon,
   PauseIcon,
   PlayIcon,
@@ -80,7 +82,9 @@ import {
   TruckIcon,
   UserCircleIcon,
   UserFocusIcon,
+  UserPlusIcon,
   UsersIcon,
+  WalletIcon,
   VideoCameraIcon,
   WarningIcon,
   WifiSlashIcon,
@@ -201,4 +205,8 @@ export const SignOut24Icon = phosphorIcon(SignOutIcon);
 export const Swords24Icon = phosphorIcon(SwordIcon);
 export const Trophy24Icon = phosphorIcon(TrophyIcon);
 export const Users24Icon = phosphorIcon(UsersIcon);
+export const GearSix24Icon = phosphorIcon(GearSixIcon);
+export const Package24Icon = phosphorIcon(PackageIcon);
+export const UserPlus24Icon = phosphorIcon(UserPlusIcon);
+export const Wallet24Icon = phosphorIcon(WalletIcon);
 export const WifiSlash24Icon = phosphorIcon(WifiSlashIcon);
