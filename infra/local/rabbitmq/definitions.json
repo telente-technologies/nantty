@@ -174,7 +174,7 @@
       "user": "notifications",
       "vhost": "zudomart",
       "configure": "^$",
-      "write": "^(zudomart\\.jobs|zudomart\\.retry)$",
+      "write": "^(zudomart\\.events|zudomart\\.jobs|zudomart\\.retry)$",
       "read": "^(notifications-domain-events|jobs-email)$"
     },
     {
@@ -4332,7 +4332,95 @@
       "vhost": "zudomart",
       "destination": "realtime-domain-events",
       "destination_type": "queue",
+      "routing_key": "message.updated",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "message.removed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "message.reactionsChanged",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "conversation.read",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "conversation.updated",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "conversation.memberRemoved",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "conversation.memberLeft",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
       "routing_key": "notification.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "account.suspended",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "account.banned",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "session.revoked",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "realtime-domain-events",
+      "destination_type": "queue",
+      "routing_key": "session.refreshTokenReuseDetected",
       "arguments": {}
     },
     {
@@ -4501,6 +4589,54 @@
       "destination": "intelligence-domain-events",
       "destination_type": "queue",
       "routing_key": "report.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "post.liked",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "post.shared",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "comment.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "content.saved",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "post.viewed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "clip.watched",
       "arguments": {}
     },
     {

@@ -14,7 +14,7 @@
     "support": { "publishesEvents": true, "consumes": ["support-domain-events"] },
     "social": { "publishesEvents": true, "consumes": ["social-domain-events"] },
     "media": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["media-domain-events", "jobs-media"] },
-    "notifications": { "enqueuesJobs": true, "consumes": ["notifications-domain-events", "jobs-email"] },
+    "notifications": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["notifications-domain-events", "jobs-email"] },
     "realtime": { "consumes": ["realtime-domain-events"] },
     "intelligence": { "publishesEvents": true, "enqueuesJobs": true, "consumes": ["intelligence-domain-events", "jobs-live-frames", "jobs-live-audio"] }
   },
@@ -52,12 +52,15 @@
     "realtime-domain-events": [
       "battle.*", "gift.sent", "goal.*", "guest.*", "leaderboard.updated", "live.*", "stage.updated",
       "liveComment.*", "liveRoomSettings.updated", "liveViewer.*", "liveRecording.*", "overlayScene.*", "liveSafety.*",
-      "message.created", "notification.created"
+      "message.created", "message.updated", "message.removed", "message.reactionsChanged",
+      "conversation.read", "conversation.updated", "conversation.memberRemoved", "conversation.memberLeft",
+      "notification.created", "account.suspended", "account.banned", "session.revoked", "session.refreshTokenReuseDetected"
     ],
     "intelligence-domain-events": [
       "account.registered", "account.loggedIn", "account.deletionRequested", "account.deletionExecuted",
       "ad.impressionRecorded", "block.created", "consent.granted", "consent.withdrawn", "follow.created",
-      "gift.sent", "media.processed", "message.sent", "post.created", "product.viewed", "report.created"
+      "gift.sent", "media.processed", "message.sent", "post.created", "product.viewed", "report.created",
+      "post.liked", "post.shared", "comment.created", "content.saved", "post.viewed", "clip.watched"
     ]
   },
   "jobQueues": [

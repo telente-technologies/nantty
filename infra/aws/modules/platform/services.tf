@@ -58,7 +58,7 @@ locals {
     support = {
       port         = 8111, cpu = 512, memory = 1024, health = "/healthz", database = true, rabbit = true, min = 2, max = 6
       public_rules = [], internal = true, request_target = 0, valkey = false, node = true
-      secret_keys  = ["SUPPORT_INTERNAL_TOKEN", "IDENTITY_INTERNAL_TOKEN", "INTELLIGENCE_SHARED_SECRET", "GATEWAY_IDENTITY_SECRET"]
+      secret_keys  = ["SUPPORT_INTERNAL_TOKEN", "IDENTITY_INTERNAL_TOKEN", "MEDIA_INTERNAL_TOKEN", "INTELLIGENCE_SHARED_SECRET", "GATEWAY_IDENTITY_SECRET"]
     }
     realtime = {
       port         = 4000, cpu = 1024, memory = 2048, health = "/healthz", database = false, rabbit = true, min = 2, max = 10

@@ -76,10 +76,12 @@ locals {
     }
     notifications = {
       SOCIAL_INTERNAL_URL = local.internal_url["social"]
+      ADMIN_WEB_BASE_URL  = try(var.app_origins["admin"], "https://admin.${var.app_domain}")
     }
     support = {
       IDENTITY_INTERNAL_URL       = local.internal_url["go-identity"]
       INTELLIGENCE_URL            = local.internal_url["intelligence"]
+      MEDIA_INTERNAL_URL          = local.internal_url["media"]
       SUPPORT_DOMAIN_EVENTS_QUEUE = "support-domain-events"
       WEB_BASE_URL                = try(var.app_origins["webapp"], "https://app.${var.app_domain}")
     }
