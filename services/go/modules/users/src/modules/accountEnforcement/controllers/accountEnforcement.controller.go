@@ -33,7 +33,9 @@ func (controller AccountEnforcementController) respond(writer http.ResponseWrite
 
 func (controller AccountEnforcementController) ListUsers(writer http.ResponseWriter, request *http.Request) {
 	query := request.URL.Query()
-	result, err := listusers.Handler{Container: controller.Container}.Execute(request.Context(), listusers.Query{Search: query.Get("search"), Cursor: query.Get("cursor")})
+	result, err := listusers.Handler{Container: controller.Container}.Execute(request.Context(), listusers.Query{
+		Search: query.Get("search"), Cursor: query.Get("cursor"), Status: query.Get("status"), Verification: query.Get("verification"), Role: query.Get("role"), Risk: query.Get("risk"),
+	})
 	controller.respond(writer, request, http.StatusOK, result, err)
 }
 

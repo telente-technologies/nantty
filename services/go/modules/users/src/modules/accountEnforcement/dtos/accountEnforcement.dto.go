@@ -67,3 +67,20 @@ type Actor struct {
 	RequestId string `json:"requestId"`
 	StepUp    bool   `json:"stepUp"`
 }
+
+type WarnRequest struct {
+	Reason    string `json:"reason"`
+	Policy    string `json:"policy"`
+	AddStrike bool   `json:"addStrike"`
+}
+
+type ForceLogoutRequest struct {
+	Reason    string `json:"reason"`
+	SessionId string `json:"sessionId"`
+}
+
+type ReclaimRequest struct {
+	Reason         string `json:"reason"`
+	Mode           string `json:"mode"`
+	ClaimantUserId string `json:"claimantUserId"`
+}
