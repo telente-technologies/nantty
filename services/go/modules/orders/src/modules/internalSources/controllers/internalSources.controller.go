@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"zudomart/modules/orders/src/container"
+	listbuyerstores "zudomart/modules/orders/src/modules/internalSources/queries/listBuyerStores"
 	liststorepurchasers "zudomart/modules/orders/src/modules/internalSources/queries/listStorePurchasers"
 	"zudomart/modules/orders/src/utils"
 	"zudomart/platform/httpserver"
@@ -45,6 +46,26 @@ func (controller InternalSourcesController) ListStorePurchasers(writer http.Resp
 	page, err := (liststorepurchasers.Handler{Container: controller.Container}).Execute(request.Context(), liststorepurchasers.Query{
 		StoreId: storeId, PurchasedFrom: controller.Container.Now().Add(-time.Duration(retentionDays) * 24 * time.Hour), MinimumOrders: minimumOrders, Cursor: request.URL.Query().Get("cursor"), Limit: limit,
 	})
+	if err != nil {
+		responder.Error(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, page)
+}
+
+func (controller InternalSourcesController) ListBuyerStores(writer http.ResponseWriter, request *http.Request) {
+	responder := utils.Responder{Logger: controller.Container.Logger}
+	buyerId, err := utils.PathIdentifier(request, "userId")
+	var collected utils.Issues
+	limit := readBoundedInteger(request, "limit", 50, 1, 200, &collected)
+	if err == nil {
+		err = collected.AsError()
+	}
+	if err != nil {
+		responder.Error(writer, request, err)
+		return
+	}
+	page, err := (listbuyerstores.Handler{Container: controller.Container}).Execute(request.Context(), listbuyerstores.Query{BuyerId: buyerId, Cursor: request.URL.Query().Get("cursor"), Limit: limit})
 	if err != nil {
 		responder.Error(writer, request, err)
 		return
