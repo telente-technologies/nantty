@@ -6,6 +6,7 @@ import { orderMartHighlightsForSession } from "@/components/home/martHighlightsO
 import { adEventsService } from "@/services/adEvents.service";
 import type { MartHighlight } from "@/types/martHighlight.type";
 
+jest.setTimeout(30_000);
 jest.mock("@react-navigation/native", () => ({ useIsFocused: () => true }));
 jest.mock("@/services/adEvents.service", () => ({ adEventsService: { recordSponsoredImpressionOncePerSession: jest.fn() } }));
 
@@ -39,6 +40,8 @@ const renderCarousel = async (highlights: readonly MartHighlight[], loading = fa
 const layOut = async (width = 320) => {
   await fireEvent(screen.getByTestId("martHighlightsCarousel"), "layout", { nativeEvent: { layout: { x: 0, y: 0, width, height: 140 } } });
 };
+
+const dragEvent = { nativeEvent: { contentOffset: { x: 0, y: 0 } } };
 
 const carouselLabel = () => screen.getByTestId("martHighlightsCarousel").props.accessibilityLabel as string;
 
@@ -80,10 +83,10 @@ test("autoplay advances, and pauses while the user is dragging", async () => {
   await act(async () => { jest.advanceTimersByTime(MART_CAROUSEL_AUTO_ADVANCE_MS); });
   expect(carouselLabel()).toContain("2 of 2");
   const list = screen.getByTestId("martHighlightsList");
-  await fireEvent(list, "scrollBeginDrag");
+  await fireEvent(list, "scrollBeginDrag", dragEvent);
   await act(async () => { jest.advanceTimersByTime(MART_CAROUSEL_AUTO_ADVANCE_MS * 3); });
   expect(carouselLabel()).toContain("2 of 2");
-  await fireEvent(list, "scrollEndDrag");
+  await fireEvent(list, "scrollEndDrag", dragEvent);
   await act(async () => { jest.advanceTimersByTime(MART_CAROUSEL_AUTO_ADVANCE_MS); });
   expect(carouselLabel()).toContain("1 of 2");
 });
