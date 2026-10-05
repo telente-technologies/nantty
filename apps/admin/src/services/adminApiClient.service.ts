@@ -112,6 +112,7 @@ export function sendAdminApiRequest<Payload>(apiPath: string, options: AdminApiR
 }
 
 export function readErrorMessageForDisplay(error: unknown): string {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline. Check your connection and we'll retry when you're back.";
   if (error instanceof AdminApiRequestError) return error.message;
   return "Something went wrong. Try again.";
 }

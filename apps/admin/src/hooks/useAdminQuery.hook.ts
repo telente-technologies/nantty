@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useOnReconnect } from "@zudomart/web-kit";
+
 import { readErrorMessageForDisplay } from "@/services/adminApiClient.service";
 
 export interface AdminQueryState<Data> {
@@ -43,6 +45,9 @@ export function useAdminQuery<Data>(loadData: (signal: AbortSignal) => Promise<D
   }, [dependencyKey, reloadCounter, isEnabled]);
 
   const reload = useCallback(() => setReloadCounter((current) => current + 1), []);
+  useOnReconnect(() => {
+    if (errorMessage) reload();
+  });
   const replaceData = useCallback((updater: (current: Data | null) => Data | null) => setData(updater), []);
   return { data, errorMessage, isLoading, reload, replaceData };
 }

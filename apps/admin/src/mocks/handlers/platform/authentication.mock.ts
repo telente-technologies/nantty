@@ -22,7 +22,8 @@ const stepUpLifetimeInSeconds = 300;
 
 function readPendingMfaAdmin(request: MockRequest): { admin: MockAdminRecord; mfaToken: string } {
   const database = readMockDatabase();
-  const mfaToken = String(readJsonObjectBody(request).mfaToken ?? "");
+  const body = readJsonObjectBody(request);
+  const mfaToken = String(body.challengeToken ?? body.mfaToken ?? "");
   const record = database.mfaTokens.get(mfaToken);
   if (!record || record.expiresAtEpochMs < Date.now()) throw new MockHttpError(401, "MFA_CHALLENGE_EXPIRED", "Your sign-in step expired. Enter your password again.");
   const admin = database.admins.find((candidate) => candidate.id === record.adminId);
@@ -43,7 +44,7 @@ function completeMfaSignIn(admin: MockAdminRecord, mfaToken: string, extra: Reco
   const database = readMockDatabase();
   const record = database.mfaTokens.get(mfaToken);
   database.mfaTokens.delete(mfaToken);
-  return respondWithJson(200, { ...startMockAdminSession(admin, record?.ipAddress ?? "127.0.0.1", record?.userAgent ?? "unknown"), admin: presentSignedInAdmin(admin), ...extra });
+  return respondWithJson(200, { ...startMockAdminSession(admin, record?.ipAddress ?? "127.0.0.1", record?.userAgent ?? "unknown"), staff: presentSignedInAdmin(admin), ...extra });
 }
 
 export function registerAuthenticationMockHandlers(): void {
@@ -70,10 +71,10 @@ export function registerAuthenticationMockHandlers(): void {
     admin.failedLoginAttempts = 0;
     const mfaToken = createRandomMockToken("mfa");
     readMockDatabase().mfaTokens.set(mfaToken, { adminId: admin.id, expiresAtEpochMs: Date.now() + mfaTokenLifetimeInMilliseconds, failedAttempts: 0, ipAddress: request.headers.get("x-forwarded-for") ?? "127.0.0.1", userAgent: request.headers.get("user-agent") ?? "unknown" });
-    return respondWithJson(200, { mfaToken, enrollmentRequired: !admin.mfaEnrolled, passkeyAvailable: admin.passkeys.length > 0 });
+    return respondWithJson(200, { status: admin.mfaEnrolled ? "mfa_required" : "mfa_enrollment_required", challengeToken: mfaToken, expiresIn: mfaTokenLifetimeInMilliseconds / 1000, passkeyAvailable: admin.passkeys.length > 0 });
   }, { public: true });
 
-  registerMockRoute("POST", "/admin/auth/mfa/totp/enroll", (request) => {
+  registerMockRoute("POST", "/admin/auth/mfa/enroll/start", (request) => {
     const { admin } = readPendingMfaAdmin(request);
     if (admin.mfaEnrolled) throw new MockHttpError(409, "MFA_ALREADY_ENROLLED", "Authenticator already set up.");
     admin.pendingTotpSecret ??= createBase32Secret();
@@ -81,7 +82,7 @@ export function registerAuthenticationMockHandlers(): void {
     return respondWithJson(200, { secret: admin.pendingTotpSecret, issuer: "Zudomart Admin", accountName: admin.email, otpauthUri: `otpauth://totp/${accountName}?secret=${admin.pendingTotpSecret}&issuer=Zudomart%20Admin&digits=6&period=30&algorithm=SHA1` });
   }, { public: true });
 
-  registerMockRoute("POST", "/admin/auth/mfa/totp/confirm", (request) => {
+  registerMockRoute("POST", "/admin/auth/mfa/enroll/confirm", (request) => {
     const { admin, mfaToken } = readPendingMfaAdmin(request);
     if (!admin.pendingTotpSecret) throw new MockHttpError(409, "MFA_ENROLLMENT_NOT_STARTED", "Start authenticator setup first.");
     if (!isMockTotpCodeValid(String(readJsonObjectBody(request).code ?? ""))) registerFailedMfaAttempt(mfaToken);
