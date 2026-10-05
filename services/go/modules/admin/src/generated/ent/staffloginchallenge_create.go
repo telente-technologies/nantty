@@ -88,6 +88,12 @@ func (_c *StaffLoginChallengeCreate) SetNillableAttempts(v *int) *StaffLoginChal
 	return _c
 }
 
+// SetWebauthnSession sets the "webauthn_session" field.
+func (_c *StaffLoginChallengeCreate) SetWebauthnSession(v []byte) *StaffLoginChallengeCreate {
+	_c.mutation.SetWebauthnSession(v)
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *StaffLoginChallengeCreate) SetID(v uuid.UUID) *StaffLoginChallengeCreate {
 	_c.mutation.SetID(v)
@@ -252,6 +258,10 @@ func (_c *StaffLoginChallengeCreate) createSpec() (*StaffLoginChallenge, *sqlgra
 	if value, ok := _c.mutation.Attempts(); ok {
 		_spec.SetField(staffloginchallenge.FieldAttempts, field.TypeInt, value)
 		_node.Attempts = value
+	}
+	if value, ok := _c.mutation.WebauthnSession(); ok {
+		_spec.SetField(staffloginchallenge.FieldWebauthnSession, field.TypeBytes, value)
+		_node.WebauthnSession = value
 	}
 	if nodes := _c.mutation.StaffIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

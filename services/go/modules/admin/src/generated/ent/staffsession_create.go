@@ -116,6 +116,40 @@ func (_c *StaffSessionCreate) SetNillableRevokedAt(v *time.Time) *StaffSessionCr
 	return _c
 }
 
+// SetWebauthnSession sets the "webauthn_session" field.
+func (_c *StaffSessionCreate) SetWebauthnSession(v []byte) *StaffSessionCreate {
+	_c.mutation.SetWebauthnSession(v)
+	return _c
+}
+
+// SetWebauthnCeremony sets the "webauthn_ceremony" field.
+func (_c *StaffSessionCreate) SetWebauthnCeremony(v staffsession.WebauthnCeremony) *StaffSessionCreate {
+	_c.mutation.SetWebauthnCeremony(v)
+	return _c
+}
+
+// SetNillableWebauthnCeremony sets the "webauthn_ceremony" field if the given value is not nil.
+func (_c *StaffSessionCreate) SetNillableWebauthnCeremony(v *staffsession.WebauthnCeremony) *StaffSessionCreate {
+	if v != nil {
+		_c.SetWebauthnCeremony(*v)
+	}
+	return _c
+}
+
+// SetWebauthnExpiresAt sets the "webauthn_expires_at" field.
+func (_c *StaffSessionCreate) SetWebauthnExpiresAt(v time.Time) *StaffSessionCreate {
+	_c.mutation.SetWebauthnExpiresAt(v)
+	return _c
+}
+
+// SetNillableWebauthnExpiresAt sets the "webauthn_expires_at" field if the given value is not nil.
+func (_c *StaffSessionCreate) SetNillableWebauthnExpiresAt(v *time.Time) *StaffSessionCreate {
+	if v != nil {
+		_c.SetWebauthnExpiresAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *StaffSessionCreate) SetID(v uuid.UUID) *StaffSessionCreate {
 	_c.mutation.SetID(v)
@@ -226,6 +260,11 @@ func (_c *StaffSessionCreate) check() error {
 	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expires_at", err: errors.New(`ent: missing required field "StaffSession.expires_at"`)}
 	}
+	if v, ok := _c.mutation.WebauthnCeremony(); ok {
+		if err := staffsession.WebauthnCeremonyValidator(v); err != nil {
+			return &ValidationError{Name: "webauthn_ceremony", err: fmt.Errorf(`ent: validator failed for field "StaffSession.webauthn_ceremony": %w`, err)}
+		}
+	}
 	if len(_c.mutation.StaffIDs()) == 0 {
 		return &ValidationError{Name: "staff", err: errors.New(`ent: missing required edge "StaffSession.staff"`)}
 	}
@@ -295,6 +334,18 @@ func (_c *StaffSessionCreate) createSpec() (*StaffSession, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.RevokedAt(); ok {
 		_spec.SetField(staffsession.FieldRevokedAt, field.TypeTime, value)
 		_node.RevokedAt = &value
+	}
+	if value, ok := _c.mutation.WebauthnSession(); ok {
+		_spec.SetField(staffsession.FieldWebauthnSession, field.TypeBytes, value)
+		_node.WebauthnSession = value
+	}
+	if value, ok := _c.mutation.WebauthnCeremony(); ok {
+		_spec.SetField(staffsession.FieldWebauthnCeremony, field.TypeEnum, value)
+		_node.WebauthnCeremony = &value
+	}
+	if value, ok := _c.mutation.WebauthnExpiresAt(); ok {
+		_spec.SetField(staffsession.FieldWebauthnExpiresAt, field.TypeTime, value)
+		_node.WebauthnExpiresAt = &value
 	}
 	if nodes := _c.mutation.StaffIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -33,6 +33,8 @@ type StaffLoginChallenge struct {
 	ConsumedAt *time.Time `json:"consumed_at,omitempty"`
 	// Attempts holds the value of the "attempts" field.
 	Attempts int `json:"attempts,omitempty"`
+	// WebauthnSession holds the value of the "webauthn_session" field.
+	WebauthnSession []byte `json:"-"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the StaffLoginChallengeQuery when eager-loading is set.
 	Edges        StaffLoginChallengeEdges `json:"edges"`
@@ -64,6 +66,8 @@ func (*StaffLoginChallenge) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case staffloginchallenge.FieldWebauthnSession:
+			values[i] = new([]byte)
 		case staffloginchallenge.FieldAttempts:
 			values[i] = new(sql.NullInt64)
 		case staffloginchallenge.FieldTokenHash, staffloginchallenge.FieldPurpose:
@@ -136,6 +140,12 @@ func (_m *StaffLoginChallenge) assignValues(columns []string, values []any) erro
 			} else if value.Valid {
 				_m.Attempts = int(value.Int64)
 			}
+		case staffloginchallenge.FieldWebauthnSession:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field webauthn_session", values[i])
+			} else if value != nil {
+				_m.WebauthnSession = *value
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -198,6 +208,8 @@ func (_m *StaffLoginChallenge) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("attempts=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Attempts))
+	builder.WriteString(", ")
+	builder.WriteString("webauthn_session=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

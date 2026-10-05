@@ -69,6 +69,18 @@ func (_u *StaffLoginChallengeUpdate) AddAttempts(v int) *StaffLoginChallengeUpda
 	return _u
 }
 
+// SetWebauthnSession sets the "webauthn_session" field.
+func (_u *StaffLoginChallengeUpdate) SetWebauthnSession(v []byte) *StaffLoginChallengeUpdate {
+	_u.mutation.SetWebauthnSession(v)
+	return _u
+}
+
+// ClearWebauthnSession clears the value of the "webauthn_session" field.
+func (_u *StaffLoginChallengeUpdate) ClearWebauthnSession() *StaffLoginChallengeUpdate {
+	_u.mutation.ClearWebauthnSession()
+	return _u
+}
+
 // Mutation returns the StaffLoginChallengeMutation object of the builder.
 func (_u *StaffLoginChallengeUpdate) Mutation() *StaffLoginChallengeMutation {
 	return _u.mutation
@@ -138,6 +150,12 @@ func (_u *StaffLoginChallengeUpdate) sqlSave(ctx context.Context) (_node int, er
 	if value, ok := _u.mutation.AddedAttempts(); ok {
 		_spec.AddField(staffloginchallenge.FieldAttempts, field.TypeInt, value)
 	}
+	if value, ok := _u.mutation.WebauthnSession(); ok {
+		_spec.SetField(staffloginchallenge.FieldWebauthnSession, field.TypeBytes, value)
+	}
+	if _u.mutation.WebauthnSessionCleared() {
+		_spec.ClearField(staffloginchallenge.FieldWebauthnSession, field.TypeBytes)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{staffloginchallenge.Label}
@@ -196,6 +214,18 @@ func (_u *StaffLoginChallengeUpdateOne) SetNillableAttempts(v *int) *StaffLoginC
 // AddAttempts adds value to the "attempts" field.
 func (_u *StaffLoginChallengeUpdateOne) AddAttempts(v int) *StaffLoginChallengeUpdateOne {
 	_u.mutation.AddAttempts(v)
+	return _u
+}
+
+// SetWebauthnSession sets the "webauthn_session" field.
+func (_u *StaffLoginChallengeUpdateOne) SetWebauthnSession(v []byte) *StaffLoginChallengeUpdateOne {
+	_u.mutation.SetWebauthnSession(v)
+	return _u
+}
+
+// ClearWebauthnSession clears the value of the "webauthn_session" field.
+func (_u *StaffLoginChallengeUpdateOne) ClearWebauthnSession() *StaffLoginChallengeUpdateOne {
+	_u.mutation.ClearWebauthnSession()
 	return _u
 }
 
@@ -297,6 +327,12 @@ func (_u *StaffLoginChallengeUpdateOne) sqlSave(ctx context.Context) (_node *Sta
 	}
 	if value, ok := _u.mutation.AddedAttempts(); ok {
 		_spec.AddField(staffloginchallenge.FieldAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.WebauthnSession(); ok {
+		_spec.SetField(staffloginchallenge.FieldWebauthnSession, field.TypeBytes, value)
+	}
+	if _u.mutation.WebauthnSessionCleared() {
+		_spec.ClearField(staffloginchallenge.FieldWebauthnSession, field.TypeBytes)
 	}
 	_node = &StaffLoginChallenge{config: _u.config}
 	_spec.Assign = _node.assignValues

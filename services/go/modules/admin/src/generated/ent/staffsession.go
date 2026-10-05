@@ -37,6 +37,12 @@ type StaffSession struct {
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// RevokedAt holds the value of the "revoked_at" field.
 	RevokedAt *time.Time `json:"revoked_at,omitempty"`
+	// WebauthnSession holds the value of the "webauthn_session" field.
+	WebauthnSession []byte `json:"-"`
+	// WebauthnCeremony holds the value of the "webauthn_ceremony" field.
+	WebauthnCeremony *staffsession.WebauthnCeremony `json:"webauthn_ceremony,omitempty"`
+	// WebauthnExpiresAt holds the value of the "webauthn_expires_at" field.
+	WebauthnExpiresAt *time.Time `json:"webauthn_expires_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the StaffSessionQuery when eager-loading is set.
 	Edges        StaffSessionEdges `json:"edges"`
@@ -68,9 +74,11 @@ func (*StaffSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case staffsession.FieldIPAddress, staffsession.FieldUserAgent, staffsession.FieldRefreshHash, staffsession.FieldPreviousRefreshHash:
+		case staffsession.FieldWebauthnSession:
+			values[i] = new([]byte)
+		case staffsession.FieldIPAddress, staffsession.FieldUserAgent, staffsession.FieldRefreshHash, staffsession.FieldPreviousRefreshHash, staffsession.FieldWebauthnCeremony:
 			values[i] = new(sql.NullString)
-		case staffsession.FieldCreatedAt, staffsession.FieldLastUsedAt, staffsession.FieldExpiresAt, staffsession.FieldRevokedAt:
+		case staffsession.FieldCreatedAt, staffsession.FieldLastUsedAt, staffsession.FieldExpiresAt, staffsession.FieldRevokedAt, staffsession.FieldWebauthnExpiresAt:
 			values[i] = new(sql.NullTime)
 		case staffsession.FieldID, staffsession.FieldStaffID:
 			values[i] = new(uuid.UUID)
@@ -151,6 +159,26 @@ func (_m *StaffSession) assignValues(columns []string, values []any) error {
 				_m.RevokedAt = new(time.Time)
 				*_m.RevokedAt = value.Time
 			}
+		case staffsession.FieldWebauthnSession:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field webauthn_session", values[i])
+			} else if value != nil {
+				_m.WebauthnSession = *value
+			}
+		case staffsession.FieldWebauthnCeremony:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field webauthn_ceremony", values[i])
+			} else if value.Valid {
+				_m.WebauthnCeremony = new(staffsession.WebauthnCeremony)
+				*_m.WebauthnCeremony = staffsession.WebauthnCeremony(value.String)
+			}
+		case staffsession.FieldWebauthnExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field webauthn_expires_at", values[i])
+			} else if value.Valid {
+				_m.WebauthnExpiresAt = new(time.Time)
+				*_m.WebauthnExpiresAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -216,6 +244,18 @@ func (_m *StaffSession) String() string {
 	builder.WriteString(", ")
 	if v := _m.RevokedAt; v != nil {
 		builder.WriteString("revoked_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("webauthn_session=<sensitive>")
+	builder.WriteString(", ")
+	if v := _m.WebauthnCeremony; v != nil {
+		builder.WriteString("webauthn_ceremony=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.WebauthnExpiresAt; v != nil {
+		builder.WriteString("webauthn_expires_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteByte(')')
