@@ -29,3 +29,13 @@ type PriceRowRequestDto struct {
 	Active                    bool              `json:"active"`
 	Reason                    string            `json:"reason"`
 }
+
+type ChangePlanRequestDto struct {
+	PlanCode string `json:"planCode"`
+	PlanId   string `json:"planId"`
+	Interval string `json:"interval"`
+}
+
+type PayNowRequestDto struct {
+	ReturnTo string `json:"returnTo"`
+}

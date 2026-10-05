@@ -39,13 +39,19 @@ func (controller BillingController) StartCheckout(writer http.ResponseWriter, re
 	}
 	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.CheckoutRequestDto) error {
 		collector := &ledgerutils.IssueCollector{}
-		collector.RequireLength("profileId", body.ProfileId, 1, 80)
+		collector.RequireLength("profileId", body.ProfileId, 0, 80)
 		collector.RequireLength("returnTo", body.ReturnTo, 0, 300)
 		return collector.Result()
 	})
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
+	}
+	if body.ProfileId == "" {
+		if body.ProfileId, err = controller.sellerProfileId(request, principal.UserId); err != nil || body.ProfileId == "" {
+			controller.fail(writer, request, services.ErrProfileNotFound)
+			return
+		}
 	}
 	planCode, interval := body.PlanCode, body.Interval
 	if body.PlanId != "" {
@@ -112,7 +118,14 @@ func (controller BillingController) Offer(writer http.ResponseWriter, request *h
 		controller.fail(writer, request, err)
 		return
 	}
-	offer, err := controller.Billing.BuildOffer(request.Context(), principal.UserId, request.URL.Query().Get("profileId"))
+	profileId := request.URL.Query().Get("profileId")
+	if profileId == "" {
+		if profileId, err = controller.sellerProfileId(request, principal.UserId); err != nil {
+			controller.fail(writer, request, err)
+			return
+		}
+	}
+	offer, err := controller.Billing.BuildOffer(request.Context(), principal.UserId, profileId)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
@@ -129,7 +142,7 @@ func (controller BillingController) RedeemStoreReceipt(writer http.ResponseWrite
 	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.StoreReceiptRequestDto) error {
 		collector := &ledgerutils.IssueCollector{}
 		collector.RequireOneOf("platform", body.Platform, "ios", "android")
-		collector.RequireLength("profileId", body.ProfileId, 1, 80)
+		collector.RequireLength("profileId", body.ProfileId, 0, 80)
 		collector.RequireLength("productId", body.ProductId, 1, 200)
 		collector.RequireLength("receipt", body.Receipt, 0, 20_000)
 		collector.RequireLength("transactionId", body.TransactionId, 0, 200)
