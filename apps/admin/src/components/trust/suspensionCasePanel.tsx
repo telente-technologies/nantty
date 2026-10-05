@@ -54,7 +54,7 @@ export function SuspensionCasePanel({ caseId, onClose, onChanged }: { readonly c
           </NoticeBanner>
           {suspensionCase.decision ? (
             <NoticeBanner tone={suspensionCase.decision.outcome === "SUSPENDED" ? "danger" : "success"} title={`${humanizeConstantName(suspensionCase.decision.outcome)} by ${suspensionCase.decision.decidedByName}`}>
-              {suspensionCase.decision.note} · {formatDateTime(suspensionCase.decision.decidedAt)}
+              {suspensionCase.decision.reason} · {formatDateTime(suspensionCase.decision.decidedAt)}
             </NoticeBanner>
           ) : null}
           <div className={styles.section}>

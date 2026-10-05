@@ -39,7 +39,7 @@ export function AdReviewPanel({ adId, policies, onClose, onAdChanged }: { readon
     if (!pendingDecision) return;
     const updated = await mutation.run({ decision: pendingDecision, reason });
     if (!updated) return;
-    replaceData(() => updated);
+    replaceData((current) => (current ? { ...current, ...updated } : updated));
     showToast(pendingDecision === "approve" ? "Ad approved. It can start delivering." : "Ad rejected. The advertiser was told which policy it breaks.");
     setPendingDecision(null);
     onAdChanged();

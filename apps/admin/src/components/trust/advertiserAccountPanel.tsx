@@ -32,7 +32,7 @@ export function AdvertiserAccountPanel({ advertiserId, onClose, onAdvertiserChan
   async function confirmStatusChange(reason: string) {
     const updated = await mutation.run(reason);
     if (!updated) return;
-    replaceData(() => updated);
+    replaceData((current) => (current ? { ...current, status: updated.status } : current));
     showToast(nextAction === "suspend" ? "Advertiser suspended. All their ads stopped delivering." : "Advertiser reinstated.");
     setIsConfirmOpen(false);
     onAdvertiserChanged();
