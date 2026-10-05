@@ -70,8 +70,8 @@ function ReviewPanel({ application, onClose, onChanged }: { readonly application
       <KeyValueList columns={2} items={[
         { label: "Status", value: <StatusBadge status={application.status} /> },
         { label: "Representative", value: `${application.representativeName}, ${application.representativeRole}` },
-        { label: "First approval", value: application.firstApproval ? `${application.firstApproval.adminName} · ${formatDateTime(application.firstApproval.approvedAt)}` : "Not yet" },
-        { label: "Second approval", value: application.secondApproval ? `${application.secondApproval.adminName} · ${formatDateTime(application.secondApproval.approvedAt)}` : "Not yet" },
+        { label: "First approval", value: application.firstApproval ? `${application.firstApproval.name} · ${formatDateTime(application.firstApproval.at)}` : "Not yet" },
+        { label: "Second approval", value: application.secondApproval ? `${application.secondApproval.name} · ${formatDateTime(application.secondApproval.at)}` : "Not yet" },
         { label: "Handle reserved", value: application.handleReserved ? "Yes, even if billing lapses" : "On approval" },
         { label: "Re-verify by", value: application.reverificationDueAt ? formatDateOnly(application.reverificationDueAt) : "After approval, yearly" },
       ]} />

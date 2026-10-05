@@ -33,7 +33,7 @@ export function EmailOutreachWorkspace() {
   const sends = useAdminQuery((signal) => fetchEmailSends(signal), "sends");
   const [audienceType, setAudienceType] = useState<"USER" | "SEGMENT">("USER");
   const [username, setUsername] = useState("");
-  const [segmentId, setSegmentId] = useState("all-sellers");
+  const [segmentId, setSegmentId] = useState("all-users");
   const [kind, setKind] = useState<EmailKind>("TRANSACTIONAL");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -56,7 +56,7 @@ export function EmailOutreachWorkspace() {
   async function confirmSend(reason: string) {
     const record = await sendMutation.run(reason);
     if (record) {
-      showToast(`Queued ${record.recipientCount} email${record.recipientCount === 1 ? "" : "s"} through AWS SES (mock).`);
+      showToast(`Queued ${record.recipientCount} email${record.recipientCount === 1 ? "" : "s"} through AWS SES.`);
       setIsConfirmOpen(false);
       setPreview(null);
       setSubject("");
@@ -95,7 +95,7 @@ export function EmailOutreachWorkspace() {
       ) : null}
       <SectionHeading>Recent sends</SectionHeading>
       <DataTable caption="Email sends" columns={sendColumns} rows={sends.data?.items ?? []} readRowKey={(item) => item.id} isLoading={sends.isLoading} emptyMessage="Nothing sent yet." />
-      {isConfirmOpen && preview ? <ConfirmActionDialog isOpen title="Send this email" consequences={[`${preview.recipientCount} recipient${preview.recipientCount === 1 ? "" : "s"} through AWS SES (mock).`, "The send, audience and counts are written to the audit log."]} confirmLabel="Send email" requiresStepUp={needsStepUp} isBusy={sendMutation.isRunning} errorMessage={sendMutation.errorMessage} onConfirm={confirmSend} onClose={() => { sendMutation.clearError(); setIsConfirmOpen(false); }} /> : null}
+      {isConfirmOpen && preview ? <ConfirmActionDialog isOpen title="Send this email" consequences={[`${preview.recipientCount} recipient${preview.recipientCount === 1 ? "" : "s"} through AWS SES.`, "The send, audience and counts are written to the audit log."]} confirmLabel="Send email" requiresStepUp={needsStepUp} isBusy={sendMutation.isRunning} errorMessage={sendMutation.errorMessage} onConfirm={confirmSend} onClose={() => { sendMutation.clearError(); setIsConfirmOpen(false); }} /> : null}
     </>
   );
 }

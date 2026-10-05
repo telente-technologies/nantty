@@ -48,7 +48,7 @@ export function VerificationQueueWorkspace() {
   const [color, setColor] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const filters = { status: statusTab === "ALL" ? undefined : statusTab, color: color || undefined, search: search.trim() || undefined, page };
+  const filters = { status: statusTab, color: color || undefined, search: search.trim() || undefined, page };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchVerificationApplications(filters, signal), JSON.stringify(filters));
 
   return (

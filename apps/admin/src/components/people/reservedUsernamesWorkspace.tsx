@@ -9,64 +9,63 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField, readIssueMessageForField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card, Toolbar, TwoColumnLayout } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { addReservedUsername, fetchHeldUsernames, fetchReservedUsernames, fetchWithheldUsernames, removeReservedUsername } from "@/services/peopleApi.service";
-import type { ReservedUsernameCategory, ReservedUsernameEntry, ReservedUsernameKind } from "@/types/usernames.type";
-import { formatDateOnly, humanizeConstantName } from "@/utils/formatting.util";
+import type { ReservedUsernameMatchKind, ReservedUsernameRule } from "@/types/usernames.type";
+import { formatDateOnly } from "@/utils/formatting.util";
 
 import { ConfusableUsernameChecker } from "./confusableUsernameChecker";
 import styles from "./peopleWorkspace.module.css";
 
-const kindOptions = [{ value: "EXACT", label: "Exact name" }, { value: "PREFIX", label: "Prefix (name*)" }, { value: "PATTERN", label: "Pattern (*word*)" }];
-const categoryOptions = ["BRAND", "GOVERNMENT", "SYSTEM", "OFFENSIVE", "PUBLIC_FIGURE"].map((value) => ({ value, label: humanizeConstantName(value) }));
+const kindOptions: { value: ReservedUsernameMatchKind; label: string }[] = [{ value: "exact", label: "Exact name" }, { value: "prefix", label: "Starts with" }, { value: "contains", label: "Contains" }, { value: "brand", label: "Brand" }];
+const kindLabels = Object.fromEntries(kindOptions.map((option) => [option.value, option.label])) as Record<ReservedUsernameMatchKind, string>;
 
 export function ReservedUsernamesWorkspace() {
   const { showToast } = useToast();
   const [search, setSearch] = useState("");
   const [kindFilter, setKindFilter] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [entryToRemove, setEntryToRemove] = useState<ReservedUsernameEntry | null>(null);
+  const [entryToRemove, setEntryToRemove] = useState<ReservedUsernameRule | null>(null);
   const [newValue, setNewValue] = useState("");
-  const [newKind, setNewKind] = useState<ReservedUsernameKind>("EXACT");
-  const [newCategory, setNewCategory] = useState<ReservedUsernameCategory>("BRAND");
-  const [newNote, setNewNote] = useState("");
-  const filters = { search: search.trim() || undefined, kind: kindFilter || undefined };
-  const reserved = useAdminQuery((signal) => fetchReservedUsernames(filters, signal), JSON.stringify(filters));
+  const [newKind, setNewKind] = useState<ReservedUsernameMatchKind>("exact");
+  const [cursors, setCursors] = useState<readonly (string | null)[]>([null]);
+  const cursor = cursors[cursors.length - 1] ?? null;
+  const reserved = useAdminQuery((signal) => fetchReservedUsernames(cursor, signal), cursor ?? "first");
+  const searchText = search.trim().toLowerCase();
+  const visibleRules = (reserved.data?.items ?? []).filter((rule) => (!searchText || rule.term.includes(searchText)) && (!kindFilter || rule.matchKind === kindFilter));
+  const nextCursor = reserved.data?.nextCursor ?? null;
   const held = useAdminQuery((signal) => fetchHeldUsernames(signal), "held");
   const withheld = useAdminQuery((signal) => fetchWithheldUsernames(signal), "withheld");
-  const addMutation = useAdminMutation((reason: string) => addReservedUsername({ value: newValue, kind: newKind, category: newCategory, note: newNote, reason }));
-  const removeMutation = useAdminMutation(({ entryId, reason }: { entryId: string; reason: string }) => removeReservedUsername(entryId, reason));
+  const addMutation = useAdminMutation(() => addReservedUsername({ term: newValue.trim(), matchKind: newKind }));
+  const removeMutation = useAdminMutation((ruleId: string) => removeReservedUsername(ruleId));
 
-  async function addEntry(reason: string) {
-    const result = await addMutation.run(reason);
+  async function addEntry() {
+    const result = await addMutation.run(undefined);
     if (!result) return;
     setIsAddOpen(false);
     setNewValue("");
-    setNewNote("");
+    setCursors([null]);
     reserved.reload();
-    showToast(result.existingAccountsMatching.length > 0 ? `Reserved ${result.entry.value}. Existing accounts matching: ${result.existingAccountsMatching.join(", ")}` : `Reserved ${result.entry.value}`, result.existingAccountsMatching.length > 0 ? "info" : "success");
+    showToast(`Reserved ${result.term}`);
   }
 
-  async function removeEntry(reason: string) {
+  async function removeEntry() {
     if (!entryToRemove) return;
-    const result = await removeMutation.run({ entryId: entryToRemove.id, reason });
+    const result = await removeMutation.run(entryToRemove.id);
     if (result === null) return;
-    showToast(`Removed ${entryToRemove.value}`);
+    showToast(`Removed ${entryToRemove.term}`);
     setEntryToRemove(null);
     reserved.reload();
   }
 
-  const columns: DataTableColumn<ReservedUsernameEntry>[] = [
-    { key: "value", header: "Name or pattern", render: (entry) => <strong className="mono">{entry.value}</strong> },
-    { key: "kind", header: "Kind", render: (entry) => humanizeConstantName(entry.kind) },
-    { key: "category", header: "Category", render: (entry) => <StatusBadge label={humanizeConstantName(entry.category)} tone={entry.category === "GOVERNMENT" ? "night" : entry.category === "OFFENSIVE" ? "danger" : "info"} hasDot={false} /> },
-    { key: "note", header: "Note", render: (entry) => <span className={styles.muted}>{entry.note ?? ""}</span> },
-    { key: "added", header: "Added", render: (entry) => <span className={styles.faint}>{formatDateOnly(entry.addedAt)} · {entry.addedByName}</span> },
-    { key: "remove", header: "", align: "end", render: (entry) => <Button size="small" variant="ghost" iconName="trash24" aria-label={`Remove ${entry.value}`} onClick={() => setEntryToRemove(entry)} /> },
+  const columns: DataTableColumn<ReservedUsernameRule>[] = [
+    { key: "term", header: "Name", render: (rule) => <strong className="mono">{rule.term}</strong> },
+    { key: "kind", header: "Match", render: (rule) => kindLabels[rule.matchKind] ?? rule.matchKind },
+    { key: "added", header: "Added", render: (rule) => <span className={styles.faint}>{rule.createdAt ? formatDateOnly(rule.createdAt) : ""}</span> },
+    { key: "remove", header: "", align: "end", render: (rule) => <Button size="small" variant="ghost" iconName="trash24" aria-label={`Remove ${rule.term}`} onClick={() => setEntryToRemove(rule)} /> },
   ];
 
   return (
@@ -76,11 +75,15 @@ export function ReservedUsernamesWorkspace() {
         main={
           <>
             <Toolbar>
-              <TextField label="Search" isLabelHidden type="search" placeholder="Search names and notes" value={search} onChange={(event) => setSearch(event.target.value)} />
+              <TextField label="Search" isLabelHidden type="search" placeholder="Search names on this page" value={search} onChange={(event) => setSearch(event.target.value)} />
               <SelectField label="Kind" isLabelHidden options={[{ value: "", label: "All kinds" }, ...kindOptions]} value={kindFilter} onChange={(event) => setKindFilter(event.target.value)} />
             </Toolbar>
             {reserved.errorMessage ? <ErrorBlock message={reserved.errorMessage} onRetry={reserved.reload} /> : null}
-            <DataTable caption="Reserved usernames" columns={columns} rows={reserved.data?.items ?? []} readRowKey={(entry) => entry.id} isLoading={reserved.isLoading} emptyMessage="No reserved names match." />
+            <DataTable caption="Reserved usernames" columns={columns} rows={visibleRules} readRowKey={(rule) => rule.id} isLoading={reserved.isLoading} emptyMessage="No reserved names match." />
+            <Toolbar>
+              <Button size="small" disabled={cursors.length < 2} onClick={() => setCursors((current) => current.slice(0, -1))}>Previous</Button>
+              <Button size="small" disabled={!nextCursor} onClick={() => nextCursor && setCursors((current) => [...current, nextCursor])}>Next</Button>
+            </Toolbar>
           </>
         }
         aside={
@@ -117,13 +120,11 @@ export function ReservedUsernamesWorkspace() {
           </>
         }
       />
-      <ConfirmActionDialog isOpen={isAddOpen} title="Reserve a name" confirmLabel="Reserve" isConfirmDisabled={newValue.trim().length < 2} isBusy={addMutation.isRunning} errorMessage={addMutation.validationIssues.length > 0 ? null : addMutation.errorMessage} onConfirm={addEntry} onClose={() => setIsAddOpen(false)}>
-        <TextField label="Name or pattern" value={newValue} onChange={(event) => setNewValue(event.target.value.toLowerCase())} placeholder={newKind === "EXACT" ? "davido" : newKind === "PREFIX" ? "zudomart*" : "*official*"} error={readIssueMessageForField(addMutation.validationIssues, "value")} spellCheck={false} />
-        <SelectField label="Kind" options={kindOptions} value={newKind} onChange={(event) => setNewKind(event.target.value as ReservedUsernameKind)} hint="Use * as a wildcard for prefixes and patterns. Regular expressions are not accepted." />
-        <SelectField label="Category" options={categoryOptions} value={newCategory} onChange={(event) => setNewCategory(event.target.value as ReservedUsernameCategory)} />
-        <TextField label="Note (optional)" value={newNote} onChange={(event) => setNewNote(event.target.value)} maxLength={200} />
+      <ConfirmActionDialog isOpen={isAddOpen} title="Reserve a name" confirmLabel="Reserve" requiresReason={false} isConfirmDisabled={!/^[a-z0-9._]{2,30}$/.test(newValue.trim())} isBusy={addMutation.isRunning} errorMessage={addMutation.validationIssues.length > 0 ? null : addMutation.errorMessage} onConfirm={addEntry} onClose={() => setIsAddOpen(false)}>
+        <TextField label="Name" value={newValue} onChange={(event) => setNewValue(event.target.value.toLowerCase())} placeholder={newKind === "exact" ? "davido" : "zudomart"} error={readIssueMessageForField(addMutation.validationIssues, "term")} spellCheck={false} hint="2–30 letters, numbers, dots or underscores. No wildcards." />
+        <SelectField label="Match" options={kindOptions} value={newKind} onChange={(event) => setNewKind(event.target.value as ReservedUsernameMatchKind)} hint="Starts with and Contains block every username built on this name." />
       </ConfirmActionDialog>
-      <ConfirmActionDialog isOpen={entryToRemove !== null} title={`Remove ${entryToRemove?.value ?? ""}`} description="Anyone will be able to register this name again." confirmLabel="Remove" tone="danger" isBusy={removeMutation.isRunning} errorMessage={removeMutation.errorMessage} onConfirm={removeEntry} onClose={() => setEntryToRemove(null)} />
+      <ConfirmActionDialog isOpen={entryToRemove !== null} title={`Remove ${entryToRemove?.term ?? ""}`} description="Anyone will be able to register this name again." confirmLabel="Remove" tone="danger" requiresReason={false} isBusy={removeMutation.isRunning} errorMessage={removeMutation.errorMessage} onConfirm={removeEntry} onClose={() => setEntryToRemove(null)} />
     </>
   );
 }

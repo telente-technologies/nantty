@@ -61,7 +61,7 @@ export function ProgramApplicationsWorkspace({ kind }: { readonly kind: Applicat
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
-  const filters = { status: statusTab === "ALL" ? undefined : statusTab, search: search.trim() || undefined, page };
+  const filters = { status: statusTab, search: search.trim() || undefined, page };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchProgramApplications(kind, filters, signal), `${kind}:${JSON.stringify(filters)}`);
 
   return (
