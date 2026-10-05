@@ -11,7 +11,7 @@ export function PayoutSetupBanner() {
   const { data: state } = usePayoutStateQuery();
   if (!state || state.status === "verified") return null;
   const isReady = state.accountStatus === "documentsRequired" && state.status === "in_progress";
-  const title = state.status === "pending_review" ? "Payouts are in review" : state.status === "action_needed" ? "Action needed on your payouts" : isReady ? (state.pendingWithdrawable ? `Verify your ID to withdraw ${formatMoneyForDisplay(state.pendingWithdrawable)}` : "Verify your ID to withdraw") : state.completedSteps.length === 0 ? "Set up payouts to receive gift earnings" : "Finish payout setup";
+  const title = state.status === "pending_review" ? "Payouts are in review" : state.status === "action_needed" ? "Action needed on your payouts" : isReady ? (state.pendingWithdrawable && state.pendingWithdrawable.amountMinor > 0 ? `Verify your ID to withdraw ${formatMoneyForDisplay(state.pendingWithdrawable)}` : "Verify your ID to withdraw") : state.completedSteps.length === 0 ? "Set up payouts to receive gift earnings" : "Finish payout setup";
   return (
     <div className={styles.banner}>
       <div className={styles.bannerText}>

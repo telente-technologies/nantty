@@ -54,7 +54,7 @@ export function PayoutStatusSummary({ state, onFix, onChanged }: PayoutStatusSum
         {key === "action_needed" ? state.reasons.map((reason) => (
           <div key={reason.code}><strong>{stepLabels[reason.step]}</strong><p className={styles.muted}>{reason.message}</p></div>
         )) : null}
-        {state.bankSummary ? <p className={styles.muted}>Payout account: <strong>{state.bankSummary}</strong></p> : null}
+        {state.bankSummary ? <p className={styles.muted}>Payout account: <strong>{`${state.bankSummary.bankName} ••••${state.bankSummary.accountLast4}`}</strong></p> : null}
         {retry.isError ? <p className={`${styles.notice} ${styles.noticeError}`} role="alert">{retry.error.message}</p> : null}
         <div className={styles.actions}>
           {key === "action_needed" ? <Button onClick={onFix}>Fix it</Button> : null}
