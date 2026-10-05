@@ -26,7 +26,7 @@ func (controller CoinsController) ListCoinTransactionsForStaff(writer http.Respo
 		collector.RequireOneOf("kind", query.Kind, "purchase", "transfer")
 	}
 	if query.ReviewStatus != "" {
-		collector.RequireOneOf("status", query.ReviewStatus, "pending_review", "reviewed", "reversed")
+		collector.RequireOneOf("status", query.ReviewStatus, "not_required", "pending_review", "reviewed", "reversed")
 	}
 	collector.RequireLength("search", query.Search, 0, 200)
 	if cursor := parameters.Get("cursor"); cursor != "" {

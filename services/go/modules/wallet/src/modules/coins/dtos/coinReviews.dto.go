@@ -20,6 +20,7 @@ type CoinTransactionDto struct {
 	Channel                *string                          `json:"channel"`
 	TransactionStatus      string                           `json:"transactionStatus"`
 	ReviewStatus           string                           `json:"reviewStatus"`
+	ReviewFlags            []string                         `json:"reviewFlags"`
 	Flags                  []string                         `json:"flags"`
 	ChargebackRisk         string                           `json:"chargebackRisk"`
 	ClawbackShortfallCoins int64                            `json:"clawbackShortfallCoins"`
