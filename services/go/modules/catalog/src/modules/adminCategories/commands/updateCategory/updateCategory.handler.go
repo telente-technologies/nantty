@@ -63,7 +63,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) (any, error
 				return err
 			}
 		}
-		change := row.Update().SetName(after.Name).SetSlug(after.Slug).ClearIconName().SetNillableIconName(after.IconName)
+		change := row.Update().SetName(after.Name).SetSlug(after.Slug)
+		if after.IconName == nil {
+			change.ClearIconName()
+		} else {
+			change.SetIconName(*after.IconName)
+		}
 		if moved {
 			if err := applyMove(ctx, tx, row, after.ParentId, change); err != nil {
 				return err
