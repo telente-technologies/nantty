@@ -10,10 +10,12 @@ import (
 	"zudomart/modules/admin/src/generated/ent/platformsetting"
 	"zudomart/modules/admin/src/generated/ent/platformsettingrevision"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	"zudomart/modules/admin/src/generated/ent/staffconsent"
 	"zudomart/modules/admin/src/generated/ent/staffinvitation"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
 	"zudomart/modules/admin/src/generated/ent/staffrole"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
+	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
 
 	"github.com/google/uuid"
 )
@@ -315,8 +317,16 @@ func init() {
 	staffaccount.DefaultFailedAttempts = staffaccountDescFailedAttempts.Default.(int)
 	// staffaccount.FailedAttemptsValidator is a validator for the "failed_attempts" field. It is called by the builders before save.
 	staffaccount.FailedAttemptsValidator = staffaccountDescFailedAttempts.Validators[0].(func(int) error)
+	// staffaccountDescRecoveryCodeHashes is the schema descriptor for recovery_code_hashes field.
+	staffaccountDescRecoveryCodeHashes := staffaccountFields[12].Descriptor()
+	// staffaccount.DefaultRecoveryCodeHashes holds the default value on creation for the recovery_code_hashes field.
+	staffaccount.DefaultRecoveryCodeHashes = staffaccountDescRecoveryCodeHashes.Default.([]string)
+	// staffaccountDescIPAllowList is the schema descriptor for ip_allow_list field.
+	staffaccountDescIPAllowList := staffaccountFields[13].Descriptor()
+	// staffaccount.DefaultIPAllowList holds the default value on creation for the ip_allow_list field.
+	staffaccount.DefaultIPAllowList = staffaccountDescIPAllowList.Default.([]string)
 	// staffaccountDescUpdatedAt is the schema descriptor for updated_at field.
-	staffaccountDescUpdatedAt := staffaccountFields[15].Descriptor()
+	staffaccountDescUpdatedAt := staffaccountFields[18].Descriptor()
 	// staffaccount.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	staffaccount.DefaultUpdatedAt = staffaccountDescUpdatedAt.Default.(func() time.Time)
 	// staffaccount.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -325,6 +335,67 @@ func init() {
 	staffaccountDescID := staffaccountMixinFields0[0].Descriptor()
 	// staffaccount.DefaultID holds the default value on creation for the id field.
 	staffaccount.DefaultID = staffaccountDescID.Default.(func() uuid.UUID)
+	staffconsentMixin := schema.StaffConsent{}.Mixin()
+	staffconsentMixinFields0 := staffconsentMixin[0].Fields()
+	_ = staffconsentMixinFields0
+	staffconsentFields := schema.StaffConsent{}.Fields()
+	_ = staffconsentFields
+	// staffconsentDescCreatedAt is the schema descriptor for created_at field.
+	staffconsentDescCreatedAt := staffconsentMixinFields0[1].Descriptor()
+	// staffconsent.DefaultCreatedAt holds the default value on creation for the created_at field.
+	staffconsent.DefaultCreatedAt = staffconsentDescCreatedAt.Default.(func() time.Time)
+	// staffconsentDescPolicyVersion is the schema descriptor for policy_version field.
+	staffconsentDescPolicyVersion := staffconsentFields[1].Descriptor()
+	// staffconsent.PolicyVersionValidator is a validator for the "policy_version" field. It is called by the builders before save.
+	staffconsent.PolicyVersionValidator = func() func(string) error {
+		validators := staffconsentDescPolicyVersion.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(policy_version string) error {
+			for _, fn := range fns {
+				if err := fn(policy_version); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// staffconsentDescSource is the schema descriptor for source field.
+	staffconsentDescSource := staffconsentFields[3].Descriptor()
+	// staffconsent.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	staffconsent.SourceValidator = func() func(string) error {
+		validators := staffconsentDescSource.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(source string) error {
+			for _, fn := range fns {
+				if err := fn(source); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// staffconsentDescIPAddress is the schema descriptor for ip_address field.
+	staffconsentDescIPAddress := staffconsentFields[5].Descriptor()
+	// staffconsent.DefaultIPAddress holds the default value on creation for the ip_address field.
+	staffconsent.DefaultIPAddress = staffconsentDescIPAddress.Default.(string)
+	// staffconsent.IPAddressValidator is a validator for the "ip_address" field. It is called by the builders before save.
+	staffconsent.IPAddressValidator = staffconsentDescIPAddress.Validators[0].(func(string) error)
+	// staffconsentDescUserAgent is the schema descriptor for user_agent field.
+	staffconsentDescUserAgent := staffconsentFields[6].Descriptor()
+	// staffconsent.DefaultUserAgent holds the default value on creation for the user_agent field.
+	staffconsent.DefaultUserAgent = staffconsentDescUserAgent.Default.(string)
+	// staffconsent.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
+	staffconsent.UserAgentValidator = staffconsentDescUserAgent.Validators[0].(func(string) error)
+	// staffconsentDescID is the schema descriptor for id field.
+	staffconsentDescID := staffconsentMixinFields0[0].Descriptor()
+	// staffconsent.DefaultID holds the default value on creation for the id field.
+	staffconsent.DefaultID = staffconsentDescID.Default.(func() uuid.UUID)
 	staffinvitationMixin := schema.StaffInvitation{}.Mixin()
 	staffinvitationMixinFields0 := staffinvitationMixin[0].Fields()
 	_ = staffinvitationMixinFields0
@@ -445,4 +516,63 @@ func init() {
 	staffsessionDescID := staffsessionMixinFields0[0].Descriptor()
 	// staffsession.DefaultID holds the default value on creation for the id field.
 	staffsession.DefaultID = staffsessionDescID.Default.(func() uuid.UUID)
+	staffwebauthncredentialMixin := schema.StaffWebauthnCredential{}.Mixin()
+	staffwebauthncredentialMixinFields0 := staffwebauthncredentialMixin[0].Fields()
+	_ = staffwebauthncredentialMixinFields0
+	staffwebauthncredentialFields := schema.StaffWebauthnCredential{}.Fields()
+	_ = staffwebauthncredentialFields
+	// staffwebauthncredentialDescCreatedAt is the schema descriptor for created_at field.
+	staffwebauthncredentialDescCreatedAt := staffwebauthncredentialMixinFields0[1].Descriptor()
+	// staffwebauthncredential.DefaultCreatedAt holds the default value on creation for the created_at field.
+	staffwebauthncredential.DefaultCreatedAt = staffwebauthncredentialDescCreatedAt.Default.(func() time.Time)
+	// staffwebauthncredentialDescCredentialID is the schema descriptor for credential_id field.
+	staffwebauthncredentialDescCredentialID := staffwebauthncredentialFields[1].Descriptor()
+	// staffwebauthncredential.CredentialIDValidator is a validator for the "credential_id" field. It is called by the builders before save.
+	staffwebauthncredential.CredentialIDValidator = func() func(string) error {
+		validators := staffwebauthncredentialDescCredentialID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(credential_id string) error {
+			for _, fn := range fns {
+				if err := fn(credential_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// staffwebauthncredentialDescSignCount is the schema descriptor for sign_count field.
+	staffwebauthncredentialDescSignCount := staffwebauthncredentialFields[3].Descriptor()
+	// staffwebauthncredential.DefaultSignCount holds the default value on creation for the sign_count field.
+	staffwebauthncredential.DefaultSignCount = staffwebauthncredentialDescSignCount.Default.(int64)
+	// staffwebauthncredential.SignCountValidator is a validator for the "sign_count" field. It is called by the builders before save.
+	staffwebauthncredential.SignCountValidator = staffwebauthncredentialDescSignCount.Validators[0].(func(int64) error)
+	// staffwebauthncredentialDescTransports is the schema descriptor for transports field.
+	staffwebauthncredentialDescTransports := staffwebauthncredentialFields[4].Descriptor()
+	// staffwebauthncredential.DefaultTransports holds the default value on creation for the transports field.
+	staffwebauthncredential.DefaultTransports = staffwebauthncredentialDescTransports.Default.([]string)
+	// staffwebauthncredentialDescLabel is the schema descriptor for label field.
+	staffwebauthncredentialDescLabel := staffwebauthncredentialFields[5].Descriptor()
+	// staffwebauthncredential.LabelValidator is a validator for the "label" field. It is called by the builders before save.
+	staffwebauthncredential.LabelValidator = func() func(string) error {
+		validators := staffwebauthncredentialDescLabel.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(label string) error {
+			for _, fn := range fns {
+				if err := fn(label); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// staffwebauthncredentialDescID is the schema descriptor for id field.
+	staffwebauthncredentialDescID := staffwebauthncredentialMixinFields0[0].Descriptor()
+	// staffwebauthncredential.DefaultID holds the default value on creation for the id field.
+	staffwebauthncredential.DefaultID = staffwebauthncredentialDescID.Default.(func() uuid.UUID)
 }

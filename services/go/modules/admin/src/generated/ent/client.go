@@ -16,10 +16,12 @@ import (
 	"zudomart/modules/admin/src/generated/ent/platformsetting"
 	"zudomart/modules/admin/src/generated/ent/platformsettingrevision"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	"zudomart/modules/admin/src/generated/ent/staffconsent"
 	"zudomart/modules/admin/src/generated/ent/staffinvitation"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
 	"zudomart/modules/admin/src/generated/ent/staffrole"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
+	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -45,6 +47,8 @@ type Client struct {
 	PlatformSettingRevision *PlatformSettingRevisionClient
 	// StaffAccount is the client for interacting with the StaffAccount builders.
 	StaffAccount *StaffAccountClient
+	// StaffConsent is the client for interacting with the StaffConsent builders.
+	StaffConsent *StaffConsentClient
 	// StaffInvitation is the client for interacting with the StaffInvitation builders.
 	StaffInvitation *StaffInvitationClient
 	// StaffLoginChallenge is the client for interacting with the StaffLoginChallenge builders.
@@ -53,6 +57,8 @@ type Client struct {
 	StaffRole *StaffRoleClient
 	// StaffSession is the client for interacting with the StaffSession builders.
 	StaffSession *StaffSessionClient
+	// StaffWebauthnCredential is the client for interacting with the StaffWebauthnCredential builders.
+	StaffWebauthnCredential *StaffWebauthnCredentialClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -69,10 +75,12 @@ func (c *Client) init() {
 	c.PlatformSetting = NewPlatformSettingClient(c.config)
 	c.PlatformSettingRevision = NewPlatformSettingRevisionClient(c.config)
 	c.StaffAccount = NewStaffAccountClient(c.config)
+	c.StaffConsent = NewStaffConsentClient(c.config)
 	c.StaffInvitation = NewStaffInvitationClient(c.config)
 	c.StaffLoginChallenge = NewStaffLoginChallengeClient(c.config)
 	c.StaffRole = NewStaffRoleClient(c.config)
 	c.StaffSession = NewStaffSessionClient(c.config)
+	c.StaffWebauthnCredential = NewStaffWebauthnCredentialClient(c.config)
 }
 
 type (
@@ -170,10 +178,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PlatformSetting:         NewPlatformSettingClient(cfg),
 		PlatformSettingRevision: NewPlatformSettingRevisionClient(cfg),
 		StaffAccount:            NewStaffAccountClient(cfg),
+		StaffConsent:            NewStaffConsentClient(cfg),
 		StaffInvitation:         NewStaffInvitationClient(cfg),
 		StaffLoginChallenge:     NewStaffLoginChallengeClient(cfg),
 		StaffRole:               NewStaffRoleClient(cfg),
 		StaffSession:            NewStaffSessionClient(cfg),
+		StaffWebauthnCredential: NewStaffWebauthnCredentialClient(cfg),
 	}, nil
 }
 
@@ -198,10 +208,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PlatformSetting:         NewPlatformSettingClient(cfg),
 		PlatformSettingRevision: NewPlatformSettingRevisionClient(cfg),
 		StaffAccount:            NewStaffAccountClient(cfg),
+		StaffConsent:            NewStaffConsentClient(cfg),
 		StaffInvitation:         NewStaffInvitationClient(cfg),
 		StaffLoginChallenge:     NewStaffLoginChallengeClient(cfg),
 		StaffRole:               NewStaffRoleClient(cfg),
 		StaffSession:            NewStaffSessionClient(cfg),
+		StaffWebauthnCredential: NewStaffWebauthnCredentialClient(cfg),
 	}, nil
 }
 
@@ -232,8 +244,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuditEvent, c.OutboxEvent, c.PlatformSetting, c.PlatformSettingRevision,
-		c.StaffAccount, c.StaffInvitation, c.StaffLoginChallenge, c.StaffRole,
-		c.StaffSession,
+		c.StaffAccount, c.StaffConsent, c.StaffInvitation, c.StaffLoginChallenge,
+		c.StaffRole, c.StaffSession, c.StaffWebauthnCredential,
 	} {
 		n.Use(hooks...)
 	}
@@ -244,8 +256,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuditEvent, c.OutboxEvent, c.PlatformSetting, c.PlatformSettingRevision,
-		c.StaffAccount, c.StaffInvitation, c.StaffLoginChallenge, c.StaffRole,
-		c.StaffSession,
+		c.StaffAccount, c.StaffConsent, c.StaffInvitation, c.StaffLoginChallenge,
+		c.StaffRole, c.StaffSession, c.StaffWebauthnCredential,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -264,6 +276,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PlatformSettingRevision.mutate(ctx, m)
 	case *StaffAccountMutation:
 		return c.StaffAccount.mutate(ctx, m)
+	case *StaffConsentMutation:
+		return c.StaffConsent.mutate(ctx, m)
 	case *StaffInvitationMutation:
 		return c.StaffInvitation.mutate(ctx, m)
 	case *StaffLoginChallengeMutation:
@@ -272,6 +286,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.StaffRole.mutate(ctx, m)
 	case *StaffSessionMutation:
 		return c.StaffSession.mutate(ctx, m)
+	case *StaffWebauthnCredentialMutation:
+		return c.StaffWebauthnCredential.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -965,6 +981,38 @@ func (c *StaffAccountClient) QueryInvitations(_m *StaffAccount) *StaffInvitation
 	return query
 }
 
+// QueryPasskeys queries the passkeys edge of a StaffAccount.
+func (c *StaffAccountClient) QueryPasskeys(_m *StaffAccount) *StaffWebauthnCredentialQuery {
+	query := (&StaffWebauthnCredentialClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(staffaccount.Table, staffaccount.FieldID, id),
+			sqlgraph.To(staffwebauthncredential.Table, staffwebauthncredential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, staffaccount.PasskeysTable, staffaccount.PasskeysColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryConsents queries the consents edge of a StaffAccount.
+func (c *StaffAccountClient) QueryConsents(_m *StaffAccount) *StaffConsentQuery {
+	query := (&StaffConsentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(staffaccount.Table, staffaccount.FieldID, id),
+			sqlgraph.To(staffconsent.Table, staffconsent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, staffaccount.ConsentsTable, staffaccount.ConsentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *StaffAccountClient) Hooks() []Hook {
 	return c.hooks.StaffAccount
@@ -987,6 +1035,155 @@ func (c *StaffAccountClient) mutate(ctx context.Context, m *StaffAccountMutation
 		return (&StaffAccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown StaffAccount mutation op: %q", m.Op())
+	}
+}
+
+// StaffConsentClient is a client for the StaffConsent schema.
+type StaffConsentClient struct {
+	config
+}
+
+// NewStaffConsentClient returns a client for the StaffConsent from the given config.
+func NewStaffConsentClient(c config) *StaffConsentClient {
+	return &StaffConsentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `staffconsent.Hooks(f(g(h())))`.
+func (c *StaffConsentClient) Use(hooks ...Hook) {
+	c.hooks.StaffConsent = append(c.hooks.StaffConsent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `staffconsent.Intercept(f(g(h())))`.
+func (c *StaffConsentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StaffConsent = append(c.inters.StaffConsent, interceptors...)
+}
+
+// Create returns a builder for creating a StaffConsent entity.
+func (c *StaffConsentClient) Create() *StaffConsentCreate {
+	mutation := newStaffConsentMutation(c.config, OpCreate)
+	return &StaffConsentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StaffConsent entities.
+func (c *StaffConsentClient) CreateBulk(builders ...*StaffConsentCreate) *StaffConsentCreateBulk {
+	return &StaffConsentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StaffConsentClient) MapCreateBulk(slice any, setFunc func(*StaffConsentCreate, int)) *StaffConsentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StaffConsentCreateBulk{err: fmt.Errorf("calling to StaffConsentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StaffConsentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StaffConsentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StaffConsent.
+func (c *StaffConsentClient) Update() *StaffConsentUpdate {
+	mutation := newStaffConsentMutation(c.config, OpUpdate)
+	return &StaffConsentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StaffConsentClient) UpdateOne(_m *StaffConsent) *StaffConsentUpdateOne {
+	mutation := newStaffConsentMutation(c.config, OpUpdateOne, withStaffConsent(_m))
+	return &StaffConsentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StaffConsentClient) UpdateOneID(id uuid.UUID) *StaffConsentUpdateOne {
+	mutation := newStaffConsentMutation(c.config, OpUpdateOne, withStaffConsentID(id))
+	return &StaffConsentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StaffConsent.
+func (c *StaffConsentClient) Delete() *StaffConsentDelete {
+	mutation := newStaffConsentMutation(c.config, OpDelete)
+	return &StaffConsentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StaffConsentClient) DeleteOne(_m *StaffConsent) *StaffConsentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StaffConsentClient) DeleteOneID(id uuid.UUID) *StaffConsentDeleteOne {
+	builder := c.Delete().Where(staffconsent.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StaffConsentDeleteOne{builder}
+}
+
+// Query returns a query builder for StaffConsent.
+func (c *StaffConsentClient) Query() *StaffConsentQuery {
+	return &StaffConsentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStaffConsent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StaffConsent entity by its id.
+func (c *StaffConsentClient) Get(ctx context.Context, id uuid.UUID) (*StaffConsent, error) {
+	return c.Query().Where(staffconsent.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StaffConsentClient) GetX(ctx context.Context, id uuid.UUID) *StaffConsent {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryStaff queries the staff edge of a StaffConsent.
+func (c *StaffConsentClient) QueryStaff(_m *StaffConsent) *StaffAccountQuery {
+	query := (&StaffAccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(staffconsent.Table, staffconsent.FieldID, id),
+			sqlgraph.To(staffaccount.Table, staffaccount.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, staffconsent.StaffTable, staffconsent.StaffColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StaffConsentClient) Hooks() []Hook {
+	return c.hooks.StaffConsent
+}
+
+// Interceptors returns the client interceptors.
+func (c *StaffConsentClient) Interceptors() []Interceptor {
+	return c.inters.StaffConsent
+}
+
+func (c *StaffConsentClient) mutate(ctx context.Context, m *StaffConsentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StaffConsentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StaffConsentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StaffConsentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StaffConsentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StaffConsent mutation op: %q", m.Op())
 	}
 }
 
@@ -1570,15 +1767,166 @@ func (c *StaffSessionClient) mutate(ctx context.Context, m *StaffSessionMutation
 	}
 }
 
+// StaffWebauthnCredentialClient is a client for the StaffWebauthnCredential schema.
+type StaffWebauthnCredentialClient struct {
+	config
+}
+
+// NewStaffWebauthnCredentialClient returns a client for the StaffWebauthnCredential from the given config.
+func NewStaffWebauthnCredentialClient(c config) *StaffWebauthnCredentialClient {
+	return &StaffWebauthnCredentialClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `staffwebauthncredential.Hooks(f(g(h())))`.
+func (c *StaffWebauthnCredentialClient) Use(hooks ...Hook) {
+	c.hooks.StaffWebauthnCredential = append(c.hooks.StaffWebauthnCredential, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `staffwebauthncredential.Intercept(f(g(h())))`.
+func (c *StaffWebauthnCredentialClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StaffWebauthnCredential = append(c.inters.StaffWebauthnCredential, interceptors...)
+}
+
+// Create returns a builder for creating a StaffWebauthnCredential entity.
+func (c *StaffWebauthnCredentialClient) Create() *StaffWebauthnCredentialCreate {
+	mutation := newStaffWebauthnCredentialMutation(c.config, OpCreate)
+	return &StaffWebauthnCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StaffWebauthnCredential entities.
+func (c *StaffWebauthnCredentialClient) CreateBulk(builders ...*StaffWebauthnCredentialCreate) *StaffWebauthnCredentialCreateBulk {
+	return &StaffWebauthnCredentialCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StaffWebauthnCredentialClient) MapCreateBulk(slice any, setFunc func(*StaffWebauthnCredentialCreate, int)) *StaffWebauthnCredentialCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StaffWebauthnCredentialCreateBulk{err: fmt.Errorf("calling to StaffWebauthnCredentialClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StaffWebauthnCredentialCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StaffWebauthnCredentialCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StaffWebauthnCredential.
+func (c *StaffWebauthnCredentialClient) Update() *StaffWebauthnCredentialUpdate {
+	mutation := newStaffWebauthnCredentialMutation(c.config, OpUpdate)
+	return &StaffWebauthnCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StaffWebauthnCredentialClient) UpdateOne(_m *StaffWebauthnCredential) *StaffWebauthnCredentialUpdateOne {
+	mutation := newStaffWebauthnCredentialMutation(c.config, OpUpdateOne, withStaffWebauthnCredential(_m))
+	return &StaffWebauthnCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StaffWebauthnCredentialClient) UpdateOneID(id uuid.UUID) *StaffWebauthnCredentialUpdateOne {
+	mutation := newStaffWebauthnCredentialMutation(c.config, OpUpdateOne, withStaffWebauthnCredentialID(id))
+	return &StaffWebauthnCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StaffWebauthnCredential.
+func (c *StaffWebauthnCredentialClient) Delete() *StaffWebauthnCredentialDelete {
+	mutation := newStaffWebauthnCredentialMutation(c.config, OpDelete)
+	return &StaffWebauthnCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StaffWebauthnCredentialClient) DeleteOne(_m *StaffWebauthnCredential) *StaffWebauthnCredentialDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StaffWebauthnCredentialClient) DeleteOneID(id uuid.UUID) *StaffWebauthnCredentialDeleteOne {
+	builder := c.Delete().Where(staffwebauthncredential.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StaffWebauthnCredentialDeleteOne{builder}
+}
+
+// Query returns a query builder for StaffWebauthnCredential.
+func (c *StaffWebauthnCredentialClient) Query() *StaffWebauthnCredentialQuery {
+	return &StaffWebauthnCredentialQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStaffWebauthnCredential},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StaffWebauthnCredential entity by its id.
+func (c *StaffWebauthnCredentialClient) Get(ctx context.Context, id uuid.UUID) (*StaffWebauthnCredential, error) {
+	return c.Query().Where(staffwebauthncredential.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StaffWebauthnCredentialClient) GetX(ctx context.Context, id uuid.UUID) *StaffWebauthnCredential {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryStaff queries the staff edge of a StaffWebauthnCredential.
+func (c *StaffWebauthnCredentialClient) QueryStaff(_m *StaffWebauthnCredential) *StaffAccountQuery {
+	query := (&StaffAccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(staffwebauthncredential.Table, staffwebauthncredential.FieldID, id),
+			sqlgraph.To(staffaccount.Table, staffaccount.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, staffwebauthncredential.StaffTable, staffwebauthncredential.StaffColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StaffWebauthnCredentialClient) Hooks() []Hook {
+	return c.hooks.StaffWebauthnCredential
+}
+
+// Interceptors returns the client interceptors.
+func (c *StaffWebauthnCredentialClient) Interceptors() []Interceptor {
+	return c.inters.StaffWebauthnCredential
+}
+
+func (c *StaffWebauthnCredentialClient) mutate(ctx context.Context, m *StaffWebauthnCredentialMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StaffWebauthnCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StaffWebauthnCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StaffWebauthnCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StaffWebauthnCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StaffWebauthnCredential mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		AuditEvent, OutboxEvent, PlatformSetting, PlatformSettingRevision, StaffAccount,
-		StaffInvitation, StaffLoginChallenge, StaffRole, StaffSession []ent.Hook
+		StaffConsent, StaffInvitation, StaffLoginChallenge, StaffRole, StaffSession,
+		StaffWebauthnCredential []ent.Hook
 	}
 	inters struct {
 		AuditEvent, OutboxEvent, PlatformSetting, PlatformSettingRevision, StaffAccount,
-		StaffInvitation, StaffLoginChallenge, StaffRole, StaffSession []ent.Interceptor
+		StaffConsent, StaffInvitation, StaffLoginChallenge, StaffRole, StaffSession,
+		StaffWebauthnCredential []ent.Interceptor
 	}
 )
 

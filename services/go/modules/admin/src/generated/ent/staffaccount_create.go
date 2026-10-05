@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	"zudomart/modules/admin/src/generated/ent/staffconsent"
 	"zudomart/modules/admin/src/generated/ent/staffinvitation"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
+	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -166,6 +168,32 @@ func (_c *StaffAccountCreate) SetNillableLockedUntil(v *time.Time) *StaffAccount
 	return _c
 }
 
+// SetRecoveryCodeHashes sets the "recovery_code_hashes" field.
+func (_c *StaffAccountCreate) SetRecoveryCodeHashes(v []string) *StaffAccountCreate {
+	_c.mutation.SetRecoveryCodeHashes(v)
+	return _c
+}
+
+// SetIPAllowList sets the "ip_allow_list" field.
+func (_c *StaffAccountCreate) SetIPAllowList(v []string) *StaffAccountCreate {
+	_c.mutation.SetIPAllowList(v)
+	return _c
+}
+
+// SetThemePreference sets the "theme_preference" field.
+func (_c *StaffAccountCreate) SetThemePreference(v staffaccount.ThemePreference) *StaffAccountCreate {
+	_c.mutation.SetThemePreference(v)
+	return _c
+}
+
+// SetNillableThemePreference sets the "theme_preference" field if the given value is not nil.
+func (_c *StaffAccountCreate) SetNillableThemePreference(v *staffaccount.ThemePreference) *StaffAccountCreate {
+	if v != nil {
+		_c.SetThemePreference(*v)
+	}
+	return _c
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (_c *StaffAccountCreate) SetCreatedBy(v uuid.UUID) *StaffAccountCreate {
 	_c.mutation.SetCreatedBy(v)
@@ -281,6 +309,36 @@ func (_c *StaffAccountCreate) AddInvitations(v ...*StaffInvitation) *StaffAccoun
 	return _c.AddInvitationIDs(ids...)
 }
 
+// AddPasskeyIDs adds the "passkeys" edge to the StaffWebauthnCredential entity by IDs.
+func (_c *StaffAccountCreate) AddPasskeyIDs(ids ...uuid.UUID) *StaffAccountCreate {
+	_c.mutation.AddPasskeyIDs(ids...)
+	return _c
+}
+
+// AddPasskeys adds the "passkeys" edges to the StaffWebauthnCredential entity.
+func (_c *StaffAccountCreate) AddPasskeys(v ...*StaffWebauthnCredential) *StaffAccountCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPasskeyIDs(ids...)
+}
+
+// AddConsentIDs adds the "consents" edge to the StaffConsent entity by IDs.
+func (_c *StaffAccountCreate) AddConsentIDs(ids ...uuid.UUID) *StaffAccountCreate {
+	_c.mutation.AddConsentIDs(ids...)
+	return _c
+}
+
+// AddConsents adds the "consents" edges to the StaffConsent entity.
+func (_c *StaffAccountCreate) AddConsents(v ...*StaffConsent) *StaffAccountCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddConsentIDs(ids...)
+}
+
 // Mutation returns the StaffAccountMutation object of the builder.
 func (_c *StaffAccountCreate) Mutation() *StaffAccountMutation {
 	return _c.mutation
@@ -344,6 +402,18 @@ func (_c *StaffAccountCreate) defaults() {
 		v := staffaccount.DefaultFailedAttempts
 		_c.mutation.SetFailedAttempts(v)
 	}
+	if _, ok := _c.mutation.RecoveryCodeHashes(); !ok {
+		v := staffaccount.DefaultRecoveryCodeHashes
+		_c.mutation.SetRecoveryCodeHashes(v)
+	}
+	if _, ok := _c.mutation.IPAllowList(); !ok {
+		v := staffaccount.DefaultIPAllowList
+		_c.mutation.SetIPAllowList(v)
+	}
+	if _, ok := _c.mutation.ThemePreference(); !ok {
+		v := staffaccount.DefaultThemePreference
+		_c.mutation.SetThemePreference(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := staffaccount.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -406,6 +476,20 @@ func (_c *StaffAccountCreate) check() error {
 	if v, ok := _c.mutation.FailedAttempts(); ok {
 		if err := staffaccount.FailedAttemptsValidator(v); err != nil {
 			return &ValidationError{Name: "failed_attempts", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.failed_attempts": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.RecoveryCodeHashes(); !ok {
+		return &ValidationError{Name: "recovery_code_hashes", err: errors.New(`ent: missing required field "StaffAccount.recovery_code_hashes"`)}
+	}
+	if _, ok := _c.mutation.IPAllowList(); !ok {
+		return &ValidationError{Name: "ip_allow_list", err: errors.New(`ent: missing required field "StaffAccount.ip_allow_list"`)}
+	}
+	if _, ok := _c.mutation.ThemePreference(); !ok {
+		return &ValidationError{Name: "theme_preference", err: errors.New(`ent: missing required field "StaffAccount.theme_preference"`)}
+	}
+	if v, ok := _c.mutation.ThemePreference(); ok {
+		if err := staffaccount.ThemePreferenceValidator(v); err != nil {
+			return &ValidationError{Name: "theme_preference", err: fmt.Errorf(`ent: validator failed for field "StaffAccount.theme_preference": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
@@ -498,6 +582,18 @@ func (_c *StaffAccountCreate) createSpec() (*StaffAccount, *sqlgraph.CreateSpec)
 		_spec.SetField(staffaccount.FieldLockedUntil, field.TypeTime, value)
 		_node.LockedUntil = &value
 	}
+	if value, ok := _c.mutation.RecoveryCodeHashes(); ok {
+		_spec.SetField(staffaccount.FieldRecoveryCodeHashes, field.TypeJSON, value)
+		_node.RecoveryCodeHashes = value
+	}
+	if value, ok := _c.mutation.IPAllowList(); ok {
+		_spec.SetField(staffaccount.FieldIPAllowList, field.TypeJSON, value)
+		_node.IPAllowList = value
+	}
+	if value, ok := _c.mutation.ThemePreference(); ok {
+		_spec.SetField(staffaccount.FieldThemePreference, field.TypeEnum, value)
+		_node.ThemePreference = value
+	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(staffaccount.FieldCreatedBy, field.TypeUUID, value)
 		_node.CreatedBy = &value
@@ -555,6 +651,38 @@ func (_c *StaffAccountCreate) createSpec() (*StaffAccount, *sqlgraph.CreateSpec)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(staffinvitation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PasskeysIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.PasskeysTable,
+			Columns: []string{staffaccount.PasskeysColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffwebauthncredential.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ConsentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   staffaccount.ConsentsTable,
+			Columns: []string{staffaccount.ConsentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(staffconsent.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

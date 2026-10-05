@@ -45,6 +45,12 @@ type StaffAccount struct {
 	FailedAttempts int `json:"failed_attempts,omitempty"`
 	// LockedUntil holds the value of the "locked_until" field.
 	LockedUntil *time.Time `json:"locked_until,omitempty"`
+	// RecoveryCodeHashes holds the value of the "recovery_code_hashes" field.
+	RecoveryCodeHashes []string `json:"-"`
+	// IPAllowList holds the value of the "ip_allow_list" field.
+	IPAllowList []string `json:"ip_allow_list,omitempty"`
+	// ThemePreference holds the value of the "theme_preference" field.
+	ThemePreference staffaccount.ThemePreference `json:"theme_preference,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy *uuid.UUID `json:"created_by,omitempty"`
 	// ApprovedBy holds the value of the "approved_by" field.
@@ -67,9 +73,13 @@ type StaffAccountEdges struct {
 	Challenges []*StaffLoginChallenge `json:"challenges,omitempty"`
 	// Invitations holds the value of the invitations edge.
 	Invitations []*StaffInvitation `json:"invitations,omitempty"`
+	// Passkeys holds the value of the passkeys edge.
+	Passkeys []*StaffWebauthnCredential `json:"passkeys,omitempty"`
+	// Consents holds the value of the consents edge.
+	Consents []*StaffConsent `json:"consents,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 }
 
 // SessionsOrErr returns the Sessions value or an error if the edge
@@ -99,6 +109,24 @@ func (e StaffAccountEdges) InvitationsOrErr() ([]*StaffInvitation, error) {
 	return nil, &NotLoadedError{edge: "invitations"}
 }
 
+// PasskeysOrErr returns the Passkeys value or an error if the edge
+// was not loaded in eager-loading.
+func (e StaffAccountEdges) PasskeysOrErr() ([]*StaffWebauthnCredential, error) {
+	if e.loadedTypes[3] {
+		return e.Passkeys, nil
+	}
+	return nil, &NotLoadedError{edge: "passkeys"}
+}
+
+// ConsentsOrErr returns the Consents value or an error if the edge
+// was not loaded in eager-loading.
+func (e StaffAccountEdges) ConsentsOrErr() ([]*StaffConsent, error) {
+	if e.loadedTypes[4] {
+		return e.Consents, nil
+	}
+	return nil, &NotLoadedError{edge: "consents"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*StaffAccount) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -106,11 +134,11 @@ func (*StaffAccount) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case staffaccount.FieldCreatedBy, staffaccount.FieldApprovedBy:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case staffaccount.FieldRoleIds, staffaccount.FieldPermissions, staffaccount.FieldTotpSecretEncrypted:
+		case staffaccount.FieldRoleIds, staffaccount.FieldPermissions, staffaccount.FieldTotpSecretEncrypted, staffaccount.FieldRecoveryCodeHashes, staffaccount.FieldIPAllowList:
 			values[i] = new([]byte)
 		case staffaccount.FieldTotpLastUsedStep, staffaccount.FieldFailedAttempts:
 			values[i] = new(sql.NullInt64)
-		case staffaccount.FieldEmail, staffaccount.FieldDisplayName, staffaccount.FieldRole, staffaccount.FieldPasswordHash, staffaccount.FieldStatus:
+		case staffaccount.FieldEmail, staffaccount.FieldDisplayName, staffaccount.FieldRole, staffaccount.FieldPasswordHash, staffaccount.FieldStatus, staffaccount.FieldThemePreference:
 			values[i] = new(sql.NullString)
 		case staffaccount.FieldCreatedAt, staffaccount.FieldTotpConfirmedAt, staffaccount.FieldLockedUntil, staffaccount.FieldApprovedAt, staffaccount.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -222,6 +250,28 @@ func (_m *StaffAccount) assignValues(columns []string, values []any) error {
 				_m.LockedUntil = new(time.Time)
 				*_m.LockedUntil = value.Time
 			}
+		case staffaccount.FieldRecoveryCodeHashes:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field recovery_code_hashes", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.RecoveryCodeHashes); err != nil {
+					return fmt.Errorf("unmarshal field recovery_code_hashes: %w", err)
+				}
+			}
+		case staffaccount.FieldIPAllowList:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field ip_allow_list", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.IPAllowList); err != nil {
+					return fmt.Errorf("unmarshal field ip_allow_list: %w", err)
+				}
+			}
+		case staffaccount.FieldThemePreference:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field theme_preference", values[i])
+			} else if value.Valid {
+				_m.ThemePreference = staffaccount.ThemePreference(value.String)
+			}
 		case staffaccount.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field created_by", values[i])
@@ -275,6 +325,16 @@ func (_m *StaffAccount) QueryChallenges() *StaffLoginChallengeQuery {
 // QueryInvitations queries the "invitations" edge of the StaffAccount entity.
 func (_m *StaffAccount) QueryInvitations() *StaffInvitationQuery {
 	return NewStaffAccountClient(_m.config).QueryInvitations(_m)
+}
+
+// QueryPasskeys queries the "passkeys" edge of the StaffAccount entity.
+func (_m *StaffAccount) QueryPasskeys() *StaffWebauthnCredentialQuery {
+	return NewStaffAccountClient(_m.config).QueryPasskeys(_m)
+}
+
+// QueryConsents queries the "consents" edge of the StaffAccount entity.
+func (_m *StaffAccount) QueryConsents() *StaffConsentQuery {
+	return NewStaffAccountClient(_m.config).QueryConsents(_m)
 }
 
 // Update returns a builder for updating this StaffAccount.
@@ -340,6 +400,14 @@ func (_m *StaffAccount) String() string {
 		builder.WriteString("locked_until=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("recovery_code_hashes=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("ip_allow_list=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IPAllowList))
+	builder.WriteString(", ")
+	builder.WriteString("theme_preference=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ThemePreference))
 	builder.WriteString(", ")
 	if v := _m.CreatedBy; v != nil {
 		builder.WriteString("created_by=")

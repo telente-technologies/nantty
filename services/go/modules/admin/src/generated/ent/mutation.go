@@ -14,10 +14,12 @@ import (
 	"zudomart/modules/admin/src/generated/ent/platformsettingrevision"
 	"zudomart/modules/admin/src/generated/ent/predicate"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	"zudomart/modules/admin/src/generated/ent/staffconsent"
 	"zudomart/modules/admin/src/generated/ent/staffinvitation"
 	"zudomart/modules/admin/src/generated/ent/staffloginchallenge"
 	"zudomart/modules/admin/src/generated/ent/staffrole"
 	"zudomart/modules/admin/src/generated/ent/staffsession"
+	"zudomart/modules/admin/src/generated/ent/staffwebauthncredential"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -38,10 +40,12 @@ const (
 	TypePlatformSetting         = "PlatformSetting"
 	TypePlatformSettingRevision = "PlatformSettingRevision"
 	TypeStaffAccount            = "StaffAccount"
+	TypeStaffConsent            = "StaffConsent"
 	TypeStaffInvitation         = "StaffInvitation"
 	TypeStaffLoginChallenge     = "StaffLoginChallenge"
 	TypeStaffRole               = "StaffRole"
 	TypeStaffSession            = "StaffSession"
+	TypeStaffWebauthnCredential = "StaffWebauthnCredential"
 )
 
 // AuditEventMutation represents an operation that mutates the AuditEvent nodes in the graph.
@@ -3092,43 +3096,54 @@ func (m *PlatformSettingRevisionMutation) ResetEdge(name string) error {
 // StaffAccountMutation represents an operation that mutates the StaffAccount nodes in the graph.
 type StaffAccountMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *uuid.UUID
-	created_at             *time.Time
-	email                  *string
-	display_name           *string
-	role                   *staffaccount.Role
-	role_ids               *[]string
-	appendrole_ids         []string
-	permissions            *[]string
-	appendpermissions      []string
-	password_hash          *string
-	status                 *staffaccount.Status
-	totp_secret_encrypted  *[]byte
-	totp_confirmed_at      *time.Time
-	totp_last_used_step    *int64
-	addtotp_last_used_step *int64
-	failed_attempts        *int
-	addfailed_attempts     *int
-	locked_until           *time.Time
-	created_by             *uuid.UUID
-	approved_by            *uuid.UUID
-	approved_at            *time.Time
-	updated_at             *time.Time
-	clearedFields          map[string]struct{}
-	sessions               map[uuid.UUID]struct{}
-	removedsessions        map[uuid.UUID]struct{}
-	clearedsessions        bool
-	challenges             map[uuid.UUID]struct{}
-	removedchallenges      map[uuid.UUID]struct{}
-	clearedchallenges      bool
-	invitations            map[uuid.UUID]struct{}
-	removedinvitations     map[uuid.UUID]struct{}
-	clearedinvitations     bool
-	done                   bool
-	oldValue               func(context.Context) (*StaffAccount, error)
-	predicates             []predicate.StaffAccount
+	op                         Op
+	typ                        string
+	id                         *uuid.UUID
+	created_at                 *time.Time
+	email                      *string
+	display_name               *string
+	role                       *staffaccount.Role
+	role_ids                   *[]string
+	appendrole_ids             []string
+	permissions                *[]string
+	appendpermissions          []string
+	password_hash              *string
+	status                     *staffaccount.Status
+	totp_secret_encrypted      *[]byte
+	totp_confirmed_at          *time.Time
+	totp_last_used_step        *int64
+	addtotp_last_used_step     *int64
+	failed_attempts            *int
+	addfailed_attempts         *int
+	locked_until               *time.Time
+	recovery_code_hashes       *[]string
+	appendrecovery_code_hashes []string
+	ip_allow_list              *[]string
+	appendip_allow_list        []string
+	theme_preference           *staffaccount.ThemePreference
+	created_by                 *uuid.UUID
+	approved_by                *uuid.UUID
+	approved_at                *time.Time
+	updated_at                 *time.Time
+	clearedFields              map[string]struct{}
+	sessions                   map[uuid.UUID]struct{}
+	removedsessions            map[uuid.UUID]struct{}
+	clearedsessions            bool
+	challenges                 map[uuid.UUID]struct{}
+	removedchallenges          map[uuid.UUID]struct{}
+	clearedchallenges          bool
+	invitations                map[uuid.UUID]struct{}
+	removedinvitations         map[uuid.UUID]struct{}
+	clearedinvitations         bool
+	passkeys                   map[uuid.UUID]struct{}
+	removedpasskeys            map[uuid.UUID]struct{}
+	clearedpasskeys            bool
+	consents                   map[uuid.UUID]struct{}
+	removedconsents            map[uuid.UUID]struct{}
+	clearedconsents            bool
+	done                       bool
+	oldValue                   func(context.Context) (*StaffAccount, error)
+	predicates                 []predicate.StaffAccount
 }
 
 var _ ent.Mutation = (*StaffAccountMutation)(nil)
@@ -3825,6 +3840,144 @@ func (m *StaffAccountMutation) ResetLockedUntil() {
 	delete(m.clearedFields, staffaccount.FieldLockedUntil)
 }
 
+// SetRecoveryCodeHashes sets the "recovery_code_hashes" field.
+func (m *StaffAccountMutation) SetRecoveryCodeHashes(s []string) {
+	m.recovery_code_hashes = &s
+	m.appendrecovery_code_hashes = nil
+}
+
+// RecoveryCodeHashes returns the value of the "recovery_code_hashes" field in the mutation.
+func (m *StaffAccountMutation) RecoveryCodeHashes() (r []string, exists bool) {
+	v := m.recovery_code_hashes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecoveryCodeHashes returns the old "recovery_code_hashes" field's value of the StaffAccount entity.
+// If the StaffAccount object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffAccountMutation) OldRecoveryCodeHashes(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecoveryCodeHashes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecoveryCodeHashes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecoveryCodeHashes: %w", err)
+	}
+	return oldValue.RecoveryCodeHashes, nil
+}
+
+// AppendRecoveryCodeHashes adds s to the "recovery_code_hashes" field.
+func (m *StaffAccountMutation) AppendRecoveryCodeHashes(s []string) {
+	m.appendrecovery_code_hashes = append(m.appendrecovery_code_hashes, s...)
+}
+
+// AppendedRecoveryCodeHashes returns the list of values that were appended to the "recovery_code_hashes" field in this mutation.
+func (m *StaffAccountMutation) AppendedRecoveryCodeHashes() ([]string, bool) {
+	if len(m.appendrecovery_code_hashes) == 0 {
+		return nil, false
+	}
+	return m.appendrecovery_code_hashes, true
+}
+
+// ResetRecoveryCodeHashes resets all changes to the "recovery_code_hashes" field.
+func (m *StaffAccountMutation) ResetRecoveryCodeHashes() {
+	m.recovery_code_hashes = nil
+	m.appendrecovery_code_hashes = nil
+}
+
+// SetIPAllowList sets the "ip_allow_list" field.
+func (m *StaffAccountMutation) SetIPAllowList(s []string) {
+	m.ip_allow_list = &s
+	m.appendip_allow_list = nil
+}
+
+// IPAllowList returns the value of the "ip_allow_list" field in the mutation.
+func (m *StaffAccountMutation) IPAllowList() (r []string, exists bool) {
+	v := m.ip_allow_list
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIPAllowList returns the old "ip_allow_list" field's value of the StaffAccount entity.
+// If the StaffAccount object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffAccountMutation) OldIPAllowList(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIPAllowList is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIPAllowList requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIPAllowList: %w", err)
+	}
+	return oldValue.IPAllowList, nil
+}
+
+// AppendIPAllowList adds s to the "ip_allow_list" field.
+func (m *StaffAccountMutation) AppendIPAllowList(s []string) {
+	m.appendip_allow_list = append(m.appendip_allow_list, s...)
+}
+
+// AppendedIPAllowList returns the list of values that were appended to the "ip_allow_list" field in this mutation.
+func (m *StaffAccountMutation) AppendedIPAllowList() ([]string, bool) {
+	if len(m.appendip_allow_list) == 0 {
+		return nil, false
+	}
+	return m.appendip_allow_list, true
+}
+
+// ResetIPAllowList resets all changes to the "ip_allow_list" field.
+func (m *StaffAccountMutation) ResetIPAllowList() {
+	m.ip_allow_list = nil
+	m.appendip_allow_list = nil
+}
+
+// SetThemePreference sets the "theme_preference" field.
+func (m *StaffAccountMutation) SetThemePreference(sp staffaccount.ThemePreference) {
+	m.theme_preference = &sp
+}
+
+// ThemePreference returns the value of the "theme_preference" field in the mutation.
+func (m *StaffAccountMutation) ThemePreference() (r staffaccount.ThemePreference, exists bool) {
+	v := m.theme_preference
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldThemePreference returns the old "theme_preference" field's value of the StaffAccount entity.
+// If the StaffAccount object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffAccountMutation) OldThemePreference(ctx context.Context) (v staffaccount.ThemePreference, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldThemePreference is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldThemePreference requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldThemePreference: %w", err)
+	}
+	return oldValue.ThemePreference, nil
+}
+
+// ResetThemePreference resets all changes to the "theme_preference" field.
+func (m *StaffAccountMutation) ResetThemePreference() {
+	m.theme_preference = nil
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (m *StaffAccountMutation) SetCreatedBy(u uuid.UUID) {
 	m.created_by = &u
@@ -4170,6 +4323,114 @@ func (m *StaffAccountMutation) ResetInvitations() {
 	m.removedinvitations = nil
 }
 
+// AddPasskeyIDs adds the "passkeys" edge to the StaffWebauthnCredential entity by ids.
+func (m *StaffAccountMutation) AddPasskeyIDs(ids ...uuid.UUID) {
+	if m.passkeys == nil {
+		m.passkeys = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.passkeys[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPasskeys clears the "passkeys" edge to the StaffWebauthnCredential entity.
+func (m *StaffAccountMutation) ClearPasskeys() {
+	m.clearedpasskeys = true
+}
+
+// PasskeysCleared reports if the "passkeys" edge to the StaffWebauthnCredential entity was cleared.
+func (m *StaffAccountMutation) PasskeysCleared() bool {
+	return m.clearedpasskeys
+}
+
+// RemovePasskeyIDs removes the "passkeys" edge to the StaffWebauthnCredential entity by IDs.
+func (m *StaffAccountMutation) RemovePasskeyIDs(ids ...uuid.UUID) {
+	if m.removedpasskeys == nil {
+		m.removedpasskeys = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.passkeys, ids[i])
+		m.removedpasskeys[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPasskeys returns the removed IDs of the "passkeys" edge to the StaffWebauthnCredential entity.
+func (m *StaffAccountMutation) RemovedPasskeysIDs() (ids []uuid.UUID) {
+	for id := range m.removedpasskeys {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PasskeysIDs returns the "passkeys" edge IDs in the mutation.
+func (m *StaffAccountMutation) PasskeysIDs() (ids []uuid.UUID) {
+	for id := range m.passkeys {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPasskeys resets all changes to the "passkeys" edge.
+func (m *StaffAccountMutation) ResetPasskeys() {
+	m.passkeys = nil
+	m.clearedpasskeys = false
+	m.removedpasskeys = nil
+}
+
+// AddConsentIDs adds the "consents" edge to the StaffConsent entity by ids.
+func (m *StaffAccountMutation) AddConsentIDs(ids ...uuid.UUID) {
+	if m.consents == nil {
+		m.consents = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.consents[ids[i]] = struct{}{}
+	}
+}
+
+// ClearConsents clears the "consents" edge to the StaffConsent entity.
+func (m *StaffAccountMutation) ClearConsents() {
+	m.clearedconsents = true
+}
+
+// ConsentsCleared reports if the "consents" edge to the StaffConsent entity was cleared.
+func (m *StaffAccountMutation) ConsentsCleared() bool {
+	return m.clearedconsents
+}
+
+// RemoveConsentIDs removes the "consents" edge to the StaffConsent entity by IDs.
+func (m *StaffAccountMutation) RemoveConsentIDs(ids ...uuid.UUID) {
+	if m.removedconsents == nil {
+		m.removedconsents = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.consents, ids[i])
+		m.removedconsents[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedConsents returns the removed IDs of the "consents" edge to the StaffConsent entity.
+func (m *StaffAccountMutation) RemovedConsentsIDs() (ids []uuid.UUID) {
+	for id := range m.removedconsents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ConsentsIDs returns the "consents" edge IDs in the mutation.
+func (m *StaffAccountMutation) ConsentsIDs() (ids []uuid.UUID) {
+	for id := range m.consents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetConsents resets all changes to the "consents" edge.
+func (m *StaffAccountMutation) ResetConsents() {
+	m.consents = nil
+	m.clearedconsents = false
+	m.removedconsents = nil
+}
+
 // Where appends a list predicates to the StaffAccountMutation builder.
 func (m *StaffAccountMutation) Where(ps ...predicate.StaffAccount) {
 	m.predicates = append(m.predicates, ps...)
@@ -4204,7 +4465,7 @@ func (m *StaffAccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StaffAccountMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 20)
 	if m.created_at != nil {
 		fields = append(fields, staffaccount.FieldCreatedAt)
 	}
@@ -4243,6 +4504,15 @@ func (m *StaffAccountMutation) Fields() []string {
 	}
 	if m.locked_until != nil {
 		fields = append(fields, staffaccount.FieldLockedUntil)
+	}
+	if m.recovery_code_hashes != nil {
+		fields = append(fields, staffaccount.FieldRecoveryCodeHashes)
+	}
+	if m.ip_allow_list != nil {
+		fields = append(fields, staffaccount.FieldIPAllowList)
+	}
+	if m.theme_preference != nil {
+		fields = append(fields, staffaccount.FieldThemePreference)
 	}
 	if m.created_by != nil {
 		fields = append(fields, staffaccount.FieldCreatedBy)
@@ -4290,6 +4560,12 @@ func (m *StaffAccountMutation) Field(name string) (ent.Value, bool) {
 		return m.FailedAttempts()
 	case staffaccount.FieldLockedUntil:
 		return m.LockedUntil()
+	case staffaccount.FieldRecoveryCodeHashes:
+		return m.RecoveryCodeHashes()
+	case staffaccount.FieldIPAllowList:
+		return m.IPAllowList()
+	case staffaccount.FieldThemePreference:
+		return m.ThemePreference()
 	case staffaccount.FieldCreatedBy:
 		return m.CreatedBy()
 	case staffaccount.FieldApprovedBy:
@@ -4333,6 +4609,12 @@ func (m *StaffAccountMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldFailedAttempts(ctx)
 	case staffaccount.FieldLockedUntil:
 		return m.OldLockedUntil(ctx)
+	case staffaccount.FieldRecoveryCodeHashes:
+		return m.OldRecoveryCodeHashes(ctx)
+	case staffaccount.FieldIPAllowList:
+		return m.OldIPAllowList(ctx)
+	case staffaccount.FieldThemePreference:
+		return m.OldThemePreference(ctx)
 	case staffaccount.FieldCreatedBy:
 		return m.OldCreatedBy(ctx)
 	case staffaccount.FieldApprovedBy:
@@ -4440,6 +4722,27 @@ func (m *StaffAccountMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLockedUntil(v)
+		return nil
+	case staffaccount.FieldRecoveryCodeHashes:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecoveryCodeHashes(v)
+		return nil
+	case staffaccount.FieldIPAllowList:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIPAllowList(v)
+		return nil
+	case staffaccount.FieldThemePreference:
+		v, ok := value.(staffaccount.ThemePreference)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetThemePreference(v)
 		return nil
 	case staffaccount.FieldCreatedBy:
 		v, ok := value.(uuid.UUID)
@@ -4629,6 +4932,15 @@ func (m *StaffAccountMutation) ResetField(name string) error {
 	case staffaccount.FieldLockedUntil:
 		m.ResetLockedUntil()
 		return nil
+	case staffaccount.FieldRecoveryCodeHashes:
+		m.ResetRecoveryCodeHashes()
+		return nil
+	case staffaccount.FieldIPAllowList:
+		m.ResetIPAllowList()
+		return nil
+	case staffaccount.FieldThemePreference:
+		m.ResetThemePreference()
+		return nil
 	case staffaccount.FieldCreatedBy:
 		m.ResetCreatedBy()
 		return nil
@@ -4647,7 +4959,7 @@ func (m *StaffAccountMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *StaffAccountMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.sessions != nil {
 		edges = append(edges, staffaccount.EdgeSessions)
 	}
@@ -4656,6 +4968,12 @@ func (m *StaffAccountMutation) AddedEdges() []string {
 	}
 	if m.invitations != nil {
 		edges = append(edges, staffaccount.EdgeInvitations)
+	}
+	if m.passkeys != nil {
+		edges = append(edges, staffaccount.EdgePasskeys)
+	}
+	if m.consents != nil {
+		edges = append(edges, staffaccount.EdgeConsents)
 	}
 	return edges
 }
@@ -4682,13 +5000,25 @@ func (m *StaffAccountMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case staffaccount.EdgePasskeys:
+		ids := make([]ent.Value, 0, len(m.passkeys))
+		for id := range m.passkeys {
+			ids = append(ids, id)
+		}
+		return ids
+	case staffaccount.EdgeConsents:
+		ids := make([]ent.Value, 0, len(m.consents))
+		for id := range m.consents {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *StaffAccountMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.removedsessions != nil {
 		edges = append(edges, staffaccount.EdgeSessions)
 	}
@@ -4697,6 +5027,12 @@ func (m *StaffAccountMutation) RemovedEdges() []string {
 	}
 	if m.removedinvitations != nil {
 		edges = append(edges, staffaccount.EdgeInvitations)
+	}
+	if m.removedpasskeys != nil {
+		edges = append(edges, staffaccount.EdgePasskeys)
+	}
+	if m.removedconsents != nil {
+		edges = append(edges, staffaccount.EdgeConsents)
 	}
 	return edges
 }
@@ -4723,13 +5059,25 @@ func (m *StaffAccountMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case staffaccount.EdgePasskeys:
+		ids := make([]ent.Value, 0, len(m.removedpasskeys))
+		for id := range m.removedpasskeys {
+			ids = append(ids, id)
+		}
+		return ids
+	case staffaccount.EdgeConsents:
+		ids := make([]ent.Value, 0, len(m.removedconsents))
+		for id := range m.removedconsents {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *StaffAccountMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.clearedsessions {
 		edges = append(edges, staffaccount.EdgeSessions)
 	}
@@ -4738,6 +5086,12 @@ func (m *StaffAccountMutation) ClearedEdges() []string {
 	}
 	if m.clearedinvitations {
 		edges = append(edges, staffaccount.EdgeInvitations)
+	}
+	if m.clearedpasskeys {
+		edges = append(edges, staffaccount.EdgePasskeys)
+	}
+	if m.clearedconsents {
+		edges = append(edges, staffaccount.EdgeConsents)
 	}
 	return edges
 }
@@ -4752,6 +5106,10 @@ func (m *StaffAccountMutation) EdgeCleared(name string) bool {
 		return m.clearedchallenges
 	case staffaccount.EdgeInvitations:
 		return m.clearedinvitations
+	case staffaccount.EdgePasskeys:
+		return m.clearedpasskeys
+	case staffaccount.EdgeConsents:
+		return m.clearedconsents
 	}
 	return false
 }
@@ -4777,8 +5135,778 @@ func (m *StaffAccountMutation) ResetEdge(name string) error {
 	case staffaccount.EdgeInvitations:
 		m.ResetInvitations()
 		return nil
+	case staffaccount.EdgePasskeys:
+		m.ResetPasskeys()
+		return nil
+	case staffaccount.EdgeConsents:
+		m.ResetConsents()
+		return nil
 	}
 	return fmt.Errorf("unknown StaffAccount edge %s", name)
+}
+
+// StaffConsentMutation represents an operation that mutates the StaffConsent nodes in the graph.
+type StaffConsentMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	created_at     *time.Time
+	policy_version *string
+	categories     *map[string]bool
+	source         *string
+	decided_at     *time.Time
+	ip_address     *string
+	user_agent     *string
+	clearedFields  map[string]struct{}
+	staff          *uuid.UUID
+	clearedstaff   bool
+	done           bool
+	oldValue       func(context.Context) (*StaffConsent, error)
+	predicates     []predicate.StaffConsent
+}
+
+var _ ent.Mutation = (*StaffConsentMutation)(nil)
+
+// staffconsentOption allows management of the mutation configuration using functional options.
+type staffconsentOption func(*StaffConsentMutation)
+
+// newStaffConsentMutation creates new mutation for the StaffConsent entity.
+func newStaffConsentMutation(c config, op Op, opts ...staffconsentOption) *StaffConsentMutation {
+	m := &StaffConsentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeStaffConsent,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withStaffConsentID sets the ID field of the mutation.
+func withStaffConsentID(id uuid.UUID) staffconsentOption {
+	return func(m *StaffConsentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *StaffConsent
+		)
+		m.oldValue = func(ctx context.Context) (*StaffConsent, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().StaffConsent.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withStaffConsent sets the old StaffConsent of the mutation.
+func withStaffConsent(node *StaffConsent) staffconsentOption {
+	return func(m *StaffConsentMutation) {
+		m.oldValue = func(context.Context) (*StaffConsent, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m StaffConsentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m StaffConsentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of StaffConsent entities.
+func (m *StaffConsentMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *StaffConsentMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *StaffConsentMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().StaffConsent.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *StaffConsentMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *StaffConsentMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the StaffConsent entity.
+// If the StaffConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffConsentMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *StaffConsentMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetStaffID sets the "staff_id" field.
+func (m *StaffConsentMutation) SetStaffID(u uuid.UUID) {
+	m.staff = &u
+}
+
+// StaffID returns the value of the "staff_id" field in the mutation.
+func (m *StaffConsentMutation) StaffID() (r uuid.UUID, exists bool) {
+	v := m.staff
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStaffID returns the old "staff_id" field's value of the StaffConsent entity.
+// If the StaffConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffConsentMutation) OldStaffID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStaffID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStaffID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStaffID: %w", err)
+	}
+	return oldValue.StaffID, nil
+}
+
+// ResetStaffID resets all changes to the "staff_id" field.
+func (m *StaffConsentMutation) ResetStaffID() {
+	m.staff = nil
+}
+
+// SetPolicyVersion sets the "policy_version" field.
+func (m *StaffConsentMutation) SetPolicyVersion(s string) {
+	m.policy_version = &s
+}
+
+// PolicyVersion returns the value of the "policy_version" field in the mutation.
+func (m *StaffConsentMutation) PolicyVersion() (r string, exists bool) {
+	v := m.policy_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPolicyVersion returns the old "policy_version" field's value of the StaffConsent entity.
+// If the StaffConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffConsentMutation) OldPolicyVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPolicyVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPolicyVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPolicyVersion: %w", err)
+	}
+	return oldValue.PolicyVersion, nil
+}
+
+// ResetPolicyVersion resets all changes to the "policy_version" field.
+func (m *StaffConsentMutation) ResetPolicyVersion() {
+	m.policy_version = nil
+}
+
+// SetCategories sets the "categories" field.
+func (m *StaffConsentMutation) SetCategories(value map[string]bool) {
+	m.categories = &value
+}
+
+// Categories returns the value of the "categories" field in the mutation.
+func (m *StaffConsentMutation) Categories() (r map[string]bool, exists bool) {
+	v := m.categories
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategories returns the old "categories" field's value of the StaffConsent entity.
+// If the StaffConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffConsentMutation) OldCategories(ctx context.Context) (v map[string]bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategories is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategories requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategories: %w", err)
+	}
+	return oldValue.Categories, nil
+}
+
+// ResetCategories resets all changes to the "categories" field.
+func (m *StaffConsentMutation) ResetCategories() {
+	m.categories = nil
+}
+
+// SetSource sets the "source" field.
+func (m *StaffConsentMutation) SetSource(s string) {
+	m.source = &s
+}
+
+// Source returns the value of the "source" field in the mutation.
+func (m *StaffConsentMutation) Source() (r string, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSource returns the old "source" field's value of the StaffConsent entity.
+// If the StaffConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffConsentMutation) OldSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSource: %w", err)
+	}
+	return oldValue.Source, nil
+}
+
+// ResetSource resets all changes to the "source" field.
+func (m *StaffConsentMutation) ResetSource() {
+	m.source = nil
+}
+
+// SetDecidedAt sets the "decided_at" field.
+func (m *StaffConsentMutation) SetDecidedAt(t time.Time) {
+	m.decided_at = &t
+}
+
+// DecidedAt returns the value of the "decided_at" field in the mutation.
+func (m *StaffConsentMutation) DecidedAt() (r time.Time, exists bool) {
+	v := m.decided_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDecidedAt returns the old "decided_at" field's value of the StaffConsent entity.
+// If the StaffConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffConsentMutation) OldDecidedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDecidedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDecidedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDecidedAt: %w", err)
+	}
+	return oldValue.DecidedAt, nil
+}
+
+// ResetDecidedAt resets all changes to the "decided_at" field.
+func (m *StaffConsentMutation) ResetDecidedAt() {
+	m.decided_at = nil
+}
+
+// SetIPAddress sets the "ip_address" field.
+func (m *StaffConsentMutation) SetIPAddress(s string) {
+	m.ip_address = &s
+}
+
+// IPAddress returns the value of the "ip_address" field in the mutation.
+func (m *StaffConsentMutation) IPAddress() (r string, exists bool) {
+	v := m.ip_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIPAddress returns the old "ip_address" field's value of the StaffConsent entity.
+// If the StaffConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffConsentMutation) OldIPAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIPAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIPAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIPAddress: %w", err)
+	}
+	return oldValue.IPAddress, nil
+}
+
+// ResetIPAddress resets all changes to the "ip_address" field.
+func (m *StaffConsentMutation) ResetIPAddress() {
+	m.ip_address = nil
+}
+
+// SetUserAgent sets the "user_agent" field.
+func (m *StaffConsentMutation) SetUserAgent(s string) {
+	m.user_agent = &s
+}
+
+// UserAgent returns the value of the "user_agent" field in the mutation.
+func (m *StaffConsentMutation) UserAgent() (r string, exists bool) {
+	v := m.user_agent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserAgent returns the old "user_agent" field's value of the StaffConsent entity.
+// If the StaffConsent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffConsentMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserAgent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserAgent: %w", err)
+	}
+	return oldValue.UserAgent, nil
+}
+
+// ResetUserAgent resets all changes to the "user_agent" field.
+func (m *StaffConsentMutation) ResetUserAgent() {
+	m.user_agent = nil
+}
+
+// ClearStaff clears the "staff" edge to the StaffAccount entity.
+func (m *StaffConsentMutation) ClearStaff() {
+	m.clearedstaff = true
+	m.clearedFields[staffconsent.FieldStaffID] = struct{}{}
+}
+
+// StaffCleared reports if the "staff" edge to the StaffAccount entity was cleared.
+func (m *StaffConsentMutation) StaffCleared() bool {
+	return m.clearedstaff
+}
+
+// StaffIDs returns the "staff" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// StaffID instead. It exists only for internal usage by the builders.
+func (m *StaffConsentMutation) StaffIDs() (ids []uuid.UUID) {
+	if id := m.staff; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetStaff resets all changes to the "staff" edge.
+func (m *StaffConsentMutation) ResetStaff() {
+	m.staff = nil
+	m.clearedstaff = false
+}
+
+// Where appends a list predicates to the StaffConsentMutation builder.
+func (m *StaffConsentMutation) Where(ps ...predicate.StaffConsent) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the StaffConsentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *StaffConsentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.StaffConsent, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *StaffConsentMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *StaffConsentMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (StaffConsent).
+func (m *StaffConsentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *StaffConsentMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, staffconsent.FieldCreatedAt)
+	}
+	if m.staff != nil {
+		fields = append(fields, staffconsent.FieldStaffID)
+	}
+	if m.policy_version != nil {
+		fields = append(fields, staffconsent.FieldPolicyVersion)
+	}
+	if m.categories != nil {
+		fields = append(fields, staffconsent.FieldCategories)
+	}
+	if m.source != nil {
+		fields = append(fields, staffconsent.FieldSource)
+	}
+	if m.decided_at != nil {
+		fields = append(fields, staffconsent.FieldDecidedAt)
+	}
+	if m.ip_address != nil {
+		fields = append(fields, staffconsent.FieldIPAddress)
+	}
+	if m.user_agent != nil {
+		fields = append(fields, staffconsent.FieldUserAgent)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *StaffConsentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case staffconsent.FieldCreatedAt:
+		return m.CreatedAt()
+	case staffconsent.FieldStaffID:
+		return m.StaffID()
+	case staffconsent.FieldPolicyVersion:
+		return m.PolicyVersion()
+	case staffconsent.FieldCategories:
+		return m.Categories()
+	case staffconsent.FieldSource:
+		return m.Source()
+	case staffconsent.FieldDecidedAt:
+		return m.DecidedAt()
+	case staffconsent.FieldIPAddress:
+		return m.IPAddress()
+	case staffconsent.FieldUserAgent:
+		return m.UserAgent()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *StaffConsentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case staffconsent.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case staffconsent.FieldStaffID:
+		return m.OldStaffID(ctx)
+	case staffconsent.FieldPolicyVersion:
+		return m.OldPolicyVersion(ctx)
+	case staffconsent.FieldCategories:
+		return m.OldCategories(ctx)
+	case staffconsent.FieldSource:
+		return m.OldSource(ctx)
+	case staffconsent.FieldDecidedAt:
+		return m.OldDecidedAt(ctx)
+	case staffconsent.FieldIPAddress:
+		return m.OldIPAddress(ctx)
+	case staffconsent.FieldUserAgent:
+		return m.OldUserAgent(ctx)
+	}
+	return nil, fmt.Errorf("unknown StaffConsent field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StaffConsentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case staffconsent.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case staffconsent.FieldStaffID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStaffID(v)
+		return nil
+	case staffconsent.FieldPolicyVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPolicyVersion(v)
+		return nil
+	case staffconsent.FieldCategories:
+		v, ok := value.(map[string]bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategories(v)
+		return nil
+	case staffconsent.FieldSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSource(v)
+		return nil
+	case staffconsent.FieldDecidedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDecidedAt(v)
+		return nil
+	case staffconsent.FieldIPAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIPAddress(v)
+		return nil
+	case staffconsent.FieldUserAgent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserAgent(v)
+		return nil
+	}
+	return fmt.Errorf("unknown StaffConsent field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *StaffConsentMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *StaffConsentMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StaffConsentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown StaffConsent numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *StaffConsentMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *StaffConsentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *StaffConsentMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown StaffConsent nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *StaffConsentMutation) ResetField(name string) error {
+	switch name {
+	case staffconsent.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case staffconsent.FieldStaffID:
+		m.ResetStaffID()
+		return nil
+	case staffconsent.FieldPolicyVersion:
+		m.ResetPolicyVersion()
+		return nil
+	case staffconsent.FieldCategories:
+		m.ResetCategories()
+		return nil
+	case staffconsent.FieldSource:
+		m.ResetSource()
+		return nil
+	case staffconsent.FieldDecidedAt:
+		m.ResetDecidedAt()
+		return nil
+	case staffconsent.FieldIPAddress:
+		m.ResetIPAddress()
+		return nil
+	case staffconsent.FieldUserAgent:
+		m.ResetUserAgent()
+		return nil
+	}
+	return fmt.Errorf("unknown StaffConsent field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *StaffConsentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.staff != nil {
+		edges = append(edges, staffconsent.EdgeStaff)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *StaffConsentMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case staffconsent.EdgeStaff:
+		if id := m.staff; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *StaffConsentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *StaffConsentMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *StaffConsentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedstaff {
+		edges = append(edges, staffconsent.EdgeStaff)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *StaffConsentMutation) EdgeCleared(name string) bool {
+	switch name {
+	case staffconsent.EdgeStaff:
+		return m.clearedstaff
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *StaffConsentMutation) ClearEdge(name string) error {
+	switch name {
+	case staffconsent.EdgeStaff:
+		m.ClearStaff()
+		return nil
+	}
+	return fmt.Errorf("unknown StaffConsent unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *StaffConsentMutation) ResetEdge(name string) error {
+	switch name {
+	case staffconsent.EdgeStaff:
+		m.ResetStaff()
+		return nil
+	}
+	return fmt.Errorf("unknown StaffConsent edge %s", name)
 }
 
 // StaffInvitationMutation represents an operation that mutates the StaffInvitation nodes in the graph.
@@ -5408,22 +6536,23 @@ func (m *StaffInvitationMutation) ResetEdge(name string) error {
 // StaffLoginChallengeMutation represents an operation that mutates the StaffLoginChallenge nodes in the graph.
 type StaffLoginChallengeMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	created_at    *time.Time
-	token_hash    *string
-	purpose       *staffloginchallenge.Purpose
-	expires_at    *time.Time
-	consumed_at   *time.Time
-	attempts      *int
-	addattempts   *int
-	clearedFields map[string]struct{}
-	staff         *uuid.UUID
-	clearedstaff  bool
-	done          bool
-	oldValue      func(context.Context) (*StaffLoginChallenge, error)
-	predicates    []predicate.StaffLoginChallenge
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	created_at       *time.Time
+	token_hash       *string
+	purpose          *staffloginchallenge.Purpose
+	expires_at       *time.Time
+	consumed_at      *time.Time
+	attempts         *int
+	addattempts      *int
+	webauthn_session *[]byte
+	clearedFields    map[string]struct{}
+	staff            *uuid.UUID
+	clearedstaff     bool
+	done             bool
+	oldValue         func(context.Context) (*StaffLoginChallenge, error)
+	predicates       []predicate.StaffLoginChallenge
 }
 
 var _ ent.Mutation = (*StaffLoginChallengeMutation)(nil)
@@ -5815,6 +6944,55 @@ func (m *StaffLoginChallengeMutation) ResetAttempts() {
 	m.addattempts = nil
 }
 
+// SetWebauthnSession sets the "webauthn_session" field.
+func (m *StaffLoginChallengeMutation) SetWebauthnSession(b []byte) {
+	m.webauthn_session = &b
+}
+
+// WebauthnSession returns the value of the "webauthn_session" field in the mutation.
+func (m *StaffLoginChallengeMutation) WebauthnSession() (r []byte, exists bool) {
+	v := m.webauthn_session
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWebauthnSession returns the old "webauthn_session" field's value of the StaffLoginChallenge entity.
+// If the StaffLoginChallenge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffLoginChallengeMutation) OldWebauthnSession(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWebauthnSession is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWebauthnSession requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWebauthnSession: %w", err)
+	}
+	return oldValue.WebauthnSession, nil
+}
+
+// ClearWebauthnSession clears the value of the "webauthn_session" field.
+func (m *StaffLoginChallengeMutation) ClearWebauthnSession() {
+	m.webauthn_session = nil
+	m.clearedFields[staffloginchallenge.FieldWebauthnSession] = struct{}{}
+}
+
+// WebauthnSessionCleared returns if the "webauthn_session" field was cleared in this mutation.
+func (m *StaffLoginChallengeMutation) WebauthnSessionCleared() bool {
+	_, ok := m.clearedFields[staffloginchallenge.FieldWebauthnSession]
+	return ok
+}
+
+// ResetWebauthnSession resets all changes to the "webauthn_session" field.
+func (m *StaffLoginChallengeMutation) ResetWebauthnSession() {
+	m.webauthn_session = nil
+	delete(m.clearedFields, staffloginchallenge.FieldWebauthnSession)
+}
+
 // ClearStaff clears the "staff" edge to the StaffAccount entity.
 func (m *StaffLoginChallengeMutation) ClearStaff() {
 	m.clearedstaff = true
@@ -5876,7 +7054,7 @@ func (m *StaffLoginChallengeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StaffLoginChallengeMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, staffloginchallenge.FieldCreatedAt)
 	}
@@ -5897,6 +7075,9 @@ func (m *StaffLoginChallengeMutation) Fields() []string {
 	}
 	if m.attempts != nil {
 		fields = append(fields, staffloginchallenge.FieldAttempts)
+	}
+	if m.webauthn_session != nil {
+		fields = append(fields, staffloginchallenge.FieldWebauthnSession)
 	}
 	return fields
 }
@@ -5920,6 +7101,8 @@ func (m *StaffLoginChallengeMutation) Field(name string) (ent.Value, bool) {
 		return m.ConsumedAt()
 	case staffloginchallenge.FieldAttempts:
 		return m.Attempts()
+	case staffloginchallenge.FieldWebauthnSession:
+		return m.WebauthnSession()
 	}
 	return nil, false
 }
@@ -5943,6 +7126,8 @@ func (m *StaffLoginChallengeMutation) OldField(ctx context.Context, name string)
 		return m.OldConsumedAt(ctx)
 	case staffloginchallenge.FieldAttempts:
 		return m.OldAttempts(ctx)
+	case staffloginchallenge.FieldWebauthnSession:
+		return m.OldWebauthnSession(ctx)
 	}
 	return nil, fmt.Errorf("unknown StaffLoginChallenge field %s", name)
 }
@@ -6001,6 +7186,13 @@ func (m *StaffLoginChallengeMutation) SetField(name string, value ent.Value) err
 		}
 		m.SetAttempts(v)
 		return nil
+	case staffloginchallenge.FieldWebauthnSession:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWebauthnSession(v)
+		return nil
 	}
 	return fmt.Errorf("unknown StaffLoginChallenge field %s", name)
 }
@@ -6049,6 +7241,9 @@ func (m *StaffLoginChallengeMutation) ClearedFields() []string {
 	if m.FieldCleared(staffloginchallenge.FieldConsumedAt) {
 		fields = append(fields, staffloginchallenge.FieldConsumedAt)
 	}
+	if m.FieldCleared(staffloginchallenge.FieldWebauthnSession) {
+		fields = append(fields, staffloginchallenge.FieldWebauthnSession)
+	}
 	return fields
 }
 
@@ -6065,6 +7260,9 @@ func (m *StaffLoginChallengeMutation) ClearField(name string) error {
 	switch name {
 	case staffloginchallenge.FieldConsumedAt:
 		m.ClearConsumedAt()
+		return nil
+	case staffloginchallenge.FieldWebauthnSession:
+		m.ClearWebauthnSession()
 		return nil
 	}
 	return fmt.Errorf("unknown StaffLoginChallenge nullable field %s", name)
@@ -6094,6 +7292,9 @@ func (m *StaffLoginChallengeMutation) ResetField(name string) error {
 		return nil
 	case staffloginchallenge.FieldAttempts:
 		m.ResetAttempts()
+		return nil
+	case staffloginchallenge.FieldWebauthnSession:
+		m.ResetWebauthnSession()
 		return nil
 	}
 	return fmt.Errorf("unknown StaffLoginChallenge field %s", name)
@@ -6881,6 +8082,9 @@ type StaffSessionMutation struct {
 	last_used_at          *time.Time
 	expires_at            *time.Time
 	revoked_at            *time.Time
+	webauthn_session      *[]byte
+	webauthn_ceremony     *staffsession.WebauthnCeremony
+	webauthn_expires_at   *time.Time
 	clearedFields         map[string]struct{}
 	staff                 *uuid.UUID
 	clearedstaff          bool
@@ -7343,6 +8547,153 @@ func (m *StaffSessionMutation) ResetRevokedAt() {
 	delete(m.clearedFields, staffsession.FieldRevokedAt)
 }
 
+// SetWebauthnSession sets the "webauthn_session" field.
+func (m *StaffSessionMutation) SetWebauthnSession(b []byte) {
+	m.webauthn_session = &b
+}
+
+// WebauthnSession returns the value of the "webauthn_session" field in the mutation.
+func (m *StaffSessionMutation) WebauthnSession() (r []byte, exists bool) {
+	v := m.webauthn_session
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWebauthnSession returns the old "webauthn_session" field's value of the StaffSession entity.
+// If the StaffSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffSessionMutation) OldWebauthnSession(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWebauthnSession is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWebauthnSession requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWebauthnSession: %w", err)
+	}
+	return oldValue.WebauthnSession, nil
+}
+
+// ClearWebauthnSession clears the value of the "webauthn_session" field.
+func (m *StaffSessionMutation) ClearWebauthnSession() {
+	m.webauthn_session = nil
+	m.clearedFields[staffsession.FieldWebauthnSession] = struct{}{}
+}
+
+// WebauthnSessionCleared returns if the "webauthn_session" field was cleared in this mutation.
+func (m *StaffSessionMutation) WebauthnSessionCleared() bool {
+	_, ok := m.clearedFields[staffsession.FieldWebauthnSession]
+	return ok
+}
+
+// ResetWebauthnSession resets all changes to the "webauthn_session" field.
+func (m *StaffSessionMutation) ResetWebauthnSession() {
+	m.webauthn_session = nil
+	delete(m.clearedFields, staffsession.FieldWebauthnSession)
+}
+
+// SetWebauthnCeremony sets the "webauthn_ceremony" field.
+func (m *StaffSessionMutation) SetWebauthnCeremony(sc staffsession.WebauthnCeremony) {
+	m.webauthn_ceremony = &sc
+}
+
+// WebauthnCeremony returns the value of the "webauthn_ceremony" field in the mutation.
+func (m *StaffSessionMutation) WebauthnCeremony() (r staffsession.WebauthnCeremony, exists bool) {
+	v := m.webauthn_ceremony
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWebauthnCeremony returns the old "webauthn_ceremony" field's value of the StaffSession entity.
+// If the StaffSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffSessionMutation) OldWebauthnCeremony(ctx context.Context) (v *staffsession.WebauthnCeremony, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWebauthnCeremony is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWebauthnCeremony requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWebauthnCeremony: %w", err)
+	}
+	return oldValue.WebauthnCeremony, nil
+}
+
+// ClearWebauthnCeremony clears the value of the "webauthn_ceremony" field.
+func (m *StaffSessionMutation) ClearWebauthnCeremony() {
+	m.webauthn_ceremony = nil
+	m.clearedFields[staffsession.FieldWebauthnCeremony] = struct{}{}
+}
+
+// WebauthnCeremonyCleared returns if the "webauthn_ceremony" field was cleared in this mutation.
+func (m *StaffSessionMutation) WebauthnCeremonyCleared() bool {
+	_, ok := m.clearedFields[staffsession.FieldWebauthnCeremony]
+	return ok
+}
+
+// ResetWebauthnCeremony resets all changes to the "webauthn_ceremony" field.
+func (m *StaffSessionMutation) ResetWebauthnCeremony() {
+	m.webauthn_ceremony = nil
+	delete(m.clearedFields, staffsession.FieldWebauthnCeremony)
+}
+
+// SetWebauthnExpiresAt sets the "webauthn_expires_at" field.
+func (m *StaffSessionMutation) SetWebauthnExpiresAt(t time.Time) {
+	m.webauthn_expires_at = &t
+}
+
+// WebauthnExpiresAt returns the value of the "webauthn_expires_at" field in the mutation.
+func (m *StaffSessionMutation) WebauthnExpiresAt() (r time.Time, exists bool) {
+	v := m.webauthn_expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWebauthnExpiresAt returns the old "webauthn_expires_at" field's value of the StaffSession entity.
+// If the StaffSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffSessionMutation) OldWebauthnExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWebauthnExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWebauthnExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWebauthnExpiresAt: %w", err)
+	}
+	return oldValue.WebauthnExpiresAt, nil
+}
+
+// ClearWebauthnExpiresAt clears the value of the "webauthn_expires_at" field.
+func (m *StaffSessionMutation) ClearWebauthnExpiresAt() {
+	m.webauthn_expires_at = nil
+	m.clearedFields[staffsession.FieldWebauthnExpiresAt] = struct{}{}
+}
+
+// WebauthnExpiresAtCleared returns if the "webauthn_expires_at" field was cleared in this mutation.
+func (m *StaffSessionMutation) WebauthnExpiresAtCleared() bool {
+	_, ok := m.clearedFields[staffsession.FieldWebauthnExpiresAt]
+	return ok
+}
+
+// ResetWebauthnExpiresAt resets all changes to the "webauthn_expires_at" field.
+func (m *StaffSessionMutation) ResetWebauthnExpiresAt() {
+	m.webauthn_expires_at = nil
+	delete(m.clearedFields, staffsession.FieldWebauthnExpiresAt)
+}
+
 // ClearStaff clears the "staff" edge to the StaffAccount entity.
 func (m *StaffSessionMutation) ClearStaff() {
 	m.clearedstaff = true
@@ -7404,7 +8755,7 @@ func (m *StaffSessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StaffSessionMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, staffsession.FieldCreatedAt)
 	}
@@ -7432,6 +8783,15 @@ func (m *StaffSessionMutation) Fields() []string {
 	if m.revoked_at != nil {
 		fields = append(fields, staffsession.FieldRevokedAt)
 	}
+	if m.webauthn_session != nil {
+		fields = append(fields, staffsession.FieldWebauthnSession)
+	}
+	if m.webauthn_ceremony != nil {
+		fields = append(fields, staffsession.FieldWebauthnCeremony)
+	}
+	if m.webauthn_expires_at != nil {
+		fields = append(fields, staffsession.FieldWebauthnExpiresAt)
+	}
 	return fields
 }
 
@@ -7458,6 +8818,12 @@ func (m *StaffSessionMutation) Field(name string) (ent.Value, bool) {
 		return m.ExpiresAt()
 	case staffsession.FieldRevokedAt:
 		return m.RevokedAt()
+	case staffsession.FieldWebauthnSession:
+		return m.WebauthnSession()
+	case staffsession.FieldWebauthnCeremony:
+		return m.WebauthnCeremony()
+	case staffsession.FieldWebauthnExpiresAt:
+		return m.WebauthnExpiresAt()
 	}
 	return nil, false
 }
@@ -7485,6 +8851,12 @@ func (m *StaffSessionMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldExpiresAt(ctx)
 	case staffsession.FieldRevokedAt:
 		return m.OldRevokedAt(ctx)
+	case staffsession.FieldWebauthnSession:
+		return m.OldWebauthnSession(ctx)
+	case staffsession.FieldWebauthnCeremony:
+		return m.OldWebauthnCeremony(ctx)
+	case staffsession.FieldWebauthnExpiresAt:
+		return m.OldWebauthnExpiresAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown StaffSession field %s", name)
 }
@@ -7557,6 +8929,27 @@ func (m *StaffSessionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRevokedAt(v)
 		return nil
+	case staffsession.FieldWebauthnSession:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWebauthnSession(v)
+		return nil
+	case staffsession.FieldWebauthnCeremony:
+		v, ok := value.(staffsession.WebauthnCeremony)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWebauthnCeremony(v)
+		return nil
+	case staffsession.FieldWebauthnExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWebauthnExpiresAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown StaffSession field %s", name)
 }
@@ -7593,6 +8986,15 @@ func (m *StaffSessionMutation) ClearedFields() []string {
 	if m.FieldCleared(staffsession.FieldRevokedAt) {
 		fields = append(fields, staffsession.FieldRevokedAt)
 	}
+	if m.FieldCleared(staffsession.FieldWebauthnSession) {
+		fields = append(fields, staffsession.FieldWebauthnSession)
+	}
+	if m.FieldCleared(staffsession.FieldWebauthnCeremony) {
+		fields = append(fields, staffsession.FieldWebauthnCeremony)
+	}
+	if m.FieldCleared(staffsession.FieldWebauthnExpiresAt) {
+		fields = append(fields, staffsession.FieldWebauthnExpiresAt)
+	}
 	return fields
 }
 
@@ -7612,6 +9014,15 @@ func (m *StaffSessionMutation) ClearField(name string) error {
 		return nil
 	case staffsession.FieldRevokedAt:
 		m.ClearRevokedAt()
+		return nil
+	case staffsession.FieldWebauthnSession:
+		m.ClearWebauthnSession()
+		return nil
+	case staffsession.FieldWebauthnCeremony:
+		m.ClearWebauthnCeremony()
+		return nil
+	case staffsession.FieldWebauthnExpiresAt:
+		m.ClearWebauthnExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown StaffSession nullable field %s", name)
@@ -7647,6 +9058,15 @@ func (m *StaffSessionMutation) ResetField(name string) error {
 		return nil
 	case staffsession.FieldRevokedAt:
 		m.ResetRevokedAt()
+		return nil
+	case staffsession.FieldWebauthnSession:
+		m.ResetWebauthnSession()
+		return nil
+	case staffsession.FieldWebauthnCeremony:
+		m.ResetWebauthnCeremony()
+		return nil
+	case staffsession.FieldWebauthnExpiresAt:
+		m.ResetWebauthnExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown StaffSession field %s", name)
@@ -7724,4 +9144,842 @@ func (m *StaffSessionMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown StaffSession edge %s", name)
+}
+
+// StaffWebauthnCredentialMutation represents an operation that mutates the StaffWebauthnCredential nodes in the graph.
+type StaffWebauthnCredentialMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	created_at       *time.Time
+	credential_id    *string
+	credential       *[]byte
+	sign_count       *int64
+	addsign_count    *int64
+	transports       *[]string
+	appendtransports []string
+	label            *string
+	last_used_at     *time.Time
+	clearedFields    map[string]struct{}
+	staff            *uuid.UUID
+	clearedstaff     bool
+	done             bool
+	oldValue         func(context.Context) (*StaffWebauthnCredential, error)
+	predicates       []predicate.StaffWebauthnCredential
+}
+
+var _ ent.Mutation = (*StaffWebauthnCredentialMutation)(nil)
+
+// staffwebauthncredentialOption allows management of the mutation configuration using functional options.
+type staffwebauthncredentialOption func(*StaffWebauthnCredentialMutation)
+
+// newStaffWebauthnCredentialMutation creates new mutation for the StaffWebauthnCredential entity.
+func newStaffWebauthnCredentialMutation(c config, op Op, opts ...staffwebauthncredentialOption) *StaffWebauthnCredentialMutation {
+	m := &StaffWebauthnCredentialMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeStaffWebauthnCredential,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withStaffWebauthnCredentialID sets the ID field of the mutation.
+func withStaffWebauthnCredentialID(id uuid.UUID) staffwebauthncredentialOption {
+	return func(m *StaffWebauthnCredentialMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *StaffWebauthnCredential
+		)
+		m.oldValue = func(ctx context.Context) (*StaffWebauthnCredential, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().StaffWebauthnCredential.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withStaffWebauthnCredential sets the old StaffWebauthnCredential of the mutation.
+func withStaffWebauthnCredential(node *StaffWebauthnCredential) staffwebauthncredentialOption {
+	return func(m *StaffWebauthnCredentialMutation) {
+		m.oldValue = func(context.Context) (*StaffWebauthnCredential, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m StaffWebauthnCredentialMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m StaffWebauthnCredentialMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of StaffWebauthnCredential entities.
+func (m *StaffWebauthnCredentialMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *StaffWebauthnCredentialMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *StaffWebauthnCredentialMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().StaffWebauthnCredential.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *StaffWebauthnCredentialMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *StaffWebauthnCredentialMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the StaffWebauthnCredential entity.
+// If the StaffWebauthnCredential object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffWebauthnCredentialMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *StaffWebauthnCredentialMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetStaffID sets the "staff_id" field.
+func (m *StaffWebauthnCredentialMutation) SetStaffID(u uuid.UUID) {
+	m.staff = &u
+}
+
+// StaffID returns the value of the "staff_id" field in the mutation.
+func (m *StaffWebauthnCredentialMutation) StaffID() (r uuid.UUID, exists bool) {
+	v := m.staff
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStaffID returns the old "staff_id" field's value of the StaffWebauthnCredential entity.
+// If the StaffWebauthnCredential object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffWebauthnCredentialMutation) OldStaffID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStaffID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStaffID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStaffID: %w", err)
+	}
+	return oldValue.StaffID, nil
+}
+
+// ResetStaffID resets all changes to the "staff_id" field.
+func (m *StaffWebauthnCredentialMutation) ResetStaffID() {
+	m.staff = nil
+}
+
+// SetCredentialID sets the "credential_id" field.
+func (m *StaffWebauthnCredentialMutation) SetCredentialID(s string) {
+	m.credential_id = &s
+}
+
+// CredentialID returns the value of the "credential_id" field in the mutation.
+func (m *StaffWebauthnCredentialMutation) CredentialID() (r string, exists bool) {
+	v := m.credential_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCredentialID returns the old "credential_id" field's value of the StaffWebauthnCredential entity.
+// If the StaffWebauthnCredential object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffWebauthnCredentialMutation) OldCredentialID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCredentialID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCredentialID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCredentialID: %w", err)
+	}
+	return oldValue.CredentialID, nil
+}
+
+// ResetCredentialID resets all changes to the "credential_id" field.
+func (m *StaffWebauthnCredentialMutation) ResetCredentialID() {
+	m.credential_id = nil
+}
+
+// SetCredential sets the "credential" field.
+func (m *StaffWebauthnCredentialMutation) SetCredential(b []byte) {
+	m.credential = &b
+}
+
+// Credential returns the value of the "credential" field in the mutation.
+func (m *StaffWebauthnCredentialMutation) Credential() (r []byte, exists bool) {
+	v := m.credential
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCredential returns the old "credential" field's value of the StaffWebauthnCredential entity.
+// If the StaffWebauthnCredential object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffWebauthnCredentialMutation) OldCredential(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCredential is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCredential requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCredential: %w", err)
+	}
+	return oldValue.Credential, nil
+}
+
+// ResetCredential resets all changes to the "credential" field.
+func (m *StaffWebauthnCredentialMutation) ResetCredential() {
+	m.credential = nil
+}
+
+// SetSignCount sets the "sign_count" field.
+func (m *StaffWebauthnCredentialMutation) SetSignCount(i int64) {
+	m.sign_count = &i
+	m.addsign_count = nil
+}
+
+// SignCount returns the value of the "sign_count" field in the mutation.
+func (m *StaffWebauthnCredentialMutation) SignCount() (r int64, exists bool) {
+	v := m.sign_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSignCount returns the old "sign_count" field's value of the StaffWebauthnCredential entity.
+// If the StaffWebauthnCredential object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffWebauthnCredentialMutation) OldSignCount(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSignCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSignCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSignCount: %w", err)
+	}
+	return oldValue.SignCount, nil
+}
+
+// AddSignCount adds i to the "sign_count" field.
+func (m *StaffWebauthnCredentialMutation) AddSignCount(i int64) {
+	if m.addsign_count != nil {
+		*m.addsign_count += i
+	} else {
+		m.addsign_count = &i
+	}
+}
+
+// AddedSignCount returns the value that was added to the "sign_count" field in this mutation.
+func (m *StaffWebauthnCredentialMutation) AddedSignCount() (r int64, exists bool) {
+	v := m.addsign_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSignCount resets all changes to the "sign_count" field.
+func (m *StaffWebauthnCredentialMutation) ResetSignCount() {
+	m.sign_count = nil
+	m.addsign_count = nil
+}
+
+// SetTransports sets the "transports" field.
+func (m *StaffWebauthnCredentialMutation) SetTransports(s []string) {
+	m.transports = &s
+	m.appendtransports = nil
+}
+
+// Transports returns the value of the "transports" field in the mutation.
+func (m *StaffWebauthnCredentialMutation) Transports() (r []string, exists bool) {
+	v := m.transports
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransports returns the old "transports" field's value of the StaffWebauthnCredential entity.
+// If the StaffWebauthnCredential object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffWebauthnCredentialMutation) OldTransports(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransports is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransports requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransports: %w", err)
+	}
+	return oldValue.Transports, nil
+}
+
+// AppendTransports adds s to the "transports" field.
+func (m *StaffWebauthnCredentialMutation) AppendTransports(s []string) {
+	m.appendtransports = append(m.appendtransports, s...)
+}
+
+// AppendedTransports returns the list of values that were appended to the "transports" field in this mutation.
+func (m *StaffWebauthnCredentialMutation) AppendedTransports() ([]string, bool) {
+	if len(m.appendtransports) == 0 {
+		return nil, false
+	}
+	return m.appendtransports, true
+}
+
+// ResetTransports resets all changes to the "transports" field.
+func (m *StaffWebauthnCredentialMutation) ResetTransports() {
+	m.transports = nil
+	m.appendtransports = nil
+}
+
+// SetLabel sets the "label" field.
+func (m *StaffWebauthnCredentialMutation) SetLabel(s string) {
+	m.label = &s
+}
+
+// Label returns the value of the "label" field in the mutation.
+func (m *StaffWebauthnCredentialMutation) Label() (r string, exists bool) {
+	v := m.label
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLabel returns the old "label" field's value of the StaffWebauthnCredential entity.
+// If the StaffWebauthnCredential object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffWebauthnCredentialMutation) OldLabel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLabel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLabel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLabel: %w", err)
+	}
+	return oldValue.Label, nil
+}
+
+// ResetLabel resets all changes to the "label" field.
+func (m *StaffWebauthnCredentialMutation) ResetLabel() {
+	m.label = nil
+}
+
+// SetLastUsedAt sets the "last_used_at" field.
+func (m *StaffWebauthnCredentialMutation) SetLastUsedAt(t time.Time) {
+	m.last_used_at = &t
+}
+
+// LastUsedAt returns the value of the "last_used_at" field in the mutation.
+func (m *StaffWebauthnCredentialMutation) LastUsedAt() (r time.Time, exists bool) {
+	v := m.last_used_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUsedAt returns the old "last_used_at" field's value of the StaffWebauthnCredential entity.
+// If the StaffWebauthnCredential object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StaffWebauthnCredentialMutation) OldLastUsedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUsedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUsedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUsedAt: %w", err)
+	}
+	return oldValue.LastUsedAt, nil
+}
+
+// ClearLastUsedAt clears the value of the "last_used_at" field.
+func (m *StaffWebauthnCredentialMutation) ClearLastUsedAt() {
+	m.last_used_at = nil
+	m.clearedFields[staffwebauthncredential.FieldLastUsedAt] = struct{}{}
+}
+
+// LastUsedAtCleared returns if the "last_used_at" field was cleared in this mutation.
+func (m *StaffWebauthnCredentialMutation) LastUsedAtCleared() bool {
+	_, ok := m.clearedFields[staffwebauthncredential.FieldLastUsedAt]
+	return ok
+}
+
+// ResetLastUsedAt resets all changes to the "last_used_at" field.
+func (m *StaffWebauthnCredentialMutation) ResetLastUsedAt() {
+	m.last_used_at = nil
+	delete(m.clearedFields, staffwebauthncredential.FieldLastUsedAt)
+}
+
+// ClearStaff clears the "staff" edge to the StaffAccount entity.
+func (m *StaffWebauthnCredentialMutation) ClearStaff() {
+	m.clearedstaff = true
+	m.clearedFields[staffwebauthncredential.FieldStaffID] = struct{}{}
+}
+
+// StaffCleared reports if the "staff" edge to the StaffAccount entity was cleared.
+func (m *StaffWebauthnCredentialMutation) StaffCleared() bool {
+	return m.clearedstaff
+}
+
+// StaffIDs returns the "staff" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// StaffID instead. It exists only for internal usage by the builders.
+func (m *StaffWebauthnCredentialMutation) StaffIDs() (ids []uuid.UUID) {
+	if id := m.staff; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetStaff resets all changes to the "staff" edge.
+func (m *StaffWebauthnCredentialMutation) ResetStaff() {
+	m.staff = nil
+	m.clearedstaff = false
+}
+
+// Where appends a list predicates to the StaffWebauthnCredentialMutation builder.
+func (m *StaffWebauthnCredentialMutation) Where(ps ...predicate.StaffWebauthnCredential) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the StaffWebauthnCredentialMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *StaffWebauthnCredentialMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.StaffWebauthnCredential, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *StaffWebauthnCredentialMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *StaffWebauthnCredentialMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (StaffWebauthnCredential).
+func (m *StaffWebauthnCredentialMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *StaffWebauthnCredentialMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.created_at != nil {
+		fields = append(fields, staffwebauthncredential.FieldCreatedAt)
+	}
+	if m.staff != nil {
+		fields = append(fields, staffwebauthncredential.FieldStaffID)
+	}
+	if m.credential_id != nil {
+		fields = append(fields, staffwebauthncredential.FieldCredentialID)
+	}
+	if m.credential != nil {
+		fields = append(fields, staffwebauthncredential.FieldCredential)
+	}
+	if m.sign_count != nil {
+		fields = append(fields, staffwebauthncredential.FieldSignCount)
+	}
+	if m.transports != nil {
+		fields = append(fields, staffwebauthncredential.FieldTransports)
+	}
+	if m.label != nil {
+		fields = append(fields, staffwebauthncredential.FieldLabel)
+	}
+	if m.last_used_at != nil {
+		fields = append(fields, staffwebauthncredential.FieldLastUsedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *StaffWebauthnCredentialMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case staffwebauthncredential.FieldCreatedAt:
+		return m.CreatedAt()
+	case staffwebauthncredential.FieldStaffID:
+		return m.StaffID()
+	case staffwebauthncredential.FieldCredentialID:
+		return m.CredentialID()
+	case staffwebauthncredential.FieldCredential:
+		return m.Credential()
+	case staffwebauthncredential.FieldSignCount:
+		return m.SignCount()
+	case staffwebauthncredential.FieldTransports:
+		return m.Transports()
+	case staffwebauthncredential.FieldLabel:
+		return m.Label()
+	case staffwebauthncredential.FieldLastUsedAt:
+		return m.LastUsedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *StaffWebauthnCredentialMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case staffwebauthncredential.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case staffwebauthncredential.FieldStaffID:
+		return m.OldStaffID(ctx)
+	case staffwebauthncredential.FieldCredentialID:
+		return m.OldCredentialID(ctx)
+	case staffwebauthncredential.FieldCredential:
+		return m.OldCredential(ctx)
+	case staffwebauthncredential.FieldSignCount:
+		return m.OldSignCount(ctx)
+	case staffwebauthncredential.FieldTransports:
+		return m.OldTransports(ctx)
+	case staffwebauthncredential.FieldLabel:
+		return m.OldLabel(ctx)
+	case staffwebauthncredential.FieldLastUsedAt:
+		return m.OldLastUsedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown StaffWebauthnCredential field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StaffWebauthnCredentialMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case staffwebauthncredential.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case staffwebauthncredential.FieldStaffID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStaffID(v)
+		return nil
+	case staffwebauthncredential.FieldCredentialID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCredentialID(v)
+		return nil
+	case staffwebauthncredential.FieldCredential:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCredential(v)
+		return nil
+	case staffwebauthncredential.FieldSignCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSignCount(v)
+		return nil
+	case staffwebauthncredential.FieldTransports:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransports(v)
+		return nil
+	case staffwebauthncredential.FieldLabel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLabel(v)
+		return nil
+	case staffwebauthncredential.FieldLastUsedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUsedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown StaffWebauthnCredential field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *StaffWebauthnCredentialMutation) AddedFields() []string {
+	var fields []string
+	if m.addsign_count != nil {
+		fields = append(fields, staffwebauthncredential.FieldSignCount)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *StaffWebauthnCredentialMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case staffwebauthncredential.FieldSignCount:
+		return m.AddedSignCount()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StaffWebauthnCredentialMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case staffwebauthncredential.FieldSignCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSignCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown StaffWebauthnCredential numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *StaffWebauthnCredentialMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(staffwebauthncredential.FieldLastUsedAt) {
+		fields = append(fields, staffwebauthncredential.FieldLastUsedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *StaffWebauthnCredentialMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *StaffWebauthnCredentialMutation) ClearField(name string) error {
+	switch name {
+	case staffwebauthncredential.FieldLastUsedAt:
+		m.ClearLastUsedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown StaffWebauthnCredential nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *StaffWebauthnCredentialMutation) ResetField(name string) error {
+	switch name {
+	case staffwebauthncredential.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case staffwebauthncredential.FieldStaffID:
+		m.ResetStaffID()
+		return nil
+	case staffwebauthncredential.FieldCredentialID:
+		m.ResetCredentialID()
+		return nil
+	case staffwebauthncredential.FieldCredential:
+		m.ResetCredential()
+		return nil
+	case staffwebauthncredential.FieldSignCount:
+		m.ResetSignCount()
+		return nil
+	case staffwebauthncredential.FieldTransports:
+		m.ResetTransports()
+		return nil
+	case staffwebauthncredential.FieldLabel:
+		m.ResetLabel()
+		return nil
+	case staffwebauthncredential.FieldLastUsedAt:
+		m.ResetLastUsedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown StaffWebauthnCredential field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *StaffWebauthnCredentialMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.staff != nil {
+		edges = append(edges, staffwebauthncredential.EdgeStaff)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *StaffWebauthnCredentialMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case staffwebauthncredential.EdgeStaff:
+		if id := m.staff; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *StaffWebauthnCredentialMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *StaffWebauthnCredentialMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *StaffWebauthnCredentialMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedstaff {
+		edges = append(edges, staffwebauthncredential.EdgeStaff)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *StaffWebauthnCredentialMutation) EdgeCleared(name string) bool {
+	switch name {
+	case staffwebauthncredential.EdgeStaff:
+		return m.clearedstaff
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *StaffWebauthnCredentialMutation) ClearEdge(name string) error {
+	switch name {
+	case staffwebauthncredential.EdgeStaff:
+		m.ClearStaff()
+		return nil
+	}
+	return fmt.Errorf("unknown StaffWebauthnCredential unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *StaffWebauthnCredentialMutation) ResetEdge(name string) error {
+	switch name {
+	case staffwebauthncredential.EdgeStaff:
+		m.ResetStaff()
+		return nil
+	}
+	return fmt.Errorf("unknown StaffWebauthnCredential edge %s", name)
 }
