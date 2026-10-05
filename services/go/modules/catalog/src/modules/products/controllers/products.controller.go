@@ -2,6 +2,9 @@ package controllers
 
 import (
 	"net/http"
+	"slices"
+	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -47,7 +50,8 @@ func (controller ProductsController) listing(featured bool) http.HandlerFunc {
 		category, categoryError := utils.OptionalQueryIdentifier(request, "categoryId")
 		store, storeError := utils.OptionalQueryIdentifier(request, "storeId")
 		limit, limitError := utils.ReadPageLimit(request, 20, 50)
-		for _, failure := range []error{storeError, limitError} {
+		filters, filterError := readListingFilters(request)
+		for _, failure := range []error{storeError, limitError, filterError} {
 			if categoryError == nil {
 				categoryError = failure
 			}
@@ -57,12 +61,41 @@ func (controller ProductsController) listing(featured bool) http.HandlerFunc {
 			return
 		}
 		query := request.URL.Query()
-		page, err := (listproducts.Handler{Container: controller.Container}).Execute(request.Context(), listproducts.Query{
-			Viewer: viewerOf(request), CategoryId: category, StoreId: store, Collection: query.Get("collection"), Text: query.Get("q"),
-			Featured: featured || query.Get("collection") == "featured_brands" || query.Get("collection") == "sales_of_the_day", Cursor: query.Get("cursor"), Limit: limit,
-		})
+		filters.Viewer, filters.CategoryId, filters.StoreId, filters.Collection, filters.Text = viewerOf(request), category, store, query.Get("collection"), query.Get("q")
+		filters.Featured = featured || query.Get("collection") == "featured_brands" || query.Get("collection") == "sales_of_the_day"
+		filters.Cursor, filters.Limit = query.Get("cursor"), limit
+		page, err := (listproducts.Handler{Container: controller.Container}).Execute(request.Context(), filters)
 		controller.respond(writer, request, http.StatusOK, page, err)
 	}
+}
+
+func readListingFilters(request *http.Request) (listproducts.Query, error) {
+	query := request.URL.Query()
+	issues := utils.Issues{}
+	filters := listproducts.Query{Sort: query.Get("sort"), CategorySlug: query.Get("categorySlug"), Currency: strings.ToUpper(query.Get("currency"))}
+	if filters.Sort != "" && !slices.Contains(listproducts.Sorts, filters.Sort) {
+		issues.Add("sort", "must be one of "+strings.Join(listproducts.Sorts, ", "))
+	}
+	for _, bound := range []struct {
+		name   string
+		target **int64
+	}{{"minPrice", &filters.MinPrice}, {"maxPrice", &filters.MaxPrice}} {
+		if raw := query.Get(bound.name); raw != "" {
+			value, err := strconv.ParseInt(raw, 10, 64)
+			if err != nil || value < 0 {
+				issues.Add(bound.name, "must be a whole amount in minor units")
+				continue
+			}
+			*bound.target = &value
+		}
+	}
+	if (filters.MinPrice != nil || filters.MaxPrice != nil) && len(filters.Currency) != 3 {
+		issues.Add("currency", "is required with minPrice or maxPrice")
+	}
+	if filters.MinPrice != nil && filters.MaxPrice != nil && *filters.MinPrice > *filters.MaxPrice {
+		issues.Add("maxPrice", "must not be below minPrice")
+	}
+	return filters, issues.AsError()
 }
 
 func (controller ProductsController) ListProducts(writer http.ResponseWriter, request *http.Request) {
