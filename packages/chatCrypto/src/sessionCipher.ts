@@ -78,8 +78,8 @@ export class SessionCipher {
     for (const candidate of candidates) {
       try {
         const { state, plaintext } = ratchetDecrypt(candidate, message.header, message.ciphertext, this.random);
-        const promoted = candidate === record.current ? { ...record, current: state } : withCurrent({ ...record, archived: record.archived.filter((entry) => entry !== candidate) }, state);
-        await this.store.saveSession(userId, deviceId, promoted);
+        const updated = candidate === record.current ? { ...record, current: state } : { ...record, archived: record.archived.map((entry) => (entry === candidate ? state : entry)) };
+        await this.store.saveSession(userId, deviceId, updated);
         return plaintext;
       } catch (error) {
         failures.push(error);
