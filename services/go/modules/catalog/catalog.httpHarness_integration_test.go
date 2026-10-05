@@ -16,6 +16,7 @@ import (
 	"zudomart/modules/catalog/src/configs"
 	"zudomart/modules/catalog/src/container"
 	"zudomart/modules/catalog/src/generated/ent"
+	"zudomart/platform/commerceports"
 	"zudomart/platform/identityports/identitytest"
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/staffaudit"
@@ -77,6 +78,9 @@ type httpHarness struct {
 	tokens    *identitytest.FakeTokenService
 	audit     *fakeAudit
 	directory *fakeDirectory
+	stock     *fakeStock
+	purchases *fakePurchases
+	follows   *fakeStoreFollows
 }
 
 func startHttpHarness(t *testing.T) *httpHarness {
@@ -85,19 +89,22 @@ func startHttpHarness(t *testing.T) *httpHarness {
 	verifier := func(audience string) *jwtauth.AccessTokenVerifier {
 		return jwtauth.NewAccessTokenVerifierFromKeySetProvider(tokens.PublishedKeySet, identitytest.FakeIssuer, audience)
 	}
-	audit := &fakeAudit{}
-	collaborators := src.Collaborators{
+	audit, follows := &fakeAudit{}, &fakeStoreFollows{followers: map[uuid.UUID]int{}}
+	collaborators := src.Collaborators{StoreFollows: follows,
 		Verifier: verifier(identitytest.FakeAccountAudience), Audit: audit, Identity: fakeIdentity{},
 		Staff: container.StaffVerifiers{Access: verifier("zudomart-admin"), StepUp: verifier("zudomart-admin-step-up")},
 	}
 	module := startAgainstFreshSchemaWith(t, collaborators, func(settings *configs.CatalogSettings) { settings.InternalApiToken = harnessInternalToken })
 	directory := &fakeDirectory{profiles: map[uuid.UUID]usersdirectory.ProfileName{}}
 	module.Container.Users = directory
+	stock, purchases := &fakeStock{locations: map[uuid.UUID]uuid.UUID{}}, &fakePurchases{received: map[uuid.UUID]map[uuid.UUID]bool{}}
+	commerceports.Default.RegisterInventoryStock(stock)
+	commerceports.Default.RegisterPurchaseVerifier(purchases)
 	mux := http.NewServeMux()
 	module.MountRoutes(mux)
 	server := httptest.NewServer(mux)
 	t.Cleanup(server.Close)
-	return &httpHarness{t: t, module: module, server: server, tokens: tokens, audit: audit, directory: directory}
+	return &httpHarness{t: t, module: module, server: server, tokens: tokens, audit: audit, directory: directory, stock: stock, purchases: purchases, follows: follows}
 }
 
 func (harness *httpHarness) client() *ent.Client { return harness.module.Container.Client }
@@ -179,4 +186,37 @@ func (harness *httpHarness) product(store *ent.Store, name string, priceMinor in
 		harness.t.Fatal(err)
 	}
 	return row
+}
+
+func (harness *httpHarness) outboxTypes() []string {
+	harness.t.Helper()
+	types, err := harness.client().OutboxEvent.Query().Select("event_type").Strings(context.Background())
+	if err != nil {
+		harness.t.Fatal(err)
+	}
+	return types
+}
+
+func contains(values []string, wanted string) bool {
+	for _, value := range values {
+		if value == wanted {
+			return true
+		}
+	}
+	return false
+}
+
+func items(body map[string]any, key string) []any {
+	list, _ := body[key].([]any)
+	return list
+}
+
+func (harness *httpHarness) parseId(raw any) uuid.UUID {
+	harness.t.Helper()
+	text, _ := raw.(string)
+	identifier, err := uuid.Parse(text)
+	if err != nil {
+		harness.t.Fatalf("not an id: %v", raw)
+	}
+	return identifier
 }
