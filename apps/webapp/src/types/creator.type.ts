@@ -145,6 +145,7 @@ export interface CreatorSubscriptionCheckout {
 
 export interface CreatorSubscriptionState {
   readonly subscriptionId: ID;
+  readonly creatorId?: ID;
   readonly status: "pending" | "active" | "cancelled" | "failed";
   readonly planId: ID;
   readonly renewsAt: ISODate | null;

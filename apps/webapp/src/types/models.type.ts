@@ -149,6 +149,8 @@ export interface Post {
   readonly linkPreview?: import("./linkPreview.type").LinkPreview | null;
   readonly isQuote?: boolean;
   readonly quotes?: number;
+  readonly resharedFrom?: Post | null;
+  readonly resharedFromUnavailable?: boolean;
   readonly replyPolicy?: import("./postAudience.type").ReplyPolicy;
   readonly viewerCanReply?: boolean;
   readonly viewerCanDownload?: boolean;
@@ -195,6 +197,7 @@ export interface Comment {
   readonly createdAt: ISODate;
   readonly likes: number;
   readonly liked: boolean;
+  readonly bookmarked?: boolean;
   readonly replyCount: number;
   readonly replyingTo?: { readonly userId: ID; readonly username: string };
   readonly mentions?: readonly import("./mentions.type").MentionEntity[];

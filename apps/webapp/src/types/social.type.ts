@@ -190,6 +190,15 @@ export interface CoinBalance {
   readonly coins: number;
 }
 
+export interface CoinActivityEntry {
+  readonly id: ID;
+  readonly transactionId: ID;
+  readonly type: "credit" | "debit";
+  readonly coins: number;
+  readonly balanceAfter: number;
+  readonly createdAt: string;
+}
+
 export interface CoinPackage {
   readonly id: ID;
   readonly coins: number;

@@ -7,6 +7,12 @@ export interface ConnectionEntry extends UserSummary {
   readonly isFollowing: boolean;
 }
 
+export interface FollowRequest {
+  readonly id: ID;
+  readonly requester: UserSummary;
+  readonly createdAt: ISODate;
+}
+
 export interface AccountSettings {
   readonly email: string;
   readonly phone: string | null;

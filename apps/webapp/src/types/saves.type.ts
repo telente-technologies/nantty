@@ -1,7 +1,7 @@
 import type { ID, ISODate, UserSummary } from "./models.type";
 import type { Money } from "./money.type";
 
-export type SaveTargetType = "post" | "video" | "clip" | "product";
+export type SaveTargetType = "post" | "video" | "clip" | "product" | "comment";
 export type SavedItemFilter = "all" | SaveTargetType;
 
 export interface SaveCollection {

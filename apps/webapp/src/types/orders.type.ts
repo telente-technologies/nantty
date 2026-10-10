@@ -33,6 +33,7 @@ export interface Order {
   readonly createdAt: ISODate;
   readonly escrowReleaseAt: ISODate | null;
   readonly paymentMode?: PaymentMode;
+  readonly fulfilmentStatus?: string;
 }
 
 export interface Address {

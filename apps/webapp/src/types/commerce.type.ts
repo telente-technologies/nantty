@@ -51,7 +51,7 @@ export interface StoreDetail extends StoreSummary {
 
 export type PaymentProvider = "paystack";
 
-export type PaymentChannel = "card" | "bank_transfer" | "ussd";
+export type PaymentChannel = "card" | "bank" | "bank_transfer" | "ussd";
 
 export interface PaymentInitialization {
   readonly orderId: ID;
