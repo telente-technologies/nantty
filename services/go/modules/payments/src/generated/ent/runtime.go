@@ -9,6 +9,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
 	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
+	"zudomart/modules/payments/src/generated/ent/customervalidation"
 	"zudomart/modules/payments/src/generated/ent/idempotentrequest"
 	"zudomart/modules/payments/src/generated/ent/orderpayable"
 	"zudomart/modules/payments/src/generated/ent/outboxevent"
@@ -22,6 +23,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
+	"zudomart/modules/payments/src/generated/ent/verificationlevelrecord"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
 	"github.com/google/uuid"
@@ -479,6 +481,83 @@ func init() {
 	connectedaccountjobDescID := connectedaccountjobMixinFields0[0].Descriptor()
 	// connectedaccountjob.DefaultID holds the default value on creation for the id field.
 	connectedaccountjob.DefaultID = connectedaccountjobDescID.Default.(func() uuid.UUID)
+	customervalidationMixin := schema.CustomerValidation{}.Mixin()
+	customervalidationMixinFields0 := customervalidationMixin[0].Fields()
+	_ = customervalidationMixinFields0
+	customervalidationFields := schema.CustomerValidation{}.Fields()
+	_ = customervalidationFields
+	// customervalidationDescCreatedAt is the schema descriptor for created_at field.
+	customervalidationDescCreatedAt := customervalidationMixinFields0[1].Descriptor()
+	// customervalidation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	customervalidation.DefaultCreatedAt = customervalidationDescCreatedAt.Default.(func() time.Time)
+	// customervalidationDescUserID is the schema descriptor for user_id field.
+	customervalidationDescUserID := customervalidationFields[0].Descriptor()
+	// customervalidation.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	customervalidation.UserIDValidator = func() func(string) error {
+		validators := customervalidationDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// customervalidationDescProvider is the schema descriptor for provider field.
+	customervalidationDescProvider := customervalidationFields[1].Descriptor()
+	// customervalidation.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	customervalidation.ProviderValidator = func() func(string) error {
+		validators := customervalidationDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// customervalidationDescProviderCustomerID is the schema descriptor for provider_customer_id field.
+	customervalidationDescProviderCustomerID := customervalidationFields[2].Descriptor()
+	// customervalidation.DefaultProviderCustomerID holds the default value on creation for the provider_customer_id field.
+	customervalidation.DefaultProviderCustomerID = customervalidationDescProviderCustomerID.Default.(string)
+	// customervalidation.ProviderCustomerIDValidator is a validator for the "provider_customer_id" field. It is called by the builders before save.
+	customervalidation.ProviderCustomerIDValidator = customervalidationDescProviderCustomerID.Validators[0].(func(string) error)
+	// customervalidationDescBankCode is the schema descriptor for bank_code field.
+	customervalidationDescBankCode := customervalidationFields[4].Descriptor()
+	// customervalidation.DefaultBankCode holds the default value on creation for the bank_code field.
+	customervalidation.DefaultBankCode = customervalidationDescBankCode.Default.(string)
+	// customervalidation.BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
+	customervalidation.BankCodeValidator = customervalidationDescBankCode.Validators[0].(func(string) error)
+	// customervalidationDescAccountLast4 is the schema descriptor for account_last4 field.
+	customervalidationDescAccountLast4 := customervalidationFields[5].Descriptor()
+	// customervalidation.DefaultAccountLast4 holds the default value on creation for the account_last4 field.
+	customervalidation.DefaultAccountLast4 = customervalidationDescAccountLast4.Default.(string)
+	// customervalidation.AccountLast4Validator is a validator for the "account_last4" field. It is called by the builders before save.
+	customervalidation.AccountLast4Validator = customervalidationDescAccountLast4.Validators[0].(func(string) error)
+	// customervalidationDescFailureReason is the schema descriptor for failure_reason field.
+	customervalidationDescFailureReason := customervalidationFields[6].Descriptor()
+	// customervalidation.DefaultFailureReason holds the default value on creation for the failure_reason field.
+	customervalidation.DefaultFailureReason = customervalidationDescFailureReason.Default.(string)
+	// customervalidation.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
+	customervalidation.FailureReasonValidator = customervalidationDescFailureReason.Validators[0].(func(string) error)
+	// customervalidationDescVersion is the schema descriptor for version field.
+	customervalidationDescVersion := customervalidationFields[9].Descriptor()
+	// customervalidation.DefaultVersion holds the default value on creation for the version field.
+	customervalidation.DefaultVersion = customervalidationDescVersion.Default.(int64)
+	// customervalidationDescID is the schema descriptor for id field.
+	customervalidationDescID := customervalidationMixinFields0[0].Descriptor()
+	// customervalidation.DefaultID holds the default value on creation for the id field.
+	customervalidation.DefaultID = customervalidationDescID.Default.(func() uuid.UUID)
 	idempotentrequestMixin := schema.IdempotentRequest{}.Mixin()
 	idempotentrequestMixinFields0 := idempotentrequestMixin[0].Fields()
 	_ = idempotentrequestMixinFields0
@@ -1856,6 +1935,71 @@ func init() {
 	storepurchaseDescID := storepurchaseMixinFields0[0].Descriptor()
 	// storepurchase.DefaultID holds the default value on creation for the id field.
 	storepurchase.DefaultID = storepurchaseDescID.Default.(func() uuid.UUID)
+	verificationlevelrecordMixin := schema.VerificationLevelRecord{}.Mixin()
+	verificationlevelrecordMixinFields0 := verificationlevelrecordMixin[0].Fields()
+	_ = verificationlevelrecordMixinFields0
+	verificationlevelrecordFields := schema.VerificationLevelRecord{}.Fields()
+	_ = verificationlevelrecordFields
+	// verificationlevelrecordDescCreatedAt is the schema descriptor for created_at field.
+	verificationlevelrecordDescCreatedAt := verificationlevelrecordMixinFields0[1].Descriptor()
+	// verificationlevelrecord.DefaultCreatedAt holds the default value on creation for the created_at field.
+	verificationlevelrecord.DefaultCreatedAt = verificationlevelrecordDescCreatedAt.Default.(func() time.Time)
+	// verificationlevelrecordDescUserID is the schema descriptor for user_id field.
+	verificationlevelrecordDescUserID := verificationlevelrecordFields[0].Descriptor()
+	// verificationlevelrecord.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	verificationlevelrecord.UserIDValidator = func() func(string) error {
+		validators := verificationlevelrecordDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// verificationlevelrecordDescLevel is the schema descriptor for level field.
+	verificationlevelrecordDescLevel := verificationlevelrecordFields[1].Descriptor()
+	// verificationlevelrecord.DefaultLevel holds the default value on creation for the level field.
+	verificationlevelrecord.DefaultLevel = verificationlevelrecordDescLevel.Default.(int)
+	// verificationlevelrecord.LevelValidator is a validator for the "level" field. It is called by the builders before save.
+	verificationlevelrecord.LevelValidator = func() func(int) error {
+		validators := verificationlevelrecordDescLevel.Validators
+		fns := [...]func(int) error{
+			validators[0].(func(int) error),
+			validators[1].(func(int) error),
+		}
+		return func(level int) error {
+			for _, fn := range fns {
+				if err := fn(level); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// verificationlevelrecordDescPayoutVerified is the schema descriptor for payout_verified field.
+	verificationlevelrecordDescPayoutVerified := verificationlevelrecordFields[2].Descriptor()
+	// verificationlevelrecord.DefaultPayoutVerified holds the default value on creation for the payout_verified field.
+	verificationlevelrecord.DefaultPayoutVerified = verificationlevelrecordDescPayoutVerified.Default.(bool)
+	// verificationlevelrecordDescIdentityVerified is the schema descriptor for identity_verified field.
+	verificationlevelrecordDescIdentityVerified := verificationlevelrecordFields[3].Descriptor()
+	// verificationlevelrecord.DefaultIdentityVerified holds the default value on creation for the identity_verified field.
+	verificationlevelrecord.DefaultIdentityVerified = verificationlevelrecordDescIdentityVerified.Default.(bool)
+	// verificationlevelrecordDescUpdatedAt is the schema descriptor for updated_at field.
+	verificationlevelrecordDescUpdatedAt := verificationlevelrecordFields[4].Descriptor()
+	// verificationlevelrecord.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	verificationlevelrecord.DefaultUpdatedAt = verificationlevelrecordDescUpdatedAt.Default.(func() time.Time)
+	// verificationlevelrecord.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	verificationlevelrecord.UpdateDefaultUpdatedAt = verificationlevelrecordDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// verificationlevelrecordDescID is the schema descriptor for id field.
+	verificationlevelrecordDescID := verificationlevelrecordMixinFields0[0].Descriptor()
+	// verificationlevelrecord.DefaultID holds the default value on creation for the id field.
+	verificationlevelrecord.DefaultID = verificationlevelrecordDescID.Default.(func() uuid.UUID)
 	webhookeventMixin := schema.WebhookEvent{}.Mixin()
 	webhookeventMixinFields0 := webhookeventMixin[0].Fields()
 	_ = webhookeventMixinFields0

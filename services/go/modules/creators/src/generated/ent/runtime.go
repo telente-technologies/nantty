@@ -11,6 +11,7 @@ import (
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
 	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
+	"zudomart/modules/creators/src/generated/ent/creatorbranddeal"
 	"zudomart/modules/creators/src/generated/ent/creatorearning"
 	"zudomart/modules/creators/src/generated/ent/creatorprogrammember"
 	"zudomart/modules/creators/src/generated/ent/creatortier"
@@ -551,6 +552,115 @@ func init() {
 	creatoraffiliationDescID := creatoraffiliationMixinFields0[0].Descriptor()
 	// creatoraffiliation.DefaultID holds the default value on creation for the id field.
 	creatoraffiliation.DefaultID = creatoraffiliationDescID.Default.(func() uuid.UUID)
+	creatorbranddealMixin := schema.CreatorBrandDeal{}.Mixin()
+	creatorbranddealMixinFields0 := creatorbranddealMixin[0].Fields()
+	_ = creatorbranddealMixinFields0
+	creatorbranddealFields := schema.CreatorBrandDeal{}.Fields()
+	_ = creatorbranddealFields
+	// creatorbranddealDescCreatedAt is the schema descriptor for created_at field.
+	creatorbranddealDescCreatedAt := creatorbranddealMixinFields0[1].Descriptor()
+	// creatorbranddeal.DefaultCreatedAt holds the default value on creation for the created_at field.
+	creatorbranddeal.DefaultCreatedAt = creatorbranddealDescCreatedAt.Default.(func() time.Time)
+	// creatorbranddealDescCreatorUserID is the schema descriptor for creator_user_id field.
+	creatorbranddealDescCreatorUserID := creatorbranddealFields[0].Descriptor()
+	// creatorbranddeal.CreatorUserIDValidator is a validator for the "creator_user_id" field. It is called by the builders before save.
+	creatorbranddeal.CreatorUserIDValidator = func() func(string) error {
+		validators := creatorbranddealDescCreatorUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(creator_user_id string) error {
+			for _, fn := range fns {
+				if err := fn(creator_user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorbranddealDescBrandName is the schema descriptor for brand_name field.
+	creatorbranddealDescBrandName := creatorbranddealFields[1].Descriptor()
+	// creatorbranddeal.BrandNameValidator is a validator for the "brand_name" field. It is called by the builders before save.
+	creatorbranddeal.BrandNameValidator = func() func(string) error {
+		validators := creatorbranddealDescBrandName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(brand_name string) error {
+			for _, fn := range fns {
+				if err := fn(brand_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorbranddealDescCurrency is the schema descriptor for currency field.
+	creatorbranddealDescCurrency := creatorbranddealFields[3].Descriptor()
+	// creatorbranddeal.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	creatorbranddeal.CurrencyValidator = func() func(string) error {
+		validators := creatorbranddealDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorbranddealDescDisclosure is the schema descriptor for disclosure field.
+	creatorbranddealDescDisclosure := creatorbranddealFields[6].Descriptor()
+	// creatorbranddeal.DisclosureValidator is a validator for the "disclosure" field. It is called by the builders before save.
+	creatorbranddeal.DisclosureValidator = func() func(string) error {
+		validators := creatorbranddealDescDisclosure.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(disclosure string) error {
+			for _, fn := range fns {
+				if err := fn(disclosure); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorbranddealDescNotes is the schema descriptor for notes field.
+	creatorbranddealDescNotes := creatorbranddealFields[7].Descriptor()
+	// creatorbranddeal.DefaultNotes holds the default value on creation for the notes field.
+	creatorbranddeal.DefaultNotes = creatorbranddealDescNotes.Default.(string)
+	// creatorbranddeal.NotesValidator is a validator for the "notes" field. It is called by the builders before save.
+	creatorbranddeal.NotesValidator = creatorbranddealDescNotes.Validators[0].(func(string) error)
+	// creatorbranddealDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	creatorbranddealDescIdempotencyKey := creatorbranddealFields[8].Descriptor()
+	// creatorbranddeal.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	creatorbranddeal.IdempotencyKeyValidator = func() func(string) error {
+		validators := creatorbranddealDescIdempotencyKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(idempotency_key string) error {
+			for _, fn := range fns {
+				if err := fn(idempotency_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// creatorbranddealDescID is the schema descriptor for id field.
+	creatorbranddealDescID := creatorbranddealMixinFields0[0].Descriptor()
+	// creatorbranddeal.DefaultID holds the default value on creation for the id field.
+	creatorbranddeal.DefaultID = creatorbranddealDescID.Default.(func() uuid.UUID)
 	creatorearningMixin := schema.CreatorEarning{}.Mixin()
 	creatorearningMixinFields0 := creatorearningMixin[0].Fields()
 	_ = creatorearningMixinFields0

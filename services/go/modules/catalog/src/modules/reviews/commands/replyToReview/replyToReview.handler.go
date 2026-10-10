@@ -42,7 +42,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Sell
 			return saveError
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, "review.replied", row.ID.String(), now, map[string]any{
-			"reviewId": row.ID, "storeId": row.StoreID, "authorAccountId": row.AuthorAccountID,
+			"reviewId": row.ID, "storeId": row.StoreID, "authorAccountId": row.AuthorAccountID, "storeName": store.Name, "firstReply": row.ReplyCreatedAt == nil, "productId": row.ProductID,
 		})
 	})
 	if err != nil {

@@ -25,7 +25,8 @@ func (AdBoost) Fields() []ent.Field {
 		field.Int64("daily_budget_minor").Immutable(),
 		field.Int("duration_days").Immutable(),
 		field.Int64("total_budget_minor").Immutable(),
-		field.Enum("payment_method").Values("wallet", "card").Immutable(),
+		field.Enum("payment_method").Values("wallet", "card", "balance", "free").Immutable(),
+		field.String("payment_top_up_id").MaxLen(80).Default(""),
 		field.String("idempotency_key").MaxLen(128).Immutable(),
 		field.String("request_hash").MaxLen(64).Immutable(),
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
@@ -45,5 +46,24 @@ func (AdBoost) Indexes() []ent.Index {
 		index.Fields("user_id", "created_at"),
 		index.Fields("campaign_id"),
 		index.Fields("status", "ends_at"),
+		index.Fields("payment_top_up_id"),
 	}
+}
+
+type AdFreeBoostGrant struct{ ent.Schema }
+
+func (AdFreeBoostGrant) Mixin() []ent.Mixin { return []ent.Mixin{TimeOrderedIdentifierMixin{}} }
+
+func (AdFreeBoostGrant) Fields() []ent.Field {
+	return []ent.Field{
+		field.UUID("user_id", uuid.UUID{}).Immutable(),
+		field.String("period_key").MinLen(7).MaxLen(7).Immutable(),
+		field.UUID("boost_id", uuid.UUID{}).Immutable(),
+		field.Int64("value_minor").Immutable(),
+		field.String("currency").MinLen(3).MaxLen(3).Immutable(),
+	}
+}
+
+func (AdFreeBoostGrant) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("user_id", "period_key").Unique(), index.Fields("boost_id").Unique()}
 }

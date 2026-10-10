@@ -24,28 +24,31 @@ import (
 )
 
 type Collaborators struct {
-	Publisher platformevents.DomainEventPublisher
-	Funding   interfaces.FundingGateway
-	Consent   interfaces.ConsentReader
-	Stores    interfaces.StoreDirectory
-	Pctr      interfaces.PctrScorer
-	Fraud     interfaces.FraudModelScorer
-	Counters  interfaces.CounterStore
-	Users     interfaces.UserDirectory
-	Signals   interfaces.ContentSignalReader
-	Source    interfaces.AudienceMemberSource
-	Identity  interfaces.IdentityMatcher
-	Content   interfaces.ContentSourceDirectory
-	Ownership interfaces.DestinationOwnership
-	Storage   interfaces.ObjectStorage
-	TopUps    interfaces.TopUpGateway
-	History   interfaces.AuditHistoryReader
-	Summaries interfaces.PlatformUserSummaries
-	Audit     staffaudit.Recorder
-	Jobs      platformevents.JobQueue
-	Access    *jwtauth.AccessTokenVerifier
-	Staff     *jwtauth.AccessTokenVerifier
-	Now       func() time.Time
+	Publisher    platformevents.DomainEventPublisher
+	Funding      interfaces.FundingGateway
+	Consent      interfaces.ConsentReader
+	Stores       interfaces.StoreDirectory
+	Pctr         interfaces.PctrScorer
+	Fraud        interfaces.FraudModelScorer
+	Counters     interfaces.CounterStore
+	Users        interfaces.UserDirectory
+	Signals      interfaces.ContentSignalReader
+	Source       interfaces.AudienceMemberSource
+	Identity     interfaces.IdentityMatcher
+	Content      interfaces.ContentSourceDirectory
+	Ownership    interfaces.DestinationOwnership
+	Storage      interfaces.ObjectStorage
+	TopUps       interfaces.TopUpGateway
+	History      interfaces.AuditHistoryReader
+	Summaries    interfaces.PlatformUserSummaries
+	Verification interfaces.VerificationReader
+	Entitlements interfaces.EntitlementReader
+	Earnings     interfaces.EarningsFunding
+	Audit        staffaudit.Recorder
+	Jobs         platformevents.JobQueue
+	Access       *jwtauth.AccessTokenVerifier
+	Staff        *jwtauth.AccessTokenVerifier
+	Now          func() time.Time
 }
 
 func AssembleContainer(ctx context.Context, settings configs.AdsSettings, collaborators Collaborators, client *ent.Client, database *sql.DB, logger *slog.Logger) (*container.Container, []func() error, error) {

@@ -26,6 +26,8 @@ type Tx struct {
 	BattleSettlement *BattleSettlementClient
 	// CreatorAffiliation is the client for interacting with the CreatorAffiliation builders.
 	CreatorAffiliation *CreatorAffiliationClient
+	// CreatorBrandDeal is the client for interacting with the CreatorBrandDeal builders.
+	CreatorBrandDeal *CreatorBrandDealClient
 	// CreatorEarning is the client for interacting with the CreatorEarning builders.
 	CreatorEarning *CreatorEarningClient
 	// CreatorProgramMember is the client for interacting with the CreatorProgramMember builders.
@@ -177,6 +179,7 @@ func (tx *Tx) init() {
 	tx.AffiliateProgramSetting = NewAffiliateProgramSettingClient(tx.config)
 	tx.BattleSettlement = NewBattleSettlementClient(tx.config)
 	tx.CreatorAffiliation = NewCreatorAffiliationClient(tx.config)
+	tx.CreatorBrandDeal = NewCreatorBrandDealClient(tx.config)
 	tx.CreatorEarning = NewCreatorEarningClient(tx.config)
 	tx.CreatorProgramMember = NewCreatorProgramMemberClient(tx.config)
 	tx.CreatorTier = NewCreatorTierClient(tx.config)

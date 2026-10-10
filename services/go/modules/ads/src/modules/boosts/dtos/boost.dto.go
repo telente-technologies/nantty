@@ -21,6 +21,16 @@ type BoostOptions struct {
 	Interests             []string                     `json:"interests"`
 	Region                string                       `json:"region"`
 	Packages              []regionpricing.BoostPackage `json:"packages"`
+	PaymentMethods        []string                     `json:"paymentMethods"`
+	FreeBoost             FreeBoost                    `json:"freeBoost"`
+}
+
+type FreeBoost struct {
+	Premium            bool        `json:"premium"`
+	Eligible           bool        `json:"eligible"`
+	RemainingThisMonth int         `json:"remainingThisMonth"`
+	MaxTotal           types.Money `json:"maxTotal"`
+	ResetsAt           string      `json:"resetsAt"`
 }
 
 type BoostEstimateRequest struct {
@@ -66,6 +76,7 @@ type Boost struct {
 	EndsAt          *string      `json:"endsAt"`
 	Results         BoostResults `json:"results"`
 	RejectionReason *string      `json:"rejectionReason"`
+	PaymentMethod   string       `json:"paymentMethod"`
 }
 
 type CreatedBoost struct {

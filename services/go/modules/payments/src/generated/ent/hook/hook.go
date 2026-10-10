@@ -56,6 +56,18 @@ func (f ConnectedAccountJobFunc) Mutate(ctx context.Context, m ent.Mutation) (en
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ConnectedAccountJobMutation", m)
 }
 
+// The CustomerValidationFunc type is an adapter to allow the use of ordinary
+// function as CustomerValidation mutator.
+type CustomerValidationFunc func(context.Context, *ent.CustomerValidationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CustomerValidationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CustomerValidationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CustomerValidationMutation", m)
+}
+
 // The IdempotentRequestFunc type is an adapter to allow the use of ordinary
 // function as IdempotentRequest mutator.
 type IdempotentRequestFunc func(context.Context, *ent.IdempotentRequestMutation) (ent.Value, error)
@@ -210,6 +222,18 @@ func (f StorePurchaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StorePurchaseMutation", m)
+}
+
+// The VerificationLevelRecordFunc type is an adapter to allow the use of ordinary
+// function as VerificationLevelRecord mutator.
+type VerificationLevelRecordFunc func(context.Context, *ent.VerificationLevelRecordMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VerificationLevelRecordFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VerificationLevelRecordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VerificationLevelRecordMutation", m)
 }
 
 // The WebhookEventFunc type is an adapter to allow the use of ordinary

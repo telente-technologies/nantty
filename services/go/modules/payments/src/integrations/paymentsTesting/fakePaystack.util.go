@@ -50,6 +50,8 @@ type FakePaystack struct {
 	Refunds              []map[string]any
 	Disputes             []map[string]any
 	Subscriptions        map[string]map[string]any
+	Customers            map[string]string
+	Identifications      map[string]map[string]any
 	PlatformBalance      map[string]int64
 	SubaccountBalances   map[string]int64
 	CallCounts           map[string]int
@@ -67,7 +69,7 @@ func StartFakePaystack(t *testing.T) *FakePaystack {
 	fake := &FakePaystack{
 		Transactions: map[string]*FakeTransaction{}, Transfers: map[string]*FakeTransfer{}, Recipients: map[string]map[string]any{},
 		Subaccounts: map[string]map[string]any{}, Subscriptions: map[string]map[string]any{}, PlatformBalance: map[string]int64{}, SubaccountBalances: map[string]int64{},
-		CallCounts: map[string]int{},
+		CallCounts: map[string]int{}, Customers: map[string]string{}, Identifications: map[string]map[string]any{},
 	}
 	fake.Server = httptest.NewServer(http.HandlerFunc(fake.serve))
 	t.Cleanup(fake.Server.Close)

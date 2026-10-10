@@ -75,6 +75,8 @@ func TestCreatorSubscriptionBoughtInTheAppStoreRenewsAndClawsBackOnRefund(t *tes
 	}}
 	ctx := context.Background()
 	fanToken := harness.Tokens.UserAccessToken(fan)
+	harness.OnboardConnectedAccount(creator, false)
+	harness.OnboardConnectedAccount(otherCreator, false)
 	createPlan := func(owner string, amount int64) map[string]any {
 		response := harness.Call(http.MethodPost, "/api/v1/creators/me/subscription-plans", harness.Tokens.UserAccessToken(owner), "", map[string]any{"name": "Club", "price": map[string]any{"amountMinor": amount, "currency": "NGN"}})
 		if amount == 120_000 {

@@ -13,6 +13,7 @@ import (
 	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
 	"zudomart/modules/wallet/src/container"
 	"zudomart/modules/wallet/src/generated/ent"
+	"zudomart/modules/wallet/src/generated/ent/adbalanceearningstransfer"
 	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
 	"zudomart/modules/wallet/src/modules/adBalances/dtos"
 	"zudomart/platform/httpserver"
@@ -69,7 +70,7 @@ func (balances AdBalances) HandleSucceededPayment(ctx context.Context, transacti
 		return err
 	}
 	return balances.Container.Outbox.EnqueueInTransaction(ctx, transaction, "adBalance.toppedUp", topUp.AdAccountID, now, map[string]any{
-		"adAccountId": topUp.AdAccountID, "topUpId": topUp.ID.String(), "fundedByUserId": topUp.FundedByUserID,
+		"adAccountId": topUp.AdAccountID, "topUpId": topUp.ID.String(), "fundedByUserId": topUp.FundedByUserID, "source": "paystack",
 		"amount": map[string]any{"amountMinor": topUp.AmountMinor, "currency": topUp.Currency},
 	})
 }
@@ -105,6 +106,11 @@ func (balances AdBalances) ReadBalance(ctx context.Context, userId, adAccountId,
 	funded, err := client.AdBalanceTopUp.Query().Where(adbalancetopup.AdAccountID(adAccountId), adbalancetopup.FundedByUserID(userId)).Exist(ctx)
 	if err != nil {
 		return dtos.AdBalanceDto{}, err
+	}
+	if !funded {
+		if funded, err = client.AdBalanceEarningsTransfer.Query().Where(adbalanceearningstransfer.AdAccountID(adAccountId), adbalanceearningstransfer.UserID(userId)).Exist(ctx); err != nil {
+			return dtos.AdBalanceDto{}, err
+		}
 	}
 	if !funded && adAccountId != BoostAdAccountId(userId) {
 		return dtos.AdBalanceDto{}, ErrAdAccountNotFunded

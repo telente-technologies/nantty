@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/payments/src/constants"
 	"zudomart/modules/payments/src/generated/ent"
 	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
+	"zudomart/modules/payments/src/generated/ent/customervalidation"
 	"zudomart/modules/payments/src/generated/ent/payoutonboarding"
 	"zudomart/modules/payments/src/interfaces"
 	"zudomart/modules/payments/src/modules/gateway/models"
@@ -95,6 +96,16 @@ func (gateway *PaymentGateway) ReadPayoutOnboardingState(ctx context.Context, us
 	}
 	state.EarningsPendingTransfer = models.MoneyView{AmountMinor: balances[ledgermodels.CreatorEarningsPayableAccount(userId, "NGN").Key()], Currency: "NGN"}
 	state.PendingWithdrawable = models.MoneyView{AmountMinor: max(balances[ledgermodels.SellerAvailableAccount(userId, "NGN").Key()], 0), Currency: "NGN"}
+	if validation, err := client.CustomerValidation.Query().Where(customervalidation.UserID(userId)).Only(ctx); err == nil {
+		state.BankValidation = &models.BankValidationView{Status: string(validation.Status), FailureReason: validation.FailureReason}
+	} else if !ent.IsNotFound(err) {
+		return models.PayoutOnboardingState{}, err
+	}
+	level, err := gateway.ReadVerificationLevel(ctx, userId)
+	if err != nil {
+		return models.PayoutOnboardingState{}, err
+	}
+	state.VerificationLevel = level.Level
 	return state, nil
 }
 
@@ -160,9 +171,16 @@ func (gateway *PaymentGateway) SavePayoutOnboardingBank(ctx context.Context, use
 	if err := gateway.ClaimSettlementAccount(ctx, userId, bank); err != nil {
 		return err
 	}
-	return gateway.saveOnboardingStep(ctx, userId, "bank", &bank, func(update *ent.PayoutOnboardingUpdateOne) {
+	if err := gateway.saveOnboardingStep(ctx, userId, "bank", &bank, func(update *ent.PayoutOnboardingUpdateOne) {
 		update.SetBankCode(input.BankCode).SetBankName(input.BankName).SetAccountLast4(lastFour(input.AccountNumber)).SetResolvedAccountName(accountName)
-	})
+	}); err != nil {
+		return err
+	}
+	if _, err := gateway.StartBankAccountValidation(ctx, userId); err != nil {
+		gateway.Container.Resources.Logger.WarnContext(ctx, "bank account validation did not start", "userId", userId, "error", err)
+	}
+	gateway.refreshVerificationLevelAfterCommit(ctx, userId)
+	return nil
 }
 
 func (gateway *PaymentGateway) ResolveOnboardingBankAccount(ctx context.Context, bankCode, accountNumber string) (string, error) {

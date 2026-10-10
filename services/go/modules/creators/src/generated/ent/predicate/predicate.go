@@ -24,6 +24,9 @@ type BattleSettlement func(*sql.Selector)
 // CreatorAffiliation is the predicate function for creatoraffiliation builders.
 type CreatorAffiliation func(*sql.Selector)
 
+// CreatorBrandDeal is the predicate function for creatorbranddeal builders.
+type CreatorBrandDeal func(*sql.Selector)
+
 // CreatorEarning is the predicate function for creatorearning builders.
 type CreatorEarning func(*sql.Selector)
 

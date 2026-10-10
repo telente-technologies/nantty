@@ -33,11 +33,26 @@ func (balances AdBalances) RefundBoostRemainder(ctx context.Context, request dto
 }
 
 func (balances AdBalances) moveBoostFunds(ctx context.Context, request dtos.BoostDebitRequestDto, prefix string, refund bool) (dtos.BoostDebitResultDto, error) {
+	var result dtos.BoostDebitResultDto
+	err := databases.RunInMoneyTransaction(ctx, balances.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		var err error
+		result, err = balances.moveBoostFundsInTransaction(ctx, transaction, request, prefix, refund)
+		if err != nil || !refund || result.Replayed {
+			return err
+		}
+		returned, err := balances.returnEarningsFundedBoostRefund(ctx, transaction, request)
+		result.BalanceAfter.AmountMinor -= returned
+		return err
+	})
+	return result, err
+}
+
+func (balances AdBalances) moveBoostFundsInTransaction(ctx context.Context, transaction *sql.Tx, request dtos.BoostDebitRequestDto, prefix string, refund bool) (dtos.BoostDebitResultDto, error) {
 	adAccountId := BoostAdAccountId(request.UserId)
 	key := prefix + request.UserId + ":" + request.IdempotencyKey
 	prepaid := ledgermodels.AdvertiserPrepaidBalanceAccount(adAccountId, request.Amount.Currency)
 	var result dtos.BoostDebitResultDto
-	err := databases.RunInMoneyTransaction(ctx, balances.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+	err := func() error {
 		client := balances.Container.Client(transaction)
 		if _, err := transaction.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "ad-balance:"+adAccountId); err != nil {
 			return err
@@ -94,6 +109,6 @@ func (balances AdBalances) moveBoostFunds(ctx context.Context, request dtos.Boos
 		}
 		result = dtos.BoostDebitResultDto{LedgerTransactionId: posted.Id.String(), BalanceAfter: dtos.MoneyDto{AmountMinor: balance, Currency: request.Amount.Currency}}
 		return nil
-	})
+	}()
 	return result, err
 }

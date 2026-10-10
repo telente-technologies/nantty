@@ -25,6 +25,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
+	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
@@ -118,6 +119,7 @@ func checkColumn(t, c string) error {
 			adcreatormonetisationhold.Table: adcreatormonetisationhold.ValidColumn,
 			adcustomaudience.Table:          adcustomaudience.ValidColumn,
 			adexperiment.Table:              adexperiment.ValidColumn,
+			adfreeboostgrant.Table:          adfreeboostgrant.ValidColumn,
 			adfrequencypolicy.Table:         adfrequencypolicy.ValidColumn,
 			adfundstransaction.Table:        adfundstransaction.ValidColumn,
 			adgroup.Table:                   adgroup.ValidColumn,

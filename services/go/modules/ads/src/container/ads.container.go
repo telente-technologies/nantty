@@ -51,6 +51,9 @@ type Container struct {
 	TopUps           interfaces.TopUpGateway
 	AuditHistory     interfaces.AuditHistoryReader
 	UserSummaries    interfaces.PlatformUserSummaries
+	Verification     interfaces.VerificationReader
+	Entitlements     interfaces.EntitlementReader
+	EarningsFunding  interfaces.EarningsFunding
 	Audit            staffaudit.Recorder
 	Jobs             platformevents.JobQueue
 	QueueConsumer    QueueConsumer

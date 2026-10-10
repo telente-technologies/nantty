@@ -9,6 +9,36 @@ import (
 )
 
 var (
+	// AdBalanceEarningsTransfersColumns holds the columns for the "ad_balance_earnings_transfers" table.
+	AdBalanceEarningsTransfersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "ad_account_id", Type: field.TypeString, Size: 80},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 160},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "refunded_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AdBalanceEarningsTransfersTable holds the schema information for the "ad_balance_earnings_transfers" table.
+	AdBalanceEarningsTransfersTable = &schema.Table{
+		Name:       "ad_balance_earnings_transfers",
+		Columns:    AdBalanceEarningsTransfersColumns,
+		PrimaryKey: []*schema.Column{AdBalanceEarningsTransfersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adbalanceearningstransfer_user_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{AdBalanceEarningsTransfersColumns[3], AdBalanceEarningsTransfersColumns[4]},
+			},
+			{
+				Name:    "adbalanceearningstransfer_ad_account_id_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdBalanceEarningsTransfersColumns[2], AdBalanceEarningsTransfersColumns[3], AdBalanceEarningsTransfersColumns[1]},
+			},
+		},
+	}
 	// AdBalanceTopUpsColumns holds the columns for the "ad_balance_top_ups" table.
 	AdBalanceTopUpsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -515,6 +545,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AdBalanceEarningsTransfersTable,
 		AdBalanceTopUpsTable,
 		AdSpendDebitsTable,
 		CoinConversionsTable,
@@ -534,6 +565,11 @@ var (
 )
 
 func init() {
+	AdBalanceEarningsTransfersTable.Annotation = &entsql.Annotation{}
+	AdBalanceEarningsTransfersTable.Annotation.Checks = map[string]string{
+		"ad_balance_earnings_transfers_amount_positive":      "amount_minor > 0",
+		"ad_balance_earnings_transfers_refund_within_amount": "refunded_minor >= 0 AND refunded_minor <= amount_minor",
+	}
 	AdBalanceTopUpsTable.Annotation = &entsql.Annotation{}
 	AdBalanceTopUpsTable.Annotation.Checks = map[string]string{
 		"ad_balance_top_ups_amount_positive":      "amount_minor > 0",

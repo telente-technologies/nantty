@@ -40,11 +40,13 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Publ
 				return err
 			}
 		}
-		if err := tx.Store.UpdateOneID(storeId).AddRatingSum(int64(created.Rating)).AddRatingCount(1).Exec(ctx); err != nil {
+		store, err := tx.Store.UpdateOneID(storeId).AddRatingSum(int64(created.Rating)).AddRatingCount(1).Save(ctx)
+		if err != nil {
 			return err
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, "review.created", created.ID.String(), handler.Container.Now(), map[string]any{
 			"reviewId": created.ID, "storeId": storeId, "productId": command.ProductId, "rating": created.Rating, "authorAccountId": command.AccountId,
+			"storeOwnerAccountId": store.OwnerAccountID, "storeName": store.Name,
 		})
 	})
 	if ent.IsConstraintError(err) {

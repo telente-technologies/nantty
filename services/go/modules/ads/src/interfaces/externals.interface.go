@@ -26,7 +26,31 @@ type FraudModelScorer interface {
 
 type FundingGateway interface {
 	ChargeUserWalletForBoost(ctx context.Context, userId, currency string, amountMinor int64, idempotencyKey string) error
+	ChargeEarningsForBoost(ctx context.Context, userId, currency string, amountMinor int64, idempotencyKey string) error
 	RefundBoostCharge(ctx context.Context, userId, currency string, amountMinor int64, idempotencyKey, debitIdempotencyKey string) error
+}
+
+type VerificationStatus struct {
+	Level    int
+	NextStep string
+}
+
+type VerificationReader interface {
+	ReadVerificationLevel(ctx context.Context, userId string) (VerificationStatus, error)
+}
+
+type EntitlementReader interface {
+	IsPremium(ctx context.Context, userId string) (bool, error)
+}
+
+type EarningsFundingResult struct {
+	FundingId   string
+	AmountMinor int64
+	Currency    string
+}
+
+type EarningsFunding interface {
+	FundAdAccountFromEarnings(ctx context.Context, userId, adAccountId, currency string, amountMinor int64, idempotencyKey string) (EarningsFundingResult, error)
 }
 
 type UserSummary struct {

@@ -23,13 +23,26 @@ func (controller BoostsController) responder() utils.Responder {
 }
 
 func (controller BoostsController) GetOptions(writer http.ResponseWriter, request *http.Request) {
-	resolution := utils.ResolvePricingRegion(request)
-	currency := strings.ToUpper(request.URL.Query().Get("currency"))
-	if !regionpricing.IsSupportedCurrency(currency) {
-		currency = resolution.Currency
-	}
-	options := (getboostoptions.Handler{Container: controller.Container}).Execute(request.Context(), getboostoptions.Query{Currency: currency, Country: resolution.CountryCode})
-	httpserver.WriteJsonResponse(writer, http.StatusOK, options)
+	controller.responder().Run(writer, request, func() error {
+		userId, err := utils.ActorUserId(request)
+		if err != nil {
+			return err
+		}
+		resolution := utils.ResolvePricingRegion(request)
+		currency := strings.ToUpper(request.URL.Query().Get("currency"))
+		if !regionpricing.IsSupportedCurrency(currency) {
+			currency = resolution.Currency
+		}
+		options, err := (getboostoptions.Handler{Container: controller.Container}).Execute(request.Context(), getboostoptions.Query{
+			Currency: currency, Country: resolution.CountryCode, UserId: userId, Platform: request.Header.Get("X-Client-Platform"),
+		})
+		if err != nil {
+			return err
+		}
+		writer.Header().Set("Cache-Control", "no-store")
+		httpserver.WriteJsonResponse(writer, http.StatusOK, options)
+		return nil
+	})
 }
 
 func (controller BoostsController) Estimate(writer http.ResponseWriter, request *http.Request) {
@@ -57,7 +70,9 @@ func (controller BoostsController) Create(writer http.ResponseWriter, request *h
 		if err := utils.DecodeBody(writer, request, &body); err != nil {
 			return err
 		}
-		created, err := (createboost.Handler{Container: controller.Container}).Execute(request.Context(), createboost.Command{UserId: userId, IdempotencyKey: request.Header.Get("Idempotency-Key"), Country: utils.ClientCountry(request), Request: body})
+		created, err := (createboost.Handler{Container: controller.Container}).Execute(request.Context(), createboost.Command{
+			UserId: userId, IdempotencyKey: request.Header.Get("Idempotency-Key"), Country: utils.ClientCountry(request), Platform: request.Header.Get("X-Client-Platform"), Request: body,
+		})
 		if err != nil {
 			return err
 		}

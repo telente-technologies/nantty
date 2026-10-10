@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
+	fundfromearnings "zudomart/modules/ads/src/modules/billing/commands/fundFromEarnings"
 	starttopup "zudomart/modules/ads/src/modules/billing/commands/startTopUp"
 	"zudomart/modules/ads/src/modules/billing/dtos"
 	gettopup "zudomart/modules/ads/src/modules/billing/queries/getTopUp"
@@ -45,6 +46,23 @@ func (controller BillingController) GetTopUp(writer http.ResponseWriter, request
 		}
 		writer.Header().Set("Cache-Control", "no-store")
 		httpserver.WriteJsonResponse(writer, http.StatusOK, topUp)
+		return nil
+	})
+}
+
+func (controller BillingController) FundFromEarnings(writer http.ResponseWriter, request *http.Request) {
+	controller.run(writer, request, func(user, account uuid.UUID) error {
+		var body dtos.FundFromEarningsRequest
+		if err := utils.DecodeBody(writer, request, &body); err != nil {
+			return err
+		}
+		funded, err := (fundfromearnings.Handler{Container: controller.Container}).Execute(request.Context(), fundfromearnings.Command{
+			AccountId: account, UserId: user, IdempotencyKey: request.Header.Get("Idempotency-Key"), Amount: body.Amount,
+		})
+		if err != nil {
+			return err
+		}
+		httpserver.WriteJsonResponse(writer, http.StatusCreated, funded)
 		return nil
 	})
 }

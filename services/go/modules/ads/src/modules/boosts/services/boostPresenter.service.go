@@ -27,7 +27,7 @@ func PresentBoost(ctx context.Context, client *ent.Client, row *ent.AdBoost, tod
 	}
 	presented := dtos.Boost{
 		Id: row.ID.String(), PostId: row.PostID, Status: string(row.Status), Goal: string(row.Goal), TotalBudget: types.Money{AmountMinor: row.TotalBudgetMinor, Currency: row.Currency},
-		Spent: types.Money{AmountMinor: raw.SpendMicros / types.MicrosPerMinorUnit, Currency: row.Currency}, Results: results,
+		Spent: types.Money{AmountMinor: raw.SpendMicros / types.MicrosPerMinorUnit, Currency: row.Currency}, Results: results, PaymentMethod: string(row.PaymentMethod),
 	}
 	if row.StartsAt != nil {
 		formatted := row.StartsAt.UTC().Format(time.RFC3339)

@@ -11,6 +11,7 @@ import (
 
 	"zudomart/modules/wallet/src/generated/ent/migrate"
 
+	"zudomart/modules/wallet/src/generated/ent/adbalanceearningstransfer"
 	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
 	"zudomart/modules/wallet/src/generated/ent/adspenddebit"
 	"zudomart/modules/wallet/src/generated/ent/coinconversion"
@@ -41,6 +42,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AdBalanceEarningsTransfer is the client for interacting with the AdBalanceEarningsTransfer builders.
+	AdBalanceEarningsTransfer *AdBalanceEarningsTransferClient
 	// AdBalanceTopUp is the client for interacting with the AdBalanceTopUp builders.
 	AdBalanceTopUp *AdBalanceTopUpClient
 	// AdSpendDebit is the client for interacting with the AdSpendDebit builders.
@@ -82,6 +85,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AdBalanceEarningsTransfer = NewAdBalanceEarningsTransferClient(c.config)
 	c.AdBalanceTopUp = NewAdBalanceTopUpClient(c.config)
 	c.AdSpendDebit = NewAdSpendDebitClient(c.config)
 	c.CoinConversion = NewCoinConversionClient(c.config)
@@ -189,23 +193,24 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		AdBalanceTopUp:          NewAdBalanceTopUpClient(cfg),
-		AdSpendDebit:            NewAdSpendDebitClient(cfg),
-		CoinConversion:          NewCoinConversionClient(cfg),
-		CoinPackage:             NewCoinPackageClient(cfg),
-		CoinPurchase:            NewCoinPurchaseClient(cfg),
-		CoinTransfer:            NewCoinTransferClient(cfg),
-		IdempotentRequest:       NewIdempotentRequestClient(cfg),
-		MonetisationHold:        NewMonetisationHoldClient(cfg),
-		OutboxEvent:             NewOutboxEventClient(cfg),
-		PayoutAccount:           NewPayoutAccountClient(cfg),
-		PayoutAccountResolution: NewPayoutAccountResolutionClient(cfg),
-		SellerPayoutSchedule:    NewSellerPayoutScheduleClient(cfg),
-		SellerReserveFlag:       NewSellerReserveFlagClient(cfg),
-		WalletRiskFlag:          NewWalletRiskFlagClient(cfg),
-		Withdrawal:              NewWithdrawalClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		AdBalanceEarningsTransfer: NewAdBalanceEarningsTransferClient(cfg),
+		AdBalanceTopUp:            NewAdBalanceTopUpClient(cfg),
+		AdSpendDebit:              NewAdSpendDebitClient(cfg),
+		CoinConversion:            NewCoinConversionClient(cfg),
+		CoinPackage:               NewCoinPackageClient(cfg),
+		CoinPurchase:              NewCoinPurchaseClient(cfg),
+		CoinTransfer:              NewCoinTransferClient(cfg),
+		IdempotentRequest:         NewIdempotentRequestClient(cfg),
+		MonetisationHold:          NewMonetisationHoldClient(cfg),
+		OutboxEvent:               NewOutboxEventClient(cfg),
+		PayoutAccount:             NewPayoutAccountClient(cfg),
+		PayoutAccountResolution:   NewPayoutAccountResolutionClient(cfg),
+		SellerPayoutSchedule:      NewSellerPayoutScheduleClient(cfg),
+		SellerReserveFlag:         NewSellerReserveFlagClient(cfg),
+		WalletRiskFlag:            NewWalletRiskFlagClient(cfg),
+		Withdrawal:                NewWithdrawalClient(cfg),
 	}, nil
 }
 
@@ -223,30 +228,31 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                     ctx,
-		config:                  cfg,
-		AdBalanceTopUp:          NewAdBalanceTopUpClient(cfg),
-		AdSpendDebit:            NewAdSpendDebitClient(cfg),
-		CoinConversion:          NewCoinConversionClient(cfg),
-		CoinPackage:             NewCoinPackageClient(cfg),
-		CoinPurchase:            NewCoinPurchaseClient(cfg),
-		CoinTransfer:            NewCoinTransferClient(cfg),
-		IdempotentRequest:       NewIdempotentRequestClient(cfg),
-		MonetisationHold:        NewMonetisationHoldClient(cfg),
-		OutboxEvent:             NewOutboxEventClient(cfg),
-		PayoutAccount:           NewPayoutAccountClient(cfg),
-		PayoutAccountResolution: NewPayoutAccountResolutionClient(cfg),
-		SellerPayoutSchedule:    NewSellerPayoutScheduleClient(cfg),
-		SellerReserveFlag:       NewSellerReserveFlagClient(cfg),
-		WalletRiskFlag:          NewWalletRiskFlagClient(cfg),
-		Withdrawal:              NewWithdrawalClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		AdBalanceEarningsTransfer: NewAdBalanceEarningsTransferClient(cfg),
+		AdBalanceTopUp:            NewAdBalanceTopUpClient(cfg),
+		AdSpendDebit:              NewAdSpendDebitClient(cfg),
+		CoinConversion:            NewCoinConversionClient(cfg),
+		CoinPackage:               NewCoinPackageClient(cfg),
+		CoinPurchase:              NewCoinPurchaseClient(cfg),
+		CoinTransfer:              NewCoinTransferClient(cfg),
+		IdempotentRequest:         NewIdempotentRequestClient(cfg),
+		MonetisationHold:          NewMonetisationHoldClient(cfg),
+		OutboxEvent:               NewOutboxEventClient(cfg),
+		PayoutAccount:             NewPayoutAccountClient(cfg),
+		PayoutAccountResolution:   NewPayoutAccountResolutionClient(cfg),
+		SellerPayoutSchedule:      NewSellerPayoutScheduleClient(cfg),
+		SellerReserveFlag:         NewSellerReserveFlagClient(cfg),
+		WalletRiskFlag:            NewWalletRiskFlagClient(cfg),
+		Withdrawal:                NewWithdrawalClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		AdBalanceTopUp.
+//		AdBalanceEarningsTransfer.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -269,9 +275,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion, c.CoinPackage,
-		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.MonetisationHold,
-		c.OutboxEvent, c.PayoutAccount, c.PayoutAccountResolution,
+		c.AdBalanceEarningsTransfer, c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion,
+		c.CoinPackage, c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest,
+		c.MonetisationHold, c.OutboxEvent, c.PayoutAccount, c.PayoutAccountResolution,
 		c.SellerPayoutSchedule, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
 	} {
 		n.Use(hooks...)
@@ -282,9 +288,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion, c.CoinPackage,
-		c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest, c.MonetisationHold,
-		c.OutboxEvent, c.PayoutAccount, c.PayoutAccountResolution,
+		c.AdBalanceEarningsTransfer, c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion,
+		c.CoinPackage, c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest,
+		c.MonetisationHold, c.OutboxEvent, c.PayoutAccount, c.PayoutAccountResolution,
 		c.SellerPayoutSchedule, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
 	} {
 		n.Intercept(interceptors...)
@@ -294,6 +300,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AdBalanceEarningsTransferMutation:
+		return c.AdBalanceEarningsTransfer.mutate(ctx, m)
 	case *AdBalanceTopUpMutation:
 		return c.AdBalanceTopUp.mutate(ctx, m)
 	case *AdSpendDebitMutation:
@@ -326,6 +334,139 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Withdrawal.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AdBalanceEarningsTransferClient is a client for the AdBalanceEarningsTransfer schema.
+type AdBalanceEarningsTransferClient struct {
+	config
+}
+
+// NewAdBalanceEarningsTransferClient returns a client for the AdBalanceEarningsTransfer from the given config.
+func NewAdBalanceEarningsTransferClient(c config) *AdBalanceEarningsTransferClient {
+	return &AdBalanceEarningsTransferClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adbalanceearningstransfer.Hooks(f(g(h())))`.
+func (c *AdBalanceEarningsTransferClient) Use(hooks ...Hook) {
+	c.hooks.AdBalanceEarningsTransfer = append(c.hooks.AdBalanceEarningsTransfer, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adbalanceearningstransfer.Intercept(f(g(h())))`.
+func (c *AdBalanceEarningsTransferClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdBalanceEarningsTransfer = append(c.inters.AdBalanceEarningsTransfer, interceptors...)
+}
+
+// Create returns a builder for creating a AdBalanceEarningsTransfer entity.
+func (c *AdBalanceEarningsTransferClient) Create() *AdBalanceEarningsTransferCreate {
+	mutation := newAdBalanceEarningsTransferMutation(c.config, OpCreate)
+	return &AdBalanceEarningsTransferCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdBalanceEarningsTransfer entities.
+func (c *AdBalanceEarningsTransferClient) CreateBulk(builders ...*AdBalanceEarningsTransferCreate) *AdBalanceEarningsTransferCreateBulk {
+	return &AdBalanceEarningsTransferCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdBalanceEarningsTransferClient) MapCreateBulk(slice any, setFunc func(*AdBalanceEarningsTransferCreate, int)) *AdBalanceEarningsTransferCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdBalanceEarningsTransferCreateBulk{err: fmt.Errorf("calling to AdBalanceEarningsTransferClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdBalanceEarningsTransferCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdBalanceEarningsTransferCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdBalanceEarningsTransfer.
+func (c *AdBalanceEarningsTransferClient) Update() *AdBalanceEarningsTransferUpdate {
+	mutation := newAdBalanceEarningsTransferMutation(c.config, OpUpdate)
+	return &AdBalanceEarningsTransferUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdBalanceEarningsTransferClient) UpdateOne(_m *AdBalanceEarningsTransfer) *AdBalanceEarningsTransferUpdateOne {
+	mutation := newAdBalanceEarningsTransferMutation(c.config, OpUpdateOne, withAdBalanceEarningsTransfer(_m))
+	return &AdBalanceEarningsTransferUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdBalanceEarningsTransferClient) UpdateOneID(id uuid.UUID) *AdBalanceEarningsTransferUpdateOne {
+	mutation := newAdBalanceEarningsTransferMutation(c.config, OpUpdateOne, withAdBalanceEarningsTransferID(id))
+	return &AdBalanceEarningsTransferUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdBalanceEarningsTransfer.
+func (c *AdBalanceEarningsTransferClient) Delete() *AdBalanceEarningsTransferDelete {
+	mutation := newAdBalanceEarningsTransferMutation(c.config, OpDelete)
+	return &AdBalanceEarningsTransferDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdBalanceEarningsTransferClient) DeleteOne(_m *AdBalanceEarningsTransfer) *AdBalanceEarningsTransferDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdBalanceEarningsTransferClient) DeleteOneID(id uuid.UUID) *AdBalanceEarningsTransferDeleteOne {
+	builder := c.Delete().Where(adbalanceearningstransfer.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdBalanceEarningsTransferDeleteOne{builder}
+}
+
+// Query returns a query builder for AdBalanceEarningsTransfer.
+func (c *AdBalanceEarningsTransferClient) Query() *AdBalanceEarningsTransferQuery {
+	return &AdBalanceEarningsTransferQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdBalanceEarningsTransfer},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdBalanceEarningsTransfer entity by its id.
+func (c *AdBalanceEarningsTransferClient) Get(ctx context.Context, id uuid.UUID) (*AdBalanceEarningsTransfer, error) {
+	return c.Query().Where(adbalanceearningstransfer.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdBalanceEarningsTransferClient) GetX(ctx context.Context, id uuid.UUID) *AdBalanceEarningsTransfer {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdBalanceEarningsTransferClient) Hooks() []Hook {
+	return c.hooks.AdBalanceEarningsTransfer
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdBalanceEarningsTransferClient) Interceptors() []Interceptor {
+	return c.inters.AdBalanceEarningsTransfer
+}
+
+func (c *AdBalanceEarningsTransferClient) mutate(ctx context.Context, m *AdBalanceEarningsTransferMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdBalanceEarningsTransferCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdBalanceEarningsTransferUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdBalanceEarningsTransferUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdBalanceEarningsTransferDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdBalanceEarningsTransfer mutation op: %q", m.Op())
 	}
 }
 
@@ -2327,16 +2468,16 @@ func (c *WithdrawalClient) mutate(ctx context.Context, m *WithdrawalMutation) (V
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AdBalanceTopUp, AdSpendDebit, CoinConversion, CoinPackage, CoinPurchase,
-		CoinTransfer, IdempotentRequest, MonetisationHold, OutboxEvent, PayoutAccount,
-		PayoutAccountResolution, SellerPayoutSchedule, SellerReserveFlag,
-		WalletRiskFlag, Withdrawal []ent.Hook
+		AdBalanceEarningsTransfer, AdBalanceTopUp, AdSpendDebit, CoinConversion,
+		CoinPackage, CoinPurchase, CoinTransfer, IdempotentRequest, MonetisationHold,
+		OutboxEvent, PayoutAccount, PayoutAccountResolution, SellerPayoutSchedule,
+		SellerReserveFlag, WalletRiskFlag, Withdrawal []ent.Hook
 	}
 	inters struct {
-		AdBalanceTopUp, AdSpendDebit, CoinConversion, CoinPackage, CoinPurchase,
-		CoinTransfer, IdempotentRequest, MonetisationHold, OutboxEvent, PayoutAccount,
-		PayoutAccountResolution, SellerPayoutSchedule, SellerReserveFlag,
-		WalletRiskFlag, Withdrawal []ent.Interceptor
+		AdBalanceEarningsTransfer, AdBalanceTopUp, AdSpendDebit, CoinConversion,
+		CoinPackage, CoinPurchase, CoinTransfer, IdempotentRequest, MonetisationHold,
+		OutboxEvent, PayoutAccount, PayoutAccountResolution, SellerPayoutSchedule,
+		SellerReserveFlag, WalletRiskFlag, Withdrawal []ent.Interceptor
 	}
 )
 

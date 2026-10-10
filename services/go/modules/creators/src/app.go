@@ -14,6 +14,9 @@ import (
 	affiliatecontrollers "zudomart/modules/creators/src/modules/affiliates/controllers"
 	affiliateroutes "zudomart/modules/creators/src/modules/affiliates/routes"
 	affiliateservices "zudomart/modules/creators/src/modules/affiliates/services"
+	branddealcontrollers "zudomart/modules/creators/src/modules/brandDeals/controllers"
+	branddealroutes "zudomart/modules/creators/src/modules/brandDeals/routes"
+	branddealservices "zudomart/modules/creators/src/modules/brandDeals/services"
 	moneycontrollers "zudomart/modules/creators/src/modules/creatorMoney/controllers"
 	moneyroutes "zudomart/modules/creators/src/modules/creatorMoney/routes"
 	moneyservices "zudomart/modules/creators/src/modules/creatorMoney/services"
@@ -123,6 +126,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	programroutes.MountCreatorProgramRoutes(mux, module.Program)
 	moneyroutes.MountCreatorMoneyRoutes(mux, moneycontrollers.CreatorMoneyController{Money: module.Money})
 	affiliateroutes.MountAffiliatesRoutes(mux, affiliatecontrollers.AffiliatesController{Affiliates: module.Affiliates})
+	branddealroutes.MountBrandDealsRoutes(mux, branddealcontrollers.BrandDealsController{Deals: branddealservices.BrandDeals{Container: module.Container, Program: module.Program}})
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

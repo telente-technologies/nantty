@@ -56,7 +56,12 @@ type paystackWebhookData struct {
 	Paid                 bool            `json:"paid"`
 	Resolution           string          `json:"resolution"`
 	Plan                 json.RawMessage `json:"plan"`
-	Customer             *struct {
+	CustomerCode         string          `json:"customer_code"`
+	Identification       *struct {
+		AccountNumber string `json:"account_number"`
+		BankCode      string `json:"bank_code"`
+	} `json:"identification"`
+	Customer *struct {
 		CustomerCode string `json:"customer_code"`
 	} `json:"customer"`
 	Subscription *struct {
@@ -95,6 +100,12 @@ func parsePaystackWebhook(rawBody []byte) (interfaces.WebhookNotification, error
 	}
 	objectId := data.Id.String()
 	switch notification.Kind {
+	case interfaces.WebhookKindIdentification:
+		notification.ProviderCustomerId, notification.ProviderChargeId = data.CustomerCode, ""
+		objectId = data.CustomerCode
+		if data.Identification != nil {
+			objectId += ":" + data.Identification.BankCode + ":" + data.Identification.AccountNumber
+		}
 	case interfaces.WebhookKindTransfer:
 		notification.ProviderObjectId, notification.ProviderChargeId = data.TransferCode, ""
 		objectId = firstNonEmptyString(data.Reference, data.TransferCode)

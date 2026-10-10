@@ -27,25 +27,33 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Creat
 	}
 	hash := hashRequest(command.Request)
 	if existing, found, err := handler.findExisting(ctx, command, hash); found || err != nil {
-		return handler.present(ctx, existing, err)
+		return handler.present(ctx, command, existing, err)
+	}
+	total := command.Request.DailyBudget.AmountMinor * int64(command.Request.DurationDays)
+	method := command.Request.PaymentMethod
+	if err := handler.checkPaymentMethod(ctx, command, total, floors.BoostMinimumDailyMinor); err != nil {
+		return dtos.CreatedBoost{}, err
 	}
 	account, err := handler.ensureBoostAccount(ctx, command)
 	if err != nil {
 		return dtos.CreatedBoost{}, err
 	}
-	total := command.Request.DailyBudget.AmountMinor * int64(command.Request.DurationDays)
-	paid := command.Request.PaymentMethod == "wallet"
-	if paid {
-		if err := deployed.Funding.ChargeUserWalletForBoost(ctx, command.UserId.String(), account.Currency, total, command.IdempotencyKey); err != nil {
+	charged := method == "wallet" || method == "balance"
+	if charged {
+		charge := deployed.Funding.ChargeUserWalletForBoost
+		if method == "balance" {
+			charge = deployed.Funding.ChargeEarningsForBoost
+		}
+		if err := charge(ctx, command.UserId.String(), account.Currency, total, command.IdempotencyKey); err != nil {
 			return dtos.CreatedBoost{}, err
 		}
 	}
 	var created *ent.AdBoost
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		created, err = handler.createRecords(ctx, tx, command, account, total, hash, paid)
+		created, err = handler.createRecords(ctx, tx, command, account, total, hash)
 		return err
 	})
-	if err != nil && paid && !ent.IsConstraintError(err) {
+	if err != nil && charged && !ent.IsConstraintError(err) {
 		if refundErr := deployed.Funding.RefundBoostCharge(ctx, command.UserId.String(), account.Currency, total, "refund-"+command.IdempotencyKey, command.IdempotencyKey); refundErr != nil {
 			deployed.Logger.Error("boost charge could not be refunded after the boost failed to save", slog.String("idempotencyKey", command.IdempotencyKey), slog.Any("error", refundErr))
 		}
@@ -53,10 +61,43 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Creat
 	if ent.IsConstraintError(err) {
 		existing, found, lookupErr := handler.findExisting(ctx, command, hash)
 		if found || lookupErr != nil {
-			return handler.present(ctx, existing, lookupErr)
+			return handler.present(ctx, command, existing, lookupErr)
+		}
+		if method == "free" {
+			return dtos.CreatedBoost{}, adserrors.FreeBoostUsed
 		}
 	}
-	return handler.present(ctx, created, err)
+	return handler.present(ctx, command, created, err)
+}
+
+func (handler Handler) checkPaymentMethod(ctx context.Context, command Command, total, freeCap int64) error {
+	deployed, method := handler.Container, command.Request.PaymentMethod
+	if (method == "balance" || method == "wallet") && services.IsNativeClient(command.Platform) {
+		return adserrors.PaymentNotAvailableInApp
+	}
+	switch method {
+	case "balance":
+		return adsservices.RequirePayoutVerified(ctx, deployed.Verification, command.UserId.String())
+	case "free":
+		premium, err := deployed.Entitlements.IsPremium(ctx, command.UserId.String())
+		if err != nil {
+			return adserrors.UpstreamUnavailable
+		}
+		if !premium {
+			return adserrors.FreeBoostNotAvailable
+		}
+		if total > freeCap {
+			return adserrors.FreeBoostTooLarge
+		}
+		state, err := services.ReadFreeBoost(ctx, deployed, command.UserId, true, freeBoostCap(freeCap, command))
+		if err != nil {
+			return err
+		}
+		if !state.Eligible {
+			return adserrors.FreeBoostUsed
+		}
+	}
+	return nil
 }
 
 func hashRequest(request dtos.CreateBoostRequest) string {
@@ -79,7 +120,7 @@ func (handler Handler) findExisting(ctx context.Context, command Command, hash s
 	return row, true, nil
 }
 
-func (handler Handler) present(ctx context.Context, row *ent.AdBoost, err error) (dtos.CreatedBoost, error) {
+func (handler Handler) present(ctx context.Context, command Command, row *ent.AdBoost, err error) (dtos.CreatedBoost, error) {
 	if err != nil || row == nil {
 		return dtos.CreatedBoost{}, err
 	}
@@ -87,6 +128,14 @@ func (handler Handler) present(ctx context.Context, row *ent.AdBoost, err error)
 	if err != nil {
 		return dtos.CreatedBoost{}, err
 	}
-	boost, err := services.PresentBoost(ctx, handler.Container.Client, row, adsservices.DayKeyInTimezone(handler.Container.Now(), account.Timezone))
-	return dtos.CreatedBoost{Boost: boost}, err
+	created := dtos.CreatedBoost{}
+	if row.PaymentMethod == adboost.PaymentMethodCard && row.Status == adboost.StatusPendingPayment {
+		checkoutUrl, err := handler.openCardCheckout(ctx, command, row, account)
+		if err != nil {
+			return dtos.CreatedBoost{}, err
+		}
+		created.CheckoutUrl = &checkoutUrl
+	}
+	created.Boost, err = services.PresentBoost(ctx, handler.Container.Client, row, adsservices.DayKeyInTimezone(handler.Container.Now(), account.Timezone))
+	return created, err
 }

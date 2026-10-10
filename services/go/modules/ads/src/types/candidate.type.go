@@ -6,6 +6,7 @@ type CandidateAd struct {
 	AdId                  string
 	AdGroupId             string
 	CampaignId            string
+	CampaignKind          string
 	AccountId             string
 	Format                string
 	Creative              Creative

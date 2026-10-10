@@ -22,6 +22,8 @@ type Tx struct {
 	ConnectedAccount *ConnectedAccountClient
 	// ConnectedAccountJob is the client for interacting with the ConnectedAccountJob builders.
 	ConnectedAccountJob *ConnectedAccountJobClient
+	// CustomerValidation is the client for interacting with the CustomerValidation builders.
+	CustomerValidation *CustomerValidationClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OrderPayable is the client for interacting with the OrderPayable builders.
@@ -48,6 +50,8 @@ type Tx struct {
 	SellerVerification *SellerVerificationClient
 	// StorePurchase is the client for interacting with the StorePurchase builders.
 	StorePurchase *StorePurchaseClient
+	// VerificationLevelRecord is the client for interacting with the VerificationLevelRecord builders.
+	VerificationLevelRecord *VerificationLevelRecordClient
 	// WebhookEvent is the client for interacting with the WebhookEvent builders.
 	WebhookEvent *WebhookEventClient
 
@@ -185,6 +189,7 @@ func (tx *Tx) init() {
 	tx.BillingSubscription = NewBillingSubscriptionClient(tx.config)
 	tx.ConnectedAccount = NewConnectedAccountClient(tx.config)
 	tx.ConnectedAccountJob = NewConnectedAccountJobClient(tx.config)
+	tx.CustomerValidation = NewCustomerValidationClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OrderPayable = NewOrderPayableClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
@@ -198,6 +203,7 @@ func (tx *Tx) init() {
 	tx.SavedCardSetup = NewSavedCardSetupClient(tx.config)
 	tx.SellerVerification = NewSellerVerificationClient(tx.config)
 	tx.StorePurchase = NewStorePurchaseClient(tx.config)
+	tx.VerificationLevelRecord = NewVerificationLevelRecordClient(tx.config)
 	tx.WebhookEvent = NewWebhookEventClient(tx.config)
 }
 

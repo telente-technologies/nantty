@@ -24,6 +24,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Campa
 	if err := accountservices.RequireActiveAccount(account); err != nil {
 		return dtos.Campaign{}, err
 	}
+	if err := adsservices.RequirePayoutVerified(ctx, deployed.Verification, command.UserId.String()); err != nil {
+		return dtos.Campaign{}, err
+	}
 	loader := services.Loader{Client: deployed.Client, Now: deployed.Now}
 	campaign, err := loader.FindCampaign(ctx, account.ID, command.CampaignId)
 	if err != nil {

@@ -3,14 +3,12 @@ package services
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"strconv"
 
 	"zudomart/modules/ledger/src/databases"
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
 	"zudomart/modules/wallet/src/generated/ent"
-	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
 	"zudomart/modules/wallet/src/generated/ent/adspenddebit"
 	"zudomart/modules/wallet/src/modules/adBalances/dtos"
 )
@@ -68,59 +66,71 @@ func (balances AdBalances) ApplySpendBatch(ctx context.Context, batch dtos.Spend
 }
 
 func (balances AdBalances) RefundUnusedBalance(ctx context.Context, userId, adAccountId, currency string) (int64, error) {
-	if !balances.Container.Settings.AdPrepaidRefundsEnabled {
-		return 0, ErrRefundsDisabled
-	}
 	var refunded int64
 	err := databases.RunInMoneyTransaction(ctx, balances.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
-		if _, err := transaction.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "ad-balance:"+adAccountId); err != nil {
+		if err := lockAdvisory(ctx, transaction, "ad-balance:"+adAccountId); err != nil {
 			return err
+		}
+		sources, err := balances.lockFundingSourcesNewestFirst(ctx, transaction, userId, adAccountId, currency)
+		if err != nil {
+			return err
+		}
+		if len(sources) == 0 {
+			return ErrAdAccountNotFunded
 		}
 		prepaid := ledgermodels.AdvertiserPrepaidBalanceAccount(adAccountId, currency)
 		remaining, err := balances.Container.Ledger.ReadAccountBalance(ctx, transaction, prepaid)
 		if err != nil {
 			return err
 		}
-		topUps, err := balances.Container.Client(transaction).AdBalanceTopUp.Query().Where(adbalancetopup.AdAccountID(adAccountId), adbalancetopup.FundedByUserID(userId),
-			adbalancetopup.StatusEQ(adbalancetopup.StatusSucceeded), adbalancetopup.Currency(currency)).Order(ent.Desc(adbalancetopup.FieldCreatedAt)).ForUpdate().All(ctx)
-		if err != nil {
-			return err
-		}
-		if len(topUps) == 0 {
-			return ErrAdAccountNotFunded
-		}
-		for _, topUp := range topUps {
-			portion := min(remaining, topUp.AmountMinor-topUp.RefundedMinor)
+		cardRefunds := balances.Container.Settings.AdPrepaidRefundsEnabled
+		blockedByPolicy := false
+		for _, source := range sources {
+			portion := min(remaining, source.unrefundedMinor())
 			if portion <= 0 {
 				continue
 			}
-			reference := "ad-refund-" + topUp.ID.String() + "-" + itoa(topUp.RefundedMinor)
-			if _, err := balances.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-				Reference: reference, Kind: "adBalance.refunded", Description: "Unused ad balance returned",
-				Lines: []ledgermodels.JournalLineRequest{
-					{Account: prepaid, Direction: ledgermodels.Debit, AmountMinor: portion},
-					{Account: ledgermodels.RefundsPayableAccount(balances.Container.Payments.Container.Settings.DefaultProvider, currency), Direction: ledgermodels.Credit, AmountMinor: portion},
-				},
-			}); err != nil {
-				return err
-			}
-			if _, err := balances.Container.Payments.RequestRefundInTransaction(ctx, transaction, paymentmodels.RefundRequest{
-				PaymentIntentId: topUp.PaymentIntentID, AmountMinor: portion, Currency: currency, Reference: reference, Reason: "unused ad balance",
-			}); err != nil {
-				return err
-			}
-			if err := topUp.Update().AddRefundedMinor(portion).Exec(ctx); err != nil {
-				return err
-			}
 			remaining -= portion
+			if source.earnings != nil {
+				if err := balances.returnEarningsCredit(ctx, transaction, source.earnings, portion, "ad-earnings-refund:"+source.earnings.ID.String()+"-"+itoa(source.earnings.RefundedMinor)); err != nil {
+					return err
+				}
+			} else if !cardRefunds {
+				blockedByPolicy = true
+				continue
+			} else if err := balances.refundCardTopUp(ctx, transaction, source.topUp, portion); err != nil {
+				return err
+			}
 			refunded += portion
 		}
-		if refunded == 0 {
-			return errors.New("nothing left to refund")
+		switch {
+		case refunded > 0:
+			return nil
+		case blockedByPolicy:
+			return ErrRefundsDisabled
 		}
-		return nil
+		return ErrNothingToRefund
 	})
 	return refunded, err
+}
+
+func (balances AdBalances) refundCardTopUp(ctx context.Context, transaction *sql.Tx, topUp *ent.AdBalanceTopUp, portion int64) error {
+	reference := "ad-refund-" + topUp.ID.String() + "-" + itoa(topUp.RefundedMinor)
+	if _, err := balances.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+		Reference: reference, Kind: "adBalance.refunded", Description: "Unused ad balance returned",
+		Lines: []ledgermodels.JournalLineRequest{
+			{Account: ledgermodels.AdvertiserPrepaidBalanceAccount(topUp.AdAccountID, topUp.Currency), Direction: ledgermodels.Debit, AmountMinor: portion},
+			{Account: ledgermodels.RefundsPayableAccount(balances.Container.Payments.Container.Settings.DefaultProvider, topUp.Currency), Direction: ledgermodels.Credit, AmountMinor: portion},
+		},
+	}); err != nil {
+		return err
+	}
+	if _, err := balances.Container.Payments.RequestRefundInTransaction(ctx, transaction, paymentmodels.RefundRequest{
+		PaymentIntentId: topUp.PaymentIntentID, AmountMinor: portion, Currency: topUp.Currency, Reference: reference, Reason: "unused ad balance",
+	}); err != nil {
+		return err
+	}
+	return topUp.Update().AddRefundedMinor(portion).Exec(ctx)
 }
 
 func itoa(value int64) string {

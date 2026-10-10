@@ -185,6 +185,38 @@ var (
 			},
 		},
 	}
+	// CreatorBrandDealsColumns holds the columns for the "creator_brand_deals" table.
+	CreatorBrandDealsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "creator_user_id", Type: field.TypeString, Size: 80},
+		{Name: "brand_name", Type: field.TypeString, Size: 120},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "starts_at", Type: field.TypeTime},
+		{Name: "ends_at", Type: field.TypeTime, Nullable: true},
+		{Name: "disclosure", Type: field.TypeString, Size: 500},
+		{Name: "notes", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "idempotency_key", Type: field.TypeString, Size: 128},
+	}
+	// CreatorBrandDealsTable holds the schema information for the "creator_brand_deals" table.
+	CreatorBrandDealsTable = &schema.Table{
+		Name:       "creator_brand_deals",
+		Columns:    CreatorBrandDealsColumns,
+		PrimaryKey: []*schema.Column{CreatorBrandDealsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "creatorbranddeal_creator_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorBrandDealsColumns[2], CreatorBrandDealsColumns[1]},
+			},
+			{
+				Name:    "creatorbranddeal_creator_user_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{CreatorBrandDealsColumns[2], CreatorBrandDealsColumns[10]},
+			},
+		},
+	}
 	// CreatorEarningsColumns holds the columns for the "creator_earnings" table.
 	CreatorEarningsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -405,6 +437,7 @@ var (
 		AffiliateProgramSettingsTable,
 		BattleSettlementsTable,
 		CreatorAffiliationsTable,
+		CreatorBrandDealsTable,
 		CreatorEarningsTable,
 		CreatorProgramMembersTable,
 		CreatorTiersTable,
@@ -416,6 +449,11 @@ var (
 )
 
 func init() {
+	CreatorBrandDealsTable.Annotation = &entsql.Annotation{}
+	CreatorBrandDealsTable.Annotation.Checks = map[string]string{
+		"creator_brand_deals_amount_not_negative": "amount_minor >= 0",
+		"creator_brand_deals_ends_after_start":    "ends_at IS NULL OR ends_at >= starts_at",
+	}
 	CreatorTiersTable.Annotation = &entsql.Annotation{}
 	CreatorTiersTable.Annotation.Checks = map[string]string{
 		"creator_tiers_gift_share_capped": "gift_share_bps >= 0 AND gift_share_bps <= 7000",

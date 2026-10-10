@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
 	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
+	"zudomart/modules/payments/src/generated/ent/customervalidation"
 	"zudomart/modules/payments/src/generated/ent/idempotentrequest"
 	"zudomart/modules/payments/src/generated/ent/orderpayable"
 	"zudomart/modules/payments/src/generated/ent/outboxevent"
@@ -25,6 +26,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
+	"zudomart/modules/payments/src/generated/ent/verificationlevelrecord"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
 	"entgo.io/ent"
@@ -94,6 +96,7 @@ func checkColumn(t, c string) error {
 			billingsubscription.Table:       billingsubscription.ValidColumn,
 			connectedaccount.Table:          connectedaccount.ValidColumn,
 			connectedaccountjob.Table:       connectedaccountjob.ValidColumn,
+			customervalidation.Table:        customervalidation.ValidColumn,
 			idempotentrequest.Table:         idempotentrequest.ValidColumn,
 			orderpayable.Table:              orderpayable.ValidColumn,
 			outboxevent.Table:               outboxevent.ValidColumn,
@@ -107,6 +110,7 @@ func checkColumn(t, c string) error {
 			savedcardsetup.Table:            savedcardsetup.ValidColumn,
 			sellerverification.Table:        sellerverification.ValidColumn,
 			storepurchase.Table:             storepurchase.ValidColumn,
+			verificationlevelrecord.Table:   verificationlevelrecord.ValidColumn,
 			webhookevent.Table:              webhookevent.ValidColumn,
 		})
 	})

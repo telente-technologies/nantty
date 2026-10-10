@@ -212,6 +212,18 @@ func (f AdExperimentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdExperimentMutation", m)
 }
 
+// The AdFreeBoostGrantFunc type is an adapter to allow the use of ordinary
+// function as AdFreeBoostGrant mutator.
+type AdFreeBoostGrantFunc func(context.Context, *ent.AdFreeBoostGrantMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdFreeBoostGrantFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdFreeBoostGrantMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdFreeBoostGrantMutation", m)
+}
+
 // The AdFrequencyPolicyFunc type is an adapter to allow the use of ordinary
 // function as AdFrequencyPolicy mutator.
 type AdFrequencyPolicyFunc func(context.Context, *ent.AdFrequencyPolicyMutation) (ent.Value, error)

@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AdBalanceEarningsTransfer is the predicate function for adbalanceearningstransfer builders.
+type AdBalanceEarningsTransfer func(*sql.Selector)
+
 // AdBalanceTopUp is the predicate function for adbalancetopup builders.
 type AdBalanceTopUp func(*sql.Selector)
 

@@ -7,21 +7,22 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
-	AdBalanceTopUp          string // AdBalanceTopUp table.
-	AdSpendDebit            string // AdSpendDebit table.
-	CoinConversion          string // CoinConversion table.
-	CoinPackage             string // CoinPackage table.
-	CoinPurchase            string // CoinPurchase table.
-	CoinTransfer            string // CoinTransfer table.
-	IdempotentRequest       string // IdempotentRequest table.
-	MonetisationHold        string // MonetisationHold table.
-	OutboxEvent             string // OutboxEvent table.
-	PayoutAccount           string // PayoutAccount table.
-	PayoutAccountResolution string // PayoutAccountResolution table.
-	SellerPayoutSchedule    string // SellerPayoutSchedule table.
-	SellerReserveFlag       string // SellerReserveFlag table.
-	WalletRiskFlag          string // WalletRiskFlag table.
-	Withdrawal              string // Withdrawal table.
+	AdBalanceEarningsTransfer string // AdBalanceEarningsTransfer table.
+	AdBalanceTopUp            string // AdBalanceTopUp table.
+	AdSpendDebit              string // AdSpendDebit table.
+	CoinConversion            string // CoinConversion table.
+	CoinPackage               string // CoinPackage table.
+	CoinPurchase              string // CoinPurchase table.
+	CoinTransfer              string // CoinTransfer table.
+	IdempotentRequest         string // IdempotentRequest table.
+	MonetisationHold          string // MonetisationHold table.
+	OutboxEvent               string // OutboxEvent table.
+	PayoutAccount             string // PayoutAccount table.
+	PayoutAccountResolution   string // PayoutAccountResolution table.
+	SellerPayoutSchedule      string // SellerPayoutSchedule table.
+	SellerReserveFlag         string // SellerReserveFlag table.
+	WalletRiskFlag            string // WalletRiskFlag table.
+	Withdrawal                string // Withdrawal table.
 }
 
 type schemaCtxKey struct{}

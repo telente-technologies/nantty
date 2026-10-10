@@ -28,7 +28,7 @@ var webRouteTerms = []string{
 	"orders", "pay", "post", "posts", "product", "products", "profile", "reset-password", "saved", "settings", "store-rewards", "stores",
 	"subscriptions", "user", "users", "verify-email", "watch", "welcome", "security-check", "cookies", "guidelines", "community-guidelines",
 	"creator-terms", "faq", "sitemap", "sitemaps", "robots", "favicon", "manifest", "_next", "static", "assets", "images", "icons", "fonts", "public",
-	"embed", "oembed", "share", "invite", "download", "app", "apps", "reels", "videos", "video", "rankings", "wallet", "studio",
+	"embed", "oembed", "share", "invite", "download", "app", "apps", "reels", "videos", "video", "rankings", "wallet", "studio", "boost", "boosts", "sounds", "stories", "verification",
 	"rss", "logout", "register", "auth", "oauth", "callback", "new", "create", "edit", "trending", "discover", "tags", "hashtag",
 }
 

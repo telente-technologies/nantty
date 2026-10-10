@@ -42,6 +42,20 @@ func (_u *AdBoostUpdate) SetNillableStatus(v *adboost.Status) *AdBoostUpdate {
 	return _u
 }
 
+// SetPaymentTopUpID sets the "payment_top_up_id" field.
+func (_u *AdBoostUpdate) SetPaymentTopUpID(v string) *AdBoostUpdate {
+	_u.mutation.SetPaymentTopUpID(v)
+	return _u
+}
+
+// SetNillablePaymentTopUpID sets the "payment_top_up_id" field if the given value is not nil.
+func (_u *AdBoostUpdate) SetNillablePaymentTopUpID(v *string) *AdBoostUpdate {
+	if v != nil {
+		_u.SetPaymentTopUpID(*v)
+	}
+	return _u
+}
+
 // SetStartsAt sets the "starts_at" field.
 func (_u *AdBoostUpdate) SetStartsAt(v time.Time) *AdBoostUpdate {
 	_u.mutation.SetStartsAt(v)
@@ -150,6 +164,11 @@ func (_u *AdBoostUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "AdBoost.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.PaymentTopUpID(); ok {
+		if err := adboost.PaymentTopUpIDValidator(v); err != nil {
+			return &ValidationError{Name: "payment_top_up_id", err: fmt.Errorf(`ent: validator failed for field "AdBoost.payment_top_up_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.RejectionReason(); ok {
 		if err := adboost.RejectionReasonValidator(v); err != nil {
 			return &ValidationError{Name: "rejection_reason", err: fmt.Errorf(`ent: validator failed for field "AdBoost.rejection_reason": %w`, err)}
@@ -172,6 +191,9 @@ func (_u *AdBoostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(adboost.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PaymentTopUpID(); ok {
+		_spec.SetField(adboost.FieldPaymentTopUpID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.StartsAt(); ok {
 		_spec.SetField(adboost.FieldStartsAt, field.TypeTime, value)
@@ -221,6 +243,20 @@ func (_u *AdBoostUpdateOne) SetStatus(v adboost.Status) *AdBoostUpdateOne {
 func (_u *AdBoostUpdateOne) SetNillableStatus(v *adboost.Status) *AdBoostUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetPaymentTopUpID sets the "payment_top_up_id" field.
+func (_u *AdBoostUpdateOne) SetPaymentTopUpID(v string) *AdBoostUpdateOne {
+	_u.mutation.SetPaymentTopUpID(v)
+	return _u
+}
+
+// SetNillablePaymentTopUpID sets the "payment_top_up_id" field if the given value is not nil.
+func (_u *AdBoostUpdateOne) SetNillablePaymentTopUpID(v *string) *AdBoostUpdateOne {
+	if v != nil {
+		_u.SetPaymentTopUpID(*v)
 	}
 	return _u
 }
@@ -346,6 +382,11 @@ func (_u *AdBoostUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "AdBoost.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.PaymentTopUpID(); ok {
+		if err := adboost.PaymentTopUpIDValidator(v); err != nil {
+			return &ValidationError{Name: "payment_top_up_id", err: fmt.Errorf(`ent: validator failed for field "AdBoost.payment_top_up_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.RejectionReason(); ok {
 		if err := adboost.RejectionReasonValidator(v); err != nil {
 			return &ValidationError{Name: "rejection_reason", err: fmt.Errorf(`ent: validator failed for field "AdBoost.rejection_reason": %w`, err)}
@@ -385,6 +426,9 @@ func (_u *AdBoostUpdateOne) sqlSave(ctx context.Context) (_node *AdBoost, err er
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(adboost.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PaymentTopUpID(); ok {
+		_spec.SetField(adboost.FieldPaymentTopUpID, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.StartsAt(); ok {
 		_spec.SetField(adboost.FieldStartsAt, field.TypeTime, value)

@@ -91,3 +91,13 @@ type Invoice struct {
 	Status      string      `json:"status"`
 	IssuedAt    string      `json:"issuedAt"`
 }
+
+type FundFromEarningsRequest struct {
+	Amount types.Money `json:"amount"`
+}
+
+type EarningsFunding struct {
+	FundingId string      `json:"fundingId"`
+	Amount    types.Money `json:"amount"`
+	Status    string      `json:"status"`
+}

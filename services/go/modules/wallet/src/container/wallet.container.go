@@ -67,7 +67,7 @@ func NewWalletContainer(resources loaders.MoneyModuleResources, settings configs
 		Now:        time.Now,
 		schemaConfig: ent.SchemaConfig{
 			CoinConversion: schema, CoinPackage: schema, CoinPurchase: schema, CoinTransfer: schema, IdempotentRequest: schema,
-			AdBalanceTopUp: schema, AdSpendDebit: schema, MonetisationHold: schema, OutboxEvent: schema, PayoutAccount: schema, PayoutAccountResolution: schema, SellerPayoutSchedule: schema, SellerReserveFlag: schema, WalletRiskFlag: schema, Withdrawal: schema,
+			AdBalanceTopUp: schema, AdBalanceEarningsTransfer: schema, AdSpendDebit: schema, MonetisationHold: schema, OutboxEvent: schema, PayoutAccount: schema, PayoutAccountResolution: schema, SellerPayoutSchedule: schema, SellerReserveFlag: schema, WalletRiskFlag: schema, Withdrawal: schema,
 		},
 	}, nil
 }

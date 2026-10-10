@@ -37,6 +37,8 @@ const (
 	FieldTotalBudgetMinor = "total_budget_minor"
 	// FieldPaymentMethod holds the string denoting the payment_method field in the database.
 	FieldPaymentMethod = "payment_method"
+	// FieldPaymentTopUpID holds the string denoting the payment_top_up_id field in the database.
+	FieldPaymentTopUpID = "payment_top_up_id"
 	// FieldIdempotencyKey holds the string denoting the idempotency_key field in the database.
 	FieldIdempotencyKey = "idempotency_key"
 	// FieldRequestHash holds the string denoting the request_hash field in the database.
@@ -75,6 +77,7 @@ var Columns = []string{
 	FieldDurationDays,
 	FieldTotalBudgetMinor,
 	FieldPaymentMethod,
+	FieldPaymentTopUpID,
 	FieldIdempotencyKey,
 	FieldRequestHash,
 	FieldAccountID,
@@ -104,6 +107,10 @@ var (
 	PostIDValidator func(string) error
 	// CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
 	CurrencyValidator func(string) error
+	// DefaultPaymentTopUpID holds the default value on creation for the "payment_top_up_id" field.
+	DefaultPaymentTopUpID string
+	// PaymentTopUpIDValidator is a validator for the "payment_top_up_id" field. It is called by the builders before save.
+	PaymentTopUpIDValidator func(string) error
 	// IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	IdempotencyKeyValidator func(string) error
 	// RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
@@ -178,8 +185,10 @@ type PaymentMethod string
 
 // PaymentMethod values.
 const (
-	PaymentMethodWallet PaymentMethod = "wallet"
-	PaymentMethodCard   PaymentMethod = "card"
+	PaymentMethodWallet  PaymentMethod = "wallet"
+	PaymentMethodCard    PaymentMethod = "card"
+	PaymentMethodBalance PaymentMethod = "balance"
+	PaymentMethodFree    PaymentMethod = "free"
 )
 
 func (pm PaymentMethod) String() string {
@@ -189,7 +198,7 @@ func (pm PaymentMethod) String() string {
 // PaymentMethodValidator is a validator for the "payment_method" field enum values. It is called by the builders before save.
 func PaymentMethodValidator(pm PaymentMethod) error {
 	switch pm {
-	case PaymentMethodWallet, PaymentMethodCard:
+	case PaymentMethodWallet, PaymentMethodCard, PaymentMethodBalance, PaymentMethodFree:
 		return nil
 	default:
 		return fmt.Errorf("adboost: invalid enum value for payment_method field: %q", pm)
@@ -252,6 +261,11 @@ func ByTotalBudgetMinor(opts ...sql.OrderTermOption) OrderOption {
 // ByPaymentMethod orders the results by the payment_method field.
 func ByPaymentMethod(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPaymentMethod, opts...).ToFunc()
+}
+
+// ByPaymentTopUpID orders the results by the payment_top_up_id field.
+func ByPaymentTopUpID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPaymentTopUpID, opts...).ToFunc()
 }
 
 // ByIdempotencyKey orders the results by the idempotency_key field.

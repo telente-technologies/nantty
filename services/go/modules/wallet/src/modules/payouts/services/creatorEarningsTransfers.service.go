@@ -43,7 +43,7 @@ func (transfers CreatorEarningsTransfers) TransferCreatorEarningsToConnectedAcco
 				report.Skipped++
 				continue
 			}
-			if transfers.Container.Payments.RequirePayoutAccountVerified(ctx, userId) != nil {
+			if transfers.Container.Payments.RequirePayoutAccountVerified(ctx, userId) != nil || transfers.Container.Payments.RequireVerificationLevel(ctx, userId, paymentmodels.VerificationLevelPayout) != nil {
 				report.Skipped++
 				continue
 			}

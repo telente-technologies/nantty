@@ -30,9 +30,15 @@ func (gateway *PaymentGateway) applyPayoutAccountStatusInTransaction(ctx context
 			}
 		}
 		data["verificationStatus"] = "verified"
-		return gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "payoutAccount.verified", account.ID.String(), now, data)
+		if err := gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "payoutAccount.verified", account.ID.String(), now, data); err != nil {
+			return err
+		}
+		return gateway.refreshVerificationLevelLogged(ctx, transaction, account.UserID)
 	case !complete && account.VerificationStatus == connectedaccount.VerificationStatusVerified:
-		return account.Update().SetVerificationStatus(connectedaccount.VerificationStatusInProgress).SetVerificationStatusChangedAt(now).AddVersion(1).Exec(ctx)
+		if err := account.Update().SetVerificationStatus(connectedaccount.VerificationStatusInProgress).SetVerificationStatusChangedAt(now).AddVersion(1).Exec(ctx); err != nil {
+			return err
+		}
+		return gateway.refreshVerificationLevelLogged(ctx, transaction, account.UserID)
 	case !complete && account.RecipientCode != "" && account.Status != connectedaccount.StatusCreated:
 		if err := account.Update().SetStatus(connectedaccount.StatusCreated).SetProviderAccountID(account.RecipientCode).SetVerificationStatus(connectedaccount.VerificationStatusInProgress).AddVersion(1).Exec(ctx); err != nil {
 			return err

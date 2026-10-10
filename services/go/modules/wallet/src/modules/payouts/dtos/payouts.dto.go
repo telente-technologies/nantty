@@ -61,13 +61,39 @@ type WithdrawalDto struct {
 }
 
 type WalletSummaryDto struct {
-	Available       MoneyDto   `json:"available"`
-	Pending         MoneyDto   `json:"pending"`
-	Locked          MoneyDto   `json:"locked"`
-	InEscrow        MoneyDto   `json:"inEscrow"`
-	PayoutRequested MoneyDto   `json:"payoutRequested"`
-	NegativeBalance MoneyDto   `json:"negativeBalance"`
-	NextAvailableAt *time.Time `json:"nextAvailableAt"`
+	Available       MoneyDto              `json:"available"`
+	Pending         MoneyDto              `json:"pending"`
+	Locked          MoneyDto              `json:"locked"`
+	InEscrow        MoneyDto              `json:"inEscrow"`
+	PayoutRequested MoneyDto              `json:"payoutRequested"`
+	NegativeBalance MoneyDto              `json:"negativeBalance"`
+	NextAvailableAt *time.Time            `json:"nextAvailableAt"`
+	AdCredit        MoneyDto              `json:"adCredit"`
+	EarningsPayable MoneyDto              `json:"earningsPayable"`
+	Debts           MoneyDto              `json:"debts"`
+	Coins           CoinHoldingsDto       `json:"coins"`
+	Lines           []WalletLineDto       `json:"lines"`
+	Verification    WalletVerificationDto `json:"verification"`
+}
+
+type CoinHoldingsDto struct {
+	Spendable int64 `json:"spendable"`
+	Earned    int64 `json:"earned"`
+}
+
+type WalletLineDto struct {
+	Key         string   `json:"key"`
+	Label       string   `json:"label"`
+	Description string   `json:"description"`
+	Amount      MoneyDto `json:"amount"`
+}
+
+type WalletVerificationDto struct {
+	Level                  int      `json:"level"`
+	WithdrawalsUnlocked    bool     `json:"withdrawalsUnlocked"`
+	WaitingForVerification MoneyDto `json:"waitingForVerification"`
+	NextStep               *string  `json:"nextStep"`
+	Message                *string  `json:"message"`
 }
 
 type ReviewWithdrawalRequestDto struct {

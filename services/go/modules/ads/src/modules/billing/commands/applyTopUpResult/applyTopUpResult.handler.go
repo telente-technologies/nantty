@@ -9,6 +9,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adtopup"
 	creditaccountfunds "zudomart/modules/ads/src/modules/billing/commands/creditAccountFunds"
 	"zudomart/modules/ads/src/modules/billing/dtos"
+	boostservices "zudomart/modules/ads/src/modules/boosts/services"
 )
 
 type Handler struct{ Container *container.Container }
@@ -29,6 +30,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 	if err != nil {
 		return err
 	}
-	return deployed.Client.AdTopUp.Update().Where(adtopup.MoneyTopUpID(command.TopUpId), adtopup.StatusIn(adtopup.StatusPending, adtopup.StatusFailed)).
-		SetStatus(adtopup.StatusSucceeded).SetCompletedAt(command.OccurredAt).SetFailureReason("").Exec(ctx)
+	if err := deployed.Client.AdTopUp.Update().Where(adtopup.MoneyTopUpID(command.TopUpId), adtopup.StatusIn(adtopup.StatusPending, adtopup.StatusFailed)).
+		SetStatus(adtopup.StatusSucceeded).SetCompletedAt(command.OccurredAt).SetFailureReason("").Exec(ctx); err != nil {
+		return err
+	}
+	return boostservices.StartBoostsPaidByTopUp(ctx, deployed, command.TopUpId)
 }

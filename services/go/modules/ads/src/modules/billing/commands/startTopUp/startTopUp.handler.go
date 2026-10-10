@@ -26,6 +26,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.TopUp
 	if err != nil {
 		return dtos.TopUpCheckout{}, err
 	}
+	if err := adsservices.RequirePayoutVerified(ctx, deployed.Verification, command.UserId.String()); err != nil {
+		return dtos.TopUpCheckout{}, err
+	}
 	if err := handler.checkAmount(ctx, account, command.Request); err != nil {
 		return dtos.TopUpCheckout{}, err
 	}

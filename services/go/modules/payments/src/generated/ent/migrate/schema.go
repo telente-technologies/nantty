@@ -197,6 +197,39 @@ var (
 			},
 		},
 	}
+	// CustomerValidationsColumns holds the columns for the "customer_validations" table.
+	CustomerValidationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "provider_customer_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "verified", "failed"}, Default: "pending"},
+		{Name: "bank_code", Type: field.TypeString, Size: 20, Default: ""},
+		{Name: "account_last4", Type: field.TypeString, Size: 4, Default: ""},
+		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "requested_at", Type: field.TypeTime},
+		{Name: "decided_at", Type: field.TypeTime, Nullable: true},
+		{Name: "version", Type: field.TypeInt64, Default: 0},
+	}
+	// CustomerValidationsTable holds the schema information for the "customer_validations" table.
+	CustomerValidationsTable = &schema.Table{
+		Name:       "customer_validations",
+		Columns:    CustomerValidationsColumns,
+		PrimaryKey: []*schema.Column{CustomerValidationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "customervalidation_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{CustomerValidationsColumns[2]},
+			},
+			{
+				Name:    "customervalidation_provider_provider_customer_id",
+				Unique:  false,
+				Columns: []*schema.Column{CustomerValidationsColumns[3], CustomerValidationsColumns[4]},
+			},
+		},
+	}
 	// IdempotentRequestsColumns holds the columns for the "idempotent_requests" table.
 	IdempotentRequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -687,6 +720,29 @@ var (
 			},
 		},
 	}
+	// VerificationLevelRecordsColumns holds the columns for the "verification_level_records" table.
+	VerificationLevelRecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 80},
+		{Name: "level", Type: field.TypeInt, Default: 0},
+		{Name: "payout_verified", Type: field.TypeBool, Default: false},
+		{Name: "identity_verified", Type: field.TypeBool, Default: false},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// VerificationLevelRecordsTable holds the schema information for the "verification_level_records" table.
+	VerificationLevelRecordsTable = &schema.Table{
+		Name:       "verification_level_records",
+		Columns:    VerificationLevelRecordsColumns,
+		PrimaryKey: []*schema.Column{VerificationLevelRecordsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "verificationlevelrecord_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{VerificationLevelRecordsColumns[2]},
+			},
+		},
+	}
 	// WebhookEventsColumns holds the columns for the "webhook_events" table.
 	WebhookEventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -725,6 +781,7 @@ var (
 		BillingSubscriptionsTable,
 		ConnectedAccountsTable,
 		ConnectedAccountJobsTable,
+		CustomerValidationsTable,
 		IdempotentRequestsTable,
 		OrderPayablesTable,
 		OutboxEventsTable,
@@ -738,6 +795,7 @@ var (
 		SavedCardSetupsTable,
 		SellerVerificationsTable,
 		StorePurchasesTable,
+		VerificationLevelRecordsTable,
 		WebhookEventsTable,
 	}
 )

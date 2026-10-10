@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
 	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
+	"zudomart/modules/creators/src/generated/ent/creatorbranddeal"
 	"zudomart/modules/creators/src/generated/ent/creatorearning"
 	"zudomart/modules/creators/src/generated/ent/creatorprogrammember"
 	"zudomart/modules/creators/src/generated/ent/creatortier"
@@ -91,6 +92,7 @@ func checkColumn(t, c string) error {
 			affiliateprogramsetting.Table:     affiliateprogramsetting.ValidColumn,
 			battlesettlement.Table:            battlesettlement.ValidColumn,
 			creatoraffiliation.Table:          creatoraffiliation.ValidColumn,
+			creatorbranddeal.Table:            creatorbranddeal.ValidColumn,
 			creatorearning.Table:              creatorearning.ValidColumn,
 			creatorprogrammember.Table:        creatorprogrammember.ValidColumn,
 			creatortier.Table:                 creatortier.ValidColumn,

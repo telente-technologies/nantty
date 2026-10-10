@@ -14,6 +14,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AdBalanceEarningsTransfer is the client for interacting with the AdBalanceEarningsTransfer builders.
+	AdBalanceEarningsTransfer *AdBalanceEarningsTransferClient
 	// AdBalanceTopUp is the client for interacting with the AdBalanceTopUp builders.
 	AdBalanceTopUp *AdBalanceTopUpClient
 	// AdSpendDebit is the client for interacting with the AdSpendDebit builders.
@@ -175,6 +177,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AdBalanceEarningsTransfer = NewAdBalanceEarningsTransferClient(tx.config)
 	tx.AdBalanceTopUp = NewAdBalanceTopUpClient(tx.config)
 	tx.AdSpendDebit = NewAdSpendDebitClient(tx.config)
 	tx.CoinConversion = NewCoinConversionClient(tx.config)
@@ -199,7 +202,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: AdBalanceTopUp.QueryXXX(), the query will be executed
+// applies a query, for example: AdBalanceEarningsTransfer.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

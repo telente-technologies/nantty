@@ -68,6 +68,7 @@ func (service *LiveService) GetLiveSession(ctx context.Context, liveId uuid.UUID
 	view, err := service.presentLiveSession(ctx, session)
 	if err == nil && session.State != "ended" {
 		view.Safety = service.LiveSafetyViewFor(ctx, session, viewer)
+		view.HostRanking = service.hostRankingFor(ctx, session)
 	}
 	return view, err
 }

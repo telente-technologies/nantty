@@ -285,7 +285,8 @@ var (
 		{Name: "daily_budget_minor", Type: field.TypeInt64},
 		{Name: "duration_days", Type: field.TypeInt},
 		{Name: "total_budget_minor", Type: field.TypeInt64},
-		{Name: "payment_method", Type: field.TypeEnum, Enums: []string{"wallet", "card"}},
+		{Name: "payment_method", Type: field.TypeEnum, Enums: []string{"wallet", "card", "balance", "free"}},
+		{Name: "payment_top_up_id", Type: field.TypeString, Size: 80, Default: ""},
 		{Name: "idempotency_key", Type: field.TypeString, Size: 128},
 		{Name: "request_hash", Type: field.TypeString, Size: 64},
 		{Name: "account_id", Type: field.TypeUUID},
@@ -306,7 +307,7 @@ var (
 			{
 				Name:    "adboost_user_id_idempotency_key",
 				Unique:  true,
-				Columns: []*schema.Column{AdBoostsColumns[2], AdBoostsColumns[12]},
+				Columns: []*schema.Column{AdBoostsColumns[2], AdBoostsColumns[13]},
 			},
 			{
 				Name:    "adboost_user_id_created_at",
@@ -316,12 +317,17 @@ var (
 			{
 				Name:    "adboost_campaign_id",
 				Unique:  false,
-				Columns: []*schema.Column{AdBoostsColumns[15]},
+				Columns: []*schema.Column{AdBoostsColumns[16]},
 			},
 			{
 				Name:    "adboost_status_ends_at",
 				Unique:  false,
-				Columns: []*schema.Column{AdBoostsColumns[5], AdBoostsColumns[19]},
+				Columns: []*schema.Column{AdBoostsColumns[5], AdBoostsColumns[20]},
+			},
+			{
+				Name:    "adboost_payment_top_up_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdBoostsColumns[12]},
 			},
 		},
 	}
@@ -586,6 +592,34 @@ var (
 				Name:    "adexperiment_status_end_at",
 				Unique:  false,
 				Columns: []*schema.Column{AdExperimentsColumns[7], AdExperimentsColumns[10]},
+			},
+		},
+	}
+	// AdFreeBoostGrantsColumns holds the columns for the "ad_free_boost_grants" table.
+	AdFreeBoostGrantsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "period_key", Type: field.TypeString, Size: 7},
+		{Name: "boost_id", Type: field.TypeUUID},
+		{Name: "value_minor", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+	}
+	// AdFreeBoostGrantsTable holds the schema information for the "ad_free_boost_grants" table.
+	AdFreeBoostGrantsTable = &schema.Table{
+		Name:       "ad_free_boost_grants",
+		Columns:    AdFreeBoostGrantsColumns,
+		PrimaryKey: []*schema.Column{AdFreeBoostGrantsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adfreeboostgrant_user_id_period_key",
+				Unique:  true,
+				Columns: []*schema.Column{AdFreeBoostGrantsColumns[2], AdFreeBoostGrantsColumns[3]},
+			},
+			{
+				Name:    "adfreeboostgrant_boost_id",
+				Unique:  true,
+				Columns: []*schema.Column{AdFreeBoostGrantsColumns[4]},
 			},
 		},
 	}
@@ -1050,6 +1084,7 @@ var (
 		AdCreatorMonetisationHoldsTable,
 		AdCustomAudiencesTable,
 		AdExperimentsTable,
+		AdFreeBoostGrantsTable,
 		AdFrequencyPoliciesTable,
 		AdFundsTransactionsTable,
 		AdGroupsTable,

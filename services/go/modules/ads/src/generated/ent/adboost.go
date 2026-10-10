@@ -40,6 +40,8 @@ type AdBoost struct {
 	TotalBudgetMinor int64 `json:"total_budget_minor,omitempty"`
 	// PaymentMethod holds the value of the "payment_method" field.
 	PaymentMethod adboost.PaymentMethod `json:"payment_method,omitempty"`
+	// PaymentTopUpID holds the value of the "payment_top_up_id" field.
+	PaymentTopUpID string `json:"payment_top_up_id,omitempty"`
 	// IdempotencyKey holds the value of the "idempotency_key" field.
 	IdempotencyKey string `json:"idempotency_key,omitempty"`
 	// RequestHash holds the value of the "request_hash" field.
@@ -72,7 +74,7 @@ func (*AdBoost) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case adboost.FieldDailyBudgetMinor, adboost.FieldDurationDays, adboost.FieldTotalBudgetMinor:
 			values[i] = new(sql.NullInt64)
-		case adboost.FieldPostID, adboost.FieldGoal, adboost.FieldStatus, adboost.FieldCurrency, adboost.FieldPaymentMethod, adboost.FieldIdempotencyKey, adboost.FieldRequestHash, adboost.FieldRejectionReason:
+		case adboost.FieldPostID, adboost.FieldGoal, adboost.FieldStatus, adboost.FieldCurrency, adboost.FieldPaymentMethod, adboost.FieldPaymentTopUpID, adboost.FieldIdempotencyKey, adboost.FieldRequestHash, adboost.FieldRejectionReason:
 			values[i] = new(sql.NullString)
 		case adboost.FieldCreatedAt, adboost.FieldStartsAt, adboost.FieldEndsAt, adboost.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -164,6 +166,12 @@ func (_m *AdBoost) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field payment_method", values[i])
 			} else if value.Valid {
 				_m.PaymentMethod = adboost.PaymentMethod(value.String)
+			}
+		case adboost.FieldPaymentTopUpID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field payment_top_up_id", values[i])
+			} else if value.Valid {
+				_m.PaymentTopUpID = value.String
 			}
 		case adboost.FieldIdempotencyKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -295,6 +303,9 @@ func (_m *AdBoost) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("payment_method=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PaymentMethod))
+	builder.WriteString(", ")
+	builder.WriteString("payment_top_up_id=")
+	builder.WriteString(_m.PaymentTopUpID)
 	builder.WriteString(", ")
 	builder.WriteString("idempotency_key=")
 	builder.WriteString(_m.IdempotencyKey)

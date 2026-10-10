@@ -123,6 +123,10 @@ func enqueuePurchaseInteractions(ctx context.Context, deployed *container.Contai
 		data := map[string]any{
 			"occurredAt": now.UTC().Format(time.RFC3339Nano), "productId": item.ProductID, "storeId": item.StoreID, "variantId": item.VariantID,
 			"quantity": item.Quantity, "personalized": choices.Personalization, "orderGroupId": group.ID,
+			"unitPrice": map[string]any{"amountMinor": item.UnitPriceMinor, "currency": group.Currency},
+		}
+		if item.AttributionSource != nil && *item.AttributionSource == "post" && item.AttributionID != nil {
+			data["sourcePostId"] = item.AttributionID.String()
 		}
 		if choices.Personalization {
 			data["actorId"] = group.BuyerAccountID

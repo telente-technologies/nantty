@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"zudomart/modules/ads/src/services"
+	"zudomart/modules/ads/src/types"
 )
 
 const (
@@ -43,7 +44,10 @@ func noEligibleAdReason(slot *slotContext) string {
 	return "no_eligible_ad"
 }
 
-func labelForSlot(slot *slotContext) string {
+func labelForSlot(slot *slotContext, winner types.CandidateAd) string {
+	if winner.CampaignKind == "boost" {
+		return "Boosted"
+	}
 	if slot.command.Slot.Kind == services.SlotFeedCommentThread {
 		return "Promoted"
 	}

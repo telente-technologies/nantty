@@ -13,6 +13,7 @@ func MountAdAccountsRoutes(mux *http.ServeMux, deployed *container.Container) {
 	authenticated := middlewares.Authenticated(deployed)
 	idempotent := middlewares.Idempotent(deployed)
 	mux.Handle("GET /api/v1/ads/memberships", authenticated(controller.ListMemberships))
+	mux.Handle("GET /api/v1/ads/verification", authenticated(controller.GetVerification))
 	mux.Handle("GET /api/v1/ads/accounts", authenticated(controller.ListAccounts))
 	mux.Handle("POST /api/v1/ads/accounts", idempotent(controller.CreateAccount))
 	mux.Handle("GET /api/v1/ads/business-profiles", authenticated(controller.ListBusinessProfiles))

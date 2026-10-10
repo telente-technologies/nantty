@@ -106,6 +106,20 @@ func (_c *AdBoostCreate) SetPaymentMethod(v adboost.PaymentMethod) *AdBoostCreat
 	return _c
 }
 
+// SetPaymentTopUpID sets the "payment_top_up_id" field.
+func (_c *AdBoostCreate) SetPaymentTopUpID(v string) *AdBoostCreate {
+	_c.mutation.SetPaymentTopUpID(v)
+	return _c
+}
+
+// SetNillablePaymentTopUpID sets the "payment_top_up_id" field if the given value is not nil.
+func (_c *AdBoostCreate) SetNillablePaymentTopUpID(v *string) *AdBoostCreate {
+	if v != nil {
+		_c.SetPaymentTopUpID(*v)
+	}
+	return _c
+}
+
 // SetIdempotencyKey sets the "idempotency_key" field.
 func (_c *AdBoostCreate) SetIdempotencyKey(v string) *AdBoostCreate {
 	_c.mutation.SetIdempotencyKey(v)
@@ -255,6 +269,10 @@ func (_c *AdBoostCreate) defaults() {
 		v := adboost.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.PaymentTopUpID(); !ok {
+		v := adboost.DefaultPaymentTopUpID
+		_c.mutation.SetPaymentTopUpID(v)
+	}
 	if _, ok := _c.mutation.RejectionReason(); !ok {
 		v := adboost.DefaultRejectionReason
 		_c.mutation.SetRejectionReason(v)
@@ -327,6 +345,14 @@ func (_c *AdBoostCreate) check() error {
 	if v, ok := _c.mutation.PaymentMethod(); ok {
 		if err := adboost.PaymentMethodValidator(v); err != nil {
 			return &ValidationError{Name: "payment_method", err: fmt.Errorf(`ent: validator failed for field "AdBoost.payment_method": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PaymentTopUpID(); !ok {
+		return &ValidationError{Name: "payment_top_up_id", err: errors.New(`ent: missing required field "AdBoost.payment_top_up_id"`)}
+	}
+	if v, ok := _c.mutation.PaymentTopUpID(); ok {
+		if err := adboost.PaymentTopUpIDValidator(v); err != nil {
+			return &ValidationError{Name: "payment_top_up_id", err: fmt.Errorf(`ent: validator failed for field "AdBoost.payment_top_up_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.IdempotencyKey(); !ok {
@@ -448,6 +474,10 @@ func (_c *AdBoostCreate) createSpec() (*AdBoost, *sqlgraph.CreateSpec) {
 		_spec.SetField(adboost.FieldPaymentMethod, field.TypeEnum, value)
 		_node.PaymentMethod = value
 	}
+	if value, ok := _c.mutation.PaymentTopUpID(); ok {
+		_spec.SetField(adboost.FieldPaymentTopUpID, field.TypeString, value)
+		_node.PaymentTopUpID = value
+	}
 	if value, ok := _c.mutation.IdempotencyKey(); ok {
 		_spec.SetField(adboost.FieldIdempotencyKey, field.TypeString, value)
 		_node.IdempotencyKey = value
@@ -549,6 +579,18 @@ func (u *AdBoostUpsert) SetStatus(v adboost.Status) *AdBoostUpsert {
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *AdBoostUpsert) UpdateStatus() *AdBoostUpsert {
 	u.SetExcluded(adboost.FieldStatus)
+	return u
+}
+
+// SetPaymentTopUpID sets the "payment_top_up_id" field.
+func (u *AdBoostUpsert) SetPaymentTopUpID(v string) *AdBoostUpsert {
+	u.Set(adboost.FieldPaymentTopUpID, v)
+	return u
+}
+
+// UpdatePaymentTopUpID sets the "payment_top_up_id" field to the value that was provided on create.
+func (u *AdBoostUpsert) UpdatePaymentTopUpID() *AdBoostUpsert {
+	u.SetExcluded(adboost.FieldPaymentTopUpID)
 	return u
 }
 
@@ -719,6 +761,20 @@ func (u *AdBoostUpsertOne) SetStatus(v adboost.Status) *AdBoostUpsertOne {
 func (u *AdBoostUpsertOne) UpdateStatus() *AdBoostUpsertOne {
 	return u.Update(func(s *AdBoostUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetPaymentTopUpID sets the "payment_top_up_id" field.
+func (u *AdBoostUpsertOne) SetPaymentTopUpID(v string) *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetPaymentTopUpID(v)
+	})
+}
+
+// UpdatePaymentTopUpID sets the "payment_top_up_id" field to the value that was provided on create.
+func (u *AdBoostUpsertOne) UpdatePaymentTopUpID() *AdBoostUpsertOne {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdatePaymentTopUpID()
 	})
 }
 
@@ -1066,6 +1122,20 @@ func (u *AdBoostUpsertBulk) SetStatus(v adboost.Status) *AdBoostUpsertBulk {
 func (u *AdBoostUpsertBulk) UpdateStatus() *AdBoostUpsertBulk {
 	return u.Update(func(s *AdBoostUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetPaymentTopUpID sets the "payment_top_up_id" field.
+func (u *AdBoostUpsertBulk) SetPaymentTopUpID(v string) *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.SetPaymentTopUpID(v)
+	})
+}
+
+// UpdatePaymentTopUpID sets the "payment_top_up_id" field to the value that was provided on create.
+func (u *AdBoostUpsertBulk) UpdatePaymentTopUpID() *AdBoostUpsertBulk {
+	return u.Update(func(s *AdBoostUpsert) {
+		s.UpdatePaymentTopUpID()
 	})
 }
 

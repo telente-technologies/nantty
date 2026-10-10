@@ -17,6 +17,7 @@ import (
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
 	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
+	"zudomart/modules/creators/src/generated/ent/creatorbranddeal"
 	"zudomart/modules/creators/src/generated/ent/creatorearning"
 	"zudomart/modules/creators/src/generated/ent/creatorprogrammember"
 	"zudomart/modules/creators/src/generated/ent/creatortier"
@@ -51,6 +52,8 @@ type Client struct {
 	BattleSettlement *BattleSettlementClient
 	// CreatorAffiliation is the client for interacting with the CreatorAffiliation builders.
 	CreatorAffiliation *CreatorAffiliationClient
+	// CreatorBrandDeal is the client for interacting with the CreatorBrandDeal builders.
+	CreatorBrandDeal *CreatorBrandDealClient
 	// CreatorEarning is the client for interacting with the CreatorEarning builders.
 	CreatorEarning *CreatorEarningClient
 	// CreatorProgramMember is the client for interacting with the CreatorProgramMember builders.
@@ -82,6 +85,7 @@ func (c *Client) init() {
 	c.AffiliateProgramSetting = NewAffiliateProgramSettingClient(c.config)
 	c.BattleSettlement = NewBattleSettlementClient(c.config)
 	c.CreatorAffiliation = NewCreatorAffiliationClient(c.config)
+	c.CreatorBrandDeal = NewCreatorBrandDealClient(c.config)
 	c.CreatorEarning = NewCreatorEarningClient(c.config)
 	c.CreatorProgramMember = NewCreatorProgramMemberClient(c.config)
 	c.CreatorTier = NewCreatorTierClient(c.config)
@@ -189,6 +193,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AffiliateProgramSetting:     NewAffiliateProgramSettingClient(cfg),
 		BattleSettlement:            NewBattleSettlementClient(cfg),
 		CreatorAffiliation:          NewCreatorAffiliationClient(cfg),
+		CreatorBrandDeal:            NewCreatorBrandDealClient(cfg),
 		CreatorEarning:              NewCreatorEarningClient(cfg),
 		CreatorProgramMember:        NewCreatorProgramMemberClient(cfg),
 		CreatorTier:                 NewCreatorTierClient(cfg),
@@ -221,6 +226,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AffiliateProgramSetting:     NewAffiliateProgramSettingClient(cfg),
 		BattleSettlement:            NewBattleSettlementClient(cfg),
 		CreatorAffiliation:          NewCreatorAffiliationClient(cfg),
+		CreatorBrandDeal:            NewCreatorBrandDealClient(cfg),
 		CreatorEarning:              NewCreatorEarningClient(cfg),
 		CreatorProgramMember:        NewCreatorProgramMemberClient(cfg),
 		CreatorTier:                 NewCreatorTierClient(cfg),
@@ -259,8 +265,9 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AffiliateCommission, c.AffiliateCommissionReversal,
 		c.AffiliateProductCommission, c.AffiliateProgramSetting, c.BattleSettlement,
-		c.CreatorAffiliation, c.CreatorEarning, c.CreatorProgramMember, c.CreatorTier,
-		c.CreatorViolation, c.GiftTransaction, c.OutboxEvent, c.TipTransaction,
+		c.CreatorAffiliation, c.CreatorBrandDeal, c.CreatorEarning,
+		c.CreatorProgramMember, c.CreatorTier, c.CreatorViolation, c.GiftTransaction,
+		c.OutboxEvent, c.TipTransaction,
 	} {
 		n.Use(hooks...)
 	}
@@ -272,8 +279,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AffiliateCommission, c.AffiliateCommissionReversal,
 		c.AffiliateProductCommission, c.AffiliateProgramSetting, c.BattleSettlement,
-		c.CreatorAffiliation, c.CreatorEarning, c.CreatorProgramMember, c.CreatorTier,
-		c.CreatorViolation, c.GiftTransaction, c.OutboxEvent, c.TipTransaction,
+		c.CreatorAffiliation, c.CreatorBrandDeal, c.CreatorEarning,
+		c.CreatorProgramMember, c.CreatorTier, c.CreatorViolation, c.GiftTransaction,
+		c.OutboxEvent, c.TipTransaction,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -294,6 +302,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.BattleSettlement.mutate(ctx, m)
 	case *CreatorAffiliationMutation:
 		return c.CreatorAffiliation.mutate(ctx, m)
+	case *CreatorBrandDealMutation:
+		return c.CreatorBrandDeal.mutate(ctx, m)
 	case *CreatorEarningMutation:
 		return c.CreatorEarning.mutate(ctx, m)
 	case *CreatorProgramMemberMutation:
@@ -1108,6 +1118,139 @@ func (c *CreatorAffiliationClient) mutate(ctx context.Context, m *CreatorAffilia
 		return (&CreatorAffiliationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown CreatorAffiliation mutation op: %q", m.Op())
+	}
+}
+
+// CreatorBrandDealClient is a client for the CreatorBrandDeal schema.
+type CreatorBrandDealClient struct {
+	config
+}
+
+// NewCreatorBrandDealClient returns a client for the CreatorBrandDeal from the given config.
+func NewCreatorBrandDealClient(c config) *CreatorBrandDealClient {
+	return &CreatorBrandDealClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `creatorbranddeal.Hooks(f(g(h())))`.
+func (c *CreatorBrandDealClient) Use(hooks ...Hook) {
+	c.hooks.CreatorBrandDeal = append(c.hooks.CreatorBrandDeal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `creatorbranddeal.Intercept(f(g(h())))`.
+func (c *CreatorBrandDealClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CreatorBrandDeal = append(c.inters.CreatorBrandDeal, interceptors...)
+}
+
+// Create returns a builder for creating a CreatorBrandDeal entity.
+func (c *CreatorBrandDealClient) Create() *CreatorBrandDealCreate {
+	mutation := newCreatorBrandDealMutation(c.config, OpCreate)
+	return &CreatorBrandDealCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CreatorBrandDeal entities.
+func (c *CreatorBrandDealClient) CreateBulk(builders ...*CreatorBrandDealCreate) *CreatorBrandDealCreateBulk {
+	return &CreatorBrandDealCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CreatorBrandDealClient) MapCreateBulk(slice any, setFunc func(*CreatorBrandDealCreate, int)) *CreatorBrandDealCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CreatorBrandDealCreateBulk{err: fmt.Errorf("calling to CreatorBrandDealClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CreatorBrandDealCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CreatorBrandDealCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CreatorBrandDeal.
+func (c *CreatorBrandDealClient) Update() *CreatorBrandDealUpdate {
+	mutation := newCreatorBrandDealMutation(c.config, OpUpdate)
+	return &CreatorBrandDealUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CreatorBrandDealClient) UpdateOne(_m *CreatorBrandDeal) *CreatorBrandDealUpdateOne {
+	mutation := newCreatorBrandDealMutation(c.config, OpUpdateOne, withCreatorBrandDeal(_m))
+	return &CreatorBrandDealUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CreatorBrandDealClient) UpdateOneID(id uuid.UUID) *CreatorBrandDealUpdateOne {
+	mutation := newCreatorBrandDealMutation(c.config, OpUpdateOne, withCreatorBrandDealID(id))
+	return &CreatorBrandDealUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CreatorBrandDeal.
+func (c *CreatorBrandDealClient) Delete() *CreatorBrandDealDelete {
+	mutation := newCreatorBrandDealMutation(c.config, OpDelete)
+	return &CreatorBrandDealDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CreatorBrandDealClient) DeleteOne(_m *CreatorBrandDeal) *CreatorBrandDealDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CreatorBrandDealClient) DeleteOneID(id uuid.UUID) *CreatorBrandDealDeleteOne {
+	builder := c.Delete().Where(creatorbranddeal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CreatorBrandDealDeleteOne{builder}
+}
+
+// Query returns a query builder for CreatorBrandDeal.
+func (c *CreatorBrandDealClient) Query() *CreatorBrandDealQuery {
+	return &CreatorBrandDealQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCreatorBrandDeal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CreatorBrandDeal entity by its id.
+func (c *CreatorBrandDealClient) Get(ctx context.Context, id uuid.UUID) (*CreatorBrandDeal, error) {
+	return c.Query().Where(creatorbranddeal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CreatorBrandDealClient) GetX(ctx context.Context, id uuid.UUID) *CreatorBrandDeal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CreatorBrandDealClient) Hooks() []Hook {
+	return c.hooks.CreatorBrandDeal
+}
+
+// Interceptors returns the client interceptors.
+func (c *CreatorBrandDealClient) Interceptors() []Interceptor {
+	return c.inters.CreatorBrandDeal
+}
+
+func (c *CreatorBrandDealClient) mutate(ctx context.Context, m *CreatorBrandDealMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CreatorBrandDealCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CreatorBrandDealUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CreatorBrandDealUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CreatorBrandDealDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CreatorBrandDeal mutation op: %q", m.Op())
 	}
 }
 
@@ -2046,15 +2189,16 @@ func (c *TipTransactionClient) mutate(ctx context.Context, m *TipTransactionMuta
 type (
 	hooks struct {
 		AffiliateCommission, AffiliateCommissionReversal, AffiliateProductCommission,
-		AffiliateProgramSetting, BattleSettlement, CreatorAffiliation, CreatorEarning,
-		CreatorProgramMember, CreatorTier, CreatorViolation, GiftTransaction,
-		OutboxEvent, TipTransaction []ent.Hook
+		AffiliateProgramSetting, BattleSettlement, CreatorAffiliation,
+		CreatorBrandDeal, CreatorEarning, CreatorProgramMember, CreatorTier,
+		CreatorViolation, GiftTransaction, OutboxEvent, TipTransaction []ent.Hook
 	}
 	inters struct {
 		AffiliateCommission, AffiliateCommissionReversal, AffiliateProductCommission,
-		AffiliateProgramSetting, BattleSettlement, CreatorAffiliation, CreatorEarning,
-		CreatorProgramMember, CreatorTier, CreatorViolation, GiftTransaction,
-		OutboxEvent, TipTransaction []ent.Interceptor
+		AffiliateProgramSetting, BattleSettlement, CreatorAffiliation,
+		CreatorBrandDeal, CreatorEarning, CreatorProgramMember, CreatorTier,
+		CreatorViolation, GiftTransaction, OutboxEvent,
+		TipTransaction []ent.Interceptor
 	}
 )
 

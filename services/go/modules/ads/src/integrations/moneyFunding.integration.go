@@ -53,6 +53,13 @@ func (gateway *GrpcMoneyFundingGateway) ChargeUserWalletForBoost(ctx context.Con
 	return translateMoneyFundingError(err)
 }
 
+func (gateway *GrpcMoneyFundingGateway) ChargeEarningsForBoost(ctx context.Context, userId, currency string, amountMinor int64, idempotencyKey string) error {
+	if gateway.Fallback == nil {
+		return adserrors.UpstreamUnavailable
+	}
+	return gateway.Fallback.ChargeEarningsForBoost(ctx, userId, currency, amountMinor, idempotencyKey)
+}
+
 func (gateway *GrpcMoneyFundingGateway) RefundBoostCharge(ctx context.Context, userId, currency string, amountMinor int64, idempotencyKey, debitIdempotencyKey string) error {
 	attempt, cancel := gateway.outgoing(ctx)
 	defer cancel()
@@ -91,6 +98,10 @@ func (gateway *HttpMoneyFundingGateway) ChargeUserWalletForBoost(ctx context.Con
 	return gateway.post(ctx, "/api/v1/internal/ads/boost-debits", map[string]any{"userId": userId, "amount": map[string]any{"amountMinor": amountMinor, "currency": currency}, "idempotencyKey": idempotencyKey})
 }
 
+func (gateway *HttpMoneyFundingGateway) ChargeEarningsForBoost(ctx context.Context, userId, currency string, amountMinor int64, idempotencyKey string) error {
+	return gateway.post(ctx, "/api/v1/internal/ads/boost-earnings-debits", map[string]any{"userId": userId, "amount": map[string]any{"amountMinor": amountMinor, "currency": currency}, "idempotencyKey": idempotencyKey})
+}
+
 func (gateway *HttpMoneyFundingGateway) RefundBoostCharge(ctx context.Context, userId, currency string, amountMinor int64, idempotencyKey, debitIdempotencyKey string) error {
 	return gateway.post(ctx, "/api/v1/internal/ads/boost-refunds", map[string]any{"userId": userId, "amount": map[string]any{"amountMinor": amountMinor, "currency": currency}, "idempotencyKey": idempotencyKey, "debitIdempotencyKey": debitIdempotencyKey})
 }
@@ -123,6 +134,10 @@ func (gateway *HttpMoneyFundingGateway) post(ctx context.Context, path string, b
 		return adserrors.InsufficientBalance
 	case "IDEMPOTENCY_KEY_REUSED":
 		return adserrors.IdempotencyKeyReused
+	case "VERIFICATION_REQUIRED":
+		return adserrors.VerificationRequired
+	case "VERIFICATION_UNAVAILABLE":
+		return adserrors.VerificationUnavailable
 	}
 	return adserrors.UpstreamUnavailable
 }

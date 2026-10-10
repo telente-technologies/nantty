@@ -41,8 +41,8 @@ func ValidateCreate(request dtos.CreateBoostRequest, minimumDailyMinor int64) er
 	if err := ValidateEstimate(request.BoostEstimateRequest, minimumDailyMinor); err != nil {
 		return err
 	}
-	if request.PaymentMethod != "wallet" && request.PaymentMethod != "card" {
-		return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "paymentMethod", Message: "Choose wallet or card."}})
+	if !slices.Contains([]string{"card", "balance", "free", "wallet"}, request.PaymentMethod) {
+		return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "paymentMethod", Message: "Choose card, balance or free."}})
 	}
 	return nil
 }

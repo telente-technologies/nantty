@@ -25,6 +25,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
+	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
@@ -71,6 +72,7 @@ const (
 	TypeAdCreatorMonetisationHold = "AdCreatorMonetisationHold"
 	TypeAdCustomAudience          = "AdCustomAudience"
 	TypeAdExperiment              = "AdExperiment"
+	TypeAdFreeBoostGrant          = "AdFreeBoostGrant"
 	TypeAdFrequencyPolicy         = "AdFrequencyPolicy"
 	TypeAdFundsTransaction        = "AdFundsTransaction"
 	TypeAdGroup                   = "AdGroup"
@@ -7120,6 +7122,7 @@ type AdBoostMutation struct {
 	total_budget_minor    *int64
 	addtotal_budget_minor *int64
 	payment_method        *adboost.PaymentMethod
+	payment_top_up_id     *string
 	idempotency_key       *string
 	request_hash          *string
 	account_id            *uuid.UUID
@@ -7696,6 +7699,42 @@ func (m *AdBoostMutation) ResetPaymentMethod() {
 	m.payment_method = nil
 }
 
+// SetPaymentTopUpID sets the "payment_top_up_id" field.
+func (m *AdBoostMutation) SetPaymentTopUpID(s string) {
+	m.payment_top_up_id = &s
+}
+
+// PaymentTopUpID returns the value of the "payment_top_up_id" field in the mutation.
+func (m *AdBoostMutation) PaymentTopUpID() (r string, exists bool) {
+	v := m.payment_top_up_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaymentTopUpID returns the old "payment_top_up_id" field's value of the AdBoost entity.
+// If the AdBoost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdBoostMutation) OldPaymentTopUpID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaymentTopUpID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaymentTopUpID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaymentTopUpID: %w", err)
+	}
+	return oldValue.PaymentTopUpID, nil
+}
+
+// ResetPaymentTopUpID resets all changes to the "payment_top_up_id" field.
+func (m *AdBoostMutation) ResetPaymentTopUpID() {
+	m.payment_top_up_id = nil
+}
+
 // SetIdempotencyKey sets the "idempotency_key" field.
 func (m *AdBoostMutation) SetIdempotencyKey(s string) {
 	m.idempotency_key = &s
@@ -8116,7 +8155,7 @@ func (m *AdBoostMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdBoostMutation) Fields() []string {
-	fields := make([]string, 0, 21)
+	fields := make([]string, 0, 22)
 	if m.created_at != nil {
 		fields = append(fields, adboost.FieldCreatedAt)
 	}
@@ -8149,6 +8188,9 @@ func (m *AdBoostMutation) Fields() []string {
 	}
 	if m.payment_method != nil {
 		fields = append(fields, adboost.FieldPaymentMethod)
+	}
+	if m.payment_top_up_id != nil {
+		fields = append(fields, adboost.FieldPaymentTopUpID)
 	}
 	if m.idempotency_key != nil {
 		fields = append(fields, adboost.FieldIdempotencyKey)
@@ -8210,6 +8252,8 @@ func (m *AdBoostMutation) Field(name string) (ent.Value, bool) {
 		return m.TotalBudgetMinor()
 	case adboost.FieldPaymentMethod:
 		return m.PaymentMethod()
+	case adboost.FieldPaymentTopUpID:
+		return m.PaymentTopUpID()
 	case adboost.FieldIdempotencyKey:
 		return m.IdempotencyKey()
 	case adboost.FieldRequestHash:
@@ -8261,6 +8305,8 @@ func (m *AdBoostMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldTotalBudgetMinor(ctx)
 	case adboost.FieldPaymentMethod:
 		return m.OldPaymentMethod(ctx)
+	case adboost.FieldPaymentTopUpID:
+		return m.OldPaymentTopUpID(ctx)
 	case adboost.FieldIdempotencyKey:
 		return m.OldIdempotencyKey(ctx)
 	case adboost.FieldRequestHash:
@@ -8366,6 +8412,13 @@ func (m *AdBoostMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPaymentMethod(v)
+		return nil
+	case adboost.FieldPaymentTopUpID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaymentTopUpID(v)
 		return nil
 	case adboost.FieldIdempotencyKey:
 		v, ok := value.(string)
@@ -8572,6 +8625,9 @@ func (m *AdBoostMutation) ResetField(name string) error {
 		return nil
 	case adboost.FieldPaymentMethod:
 		m.ResetPaymentMethod()
+		return nil
+	case adboost.FieldPaymentTopUpID:
+		m.ResetPaymentTopUpID()
 		return nil
 	case adboost.FieldIdempotencyKey:
 		m.ResetIdempotencyKey()
@@ -16595,6 +16651,644 @@ func (m *AdExperimentMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AdExperimentMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AdExperiment edge %s", name)
+}
+
+// AdFreeBoostGrantMutation represents an operation that mutates the AdFreeBoostGrant nodes in the graph.
+type AdFreeBoostGrantMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	created_at     *time.Time
+	user_id        *uuid.UUID
+	period_key     *string
+	boost_id       *uuid.UUID
+	value_minor    *int64
+	addvalue_minor *int64
+	currency       *string
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*AdFreeBoostGrant, error)
+	predicates     []predicate.AdFreeBoostGrant
+}
+
+var _ ent.Mutation = (*AdFreeBoostGrantMutation)(nil)
+
+// adfreeboostgrantOption allows management of the mutation configuration using functional options.
+type adfreeboostgrantOption func(*AdFreeBoostGrantMutation)
+
+// newAdFreeBoostGrantMutation creates new mutation for the AdFreeBoostGrant entity.
+func newAdFreeBoostGrantMutation(c config, op Op, opts ...adfreeboostgrantOption) *AdFreeBoostGrantMutation {
+	m := &AdFreeBoostGrantMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdFreeBoostGrant,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdFreeBoostGrantID sets the ID field of the mutation.
+func withAdFreeBoostGrantID(id uuid.UUID) adfreeboostgrantOption {
+	return func(m *AdFreeBoostGrantMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdFreeBoostGrant
+		)
+		m.oldValue = func(ctx context.Context) (*AdFreeBoostGrant, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdFreeBoostGrant.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdFreeBoostGrant sets the old AdFreeBoostGrant of the mutation.
+func withAdFreeBoostGrant(node *AdFreeBoostGrant) adfreeboostgrantOption {
+	return func(m *AdFreeBoostGrantMutation) {
+		m.oldValue = func(context.Context) (*AdFreeBoostGrant, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdFreeBoostGrantMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdFreeBoostGrantMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of AdFreeBoostGrant entities.
+func (m *AdFreeBoostGrantMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdFreeBoostGrantMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdFreeBoostGrantMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdFreeBoostGrant.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AdFreeBoostGrantMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AdFreeBoostGrantMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AdFreeBoostGrant entity.
+// If the AdFreeBoostGrant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdFreeBoostGrantMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AdFreeBoostGrantMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *AdFreeBoostGrantMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *AdFreeBoostGrantMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the AdFreeBoostGrant entity.
+// If the AdFreeBoostGrant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdFreeBoostGrantMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *AdFreeBoostGrantMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetPeriodKey sets the "period_key" field.
+func (m *AdFreeBoostGrantMutation) SetPeriodKey(s string) {
+	m.period_key = &s
+}
+
+// PeriodKey returns the value of the "period_key" field in the mutation.
+func (m *AdFreeBoostGrantMutation) PeriodKey() (r string, exists bool) {
+	v := m.period_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPeriodKey returns the old "period_key" field's value of the AdFreeBoostGrant entity.
+// If the AdFreeBoostGrant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdFreeBoostGrantMutation) OldPeriodKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPeriodKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPeriodKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPeriodKey: %w", err)
+	}
+	return oldValue.PeriodKey, nil
+}
+
+// ResetPeriodKey resets all changes to the "period_key" field.
+func (m *AdFreeBoostGrantMutation) ResetPeriodKey() {
+	m.period_key = nil
+}
+
+// SetBoostID sets the "boost_id" field.
+func (m *AdFreeBoostGrantMutation) SetBoostID(u uuid.UUID) {
+	m.boost_id = &u
+}
+
+// BoostID returns the value of the "boost_id" field in the mutation.
+func (m *AdFreeBoostGrantMutation) BoostID() (r uuid.UUID, exists bool) {
+	v := m.boost_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBoostID returns the old "boost_id" field's value of the AdFreeBoostGrant entity.
+// If the AdFreeBoostGrant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdFreeBoostGrantMutation) OldBoostID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBoostID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBoostID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBoostID: %w", err)
+	}
+	return oldValue.BoostID, nil
+}
+
+// ResetBoostID resets all changes to the "boost_id" field.
+func (m *AdFreeBoostGrantMutation) ResetBoostID() {
+	m.boost_id = nil
+}
+
+// SetValueMinor sets the "value_minor" field.
+func (m *AdFreeBoostGrantMutation) SetValueMinor(i int64) {
+	m.value_minor = &i
+	m.addvalue_minor = nil
+}
+
+// ValueMinor returns the value of the "value_minor" field in the mutation.
+func (m *AdFreeBoostGrantMutation) ValueMinor() (r int64, exists bool) {
+	v := m.value_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValueMinor returns the old "value_minor" field's value of the AdFreeBoostGrant entity.
+// If the AdFreeBoostGrant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdFreeBoostGrantMutation) OldValueMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValueMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValueMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValueMinor: %w", err)
+	}
+	return oldValue.ValueMinor, nil
+}
+
+// AddValueMinor adds i to the "value_minor" field.
+func (m *AdFreeBoostGrantMutation) AddValueMinor(i int64) {
+	if m.addvalue_minor != nil {
+		*m.addvalue_minor += i
+	} else {
+		m.addvalue_minor = &i
+	}
+}
+
+// AddedValueMinor returns the value that was added to the "value_minor" field in this mutation.
+func (m *AdFreeBoostGrantMutation) AddedValueMinor() (r int64, exists bool) {
+	v := m.addvalue_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetValueMinor resets all changes to the "value_minor" field.
+func (m *AdFreeBoostGrantMutation) ResetValueMinor() {
+	m.value_minor = nil
+	m.addvalue_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *AdFreeBoostGrantMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *AdFreeBoostGrantMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the AdFreeBoostGrant entity.
+// If the AdFreeBoostGrant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdFreeBoostGrantMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *AdFreeBoostGrantMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// Where appends a list predicates to the AdFreeBoostGrantMutation builder.
+func (m *AdFreeBoostGrantMutation) Where(ps ...predicate.AdFreeBoostGrant) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdFreeBoostGrantMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdFreeBoostGrantMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdFreeBoostGrant, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdFreeBoostGrantMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdFreeBoostGrantMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdFreeBoostGrant).
+func (m *AdFreeBoostGrantMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdFreeBoostGrantMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, adfreeboostgrant.FieldCreatedAt)
+	}
+	if m.user_id != nil {
+		fields = append(fields, adfreeboostgrant.FieldUserID)
+	}
+	if m.period_key != nil {
+		fields = append(fields, adfreeboostgrant.FieldPeriodKey)
+	}
+	if m.boost_id != nil {
+		fields = append(fields, adfreeboostgrant.FieldBoostID)
+	}
+	if m.value_minor != nil {
+		fields = append(fields, adfreeboostgrant.FieldValueMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, adfreeboostgrant.FieldCurrency)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdFreeBoostGrantMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adfreeboostgrant.FieldCreatedAt:
+		return m.CreatedAt()
+	case adfreeboostgrant.FieldUserID:
+		return m.UserID()
+	case adfreeboostgrant.FieldPeriodKey:
+		return m.PeriodKey()
+	case adfreeboostgrant.FieldBoostID:
+		return m.BoostID()
+	case adfreeboostgrant.FieldValueMinor:
+		return m.ValueMinor()
+	case adfreeboostgrant.FieldCurrency:
+		return m.Currency()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdFreeBoostGrantMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adfreeboostgrant.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case adfreeboostgrant.FieldUserID:
+		return m.OldUserID(ctx)
+	case adfreeboostgrant.FieldPeriodKey:
+		return m.OldPeriodKey(ctx)
+	case adfreeboostgrant.FieldBoostID:
+		return m.OldBoostID(ctx)
+	case adfreeboostgrant.FieldValueMinor:
+		return m.OldValueMinor(ctx)
+	case adfreeboostgrant.FieldCurrency:
+		return m.OldCurrency(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdFreeBoostGrant field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdFreeBoostGrantMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adfreeboostgrant.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case adfreeboostgrant.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case adfreeboostgrant.FieldPeriodKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPeriodKey(v)
+		return nil
+	case adfreeboostgrant.FieldBoostID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBoostID(v)
+		return nil
+	case adfreeboostgrant.FieldValueMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValueMinor(v)
+		return nil
+	case adfreeboostgrant.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdFreeBoostGrant field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdFreeBoostGrantMutation) AddedFields() []string {
+	var fields []string
+	if m.addvalue_minor != nil {
+		fields = append(fields, adfreeboostgrant.FieldValueMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdFreeBoostGrantMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case adfreeboostgrant.FieldValueMinor:
+		return m.AddedValueMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdFreeBoostGrantMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case adfreeboostgrant.FieldValueMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddValueMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdFreeBoostGrant numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdFreeBoostGrantMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdFreeBoostGrantMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdFreeBoostGrantMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AdFreeBoostGrant nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdFreeBoostGrantMutation) ResetField(name string) error {
+	switch name {
+	case adfreeboostgrant.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case adfreeboostgrant.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case adfreeboostgrant.FieldPeriodKey:
+		m.ResetPeriodKey()
+		return nil
+	case adfreeboostgrant.FieldBoostID:
+		m.ResetBoostID()
+		return nil
+	case adfreeboostgrant.FieldValueMinor:
+		m.ResetValueMinor()
+		return nil
+	case adfreeboostgrant.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	}
+	return fmt.Errorf("unknown AdFreeBoostGrant field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdFreeBoostGrantMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdFreeBoostGrantMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdFreeBoostGrantMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdFreeBoostGrantMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdFreeBoostGrantMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdFreeBoostGrantMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdFreeBoostGrantMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown AdFreeBoostGrant unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdFreeBoostGrantMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown AdFreeBoostGrant edge %s", name)
 }
 
 // AdFrequencyPolicyMutation represents an operation that mutates the AdFrequencyPolicy nodes in the graph.

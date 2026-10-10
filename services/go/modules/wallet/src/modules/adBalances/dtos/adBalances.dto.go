@@ -72,3 +72,17 @@ type TopUpStatusDto struct {
 	CreatedAt      time.Time  `json:"createdAt"`
 	CompletedAt    *time.Time `json:"completedAt"`
 }
+
+type EarningsFundingRequestDto struct {
+	UserId string   `json:"userId"`
+	Amount MoneyDto `json:"amount"`
+}
+
+type EarningsFundingDto struct {
+	FundingId   string    `json:"fundingId"`
+	AdAccountId string    `json:"adAccountId"`
+	Amount      MoneyDto  `json:"amount"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"createdAt"`
+	Replayed    bool      `json:"replayed"`
+}

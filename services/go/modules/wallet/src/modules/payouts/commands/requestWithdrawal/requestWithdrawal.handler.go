@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	ledgerutils "zudomart/modules/ledger/src/utils"
+	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
 	"zudomart/modules/wallet/src/modules/payouts"
 	"zudomart/modules/wallet/src/modules/payouts/dtos"
 )
@@ -19,6 +20,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Withd
 		return dtos.WithdrawalDto{}, false, err
 	}
 	if err := application.Container.Payments.RequirePayoutAccountVerified(ctx, command.UserId); err != nil {
+		return dtos.WithdrawalDto{}, false, err
+	}
+	if err := application.Container.Payments.RequireVerificationLevel(ctx, command.UserId, paymentmodels.VerificationLevelPayout); err != nil {
 		return dtos.WithdrawalDto{}, false, err
 	}
 	providerAvailable, err := application.Container.Payments.ReadProviderAvailableBalanceForUser(ctx, command.UserId, command.Currency)

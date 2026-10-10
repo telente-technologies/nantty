@@ -21,10 +21,10 @@ func TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored(t *test
 	creator := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(creator)
 	harness.creditEarnedCoins(creator, 180)
+	harness.OnboardConnectedAccount(creator, false)
 	if converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-held-1", map[string]any{"coins": 180, "currency": "NGN"}); converted.Status != http.StatusCreated {
 		t.Fatalf("convert: %d %s", converted.Status, converted.Raw)
 	}
-	harness.OnboardConnectedAccount(creator, false)
 	harness.Paystack.FundPlatformBalance("NGN", 175_000)
 	holds := harness.wallet.Payouts.Holds
 	restrictedAt := time.Now().UTC()

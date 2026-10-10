@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/creators/src/generated/ent/affiliateprogramsetting"
 	"zudomart/modules/creators/src/generated/ent/battlesettlement"
 	"zudomart/modules/creators/src/generated/ent/creatoraffiliation"
+	"zudomart/modules/creators/src/generated/ent/creatorbranddeal"
 	"zudomart/modules/creators/src/generated/ent/creatorearning"
 	"zudomart/modules/creators/src/generated/ent/creatorprogrammember"
 	"zudomart/modules/creators/src/generated/ent/creatortier"
@@ -43,6 +44,7 @@ const (
 	TypeAffiliateProgramSetting     = "AffiliateProgramSetting"
 	TypeBattleSettlement            = "BattleSettlement"
 	TypeCreatorAffiliation          = "CreatorAffiliation"
+	TypeCreatorBrandDeal            = "CreatorBrandDeal"
 	TypeCreatorEarning              = "CreatorEarning"
 	TypeCreatorProgramMember        = "CreatorProgramMember"
 	TypeCreatorTier                 = "CreatorTier"
@@ -5356,6 +5358,882 @@ func (m *CreatorAffiliationMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *CreatorAffiliationMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown CreatorAffiliation edge %s", name)
+}
+
+// CreatorBrandDealMutation represents an operation that mutates the CreatorBrandDeal nodes in the graph.
+type CreatorBrandDealMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	created_at      *time.Time
+	creator_user_id *string
+	brand_name      *string
+	amount_minor    *int64
+	addamount_minor *int64
+	currency        *string
+	starts_at       *time.Time
+	ends_at         *time.Time
+	disclosure      *string
+	notes           *string
+	idempotency_key *string
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*CreatorBrandDeal, error)
+	predicates      []predicate.CreatorBrandDeal
+}
+
+var _ ent.Mutation = (*CreatorBrandDealMutation)(nil)
+
+// creatorbranddealOption allows management of the mutation configuration using functional options.
+type creatorbranddealOption func(*CreatorBrandDealMutation)
+
+// newCreatorBrandDealMutation creates new mutation for the CreatorBrandDeal entity.
+func newCreatorBrandDealMutation(c config, op Op, opts ...creatorbranddealOption) *CreatorBrandDealMutation {
+	m := &CreatorBrandDealMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCreatorBrandDeal,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCreatorBrandDealID sets the ID field of the mutation.
+func withCreatorBrandDealID(id uuid.UUID) creatorbranddealOption {
+	return func(m *CreatorBrandDealMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CreatorBrandDeal
+		)
+		m.oldValue = func(ctx context.Context) (*CreatorBrandDeal, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CreatorBrandDeal.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCreatorBrandDeal sets the old CreatorBrandDeal of the mutation.
+func withCreatorBrandDeal(node *CreatorBrandDeal) creatorbranddealOption {
+	return func(m *CreatorBrandDealMutation) {
+		m.oldValue = func(context.Context) (*CreatorBrandDeal, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CreatorBrandDealMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CreatorBrandDealMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CreatorBrandDeal entities.
+func (m *CreatorBrandDealMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CreatorBrandDealMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CreatorBrandDealMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CreatorBrandDeal.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CreatorBrandDealMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CreatorBrandDealMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CreatorBrandDealMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetCreatorUserID sets the "creator_user_id" field.
+func (m *CreatorBrandDealMutation) SetCreatorUserID(s string) {
+	m.creator_user_id = &s
+}
+
+// CreatorUserID returns the value of the "creator_user_id" field in the mutation.
+func (m *CreatorBrandDealMutation) CreatorUserID() (r string, exists bool) {
+	v := m.creator_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorUserID returns the old "creator_user_id" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldCreatorUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorUserID: %w", err)
+	}
+	return oldValue.CreatorUserID, nil
+}
+
+// ResetCreatorUserID resets all changes to the "creator_user_id" field.
+func (m *CreatorBrandDealMutation) ResetCreatorUserID() {
+	m.creator_user_id = nil
+}
+
+// SetBrandName sets the "brand_name" field.
+func (m *CreatorBrandDealMutation) SetBrandName(s string) {
+	m.brand_name = &s
+}
+
+// BrandName returns the value of the "brand_name" field in the mutation.
+func (m *CreatorBrandDealMutation) BrandName() (r string, exists bool) {
+	v := m.brand_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBrandName returns the old "brand_name" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldBrandName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBrandName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBrandName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBrandName: %w", err)
+	}
+	return oldValue.BrandName, nil
+}
+
+// ResetBrandName resets all changes to the "brand_name" field.
+func (m *CreatorBrandDealMutation) ResetBrandName() {
+	m.brand_name = nil
+}
+
+// SetAmountMinor sets the "amount_minor" field.
+func (m *CreatorBrandDealMutation) SetAmountMinor(i int64) {
+	m.amount_minor = &i
+	m.addamount_minor = nil
+}
+
+// AmountMinor returns the value of the "amount_minor" field in the mutation.
+func (m *CreatorBrandDealMutation) AmountMinor() (r int64, exists bool) {
+	v := m.amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountMinor returns the old "amount_minor" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountMinor: %w", err)
+	}
+	return oldValue.AmountMinor, nil
+}
+
+// AddAmountMinor adds i to the "amount_minor" field.
+func (m *CreatorBrandDealMutation) AddAmountMinor(i int64) {
+	if m.addamount_minor != nil {
+		*m.addamount_minor += i
+	} else {
+		m.addamount_minor = &i
+	}
+}
+
+// AddedAmountMinor returns the value that was added to the "amount_minor" field in this mutation.
+func (m *CreatorBrandDealMutation) AddedAmountMinor() (r int64, exists bool) {
+	v := m.addamount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmountMinor resets all changes to the "amount_minor" field.
+func (m *CreatorBrandDealMutation) ResetAmountMinor() {
+	m.amount_minor = nil
+	m.addamount_minor = nil
+}
+
+// SetCurrency sets the "currency" field.
+func (m *CreatorBrandDealMutation) SetCurrency(s string) {
+	m.currency = &s
+}
+
+// Currency returns the value of the "currency" field in the mutation.
+func (m *CreatorBrandDealMutation) Currency() (r string, exists bool) {
+	v := m.currency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCurrency returns the old "currency" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldCurrency(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCurrency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
+	}
+	return oldValue.Currency, nil
+}
+
+// ResetCurrency resets all changes to the "currency" field.
+func (m *CreatorBrandDealMutation) ResetCurrency() {
+	m.currency = nil
+}
+
+// SetStartsAt sets the "starts_at" field.
+func (m *CreatorBrandDealMutation) SetStartsAt(t time.Time) {
+	m.starts_at = &t
+}
+
+// StartsAt returns the value of the "starts_at" field in the mutation.
+func (m *CreatorBrandDealMutation) StartsAt() (r time.Time, exists bool) {
+	v := m.starts_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartsAt returns the old "starts_at" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldStartsAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartsAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartsAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartsAt: %w", err)
+	}
+	return oldValue.StartsAt, nil
+}
+
+// ResetStartsAt resets all changes to the "starts_at" field.
+func (m *CreatorBrandDealMutation) ResetStartsAt() {
+	m.starts_at = nil
+}
+
+// SetEndsAt sets the "ends_at" field.
+func (m *CreatorBrandDealMutation) SetEndsAt(t time.Time) {
+	m.ends_at = &t
+}
+
+// EndsAt returns the value of the "ends_at" field in the mutation.
+func (m *CreatorBrandDealMutation) EndsAt() (r time.Time, exists bool) {
+	v := m.ends_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndsAt returns the old "ends_at" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldEndsAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndsAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndsAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndsAt: %w", err)
+	}
+	return oldValue.EndsAt, nil
+}
+
+// ClearEndsAt clears the value of the "ends_at" field.
+func (m *CreatorBrandDealMutation) ClearEndsAt() {
+	m.ends_at = nil
+	m.clearedFields[creatorbranddeal.FieldEndsAt] = struct{}{}
+}
+
+// EndsAtCleared returns if the "ends_at" field was cleared in this mutation.
+func (m *CreatorBrandDealMutation) EndsAtCleared() bool {
+	_, ok := m.clearedFields[creatorbranddeal.FieldEndsAt]
+	return ok
+}
+
+// ResetEndsAt resets all changes to the "ends_at" field.
+func (m *CreatorBrandDealMutation) ResetEndsAt() {
+	m.ends_at = nil
+	delete(m.clearedFields, creatorbranddeal.FieldEndsAt)
+}
+
+// SetDisclosure sets the "disclosure" field.
+func (m *CreatorBrandDealMutation) SetDisclosure(s string) {
+	m.disclosure = &s
+}
+
+// Disclosure returns the value of the "disclosure" field in the mutation.
+func (m *CreatorBrandDealMutation) Disclosure() (r string, exists bool) {
+	v := m.disclosure
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisclosure returns the old "disclosure" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldDisclosure(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisclosure is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisclosure requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisclosure: %w", err)
+	}
+	return oldValue.Disclosure, nil
+}
+
+// ResetDisclosure resets all changes to the "disclosure" field.
+func (m *CreatorBrandDealMutation) ResetDisclosure() {
+	m.disclosure = nil
+}
+
+// SetNotes sets the "notes" field.
+func (m *CreatorBrandDealMutation) SetNotes(s string) {
+	m.notes = &s
+}
+
+// Notes returns the value of the "notes" field in the mutation.
+func (m *CreatorBrandDealMutation) Notes() (r string, exists bool) {
+	v := m.notes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNotes returns the old "notes" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldNotes(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNotes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNotes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNotes: %w", err)
+	}
+	return oldValue.Notes, nil
+}
+
+// ResetNotes resets all changes to the "notes" field.
+func (m *CreatorBrandDealMutation) ResetNotes() {
+	m.notes = nil
+}
+
+// SetIdempotencyKey sets the "idempotency_key" field.
+func (m *CreatorBrandDealMutation) SetIdempotencyKey(s string) {
+	m.idempotency_key = &s
+}
+
+// IdempotencyKey returns the value of the "idempotency_key" field in the mutation.
+func (m *CreatorBrandDealMutation) IdempotencyKey() (r string, exists bool) {
+	v := m.idempotency_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdempotencyKey returns the old "idempotency_key" field's value of the CreatorBrandDeal entity.
+// If the CreatorBrandDeal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorBrandDealMutation) OldIdempotencyKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdempotencyKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdempotencyKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdempotencyKey: %w", err)
+	}
+	return oldValue.IdempotencyKey, nil
+}
+
+// ResetIdempotencyKey resets all changes to the "idempotency_key" field.
+func (m *CreatorBrandDealMutation) ResetIdempotencyKey() {
+	m.idempotency_key = nil
+}
+
+// Where appends a list predicates to the CreatorBrandDealMutation builder.
+func (m *CreatorBrandDealMutation) Where(ps ...predicate.CreatorBrandDeal) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CreatorBrandDealMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CreatorBrandDealMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CreatorBrandDeal, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CreatorBrandDealMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CreatorBrandDealMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CreatorBrandDeal).
+func (m *CreatorBrandDealMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CreatorBrandDealMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.created_at != nil {
+		fields = append(fields, creatorbranddeal.FieldCreatedAt)
+	}
+	if m.creator_user_id != nil {
+		fields = append(fields, creatorbranddeal.FieldCreatorUserID)
+	}
+	if m.brand_name != nil {
+		fields = append(fields, creatorbranddeal.FieldBrandName)
+	}
+	if m.amount_minor != nil {
+		fields = append(fields, creatorbranddeal.FieldAmountMinor)
+	}
+	if m.currency != nil {
+		fields = append(fields, creatorbranddeal.FieldCurrency)
+	}
+	if m.starts_at != nil {
+		fields = append(fields, creatorbranddeal.FieldStartsAt)
+	}
+	if m.ends_at != nil {
+		fields = append(fields, creatorbranddeal.FieldEndsAt)
+	}
+	if m.disclosure != nil {
+		fields = append(fields, creatorbranddeal.FieldDisclosure)
+	}
+	if m.notes != nil {
+		fields = append(fields, creatorbranddeal.FieldNotes)
+	}
+	if m.idempotency_key != nil {
+		fields = append(fields, creatorbranddeal.FieldIdempotencyKey)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CreatorBrandDealMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case creatorbranddeal.FieldCreatedAt:
+		return m.CreatedAt()
+	case creatorbranddeal.FieldCreatorUserID:
+		return m.CreatorUserID()
+	case creatorbranddeal.FieldBrandName:
+		return m.BrandName()
+	case creatorbranddeal.FieldAmountMinor:
+		return m.AmountMinor()
+	case creatorbranddeal.FieldCurrency:
+		return m.Currency()
+	case creatorbranddeal.FieldStartsAt:
+		return m.StartsAt()
+	case creatorbranddeal.FieldEndsAt:
+		return m.EndsAt()
+	case creatorbranddeal.FieldDisclosure:
+		return m.Disclosure()
+	case creatorbranddeal.FieldNotes:
+		return m.Notes()
+	case creatorbranddeal.FieldIdempotencyKey:
+		return m.IdempotencyKey()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CreatorBrandDealMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case creatorbranddeal.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case creatorbranddeal.FieldCreatorUserID:
+		return m.OldCreatorUserID(ctx)
+	case creatorbranddeal.FieldBrandName:
+		return m.OldBrandName(ctx)
+	case creatorbranddeal.FieldAmountMinor:
+		return m.OldAmountMinor(ctx)
+	case creatorbranddeal.FieldCurrency:
+		return m.OldCurrency(ctx)
+	case creatorbranddeal.FieldStartsAt:
+		return m.OldStartsAt(ctx)
+	case creatorbranddeal.FieldEndsAt:
+		return m.OldEndsAt(ctx)
+	case creatorbranddeal.FieldDisclosure:
+		return m.OldDisclosure(ctx)
+	case creatorbranddeal.FieldNotes:
+		return m.OldNotes(ctx)
+	case creatorbranddeal.FieldIdempotencyKey:
+		return m.OldIdempotencyKey(ctx)
+	}
+	return nil, fmt.Errorf("unknown CreatorBrandDeal field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CreatorBrandDealMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case creatorbranddeal.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case creatorbranddeal.FieldCreatorUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorUserID(v)
+		return nil
+	case creatorbranddeal.FieldBrandName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBrandName(v)
+		return nil
+	case creatorbranddeal.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountMinor(v)
+		return nil
+	case creatorbranddeal.FieldCurrency:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCurrency(v)
+		return nil
+	case creatorbranddeal.FieldStartsAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartsAt(v)
+		return nil
+	case creatorbranddeal.FieldEndsAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndsAt(v)
+		return nil
+	case creatorbranddeal.FieldDisclosure:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisclosure(v)
+		return nil
+	case creatorbranddeal.FieldNotes:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNotes(v)
+		return nil
+	case creatorbranddeal.FieldIdempotencyKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdempotencyKey(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorBrandDeal field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CreatorBrandDealMutation) AddedFields() []string {
+	var fields []string
+	if m.addamount_minor != nil {
+		fields = append(fields, creatorbranddeal.FieldAmountMinor)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CreatorBrandDealMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case creatorbranddeal.FieldAmountMinor:
+		return m.AddedAmountMinor()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CreatorBrandDealMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case creatorbranddeal.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmountMinor(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorBrandDeal numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CreatorBrandDealMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(creatorbranddeal.FieldEndsAt) {
+		fields = append(fields, creatorbranddeal.FieldEndsAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CreatorBrandDealMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CreatorBrandDealMutation) ClearField(name string) error {
+	switch name {
+	case creatorbranddeal.FieldEndsAt:
+		m.ClearEndsAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorBrandDeal nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CreatorBrandDealMutation) ResetField(name string) error {
+	switch name {
+	case creatorbranddeal.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case creatorbranddeal.FieldCreatorUserID:
+		m.ResetCreatorUserID()
+		return nil
+	case creatorbranddeal.FieldBrandName:
+		m.ResetBrandName()
+		return nil
+	case creatorbranddeal.FieldAmountMinor:
+		m.ResetAmountMinor()
+		return nil
+	case creatorbranddeal.FieldCurrency:
+		m.ResetCurrency()
+		return nil
+	case creatorbranddeal.FieldStartsAt:
+		m.ResetStartsAt()
+		return nil
+	case creatorbranddeal.FieldEndsAt:
+		m.ResetEndsAt()
+		return nil
+	case creatorbranddeal.FieldDisclosure:
+		m.ResetDisclosure()
+		return nil
+	case creatorbranddeal.FieldNotes:
+		m.ResetNotes()
+		return nil
+	case creatorbranddeal.FieldIdempotencyKey:
+		m.ResetIdempotencyKey()
+		return nil
+	}
+	return fmt.Errorf("unknown CreatorBrandDeal field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CreatorBrandDealMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CreatorBrandDealMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CreatorBrandDealMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CreatorBrandDealMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CreatorBrandDealMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CreatorBrandDealMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CreatorBrandDealMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CreatorBrandDeal unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CreatorBrandDealMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CreatorBrandDeal edge %s", name)
 }
 
 // CreatorEarningMutation represents an operation that mutates the CreatorEarning nodes in the graph.

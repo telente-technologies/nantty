@@ -13,6 +13,7 @@ type SchemaConfig struct {
 	AffiliateProgramSetting     string // AffiliateProgramSetting table.
 	BattleSettlement            string // BattleSettlement table.
 	CreatorAffiliation          string // CreatorAffiliation table.
+	CreatorBrandDeal            string // CreatorBrandDeal table.
 	CreatorEarning              string // CreatorEarning table.
 	CreatorProgramMember        string // CreatorProgramMember table.
 	CreatorTier                 string // CreatorTier table.

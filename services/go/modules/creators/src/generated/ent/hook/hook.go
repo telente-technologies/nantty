@@ -80,6 +80,18 @@ func (f CreatorAffiliationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreatorAffiliationMutation", m)
 }
 
+// The CreatorBrandDealFunc type is an adapter to allow the use of ordinary
+// function as CreatorBrandDeal mutator.
+type CreatorBrandDealFunc func(context.Context, *ent.CreatorBrandDealMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreatorBrandDealFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreatorBrandDealMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreatorBrandDealMutation", m)
+}
+
 // The CreatorEarningFunc type is an adapter to allow the use of ordinary
 // function as CreatorEarning mutator.
 type CreatorEarningFunc func(context.Context, *ent.CreatorEarningMutation) (ent.Value, error)

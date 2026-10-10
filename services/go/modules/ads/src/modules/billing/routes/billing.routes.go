@@ -17,6 +17,7 @@ func MountBillingRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("PUT "+base+"/spend-limit", authenticated(controller.SetSpendLimit))
 	mux.Handle("PUT "+base+"/funding-mode", authenticated(controller.SetFundingMode))
 	mux.Handle("POST "+base+"/top-ups", middlewares.Idempotent(deployed)(controller.StartTopUp))
+	mux.Handle("POST "+base+"/fund-from-earnings", middlewares.Idempotent(deployed)(controller.FundFromEarnings))
 	mux.Handle("GET "+base+"/top-ups/{reference}", authenticated(controller.GetTopUp))
 	mux.Handle("GET "+base+"/transactions/{transactionId}/receipt", authenticated(controller.DownloadReceipt))
 	mux.Handle("GET "+base+"/invoices", authenticated(controller.ListInvoices))

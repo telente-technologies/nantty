@@ -18,6 +18,9 @@ type ConnectedAccount func(*sql.Selector)
 // ConnectedAccountJob is the predicate function for connectedaccountjob builders.
 type ConnectedAccountJob func(*sql.Selector)
 
+// CustomerValidation is the predicate function for customervalidation builders.
+type CustomerValidation func(*sql.Selector)
+
 // IdempotentRequest is the predicate function for idempotentrequest builders.
 type IdempotentRequest func(*sql.Selector)
 
@@ -56,6 +59,9 @@ type SellerVerification func(*sql.Selector)
 
 // StorePurchase is the predicate function for storepurchase builders.
 type StorePurchase func(*sql.Selector)
+
+// VerificationLevelRecord is the predicate function for verificationlevelrecord builders.
+type VerificationLevelRecord func(*sql.Selector)
 
 // WebhookEvent is the predicate function for webhookevent builders.
 type WebhookEvent func(*sql.Selector)

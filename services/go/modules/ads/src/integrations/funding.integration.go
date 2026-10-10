@@ -13,6 +13,10 @@ func (UnconfiguredFundingGateway) ChargeUserWalletForBoost(context.Context, stri
 	return adserrors.UpstreamUnavailable
 }
 
+func (UnconfiguredFundingGateway) ChargeEarningsForBoost(context.Context, string, string, int64, string) error {
+	return adserrors.UpstreamUnavailable
+}
+
 func (UnconfiguredFundingGateway) RefundBoostCharge(context.Context, string, string, int64, string, string) error {
 	return adserrors.UpstreamUnavailable
 }
@@ -33,6 +37,10 @@ func (gateway *InMemoryFundingGateway) ChargeUserWalletForBoost(_ context.Contex
 		gateway.charged[userId+idempotencyKey] = amountMinor
 	}
 	return nil
+}
+
+func (gateway *InMemoryFundingGateway) ChargeEarningsForBoost(ctx context.Context, userId, currency string, amountMinor int64, idempotencyKey string) error {
+	return gateway.ChargeUserWalletForBoost(ctx, userId, currency, amountMinor, idempotencyKey)
 }
 
 func (gateway *InMemoryFundingGateway) RefundBoostCharge(_ context.Context, userId, _ string, _ int64, _, debitIdempotencyKey string) error {

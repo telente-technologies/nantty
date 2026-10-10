@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 	"zudomart/modules/wallet/src/databases/schema"
+	"zudomart/modules/wallet/src/generated/ent/adbalanceearningstransfer"
 	"zudomart/modules/wallet/src/generated/ent/adbalancetopup"
 	"zudomart/modules/wallet/src/generated/ent/adspenddebit"
 	"zudomart/modules/wallet/src/generated/ent/coinconversion"
@@ -28,6 +29,101 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	adbalanceearningstransferMixin := schema.AdBalanceEarningsTransfer{}.Mixin()
+	adbalanceearningstransferMixinFields0 := adbalanceearningstransferMixin[0].Fields()
+	_ = adbalanceearningstransferMixinFields0
+	adbalanceearningstransferFields := schema.AdBalanceEarningsTransfer{}.Fields()
+	_ = adbalanceearningstransferFields
+	// adbalanceearningstransferDescCreatedAt is the schema descriptor for created_at field.
+	adbalanceearningstransferDescCreatedAt := adbalanceearningstransferMixinFields0[1].Descriptor()
+	// adbalanceearningstransfer.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adbalanceearningstransfer.DefaultCreatedAt = adbalanceearningstransferDescCreatedAt.Default.(func() time.Time)
+	// adbalanceearningstransferDescAdAccountID is the schema descriptor for ad_account_id field.
+	adbalanceearningstransferDescAdAccountID := adbalanceearningstransferFields[0].Descriptor()
+	// adbalanceearningstransfer.AdAccountIDValidator is a validator for the "ad_account_id" field. It is called by the builders before save.
+	adbalanceearningstransfer.AdAccountIDValidator = func() func(string) error {
+		validators := adbalanceearningstransferDescAdAccountID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(ad_account_id string) error {
+			for _, fn := range fns {
+				if err := fn(ad_account_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adbalanceearningstransferDescUserID is the schema descriptor for user_id field.
+	adbalanceearningstransferDescUserID := adbalanceearningstransferFields[1].Descriptor()
+	// adbalanceearningstransfer.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	adbalanceearningstransfer.UserIDValidator = func() func(string) error {
+		validators := adbalanceearningstransferDescUserID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user_id string) error {
+			for _, fn := range fns {
+				if err := fn(user_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adbalanceearningstransferDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	adbalanceearningstransferDescIdempotencyKey := adbalanceearningstransferFields[2].Descriptor()
+	// adbalanceearningstransfer.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	adbalanceearningstransfer.IdempotencyKeyValidator = func() func(string) error {
+		validators := adbalanceearningstransferDescIdempotencyKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(idempotency_key string) error {
+			for _, fn := range fns {
+				if err := fn(idempotency_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adbalanceearningstransferDescCurrency is the schema descriptor for currency field.
+	adbalanceearningstransferDescCurrency := adbalanceearningstransferFields[4].Descriptor()
+	// adbalanceearningstransfer.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	adbalanceearningstransfer.CurrencyValidator = func() func(string) error {
+		validators := adbalanceearningstransferDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adbalanceearningstransferDescRefundedMinor is the schema descriptor for refunded_minor field.
+	adbalanceearningstransferDescRefundedMinor := adbalanceearningstransferFields[5].Descriptor()
+	// adbalanceearningstransfer.DefaultRefundedMinor holds the default value on creation for the refunded_minor field.
+	adbalanceearningstransfer.DefaultRefundedMinor = adbalanceearningstransferDescRefundedMinor.Default.(int64)
+	// adbalanceearningstransferDescUpdatedAt is the schema descriptor for updated_at field.
+	adbalanceearningstransferDescUpdatedAt := adbalanceearningstransferFields[6].Descriptor()
+	// adbalanceearningstransfer.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	adbalanceearningstransfer.DefaultUpdatedAt = adbalanceearningstransferDescUpdatedAt.Default.(func() time.Time)
+	// adbalanceearningstransfer.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	adbalanceearningstransfer.UpdateDefaultUpdatedAt = adbalanceearningstransferDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// adbalanceearningstransferDescID is the schema descriptor for id field.
+	adbalanceearningstransferDescID := adbalanceearningstransferMixinFields0[0].Descriptor()
+	// adbalanceearningstransfer.DefaultID holds the default value on creation for the id field.
+	adbalanceearningstransfer.DefaultID = adbalanceearningstransferDescID.Default.(func() uuid.UUID)
 	adbalancetopupMixin := schema.AdBalanceTopUp{}.Mixin()
 	adbalancetopupMixinFields0 := adbalancetopupMixin[0].Fields()
 	_ = adbalancetopupMixinFields0

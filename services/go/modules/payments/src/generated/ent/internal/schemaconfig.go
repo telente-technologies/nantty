@@ -11,6 +11,7 @@ type SchemaConfig struct {
 	BillingSubscription       string // BillingSubscription table.
 	ConnectedAccount          string // ConnectedAccount table.
 	ConnectedAccountJob       string // ConnectedAccountJob table.
+	CustomerValidation        string // CustomerValidation table.
 	IdempotentRequest         string // IdempotentRequest table.
 	OrderPayable              string // OrderPayable table.
 	OutboxEvent               string // OutboxEvent table.
@@ -24,6 +25,7 @@ type SchemaConfig struct {
 	SavedCardSetup            string // SavedCardSetup table.
 	SellerVerification        string // SellerVerification table.
 	StorePurchase             string // StorePurchase table.
+	VerificationLevelRecord   string // VerificationLevelRecord table.
 	WebhookEvent              string // WebhookEvent table.
 }
 

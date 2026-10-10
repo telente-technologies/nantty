@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/billingsubscription"
 	"zudomart/modules/payments/src/generated/ent/connectedaccount"
 	"zudomart/modules/payments/src/generated/ent/connectedaccountjob"
+	"zudomart/modules/payments/src/generated/ent/customervalidation"
 	"zudomart/modules/payments/src/generated/ent/idempotentrequest"
 	"zudomart/modules/payments/src/generated/ent/orderpayable"
 	"zudomart/modules/payments/src/generated/ent/outboxevent"
@@ -28,6 +29,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
 	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
+	"zudomart/modules/payments/src/generated/ent/verificationlevelrecord"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
 	"entgo.io/ent"
@@ -52,6 +54,8 @@ type Client struct {
 	ConnectedAccount *ConnectedAccountClient
 	// ConnectedAccountJob is the client for interacting with the ConnectedAccountJob builders.
 	ConnectedAccountJob *ConnectedAccountJobClient
+	// CustomerValidation is the client for interacting with the CustomerValidation builders.
+	CustomerValidation *CustomerValidationClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
 	IdempotentRequest *IdempotentRequestClient
 	// OrderPayable is the client for interacting with the OrderPayable builders.
@@ -78,6 +82,8 @@ type Client struct {
 	SellerVerification *SellerVerificationClient
 	// StorePurchase is the client for interacting with the StorePurchase builders.
 	StorePurchase *StorePurchaseClient
+	// VerificationLevelRecord is the client for interacting with the VerificationLevelRecord builders.
+	VerificationLevelRecord *VerificationLevelRecordClient
 	// WebhookEvent is the client for interacting with the WebhookEvent builders.
 	WebhookEvent *WebhookEventClient
 }
@@ -95,6 +101,7 @@ func (c *Client) init() {
 	c.BillingSubscription = NewBillingSubscriptionClient(c.config)
 	c.ConnectedAccount = NewConnectedAccountClient(c.config)
 	c.ConnectedAccountJob = NewConnectedAccountJobClient(c.config)
+	c.CustomerValidation = NewCustomerValidationClient(c.config)
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
 	c.OrderPayable = NewOrderPayableClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
@@ -108,6 +115,7 @@ func (c *Client) init() {
 	c.SavedCardSetup = NewSavedCardSetupClient(c.config)
 	c.SellerVerification = NewSellerVerificationClient(c.config)
 	c.StorePurchase = NewStorePurchaseClient(c.config)
+	c.VerificationLevelRecord = NewVerificationLevelRecordClient(c.config)
 	c.WebhookEvent = NewWebhookEventClient(c.config)
 }
 
@@ -207,6 +215,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		BillingSubscription:       NewBillingSubscriptionClient(cfg),
 		ConnectedAccount:          NewConnectedAccountClient(cfg),
 		ConnectedAccountJob:       NewConnectedAccountJobClient(cfg),
+		CustomerValidation:        NewCustomerValidationClient(cfg),
 		IdempotentRequest:         NewIdempotentRequestClient(cfg),
 		OrderPayable:              NewOrderPayableClient(cfg),
 		OutboxEvent:               NewOutboxEventClient(cfg),
@@ -220,6 +229,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		SavedCardSetup:            NewSavedCardSetupClient(cfg),
 		SellerVerification:        NewSellerVerificationClient(cfg),
 		StorePurchase:             NewStorePurchaseClient(cfg),
+		VerificationLevelRecord:   NewVerificationLevelRecordClient(cfg),
 		WebhookEvent:              NewWebhookEventClient(cfg),
 	}, nil
 }
@@ -244,6 +254,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		BillingSubscription:       NewBillingSubscriptionClient(cfg),
 		ConnectedAccount:          NewConnectedAccountClient(cfg),
 		ConnectedAccountJob:       NewConnectedAccountJobClient(cfg),
+		CustomerValidation:        NewCustomerValidationClient(cfg),
 		IdempotentRequest:         NewIdempotentRequestClient(cfg),
 		OrderPayable:              NewOrderPayableClient(cfg),
 		OutboxEvent:               NewOutboxEventClient(cfg),
@@ -257,6 +268,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		SavedCardSetup:            NewSavedCardSetupClient(cfg),
 		SellerVerification:        NewSellerVerificationClient(cfg),
 		StorePurchase:             NewStorePurchaseClient(cfg),
+		VerificationLevelRecord:   NewVerificationLevelRecordClient(cfg),
 		WebhookEvent:              NewWebhookEventClient(cfg),
 	}, nil
 }
@@ -288,10 +300,11 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.BillingAuthorization, c.BillingSubscription, c.ConnectedAccount,
-		c.ConnectedAccountJob, c.IdempotentRequest, c.OrderPayable, c.OutboxEvent,
-		c.PaymentIntent, c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer,
-		c.ProviderCustomer, c.ProviderDispute, c.ProviderPayoutDestination,
-		c.SavedCardSetup, c.SellerVerification, c.StorePurchase, c.WebhookEvent,
+		c.ConnectedAccountJob, c.CustomerValidation, c.IdempotentRequest,
+		c.OrderPayable, c.OutboxEvent, c.PaymentIntent, c.PaymentRefund,
+		c.PayoutOnboarding, c.PayoutTransfer, c.ProviderCustomer, c.ProviderDispute,
+		c.ProviderPayoutDestination, c.SavedCardSetup, c.SellerVerification,
+		c.StorePurchase, c.VerificationLevelRecord, c.WebhookEvent,
 	} {
 		n.Use(hooks...)
 	}
@@ -302,10 +315,11 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.BillingAuthorization, c.BillingSubscription, c.ConnectedAccount,
-		c.ConnectedAccountJob, c.IdempotentRequest, c.OrderPayable, c.OutboxEvent,
-		c.PaymentIntent, c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer,
-		c.ProviderCustomer, c.ProviderDispute, c.ProviderPayoutDestination,
-		c.SavedCardSetup, c.SellerVerification, c.StorePurchase, c.WebhookEvent,
+		c.ConnectedAccountJob, c.CustomerValidation, c.IdempotentRequest,
+		c.OrderPayable, c.OutboxEvent, c.PaymentIntent, c.PaymentRefund,
+		c.PayoutOnboarding, c.PayoutTransfer, c.ProviderCustomer, c.ProviderDispute,
+		c.ProviderPayoutDestination, c.SavedCardSetup, c.SellerVerification,
+		c.StorePurchase, c.VerificationLevelRecord, c.WebhookEvent,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -322,6 +336,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ConnectedAccount.mutate(ctx, m)
 	case *ConnectedAccountJobMutation:
 		return c.ConnectedAccountJob.mutate(ctx, m)
+	case *CustomerValidationMutation:
+		return c.CustomerValidation.mutate(ctx, m)
 	case *IdempotentRequestMutation:
 		return c.IdempotentRequest.mutate(ctx, m)
 	case *OrderPayableMutation:
@@ -348,6 +364,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SellerVerification.mutate(ctx, m)
 	case *StorePurchaseMutation:
 		return c.StorePurchase.mutate(ctx, m)
+	case *VerificationLevelRecordMutation:
+		return c.VerificationLevelRecord.mutate(ctx, m)
 	case *WebhookEventMutation:
 		return c.WebhookEvent.mutate(ctx, m)
 	default:
@@ -884,6 +902,139 @@ func (c *ConnectedAccountJobClient) mutate(ctx context.Context, m *ConnectedAcco
 		return (&ConnectedAccountJobDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown ConnectedAccountJob mutation op: %q", m.Op())
+	}
+}
+
+// CustomerValidationClient is a client for the CustomerValidation schema.
+type CustomerValidationClient struct {
+	config
+}
+
+// NewCustomerValidationClient returns a client for the CustomerValidation from the given config.
+func NewCustomerValidationClient(c config) *CustomerValidationClient {
+	return &CustomerValidationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `customervalidation.Hooks(f(g(h())))`.
+func (c *CustomerValidationClient) Use(hooks ...Hook) {
+	c.hooks.CustomerValidation = append(c.hooks.CustomerValidation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `customervalidation.Intercept(f(g(h())))`.
+func (c *CustomerValidationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CustomerValidation = append(c.inters.CustomerValidation, interceptors...)
+}
+
+// Create returns a builder for creating a CustomerValidation entity.
+func (c *CustomerValidationClient) Create() *CustomerValidationCreate {
+	mutation := newCustomerValidationMutation(c.config, OpCreate)
+	return &CustomerValidationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CustomerValidation entities.
+func (c *CustomerValidationClient) CreateBulk(builders ...*CustomerValidationCreate) *CustomerValidationCreateBulk {
+	return &CustomerValidationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CustomerValidationClient) MapCreateBulk(slice any, setFunc func(*CustomerValidationCreate, int)) *CustomerValidationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CustomerValidationCreateBulk{err: fmt.Errorf("calling to CustomerValidationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CustomerValidationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CustomerValidationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CustomerValidation.
+func (c *CustomerValidationClient) Update() *CustomerValidationUpdate {
+	mutation := newCustomerValidationMutation(c.config, OpUpdate)
+	return &CustomerValidationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CustomerValidationClient) UpdateOne(_m *CustomerValidation) *CustomerValidationUpdateOne {
+	mutation := newCustomerValidationMutation(c.config, OpUpdateOne, withCustomerValidation(_m))
+	return &CustomerValidationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CustomerValidationClient) UpdateOneID(id uuid.UUID) *CustomerValidationUpdateOne {
+	mutation := newCustomerValidationMutation(c.config, OpUpdateOne, withCustomerValidationID(id))
+	return &CustomerValidationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CustomerValidation.
+func (c *CustomerValidationClient) Delete() *CustomerValidationDelete {
+	mutation := newCustomerValidationMutation(c.config, OpDelete)
+	return &CustomerValidationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CustomerValidationClient) DeleteOne(_m *CustomerValidation) *CustomerValidationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CustomerValidationClient) DeleteOneID(id uuid.UUID) *CustomerValidationDeleteOne {
+	builder := c.Delete().Where(customervalidation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CustomerValidationDeleteOne{builder}
+}
+
+// Query returns a query builder for CustomerValidation.
+func (c *CustomerValidationClient) Query() *CustomerValidationQuery {
+	return &CustomerValidationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCustomerValidation},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CustomerValidation entity by its id.
+func (c *CustomerValidationClient) Get(ctx context.Context, id uuid.UUID) (*CustomerValidation, error) {
+	return c.Query().Where(customervalidation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CustomerValidationClient) GetX(ctx context.Context, id uuid.UUID) *CustomerValidation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CustomerValidationClient) Hooks() []Hook {
+	return c.hooks.CustomerValidation
+}
+
+// Interceptors returns the client interceptors.
+func (c *CustomerValidationClient) Interceptors() []Interceptor {
+	return c.inters.CustomerValidation
+}
+
+func (c *CustomerValidationClient) mutate(ctx context.Context, m *CustomerValidationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CustomerValidationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CustomerValidationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CustomerValidationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CustomerValidationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CustomerValidation mutation op: %q", m.Op())
 	}
 }
 
@@ -2616,6 +2767,139 @@ func (c *StorePurchaseClient) mutate(ctx context.Context, m *StorePurchaseMutati
 	}
 }
 
+// VerificationLevelRecordClient is a client for the VerificationLevelRecord schema.
+type VerificationLevelRecordClient struct {
+	config
+}
+
+// NewVerificationLevelRecordClient returns a client for the VerificationLevelRecord from the given config.
+func NewVerificationLevelRecordClient(c config) *VerificationLevelRecordClient {
+	return &VerificationLevelRecordClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `verificationlevelrecord.Hooks(f(g(h())))`.
+func (c *VerificationLevelRecordClient) Use(hooks ...Hook) {
+	c.hooks.VerificationLevelRecord = append(c.hooks.VerificationLevelRecord, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `verificationlevelrecord.Intercept(f(g(h())))`.
+func (c *VerificationLevelRecordClient) Intercept(interceptors ...Interceptor) {
+	c.inters.VerificationLevelRecord = append(c.inters.VerificationLevelRecord, interceptors...)
+}
+
+// Create returns a builder for creating a VerificationLevelRecord entity.
+func (c *VerificationLevelRecordClient) Create() *VerificationLevelRecordCreate {
+	mutation := newVerificationLevelRecordMutation(c.config, OpCreate)
+	return &VerificationLevelRecordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of VerificationLevelRecord entities.
+func (c *VerificationLevelRecordClient) CreateBulk(builders ...*VerificationLevelRecordCreate) *VerificationLevelRecordCreateBulk {
+	return &VerificationLevelRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VerificationLevelRecordClient) MapCreateBulk(slice any, setFunc func(*VerificationLevelRecordCreate, int)) *VerificationLevelRecordCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VerificationLevelRecordCreateBulk{err: fmt.Errorf("calling to VerificationLevelRecordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VerificationLevelRecordCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VerificationLevelRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for VerificationLevelRecord.
+func (c *VerificationLevelRecordClient) Update() *VerificationLevelRecordUpdate {
+	mutation := newVerificationLevelRecordMutation(c.config, OpUpdate)
+	return &VerificationLevelRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VerificationLevelRecordClient) UpdateOne(_m *VerificationLevelRecord) *VerificationLevelRecordUpdateOne {
+	mutation := newVerificationLevelRecordMutation(c.config, OpUpdateOne, withVerificationLevelRecord(_m))
+	return &VerificationLevelRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VerificationLevelRecordClient) UpdateOneID(id uuid.UUID) *VerificationLevelRecordUpdateOne {
+	mutation := newVerificationLevelRecordMutation(c.config, OpUpdateOne, withVerificationLevelRecordID(id))
+	return &VerificationLevelRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for VerificationLevelRecord.
+func (c *VerificationLevelRecordClient) Delete() *VerificationLevelRecordDelete {
+	mutation := newVerificationLevelRecordMutation(c.config, OpDelete)
+	return &VerificationLevelRecordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VerificationLevelRecordClient) DeleteOne(_m *VerificationLevelRecord) *VerificationLevelRecordDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VerificationLevelRecordClient) DeleteOneID(id uuid.UUID) *VerificationLevelRecordDeleteOne {
+	builder := c.Delete().Where(verificationlevelrecord.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VerificationLevelRecordDeleteOne{builder}
+}
+
+// Query returns a query builder for VerificationLevelRecord.
+func (c *VerificationLevelRecordClient) Query() *VerificationLevelRecordQuery {
+	return &VerificationLevelRecordQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVerificationLevelRecord},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a VerificationLevelRecord entity by its id.
+func (c *VerificationLevelRecordClient) Get(ctx context.Context, id uuid.UUID) (*VerificationLevelRecord, error) {
+	return c.Query().Where(verificationlevelrecord.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VerificationLevelRecordClient) GetX(ctx context.Context, id uuid.UUID) *VerificationLevelRecord {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *VerificationLevelRecordClient) Hooks() []Hook {
+	return c.hooks.VerificationLevelRecord
+}
+
+// Interceptors returns the client interceptors.
+func (c *VerificationLevelRecordClient) Interceptors() []Interceptor {
+	return c.inters.VerificationLevelRecord
+}
+
+func (c *VerificationLevelRecordClient) mutate(ctx context.Context, m *VerificationLevelRecordMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VerificationLevelRecordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VerificationLevelRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VerificationLevelRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VerificationLevelRecordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown VerificationLevelRecord mutation op: %q", m.Op())
+	}
+}
+
 // WebhookEventClient is a client for the WebhookEvent schema.
 type WebhookEventClient struct {
 	config
@@ -2753,17 +3037,19 @@ func (c *WebhookEventClient) mutate(ctx context.Context, m *WebhookEventMutation
 type (
 	hooks struct {
 		BillingAuthorization, BillingSubscription, ConnectedAccount,
-		ConnectedAccountJob, IdempotentRequest, OrderPayable, OutboxEvent,
-		PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
+		ConnectedAccountJob, CustomerValidation, IdempotentRequest, OrderPayable,
+		OutboxEvent, PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
 		ProviderCustomer, ProviderDispute, ProviderPayoutDestination, SavedCardSetup,
-		SellerVerification, StorePurchase, WebhookEvent []ent.Hook
+		SellerVerification, StorePurchase, VerificationLevelRecord,
+		WebhookEvent []ent.Hook
 	}
 	inters struct {
 		BillingAuthorization, BillingSubscription, ConnectedAccount,
-		ConnectedAccountJob, IdempotentRequest, OrderPayable, OutboxEvent,
-		PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
+		ConnectedAccountJob, CustomerValidation, IdempotentRequest, OrderPayable,
+		OutboxEvent, PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
 		ProviderCustomer, ProviderDispute, ProviderPayoutDestination, SavedCardSetup,
-		SellerVerification, StorePurchase, WebhookEvent []ent.Interceptor
+		SellerVerification, StorePurchase, VerificationLevelRecord,
+		WebhookEvent []ent.Interceptor
 	}
 )
 

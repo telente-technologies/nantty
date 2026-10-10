@@ -21,6 +21,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
+	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
@@ -399,22 +400,28 @@ func init() {
 			return nil
 		}
 	}()
+	// adboostDescPaymentTopUpID is the schema descriptor for payment_top_up_id field.
+	adboostDescPaymentTopUpID := adboostFields[10].Descriptor()
+	// adboost.DefaultPaymentTopUpID holds the default value on creation for the payment_top_up_id field.
+	adboost.DefaultPaymentTopUpID = adboostDescPaymentTopUpID.Default.(string)
+	// adboost.PaymentTopUpIDValidator is a validator for the "payment_top_up_id" field. It is called by the builders before save.
+	adboost.PaymentTopUpIDValidator = adboostDescPaymentTopUpID.Validators[0].(func(string) error)
 	// adboostDescIdempotencyKey is the schema descriptor for idempotency_key field.
-	adboostDescIdempotencyKey := adboostFields[10].Descriptor()
+	adboostDescIdempotencyKey := adboostFields[11].Descriptor()
 	// adboost.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	adboost.IdempotencyKeyValidator = adboostDescIdempotencyKey.Validators[0].(func(string) error)
 	// adboostDescRequestHash is the schema descriptor for request_hash field.
-	adboostDescRequestHash := adboostFields[11].Descriptor()
+	adboostDescRequestHash := adboostFields[12].Descriptor()
 	// adboost.RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
 	adboost.RequestHashValidator = adboostDescRequestHash.Validators[0].(func(string) error)
 	// adboostDescRejectionReason is the schema descriptor for rejection_reason field.
-	adboostDescRejectionReason := adboostFields[18].Descriptor()
+	adboostDescRejectionReason := adboostFields[19].Descriptor()
 	// adboost.DefaultRejectionReason holds the default value on creation for the rejection_reason field.
 	adboost.DefaultRejectionReason = adboostDescRejectionReason.Default.(string)
 	// adboost.RejectionReasonValidator is a validator for the "rejection_reason" field. It is called by the builders before save.
 	adboost.RejectionReasonValidator = adboostDescRejectionReason.Validators[0].(func(string) error)
 	// adboostDescUpdatedAt is the schema descriptor for updated_at field.
-	adboostDescUpdatedAt := adboostFields[19].Descriptor()
+	adboostDescUpdatedAt := adboostFields[20].Descriptor()
 	// adboost.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	adboost.DefaultUpdatedAt = adboostDescUpdatedAt.Default.(func() time.Time)
 	// adboost.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -834,6 +841,55 @@ func init() {
 	adexperimentDescID := adexperimentMixinFields0[0].Descriptor()
 	// adexperiment.DefaultID holds the default value on creation for the id field.
 	adexperiment.DefaultID = adexperimentDescID.Default.(func() uuid.UUID)
+	adfreeboostgrantMixin := schema.AdFreeBoostGrant{}.Mixin()
+	adfreeboostgrantMixinFields0 := adfreeboostgrantMixin[0].Fields()
+	_ = adfreeboostgrantMixinFields0
+	adfreeboostgrantFields := schema.AdFreeBoostGrant{}.Fields()
+	_ = adfreeboostgrantFields
+	// adfreeboostgrantDescCreatedAt is the schema descriptor for created_at field.
+	adfreeboostgrantDescCreatedAt := adfreeboostgrantMixinFields0[1].Descriptor()
+	// adfreeboostgrant.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adfreeboostgrant.DefaultCreatedAt = adfreeboostgrantDescCreatedAt.Default.(func() time.Time)
+	// adfreeboostgrantDescPeriodKey is the schema descriptor for period_key field.
+	adfreeboostgrantDescPeriodKey := adfreeboostgrantFields[1].Descriptor()
+	// adfreeboostgrant.PeriodKeyValidator is a validator for the "period_key" field. It is called by the builders before save.
+	adfreeboostgrant.PeriodKeyValidator = func() func(string) error {
+		validators := adfreeboostgrantDescPeriodKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(period_key string) error {
+			for _, fn := range fns {
+				if err := fn(period_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adfreeboostgrantDescCurrency is the schema descriptor for currency field.
+	adfreeboostgrantDescCurrency := adfreeboostgrantFields[4].Descriptor()
+	// adfreeboostgrant.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	adfreeboostgrant.CurrencyValidator = func() func(string) error {
+		validators := adfreeboostgrantDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// adfreeboostgrantDescID is the schema descriptor for id field.
+	adfreeboostgrantDescID := adfreeboostgrantMixinFields0[0].Descriptor()
+	// adfreeboostgrant.DefaultID holds the default value on creation for the id field.
+	adfreeboostgrant.DefaultID = adfreeboostgrantDescID.Default.(func() uuid.UUID)
 	adfrequencypolicyMixin := schema.AdFrequencyPolicy{}.Mixin()
 	adfrequencypolicyMixinFields0 := adfrequencypolicyMixin[0].Fields()
 	_ = adfrequencypolicyMixinFields0

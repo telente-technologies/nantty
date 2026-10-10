@@ -38,8 +38,14 @@ func TestUnverifiedSellersCannotWithdrawUntilBusinessVerificationPasses(t *testi
 	if failClosed := harness.withdraw(token, "unverified-withdraw-2", accountId, 50_000); failClosed.Status != http.StatusServiceUnavailable || failClosed.Body["code"] != "SELLER_VERIFICATION_UNAVAILABLE" {
 		t.Fatalf("an unreadable verification status must refuse: %d %s", failClosed.Status, failClosed.Raw)
 	}
-	if _, err := harness.Database.Exec(`CREATE TABLE ` + pgx.Identifier{users, "profile_checkmarks"}.Sanitize() + ` (profile_id uuid, account_id uuid, color text, status text)`); err != nil {
-		t.Fatal(err)
+	for _, statement := range []string{
+		`CREATE TABLE ` + pgx.Identifier{users, "profile_checkmarks"}.Sanitize() + ` (profile_id uuid, account_id uuid, color text, status text)`,
+		`CREATE TABLE ` + pgx.Identifier{users, "profiles"}.Sanitize() + ` (account_id uuid, kind text, country_code text)`,
+		`CREATE TABLE ` + pgx.Identifier{users, "verification_cases"}.Sanitize() + ` (account_id uuid, status text, liveness_result text, face_match_result text)`,
+	} {
+		if _, err := harness.Database.Exec(statement); err != nil {
+			t.Fatal(err)
+		}
 	}
 	harness.Payments.Application.Container.Settings.UsersSchema = users
 	if _, err := harness.Database.Exec(`INSERT INTO `+pgx.Identifier{users, "profile_checkmarks"}.Sanitize()+` VALUES ($1, $2, 'gold', 'suspended')`, uuid.New(), seller); err != nil {

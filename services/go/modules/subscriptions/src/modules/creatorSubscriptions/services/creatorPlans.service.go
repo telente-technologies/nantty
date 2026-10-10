@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"zudomart/modules/ledger/src/databases"
+	paymentmodels "zudomart/modules/payments/src/modules/gateway/models"
 	"zudomart/modules/subscriptions/src/generated/ent"
 	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscription"
 	"zudomart/modules/subscriptions/src/generated/ent/creatorsubscriptionplan"
@@ -57,6 +58,9 @@ func (service CreatorSubscriptions) creatorBandsFor(ctx context.Context, currenc
 func (service CreatorSubscriptions) CreatePlan(ctx context.Context, plan NewCreatorPlan) (CreatorPlanView, error) {
 	creatorId, err := service.requireApprovedCreator(ctx, plan.CreatorId)
 	if err != nil {
+		return CreatorPlanView{}, err
+	}
+	if err := service.Container.Payments.RequireVerificationLevel(ctx, creatorId, paymentmodels.VerificationLevelPayout); err != nil {
 		return CreatorPlanView{}, err
 	}
 	plan.Currency = strings.ToUpper(plan.Currency)

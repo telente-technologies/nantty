@@ -80,6 +80,8 @@ func (gateway *PaymentGateway) processVerifiedWebhook(ctx context.Context, notif
 		return gateway.HandleProviderDisputeNotification(ctx, notification)
 	case interfaces.WebhookKindSubscription, interfaces.WebhookKindInvoice:
 		return gateway.HandleSubscriptionNotification(ctx, notification)
+	case interfaces.WebhookKindIdentification:
+		return gateway.HandleCustomerIdentificationNotification(ctx, notification)
 	}
 	return nil
 }

@@ -3,11 +3,13 @@ package createboost
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"zudomart/modules/ads/src/events"
 	"zudomart/modules/ads/src/generated/ent"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
+	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
 	accountservices "zudomart/modules/ads/src/modules/adAccounts/services"
 	"zudomart/modules/ads/src/modules/boosts/dtos"
@@ -32,7 +34,9 @@ func (handler Handler) ensureBoostAccount(ctx context.Context, command Command) 
 	return handler.Container.Client.AdAccount.Create().SetName("Boosted posts").SetKind("personal").SetOwnerUserID(command.UserId).SetCountryCode(country).SetCurrency(currency).Save(ctx)
 }
 
-func (handler Handler) createRecords(ctx context.Context, tx *ent.Tx, command Command, account *ent.AdAccount, total int64, hash string, paid bool) (*ent.AdBoost, error) {
+func (handler Handler) createRecords(ctx context.Context, tx *ent.Tx, command Command, account *ent.AdAccount, total int64, hash string) (*ent.AdBoost, error) {
+	method := command.Request.PaymentMethod
+	funded := method != "card"
 	deployed, request, now := handler.Container, command.Request, handler.Container.Now()
 	if err := ensureOwnerMembership(ctx, tx, account, command); err != nil {
 		return nil, err
@@ -54,9 +58,9 @@ func (handler Handler) createRecords(ctx context.Context, tx *ent.Tx, command Co
 		return nil, err
 	}
 	status := adboost.StatusPendingPayment
-	if paid {
+	if funded {
 		status = adboost.StatusInReview
-		if err := creditAccountForBoost(ctx, tx, account, total, request.DailyBudget.Currency, campaign.ID.String()); err != nil {
+		if err := creditAccountForBoost(ctx, tx, account, total, request.DailyBudget.Currency, campaign.ID.String(), method == "free"); err != nil {
 			return nil, err
 		}
 		if _, err := campaignservices.SubmitAdsForReviewInTransaction(ctx, tx, campaign.ID, now); err != nil {
@@ -70,16 +74,30 @@ func (handler Handler) createRecords(ctx context.Context, tx *ent.Tx, command Co
 	if err != nil {
 		return nil, err
 	}
+	if method == "free" {
+		if err := consumeFreeBoost(ctx, tx, boost, account.Timezone, now); err != nil {
+			return nil, err
+		}
+	}
 	return boost, events.EnqueueOutboxEventInTransaction(ctx, tx, events.AdBoostCreated, boost.ID.String(), now, events.AdBoostCreatedEventData{
 		BoostId: boost.ID.String(), UserId: command.UserId.String(), PostId: request.PostId, Goal: request.Goal, TotalBudgetMinor: total, Currency: request.DailyBudget.Currency, PaymentMethod: request.PaymentMethod,
 	})
 }
 
-func creditAccountForBoost(ctx context.Context, tx *ent.Tx, account *ent.AdAccount, total int64, currency, reference string) error {
+func creditAccountForBoost(ctx context.Context, tx *ent.Tx, account *ent.AdAccount, total int64, currency, reference string, free bool) error {
 	if err := tx.AdAccount.UpdateOneID(account.ID).AddBalanceMinor(total).Exec(ctx); err != nil {
 		return err
 	}
-	return tx.AdFundsTransaction.Create().SetAccountID(account.ID).SetType("top_up").SetAmountMinor(total).SetCurrency(currency).SetDescription("Post boost funding").SetReference("boost:" + reference).Exec(ctx)
+	kind, description := adfundstransaction.TypeTopUp, "Post boost funding"
+	if free {
+		kind, description = adfundstransaction.TypeCreditGrant, "Free Premium boost"
+	}
+	return tx.AdFundsTransaction.Create().SetAccountID(account.ID).SetType(kind).SetAmountMinor(total).SetCurrency(currency).SetDescription(description).SetReference("boost:" + reference).Exec(ctx)
+}
+
+func consumeFreeBoost(ctx context.Context, tx *ent.Tx, boost *ent.AdBoost, timezone string, now time.Time) error {
+	period, _ := services.FreeBoostPeriod(now, timezone)
+	return tx.AdFreeBoostGrant.Create().SetUserID(boost.UserID).SetPeriodKey(period).SetBoostID(boost.ID).SetValueMinor(boost.TotalBudgetMinor).SetCurrency(boost.Currency).Exec(ctx)
 }
 
 func boostCreativeInput(request dtos.CreateBoostRequest) types.CreativeInput {

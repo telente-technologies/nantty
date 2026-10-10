@@ -95,6 +95,11 @@ func TotalBudgetMinor(v int64) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldEQ(FieldTotalBudgetMinor, v))
 }
 
+// PaymentTopUpID applies equality check predicate on the "payment_top_up_id" field. It's identical to PaymentTopUpIDEQ.
+func PaymentTopUpID(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldEQ(FieldPaymentTopUpID, v))
+}
+
 // IdempotencyKey applies equality check predicate on the "idempotency_key" field. It's identical to IdempotencyKeyEQ.
 func IdempotencyKey(v string) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldEQ(FieldIdempotencyKey, v))
@@ -573,6 +578,71 @@ func PaymentMethodIn(vs ...PaymentMethod) predicate.AdBoost {
 // PaymentMethodNotIn applies the NotIn predicate on the "payment_method" field.
 func PaymentMethodNotIn(vs ...PaymentMethod) predicate.AdBoost {
 	return predicate.AdBoost(sql.FieldNotIn(FieldPaymentMethod, vs...))
+}
+
+// PaymentTopUpIDEQ applies the EQ predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDEQ(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldEQ(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDNEQ applies the NEQ predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDNEQ(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNEQ(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDIn applies the In predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDIn(vs ...string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldIn(FieldPaymentTopUpID, vs...))
+}
+
+// PaymentTopUpIDNotIn applies the NotIn predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDNotIn(vs ...string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldNotIn(FieldPaymentTopUpID, vs...))
+}
+
+// PaymentTopUpIDGT applies the GT predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDGT(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldGT(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDGTE applies the GTE predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDGTE(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldGTE(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDLT applies the LT predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDLT(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldLT(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDLTE applies the LTE predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDLTE(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldLTE(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDContains applies the Contains predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDContains(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldContains(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDHasPrefix applies the HasPrefix predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDHasPrefix(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldHasPrefix(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDHasSuffix applies the HasSuffix predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDHasSuffix(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldHasSuffix(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDEqualFold applies the EqualFold predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDEqualFold(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldEqualFold(FieldPaymentTopUpID, v))
+}
+
+// PaymentTopUpIDContainsFold applies the ContainsFold predicate on the "payment_top_up_id" field.
+func PaymentTopUpIDContainsFold(v string) predicate.AdBoost {
+	return predicate.AdBoost(sql.FieldContainsFold(FieldPaymentTopUpID, v))
 }
 
 // IdempotencyKeyEQ applies the EQ predicate on the "idempotency_key" field.

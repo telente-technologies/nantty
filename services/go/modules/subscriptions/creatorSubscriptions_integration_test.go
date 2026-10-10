@@ -23,6 +23,7 @@ func startCreatorSubscriptionsHarness(t *testing.T, creator, fan, blocked string
 		Blocks: map[[2]string]bool{{creator, blocked}: true},
 		Users:  map[string]repositories.UserSummary{fan: {Id: fan, Username: "ada", Name: "Ada"}},
 	}
+	harness.OnboardConnectedAccount(creator, false)
 	return harness
 }
 

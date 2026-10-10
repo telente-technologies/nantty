@@ -9,6 +9,9 @@ import (
 func (fake *FakePaystack) route(request fakeRequest) (int, any, any) {
 	segments := request.segments
 	resource := segments[0]
+	if resource == "customer" {
+		return fake.routeCustomers(request)
+	}
 	switch {
 	case resource == "transaction" && len(segments) > 1 && segments[1] == "initialize":
 		return fake.initializeTransaction(request)

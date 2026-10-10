@@ -26,6 +26,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Campa
 	if err := accountservices.RequireActiveAccount(account); err != nil {
 		return dtos.CampaignDraftResult{}, err
 	}
+	if command.Submission.SubmitForReview {
+		if err := adsservices.RequirePayoutVerified(ctx, deployed.Verification, command.UserId.String()); err != nil {
+			return dtos.CampaignDraftResult{}, err
+		}
+	}
 	if err := validators.ValidateBundle(command.Submission, account.Currency, deployed.Pricing.FloorsForAudience(ctx, command.Submission.AdSet.Audience, account.Currency)); err != nil {
 		return dtos.CampaignDraftResult{}, err
 	}

@@ -53,31 +53,39 @@ type MediaConnection struct {
 }
 
 type LiveSessionView struct {
-	Id                         string          `json:"id"`
-	Host                       HostSummary     `json:"host"`
-	Title                      string          `json:"title"`
-	Category                   string          `json:"category"`
-	State                      string          `json:"state"`
-	Status                     string          `json:"status"`
-	Visibility                 string          `json:"visibility"`
-	Viewers                    int             `json:"viewers"`
-	PeakViewers                int             `json:"peakViewers"`
-	StartedAt                  *string         `json:"startedAt"`
-	EndedAt                    *string         `json:"endedAt"`
-	CoverUrl                   *string         `json:"coverUrl"`
-	PlaybackUrl                *string         `json:"playbackUrl"`
-	Media                      MediaConnection `json:"media"`
-	GiftsEnabled               bool            `json:"giftsEnabled"`
-	HostIsCreator              bool            `json:"hostIsCreator"`
-	IsFollowingHost            bool            `json:"isFollowingHost"`
-	StoreId                    *string         `json:"storeId"`
-	Products                   []any           `json:"products"`
-	PinnedProductId            *string         `json:"pinnedProductId"`
-	LiveAdSettings             map[string]any  `json:"liveAdSettings"`
-	AcceptedLiveAdTermsVersion *string         `json:"acceptedLiveAdTermsVersion"`
-	SponsorshipLine            *string         `json:"sponsorshipLine"`
-	TopSupporterUserId         *string         `json:"topSupporterUserId"`
-	Safety                     *LiveSafetyView `json:"safety"`
+	Id                         string           `json:"id"`
+	Host                       HostSummary      `json:"host"`
+	Title                      string           `json:"title"`
+	Category                   string           `json:"category"`
+	State                      string           `json:"state"`
+	Status                     string           `json:"status"`
+	Visibility                 string           `json:"visibility"`
+	Viewers                    int              `json:"viewers"`
+	PeakViewers                int              `json:"peakViewers"`
+	StartedAt                  *string          `json:"startedAt"`
+	EndedAt                    *string          `json:"endedAt"`
+	CoverUrl                   *string          `json:"coverUrl"`
+	PlaybackUrl                *string          `json:"playbackUrl"`
+	Media                      MediaConnection  `json:"media"`
+	GiftsEnabled               bool             `json:"giftsEnabled"`
+	HostIsCreator              bool             `json:"hostIsCreator"`
+	IsFollowingHost            bool             `json:"isFollowingHost"`
+	StoreId                    *string          `json:"storeId"`
+	Products                   []any            `json:"products"`
+	PinnedProductId            *string          `json:"pinnedProductId"`
+	LiveAdSettings             map[string]any   `json:"liveAdSettings"`
+	AcceptedLiveAdTermsVersion *string          `json:"acceptedLiveAdTermsVersion"`
+	SponsorshipLine            *string          `json:"sponsorshipLine"`
+	TopSupporterUserId         *string          `json:"topSupporterUserId"`
+	Safety                     *LiveSafetyView  `json:"safety"`
+	HostRanking                *HostRankingView `json:"hostRanking"`
+}
+
+type HostRankingView struct {
+	GlobalRank   int     `json:"globalRank"`
+	CategoryRank *int    `json:"categoryRank"`
+	Category     *string `json:"category"`
+	Period       string  `json:"period"`
 }
 
 type SuggestedLiveView struct {

@@ -28,6 +28,7 @@ import (
 	"zudomart/modules/ads/src/generated/ent/adcreatormonetisationhold"
 	"zudomart/modules/ads/src/generated/ent/adcustomaudience"
 	"zudomart/modules/ads/src/generated/ent/adexperiment"
+	"zudomart/modules/ads/src/generated/ent/adfreeboostgrant"
 	"zudomart/modules/ads/src/generated/ent/adfrequencypolicy"
 	"zudomart/modules/ads/src/generated/ent/adfundstransaction"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
@@ -88,6 +89,8 @@ type Client struct {
 	AdCustomAudience *AdCustomAudienceClient
 	// AdExperiment is the client for interacting with the AdExperiment builders.
 	AdExperiment *AdExperimentClient
+	// AdFreeBoostGrant is the client for interacting with the AdFreeBoostGrant builders.
+	AdFreeBoostGrant *AdFreeBoostGrantClient
 	// AdFrequencyPolicy is the client for interacting with the AdFrequencyPolicy builders.
 	AdFrequencyPolicy *AdFrequencyPolicyClient
 	// AdFundsTransaction is the client for interacting with the AdFundsTransaction builders.
@@ -140,6 +143,7 @@ func (c *Client) init() {
 	c.AdCreatorMonetisationHold = NewAdCreatorMonetisationHoldClient(c.config)
 	c.AdCustomAudience = NewAdCustomAudienceClient(c.config)
 	c.AdExperiment = NewAdExperimentClient(c.config)
+	c.AdFreeBoostGrant = NewAdFreeBoostGrantClient(c.config)
 	c.AdFrequencyPolicy = NewAdFrequencyPolicyClient(c.config)
 	c.AdFundsTransaction = NewAdFundsTransactionClient(c.config)
 	c.AdGroup = NewAdGroupClient(c.config)
@@ -261,6 +265,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AdCreatorMonetisationHold: NewAdCreatorMonetisationHoldClient(cfg),
 		AdCustomAudience:          NewAdCustomAudienceClient(cfg),
 		AdExperiment:              NewAdExperimentClient(cfg),
+		AdFreeBoostGrant:          NewAdFreeBoostGrantClient(cfg),
 		AdFrequencyPolicy:         NewAdFrequencyPolicyClient(cfg),
 		AdFundsTransaction:        NewAdFundsTransactionClient(cfg),
 		AdGroup:                   NewAdGroupClient(cfg),
@@ -309,6 +314,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AdCreatorMonetisationHold: NewAdCreatorMonetisationHoldClient(cfg),
 		AdCustomAudience:          NewAdCustomAudienceClient(cfg),
 		AdExperiment:              NewAdExperimentClient(cfg),
+		AdFreeBoostGrant:          NewAdFreeBoostGrantClient(cfg),
 		AdFrequencyPolicy:         NewAdFrequencyPolicyClient(cfg),
 		AdFundsTransaction:        NewAdFundsTransactionClient(cfg),
 		AdGroup:                   NewAdGroupClient(cfg),
@@ -354,8 +360,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.AdAudienceMember, c.AdAutomatedRule, c.AdBoost, c.AdCampaign,
 		c.AdCardStatsDaily, c.AdContentSignal, c.AdConversion, c.AdConversionEvent,
 		c.AdCreatorEarning, c.AdCreatorMonetisationHold, c.AdCustomAudience,
-		c.AdExperiment, c.AdFrequencyPolicy, c.AdFundsTransaction, c.AdGroup,
-		c.AdImpression, c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily,
+		c.AdExperiment, c.AdFreeBoostGrant, c.AdFrequencyPolicy, c.AdFundsTransaction,
+		c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily,
 		c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily, c.AdTopUp, c.OutboxEvent,
 	} {
 		n.Use(hooks...)
@@ -370,8 +376,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.AdAudienceMember, c.AdAutomatedRule, c.AdBoost, c.AdCampaign,
 		c.AdCardStatsDaily, c.AdContentSignal, c.AdConversion, c.AdConversionEvent,
 		c.AdCreatorEarning, c.AdCreatorMonetisationHold, c.AdCustomAudience,
-		c.AdExperiment, c.AdFrequencyPolicy, c.AdFundsTransaction, c.AdGroup,
-		c.AdImpression, c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily,
+		c.AdExperiment, c.AdFreeBoostGrant, c.AdFrequencyPolicy, c.AdFundsTransaction,
+		c.AdGroup, c.AdImpression, c.AdMedia, c.AdPolicyCategory, c.AdPoolDaily,
 		c.AdScheduledReport, c.AdSpendBatch, c.AdStatsDaily, c.AdTopUp, c.OutboxEvent,
 	} {
 		n.Intercept(interceptors...)
@@ -415,6 +421,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AdCustomAudience.mutate(ctx, m)
 	case *AdExperimentMutation:
 		return c.AdExperiment.mutate(ctx, m)
+	case *AdFreeBoostGrantMutation:
+		return c.AdFreeBoostGrant.mutate(ctx, m)
 	case *AdFrequencyPolicyMutation:
 		return c.AdFrequencyPolicy.mutate(ctx, m)
 	case *AdFundsTransactionMutation:
@@ -2705,6 +2713,139 @@ func (c *AdExperimentClient) mutate(ctx context.Context, m *AdExperimentMutation
 	}
 }
 
+// AdFreeBoostGrantClient is a client for the AdFreeBoostGrant schema.
+type AdFreeBoostGrantClient struct {
+	config
+}
+
+// NewAdFreeBoostGrantClient returns a client for the AdFreeBoostGrant from the given config.
+func NewAdFreeBoostGrantClient(c config) *AdFreeBoostGrantClient {
+	return &AdFreeBoostGrantClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `adfreeboostgrant.Hooks(f(g(h())))`.
+func (c *AdFreeBoostGrantClient) Use(hooks ...Hook) {
+	c.hooks.AdFreeBoostGrant = append(c.hooks.AdFreeBoostGrant, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `adfreeboostgrant.Intercept(f(g(h())))`.
+func (c *AdFreeBoostGrantClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AdFreeBoostGrant = append(c.inters.AdFreeBoostGrant, interceptors...)
+}
+
+// Create returns a builder for creating a AdFreeBoostGrant entity.
+func (c *AdFreeBoostGrantClient) Create() *AdFreeBoostGrantCreate {
+	mutation := newAdFreeBoostGrantMutation(c.config, OpCreate)
+	return &AdFreeBoostGrantCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AdFreeBoostGrant entities.
+func (c *AdFreeBoostGrantClient) CreateBulk(builders ...*AdFreeBoostGrantCreate) *AdFreeBoostGrantCreateBulk {
+	return &AdFreeBoostGrantCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AdFreeBoostGrantClient) MapCreateBulk(slice any, setFunc func(*AdFreeBoostGrantCreate, int)) *AdFreeBoostGrantCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AdFreeBoostGrantCreateBulk{err: fmt.Errorf("calling to AdFreeBoostGrantClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AdFreeBoostGrantCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AdFreeBoostGrantCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AdFreeBoostGrant.
+func (c *AdFreeBoostGrantClient) Update() *AdFreeBoostGrantUpdate {
+	mutation := newAdFreeBoostGrantMutation(c.config, OpUpdate)
+	return &AdFreeBoostGrantUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdFreeBoostGrantClient) UpdateOne(_m *AdFreeBoostGrant) *AdFreeBoostGrantUpdateOne {
+	mutation := newAdFreeBoostGrantMutation(c.config, OpUpdateOne, withAdFreeBoostGrant(_m))
+	return &AdFreeBoostGrantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdFreeBoostGrantClient) UpdateOneID(id uuid.UUID) *AdFreeBoostGrantUpdateOne {
+	mutation := newAdFreeBoostGrantMutation(c.config, OpUpdateOne, withAdFreeBoostGrantID(id))
+	return &AdFreeBoostGrantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AdFreeBoostGrant.
+func (c *AdFreeBoostGrantClient) Delete() *AdFreeBoostGrantDelete {
+	mutation := newAdFreeBoostGrantMutation(c.config, OpDelete)
+	return &AdFreeBoostGrantDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AdFreeBoostGrantClient) DeleteOne(_m *AdFreeBoostGrant) *AdFreeBoostGrantDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AdFreeBoostGrantClient) DeleteOneID(id uuid.UUID) *AdFreeBoostGrantDeleteOne {
+	builder := c.Delete().Where(adfreeboostgrant.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdFreeBoostGrantDeleteOne{builder}
+}
+
+// Query returns a query builder for AdFreeBoostGrant.
+func (c *AdFreeBoostGrantClient) Query() *AdFreeBoostGrantQuery {
+	return &AdFreeBoostGrantQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAdFreeBoostGrant},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AdFreeBoostGrant entity by its id.
+func (c *AdFreeBoostGrantClient) Get(ctx context.Context, id uuid.UUID) (*AdFreeBoostGrant, error) {
+	return c.Query().Where(adfreeboostgrant.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdFreeBoostGrantClient) GetX(ctx context.Context, id uuid.UUID) *AdFreeBoostGrant {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AdFreeBoostGrantClient) Hooks() []Hook {
+	return c.hooks.AdFreeBoostGrant
+}
+
+// Interceptors returns the client interceptors.
+func (c *AdFreeBoostGrantClient) Interceptors() []Interceptor {
+	return c.inters.AdFreeBoostGrant
+}
+
+func (c *AdFreeBoostGrantClient) mutate(ctx context.Context, m *AdFreeBoostGrantMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AdFreeBoostGrantCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AdFreeBoostGrantUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AdFreeBoostGrantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AdFreeBoostGrantDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AdFreeBoostGrant mutation op: %q", m.Op())
+	}
+}
+
 // AdFrequencyPolicyClient is a client for the AdFrequencyPolicy schema.
 type AdFrequencyPolicyClient struct {
 	config
@@ -4307,19 +4448,19 @@ type (
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
 		AdAudienceMember, AdAutomatedRule, AdBoost, AdCampaign, AdCardStatsDaily,
 		AdContentSignal, AdConversion, AdConversionEvent, AdCreatorEarning,
-		AdCreatorMonetisationHold, AdCustomAudience, AdExperiment, AdFrequencyPolicy,
-		AdFundsTransaction, AdGroup, AdImpression, AdMedia, AdPolicyCategory,
-		AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily, AdTopUp,
-		OutboxEvent []ent.Hook
+		AdCreatorMonetisationHold, AdCustomAudience, AdExperiment, AdFreeBoostGrant,
+		AdFrequencyPolicy, AdFundsTransaction, AdGroup, AdImpression, AdMedia,
+		AdPolicyCategory, AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
+		AdTopUp, OutboxEvent []ent.Hook
 	}
 	inters struct {
 		Ad, AdAccount, AdAccountInvite, AdAccountMember, AdActivityEntry,
 		AdAudienceMember, AdAutomatedRule, AdBoost, AdCampaign, AdCardStatsDaily,
 		AdContentSignal, AdConversion, AdConversionEvent, AdCreatorEarning,
-		AdCreatorMonetisationHold, AdCustomAudience, AdExperiment, AdFrequencyPolicy,
-		AdFundsTransaction, AdGroup, AdImpression, AdMedia, AdPolicyCategory,
-		AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily, AdTopUp,
-		OutboxEvent []ent.Interceptor
+		AdCreatorMonetisationHold, AdCustomAudience, AdExperiment, AdFreeBoostGrant,
+		AdFrequencyPolicy, AdFundsTransaction, AdGroup, AdImpression, AdMedia,
+		AdPolicyCategory, AdPoolDaily, AdScheduledReport, AdSpendBatch, AdStatsDaily,
+		AdTopUp, OutboxEvent []ent.Interceptor
 	}
 )
 

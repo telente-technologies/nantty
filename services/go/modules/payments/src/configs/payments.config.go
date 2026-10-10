@@ -28,6 +28,7 @@ type PaymentsSettings struct {
 	OrderStatusSchema           string
 	UsersSchema                 string
 	UnverifiedSellerSalesCaps   map[string]int64
+	CustomerValidationMode      string
 	WebSubscriptionPlanProducts map[string]string
 	AppleInAppPurchaseFeeBps    int64
 	GooglePlayBillingFeeBps     int64
@@ -110,6 +111,7 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 		OrderStatusSchema:           reader.ReadStringOrDefault("PAYMENTS_ORDER_STATUS_SCHEMA", "orders"),
 		UsersSchema:                 reader.ReadStringOrDefault("PAYMENTS_USERS_SCHEMA", "users"),
 		UnverifiedSellerSalesCaps:   loaders.ParseCurrencyAmountMap(reader.ReadStringOrDefault("UNVERIFIED_SELLER_SALES_CAPS", "NGN:20000000")),
+		CustomerValidationMode:      reader.ReadStringOrDefault("PAYOUT_BANK_VALIDATION", "required"),
 		WebSubscriptionPlanProducts: parsePlanProducts(reader.ReadStringOrDefault("PAYSTACK_PLAN_CODES", "")),
 		AppleInAppPurchaseFeeBps:    int64(reader.ReadIntegerOrDefault("APPLE_IAP_STORE_FEE_BPS", 3000)),
 		GooglePlayBillingFeeBps:     int64(reader.ReadIntegerOrDefault("GOOGLE_PLAY_STORE_FEE_BPS", 1500)),

@@ -66,6 +66,17 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		}
 		return gateway.RevokeSellerVerification(ctx, data.AccountId, envelope.Id, envelope.OccurredAt)
 	})
+	for _, eventType := range []string{"verificationCase.decided", "checkmark.revoked"} {
+		loaders.RegisterMoneyDomainEventHandler(eventType, func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+			var data struct {
+				AccountId string `json:"accountId"`
+			}
+			if err := loaders.DecodeEventData(envelope, &data); err != nil || data.AccountId == "" {
+				return err
+			}
+			return gateway.RefreshVerificationLevel(ctx, data.AccountId)
+		})
+	}
 	ledgerjobs.RegisterProviderMirrorReconciler(module.Application.Gateway)
 	return module, nil
 }

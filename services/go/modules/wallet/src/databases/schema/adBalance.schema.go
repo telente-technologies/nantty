@@ -90,3 +90,34 @@ func (SellerReserveFlag) Fields() []ent.Field {
 func (SellerReserveFlag) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("seller_user_id").Unique().Annotations(entsql.IndexWhere("released_at IS NULL")).StorageKey("seller_reserve_flags_active")}
 }
+
+type AdBalanceEarningsTransfer struct {
+	ent.Schema
+}
+
+func (AdBalanceEarningsTransfer) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Checks(map[string]string{
+		"ad_balance_earnings_transfers_amount_positive":      "amount_minor > 0",
+		"ad_balance_earnings_transfers_refund_within_amount": "refunded_minor >= 0 AND refunded_minor <= amount_minor",
+	})}
+}
+
+func (AdBalanceEarningsTransfer) Mixin() []ent.Mixin {
+	return []ent.Mixin{TimeOrderedIdentifierMixin{}}
+}
+
+func (AdBalanceEarningsTransfer) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("ad_account_id").NotEmpty().MaxLen(80).Immutable(),
+		field.String("user_id").NotEmpty().MaxLen(80).Immutable(),
+		field.String("idempotency_key").NotEmpty().MaxLen(160).Immutable(),
+		field.Int64("amount_minor").Immutable(),
+		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
+		field.Int64("refunded_minor").Default(0),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+	}
+}
+
+func (AdBalanceEarningsTransfer) Indexes() []ent.Index {
+	return []ent.Index{index.Fields("user_id", "idempotency_key").Unique(), index.Fields("ad_account_id", "user_id", "created_at")}
+}

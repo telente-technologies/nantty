@@ -38,6 +38,13 @@ type PayoutOnboardingState struct {
 	VerifiedVia             *string                `json:"verifiedVia"`
 	WithdrawalsEnabled      bool                   `json:"withdrawalsEnabled"`
 	FirstEarningsUnlockAt   *string                `json:"firstEarningsUnlockAt"`
+	BankValidation          *BankValidationView    `json:"bankValidation"`
+	VerificationLevel       int                    `json:"verificationLevel"`
+}
+
+type BankValidationView struct {
+	Status        string `json:"status"`
+	FailureReason string `json:"failureReason,omitempty"`
 }
 
 type OnboardingJobSnapshot struct {

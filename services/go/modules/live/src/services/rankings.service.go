@@ -38,17 +38,27 @@ func rankingPredicates(query types.RankingQuery, now time.Time) []predicate.Poin
 	return conditions
 }
 
-func (service *LiveService) GetRankings(ctx context.Context, query types.RankingQuery) (types.RankingsView, error) {
-	var totals []struct {
-		UserID uuid.UUID `json:"user_id"`
-		Total  int64     `json:"total"`
-	}
+type rankedTotal = struct {
+	UserID uuid.UUID `json:"user_id"`
+	Total  int64     `json:"total"`
+}
+
+func (service *LiveService) rankedTotals(ctx context.Context, query types.RankingQuery) ([]rankedTotal, error) {
+	var totals []rankedTotal
 	err := service.Client.PointsEntry.Query().Where(rankingPredicates(query, service.Now())...).GroupBy(pointsentry.FieldUserID).
 		Aggregate(ent.As(ent.Sum(pointsentry.FieldAmount), "total")).Scan(ctx, &totals)
 	if err != nil {
-		return types.RankingsView{}, err
+		return nil, err
 	}
 	sortTotalsDescending(totals)
+	return totals, nil
+}
+
+func (service *LiveService) GetRankings(ctx context.Context, query types.RankingQuery) (types.RankingsView, error) {
+	totals, err := service.rankedTotals(ctx, query)
+	if err != nil {
+		return types.RankingsView{}, err
+	}
 	view := types.RankingsView{Data: []types.RankingEntryView{}}
 	if query.Cursor >= len(totals) {
 		return view, nil

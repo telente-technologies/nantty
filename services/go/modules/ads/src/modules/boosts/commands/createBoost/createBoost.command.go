@@ -10,5 +10,6 @@ type Command struct {
 	UserId         uuid.UUID
 	IdempotencyKey string
 	Country        string
+	Platform       string
 	Request        dtos.CreateBoostRequest
 }

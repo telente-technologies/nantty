@@ -164,7 +164,7 @@ func buildCandidate(row *ent.Ad, group *ent.AdGroup, campaign *ent.AdCampaign, a
 		creditMinor = 0
 	}
 	candidate := types.CandidateAd{
-		AdId: row.ID.String(), AdGroupId: group.ID.String(), CampaignId: campaign.ID.String(), AccountId: account.ID.String(),
+		AdId: row.ID.String(), AdGroupId: group.ID.String(), CampaignId: campaign.ID.String(), CampaignKind: string(campaign.Kind), AccountId: account.ID.String(),
 		Format: row.Format, Creative: row.Creative.Resolved, Audience: group.Audience, Placements: resolvePlacements(group),
 		BidType: string(group.BidType), StartAt: group.StartAt, EndAt: group.EndAt, Currency: account.Currency, Timezone: account.Timezone,
 		AvailableFundsMicros: (account.BalanceMinor + creditMinor) * types.MicrosPerMinorUnit,

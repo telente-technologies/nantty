@@ -29,19 +29,19 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 	creator := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(creator)
 	harness.creditEarnedCoins(creator, 180)
+	if refused := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-key-0", map[string]any{"coins": 180, "currency": "NGN"}); refused.Status != http.StatusForbidden || refused.Body["code"] != "VERIFICATION_REQUIRED" {
+		t.Fatalf("an unverified creator converted coins to cash: %d %s", refused.Status, refused.Raw)
+	}
+	if harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator)) != 180 {
+		t.Fatal("an unverified creator's earned coins must stay as coins")
+	}
+	harness.OnboardConnectedAccount(creator, false)
 	converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-key-1", map[string]any{"coins": 180, "currency": "NGN"})
 	if converted.Status != http.StatusCreated || converted.Body["cash"].(map[string]any)["amountMinor"].(float64) != 180_000 {
 		t.Fatalf("convert: %d %s", converted.Status, converted.Raw)
 	}
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process")
 	stepUp := http.Header{"X-Step-Up-Token": {staff.StepUpToken}}
-	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["creatorTransfers"].(float64) != 0 {
-		t.Fatalf("earnings moved for a creator without a verified payout account: %v", report.Body)
-	}
-	if harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")) != 180_000 {
-		t.Fatal("gap earnings must stay recorded as payable")
-	}
-	harness.OnboardConnectedAccount(creator, false)
 	harness.Paystack.FundPlatformBalance("NGN", 175_000)
 	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp); report.Body["creatorTransfers"].(float64) != 1 {
 		t.Fatalf("creator earnings: %v", report.Body)

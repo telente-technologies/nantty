@@ -57,6 +57,9 @@ type AdCustomAudience func(*sql.Selector)
 // AdExperiment is the predicate function for adexperiment builders.
 type AdExperiment func(*sql.Selector)
 
+// AdFreeBoostGrant is the predicate function for adfreeboostgrant builders.
+type AdFreeBoostGrant func(*sql.Selector)
+
 // AdFrequencyPolicy is the predicate function for adfrequencypolicy builders.
 type AdFrequencyPolicy func(*sql.Selector)
 

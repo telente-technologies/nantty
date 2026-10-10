@@ -20,6 +20,9 @@ type Handler struct{ Container *container.Container }
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.AdAccount, error) {
 	deployed := handler.Container
 	request := command.Request
+	if err := services.RequirePayoutVerified(ctx, deployed.Verification, command.UserId.String()); err != nil {
+		return dtos.AdAccount{}, err
+	}
 	linked, err := handler.resolveLinkedStore(ctx, command)
 	if err != nil {
 		return dtos.AdAccount{}, err

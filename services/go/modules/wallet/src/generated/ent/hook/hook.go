@@ -8,6 +8,18 @@ import (
 	"zudomart/modules/wallet/src/generated/ent"
 )
 
+// The AdBalanceEarningsTransferFunc type is an adapter to allow the use of ordinary
+// function as AdBalanceEarningsTransfer mutator.
+type AdBalanceEarningsTransferFunc func(context.Context, *ent.AdBalanceEarningsTransferMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdBalanceEarningsTransferFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AdBalanceEarningsTransferMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdBalanceEarningsTransferMutation", m)
+}
+
 // The AdBalanceTopUpFunc type is an adapter to allow the use of ordinary
 // function as AdBalanceTopUp mutator.
 type AdBalanceTopUpFunc func(context.Context, *ent.AdBalanceTopUpMutation) (ent.Value, error)
