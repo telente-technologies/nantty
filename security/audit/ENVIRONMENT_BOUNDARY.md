@@ -44,7 +44,7 @@ Every compose port binds to `127.0.0.1` only.
 | Credential | Where | Value class | Risk |
 |---|---|---|---|
 | Paystack secret/public/previous | `services/go/.env.example:88-90` | empty | none in repo |
-| Paystack test keys in tests | `paystackWebhooks.integration_test.go:16`, `apps/api/tests/fixtures/testApplication.fixture.ts:72` | `sk_test_****` fakes | none |
+| Paystack test keys in tests | `paystackWebhooks.integration_test.go:16` | `sk_test_****` fakes | none |
 | Fake Paystack key | `paymentsTesting/fakePaystack.util.go:16` | `sk_test_fake…` | none |
 | Internal service tokens | `*.env.example` (`*_INTERNAL_*TOKEN`) | `local-only-…` | local only; must be rotated per env |
 | Encryption keys / peppers | `services/go/.env.example:8,9,13,22,124` | base64 of `local…` | local only |
