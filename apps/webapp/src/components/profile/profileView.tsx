@@ -3,7 +3,7 @@
 import { MentionText } from "@/components/mentions/mentionText";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ProfileCelebration } from "@/components/celebrations/profileCelebration";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
@@ -43,6 +43,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isFollowing, setIsFollowing] = useState(user.isFollowing ?? false);
+  useEffect(() => setIsFollowing(user.isFollowing ?? false), [user.isFollowing]);
 
   const followMutation = useMutation({
     mutationFn: (followNow: boolean) => (followNow ? followsService.followUser(user.id) : followsService.unfollowUser(user.id)),
@@ -51,6 +52,7 @@ export function ProfileView({ user, isSelf }: ProfileViewProps) {
       await queryClient.cancelQueries({ queryKey: ["profile", user.id] });
     },
     onError: (_error, followNow) => setIsFollowing(!followNow),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["profile", user.id] }),
   });
 
   const startChat = useMutation({
