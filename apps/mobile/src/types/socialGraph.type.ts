@@ -64,20 +64,3 @@ export interface LiveViewerPoints {
   readonly totalPoints: number;
   readonly likePointsThisMinute: number;
 }
-
-export type RankingBoard = "streamer" | "supporter" | "creator";
-export type RankingScope = "global" | "country" | "category";
-
-export interface RankingEntry {
-  readonly rank: number;
-  readonly user: UserSummary;
-  readonly points: number;
-}
-
-export interface RankingQuery {
-  readonly board: RankingBoard;
-  readonly scope: RankingScope;
-  readonly countryCode?: string;
-  readonly categoryId?: string;
-  readonly period?: "day" | "week" | "month" | "all";
-}

@@ -4,6 +4,8 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Comment } from "@/types";
 
+import { countRepliesHiddenFromChain } from "@/utils/commentChain.util";
+
 import { CommentRow } from "./commentRow";
 import { isPendingComment, mergeServerAndLocalComments, useCommentThreadContext } from "./commentThreadController.hook";
 import { useRepliesForComment } from "./postComments.hook";
@@ -32,6 +34,9 @@ export function CommentThread({ comment, nestingDepth, previewReplies = [] }: Co
   const { query: repliesQuery, loadedReplies } = useRepliesForComment(comment.id, isExpanded);
 
   if (thread.isCommentDeleted(comment.id)) return null;
+  if (nestingDepth === 0 && !isExpanded && !isCollapsed && previewReplies.length > 0) {
+    return <CommentChain comment={comment} previewReplies={previewReplies} onShowMore={() => thread.setReplyThreadVisibility(comment.id, "expanded")} />;
+  }
 
   const commentWithLocalChanges = thread.applyLocalOverridesToComment(comment);
   const visualIndentLevel = Math.min(nestingDepth, MAXIMUM_VISUAL_INDENT_LEVEL);
@@ -90,6 +95,46 @@ export function CommentThread({ comment, nestingDepth, previewReplies = [] }: Co
             />
           ) : null}
           {showHideLink ? <ThreadLink label="Hide replies" onPress={() => thread.setReplyThreadVisibility(comment.id, "collapsed")} /> : null}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function CommentChain({ comment, previewReplies, onShowMore }: { readonly comment: Comment; readonly previewReplies: readonly Comment[]; readonly onShowMore: () => void }) {
+  const styles = useStyles();
+  const thread = useCommentThreadContext();
+  const serverChain = previewReplies.filter((reply) => !thread.isCommentDeleted(reply.id));
+  const localReplies = [comment, ...serverChain].flatMap((node) => thread.locallyPostedCommentsFor(node.id));
+  const chain = mergeServerAndLocalComments(serverChain, localReplies, false).filter((reply) => !thread.isCommentDeleted(reply.id));
+  const hiddenCount = countRepliesHiddenFromChain(comment, serverChain);
+  const rowFor = (node: Comment, connectBelow: boolean) => {
+    const withLocalChanges = thread.applyLocalOverridesToComment(node);
+    return (
+      <CommentRow
+        key={node.id}
+        comment={withLocalChanges}
+        connectBelow={connectBelow}
+        isPending={isPendingComment(node)}
+        canDelete={thread.canDeleteComment(node)}
+        canPin={thread.canPinComment(withLocalChanges)}
+        onToggleLike={() => thread.toggleLikeOnComment(node)}
+        onReply={() => thread.startReplyingToComment(node)}
+        onDelete={() => thread.deleteOwnComment(node)}
+        onTogglePin={() => thread.togglePinOnComment(withLocalChanges)}
+        onReplyWithVideo={thread.canReplyWithVideoTo(node) ? () => thread.startVideoReplyTo(node) : undefined}
+        isPickingForVideoReply={thread.isPickingVideoReplyComment}
+        isHighlighted={thread.highlightedCommentId === node.id}
+      />
+    );
+  };
+  return (
+    <View style={styles.thread}>
+      {rowFor(comment, chain.length > 0)}
+      {chain.map((reply, index) => rowFor(reply, index < chain.length - 1))}
+      {hiddenCount > 0 ? (
+        <View style={[styles.links, { paddingLeft: INDENT_WIDTH_PER_LEVEL }]}>
+          <ThreadLink label={`Show ${hiddenCount} more ${hiddenCount === 1 ? "reply" : "replies"}`} onPress={onShowMore} />
         </View>
       ) : null}
     </View>

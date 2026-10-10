@@ -10,7 +10,6 @@ import {
   GearSix24Icon,
   Package24Icon,
   SealCheck20Icon,
-  Trophy24Icon,
   UserPlus24Icon,
   VideoCamera24Icon,
   Wallet24Icon,
@@ -41,7 +40,6 @@ function MenuIcon({ name, color }: { name: OwnProfileMenuIcon; color: string }):
     case "seller": return <BuildingStore20Icon size={20} color={color} />;
     case "creator": return <VideoCamera24Icon size={20} color={color} />;
     case "followRequests": return <UserPlus24Icon size={20} color={color} />;
-    case "rankings": return <Trophy24Icon size={20} color={color} />;
     case "saved": return <BookmarkSimple24Icon size={20} color={color} />;
     case "orders": return <Package24Icon size={20} color={color} />;
     case "wallet": return <Wallet24Icon size={20} color={color} />;

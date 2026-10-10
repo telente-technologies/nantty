@@ -1,14 +1,17 @@
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, type AccessibilityActionEvent, type AccessibilityActionInfo } from "react-native";
 
 import { ExpandableText } from "@/components/ui/expandableText";
-import { BoxArrowDown24Icon, DotsThreeVertical24Icon, Group1256Icon, PushPin24Icon, ReplyActionIcon } from "@/components/icons";
+import { Bell24Icon, BellSlash24Icon, BoxArrowDown24Icon, DotsThreeVertical24Icon, Group1256Icon, PushPin24Icon, ReplyActionIcon } from "@/components/icons";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { FriendsLikedAvatarStack } from "@/components/feed/friendsLikedAvatarStack";
 import { Avatar } from "@/components/ui/avatar";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
+import { usePostInteractions } from "@/hooks/usePostInteractions.hook";
+import type { MainStackParamList } from "@/navigation/navigation.types";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useAuthStore } from "@/store/auth.store";
@@ -19,10 +22,14 @@ import { useIsFeedItemVisibleForAutoplay } from "./feedVisibility.hook";
 import { CommentStickerOverlay } from "@/components/clips/videoReply/commentStickerOverlay";
 import { MediaPager } from "./mediaPager";
 import { PostActionRow } from "./postActionRow";
+import { PostCardFallbackActions, type PostCardFallbackRequest } from "./postCardFallbackActions";
 import { usePinPostMutation } from "./usePinPost.hook";
+import { postNotificationMuteLabel, usePostNotificationMute } from "./postNotificationMute.hook";
+import { canOfferPostNotificationMute } from "@/utils/postNotificationMute.util";
 import { ReplySettingsSheet } from "./replySettingsSheet";
 import { SensitiveContentGate } from "./sensitiveContentGate";
-import { ResharedPostBlock } from "./resharedPostBlock";
+import { QuotedPostCard } from "./quotedPostCard";
+import { quotedSummaryFromPost } from "@/utils/postLinks.util";
 import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
 import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
 import { SponsoredMedia } from "./sponsoredMedia";
@@ -85,6 +92,20 @@ export function PostCard(props: PostCardProps) {
     if (isDownloadableMedia(media)) requireAuthThen(() => startBrandedDownload(post.id, media), null, "download");
   };
   const pinMutation = usePinPostMutation();
+  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+  const { togglePostLike } = usePostInteractions();
+  const [fallbackRequest, setFallbackRequest] = useState<PostCardFallbackRequest | null>(null);
+  const requestFallback = (kind: PostCardFallbackRequest["kind"]) => setFallbackRequest((current) => ({ kind, nonce: (current?.nonce ?? 0) + 1 }));
+  const onToggleLike = props.onToggleLike ?? (() => togglePostLike(post));
+  const onPressComments = props.onPressComments ?? (() => navigation.navigate("PostDetail", { postId: post.id }));
+  const onRepost = props.onRepost ?? (() => requestFallback("repost"));
+  const onShare = props.onShare ?? (() => requestFallback("share"));
+  const onPressViewProducts = props.onPressViewProducts ?? (() => requestFallback("products"));
+  const onPressAnalytics = props.onPressAnalytics ?? (() => navigation.navigate("PostAnalytics", { postId: post.id }));
+  const resharedFromId = post.resharedFrom?.id;
+  const onPressOriginalPost = props.onPressOriginalPost ?? (resharedFromId ? () => navigation.navigate("PostDetail", { postId: resharedFromId }) : undefined);
+  const isSignedIn = useAuthStore((state) => state.status === "signedIn");
+  const { togglePostNotifications } = usePostNotificationMute();
   const optionActions = [
     ...(canDownload ? [{ label: "Download", icon: <BoxArrowDown24Icon size={20} />, onPress: () => downloadMedia(findFirstDownloadableMedia(post)) }] : []),
     ...(isOwnPost ? [{ label: "Edit reply settings", icon: <ReplyActionIcon size={20} />, onPress: () => setReplySettingsPost(post) }] : []),
@@ -93,6 +114,13 @@ export function PostCard(props: PostCardProps) {
         label: post.isPinned === true ? "Unpin from profile" : "Pin to profile",
         icon: <PushPin24Icon size={20} color={colors.text} />,
         onPress: () => pinMutation.mutate(post),
+      }]
+      : []),
+    ...(canOfferPostNotificationMute(isSignedIn, post)
+      ? [{
+        label: postNotificationMuteLabel(post.viewerNotificationsMuted === true),
+        icon: post.viewerNotificationsMuted === true ? <Bell24Icon size={20} color={colors.text} /> : <BellSlash24Icon size={20} color={colors.text} />,
+        onPress: () => togglePostNotifications(post),
       }]
       : []),
   ];
@@ -107,7 +135,7 @@ export function PostCard(props: PostCardProps) {
   );
   const likeFromDoubleTap = () => {
     setLikeBurstKey((key) => key + 1);
-    if (!post.liked) props.onToggleLike?.();
+    if (!post.liked) onToggleLike();
   };
   const handleBodyPress = () => {
     const now = Date.now();
@@ -185,7 +213,6 @@ export function PostCard(props: PostCardProps) {
       <SensitiveContentGate postId={post.id} sensitive={post.sensitive} blurredPreviewUrl={post.media[0]?.posterUrl ?? post.media[0]?.url ?? null}>
       <Pressable
         onPress={handleBodyPress}
-        disabled={!props.onPress && !props.onToggleLike}
         accessibilityRole="button"
         accessibilityLabel={props.onPress ? "Open post" : "Like post by double tap"}
         accessibilityHint="Double tap to like"
@@ -202,13 +229,6 @@ export function PostCard(props: PostCardProps) {
             <ExpandableText text={post.text} mentions={post.mentions} size={14} lineHeight={16.8} />
           </View>
         ) : null}
-        {post.resharedFrom ? (
-          <ResharedPostBlock
-            original={post.resharedFrom}
-            onPressAuthor={() => openUserProfile(post.resharedFrom!.author.id)}
-            onPress={props.onPressOriginalPost}
-          />
-        ) : null}
         {isMediaLockedForViewer ? (
           <View style={styles.lockedMedia}>
             <SubscriberOnlyLock
@@ -224,7 +244,7 @@ export function PostCard(props: PostCardProps) {
                 media={post.media}
                 overlay={post.replyToComment ? <CommentStickerOverlay clip={post} /> : undefined}
                 isVisibleOnScreen={isVisibleForAutoplay}
-                onPressViewProducts={post.products.length > 0 ? props.onPressViewProducts : undefined}
+                onPressViewProducts={post.products.length > 0 ? onPressViewProducts : undefined}
                 saveTarget={saveTargetForPost(post)}
                 savedAccordingToServer={post.bookmarked}
                 onDownloadMedia={canDownload ? downloadMedia : undefined}
@@ -240,9 +260,9 @@ export function PostCard(props: PostCardProps) {
             <SponsoredCallToAction sponsored={post.sponsored} placement={props.adPlacement ?? "feed"} itemId={post.id} />
           </View>
         ) : null}
-        {post.resharedFromUnavailable ? (
-          <View style={[styles.body, styles.unavailableQuote]}>
-            <Text size={13} lineHeight={18} color={colors.textMuted}>This post isn't available.</Text>
+        {post.resharedFrom || post.resharedFromUnavailable ? (
+          <View style={styles.quote}>
+            <QuotedPostCard quoted={post.resharedFrom ? quotedSummaryFromPost(post.resharedFrom) : null} unavailable={!post.resharedFrom} onPress={onPressOriginalPost} />
           </View>
         ) : null}
       </Pressable>
@@ -252,11 +272,11 @@ export function PostCard(props: PostCardProps) {
       <PostActionRow
         post={post}
         isOwnPost={isOwnPost}
-        onToggleLike={props.onToggleLike}
-        onPressComments={props.onPressComments}
-        onRepost={props.onRepost}
-        onShare={props.onShare}
-        onPressAnalytics={props.onPressAnalytics}
+        onToggleLike={onToggleLike}
+        onPressComments={onPressComments}
+        onRepost={onRepost}
+        onShare={onShare}
+        onPressAnalytics={onPressAnalytics}
         likePopKey={props.likePopKey}
       />
       <LikeBurst burstKey={likeBurstKey} />
@@ -271,6 +291,7 @@ export function PostCard(props: PostCardProps) {
           additionalActions={optionActions.length > 0 ? optionActions : undefined}
         />
       ) : null}
+      {fallbackRequest ? <PostCardFallbackActions post={post} request={fallbackRequest} /> : null}
       {isOwnPost ? <ReplySettingsSheet post={replySettingsPost} onClose={() => setReplySettingsPost(null)} /> : null}
     </View>
   );
@@ -297,5 +318,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingVertical: 8 },
   sponsoredCallToAction: { paddingHorizontal: 16, paddingTop: 8 },
   lockedMedia: { height: 335, overflow: "hidden" },
-  unavailableQuote: { marginHorizontal: 16, borderWidth: 1, borderColor: colors.divider, borderRadius: 12 },
+  quote: { paddingTop: 8 },
 }));

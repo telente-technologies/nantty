@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { setFollowingAuthorEverywhere } from "@/cache/postEngagementCache.util";
 import { followsService } from "@/services/social/follows.service";
 import { usersService, type ProfileDetailsUpdate } from "@/services/account/users.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -54,8 +55,12 @@ export function useToggleFollowMutation(userId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (currentlyFollowing: boolean) => {
-      await (currentlyFollowing ? followsService.unfollowUser(userId) : followsService.followUser(userId));
+      if (currentlyFollowing) await followsService.unfollowUser(userId);
+      else return followsService.followUser(userId);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+    onSuccess: (result) => {
+      setFollowingAuthorEverywhere(queryClient, userId, result?.state === "accepted");
+      return queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
   });
 }

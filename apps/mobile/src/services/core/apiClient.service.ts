@@ -7,7 +7,7 @@ import { usePendingAuthIntentStore } from "@/store/pendingAuthIntent.store";
 import { ApiError } from "@/errors/api.error";
 import type { Page } from "@/types";
 import { isBackgroundCallSkippedForGuests } from "@/config/guestAccess.config";
-import { readStoreBillingRequestHeaders } from "../money/storeBilling.service";
+import { readStoreBillingRequestHeaders, readStorePlatformName } from "../money/storeBilling.service";
 import { runHumanVerificationInAppBrowser } from "../auth/humanVerification.service";
 
 export { ApiError };
@@ -84,6 +84,8 @@ export function getAuthorizedRequestHeaders(includeAuthorization = true): Record
   const headers: Record<string, string> = {};
   const deviceRegionCode = useLocaleStore.getState().deviceRegionCode;
   if (deviceRegionCode) headers["X-Client-Region"] = deviceRegionCode;
+  const platform = readStorePlatformName();
+  if (platform) headers["X-Client-Platform"] = platform;
   Object.assign(headers, readStoreBillingRequestHeaders());
   const token = useAuthStore.getState().accessToken;
   if (includeAuthorization && token) headers.Authorization = `Bearer ${token}`;
@@ -137,7 +139,7 @@ export const api = {
   getList: async <T>(path: string, query?: RequestOptions["query"]) =>
     toPageEnvelope<T>(await sendRequestWithTokenRefresh<unknown>("GET", path, { query })).data,
   post: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "body">) => sendRequestWithTokenRefresh<T>("POST", path, { ...options, body }),
-  put: <T>(path: string, body?: unknown) => sendRequestWithTokenRefresh<T>("PUT", path, { body }),
+  put: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "body">) => sendRequestWithTokenRefresh<T>("PUT", path, { ...options, body }),
   patch: <T>(path: string, body?: unknown) => sendRequestWithTokenRefresh<T>("PATCH", path, { body }),
   delete: <T>(path: string, options?: Omit<RequestOptions, "body">) => sendRequestWithTokenRefresh<T>("DELETE", path, options),
 };

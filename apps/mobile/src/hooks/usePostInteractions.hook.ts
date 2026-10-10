@@ -1,6 +1,8 @@
 import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { Share } from "react-native";
 
+import { isPostWithRepostCount, setFollowingAuthorEverywhere, updateMatchingRecordsInEveryQuery } from "@/cache/postEngagementCache.util";
+import { togglePostLiked, type LikeablePost } from "@/cache/postLikeSync.util";
 import { postsService } from "@/services/content/posts.service";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import type { Page, Post } from "@/types";
@@ -8,39 +10,23 @@ import { webAppLinks } from "@/config/webAppLinks.config";
 
 export const feedQueryKeyPrefix = ["feed"] as const;
 
+type SharablePost = Pick<Post, "id"> & { readonly author: Pick<Post["author"], "id" | "name"> };
+
 export function usePostInteractions() {
   const queryClient = useQueryClient();
 
-  const updatePostInEveryCachedFeed = (postId: string, change: (post: Post) => Post) => {
-    queryClient.setQueriesData<InfiniteData<Page<Post>>>({ queryKey: feedQueryKeyPrefix }, (cached) =>
-      cached
-        ? { ...cached, pages: cached.pages.map((page) => ({ ...page, data: page.data.map((p) => (p.id === postId ? change(p) : p)) })) }
-        : cached,
-    );
-  };
-
-  const applyPostLikeToggle = async (post: Post) => {
-    const likeNow = !post.liked;
-    updatePostInEveryCachedFeed(post.id, (p) => ({ ...p, liked: likeNow, likes: p.likes + (likeNow ? 1 : -1) }));
-    try {
-      await (likeNow ? postsService.likePost(post.id) : postsService.unlikePost(post.id));
-    } catch {
-      updatePostInEveryCachedFeed(post.id, (p) => ({ ...p, liked: !likeNow, likes: p.likes + (likeNow ? -1 : 1) }));
-    }
-  };
-
-  const applyFollowPostAuthor = async (post: Post) => {
-    updatePostInEveryCachedFeed(post.id, (p) => ({ ...p, isFollowingAuthor: true }));
+  const applyFollowPostAuthor = async (post: SharablePost) => {
+    setFollowingAuthorEverywhere(queryClient, post.author.id, true);
     try {
       await postsService.followPostAuthor(post.author.id);
     } catch {
-      updatePostInEveryCachedFeed(post.id, (p) => ({ ...p, isFollowingAuthor: false }));
+      setFollowingAuthorEverywhere(queryClient, post.author.id, false);
     }
   };
 
   const prependToEveryCachedFeed = (created: Post) => {
     queryClient.setQueriesData<InfiniteData<Page<Post>>>({ queryKey: feedQueryKeyPrefix }, (cached) =>
-      cached
+      cached?.pages
         ? {
             ...cached,
             pages: cached.pages.map((page, index) =>
@@ -51,19 +37,19 @@ export function usePostInteractions() {
     );
   };
 
-  const resharePost = async (post: Post, text?: string) => {
+  const resharePost = async (post: Pick<Post, "id">, text?: string) => {
     const created = await postsService.repostPost(post.id, text);
-    updatePostInEveryCachedFeed(post.id, (p) => ({ ...p, reposts: p.reposts + 1 }));
+    updateMatchingRecordsInEveryQuery(queryClient, isPostWithRepostCount(post.id), (p) => ({ ...p, reposts: (p.reposts as number) + 1 }));
     prependToEveryCachedFeed(created);
   };
 
-  const sharePost = async (post: Post) => {
+  const sharePost = async (post: SharablePost) => {
     const result = await Share.share({ message: `${post.author.name} on Zudomart: ${webAppLinks.post(post.id)}` }).catch(() => null);
     if (result?.action === Share.sharedAction) postsService.recordPostShare(post.id).catch(() => undefined);
   };
 
-  const togglePostLike = (post: Post) => requireAuthThen(() => applyPostLikeToggle(post), undefined, "like posts");
-  const followPostAuthor = (post: Post) => requireAuthThen(() => applyFollowPostAuthor(post), undefined, "follow creators");
+  const togglePostLike = (post: LikeablePost) => requireAuthThen(() => togglePostLiked(queryClient, post), undefined, "like posts");
+  const followPostAuthor = (post: SharablePost) => requireAuthThen(() => applyFollowPostAuthor(post), undefined, "follow creators");
 
   return { togglePostLike, followPostAuthor, resharePost, sharePost };
 }

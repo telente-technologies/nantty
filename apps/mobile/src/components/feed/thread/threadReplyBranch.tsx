@@ -24,10 +24,10 @@ export interface ThreadReplyBranchProps {
 export const MAXIMUM_THREAD_INDENT_LEVELS = 3;
 const THREAD_INDENT_WIDTH = 20;
 
-const describeShowRepliesLabel = (hiddenCount: number, isExpanded: boolean, isLoading: boolean) => {
+const describeShowRepliesLabel = (hiddenCount: number, isExpanded: boolean, isLoading: boolean, hasVisibleReplies = false) => {
   if (isLoading) return "Loading replies";
   if (isExpanded) return "Show more replies";
-  return hiddenCount === 1 ? "Show 1 reply" : `Show ${hiddenCount} replies`;
+  return `Show ${hiddenCount}${hasVisibleReplies ? " more" : ""} ${hiddenCount === 1 ? "reply" : "replies"}`;
 };
 
 export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showReplyingTo, nestingLevel = 0, onRepostReply }: ThreadReplyBranchProps) {
@@ -45,7 +45,8 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
   const localChildren = thread.locallyPostedCommentsFor(reply.id).map((comment) => toLocalThreadReply(comment, postAuthorId, true));
   const visibleChildren = mergeServerAndLocalComments(serverChildren, localChildren, false).filter((child) => !thread.isCommentDeleted(child.id));
   const hiddenCount = Math.max(0, (reply.replyCount ?? 0) - serverChildren.length);
-  const opensThreadInstead = isAtIndentLimit && hiddenCount > 0 && !isExpanded && (reply.continuesInThread ?? true);
+  const opensThreadInstead = hiddenCount > 0 && !isExpanded && (isAtIndentLimit ? (reply.continuesInThread ?? true) : reply.continuesInThread === true);
+  const continuesAsChain = visibleChildren.length === 1 && !isExpanded;
   const canShowMore = !opensThreadInstead && ((!isExpanded && hiddenCount > 0) || (isExpanded && (query.hasNextPage || query.isLoading)));
   const replyWithLocalChanges = thread.applyLocalOverridesToComment(reply);
 
@@ -76,15 +77,15 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
         onOpenThread={() => navigation.navigate("CommentThread", { commentId: reply.id, postId: reply.postId })}
         onDelete={() => thread.deleteOwnComment(reply)}
       />
-      <View style={childrenAreIndented && visibleChildren.length > 0 ? styles.indented : null}>
+      <View style={childrenAreIndented && !continuesAsChain && visibleChildren.length > 0 ? styles.indented : null}>
         {visibleChildren.map((child, index) => (
           <ThreadReplyBranch
             key={child.id}
             reply={child}
             postAuthorId={postAuthorId}
             hasParentAbove={index === 0}
-            showReplyingTo={!childrenAreIndented || index > 0}
-            nestingLevel={nestingLevel + 1}
+            showReplyingTo={!continuesAsChain && (!childrenAreIndented || index > 0)}
+            nestingLevel={continuesAsChain ? nestingLevel : nestingLevel + 1}
             onRepostReply={onRepostReply}
           />
         ))}
@@ -119,7 +120,7 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
           </View>
           {query.isFetching && isExpanded ? <ActivityIndicator size="small" color={colors.primary} /> : null}
           <Text size={14} weight={500} lineHeight={18} color={colors.primary}>
-            {describeShowRepliesLabel(hiddenCount, isExpanded, query.isFetching && isExpanded)}
+            {describeShowRepliesLabel(hiddenCount, isExpanded, query.isFetching && isExpanded, visibleChildren.length > 0)}
           </Text>
           <CaretRight24Icon size={20} color={colors.primary} />
         </Pressable>

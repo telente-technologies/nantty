@@ -7,6 +7,7 @@ import { getActiveActingProfileOfSignedInUser } from "./brands.mock";
 import { SIGNED_IN_BUYER, mockOrderRecords } from "./orderFixtures.mock";
 import { listPostsByAuthor, pinnedPostsFirst, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { withViewerSavedState } from "./savedEntries.mock";
 import { setFollowingAuthor } from "./followGraph.mock";
 import { blockedUserIds, canSignedInUserSeeProfileContent, followedUserIds, followerUserIds, followStateForUser, privateUserIds, relationshipDetailsFor } from "./socialGraph.mock";
 import { findActiveLiveForHost } from "./activeLives.mock";
@@ -174,7 +175,7 @@ export const usersMocks: MockRoute[] = [
     };
   }),
   createMockRoute("GET", "/api/v1/users/:userId/posts", ({ params }) => ({
-    data: canSignedInUserSeeProfileContent(params.userId!) && !SUSPENDED_USER_IDS.has(params.userId!) ? listPostsByAuthor(params.userId!).sort(pinnedPostsFirst).map(withCurrentProductPrices) : [],
+    data: canSignedInUserSeeProfileContent(params.userId!) && !SUSPENDED_USER_IDS.has(params.userId!) ? listPostsByAuthor(params.userId!).sort(pinnedPostsFirst).map((post) => withViewerSavedState(withCurrentProductPrices(post))) : [],
     nextCursor: null,
   })),
   createMockRoute("GET", "/api/v1/users/:userId/connections", ({ query }) => listConnections((query.get("tab") as ConnectionTab) ?? "followers")),

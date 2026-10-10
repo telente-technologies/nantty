@@ -21,6 +21,16 @@ export interface BoostPackage {
   readonly impressions: EstimateRange;
 }
 
+export type BoostPaymentMethod = "card" | "balance" | "free";
+
+export interface FreeBoostAllowance {
+  readonly premium: boolean;
+  readonly eligible: boolean;
+  readonly remainingThisMonth: number;
+  readonly maxTotal: Money;
+  readonly resetsAt: ISODate | null;
+}
+
 export interface BoostOptions {
   readonly minimumDailyBudget: Money;
   readonly suggestedDailyBudgets: readonly Money[];
@@ -28,6 +38,8 @@ export interface BoostOptions {
   readonly interests: readonly string[];
   readonly region?: string;
   readonly packages?: readonly BoostPackage[];
+  readonly paymentMethods?: readonly BoostPaymentMethod[];
+  readonly freeBoost?: FreeBoostAllowance | null;
 }
 
 export interface BoostEstimateRequest {
@@ -51,7 +63,7 @@ export interface BoostEstimate {
 }
 
 export interface CreateBoostRequest extends BoostEstimateRequest {
-  readonly paymentMethod: "wallet" | "card";
+  readonly paymentMethod: BoostPaymentMethod;
 }
 
 export interface BoostResults {
@@ -72,6 +84,7 @@ export interface Boost {
   readonly endsAt: ISODate | null;
   readonly results: BoostResults;
   readonly rejectionReason: string | null;
+  readonly paymentMethod?: BoostPaymentMethod | "wallet";
 }
 
 export interface CreatedBoost {

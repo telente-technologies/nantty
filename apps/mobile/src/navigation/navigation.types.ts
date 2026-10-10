@@ -122,7 +122,6 @@ export type MainStackParamList = {
   SettingsPrivacyData: undefined;
   CreateBusinessProfile: undefined;
   Saved: { initialFilter?: SavedItemFilter } | undefined;
-  Rankings: undefined;
   Sound: { soundId: string };
   AuthFlow: { mode?: "signup" | "login" } | undefined;
 };

@@ -10,7 +10,7 @@ export const deepLinking: LinkingOptions<RootStackParamList> = {
   prefixes: [...deepLinkPrefixes],
   config: {
     screens: {
-      Tabs: { screens: { Home: "", Clips: "clips", Chats: "chats", Me: "me" } },
+      Tabs: { screens: { Home: "", Clips: "clips", Chats: "chats", Me: { path: "me", alias: ["rankings"] } } },
       ProductDetail: { path: "p/:productId", alias: ["product/:productId", "products/:productId"], parse: { productId: readProductIdFromSlug } },
       Store: { path: "store/:storeId", alias: ["stores/:storeId"] },
       PostDetail: { path: "post/:postId", alias: ["posts/:postId"] },

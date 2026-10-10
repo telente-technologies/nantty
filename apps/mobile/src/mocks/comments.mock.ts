@@ -6,10 +6,12 @@ import { withCommentViewerSavedState } from "./savedEntries.mock";
 import { notifyMentionedUsers, sanitizeMentionsForWrite, userIdsWhoBlockedTheAuthor } from "./mentionRules.mock";
 import { mockPostsState } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { chooseMockChain, mockPostAuthorId, rankMockTopLevelComments, resolveMockQuote, withMockQuoteState } from "./quoteLinks.mock";
+import { quotedSummaryFromPost } from "@/utils/postLinks.util";
 
 const TOP_LEVEL_PAGE_SIZE = 6;
 const REPLIES_PAGE_SIZE = 4;
-const PREVIEW_REPLY_COUNT = 2;
+const PREVIEW_REPLY_COUNT = 3;
 
 const buildCommenter = (id: string, name: string, username: string, verified = false): UserSummary => ({
   id,
@@ -196,11 +198,13 @@ const collectDescendantIds = (postId: string, commentId: string): string[] =>
 export const commentsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId/comments", ({ params, query }) => {
     const postId = params.postId!;
-    const topLevel = commentsForPost(postId).filter((c) => c.parentCommentId === null).sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true));
+    const postAuthorId = mockPostAuthorId(postId);
+    const everyComment = commentsForPost(postId);
+    const topLevel = rankMockTopLevelComments(everyComment.filter((c) => c.parentCommentId === null), everyComment, postAuthorId);
     const page = paginateByOffset(topLevel, query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
     const withPreviews: CommentWithReplies[] = page.data.map((c) => ({
-      ...withVideoReplyInfo(withCommentViewerSavedState(c)),
-      previewReplies: directRepliesOf(postId, c.id).slice(0, PREVIEW_REPLY_COUNT).map(withVideoReplyInfo),
+      ...withMockQuoteState(withVideoReplyInfo(withCommentViewerSavedState(c)), postAuthorId),
+      previewReplies: chooseMockChain(c, everyComment, postAuthorId, PREVIEW_REPLY_COUNT).map((reply) => withMockQuoteState(withVideoReplyInfo(reply), postAuthorId)),
     }));
     return { data: withPreviews, nextCursor: page.nextCursor };
   }),
@@ -208,12 +212,12 @@ export const commentsMocks: MockRoute[] = [
     const parent = findCommentAnywhere(params.commentId!);
     if (!parent) return { data: [], nextCursor: null };
     const page = paginateByOffset(directRepliesOf(parent.postId, parent.id), query.get("cursor"), REPLIES_PAGE_SIZE);
-    return { ...page, data: page.data.map((c) => withVideoReplyInfo(withCommentViewerSavedState(c))) };
+    return { ...page, data: page.data.map((c) => withMockQuoteState(withVideoReplyInfo(withCommentViewerSavedState(c)), mockPostAuthorId(parent.postId))) };
   }),
   createMockRoute("GET", "/api/v1/comments/:commentId", ({ params }) => {
     const comment = findCommentAnywhere(params.commentId!);
     if (!comment) throw new ApiError(404, "Comment not found", "COMMENT_NOT_FOUND");
-    return withVideoReplyInfo(withCommentViewerSavedState(comment));
+    return withMockQuoteState(withVideoReplyInfo(withCommentViewerSavedState(comment)), mockPostAuthorId(comment.postId));
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/comments", ({ params, body }) => {
     const postId = params.postId!;
@@ -222,7 +226,9 @@ export const commentsMocks: MockRoute[] = [
     if (targetPost?.viewerCanReply === false && targetPost.author.id !== me.id) throw new ApiError(403, targetPost.replyRestriction?.message ?? "You can't reply to this post.", targetPost.replyRestriction?.reason ?? "REPLIES_OFF");
     const parent = input.parentCommentId ? (findCommentAnywhere(input.parentCommentId) ?? null) : null;
     const sanitized = sanitizeMentionsForWrite(me, input.mentions, "comment");
-    const created = createStoredComment(postId, me, input.text, parent, 0, 0, sanitized.mentions);
+    const quote = resolveMockQuote(input.text, input.quotedPostId);
+    const stored = createStoredComment(postId, me, quote?.text ?? input.text, parent, 0, 0, sanitized.mentions);
+    const created = withMockQuoteState(quote ? { ...stored, quotedPost: quotedSummaryFromPost(quote.original) } : stored, targetPost?.author.id);
     notifyMentionedUsers(me, sanitized, "comment");
     const comments = commentsForPost(postId);
     commentsByPostId.set(postId, parent ? [...comments, created] : [created, ...comments]);

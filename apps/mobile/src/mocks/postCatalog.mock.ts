@@ -151,7 +151,12 @@ for (const seed of RESHARE_SEEDS) {
 }
 
 const singleSponsoredFeedPosts: readonly Post[] = SPONSORED_POST_SEEDS.map((seed) => buildPostFromSeed(seed, true));
-export const sponsoredFeedPosts: readonly Post[] = [...singleSponsoredFeedPosts, ...buildRichSponsoredPosts(singleSponsoredFeedPosts)];
+const BOOSTED_POST_SEED: PostSeed = { id: "boosted_post_1", authorKey: "u_9", hoursAgo: 6, photoKey: "cameraGear", engagement: [212, 27, 4, 14_500], text: "Booking portrait shoots in Lagos this month 📸 DM me for dates and rates." };
+const boostedFeedPost = (): Post => {
+  const post = buildPostFromSeed(BOOSTED_POST_SEED);
+  return { ...post, sponsored: { campaignId: "bst_mock_1", label: "Boosted", advertiserName: post.author.name } };
+};
+export const sponsoredFeedPosts: readonly Post[] = [boostedFeedPost(), ...singleSponsoredFeedPosts, ...buildRichSponsoredPosts(singleSponsoredFeedPosts)];
 
 export const listPostsByAuthor = (authorId: string) => [...mockPostsState.values()].filter((post) => post.author.id === authorId);
 

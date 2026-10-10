@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 
 import { postCommentsService } from "@/services/content/postComments.service";
 import { useAuthStore } from "@/store/auth.store";
-import type { Comment, UserSummary } from "@/types";
+import type { Comment, ID, QuotedPostSummary, UserSummary } from "@/types";
 import type { MentionEntity } from "@/types/mention.type";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { canReplyWithVideo } from "./videoReply/videoReply.util";
@@ -35,6 +35,11 @@ const EMPTY_THREAD_STATE: CommentThreadLocalState = {
 };
 
 const FALLBACK_SIGNED_IN_AUTHOR: UserSummary = { id: "u_me", name: "You", username: "you", avatarUrl: null, verified: false };
+
+export interface CommentQuoteOptions {
+  readonly quotedPostId: ID | null | undefined;
+  readonly quotedPost: QuotedPostSummary | null;
+}
 
 export const isPendingComment = (comment: Comment) => comment.id.startsWith("pending_");
 
@@ -95,7 +100,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
       return { ...s, locallyPostedCommentsByParentKey: { ...s.locallyPostedCommentsByParentKey, [parentKey]: updated } };
     });
 
-  const applyCommentOrReplyText = (text: string, mentions: readonly MentionEntity[]) => {
+  const applyCommentOrReplyText = (text: string, mentions: readonly MentionEntity[], quote?: CommentQuoteOptions) => {
     if (!postId || !text.trim()) return;
     const parent = threadState.replyTarget;
     const parentKey = parent?.id ?? TOP_LEVEL_PARENT_KEY;
@@ -113,6 +118,8 @@ export function useCommentThreadController(postId: string | null, closeContainin
       bookmarked: false,
       replyCount: 0,
       replyingTo: parent ? { userId: parent.author.id, username: parent.author.username } : undefined,
+      isPostAuthor: !!postAuthorId && signedInAuthor.id === postAuthorId,
+      quotedPost: quote?.quotedPostId ? quote.quotedPost : null,
     };
     setThreadState((s) => ({
       ...s,
@@ -125,7 +132,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
       },
     }));
     postCommentsService
-      .addCommentToPost(postId, { text: pendingComment.text, parentCommentId: parent?.id, mentions })
+      .addCommentToPost(postId, { text: pendingComment.text, parentCommentId: parent?.id, mentions, ...(quote?.quotedPostId === undefined ? {} : { quotedPostId: quote.quotedPostId }) })
       .then((savedComment) => replaceLocallyPostedComment(parentKey, pendingComment.id, savedComment))
       .catch(() => {
         replaceLocallyPostedComment(parentKey, pendingComment.id, null);
@@ -137,9 +144,9 @@ export function useCommentThreadController(postId: string | null, closeContainin
     closeContainingModal ? requireAuthAfterClosingModal(closeContainingModal, action, reason) : requireAuthThen(action, undefined, reason);
 
   const toggleLikeOnComment = (comment: Comment) => requireSignInFor(() => applyCommentLikeToggle(comment), "like comments");
-  const submitCommentOrReplyText = (text: string, mentions: readonly MentionEntity[] = []) => {
+  const submitCommentOrReplyText = (text: string, mentions: readonly MentionEntity[] = [], quote?: CommentQuoteOptions) => {
     if (!postId || !text.trim()) return;
-    requireSignInFor(() => applyCommentOrReplyText(text, mentions), "comment");
+    requireSignInFor(() => applyCommentOrReplyText(text, mentions, quote), "comment");
   };
 
   const setDeletedFlag = (commentId: string, deleted: boolean) =>
@@ -179,14 +186,21 @@ export function useCommentThreadController(postId: string | null, closeContainin
     });
   };
 
-  const setReplyThreadVisibility = (commentId: string, visibility: ReplyThreadVisibility) =>
-    setThreadState((s) => ({ ...s, replyThreadVisibilityByCommentId: { ...s.replyThreadVisibilityByCommentId, [commentId]: visibility } }));
+  const setReplyThreadVisibility = useCallback(
+    (commentId: string, visibility: ReplyThreadVisibility) =>
+      setThreadState((s) =>
+        s.replyThreadVisibilityByCommentId[commentId] === visibility
+          ? s
+          : { ...s, replyThreadVisibilityByCommentId: { ...s.replyThreadVisibilityByCommentId, [commentId]: visibility } },
+      ),
+    [],
+  );
 
-  const startReplyingToComment = (comment: Comment) => {
+  const startReplyingToComment = useCallback((comment: Comment) => {
     if (isPendingComment(comment)) return;
-    setThreadState((s) => ({ ...s, replyTarget: comment }));
-  };
-  const cancelReplyingToComment = () => setThreadState((s) => ({ ...s, replyTarget: null }));
+    setThreadState((s) => (s.replyTarget?.id === comment.id ? s : { ...s, replyTarget: comment }));
+  }, []);
+  const cancelReplyingToComment = useCallback(() => setThreadState((s) => (s.replyTarget ? { ...s, replyTarget: null } : s)), []);
 
   const locallyPostedCommentsFor = (parentKey: string) => threadState.locallyPostedCommentsByParentKey[parentKey] ?? [];
   const isCommentDeleted = (commentId: string) => !!threadState.deletedCommentIds[commentId];

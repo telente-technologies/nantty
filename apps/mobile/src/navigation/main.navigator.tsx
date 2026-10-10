@@ -91,7 +91,6 @@ import { SettingsUsernameScreen } from "@/screens/settings/settingsUsername.scre
 import { BrandProfileScreen } from "@/screens/brand/brandProfile.screen";
 import { CreateBusinessProfileScreen } from "@/screens/brand/createBusinessProfile.screen";
 import { FollowRequestsScreen } from "@/screens/profile/followRequests.screen";
-import { RankingsScreen } from "@/screens/rankings/rankings.screen";
 import { SettingsPrivacyDataScreen } from "@/screens/settings/settingsPrivacyData.screen";
 import { SettingsPrivacyScreen } from "@/screens/settings/settingsPrivacy.screen";
 import { CreateBrandScreen } from "@/screens/brand/createBrand.screen";
@@ -203,7 +202,6 @@ export function MainNavigator() {
       <Stack.Screen name="SettingsPrivacy" component={SettingsPrivacyScreen} />
       <Stack.Screen name="SettingsPrivacyData" component={SettingsPrivacyDataScreen} />
       <Stack.Screen name="CreateBusinessProfile" component={CreateBusinessProfileScreen} />
-      <Stack.Screen name="Rankings" component={RankingsScreen} />
       <Stack.Screen name="Saved" component={SavedScreen} />
       <Stack.Screen name="Sound" component={SoundScreen} />
       <Stack.Screen name="AuthFlow" component={AuthFlowScreen} options={modal} />

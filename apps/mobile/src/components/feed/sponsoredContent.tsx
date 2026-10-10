@@ -1,6 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
+import { RocketLaunchFill24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { SponsoredAppInstallRow } from "@/components/feed/sponsoredAppInstall";
@@ -9,6 +10,16 @@ import type { AdPlacement, ID, SponsoredPlacement } from "@/types";
 
 export function SponsoredLabel({ sponsored, color }: { sponsored: SponsoredPlacement; color?: string }) {
   const { colors } = useTheme();
+  const styles = useStyles();
+  if (sponsored.label === "Boosted") {
+    const ink = color ?? colors.primary;
+    return (
+      <View style={[styles.boosted, { borderColor: ink }]} accessible accessibilityRole="text" accessibilityLabel={`Boosted post by ${sponsored.advertiserName}`}>
+        <RocketLaunchFill24Icon size={11} color={ink} />
+        <Text size={11} weight={500} lineHeight={14} color={ink}>Boosted</Text>
+      </View>
+    );
+  }
   return (
     <Text size={12} weight={400} lineHeight={16.8} color={color ?? colors.textSubtle} accessibilityLabel={`${sponsored.label} by ${sponsored.advertiserName}`}>
       {sponsored.label}
@@ -44,6 +55,16 @@ export function SponsoredCallToAction({ sponsored, placement, itemId, horizontal
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
+  boosted: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 999,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   callToAction: {
     height: 36,
     borderRadius: 4,

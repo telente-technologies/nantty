@@ -12,6 +12,9 @@ import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typograph
 import { useAuthStore } from "@/store/auth.store";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Comment, ReplyRestriction } from "@/types";
+import type { CommentQuoteOptions } from "@/components/clips/commentThreadController.hook";
+import { QuotedPostCard } from "@/components/feed/quotedPostCard";
+import { useQuotedPostPreview } from "@/components/feed/quotedPostPreview.hook";
 import type { MentionEntity } from "@/types/mention.type";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 import { requireAuthThen } from "@/utils/requireAuth.util";
@@ -23,7 +26,7 @@ export interface ThreadComposerProps {
   readonly postAuthorUsername: string | undefined;
   readonly replyTarget: Comment | null;
   readonly onCancelReply: () => void;
-  readonly onSubmit: (text: string, mentions: readonly MentionEntity[]) => void;
+  readonly onSubmit: (text: string, mentions: readonly MentionEntity[], quote?: CommentQuoteOptions) => void;
   readonly replyRestriction?: ReplyRestriction | null;
 }
 
@@ -48,6 +51,7 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
       setMentions(nextMentions);
     },
   });
+  const quote = useQuotedPostPreview(text);
   useImperativeHandle(ref, () => inputRef.current as TextInput);
 
   useEffect(() => {
@@ -59,9 +63,10 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
   const submitReply = () => {
     if (!canSubmit) return;
     const trimmed = shiftMentionsAfterTrimmingStart(text, mentions);
-    onSubmit(trimmed.text, trimmed.mentions);
+    onSubmit(trimmed.text, trimmed.mentions, { quotedPostId: quote.quotedPostId, quotedPost: quote.preview?.quoted ?? null });
     setText("");
     setMentions([]);
+    quote.reset();
   };
 
   return (
@@ -131,6 +136,11 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
             </Text>
           </Pressable>
         )}
+        {viewer && !replyRestriction && quote.preview ? (
+          <View style={styles.quotePreview}>
+            <QuotedPostCard compact quoted={quote.preview.quoted} loading={quote.preview.status === "loading"} unavailable={quote.preview.status === "unavailable"} onRemove={quote.remove} />
+          </View>
+        ) : null}
         <MentionCountLabel mentionCount={mentionComposer.mentionCount} />
       </View>
       <KeyboardSpacer style={styles.keyboardArea} />
@@ -160,5 +170,6 @@ const useStyles = makeThemedStyles((colors) =>
     send: { minHeight: 36, paddingHorizontal: 16, borderRadius: 18, backgroundColor: colors.primarySolid, alignItems: "center", justifyContent: "center" },
     restricted: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 44 },
     guestPrompt: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 44 },
+    quotePreview: { paddingLeft: 44 },
   }),
 );

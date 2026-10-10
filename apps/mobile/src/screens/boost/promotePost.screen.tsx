@@ -1,25 +1,29 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
 import { SelectableRow } from "@/components/cart/selectableRow";
 import { AdsManagerBanner } from "@/components/boost/adsManagerBanner";
 import { BoostAudiencePicker } from "@/components/boost/boostAudiencePicker";
+import { BoostPaymentPicker } from "@/components/boost/boostPaymentPicker";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
-import { useWalletBalanceQuery } from "@/components/wallet/walletQueries.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { ApiError, generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { boostsService } from "@/services/feed/boosts.service";
 import { paymentsService } from "@/services/commerce/payments.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useLocaleStore } from "@/store/locale.store";
-import type { BoostAudience, BoostGoal } from "@/types/boost.type";
+import type { BoostAudience, BoostGoal, CreateBoostRequest } from "@/types/boost.type";
 import type { Money } from "@/types";
+import {
+  FREE_BOOST_ERROR_CODES, boostErrorMessage, fitsWithinFreeBoost, nativeBoostPaymentMethods, pickFreeBoostSelection, usableFreeBoost,
+  type NativeBoostPaymentMethod,
+} from "@/utils/boostPayment.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 
@@ -35,16 +39,25 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
   const { postId } = route.params;
   const signedInUser = useAuthStore((state) => state.user);
   const countryCode = useLocaleStore((state) => state.countryCode ?? state.deviceRegionCode ?? "NG");
+  const queryClient = useQueryClient();
   const options = useQuery({ queryKey: ["boosts", "options"], queryFn: boostsService.fetchBoostOptions });
-  const { data: wallet } = useWalletBalanceQuery();
   const [goal, setGoal] = useState<BoostGoal>("views");
   const [audience, setAudience] = useState<BoostAudience>({ mode: "automatic" });
   const [chosenDailyBudget, setChosenDailyBudget] = useState<Money | null>(null);
   const [chosenDurationDays, setChosenDurationDays] = useState<number | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"wallet" | "card">("card");
-  const idempotencyKey = useRef(generateIdempotencyKey());
-  const dailyBudget = chosenDailyBudget ?? options.data?.suggestedDailyBudgets[1] ?? null;
-  const durationDays = chosenDurationDays ?? options.data?.durationDayOptions[1] ?? null;
+  const [chosenPaymentMethod, setChosenPaymentMethod] = useState<NativeBoostPaymentMethod | null>(null);
+  const idempotency = useRef<{ readonly body: string; readonly key: string } | null>(null);
+  const cardAllowed = nativeBoostPaymentMethods(options.data).includes("card");
+  const freeBoost = usableFreeBoost(options.data);
+  const usedFreeBoost = !freeBoost && options.data?.freeBoost?.premium && options.data.freeBoost.remainingThisMonth <= 0 ? options.data.freeBoost : null;
+  const freeSelection = useMemo(() => (options.data && freeBoost ? pickFreeBoostSelection(options.data, freeBoost) : null), [options.data, freeBoost]);
+  const paymentMethod: NativeBoostPaymentMethod = freeSelection && (chosenPaymentMethod !== "card" || !cardAllowed) ? "free" : "card";
+  const defaults = paymentMethod === "free" && freeSelection ? freeSelection : {
+    dailyBudget: options.data?.suggestedDailyBudgets[1] ?? options.data?.suggestedDailyBudgets[0] ?? null,
+    durationDays: options.data?.durationDayOptions[1] ?? options.data?.durationDayOptions[0] ?? null,
+  };
+  const dailyBudget = chosenDailyBudget ?? defaults.dailyBudget;
+  const durationDays = chosenDurationDays ?? defaults.durationDays;
   const request = dailyBudget && durationDays ? { postId, goal, audience, dailyBudget, durationDays } : null;
 
   const estimate = useQuery({
@@ -52,15 +65,43 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
     queryFn: () => boostsService.estimateBoostReach(request!),
     enabled: !!request,
   });
-  const walletCanPay = !!wallet && !!estimate.data && wallet.available.currency === estimate.data.totalCost.currency && wallet.available.amountMinor >= estimate.data.totalCost.amountMinor;
+  const freeBoostFits = !freeBoost || !estimate.data || fitsWithinFreeBoost(estimate.data.totalCost, freeBoost);
+  const canPay = paymentMethod === "free" ? !!freeBoost && freeBoostFits : cardAllowed;
+
+  const chooseBudgetAndDuration = (nextDailyBudget: Money, nextDurationDays: number) => {
+    setChosenDailyBudget(nextDailyBudget);
+    setChosenDurationDays(nextDurationDays);
+    const total = { amountMinor: nextDailyBudget.amountMinor * nextDurationDays, currency: nextDailyBudget.currency };
+    setChosenPaymentMethod(paymentMethod === "free" && freeBoost && fitsWithinFreeBoost(total, freeBoost) ? "free" : "card");
+  };
+  const chooseFreeBoost = () => {
+    if (!freeSelection) return;
+    setChosenPaymentMethod("free");
+    setChosenDailyBudget(freeSelection.dailyBudget);
+    setChosenDurationDays(freeSelection.durationDays);
+  };
+  const idempotencyKeyFor = (body: CreateBoostRequest) => {
+    const signature = JSON.stringify(body);
+    if (idempotency.current?.body !== signature) idempotency.current = { body: signature, key: generateIdempotencyKey() };
+    return idempotency.current.key;
+  };
 
   const startBoost = useMutation({
     mutationFn: async () => {
-      const created = await boostsService.createBoost({ ...request!, paymentMethod }, idempotencyKey.current);
+      const body: CreateBoostRequest = { ...request!, paymentMethod };
+      const created = await boostsService.createBoost(body, idempotencyKeyFor(body));
       if (created.checkoutUrl) await paymentsService.openHostedCheckoutInAppBrowser(created.checkoutUrl);
       return created.boost;
     },
-    onSuccess: (boost) => navigation.replace("BoostStatus", { boostId: boost.id }),
+    onSuccess: (boost) => {
+      if (paymentMethod === "free") queryClient.invalidateQueries({ queryKey: ["boosts", "options"] });
+      navigation.replace("BoostStatus", { boostId: boost.id });
+    },
+    onError: (error) => {
+      if (!(error instanceof ApiError) || !error.code || !FREE_BOOST_ERROR_CODES.has(error.code)) return;
+      queryClient.invalidateQueries({ queryKey: ["boosts", "options"] });
+      if (error.code !== "FREE_BOOST_TOO_LARGE" && cardAllowed) setChosenPaymentMethod("card");
+    },
   });
 
   if (!options.data) {
@@ -93,7 +134,7 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
               const daily = { amountMinor: Math.floor(boostPackage.priceMinor / boostPackage.days), currency: boostPackage.currency };
               const selected = durationDays === boostPackage.days && dailyBudget?.amountMinor === daily.amountMinor;
               return (
-                <SelectableRow key={`${boostPackage.label}-${boostPackage.priceMinor}`} selected={selected} onPress={() => { setChosenDailyBudget(daily); setChosenDurationDays(boostPackage.days); }} accessibilityLabel={`${boostPackage.label} package`}>
+                <SelectableRow key={`${boostPackage.label}-${boostPackage.priceMinor}`} selected={selected} onPress={() => chooseBudgetAndDuration(daily, boostPackage.days)} accessibilityLabel={`${boostPackage.label} package`}>
                   <Text size={14} weight={500} lineHeight={16.8}>{formatMoneyForDisplay({ amountMinor: boostPackage.priceMinor, currency: boostPackage.currency }, { showDecimals: false })} · {boostPackage.label}</Text>
                   <Text size={12} lineHeight={16.8} color={colors.textMuted}>About {boostPackage.estimatedReach.low.toLocaleString()}–{boostPackage.estimatedReach.high.toLocaleString()} people</Text>
                 </SelectableRow>
@@ -104,13 +145,13 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
         <Text size={16} weight={600} lineHeight={19.2} style={styles.sectionTitle}>Daily budget</Text>
         <View style={styles.chips}>
           {options.data.suggestedDailyBudgets.map((budget) => (
-            <Chip key={budget.amountMinor} kind="topic" label={formatMoneyForDisplay(budget, { showDecimals: false })} selected={dailyBudget?.amountMinor === budget.amountMinor} onPress={() => setChosenDailyBudget(budget)} />
+            <Chip key={budget.amountMinor} kind="topic" label={formatMoneyForDisplay(budget, { showDecimals: false })} selected={dailyBudget?.amountMinor === budget.amountMinor} onPress={() => chooseBudgetAndDuration(budget, durationDays ?? 1)} />
           ))}
         </View>
         <Text size={16} weight={600} lineHeight={19.2} style={styles.sectionTitle}>Duration</Text>
         <View style={styles.chips}>
           {options.data.durationDayOptions.map((days) => (
-            <Chip key={days} kind="topic" label={`${days} ${days === 1 ? "day" : "days"}`} selected={durationDays === days} onPress={() => setChosenDurationDays(days)} />
+            <Chip key={days} kind="topic" label={`${days} ${days === 1 ? "day" : "days"}`} selected={durationDays === days} onPress={() => (dailyBudget ? chooseBudgetAndDuration(dailyBudget, days) : setChosenDurationDays(days))} />
           ))}
         </View>
         <View style={styles.estimate} accessibilityLiveRegion="polite">
@@ -129,24 +170,33 @@ export function PromotePostScreen({ navigation, route }: MainScreenProps<"Promot
                 </Text>
               ) : null}
               {estimate.data.minimumDailyBudget ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>Minimum daily budget here: {formatMoneyForDisplay(estimate.data.minimumDailyBudget)}</Text> : null}
-              <Text size={14} weight={600} lineHeight={16.8}>Total: {formatMoneyForDisplay(estimate.data.totalCost)}</Text>
+              <Text size={14} weight={600} lineHeight={16.8}>
+                {paymentMethod === "free" && freeBoostFits ? `Total: Free (usually ${formatMoneyForDisplay(estimate.data.totalCost)})` : `Total: ${formatMoneyForDisplay(estimate.data.totalCost)}`}
+              </Text>
             </>
           ) : null}
           {estimate.isError ? <Text size={12} color={colors.error}>{estimate.error.message}</Text> : null}
         </View>
         <Text size={16} weight={600} lineHeight={19.2} style={styles.sectionTitle}>Pay with</Text>
-        <SelectableRow selected={paymentMethod === "wallet"} onPress={() => walletCanPay && setPaymentMethod("wallet")} accessibilityLabel="Zudomart wallet">
-          <Text size={14} weight={500} lineHeight={16.8} color={walletCanPay ? colors.text : colors.textSubtle}>Zudomart wallet</Text>
-          <Text size={12} lineHeight={16.8} color={colors.textMuted}>{wallet ? `${formatMoneyForDisplay(wallet.available)} available` : " "}</Text>
-        </SelectableRow>
-        <SelectableRow selected={paymentMethod === "card"} onPress={() => setPaymentMethod("card")} accessibilityLabel="Card or bank transfer">
-          <Text size={14} weight={500} lineHeight={16.8}>Card or bank transfer</Text>
-          <Text size={12} lineHeight={16.8} color={colors.textMuted}>Pay in a secure payment window</Text>
-        </SelectableRow>
+        <BoostPaymentPicker
+          paymentMethod={paymentMethod}
+          cardAllowed={cardAllowed}
+          freeBoost={freeSelection ? freeBoost : null}
+          freeBoostFits={freeBoostFits}
+          usedFreeBoost={usedFreeBoost}
+          totalCost={estimate.data?.totalCost ?? null}
+          onSelectCard={() => setChosenPaymentMethod("card")}
+          onSelectFree={chooseFreeBoost}
+        />
       </ScrollView>
       <View style={styles.footer}>
-        {startBoost.isError ? <Text size={12} color={colors.error} align="center">{startBoost.error.message}</Text> : null}
-        <Button title="Boost post" disabled={!estimate.data} loading={startBoost.isPending} onPress={() => startBoost.mutate()} />
+        {startBoost.isError ? <Text size={12} color={colors.error} align="center">{boostErrorMessage(startBoost.error)}</Text> : null}
+        <Button
+          title={paymentMethod === "free" ? "Use free boost" : estimate.data ? `Boost post · ${formatMoneyForDisplay(estimate.data.totalCost)}` : "Boost post"}
+          disabled={!estimate.data || !canPay}
+          loading={startBoost.isPending}
+          onPress={() => startBoost.mutate()}
+        />
       </View>
     </Screen>
   );

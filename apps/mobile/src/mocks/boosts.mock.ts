@@ -1,13 +1,36 @@
 import { ApiError } from "@/errors/api.error";
-import type { Boost, BoostEstimate, BoostEstimateRequest, BoostOptions, CreateBoostRequest } from "@/types/boost.type";
+import type { Boost, BoostEstimate, BoostEstimateRequest, BoostOptions, CreateBoostRequest, FreeBoostAllowance } from "@/types/boost.type";
 
+import { getSignedInMockUser, signedInUserIsTheDemoSeller } from "./fixtures.mock";
 import { convertUsdCentsToViewerCurrency, convertViewerMoneyToUsdCents } from "./locale.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const MINIMUM_DAILY_BUDGET_USD_CENTS = 100;
 const REACH_PER_USD_CENT = 3.2;
 
+const FREE_BOOSTS_PER_MONTH = 1;
+const FREE_BOOST_MAX_USD_CENTS = MINIMUM_DAILY_BUDGET_USD_CENTS;
+const freeBoostsUsedByUserMonth = new Map<string, number>();
+
+const signedInUserHasPremium = () => getSignedInMockUser().verification?.tier === "PREMIUM" || signedInUserIsTheDemoSeller();
+const freeBoostUsageKey = () => `${getSignedInMockUser().id}:${new Date().toISOString().slice(0, 7)}`;
+
+const buildFreeBoost = (): FreeBoostAllowance => {
+  const premium = signedInUserHasPremium();
+  const remaining = premium ? Math.max(0, FREE_BOOSTS_PER_MONTH - (freeBoostsUsedByUserMonth.get(freeBoostUsageKey()) ?? 0)) : 0;
+  const now = new Date();
+  return {
+    premium,
+    eligible: premium && remaining > 0,
+    remainingThisMonth: remaining,
+    maxTotal: convertUsdCentsToViewerCurrency(FREE_BOOST_MAX_USD_CENTS),
+    resetsAt: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)).toISOString(),
+  };
+};
+
 const buildOptions = (): BoostOptions => ({
+  paymentMethods: signedInUserHasPremium() ? ["card", "free"] : ["card"],
+  freeBoost: buildFreeBoost(),
   minimumDailyBudget: convertUsdCentsToViewerCurrency(MINIMUM_DAILY_BUDGET_USD_CENTS),
   suggestedDailyBudgets: [100, 300, 700, 1_500].map(convertUsdCentsToViewerCurrency),
   durationDayOptions: [1, 3, 7, 14],
@@ -53,6 +76,7 @@ const presentBoost = (record: MockBoost): Boost => {
     endsAt: new Date(record.createdAt + record.request.durationDays * 86_400_000).toISOString(),
     results: { impressions: Math.round(reach * 1.6), reach, profileVisits: Math.round(reach * 0.04), messages: Math.round(reach * 0.006) },
     rejectionReason: null,
+    paymentMethod: record.request.paymentMethod,
   };
 };
 
@@ -61,7 +85,16 @@ export const boostsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/ads/boosts/estimate", ({ body }) => estimate(body as BoostEstimateRequest)),
   createMockRoute("POST", "/api/v1/ads/boosts", ({ body }) => {
     const request = body as CreateBoostRequest;
-    const total = convertViewerMoneyToUsdCents(estimate(request).totalCost);
+    const totalCost = estimate(request).totalCost;
+    const total = convertViewerMoneyToUsdCents(totalCost);
+    if (request.paymentMethod === "balance") throw new ApiError(403, "Paying from your balance isn't available in the app.", "PAYMENT_METHOD_NOT_AVAILABLE_IN_APP");
+    if (request.paymentMethod === "free") {
+      const free = buildFreeBoost();
+      if (!free.premium) throw new ApiError(403, "Free boosts come with Premium.", "FREE_BOOST_NOT_AVAILABLE");
+      if (free.remainingThisMonth <= 0) throw new ApiError(409, "You've already used this month's free boost.", "FREE_BOOST_USED");
+      if (totalCost.amountMinor > free.maxTotal.amountMinor) throw new ApiError(422, "This boost is bigger than your free boost covers.", "FREE_BOOST_TOO_LARGE");
+      freeBoostsUsedByUserMonth.set(freeBoostUsageKey(), (freeBoostsUsedByUserMonth.get(freeBoostUsageKey()) ?? 0) + 1);
+    }
     const record: MockBoost = { id: `bst_${Date.now()}`, request, totalUsdCents: total, createdAt: Date.now() };
     boosts.set(record.id, record);
     return { boost: presentBoost(record), checkoutUrl: request.paymentMethod === "card" ? `https://checkout.paystack.com/mock-boost/${record.id}` : null };

@@ -1,7 +1,9 @@
 import { memo, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
-import { BoxArrowDown24Icon, Play24Icon } from "@/components/icons";
+import { Bell24Icon, BellSlash24Icon, BoxArrowDown24Icon, Play24Icon } from "@/components/icons";
+import { postNotificationMuteLabel, usePostNotificationMute } from "@/components/feed/postNotificationMute.hook";
+import { canOfferPostNotificationMute } from "@/utils/postNotificationMute.util";
 import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
 import { Text } from "@/components/ui/text";
 import { ClipVideoPlayer, VideoPosterOnly, type VideoPlaybackProgress } from "@/components/media/clipVideoPlayer";
@@ -23,6 +25,7 @@ import type { Clip } from "@/types";
 import { ClipActionRail } from "./clipActionRail";
 import { ClipDetails } from "./clipDetails";
 import { ClipPlaybackControls } from "./clipPlaybackControls";
+import { clipCaptionMaxHeight, clipOverlayBottomOffset } from "./clipPageLayout.util";
 import { ClipReadabilityScrim } from "./clipReadabilityScrim";
 import { LikeBurst } from "./likeBurst";
 import { CommentStickerOverlay } from "./videoReply/commentStickerOverlay";
@@ -85,6 +88,8 @@ function ClipPageComponent(props: ClipPageProps) {
   const letterboxedVideoHeight = video?.width && video.height ? (windowWidth * video.height) / video.width : (windowWidth * 9) / 16;
   const [isFullScreenPlayerOpen, setIsFullScreenPlayerOpen] = useState(false);
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
+  const isSignedIn = useAuthStore((state) => state.status === "signedIn");
+  const { togglePostNotifications } = usePostNotificationMute();
   const [isTipSheetOpen, setIsTipSheetOpen] = useState(false);
   const [isTaggedSheetOpen, setIsTaggedSheetOpen] = useState(false);
   const canTipAuthor = clip.author.isCreator === true && clip.author.id !== signedInUserId;
@@ -108,7 +113,7 @@ function ClipPageComponent(props: ClipPageProps) {
 
   const showPlaybackControls = isActive && isPausedByUser;
   const durationSeconds = playbackProgress.durationSeconds || clip.durationSeconds;
-  const overlayBottomOffset = props.bottomInset + 16;
+  const overlayBottomOffset = clipOverlayBottomOffset(props.bottomInset);
 
   return (
     <View style={[styles.page, { height: props.height }]}>
@@ -175,6 +180,7 @@ function ClipPageComponent(props: ClipPageProps) {
           onPressAuthor={props.onPressAuthor}
           foregroundColor={FOREGROUND_ON_VIDEO}
           onOpenTaggedPeople={() => setIsTaggedSheetOpen(true)}
+          captionMaxHeight={clipCaptionMaxHeight(props.height, props.topInset, overlayBottomOffset)}
         />
         <ClipActionRail
           liked={engagement.liked}
@@ -216,7 +222,12 @@ function ClipPageComponent(props: ClipPageProps) {
               : null
           }
           onClose={() => setIsOptionsSheetOpen(false)}
-          additionalActions={downloadableVideo ? [{ label: "Download", icon: <BoxArrowDown24Icon size={20} />, onPress: () => requireAuthThen(() => startBrandedDownload(clip.id, downloadableVideo), null, "download") }] : undefined}
+          additionalActions={[
+            ...(downloadableVideo ? [{ label: "Download", icon: <BoxArrowDown24Icon size={20} />, onPress: () => requireAuthThen(() => startBrandedDownload(clip.id, downloadableVideo), null, "download") }] : []),
+            ...(canOfferPostNotificationMute(isSignedIn, clip)
+              ? [{ label: postNotificationMuteLabel(clip.viewerNotificationsMuted === true), icon: clip.viewerNotificationsMuted === true ? <Bell24Icon size={20} /> : <BellSlash24Icon size={20} />, onPress: () => togglePostNotifications(clip) }]
+              : []),
+          ]}
         />
       ) : null}
       <LandscapeVideoFullScreenModal

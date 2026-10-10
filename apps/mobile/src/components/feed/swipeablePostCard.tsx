@@ -5,6 +5,7 @@ import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue,
 
 import { LikeActionIcon, ReplyActionIcon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
+import { usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { requireAuthThen } from "@/utils/requireAuth.util";
@@ -39,14 +40,16 @@ export function SwipeablePostCard({ onOpenComments, onSwipeActiveChange, ...card
   const touchStartedOnCarousel = useRef(false);
   const hasCrossedThreshold = useRef(false);
   const commitDistance = cardWidth * COMMIT_WIDTH_RATIO;
+  const { togglePostLike } = usePostInteractions();
+  const toggleLike = cardProps.onToggleLike ?? (() => togglePostLike(cardProps.post));
 
   const likeFromSwipe = () => {
-    if (cardProps.post.liked || !cardProps.onToggleLike) return;
+    if (cardProps.post.liked) return;
     requireAuthThen(
       () => {
         setLikePopKey((key) => key + 1);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
-        cardProps.onToggleLike?.();
+        toggleLike();
       },
       undefined,
       "like posts",

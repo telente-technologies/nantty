@@ -54,6 +54,7 @@ export const HouseIcon: Icon = require("phosphor-react-native/src/icons/House").
 export const ImageIcon: Icon = require("phosphor-react-native/src/icons/Image").ImageIcon;
 export const ImageSquareIcon: Icon = require("phosphor-react-native/src/icons/ImageSquare").ImageSquareIcon;
 export const LightningIcon: Icon = require("phosphor-react-native/src/icons/Lightning").LightningIcon;
+export const RocketLaunchIcon: Icon = require("phosphor-react-native/src/icons/RocketLaunch").RocketLaunchIcon;
 export const LockSimpleIcon: Icon = require("phosphor-react-native/src/icons/LockSimple").LockSimpleIcon;
 export const MagnifyingGlassIcon: Icon = require("phosphor-react-native/src/icons/MagnifyingGlass").MagnifyingGlassIcon;
 export const MapPinIcon: Icon = require("phosphor-react-native/src/icons/MapPin").MapPinIcon;

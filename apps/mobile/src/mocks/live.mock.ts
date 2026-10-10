@@ -1,4 +1,4 @@
-import type { LiveCategory, LiveComment, LiveSessionDetails } from "@/types";
+import type { LiveCategory, LiveComment, LiveHostRanking, LiveSessionDetails } from "@/types";
 import type { LiveMonetizationInput } from "@/types/socialGraph.type";
 
 import { ApiError } from "@/errors/api.error";
@@ -46,6 +46,19 @@ const CONTENT_ONLY_LIVE_IDS: ReadonlySet<string> = new Set(["live_olumide_cuts",
 
 const findKnownLiveOrDefault = (liveId: string) => KNOWN_LIVES_BY_ID[liveId] ?? DEFAULT_LIVE;
 
+const MOCK_HOST_RANKINGS: Readonly<Record<string, LiveHostRanking>> = {
+  live_olumide_cuts: { globalRank: 2, categoryRank: 1, category: "irl", period: "week" },
+  live_s0: { globalRank: 1, categoryRank: 1, category: "shopping", period: "week" },
+  live_s1: { globalRank: 7, categoryRank: 3, category: "shopping", period: "week" },
+  live_s3: { globalRank: 64, categoryRank: 12, category: "music", period: "week" },
+  live_s4: { globalRank: 318, categoryRank: null, category: null, period: "week" },
+};
+
+const DEFAULT_LIVE_HOST_RANKING: LiveHostRanking = { globalRank: 12, categoryRank: 3, category: "shopping", period: "week" };
+
+const mockHostRankingFor = (liveId: string): LiveHostRanking | null =>
+  MOCK_HOST_RANKINGS[liveId] ?? (KNOWN_LIVES_BY_ID[liveId] ? null : DEFAULT_LIVE_HOST_RANKING);
+
 const findStreamPreviewForHost = (hostId: string) => {
   const hostClip = clipVideoSeeds.find((seed) => seed.authorId === hostId);
   return { coverUrl: hostClip?.posterUrl ?? null, playbackUrl: hostClip?.videoUrl ?? null };
@@ -60,6 +73,7 @@ export const buildLiveSession = (liveId: string, host = userSummaryById(findKnow
   products: CONTENT_ONLY_LIVE_IDS.has(liveId) ? [] : (["f1", "f2", "f4", "f6"] as const).map((key) => productSummaryByKey(key)),
   isFollowingHost: false,
   startedAt: new Date().toISOString(),
+  hostRanking: mockHostRankingFor(liveId),
   ...findStreamPreviewForHost(host.id),
 });
 
@@ -109,6 +123,7 @@ export const liveMocks: MockRoute[] = [
       viewers: 0,
       coverUrl: null,
       playbackUrl: null,
+      hostRanking: null,
     };
     hostedLives.set(session.id, session);
     return session;

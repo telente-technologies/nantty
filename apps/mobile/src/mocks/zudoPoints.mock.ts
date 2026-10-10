@@ -1,6 +1,6 @@
 import { ApiError } from "@/errors/api.error";
 import type { LiveGiftLeaderboardEntry } from "@/types";
-import type { LivePointsAction, LivePointsAward, RankingBoard, RankingEntry } from "@/types/socialGraph.type";
+import type { LivePointsAction, LivePointsAward } from "@/types/socialGraph.type";
 
 import { getSignedInMockUser } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -87,15 +87,6 @@ const awardEngagement = (liveId: string, action: LivePointsAction): LivePointsAw
   return { awarded, totalPoints: board.pointsByUserId.get(viewer.id)?.points ?? 0, likePointsThisMinute: likePointsInLastMinute(board, viewer.id) };
 };
 
-const hashText = (text: string) => [...text].reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) % 100_003, 7);
-
-const buildRankings = (board: RankingBoard, scope: string, qualifier: string): RankingEntry[] =>
-  directoryUsersExcludingAccounts
-    .map((user) => ({ user: summariseUser(user), points: 500 + (hashText(`${user.id}:${board}:${scope}:${qualifier}`) % 9_500) }))
-    .sort((a, b) => b.points - a.points)
-    .slice(0, 20)
-    .map((entry, index) => ({ rank: index + 1, ...entry }));
-
 export const zudoPointsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/lives/:liveId/points/me", ({ params }) => {
     const board = boardFor(params.liveId!);
@@ -103,8 +94,4 @@ export const zudoPointsMocks: MockRoute[] = [
     return { totalPoints: board.pointsByUserId.get(viewerId)?.points ?? 0, likePointsThisMinute: likePointsInLastMinute(board, viewerId) };
   }),
   createMockRoute("POST", "/api/v1/lives/:liveId/engagement", ({ params, body }) => awardEngagement(params.liveId!, (body as { action: LivePointsAction }).action)),
-  createMockRoute("GET", "/api/v1/rankings", ({ query }) => ({
-    data: buildRankings((query.get("board") ?? "supporter") as RankingBoard, query.get("scope") ?? "global", query.get("countryCode") ?? query.get("categoryId") ?? ""),
-    nextCursor: null,
-  })),
 ];

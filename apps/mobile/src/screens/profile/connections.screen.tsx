@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDeferredValue, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
+import { setFollowingAuthorEverywhere } from "@/cache/postEngagementCache.util";
 import { ArrowLeft24Icon, MagnifyingGlass20Icon, SlidersHorizontal24Icon, Users24Icon } from "@/components/icons";
 import { connectionSortLabel, sortAndFilterConnections } from "@/components/profile/connectionSort.util";
 import { ConnectionSortSheet } from "@/components/profile/connectionSortSheet";
@@ -63,11 +64,10 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
 
   const changeRelationshipWithUser = useMutation({
     mutationFn: async (entry: ConnectionEntry) => {
-      await (tab === "blocked"
-        ? followsService.unblockUser(entry.id)
-        : resolveFollowStateOfUser(entry) !== "none" && resolveFollowStateOfUser(entry) !== "rejected"
-          ? followsService.unfollowUser(entry.id)
-          : followsService.followUser(entry.id));
+      if (tab === "blocked") return void (await followsService.unblockUser(entry.id));
+      const isFollowingNow = resolveFollowStateOfUser(entry) !== "none" && resolveFollowStateOfUser(entry) !== "rejected";
+      await (isFollowingNow ? followsService.unfollowUser(entry.id) : followsService.followUser(entry.id));
+      if (isFollowingNow) setFollowingAuthorEverywhere(queryClient, entry.id, false);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users", userId, "connections"] }),
   });

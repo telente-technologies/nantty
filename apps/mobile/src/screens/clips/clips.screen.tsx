@@ -5,12 +5,13 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, FlatList, Share, StyleSheet, View, type ViewToken, type ViewabilityConfigCallbackPairs } from "react-native";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaFrame, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ClipCommentsSheet } from "@/components/clips/clipCommentsSheet";
 import { ClipPage, type ClipEngagement } from "@/components/clips/clipPage";
 import { ClipsFeedState } from "@/components/clips/clipsFeedState";
 import { ClipsHeader } from "@/components/clips/clipsHeader";
+import { bottomSafeAreaNotCoveredByTabBar } from "@/components/clips/clipPageLayout.util";
 import { rememberClipGestureTipsSeen, shouldShowClipGestureTips } from "@/components/clips/clipGestureTipsSeen.util";
 import { GestureTipsOverlay } from "@/components/clips/gestureTipsOverlay";
 import { colors } from "@/constants/colors.constant";
@@ -19,12 +20,12 @@ import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabil
 import { clipsService } from "@/services/clips/clips.service";
 import { claimAudioFocusForVideoPlayback } from "@/services/clips/videoAudio.service";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
+import { usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import { useAuthStore } from "@/store/auth.store";
 import { useVideoAudioStore } from "@/store/videoAudio.store";
 import type { Clip, ClipsFeedTab } from "@/types";
 
 import { prefetchUpcomingClipPosters } from "./clipsPrefetch.util";
-import { requireAuthThen } from "@/utils/requireAuth.util";
 import { webAppLinks } from "@/config/webAppLinks.config";
 
 type ClipsScreenProps = CompositeScreenProps<
@@ -40,6 +41,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const requestedCommentId = route.params?.commentId;
   const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
+  const safeAreaFrame = useSafeAreaFrame();
   const isScreenFocused = useIsFocused();
   const myAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const myUserId = useAuthStore((s) => s.user?.id ?? null);
@@ -50,10 +52,10 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const [isAppInForeground, setIsAppInForeground] = useState(AppState.currentState === "active");
   const isMuted = useVideoAudioStore((state) => state.isMuted);
   const toggleMute = useVideoAudioStore((state) => state.toggleMute);
-  const [engagementByClipId, setEngagementByClipId] = useState<Record<string, ClipEngagement>>({});
   const [commentsForClipId, setCommentsForClipId] = useState<string | null>(null);
   const [showGestureTips, setShowGestureTips] = useState(() => shouldShowClipGestureTips(myUserId));
   const clipsListRef = useRef<FlatList<Clip>>(null);
+  const uncoveredBottomInset = bottomSafeAreaNotCoveredByTabBar(insets.bottom, safeAreaFrame.height, pageHeight);
   const [clipIndexToOpenListAt, setClipIndexToOpenListAt] = useState(0);
 
   const clipsFeed = useInfiniteQuery({
@@ -114,34 +116,20 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     },
   ]).current;
 
-  const engagementFor = (clip: Clip): ClipEngagement =>
-    engagementByClipId[clip.id] ?? { liked: clip.liked, likes: clip.likes, isFollowing: clip.isFollowingAuthor };
+  const { togglePostLike, followPostAuthor } = usePostInteractions();
 
-  const updateEngagement = (clip: Clip, change: (current: ClipEngagement) => ClipEngagement) =>
-    setEngagementByClipId((all) => ({ ...all, [clip.id]: change(all[clip.id] ?? engagementFor(clip)) }));
+  const engagementFor = (clip: Clip): ClipEngagement => ({ liked: clip.liked, likes: clip.likes, isFollowing: clip.isFollowingAuthor });
 
-  const applyLikeToggleOnClip = (clip: Clip) => {
-    const wasLiked = engagementFor(clip).liked;
-    updateEngagement(clip, (e) => ({ ...e, liked: !wasLiked, likes: e.likes + (wasLiked ? -1 : 1) }));
-    (wasLiked ? clipsService.unlikeClip(clip.id) : clipsService.likeClip(clip.id)).catch(() =>
-      updateEngagement(clip, (e) => ({ ...e, liked: wasLiked, likes: e.likes + (wasLiked ? 1 : -1) })),
-    );
-  };
-
-  const toggleLikeOnClip = (clip: Clip) => requireAuthThen(() => applyLikeToggleOnClip(clip), undefined, "like clips");
+  const toggleLikeOnClip = (clip: Clip) => togglePostLike(clip);
 
   const likeClipWithDoubleTap = (clip: Clip) => {
     if (clip.sponsored) return;
-    if (!engagementFor(clip).liked) toggleLikeOnClip(clip);
+    if (!clip.liked) toggleLikeOnClip(clip);
   };
 
-  const applyFollowOnClipAuthor = (clip: Clip) => {
-    const wasFollowing = engagementFor(clip).isFollowing;
-    updateEngagement(clip, (e) => ({ ...e, isFollowing: !wasFollowing }));
-    if (!wasFollowing) clipsService.followClipAuthor(clip.author.id).catch(() => updateEngagement(clip, (e) => ({ ...e, isFollowing: false })));
+  const toggleFollowOnClipAuthor = (clip: Clip) => {
+    if (!clip.isFollowingAuthor) followPostAuthor(clip);
   };
-
-  const toggleFollowOnClipAuthor = (clip: Clip) => requireAuthThen(() => applyFollowOnClipAuthor(clip), undefined, "follow creators");
 
   const { offerSendInChat, sendInChatElement } = useShareToChat();
 
@@ -167,7 +155,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   }, [isPlaybackAllowed, isMuted]);
 
   return (
-    <View style={styles.root} onLayout={(e) => setPageHeight(Math.round(e.nativeEvent.layout.height))}>
+    <View style={styles.root} onLayout={(e) => setPageHeight(e.nativeEvent.layout.height)}>
       {sendInChatElement}
       {pageHeight > 0 ? (
         <FlatList
@@ -182,6 +170,8 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
           decelerationRate="fast"
           disableIntervalMomentum
           showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="never"
+          automaticallyAdjustContentInsets={false}
           getItemLayout={(_, index) => ({ length: pageHeight, offset: pageHeight * index, index })}
           initialNumToRender={2}
           maxToRenderPerBatch={2}
@@ -192,7 +182,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
           onEndReached={() => {
             if (clipsFeed.hasNextPage && !clipsFeed.isFetchingNextPage) clipsFeed.fetchNextPage().catch(() => undefined);
           }}
-          extraData={{ activeClipIndex, isMuted, isPlaybackAllowed, engagementByClipId }}
+          extraData={{ activeClipIndex, isMuted, isPlaybackAllowed }}
           renderItem={({ item, index }) => (
             <ClipPage
               clip={item}
@@ -201,7 +191,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
               shouldMountVideoPlayer={index >= activeClipIndex - 1 && index <= activeClipIndex + NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD}
               isMuted={isMuted}
               topInset={insets.top}
-              bottomInset={insets.bottom}
+              bottomInset={uncoveredBottomInset}
               engagement={engagementFor(item)}
               myAvatarUrl={myAvatarUrl}
               onToggleMute={toggleMute}

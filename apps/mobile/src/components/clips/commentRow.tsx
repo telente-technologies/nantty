@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Heart20Icon, HeartFill72Icon, PushPin24Icon, Trash24Icon, VideoCamera24Icon, Warning20Icon } from "@/components/icons";
 import { MentionText } from "@/components/mentions/mentionText";
 import { VideoReplyChip } from "./videoReply/videoReplyChip";
+import { CommentQuotedPost } from "@/components/feed/commentQuotedPost";
 import { ReportSheet } from "@/components/moderation/reportSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { ActionSheet, type ActionSheetOption } from "@/components/ui/actionSheet";
@@ -30,6 +31,7 @@ export interface CommentRowProps {
   readonly onReplyWithVideo?: () => void;
   readonly isPickingForVideoReply?: boolean;
   readonly isHighlighted?: boolean;
+  readonly connectBelow?: boolean;
 }
 
 const TOP_LEVEL_AVATAR_SIZE = 36;
@@ -49,6 +51,7 @@ export function CommentRow({
   onReplyWithVideo,
   isPickingForVideoReply,
   isHighlighted,
+  connectBelow,
 }: CommentRowProps) {
   const { colors } = useTheme();
   const styles = useStyles();
@@ -96,15 +99,25 @@ export function CommentRow({
       }}
       style={[styles.row, isPending && styles.pending, (isHighlighted || (isPickingForVideoReply && onReplyWithVideo)) && styles.pickable]}
     >
-      <Pressable accessibilityRole="button" accessibilityLabel={`${comment.author.username}'s profile`} onPress={() => openUserProfile(comment.author.id)}>
-        <Avatar uri={comment.author.avatarUrl} size={isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE} placeholderColor={colors.placeholder} />
-      </Pressable>
+      <View>
+        <Pressable accessibilityRole="button" accessibilityLabel={`${comment.author.username}'s profile`} onPress={() => openUserProfile(comment.author.id)}>
+          <Avatar uri={comment.author.avatarUrl} size={isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE} placeholderColor={colors.placeholder} />
+        </Pressable>
+        {connectBelow ? <View style={[styles.chainLine, { left: (isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE) / 2 - 1, top: (isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE) + 4 }]} /> : null}
+      </View>
       <View style={styles.body}>
         <View style={styles.meta}>
           <Text size={12} weight={600} lineHeight={16.8} accessibilityRole="link" onPress={() => openUserProfile(comment.author.id)}>
             {comment.author.username}
           </Text>
           <VerificationBadge verification={comment.author.verification} legacyVerified={comment.author.verified} size={12} />
+          {comment.isPostAuthor ? (
+            <View style={styles.authorBadge} accessibilityLabel="Post author">
+              <Text size={11} weight={600} lineHeight={14} color={colors.primary}>
+                Author
+              </Text>
+            </View>
+          ) : null}
           {comment.isPinned === true ? (
             <View style={styles.pinnedBadge} accessibilityLabel="Pinned by author">
               <PushPin24Icon size={12} color={colors.primary} />
@@ -125,6 +138,7 @@ export function CommentRow({
           ) : null}
           <MentionText text={comment.text} mentions={comment.mentions} size={12} lineHeight={16.8} />
         </Text>
+        <CommentQuotedPost comment={comment} />
         {isPending ? null : (
           <View style={styles.actions}>
             <Text size={12} weight={600} lineHeight={16.8} color={colors.textMuted} accessibilityRole="button" onPress={onReply}>
@@ -167,6 +181,8 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   actions: { flexDirection: "row", alignItems: "center", gap: 12 },
   body: { flex: 1, gap: 4 },
   pinnedBadge: { flexDirection: "row", alignItems: "center", gap: 2 },
+  authorBadge: { paddingHorizontal: 6, borderRadius: 4, backgroundColor: colors.primaryTint },
   meta: { flexDirection: "row", alignItems: "center", gap: 4 },
+  chainLine: { position: "absolute", bottom: -12, width: 2, borderRadius: 1, backgroundColor: colors.divider },
   like: { width: 32, gap: 4, alignItems: "center", alignSelf: "center" },
 }));

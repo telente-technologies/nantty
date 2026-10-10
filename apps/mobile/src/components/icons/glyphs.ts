@@ -46,6 +46,7 @@ import {
   ImageIcon,
   ImageSquareIcon,
   LightningIcon,
+  RocketLaunchIcon,
   LockSimpleIcon,
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -230,6 +231,8 @@ export const Handshake24Icon = phosphorIcon(HandshakeIcon);
 export const HeartBroken24Icon = phosphorIcon(HeartBreakIcon);
 export const Hourglass24Icon = phosphorIcon(HourglassIcon);
 export const Lightning24Icon = phosphorIcon(LightningIcon);
+export const RocketLaunch24Icon = phosphorIcon(RocketLaunchIcon);
+export const RocketLaunchFill24Icon = phosphorIcon(RocketLaunchIcon, { weight: "fill" });
 export const Medal24Icon = phosphorIcon(MedalIcon);
 export const MicrophoneSlash24Icon = phosphorIcon(MicrophoneSlashIcon);
 export const PersonTag24Icon = phosphorIcon(UserFocusIcon);

@@ -3,11 +3,11 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { ArrowLeft24Icon, DotsThreeVertical24Icon, Eye16Icon } from "@/components/icons";
 import { FollowPill } from "@/components/clips/followPill";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
-import { Avatar } from "@/components/ui/avatar";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
 import type { LiveCategory, LiveSessionDetails } from "@/types";
 
+import { LiveHostRankAvatar } from "./ranking/liveHostRankAvatar";
 import { liveAccent, useLiveForeground, type LiveForeground } from "./liveSurface.constant";
 
 export interface LiveHeaderProps {
@@ -74,7 +74,12 @@ export function LiveHeader(props: LiveHeaderProps) {
           onLongPress={props.onHostLongPress}
           style={[styles.host, { backgroundColor: foreground.chip, borderColor: foreground.chipBorder }]}
         >
-          <Avatar uri={session.host.avatarUrl} size={32} />
+          <LiveHostRankAvatar
+            avatarUrl={session.host.avatarUrl}
+            hostName={session.host.name}
+            ranking={session.hostRanking}
+            categoryLabel={session.hostRanking?.category ? (LIVE_CATEGORY_LABELS[session.hostRanking.category] ?? null) : null}
+          />
           <View style={styles.hostText}>
             <View style={styles.hostNameRow}>
               <Text size={13} weight={600} lineHeight={17} numberOfLines={1} color={foreground.ink} style={[styles.shrink, foreground.textShadow]}>

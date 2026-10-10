@@ -1,5 +1,5 @@
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { ExpandableText, CLIP_CAPTION_WORD_LIMIT } from "@/components/ui/expandableText";
 import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
@@ -29,9 +29,10 @@ export interface ClipDetailsProps {
   readonly foregroundColor?: string;
   readonly isActive?: boolean;
   readonly onOpenTaggedPeople?: () => void;
+  readonly captionMaxHeight?: number;
 }
 
-export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, foregroundColor, isActive = true, onOpenTaggedPeople }: ClipDetailsProps) {
+export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, foregroundColor, isActive = true, onOpenTaggedPeople, captionMaxHeight }: ClipDetailsProps) {
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const isViewerTheAuthor = useAuthStore((state) => state.user?.id === clip.author.id);
   const readableTextStyle = foregroundColor ? styles.readableOnVideo : undefined;
@@ -54,7 +55,7 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
                 {clip.author.name}
               </Text>
               <VerificationBadge verification={clip.author.verification} legacyVerified={clip.author.verified} size={16} />
-              {clip.sponsored ? <SponsoredLabel sponsored={clip.sponsored} /> : null}
+              {clip.sponsored ? <SponsoredLabel sponsored={clip.sponsored} color={foregroundColor} /> : null}
             </View>
             <Text size={12} lineHeight={16.8} color={foregroundColor} style={readableTextStyle}>
               @{clip.author.username}
@@ -66,7 +67,9 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
       {clip.replyToComment ? <ReplyingToCommentLink clip={clip} foregroundColor={foregroundColor} /> : null}
       {clip.isAiGenerated ? <AiGeneratedLabel onVideo /> : null}
       {onOpenTaggedPeople ? <ClipTaggedPill post={clip} onPress={onOpenTaggedPeople} /> : null}
-      <ExpandableText text={clip.text} mentions={clip.mentions} wordLimit={CLIP_CAPTION_WORD_LIMIT} size={13} lineHeight={16.9} color={foregroundColor} mentionColor={foregroundColor} style={readableTextStyle} expandOnTextPress />
+      <ScrollView style={captionMaxHeight ? { maxHeight: captionMaxHeight } : undefined} scrollEnabled={!!captionMaxHeight} nestedScrollEnabled showsVerticalScrollIndicator={false} bounces={false}>
+        <ExpandableText text={clip.text} mentions={clip.mentions} wordLimit={CLIP_CAPTION_WORD_LIMIT} size={13} lineHeight={16.9} color={foregroundColor} mentionColor={foregroundColor} style={readableTextStyle} expandOnTextPress />
+      </ScrollView>
       {clip.sound ? (
         <ClipSoundRow
           sound={clip.sound}
@@ -87,7 +90,7 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
 }
 
 const styles = StyleSheet.create({
-  root: { width: 269, gap: 8 },
+  root: { width: 269, flexShrink: 1, gap: 8 },
   likedBy: { flexDirection: "row", alignItems: "center", gap: 4 },
   authorRow: { height: 34, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   author: { flexDirection: "row", alignItems: "center", gap: 9 },

@@ -1,13 +1,12 @@
 import type { CreatorEntryRoute } from "@/hooks/useCreatorStatus.hook";
 import type { User } from "@/types";
 
-export type OwnProfileMenuIcon = "seller" | "creator" | "followRequests" | "rankings" | "saved" | "orders" | "wallet" | "verification" | "settings";
+export type OwnProfileMenuIcon = "seller" | "creator" | "followRequests" | "saved" | "orders" | "wallet" | "verification" | "settings";
 
 export type OwnProfileMenuRoute =
   | "SellerDashboard"
   | CreatorEntryRoute
   | "FollowRequests"
-  | "Rankings"
   | "Saved"
   | "Orders"
   | "Wallet"
@@ -36,7 +35,6 @@ export function buildOwnProfileMenuItems({ profile, creatorEntry, pendingFollowR
     ...(profile.isSeller ? [{ key: "seller", label: "Seller dashboard", route: "SellerDashboard" } as const] : []),
     { key: "creator", label: creatorEntry.label, route: creatorEntry.route, disabled: creatorEntry.isLoading },
     ...(showFollowRequests ? [{ key: "followRequests", label: "Follow requests", route: "FollowRequests", badge: followRequestsBadge } as const] : []),
-    { key: "rankings", label: "Rankings", route: "Rankings" },
     { key: "saved", label: "Saved", route: "Saved" },
     { key: "orders", label: "My orders", route: "Orders" },
     { key: "wallet", label: "Wallet", route: "Wallet" },

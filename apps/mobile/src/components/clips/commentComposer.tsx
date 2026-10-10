@@ -11,6 +11,9 @@ import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typograph
 import { MentionCountLabel, MentionSuggestionList } from "@/components/mentions/mentionSuggestionList";
 import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
 import type { Comment } from "@/types";
+import { QuotedPostCard } from "@/components/feed/quotedPostCard";
+import { useQuotedPostPreview } from "@/components/feed/quotedPostPreview.hook";
+import type { CommentQuoteOptions } from "./commentThreadController.hook";
 import type { MentionEntity } from "@/types/mention.type";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 import { hasSendableContent } from "@/utils/sendableContent.util";
@@ -19,7 +22,7 @@ export const QUICK_REACTION_EMOJI = ["😂", "😍", "💕", "😊", "🥰", "�
 
 export interface CommentComposerProps {
   readonly myAvatarUrl: string | null;
-  readonly onSubmit: (text: string, mentions: readonly MentionEntity[]) => void;
+  readonly onSubmit: (text: string, mentions: readonly MentionEntity[], quote?: CommentQuoteOptions) => void;
   readonly placeholder?: string;
   readonly replyTarget?: Comment | null;
   readonly onCancelReply?: () => void;
@@ -46,6 +49,7 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
       setMentions(nextMentions);
     },
   });
+  const quote = useQuotedPostPreview(text);
   useImperativeHandle(ref, () => inputRef.current as TextInput);
 
   useEffect(() => {
@@ -56,9 +60,10 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
   const submitTypedComment = () => {
     if (!hasContent) return;
     const trimmed = shiftMentionsAfterTrimmingStart(text, mentions);
-    onSubmit(trimmed.text, trimmed.mentions);
+    onSubmit(trimmed.text, trimmed.mentions, { quotedPostId: quote.quotedPostId, quotedPost: quote.preview?.quoted ?? null });
     setText("");
     setMentions([]);
+    quote.reset();
   };
   const effectivePlaceholder = replyTarget ? `Reply to @${replyTarget.author.username}...` : placeholder;
 
@@ -78,6 +83,9 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
             <Cancel20Icon />
           </Pressable>
         </View>
+      ) : null}
+      {quote.preview ? (
+        <QuotedPostCard compact quoted={quote.preview.quoted} loading={quote.preview.status === "loading"} unavailable={quote.preview.status === "unavailable"} onRemove={quote.remove} />
       ) : null}
       <View style={styles.emojiRow}>
         {QUICK_REACTION_EMOJI.map((emoji) => (

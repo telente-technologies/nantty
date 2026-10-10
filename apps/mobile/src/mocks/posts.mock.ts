@@ -113,6 +113,21 @@ export const postsMocks: MockRoute[] = [
     return reshare;
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/share", () => undefined),
+  createMockRoute("GET", "/api/v1/posts/:postId/notifications-mute", ({ params, isGuest }) => {
+    if (isGuest) throw new ApiError(401, "Sign in to continue.", "UNAUTHORIZED");
+    return { postId: params.postId!, muted: mockPostsState.get(params.postId!)?.viewerNotificationsMuted === true };
+  }),
+  createMockRoute("PUT", "/api/v1/posts/:postId/notifications-mute", ({ params, isGuest }) => {
+    if (isGuest) throw new ApiError(401, "Sign in to continue.", "UNAUTHORIZED");
+    if (!findPostIncludingSponsored(params.postId!)) throw new ApiError(404, "Post not found.", "POST_NOT_FOUND");
+    updateMockPost(params.postId!, (p) => ({ ...p, viewerNotificationsMuted: true }));
+    return { postId: params.postId!, muted: true };
+  }),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/notifications-mute", ({ params, isGuest }) => {
+    if (isGuest) throw new ApiError(401, "Sign in to continue.", "UNAUTHORIZED");
+    updateMockPost(params.postId!, (p) => ({ ...p, viewerNotificationsMuted: false }));
+    return { postId: params.postId!, muted: false };
+  }),
   createMockRoute("PUT", "/api/v1/posts/:postId/pin", ({ params }) => {
     const post = mockPostsState.get(params.postId!);
     if (!post) throw new ApiError(404, "This post was removed");

@@ -10,6 +10,8 @@ import { ClipComposer, type ClipComposerSeed } from "@/components/create/clip/cl
 import type { ClipLookId } from "@/components/create/clip/clipLook.constant";
 import { DraftsButton, DraftsSheet } from "@/components/create/draftsSheet";
 import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
+import { QuotedPostCard } from "@/components/feed/quotedPostCard";
+import { useQuotedPostPreview } from "@/components/feed/quotedPostPreview.hook";
 import { usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
 import { usePublishPost } from "@/components/create/publishPost.hook";
 import { buildPostSettingsFields, DEFAULT_POST_SETTINGS } from "@/components/create/settings/postSettings.type";
@@ -142,6 +144,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     if (draft.files.length > 0) void postDraftUploads.addPickedMediaAndStartUploading(draft.files.map((file) => ({ ...file })));
   };
 
+  const quote = useQuotedPostPreview(mode === "post" && !videoReply && postDraft.kind !== "clip" ? postDraft.text : "");
   const publishPost = usePublishPost({
     draftMediaItems: postDraftUploads.draftMediaItems,
     combinedUploadedFraction: postDraftUploads.combinedUploadedFraction,
@@ -161,6 +164,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
           ? { replyToComment: { commentId: videoReply.commentId, clipId: videoReply.clipId, commenterUserId: videoReply.commenterUserId }, stickerLayout }
           : {}),
         ...(videoReply && selectedSoundId ? { soundId: selectedSoundId } : {}),
+        ...(quote.quotedPostId === undefined || postDraft.kind === "clip" || videoReply ? {} : { quotedPostId: quote.quotedPostId }),
       };
     },
   });
@@ -282,6 +286,11 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             mode={mode}
             draft={postDraft}
             onChangeDraft={setPostDraft}
+            quotePreview={
+              quote.preview ? (
+                <QuotedPostCard compact quoted={quote.preview.quoted} loading={quote.preview.status === "loading"} unavailable={quote.preview.status === "unavailable"} onRemove={quote.remove} />
+              ) : null
+            }
             draftMediaItems={postDraftUploads.draftMediaItems}
             onAddPickedMedia={postDraftUploads.addPickedMediaAndStartUploading}
             onRemoveDraftMedia={postDraftUploads.removeDraftMediaItem}

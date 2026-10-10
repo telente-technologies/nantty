@@ -53,6 +53,7 @@ export interface NewCommentInput {
   readonly text: string;
   readonly parentCommentId?: ID;
   readonly mentions?: readonly MentionEntity[];
+  readonly quotedPostId?: ID | null;
 }
 
 export type LiveSource = "camera" | "screen" | "external";
@@ -67,6 +68,14 @@ export interface LiveSessionDetails extends LiveSession {
   readonly liveAdSettings?: LiveAdSettings | null;
   readonly acceptedLiveAdTermsVersion?: string | null;
   readonly sponsorshipLine?: string | null;
+  readonly hostRanking?: LiveHostRanking | null;
+}
+
+export interface LiveHostRanking {
+  readonly globalRank: number;
+  readonly categoryRank: number | null;
+  readonly category: LiveCategory | null;
+  readonly period: "day" | "week" | "month" | "all";
 }
 
 export interface SuggestedLive {
@@ -95,6 +104,7 @@ export interface NewPostInput {
   readonly slideshow?: ClipSlideshowInput;
   readonly location?: PostLocationTag;
   readonly taggedUserIds?: readonly ID[];
+  readonly quotedPostId?: ID | null;
 }
 
 export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live" | "feedCommentThread";

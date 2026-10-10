@@ -23,6 +23,7 @@ const mockCoinActivity: CoinActivityEntry[] = [
 ];
 
 export const readMockCoinBalance = () => mockCoinWallet.balance;
+export const readMockEarnedCoins = () => mockCoinWallet.earned;
 
 export function spendMockCoinsOrThrow(coins: number) {
   if (coins > mockCoinWallet.balance) throw new ApiError(402, "You don't have enough coins. Buy more coins and try again.", "INSUFFICIENT_COINS");

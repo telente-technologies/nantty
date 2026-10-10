@@ -14,6 +14,7 @@ import { notifyMentionedUsers, sanitizeMentionsForWrite, userIdsWhoBlockedTheAut
 import { recordVideoReplyNotification } from "./mentionNotifications.mock";
 import { mockPostsState } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { resolveMockQuote } from "./quoteLinks.mock";
 
 interface MockUploadSession {
   readonly request: CreateUploadSessionRequest;
@@ -197,6 +198,8 @@ export const mediaMocks: MockRoute[] = [
     }
     const CLIP_LOOKS = ["warm", "cool", "rose", "aqua", "sunset"];
     if (input.look !== undefined && !CLIP_LOOKS.includes(input.look)) throw new ApiError(422, "That look isn't available", "INVALID_LOOK");
+    if (input.quotedPostId && (input.kind === "clip" || videoReplyTarget)) throw new ApiError(422, "Only posts can quote another post.", "QUOTE_REQUIRES_POST");
+    const quote = input.kind === "clip" || videoReplyTarget ? null : resolveMockQuote(input.text, input.quotedPostId);
     const sanitizedMentions = sanitizeMentionsForWrite(getSignedInMockUser(), input.mentions, "post");
     const actingProfile = input.asProfileId ? findOwnedProfileOfSignedInUser(input.asProfileId) : undefined;
     if (input.asProfileId && !actingProfile) throw new ApiError(403, "You can't post as that profile", "FORBIDDEN");
@@ -219,8 +222,9 @@ export const mediaMocks: MockRoute[] = [
         ? { postedAs: { id: actingProfile.id, kind: actingProfile.kind, name: actingProfile.name, handle: actingProfile.handle, avatarUrl: actingProfile.avatarUrl } }
         : {}),
       createdAt: new Date().toISOString(),
-      text: input.text,
+      text: quote?.text ?? input.text,
       media: [...media],
+      ...(quote ? { resharedFrom: quote.original, isQuote: true, resharedFromUnavailable: false } : {}),
       likes: 0,
       comments: 0,
       reposts: 0,
@@ -249,6 +253,11 @@ export const mediaMocks: MockRoute[] = [
       appendMockClip({ ...post, shares: 0, durationSeconds: media[0]?.durationSeconds ?? 15, sound: currentSoundForClip(post.id) });
     }
     mockPostsState.set(post.id, post);
+    if (quote) {
+      const quotedId = quote.original.id;
+      const current = mockPostsState.get(quotedId);
+      if (current) mockPostsState.set(quotedId, { ...current, reposts: current.reposts + 1, quotes: (current.quotes ?? 0) + 1 });
+    }
     return post;
   }),
 ];

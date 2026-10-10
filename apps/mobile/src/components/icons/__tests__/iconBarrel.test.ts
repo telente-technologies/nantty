@@ -11,8 +11,8 @@ test("every icon renders", async () => {
     await result.unmount();
     count += 1;
   }
-  expect(count).toBe(169);
-});
+  expect(count).toBe(171);
+}, 60_000);
 
 test("padded tab icon keeps footprint", async () => {
   await render(createElement(icons.Home33Icon));

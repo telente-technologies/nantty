@@ -29,7 +29,7 @@ const STATUS_APPEARANCE: Record<Boost["status"], { label: string; tone: StatusTo
 export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostStatus">) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const boost = useQuery({ queryKey: ["boosts", route.params.boostId], queryFn: () => boostsService.fetchBoostById(route.params.boostId), refetchInterval: 30_000 });
+  const boost = useQuery({ queryKey: ["boosts", route.params.boostId], queryFn: () => boostsService.fetchBoostById(route.params.boostId), refetchInterval: (query) => (query.state.data?.status === "pending_payment" ? 5_000 : 30_000) });
   if (!boost.data) {
     return (
       <Screen>
@@ -54,6 +54,7 @@ export function BoostStatusScreen({ navigation, route }: MainScreenProps<"BoostS
           <Text size={typeScale.md} lineHeight={16.8} color={colors.textMuted}>
             Spent {formatMoneyForDisplay(details.spent)} of {formatMoneyForDisplay(details.totalBudget)}
           </Text>
+          {details.paymentMethod === "free" ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>Covered by your free Premium boost</Text> : null}
           {details.startsAt && details.endsAt ? (
             <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle}>{formatFriendlyDate(details.startsAt)} – {formatFriendlyDate(details.endsAt)}</Text>
           ) : null}

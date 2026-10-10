@@ -84,7 +84,6 @@ export const guestPublicRouteNames: readonly string[] = [
   "Live",
   "LiveEnded",
   "Story",
-  "Rankings",
   "Sound",
   "SettingsAppPreference",
   "SettingsAbout",

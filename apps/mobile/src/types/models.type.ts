@@ -139,7 +139,7 @@ export interface Media {
 
 export interface SponsoredPlacement {
   readonly campaignId: ID;
-  readonly label: "Sponsored" | "Promoted";
+  readonly label: "Sponsored" | "Promoted" | "Boosted";
   readonly advertiserName: string;
   readonly ctaLabel?: string;
   readonly ctaUrl?: string;
@@ -186,6 +186,7 @@ export interface Post {
   readonly isPinned?: boolean;
   readonly pinnedAt?: ISODate | null;
   readonly pinnedCommentId?: ID | null;
+  readonly viewerNotificationsMuted?: boolean;
   readonly location?: PostLocationTag | null;
   readonly mentions?: readonly MentionEntity[];
   readonly taggedUsers?: readonly TaggedUser[];
@@ -223,6 +224,16 @@ export interface PostAnalytics {
   readonly daily: readonly PostAnalyticsDaily[];
 }
 
+export interface QuotedPostSummary {
+  readonly id: ID;
+  readonly kind: "post" | "clip";
+  readonly author: UserSummary;
+  readonly text: string;
+  readonly thumbnail: { readonly type: "image" | "video"; readonly url: string; readonly blurhash: string | null } | null;
+  readonly mediaCount: number;
+  readonly createdAt: ISODate;
+}
+
 export interface Comment {
   readonly id: ID;
   readonly postId: ID;
@@ -241,6 +252,9 @@ export interface Comment {
   readonly mentions?: readonly MentionEntity[];
   readonly videoReplies?: readonly CommentVideoReply[];
   readonly videoReplyBlocked?: boolean;
+  readonly isPostAuthor?: boolean;
+  readonly quotedPost?: QuotedPostSummary | null;
+  readonly quotedPostUnavailable?: boolean;
 }
 
 export interface CommentVideoReply {

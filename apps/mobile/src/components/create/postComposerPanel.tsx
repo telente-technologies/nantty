@@ -41,6 +41,7 @@ export interface PostComposerPanelProps {
   readonly onSaveDraft?: () => void;
   readonly soundPicker?: ReactNode;
   readonly videoReplyStage?: ReactNode;
+  readonly quotePreview?: ReactNode;
 }
 
 const describeDraftMedia = (items: readonly PostDraftMediaItem[]) => {
@@ -88,6 +89,7 @@ export function PostComposerPanel(props: PostComposerPanelProps) {
     <View style={styles.flex}>
       <DismissKeyboardScrollView contentContainerStyle={styles.compose}>
         {caption.input}
+        {props.quotePreview ?? null}
         {videoReplyStage ?? null}
         <DraftMediaStrip items={draftMediaItems} maximumItems={MAXIMUM_MEDIA_PER_POST} onRemoveItem={props.onRemoveDraftMedia} />
         {props.validationHint ? (

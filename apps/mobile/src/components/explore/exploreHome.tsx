@@ -1,7 +1,8 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { setFollowingAuthorEverywhere } from "@/cache/postEngagementCache.util";
 import { PostCard } from "@/components/feed/postCard";
 import { Button } from "@/components/ui/button";
 import { useRequireAuth } from "@/hooks/useRequireAuth.hook";
@@ -26,6 +27,7 @@ const COLLAPSED_TREND_COUNT = 5;
 
 export function ExploreHome({ onSearchHashtag, onOpenPost, onOpenProfile }: ExploreHomeProps) {
   const { requireAuthThen } = useRequireAuth();
+  const queryClient = useQueryClient();
   const [category, setCategory] = useState<ExploreCategoryId>("for_you");
   const [showAllTrends, setShowAllTrends] = useState(false);
   const [followed, setFollowed] = useState<ReadonlySet<string>>(new Set());
@@ -51,7 +53,17 @@ export function ExploreHome({ onSearchHashtag, onOpenPost, onOpenProfile }: Expl
         else next.add(userId);
         return next;
       });
-      await (following ? followsService.unfollowUser(userId) : followsService.followUser(userId)).catch(() => undefined);
+      try {
+        const result = following ? await followsService.unfollowUser(userId) : await followsService.followUser(userId);
+        setFollowingAuthorEverywhere(queryClient, userId, result?.state === "accepted");
+      } catch {
+        setFollowed((current) => {
+          const next = new Set(current);
+          if (following) next.add(userId);
+          else next.delete(userId);
+          return next;
+        });
+      }
     }, "follow accounts");
 
   return (

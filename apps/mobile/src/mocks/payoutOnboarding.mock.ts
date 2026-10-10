@@ -110,6 +110,12 @@ const requireStep = (record: PayoutOnboardingRecord, step: PayoutOnboardingStep)
   if (step !== "identity" && !record.state.completedSteps.includes("identity")) throw new ApiError(409, "Start with your personal details.", "STEP_ORDER");
 };
 
+export const signedInUserCanWithdraw = () => {
+  const record = recordForSignedInUser();
+  settleReview(record);
+  return record.state.withdrawalsEnabled;
+};
+
 export const payoutOnboardingMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/payments/payout-onboarding/me", () => {
     const record = recordForSignedInUser();

@@ -14,6 +14,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { EscrowHoldRow } from "@/components/wallet/escrowHoldRow";
 import { TransactionRow } from "@/components/wallet/transactionRow";
+import { VerifyToWithdrawBanner } from "@/components/wallet/verifyToWithdrawBanner";
 import { WalletBalanceCards } from "@/components/wallet/walletBalanceCards";
 import {
   useEscrowHoldsQuery,
@@ -24,6 +25,7 @@ import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
+import { walletVerificationMessage } from "@/utils/walletLines.util";
 
 export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
   const { colors } = useTheme();
@@ -43,10 +45,10 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
         <ErrorState message="Couldn't load your wallet." onRetry={() => balance.refetch()} retrying={balance.isRefetching} />
       ) : (
       <ScrollView contentContainerStyle={styles.content} refreshControl={refreshControl}>
-        <PayoutSetupCard />
+        {walletVerificationMessage(wallet) ? <VerifyToWithdrawBanner wallet={wallet} /> : <PayoutSetupCard />}
         <WalletBalanceCards wallet={wallet} />
         <Text size={typeScale.xs} lineHeight={16.8} color={colors.textMuted}>
-          Pending money is held in escrow until buyers confirm delivery (or 3 days after delivery). It then moves to your available balance.
+          Each balance is kept separately. Escrow money is released when buyers confirm delivery (or 3 days after delivery), then passes a short safety hold before it becomes available.
         </Text>
         <Button title="Withdraw" disabled={!wallet || wallet.available.amountMinor <= 0} onPress={() => navigation.navigate("Withdraw")} />
 

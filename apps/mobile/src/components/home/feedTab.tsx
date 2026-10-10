@@ -8,14 +8,12 @@ import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { PostCard } from "@/components/feed/postCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { useCartActions } from "@/hooks/useCart.hook";
 import { feedQueryKeyPrefix, usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import { feedsService } from "@/services/feed/feeds.service";
 import type { Post, ProductSummary } from "@/types";
-import { requireAuthAfterClosingModal, requireAuthThen } from "@/utils/requireAuth.util";
+import { requireAuthThen } from "@/utils/requireAuth.util";
 
-import { PostProductsSheet } from "./postProductsSheet";
-import { VariantPickerSheet } from "@/components/product/variantPickerSheet";
+import { PostProductsFlow } from "./postProductsFlow";
 import { SuggestedClipsRow } from "./suggestedClipsRow";
 import { TopicFilterRow } from "./topicFilterRow";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -36,10 +34,8 @@ export function FeedTab() {
   const [feedMode, setFeedMode] = useState<FeedMode>("for-you");
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [productsInOpenPost, setProductsInOpenPost] = useState<readonly ProductSummary[] | null>(null);
-  const [variantPickerProductId, setVariantPickerProductId] = useState<string | null>(null);
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const { togglePostLike, followPostAuthor, sharePost } = usePostInteractions();
-  const { addProductToCart } = useCartActions();
   const { offerSendInChat, sendInChatElement } = useShareToChat();
 
   const topics = useQuery({ queryKey: ["topics", "mine"], queryFn: feedsService.fetchMyFollowedTopics });
@@ -75,30 +71,6 @@ export function FeedTab() {
     setFeedMode("for-you");
     setSelectedTopicId(topicId);
   };
-
-  const addEveryPostProductToCart = (products: readonly ProductSummary[]) =>
-    requireAuthAfterClosingModal(
-      () => setProductsInOpenPost(null),
-      async () => {
-        for (const product of products) await addProductToCart.mutateAsync({ productId: product.id, quantity: 1 });
-        setProductsInOpenPost(null);
-        navigation.navigate("Cart");
-      },
-      "add to cart",
-    );
-
-  const addSinglePostProductToCart = (product: ProductSummary) =>
-    requireAuthThen(
-      () => {
-        if (product.hasVariants || (product.variantGroups?.length ?? 0) > 0) {
-          setVariantPickerProductId(product.id);
-          return;
-        }
-        addProductToCart.mutate({ productId: product.id, quantity: 1 });
-      },
-      undefined,
-      "add to cart",
-    );
 
   return (
     <View style={styles.root}>
@@ -159,25 +131,7 @@ export function FeedTab() {
         }
         ListFooterComponent={feed.isFetchingNextPage ? <ActivityIndicator style={styles.footer} color={colors.primary} /> : null}
       />
-      <PostProductsSheet
-        products={productsInOpenPost}
-        onClose={() => setProductsInOpenPost(null)}
-        onPressProduct={(productId) => {
-          setProductsInOpenPost(null);
-          navigation.navigate("ProductDetail", { productId });
-        }}
-        onAddProduct={addSinglePostProductToCart}
-        onAddAllToCart={addEveryPostProductToCart}
-        adding={addProductToCart.isPending}
-      />
-      <VariantPickerSheet
-        productId={variantPickerProductId}
-        onClose={() => setVariantPickerProductId(null)}
-        onAddedToCart={() => {
-          setVariantPickerProductId(null);
-          navigation.navigate("Cart");
-        }}
-      />
+      <PostProductsFlow products={productsInOpenPost} onClose={() => setProductsInOpenPost(null)} />
       <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
       {sendInChatElement}
     </View>

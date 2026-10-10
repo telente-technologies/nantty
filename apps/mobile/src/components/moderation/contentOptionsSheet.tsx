@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Share } from "react-native";
 
-import { ArrowUpRight24Icon, Copy24Icon, EyeClosed20Icon, EyeSlash24Icon, Share24Icon, Warning20Icon } from "@/components/icons";
+import { Copy24Icon, RocketLaunch24Icon, EyeClosed20Icon, EyeSlash24Icon, Share24Icon, Warning20Icon } from "@/components/icons";
 import { ActionSheet } from "@/components/ui/actionSheet";
 import { feedFeedbackService, hidePostFromAllCachedFeeds, type FeedFeedbackType } from "@/services/feed/feedFeedback.service";
 import type { ReportTargetType } from "@/services/moderation/reports.service";
@@ -104,7 +104,7 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
         onClose={onClose}
         closeBeforeSelect={false}
         options={[
-          ...(canPromote ? [{ label: "Promote post", icon: <ArrowUpRight24Icon />, onPress: promoteOwnPost }] : []),
+          ...(canPromote ? [{ label: "Promote post", icon: <RocketLaunch24Icon />, onPress: promoteOwnPost }] : []),
           ...(target?.shareUrl ? [{ label: "Copy link", icon: <Copy24Icon />, onPress: copyLinkToContent }] : []),
           ...additionalActions.map((action) => ({ label: action.label, icon: action.icon, onPress: () => { onClose(); action.onPress(); } })),
           ...(canGiveFeedFeedback

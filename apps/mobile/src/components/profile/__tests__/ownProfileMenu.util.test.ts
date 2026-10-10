@@ -9,7 +9,7 @@ const base: OwnProfileMenuInput = {
 const keys = (input: OwnProfileMenuInput) => buildOwnProfileMenuItems(input).map((item) => item.key);
 
 test("public non-seller sees the personal hubs with Settings last", () => {
-  expect(keys(base)).toEqual(["creator", "rankings", "saved", "orders", "wallet", "verification", "settings"]);
+  expect(keys(base)).toEqual(["creator", "saved", "orders", "wallet", "verification", "settings"]);
 });
 
 test("seller dashboard only for sellers, first in the list", () => {

@@ -8,6 +8,7 @@ import { postImageUrlsForPhotoKey } from "./mockImages.mock";
 import { findPostIncludingSponsored } from "./posts.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { decideStoryAdMock } from "./storyAds.mock";
+import { chooseMockChain, rankMockTopLevelComments, withMockQuoteState } from "./quoteLinks.mock";
 
 const CONVERSATION_PAGE_SIZE = 6;
 const REPLIES_PAGE_SIZE = 4;
@@ -54,13 +55,13 @@ const repliesOf = (postId: string, parentId: string): Comment[] => {
   return authorReply?.parentCommentId === parentId ? [authorReply, ...stored] : stored;
 };
 
-const toThreadReply = (comment: Comment, postAuthorId: string | null, depth: number, hasParentAbove: boolean, maximumDepth = MAXIMUM_INLINE_DEPTH, includeEveryChild = false): ThreadReply => {
+const toThreadReply = (comment: Comment, postAuthorId: string | null, depth: number, hasParentAbove: boolean, maximumDepth = MAXIMUM_INLINE_DEPTH, includeEveryChild = false, chainIds?: ReadonlySet<string>): ThreadReply => {
   const children = repliesOf(comment.postId, comment.id);
   const preferred = children.find((c) => c.author.id === postAuthorId) ?? children[0];
-  const chosen = includeEveryChild ? children : preferred ? [preferred] : [];
-  const inline = depth < maximumDepth ? chosen.map((child, index) => toThreadReply(child, postAuthorId, depth + 1, index === 0, maximumDepth, includeEveryChild)) : [];
+  const chosen = includeEveryChild ? children : chainIds ? children.filter((child) => chainIds.has(child.id)) : preferred ? [preferred] : [];
+  const inline = depth < maximumDepth ? chosen.map((child, index) => toThreadReply(child, postAuthorId, depth + 1, index === 0, maximumDepth, includeEveryChild, chainIds)) : [];
   const media = Object.entries(replyMediaByTextPrefix).find(([prefix]) => comment.text.startsWith(prefix))?.[1];
-  const viewed = withCommentViewerSavedState(comment);
+  const viewed = withMockQuoteState(withCommentViewerSavedState(comment), postAuthorId ?? undefined);
   return {
     ...viewed,
     replyCount: children.length,
@@ -173,9 +174,16 @@ export const postThreadMocks: MockRoute[] = [
     const postAuthorId = findPostIncludingSponsored(postId)?.author.id ?? null;
     const rawSort = query.get("sort");
     const sort: ThreadSort = rawSort === "latest" || rawSort === "likes" ? rawSort : "relevant";
-    const topLevel = sortConversation(commentsForPost(postId).filter((c) => c.parentCommentId === null), sort);
+    const everyComment = commentsForPost(postId);
+    const roots = everyComment.filter((c) => c.parentCommentId === null);
+    const topLevel = sort === "relevant" ? rankMockTopLevelComments(roots, everyComment, postAuthorId ?? undefined) : sortConversation(roots, sort);
     const page = paginate(topLevel, query.get("cursor"), CONVERSATION_PAGE_SIZE);
-    return { data: page.data.map((c) => toThreadReply(c, postAuthorId, 0, false)), nextCursor: page.nextCursor };
+    if (sort !== "relevant") return { data: page.data.map((c) => toThreadReply(c, postAuthorId, 0, false)), nextCursor: page.nextCursor };
+    const withAuthorReplies = [...everyComment, ...(authorReplyFor(postId) ? [authorReplyFor(postId)!] : [])];
+    return {
+      data: page.data.map((c) => toThreadReply(c, postAuthorId, 0, false, 3, false, new Set(chooseMockChain(c, withAuthorReplies, postAuthorId ?? undefined).map((reply) => reply.id)))),
+      nextCursor: page.nextCursor,
+    };
   }),
   createMockRoute("GET", "/api/v1/comments/:commentId/thread", ({ params, query }) => {
     const parent = findCommentAnywhere(params.commentId!) ?? [...authorRepliesByPostId.values()].find((c) => c.id === params.commentId);

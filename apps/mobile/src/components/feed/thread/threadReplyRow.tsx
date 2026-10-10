@@ -18,6 +18,7 @@ import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 
 import { PostActionButton } from "../postActionButton";
+import { CommentQuotedPost } from "../commentQuotedPost";
 
 export const THREAD_AVATAR_SIZE = 40;
 const ACTION_ICON_SIZE = 17;
@@ -114,6 +115,7 @@ export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReply
           </Text>
         ) : null}
         <MentionText text={reply.text ?? ""} mentions={reply.mentions} size={15} lineHeight={20} />
+        <CommentQuotedPost comment={reply} />
         {firstImage ? (
           <PreviewableImage imageUrl={firstImage.url} accessibilityLabel={`Image in ${authorName}'s reply`} style={styles.mediaFrame}>
             <Image

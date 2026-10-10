@@ -1,5 +1,5 @@
 import { useIsFocused } from "@react-navigation/native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { FlatList, Platform, RefreshControl, Share, StyleSheet, View, type TextInput } from "react-native";
 
@@ -20,6 +20,7 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
+import { usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import { useScreenshotSharePrompt } from "@/hooks/useScreenshotSharePrompt.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { postsService } from "@/services/content/posts.service";
@@ -43,7 +44,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const styles = useStyles();
   const openUserProfile = useOpenUserProfile();
   const { postId } = route.params;
-  const queryClient = useQueryClient();
+  const { togglePostLike, followPostAuthor } = usePostInteractions();
   const composerRef = useRef<TextInput>(null);
   const isGuest = useAuthStore((s) => s.status !== "signedIn");
   const post = useQuery({ queryKey: ["post", postId], queryFn: () => postsService.fetchPostById(postId) });
@@ -55,14 +56,6 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const commentThread = useCommentThreadController(postId, undefined, undefined, postAuthorId);
   const conversation = usePostConversation(postId, sort);
   const { offerSendInChat, sendInChatElement } = useShareToChat();
-
-  const updateCachedPost = (change: (p: Post) => Post) => queryClient.setQueryData<Post>(["post", postId], (p) => (p ? change(p) : p));
-
-  const toggleLikeOnPost = useMutation({
-    mutationFn: (liked: boolean) => (liked ? postsService.unlikePost(postId) : postsService.likePost(postId)),
-    onMutate: (liked) => updateCachedPost((p) => ({ ...p, liked: !liked, likes: p.likes + (liked ? -1 : 1) })),
-    onError: (_, liked) => updateCachedPost((p) => ({ ...p, liked, likes: p.likes + (liked ? 1 : -1) })),
-  });
 
   const sharePostLink = async () => {
     await Share.share({ message: webAppLinks.post(postId) }).catch(() => undefined);
@@ -91,13 +84,8 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
       <PostCard
         post={post.data}
         onPressAuthor={() => openUserProfile(post.data!.author.id)}
-        onToggleFollow={() =>
-          requireAuthThen(() => {
-            updateCachedPost((p) => ({ ...p, isFollowingAuthor: true }));
-            postsService.followPostAuthor(post.data!.author.id).catch(() => undefined);
-          }, undefined, "follow creators")
-        }
-        onToggleLike={() => requireAuthThen(() => toggleLikeOnPost.mutate(post.data!.liked), undefined, "like posts")}
+        onToggleFollow={() => followPostAuthor(post.data!)}
+        onToggleLike={() => togglePostLike(post.data!)}
         onPressComments={() => requireAuthThen(() => composerRef.current?.focus(), undefined, "reply")}
         onRepost={() => setReshareTarget(post.data ?? null)}
         onShare={() => offerSendInChat({ kind: "post", id: postId }, sharePostLink)}

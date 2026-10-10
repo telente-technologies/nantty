@@ -9,12 +9,14 @@ import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { usePayoutFeesQuery, usePayoutOnboardingQuery } from "@/components/payoutOnboarding/payoutOnboardingQueries.hook";
+import { VerifyToWithdrawBanner } from "@/components/wallet/verifyToWithdrawBanner";
 import { usePayoutAccountsQuery, useWalletBalanceQuery } from "@/components/wallet/walletQueries.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { walletsService } from "@/services/money/wallets.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { walletVerificationMessage } from "@/utils/walletLines.util";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
 
@@ -28,7 +30,8 @@ export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
   const { data: payoutAccounts = [] } = usePayoutAccountsQuery();
   const { data: onboarding } = usePayoutOnboardingQuery();
   const { data: fees } = usePayoutFeesQuery();
-  const payoutsLocked = !onboarding?.withdrawalsEnabled;
+  const verificationMessage = walletVerificationMessage(wallet);
+  const payoutsLocked = !onboarding?.withdrawalsEnabled || wallet?.verification?.withdrawalsUnlocked === false;
   const [amountText, setAmountText] = useState("");
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const idempotencyKey = useRef(generateIdempotencyKey());
@@ -58,7 +61,7 @@ export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
         <Text size={typeScale.md} lineHeight={16.8} color={colors.textMuted}>
           Available: {available ? formatMoneyForDisplay(available) : "…"}
         </Text>
-        {payoutsLocked ? (
+        {verificationMessage ? <VerifyToWithdrawBanner wallet={wallet} /> : payoutsLocked ? (
           <View style={styles.locked}>
             <Text size={typeScale.md} weight={600} lineHeight={16.8}>Withdrawals are locked</Text>
             <Text size={typeScale.sm} lineHeight={18} color={colors.textMuted}>
