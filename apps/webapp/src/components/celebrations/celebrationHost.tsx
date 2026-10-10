@@ -1,6 +1,7 @@
 "use client";
 
 import { Dialog } from "@/components/ui/dialog";
+import { GiftIcon } from "@/components/ui/icons";
 import { useSession } from "@/components/providers/sessionProvider";
 
 import styles from "./celebrations.module.css";
@@ -19,6 +20,7 @@ export function CelebrationHost() {
       description={celebration.message.slice(celebration.title.length).trim()}
       tone="brand"
       role="alertdialog"
+      icon={<GiftIcon size={24} />}
       actions={[{ label: "Thank you", onClick: dismiss, variant: "primary", isInitialFocus: true }]}
     >
       <div className={styles.dialogBalloons}>

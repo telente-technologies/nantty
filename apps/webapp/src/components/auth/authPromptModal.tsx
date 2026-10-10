@@ -49,7 +49,8 @@ export function AuthPromptModal() {
     setIsBusy(true);
     setFormError(null);
     try {
-      await sendRequestToWebappServer<{ user: User }>("/auth/login", { method: "POST", body: { identifier: identifier.trim(), password } });
+      const signedIn = await sendRequestToWebappServer<{ user: User; csrfToken?: string }>("/auth/login", { method: "POST", body: { identifier: identifier.trim(), password } });
+      if (signedIn.csrfToken) rememberCsrfTokenForRequests(signedIn.csrfToken);
       setPassword("");
       markSignedInAndWaitToReplay();
       router.refresh();

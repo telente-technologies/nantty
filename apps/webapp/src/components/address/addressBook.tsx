@@ -49,7 +49,7 @@ export function AddressEditorDialog({ address, isOpen, onClose, onSaved }: { rea
     onClose();
   });
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title={address ? "Edit address" : "Add address"} layout="sheet" size="large">
+    <Dialog isOpen={isOpen} onClose={onClose} title={address ? "Edit address" : "Add address"} description="A saved address speeds up checkout." layout="sheet" size="large" icon={<MapPinIcon size={24} />}>
       <AddressForm
         key={address?.id ?? "new"}
         initial={address ? addressToInput(address) : emptyAddressInput}
