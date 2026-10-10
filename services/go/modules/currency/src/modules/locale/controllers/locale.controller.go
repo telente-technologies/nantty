@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/google/uuid"
 
@@ -21,7 +20,7 @@ func (controller LocaleController) ResolveViewerLocale(writer http.ResponseWrite
 	locale, err := resolveviewerlocale.Handler{Container: controller.Container}.Execute(request.Context(), resolveviewerlocale.Query{
 		AccountId:            controller.readOptionalAccountId(request),
 		TrustedHeaderCountry: controller.readTrustedHeader(request),
-		RemoteAddress:        strings.TrimSpace(request.Header.Get("X-Real-Ip")),
+		RemoteAddress:        httpserver.ClientIP(request),
 		ClientRegionHint:     request.Header.Get("X-Client-Region"),
 	})
 	if err != nil {

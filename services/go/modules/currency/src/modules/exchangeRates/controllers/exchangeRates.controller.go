@@ -66,7 +66,7 @@ func (controller ExchangeRatesController) SetExchangeRate(writer http.ResponseWr
 	staff, _ := staffauth.StaffFromContext(request.Context())
 	result, err := setexchangerate.Handler{Container: controller.Container}.Execute(request.Context(), setexchangerate.Command{
 		StaffId: staff.Id, StaffRole: staff.Role, Currency: request.PathValue("currency"), Rate: body.Rate, Reason: body.Reason,
-		ConfirmLargeChange: body.ConfirmLargeChange, IpAddress: strings.TrimSpace(request.Header.Get("X-Real-Ip")), UserAgent: request.UserAgent(),
+		ConfirmLargeChange: body.ConfirmLargeChange, IpAddress: httpserver.ClientIP(request), UserAgent: request.UserAgent(),
 		RequestId: httpserver.RequestIdFromContext(request.Context()),
 	})
 	if err != nil {

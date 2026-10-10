@@ -24,6 +24,7 @@ import (
 	"zudomart/platform/identityports/identitytest"
 	"zudomart/platform/postgres"
 	"zudomart/platform/servicemodule"
+	"zudomart/platform/staffauth"
 )
 
 type countryLookupByAccount map[uuid.UUID]string
@@ -34,7 +35,8 @@ func (lookup countryLookupByAccount) FindAccountCountryCode(_ context.Context, a
 
 type recordingAudit struct{ events []identityports.AuditEvent }
 
-func (recorder *recordingAudit) RecordAuditEvent(_ context.Context, event identityports.AuditEvent) error {
+func (recorder *recordingAudit) RecordAuditEvent(ctx context.Context, event identityports.AuditEvent) error {
+	staffauth.MarkAuditRecorded(ctx)
 	recorder.events = append(recorder.events, event)
 	return nil
 }
@@ -66,6 +68,8 @@ func startCurrencyModuleAgainstFreshSchema(t *testing.T) *currencyHarness {
 	t.Cleanup(func() { dropSchemaAndClose(administrator, schema) })
 	harness := &currencyHarness{t: t, tokens: identitytest.NewFakeTokenService(t), publisher: &events.RecordingPublisher{}, audit: &recordingAudit{}, countries: countryLookupByAccount{}}
 	identityports.Default.RegisterStaffTokenService(harness.tokens)
+	identityports.Default.RegisterStaffSessionChecker(identitytest.ActiveStaffSessionChecker{})
+	identityports.Default.RegisterStaffNetworkPolicy(identitytest.PermissiveStaffNetworkPolicy{})
 	identityports.Default.RegisterAccountCountryLookup(harness.countries)
 	identityports.Default.RegisterAuditRecorder(harness.audit)
 	t.Cleanup(func() {
