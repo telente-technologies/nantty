@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { BulletLine } from "@/components/ui/bulletLine";
 import { Text } from "@/components/ui/text";
-import { describeAccountStanding, describeRestriction, formatTimeRemaining } from "@/services/accountHealth.service";
+import { describeAccountStanding, describeRestriction, formatTimeRemaining } from "@/services/account/accountHealth.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { AccountHealth, AccountStrike, CopyrightNotice } from "@/types";
 

@@ -2,7 +2,7 @@ import { StackActions } from "@react-navigation/native";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
-import { refreshTrackingConsents } from "@/services/productInteractions.service";
+import { refreshTrackingConsents } from "@/services/sellers/productInteractions.service";
 import { rootNavigationRef } from "@/navigation/navigationRef";
 import { useAuthStore } from "@/store/auth.store";
 import { usePendingAuthIntentStore } from "@/store/pendingAuthIntent.store";

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { SealCheck20Icon, ShieldCheck24Icon } from "@/components/icons";
 import { ClaimTextField } from "@/components/moderation/copyrightClaimFields";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,9 @@ export function AppealStrikeSheet({ strike, onClose }: { readonly strike: Accoun
   return (
     <BottomSheet visible={!!strike} onClose={onClose} title={appeal.isSuccess ? "Appeal sent" : `Appeal this ${strike?.kind === "WARNING" ? "warning" : "strike"}`}>
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          {appeal.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <ShieldCheck24Icon size={22} color={colors.textMuted} />}
+        </View>
         {appeal.isSuccess ? (
           <Text size={14} lineHeight={19.6} color={colors.textMuted}>
             A different reviewer will look at your appeal. We'll let you know the outcome by email and in your notifications.

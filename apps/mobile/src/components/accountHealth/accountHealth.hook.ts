@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { ACCOUNT_HEALTH_QUERY_KEY, accountHealthService } from "@/services/accountHealth.service";
+import { ACCOUNT_HEALTH_QUERY_KEY, accountHealthService } from "@/services/account/accountHealth.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CounterNoticeInput, ID } from "@/types";
 

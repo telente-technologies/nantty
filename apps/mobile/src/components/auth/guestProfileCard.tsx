@@ -7,7 +7,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { rootNavigationRef } from "@/navigation/navigationRef";
 import { useGuestSessionStore } from "@/store/guestSession.store";
-import { refreshTrackingConsents } from "@/services/productInteractions.service";
+import { refreshTrackingConsents } from "@/services/sellers/productInteractions.service";
 import { makeThemedStyles } from "@/theme";
 import { openAuthFlowThenReturn } from "@/utils/requireAuth.util";
 

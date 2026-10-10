@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { Scales24Icon, SealCheck20Icon } from "@/components/icons";
 import { ClaimCheckbox, ClaimTextField } from "@/components/moderation/copyrightClaimFields";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { COUNTER_NOTICE_DECLARATION } from "@/constants/copyrightLegal.constant";
-import { isValidContactEmailAddress } from "@/services/copyrightClaims.service";
+import { isValidContactEmailAddress } from "@/services/moderation/copyrightClaims.service";
 import { useTheme } from "@/theme";
 import type { CopyrightNotice } from "@/types";
 
@@ -27,6 +28,9 @@ export function CounterNoticeSheet({ notice, onClose }: { readonly notice: Copyr
   return (
     <BottomSheet visible={!!notice} onClose={onClose} title={submit.isSuccess ? "Counter-notice sent" : "Send a counter-notice"}>
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          {submit.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Scales24Icon size={22} color={colors.textMuted} />}
+        </View>
         {submit.isSuccess ? (
           <Text size={14} lineHeight={19.6} color={colors.textMuted}>
             We've sent your counter-notice to our copyright team and the claimant. If it is accepted and the claimant doesn't start court action, your content is restored after 10 business days.

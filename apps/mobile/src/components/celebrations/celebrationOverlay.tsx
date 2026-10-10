@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { AccessibilityInfo, Pressable, StyleSheet, View } from "react-native";
 
+import { Trophy24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 import { Text } from "@/components/ui/text";
@@ -26,6 +27,9 @@ export function CelebrationOverlay({ celebration, onDismiss }: CelebrationOverla
         <Pressable style={StyleSheet.absoluteFill} accessibilityRole="button" accessibilityLabel="Close celebration" onPress={onDismiss} />
         <FloatingBalloons height={640} count={9} style={styles.balloons} />
         <View style={styles.card} accessibilityRole="alert" accessibilityLiveRegion="polite" accessibilityLabel={celebration.message}>
+          <View style={{ width: 56, height: 56, borderRadius: 28, alignSelf: "center", alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+            <Trophy24Icon size={28} color={colors.textMuted} />
+          </View>
           <Text size={22} weight={700} lineHeight={28} align="center" accessible={false}>{celebration.title}</Text>
           <Text size={14} lineHeight={20} color={colors.textMuted} align="center" accessible={false}>{celebration.message.slice(celebration.title.length).trim()}</Text>
           {celebration.stats.length > 0 ? (

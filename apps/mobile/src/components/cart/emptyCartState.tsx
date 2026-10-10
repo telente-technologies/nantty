@@ -7,8 +7,8 @@ import { ShoppingCart48Icon } from "@/components/icons";
 import { FeaturedProductsGrid } from "@/components/product/featuredProductsGrid";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { categoriesService } from "@/services/categories.service";
-import { productsService } from "@/services/products.service";
+import { categoriesService } from "@/services/catalog/categories.service";
+import { productsService } from "@/services/sellers/products.service";
 
 export function EmptyCartState() {
   const { colors } = useTheme();

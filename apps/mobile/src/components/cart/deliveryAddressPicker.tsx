@@ -10,7 +10,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { usersService } from "@/services/users.service";
+import { usersService } from "@/services/account/users.service";
 import { useDeliveryAddressStore } from "@/store/deliveryAddress.store";
 
 export function DeliveryAddressPicker({ onAddAddress }: { onAddAddress: () => void }) {

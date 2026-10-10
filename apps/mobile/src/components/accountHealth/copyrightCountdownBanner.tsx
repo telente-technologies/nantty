@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Warning20Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { formatTimeRemaining } from "@/services/accountHealth.service";
+import { formatTimeRemaining } from "@/services/account/accountHealth.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { ID } from "@/types";
 
