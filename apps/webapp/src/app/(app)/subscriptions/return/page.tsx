@@ -2,13 +2,17 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 
 import { PaymentReturnStatus } from "@/components/actions/paymentReturnStatus";
 import { creatorSubscriptionsService } from "@/services/webActions.service";
+import { forgetPendingValue, pendingSubscriptionStorageKey, readPendingValue } from "@/utils/paymentReturn.util";
 
 function SubscriptionReturn() {
   const subscriptionId = useSearchParams().get("subscriptionId") ?? "";
+  useEffect(() => {
+    if (subscriptionId && readPendingValue(pendingSubscriptionStorageKey) === subscriptionId) forgetPendingValue(pendingSubscriptionStorageKey);
+  }, [subscriptionId]);
   const stateQuery = useQuery({
     queryKey: ["subscriptions", subscriptionId],
     queryFn: () => creatorSubscriptionsService.fetchSubscriptionState(subscriptionId),
