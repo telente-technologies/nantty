@@ -65,7 +65,7 @@ func ConvertAccountToCurrentUserResponse(account *ent.Account) CurrentUserRespon
 	joinedAt := account.CreatedAt.UTC().Format(time.RFC3339)
 	return CurrentUserResponse{
 		Id: account.ID.String(), Name: account.Name, Username: account.Username, Email: account.Email, Birthday: birthday, Roles: account.Roles,
-		IsSeller: slices.Contains(account.Roles, "seller"), EmailVerified: account.EmailVerifiedAt != nil, HasPassword: account.PasswordHash != nil,
+		IsCreator: slices.Contains(account.Roles, "creator"), IsSeller: slices.Contains(account.Roles, "seller"), EmailVerified: account.EmailVerifiedAt != nil, HasPassword: account.PasswordHash != nil,
 		JoinedAt: joinedAt, CreatedAt: joinedAt, AccountStatus: string(account.Status), MustChangePassword: account.MustChangePassword,
 	}
 }

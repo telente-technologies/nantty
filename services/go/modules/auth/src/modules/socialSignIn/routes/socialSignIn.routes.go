@@ -5,10 +5,12 @@ import (
 
 	"zudomart/modules/auth/src/container"
 	"zudomart/modules/auth/src/modules/socialSignIn/controllers"
+	"zudomart/platform/httpserver"
 )
 
 func MountSocialSignInRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.SocialSignInController{Container: container}
-	mux.HandleFunc("POST /api/v1/auth/google", controller.SignInWithGoogle)
-	mux.HandleFunc("POST /api/v1/auth/apple", controller.SignInWithApple)
+	rateLimitAuth := httpserver.RateLimitAuthEndpoints()
+	mux.Handle("POST /api/v1/auth/google", rateLimitAuth(http.HandlerFunc(controller.SignInWithGoogle)))
+	mux.Handle("POST /api/v1/auth/apple", rateLimitAuth(http.HandlerFunc(controller.SignInWithApple)))
 }
