@@ -59,11 +59,14 @@ func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Contex
 	if err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
+	if err := withdrawals.LockUserCashForWithdrawal(ctx, transaction, userId, currency); err != nil {
+		return dtos.WithdrawalDto{}, err
+	}
 	alreadyReserved, err := withdrawals.sumWithdrawalsNotYetSentToProvider(ctx, transaction, userId, currency)
 	if err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
-	if providerAvailableMinor-alreadyReserved < amountMinor {
+	if !withdrawalFitsAvailableBalance(providerAvailableMinor, alreadyReserved, amountMinor) {
 		return dtos.WithdrawalDto{}, ErrInsufficientFunds
 	}
 	status := withdrawal.StatusQueued
@@ -77,6 +80,9 @@ func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Contex
 		SetDestinationLabel(fmt.Sprintf("Withdrawal to %s ••••%s", account.BankName, account.AccountNumberLast4)).SetStatus(status).
 		SetCreatedAt(withdrawals.Container.Now().UTC()).Save(ctx)
 	if err != nil {
+		return dtos.WithdrawalDto{}, err
+	}
+	if _, err := withdrawals.settleDebtsBeforeWithdrawal(ctx, transaction, userId, currency, created.ID.String()); err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
 	_, err = withdrawals.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
@@ -94,6 +100,11 @@ func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Contex
 		return dtos.WithdrawalDto{}, err
 	}
 	return ConvertWithdrawal(created), withdrawals.Container.Outbox.EnqueueInTransaction(ctx, transaction, "withdrawal.requested", created.ID.String(), created.CreatedAt, withdrawalEventData(created))
+}
+
+func withdrawalFitsAvailableBalance(providerAvailableMinor, alreadyReserved, amountMinor int64) bool {
+	return providerAvailableMinor >= 0 && alreadyReserved >= 0 && amountMinor > 0 &&
+		alreadyReserved <= providerAvailableMinor && amountMinor <= providerAvailableMinor-alreadyReserved
 }
 
 func (withdrawals Withdrawals) CancelWithdrawalInTransaction(ctx context.Context, transaction *sql.Tx, userId string, withdrawalId uuid.UUID) (dtos.WithdrawalDto, error) {
