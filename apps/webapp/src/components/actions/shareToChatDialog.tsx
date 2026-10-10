@@ -16,6 +16,15 @@ import { messagesService } from "@/services/messages.service";
 import { chatSharesService, toShareReferenceKind, type ShareReferenceKind } from "@/services/webActions.service";
 
 import styles from "./actionDialogs.module.css";
+import { buildAbsoluteSiteUrl, buildPostPath, buildProductPath, buildStorePath } from "@/utils/seoPaths.util";
+
+const shareLinkPathFor = (kind: ShareReferenceKind, referenceId: string): string | null => {
+  if (kind === "post" || kind === "clip" || kind === "video") return buildPostPath(referenceId);
+  if (kind === "product") return buildProductPath({ id: referenceId });
+  if (kind === "store") return buildStorePath(referenceId);
+  if (kind === "live") return `/live/${encodeURIComponent(referenceId)}`;
+  return null;
+};
 
 const maximumChatsPerShare = 20;
 
@@ -63,6 +72,16 @@ export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareT
     );
   }
 
+  const shareLinkPath = shareLinkPathFor(kind, referenceId);
+  async function copyShareLink(path: string) {
+    try {
+      await navigator.clipboard.writeText(buildAbsoluteSiteUrl(path));
+      showToast({ text: "Link copied" });
+    } catch {
+      showToast({ text: "Couldn't copy the link", tone: "error" });
+    }
+  }
+
   return (
     <ModalDialog
       isOpen={isOpen}
@@ -73,6 +92,11 @@ export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareT
       icon={<ShareActionIcon size={24} />}
       footer={
         <>
+          {shareLinkPath ? (
+            <Button variant="secondary" onClick={() => void copyShareLink(shareLinkPath)}>
+              Copy link
+            </Button>
+          ) : null}
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>

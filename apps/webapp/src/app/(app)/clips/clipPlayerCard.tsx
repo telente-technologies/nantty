@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/icons";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
+import { usePostNotificationMute } from "@/components/feed/postNotificationMute.hook";
+import { useSession } from "@/components/providers/sessionProvider";
+import { canOfferPostNotificationMute } from "@/utils/postNotificationMute.util";
 import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { formatCompactCount } from "@/utils/formatCount.util";
@@ -67,6 +70,8 @@ export function ClipPlayerCard({
   onShareLink,
 }: ClipPlayerCardProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const { viewer } = useSession();
+  const notificationMute = usePostNotificationMute(clip);
   const lastTapAt = useRef(0);
   const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isPausedByViewer, setIsPausedByViewer] = useState(false);
@@ -74,6 +79,7 @@ export function ClipPlayerCard({
   const [isTaggedOpen, setIsTaggedOpen] = useState(false);
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
   const media = clip.media[0];
+  const isLandscapeClip = !!media?.width && !!media.height && media.width > media.height;
   const playableUrl = canPlayInBrowser(media?.url ?? null) ? (media as { url: string }).url : null;
   const captionNeedsToggle = clip.text.length > 140;
   const visibleCaption = !captionNeedsToggle || isCaptionExpanded ? clip.text : `${clip.text.slice(0, 140).trimEnd()}…`;
@@ -121,7 +127,7 @@ export function ClipPlayerCard({
         {playableUrl ? (
           <video
             ref={videoRef}
-            className={styles.video}
+            className={[styles.video, isLandscapeClip ? styles.videoLandscape : ""].join(" ")}
             src={playableUrl}
             poster={media?.posterUrl ?? undefined}
             loop
@@ -177,7 +183,7 @@ export function ClipPlayerCard({
             </button>
           </div>
           <ClipTaggedPill post={clip} isOpen={isTaggedOpen} onOpenChange={setIsTaggedOpen} />
-          <p className={styles.clipCaption}>
+          <p className={[styles.clipCaption, isCaptionExpanded ? styles.clipCaptionExpanded : ""].join(" ")}>
             {visibleCaption}{" "}
             {captionNeedsToggle ? (
               <button type="button" className={styles.captionToggle} onClick={() => setIsCaptionExpanded((expanded) => !expanded)}>
@@ -258,6 +264,7 @@ export function ClipPlayerCard({
             canonicalPath={`/clips?start=${clip.id}`}
             triggerClassName={styles.actionCircle}
             downloadTarget={findDownloadTargetForPost(clip)}
+            notificationMuteAction={canOfferPostNotificationMute(viewer !== null, clip) ? { isMuted: notificationMute.isMuted, onToggle: notificationMute.toggle } : undefined}
           />
         </span>
       </div>

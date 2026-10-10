@@ -20,6 +20,7 @@ import type { ThreadReply as ThreadReplyModel } from "@/types/postThread.type";
 import { formatCompactCount, formatTimeSincePosted } from "@/utils/formatDate.util";
 
 import { useThreadReplies } from "./postThread.hook";
+import { QuotedPostCard } from "../quotedPostCard";
 import styles from "./thread.module.css";
 import { describeCount } from "@/utils/countLabel.util";
 
@@ -134,6 +135,7 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
         <p className={styles.text}>
           <MentionText text={reply.text} mentions={reply.mentions} />
         </p>
+        {reply.quotedPost || reply.quotedPostUnavailable ? <QuotedPostCard quoted={reply.quotedPost ?? null} unavailable={!reply.quotedPost} /> : null}
         {firstImage ? (
           <div className={styles.media} style={{ aspectRatio: firstImage.width && firstImage.height ? `${firstImage.width} / ${firstImage.height}` : "4 / 3" }}>
             <MediaImage src={firstImage.url} alt={`Image in ${reply.author.name}'s reply`} sizes="(max-width: 768px) 80vw, 520px" />
@@ -209,19 +211,22 @@ interface ThreadReplyBranchProps {
   readonly nestingLevel?: number;
   readonly startExpanded?: boolean;
   readonly onOpenThread?: (reply: ThreadReplyModel) => void;
+  readonly localRepliesFor?: (parentId: string) => readonly ThreadReplyModel[];
 }
 
 export const MAXIMUM_THREAD_INDENT_LEVELS = 3;
 
-export function ThreadReplyBranch({ reply, postId, postAuthorId, hasParentAbove, showReplyingTo, onReply, onRepostReply, nestingLevel = 0, startExpanded = false, onOpenThread }: ThreadReplyBranchProps) {
+export function ThreadReplyBranch({ reply, postId, postAuthorId, hasParentAbove, showReplyingTo, onReply, onRepostReply, nestingLevel = 0, startExpanded = false, onOpenThread, localRepliesFor }: ThreadReplyBranchProps) {
   const [isExpanded, setIsExpanded] = useState(startExpanded);
-  const childrenAreIndented = nestingLevel + 1 <= MAXIMUM_THREAD_INDENT_LEVELS;
   const { query, replies } = useThreadReplies(reply.id, isExpanded);
-  const children = isExpanded && query.data ? replies : reply.inlineReplies;
-  const hiddenCount = Math.max(0, reply.replyCount - children.length);
-  const opensThreadInstead = onOpenThread !== undefined && nestingLevel >= MAXIMUM_THREAD_INDENT_LEVELS && hiddenCount > 0 && !isExpanded;
+  const serverChildren = isExpanded && query.data ? replies : reply.inlineReplies;
+  const children = [...serverChildren, ...(localRepliesFor?.(reply.id) ?? []).filter((local) => !serverChildren.some((child) => child.id === local.id))];
+  const continuesAsChain = children.length === 1 && !isExpanded;
+  const childrenAreIndented = nestingLevel + 1 <= MAXIMUM_THREAD_INDENT_LEVELS && !continuesAsChain;
+  const hiddenCount = Math.max(0, reply.replyCount - serverChildren.length);
+  const opensThreadInstead = onOpenThread !== undefined && hiddenCount > 0 && !isExpanded && (nestingLevel >= MAXIMUM_THREAD_INDENT_LEVELS || reply.continuesInThread === true);
   const canShowMore = !opensThreadInstead && ((!isExpanded && hiddenCount > 0) || (isExpanded && (query.hasNextPage || query.isLoading)));
-  const label = query.isFetching && isExpanded ? "Loading replies" : isExpanded ? "Show more replies" : hiddenCount === 1 ? "Show 1 reply" : `Show ${hiddenCount} replies`;
+  const label = query.isFetching && isExpanded ? "Loading replies" : isExpanded ? "Show more replies" : `Show ${hiddenCount}${children.length > 0 ? " more" : ""} ${hiddenCount === 1 ? "reply" : "replies"}`;
 
   return (
     <>
@@ -235,11 +240,12 @@ export function ThreadReplyBranch({ reply, postId, postAuthorId, hasParentAbove,
               postId={postId}
               postAuthorId={postAuthorId}
               hasParentAbove={index === 0}
-              showReplyingTo={!childrenAreIndented || index > 0}
+              showReplyingTo={!continuesAsChain && (!childrenAreIndented || index > 0)}
               onReply={onReply}
               onRepostReply={onRepostReply}
-              nestingLevel={nestingLevel + 1}
+              nestingLevel={continuesAsChain ? nestingLevel : nestingLevel + 1}
               onOpenThread={onOpenThread}
+              localRepliesFor={localRepliesFor}
             />
           ))}
         </div>
@@ -254,7 +260,11 @@ export function ThreadReplyBranch({ reply, postId, postAuthorId, hasParentAbove,
         <button
           type="button"
           className={styles.showMore}
-          onClick={() => (isExpanded ? void query.fetchNextPage() : setIsExpanded(true))}
+          onClick={() => {
+            if (query.isFetching) return;
+            if (isExpanded) void query.fetchNextPage();
+            else setIsExpanded(true);
+          }}
           disabled={query.isFetching}
         >
           <span className={[styles.showMoreRail, children.length === 0 ? styles.showMoreRailJoined : ""].join(" ")} aria-hidden="true" />

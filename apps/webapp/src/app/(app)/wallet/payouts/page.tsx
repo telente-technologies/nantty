@@ -7,9 +7,11 @@ import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
+import { VerifyToWithdrawBanner } from "@/components/wallet/verifyToWithdrawBanner";
 import { createIdempotencyKey, readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { walletsService } from "@/services/wallets.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { readVerifyToWithdrawMessage, readWalletVerification, verifyActionForWallet } from "@/utils/walletLines.util";
 
 import styles from "../page.module.css";
 
@@ -30,7 +32,8 @@ export default function WalletPayoutsPage() {
       setBankCode("");
       setAccountNumber("");
       setError(null);
-      void queryClient.invalidateQueries({ queryKey: ["wallet", "payout-accounts"] });
+      void queryClient.invalidateQueries({ queryKey: ["wallet"] });
+      void queryClient.invalidateQueries({ queryKey: ["rail", "wallet"] });
       showToast({ text: "Payout account added" });
     },
     onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
@@ -43,14 +46,12 @@ export default function WalletPayoutsPage() {
     },
     onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
   });
+  const withdrawalAccountId = selectedAccountId ?? accounts.data?.[0]?.id ?? null;
+  const withdrawalAmountMinor = Math.round(Number.parseFloat(amountText || "0") * 100);
   const withdraw = useMutation({
-    mutationFn: () => {
-      const accountId = selectedAccountId ?? accounts.data?.[0]?.id;
+    mutationFn: (payoutAccountId: string) => {
       const currency = summary.data?.available.currency ?? "NGN";
-      const amountMinor = Math.round(Number.parseFloat(amountText || "0") * 100);
-      if (!accountId) throw new Error("Add a payout account first.");
-      if (!Number.isFinite(amountMinor) || amountMinor <= 0) throw new Error("Enter an amount greater than zero.");
-      return walletsService.requestWithdrawal({ payoutAccountId: accountId, amount: { amountMinor, currency } }, createIdempotencyKey("withdraw"));
+      return walletsService.requestWithdrawal({ payoutAccountId, amount: { amountMinor: withdrawalAmountMinor, currency } }, createIdempotencyKey("withdraw"));
     },
     onSuccess: () => {
       setAmountText("");
@@ -61,14 +62,19 @@ export default function WalletPayoutsPage() {
     onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
   });
 
+  const verifyMessage = readVerifyToWithdrawMessage(summary.data);
+  const verifyAction = verifyActionForWallet(summary.data, "#payout-accounts");
+  const withdrawalsLocked = readWalletVerification(summary.data)?.withdrawalsUnlocked === false;
+
   if (accounts.isLoading) return <ListRowsSkeleton label="Loading payout accounts" rows={4} />;
   if (accounts.isError) return <ErrorState description="We couldn't load payout accounts." action={<RetryButton onRetry={() => accounts.refetch()} />} />;
 
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Payouts & withdraw</h1>
-      <p className={styles.note}>Available: {summary.data ? formatMoneyForDisplay(summary.data.available) : "…"}</p>
-      <section className={styles.section} aria-label="Payout accounts">
+      {verifyMessage ? <VerifyToWithdrawBanner message={verifyMessage} href={verifyAction.href} actionLabel={verifyAction.label} /> : null}
+      <p className={styles.note}>Available to withdraw: {summary.data ? formatMoneyForDisplay(summary.data.available) : "…"}</p>
+      <section id="payout-accounts" className={styles.section} aria-label="Payout accounts">
         <h2 className={styles.sectionTitle}>Payout accounts</h2>
         {(accounts.data ?? []).length === 0 ? (
           <EmptyState title="No payout accounts" description="Add a bank account to receive withdrawals." />
@@ -107,7 +113,9 @@ export default function WalletPayoutsPage() {
           className={styles.form}
           onSubmit={(event) => {
             event.preventDefault();
-            withdraw.mutate();
+            if (!withdrawalAccountId) return setError("Add a payout account first.");
+            if (!Number.isFinite(withdrawalAmountMinor) || withdrawalAmountMinor <= 0) return setError("Enter an amount greater than zero.");
+            withdraw.mutate(withdrawalAccountId);
           }}
         >
           <label className={styles.field}>To account
@@ -121,7 +129,8 @@ export default function WalletPayoutsPage() {
             <input className={styles.input} value={amountText} onChange={(event) => setAmountText(event.target.value)} placeholder="0.00" inputMode="decimal" required />
           </label>
           {error ? <p className={styles.error} role="alert">{error}</p> : null}
-          <button type="submit" className={styles.primary} disabled={withdraw.isPending || (accounts.data ?? []).length === 0}>{withdraw.isPending ? "Requesting…" : "Request withdrawal"}</button>
+          {withdrawalsLocked ? <p className={styles.note}>Withdrawals open once your payout details are verified. Your balance stays in your wallet until then.</p> : null}
+          <button type="submit" className={styles.primary} disabled={withdraw.isPending || withdrawalsLocked || (accounts.data ?? []).length === 0}>{withdraw.isPending ? "Requesting…" : "Request withdrawal"}</button>
         </form>
       </section>
       <section className={styles.section} aria-label="Withdrawal history">

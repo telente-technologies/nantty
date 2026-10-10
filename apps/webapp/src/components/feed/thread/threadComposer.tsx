@@ -12,6 +12,7 @@ import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { commentsService } from "@/services/webActions.service";
 import type { ThreadReply } from "@/types/postThread.type";
+import type { Comment } from "@/types";
 import type { ReplyRestriction } from "@/types/postAudience.type";
 import { LockIcon } from "@/components/ui/icons";
 import { maximumMentionsPerText } from "@/types/mentions.type";
@@ -19,6 +20,8 @@ import { buildMentionEntitiesFromText, countMentionsInText, type MentionDraft } 
 
 import styles from "./thread.module.css";
 import composerStyles from "./threadComposer.module.css";
+import { QuotedPostCard } from "../quotedPostCard";
+import { useQuotedPostPreview } from "../quotedPostPreview.hook";
 
 interface ThreadComposerProps {
   readonly postId: string;
@@ -26,20 +29,24 @@ interface ThreadComposerProps {
   readonly replyTarget: ThreadReply | null;
   readonly onCancelReply: () => void;
   readonly replyRestriction?: ReplyRestriction | null;
+  readonly onPosted?: (created: Comment) => void;
 }
 
-export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCancelReply, replyRestriction }: ThreadComposerProps) {
+export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCancelReply, replyRestriction, onPosted }: ThreadComposerProps) {
   const { viewer } = useSession();
   const queryClient = useQueryClient();
   const [text, setText] = useState("");
   const [chosenMentions, setChosenMentions] = useState<readonly MentionDraft[]>([]);
   const mentionCount = countMentionsInText(text, chosenMentions);
   const replyingToUsername = replyTarget?.author.username ?? postAuthorUsername;
+  const quote = useQuotedPostPreview(text);
   const postMutation = useMutation({
-    mutationFn: (replyText: string) => commentsService.addComment(postId, replyText, replyTarget?.id, buildMentionEntitiesFromText(replyText, chosenMentions)),
-    onSuccess: () => {
+    mutationFn: (replyText: string) => commentsService.addComment(postId, replyText, replyTarget?.id, buildMentionEntitiesFromText(replyText, chosenMentions), quote.quotedPostId),
+    onSuccess: (created) => {
       setText("");
       setChosenMentions([]);
+      quote.reset();
+      onPosted?.(created);
       void queryClient.invalidateQueries({ queryKey: ["post-thread", postId] });
       if (replyTarget) void queryClient.invalidateQueries({ queryKey: ["post-thread-replies", replyTarget.id] });
       showToast({ text: "Reply posted" });
@@ -51,7 +58,7 @@ export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCanc
   function submitReply(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const replyText = text.trim();
-    if (!replyText) return;
+    if (!replyText || postMutation.isPending) return;
     requireAuthThen(() => postMutation.mutate(replyText), "Sign in to join the conversation.");
   }
 
@@ -112,6 +119,11 @@ export function ThreadComposer({ postId, postAuthorUsername, replyTarget, onCanc
           Reply
         </button>
       </div>
+      {quote.preview ? (
+        <div className={composerStyles.composerQuote}>
+          <QuotedPostCard quoted={quote.preview.quoted} loading={quote.preview.status === "loading"} unavailable={quote.preview.status === "unavailable"} onRemove={quote.remove} />
+        </div>
+      ) : null}
       {mentionCount > 0 ? (
         <span className={mentionStyles.mentionCounter} aria-live="polite">
           {mentionCount}/{maximumMentionsPerText} mentions

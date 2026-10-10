@@ -96,12 +96,13 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
     const plan = plans.find((candidate) => candidate.id === planId && candidate.creatorId === params.creatorId);
     if (!plan) throw new ApiError(404, "Plan not found");
     const subscriptionId = `subs_${Date.now()}`;
-    subscriptionStates.set(subscriptionId, { subscriptionId, status: "active", planId, renewsAt: isoDateHoursAgo(plan.interval === "month" ? -720 : -8760) });
+    subscriptionStates.set(subscriptionId, { subscriptionId, creatorId: plan.creatorId, status: "active", planId, renewsAt: isoDateHoursAgo(plan.interval === "month" ? -720 : -8760) });
     plan.subscriberCount += 1;
     const viewerId = getSignedInMockUser().id;
     subscribedCreatorIdsByViewerId.set(viewerId, new Set([...(subscribedCreatorIdsByViewerId.get(viewerId) ?? []), plan.creatorId]));
     return { subscriptionId, reference: subscriptionId, provider: "paystack", accessCode: "", authorizationUrl: `/subscriptions/return?subscriptionId=${subscriptionId}` };
   }),
+  createMockRoute("GET", "/api/v1/creator-subscriptions", () => ({ data: [...subscriptionStates.values()], nextCursor: null })),
   createMockRoute("GET", "/api/v1/subscriptions/:subscriptionId", ({ params }) => {
     const state = subscriptionStates.get(params.subscriptionId!);
     if (!state) throw new ApiError(404, "Subscription not found");

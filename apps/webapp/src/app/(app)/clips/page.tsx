@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
@@ -9,6 +9,8 @@ import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedb
 import { SegmentedControl } from "@/components/ui/controls";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
 import { discoveryService } from "@/services/discovery.service";
+import { usePostLikeActions } from "@/components/feed/usePostLike.hook";
+import { setFollowingAuthorEverywhere } from "@/utils/postEngagementCache.util";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { SpeakerHighIcon, SpeakerMutedIcon } from "@/components/ui/icons";
 import { showToast } from "@/components/ui/toast";
@@ -28,7 +30,8 @@ export default function ClipsPage() {
   const [tab, setTab] = useState<ClipsTab>("forYou");
   const [activeClipId, setActiveClipId] = useState<string | null>(startClipId);
   const [isMuted, setIsMuted] = useState(true);
-  const [engagementByClipId, setEngagementByClipId] = useState<Record<string, ClipEngagement>>({});
+  const queryClient = useQueryClient();
+  const clipLikeActions = usePostLikeActions();
   const [shareCountByClipId, setShareCountByClipId] = useState<Record<string, number>>({});
   const [commentsForClip, setCommentsForClip] = useState<Clip | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
@@ -79,35 +82,22 @@ export default function ClipsPage() {
   }
 
   function engagementFor(clip: Clip): ClipEngagement {
-    return engagementByClipId[clip.id] ?? { liked: clip.liked, likes: clip.likes, isFollowing: clip.isFollowingAuthor };
+    return { liked: clip.liked, likes: clip.likes, isFollowing: clip.isFollowingAuthor };
   }
 
   function toggleLikeOnClip(clip: Clip) {
-    requireAuthThen(() => {
-      const wasLiked = engagementFor(clip).liked;
-      setEngagementByClipId((all) => ({
-        ...all,
-        [clip.id]: { ...engagementFor(clip), liked: !wasLiked, likes: Math.max(0, engagementFor(clip).likes + (wasLiked ? -1 : 1)) },
-      }));
-      void (wasLiked ? discoveryService.unlikeClip(clip.id) : discoveryService.likeClip(clip.id)).catch(() =>
-        setEngagementByClipId((all) => ({ ...all, [clip.id]: engagementFor(clip) })),
-      );
-    }, "Sign in to like clips.");
+    clipLikeActions.toggleLike(clip, "Sign in to like clips.");
   }
 
   function likeClipWithDoubleTap(clip: Clip) {
-    if (!engagementFor(clip).liked) toggleLikeOnClip(clip);
+    if (!clip.liked) clipLikeActions.likeIfNotLiked(clip, "Sign in to like clips.");
   }
 
   function toggleFollowOnClipAuthor(clip: Clip) {
     requireAuthThen(() => {
-      const wasFollowing = engagementFor(clip).isFollowing;
-      setEngagementByClipId((all) => ({ ...all, [clip.id]: { ...engagementFor(clip), isFollowing: !wasFollowing } }));
-      if (!wasFollowing) {
-        void discoveryService.followClipAuthor(clip.author.id).catch(() =>
-          setEngagementByClipId((all) => ({ ...all, [clip.id]: { ...engagementFor(clip), isFollowing: false } })),
-        );
-      }
+      if (clip.isFollowingAuthor) return;
+      setFollowingAuthorEverywhere(queryClient, clip.author.id, true);
+      void discoveryService.followClipAuthor(clip.author.id).catch(() => setFollowingAuthorEverywhere(queryClient, clip.author.id, false));
     }, "Sign in to follow creators.");
   }
 

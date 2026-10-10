@@ -74,6 +74,18 @@ export const postsMocks: MockRoute[] = [
   ),
   createMockRoute("POST", "/api/v1/posts/:postId/repost", ({ params }) => updateMockPost(params.postId!, (p) => ({ ...p, reposts: p.reposts + 1 }))),
   createMockRoute("POST", "/api/v1/posts/:postId/share", () => undefined),
+  createMockRoute("GET", "/api/v1/posts/:postId/notifications-mute", ({ params }) => {
+    return { postId: params.postId!, muted: mockPostsState.get(params.postId!)?.viewerNotificationsMuted === true };
+  }),
+  createMockRoute("PUT", "/api/v1/posts/:postId/notifications-mute", ({ params }) => {
+    if (!findPostIncludingSponsored(params.postId!)) throw new ApiError(404, "Post not found.", "POST_NOT_FOUND");
+    updateMockPost(params.postId!, (p) => ({ ...p, viewerNotificationsMuted: true }));
+    return { postId: params.postId!, muted: true };
+  }),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/notifications-mute", ({ params }) => {
+    updateMockPost(params.postId!, (p) => ({ ...p, viewerNotificationsMuted: false }));
+    return { postId: params.postId!, muted: false };
+  }),
   createMockRoute("PUT", "/api/v1/posts/:postId/pin", ({ params }) => {
     const post = mockPostsState.get(params.postId!);
     if (!post) throw new ApiError(404, "This post was removed");

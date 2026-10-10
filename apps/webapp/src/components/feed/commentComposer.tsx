@@ -10,17 +10,20 @@ import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { MentionAutocompleteInput } from "@/components/mentions/mentionAutocompleteInput";
 import { commentsService } from "@/services/webActions.service";
+import type { Comment } from "@/types";
 import { maximumMentionsPerText } from "@/types/mentions.type";
 import { buildMentionEntitiesFromText, countMentionsInText, type MentionDraft } from "@/utils/mentions.util";
 import mentionStyles from "@/components/mentions/mentions.module.css";
 
 import styles from "./commentsPanel.module.css";
+import { QuotedPostCard } from "./quotedPostCard";
+import { useQuotedPostPreview } from "./quotedPostPreview.hook";
 
 interface CommentComposerProps {
   readonly postId: string;
   readonly parentCommentId?: string;
   readonly replyingTo?: MentionDraft;
-  readonly onPosted?: () => void;
+  readonly onPosted?: (created: Comment) => void;
   readonly autoFocus?: boolean;
 }
 
@@ -30,14 +33,16 @@ export function CommentComposer({ postId, parentCommentId, replyingTo, onPosted,
   const [text, setText] = useState(replyingTo ? `@${replyingTo.username} ` : "");
   const [chosenMentions, setChosenMentions] = useState<readonly MentionDraft[]>(replyingTo ? [replyingTo] : []);
   const mentionCount = countMentionsInText(text, chosenMentions);
+  const quote = useQuotedPostPreview(text);
   const postMutation = useMutation({
-    mutationFn: (commentText: string) => commentsService.addComment(postId, commentText, parentCommentId, buildMentionEntitiesFromText(commentText, chosenMentions)),
-    onSuccess: () => {
+    mutationFn: (commentText: string) => commentsService.addComment(postId, commentText, parentCommentId, buildMentionEntitiesFromText(commentText, chosenMentions), quote.quotedPostId),
+    onSuccess: (created) => {
       setText("");
       setChosenMentions([]);
+      quote.reset();
       void queryClient.invalidateQueries({ queryKey: ["comments", postId] });
       if (parentCommentId) void queryClient.invalidateQueries({ queryKey: ["commentReplies", parentCommentId] });
-      onPosted?.();
+      onPosted?.(created);
     },
     onError: (error) => showToast({ text: readErrorMessageForDisplay(error), tone: "error" }),
   });
@@ -45,7 +50,7 @@ export function CommentComposer({ postId, parentCommentId, replyingTo, onPosted,
   function submitComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const commentText = text.trim();
-    if (!commentText) return;
+    if (!commentText || postMutation.isPending) return;
     requireAuthThen(() => postMutation.mutate(commentText), "Sign in to join the conversation.");
   }
 
@@ -76,6 +81,11 @@ export function CommentComposer({ postId, parentCommentId, replyingTo, onPosted,
         <span className={mentionStyles.mentionCounter} aria-live="polite">
           {mentionCount}/{maximumMentionsPerText} mentions
         </span>
+      ) : null}
+      {quote.preview ? (
+        <div className={styles.composerQuote}>
+          <QuotedPostCard quoted={quote.preview.quoted} loading={quote.preview.status === "loading"} unavailable={quote.preview.status === "unavailable"} onRemove={quote.remove} />
+        </div>
       ) : null}
       <button type="submit" className={styles.composerSend} disabled={!text.trim() || postMutation.isPending}>
         {parentCommentId ? "Reply" : "Post"}

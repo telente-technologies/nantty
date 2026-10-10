@@ -8,17 +8,19 @@ export const postsService = {
   fetchPostById: (postId: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}`),
   fetchPostAnalytics: (postId: string) => sendRequestToWebappServer<PostAnalytics>(`/api/v1/posts/${postId}/analytics`),
   likePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/like`, { method: "POST", idempotencyKey: createIdempotencyKey("like") }),
-  unlikePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/like`, { method: "DELETE" }),
+  unlikePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/like`, { method: "DELETE", idempotencyKey: createIdempotencyKey("unlike") }),
   pinPost: (postId: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/pin`, { method: "PUT", idempotencyKey: createIdempotencyKey("pin") }),
   unpinPost: (postId: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/pin`, { method: "DELETE", idempotencyKey: createIdempotencyKey("unpin") }),
   refreshPostLinkPreview: (postId: string) => sendRequestToWebappServer<LinkPreview | null>(`/api/v1/posts/${postId}/link-preview`, { method: "POST" }),
-  repostPost: (postId: string, text?: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/repost`, { method: "POST", body: text ? { text } : {} }),
+  repostPost: (postId: string, text?: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/repost`, { method: "POST", body: text ? { text } : {}, idempotencyKey: createIdempotencyKey("repost") }),
   fetchCommentsPage: (postId: string, cursor: string | null | undefined) =>
     sendRequestToWebappServer<Page<CommentWithReplies>>(`/api/v1/posts/${postId}/comments`, { query: { cursor: cursor ?? undefined } }),
   fetchPostQuotes: (postId: string, cursor: string | null | undefined) => sendRequestToWebappServer<Page<Post>>(`/api/v1/posts/${postId}/quotes`, { query: { cursor: cursor ?? undefined } }),
   fetchPostTaggedUsers: (postId: string, cursor: string | null) =>
     sendRequestToWebappServer<Page<TaggedUser>>(`/api/v1/posts/${encodeURIComponent(postId)}/tagged-users`, { query: { cursor: cursor ?? undefined } }),
   updateReplySettings: (postId: string, replyPolicy: ReplyPolicy) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/reply-settings`, { method: "PATCH", body: { replyPolicy } }),
+  mutePostNotifications: (postId: string) => sendRequestToWebappServer<{ readonly postId: string; readonly muted: boolean }>(`/api/v1/posts/${postId}/notifications-mute`, { method: "PUT", idempotencyKey: createIdempotencyKey("postmute") }),
+  unmutePostNotifications: (postId: string) => sendRequestToWebappServer<{ readonly postId: string; readonly muted: boolean }>(`/api/v1/posts/${postId}/notifications-mute`, { method: "DELETE", idempotencyKey: createIdempotencyKey("postunmute") }),
   recordPostShare: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/share`, { method: "POST", body: {} }),
 };
 

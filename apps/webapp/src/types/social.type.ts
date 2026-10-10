@@ -184,6 +184,14 @@ export interface LiveSessionDetails {
   readonly giftsEnabled?: boolean;
   readonly hostIsCreator?: boolean;
   readonly pinnedProductId?: ID | null;
+  readonly hostRanking?: LiveHostRanking | null;
+}
+
+export interface LiveHostRanking {
+  readonly globalRank: number;
+  readonly categoryRank: number | null;
+  readonly category: string | null;
+  readonly period: "day" | "week" | "month" | "all";
 }
 
 export interface CoinBalance {

@@ -1,5 +1,5 @@
 .page {
-  --clip-feed-height: calc(100dvh - 60px - 56px - var(--bottom-bar-height) - var(--space-5) - 52px);
+  --clip-feed-height: calc(100dvh - 60px - 56px - var(--bottom-bar-height) - env(safe-area-inset-bottom, 0px) - var(--space-5) - 52px);
 
   display: flex;
   flex-direction: column;
@@ -86,7 +86,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   cursor: pointer;
+}
+
+.videoLandscape {
+  object-fit: contain;
 }
 
 .playToggle {
@@ -111,7 +116,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-8) var(--space-4) var(--space-4);
+  padding: var(--space-8) var(--space-4) var(--space-3);
   padding-right: 72px;
   background: linear-gradient(to top, var(--color-overlay), transparent);
   color: var(--color-on-brand);
@@ -139,6 +144,14 @@
   -webkit-box-orient: vertical;
 }
 
+.clipCaptionExpanded {
+  display: block;
+  max-height: calc(var(--clip-feed-height) * 0.4);
+  overflow-y: auto;
+  -webkit-line-clamp: unset;
+  pointer-events: auto;
+}
+
 .clipSound {
   font-size: var(--text-xs);
   opacity: 0.85;
@@ -157,7 +170,7 @@
 .actionColumn {
   position: absolute;
   right: var(--space-3);
-  bottom: var(--space-8);
+  bottom: var(--space-3);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -427,7 +440,7 @@
 
   .actionColumn {
     position: static;
-    padding-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
   }
 
   .overlay {

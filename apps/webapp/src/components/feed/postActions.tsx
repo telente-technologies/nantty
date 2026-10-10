@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
@@ -23,6 +23,7 @@ import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { postsService } from "@/services/posts.service";
 import type { Post, SaveTargetType } from "@/types";
 import { formatCompactCount } from "@/utils/formatDate.util";
+import { addRepostEverywhere } from "@/utils/postEngagementCache.util";
 
 import styles from "./postActions.module.css";
 import { describeCount } from "@/utils/countLabel.util";
@@ -55,6 +56,7 @@ interface PostActionsProps {
 
 export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCount, onToggleLike, likePopSignal = 0 }: PostActionsProps) {
   const { isSaved, toggleSaved } = useSaveToggle(saveTargetType, post.id, post.bookmarked);
+  const queryClient = useQueryClient();
   const [hasReposted, setHasReposted] = useState(false);
   const [viewsInfoOpen, setViewsInfoOpen] = useState(false);
   const [lastToggledTone, setLastToggledTone] = useState<ActionTone | null>(null);
@@ -67,13 +69,14 @@ export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCoun
       setHasReposted(true);
       showToast({ text: "Reposted" });
     },
+    onSuccess: () => addRepostEverywhere(queryClient, post.id),
     onError: (error) => {
       setHasReposted(false);
       showToast({ text: readErrorMessageForDisplay(error), tone: "error" });
     },
   });
   const savedCount = Math.max((post.saveCount ?? 0) + (isSaved === post.bookmarked ? 0 : isSaved ? 1 : -1), 0);
-  const repostCount = post.reposts + (hasReposted ? 1 : 0);
+  const repostCount = post.reposts + (repostMutation.isPending ? 1 : 0);
 
   return (
     <div className={styles.row}>

@@ -55,9 +55,39 @@ export interface Address {
   readonly details: string;
 }
 
+export type WalletLineKey = "available" | "pending" | "locked" | "earningsPayable" | "adCredit" | "coins" | "debts";
+
+export interface WalletLine {
+  readonly key: WalletLineKey | (string & {});
+  readonly label: string;
+  readonly description: string;
+  readonly amount: { readonly amountMinor: number; readonly currency: Money["currency"] | "COIN" };
+}
+
+export type PayoutVerificationNextStep = "payout_setup" | "bank_validation" | "identity_check" | "business_verification";
+
+export interface WalletVerification {
+  readonly level: 0 | 1 | 2;
+  readonly withdrawalsUnlocked: boolean;
+  readonly waitingForVerification: Money;
+  readonly nextStep: PayoutVerificationNextStep | (string & {}) | null;
+  readonly message: string | null;
+}
+
 export interface WalletSummary {
   readonly available: Money;
   readonly pending: Money;
+  readonly locked?: Money;
+  readonly inEscrow?: Money;
+  readonly payoutRequested?: Money;
+  readonly negativeBalance?: Money;
+  readonly nextAvailableAt?: ISODate | null;
+  readonly adCredit?: Money;
+  readonly earningsPayable?: Money;
+  readonly debts?: Money;
+  readonly coins?: { readonly spendable: number; readonly earned: number };
+  readonly lines?: readonly WalletLine[];
+  readonly verification?: WalletVerification | null;
 }
 
 export interface WalletTransaction {

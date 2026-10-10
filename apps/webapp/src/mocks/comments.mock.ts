@@ -5,10 +5,12 @@ import { isoDateHoursAgo, me } from "./fixtures.mock";
 import { keepAllowedMentionEntities } from "./mentions.mock";
 import { mockPostsState } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { chooseMockChain, mockPostAuthorId, rankMockTopLevelComments, resolveMockQuote, withMockQuoteState } from "./quoteLinks.mock";
+import { quotedSummaryFromPost } from "@/utils/quotedPostLinks.util";
 
 const TOP_LEVEL_PAGE_SIZE = 6;
 const REPLIES_PAGE_SIZE = 4;
-const PREVIEW_REPLY_COUNT = 2;
+const PREVIEW_REPLY_COUNT = 3;
 
 const buildCommenter = (id: string, name: string, username: string, verified = false): UserSummary => ({
   id,
@@ -177,26 +179,32 @@ const collectDescendantIds = (postId: string, commentId: string): string[] =>
 export const commentsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId/comments", ({ params, query }) => {
     const postId = params.postId!;
-    const topLevel = commentsForPost(postId).filter((c) => c.parentCommentId === null).sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true));
+    const postAuthorId = mockPostAuthorId(postId);
+    const everyComment = commentsForPost(postId);
+    const topLevel = rankMockTopLevelComments(everyComment.filter((c) => c.parentCommentId === null), everyComment, postAuthorId);
     const page = paginateByOffset(topLevel, query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
     const withPreviews: CommentWithReplies[] = page.data.map((c) => ({
-      ...c,
-      previewReplies: directRepliesOf(postId, c.id).slice(0, PREVIEW_REPLY_COUNT),
+      ...withMockQuoteState(c, postAuthorId),
+      previewReplies: chooseMockChain(c, everyComment, postAuthorId, PREVIEW_REPLY_COUNT).map((reply) => withMockQuoteState(reply, postAuthorId)),
     }));
     return { data: withPreviews, nextCursor: page.nextCursor };
   }),
   createMockRoute("GET", "/api/v1/comments/:commentId/replies", ({ params, query }) => {
     const parent = findCommentAnywhere(params.commentId!);
     if (!parent) return { data: [], nextCursor: null };
-    return paginateByOffset(directRepliesOf(parent.postId, parent.id), query.get("cursor"), REPLIES_PAGE_SIZE);
+    const page = paginateByOffset(directRepliesOf(parent.postId, parent.id), query.get("cursor"), REPLIES_PAGE_SIZE);
+    return { ...page, data: page.data.map((c) => withMockQuoteState(c, mockPostAuthorId(parent.postId))) };
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/comments", ({ params, body }) => {
     const postId = params.postId!;
-    const input = body as { text: string; parentCommentId?: string; mentions?: unknown };
+    const input = body as { text: string; parentCommentId?: string; mentions?: unknown; quotedPostId?: string | null };
     const targetPost = mockPostsState.get(postId);
     if (targetPost?.viewerCanReply === false && targetPost.author.id !== me.id) throw new ApiError(403, targetPost.replyRestriction?.message ?? "You can't reply to this post.", targetPost.replyRestriction?.reason ?? "REPLIES_OFF");
     const parent = input.parentCommentId ? (findCommentAnywhere(input.parentCommentId) ?? null) : null;
-    const created = { ...createStoredComment(postId, me, input.text, parent, 0, 0), mentions: keepAllowedMentionEntities(input.text, input.mentions) };
+    const quote = resolveMockQuote(input.text, input.quotedPostId);
+    const text = quote?.text ?? input.text;
+    const stored = { ...createStoredComment(postId, me, text, parent, 0, 0), mentions: keepAllowedMentionEntities(text, input.mentions) };
+    const created = withMockQuoteState(quote ? { ...stored, quotedPost: quotedSummaryFromPost(quote.original) } : stored, targetPost?.author.id);
     const comments = commentsForPost(postId);
     commentsByPostId.set(postId, parent ? [...comments, created] : [created, ...comments]);
     if (parent) replaceStoredComment(parent.id, (c) => ({ ...c, replyCount: c.replyCount + 1 }));

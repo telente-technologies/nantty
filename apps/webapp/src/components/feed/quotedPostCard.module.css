@@ -1,0 +1,141 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-3);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
+  background: var(--surface-card);
+  color: inherit;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.link {
+  transition: background-color 140ms ease;
+}
+
+.link:hover {
+  background: var(--surface-sunken);
+}
+
+.placeholder {
+  flex-direction: row;
+  align-items: center;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding-right: 28px;
+  font-size: var(--text-sm);
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.verified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+}
+
+.handle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-muted);
+}
+
+.bodyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.mediaOnly {
+  display: block;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.thumb,
+.wideThumb {
+  position: relative;
+  display: block;
+  flex: none;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--surface-sunken);
+}
+
+.thumb {
+  width: 72px;
+  height: 72px;
+}
+
+.wideThumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.play {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--surface-sunken);
+  color: var(--ink-strong);
+}
+
+.placeholder .remove {
+  position: static;
+}

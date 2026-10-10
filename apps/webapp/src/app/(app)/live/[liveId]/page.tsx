@@ -7,12 +7,13 @@ import { use, useState } from "react";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { LiveChatPanel } from "@/components/live/liveChatPanel";
 import { LiveGiftTray } from "@/components/live/liveGiftTray";
+import { LiveHostRankAvatar } from "@/components/live/liveHostRankAvatar";
 import { LiveReportDialog } from "@/components/live/liveReportDialog";
 import { LiveSafetyHostBanner, LiveSafetyOverlay } from "@/components/live/liveSafetyNotices";
 import styles from "@/components/live/liveRoom.module.css";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
-import { Avatar, MediaImage } from "@/components/ui/media";
+import { MediaImage } from "@/components/ui/media";
 import { liveService } from "@/services/webActions.service";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 
@@ -49,19 +50,19 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
           ) : (
             <MediaImage src={live.coverUrl ?? null} alt="" sizes="(max-width: 1024px) 100vw, 720px" />
           )}
-          <span className={isLive ? styles.liveBadge : styles.endedBadge}>{isLive ? "LIVE" : live.status === "upcoming" ? "Starting soon" : "Ended"}</span>
+          <span className={isLive ? styles.liveBadge : styles.endedBadge}>{isLive ? "LIVE" : "Ended"}</span>
           {isLive ? <span className={styles.viewerBadge}>{formatCountWithThousandsSuffix(live.viewers)} watching</span> : null}
           {isPausedForSafety && !isHostView ? <LiveSafetyOverlay message={safety?.viewerMessage} /> : null}
         </div>
         {safety && isHostView ? <LiveSafetyHostBanner liveId={live.id} safety={safety} onAppealed={() => liveQuery.refetch()} /> : null}
         <div className={styles.hostBar}>
-          <Link href={`/user/${live.host.id}`} className={styles.host}>
-            <Avatar name={live.host.name} src={live.host.avatarUrl} size="md" />
-            <span>
+          <div className={styles.host}>
+            <LiveHostRankAvatar hostName={live.host.name} avatarUrl={live.host.avatarUrl} ranking={isLive ? live.hostRanking : null} />
+            <Link href={`/user/${live.host.id}`} className={styles.hostLink}>
               <span className={styles.hostName}>{live.host.name}</span>
               <span className={styles.liveTitle}>{live.title}</span>
-            </span>
-          </Link>
+            </Link>
+          </div>
           <ContentActionsMenu shareKind="live" reportTargetType="live" targetId={live.id} canonicalPath={`/live/${live.id}`} onReport={() => setIsReportOpen(true)} />
         </div>
         {live.products.length > 0 ? (

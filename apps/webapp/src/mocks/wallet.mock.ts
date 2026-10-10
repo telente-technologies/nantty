@@ -1,11 +1,13 @@
 import { ApiError } from "@/errors/api.error";
 import type { PayoutAccountInput, WithdrawalRequest } from "@/types/account.type";
-import type { PayoutAccount, WalletSummary, WalletTransaction } from "@/types";
+import type { Money, PayoutAccount, WalletLine, WalletSummary, WalletTransaction } from "@/types";
+import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 import { bankNameForCode } from "./banks.mock";
+import { readMockCoinBalance } from "./coins.mock";
 import { creatorEarningRecords, creatorEarningsUsdCentsByStatus, signedInUserIsApprovedCreator } from "./creatorFixtures.mock";
 import { buildEscrowHoldFromRecord } from "./escrowBuilders.mock";
-import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
+import { getSignedInMockUser, isoDateHoursAgo, signedInUserIsTheDemoSeller } from "./fixtures.mock";
 import { convertUsdCentsToViewerCurrency, convertViewerMoneyToUsdCents } from "./locale.mock";
 import { mockOrderRecords, sellerPayoutUsdCentsForOrderRecord } from "./orderFixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -38,15 +40,61 @@ function computeWalletBalancesInUsdCents() {
   const held = signedInStoreRecords().filter((record) => HELD_ORDER_STATUSES.has(record.status));
   const creator = creatorEarningsUsdCentsByStatus();
   const withdrawn = myWithdrawals().filter((w) => w.status !== "failed").reduce((sum, w) => sum + w.usdCents, 0);
+  const requested = myWithdrawals().filter((w) => w.status === "pending").reduce((sum, w) => sum + w.usdCents, 0);
   return {
     available: released.reduce((sum, record) => sum + sellerPayoutUsdCentsForOrderRecord(record), 0) + creator.availableUsdCents - withdrawn,
-    pending: held.reduce((sum, record) => sum + sellerPayoutUsdCentsForOrderRecord(record), 0) + creator.pendingUsdCents,
+    pending: held.reduce((sum, record) => sum + sellerPayoutUsdCentsForOrderRecord(record), 0),
+    earningsPayable: creator.pendingUsdCents,
+    payoutRequested: requested,
   };
 }
 
-const buildWalletSummary = (): WalletSummary => {
+const MOCK_AD_CREDIT_USD_CENTS = 1_500;
+
+export const signedInUserIsPayoutVerified = () => myPayoutAccounts().length > 0;
+
+const line = (key: WalletLine["key"], label: string, description: string, amount: WalletLine["amount"]): WalletLine => ({ key, label, description, amount });
+
+export const buildWalletSummary = (): WalletSummary => {
   const balances = computeWalletBalancesInUsdCents();
-  return { available: convertUsdCentsToViewerCurrency(Math.max(0, balances.available)), pending: convertUsdCentsToViewerCurrency(balances.pending) };
+  const money = (usdCents: number): Money => convertUsdCentsToViewerCurrency(Math.max(0, usdCents));
+  const available = money(balances.available);
+  const pending = money(balances.pending);
+  const zero = money(0);
+  const earningsPayable = money(balances.earningsPayable);
+  const adCredit = money(signedInUserIsTheDemoSeller() ? MOCK_AD_CREDIT_USD_CENTS : 0);
+  const coins = readMockCoinBalance();
+  const verified = signedInUserIsPayoutVerified();
+  const waiting: Money = { amountMinor: available.amountMinor + earningsPayable.amountMinor, currency: available.currency };
+  return {
+    available,
+    pending,
+    locked: zero,
+    inEscrow: pending,
+    payoutRequested: money(balances.payoutRequested),
+    negativeBalance: zero,
+    nextAvailableAt: null,
+    adCredit,
+    earningsPayable,
+    debts: zero,
+    coins: { spendable: coins, earned: 0 },
+    lines: [
+      line("available", "Available to withdraw", "Sales and creator earnings you can withdraw now, after anything you owe.", available),
+      line("pending", "Pending (escrow)", "Order money held until the buyer confirms delivery.", pending),
+      line("locked", "Locked", "Released order money in its short safety hold before it becomes available.", zero),
+      line("earningsPayable", "Creator earnings", "Gift, subscription and ad-share earnings waiting to move to your available balance.", earningsPayable),
+      line("adCredit", "Ad credit", "Prepaid credit for Zudomart ads and boosts. It cannot be withdrawn.", adCredit),
+      line("coins", "Coins", "Coins to send as gifts, plus coins you earned. Coins are not cash.", { amountMinor: coins, currency: "COIN" }),
+      line("debts", "Owed to Zudomart", "Refunds or chargebacks taken from your next earnings.", zero),
+    ],
+    verification: {
+      level: verified ? 1 : 0,
+      withdrawalsUnlocked: verified,
+      waitingForVerification: verified ? zero : waiting,
+      nextStep: verified ? "identity_check" : "payout_setup",
+      message: verified ? null : waiting.amountMinor > 0 ? `Verify to withdraw ${formatMoneyForDisplay(waiting, { showDecimals: false })}` : "Verify to withdraw your earnings",
+    },
+  };
 };
 
 function listWalletTransactions(): WalletTransaction[] {
@@ -108,6 +156,7 @@ export const walletMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/wallets/me/withdrawals", ({ body }) => {
     const { amount, payoutAccountId } = body as WithdrawalRequest;
     const summary = buildWalletSummary();
+    if (!signedInUserIsPayoutVerified()) throw new ApiError(403, "Verify your payout details to withdraw. Your money stays in your wallet until then.", "SELLER_VERIFICATION_REQUIRED");
     if (amount.currency !== summary.available.currency) throw new ApiError(422, "Withdrawals must be in your wallet currency");
     if (amount.amountMinor > summary.available.amountMinor) throw new ApiError(422, "Amount is more than your available balance");
     const account = myPayoutAccounts().find((a) => a.id === payoutAccountId);

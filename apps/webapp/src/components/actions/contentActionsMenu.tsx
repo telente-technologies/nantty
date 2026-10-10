@@ -11,6 +11,7 @@ import { showToast } from "@/components/ui/toast";
 import type { ReportTargetType, ShareReferenceKind } from "@/services/webActions.service";
 import type { DownloadTarget } from "@/types";
 import { buildAbsoluteSiteUrl } from "@/utils/seoPaths.util";
+import { postNotificationMuteLabel } from "@/utils/postNotificationMute.util";
 
 import styles from "./contentActionsMenu.module.css";
 import { CopyrightClaimDialog } from "@/components/copyright/copyrightClaimDialog";
@@ -31,11 +32,12 @@ interface ContentActionsMenuProps {
   readonly soundId?: string | null;
   readonly downloadTarget?: DownloadTarget | null;
   readonly pinAction?: { readonly isPinned: boolean; readonly onTogglePin: () => void; readonly disabled?: boolean };
+  readonly notificationMuteAction?: { readonly isMuted: boolean; readonly onToggle: () => void };
 }
 
 type CopyrightDialogTarget = { readonly targetType: "post" | "clip" | "live" | "sound"; readonly targetId: string };
 
-export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName, onReport, soundId, downloadTarget = null, pinAction }: ContentActionsMenuProps) {
+export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName, onReport, soundId, downloadTarget = null, pinAction, notificationMuteAction }: ContentActionsMenuProps) {
   const { activeDownload, startDownload, cancelDownload } = useBrandedMediaDownload();
   const { isOpen: menuIsOpen, close: menuClose, containerRef: menuContainerRef, triggerRef: menuTriggerRef, menuRef: menuMenuRef, triggerProps: menuTriggerProps, menuProps: menuMenuProps } = usePopoverMenu();
   const [copyrightTarget, setCopyrightTarget] = useState<CopyrightDialogTarget | null>(null);
@@ -84,6 +86,12 @@ export function ContentActionsMenu({ shareKind, reportTargetType, targetId, cano
             <button type="button" role="menuitem" className={styles.item} onClick={() => chooseAction(pinAction.onTogglePin)} disabled={pinAction.disabled}>
               <AppIcon name="pushPin24" size={18} />
               <span>{pinAction.isPinned ? "Unpin from profile" : "Pin to profile"}</span>
+            </button>
+          ) : null}
+          {notificationMuteAction ? (
+            <button type="button" role="menuitem" className={styles.item} onClick={() => chooseAction(notificationMuteAction.onToggle)}>
+              <AppIcon name={notificationMuteAction.isMuted ? "bell24" : "bellSlash24"} size={18} />
+              <span>{postNotificationMuteLabel(notificationMuteAction.isMuted)}</span>
             </button>
           ) : null}
           {isOwnContent ? null : (

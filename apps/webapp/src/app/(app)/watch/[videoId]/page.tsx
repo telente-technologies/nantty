@@ -5,6 +5,7 @@ import Link from "next/link";
 import { use, useState } from "react";
 
 import { CommentsPanel } from "@/components/feed/commentsPanel";
+import { usePostLike } from "@/components/feed/usePostLike.hook";
 import { formatVideoDuration } from "@/components/feed/postCardMedia";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { RetryButton } from "@/components/ui/controls";
@@ -54,22 +55,11 @@ function UpNextList({ currentVideoId }: { readonly currentVideoId: string }) {
 
 function VideoDetails({ video }: { readonly video: Post }) {
   const media = video.media[0];
-  const [isLiked, setIsLiked] = useState(video.liked);
-  const [likeCount, setLikeCount] = useState(video.likes);
+  const isLiked = video.liked;
+  const likeCount = video.likes;
+  const { toggleLike } = usePostLike(video, "Sign in to like videos.");
   const [isFollowing, setIsFollowing] = useState(video.isFollowingAuthor);
   const [shareCount, setShareCount] = useState(video.reposts);
-
-  function toggleLike() {
-    requireAuthThen(() => {
-      const likeNow = !isLiked;
-      setIsLiked(likeNow);
-      setLikeCount((count) => Math.max(0, count + (likeNow ? 1 : -1)));
-      void (likeNow ? postsService.likePost(video.id) : postsService.unlikePost(video.id)).catch(() => {
-        setIsLiked(!likeNow);
-        setLikeCount((count) => Math.max(0, count + (likeNow ? -1 : 1)));
-      });
-    }, "Sign in to like videos.");
-  }
 
   function toggleFollow() {
     requireAuthThen(() => {

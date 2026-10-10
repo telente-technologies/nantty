@@ -4,7 +4,11 @@ import { fetchPublicProduct, fetchPublicProfileById } from "./publicContent.serv
 
 const legacyPathPattern = /^\/(u|user|product)\/([^/]+)$/;
 
+const removedPagePaths: Readonly<Record<string, string>> = { "/rankings": "/me" };
+
 export async function resolveLegacyPublicPathRedirect(pathname: string): Promise<string | null> {
+  const removedPageTarget = removedPagePaths[pathname.replace(/\/+$/, "")];
+  if (removedPageTarget) return removedPageTarget;
   const match = pathname.match(legacyPathPattern);
   if (!match) return null;
   const [, kind, rawValue = ""] = match;

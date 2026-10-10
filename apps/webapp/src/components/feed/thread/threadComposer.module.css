@@ -114,3 +114,7 @@
 .restrictedText strong {
   color: var(--ink-strong);
 }
+
+.composerQuote {
+  padding-left: calc(40px + var(--space-3));
+}

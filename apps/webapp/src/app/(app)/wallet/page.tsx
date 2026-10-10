@@ -2,47 +2,46 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRightIcon, CoinsIcon, WalletIcon } from "@phosphor-icons/react/dist/ssr";
 
 import { InlineLink, RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
+import { ArrowRightIcon, CoinIcon, WalletIcon } from "@/components/ui/icons";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
+import { VerifyToWithdrawBanner } from "@/components/wallet/verifyToWithdrawBanner";
 import { walletsService } from "@/services/wallets.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { formatWalletLineAmount, readVerifyToWithdrawMessage, readWalletLines, verifyActionForWallet } from "@/utils/walletLines.util";
 
 import styles from "./page.module.css";
 
 export default function WalletPage() {
   const summary = useQuery({ queryKey: ["wallet", "summary"], queryFn: () => walletsService.fetchMyWalletSummary() });
-  const coins = useQuery({ queryKey: ["coins", "balance"], queryFn: () => walletsService.fetchMyCoinBalance() });
   const transactions = useQuery({ queryKey: ["wallet", "transactions"], queryFn: () => walletsService.listMyTransactions() });
   const escrow = useQuery({ queryKey: ["wallet", "escrow"], queryFn: () => walletsService.listMyEscrowHolds() });
-  const loading = summary.isLoading || coins.isLoading || transactions.isLoading;
+  const loading = summary.isLoading || transactions.isLoading;
   if (loading) return <ListRowsSkeleton label="Loading wallet" rows={6} />;
-  if (summary.isError) return <ErrorState description="We couldn't load your wallet." action={<RetryButton onRetry={() => summary.refetch()} />} />;
+  if (summary.isError || !summary.data) return <ErrorState description="We couldn't load your wallet." action={<RetryButton onRetry={() => summary.refetch()} />} />;
 
   const recent = (transactions.data ?? []).slice(0, 5);
+  const lines = readWalletLines(summary.data);
+  const verifyMessage = readVerifyToWithdrawMessage(summary.data);
+  const verifyAction = verifyActionForWallet(summary.data, "/wallet/payouts#payout-accounts");
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Wallet</h1>
-      <div className={styles.grid}>
-        <div className={styles.card}>
-          <span className={styles.label}>Available</span>
-          <span className={styles.value}>{summary.data ? formatMoneyForDisplay(summary.data.available) : "—"}</span>
-        </div>
-        <div className={styles.card}>
-          <span className={styles.label}>Pending in escrow</span>
-          <span className={styles.value}>{summary.data ? formatMoneyForDisplay(summary.data.pending) : "—"}</span>
-        </div>
-        <div className={styles.card}>
-          <span className={styles.label}>Coins</span>
-          <span className={styles.value}>{coins.data ? coins.data.coins.toLocaleString() : "—"}</span>
-        </div>
-      </div>
-      <p className={styles.note}>Pending money is held in escrow until buyers confirm delivery, then it moves to your available balance.</p>
+      {verifyMessage ? <VerifyToWithdrawBanner message={verifyMessage} href={verifyAction.href} actionLabel={verifyAction.label} /> : null}
+      <ul className={styles.grid} aria-label="Balances">
+        {lines.map((line, index) => (
+          <li key={`${line.key}:${index}`} className={styles.card}>
+            <span className={styles.label}>{line.label}</span>
+            <span className={styles.value}>{formatWalletLineAmount(line)}</span>
+            {line.description ? <span className={styles.cardNote}>{line.description}</span> : null}
+          </li>
+        ))}
+      </ul>
       <div className={styles.actions}>
         <Link className={styles.primary} href="/wallet/payouts"><WalletIcon size={18} /> Withdraw</Link>
-        <Link className={styles.linkButton} href="/wallet/coins"><CoinsIcon size={18} /> Coins</Link>
+        <Link className={styles.linkButton} href="/wallet/coins"><CoinIcon size={18} /> Coins</Link>
       </div>
       {(escrow.data ?? []).length > 0 ? (
         <section className={styles.section} aria-label="Held in escrow">

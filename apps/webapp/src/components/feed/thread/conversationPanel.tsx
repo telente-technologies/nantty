@@ -6,7 +6,7 @@ import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { UnderlineTabs } from "@/components/ui/underlineTabs";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
-import type { Post } from "@/types";
+import type { Comment, Post } from "@/types";
 import type { ThreadReply, ThreadSort } from "@/types/postThread.type";
 import { formatCompactCount } from "@/utils/formatDate.util";
 
@@ -20,7 +20,7 @@ import styles from "./thread.module.css";
 import panelStyles from "./conversationPanel.module.css";
 
 const SORT_OPTIONS = [
-  { value: "top", label: "Top" },
+  { value: "relevant", label: "Top" },
   { value: "latest", label: "Latest" },
 ] as const;
 
@@ -47,12 +47,20 @@ const formatFullTimestamp = (iso: string) => {
 };
 
 export function ConversationPanel({ post }: { readonly post: Post }) {
-  const [sort, setSort] = useState<ThreadSort>("top");
+  const [sort, setSort] = useState<ThreadSort>("relevant");
   const [replyTarget, setReplyTarget] = useState<ThreadReply | null>(null);
   const [focusedReply, setFocusedReply] = useState<ThreadReply | null>(null);
+  const [localReplies, setLocalReplies] = useState<Readonly<Record<string, readonly ThreadReply[]>>>({});
+  const rememberPostedReply = (created: Comment) => {
+    const parentKey = created.parentCommentId ?? "root";
+    const asThreadReply: ThreadReply = { ...created, isPostAuthor: created.author.id === post.author.id, connector: { depth: 0, hasParentAbove: false, hasChildBelow: false, isLastInChain: true }, inlineReplies: [] };
+    setLocalReplies((current) => ({ ...current, [parentKey]: [...(current[parentKey] ?? []), asThreadReply] }));
+  };
+  const localRepliesFor = (parentId: string) => localReplies[parentId] ?? [];
   const { viewer } = useSession();
   const isOwnPost = viewer?.id === post.author.id;
   const { query, rows } = usePostConversation(post.id, sort);
+  const localTopLevel = (localReplies["root"] ?? []).filter((local) => !rows.some((row) => row.kind === "reply" && row.reply.id === local.id));
   const sentinelRef = useInfiniteScrollSentinel({
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
@@ -87,21 +95,21 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
       <div id={panelId} role="tabpanel" className={panelStyles.list}>
         {focusedReply ? (
           <div className={panelStyles.conversation}>
-            <ThreadReplyBranch key={focusedReply.id} reply={{ ...focusedReply, inlineReplies: [] }} postId={post.id} postAuthorId={post.author.id} hasParentAbove={false} showReplyingTo onReply={setReplyTarget} startExpanded onOpenThread={setFocusedReply} />
+            <ThreadReplyBranch key={focusedReply.id} reply={{ ...focusedReply, inlineReplies: [] }} postId={post.id} postAuthorId={post.author.id} hasParentAbove={false} showReplyingTo onReply={setReplyTarget} startExpanded onOpenThread={setFocusedReply} localRepliesFor={localRepliesFor} />
           </div>
         ) : query.isLoading ? (
           <ThreadSkeleton rows={4} />
         ) : query.isError ? (
           <ErrorState title="Replies didn't load" description="Check your connection, then try again." action={<RetryButton onRetry={() => query.refetch()} />} />
-        ) : rows.length === 0 ? (
+        ) : rows.length === 0 && localTopLevel.length === 0 ? (
           <EmptyState title="No replies yet" description="Be the first to reply to this post." />
         ) : (
-          rows.map((row) =>
+          [...localTopLevel.map((reply) => ({ kind: "reply" as const, key: reply.id, reply })), ...rows].map((row) =>
             row.kind === "sponsored" ? (
               <SponsoredThreadItem key={row.key} ad={row.ad} postId={post.id} />
             ) : (
               <div key={row.key} className={panelStyles.conversation}>
-                <ThreadReplyBranch reply={row.reply} postId={post.id} postAuthorId={post.author.id} hasParentAbove={false} showReplyingTo={false} onReply={setReplyTarget} onOpenThread={setFocusedReply} />
+                <ThreadReplyBranch reply={row.reply} postId={post.id} postAuthorId={post.author.id} hasParentAbove={false} showReplyingTo={false} onReply={setReplyTarget} onOpenThread={setFocusedReply} localRepliesFor={localRepliesFor} />
               </div>
             ),
           )
@@ -115,6 +123,7 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
         replyTarget={replyTarget}
         onCancelReply={() => setReplyTarget(null)}
         replyRestriction={post.viewerCanReply === false ? (post.replyRestriction ?? null) : null}
+        onPosted={rememberPostedReply}
       />
     </section>
   );

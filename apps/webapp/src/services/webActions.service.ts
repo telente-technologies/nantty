@@ -40,8 +40,12 @@ export interface AccountEmailStatus {
 export const commentsService = {
   fetchReplies: (commentId: ID, cursor: string | null | undefined) =>
     sendRequestToWebappServer<Page<Comment>>(`/api/v1/comments/${commentId}/replies`, { query: { cursor: cursor ?? undefined } }),
-  addComment: (postId: ID, text: string, parentCommentId: ID | undefined, mentions: readonly MentionEntity[]) =>
-    sendRequestToWebappServer<Comment>(`/api/v1/posts/${postId}/comments`, { method: "POST", body: { text, parentCommentId, mentions }, idempotencyKey: createIdempotencyKey("comment") }),
+  addComment: (postId: ID, text: string, parentCommentId: ID | undefined, mentions: readonly MentionEntity[], quotedPostId?: ID | null) =>
+    sendRequestToWebappServer<Comment>(`/api/v1/posts/${postId}/comments`, {
+      method: "POST",
+      body: { text, parentCommentId, mentions, ...(quotedPostId === undefined ? {} : { quotedPostId }) },
+      idempotencyKey: createIdempotencyKey("comment"),
+    }),
   likeComment: (commentId: ID) => sendRequestToWebappServer<void>(`/api/v1/comments/${commentId}/like`, { method: "POST" }),
   unlikeComment: (commentId: ID) => sendRequestToWebappServer<void>(`/api/v1/comments/${commentId}/like`, { method: "DELETE" }),
   deleteComment: (commentId: ID) => sendRequestToWebappServer<void>(`/api/v1/comments/${commentId}`, { method: "DELETE" }),
@@ -89,6 +93,7 @@ export const creatorSubscriptionsService = {
   startSubscription: (creatorId: ID, planId: ID) =>
     sendRequestToWebappServer<CreatorSubscriptionCheckout>(`/api/v1/creators/${creatorId}/subscriptions`, { method: "POST", body: { planId }, idempotencyKey: createIdempotencyKey("subscribe") }),
   fetchSubscriptionState: (subscriptionId: ID) => sendRequestToWebappServer<CreatorSubscriptionState>(`/api/v1/subscriptions/${encodeURIComponent(subscriptionId)}`),
+  fetchMySubscriptions: async () => (await sendRequestToWebappServer<{ readonly data: CreatorSubscriptionState[] }>("/api/v1/creator-subscriptions")).data,
 };
 
 export const emailVerificationService = {

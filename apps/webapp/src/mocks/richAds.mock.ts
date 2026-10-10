@@ -69,7 +69,15 @@ function buildPromotedPostAd(source: Post): Post {
   };
 }
 
+function buildBoostedPost(source: Post): Post {
+  return {
+    ...source,
+    id: `${source.id}_boosted`,
+    sponsored: placementFor(source, { campaignId: `bst_${source.id}`, label: "Boosted", adType: "promoted_post", impressionToken: "mock.impression.token", destination: { type: "post", targetId: source.id } }),
+  };
+}
+
 export function buildRichSponsoredPosts(sponsoredPosts: readonly Post[]): Post[] {
   const [first, second, third] = sponsoredPosts;
-  return [second && buildCarouselAd(second), first && buildAppInstallAd(first), third && buildPromotedPostAd(third)].filter((post): post is Post => Boolean(post));
+  return [second && buildCarouselAd(second), first && buildAppInstallAd(first), third && buildPromotedPostAd(third), first && buildBoostedPost(first)].filter((post): post is Post => Boolean(post));
 }

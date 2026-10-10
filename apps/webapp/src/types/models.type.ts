@@ -112,7 +112,7 @@ export interface Media {
 
 export interface SponsoredPlacement {
   readonly campaignId: ID;
-  readonly label: "Sponsored" | "Promoted";
+  readonly label: "Sponsored" | "Promoted" | "Boosted";
   readonly advertiserName: string;
   readonly ctaLabel?: string;
   readonly ctaUrl?: string;
@@ -161,6 +161,7 @@ export interface Post {
   readonly isPinned?: boolean;
   readonly pinnedAt?: ISODate | null;
   readonly pinnedCommentId?: ID | null;
+  readonly viewerNotificationsMuted?: boolean;
 }
 
 export interface PostAnalyticsDaily {
@@ -190,6 +191,16 @@ export interface PostAnalytics {
   readonly daily: readonly PostAnalyticsDaily[];
 }
 
+export interface QuotedPostSummary {
+  readonly id: ID;
+  readonly kind: "post" | "clip";
+  readonly author: UserSummary;
+  readonly text: string;
+  readonly thumbnail: { readonly type: "image" | "video"; readonly url: string; readonly blurhash: string | null } | null;
+  readonly mediaCount: number;
+  readonly createdAt: ISODate;
+}
+
 export interface Comment {
   readonly id: ID;
   readonly postId: ID;
@@ -206,6 +217,9 @@ export interface Comment {
   readonly pinnedAt?: ISODate | null;
   readonly replyingTo?: { readonly userId: ID; readonly username: string };
   readonly mentions?: readonly import("./mentions.type").MentionEntity[];
+  readonly isPostAuthor?: boolean;
+  readonly quotedPost?: QuotedPostSummary | null;
+  readonly quotedPostUnavailable?: boolean;
 }
 
 export interface Conversation {
@@ -306,7 +320,7 @@ export interface AuthSession {
   readonly notice?: string | null;
 }
 
-export type { CartItem, Cart, OrderStatus, PaymentMode, Order, Address, WalletSummary, WalletTransaction, PayoutAccount, SellerDashboard } from "./orders.type";
+export type { CartItem, Cart, OrderStatus, PaymentMode, Order, Address, WalletSummary, WalletLine, WalletVerification, WalletTransaction, PayoutAccount, SellerDashboard } from "./orders.type";
 
 export interface StoreCreditBalance {
   readonly storeId: ID;

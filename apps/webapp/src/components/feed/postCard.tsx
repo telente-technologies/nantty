@@ -23,6 +23,7 @@ import type { Post } from "@/types";
 import styles from "./postCard.module.css";
 import swipeStyles from "./postSwipe.module.css";
 import { usePostSwipe } from "./postSwipe.hook";
+import { usePostLike } from "./usePostLike.hook";
 import { PostActions } from "./postActions";
 import { SponsoredAdBody, SponsoredMediaLink } from "./sponsoredAd";
 import { hasVideoMedia, isLandscapeVideoPost, PostMedia } from "./postCardMedia";
@@ -31,6 +32,10 @@ import { buildProductPath, buildProfilePath } from "@/utils/seoPaths.util";
 import { PostLinkCard } from "./postLinkCard";
 import { SensitiveContentGate } from "./sensitiveContentGate";
 import { ViewQuotesLink } from "./viewQuotesLink";
+import { usePostNotificationMute } from "./postNotificationMute.hook";
+import { canOfferPostNotificationMute } from "@/utils/postNotificationMute.util";
+import { QuotedPostCard } from "./quotedPostCard";
+import { quotedSummaryFromPost } from "@/utils/quotedPostLinks.util";
 import { TaggedPeopleLine } from "@/components/taggedPeople/taggedPeopleLine";
 
 export function PostCard({ post, priority = false, swipeable = false, showPinnedBadge = false }: { readonly post: Post; readonly priority?: boolean; readonly swipeable?: boolean; readonly showPinnedBadge?: boolean }) {
@@ -38,24 +43,9 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
   const [likePopSignal, setLikePopSignal] = useState(0);
   const queryClient = useQueryClient();
   const { viewer } = useSession();
-  const [optimisticLikes, setOptimisticLikes] = useState(post.likes);
-  const [optimisticLiked, setOptimisticLiked] = useState(post.liked);
-
-  const likeMutation = useMutation({
-    mutationFn: (liked: boolean) => (liked ? postsService.unlikePost(post.id) : postsService.likePost(post.id)),
-    onMutate: async (liked) => {
-      setOptimisticLiked(!liked);
-      setOptimisticLikes((count) => Math.max(0, count + (liked ? -1 : 1)));
-      await queryClient.cancelQueries({ queryKey: ["feed"] });
-    },
-    onError: (_error, liked) => {
-      setOptimisticLiked(liked);
-      setOptimisticLikes((count) => Math.max(0, count + (liked ? 1 : -1)));
-    },
-  });
-
-  const toggleLike = () => requireAuthThen(() => likeMutation.mutate(optimisticLiked), "Sign in to like posts.");
+  const { toggleLike, likeIfNotLiked } = usePostLike(post);
   const isOwnPost = viewer?.id === post.author.id;
+  const notificationMute = usePostNotificationMute(post);
   const [optimisticPinned, setOptimisticPinned] = useState(post.isPinned === true);
   const pinMutation = useMutation({
     mutationFn: () => (optimisticPinned ? postsService.unpinPost(post.id) : postsService.pinPost(post.id)),
@@ -73,11 +63,11 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
   });
   const swipe = usePostSwipe({
     enabled: swipeable && !post.sponsored,
-    isLiked: optimisticLiked,
+    isLiked: post.liked,
     onLike: () =>
       requireAuthThen(() => {
         setLikePopSignal((signal) => signal + 1);
-        likeMutation.mutate(false);
+        likeIfNotLiked();
       }, "Sign in to like posts."),
     onOpenComments: () => router.push(`/post/${post.id}#comments`),
   });
@@ -95,7 +85,7 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
             <span className={styles.authorMeta}>@{post.author.username}</span>
           </span>
         </Link>
-        {post.sponsored ? <span className={styles.sponsored}>{post.sponsored.label}</span> : null}
+        {post.sponsored ? <span className={post.sponsored.label === "Boosted" ? styles.boosted : styles.sponsored}>{post.sponsored.label === "Boosted" ? <AppIcon name="rocketLaunch16" size={11} /> : null}{post.sponsored.label}</span> : null}
         {showPinnedBadge && optimisticPinned ? (
           <span className={styles.pinned} aria-label="Pinned post">
             <AppIcon name="pushPin24" size={12} /> Pinned
@@ -111,6 +101,7 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
           canonicalPath={`/post/${post.id}`}
           isOwnContent={viewer?.id === post.author.id}
           downloadTarget={findDownloadTargetForPost(post)}
+          notificationMuteAction={canOfferPostNotificationMute(viewer !== null, post) ? { isMuted: notificationMute.isMuted, onToggle: notificationMute.toggle } : undefined}
           pinAction={isOwnPost ? { isPinned: optimisticPinned, onTogglePin: () => requireAuthThen(() => pinMutation.mutate(), "Sign in to pin posts."), disabled: pinMutation.isPending } : undefined}
         />
       </header>
@@ -129,6 +120,7 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
         </SponsoredMediaLink>
       )}
       <SponsoredAdBody post={post} />
+      {post.resharedFrom || post.resharedFromUnavailable ? <QuotedPostCard quoted={post.resharedFrom ? quotedSummaryFromPost(post.resharedFrom) : null} unavailable={!post.resharedFrom} /> : null}
       </SensitiveContentGate>
       <TaggedPeopleLine post={post} />
 
@@ -154,8 +146,8 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
           post={post}
           saveTargetType={hasVideoMedia(post) ? "video" : "post"}
           isOwnPost={viewer?.id === post.author.id}
-          isLiked={optimisticLiked}
-          likeCount={optimisticLikes}
+          isLiked={post.liked}
+          likeCount={post.likes}
           onToggleLike={toggleLike}
           likePopSignal={likePopSignal}
         />
@@ -170,7 +162,7 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
       <div className={swipeStyles.hints} aria-hidden="true">
         <span className={[swipeStyles.hint, swipeStyles.likeHint].join(" ")}>
           <LikeFilledActionIcon size={26} />
-          {optimisticLiked ? "Liked" : "Like"}
+          {post.liked ? "Liked" : "Like"}
         </span>
         <span className={[swipeStyles.hint, swipeStyles.replyHint].join(" ")}>
           <ReplyActionIcon size={26} />

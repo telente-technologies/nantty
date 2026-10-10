@@ -18,8 +18,19 @@ import { MentionText } from "@/components/mentions/mentionText";
 
 import { CommentComposer } from "./commentComposer";
 import styles from "./commentsPanel.module.css";
+import { QuotedPostCard } from "./quotedPostCard";
+import { countRepliesHiddenFromChain } from "@/utils/commentChain.util";
 
-function CommentRow({ comment, postId, postAuthorId, isReply, onReply }: { readonly comment: Comment; readonly postId: string; readonly postAuthorId?: string; readonly isReply: boolean; readonly onReply: (comment: Comment) => void }) {
+interface CommentRowProps {
+  readonly comment: Comment;
+  readonly postId: string;
+  readonly postAuthorId?: string;
+  readonly isReply: boolean;
+  readonly connectBelow?: boolean;
+  readonly onReply: (comment: Comment) => void;
+}
+
+function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = false, onReply }: CommentRowProps) {
   const { viewer } = useSession();
   const queryClient = useQueryClient();
   const [isLiked, setIsLiked] = useState(comment.liked);
@@ -64,13 +75,18 @@ function CommentRow({ comment, postId, postAuthorId, isReply, onReply }: { reado
     },
   });
   const isOwnComment = viewer?.id === comment.author.id;
+  const isPostAuthor = comment.isPostAuthor ?? (postAuthorId !== undefined && comment.author.id === postAuthorId);
 
   return (
     <div className={[styles.comment, isReply ? styles.reply : ""].join(" ")}>
-      <Avatar name={comment.author.name} src={comment.author.avatarUrl} size={isReply ? "xs" : "sm"} />
+      <span className={styles.avatarRail}>
+        <Avatar name={comment.author.name} src={comment.author.avatarUrl} size={isReply ? "xs" : "sm"} />
+        {connectBelow ? <span className={styles.chainLine} aria-hidden="true" /> : null}
+      </span>
       <div className={styles.commentBody}>
         <p className={styles.commentMeta}>
           <strong>{comment.author.name}</strong>
+          {isPostAuthor ? <span className={styles.authorBadge}>Author</span> : null}
           {optimisticPinned ? (
             <span className={styles.pinnedBadge} aria-label="Pinned by author">
               <AppIcon name="pushPin24" size={12} /> Pinned by author
@@ -81,6 +97,7 @@ function CommentRow({ comment, postId, postAuthorId, isReply, onReply }: { reado
         <p className={styles.commentText}>
           <MentionText text={comment.text} mentions={comment.mentions} />
         </p>
+        {comment.quotedPost || comment.quotedPostUnavailable ? <QuotedPostCard quoted={comment.quotedPost ?? null} unavailable={!comment.quotedPost} /> : null}
         <div className={styles.commentActions}>
           <button
             type="button"
@@ -118,6 +135,7 @@ function CommentRow({ comment, postId, postAuthorId, isReply, onReply }: { reado
 export function CommentThread({ comment, postId, postAuthorId }: { readonly comment: CommentWithReplies; readonly postId: string; readonly postAuthorId?: string }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
+  const [localReplies, setLocalReplies] = useState<readonly Comment[]>([]);
   const repliesQuery = useInfiniteQuery({
     queryKey: ["commentReplies", comment.id],
     queryFn: ({ pageParam }) => commentsService.fetchReplies(comment.id, pageParam),
@@ -125,23 +143,31 @@ export function CommentThread({ comment, postId, postAuthorId }: { readonly comm
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: isExpanded,
   });
-  const replies = isExpanded ? (repliesQuery.data?.pages ?? []).flatMap((page) => page.data) : comment.previewReplies;
-  const hiddenReplyCount = Math.max(0, comment.replyCount - replies.length);
+  const serverReplies = isExpanded ? (repliesQuery.data?.pages ?? []).flatMap((page) => page.data) : comment.previewReplies;
+  const replies = [...serverReplies, ...localReplies.filter((local) => !serverReplies.some((reply) => reply.id === local.id))];
+  const isChain = !isExpanded;
+  const hiddenReplyCount = isExpanded ? Math.max(0, comment.replyCount - serverReplies.length) : countRepliesHiddenFromChain(comment, comment.previewReplies);
+  const canShowMore = isExpanded ? repliesQuery.hasNextPage === true : hiddenReplyCount > 0;
+  const showMoreLabel = repliesQuery.isFetching ? "Loading replies…" : isExpanded ? "Show more replies" : `Show ${hiddenReplyCount} more ${hiddenReplyCount === 1 ? "reply" : "replies"}`;
 
   return (
     <div className={styles.thread}>
-      <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={false} onReply={setReplyTarget} />
-      {replies.map((reply) => (
-        <CommentRow key={reply.id} comment={reply} postId={postId} postAuthorId={postAuthorId} isReply onReply={setReplyTarget} />
+      <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={false} connectBelow={isChain && replies.length > 0} onReply={setReplyTarget} />
+      {replies.map((reply, index) => (
+        <CommentRow key={reply.id} comment={reply} postId={postId} postAuthorId={postAuthorId} isReply={!isChain} connectBelow={isChain && index < replies.length - 1} onReply={setReplyTarget} />
       ))}
-      {hiddenReplyCount > 0 || (isExpanded && repliesQuery.hasNextPage) ? (
+      {canShowMore ? (
         <button
           type="button"
           className={styles.viewReplies}
-          onClick={() => (isExpanded ? repliesQuery.fetchNextPage() : setIsExpanded(true))}
+          onClick={() => {
+            if (repliesQuery.isFetching) return;
+            if (!isExpanded) setIsExpanded(true);
+            else void repliesQuery.fetchNextPage();
+          }}
           disabled={repliesQuery.isFetching}
         >
-          {repliesQuery.isFetching ? "Loading replies…" : `View ${hiddenReplyCount > 0 ? hiddenReplyCount : "more"} ${hiddenReplyCount === 1 ? "reply" : "replies"}`}
+          {showMoreLabel}
         </button>
       ) : null}
       {replyTarget ? (
@@ -151,9 +177,9 @@ export function CommentThread({ comment, postId, postAuthorId }: { readonly comm
           parentCommentId={comment.id}
           replyingTo={replyTarget.id === comment.id ? undefined : { userId: replyTarget.author.id, username: replyTarget.author.username }}
           autoFocus
-          onPosted={() => {
+          onPosted={(created) => {
             setReplyTarget(null);
-            setIsExpanded(true);
+            setLocalReplies((current) => [...current, created]);
           }}
         />
       ) : null}
