@@ -10,6 +10,7 @@ export interface User {
   readonly isCreator: boolean;
   readonly channelHandle: string;
   readonly hasStore: boolean;
+  readonly storeId: ID | null;
 }
 
 export interface AuthSession {
@@ -90,7 +91,22 @@ export interface LiveSession {
   readonly hlsUrl: string | null;
 }
 
-export type LiveDetail = Omit<LiveSession, "createdAt">;
+export interface LiveDetail extends Omit<LiveSession, "createdAt"> {
+  readonly storeId: ID | null;
+}
+
+export interface StoreOption {
+  readonly id: ID;
+  readonly name: string;
+  readonly isCurrent: boolean;
+}
+
+export interface MyStoreWire {
+  readonly storeId: ID;
+  readonly storeName: string;
+  readonly role: string;
+  readonly isCurrent: boolean;
+}
 
 export interface StreamKey {
   readonly ingestUrl: string;
@@ -131,6 +147,7 @@ export interface LiveSessionWire {
   readonly startedAt: ISODate | null;
   readonly endedAt: ISODate | null;
   readonly playbackUrl: string | null;
+  readonly storeId?: ID | null;
 }
 
 export interface StreamKeyWire {

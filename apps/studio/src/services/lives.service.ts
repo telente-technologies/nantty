@@ -10,10 +10,12 @@ import type {
   LiveSession,
   LiveSessionWire,
   LiveState,
+  MyStoreWire,
   OverlayLayer,
   OverlayScene,
   Page,
   SellerProductWire,
+  StoreOption,
   StreamKey,
   StreamKeyWire,
   StreamStatsWire,
@@ -21,6 +23,12 @@ import type {
 } from "@/types";
 
 import { isNotFoundError, sendRequestToStudioServer } from "./clientApi.service";
+
+export interface CreateLiveInput {
+  readonly title: string;
+  readonly category: LiveCategory;
+  readonly storeId: ID | null;
+}
 
 export interface OverlayScenePayload {
   readonly scene: OverlayScene;
@@ -88,6 +96,7 @@ export const livesService = {
       viewers: live.viewers,
       peakViewers: live.peakViewers,
       hlsUrl: live.playbackUrl,
+      storeId: live.storeId ?? null,
       earnings: toEarnings(stats),
     };
   },
@@ -104,8 +113,10 @@ export const livesService = {
     }
   },
   rotateStreamKey: async (liveId: ID) => toStreamKey(await sendRequestToStudioServer<StreamKeyWire>(`/api/v1/lives/${liveId}/stream-key`, { method: "POST" })),
-  createLive: (title: string, category: LiveCategory) =>
-    sendRequestToStudioServer<LiveSessionWire>("/api/v1/lives", { method: "POST", body: { title, category, startNow: false } }),
+  createLive: ({ title, category, storeId }: CreateLiveInput) =>
+    sendRequestToStudioServer<LiveSessionWire>("/api/v1/lives", { method: "POST", body: { title, category, startNow: false, ...(storeId ? { storeId } : {}) } }),
+  listMyStores: async (): Promise<StoreOption[]> =>
+    (await sendRequestToStudioServer<Page<MyStoreWire>>("/api/v1/seller/stores/mine")).data.map((store) => ({ id: store.storeId, name: store.storeName, isCurrent: store.isCurrent })),
   listComments: async (liveId: ID) =>
     (await sendRequestToStudioServer<Page<LiveCommentWire>>(`/api/v1/lives/${liveId}/comments`)).data.map(toLiveComment),
   postComment: async (liveId: ID, text: string) =>
@@ -120,6 +131,7 @@ export const livesService = {
     return products.filter((product): product is LiveProduct => product !== null);
   },
   pinProduct: (liveId: ID, productId: ID) => sendRequestToStudioServer<Page<LiveProductPinWire>>(`/api/v1/lives/${liveId}/pins`, { method: "POST", body: { productId } }),
+  unpinProduct: (liveId: ID) => sendRequestToStudioServer<Page<LiveProductPinWire>>(`/api/v1/lives/${liveId}/pins`, { method: "DELETE" }),
   listPinneableProducts: listSellerProducts,
   fetchOverlays: (liveId: ID) => sendRequestToStudioServer<OverlayScene>(`/api/v1/lives/${liveId}/overlays`),
   saveOverlays: (liveId: ID, scene: { readonly name: string; readonly layers: readonly OverlayLayer[] }) =>

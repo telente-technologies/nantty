@@ -28,6 +28,7 @@ export function toStudioViewer(raw: BackendViewer): User {
     isCreator: raw.isCreator ?? false,
     channelHandle: raw.channelHandle ?? `@${username}`,
     hasStore: raw.hasStore ?? Boolean(raw.isSeller || raw.storeId || raw.roles?.includes("seller")),
+    storeId: raw.storeId ?? null,
   };
 }
 
