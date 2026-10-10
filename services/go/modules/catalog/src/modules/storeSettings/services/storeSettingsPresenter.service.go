@@ -93,7 +93,7 @@ func PresentStorefront(row *ent.Store, featured []dtos.StorefrontFeaturedProduct
 }
 
 func MediaUrlFor(deployed *container.Container, mediaId string) string {
-	return strings.TrimRight(deployed.Settings.MediaPublicBaseUrl, "/") + "/" + mediaId
+	return strings.TrimRight(deployed.Settings.MediaPublicBaseUrl, "/") + "/m/" + mediaId + "/display.jpg"
 }
 
 func ParseIdentifierList(values []string) []uuid.UUID {

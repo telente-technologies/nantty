@@ -56,9 +56,14 @@ func LoadProductSummaries(ctx context.Context, deployed *container.Container, pr
 	views := make([]types.ProductSummaryView, 0, len(products))
 	for _, product := range products {
 		displayed := pricing.ForProduct(product, variantsByProduct[product.ID])
+		options := make([]types.OptionView, 0, len(product.Options))
+		for _, option := range product.Options {
+			options = append(options, types.OptionView{Name: option.Name, Values: option.Values})
+		}
 		view := types.ProductSummaryView{
 			Id: product.ID.String(), Name: product.Name, Price: displayed.Price, PriceIsRegional: displayed.IsRegional, ApproxPrice: displayed.Approx,
 			Liked: liked[product.ID], Stock: stock[product.ID], StoreId: product.StoreID.String(),
+			HasVariants: len(variantsByProduct[product.ID]) > 1 || len(options) > 0, Options: options,
 		}
 		if url, found := firstImage[product.ID]; found {
 			view.ImageUrl = &url

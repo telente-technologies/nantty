@@ -47,6 +47,9 @@ type ProductSummaryView struct {
 
 	PriceIsRegional bool         `json:"priceIsRegional"`
 	ApproxPrice     *money.Money `json:"approxPrice"`
+
+	HasVariants bool         `json:"hasVariants"`
+	Options     []OptionView `json:"options"`
 }
 
 type BrandTagView struct {
@@ -80,8 +83,9 @@ type BuyerVariantView struct {
 	Price   money.Money `json:"price"`
 	InStock bool        `json:"inStock"`
 
-	PriceIsRegional bool         `json:"priceIsRegional"`
-	ApproxPrice     *money.Money `json:"approxPrice"`
+	PriceIsRegional bool              `json:"priceIsRegional"`
+	ApproxPrice     *money.Money      `json:"approxPrice"`
+	OptionValues    map[string]string `json:"optionValues"`
 }
 
 type CategoryView struct {

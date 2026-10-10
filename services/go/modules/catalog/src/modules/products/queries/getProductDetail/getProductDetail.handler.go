@@ -92,7 +92,7 @@ func (handler Handler) fillMediaVariantsAndBrand(ctx context.Context, row *ent.P
 		displayed := pricing.ForVariant(row, variant, regionalForAll)
 		detail.Variants = append(detail.Variants, types.BuyerVariantView{
 			Id: variant.ID.String(), Title: variant.Title, Size: variant.Size, Color: variant.Color, Sku: variant.Sku, InStock: inStock,
-			Price: displayed.Price, PriceIsRegional: displayed.IsRegional, ApproxPrice: displayed.Approx,
+			Price: displayed.Price, PriceIsRegional: displayed.IsRegional, ApproxPrice: displayed.Approx, OptionValues: variant.OptionValues,
 		})
 		if variant.Size != "" && !sizes[variant.Size] {
 			sizes[variant.Size] = true

@@ -223,7 +223,7 @@ func replaceProductMedia(ctx context.Context, deployed *container.Container, tx 
 	for position, mediaId := range mediaIds {
 		url := urls[mediaId]
 		if url == "" {
-			url = strings.TrimRight(deployed.Settings.MediaPublicBaseUrl, "/") + "/" + mediaId
+			url = strings.TrimRight(deployed.Settings.MediaPublicBaseUrl, "/") + "/m/" + mediaId + "/display.jpg"
 		}
 		if err := tx.ProductMedia.Create().SetProductID(productId).SetMediaID(mediaId).SetURL(url).SetPosition(position).Exec(ctx); err != nil {
 			return err

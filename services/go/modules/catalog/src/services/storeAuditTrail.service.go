@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"net"
 	"net/http"
 	"strings"
 
@@ -12,6 +11,7 @@ import (
 	"zudomart/modules/catalog/src/generated/ent"
 	"zudomart/modules/catalog/src/generated/ent/storeauditentry"
 	"zudomart/platform/commerceports"
+	"zudomart/platform/httpserver"
 )
 
 type StoreActor struct {
@@ -33,12 +33,7 @@ func ClientAddressOf(request *http.Request) string {
 	if request == nil {
 		return ""
 	}
-	for _, header := range []string{"X-Real-Ip", "X-Forwarded-For"} {
-		if value := strings.TrimSpace(strings.Split(request.Header.Get(header), ",")[0]); net.ParseIP(value) != nil {
-			return value
-		}
-	}
-	return ""
+	return httpserver.ClientIP(request)
 }
 
 func RecordStoreAuditInTransaction(ctx context.Context, tx *ent.Tx, record commerceports.StoreAuditRecord) error {
