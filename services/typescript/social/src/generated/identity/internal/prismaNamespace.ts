@@ -398,10 +398,10 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   IdentityProfile: 'IdentityProfile',
+  IdentityProfileCheckmark: 'IdentityProfileCheckmark',
   IdentityPrivacySetting: 'IdentityPrivacySetting',
   IdentityAccountSuspension: 'IdentityAccountSuspension',
   IdentityAccount: 'IdentityAccount',
-  IdentityProfileCheckmark: 'IdentityProfileCheckmark',
   IdentityAdminCreatedAccount: 'IdentityAdminCreatedAccount'
 } as const
 
@@ -418,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "identityProfile" | "identityPrivacySetting" | "identityAccountSuspension" | "identityAccount" | "identityProfileCheckmark" | "identityAdminCreatedAccount"
+    modelProps: "identityProfile" | "identityProfileCheckmark" | "identityPrivacySetting" | "identityAccountSuspension" | "identityAccount" | "identityAdminCreatedAccount"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -493,6 +493,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.IdentityProfileCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.IdentityProfileCountAggregateOutputType> | number
+        }
+      }
+    }
+    IdentityProfileCheckmark: {
+      payload: Prisma.$IdentityProfileCheckmarkPayload<ExtArgs>
+      fields: Prisma.IdentityProfileCheckmarkFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.IdentityProfileCheckmarkFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.IdentityProfileCheckmarkFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
+        }
+        findFirst: {
+          args: Prisma.IdentityProfileCheckmarkFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.IdentityProfileCheckmarkFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
+        }
+        findMany: {
+          args: Prisma.IdentityProfileCheckmarkFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>[]
+        }
+        create: {
+          args: Prisma.IdentityProfileCheckmarkCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
+        }
+        createMany: {
+          args: Prisma.IdentityProfileCheckmarkCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.IdentityProfileCheckmarkCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>[]
+        }
+        delete: {
+          args: Prisma.IdentityProfileCheckmarkDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
+        }
+        update: {
+          args: Prisma.IdentityProfileCheckmarkUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
+        }
+        deleteMany: {
+          args: Prisma.IdentityProfileCheckmarkDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.IdentityProfileCheckmarkUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.IdentityProfileCheckmarkUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>[]
+        }
+        upsert: {
+          args: Prisma.IdentityProfileCheckmarkUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
+        }
+        aggregate: {
+          args: Prisma.IdentityProfileCheckmarkAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateIdentityProfileCheckmark>
+        }
+        groupBy: {
+          args: Prisma.IdentityProfileCheckmarkGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IdentityProfileCheckmarkGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.IdentityProfileCheckmarkCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IdentityProfileCheckmarkCountAggregateOutputType> | number
         }
       }
     }
@@ -718,80 +792,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    IdentityProfileCheckmark: {
-      payload: Prisma.$IdentityProfileCheckmarkPayload<ExtArgs>
-      fields: Prisma.IdentityProfileCheckmarkFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.IdentityProfileCheckmarkFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.IdentityProfileCheckmarkFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
-        }
-        findFirst: {
-          args: Prisma.IdentityProfileCheckmarkFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.IdentityProfileCheckmarkFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
-        }
-        findMany: {
-          args: Prisma.IdentityProfileCheckmarkFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>[]
-        }
-        create: {
-          args: Prisma.IdentityProfileCheckmarkCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
-        }
-        createMany: {
-          args: Prisma.IdentityProfileCheckmarkCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.IdentityProfileCheckmarkCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>[]
-        }
-        delete: {
-          args: Prisma.IdentityProfileCheckmarkDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
-        }
-        update: {
-          args: Prisma.IdentityProfileCheckmarkUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
-        }
-        deleteMany: {
-          args: Prisma.IdentityProfileCheckmarkDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.IdentityProfileCheckmarkUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.IdentityProfileCheckmarkUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>[]
-        }
-        upsert: {
-          args: Prisma.IdentityProfileCheckmarkUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdentityProfileCheckmarkPayload>
-        }
-        aggregate: {
-          args: Prisma.IdentityProfileCheckmarkAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateIdentityProfileCheckmark>
-        }
-        groupBy: {
-          args: Prisma.IdentityProfileCheckmarkGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.IdentityProfileCheckmarkGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.IdentityProfileCheckmarkCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.IdentityProfileCheckmarkCountAggregateOutputType> | number
-        }
-      }
-    }
     IdentityAdminCreatedAccount: {
       payload: Prisma.$IdentityAdminCreatedAccountPayload<ExtArgs>
       fields: Prisma.IdentityAdminCreatedAccountFieldRefs
@@ -922,6 +922,16 @@ export const IdentityProfileScalarFieldEnum = {
 export type IdentityProfileScalarFieldEnum = (typeof IdentityProfileScalarFieldEnum)[keyof typeof IdentityProfileScalarFieldEnum]
 
 
+export const IdentityProfileCheckmarkScalarFieldEnum = {
+  profileId: 'profileId',
+  accountId: 'accountId',
+  color: 'color',
+  status: 'status'
+} as const
+
+export type IdentityProfileCheckmarkScalarFieldEnum = (typeof IdentityProfileCheckmarkScalarFieldEnum)[keyof typeof IdentityProfileCheckmarkScalarFieldEnum]
+
+
 export const IdentityPrivacySettingScalarFieldEnum = {
   accountId: 'accountId',
   personalization: 'personalization',
@@ -947,16 +957,6 @@ export const IdentityAccountScalarFieldEnum = {
 } as const
 
 export type IdentityAccountScalarFieldEnum = (typeof IdentityAccountScalarFieldEnum)[keyof typeof IdentityAccountScalarFieldEnum]
-
-
-export const IdentityProfileCheckmarkScalarFieldEnum = {
-  profileId: 'profileId',
-  accountId: 'accountId',
-  color: 'color',
-  status: 'status'
-} as const
-
-export type IdentityProfileCheckmarkScalarFieldEnum = (typeof IdentityProfileCheckmarkScalarFieldEnum)[keyof typeof IdentityProfileCheckmarkScalarFieldEnum]
 
 
 export const IdentityAdminCreatedAccountScalarFieldEnum = {
@@ -1196,10 +1196,10 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   identityProfile?: Prisma.IdentityProfileOmit
+  identityProfileCheckmark?: Prisma.IdentityProfileCheckmarkOmit
   identityPrivacySetting?: Prisma.IdentityPrivacySettingOmit
   identityAccountSuspension?: Prisma.IdentityAccountSuspensionOmit
   identityAccount?: Prisma.IdentityAccountOmit
-  identityProfileCheckmark?: Prisma.IdentityProfileCheckmarkOmit
   identityAdminCreatedAccount?: Prisma.IdentityAdminCreatedAccountOmit
 }
 

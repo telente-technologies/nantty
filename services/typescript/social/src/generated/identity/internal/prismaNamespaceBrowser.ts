@@ -52,10 +52,10 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   IdentityProfile: 'IdentityProfile',
+  IdentityProfileCheckmark: 'IdentityProfileCheckmark',
   IdentityPrivacySetting: 'IdentityPrivacySetting',
   IdentityAccountSuspension: 'IdentityAccountSuspension',
   IdentityAccount: 'IdentityAccount',
-  IdentityProfileCheckmark: 'IdentityProfileCheckmark',
   IdentityAdminCreatedAccount: 'IdentityAdminCreatedAccount'
 } as const
 
@@ -92,6 +92,16 @@ export const IdentityProfileScalarFieldEnum = {
 export type IdentityProfileScalarFieldEnum = (typeof IdentityProfileScalarFieldEnum)[keyof typeof IdentityProfileScalarFieldEnum]
 
 
+export const IdentityProfileCheckmarkScalarFieldEnum = {
+  profileId: 'profileId',
+  accountId: 'accountId',
+  color: 'color',
+  status: 'status'
+} as const
+
+export type IdentityProfileCheckmarkScalarFieldEnum = (typeof IdentityProfileCheckmarkScalarFieldEnum)[keyof typeof IdentityProfileCheckmarkScalarFieldEnum]
+
+
 export const IdentityPrivacySettingScalarFieldEnum = {
   accountId: 'accountId',
   personalization: 'personalization',
@@ -117,16 +127,6 @@ export const IdentityAccountScalarFieldEnum = {
 } as const
 
 export type IdentityAccountScalarFieldEnum = (typeof IdentityAccountScalarFieldEnum)[keyof typeof IdentityAccountScalarFieldEnum]
-
-
-export const IdentityProfileCheckmarkScalarFieldEnum = {
-  profileId: 'profileId',
-  accountId: 'accountId',
-  color: 'color',
-  status: 'status'
-} as const
-
-export type IdentityProfileCheckmarkScalarFieldEnum = (typeof IdentityProfileCheckmarkScalarFieldEnum)[keyof typeof IdentityProfileCheckmarkScalarFieldEnum]
 
 
 export const IdentityAdminCreatedAccountScalarFieldEnum = {

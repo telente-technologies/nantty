@@ -50,6 +50,8 @@ enum SensitiveLabel {
 model Post {
   id                 String         @id @default(uuid(7)) @db.Uuid
   authorId           String         @db.Uuid
+  authorProfileId    String?        @db.Uuid
+  authorProfileKind  String?
   kind               PostKind
   text               String         @default("")
   audience           PostAudience   @default(everyone)
@@ -86,6 +88,9 @@ model Post {
   expiresAt          DateTime?
   deletedAt          DateTime?
   createdAt          DateTime       @default(now())
+  isPinned           Boolean        @default(false)
+  pinnedAt           DateTime?
+  pinnedCommentId    String?        @db.Uuid
 
   media      PostMedia[]
   comments   Comment[]
@@ -100,6 +105,7 @@ model Post {
   @@index([resharedFromId])
   @@index([resharedFromId, isQuote, id])
   @@index([replyToCommentId])
+  @@index([authorId, isPinned])
   @@map("posts")
 }
 
@@ -163,11 +169,14 @@ model Comment {
   moderationVisibility ModerationVisibility @default(visible)
   deletedAt        DateTime?
   createdAt        DateTime  @default(now())
+  isPinned         Boolean   @default(false)
+  pinnedAt         DateTime?
 
   post    Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
   likes   CommentLike[]
 
   @@index([postId, parentCommentId, id])
+  @@index([postId, isPinned])
   @@index([rootCommentId, id])
   @@index([rootCommentId, path])
   @@index([authorId])

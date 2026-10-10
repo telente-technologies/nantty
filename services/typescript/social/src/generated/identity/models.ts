@@ -9,9 +9,9 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/IdentityProfile.js'
+export type * from './models/IdentityProfileCheckmark.js'
 export type * from './models/IdentityPrivacySetting.js'
 export type * from './models/IdentityAccountSuspension.js'
 export type * from './models/IdentityAccount.js'
-export type * from './models/IdentityProfileCheckmark.js'
 export type * from './models/IdentityAdminCreatedAccount.js'
 export type * from './commonInputTypes.js'

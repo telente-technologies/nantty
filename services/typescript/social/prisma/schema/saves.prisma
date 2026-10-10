@@ -3,6 +3,7 @@ enum SavedItemType {
   video
   clip
   product
+  comment
 }
 
 model SaveCollection {
