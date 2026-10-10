@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { chatSafetyService } from "@/services/chatSafety.service";
+import { chatSafetyService } from "@/services/chat/chatSafety.service";
 import type { ChatSettings } from "@/types";
 
 const CHAT_SETTINGS_QUERY_KEY = ["chat", "settings"] as const;

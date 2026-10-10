@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { CaretDown24Icon } from "@/components/icons";
+import { CaretDown24Icon, ChatCircle24Icon, Prohibit24Icon, UserPlus24Icon } from "@/components/icons";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 import { buildPopoverMenuSurface } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
@@ -41,6 +41,13 @@ export function InboxFolderMenu({ folder, topOffset, onSelect, titleSize = 21 }:
                 }}
                 style={styles.item}
               >
+                {option === "chats" ? (
+                  <ChatCircle24Icon size={20} color={colors.textMuted} />
+                ) : option === "requests" ? (
+                  <UserPlus24Icon size={20} color={colors.textMuted} />
+                ) : (
+                  <Prohibit24Icon size={20} color={colors.textMuted} />
+                )}
                 <Text size={14} weight={option === folder ? 600 : 500} lineHeight={16.8}>{INBOX_FOLDER_LABELS[option]}</Text>
               </Pressable>
             ))}
@@ -55,5 +62,5 @@ const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   title: { flexDirection: "row", alignItems: "center", gap: 6 },
   backdrop: { flex: 1 },
   menu: { position: "absolute", left: 52, ...buildPopoverMenuSurface(colors, scheme) },
-  item: { minHeight: 48, paddingHorizontal: 16, justifyContent: "center" },
+  item: { minHeight: 48, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 12, justifyContent: "flex-start" },
 }));

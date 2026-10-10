@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Dialog } from "@/components/ui/dialog";
-import { messagesService } from "@/services/messages.service";
+import { messagesService } from "@/services/chat/messages.service";
 import type { Conversation } from "@/types";
 
 export interface ChatBlockDialogProps {

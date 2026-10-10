@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { ChatTeardropText24Icon, Share24Icon } from "@/components/icons";
 import { ActionSheet } from "@/components/ui/actionSheet";
 import type { SharedContentReference } from "@/types";
 import { requireAuthThen } from "@/utils/requireAuth.util";
@@ -19,8 +20,8 @@ export function useShareToChat() {
   const afterSheetCloses = (action: () => void) => setTimeout(action, SHEET_HANDOFF_MS);
   const options = offer
     ? [
-        { label: "Send in chat", onPress: () => afterSheetCloses(() => requireAuthThen(() => setReference(offer.target), undefined, "send this in chat")) },
-        ...(offer.shareElsewhere ? [{ label: "Share link", onPress: () => afterSheetCloses(() => offer.shareElsewhere?.()) }] : []),
+        { label: "Send in chat", icon: <ChatTeardropText24Icon size={20} />, onPress: () => afterSheetCloses(() => requireAuthThen(() => setReference(offer.target), undefined, "send this in chat")) },
+        ...(offer.shareElsewhere ? [{ label: "Share link", icon: <Share24Icon size={20} />, onPress: () => afterSheetCloses(() => offer.shareElsewhere?.()) }] : []),
       ]
     : [];
   const sendInChatElement = (

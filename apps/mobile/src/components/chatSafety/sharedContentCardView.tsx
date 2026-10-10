@@ -7,8 +7,8 @@ import { buildInternalRoute } from "@/components/chat/chatLinks.util";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { chatSafetyService } from "@/services/chatSafety.service";
-import { followsService } from "@/services/follows.service";
+import { chatSafetyService } from "@/services/chat/chatSafety.service";
+import { followsService } from "@/services/social/follows.service";
 import type { SharedContentCard, SharedContentReference } from "@/types";
 
 export interface SharedContentCardViewProps {

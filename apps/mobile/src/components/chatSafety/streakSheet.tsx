@@ -5,7 +5,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { chatSafetyService } from "@/services/chatSafety.service";
+import { chatSafetyService } from "@/services/chat/chatSafety.service";
 import type { ChatStreak } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { Flame24Icon, HeartBroken24Icon, Hourglass24Icon } from "@/components/icons";

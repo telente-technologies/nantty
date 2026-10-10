@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { StyleSheet, View } from "react-native";
 
 import { syncConversationMessagesIncrementallyAndReadLocalHistory } from "@/cache/messageSync.util";
+import { Flag24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import type { ModalAction } from "@/components/ui/modalActions";
 import { Text } from "@/components/ui/text";
@@ -71,6 +72,9 @@ export function ChatReportSheet({ target, onClose }: ChatReportSheetProps) {
           </View>
         ) : (
           <View style={styles.body}>
+            <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+              <Flag24Icon size={22} color={colors.error} />
+            </View>
             {draft.step === "reason" ? (
               <>
                 <Text size={14} weight={500} lineHeight={18} color={colors.textMuted}>Why are you reporting this?</Text>

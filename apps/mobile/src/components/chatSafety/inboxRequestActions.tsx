@@ -5,7 +5,7 @@ import { useChatReportLauncher } from "@/components/chatReport/chatReportLaunche
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { messagesService } from "@/services/messages.service";
+import { messagesService } from "@/services/chat/messages.service";
 import type { Conversation } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 

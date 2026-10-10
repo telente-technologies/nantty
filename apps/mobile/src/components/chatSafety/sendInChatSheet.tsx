@@ -12,11 +12,11 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { chatCryptoService, readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
-import { chatSafetyService } from "@/services/chatSafety.service";
-import { messagesService } from "@/services/messages.service";
+import { chatSafetyService } from "@/services/chat/chatSafety.service";
+import { messagesService } from "@/services/chat/messages.service";
 import type { Conversation, SharedContentReference } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
-import { Check16Icon } from "@/components/icons";
+import { Check16Icon, PaperPlaneTilt24Icon } from "@/components/icons";
 
 export interface SendInChatSheetProps {
   readonly reference: SharedContentReference | null;
@@ -66,6 +66,9 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
   return (
     <BottomSheet visible={!!reference} onClose={onClose} title="Send in chat">
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <PaperPlaneTilt24Icon size={22} color={colors.textMuted} />
+        </View>
         {chats.isLoading ? (
           <ListSkeleton rows={4} avatarSize={40} />
         ) : chats.isError ? (

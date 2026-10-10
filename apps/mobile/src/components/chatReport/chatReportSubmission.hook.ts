@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { chatReportsService } from "@/services/chatReports.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { chatReportsService } from "@/services/chat/chatReports.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { ChatReportInput } from "@/types";
 import { buildEvidenceMessage, hashEvidenceForIntegrity, listReportableMessagesOldestFirst, pickLastReportableMessages } from "@/utils/chatReportEvidence.util";

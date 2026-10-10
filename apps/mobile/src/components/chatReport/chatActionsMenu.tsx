@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { Flag24Icon, Info24Icon, Prohibit24Icon, UserCircle24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { ActionSheetOptionList } from "@/components/ui/actionSheet";
-import { groupsService } from "@/services/groups.service";
+import { groupsService } from "@/services/social/groups.service";
 import { useAuthStore } from "@/store/auth.store";
-import { makeThemedStyles } from "@/theme";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { Conversation, UserSummary } from "@/types";
 
 import { ChatBlockDialog } from "./chatBlockDialog";
@@ -26,6 +27,7 @@ export interface ChatActionsMenuProps {
 
 export function ChatActionsMenu({ visible, conversation, isGroupLike, onClose, onOpenConversationInfo, onBlocked, report }: ChatActionsMenuProps) {
   const styles = useStyles();
+  const { colors } = useTheme();
   const myUserId = useAuthStore((state) => state.user?.id ?? "u_me");
   const [isPickingMember, setIsPickingMember] = useState(false);
   const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
@@ -44,16 +46,16 @@ export function ChatActionsMenu({ visible, conversation, isGroupLike, onClose, o
   const reportMember = (member: UserSummary) => closeThen(() => report.reportMember(member))();
   const rows = isGroupLike
     ? [
-        { label: "Conversation info", onPress: closeThen(onOpenConversationInfo) },
-        { label: isGroup ? "Report group" : "Report channel", onPress: closeThen(report.reportGroup), isDestructive: true },
-        ...(isGroup ? [{ label: "Report a member", onPress: () => setIsPickingMember(true), isDestructive: true }] : []),
+        { label: "Conversation info", onPress: closeThen(onOpenConversationInfo), icon: <Info24Icon size={20} color={colors.textMuted} /> },
+        { label: isGroup ? "Report group" : "Report channel", onPress: closeThen(report.reportGroup), isDestructive: true, icon: <Flag24Icon size={20} color={colors.error} /> },
+        ...(isGroup ? [{ label: "Report a member", onPress: () => setIsPickingMember(true), isDestructive: true, icon: <UserCircle24Icon size={20} color={colors.error} /> }] : []),
       ]
     : [
-        { label: "Conversation info", onPress: closeThen(onOpenConversationInfo) },
-        { label: "Report user", onPress: closeThen(() => report.reportUser(false)), isDestructive: true },
-        { label: "Report and block", onPress: closeThen(() => report.reportUser(true)), isDestructive: true },
-        { label: "Report conversation", onPress: closeThen(report.reportConversation), isDestructive: true },
-        { label: "Block", onPress: closeThen(() => setIsBlockDialogOpen(true)), isDestructive: true },
+        { label: "Conversation info", onPress: closeThen(onOpenConversationInfo), icon: <Info24Icon size={20} color={colors.textMuted} /> },
+        { label: "Report user", onPress: closeThen(() => report.reportUser(false)), isDestructive: true, icon: <Flag24Icon size={20} color={colors.error} /> },
+        { label: "Report and block", onPress: closeThen(() => report.reportUser(true)), isDestructive: true, icon: <Flag24Icon size={20} color={colors.error} /> },
+        { label: "Report conversation", onPress: closeThen(report.reportConversation), isDestructive: true, icon: <Flag24Icon size={20} color={colors.error} /> },
+        { label: "Block", onPress: closeThen(() => setIsBlockDialogOpen(true)), isDestructive: true, icon: <Prohibit24Icon size={20} color={colors.error} /> },
       ];
   const reportableMembers = (members.data ?? []).filter((member) => member.user.id !== myUserId && member.user.id !== "u_me");
 
@@ -72,8 +74,8 @@ export function ChatActionsMenu({ visible, conversation, isGroupLike, onClose, o
           <ActionSheetOptionList
             options={
               isPickingMember
-                ? reportableMembers.map((member) => ({ label: member.user.name, detail: `@${member.user.username}`, onPress: () => reportMember(member.user) }))
-                : rows.map((row) => ({ label: row.label, onPress: row.onPress, destructive: row.isDestructive }))
+                ? reportableMembers.map((member) => ({ label: member.user.name, detail: `@${member.user.username}`, icon: <UserCircle24Icon size={20} color={colors.textMuted} />, onPress: () => reportMember(member.user) }))
+                : rows.map((row) => ({ label: row.label, icon: row.icon, onPress: row.onPress, destructive: row.isDestructive }))
             }
           />
         </View>

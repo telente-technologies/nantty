@@ -6,8 +6,8 @@ import { ChatMuteSheet } from "@/components/chatSafety/chatMuteSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { chatReportsService } from "@/services/chatReports.service";
-import { messagesService } from "@/services/messages.service";
+import { chatReportsService } from "@/services/chat/chatReports.service";
+import { messagesService } from "@/services/chat/messages.service";
 
 import type { ChatReportTarget } from "./chatReportTarget.type";
 
