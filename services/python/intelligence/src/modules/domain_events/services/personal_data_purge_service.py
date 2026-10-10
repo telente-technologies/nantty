@@ -8,7 +8,9 @@ from src.repositories.online_feature_keyspace_repository import (
     ACCOUNT_DELETED_FIELD,
     AFFINITY_HALF_LIFE_SECONDS,
     BEHAVIOUR_RETENTION_DAYS,
+    DAILY_COUNTER_TTL_SECONDS,
     PERSONALIZATION_OPT_OUT_FIELD,
+    SECONDS_PER_DAY,
     TOPIC_AFFINITY_KIND,
     VALUE_FLOW_HALF_LIFE_SECONDS,
     OnlineFeatureKeyspace,
@@ -18,6 +20,10 @@ from src.utils.decay_math_util import find_forward_decay_generation
 
 FLOW_DIRECTIONS = ("out", "in")
 BEHAVIOUR_SET_NAMES = ("recipients", "devices", "ips")
+
+
+def ad_frequency_purge_bucket_count() -> int:
+    return DAILY_COUNTER_TTL_SECONDS // SECONDS_PER_DAY + 1
 
 
 def list_all_generation_keys(base_key: str, half_life_seconds: float) -> list[str]:
@@ -43,16 +49,25 @@ class PersonalDataPurgeService:
             await self.purge_personalization_features(user_id)
 
     async def purge_personalization_features(self, user_id: str) -> None:
+        await self.backend.apply_write_operations(
+            [HashFieldAssign(self.keyspace.consent_key(user_id), PERSONALIZATION_OPT_OUT_FIELD, 1.0)]
+        )
         now = datetime.now(UTC)
         keys = [self.keyspace.recently_seen_items_key(user_id)]
         for kind in (TOPIC_AFFINITY_KIND, ACCOUNT_AFFINITY_KIND):
             keys += list_all_generation_keys(self.keyspace.affinity_base_key(kind, user_id), AFFINITY_HALF_LIFE_SECONDS)
-        keys += [self.keyspace.ad_frequency_key(day, user_id) for day in list_recent_day_buckets(now, 3)]
+        keys += [
+            self.keyspace.ad_frequency_key(day, user_id)
+            for day in list_recent_day_buckets(now, ad_frequency_purge_bucket_count())
+        ]
         await self.backend.delete_keys(keys)
 
     async def purge_account(self, user_id: str) -> None:
-        now = datetime.now(UTC)
+        await self.backend.apply_write_operations(
+            [HashFieldAssign(self.keyspace.consent_key(user_id), ACCOUNT_DELETED_FIELD, 1.0)]
+        )
         await self.purge_personalization_features(user_id)
+        now = datetime.now(UTC)
         keys = [self.keyspace.account_profile_key(user_id)]
         for day in list_recent_day_buckets(now, BEHAVIOUR_RETENTION_DAYS + 1):
             keys.append(self.keyspace.behaviour_counter_key(user_id, day))

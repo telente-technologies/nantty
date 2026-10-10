@@ -8,15 +8,21 @@ from src.modules.content_scoring.dtos.content_score_dto import ContentScoreMessa
 
 
 class ContentScorePublisher(Protocol):
+    delivers: bool
+
     async def publish_content_score(self, message: ContentScoreMessage) -> None: ...
 
 
 class NullContentScorePublisher:
+    delivers = False
+
     async def publish_content_score(self, _message: ContentScoreMessage) -> None:
         return None
 
 
 class AmqpContentScorePublisher:
+    delivers = True
+
     def __init__(self, channels: RabbitMqChannelProvider, queue_name: str) -> None:
         self.channels = channels
         self.queue_name = queue_name

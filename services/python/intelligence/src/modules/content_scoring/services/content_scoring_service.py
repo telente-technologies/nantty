@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import logging
 from collections.abc import Sequence
@@ -134,7 +135,7 @@ class ContentScoringService:
         except Exception:
             scoring_logger.exception("sensitivity_advisory_publish_failed")
             return False
-        return True
+        return self.sensitivity_publisher.delivers
 
     async def score_processed_media(
         self, media_id: str, owner_id: str, purpose: str | None, now: datetime, image_key: str | None = None
@@ -143,13 +144,19 @@ class ContentScoringService:
         if not links or not links[0]:
             return None
         post_id, author_id, target_type = links[0][0][0].split(LINK_SEPARATOR)
-        response = self.image_moderation.classify_image(
+        response = await asyncio.to_thread(
+            self.image_moderation.classify_image,
             ImageModerationRequest(
                 media_id=media_id, owner_id=owner_id, purpose=purpose, image_url=self.build_image_url(image_key)
             ),
             now,
         )
         if response.no_signal:
+            if response.model_version == "unavailable":
+                scoring_logger.error(
+                    "image_moderation_unavailable_for_media",
+                    extra={"media_id": media_id, "post_id": post_id},
+                )
             return None
         message = ContentScoreMessage(
             score_id=build_score_id("image", post_id, media_id, response.model_version),

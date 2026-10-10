@@ -1,4 +1,4 @@
-import contextlib
+import logging
 
 from src.interfaces.feature_backend_interface import (
     DistinctMemberAdd,
@@ -63,8 +63,13 @@ class ExperimentService:
                     DistinctMemberAdd(users_key, request.user_id),
                     KeyExpiry(users_key, EXPERIMENT_COUNTER_TTL_SECONDS),
                 ]
-            with contextlib.suppress(FeatureBackendUnavailableError):
+            try:
                 await self.feature_store.feature_backend.apply_write_operations(operations)
+            except FeatureBackendUnavailableError:
+                logging.getLogger("intelligence.experiments").warning(
+                    "experiment_exposure_write_failed",
+                    extra={"user_id": request.user_id, "operation_count": len(operations)},
+                )
         return ExperimentAssignmentResponse(assignments=assignments)
 
     async def read_variant_metrics(self, experiment_key: str, variant_names: list[str]) -> ExperimentMetricsResponse:

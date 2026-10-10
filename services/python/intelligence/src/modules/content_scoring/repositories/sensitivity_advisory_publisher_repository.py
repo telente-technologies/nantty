@@ -8,15 +8,21 @@ from src.modules.content_scoring.dtos.sensitivity_advisory_dto import Sensitivit
 
 
 class SensitivityAdvisoryPublisher(Protocol):
+    delivers: bool
+
     async def publish_sensitivity_advisory(self, event: SensitivityAdvisedEvent) -> None: ...
 
 
 class NullSensitivityAdvisoryPublisher:
+    delivers = False
+
     async def publish_sensitivity_advisory(self, _event: SensitivityAdvisedEvent) -> None:
         return None
 
 
 class AmqpSensitivityAdvisoryPublisher:
+    delivers = True
+
     def __init__(self, channels: RabbitMqChannelProvider) -> None:
         self.channels = channels
 

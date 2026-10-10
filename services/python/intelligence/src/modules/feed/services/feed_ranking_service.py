@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 from src.dtos.common_dto import ExcludedItem, RankingResponseMetadata
@@ -137,12 +138,14 @@ class FeedRankingService:
             for candidate in candidates
         ]
         feature_mappings = [convert_feature_values_to_mapping(row) for row in feature_rows]
-        scoring = score_feed_candidates_in_two_stages(
+        loaded_feed_model = self.model_holder.get_loaded_model("feed_engagement")
+        scoring = await asyncio.to_thread(
+            score_feed_candidates_in_two_stages,
             candidates,
             feature_rows,
             feature_mappings,
             request.feed_mode,
-            self.model_holder.get_loaded_model("feed_engagement"),
+            loaded_feed_model,
         )
         clamped_policy = clamp_boost_policy_to_hard_caps(request.boost_policy)
         boosts: dict[str, float] = {}
@@ -202,7 +205,7 @@ class FeedRankingService:
                 request_id=request_id,
                 ranking_source=f"{request.feed_mode}:{scoring.ranking_source}",
                 model_version=scoring.model_version,
-                degraded=degraded,
+                degraded=degraded or loaded_feed_model is None,
                 generated_at=now,
             ),
         )

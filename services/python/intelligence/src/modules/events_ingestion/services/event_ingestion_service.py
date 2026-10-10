@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
@@ -68,7 +69,7 @@ class EventIngestionService:
         self, raw_events: Sequence[dict[str, JsonValue]], received_at: datetime | None = None
     ) -> EventBatchResponse:
         received_at = received_at or datetime.now(UTC)
-        valid_events, rejected = validate_raw_events(raw_events, received_at)
+        valid_events, rejected = await asyncio.to_thread(validate_raw_events, list(raw_events), received_at)
         unique_events: dict[str, IntelligenceEvent] = {}
         duplicate_count = 0
         for event in valid_events:
@@ -92,13 +93,17 @@ class EventIngestionService:
             await self.release_claims_quietly(claimed_keys)
             ingestion_logger.exception("raw_event_write_failed", extra={"event_count": len(new_events)})
             raise EventStorageUnavailableError("raw event storage unavailable") from storage_error
-        await self.update_online_features_best_effort(new_events)
+        try:
+            await self.update_online_features_best_effort(new_events)
+        except BaseException:
+            await self.release_claims_quietly(claimed_keys)
+            raise
         return EventBatchResponse(accepted=len(new_events), duplicates=duplicate_count, rejected=rejected)
 
     async def release_claims_quietly(self, claimed_keys: list[str]) -> None:
         try:
             await self.feature_store.feature_backend.delete_keys(claimed_keys)
-        except FeatureBackendUnavailableError:
+        except Exception:
             ingestion_logger.warning("event_claim_release_failed", extra={"event_count": len(claimed_keys)})
 
     async def update_online_features_best_effort(self, events: Sequence[IntelligenceEvent]) -> None:

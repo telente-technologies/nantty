@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime
 from typing import Protocol
 
@@ -58,7 +59,18 @@ class ImageModerationService:
         try:
             raw_scores = model.classify_image(request)
         except Exception:
-            raw_scores = {}
+            logging.getLogger("intelligence.content_scoring").exception(
+                "image_moderation_failed", extra={"media_id": request.media_id}
+            )
+            return ImageModerationResponse(
+                media_id=request.media_id,
+                categories=[],
+                score=0.0,
+                suggested_action="review",
+                no_signal=True,
+                model_version="unavailable",
+                generated_at=now or datetime.now(UTC),
+            )
         categories = sorted(
             (
                 ContentScoreCategory(category=category, score=round(min(max(score, 0.0), 1.0), 6))

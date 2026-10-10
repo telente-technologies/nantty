@@ -1,3 +1,5 @@
+import asyncio
+import contextlib
 import json
 import logging
 from dataclasses import dataclass
@@ -56,19 +58,22 @@ class DomainEventConsumerService:
     async def score_content_for_trust(self, event: DomainEvent) -> None:
         if self.content_scoring_service is None:
             return
-        if isinstance(event, PostCreatedDomainEvent):
-            payload = event.payload
-            await self.content_scoring_service.score_created_post(
-                payload.post_id, event.actor_id, payload.kind, payload.text, payload.media_ids, event.occurred_at
-            )
-        elif isinstance(event, MediaProcessedDomainEvent):
-            await self.content_scoring_service.score_processed_media(
-                event.payload.media_id,
-                event.actor_id,
-                event.payload.purpose,
-                event.occurred_at,
-                event.payload.image_key,
-            )
+        try:
+            if isinstance(event, PostCreatedDomainEvent):
+                payload = event.payload
+                await self.content_scoring_service.score_created_post(
+                    payload.post_id, event.actor_id, payload.kind, payload.text, payload.media_ids, event.occurred_at
+                )
+            elif isinstance(event, MediaProcessedDomainEvent):
+                await self.content_scoring_service.score_processed_media(
+                    event.payload.media_id,
+                    event.actor_id,
+                    event.payload.purpose,
+                    event.occurred_at,
+                    event.payload.image_key,
+                )
+        except Exception:
+            consumer_logger.exception("content_score_side_effect_failed")
 
     def parse_message_body(self, message_body: str) -> DomainEvent | None:
         try:
@@ -89,8 +94,13 @@ class DomainEventConsumerService:
             return DomainEventProcessingOutcome("duplicate", event.event_id)
         try:
             return await self.apply_event(event)
+        except asyncio.CancelledError:
+            with contextlib.suppress(Exception):
+                await backend.delete_keys([claim_key])
+            raise
         except Exception:
-            await backend.delete_keys([claim_key])
+            with contextlib.suppress(Exception):
+                await backend.delete_keys([claim_key])
             raise
 
     def account_identities(self, actor_id: str) -> list[str]:
