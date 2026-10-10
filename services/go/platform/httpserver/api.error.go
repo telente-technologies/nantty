@@ -35,6 +35,10 @@ func NewValidationFailedError(issues []ValidationIssue) *ApiError {
 	return &ApiError{Status: http.StatusBadRequest, Code: "VALIDATION_FAILED", Message: "Validation failed", Issues: issues}
 }
 
+func NewForbiddenError(message string) *ApiError {
+	return NewApiError(http.StatusForbidden, "FORBIDDEN", message)
+}
+
 var (
 	ErrUnauthorized = NewApiError(http.StatusUnauthorized, "UNAUTHORIZED", "Sign in to continue.")
 	ErrForbidden    = NewApiError(http.StatusForbidden, "FORBIDDEN", "You do not have permission to do that.")

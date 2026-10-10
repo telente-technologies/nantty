@@ -3,6 +3,7 @@ package jwtauth
 import (
 	"context"
 	"net/http"
+	"slices"
 	"strings"
 
 	"zudomart/platform/httpserver"
@@ -28,6 +29,14 @@ func ExtractBearerTokenFromAuthorizationHeader(request *http.Request) string {
 }
 
 func RequireVerifiedAccessToken(verifier *AccessTokenVerifier) func(http.Handler) http.Handler {
+	return RequireVerifiedAccessTokenWithSuspendedPolicy(verifier, false)
+}
+
+func RequireVerifiedAccessTokenAllowingSuspended(verifier *AccessTokenVerifier) func(http.Handler) http.Handler {
+	return RequireVerifiedAccessTokenWithSuspendedPolicy(verifier, true)
+}
+
+func RequireVerifiedAccessTokenWithSuspendedPolicy(verifier *AccessTokenVerifier, allowSuspended bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			rawToken := ExtractBearerTokenFromAuthorizationHeader(request)
@@ -38,6 +47,10 @@ func RequireVerifiedAccessToken(verifier *AccessTokenVerifier) func(http.Handler
 			principal, err := verifier.VerifyAccessTokenAndExtractPrincipal(request.Context(), rawToken)
 			if err != nil {
 				httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+				return
+			}
+			if !allowSuspended && slices.Contains(principal.Roles, "suspended") {
+				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.NewForbiddenError("account is suspended"))
 				return
 			}
 			next.ServeHTTP(writer, request.WithContext(ContextWithPrincipal(request.Context(), principal)))

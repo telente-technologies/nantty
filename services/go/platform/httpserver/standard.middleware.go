@@ -6,7 +6,9 @@ import (
 	"encoding/hex"
 	"log/slog"
 	"net/http"
+	"os"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -59,6 +61,69 @@ func LogEveryRequestWithDuration(logger *slog.Logger) func(http.Handler) http.Ha
 			)
 		})
 	}
+}
+
+func ApplySecurityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		headers := writer.Header()
+		headers.Set("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'")
+		headers.Set("X-Content-Type-Options", "nosniff")
+		headers.Set("X-Frame-Options", "DENY")
+		headers.Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		headers.Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+		headers.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+		headers.Set("X-XSS-Protection", "0")
+		next.ServeHTTP(writer, request)
+	})
+}
+
+func ApplyCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		origin := strings.TrimSpace(request.Header.Get("Origin"))
+		allowedOrigins := parseAllowedOriginsFromEnvironment()
+		if origin == "" || len(allowedOrigins) == 0 {
+			next.ServeHTTP(writer, request)
+			return
+		}
+		allowedOrigin := ""
+		for _, candidate := range allowedOrigins {
+			if candidate == "*" || strings.EqualFold(candidate, origin) {
+				allowedOrigin = candidate
+				break
+			}
+		}
+		if allowedOrigin == "" {
+			next.ServeHTTP(writer, request)
+			return
+		}
+		header := writer.Header()
+		header.Set("Vary", "Origin")
+		header.Set("Access-Control-Allow-Origin", allowedOrigin)
+		header.Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		header.Set("Access-Control-Allow-Headers", "Authorization, Content-Type, X-Request-Id, Idempotency-Key, X-Step-Up-Token")
+		header.Set("Access-Control-Max-Age", "600")
+		if request.Method == http.MethodOptions {
+			writer.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(writer, request)
+	})
+}
+
+func parseAllowedOriginsFromEnvironment() []string {
+	value := strings.TrimSpace(os.Getenv("CORS_ALLOWED_ORIGINS"))
+	if value == "" {
+		return nil
+	}
+	parts := strings.Split(value, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }
 
 func ChainMiddlewares(handler http.Handler, middlewares ...func(http.Handler) http.Handler) http.Handler {

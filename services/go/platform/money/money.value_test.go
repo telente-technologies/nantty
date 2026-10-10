@@ -54,6 +54,49 @@ func TestApplyBasisPointsRoundsHalfToEven(t *testing.T) {
 	}
 }
 
+func TestMultiplyByQuantityRejectsOverflowForAllSigns(t *testing.T) {
+	cases := []struct {
+		name     string
+		amount   int64
+		quantity int64
+		want     int64
+		wantErr  error
+	}{
+		{"positive overflow", math.MaxInt64, 2, 0, ErrAmountOverflow},
+		{"negative overflow", math.MinInt64, 2, 0, ErrAmountOverflow},
+		{"negative times negative overflow", math.MinInt64, -1, 0, ErrAmountOverflow},
+		{"negative times negative valid", -3, -4, 12, nil},
+		{"zero quantity", math.MinInt64, 0, 0, nil},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			got, err := (Money{AmountMinor: testCase.amount, Currency: "USD"}).MultiplyByQuantity(testCase.quantity)
+			if !errors.Is(err, testCase.wantErr) {
+				t.Fatalf("error = %v, want %v", err, testCase.wantErr)
+			}
+			if err == nil && got.AmountMinor != testCase.want {
+				t.Fatalf("amount = %d, want %d", got.AmountMinor, testCase.want)
+			}
+		})
+	}
+}
+
+func TestApplyBasisPointsRejectsOverflowForAllSigns(t *testing.T) {
+	cases := []struct {
+		amount      int64
+		basisPoints int64
+	}{
+		{math.MaxInt64, 2},
+		{math.MinInt64, 2},
+		{math.MinInt64, -1},
+	}
+	for _, testCase := range cases {
+		if _, err := (Money{AmountMinor: testCase.amount, Currency: "USD"}).ApplyBasisPointsRoundingHalfToEven(testCase.basisPoints); !errors.Is(err, ErrAmountOverflow) {
+			t.Fatalf("%d x %d bps error = %v, want %v", testCase.amount, testCase.basisPoints, err, ErrAmountOverflow)
+		}
+	}
+}
+
 func TestAllocateByWeightsKeepsEveryMinorUnit(t *testing.T) {
 	cases := []struct {
 		amount  int64
@@ -79,6 +122,33 @@ func TestAllocateByWeightsKeepsEveryMinorUnit(t *testing.T) {
 		}
 		if total != testCase.amount {
 			t.Fatalf("total %d != %d", total, testCase.amount)
+		}
+	}
+}
+
+func TestAllocateByWeightsHandlesExtremeAmountsAndWeights(t *testing.T) {
+	cases := []struct {
+		amount  int64
+		weights []int64
+		want    []int64
+	}{
+		{math.MaxInt64, []int64{math.MaxInt64, math.MaxInt64}, []int64{4_611_686_018_427_387_904, 4_611_686_018_427_387_903}},
+		{math.MinInt64, []int64{math.MaxInt64, math.MaxInt64}, []int64{-4_611_686_018_427_387_904, -4_611_686_018_427_387_904}},
+	}
+	for _, testCase := range cases {
+		shares, err := (Money{AmountMinor: testCase.amount, Currency: "USD"}).AllocateByWeightsWithoutLosingMinorUnits(testCase.weights)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var total int64
+		for index, share := range shares {
+			if share.AmountMinor != testCase.want[index] {
+				t.Fatalf("share %d = %d, want %d", index, share.AmountMinor, testCase.want[index])
+			}
+			total += share.AmountMinor
+		}
+		if total != testCase.amount {
+			t.Fatalf("total = %d, want %d", total, testCase.amount)
 		}
 	}
 }

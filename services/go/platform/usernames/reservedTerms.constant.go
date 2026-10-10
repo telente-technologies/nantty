@@ -25,7 +25,7 @@ var exactTerms = []string{
 var webRouteTerms = []string{
 	"analytics", "bff", "brand", "brands", "cart", "category", "categories", "chat", "chats", "checkout", "clip", "clips", "coins",
 	"collection", "collections", "creator", "creators", "feed", "forgot-password", "live", "lives", "me", "notifications", "order",
-	"orders", "post", "posts", "product", "products", "profile", "reset-password", "saved", "settings", "store-rewards", "stores",
+	"orders", "pay", "post", "posts", "product", "products", "profile", "reset-password", "saved", "settings", "store-rewards", "stores",
 	"subscriptions", "user", "users", "verify-email", "watch", "welcome", "security-check", "cookies", "guidelines", "community-guidelines",
 	"creator-terms", "faq", "sitemap", "sitemaps", "robots", "favicon", "manifest", "_next", "static", "assets", "images", "icons", "fonts", "public",
 	"embed", "oembed", "share", "invite", "download", "app", "apps", "reels", "videos", "video", "rankings", "wallet", "studio",

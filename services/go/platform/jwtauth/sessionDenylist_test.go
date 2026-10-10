@@ -87,13 +87,13 @@ func TestMiddlewareReturns401ForRevokedSession(t *testing.T) {
 	}
 }
 
-func TestDenylistOutageFailsOpenAndCountsFailure(t *testing.T) {
+func TestDenylistOutageFailsClosedAndCountsFailure(t *testing.T) {
 	verifier, sign := verifierWithFreshKey(t)
 	denylist := newFakeDenylist()
 	denylist.failing = true
 	before := SessionDenylistCheckFailures()
-	if _, err := verifier.WithSessionDenylist(denylist).VerifyAccessTokenAndExtractPrincipal(context.Background(), sign("session-a")); err != nil {
-		t.Fatalf("outage must fail open, got %v", err)
+	if _, err := verifier.WithSessionDenylist(denylist).VerifyAccessTokenAndExtractPrincipal(context.Background(), sign("session-a")); !errors.Is(err, ErrInvalidAccessToken) {
+		t.Fatalf("outage must fail closed, got %v", err)
 	}
 	if SessionDenylistCheckFailures() != before+1 {
 		t.Fatal("outage must increment the check-failure metric")

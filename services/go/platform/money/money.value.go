@@ -77,22 +77,33 @@ func (amount Money) Subtract(other Money) (Money, error) {
 }
 
 func (amount Money) MultiplyByQuantity(quantity int64) (Money, error) {
-	if quantity == 0 || amount.AmountMinor == 0 {
-		return ZeroMoneyInCurrency(amount.Currency), nil
-	}
-	product := amount.AmountMinor * quantity
-	if product/quantity != amount.AmountMinor {
+	product, err := multiplyInt64WithoutOverflow(amount.AmountMinor, quantity)
+	if err != nil {
 		return Money{}, ErrAmountOverflow
 	}
 	return Money{AmountMinor: product, Currency: amount.Currency}, nil
 }
 
 func (amount Money) ApplyBasisPointsRoundingHalfToEven(basisPoints int64) (Money, error) {
-	numerator := amount.AmountMinor * basisPoints
-	if basisPoints != 0 && numerator/basisPoints != amount.AmountMinor {
+	numerator, err := multiplyInt64WithoutOverflow(amount.AmountMinor, basisPoints)
+	if err != nil {
 		return Money{}, ErrAmountOverflow
 	}
 	return Money{AmountMinor: divideRoundingHalfToEven(numerator, 10_000), Currency: amount.Currency}, nil
+}
+
+func multiplyInt64WithoutOverflow(left, right int64) (int64, error) {
+	if left == 0 || right == 0 {
+		return 0, nil
+	}
+	if left > 0 {
+		if (right > 0 && left > math.MaxInt64/right) || (right < 0 && right < math.MinInt64/left) {
+			return 0, ErrAmountOverflow
+		}
+	} else if (right > 0 && left < math.MinInt64/right) || (right < 0 && left < math.MaxInt64/right) {
+		return 0, ErrAmountOverflow
+	}
+	return left * right, nil
 }
 
 func (amount Money) String() string {

@@ -73,6 +73,8 @@ type cachedPlan struct {
 	expiresAt time.Time
 }
 
+const freePlanCacheDuration = 5 * time.Second
+
 var (
 	configureOnce sync.Once
 	Default       = &Resolver{Timeout: 2 * time.Second, CacheDuration: time.Minute, Now: time.Now, AllowAll: true}
@@ -104,7 +106,11 @@ func (resolver *Resolver) PlanOf(ctx context.Context, ownerAccountId uuid.UUID) 
 	if resolver.cache == nil {
 		resolver.cache = map[uuid.UUID]cachedPlan{}
 	}
-	resolver.cache[ownerAccountId] = cachedPlan{plan: plan, expiresAt: resolver.Now().Add(resolver.CacheDuration)}
+	lifetime := resolver.CacheDuration
+	if plan == Free && lifetime > freePlanCacheDuration {
+		lifetime = freePlanCacheDuration
+	}
+	resolver.cache[ownerAccountId] = cachedPlan{plan: plan, expiresAt: resolver.Now().Add(lifetime)}
 	resolver.mutex.Unlock()
 	return plan
 }

@@ -69,3 +69,22 @@ func contains(text, part string) bool {
 	}
 	return false
 }
+
+func TestFreePlanIsRecheckedSoonSoAnUpgradeShowsQuickly(t *testing.T) {
+	plan := "free"
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		_, _ = writer.Write([]byte(`{"sellerPlan":"` + plan + `"}`))
+	}))
+	defer server.Close()
+	clock := time.Date(2026, 10, 6, 10, 0, 0, 0, time.UTC)
+	resolver := &Resolver{BaseUrl: server.URL, Timeout: time.Second, CacheDuration: time.Minute, Now: func() time.Time { return clock }}
+	owner := uuid.New()
+	if got := resolver.PlanOf(context.Background(), owner); got != Free {
+		t.Fatalf("plan = %s, want free", got)
+	}
+	plan = "business"
+	clock = clock.Add(6 * time.Second)
+	if got := resolver.PlanOf(context.Background(), owner); got != Business {
+		t.Fatalf("plan = %s, want business after the short free-plan cache", got)
+	}
+}

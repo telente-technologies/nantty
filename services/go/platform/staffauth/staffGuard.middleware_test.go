@@ -45,13 +45,21 @@ func newGuard(t *testing.T) (staffauth.Guard, *identityports.Registry, *identity
 	registry := &identityports.Registry{}
 	tokens := identitytest.NewFakeTokenService(t)
 	registry.RegisterStaffTokenService(tokens)
+	registry.RegisterStaffSessionChecker(activeSessionChecker{})
 	recorder := &capturingRecorder{}
 	registry.RegisterAuditRecorder(recorder)
 	return staffauth.Guard{Registry: registry}, registry, tokens, recorder
 }
 
+type activeSessionChecker struct{}
+
+func (activeSessionChecker) IsStaffSessionActive(_ context.Context, _, _ string) (bool, error) {
+	return true, nil
+}
+
 func serve(handler http.Handler, method, address, token string) int {
 	request := httptest.NewRequest(method, "/api/v1/admin/things", nil)
+	request.RemoteAddr = "10.0.0.5:1234"
 	request.Header.Set("Authorization", "Bearer "+token)
 	request.Header.Set("X-Real-Ip", address)
 	response := httptest.NewRecorder()
@@ -72,8 +80,27 @@ func TestGuardRefusesStaffOutsideTheNetworkAllowList(t *testing.T) {
 	}
 }
 
+func TestGuardIgnoresSpoofedXRealIpFromUntrustedPeer(t *testing.T) {
+	guard, registry, tokens, _ := newGuard(t)
+	registry.RegisterStaffNetworkPolicy(allowListPolicy{allowed: "203.0.113.7"})
+	accessToken, _, _ := tokens.SignStaffTokensForTest(t, staffauth.AdminRole, []string{"users:read"})
+	handler := guard.RequireStaff("users:read", false)(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) { writer.WriteHeader(http.StatusOK) }))
+
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/admin/things", nil)
+	request.RemoteAddr = "198.51.100.4:1234"
+	request.Header.Set("Authorization", "Bearer "+accessToken)
+	request.Header.Set("X-Real-Ip", "203.0.113.7")
+
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusForbidden {
+		t.Fatalf("spoofed X-Real-Ip from untrusted peer must be rejected, got %d", recorder.Code)
+	}
+}
+
 func TestGuardAuditsSuccessfulMutationsThatRecordedNothing(t *testing.T) {
-	guard, _, tokens, recorder := newGuard(t)
+	guard, registry, tokens, recorder := newGuard(t)
+	registry.RegisterStaffNetworkPolicy(allowListPolicy{allowed: "203.0.113.7"})
 	accessToken, _, _ := tokens.SignStaffTokensForTest(t, staffauth.AdminRole, []string{"users:read"})
 	silent := guard.RequireStaff("", false)(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) { writer.WriteHeader(http.StatusNoContent) }))
 	explicit := guard.RequireStaff("", false)(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"golang.org/x/sync/errgroup"
@@ -26,6 +27,15 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	defer stop()
 	environment := config.NewEnvironmentReader()
 	logger := logging.NewJsonLoggerForService(deployableName, environment.ReadStringOrDefault("LOG_LEVEL", "info"))
+	appEnv := environment.ReadStringOrDefault("APP_ENV", "")
+	if appEnv == "" {
+		environment.ReportProblem("APP_ENV must be set to development, staging, or production")
+	}
+	if appEnv == "production" {
+		if strings.TrimSpace(environment.ReadStringOrDefault("AUTH_SESSION_DENYLIST_URL", "")) == "" {
+			environment.ReportProblem("AUTH_SESSION_DENYLIST_URL is required in production")
+		}
+	}
 	address := environment.ReadStringOrDefault("HTTP_ADDRESS", ":8080")
 	shutDownTracing, err := telemetry.StartTracingWhenCollectorIsConfigured(ctx, deployableName)
 	if err != nil {
@@ -44,6 +54,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	if err := environment.CombinedConfigurationError(); err != nil {
 		return err
 	}
+	isProduction := appEnv == "production"
 	mux := http.NewServeMux()
 	dependencies.Health.MountLivenessAndReadinessRoutes(mux)
 	for _, module := range modules {
@@ -54,6 +65,9 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 		httpserver.AssignRequestIdToEveryRequest,
 		telemetry.TraceEveryHttpRequest(deployableName),
 		httpserver.RecoverFromPanicsAsInternalErrors(logger),
+		httpserver.ApplySecurityHeaders,
+		httpserver.ApplyCors,
+		httpserver.RateLimitEveryRequest(isProduction),
 		viewerregion.CaptureSignals(environment.ReadStringOrDefault("TRUSTED_COUNTRY_HEADER", viewerregion.DefaultTrustedCountryName)),
 		httpserver.LogEveryRequestWithDuration(logger),
 	)
@@ -67,6 +81,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 			OnShutdown: append(closersForModules(modules), events.CloseSharedRabbitConnections, shutDownTracing),
 		})
 	})
+	_ = stop
 	return group.Wait()
 }
 

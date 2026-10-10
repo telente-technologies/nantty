@@ -2,7 +2,6 @@ package staffauth
 
 import (
 	"context"
-	"net"
 	"net/http"
 	"slices"
 	"strings"
@@ -122,10 +121,12 @@ func (guard Guard) authenticate(request *http.Request, requireStepUp bool) (Staf
 		return Staff{}, httpserver.ErrUnauthorized
 	}
 	staff := staffFromPrincipal(principal)
-	if checker, checkerErr := guard.Registry.StaffSessionChecker(); checkerErr == nil {
-		if active, err := checker.IsStaffSessionActive(request.Context(), staff.Id, staff.SessionId); err != nil || !active {
-			return Staff{}, httpserver.ErrUnauthorized
-		}
+	checker, checkerErr := guard.Registry.StaffSessionChecker()
+	if checkerErr != nil {
+		return Staff{}, httpserver.NewApiError(http.StatusServiceUnavailable, "UNAVAILABLE", "Staff authentication is unavailable.")
+	}
+	if active, err := checker.IsStaffSessionActive(request.Context(), staff.Id, staff.SessionId); err != nil || !active {
+		return Staff{}, httpserver.ErrUnauthorized
 	}
 	if failure := guard.refuseDisallowedNetwork(request, staff); failure != nil {
 		return Staff{}, failure
@@ -145,7 +146,7 @@ func (guard Guard) authenticate(request *http.Request, requireStepUp bool) (Staf
 func (guard Guard) refuseDisallowedNetwork(request *http.Request, staff Staff) *httpserver.ApiError {
 	policy, err := guard.Registry.StaffNetworkPolicy()
 	if err != nil {
-		return nil
+		return httpserver.NewApiError(http.StatusServiceUnavailable, "UNAVAILABLE", "Staff authentication is unavailable.")
 	}
 	allowed, err := policy.IsStaffAddressAllowed(request.Context(), staff.Id, ClientAddress(request))
 	if err != nil {
@@ -160,12 +161,5 @@ func (guard Guard) refuseDisallowedNetwork(request *http.Request, staff Staff) *
 var IpNotAllowed = httpserver.NewApiError(http.StatusForbidden, "IP_NOT_ALLOWED", "The admin console cannot be used from this network.")
 
 func ClientAddress(request *http.Request) string {
-	if forwarded := strings.TrimSpace(request.Header.Get("X-Real-Ip")); forwarded != "" {
-		return forwarded
-	}
-	host, _, err := net.SplitHostPort(request.RemoteAddr)
-	if err != nil {
-		return request.RemoteAddr
-	}
-	return host
+	return httpserver.ClientIP(request)
 }

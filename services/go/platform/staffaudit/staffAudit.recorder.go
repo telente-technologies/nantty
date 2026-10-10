@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"zudomart/platform/httpserver"
 	"zudomart/platform/staffauth"
 )
 
@@ -81,6 +82,6 @@ func RecordStaffChange(request *http.Request, recorder Recorder, staff staffauth
 	}
 	return recorder.Record(request.Context(), Record{
 		ActorId: staff.Id, ActorName: staff.Name, ActorRole: staff.Role, Action: action, SubjectType: subjectType, SubjectId: subjectId, SubjectLabel: subjectId,
-		Before: Snapshot(before), After: Snapshot(after), Reason: reason, IpAddress: request.Header.Get("X-Real-Ip"), RequestId: request.Header.Get("X-Request-Id"), StepUpVerified: staff.SteppedUp,
+		Before: Snapshot(before), After: Snapshot(after), Reason: reason, IpAddress: httpserver.ClientIP(request), RequestId: request.Header.Get("X-Request-Id"), StepUpVerified: staff.SteppedUp,
 	})
 }

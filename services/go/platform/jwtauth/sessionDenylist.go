@@ -52,9 +52,9 @@ func isSessionRevokedFailingOpen(ctx context.Context, denylist SessionDenylist, 
 	revoked, err := denylist.IsSessionRevoked(checkCtx, sessionId)
 	if err != nil {
 		denylistCheckFailures.Add(1)
-		slog.ErrorContext(ctx, "session denylist check failed; allowing token until it expires",
+		slog.ErrorContext(ctx, "session denylist check failed; rejecting token to fail closed",
 			slog.String("metric", "auth_session_denylist_check_failed_total"), slog.Any("error", err))
-		return false
+		return true
 	}
 	return revoked
 }

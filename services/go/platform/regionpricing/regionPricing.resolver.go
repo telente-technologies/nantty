@@ -68,6 +68,21 @@ func ResolvePricingRegion(signals Signals) Resolution {
 	return Resolution{Region: FallbackRegion.Code, Currency: FallbackRegion.Currency, Channel: channel, Source: SourceFallback, IsFallback: true}
 }
 
+func ResolveChargingRegion(signals Signals) Resolution {
+	channel := ChannelForClientPlatform(signals.ClientPlatform)
+	candidates := []struct{ country, source string }{
+		{signals.ProfileCountry, SourceProfile},
+		{signals.TrustedHeaderCountry, SourceTrustedProxy},
+		{signals.IpCountry, SourceIp},
+	}
+	for _, candidate := range candidates {
+		if country := NormalizeCountryCode(candidate.country); country != "" {
+			return resolutionFor(country, channel, candidate.source)
+		}
+	}
+	return Resolution{Region: FallbackRegion.Code, Currency: FallbackRegion.Currency, Channel: channel, Source: SourceFallback, IsFallback: true}
+}
+
 func resolutionFor(country, channel, source string) Resolution {
 	region, supported := RegionForCountry(country)
 	return Resolution{CountryCode: country, Region: region.Code, Currency: region.Currency, Channel: channel, Source: source, IsFallback: !supported}
