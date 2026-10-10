@@ -12,7 +12,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { savedItemsQueryKeyPrefix } from "@/hooks/useSaveToggle.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { savesService } from "@/services/saves.service";
+import { savesService } from "@/services/social/saves.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { SavedItem, SavedItemFilter } from "@/types";
 import { spacing } from "@/constants/spacing.constant";
@@ -28,6 +28,7 @@ const EMPTY_STATE_TITLE: Record<SavedItemFilter, string> = {
   video: "No saved videos",
   clip: "No saved clips",
   product: "No saved products",
+  comment: "No saved replies",
 };
 
 export function SavedScreen({ navigation, route }: MainScreenProps<"Saved">) {
@@ -55,6 +56,7 @@ export function SavedScreen({ navigation, route }: MainScreenProps<"Saved">) {
   const openSavedItem = (item: SavedItem) => {
     if (item.type === "product") navigation.navigate("ProductDetail", { productId: item.targetId });
     else if (item.type === "clip") navigation.navigate("Tabs", { screen: "Clips", params: { startId: item.targetId } });
+    else if (item.type === "comment") navigation.navigate("CommentThread", { commentId: item.targetId, postId: item.postId });
     else navigation.navigate("PostDetail", { postId: item.targetId });
   };
 

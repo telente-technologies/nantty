@@ -6,7 +6,7 @@ import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { usersService } from "@/services/users.service";
+import { usersService } from "@/services/account/users.service";
 import { useTheme } from "@/theme";
 
 export function UserProfileByUsernameScreen({ navigation, route }: MainScreenProps<"UserProfileByUsername">) {

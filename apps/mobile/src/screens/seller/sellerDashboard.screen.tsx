@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-
 import { CaretDown24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { BusinessDocumentsNudge } from "@/components/seller/businessDocumentsNudge";
 import { InventoryCard } from "@/components/seller/inventoryCard";
@@ -14,6 +14,9 @@ import { useSellerDashboardQuery } from "@/components/seller/sellerQueries.hook"
 import { StoreOrderRow } from "@/components/seller/storeOrderRow";
 import { Header, HeaderAction } from "@/components/ui/header";
 import { useAuthStore } from "@/store/auth.store";
+import { useActingProfileStore } from "@/store/actingProfile.store";
+import { useToastStore } from "@/store/toast.store";
+import { brandsService } from "@/services/sellers/brands.service";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -35,6 +38,20 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
   const { data: dashboard, isLoading, isError, refetch, isRefetching } = useSellerDashboardQuery(period);
   const refreshControl = usePullToRefresh(refetch);
   const myStoreId = useAuthStore((state) => state.user?.storeId ?? null);
+  const setActingProfile = useActingProfileStore((s) => s.setActingProfile);
+  const showToast = useToastStore((s) => s.showToast);
+  const queryClient = useQueryClient();
+  const postAsStore = useMutation({
+    mutationFn: async () => {
+      if (!myStoreId) throw new Error("No store found");
+      const profile = await brandsService.switchActingProfile(myStoreId);
+      setActingProfile(profile);
+      queryClient.setQueryData(["users", "me", "acting-profile"], profile);
+      return profile;
+    },
+    onSuccess: () => navigation.navigate("CreatePost", { mode: "post" }),
+    onError: () => showToast("Couldn't switch to your store. Try again."),
+  });
   const totalSales = dashboard ? splitMoneyIntoSymbolAndAmount(dashboard.totalSales) : null;
 
   return (
@@ -79,6 +96,14 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
             <Button variant="subtle" title="Products" height={38} style={styles.quickLink} onPress={() => navigation.navigate("SellerProducts")} />
             <Button variant="subtle" title="Wallet" height={38} style={styles.quickLink} onPress={() => navigation.navigate("Wallet")} />
           </View>
+          {myStoreId ? (
+            <Button
+              title="Post as store"
+              height={44}
+              loading={postAsStore.isPending}
+              onPress={() => postAsStore.mutate()}
+            />
+          ) : null}
 
           <SalesChart values={dashboard.series.map((point) => point.value)} />
 

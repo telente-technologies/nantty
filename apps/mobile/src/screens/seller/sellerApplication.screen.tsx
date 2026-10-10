@@ -14,8 +14,8 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { sellerService } from "@/services/seller.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { sellerService } from "@/services/sellers/seller.service";
 import type { SellerApplicationDraft, SellerApplicationInput } from "@/types/account.type";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 

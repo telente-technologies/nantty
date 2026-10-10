@@ -14,7 +14,7 @@ import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { sellerService } from "@/services/seller.service";
+import { sellerService } from "@/services/sellers/seller.service";
 import type { OrderStatus } from "@/types";
 import { spacing } from "@/constants/spacing.constant";
 

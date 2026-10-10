@@ -15,16 +15,20 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { mediaService } from "@/services/media.service";
-import { sellerService } from "@/services/seller.service";
+import { mediaService } from "@/services/media/media.service";
+import { sellerService } from "@/services/sellers/seller.service";
 import { useLocaleStore } from "@/store/locale.store";
 import type { StoreProductInput } from "@/types/account.type";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { RoleGateScreen } from "@/components/roleGate/roleGateScreen";
 import { useCreateMenuAccess } from "@/hooks/useCreateMenuAccess.hook";
 
-const EMPTY_FORM: ProductFormValues = { name: "", description: "", priceInMajorUnits: "", stock: "", sizes: "", colors: "" };
+const EMPTY_FORM: ProductFormValues = { name: "", description: "", priceInMajorUnits: "", stock: "", sizes: "", colors: "", variants: [] };
 const splitCommaSeparatedList = (value: string) => value.split(",").map((v) => v.trim()).filter(Boolean);
+const toVariantGroups = (variants: ProductFormValues["variants"]) =>
+  variants
+    .map((variant) => ({ name: variant.name.trim(), options: splitCommaSeparatedList(variant.options) }))
+    .filter((variant) => variant.name.length > 0 && variant.options.length > 0);
 const convertMajorUnitTextToMinorUnits = (value: string) => Math.round(Number.parseFloat(value || "0") * 100);
 
 export function ProductFormScreen(props: MainScreenProps<"ProductForm">) {
@@ -61,6 +65,7 @@ function ProductFormEditor({ navigation, route }: MainScreenProps<"ProductForm">
       stock: String(existing.stock),
       sizes: existing.sizes.join(", "),
       colors: existing.colors.join(", "),
+      variants: (existing.variants ?? existing.variantGroups ?? []).map((variant) => ({ name: variant.name, options: variant.options.join(", ") })),
     });
     setImageUrls([...existing.imageUrls]);
   }, [existing]);
@@ -79,6 +84,7 @@ function ProductFormEditor({ navigation, route }: MainScreenProps<"ProductForm">
         stock: Number.parseInt(form.stock || "0", 10),
         sizes: splitCommaSeparatedList(form.sizes),
         colors: splitCommaSeparatedList(form.colors),
+        variants: toVariantGroups(form.variants),
         imageUrls,
         brandId: brand?.id ?? null,
       };

@@ -14,7 +14,7 @@ import { ErrorState } from "@/components/ui/errorState";
 import { Screen } from "@/components/ui/screen";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { creatorProgramService } from "@/services/creatorProgram.service";
+import { creatorProgramService } from "@/services/creators/creatorProgram.service";
 import { useAuthStore } from "@/store/auth.store";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 

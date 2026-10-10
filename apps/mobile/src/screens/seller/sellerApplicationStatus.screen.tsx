@@ -13,7 +13,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { sellerService } from "@/services/seller.service";
+import { sellerService } from "@/services/sellers/seller.service";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { spacing } from "@/constants/spacing.constant";

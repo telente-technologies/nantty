@@ -10,7 +10,7 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { pointsService } from "@/services/points.service";
+import { pointsService } from "@/services/social/points.service";
 import { useLocaleStore } from "@/store/locale.store";
 import type { RankingBoard, RankingScope } from "@/types/socialGraph.type";
 
