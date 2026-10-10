@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { PayoutsWorkspace } from "@/components/money/payoutsWorkspace";
+import { WithdrawalsWorkspace } from "@/components/money/withdrawalsWorkspace";
 
-export const metadata: Metadata = { title: "Payouts" };
+export const metadata: Metadata = { title: "Withdrawals" };
 
-export default function PayoutsPage() {
-  return <PayoutsWorkspace />;
+export default function WithdrawalsPage() {
+  return <WithdrawalsWorkspace />;
 }
