@@ -15,8 +15,8 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { verificationService } from "@/services/verification.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { verificationService } from "@/services/auth/verification.service";
 import type { IdentityDocumentType } from "@/types/account.type";
 import type { VerificationApplicationInput } from "@/types/verification.type";
 

@@ -16,12 +16,12 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useActingProfileType } from "@/hooks/useActingProfileType.hook";
-import { webHandoffService } from "@/services/webHandoff.service";
+import { webHandoffService } from "@/services/core/webHandoff.service";
 import { MANAGE_ON_THE_WEB_LABEL, verificationForProfileKind } from "@/utils/verificationProfile.util";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { verificationService } from "@/services/verification.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { verificationService } from "@/services/auth/verification.service";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
 
