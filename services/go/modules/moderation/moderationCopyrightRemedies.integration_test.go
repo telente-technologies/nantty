@@ -134,11 +134,11 @@ func TestVideoClaimWarnsThenTakesDownAtTheDeadlineWithAStrike(t *testing.T) {
 	harness.expect("POST", "/api/v1/account/status/strikes/"+strikeId+"/appeal", uploaderToken, map[string]string{"message": "short"}, http.StatusBadRequest)
 	harness.expect("POST", "/api/v1/account/status/strikes/"+strikeId+"/appeal", uploaderToken, map[string]string{"message": "I removed the clip but the notice arrived while I was offline"}, http.StatusAccepted)
 	harness.expect("POST", "/api/v1/account/status/strikes/"+strikeId+"/appeal", uploaderToken, map[string]string{"message": "I removed the clip but the notice arrived while I was offline"}, http.StatusConflict)
-	appeals, _ := harness.staff("moderation:appeals")
+	appeals, appealsStepUp := harness.staff("moderation:appeals")
 	if queue := harness.expect("GET", "/api/v1/admin/strike-appeals", appeals, nil, http.StatusOK)["data"].([]any); len(queue) != 1 {
 		t.Fatalf("the appeal is queued: %v", queue)
 	}
-	harness.expect("POST", "/api/v1/admin/strike-appeals/"+strikeId+"/overturn", appeals, map[string]string{"reason": "notice was not delivered"}, http.StatusOK)
+	harness.expect("POST", "/api/v1/admin/strike-appeals/"+strikeId+"/overturn", appeals, map[string]string{"reason": "notice was not delivered"}, http.StatusOK, appealsStepUp...)
 	if after := harness.accountStatus(uploader); len(after["strikes"].([]any)) != 0 {
 		t.Fatalf("an overturned appeal removes the strike: %v", after)
 	}

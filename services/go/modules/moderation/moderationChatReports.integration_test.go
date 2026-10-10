@@ -113,14 +113,14 @@ func TestChatReportActionsUseUserActionsPermissionsStepUpAndNotifyTheReporter(t 
 
 	restrict := submit(nil)
 	act(restrict, reviewer, map[string]any{"action": "RESTRICT_USER", "reason": "abusive messages", "durationDays": 7}, http.StatusForbidden)
-	act(restrict, moderator, map[string]any{"action": "RESTRICT_USER", "reason": "abusive messages", "durationDays": 14}, http.StatusOK)
+	act(restrict, moderator, map[string]any{"action": "RESTRICT_USER", "reason": "abusive messages", "durationDays": 14}, http.StatusOK, moderatorStepUp...)
 	forwarded := harness.users.last()
 	if forwarded.Action != "restrict" || forwarded.Features[0] != "MESSAGING" || *forwarded.DurationDays != 14 || forwarded.Actor.Id == "" {
 		t.Fatalf("the report action is wired to the user action: %+v", forwarded)
 	}
 
 	suspend := submit(map[string]any{"reason": "fraud_or_payment_scam"})
-	act(suspend, moderator, map[string]any{"action": "SUSPEND_USER", "reason": "payment scam in chat"}, http.StatusOK)
+	act(suspend, moderator, map[string]any{"action": "SUSPEND_USER", "reason": "payment scam in chat"}, http.StatusOK, moderatorStepUp...)
 	if last := harness.users.last(); last.Action != "suspend" || last.Source != "chat_report" || last.ReasonCode != "FRAUD" {
 		t.Fatalf("unexpected %+v", last)
 	}
@@ -138,13 +138,13 @@ func TestChatReportActionsUseUserActionsPermissionsStepUpAndNotifyTheReporter(t 
 	warn := submit(map[string]any{"targetType": "user", "evidence": json.RawMessage("[]"), "evidenceHash": ""})
 	act(warn, moderator, map[string]any{"action": "REMOVE_GROUP", "reason": "this is not a group"}, http.StatusForbidden)
 	act(warn, moderator, map[string]any{"action": "REMOVE_GROUP", "reason": "this is not a group"}, http.StatusConflict, moderatorStepUp...)
-	act(warn, moderator, map[string]any{"action": "WARN_USER", "reason": "first warning"}, http.StatusOK)
+	act(warn, moderator, map[string]any{"action": "WARN_USER", "reason": "first warning"}, http.StatusOK, moderatorStepUp...)
 	if last := harness.users.last(); last.Action != "warn" || last.Source != "chat_report" || last.CaseId == "" {
 		t.Fatalf("a warning goes through the identity warning path: %+v", last)
 	}
 
 	noUser := submit(map[string]any{"reportedUserId": nil})
-	conflict := act(noUser, moderator, map[string]any{"action": "WARN_USER", "reason": "cannot warn nobody"}, http.StatusConflict)
+	conflict := act(noUser, moderator, map[string]any{"action": "WARN_USER", "reason": "cannot warn nobody"}, http.StatusConflict, moderatorStepUp...)
 	if conflict["code"] != "NO_REPORTED_USER" {
 		t.Fatalf("unexpected %v", conflict)
 	}

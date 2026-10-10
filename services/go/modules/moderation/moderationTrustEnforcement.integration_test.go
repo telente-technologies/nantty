@@ -146,11 +146,11 @@ func TestContentReportsGroupPerTargetAndActionsGoThroughEventsAndGoIdentity(t *t
 	if len(detail["reporterNotes"].([]any)) != 3 {
 		t.Fatalf("reporter notes %v", detail["reporterNotes"])
 	}
-	acting, _ := harness.staff("moderation:reports")
+	acting, actingStepUp := harness.staff("moderation:reports")
 	actions := "/api/v1/admin/reports/" + reportId + "/actions"
 	harness.expect("POST", actions, acting, map[string]string{"action": "NOPE", "reason": "valid reason here"}, http.StatusBadRequest)
 	harness.expect("POST", actions, acting, map[string]string{"action": "SUSPEND_AUTHOR", "reason": "valid reason here"}, http.StatusForbidden)
-	decided := harness.expect("POST", actions, acting, map[string]string{"action": "REMOVE", "reason": "fake giveaway scam"}, http.StatusOK)
+	decided := harness.expect("POST", actions, acting, map[string]string{"action": "REMOVE", "reason": "fake giveaway scam"}, http.StatusOK, actingStepUp...)
 	if decided["status"] != "RESOLVED" || decided["target"].(map[string]any)["visibility"] != "REMOVED" || decided["decision"].(map[string]any)["action"] != "REMOVE" {
 		t.Fatalf("unexpected decision %v", decided)
 	}

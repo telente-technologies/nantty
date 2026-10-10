@@ -46,7 +46,7 @@ func RequireStaffWithAnyPermission(verifiers StaffTokenVerifiers, permissions []
 					return
 				}
 			}
-			if len(permissions) > 0 && !staff.CanAny(permissions...) {
+			if len(permissions) == 0 || !staff.CanAny(permissions...) {
 				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
 				return
 			}

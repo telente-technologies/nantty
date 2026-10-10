@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (harness *moderationHarness) reportAndDecide(targetType, targetId, author, action string, permissions ...string) (string, string) {
+func (harness *moderationHarness) reportAndDecide(targetType, targetId, author, action string, permissions ...string) (string, string, []string) {
 	harness.t.Helper()
 	harness.targets.own(targetType, targetId, author)
 	if err := harness.contentReportHandler()(context.Background(), reportCreatedEnvelope(uuid.NewString(), targetType, targetId, "spam", "")); err != nil {
@@ -18,14 +18,14 @@ func (harness *moderationHarness) reportAndDecide(targetType, targetId, author, 
 	queue := harness.expect("GET", "/api/v1/admin/reports?search="+targetId, decider, nil, http.StatusOK)["data"].([]any)
 	reportId := queue[0].(map[string]any)["id"].(string)
 	harness.expect("POST", "/api/v1/admin/reports/"+reportId+"/actions", decider, map[string]string{"action": action, "reason": "breaks the spam policy"}, http.StatusOK, stepUp...)
-	return reportId, decider
+	return reportId, decider, stepUp
 }
 
 func TestHiddenContentCanBeAppealedAndAnOverturnRestoresIt(t *testing.T) {
 	harness := startModerationAgainstFreshSchema(t)
 	author := uuid.NewString()
 	authorToken := harness.tokens.SignAccountAccessToken(t, author)
-	reportId, _ := harness.reportAndDecide("post", "p-appeal", author, "HIDE")
+	reportId, _, _ := harness.reportAndDecide("post", "p-appeal", author, "HIDE")
 	mine := harness.expect("GET", "/api/v1/moderation/decisions/me", authorToken, nil, http.StatusOK)["data"].([]any)
 	if len(mine) != 1 || mine[0].(map[string]any)["action"] != "HIDE" || mine[0].(map[string]any)["appealable"] != true {
 		t.Fatalf("the author sees the decision against them: %v", mine)
@@ -38,7 +38,7 @@ func TestHiddenContentCanBeAppealedAndAnOverturnRestoresIt(t *testing.T) {
 	harness.expect("POST", "/api/v1/moderation/decisions/"+reportId+"/appeal", authorToken, statement, http.StatusConflict)
 	appealId := received["appealId"].(string)
 
-	reviewer, _ := harness.staff("moderation:appeals")
+	reviewer, reviewerStepUp := harness.staff("moderation:appeals")
 	nobody, _ := harness.staff("moderation:reports")
 	harness.expect("GET", "/api/v1/admin/appeals", nobody, nil, http.StatusForbidden)
 	queue := harness.expect("GET", "/api/v1/admin/appeals?decisionType=CONTENT_REMOVED", reviewer, nil, http.StatusOK)["data"].([]any)
@@ -56,7 +56,7 @@ func TestHiddenContentCanBeAppealedAndAnOverturnRestoresIt(t *testing.T) {
 	harness.expect("GET", "/api/v1/admin/appeals?status=BOGUS", reviewer, nil, http.StatusBadRequest)
 	path := "/api/v1/admin/appeals/" + appealId + "/decide"
 	harness.expect("POST", path, reviewer, map[string]string{"outcome": "MAYBE", "reason": "looked again"}, http.StatusBadRequest)
-	decided := harness.expect("POST", path, reviewer, map[string]string{"outcome": "OVERTURNED", "reason": "The giveaway is genuine."}, http.StatusOK)
+	decided := harness.expect("POST", path, reviewer, map[string]string{"outcome": "OVERTURNED", "reason": "The giveaway is genuine."}, http.StatusOK, reviewerStepUp...)
 	if decided["status"] != "OVERTURNED" || decided["decision"].(map[string]any)["outcome"] != "overturned" || decided["target"].(map[string]any)["visibility"] != "VISIBLE" {
 		t.Fatalf("an overturn restores the content: %v", decided)
 	}
@@ -74,7 +74,7 @@ func TestStrikeAppealsJoinTheUnifiedQueueWithFourEyes(t *testing.T) {
 	harness := startModerationAgainstFreshSchema(t)
 	author := uuid.NewString()
 	authorToken := harness.tokens.SignAccountAccessToken(t, author)
-	_, decider := harness.reportAndDecide("clip", "c-strike", author, "REMOVE", "moderation:appeals")
+	_, decider, deciderStepUp := harness.reportAndDecide("clip", "c-strike", author, "REMOVE", "moderation:appeals")
 	strikes := harness.expect("GET", "/api/v1/account/status", authorToken, nil, http.StatusOK)
 	strikeId := firstStrikeId(t, strikes)
 	harness.expect("POST", "/api/v1/account/status/strikes/"+strikeId+"/appeal", authorToken, map[string]string{"message": "The clip was my own original footage."}, http.StatusAccepted)
@@ -84,7 +84,7 @@ func TestStrikeAppealsJoinTheUnifiedQueueWithFourEyes(t *testing.T) {
 		t.Fatalf("a strike from a removal is a CONTENT_REMOVED appeal: %v", queue)
 	}
 	appealId := queue[0].(map[string]any)["id"].(string)
-	harness.expect("POST", "/api/v1/admin/appeals/"+appealId+"/decide", decider, map[string]string{"outcome": "OVERTURNED", "reason": "I changed my mind."}, http.StatusConflict)
+	harness.expect("POST", "/api/v1/admin/appeals/"+appealId+"/decide", decider, map[string]string{"outcome": "OVERTURNED", "reason": "I changed my mind."}, http.StatusConflict, deciderStepUp...)
 	upheld := harness.expect("POST", "/api/v1/admin/appeals/"+appealId+"/decide", reviewer, map[string]string{"outcome": "UPHELD", "reason": "The footage is not original."}, http.StatusOK)
 	if upheld["status"] != "UPHELD" {
 		t.Fatalf("unexpected %v", upheld)
@@ -170,12 +170,12 @@ func TestOverturningASuspensionThroughTheLegacyRouteLiftsItAndRestoresTheContent
 	harness.expect("POST", "/api/v1/admin/reports/"+reportId+"/suspend-author", moderator, map[string]any{"durationDays": 7, "reason": "credible threats"}, http.StatusOK, stepUp...)
 	strikeId := firstStrikeId(t, harness.expect("GET", "/api/v1/account/status", authorToken, nil, http.StatusOK))
 	harness.expect("POST", "/api/v1/account/status/strikes/"+strikeId+"/appeal", authorToken, map[string]string{"message": "It was a scene from a film I am making."}, http.StatusAccepted)
-	reviewer, _ := harness.staff("moderation:appeals")
+	reviewer, reviewerStepUp := harness.staff("moderation:appeals")
 	queue := harness.expect("GET", "/api/v1/admin/appeals?decisionType=SUSPENSION", reviewer, nil, http.StatusOK)["data"].([]any)
 	if len(queue) != 1 {
 		t.Fatalf("report suspensions appear as SUSPENSION appeals: %v", queue)
 	}
-	harness.expect("POST", "/api/v1/admin/strike-appeals/"+strikeId+"/overturn", reviewer, map[string]string{"reason": "Clearly fiction, context given."}, http.StatusOK)
+	harness.expect("POST", "/api/v1/admin/strike-appeals/"+strikeId+"/overturn", reviewer, map[string]string{"reason": "Clearly fiction, context given."}, http.StatusOK, reviewerStepUp...)
 	if lifted := harness.users.last(); lifted.Action != "reinstate" || lifted.UserId != author {
 		t.Fatalf("the suspension is lifted through goIdentity: %+v", lifted)
 	}
