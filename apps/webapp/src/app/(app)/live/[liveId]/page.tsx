@@ -49,7 +49,7 @@ export default function LiveRoomPage({ params }: { readonly params: Promise<{ re
           ) : (
             <MediaImage src={live.coverUrl ?? null} alt="" sizes="(max-width: 1024px) 100vw, 720px" />
           )}
-          <span className={isLive ? styles.liveBadge : styles.endedBadge}>{isLive ? "LIVE" : "Ended"}</span>
+          <span className={isLive ? styles.liveBadge : styles.endedBadge}>{isLive ? "LIVE" : live.status === "upcoming" ? "Starting soon" : "Ended"}</span>
           {isLive ? <span className={styles.viewerBadge}>{formatCountWithThousandsSuffix(live.viewers)} watching</span> : null}
           {isPausedForSafety && !isHostView ? <LiveSafetyOverlay message={safety?.viewerMessage} /> : null}
         </div>
