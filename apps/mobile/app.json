@@ -81,7 +81,9 @@
           "savePhotosPermission": "Allow Zudomart to save photos and videos you download.",
           "granularPermissions": ["photo", "video"]
         }
-      ]
+      ],
+      "expo-dev-client",
+      "expo-iap"
     ],
     "owner": "oyinlola141"
   }

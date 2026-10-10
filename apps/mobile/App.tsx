@@ -28,9 +28,9 @@ import { KeepRealtimeMessagingConnectedWhileSignedIn } from "@/components/chat/a
 import { DeviceFrame } from "@/components/ui/deviceFrame";
 import { CelebrationHost } from "@/components/celebrations/celebrationHost";
 import { RootNavigator } from "@/navigation/root.navigator";
-import { localeService } from "@/services/locale.service";
-import { cancelAndRemoveUpload } from "@/services/mediaUploadQueue.service";
-import { startAutomaticUploadResume } from "@/services/uploadBackgroundTask.service";
+import { localeService } from "@/services/geo/locale.service";
+import { cancelAndRemoveUpload } from "@/services/media/mediaUploadQueue.service";
+import { startAutomaticUploadResume } from "@/services/core/uploadBackgroundTask.service";
 import { useAuthStore } from "@/store/auth.store";
 import { addOfflineMutationReplayedListener, startOfflineConnectivityMonitoring, useOfflineStore } from "@/store/offline.store";
 import { useUploadQueueStore } from "@/store/uploadQueue.store";
