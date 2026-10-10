@@ -61,6 +61,13 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		}
 		return module.Money.RecordSubscriptionEarning(ctx, paid, envelope.OccurredAt)
 	})
+	loaders.RegisterMoneyDomainEventHandler("creatorSubscription.refunded", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var refunded moneyservices.CreatorSubscriptionRefunded
+		if err := loaders.DecodeEventData(envelope, &refunded); err != nil {
+			return err
+		}
+		return module.Money.ReverseSubscriptionEarning(ctx, refunded, envelope.OccurredAt)
+	})
 	loaders.RegisterMoneyDomainEventHandler("adCreatorEarnings.posted", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
 		var posted moneyservices.AdCreatorEarningsPosted
 		if err := loaders.DecodeEventData(envelope, &posted); err != nil {

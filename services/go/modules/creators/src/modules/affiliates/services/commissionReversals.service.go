@@ -24,7 +24,7 @@ type EscrowRefunded struct {
 }
 
 func CreatorEarningsDebtAccount(userId, currency string) ledgermodels.AccountRef {
-	return ledgermodels.AccountRef{Code: "creator:" + userId + ":earningsDebt", Currency: currency, Kind: ledgermodels.AccountKindAsset, OwnerType: ledgermodels.OwnerTypeUser, OwnerId: userId}
+	return ledgermodels.CreatorEarningsDebtAccount(userId, currency)
 }
 
 func ReversalTarget(commissionMinor, refundedMinor, orderMinor int64) int64 {

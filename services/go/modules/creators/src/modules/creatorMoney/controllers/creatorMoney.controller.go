@@ -36,7 +36,7 @@ func (controller CreatorMoneyController) MyStatus(writer http.ResponseWriter, re
 }
 
 func (controller CreatorMoneyController) RevenueRules(writer http.ResponseWriter, request *http.Request) {
-	controller.respond(writer, request, controller.Money.RevenueRules(request.URL.Query().Get("currency")), nil)
+	controller.respond(writer, request, controller.Money.RevenueRules(request.Context(), request.URL.Query().Get("currency")), nil)
 }
 
 func (controller CreatorMoneyController) Earnings(writer http.ResponseWriter, request *http.Request) {
