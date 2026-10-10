@@ -7,7 +7,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
@@ -31,11 +31,11 @@ const columns: readonly DataTableColumn<AdminAccountSummary>[] = [
 export function AdminsWorkspace() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [page, setPage] = useState(1);
+  const [cursor, setCursor] = useState<string | undefined>();
   const [selectedAdminId, setSelectedAdminId] = useState<string | null>(null);
   const [accessDialogAdmin, setAccessDialogAdmin] = useState<AdminAccountSummary | null | "new">(null);
   const [detailRefreshCount, setDetailRefreshCount] = useState(0);
-  const list = useAdminQuery((signal) => fetchAdminAccounts({ search, status, page }, signal), `${search}|${status}|${page}`);
+  const list = useAdminQuery((signal) => fetchAdminAccounts({ search, status, cursor }, signal), `${search}|${status}|${cursor ?? ""}`);
 
   return (
     <>
@@ -51,12 +51,12 @@ export function AdminsWorkspace() {
       />
       <StaffSettingsBar />
       <Toolbar>
-        <TextField label="Search admins" isLabelHidden placeholder="Search by name or email" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
-        <SelectField label="Status" isLabelHidden value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} options={[{ value: "", label: "All statuses" }, { value: "ACTIVE", label: "Active" }, { value: "INVITED", label: "Invited" }, { value: "DISABLED", label: "Disabled" }, { value: "SUSPENDED", label: "Suspended" }, { value: "REVOKED", label: "Revoked" }, { value: "PENDING_APPROVAL", label: "Awaiting approval" }]} />
+        <TextField label="Search admins" isLabelHidden placeholder="Search by name or email" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
+        <SelectField label="Status" isLabelHidden value={status} onChange={(event) => { setStatus(event.target.value); setCursor(undefined); }} options={[{ value: "", label: "All statuses" }, { value: "ACTIVE", label: "Active" }, { value: "INVITED", label: "Invited" }, { value: "DISABLED", label: "Disabled" }, { value: "SUSPENDED", label: "Suspended" }, { value: "REVOKED", label: "Revoked" }, { value: "PENDING_APPROVAL", label: "Awaiting approval" }]} />
       </Toolbar>
       {list.errorMessage ? <ErrorBlock message={list.errorMessage} onRetry={list.reload} /> : null}
       <DataTable caption="Admin accounts" columns={columns} rows={list.data?.items ?? []} readRowKey={(admin) => admin.id} isLoading={list.isLoading} onRowOpen={(admin) => setSelectedAdminId(admin.id)} selectedRowKey={selectedAdminId} readRowTone={(admin) => (admin.status === "LOCKED" ? "danger" : !admin.mfaEnrolled ? "caution" : null)} />
-      {list.data ? <Pagination page={list.data.page} pageSize={list.data.pageSize} total={list.data.total} onPageChange={setPage} /> : null}
+      <CursorPagination cursor={cursor} nextCursor={list.data?.nextCursor} onCursorChange={setCursor} />
       {selectedAdminId ? <AdminDetailPanel key={`${selectedAdminId}-${detailRefreshCount}`} adminId={selectedAdminId} onClose={() => setSelectedAdminId(null)} onEditAccess={(admin) => setAccessDialogAdmin(admin)} onChanged={list.reload} /> : null}
       {accessDialogAdmin ? (
         <AdminAccessDialog

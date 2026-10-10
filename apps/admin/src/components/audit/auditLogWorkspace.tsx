@@ -9,7 +9,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
@@ -44,17 +44,17 @@ export function AuditLogWorkspace() {
   const [actorId, setActorId] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-  const [page, setPage] = useState(1);
+  const [cursor, setCursor] = useState<string | undefined>();
   const [selectedEntry, setSelectedEntry] = useState<AuditLogEntry | null>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const filters: AuditLogFilters = { search, area, actorId, from: convertDateInputToIso(fromDate, false), to: convertDateInputToIso(toDate, true), targetType: searchParams.get("targetType") ?? undefined, targetId: searchParams.get("targetId") ?? undefined, page };
+  const filters: AuditLogFilters = { search, area, actorId, from: convertDateInputToIso(fromDate, false), to: convertDateInputToIso(toDate, true), targetType: searchParams.get("targetType") ?? undefined, targetId: searchParams.get("targetId") ?? undefined, cursor };
   const list = useAdminQuery((signal) => fetchAuditLog(filters, signal), JSON.stringify(filters));
   const facets = useAdminQuery((signal) => fetchAuditFacets(signal), "facets");
 
   async function exportCsv() {
     setIsExporting(true);
     try {
-      saveBlobAsDownloadedFile(await downloadAuditLogCsv({ ...filters, page: undefined }), `zudomart-audit-${new Date().toISOString().slice(0, 10)}.csv`);
+      saveBlobAsDownloadedFile(await downloadAuditLogCsv({ ...filters, cursor: undefined }), `zudomart-audit-${new Date().toISOString().slice(0, 10)}.csv`);
       showToast("Export downloaded. The export itself was recorded in the audit log.");
     } catch (error) {
       showToast(readErrorMessageForDisplay(error), "error");
@@ -65,7 +65,7 @@ export function AuditLogWorkspace() {
 
   const resetToFirstPage = <Value,>(setter: (value: Value) => void) => (value: Value) => {
     setter(value);
-    setPage(1);
+    setCursor(undefined);
   };
 
   return (
@@ -85,7 +85,7 @@ export function AuditLogWorkspace() {
       </Toolbar>
       {list.errorMessage ? <ErrorBlock message={list.errorMessage} onRetry={list.reload} /> : null}
       <DataTable caption="Audit log entries" columns={columns} rows={list.data?.items ?? []} readRowKey={(entry) => entry.id} isLoading={list.isLoading} onRowOpen={setSelectedEntry} selectedRowKey={selectedEntry?.id ?? null} emptyMessage="No entries match these filters." />
-      {list.data ? <Pagination page={list.data.page} pageSize={list.data.pageSize} total={list.data.total} onPageChange={setPage} /> : null}
+      <CursorPagination cursor={cursor} nextCursor={list.data?.nextCursor} onCursorChange={setCursor} />
       {selectedEntry ? <AuditEntryPanel entry={selectedEntry} onClose={() => setSelectedEntry(null)} /> : null}
     </>
   );

@@ -7,7 +7,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
 import { UserIdentity } from "@/components/ui/userIdentity";
@@ -48,15 +48,15 @@ export function BrandDirectoryWorkspace() {
   const searchParams = useSearchParams();
   const [official, setOfficial] = useState<OfficialFilter>(readOfficialFilterFromQuery(searchParams.get("official")));
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const list = useAdminQuery((signal) => fetchBrandDirectory({ official, search, page }, signal), `${official}|${search}|${page}`);
+  const [cursor, setCursor] = useState<string | undefined>();
+  const list = useAdminQuery((signal) => fetchBrandDirectory({ official, search, cursor }, signal), `${official}|${search}|${cursor ?? ""}`);
 
   return (
     <>
       <PageHeader area="People · brands" title="Brands" description="Brand profiles, who runs them, the stores that sell under them, and Official Store status. Official Store is a Gold business verification backed by a registered trademark." />
-      <SegmentedTabs label="Official Store status" items={officialTabs} activeKey={official} onChange={(key) => { setOfficial(key); setPage(1); }} />
+      <SegmentedTabs label="Official Store status" items={officialTabs} activeKey={official} onChange={(key) => { setOfficial(key); setCursor(undefined); }} />
       <Toolbar>
-        <TextField label="Search brands" isLabelHidden placeholder="Search by brand name, slug or category" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
+        <TextField label="Search brands" isLabelHidden placeholder="Search by brand name, slug or category" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
       </Toolbar>
       {list.errorMessage ? <ErrorBlock message={list.errorMessage} onRetry={list.reload} /> : null}
       <DataTable
@@ -69,7 +69,7 @@ export function BrandDirectoryWorkspace() {
         readRowTone={(brand) => (brand.officialStatus === "PENDING" ? "caution" : null)}
         emptyMessage="No brands match these filters."
       />
-      {list.data ? <Pagination page={list.data.page} pageSize={list.data.pageSize} total={list.data.total} onPageChange={setPage} /> : null}
+      <CursorPagination cursor={cursor} nextCursor={list.data?.nextCursor} onCursorChange={setCursor} />
     </>
   );
 }

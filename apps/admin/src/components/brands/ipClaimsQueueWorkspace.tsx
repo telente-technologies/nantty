@@ -7,7 +7,7 @@ import { DataTable } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
@@ -30,16 +30,16 @@ export function IpClaimsQueueWorkspace() {
   const [status, setStatus] = useState<ClaimStatusFilter>("OPEN");
   const [type, setType] = useState("");
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const list = useAdminQuery((signal) => fetchIpClaims({ status, type, search, page }, signal), `${status}|${type}|${search}|${page}`);
+  const [cursor, setCursor] = useState<string | undefined>();
+  const list = useAdminQuery((signal) => fetchIpClaims({ status, type, search, cursor }, signal), `${status}|${type}|${search}|${cursor ?? ""}`);
 
   return (
     <>
       <PageHeader area="Trust & safety" title="Trademark & counterfeit claims" description="Claims filed by brand owners against other sellers' listings. Upholding delists the listing and adds a strike to the seller." />
-      <SegmentedTabs label="Claim status" items={statusTabs} activeKey={status} onChange={(key) => { setStatus(key); setPage(1); }} />
+      <SegmentedTabs label="Claim status" items={statusTabs} activeKey={status} onChange={(key) => { setStatus(key); setCursor(undefined); }} />
       <Toolbar>
-        <TextField label="Search claims" isLabelHidden placeholder="Search claim ID, listing, brand or seller" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
-        <SelectField label="Claim type" isLabelHidden value={type} onChange={(event) => { setType(event.target.value); setPage(1); }} options={[{ value: "", label: "All types" }, { value: "COUNTERFEIT", label: "Counterfeit" }, { value: "TRADEMARK", label: "Trademark" }]} />
+        <TextField label="Search claims" isLabelHidden placeholder="Search claim ID, listing, brand or seller" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
+        <SelectField label="Claim type" isLabelHidden value={type} onChange={(event) => { setType(event.target.value); setCursor(undefined); }} options={[{ value: "", label: "All types" }, { value: "COUNTERFEIT", label: "Counterfeit" }, { value: "TRADEMARK", label: "Trademark" }]} />
       </Toolbar>
       {list.errorMessage ? <ErrorBlock message={list.errorMessage} onRetry={list.reload} /> : null}
       <DataTable
@@ -52,7 +52,7 @@ export function IpClaimsQueueWorkspace() {
         readRowTone={(claim) => (isIpClaimPastSla(claim) ? "danger" : claim.priorStrikeCount >= 2 ? "caution" : null)}
         emptyMessage="No claims in this view."
       />
-      {list.data ? <Pagination page={list.data.page} pageSize={list.data.pageSize} total={list.data.total} onPageChange={setPage} /> : null}
+      <CursorPagination cursor={cursor} nextCursor={list.data?.nextCursor} onCursorChange={setCursor} />
     </>
   );
 }
