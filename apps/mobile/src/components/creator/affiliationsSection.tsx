@@ -3,13 +3,14 @@ import { Image } from "expo-image";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
+import { Handshake24Icon, Storefront24Icon } from "@/components/icons";
 import { StatusPill } from "@/components/escrow/statusPill";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { creatorProgramService } from "@/services/creatorProgram.service";
-import { productsService } from "@/services/products.service";
+import { creatorProgramService } from "@/services/creators/creatorProgram.service";
+import { productsService } from "@/services/sellers/products.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 import { creatorQueryKeys } from "./creatorQueries.hook";
@@ -34,7 +35,10 @@ export function AffiliationsSection() {
 
   return (
     <View style={styles.card}>
-      <Text size={16} weight={600} lineHeight={19.2}>Affiliated sellers & products</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <Handshake24Icon size={20} color={colors.textMuted} />
+        <Text size={16} weight={600} lineHeight={19.2}>Affiliated sellers & products</Text>
+      </View>
       {(affiliations.data ?? []).map((affiliation) => (
         <View key={affiliation.id} style={styles.row}>
           <Image source={{ uri: affiliation.product?.imageUrl ?? affiliation.store.logoUrl ?? undefined }} style={styles.thumb} contentFit="cover" />
@@ -50,6 +54,9 @@ export function AffiliationsSection() {
       <Button variant="subtle" title="Find products to promote" onPress={() => setPickerVisible(true)} />
       <BottomSheet visible={pickerVisible} onClose={() => setPickerVisible(false)} title="Request affiliation">
         <ScrollView style={styles.sheetList} contentContainerStyle={styles.sheetContent}>
+          <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+            <Storefront24Icon size={22} color={colors.textMuted} />
+          </View>
           {(candidates.data ?? []).filter((product) => !affiliatedProductIds.has(product.id)).map((product) => (
             <Pressable key={product.id} accessibilityRole="button" accessibilityLabel={`Request to promote ${product.name}`} disabled={requestAffiliation.isPending} onPress={() => requestAffiliation.mutate(product.id)} style={styles.row}>
               <Image source={{ uri: product.imageUrl ?? undefined }} style={styles.thumb} contentFit="cover" />

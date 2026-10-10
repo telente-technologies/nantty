@@ -37,8 +37,6 @@ export function PostActionRow({ post, isOwnPost, onToggleLike, onPressComments, 
   const { isSaved, savedDelta, toggleSaved } = useSaveToggle(saveTargetForPost(post), post.bookmarked);
   return (
     <View style={styles.row}>
-      <PostActionButton label="Reply" tone="reply" count={post.comments} onPress={onPressComments} renderIcon={(ink) => <ReplyActionIcon size={ICON_SIZE} color={ink} />} />
-      <PostActionButton label="Repost" tone="repost" count={post.reposts} onPress={onRepost} renderIcon={(ink) => <RepostActionIcon size={ICON_SIZE} color={ink} />} />
       <PostActionButton
         label={post.liked ? "Unlike" : "Like"}
         tone="like"
@@ -49,6 +47,8 @@ export function PostActionRow({ post, isOwnPost, onToggleLike, onPressComments, 
         onPress={onToggleLike}
         renderIcon={(ink) => <LikeActionIcon size={ICON_SIZE} color={ink} filled={post.liked} />}
       />
+      <PostActionButton label="Reply" tone="reply" count={post.comments} onPress={onPressComments} renderIcon={(ink) => <ReplyActionIcon size={ICON_SIZE} color={ink} />} />
+      <PostActionButton label="Repost" tone="repost" count={post.reposts} onPress={onRepost} renderIcon={(ink) => <RepostActionIcon size={ICON_SIZE} color={ink} />} />
       <PostActionButton
         label={isOwnPost ? "Views, open post analytics" : "Views, what are views"}
         tone="reply"

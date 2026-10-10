@@ -7,12 +7,14 @@ import { ClipVideoPlayer, VideoPosterOnly } from "@/components/media/clipVideoPl
 import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
 import { calculateFeedVideoAspectRatio } from "@/components/media/videoOrientation.util";
 import { makeThemedStyles } from "@/theme";
-import { claimAudioFocusForVideoPlayback } from "@/services/videoAudio.service";
+import { claimAudioFocusForVideoPlayback } from "@/services/clips/videoAudio.service";
 import { useVideoAudioStore } from "@/store/videoAudio.store";
 import type { Media, SaveTarget } from "@/types";
 
 import { MediaLightbox } from "./mediaLightbox";
 import { AnimatedPageIndicator } from "./pageIndicator";
+import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
+import { VideoWatermark } from "@/components/media/videoWatermark";
 
 export interface MediaPagerProps {
   readonly media: readonly Media[];
@@ -23,12 +25,14 @@ export interface MediaPagerProps {
   readonly savedAccordingToServer?: boolean;
   readonly overlay?: ReactNode;
   readonly onDownloadMedia?: (media: Media) => void;
+  readonly look?: string | null;
+  readonly watermarkHandle?: string | null;
 }
 
 const MAXIMUM_PAGER_WIDTH = 393;
 const DEFAULT_PHOTO_PAGER_HEIGHT = 335;
 
-export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer, overlay, onDownloadMedia }: MediaPagerProps) {
+export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer, overlay, onDownloadMedia, look, watermarkHandle }: MediaPagerProps) {
   const styles = useStyles();
   const { width: windowWidth } = useWindowDimensions();
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
@@ -97,6 +101,8 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
               isActive={isVisibleOnScreen && fullScreenVideo === null && index === activePageIndex}
               isNearActive={Math.abs(index - activePageIndex) <= 1}
             />
+            <ClipLookOverlay look={isClipLookId(look) ? look : "none"} />
+            {item.type === "video" && watermarkHandle ? <VideoWatermark handle={watermarkHandle} /> : null}
             {item.type === "video" ? (
               <Pressable
                 accessibilityRole="button"
@@ -148,6 +154,7 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
         onClose={() => setFullScreenVideo(null)}
         saveTarget={saveTarget}
         savedAccordingToServer={savedAccordingToServer}
+        look={look}
       />
       {openedImageIndex !== null ? (
         <MediaLightbox images={imagePages} initialIndex={openedImageIndex} onClose={() => setOpenedImageIndex(null)} onDownloadImage={onDownloadMedia} />

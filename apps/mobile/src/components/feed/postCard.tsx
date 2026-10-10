@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, type AccessibilityActionEvent, type AccessibilityActionInfo } from "react-native";
 
-import { MentionText } from "@/components/mentions/mentionText";
-import { BoxArrowDown24Icon, DotsThreeVertical24Icon, Group1256Icon, ReplyActionIcon } from "@/components/icons";
+import { ExpandableText } from "@/components/ui/expandableText";
+import { BoxArrowDown24Icon, DotsThreeVertical24Icon, Group1256Icon, PushPin24Icon, ReplyActionIcon } from "@/components/icons";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
@@ -19,9 +19,9 @@ import { useIsFeedItemVisibleForAutoplay } from "./feedVisibility.hook";
 import { CommentStickerOverlay } from "@/components/clips/videoReply/commentStickerOverlay";
 import { MediaPager } from "./mediaPager";
 import { PostActionRow } from "./postActionRow";
+import { usePinPostMutation } from "./usePinPost.hook";
 import { ReplySettingsSheet } from "./replySettingsSheet";
 import { SensitiveContentGate } from "./sensitiveContentGate";
-import { ViewQuotesLink } from "./viewQuotesLink";
 import { ResharedPostBlock } from "./resharedPostBlock";
 import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
 import { SponsoredCallToAction, SponsoredLabel } from "./sponsoredContent";
@@ -46,6 +46,7 @@ export interface PostCardProps {
   readonly onRepost?: () => void;
   readonly onShare?: () => void;
   readonly onPressMore?: () => void;
+  readonly showPinnedBadge?: boolean;
   readonly onPressViewProducts?: () => void;
   readonly onPressAnalytics?: () => void;
   readonly onPress?: () => void;
@@ -83,9 +84,17 @@ export function PostCard(props: PostCardProps) {
   const downloadMedia = (media: Post["media"][number] | undefined) => {
     if (isDownloadableMedia(media)) requireAuthThen(() => startBrandedDownload(post.id, media), null, "download");
   };
+  const pinMutation = usePinPostMutation();
   const optionActions = [
     ...(canDownload ? [{ label: "Download", icon: <BoxArrowDown24Icon size={20} />, onPress: () => downloadMedia(findFirstDownloadableMedia(post)) }] : []),
     ...(isOwnPost ? [{ label: "Edit reply settings", icon: <ReplyActionIcon size={20} />, onPress: () => setReplySettingsPost(post) }] : []),
+    ...(isOwnPost
+      ? [{
+        label: post.isPinned === true ? "Unpin from profile" : "Pin to profile",
+        icon: <PushPin24Icon size={20} color={colors.text} />,
+        onPress: () => pinMutation.mutate(post),
+      }]
+      : []),
   ];
   const [likeBurstKey, setLikeBurstKey] = useState(0);
   const lastBodyTapAt = useRef(0);
@@ -131,16 +140,31 @@ export function PostCard(props: PostCardProps) {
         <View style={styles.authorRow}>
           <Pressable accessibilityRole="button" onPress={openPostAuthorProfile} style={styles.author}>
             <Avatar uri={post.author.avatarUrl} size={32} />
-            <View style={styles.nameRow}>
-              <Text size={14} weight={500} lineHeight={16.8}>
-                {post.author.name}
-              </Text>
-              <VerificationBadge verification={post.author.verification} legacyVerified={post.author.verified} size={16} />
-              <View style={styles.dot} />
-              <Text size={14} weight={500} lineHeight={16.8}>
-                {formatTimeSincePosted(post.createdAt)}
-              </Text>
-              {post.sponsored ? <SponsoredLabel sponsored={post.sponsored} /> : null}
+            <View>
+              <View style={styles.nameRow}>
+                <Text size={14} weight={500} lineHeight={16.8}>
+                  {post.author.name}
+                </Text>
+                <VerificationBadge verification={post.author.verification} legacyVerified={post.author.verified} size={16} />
+                <View style={styles.dot} />
+                <Text size={14} weight={500} lineHeight={16.8}>
+                  {formatTimeSincePosted(post.createdAt)}
+                </Text>
+                {post.sponsored ? <SponsoredLabel sponsored={post.sponsored} /> : null}
+                {props.showPinnedBadge === true && post.isPinned === true ? (
+                  <View style={styles.pinnedBadge} accessibilityLabel="Pinned post">
+                    <PushPin24Icon size={12} color={colors.primary} />
+                    <Text size={12} weight={600} lineHeight={16.8} color={colors.primary}>
+                      Pinned
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+              {post.postedAs ? (
+                <Text size={12} lineHeight={16} color={colors.textMuted}>
+                  Posted as {post.postedAs.name} · @{post.postedAs.handle}
+                </Text>
+              ) : null}
             </View>
           </Pressable>
           <View style={styles.authorActions}>
@@ -175,7 +199,7 @@ export function PostCard(props: PostCardProps) {
         ) : null}
         {post.text ? (
           <View style={styles.body}>
-            <MentionText text={post.text} mentions={post.mentions} size={14} lineHeight={16.8} />
+            <ExpandableText text={post.text} mentions={post.mentions} size={14} lineHeight={16.8} />
           </View>
         ) : null}
         {post.resharedFrom ? (
@@ -204,6 +228,8 @@ export function PostCard(props: PostCardProps) {
                 saveTarget={saveTargetForPost(post)}
                 savedAccordingToServer={post.bookmarked}
                 onDownloadMedia={canDownload ? downloadMedia : undefined}
+                look={post.look}
+                watermarkHandle={post.author.username}
               />
             </View>
           </SponsoredMedia>
@@ -233,7 +259,6 @@ export function PostCard(props: PostCardProps) {
         onPressAnalytics={props.onPressAnalytics}
         likePopKey={props.likePopKey}
       />
-      <ViewQuotesLink post={post} />
       <LikeBurst burstKey={likeBurstKey} />
       {hasOpenedOptionsSheet ? (
         <ContentOptionsSheet
@@ -262,9 +287,10 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   },
   combo: { gap: 4 },
   likedBy: { height: 24, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 4 },
-  authorRow: { height: 32, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  authorRow: { minHeight: 32, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   author: { flexDirection: "row", alignItems: "center", gap: 9 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  pinnedBadge: { flexDirection: "row", alignItems: "center", gap: 2 },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.avatar },
   authorActions: { flexDirection: "row", alignItems: "center", gap: 12 },
   follow: { height: 25, paddingHorizontal: 16, borderRadius: 4, backgroundColor: colors.primarySolid, justifyContent: "center" },

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { creatorProgramService } from "@/services/creatorProgram.service";
+import { creatorProgramService } from "@/services/creators/creatorProgram.service";
 import type { CreatorDashboardPeriod } from "@/types/creator.type";
 
 export const creatorQueryKeys = {

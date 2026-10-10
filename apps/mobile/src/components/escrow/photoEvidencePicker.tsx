@@ -6,7 +6,7 @@ import { Cancel20Icon, CameraBolt24Icon } from "@/components/icons";
 import { pickSquareOrWideImageFromLibrary } from "@/components/profile/pickImage.util";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { mediaService, type MediaUploadPurpose } from "@/services/media.service";
+import { mediaService, type MediaUploadPurpose } from "@/services/media/media.service";
 
 export interface PhotoEvidencePickerProps {
   readonly photoUrls: readonly string[];

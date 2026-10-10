@@ -7,7 +7,7 @@ import { buildInternalRoute, findFirstExternalUrl, findFirstInternalReference, r
 import { SharedContentCardView } from "@/components/chatSafety/sharedContentCardView";
 import { confirmRiskyLink, inAppBrowserColorsFromTheme, openInAppBrowser } from "@/components/links/openLink.util";
 import { Text } from "@/components/ui/text";
-import { postsService } from "@/services/posts.service";
+import { postsService } from "@/services/content/posts.service";
 import { useAuthStore } from "@/store/auth.store";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { LinkPreview, Post, SharedContentReference } from "@/types";

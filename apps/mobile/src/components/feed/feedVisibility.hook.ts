@@ -3,7 +3,7 @@ import type { ViewToken, ViewabilityConfigCallbackPairs } from "react-native";
 import { create } from "zustand";
 
 import { prefetchImagesToDiskCache } from "@/cache/cachedImage";
-import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabilityConfig } from "@/services/adEvents.service";
+import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabilityConfig } from "@/services/ads/adEvents.service";
 import type { AdPlacement, ID, Media } from "@/types";
 
 interface VisibleFeedItemsState {

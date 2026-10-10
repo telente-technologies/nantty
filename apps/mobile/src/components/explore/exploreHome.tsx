@@ -5,8 +5,8 @@ import { StyleSheet, View } from "react-native";
 import { PostCard } from "@/components/feed/postCard";
 import { Button } from "@/components/ui/button";
 import { useRequireAuth } from "@/hooks/useRequireAuth.hook";
-import { exploreService } from "@/services/explore.service";
-import { followsService } from "@/services/follows.service";
+import { exploreService } from "@/services/feed/explore.service";
+import { followsService } from "@/services/social/follows.service";
 import type { ExploreCategoryId } from "@/types/explore.type";
 
 import { DEFAULT_EXPLORE_CATEGORIES, ExploreCategoryTabs } from "./exploreCategoryTabs";

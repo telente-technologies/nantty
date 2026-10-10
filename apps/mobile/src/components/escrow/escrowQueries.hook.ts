@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { disputesService } from "@/services/disputes.service";
-import { escrowsService } from "@/services/escrows.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { disputesService } from "@/services/moderation/disputes.service";
+import { escrowsService } from "@/services/commerce/escrows.service";
 
 export const escrowQueryKeys = {
   forOrder: (orderId: string) => ["escrow", orderId] as const,

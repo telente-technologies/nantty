@@ -4,7 +4,6 @@ import { makeThemedStyles, useTheme } from "@/theme";
 
 const INACTIVE_DOT_WIDTH = 4;
 const ACTIVE_DOT_WIDTH = 24;
-const ACTIVE_DOT_COLOR = "#0D0D0D";
 const DOT_GAP_FOR_FEW_ITEMS = 2;
 const DOT_GAP_FOR_MANY_ITEMS = 1;
 const MANY_ITEMS_THRESHOLD = 8;
@@ -17,7 +16,7 @@ export interface AnimatedPageIndicatorProps {
 }
 
 export function AnimatedPageIndicator({ count, activeIndex, scrollOffsetX, pageWidth }: AnimatedPageIndicatorProps) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const styles = useStyles();
   if (count <= 1) return null;
   const dotGap = count >= MANY_ITEMS_THRESHOLD ? DOT_GAP_FOR_MANY_ITEMS : DOT_GAP_FOR_FEW_ITEMS;
@@ -36,7 +35,7 @@ export function AnimatedPageIndicator({ count, activeIndex, scrollOffsetX, pageW
         });
         const backgroundColor = scrollOffsetX.interpolate({
           inputRange,
-          outputRange: [colors.placeholder, isDark ? colors.text : ACTIVE_DOT_COLOR, colors.placeholder],
+          outputRange: [colors.placeholder, colors.primary, colors.placeholder],
           extrapolate: "clamp",
         });
         return <Animated.View key={dotIndex} style={[styles.dot, { width, backgroundColor }]} />;
