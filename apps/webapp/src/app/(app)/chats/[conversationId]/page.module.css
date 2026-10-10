@@ -182,3 +182,14 @@
   color: var(--color-danger, #c0362c);
   font-size: var(--text-sm);
 }
+
+.requestBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+}

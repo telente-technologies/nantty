@@ -15,7 +15,8 @@ import { ErrorState } from "@/components/ui/feedback";
 import { ChatMessagesSkeleton } from "@/components/ui/pageSkeletons";
 import { RetryButton } from "@/components/ui/controls";
 import { useSession } from "@/components/providers/sessionProvider";
-import { DecryptionNotice, EncryptedLinkPreviewCard, SecurityCodeChangedBanner } from "@/components/messages/secureChatNotices";
+import { EncryptedMedia } from "@/components/messages/encryptedMedia";
+import { DecryptionNotice, EncryptedLinkPreviewCard, SharedContentPreviewCard, SecurityCodeChangedBanner } from "@/components/messages/secureChatNotices";
 import { readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { messagesService } from "@/services/messages.service";
@@ -36,6 +37,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
   const [reportTarget, setReportTarget] = useState<ChatReportTarget | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const sendInFlight = useRef(false);
 
   const conversationQuery = useQuery({
     queryKey: ["conversations", "detail", conversationId],
@@ -76,6 +78,13 @@ export default function ConversationPage({ params }: { readonly params: Promise<
     if (isNearBottom) bottomRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
 
+  const acceptRequest = useMutation({
+    mutationFn: () => messagesService.acceptMessageRequest(conversationId),
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+  });
+
   const sendMutation = useMutation({
     mutationFn: (text: string) => {
       if (!conversationQuery.data || !viewer?.id) throw new Error("This conversation is still loading.");
@@ -90,8 +99,13 @@ export default function ConversationPage({ params }: { readonly params: Promise<
 
   function sendDraft() {
     const text = draft.trim();
-    if (!text || sendMutation.isPending) return;
-    sendMutation.mutate(text);
+    if (!text || sendMutation.isPending || sendInFlight.current) return;
+    sendInFlight.current = true;
+    sendMutation.mutate(text, {
+      onSettled: () => {
+        sendInFlight.current = false;
+      },
+    });
   }
 
   function handleSend(event: FormEvent<HTMLFormElement>) {
@@ -100,6 +114,7 @@ export default function ConversationPage({ params }: { readonly params: Promise<
   }
 
   const peer = conversationQuery.data?.peer;
+  const isMessageRequest = conversationQuery.data?.inboxFolder === "requests";
 
   return (
     <div className={styles.page}>
@@ -122,6 +137,15 @@ export default function ConversationPage({ params }: { readonly params: Promise<
           <ChatActionsMenu conversation={conversationQuery.data} onStartReport={(target) => setReportTarget({ ...target, conversationId })} />
         ) : null}
       </header>
+
+      {isMessageRequest ? (
+        <div className={styles.requestBanner} role="region" aria-label="Message request">
+          <p>{peer?.name ?? "Someone"} wants to message you. Accept to move this chat to your inbox.</p>
+          <button type="button" className={styles.sendButton} disabled={acceptRequest.isPending} onClick={() => acceptRequest.mutate()}>
+            Accept
+          </button>
+        </div>
+      ) : null}
 
       {conversationQuery.data && viewer?.id ? (
         <SecurityCodeChangedBanner
@@ -146,12 +170,9 @@ export default function ConversationPage({ params }: { readonly params: Promise<
                   {message.text ? <p className={styles.bubbleText}><MentionText text={message.text} inverseLinks={mine} /></p> : null}
                   {message.decryptionNotice ? <DecryptionNotice text={message.decryptionNotice} /> : null}
                   {message.linkPreview ? <EncryptedLinkPreviewCard preview={message.linkPreview} /> : null}
-                  {message.media?.url ? (
-                    message.media.type === "image" ? (
-                      <img src={message.media.url} alt="Photo" className={styles.bubbleImage} loading="lazy" />
-                    ) : (
-                      <video src={message.media.url} controls className={styles.bubbleImage} preload="metadata" />
-                    )
+                  {message.sharedContent ? <SharedContentPreviewCard card={message.sharedContent} /> : null}
+                  {message.media ? (
+                    <EncryptedMedia cacheKey={message.media.id} type={message.media.type} url={message.media.url} pointer={message.attachment} className={styles.bubbleImage} />
                   ) : null}
                   <span className={styles.bubbleTime}>{formatMessageTime(message.createdAt)}</span>
                 </div>
