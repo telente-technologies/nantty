@@ -3,7 +3,8 @@
 import { useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
-import { CopyrightIcon, DownloadIcon, FlagIcon, LinkIcon, MoreIcon, PinIcon, SendActionIcon } from "@/components/ui/icons";
+import { AppIcon } from "@/components/ui/appIcon";
+import { CopyrightIcon, DownloadIcon, FlagIcon, LinkIcon, MoreIcon, SendActionIcon } from "@/components/ui/icons";
 import { usePopoverMenu } from "@/components/ui/popoverMenu.hook";
 import sheetStyles from "@/components/ui/popoverMenu.module.css";
 import { showToast } from "@/components/ui/toast";
@@ -29,7 +30,7 @@ interface ContentActionsMenuProps {
   readonly onReport?: () => void;
   readonly soundId?: string | null;
   readonly downloadTarget?: DownloadTarget | null;
-  readonly pinAction?: { readonly pinned: boolean; readonly onTogglePin: () => void; readonly disabled?: boolean };
+  readonly pinAction?: { readonly isPinned: boolean; readonly onTogglePin: () => void; readonly disabled?: boolean };
 }
 
 type CopyrightDialogTarget = { readonly targetType: "post" | "clip" | "live" | "sound"; readonly targetId: string };
@@ -81,8 +82,8 @@ export function ContentActionsMenu({ shareKind, reportTargetType, targetId, cano
           ) : null}
           {isOwnContent && pinAction ? (
             <button type="button" role="menuitem" className={styles.item} onClick={() => chooseAction(pinAction.onTogglePin)} disabled={pinAction.disabled}>
-              <PinIcon size={18} aria-hidden="true" />
-              <span>{pinAction.pinned ? "Unpin from profile" : "Pin to profile"}</span>
+              <AppIcon name="pushPin24" size={18} />
+              <span>{pinAction.isPinned ? "Unpin from profile" : "Pin to profile"}</span>
             </button>
           ) : null}
           {isOwnContent ? null : (

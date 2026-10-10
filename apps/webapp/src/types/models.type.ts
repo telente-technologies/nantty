@@ -158,6 +158,9 @@ export interface Post {
   readonly sensitive?: import("./postAudience.type").SensitiveContent | null;
   readonly taggedUsers?: readonly import("./taggedUser.type").TaggedUser[];
   readonly taggedUsersCount?: number;
+  readonly isPinned?: boolean;
+  readonly pinnedAt?: ISODate | null;
+  readonly pinnedCommentId?: ID | null;
 }
 
 export interface PostAnalyticsDaily {
@@ -199,6 +202,8 @@ export interface Comment {
   readonly liked: boolean;
   readonly bookmarked?: boolean;
   readonly replyCount: number;
+  readonly isPinned?: boolean;
+  readonly pinnedAt?: ISODate | null;
   readonly replyingTo?: { readonly userId: ID; readonly username: string };
   readonly mentions?: readonly import("./mentions.type").MentionEntity[];
 }

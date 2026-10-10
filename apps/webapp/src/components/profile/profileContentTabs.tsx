@@ -34,6 +34,11 @@ function MediaGrid({ posts }: { readonly posts: readonly Post[] }) {
           <Link href={`/post/${post.id}`} className={styles.mediaTile}>
             <MediaImage src={firstThumbnailOf(post)} alt={post.text.slice(0, 80)} sizes="(max-width: 768px) 33vw, 260px" />
             {post.media.length > 1 ? <span className={styles.mediaCount}>{post.media.length}</span> : null}
+            {post.isPinned === true ? (
+              <span className={styles.pinnedTile} aria-label="Pinned post">
+                <AppIcon name="pushPin24" size={14} />
+              </span>
+            ) : null}
           </Link>
         </li>
       ))}
@@ -51,7 +56,7 @@ export function ProfileContentTabs({ user, isSelf }: { readonly user: User; read
     retry: false,
   });
   const posts = sortPinnedPostsFirst(postsQuery.data?.data ?? []);
-  const clips = clipsQuery.data?.data ?? [];
+  const clips = sortPinnedPostsFirst(clipsQuery.data?.data ?? []);
   const panelId = `profile-panel-${user.id}`;
   const visiblePosts = tab === "posts" ? posts : tab === "reposts" ? filterPostsForProfileTab(posts, "reposts") : [];
   const isLoading = tab === "clips" ? clipsQuery.isLoading : postsQuery.isLoading;
@@ -85,7 +90,7 @@ export function ProfileContentTabs({ user, isSelf }: { readonly user: User; read
         ) : (
           <div className={styles.postList}>
             {(tab === "clips" ? clips : visiblePosts).map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCard key={post.id} post={post} showPinnedBadge />
             ))}
           </div>
         )}

@@ -75,6 +75,17 @@
   font-weight: 800;
 }
 
+.pinnedTile {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  display: inline-flex;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-overlay);
+  color: var(--color-on-brand);
+}
+
 @media (min-width: 768px) {
   .mediaGrid {
     gap: var(--space-2);

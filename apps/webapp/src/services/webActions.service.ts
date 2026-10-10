@@ -45,6 +45,10 @@ export const commentsService = {
   likeComment: (commentId: ID) => sendRequestToWebappServer<void>(`/api/v1/comments/${commentId}/like`, { method: "POST" }),
   unlikeComment: (commentId: ID) => sendRequestToWebappServer<void>(`/api/v1/comments/${commentId}/like`, { method: "DELETE" }),
   deleteComment: (commentId: ID) => sendRequestToWebappServer<void>(`/api/v1/comments/${commentId}`, { method: "DELETE" }),
+  pinComment: (postId: ID, commentId: ID) =>
+    sendRequestToWebappServer<Comment>(`/api/v1/posts/${postId}/comments/${commentId}/pin`, { method: "PUT", idempotencyKey: createIdempotencyKey("pin") }),
+  unpinComment: (postId: ID, commentId: ID) =>
+    sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/comments/${commentId}/pin`, { method: "DELETE", idempotencyKey: createIdempotencyKey("unpin") }),
 };
 
 export const reportsService = {

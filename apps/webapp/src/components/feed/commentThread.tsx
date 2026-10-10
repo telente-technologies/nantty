@@ -6,7 +6,8 @@ import { useState } from "react";
 import { ReportDialog } from "@/components/actions/reportDialog";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { useSession } from "@/components/providers/sessionProvider";
-import { HeartIcon, PinIcon } from "@/components/ui/icons";
+import { AppIcon } from "@/components/ui/appIcon";
+import { HeartIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
 import { showToast } from "@/components/ui/toast";
 import { commentsService } from "@/services/webActions.service";
@@ -24,8 +25,9 @@ function CommentRow({ comment, postId, postAuthorId, isReply, onReply }: { reado
   const [isLiked, setIsLiked] = useState(comment.liked);
   const [likeCount, setLikeCount] = useState(comment.likes);
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const [optimisticPinned, setOptimisticPinned] = useState(comment.pinned === true);
-  const canPin = postAuthorId !== undefined && viewer?.id === postAuthorId;
+  const [pinOverride, setPinOverride] = useState<boolean | null>(null);
+  const optimisticPinned = pinOverride ?? comment.isPinned === true;
+  const canPin = postAuthorId !== undefined && viewer?.id === postAuthorId && comment.parentCommentId === null;
   const likeMutation = useMutation({
     mutationFn: (likeNow: boolean) => (likeNow ? commentsService.likeComment(comment.id) : commentsService.unlikeComment(comment.id)),
     onMutate: (likeNow) => {
@@ -50,13 +52,14 @@ function CommentRow({ comment, postId, postAuthorId, isReply, onReply }: { reado
       if (optimisticPinned) await commentsService.unpinComment(postId, comment.id);
       else await commentsService.pinComment(postId, comment.id);
     },
-    onMutate: () => setOptimisticPinned((pinned) => !pinned),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    onMutate: () => setPinOverride(!optimisticPinned),
+    onSuccess: async () => {
       void queryClient.invalidateQueries({ queryKey: ["post-thread", postId] });
+      await queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      setPinOverride(null);
     },
     onError: () => {
-      setOptimisticPinned(comment.pinned === true);
+      setPinOverride(null);
       showToast({ text: "Couldn't update the pin. Try again.", tone: "error" });
     },
   });
@@ -69,8 +72,8 @@ function CommentRow({ comment, postId, postAuthorId, isReply, onReply }: { reado
         <p className={styles.commentMeta}>
           <strong>{comment.author.name}</strong>
           {optimisticPinned ? (
-            <span className={styles.pinnedBadge} aria-label="Pinned comment">
-              <PinIcon size={12} /> Pinned
+            <span className={styles.pinnedBadge} aria-label="Pinned by author">
+              <AppIcon name="pushPin24" size={12} /> Pinned by author
             </span>
           ) : null}
           <span>{formatTimeSincePosted(comment.createdAt)}</span>
@@ -123,13 +126,12 @@ export function CommentThread({ comment, postId, postAuthorId }: { readonly comm
     enabled: isExpanded,
   });
   const replies = isExpanded ? (repliesQuery.data?.pages ?? []).flatMap((page) => page.data) : comment.previewReplies;
-  const orderedReplies = [...replies].sort((a, b) => Number(b.pinned === true) - Number(a.pinned === true));
   const hiddenReplyCount = Math.max(0, comment.replyCount - replies.length);
 
   return (
     <div className={styles.thread}>
       <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={false} onReply={setReplyTarget} />
-      {orderedReplies.map((reply) => (
+      {replies.map((reply) => (
         <CommentRow key={reply.id} comment={reply} postId={postId} postAuthorId={postAuthorId} isReply onReply={setReplyTarget} />
       ))}
       {hiddenReplyCount > 0 || (isExpanded && repliesQuery.hasNextPage) ? (

@@ -1,6 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 import type { ConnectionEntry, ConnectionTab, FollowRequest } from "@/types/account.type";
 import type { Page, User } from "@/types";
+import { sortPinnedPostsFirst } from "@/utils/profileContent.util";
 
 import { getSignedInMockUser } from "./fixtures.mock";
 import { SIGNED_IN_BUYER, mockOrderRecords } from "./orderFixtures.mock";
@@ -93,7 +94,7 @@ export const usersMocks: MockRoute[] = [
     return { ...user, isFollowing: followedUserIds.has(user.id), followers: user.followers + (followedUserIds.has(user.id) ? 1 : 0) };
   }),
   createMockRoute("GET", "/api/v1/users/:userId/posts", ({ params }) => ({
-    data: listPostsByAuthor(params.userId!).map(withCurrentProductPrices),
+    data: sortPinnedPostsFirst(listPostsByAuthor(params.userId!)).map(withCurrentProductPrices),
     nextCursor: null,
   })),
   createMockRoute("GET", "/api/v1/users/:userId/connections", ({ query }) => listConnections((query.get("tab") as ConnectionTab) ?? "followers")),

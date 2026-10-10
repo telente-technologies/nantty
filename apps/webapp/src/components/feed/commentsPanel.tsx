@@ -19,7 +19,7 @@ export function CommentsPanel({ postId, postAuthorId, totalComments }: { readonl
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
   const comments = (commentsQuery.data?.pages ?? []).flatMap((page) => page.data);
-  const orderedComments = [...comments].sort((a, b) => Number(b.pinned === true) - Number(a.pinned === true));
+  const orderedComments = [...comments].sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true));
 
   return (
     <section className={styles.panel} id="comments" aria-labelledby={`comments-${postId}`}>

@@ -10,7 +10,7 @@ import { MentionText } from "@/components/mentions/mentionText";
 import { useSession } from "@/components/providers/sessionProvider";
 import { useSaveToggle } from "@/components/saves/useSaveToggle.hook";
 import { AppIcon } from "@/components/ui/appIcon";
-import { BookmarkActionIcon, BookmarkFilledActionIcon, LikeActionIcon, LikeFilledActionIcon, PinIcon, ReplyActionIcon, RepostActionIcon, ShareActionIcon } from "@/components/ui/icons";
+import { BookmarkActionIcon, BookmarkFilledActionIcon, LikeActionIcon, LikeFilledActionIcon, ReplyActionIcon, RepostActionIcon, ShareActionIcon } from "@/components/ui/icons";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { showToast } from "@/components/ui/toast";
 import { commentsService } from "@/services/webActions.service";
@@ -43,9 +43,10 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
   const [likeCount, setLikeCount] = useState(reply.likes);
   const [shouldPopLike, setShouldPopLike] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const [optimisticPinned, setOptimisticPinned] = useState(reply.pinned === true);
+  const [pinOverride, setPinOverride] = useState<boolean | null>(null);
+  const optimisticPinned = pinOverride ?? reply.isPinned === true;
   const { isSaved, toggleSaved } = useSaveToggle("comment", reply.id, reply.bookmarked ?? false);
-  const canPin = postAuthorId !== undefined && viewer?.id === postAuthorId;
+  const canPin = postAuthorId !== undefined && viewer?.id === postAuthorId && reply.parentCommentId === null;
   const firstImage = reply.media?.find((item) => item.type === "image" && item.url);
   const likeMutation = useMutation({
     mutationFn: (likeNow: boolean) => (likeNow ? commentsService.likeComment(reply.id) : commentsService.unlikeComment(reply.id)),
@@ -73,13 +74,14 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
       if (optimisticPinned) await commentsService.unpinComment(postId, reply.id);
       else await commentsService.pinComment(postId, reply.id);
     },
-    onMutate: () => setOptimisticPinned((pinned) => !pinned),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["post-thread", postId] });
+    onMutate: () => setPinOverride(!optimisticPinned),
+    onSuccess: async () => {
       void queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      await queryClient.invalidateQueries({ queryKey: ["post-thread", postId] });
+      setPinOverride(null);
     },
     onError: () => {
-      setOptimisticPinned(reply.pinned === true);
+      setPinOverride(null);
       showToast({ text: "Couldn't update the pin. Try again.", tone: "error" });
     },
   });
@@ -116,8 +118,8 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
           ) : null}
           {reply.isPostAuthor ? <span className={styles.authorBadge}>Author</span> : null}
           {optimisticPinned ? (
-            <span className={styles.pinnedBadge} aria-label="Pinned reply">
-              <PinIcon size={12} /> Pinned
+            <span className={styles.pinnedBadge} aria-label="Pinned by author">
+              <AppIcon name="pushPin24" size={12} /> Pinned by author
             </span>
           ) : null}
           <span className={styles.handle}>
@@ -211,13 +213,11 @@ interface ThreadReplyBranchProps {
 
 export const MAXIMUM_THREAD_INDENT_LEVELS = 3;
 
-const orderPinnedFirst = (replies: readonly ThreadReplyModel[]): ThreadReplyModel[] => [...replies].sort((a, b) => Number(b.pinned === true) - Number(a.pinned === true));
-
 export function ThreadReplyBranch({ reply, postId, postAuthorId, hasParentAbove, showReplyingTo, onReply, onRepostReply, nestingLevel = 0, startExpanded = false, onOpenThread }: ThreadReplyBranchProps) {
   const [isExpanded, setIsExpanded] = useState(startExpanded);
   const childrenAreIndented = nestingLevel + 1 <= MAXIMUM_THREAD_INDENT_LEVELS;
   const { query, replies } = useThreadReplies(reply.id, isExpanded);
-  const children = orderPinnedFirst(isExpanded && query.data ? replies : reply.inlineReplies);
+  const children = isExpanded && query.data ? replies : reply.inlineReplies;
   const hiddenCount = Math.max(0, reply.replyCount - children.length);
   const opensThreadInstead = onOpenThread !== undefined && nestingLevel >= MAXIMUM_THREAD_INDENT_LEVELS && hiddenCount > 0 && !isExpanded;
   const canShowMore = !opensThreadInstead && ((!isExpanded && hiddenCount > 0) || (isExpanded && (query.hasNextPage || query.isLoading)));

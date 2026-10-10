@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { LikeFilledActionIcon, PinIcon, ReplyActionIcon, TagIcon } from "@/components/ui/icons";
+import { LikeFilledActionIcon, ReplyActionIcon, TagIcon } from "@/components/ui/icons";
 import { showToast } from "@/components/ui/toast";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { MentionText } from "@/components/mentions/mentionText";
@@ -33,7 +33,7 @@ import { SensitiveContentGate } from "./sensitiveContentGate";
 import { ViewQuotesLink } from "./viewQuotesLink";
 import { TaggedPeopleLine } from "@/components/taggedPeople/taggedPeopleLine";
 
-export function PostCard({ post, priority = false, swipeable = false }: { readonly post: Post; readonly priority?: boolean; readonly swipeable?: boolean }) {
+export function PostCard({ post, priority = false, swipeable = false, showPinnedBadge = false }: { readonly post: Post; readonly priority?: boolean; readonly swipeable?: boolean; readonly showPinnedBadge?: boolean }) {
   const router = useRouter();
   const [likePopSignal, setLikePopSignal] = useState(0);
   const queryClient = useQueryClient();
@@ -56,19 +56,19 @@ export function PostCard({ post, priority = false, swipeable = false }: { readon
 
   const toggleLike = () => requireAuthThen(() => likeMutation.mutate(optimisticLiked), "Sign in to like posts.");
   const isOwnPost = viewer?.id === post.author.id;
-  const [optimisticPinned, setOptimisticPinned] = useState(post.pinned === true);
+  const [optimisticPinned, setOptimisticPinned] = useState(post.isPinned === true);
   const pinMutation = useMutation({
     mutationFn: () => (optimisticPinned ? postsService.unpinPost(post.id) : postsService.pinPost(post.id)),
     onMutate: () => setOptimisticPinned((pinned) => !pinned),
     onSuccess: (updated) => {
-      setOptimisticPinned(updated.pinned === true);
+      setOptimisticPinned(updated.isPinned === true);
       void queryClient.invalidateQueries({ queryKey: ["profile", "posts", post.author.id] });
       void queryClient.invalidateQueries({ queryKey: ["profile", "clips", post.author.id] });
       void queryClient.invalidateQueries({ queryKey: ["post", post.id] });
     },
     onError: (error) => {
-      setOptimisticPinned(post.pinned === true);
-      showToast({ text: error instanceof WebappRequestError && error.status === 409 ? "You can pin up to 3 posts." : "Couldn't update the pin. Try again.", tone: "error" });
+      setOptimisticPinned(post.isPinned === true);
+      showToast({ text: error instanceof WebappRequestError && error.code === "PIN_LIMIT_REACHED" ? "You can pin up to 3 posts. Unpin one to pin another." : "Couldn't update the pin. Try again.", tone: "error" });
     },
   });
   const swipe = usePostSwipe({
@@ -96,9 +96,9 @@ export function PostCard({ post, priority = false, swipeable = false }: { readon
           </span>
         </Link>
         {post.sponsored ? <span className={styles.sponsored}>{post.sponsored.label}</span> : null}
-        {optimisticPinned ? (
+        {showPinnedBadge && optimisticPinned ? (
           <span className={styles.pinned} aria-label="Pinned post">
-            <PinIcon size={12} /> Pinned
+            <AppIcon name="pushPin24" size={12} /> Pinned
           </span>
         ) : null}
         <Link href={`/post/${post.id}`} className={styles.timestamp}>
@@ -111,7 +111,7 @@ export function PostCard({ post, priority = false, swipeable = false }: { readon
           canonicalPath={`/post/${post.id}`}
           isOwnContent={viewer?.id === post.author.id}
           downloadTarget={findDownloadTargetForPost(post)}
-          pinAction={isOwnPost ? { pinned: optimisticPinned, onTogglePin: () => requireAuthThen(() => pinMutation.mutate(), "Sign in to pin posts."), disabled: pinMutation.isPending } : undefined}
+          pinAction={isOwnPost ? { isPinned: optimisticPinned, onTogglePin: () => requireAuthThen(() => pinMutation.mutate(), "Sign in to pin posts."), disabled: pinMutation.isPending } : undefined}
         />
       </header>
 
