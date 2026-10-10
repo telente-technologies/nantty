@@ -9,7 +9,6 @@ import { ControlRoomSkeleton } from "@/components/ui/pageSkeletons";
 import { LiveEarningsPanel } from "@/components/live/liveEarningsPanel";
 import { LiveSafetyPanel } from "@/components/live/liveSafetyPanel";
 import { StageGuestsPanel } from "@/components/live/stageGuestsPanel";
-import { useSession } from "@/components/providers/sessionProvider";
 import { LIVE_CATEGORY_LABELS } from "@/constants/liveCategories.constant";
 import { RetryButton } from "@/components/ui/controls";
 import { readPublicSiteUrl } from "@/config/studioEnvironment.config";
@@ -18,6 +17,7 @@ import { livesService } from "@/services/lives.service";
 import type { LiveState } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { readLiveErrorMessage } from "@/utils/liveStoreErrors.util";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { CopyField, copyGridClassName } from "./copyField";
@@ -27,10 +27,9 @@ const STATE_LABEL: Record<LiveState, string> = { idle: "Ready", connecting: "Con
 
 export default function ControlRoomPage({ params }: { readonly params: Promise<{ readonly liveId: string }> }) {
   const { liveId } = use(params);
-  const { viewer } = useSession();
-  const canPinProducts = Boolean(viewer?.hasStore);
   const queryClient = useQueryClient();
   const live = useQuery({ queryKey: ["live", liveId], queryFn: () => livesService.fetchLiveById(liveId), refetchInterval: 5000 });
+  const canPinProducts = Boolean(live.data?.storeId);
   const comments = useQuery({ queryKey: ["live-comments", liveId], queryFn: () => livesService.listComments(liveId), refetchInterval: 5000 });
   const products = useQuery({ queryKey: ["live-products", liveId], queryFn: () => livesService.listPinnedProducts(liveId), enabled: canPinProducts });
   const catalogue = useQuery({ queryKey: ["live-catalogue"], queryFn: () => livesService.listPinneableProducts(), enabled: canPinProducts });
@@ -49,6 +48,10 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
   const rotateKey = useMutation({ mutationFn: () => livesService.rotateStreamKey(liveId), onSuccess: (key) => queryClient.setQueryData(["live-stream-key", liveId], key) });
   const pinProduct = useMutation({
     mutationFn: (productId: string) => livesService.pinProduct(liveId, productId),
+    onSuccess: invalidate,
+  });
+  const unpinProduct = useMutation({
+    mutationFn: () => livesService.unpinProduct(liveId),
     onSuccess: invalidate,
   });
 
@@ -99,7 +102,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
             <Button variant="danger" busy={endLive.isPending} onClick={() => endLive.mutate()}>
               End live
             </Button>
-          ) : (
+          ) : session.state === "ended" ? null : (
             <Button busy={startLive.isPending} onClick={() => startLive.mutate()}>
               Start live
             </Button>
@@ -112,7 +115,7 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
 
       {actionError ? (
         <p className={styles.actionError} role="alert">
-          {readErrorMessageForDisplay(actionError)}
+          {readLiveErrorMessage(actionError)}
         </p>
       ) : null}
 
@@ -154,10 +157,15 @@ export default function ControlRoomPage({ params }: { readonly params: Promise<{
               <li key={product.id} className={styles.listItem}>
                 <span className={styles.listItemMain}>{product.title}</span>
                 <span className={styles.listItemMeta}>{formatMoneyForDisplay(product.price)}{product.pinned ? " · On screen" : ""}</span>
+                {product.pinned ? (
+                  <button type="button" className={styles.chip} disabled={unpinProduct.isPending} onClick={() => unpinProduct.mutate()}>
+                    Unpin
+                  </button>
+                ) : null}
               </li>
             ))}
           </ul>
-          {products.isError ? <ErrorState title="Pinned products didn't load" description={readErrorMessageForDisplay(products.error)} onRetry={() => void products.refetch()} /> : null}
+          {products.isError ? <ErrorState title="Pinned products didn't load" description={readLiveErrorMessage(products.error)} onRetry={() => void products.refetch()} /> : null}
           {products.isSuccess && products.data.length === 0 ? <p className={styles.muted}>Nothing pinned yet. Pick a product below to show it on stream.</p> : null}
           <div className={styles.chipRow}>
             {catalogue.data

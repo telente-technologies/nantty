@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import { TextField } from "@/components/ui/field";
+import { SelectField, TextField } from "@/components/ui/field";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListPageSkeleton } from "@/components/ui/pageSkeletons";
 import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
@@ -14,8 +14,9 @@ import { LIVE_CATEGORY_LABELS, LIVE_CATEGORY_OPTIONS } from "@/constants/liveCat
 import { useSession } from "@/components/providers/sessionProvider";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { livesService } from "@/services/lives.service";
-import type { LiveCategory, LiveEarnings, LiveSession, LiveState } from "@/types";
+import type { LiveCategory, LiveEarnings, LiveSession, LiveState, StoreOption, User } from "@/types";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
+import { readLiveErrorMessage } from "@/utils/liveStoreErrors.util";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import styles from "./page.module.css";
@@ -39,30 +40,43 @@ const sumEarningsAcrossLives = (lives: readonly LiveSession[]): LiveEarnings => 
   };
 };
 
+const NO_STORE = "";
+
+const pickDefaultStore = (stores: readonly StoreOption[], viewer: User | null): string =>
+  (stores.find((store) => store.id === viewer?.storeId) ?? stores.find((store) => store.isCurrent) ?? stores[0])?.id ?? NO_STORE;
+
 export default function LivesDashboardPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { viewer } = useSession();
-  const categoryOptions = LIVE_CATEGORY_OPTIONS.filter((option) => option.value !== "shopping" || viewer?.hasStore);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<LiveCategory>("justChatting");
+  const [chosenStoreId, setChosenStoreId] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const createInFlight = useRef(false);
   const lives = useQuery({ queryKey: ["lives"], queryFn: () => livesService.listLives() });
+  const stores = useQuery({ queryKey: ["my-stores"], queryFn: () => livesService.listMyStores(), enabled: viewer !== null });
+  const storeOptions = stores.data ?? [];
+  const storeId = chosenStoreId ?? pickDefaultStore(storeOptions, viewer);
+  const categoryOptions = LIVE_CATEGORY_OPTIONS.filter((option) => option.value !== "shopping" || storeId !== NO_STORE);
+  const effectiveCategory = category === "shopping" && storeId === NO_STORE ? "justChatting" : category;
 
   const createLive = useMutation({
-    mutationFn: () => livesService.createLive(title.trim() || "Untitled live", category),
+    mutationFn: () => livesService.createLive({ title: title.trim() || "Untitled live", category: effectiveCategory, storeId: storeId || null }),
     onSuccess: (live) => {
       setTitle("");
       queryClient.invalidateQueries({ queryKey: ["lives"] });
       router.push(`/lives/${live.id}`);
     },
-    onError: (error: Error) => setFormError(error.message),
+    onError: (error: Error) => setFormError(readLiveErrorMessage(error)),
   });
 
   function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
-    createLive.mutate();
+    if (createInFlight.current) return;
+    createInFlight.current = true;
+    createLive.mutate(undefined, { onSettled: () => { createInFlight.current = false; } });
   }
 
   if (lives.isLoading) return <ListPageSkeleton label="Loading lives" />;
@@ -93,16 +107,33 @@ export default function LivesDashboardPage() {
                 key={option.value}
                 type="button"
                 role="radio"
-                aria-checked={category === option.value}
-                className={`${styles.categoryChip} ${category === option.value ? styles.categoryChipActive : ""}`}
+                aria-checked={effectiveCategory === option.value}
+                className={`${styles.categoryChip} ${effectiveCategory === option.value ? styles.categoryChipActive : ""}`}
                 onClick={() => setCategory(option.value)}
               >
                 {option.label}
               </button>
             ))}
           </div>
+          {storeOptions.length > 0 ? (
+            <SelectField
+              label="Stream for"
+              name="storeId"
+              hint="Only lives started for a store can show and pin that store's products."
+              value={storeId}
+              onChange={(event) => setChosenStoreId(event.target.value)}
+            >
+              {storeOptions.map((store) => (
+                <option key={store.id} value={store.id}>
+                  {store.name}
+                </option>
+              ))}
+              <option value={NO_STORE}>Just me (no products)</option>
+            </SelectField>
+          ) : null}
+          {stores.isError ? <p className={styles.formError} role="alert">{readLiveErrorMessage(stores.error)}</p> : null}
         </div>
-        <Button type="submit" busy={createLive.isPending}>
+        <Button type="submit" busy={createLive.isPending} disabled={stores.isLoading}>
           Create live
         </Button>
       </form>

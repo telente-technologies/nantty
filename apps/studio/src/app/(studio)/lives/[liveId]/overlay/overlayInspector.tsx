@@ -7,6 +7,15 @@ import baseStyles from "./page.module.css";
 
 const styles = { ...baseStyles, ...partStyles };
 
+const canvasWidth = 1920;
+const canvasHeight = 1080;
+
+function clampToRange(raw: string, minimum: number, maximum: number): number {
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return minimum;
+  return Math.min(maximum, Math.max(minimum, Math.round(value)));
+}
+
 interface OverlayInspectorProps {
   readonly selected: OverlayLayer;
   readonly onPatch: (patch: Partial<OverlayLayer>) => void;
@@ -63,22 +72,22 @@ export function OverlayInspector({ selected, onPatch, onMove, onRemove }: Overla
         <div className={styles.fieldRow}>
           <label className={styles.field}>
             <span className={styles.fieldLabel}>X</span>
-            <input className={styles.input} type="number" value={selected.x} onChange={(event) => onPatch({ x: Number(event.target.value) })} />
+            <input className={styles.input} type="number" min={-canvasWidth} max={2 * canvasWidth} value={selected.x} onChange={(event) => onPatch({ x: clampToRange(event.target.value, -canvasWidth, 2 * canvasWidth) })} />
           </label>
           <label className={styles.field}>
             <span className={styles.fieldLabel}>Y</span>
-            <input className={styles.input} type="number" value={selected.y} onChange={(event) => onPatch({ y: Number(event.target.value) })} />
+            <input className={styles.input} type="number" min={-canvasHeight} max={2 * canvasHeight} value={selected.y} onChange={(event) => onPatch({ y: clampToRange(event.target.value, -canvasHeight, 2 * canvasHeight) })} />
           </label>
         </div>
 
         <div className={styles.fieldRow}>
           <label className={styles.field}>
             <span className={styles.fieldLabel}>Width</span>
-            <input className={styles.input} type="number" value={selected.width} onChange={(event) => onPatch({ width: Number(event.target.value) })} />
+            <input className={styles.input} type="number" min={1} max={2 * canvasWidth} value={selected.width} onChange={(event) => onPatch({ width: clampToRange(event.target.value, 1, 2 * canvasWidth) })} />
           </label>
           <label className={styles.field}>
             <span className={styles.fieldLabel}>Height</span>
-            <input className={styles.input} type="number" value={selected.height} onChange={(event) => onPatch({ height: Number(event.target.value) })} />
+            <input className={styles.input} type="number" min={1} max={2 * canvasHeight} value={selected.height} onChange={(event) => onPatch({ height: clampToRange(event.target.value, 1, 2 * canvasHeight) })} />
           </label>
         </div>
 
