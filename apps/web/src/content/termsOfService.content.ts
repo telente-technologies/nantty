@@ -32,23 +32,38 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     heading: "Buying on Zudomart",
     paragraphs: [
       "Products are sold by independent sellers, not by Zudomart. Prices are shown in your local currency where supported, and otherwise in US dollars.",
-      "When you pay, the money is held in escrow. It is released to the seller when you confirm delivery, or after a set period if you do not confirm or open a dispute.",
+      "Zudomart does not hold your money. Payments, wallets and payouts are provided by our licensed payment partner, and wallet balances are held by that partner in your name.",
+      "In Nigeria, when you pay, the money is locked in your own wallet as escrow. It is released to the seller when you confirm delivery, or after a set period if you do not confirm or open a dispute. If the order is refunded, the money is unlocked in your wallet.",
+      "Outside Nigeria, escrow and buyer protection are not available. See \"Buying and selling outside Nigeria\" below.",
       "[Team to replace: automatic release period and dispute window.]",
+    ],
+  },
+  {
+    id: "outside-nigeria",
+    heading: "Buying and selling outside Nigeria",
+    paragraphs: [
+      "Outside Nigeria, you pay the seller directly at checkout through our payment partner, and the seller is paid as soon as the payment settles. There is no escrow, and Zudomart does not hold, control or guarantee the money. You buy and sell at your own risk, and you do not get the buyer protection available in Nigeria.",
+      "Every seller outside Nigeria must verify their identity and a payout account in their own name before they can sell. Verification lowers risk but is not a guarantee about a seller or their goods.",
+      "If something goes wrong, what Zudomart can do is limited to: reviewing your report; asking the seller to refund you; warning, restricting, suspending or banning the seller's account; freezing the seller's access to Zudomart features where the law and our partner allow; reporting the seller to our payment partner and, where appropriate, to the authorities; and escalating your case to our payment partner so they can assist you.",
+      "Zudomart cannot reverse a payment, force a refund or recover money that has already been paid out. Whether money can be recovered depends on our payment partner, your card issuer or bank, or your mobile money provider. If they cannot help, there may be nothing more Zudomart can do.",
+      "[Team to replace: confirm wording with counsel in each country where we operate, including any consumer rights that cannot be excluded by law.]",
     ],
   },
   {
     id: "selling",
     heading: "Selling on Zudomart",
     paragraphs: [
-      "Sellers must be approved before listing. Sellers must describe products accurately, ship on time, and follow our prohibited items list and applicable law.",
-      "Seller fees will be published before they apply. Payouts are made to a verified bank account after escrow is released.",
+      "Sellers must describe products accurately, ship on time, and follow our prohibited items list and applicable law.",
+      "In Nigeria, you can open a store and start selling before you are verified, but only through escrow and up to a sales limit, and you cannot withdraw until you are verified. Outside Nigeria, you must verify your identity and a payout account in your own name before you can sell.",
+      "Seller fees will be published before they apply. Payouts go to a verified bank or mobile money account in your own name: in Nigeria after escrow is released, and outside Nigeria once the buyer's payment settles.",
     ],
   },
   {
     id: "disputes",
     heading: "Disputes and refunds",
     paragraphs: [
-      "If an order does not arrive or is not as described, open a dispute before confirming delivery. Zudomart will review the evidence from both sides and decide whether to refund the buyer or release payment to the seller.",
+      "In Nigeria, if an order does not arrive or is not as described, open a dispute before confirming delivery. Zudomart will review the evidence from both sides and decide whether to refund the buyer or release payment to the seller.",
+      "Outside Nigeria, you can still report an order, and we will act against the seller's account and escalate to our payment partner. Refunds are not guaranteed (see \"Buying and selling outside Nigeria\").",
     ],
   },
   {
