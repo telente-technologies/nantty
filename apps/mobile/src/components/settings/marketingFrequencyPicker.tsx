@@ -5,7 +5,7 @@ import { useUpdateConsentMutation } from "@/components/settings/privacyQueries.h
 import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { consentsService } from "@/services/consents.service";
+import { consentsService } from "@/services/account/consents.service";
 import type { MarketingFrequency } from "@/types/trust.type";
 
 const FREQUENCY_OPTIONS: readonly { id: MarketingFrequency; label: string }[] = [

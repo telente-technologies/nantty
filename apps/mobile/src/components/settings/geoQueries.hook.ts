@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import type { GeoLevel } from "@/types";
-import { geoService } from "@/services/geo.service";
+import { geoService } from "@/services/geo/geo.service";
 
 export const geoQueryKeys = {
   countries: ["geo", "countries"] as const,

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { mediaDownloadsService } from "@/services/mediaDownloads.service";
+import { mediaDownloadsService } from "@/services/media/mediaDownloads.service";
 import type { DownloadSettings } from "@/types";
 
 import { ConsentToggleRow } from "./consentToggleRow";

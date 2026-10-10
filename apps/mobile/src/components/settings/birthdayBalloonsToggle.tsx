@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { celebrationsQueryKey, useViewerCelebrationsQuery } from "@/hooks/useSurfaceCelebration.hook";
-import { celebrationsService } from "@/services/celebrations.service";
+import { celebrationsService } from "@/services/social/celebrations.service";
 
 import { ConsentToggleRow } from "./consentToggleRow";
 
