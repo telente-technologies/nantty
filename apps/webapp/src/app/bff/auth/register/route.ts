@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { callAuthEndpoint, beginSessionWithAuthResult } from "@/server/authentication.service";
 import { respondWithBffError } from "@/server/gateway.service";
 import { isRequestFromWebappOrigin } from "@/server/requestOriginGuard.service";
+import { createNewSessionId } from "@/server/session.service";
+import { deriveCsrfTokenForSession } from "@/server/signedCookie.service";
 
 interface RegisterBody {
   readonly email?: unknown;
@@ -45,7 +47,8 @@ export async function POST(request: NextRequest) {
     otpToken,
   });
   if (!result.session) return respondWithBffError(result.status, result.error?.code ?? "REGISTRATION_FAILED", result.error?.message ?? "We could not create your account.", result.error?.suggestions);
-  const response = NextResponse.json({ user: result.session.user }, { status: 201, headers: { "Cache-Control": "no-store" } });
-  beginSessionWithAuthResult(response, result.session);
+  const sessionId = createNewSessionId();
+  const response = NextResponse.json({ user: result.session.user, csrfToken: deriveCsrfTokenForSession(sessionId) }, { status: 201, headers: { "Cache-Control": "no-store" } });
+  beginSessionWithAuthResult(response, result.session, sessionId);
   return response;
 }

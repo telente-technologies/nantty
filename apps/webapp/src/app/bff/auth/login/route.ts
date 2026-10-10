@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { callAuthEndpoint, beginSessionWithAuthResult } from "@/server/authentication.service";
 import { respondWithBffError } from "@/server/gateway.service";
 import { isRequestFromWebappOrigin } from "@/server/requestOriginGuard.service";
+import { createNewSessionId } from "@/server/session.service";
+import { deriveCsrfTokenForSession } from "@/server/signedCookie.service";
 
 export async function POST(request: NextRequest) {
   if (!isRequestFromWebappOrigin(request)) return respondWithBffError(403, "CSRF_REJECTED", "This sign-in request could not be verified.");
@@ -14,7 +16,8 @@ export async function POST(request: NextRequest) {
   }
   const result = await callAuthEndpoint("/api/v1/auth/login", { identifier, password });
   if (!result.session) return respondWithBffError(result.status, result.error?.code ?? "INVALID_CREDENTIALS", result.error?.message ?? "That sign-in details are not right.");
-  const response = NextResponse.json({ user: result.session.user, notice: result.session.notice ?? null }, { headers: { "Cache-Control": "no-store" } });
-  beginSessionWithAuthResult(response, result.session);
+  const sessionId = createNewSessionId();
+  const response = NextResponse.json({ user: result.session.user, notice: result.session.notice ?? null, csrfToken: deriveCsrfTokenForSession(sessionId) }, { headers: { "Cache-Control": "no-store" } });
+  beginSessionWithAuthResult(response, result.session, sessionId);
   return response;
 }
