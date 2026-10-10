@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -27,6 +28,23 @@ func StoreProfileOf(ctx context.Context, client *ent.Client, accountId uuid.UUID
 func AllDocumentsApproved(ctx context.Context, client *ent.Client, accountId uuid.UUID) (bool, error) {
 	count, err := client.BusinessDocument.Query().Where(businessdocument.AccountID(accountId), businessdocument.IsCurrent(true), businessdocument.StatusEQ(businessdocument.StatusApproved)).Count(ctx)
 	return count >= len(DocumentKindOrder), err
+}
+
+func EveryKindApprovedOnce(ctx context.Context, client *ent.Client, accountId uuid.UUID) (bool, error) {
+	kinds, err := client.BusinessDocument.Query().Where(businessdocument.AccountID(accountId), businessdocument.StatusEQ(businessdocument.StatusApproved)).GroupBy(businessdocument.FieldKind).Strings(ctx)
+	return len(kinds) >= len(DocumentKindOrder), err
+}
+
+func EnqueueVerificationRevokedInTransaction(ctx context.Context, tx *ent.Tx, now time.Time, accountId uuid.UUID, documentKind, reason string) error {
+	store, err := StoreProfileOf(ctx, tx.Client(), accountId)
+	if err != nil {
+		return err
+	}
+	data := businessevents.VerificationRevokedData{AccountId: accountId.String(), DocumentKind: documentKind, Reason: reason}
+	if store != nil {
+		data.ProfileId = store.ID.String()
+	}
+	return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, businessevents.BusinessVerificationRevokedType, accountId.String(), now, data)
 }
 
 func GoldGrantedFor(ctx context.Context, client *ent.Client, profileId uuid.UUID) (bool, error) {

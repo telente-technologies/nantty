@@ -38,8 +38,15 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.S
 		if err != nil {
 			return err
 		}
-		if document.Status != businessdocument.StatusPending {
+		revoking := !command.Approve && document.Status == businessdocument.StatusApproved
+		if document.Status != businessdocument.StatusPending && !revoking {
 			return usersErrors.Conflict("ALREADY_DECIDED", "This document was already reviewed.")
+		}
+		wasVerified := false
+		if !command.Approve {
+			if wasVerified, err = services.EveryKindApprovedOnce(ctx, tx.Client(), owner); err != nil {
+				return err
+			}
 		}
 		status, action := businessdocument.StatusRejected, "business_document.rejected"
 		if command.Approve {
@@ -64,6 +71,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.S
 				return err
 			}
 		}
+		if wasVerified {
+			if err := services.EnqueueVerificationRevokedInTransaction(ctx, tx, now, owner, string(document.Kind), reason); err != nil {
+				return err
+			}
+		}
 		if command.Approve {
 			if allApproved, err := services.AllDocumentsApproved(ctx, tx.Client(), owner); err != nil {
 				return err
@@ -78,7 +90,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.S
 		}
 		return usersservices.RecordStaffAuditEntry(ctx, command.Actor, usersservices.StaffAuditEntry{
 			Action: action, SubjectType: "business_document", SubjectId: document.ID.String(), SubjectLabel: string(document.Kind), Reason: reason,
-			Before: map[string]any{"status": "pending"}, After: map[string]any{"status": status, "accountId": owner},
+			Before: map[string]any{"status": document.Status}, After: map[string]any{"status": status, "accountId": owner},
 		})
 	})
 	if err != nil {

@@ -115,6 +115,8 @@ func startPrivacyHarness(t *testing.T, adjust ...func(*configs.PrivacySettings))
 	audit := &recordedAudit{}
 	identityports.Default.RegisterAccountDirectory(directory)
 	identityports.Default.RegisterStaffTokenService(tokens)
+	identityports.Default.RegisterStaffSessionChecker(identitytest.ActiveStaffSessionChecker{})
+	identityports.Default.RegisterStaffNetworkPolicy(identitytest.PermissiveStaffNetworkPolicy{})
 	identityports.Default.RegisterAuditRecorder(audit)
 	clock := &testClock{}
 	privacy := configs.PrivacySettings{

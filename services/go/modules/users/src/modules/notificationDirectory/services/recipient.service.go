@@ -9,20 +9,23 @@ import (
 	"zudomart/modules/users/src/container"
 	"zudomart/modules/users/src/generated/ent"
 	"zudomart/modules/users/src/generated/ent/privacysetting"
+	"zudomart/modules/users/src/generated/ent/profile"
 	"zudomart/platform/identityports"
 )
 
 type Recipient struct {
-	AccountId        string          `json:"accountId"`
-	Email            *string         `json:"email"`
-	EmailVerified    bool            `json:"emailVerified"`
-	FirstName        string          `json:"firstName"`
-	Name             string          `json:"name"`
-	Username         string          `json:"username"`
-	Locale           string          `json:"locale"`
-	MarketingConsent bool            `json:"marketingConsent"`
-	Status           string          `json:"status"`
-	Preferences      map[string]bool `json:"preferences"`
+	AccountId          string          `json:"accountId"`
+	Email              *string         `json:"email"`
+	EmailVerified      bool            `json:"emailVerified"`
+	FirstName          string          `json:"firstName"`
+	Name               string          `json:"name"`
+	Username           string          `json:"username"`
+	Locale             string          `json:"locale"`
+	MarketingConsent   bool            `json:"marketingConsent"`
+	Status             string          `json:"status"`
+	Preferences        map[string]bool `json:"preferences"`
+	PushEnabled        bool            `json:"pushEnabled"`
+	MarketingFrequency string          `json:"marketingFrequency"`
 }
 
 func firstNameOf(name string) string {
@@ -36,6 +39,14 @@ func BuildRecipient(ctx context.Context, application *container.Container, summa
 	recipient := Recipient{
 		AccountId: summary.ID.String(), Email: summary.Email, EmailVerified: summary.EmailVerified, FirstName: firstNameOf(summary.Name), Name: summary.Name, Username: summary.Username, Locale: "en",
 		Status: summary.Status, Preferences: map[string]bool{"marketing": false, "analytics": false, "personalization": false, "personalizedAds": false},
+		PushEnabled: true, MarketingFrequency: string(privacysetting.DefaultMarketingFrequency),
+	}
+	personal, err := application.Client.Profile.Query().Where(profile.AccountID(summary.ID), profile.KindEQ(profile.KindPersonal)).Only(ctx)
+	if err != nil && !ent.IsNotFound(err) {
+		return recipient, err
+	}
+	if personal != nil {
+		recipient.PushEnabled = personal.PushNotificationsEnabled
 	}
 	settings, err := application.Client.PrivacySetting.Query().Where(privacysetting.AccountID(summary.ID)).Only(ctx)
 	if ent.IsNotFound(err) {
@@ -45,6 +56,7 @@ func BuildRecipient(ctx context.Context, application *container.Container, summa
 		return recipient, err
 	}
 	recipient.MarketingConsent = settings.Marketing
+	recipient.MarketingFrequency = string(settings.MarketingFrequency)
 	recipient.Preferences = map[string]bool{"marketing": settings.Marketing, "analytics": settings.Analytics, "personalization": settings.Personalization, "personalizedAds": settings.PersonalizedAds}
 	return recipient, nil
 }

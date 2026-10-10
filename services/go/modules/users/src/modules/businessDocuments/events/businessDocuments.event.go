@@ -4,6 +4,7 @@ const (
 	BusinessDocumentSubmittedType    = "businessDocument.submitted"
 	BusinessDocumentReviewedType     = "businessDocument.reviewed"
 	BusinessVerificationApprovedType = "businessVerification.approved"
+	BusinessVerificationRevokedType  = "businessVerification.revoked"
 )
 
 type DocumentEventData struct {
@@ -19,4 +20,11 @@ type VerificationApprovedData struct {
 	ProfileId            string `json:"profileId,omitempty"`
 	GoldEligible         bool   `json:"goldEligible"`
 	GoldCheckmarkGranted bool   `json:"goldCheckmarkGranted"`
+}
+
+type VerificationRevokedData struct {
+	AccountId    string `json:"accountId"`
+	ProfileId    string `json:"profileId,omitempty"`
+	DocumentKind string `json:"documentKind"`
+	Reason       string `json:"reason"`
 }

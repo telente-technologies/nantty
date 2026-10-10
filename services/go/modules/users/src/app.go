@@ -78,7 +78,9 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database)))
 	usersContainer := &container.Container{
 		Client: client, Settings: settings, Logger: logger, Now: time.Now,
-		AccessVerifier: jwtauth.NewAccessTokenVerifierFromKeySetProvider(publishedKeySetFromAuth, settings.TokenIssuer, settings.TokenAudience),
+		PlatformSettings: identityports.NewCachedPlatformSettings(identityports.Default, settings.PlatformSettingsTtl, logger),
+		OwnedStores:      integrations.CatalogOwnedStores{Database: database, Schema: settings.CatalogSchema},
+		AccessVerifier:   jwtauth.NewAccessTokenVerifierFromKeySetProvider(publishedKeySetFromAuth, settings.TokenIssuer, settings.TokenAudience),
 	}
 	if err := legal.SeedReferenceData(ctx, usersContainer); err != nil {
 		_ = database.Close()

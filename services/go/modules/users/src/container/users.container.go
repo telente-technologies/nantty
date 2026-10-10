@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/users/src/configs"
 	"zudomart/modules/users/src/generated/ent"
 	"zudomart/modules/users/src/integrations"
+	"zudomart/platform/identityports"
 	"zudomart/platform/jwtauth"
 )
 
@@ -25,6 +26,12 @@ type Container struct {
 	ActivityCounts     ActivityCountSource
 	IdentityCapture    IdentityCaptureProvider
 	Eligibility        VerificationEligibilityAssessor
+	PlatformSettings   *identityports.CachedPlatformSettings
+	OwnedStores        OwnedStoreLookup
+}
+
+type OwnedStoreLookup interface {
+	FindOwnedStoreId(ctx context.Context, accountId uuid.UUID) (*string, error)
 }
 
 type IdentityCaptureProvider interface {

@@ -14,4 +14,5 @@ func MountPrivacySettingsRoutes(mux *http.ServeMux, c *container.Container) {
 	mux.Handle("GET /api/v1/users/me/privacy-settings", requireAccount(http.HandlerFunc(controller.GetMine)))
 	mux.Handle("PATCH /api/v1/users/me/privacy-settings", requireAccount(http.HandlerFunc(controller.UpdateMine)))
 	mux.HandleFunc("GET /api/v1/internal/users/{accountId}/privacy-settings", controller.GetForInternalCaller)
+	mux.HandleFunc("GET /api/v1/internal/ownership/profile/{id}", controller.GetProfileOwnership)
 }

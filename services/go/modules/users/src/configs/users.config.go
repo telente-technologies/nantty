@@ -18,6 +18,8 @@ type UsersSettings struct {
 	UsernameChangeCooldown      time.Duration
 	UsernameMaximumChangesYear  int
 	UsernameQuarantine          time.Duration
+	PlatformSettingsTtl         time.Duration
+	CatalogSchema               string
 	MediaPublicBaseUrl          string
 	MediaUploadBaseUrl          string
 	MediaUploadSigningKey       []byte
@@ -45,6 +47,8 @@ func ReadUsersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		UsernameChangeCooldown:      time.Duration(reader.ReadIntegerOrDefault("USERS_USERNAME_CHANGE_COOLDOWN_DAYS", 30)) * 24 * time.Hour,
 		UsernameMaximumChangesYear:  reader.ReadIntegerOrDefault("USERS_USERNAME_MAX_CHANGES_PER_YEAR", 3),
 		UsernameQuarantine:          time.Duration(reader.ReadIntegerOrDefault("USERS_USERNAME_QUARANTINE_DAYS", 120)) * 24 * time.Hour,
+		PlatformSettingsTtl:         reader.ReadDurationOrDefault("USERS_PLATFORM_SETTINGS_TTL", 30*time.Second),
+		CatalogSchema:               reader.ReadStringOrDefault("USERS_CATALOG_SCHEMA", "catalog"),
 		MediaPublicBaseUrl:          reader.ReadStringOrDefault("USERS_MEDIA_PUBLIC_BASE_URL", "http://localhost:18333/zudomart-media"),
 		MediaUploadBaseUrl:          reader.ReadStringOrDefault("USERS_MEDIA_UPLOAD_BASE_URL", "http://localhost:18333/zudomart-media"),
 		MediaUploadSigningKey:       readSigningKey(reader, "USERS_MEDIA_UPLOAD_SIGNING_KEY"),
