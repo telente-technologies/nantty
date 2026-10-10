@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, Skeleton } from "@/components/ui/feedback";
+import { ShareActionIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { showToast } from "@/components/ui/toast";
@@ -68,6 +69,8 @@ export function ShareToChatDialog({ isOpen, onClose, kind, referenceId }: ShareT
       onClose={onClose}
       title="Send in chat"
       description={`Pick up to ${maximumChatsPerShare} chats.`}
+      tone="brand"
+      icon={<ShareActionIcon size={24} />}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>

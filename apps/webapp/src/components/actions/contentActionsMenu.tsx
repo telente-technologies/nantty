@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
-import { MoreIcon } from "@/components/ui/icons";
+import { CopyrightIcon, DownloadIcon, FlagIcon, LinkIcon, MoreIcon, PinIcon, SendActionIcon } from "@/components/ui/icons";
 import { usePopoverMenu } from "@/components/ui/popoverMenu.hook";
 import sheetStyles from "@/components/ui/popoverMenu.module.css";
 import { showToast } from "@/components/ui/toast";
@@ -29,11 +29,12 @@ interface ContentActionsMenuProps {
   readonly onReport?: () => void;
   readonly soundId?: string | null;
   readonly downloadTarget?: DownloadTarget | null;
+  readonly pinAction?: { readonly pinned: boolean; readonly onTogglePin: () => void; readonly disabled?: boolean };
 }
 
 type CopyrightDialogTarget = { readonly targetType: "post" | "clip" | "live" | "sound"; readonly targetId: string };
 
-export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName, onReport, soundId, downloadTarget = null }: ContentActionsMenuProps) {
+export function ContentActionsMenu({ shareKind, reportTargetType, targetId, canonicalPath, isOwnContent = false, triggerClassName, onReport, soundId, downloadTarget = null, pinAction }: ContentActionsMenuProps) {
   const { activeDownload, startDownload, cancelDownload } = useBrandedMediaDownload();
   const { isOpen: menuIsOpen, close: menuClose, containerRef: menuContainerRef, triggerRef: menuTriggerRef, menuRef: menuMenuRef, triggerProps: menuTriggerProps, menuProps: menuMenuProps } = usePopoverMenu();
   const [copyrightTarget, setCopyrightTarget] = useState<CopyrightDialogTarget | null>(null);
@@ -64,30 +65,42 @@ export function ContentActionsMenu({ shareKind, reportTargetType, targetId, cano
         <div className={[styles.menu, sheetStyles.sheet].join(" ")} aria-label="More options" ref={menuMenuRef} {...menuMenuProps}>
           {shareKind ? (
             <button type="button" role="menuitem" className={styles.item} onClick={() => chooseAction(() => requireAuthThen(() => setOpenDialog("share"), "Sign in to send this in a chat."))}>
-              Send in chat
+              <SendActionIcon size={18} aria-hidden="true" />
+              <span>Send in chat</span>
             </button>
           ) : null}
           <button type="button" role="menuitem" className={styles.item} onClick={() => chooseAction(() => void copyLinkToClipboard())}>
-            Copy link
+            <LinkIcon size={18} aria-hidden="true" />
+            <span>Copy link</span>
           </button>
           {downloadTarget ? (
             <button type="button" role="menuitem" className={styles.item} onClick={() => chooseAction(() => requireAuthThen(() => void startDownload(downloadTarget), "Sign in to download."))}>
-              Download
+              <DownloadIcon size={18} aria-hidden="true" />
+              <span>Download</span>
+            </button>
+          ) : null}
+          {isOwnContent && pinAction ? (
+            <button type="button" role="menuitem" className={styles.item} onClick={() => chooseAction(pinAction.onTogglePin)} disabled={pinAction.disabled}>
+              <PinIcon size={18} aria-hidden="true" />
+              <span>{pinAction.pinned ? "Unpin from profile" : "Pin to profile"}</span>
             </button>
           ) : null}
           {isOwnContent ? null : (
             <button type="button" role="menuitem" className={[styles.item, styles.itemDanger].join(" ")} onClick={() => chooseAction(() => requireAuthThen(onReport ?? (() => setOpenDialog("report")), "Sign in to report content."))}>
-              Report
+              <FlagIcon size={18} aria-hidden="true" />
+              <span>Report</span>
             </button>
           )}
           {isOwnContent || !canClaimCopyright ? null : (
             <button type="button" role="menuitem" className={[styles.item, styles.itemDanger].join(" ")} onClick={() => chooseAction(() => openCopyrightClaim({ targetType: reportTargetType as "post" | "clip" | "live", targetId }))}>
-              Report copyright
+              <CopyrightIcon size={18} aria-hidden="true" />
+              <span>Report copyright</span>
             </button>
           )}
           {isOwnContent || !soundId ? null : (
             <button type="button" role="menuitem" className={[styles.item, styles.itemDanger].join(" ")} onClick={() => chooseAction(() => openCopyrightClaim({ targetType: "sound", targetId: soundId }))}>
-              Report the sound for copyright
+              <CopyrightIcon size={18} aria-hidden="true" />
+              <span>Report the sound for copyright</span>
             </button>
           )}
         </div>

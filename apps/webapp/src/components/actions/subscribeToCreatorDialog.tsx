@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState, Skeleton } from "@/components/ui/feedback";
+import { StarIcon } from "@/components/ui/icons";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { creatorSubscriptionsService } from "@/services/webActions.service";
@@ -38,6 +39,8 @@ export function SubscribeToCreatorDialog({ isOpen, onClose, creatorId, creatorNa
       onClose={onClose}
       title={`Subscribe to ${creatorName}`}
       description="Support this creator and unlock subscriber-only posts, clips and lives. Pay by card, bank transfer or USSD in a secure window."
+      tone="brand"
+      icon={<StarIcon size={24} />}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>

@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { FlagIcon } from "@/components/ui/icons";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
@@ -60,6 +61,7 @@ export function ReportDialog({ isOpen, onClose, targetType, targetId }: ReportDi
       onClose={onClose}
       title={`Report this ${targetNames[targetType]}`}
       description="Reports are anonymous. The person you report won't know it was you."
+      icon={<FlagIcon size={24} />}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>
