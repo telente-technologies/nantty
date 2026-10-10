@@ -154,7 +154,7 @@ func (controller CoinsController) QuoteCoinTransfer(writer http.ResponseWriter, 
 		controller.fail(writer, request, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "coins", Message: "must be a whole number from 1 to 100000000"}}))
 		return
 	}
-	quote, err := quotecointransfer.Handler{Application: controller.Application}.Execute(quotecointransfer.Query{Coins: coinsToSend})
+	quote, err := quotecointransfer.Handler{Application: controller.Application}.Execute(request.Context(), quotecointransfer.Query{Coins: coinsToSend})
 	if err != nil {
 		controller.fail(writer, request, err)
 		return

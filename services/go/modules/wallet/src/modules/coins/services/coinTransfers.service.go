@@ -27,12 +27,13 @@ type CoinTransfers struct {
 	Accounts  repositories.AccountDirectory
 }
 
-func (transfers CoinTransfers) QuoteTransfer(coins int64) (dtos.CoinTransferQuoteDto, error) {
-	split, err := models.SplitCoinTransfer(coins, transfers.Container.Settings.CoinTransferFeeBps)
+func (transfers CoinTransfers) QuoteTransfer(ctx context.Context, coins int64) (dtos.CoinTransferQuoteDto, error) {
+	feeBps := transfers.Container.CoinTransferFeeBps(ctx)
+	split, err := models.SplitCoinTransfer(coins, feeBps)
 	if err != nil {
 		return dtos.CoinTransferQuoteDto{}, err
 	}
-	return dtos.CoinTransferQuoteDto{Coins: coins, FeeCoins: split.FeeCoins, NetCoins: split.NetCoins, FeePercent: transfers.Container.Settings.CoinTransferFeeBps / 100}, nil
+	return dtos.CoinTransferQuoteDto{Coins: coins, FeeCoins: split.FeeCoins, NetCoins: split.NetCoins, FeePercent: feeBps / 100}, nil
 }
 
 type CoinTransferInput struct {
@@ -61,7 +62,7 @@ func (transfers CoinTransfers) TransferCoinsInTransaction(ctx context.Context, t
 	if blocked {
 		return dtos.CoinTransferReceiptDto{}, ErrCoinTransferBlocked
 	}
-	feeBps := transfers.Container.Settings.CoinTransferFeeBps
+	feeBps := transfers.Container.CoinTransferFeeBps(ctx)
 	split, err := models.SplitCoinTransfer(input.Coins, feeBps)
 	if err != nil {
 		return dtos.CoinTransferReceiptDto{}, err

@@ -1,6 +1,7 @@
 package container
 
 import (
+	"context"
 	"time"
 
 	"zudomart/modules/ledger/src/databases"
@@ -69,6 +70,14 @@ func NewWalletContainer(resources loaders.MoneyModuleResources, settings configs
 			AdBalanceTopUp: schema, AdSpendDebit: schema, MonetisationHold: schema, OutboxEvent: schema, PayoutAccount: schema, PayoutAccountResolution: schema, SellerPayoutSchedule: schema, SellerReserveFlag: schema, WalletRiskFlag: schema, Withdrawal: schema,
 		},
 	}, nil
+}
+
+func (container *Container) CoinTransferFeeBps(ctx context.Context) int64 {
+	return container.Resources.Platform.CoinTransferFeeBps(ctx, container.Settings.CoinTransferFeeBps)
+}
+
+func (container *Container) CoinCashValuesMinor(ctx context.Context) map[string]int64 {
+	return container.Resources.Platform.CoinCashValuesMinor(ctx, container.Settings.CoinCashValueMinorByCurrency)
 }
 
 func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Client {

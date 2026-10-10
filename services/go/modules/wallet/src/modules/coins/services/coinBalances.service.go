@@ -64,7 +64,7 @@ type EarnedCoinConversionInput struct {
 
 func (balances CoinBalances) ConvertEarnedCoinsToCashInTransaction(ctx context.Context, transaction *sql.Tx, input EarnedCoinConversionInput) (dtos.CoinConversionReceiptDto, error) {
 	settings := balances.Container.Settings
-	valuePerCoin, supported := settings.CoinCashValueMinorByCurrency[input.Currency]
+	valuePerCoin, supported := balances.Container.CoinCashValuesMinor(ctx)[input.Currency]
 	minimum := settings.MinimumPayoutMinorByCurrency[input.Currency]
 	if !supported {
 		return dtos.CoinConversionReceiptDto{}, httpserver.NewApiError(http.StatusUnprocessableEntity, "CURRENCY_NOT_SUPPORTED", "Earned coins cannot be converted to this currency yet.")
