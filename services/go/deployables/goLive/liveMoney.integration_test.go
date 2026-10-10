@@ -25,6 +25,7 @@ import (
 
 	creatorssrc "zudomart/modules/creators/src"
 	creatorsconfigs "zudomart/modules/creators/src/configs"
+	creatorprogramservices "zudomart/modules/creators/src/modules/creatorProgram/services"
 	"zudomart/modules/ledger/src/databases"
 	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
 	"zudomart/modules/ledger/src/loaders"
@@ -109,7 +110,7 @@ func TestGiftSentThroughLiveChargesRealMoneyAndWritesBothOutboxRows(t *testing.T
 	host, fan := uuid.New(), uuid.New()
 	directory.Register(livemodels.Participant{Id: host, Name: "host", Username: "host", IsCreatorProgramMember: true})
 	directory.Register(livemodels.Participant{Id: fan, Name: "fan", Username: "fan"})
-	if _, err := creators.Program.SetCreatorProgramMembership(ctx, "staff", host.String(), "starter", "approved"); err != nil {
+	if _, err := creators.Program.SetCreatorProgramMembership(ctx, creatorprogramservices.MembershipChange{StaffId: "staff", UserId: host.String(), TierId: "starter", Status: "approved"}); err != nil {
 		t.Fatal(err)
 	}
 	ledger := ledgerservices.NewLedgerInSchema(ledgerSchema)

@@ -51,7 +51,9 @@ func (stock *fakeStock) ProvisionVariantStock(context.Context, commerceports.Pro
 	return nil
 }
 
-func (stock *fakeStock) SetProductListed(context.Context, uuid.UUID, uuid.UUID, bool) error { return nil }
+func (stock *fakeStock) SetProductListed(context.Context, uuid.UUID, uuid.UUID, bool) error {
+	return nil
+}
 
 func (stock *fakeStock) EnsureDefaultLocation(context.Context, uuid.UUID, string) (uuid.UUID, error) {
 	return uuid.New(), nil

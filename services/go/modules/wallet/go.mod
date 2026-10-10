@@ -1,6 +1,6 @@
 module zudomart/modules/wallet
 
-go 1.26.7
+go 1.26.9
 
 require (
 	ariga.io/atlas v0.36.2-0.20250730182955-2c6300d0a3e1

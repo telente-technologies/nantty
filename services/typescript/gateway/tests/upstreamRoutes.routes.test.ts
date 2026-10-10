@@ -121,6 +121,21 @@ describe("social routes", () => {
     expect(route?.authentication).toBe(authentication);
   });
 
+  it.each([
+    ["PUT", "/api/v1/posts/p_1/pin"],
+    ["DELETE", "/api/v1/posts/p_1/pin"],
+    ["PUT", "/api/v1/posts/p_1/comments/c_1/pin"],
+    ["DELETE", "/api/v1/posts/p_1/comments/c_1/pin"],
+  ])("%s %s pins through social and requires a token", (method, path) => {
+    expect(resolveUpstreamRouteForRequest(method, path)).toMatchObject({ upstream: "social", authentication: "required" });
+  });
+
+  it("does not let the pin routes swallow other post paths", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/posts/p_1/pin")).toMatchObject({ upstream: "social", authentication: "optional" });
+    expect(resolveUpstreamRouteForRequest("PUT", "/api/v1/posts/p_1/pin/extra")?.authentication).toBe("optional");
+    expect(resolveUpstreamRouteForRequest("PUT", "/api/v1/posts//pin")?.authentication).toBe("optional");
+  });
+
   it("keeps mention privacy and other user routes on identity", () => {
     expect(resolveUpstreamRouteForRequest("PUT", "/api/v1/users/me/mention-privacy")?.upstream).toBe("identity");
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/u_1")?.upstream).toBe("identity");

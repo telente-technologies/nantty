@@ -27,7 +27,7 @@ func TestPlatformSettingsAreReadFromTheAdminSchemaCachedAndFallBackToTheEnvironm
 	if policy := source.ReadEscrowPolicy(ctx, fallback); policy != fallback {
 		t.Fatalf("a missing setting must use the environment fallback, got %+v", policy)
 	}
-	if _, err := database.Exec(`INSERT INTO `+table+` VALUES ('escrow.policy', '{"autoReleaseDays":5,"sellerCreditHoldHours":12,"sellerReserveBps":300}')`); err != nil {
+	if _, err := database.Exec(`INSERT INTO ` + table + ` VALUES ('escrow.policy', '{"autoReleaseDays":5,"sellerCreditHoldHours":12,"sellerReserveBps":300}')`); err != nil {
 		t.Fatal(err)
 	}
 	source = loaders.NewPlatformSettingsSource(database, adminSchema, time.Hour, slog.New(slog.NewTextHandler(io.Discard, nil)))

@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 
 	"zudomart/modules/catalog/src/container"
-	catalogerrors "zudomart/modules/catalog/src/errors"
 	"zudomart/modules/catalog/src/databases/schema"
+	catalogerrors "zudomart/modules/catalog/src/errors"
 	"zudomart/modules/catalog/src/generated/ent"
 	"zudomart/modules/catalog/src/generated/ent/productimportjob"
 	"zudomart/modules/catalog/src/modules/productImports/dtos"

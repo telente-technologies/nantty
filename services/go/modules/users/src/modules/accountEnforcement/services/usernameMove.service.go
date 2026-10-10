@@ -14,6 +14,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/profile"
 	"zudomart/modules/users/src/generated/ent/usernamechange"
 	"zudomart/modules/users/src/generated/ent/usernamehold"
+	userservices "zudomart/modules/users/src/services"
 	"zudomart/platform/identityports"
 )
 
@@ -62,6 +63,7 @@ func MoveUsername(ctx context.Context, application *container.Container, account
 		}
 		return err
 	}
+	quarantine := userservices.LoadUsernameRules(ctx, application).Quarantine
 	err = application.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		now := application.Now()
 		if _, err := tx.Profile.Update().Where(profile.AccountID(accountId), profile.KindEQ(profile.KindPersonal)).SetHandle(next).Save(ctx); err != nil {
@@ -76,7 +78,7 @@ func MoveUsername(ctx context.Context, application *container.Container, account
 		if !holdPrevious {
 			return nil
 		}
-		return tx.UsernameHold.Create().SetUsername(previous).SetKind(usernamehold.KindQuarantine).SetHeldForAccountID(accountId).SetReason("released").SetExpiresAt(now.Add(application.Settings.UsernameQuarantine)).Exec(ctx)
+		return tx.UsernameHold.Create().SetUsername(previous).SetKind(usernamehold.KindQuarantine).SetHeldForAccountID(accountId).SetReason("released").SetExpiresAt(now.Add(quarantine)).Exec(ctx)
 	})
 	if err != nil {
 		_ = directory.RenameAccountUsername(ctx, accountId, previous)
