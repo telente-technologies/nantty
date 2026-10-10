@@ -4,6 +4,7 @@ import type { CreatorStatus, LiveSessionDetails, ProductSummary } from "@/types"
 
 import { buildMockProductSummary } from "./commerceFixtures.mock";
 import { liveMocks } from "./live.mock";
+import { listProductSummariesInStore } from "./productCatalog.mock";
 import { createMockRoute, type MockContext, type MockRoute } from "./registry.mock";
 
 const APPROVED_CREATOR_STATUS: CreatorStatus = { status: "approved", canGoLive: true, tier: "rising" };
@@ -34,7 +35,7 @@ const originalStartLiveSessionHandler = findOriginalLiveRouteHandler("POST", "/a
 
 const enrichLiveSessionWithCreatorFeatures = (session: LiveSessionDetails): LiveSessionDetails => {
   const pinnedProductId = pinnedProductIdByLiveId.get(session.id) ?? null;
-  const pinnedProduct = affiliatedProducts.find((product) => product.id === pinnedProductId);
+  const pinnedProduct = session.storeId ? listProductSummariesInStore(session.storeId).find((product) => product.id === pinnedProductId) : undefined;
   const productsWithoutPinned = session.products.filter((product) => product.id !== pinnedProductId);
   return {
     ...session,
@@ -64,10 +65,13 @@ export const creatorsMocks: MockRoute[] = [
     if (resolveMockCreatorStatusForSignedInUser().status !== "approved") return [];
     return affiliatedProducts;
   }),
-  createMockRoute("POST", "/api/v1/lives/:liveId/pins", ({ params, body }) => {
-    if (resolveMockCreatorStatusForSignedInUser().status !== "approved") throw new ApiError(403, "Only creators can pin products");
+  createMockRoute("POST", "/api/v1/lives/:liveId/pins", (context) => {
+    const { params, body } = context;
+    if (resolveMockCreatorStatusForSignedInUser().status !== "approved") throw new ApiError(403, "Only creators can pin products", "NOT_LIVE_HOST");
     const { productId } = body as { productId: string };
-    if (!affiliatedProducts.some((product) => product.id === productId)) throw new ApiError(404, "Product not found");
+    const session = fetchLiveSessionWithCreatorFeatures({ ...context, params: { liveId: params.liveId! } });
+    if (!session.storeId) throw new ApiError(422, "Start the live for a store to show products.", "PRODUCTS_REQUIRE_STORE");
+    if (!listProductSummariesInStore(session.storeId).some((product) => product.id === productId)) throw new ApiError(403, "That product is not in this store.", "PRODUCT_NOT_IN_STORE");
     pinnedProductIdByLiveId.set(params.liveId!, productId);
   }),
   createMockRoute("GET", "/api/v1/lives/:liveId", fetchLiveSessionWithCreatorFeatures),

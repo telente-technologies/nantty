@@ -2,6 +2,7 @@ import { ApiError } from "@/errors/api.error";
 import type { Post, PostAnalytics, PostAnalyticsDaily } from "@/types";
 
 import { getSignedInMockUser } from "./fixtures.mock";
+import { isOwnedProfileOfSignedInUser } from "./brands.mock";
 import { isAuthorContentVisibleToSignedInViewer } from "./socialGraph.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -112,10 +113,28 @@ export const postsMocks: MockRoute[] = [
     return reshare;
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/share", () => undefined),
+  createMockRoute("PUT", "/api/v1/posts/:postId/pin", ({ params }) => {
+    const post = mockPostsState.get(params.postId!);
+    if (!post) throw new ApiError(404, "This post was removed");
+    if (post.author.id !== getSignedInMockUser().id) throw new ApiError(403, "You can only pin your own posts.", "FORBIDDEN");
+    if (post.isPinned !== true) {
+      const pinnedCount = [...mockPostsState.values()].filter((candidate) => candidate.author.id === post.author.id && candidate.isPinned === true).length;
+      if (pinnedCount >= 3) throw new ApiError(409, "You can only pin up to 3 posts on your profile.", "PIN_LIMIT_REACHED");
+      updateMockPost(params.postId!, (p) => ({ ...p, isPinned: true, pinnedAt: new Date().toISOString() }));
+    }
+    return mockPostsState.get(params.postId!);
+  }),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/pin", ({ params }) => {
+    const post = mockPostsState.get(params.postId!);
+    if (!post) throw new ApiError(404, "This post was removed");
+    if (post.author.id !== getSignedInMockUser().id) throw new ApiError(403, "You can only unpin your own posts.", "FORBIDDEN");
+    updateMockPost(params.postId!, (p) => ({ ...p, isPinned: false, pinnedAt: null }));
+    return mockPostsState.get(params.postId!);
+  }),
   createMockRoute("GET", "/api/v1/posts/:postId/analytics", ({ params }) => {
     const post = findPostIncludingSponsored(params.postId!);
     if (!post) throw new ApiError(404, "This post was removed");
-    if (post.author.id !== getSignedInMockUser().id) throw new ApiError(403, "Only the author of a post can see its analytics.", "NOT_POST_OWNER");
+    if (post.author.id !== getSignedInMockUser().id && !isOwnedProfileOfSignedInUser(post.author.id)) throw new ApiError(403, "Only the author of a post can see its analytics.", "NOT_POST_OWNER");
     return buildPostAnalytics(post);
   }),
 ];

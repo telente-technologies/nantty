@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 
-import { usersService } from "@/services/users.service";
+import { usersService } from "@/services/account/users.service";
 import { showToast } from "@/store/toast.store";
 
 import { useOpenUserProfile } from "./useOpenUserProfile.hook";

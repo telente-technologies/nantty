@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { legalService } from "@/services/legal.service";
+import { legalService } from "@/services/account/legal.service";
 import { useAuthStore } from "@/store/auth.store";
 import { usePolicyUpdateStore } from "@/store/policyUpdate.store";
 import type { PolicyVersionSummary } from "@/types";

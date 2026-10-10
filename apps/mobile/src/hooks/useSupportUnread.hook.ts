@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { supportService } from "@/services/support.service";
+import { supportService } from "@/services/support/support.service";
 import { useAuthStore } from "@/store/auth.store";
 
 export const supportUnreadQueryKey = ["support", "unread"] as const;

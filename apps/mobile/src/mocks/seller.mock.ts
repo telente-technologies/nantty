@@ -10,7 +10,7 @@ import { buildShipment, mockOrderRecords, usdCentsForOrderRecord, type MockOrder
 import { catalogProductSeeds, buildCatalogProductSummary } from "./productCatalog.mock";
 import { productImageUrlsForProduct } from "./mockImages.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
-import { productCategories } from "./storeDirectory.mock";
+import { findDirectoryStoreById, productCategories } from "./storeDirectory.mock";
 
 const HOUR = 3_600_000;
 const PERIOD_WINDOW_HOURS: Record<SellerDashboardPeriod, number> = { live: 1, today: 24, yesterday: 48, week: 168, month: 720, all: 24 * 3650 };
@@ -35,6 +35,7 @@ const catalogStoreProducts = (): StoreProduct[] =>
       description: seed.description,
       sizes: seed.sizes,
       colors: seed.colors,
+      variants: seed.variants ?? [],
       imageUrls: productImageUrlsForProduct(seed.key),
       published: true,
     }));
@@ -48,7 +49,14 @@ const listStoreProducts = (): StoreProduct[] => {
   return [...createdBySeller, ...fromCatalog].filter((product) => !deletedProductIds.has(product.id));
 };
 
-const toStoreProduct = (id: string, input: StoreProductInput): StoreProduct => ({ ...input, id, imageUrl: input.imageUrls[0] ?? null, published: true });
+const toStoreProduct = (id: string, input: StoreProductInput): StoreProduct => ({
+  ...input,
+  id,
+  imageUrl: input.imageUrls[0] ?? null,
+  published: true,
+  hasVariants: input.sizes.length > 0 || input.colors.length > 0 || (input.variants?.length ?? 0) > 0,
+  variantGroups: input.variants ?? [],
+});
 
 const isCountedAsSale = (record: MockOrderRecord) => record.status !== "pending" && record.status !== "cancelled";
 
@@ -111,6 +119,10 @@ export const sellerMocks: MockRoute[] = [
     };
     applicationsByUserId.set(getSignedInMockUser().id, application);
     return application;
+  }),
+  createMockRoute("GET", "/api/v1/seller/stores/mine", () => {
+    const storeId = signedInStoreId();
+    return storeId ? [{ storeId, storeName: findDirectoryStoreById(storeId).name, role: "owner", isCurrent: true }] : [];
   }),
   createMockRoute("GET", "/api/v1/seller/products", () => listStoreProducts()),
   createMockRoute("GET", "/api/v1/seller/products/:productId", ({ params }) => listStoreProducts().find((p) => p.id === params.productId)),

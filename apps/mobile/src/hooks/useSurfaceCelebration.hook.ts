@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
-import { celebrationsService } from "@/services/celebrations.service";
+import { celebrationsService } from "@/services/social/celebrations.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { ActiveCelebration, CelebrationSurface, ViewerCelebrations } from "@/types/celebrations.type";
 import { celebrationSeenKey, deviceTimezone, pickCelebration } from "@/utils/celebrations.util";

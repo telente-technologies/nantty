@@ -14,6 +14,11 @@ import { checkAvailability } from "./username.mock";
 export const followedBrandIds = new Set<string>(["br_adire"]);
 const actingProfileIdByUserId = new Map<string, string>();
 
+export function getActiveActingProfileOfSignedInUser(): ActingProfile | null {
+  const profiles = listProfilesOfSignedInUser();
+  return profiles.find((profile) => profile.id === actingProfileIdByUserId.get(getSignedInMockUser().id)) ?? null;
+}
+
 const findBrandOrThrow = (brandId: string) => {
   const brand = findBrandRecord(brandId);
   if (!brand) throw new ApiError(404, "Brand not found");
@@ -31,6 +36,14 @@ function listProfilesOfSignedInUser(): ActingProfile[] {
     .filter((brand) => brand.ownerUserKey === user.id)
     .map((brand) => ({ kind: "brand", id: brand.id, name: brand.name, handle: brand.handle, avatarUrl: brand.logoUrl, verification: brand.verification }));
   return [person, ...mockBusinessProfiles, ...storeProfile, ...brandProfiles];
+}
+
+export function findOwnedProfileOfSignedInUser(profileId: string): ActingProfile | undefined {
+  return listProfilesOfSignedInUser().find((profile) => profile.id === profileId);
+}
+
+export function isOwnedProfileOfSignedInUser(profileId: string): boolean {
+  return findOwnedProfileOfSignedInUser(profileId) !== undefined;
 }
 
 export const brandsMocks: MockRoute[] = [

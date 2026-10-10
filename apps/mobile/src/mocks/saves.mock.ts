@@ -2,13 +2,14 @@ import { ApiError } from "@/errors/api.error";
 import type { Page, SavedItem, SavedItemType } from "@/types";
 
 import { findMockClipsByIds } from "./clips.mock";
+import { findCommentAnywhere } from "./comments.mock";
 import { findPostIncludingSponsored } from "./posts.mock";
 import { buildCatalogProductSummary, findCatalogSeedByProductId } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { savedEntriesNewestFirst, saveTargetForSignedInViewer, unsaveTargetForSignedInViewer, type SavedEntry } from "./savedEntries.mock";
 
 const SAVED_ITEMS_PAGE_SIZE = 12;
-const SAVED_ITEM_TYPES: readonly SavedItemType[] = ["post", "video", "clip", "product"];
+const SAVED_ITEM_TYPES: readonly SavedItemType[] = ["post", "video", "clip", "product", "comment"];
 
 const entryKey = (type: SavedItemType, targetId: string) => `${type}:${targetId}`;
 
@@ -21,6 +22,10 @@ const resolveSavedEntry = (entry: SavedEntry): SavedItem | null => {
   if (entry.type === "product") {
     const seed = findCatalogSeedByProductId(entry.targetId);
     return seed ? { ...base, type: "product", product: buildCatalogProductSummary(seed) } : null;
+  }
+  if (entry.type === "comment") {
+    const comment = findCommentAnywhere(entry.targetId);
+    return comment ? { ...base, type: "comment", comment: { ...comment, bookmarked: true }, postId: comment.postId } : null;
   }
   const post = findPostIncludingSponsored(entry.targetId);
   return post ? { ...base, type: entry.type, post: { ...post, bookmarked: true } } : null;

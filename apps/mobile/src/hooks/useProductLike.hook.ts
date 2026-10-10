@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 
-import { productsService } from "@/services/products.service";
+import { productsService } from "@/services/sellers/products.service";
 import type { ProductSummary } from "@/types";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 

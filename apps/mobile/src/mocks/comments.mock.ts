@@ -2,6 +2,7 @@ import { ApiError } from "@/errors/api.error";
 import type { Comment, CommentVideoReply, CommentWithReplies, NewCommentInput, Page, UserSummary } from "@/types";
 
 import { isoDateHoursAgo, me } from "./fixtures.mock";
+import { withCommentViewerSavedState } from "./savedEntries.mock";
 import { notifyMentionedUsers, sanitizeMentionsForWrite, userIdsWhoBlockedTheAuthor } from "./mentionRules.mock";
 import { mockPostsState } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -125,6 +126,7 @@ const createStoredComment = (
   createdAt: isoDateHoursAgo(hoursAgo),
   likes,
   liked: false,
+  bookmarked: false,
   replyCount: 0,
   replyingTo: parent ? { userId: parent.author.id, username: parent.author.username } : undefined,
   ...(mentions?.length ? { mentions } : {}),
@@ -194,10 +196,10 @@ const collectDescendantIds = (postId: string, commentId: string): string[] =>
 export const commentsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId/comments", ({ params, query }) => {
     const postId = params.postId!;
-    const topLevel = commentsForPost(postId).filter((c) => c.parentCommentId === null);
+    const topLevel = commentsForPost(postId).filter((c) => c.parentCommentId === null).sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true));
     const page = paginateByOffset(topLevel, query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
     const withPreviews: CommentWithReplies[] = page.data.map((c) => ({
-      ...withVideoReplyInfo(c),
+      ...withVideoReplyInfo(withCommentViewerSavedState(c)),
       previewReplies: directRepliesOf(postId, c.id).slice(0, PREVIEW_REPLY_COUNT).map(withVideoReplyInfo),
     }));
     return { data: withPreviews, nextCursor: page.nextCursor };
@@ -206,12 +208,12 @@ export const commentsMocks: MockRoute[] = [
     const parent = findCommentAnywhere(params.commentId!);
     if (!parent) return { data: [], nextCursor: null };
     const page = paginateByOffset(directRepliesOf(parent.postId, parent.id), query.get("cursor"), REPLIES_PAGE_SIZE);
-    return { ...page, data: page.data.map(withVideoReplyInfo) };
+    return { ...page, data: page.data.map((c) => withVideoReplyInfo(withCommentViewerSavedState(c))) };
   }),
   createMockRoute("GET", "/api/v1/comments/:commentId", ({ params }) => {
     const comment = findCommentAnywhere(params.commentId!);
     if (!comment) throw new ApiError(404, "Comment not found", "COMMENT_NOT_FOUND");
-    return withVideoReplyInfo(comment);
+    return withVideoReplyInfo(withCommentViewerSavedState(comment));
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/comments", ({ params, body }) => {
     const postId = params.postId!;
@@ -233,6 +235,30 @@ export const commentsMocks: MockRoute[] = [
   createMockRoute("DELETE", "/api/v1/comments/:commentId/like", ({ params }) =>
     replaceStoredComment(params.commentId!, (c) => (c.liked ? { ...c, liked: false, likes: c.likes - 1 } : c)),
   ),
+  createMockRoute("PUT", "/api/v1/posts/:postId/comments/:commentId/pin", ({ params }) => {
+    const post = mockPostsState.get(params.postId!);
+    if (!post) throw new ApiError(404, "Post not found.", "POST_NOT_FOUND");
+    if (post.author.id !== me.id) throw new ApiError(403, "Only the post author can pin a comment.", "FORBIDDEN");
+    const comment = findCommentAnywhere(params.commentId!);
+    if (!comment || comment.postId !== params.postId) throw new ApiError(404, "Comment not found", "COMMENT_NOT_FOUND");
+    if (comment.parentCommentId !== null) throw new ApiError(422, "Only top-level comments can be pinned.", "COMMENT_NOT_PINNABLE");
+    if (comment.isPinned === true) return withCommentViewerSavedState(comment);
+    for (const other of commentsForPost(post.id)) {
+      if (other.isPinned === true) replaceStoredComment(other.id, (c) => ({ ...c, isPinned: false, pinnedAt: null }));
+    }
+    mockPostsState.set(post.id, { ...post, pinnedCommentId: comment.id });
+    replaceStoredComment(comment.id, (c) => ({ ...c, isPinned: true, pinnedAt: new Date().toISOString() }));
+    return withCommentViewerSavedState(findCommentAnywhere(comment.id)!);
+  }),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/comments/:commentId/pin", ({ params }) => {
+    const post = mockPostsState.get(params.postId!);
+    if (!post) throw new ApiError(404, "Post not found.", "POST_NOT_FOUND");
+    if (post.author.id !== me.id) throw new ApiError(403, "Only the post author can unpin a comment.", "FORBIDDEN");
+    const comment = findCommentAnywhere(params.commentId!);
+    if (!comment || comment.postId !== params.postId) throw new ApiError(404, "Comment not found", "COMMENT_NOT_FOUND");
+    replaceStoredComment(comment.id, (c) => ({ ...c, isPinned: false, pinnedAt: null }));
+    if (post.pinnedCommentId === comment.id) mockPostsState.set(post.id, { ...post, pinnedCommentId: null });
+  }),
   createMockRoute("DELETE", "/api/v1/comments/:commentId", ({ params }) => {
     const comment = findCommentAnywhere(params.commentId!);
     if (!comment) throw new ApiError(404, "Comment not found");
@@ -243,5 +269,7 @@ export const commentsMocks: MockRoute[] = [
       commentsForPost(comment.postId).filter((c) => !removedIds.has(c.id)),
     );
     if (comment.parentCommentId) replaceStoredComment(comment.parentCommentId, (c) => ({ ...c, replyCount: Math.max(0, c.replyCount - 1) }));
+    const post = mockPostsState.get(comment.postId);
+    if (post?.pinnedCommentId === comment.id) mockPostsState.set(post.id, { ...post, pinnedCommentId: null });
   }),
 ];

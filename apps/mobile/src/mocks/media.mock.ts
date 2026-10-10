@@ -1,7 +1,10 @@
+import { encryptedAttachmentMimeType } from "@zudomart/chat-crypto";
+
 import { ApiError } from "@/errors/api.error";
 import type { CreateUploadSessionRequest, Media, MediaAsset, NewPostInput, Post } from "@/types";
 
 import { getSignedInMockUser } from "./fixtures.mock";
+import { findOwnedProfileOfSignedInUser } from "./brands.mock";
 import { appendMockClip, findMockClipsByIds } from "./clips.mock";
 import { buildClipMediaFromInput, validatePostLocation } from "./clipCreate.mock";
 import { recordTagNotifications, sanitizeTaggedUserIds } from "./postTags.mock";
@@ -9,6 +12,7 @@ import { findCommentAnywhere, registerMockVideoReply } from "./comments.mock";
 import { currentSoundForClip, findMutableSoundState } from "./soundCatalog.mock";
 import { notifyMentionedUsers, sanitizeMentionsForWrite, userIdsWhoBlockedTheAuthor } from "./mentionRules.mock";
 import { recordVideoReplyNotification } from "./mentionNotifications.mock";
+import { mockPostsState } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 interface MockUploadSession {
@@ -82,7 +86,8 @@ export const findMockPostMediaById = (mediaId: string): Media | null => {
 export const mediaMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/media/uploads", ({ body }) => {
     const request = body as CreateUploadSessionRequest;
-    const isSupportedMimeType = ["image/", "video/", "audio/", "application/pdf"].some((prefix) => request.mimeType.startsWith(prefix));
+    const isEncryptedChatBlob = request.mimeType === encryptedAttachmentMimeType && (request.purpose === "chat" || request.purpose === "voice");
+    const isSupportedMimeType = isEncryptedChatBlob || ["image/", "video/", "audio/", "application/pdf"].some((prefix) => request.mimeType.startsWith(prefix));
     if (!isSupportedMimeType) {
       throw new ApiError(415, "Unsupported media type", "UNSUPPORTED_MEDIA_TYPE");
     }
@@ -190,11 +195,29 @@ export const mediaMocks: MockRoute[] = [
       if (!sound) throw new ApiError(422, "That sound isn't available", "SOUND_NOT_FOUND");
       if (!sound.allowReuse || sound.status !== "available") throw new ApiError(422, "That sound can't be reused", "SOUND_REUSE_NOT_ALLOWED");
     }
+    const CLIP_LOOKS = ["warm", "cool", "rose", "aqua", "sunset"];
+    if (input.look !== undefined && !CLIP_LOOKS.includes(input.look)) throw new ApiError(422, "That look isn't available", "INVALID_LOOK");
     const sanitizedMentions = sanitizeMentionsForWrite(getSignedInMockUser(), input.mentions, "post");
+    const actingProfile = input.asProfileId ? findOwnedProfileOfSignedInUser(input.asProfileId) : undefined;
+    if (input.asProfileId && !actingProfile) throw new ApiError(403, "You can't post as that profile", "FORBIDDEN");
+    const author = actingProfile
+      ? {
+          ...getSignedInMockUser(),
+          id: actingProfile.id,
+          name: actingProfile.name,
+          username: actingProfile.handle,
+          avatarUrl: actingProfile.avatarUrl,
+          verified: !!actingProfile.verification,
+          verification: actingProfile.verification,
+        }
+      : getSignedInMockUser();
     const post: Post = {
       id: nextMockId("p"),
       kind: input.kind === "clip" ? "clip" : "post",
-      author: getSignedInMockUser(),
+      author,
+      ...(actingProfile && actingProfile.kind !== "person"
+        ? { postedAs: { id: actingProfile.id, kind: actingProfile.kind, name: actingProfile.name, handle: actingProfile.handle, avatarUrl: actingProfile.avatarUrl } }
+        : {}),
       createdAt: new Date().toISOString(),
       text: input.text,
       media: [...media],
@@ -210,6 +233,7 @@ export const mediaMocks: MockRoute[] = [
       products: [],
       sponsored: null,
       isAiGenerated: input.isAiGenerated === true,
+      ...(input.look ? { look: input.look } : {}),
       ...(input.location ? { location: input.location } : {}),
       ...(sanitizedMentions.mentions.length ? { mentions: sanitizedMentions.mentions } : {}),
       ...(videoReplyTarget ? { replyToComment: videoReplyTarget } : {}),
@@ -224,6 +248,7 @@ export const mediaMocks: MockRoute[] = [
     if (post.kind === "clip") {
       appendMockClip({ ...post, shares: 0, durationSeconds: media[0]?.durationSeconds ?? 15, sound: currentSoundForClip(post.id) });
     }
+    mockPostsState.set(post.id, post);
     return post;
   }),
 ];

@@ -3,9 +3,11 @@ import { THREAD_AD_SLOT_KIND, type ThreadAdDecision, type ThreadDecidedAd, type 
 
 import { commentsForPost, directRepliesOf, findCommentAnywhere } from "./comments.mock";
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
+import { withCommentViewerSavedState } from "./savedEntries.mock";
 import { postImageUrlsForPhotoKey } from "./mockImages.mock";
 import { findPostIncludingSponsored } from "./posts.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { decideStoryAdMock } from "./storyAds.mock";
 
 const CONVERSATION_PAGE_SIZE = 6;
 const REPLIES_PAGE_SIZE = 4;
@@ -38,6 +40,7 @@ const authorReplyFor = (postId: string): Comment | null => {
       createdAt: isoDateHoursAgo(19.5),
       likes: 88,
       liked: false,
+      bookmarked: false,
       replyCount: 0,
       replyingTo: { userId: firstThread.author.id, username: firstThread.author.username },
     });
@@ -57,8 +60,9 @@ const toThreadReply = (comment: Comment, postAuthorId: string | null, depth: num
   const chosen = includeEveryChild ? children : preferred ? [preferred] : [];
   const inline = depth < maximumDepth ? chosen.map((child, index) => toThreadReply(child, postAuthorId, depth + 1, index === 0, maximumDepth, includeEveryChild)) : [];
   const media = Object.entries(replyMediaByTextPrefix).find(([prefix]) => comment.text.startsWith(prefix))?.[1];
+  const viewed = withCommentViewerSavedState(comment);
   return {
-    ...comment,
+    ...viewed,
     replyCount: children.length,
     ...(media ? { media } : {}),
     isPostAuthor: comment.author.id === postAuthorId,
@@ -70,7 +74,14 @@ const toThreadReply = (comment: Comment, postAuthorId: string | null, depth: num
 };
 
 const sortConversation = (comments: readonly Comment[], sort: ThreadSort) =>
-  [...comments].sort((a, b) => (sort === "latest" ? b.createdAt.localeCompare(a.createdAt) : b.likes + b.replyCount * 5 - (a.likes + a.replyCount * 5)));
+  [...comments].sort((a, b) =>
+    Number(b.isPinned === true) - Number(a.isPinned === true) ||
+    (sort === "latest"
+      ? b.createdAt.localeCompare(a.createdAt)
+      : sort === "likes"
+        ? b.likes - a.likes || b.createdAt.localeCompare(a.createdAt)
+        : b.likes + b.replyCount * 5 - (a.likes + a.replyCount * 5)),
+  );
 
 const paginate = <T>(items: readonly T[], cursor: string | null, pageSize: number): Page<T> => {
   const start = Number(cursor ?? 0);
@@ -160,7 +171,8 @@ export const postThreadMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId/thread", ({ params, query }) => {
     const postId = params.postId!;
     const postAuthorId = findPostIncludingSponsored(postId)?.author.id ?? null;
-    const sort: ThreadSort = query.get("sort") === "latest" ? "latest" : "top";
+    const rawSort = query.get("sort");
+    const sort: ThreadSort = rawSort === "latest" || rawSort === "likes" ? rawSort : "relevant";
     const topLevel = sortConversation(commentsForPost(postId).filter((c) => c.parentCommentId === null), sort);
     const page = paginate(topLevel, query.get("cursor"), CONVERSATION_PAGE_SIZE);
     return { data: page.data.map((c) => toThreadReply(c, postAuthorId, 0, false)), nextCursor: page.nextCursor };
@@ -169,11 +181,24 @@ export const postThreadMocks: MockRoute[] = [
     const parent = findCommentAnywhere(params.commentId!) ?? [...authorRepliesByPostId.values()].find((c) => c.id === params.commentId);
     if (!parent) return { data: [], nextCursor: null };
     const postAuthorId = findPostIncludingSponsored(parent.postId)?.author.id ?? null;
+    const ancestors: Comment[] = [];
+    let cursor: Comment | undefined = findCommentAnywhere(parent.parentCommentId ?? "");
+    while (cursor) {
+      ancestors.unshift(cursor);
+      cursor = cursor.parentCommentId ? findCommentAnywhere(cursor.parentCommentId) : undefined;
+    }
     const page = paginate(repliesOf(parent.postId, parent.id), query.get("cursor"), REPLIES_PAGE_SIZE);
-    return { data: page.data.map((c, index) => toThreadReply(c, postAuthorId, 1, index === 0, MAXIMUM_THREAD_DEPTH, true)), nextCursor: page.nextCursor };
+    return {
+      data: page.data.map((c, index) => toThreadReply(c, postAuthorId, 1, index === 0, MAXIMUM_THREAD_DEPTH, true)),
+      nextCursor: page.nextCursor,
+      focus: withCommentViewerSavedState(parent),
+      ancestors,
+      maximumVisibleDepth: MAXIMUM_THREAD_DEPTH,
+    };
   }),
   createMockRoute("POST", "/api/v1/ads/decide", ({ body, isGuest }) => {
     const { slot } = (body ?? {}) as { slot?: ThreadSlotRequest };
+    if (slot?.kind === "story") return decideStoryAdMock(slot ?? {}, isGuest ? null : getSignedInMockUser().id);
     return decideThreadAd(slot ?? {}, isGuest ? null : getSignedInMockUser().id);
   }),
 ];

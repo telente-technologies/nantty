@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { SocialSignInCancelledError, type SocialSignInProvider } from "@/errors/socialSignIn.error";
-import { checkIfAppleSignInIsAvailableOnThisDevice } from "@/services/appleSignIn.service";
-import { authService } from "@/services/auth.service";
+import { checkIfAppleSignInIsAvailableOnThisDevice } from "@/services/auth/appleSignIn.service";
+import { authService } from "@/services/auth/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 
 export function useSocialSignIn() {

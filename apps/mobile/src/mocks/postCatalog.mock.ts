@@ -155,6 +155,9 @@ export const sponsoredFeedPosts: readonly Post[] = [...singleSponsoredFeedPosts,
 
 export const listPostsByAuthor = (authorId: string) => [...mockPostsState.values()].filter((post) => post.author.id === authorId);
 
+export const pinnedPostsFirst = (a: Post, b: Post) =>
+  Number(b.isPinned === true) - Number(a.isPinned === true) || (a.isPinned === true && b.isPinned === true ? (b.pinnedAt ?? "").localeCompare(a.pinnedAt ?? "") : 0);
+
 export const withCurrentProductPrices = (post: Post): Post => ({
   ...post,
   products: post.products.map((product) => {

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { contentPreferencesService } from "@/services/contentPreferences.service";
+import { contentPreferencesService } from "@/services/feed/contentPreferences.service";
 import { useAuthStore } from "@/store/auth.store";
 
 export const CONTENT_PREFERENCES_QUERY_KEY = ["content-preferences"] as const;

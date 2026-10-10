@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useCreatorApplicationQuery } from "@/components/creator/creatorQueries.hook";
-import { creatorsService } from "@/services/creators.service";
+import { creatorsService } from "@/services/creators/creators.service";
 import { useAuthStore } from "@/store/auth.store";
 
 export const CREATOR_STATUS_QUERY_KEY = "creator-status";

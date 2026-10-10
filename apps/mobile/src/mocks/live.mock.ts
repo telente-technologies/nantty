@@ -5,7 +5,7 @@ import { ApiError } from "@/errors/api.error";
 import { clipVideoSeeds } from "./clipsVideoCatalog.mock";
 import { buildMockUserSummary, getSignedInMockUser } from "./fixtures.mock";
 import { productImageUrlsForProduct } from "./mockImages.mock";
-import { productSummaryByKey } from "./productCatalog.mock";
+import { listProductSummariesInStore, productSummaryByKey } from "./productCatalog.mock";
 import { findDirectoryUserById, summariseUser, userSummaryById, type DirectoryUserId } from "./userDirectory.mock";
 import { readMockLiveSafety } from "./liveSafety.mock";
 import { createMockRoute, mockPage, type MockRoute } from "./registry.mock";
@@ -92,11 +92,17 @@ export const liveMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/lives", ({ body }) => {
     const monetization = body as Partial<LiveMonetizationInput>;
     if (monetization.liveAdSettings?.allowAds && !monetization.acceptedLiveAdTermsVersion) throw new ApiError(422, "Accept the live-ad terms to allow ads", "LIVE_AD_TERMS_REQUIRED");
+    const { storeId = null, productIds = [] } = body as { storeId?: string | null; productIds?: string[] };
+    if (productIds.length > 0 && !storeId) throw new ApiError(422, "Start the live for a store to show products.", "PRODUCTS_REQUIRE_STORE");
+    if (storeId && storeId !== getSignedInMockUser().storeId) throw new ApiError(403, "You are not a member of this store.", "NOT_STORE_MEMBER");
+    const storeProducts = storeId ? listProductSummariesInStore(storeId) : [];
+    if (productIds.some((productId) => !storeProducts.some((product) => product.id === productId))) throw new ApiError(403, "That product is not in this store.", "PRODUCT_NOT_IN_STORE");
     const session = {
       ...buildLiveSession(`live_${Date.now()}`, summariseUser(getSignedInMockUser())),
       title: (body as { title: string }).title,
       category: (body as { category?: LiveCategory }).category ?? "justChatting",
-      products: (body as { category?: LiveCategory }).category === "shopping" ? buildLiveSession(`live_${Date.now()}`).products : [],
+      products: storeProducts.filter((product) => productIds.includes(product.id)),
+      storeId,
       liveAdSettings: monetization.liveAdSettings ?? null,
       acceptedLiveAdTermsVersion: monetization.acceptedLiveAdTermsVersion ?? null,
       sponsorshipLine: monetization.sponsorshipLine ?? null,

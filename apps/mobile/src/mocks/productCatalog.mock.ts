@@ -1,4 +1,4 @@
-import type { Product, ProductSummary, SponsoredPlacement } from "@/types";
+import type { Product, ProductSummary, ProductVariantGroup, SponsoredPlacement } from "@/types";
 import type { ProductCollection } from "@/types/commerce.type";
 
 import { beautyHomeFoodAndKidsSeeds } from "./catalogBeautyHomeFoodKids.mock";
@@ -18,6 +18,7 @@ export interface CatalogProductSeed {
   readonly stock: number;
   readonly sizes: readonly string[];
   readonly colors: readonly string[];
+  readonly variants?: readonly ProductVariantGroup[];
   readonly rating: number;
   readonly reviewCount: number;
   readonly addedDaysAgo: number;
@@ -49,6 +50,7 @@ export const isMartSponsoredSeed = (seed: CatalogProductSeed) => MART_SPONSORED_
 
 export function buildCatalogProductSummary(seed: CatalogProductSeed, options: { sponsored?: boolean } = {}): ProductSummary {
   const productId = productIdForKey(seed.key);
+  const variantGroups = seed.variants ?? [];
   return {
     id: productId,
     name: seed.name,
@@ -57,6 +59,8 @@ export function buildCatalogProductSummary(seed: CatalogProductSeed, options: { 
     liked: false,
     stock: stockLevelsByProductId.get(productId) ?? seed.stock,
     sponsored: options.sponsored ? buildSponsoredPlacementForSeed(seed) : null,
+    hasVariants: seed.sizes.length > 0 || seed.colors.length > 0 || variantGroups.length > 0,
+    variantGroups,
   };
 }
 
@@ -121,6 +125,7 @@ export function buildCatalogProductDetail(productId: string): Product | undefine
     promo: buildPromoLine(seed),
     sizes: seed.sizes,
     colors: seed.colors,
+    variantGroups: seed.variants ?? [],
     shippingInfo: store.shippingInfo,
     description: seed.description,
     store: summariseStore(store),

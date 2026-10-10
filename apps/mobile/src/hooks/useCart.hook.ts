@@ -1,8 +1,8 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { cartsService, type AddProductToCartInput } from "@/services/carts.service";
+import { cartsService, type AddProductToCartInput } from "@/services/commerce/carts.service";
 import { useAuthStore } from "@/store/auth.store";
-import { trackProductInteraction } from "@/services/productInteractions.service";
+import { trackProductInteraction } from "@/services/sellers/productInteractions.service";
 
 export const cartQueryKey = ["cart"] as const;
 

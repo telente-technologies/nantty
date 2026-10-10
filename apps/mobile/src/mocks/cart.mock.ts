@@ -10,6 +10,8 @@ interface AddToCartBody {
   readonly quantity: number;
   readonly size?: string | null;
   readonly color?: string | null;
+  readonly variants?: Record<string, string> | null;
+  readonly options?: Record<string, string> | null;
 }
 
 export const cartMocks: MockRoute[] = [
@@ -20,9 +22,9 @@ export const cartMocks: MockRoute[] = [
     return summariseMockCart({ countryId: address.countryId, stateId: address.stateId, lgaId: address.lgaId, cityId: address.cityId }, address.id);
   }),
   createMockRoute("POST", "/api/v1/cart/items", ({ body }) => {
-    const { productId, quantity, size, color } = body as AddToCartBody;
+    const { productId, quantity, size, color, variants, options } = body as AddToCartBody;
     if (!findCatalogSeedByProductId(productId)) throw new ApiError(404, "This product is no longer available");
-    const variant = describeVariant(size, color);
+    const variant = describeVariant(size, color, variants ?? options);
     const existing = mockCartState.lines.find((line) => line.productId === productId && line.variant === variant);
     mockCartState.lines = existing
       ? mockCartState.lines.map((line) => (line === existing ? { ...line, quantity: line.quantity + quantity } : line))

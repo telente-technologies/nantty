@@ -1,5 +1,13 @@
 import { ApiError } from "@/errors/api.error";
-import type { CreatorRevenueRules, CreatorSubscriber, CreatorSubscriptionPlan, CreatorSubscriptionPlanInput, CreatorSubscriptionState } from "@/types/creator.type";
+import type {
+  CreatorBillingChannel,
+  CreatorRevenueRules,
+  CreatorSubscriber,
+  CreatorSubscriptionPlan,
+  CreatorSubscriptionPlanInput,
+  CreatorSubscriptionPriceTier,
+  CreatorSubscriptionState,
+} from "@/types/creator.type";
 
 import { signedInUserIsApprovedCreator } from "./creatorFixtures.mock";
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
@@ -55,7 +63,13 @@ const presentState = (subscriptionId: string, plan: MockPlan, status: CreatorSub
 export const hasSignedInViewerSubscribedToCreator = (creatorId: string) =>
   subscribedCreatorIdsByViewerId.get(getSignedInMockUser().id)?.has(creatorId) ?? false;
 
-const presentPlan = (plan: MockPlan): CreatorSubscriptionPlan => ({
+const STORE_FEE_PERCENT: Record<CreatorBillingChannel, number> = { web: 0, ios: 30, android: 15 };
+const TIER_USD_CENTS = [199, 499, 749, 999, 1_499, 1_799, 1_999];
+const TIER_KEYS = ["500", "1000", "1500", "2000", "3000", "4000", "5000"];
+
+const grossUp = (usdCents: number, channel: CreatorBillingChannel) => Math.ceil(usdCents / (1 - STORE_FEE_PERCENT[channel] / 100));
+
+const presentPlan = (plan: MockPlan, channel: CreatorBillingChannel = "web"): CreatorSubscriptionPlan => ({
   id: plan.id,
   name: plan.name,
   price: convertUsdCentsToViewerCurrency(plan.usdCents),
@@ -63,7 +77,33 @@ const presentPlan = (plan: MockPlan): CreatorSubscriptionPlan => ({
   benefits: plan.benefits,
   subscriberCount: plan.subscriberCount,
   active: plan.active,
+  tier: "1000",
+  channel,
+  channelPrice: convertUsdCentsToViewerCurrency(grossUp(plan.usdCents, channel)),
+  storeProductId: channel === "web" ? null : `zudomart.creatorsub.tier_1000.s1.${plan.interval === "month" ? "monthly" : "yearly"}`,
 });
+
+const priceTiers = (interval: "month" | "year"): CreatorSubscriptionPriceTier[] =>
+  TIER_USD_CENTS.map((usdCents, index) => {
+    const base = interval === "year" ? usdCents * 10 : usdCents;
+    return {
+      tier: TIER_KEYS[index]!,
+      default: index === 1,
+      prices: { web: convertUsdCentsToViewerCurrency(base), ios: convertUsdCentsToViewerCurrency(grossUp(base, "ios")), android: convertUsdCentsToViewerCurrency(grossUp(base, "android")) },
+    };
+  });
+
+const recordSubscription = (plan: MockPlan, status: CreatorSubscriptionState["status"], billingChannel: CreatorSubscriptionState["billingChannel"]) => {
+  const subscriptionId = `subs_${Date.now()}`;
+  const state: CreatorSubscriptionState = { ...presentState(subscriptionId, plan, status), billingChannel };
+  subscriptionStates.set(subscriptionId, state);
+  if (status === "active") {
+    plan.subscriberCount += 1;
+    const viewerId = getSignedInMockUser().id;
+    subscribedCreatorIdsByViewerId.set(viewerId, new Set([...(subscribedCreatorIdsByViewerId.get(viewerId) ?? []), plan.creatorId]));
+  }
+  return state;
+};
 
 const subscribers = (): CreatorSubscriber[] =>
   (["u_10", "u_17", "u_20", "u_7", "u_11"] as const).map((userId, index) => ({
@@ -82,7 +122,7 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/creators/revenue-rules", () => REVENUE_RULES),
   createMockRoute("GET", "/api/v1/creators/me/subscription-plans", () => {
     requireCreator();
-    return plans.filter((plan) => plan.creatorId === getSignedInMockUser().id).map(presentPlan);
+    return plans.filter((plan) => plan.creatorId === getSignedInMockUser().id).map((plan) => presentPlan(plan));
   }),
   createMockRoute("POST", "/api/v1/creators/me/subscription-plans", ({ body }) => {
     requireCreator();
@@ -91,6 +131,10 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
     const plan: MockPlan = { id: `plan_${Date.now()}`, creatorId: getSignedInMockUser().id, name: input.name.trim(), usdCents: convertViewerMoneyToUsdCents(input.price), interval: input.interval, benefits: input.benefits, subscriberCount: 0, active: true };
     plans.push(plan);
     return presentPlan(plan);
+  }),
+  createMockRoute("GET", "/api/v1/creators/me/subscription-plans/price-tiers", ({ query }) => {
+    requireCreator();
+    return priceTiers(query.get("interval") === "year" ? "year" : "month");
   }),
   createMockRoute("PATCH", "/api/v1/creators/me/subscription-plans/:planId", ({ params, body }) => {
     const plan = plans.find((candidate) => candidate.id === params.planId && candidate.creatorId === getSignedInMockUser().id);
@@ -102,9 +146,28 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
     requireCreator();
     return subscribers();
   }),
-  createMockRoute("GET", "/api/v1/creators/:creatorId/subscription-plans", ({ params }) =>
-    plans.filter((plan) => plan.creatorId === params.creatorId && plan.active).map(presentPlan),
-  ),
+  createMockRoute("GET", "/api/v1/creators/:creatorId/subscription-plans", ({ params, query }) => {
+    const channel = (["ios", "android"] as const).find((candidate) => candidate === query.get("channel")) ?? "web";
+    return plans.filter((plan) => plan.creatorId === params.creatorId && plan.active).map((plan) => presentPlan(plan, channel));
+  }),
+  createMockRoute("POST", "/api/v1/creators/:creatorId/subscriptions/store", ({ params, body }) => {
+    const { planId, platform } = body as { planId: string; platform: "ios" | "android" };
+    const plan = plans.find((candidate) => candidate.id === planId && candidate.creatorId === params.creatorId);
+    if (!plan) throw new ApiError(404, "Plan not found");
+    const presented = presentPlan(plan, platform);
+    const state = recordSubscription(plan, "pending", platform === "ios" ? "apple_iap" : "google_play");
+    return { subscriptionId: state.subscriptionId, platform, productId: presented.storeProductId, appAccountToken: state.subscriptionId, obfuscatedAccountId: state.subscriptionId, channelPrice: presented.channelPrice, subscription: state };
+  }),
+  createMockRoute("POST", "/api/v1/creator-subscriptions/store-receipts", ({ body }) => {
+    const { productId } = body as { productId: string };
+    const pending = [...subscriptionStates.values()].find((state) => state.status === "pending" && state.billingChannel !== "web");
+    if (!pending || !productId.startsWith("zudomart.creatorsub.")) throw new ApiError(422, "This purchase isn't linked to a creator subscription.", "STORE_PURCHASE_NOT_LINKED");
+    const active: CreatorSubscriptionState = { ...pending, status: "active", storeProductId: productId };
+    subscriptionStates.set(active.subscriptionId, active);
+    const viewerId = getSignedInMockUser().id;
+    subscribedCreatorIdsByViewerId.set(viewerId, new Set([...(subscribedCreatorIdsByViewerId.get(viewerId) ?? []), active.creatorId]));
+    return active;
+  }),
   createMockRoute("POST", "/api/v1/creators/:creatorId/subscriptions", ({ params, body }) => {
     const { planId } = body as { planId: string };
     const plan = plans.find((candidate) => candidate.id === planId && candidate.creatorId === params.creatorId);

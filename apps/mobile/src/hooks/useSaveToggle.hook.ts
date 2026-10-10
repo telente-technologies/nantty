@@ -3,7 +3,7 @@ import * as Haptics from "expo-haptics";
 import { useCallback } from "react";
 
 import { rootNavigationRef } from "@/navigation/navigationRef";
-import { savesService } from "@/services/saves.service";
+import { savesService } from "@/services/social/saves.service";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import { showToast } from "@/store/toast.store";
 import { saveTargetKey, useSavedItemsStore } from "@/store/savedItems.store";

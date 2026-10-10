@@ -40,7 +40,8 @@ export const mockCartState: { lines: MockCartLine[] } = {
   ],
 };
 
-export const describeVariant = (size?: string | null, color?: string | null) => [size, color].filter(Boolean).join(" • ") || null;
+export const describeVariant = (size?: string | null, color?: string | null, variants?: Record<string, string> | null) =>
+  [...[size, color].filter(Boolean), ...Object.values(variants ?? {}).filter(Boolean)].join(" • ") || null;
 
 export const buildCartItemFromLine = (line: MockCartLine): CartItem => {
   const seed = findCatalogSeedByProductId(line.productId);

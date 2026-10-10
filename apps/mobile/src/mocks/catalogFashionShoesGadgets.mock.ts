@@ -112,5 +112,6 @@ export const fashionShoesAndGadgetSeeds: readonly CatalogProductSeed[] = [
     title: "75% hot-swappable mechanical keyboard with tactile switches and PBT keycaps",
     description: "Hot-swappable sockets, pre-lubed tactile switches, PBT double-shot keycaps and a gasket mount for that soft thock. Connects by USB-C, Bluetooth or 2.4GHz dongle. Mac and Windows layouts.",
     sizes: [], colors: ["Cream & sage", "Black & grey"],
+    variants: [{ name: "Switch type", options: ["Tactile", "Linear", "Clicky"] }, { name: "Connectivity", options: ["USB-C", "Bluetooth", "2.4GHz"] }],
   },
 ];

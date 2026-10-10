@@ -1,7 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 import { CURRENT_POLICY_VERSION } from "@/config/legalLinks.config";
 import type { ConsentKey, ConsentRecord, DataExportRequest, ProductInteractionRecord, UpdateConsentsInput } from "@/types";
-import type { ConsentsWire } from "@/services/consents.service";
+import type { ConsentsWire } from "@/services/account/consents.service";
 
 import { recordMockPolicyAcceptance } from "./legal.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";

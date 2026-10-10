@@ -3,9 +3,10 @@ import { ApiError } from "@/errors/api.error";
 
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
 import { findMockPostMediaById } from "./media.mock";
+import { findMutableSoundState } from "./soundCatalog.mock";
 import { postImageUrlsForPhotoKey, productImageUrlsForProduct } from "./mockImages.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
-import { findDirectoryUserById, summariseUser, userSummaryById } from "./userDirectory.mock";
+import { directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser, userSummaryById } from "./userDirectory.mock";
 
 const STORY_IMAGES_BY_USER_ID: Record<string, readonly string[]> = {
   u_1: productImageUrlsForProduct("f1").slice(0, 2),
@@ -40,15 +41,27 @@ export const storiesMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/stories/tray", () => tray()),
   createMockRoute("GET", "/api/v1/users/:userId/stories", ({ params }) => buildStoriesForUser(params.userId!)),
   createMockRoute("POST", "/api/v1/stories/:storyId/seen", ({ params }) => void seenStoryIds.add(params.storyId!)),
+  createMockRoute("GET", "/api/v1/stories/:storyId/viewers", () => {
+    const viewers = directoryUsersExcludingAccounts.slice(0, 12).map((user) => summariseUser(user));
+    return { viewers, total: viewers.length, nextCursor: null };
+  }),
   createMockRoute("POST", "/api/v1/stories/:storyId/replies", ({ body }) => {
     const input = (body ?? {}) as { text?: string; encryption?: { ciphertext?: string } };
     if (input.text !== undefined || !input.encryption?.ciphertext) throw new ApiError(400, "Story replies are end-to-end encrypted.", "VALIDATION_FAILED");
   }),
-  createMockRoute("POST", "/api/v1/stories", ({ body }) => ({
-    id: `st_${Date.now()}`,
-    author: summariseUser(getSignedInMockUser()),
-    media: findMockPostMediaById((body as { mediaId: string }).mediaId) ?? (body as { media: Story["media"] }).media,
-    createdAt: new Date().toISOString(),
-    seen: true,
-  })),
+  createMockRoute("POST", "/api/v1/stories", ({ body }) => {
+    const input = body as { mediaId: string; media: Story["media"]; soundId?: string; look?: string };
+    const soundState = input.soundId ? findMutableSoundState(input.soundId) : undefined;
+    if (input.soundId && !soundState) throw new ApiError(422, "That sound isn't available", "SOUND_NOT_FOUND");
+    const look = input.look && ["warm", "cool", "rose", "aqua", "sunset"].includes(input.look) ? input.look : null;
+    return {
+      id: `st_${Date.now()}`,
+      author: summariseUser(getSignedInMockUser()),
+      media: findMockPostMediaById(input.mediaId) ?? input.media,
+      createdAt: new Date().toISOString(),
+      seen: true,
+      sound: soundState ? { id: input.soundId!, title: soundState.title } : null,
+      look,
+    };
+  }),
 ];

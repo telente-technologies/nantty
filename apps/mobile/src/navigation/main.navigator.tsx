@@ -64,6 +64,7 @@ import { ContentPreferencesScreen } from "@/screens/settings/contentPreferences.
 import { LiveScreen } from "@/screens/live/live.screen";
 import { LiveEndedScreen } from "@/screens/live/liveEnded.screen";
 import { StoryScreen } from "@/screens/story/story.screen";
+import { StoryAnalyticsScreen } from "@/screens/story/storyAnalytics.screen";
 import { EscrowStatusScreen } from "@/screens/escrow/escrowStatus.screen";
 import { DisputeDetailScreen } from "@/screens/disputes/disputeDetail.screen";
 import { SellerApplicationStatusScreen } from "@/screens/seller/sellerApplicationStatus.screen";
@@ -172,6 +173,7 @@ export function MainNavigator() {
       <Stack.Screen name="Live" component={LiveScreen} options={dark} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="LiveEnded" component={LiveEndedScreen} options={dark} layout={keepOnDarkFirstPalette} />
       <Stack.Screen name="Story" component={StoryScreen} options={dark} layout={keepOnDarkFirstPalette} />
+      <Stack.Screen name="StoryAnalytics" component={StoryAnalyticsScreen} />
       <Stack.Screen name="EscrowStatus" component={EscrowStatusScreen} />
       <Stack.Screen name="DisputeDetail" component={DisputeDetailScreen} />
       <Stack.Screen name="SellerApplicationStatus" component={SellerApplicationStatusScreen} />

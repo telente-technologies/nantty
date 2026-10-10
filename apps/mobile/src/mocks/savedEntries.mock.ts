@@ -1,4 +1,4 @@
-import type { Post, SavedItemType } from "@/types";
+import type { Comment, Post, SavedItemType } from "@/types";
 
 import { isoDateHoursAgo } from "./fixtures.mock";
 
@@ -24,6 +24,11 @@ export const isSavedBySignedInViewer = (type: SavedItemType, targetId: string) =
 export const withViewerSavedState = <Item extends Post>(item: Item, type: SavedItemType = item.kind === "clip" ? "clip" : "post"): Item => {
   const savedUnderEitherPostType = type === "clip" ? isSavedBySignedInViewer("clip", item.id) : isSavedBySignedInViewer("post", item.id) || isSavedBySignedInViewer("video", item.id);
   return savedUnderEitherPostType === item.bookmarked ? item : { ...item, bookmarked: savedUnderEitherPostType };
+};
+
+export const withCommentViewerSavedState = (comment: Comment): Comment => {
+  const saved = isSavedBySignedInViewer("comment", comment.id);
+  return saved === comment.bookmarked ? comment : { ...comment, bookmarked: saved };
 };
 
 export const saveTargetForSignedInViewer = (type: SavedItemType, targetId: string) => {

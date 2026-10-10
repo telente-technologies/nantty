@@ -1,7 +1,7 @@
 import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { Share } from "react-native";
 
-import { postsService } from "@/services/posts.service";
+import { postsService } from "@/services/content/posts.service";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import type { Page, Post } from "@/types";
 import { webAppLinks } from "@/config/webAppLinks.config";
