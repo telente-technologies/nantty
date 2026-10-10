@@ -35,6 +35,11 @@ Queue `notifications-domain-events` (RabbitMQ quorum queue bound to `zudomart.ev
 | adReport.ready | goAds | R scheduledReportId, accountId, reportName, recipients[] (plain email addresses, email each one), frequency, periodFrom, periodTo, currency, spendMinor, impressions, clicks; O csvUrl, pdfUrl, urlsExpireAt (links expire, do not store) |
 | gift.sent | goLive | R receiverUserId, liveId; O quantity, totalCoins, sender{id,name,username,avatarUrl} |
 | live.started | goLive | R title, liveId, hostName, hostHandle, host{id,name,username,avatarUrl}, notifyUserIds[] (opted-in unblocked followers, at most 1000; notifyTruncated marks more), isShopping, viewerCount, visibility, notifyAudience, startedAt; O emailUserIds[], liveUrl, coverUrl (schema `live.started.v1.json`) |
+| review.created | goCommerce | R storeOwnerAccountId; O rating, storeName, reviewId. Seller category: in-app + push "New review" linking to the dashboard reviews page |
+| review.replied | goCommerce | R authorAccountId, storeId, reviewId; O storeName, productId, firstReply (false = an edit, nothing sent). In-app + push to the reviewer |
+| sellerApplication.reviewed | goCommerce | R accountId, applicationId, decision (`approved`\|`rejected`); O storeName, reason. Seller category: in-app + push |
+| creator.standingChanged | goMoney | R userId, status (`approved`\|`suspended`); O reason. Creator category: in-app + push (unpublished schema) |
+| message.sent | ts-social | R conversationId, pushRecipients[{userId, showPreview}]; O conversationKind, conversationTitle, senderName. Push only, never message content (E2EE); `showPreview: false` hides the sender and group name. Events without `pushRecipients` are dropped |
 
 ## Schemas added in `../schemas` (unpublished before)
 otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.suggested|applicationSubmitted|approved|rejected|revoked|renewalFailed, creatorApplication.submitted|approved|needsReview|ineligible, sellerDocuments.submitted|approved|rejected (goIdentity); planTrial.started|ending|converted, planInvoice.paymentFailed|paid, cardVerification.refunded, subscriptionTrial.ending, subscriptionRenewal.upcoming, subscriptionInvoice.paid, subscriptionPayment.failed, subscriptionGrace.ending, subscription.downgraded, subscriptionCard.expiring, subscriptionPrice.changeNotice, payoutAccount.created|verified|creationFailed|actionRequired, paymentRefund.bankDetailsRequired (goMoney). Fields exactly as in each schema (R = schema `required`).
@@ -55,6 +60,8 @@ otp.issued, signIn.newDeviceDetected, twoFactor.enabled (goIdentity); checkmark.
 | post.tagged | social | R recipientUserId, actor{id,name}, postId, kind (post or clip); O taggedUserId, authorId, url |
 | follow.created, followRequest.created, messageRequest.received, videoReply.created | social | R recipientUserId, actor{id,name}; O url |
 | comment.created | social | R recipientUserId, actor; O target, excerpt, url |
+| post.reshared | social | R originalAuthorId, authorId, postId, originalPostId, isQuote, actor{id,name}; O surface (post or comment), commentId, url. Self-quotes are skipped. In-app + push |
+| any social event with `notificationsMuted: true` | social | Dropped without a notification: the recipient turned off notifications for that post (comment.created, mention.created, videoReply.created, post.tagged, post.reshared, post.liked, comment.liked, comment.pinned) |
 
 ## Digest source (social internal API, not an event)
 `GET /api/v1/internal/digests/{weekly|followRequests|messageRequests}?cursor=&limit=` returns `{data:[{userId, props}], nextCursor}`; props are the template props without firstName.

@@ -78,6 +78,14 @@
       "items": {
         "type": "string"
       }
+    },
+    "quotedPostId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid",
+      "description": "Post this one quotes, resolved server-side from a Zudomart post link or an explicit quotedPostId."
     }
   }
 }

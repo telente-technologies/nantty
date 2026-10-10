@@ -58,6 +58,18 @@
         "string",
         "null"
       ]
+    },
+    "quotedPostId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid",
+      "description": "Post this one quotes, resolved server-side from a Zudomart post link or an explicit quotedPostId."
+    },
+    "notificationsMuted": {
+      "type": "boolean",
+      "description": "Set by social when the recipient turned off notifications for this post. Notifications drops the event."
     }
   }
 }

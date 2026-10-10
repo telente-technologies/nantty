@@ -41,7 +41,9 @@
     "paymentMethod": {
       "enum": [
         "wallet",
-        "card"
+        "card",
+        "balance",
+        "free"
       ]
     }
   }

@@ -4,6 +4,85 @@
   "title": "MessageSent",
   "type": "object",
   "additionalProperties": false,
-  "required": ["conversationId","messageId","senderId","kind","recipientIds","sentAt"],
-  "properties": { "conversationId": { "type": "string", "format": "uuid" }, "messageId": { "type": "string", "format": "uuid" }, "senderId": { "type": "string", "format": "uuid" }, "kind": { "type": "string" }, "recipientIds": { "type": "array", "items": { "type": "string", "format": "uuid" } }, "isNewConversation": { "type": "boolean" }, "inboxFolderByRecipient": { "type": "object" }, "sentAt": { "type": "string", "format": "date-time" } }
+  "required": [
+    "conversationId",
+    "messageId",
+    "senderId",
+    "kind",
+    "recipientIds",
+    "sentAt"
+  ],
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "messageId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "senderId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "recipientIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "isNewConversation": {
+      "type": "boolean"
+    },
+    "inboxFolderByRecipient": {
+      "type": "object"
+    },
+    "sentAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "conversationKind": {
+      "type": "string",
+      "enum": [
+        "direct",
+        "group",
+        "channel",
+        "business"
+      ]
+    },
+    "conversationTitle": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "senderName": {
+      "type": "string"
+    },
+    "pushRecipients": {
+      "type": "array",
+      "description": "Recipients to push to: in their chats folder, chat not muted, chat pushes on. Never carries message content.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "userId",
+          "showPreview"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "showPreview": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
 }

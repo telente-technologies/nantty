@@ -1,7 +1,7 @@
 # Zudomart backend services
 
-The backend is polyglot and lives here. `apps/api` is the old Zudojs monolith: it is a **reference only** (validators,
-DTO shapes, state machines, tests to port) and is never deployed or edited. The service map and the platform rules are
+The backend is polyglot and lives here (the old `apps/api` monolith was removed on 2026-10-10 after everything still in
+use was ported into these services). The service map and the platform rules are
 in [`docs/architecture/microservicesPlan.json`](../docs/architecture/microservicesPlan.json) (`platform` section first),
 and the contract inventory is in [`docs/backendPlan.md`](../docs/backendPlan.md).
 
@@ -262,8 +262,7 @@ Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/m
 
 ## Adding a service or module (template for per-service agents)
 
-1. Read the service's block in `microservicesPlan.json` and its rows in `docs/backendPlan.md`; port rules and validators
-   from `apps/api/src/modules/<x>` without editing it.
+1. Read the service's block in `microservicesPlan.json` and its rows in `docs/backendPlan.md`.
 2. Go: work in `services/go/modules/<service>` using the Zudojs layout from [`zudojsStructure.md`](zudojsStructure.md); copy auth or currency:
    ```
    <service>.module.go                       facade at the module root (package <service>) forwarding to src

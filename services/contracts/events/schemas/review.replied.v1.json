@@ -18,6 +18,18 @@
     },
     "authorAccountId": {
       "type": "string"
+    },
+    "storeName": {
+      "type": "string"
+    },
+    "firstReply": {
+      "type": "boolean"
+    },
+    "productId": {
+      "type": [
+        "string",
+        "null"
+      ]
     }
   }
 }

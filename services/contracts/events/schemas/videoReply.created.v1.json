@@ -55,6 +55,10 @@
     "commenterId": {
       "type": "string",
       "format": "uuid"
+    },
+    "notificationsMuted": {
+      "type": "boolean",
+      "description": "Set by social when the recipient turned off notifications for this post. Notifications drops the event."
     }
   }
 }

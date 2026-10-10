@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/post.reshared.v1.json",
+  "title": "PostReshared",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "postId",
+    "originalPostId",
+    "authorId",
+    "originalAuthorId",
+    "isQuote"
+  ],
+  "properties": {
+    "postId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The new post, or the post the quoting comment is on when surface is comment."
+    },
+    "originalPostId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "authorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "originalAuthorId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "isQuote": {
+      "type": "boolean"
+    },
+    "notificationsMuted": {
+      "type": "boolean",
+      "description": "Set by social when the recipient turned off notifications for this post. Notifications drops the event."
+    },
+    "actor": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "surface": {
+      "enum": [
+        "post",
+        "comment"
+      ]
+    },
+    "commentId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "url": {
+      "type": "string"
+    }
+  }
+}

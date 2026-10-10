@@ -28,6 +28,12 @@
     },
     "authorAccountId": {
       "type": "string"
+    },
+    "storeOwnerAccountId": {
+      "type": "string"
+    },
+    "storeName": {
+      "type": "string"
     }
   }
 }

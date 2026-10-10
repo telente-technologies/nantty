@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/verificationLevel.changed.v1.json",
+  "title": "VerificationLevelChanged",
+  "description": "A user's verification level changed. 0 = email only, 1 = payout-verified (withdrawals, creator cash, ads), 2 = identity-verified (Smile ID liveness and face match).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "userId",
+    "level",
+    "previousLevel",
+    "payoutVerified",
+    "identityVerified",
+    "country"
+  ],
+  "properties": {
+    "userId": {
+      "type": "string"
+    },
+    "level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+    },
+    "previousLevel": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+    },
+    "payoutVerified": {
+      "type": "boolean"
+    },
+    "identityVerified": {
+      "type": "boolean"
+    },
+    "country": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2
+    },
+    "method": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "bank_account",
+        "payout_account",
+        "smile_id",
+        null
+      ]
+    }
+  }
+}

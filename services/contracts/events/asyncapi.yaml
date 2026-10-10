@@ -96,6 +96,8 @@ channels:
         $ref: '#/components/messages/ticketResolved'
       postCreated:
         $ref: '#/components/messages/postCreated'
+      postReshared:
+        $ref: '#/components/messages/postReshared'
       mentionCreated:
         $ref: '#/components/messages/mentionCreated'
       postTagged:
@@ -324,6 +326,10 @@ channels:
         $ref: '#/components/messages/disputeMessagePosted'
       adBalanceTopUpFailed:
         $ref: '#/components/messages/adBalanceTopUpFailed'
+      adBalanceToppedUp:
+        $ref: '#/components/messages/adBalanceToppedUp'
+      verificationLevelChanged:
+        $ref: '#/components/messages/verificationLevelChanged'
       coinPurchaseCompleted:
         $ref: '#/components/messages/coinPurchaseCompleted'
       coinPurchaseRefunded:
@@ -636,6 +642,8 @@ operations:
       - $ref: '#/channels/domainEvents/messages/disputeClosed'
       - $ref: '#/channels/domainEvents/messages/disputeMessagePosted'
       - $ref: '#/channels/domainEvents/messages/adBalanceTopUpFailed'
+      - $ref: '#/channels/domainEvents/messages/adBalanceToppedUp'
+      - $ref: '#/channels/domainEvents/messages/verificationLevelChanged'
       - $ref: '#/channels/domainEvents/messages/coinPurchaseCompleted'
       - $ref: '#/channels/domainEvents/messages/coinPurchaseRefunded'
       - $ref: '#/channels/domainEvents/messages/coinTransferCompleted'
@@ -1508,6 +1516,20 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/adBalance.topUpFailed.v1.json' } }
+    adBalanceToppedUp:
+      name: adBalance.toppedUp
+      headers: { type: object, properties: { eventType: { const: adBalance.toppedUp } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/adBalance.toppedUp.v1.json' } }
+    verificationLevelChanged:
+      name: verificationLevel.changed
+      headers: { type: object, properties: { eventType: { const: verificationLevel.changed } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/verificationLevel.changed.v1.json' } }
     coinPurchaseCompleted:
       name: coinPurchase.completed
       headers: { type: object, properties: { eventType: { const: coinPurchase.completed } } }
@@ -1711,6 +1733,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/post.created.v1.json' } }
+    postReshared:
+      name: post.reshared
+      headers: { type: object, properties: { eventType: { const: post.reshared } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/post.reshared.v1.json' } }
     mentionCreated:
       name: mention.created
       headers: { type: object, properties: { eventType: { const: mention.created } } }
