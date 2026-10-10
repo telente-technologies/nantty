@@ -1,6 +1,6 @@
 import { resolveMockApiRequest } from "@/mocks";
-import { formatTimeRemaining, parseTimestampToSeconds } from "@/services/accountHealth.service";
-import { isValidEvidenceLink, splitEvidenceLinks } from "@/services/copyrightClaims.service";
+import { formatTimeRemaining, parseTimestampToSeconds } from "@/services/account/accountHealth.service";
+import { isValidEvidenceLink, splitEvidenceLinks } from "@/services/moderation/copyrightClaims.service";
 import type { AccountHealth } from "@/types";
 
 describe("account status and copyright claims", () => {

@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
-import { identityVerificationService } from "@/services/identityVerification.service";
+import { identityVerificationService } from "@/services/auth/identityVerification.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { biometricConsentPoints, describeDocumentType } from "@/utils/identityVerificationCopy.util";
 

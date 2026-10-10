@@ -61,11 +61,12 @@ export function SettingsRow({ label, icon, trailing = "chevron", labelColor, onP
   );
 }
 
-export function SettingsCenteredAction({ label, color, onPress }: { label: string; color?: string; onPress: () => void }) {
+export function SettingsCenteredAction({ label, color, icon, onPress }: { label: string; color?: string; icon?: ReactNode; onPress: () => void }) {
   const { colors } = useTheme();
   const styles = useStyles();
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.group, styles.centered, pressed && styles.pressed]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [styles.group, styles.centered, pressed && styles.pressed]}>
+      {icon}
       <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={color ?? colors.error}>
         {label}
       </Text>
@@ -79,6 +80,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   iconRow: { height: 48, paddingHorizontal: spacing[3] },
   plainRow: { height: 44, paddingHorizontal: spacing[3] },
   leading: { flexDirection: "row", alignItems: "center", gap: spacing[3], flexShrink: 1 },
-  centered: { height: 44, alignItems: "center", justifyContent: "center" },
+  centered: { height: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing[2] },
   pressed: { opacity: 0.7 },
 }));

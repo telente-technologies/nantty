@@ -5,7 +5,7 @@ import { FollowPill } from "@/components/clips/followPill";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
-import { followsService } from "@/services/follows.service";
+import { followsService } from "@/services/social/follows.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useTheme } from "@/theme";
 import type { TaggedUser, Verification, VerificationColor } from "@/types";

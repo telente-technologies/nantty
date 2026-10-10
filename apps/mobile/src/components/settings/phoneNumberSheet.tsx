@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { Phone24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
@@ -24,6 +25,9 @@ export function PhoneNumberSheet({ visible, initialPhone, saving, onClose, onSav
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Phone number">
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <Phone24Icon size={22} color={colors.textMuted} />
+        </View>
         <TextField
           label="Phone number"
           placeholder="0907 750 5722"

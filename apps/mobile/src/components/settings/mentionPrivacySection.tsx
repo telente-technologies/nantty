@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { mentionsService } from "@/services/mentions.service";
+import { mentionsService } from "@/services/content/mentions.service";
 import type { WhoCanMentionMe } from "@/types/mention.type";
 
 const MENTION_PRIVACY_QUERY_KEY = ["users", "me", "mention-privacy"] as const;

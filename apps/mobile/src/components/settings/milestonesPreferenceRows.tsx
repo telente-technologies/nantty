@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { notificationsService } from "@/services/notifications.service";
+import { notificationsService } from "@/services/account/notifications.service";
 import type { NotificationPreference } from "@/types/notificationPreference.type";
 
 import { ConsentToggleRow } from "./consentToggleRow";

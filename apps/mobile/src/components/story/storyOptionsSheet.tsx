@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Flag24Icon, UserCircle24Icon } from "@/components/icons";
+import { Analytics24Icon, Flag24Icon, UserCircle24Icon } from "@/components/icons";
 import { ReportSheet, type ReportTarget } from "@/components/moderation/reportSheet";
 import { ActionSheet, type ActionSheetOption } from "@/components/ui/actionSheet";
 import { useAuthStore } from "@/store/auth.store";
@@ -12,10 +12,11 @@ export interface StoryOptionsSheetProps {
   readonly visible: boolean;
   readonly onClose: () => void;
   readonly onOpenProfile: (userId: string) => void;
+  readonly onOpenAnalytics: (storyId: string) => void;
   readonly onReportClosed: () => void;
 }
 
-export function StoryOptionsSheet({ story, visible, onClose, onOpenProfile, onReportClosed }: StoryOptionsSheetProps) {
+export function StoryOptionsSheet({ story, visible, onClose, onOpenProfile, onOpenAnalytics, onReportClosed }: StoryOptionsSheetProps) {
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
   const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
   if (!story) return null;
@@ -23,6 +24,9 @@ export function StoryOptionsSheet({ story, visible, onClose, onOpenProfile, onRe
   const options: ActionSheetOption[] = [
     { label: isOwnStory ? "View my profile" : `View @${story.author.username}`, icon: <UserCircle24Icon />, onPress: () => onOpenProfile(story.author.id) },
   ];
+  if (isOwnStory) {
+    options.push({ label: "Story analytics", icon: <Analytics24Icon />, onPress: () => onOpenAnalytics(story.id) });
+  }
   if (!isOwnStory) {
     options.push({
       label: "Report",

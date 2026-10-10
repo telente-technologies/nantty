@@ -3,7 +3,7 @@ import { Animated, Easing, Pressable, StyleSheet, View } from "react-native";
 
 import { SpeakerHigh24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { describeClipSoundForDisplay } from "@/services/sounds.service";
+import { describeClipSoundForDisplay } from "@/services/clips/sounds.service";
 import type { ClipSound } from "@/types";
 
 export interface ClipSoundRowProps {

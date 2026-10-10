@@ -1,6 +1,6 @@
 import { ApiError } from "@/errors/api.error";
 import { resolveMockApiRequest } from "@/mocks";
-import { toPageEnvelope, unwrapApiPayload } from "@/services/apiClient.service";
+import { toPageEnvelope, unwrapApiPayload } from "@/services/core/apiClient.service";
 
 import { validateAgainstContract } from "./contractSchema.util";
 import { identityContracts } from "./identity.contract";

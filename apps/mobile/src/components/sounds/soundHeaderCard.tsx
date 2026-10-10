@@ -6,7 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { explainWhySoundCannotBeReused } from "@/services/sounds.service";
+import { explainWhySoundCannotBeReused } from "@/services/clips/sounds.service";
 import type { ClipSound } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 

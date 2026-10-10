@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { profileQueryKeys } from "@/components/profile/profileQueries.hook";
-import { usersService } from "@/services/users.service";
+import { usersService } from "@/services/account/users.service";
 import type { AccountSettings } from "@/types/account.type";
 
 export function useAccountSettingsQuery() {

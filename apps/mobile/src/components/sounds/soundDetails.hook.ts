@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { soundsService } from "@/services/sounds.service";
+import { soundsService } from "@/services/clips/sounds.service";
 import type { ClipSound, ID, UpdateSoundInput } from "@/types";
 
 export const soundQueryKey = (soundId: ID) => ["sound", soundId] as const;

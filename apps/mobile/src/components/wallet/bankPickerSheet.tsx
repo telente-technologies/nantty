@@ -7,7 +7,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { banksService } from "@/services/banks.service";
+import { banksService } from "@/services/commerce/banks.service";
 import { useLocaleStore } from "@/store/locale.store";
 import type { Bank } from "@/types/commerce.type";
 

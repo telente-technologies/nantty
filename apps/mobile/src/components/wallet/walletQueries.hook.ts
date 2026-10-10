@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { storeRewardsService } from "@/services/storeRewards.service";
-import { walletsService } from "@/services/wallets.service";
+import { storeRewardsService } from "@/services/sellers/storeRewards.service";
+import { walletsService } from "@/services/money/wallets.service";
 
 export const walletQueryKeys = {
   balance: ["wallet", "balance"] as const,

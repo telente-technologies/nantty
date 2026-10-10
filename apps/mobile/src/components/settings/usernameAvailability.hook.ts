@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { usersService } from "@/services/users.service";
+import { usersService } from "@/services/account/users.service";
 import type { UsernameUnavailableReason } from "@/types/account.type";
 import { isValidUsername } from "@/utils/validators.util";
 

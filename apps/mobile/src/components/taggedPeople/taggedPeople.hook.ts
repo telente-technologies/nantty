@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { postsService } from "@/services/posts.service";
+import { postsService } from "@/services/content/posts.service";
 import type { Post, TaggedUser } from "@/types";
 
 export const taggedPeopleQueryKey = (postId: string) => ["posts", "taggedUsers", postId] as const;

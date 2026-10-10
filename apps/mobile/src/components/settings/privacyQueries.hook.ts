@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { consentsService } from "@/services/consents.service";
-import { refreshTrackingConsents } from "@/services/productInteractions.service";
+import { consentsService } from "@/services/account/consents.service";
+import { refreshTrackingConsents } from "@/services/sellers/productInteractions.service";
 import type { ConsentChoices, ConsentKey, ConsentRecord } from "@/types";
 
 export const privacyQueryKeys = {

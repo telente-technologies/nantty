@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { supportService } from "@/services/support.service";
+import { supportService } from "@/services/support/support.service";
 
 const scores = [1, 2, 3, 4, 5] as const;
 
