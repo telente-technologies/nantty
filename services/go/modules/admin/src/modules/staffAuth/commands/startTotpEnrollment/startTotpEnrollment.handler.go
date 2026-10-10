@@ -38,12 +38,16 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Tot
 		if staff.Status != staffaccount.StatusActive || staff.TotpConfirmedAt != nil {
 			return adminerrors.InvalidChallenge
 		}
-		secret, sealed, err := service.SealNewTotpSecret()
-		if err != nil {
-			return err
-		}
-		if err := tx.StaffAccount.UpdateOneID(staff.ID).SetTotpSecretEncrypted(sealed).Exec(ctx); err != nil {
-			return err
+		secret, reused := service.OpenPendingTotpSecret(staff)
+		if !reused {
+			fresh, sealed, err := service.SealNewTotpSecret()
+			if err != nil {
+				return err
+			}
+			if err := tx.StaffAccount.UpdateOneID(staff.ID).SetTotpSecretEncrypted(sealed).Exec(ctx); err != nil {
+				return err
+			}
+			secret = fresh
 		}
 		enrollment = models.TotpEnrollment{
 			Secret:     totp.EncodeSecretForAuthenticatorApps(secret),

@@ -17,6 +17,14 @@ func (service StaffAuthService) SealNewTotpSecret() (secret []byte, sealed []byt
 	return secret, sealed, err
 }
 
+func (service StaffAuthService) OpenPendingTotpSecret(staff *ent.StaffAccount) ([]byte, bool) {
+	if len(staff.TotpSecretEncrypted) == 0 || staff.TotpConfirmedAt != nil {
+		return nil, false
+	}
+	secret, err := secretbox.OpenWithAesGcm(service.Container.Settings.TotpEncryptionKey, staff.TotpSecretEncrypted)
+	return secret, err == nil
+}
+
 func (service StaffAuthService) CheckTotpCodeAgainstStaff(staff *ent.StaffAccount, code string, now time.Time) (int64, bool, error) {
 	if len(staff.TotpSecretEncrypted) == 0 {
 		return 0, false, adminerrors.MfaNotEnrolled
