@@ -1,5 +1,5 @@
-import { isNetworkFailureError } from "@/services/apiClient.service";
-import { messagesService } from "@/services/messages.service";
+import { isNetworkFailureError } from "@/services/core/apiClient.service";
+import { messagesService } from "@/services/chat/messages.service";
 import type { Conversation, ConversationFilter } from "@/types";
 
 import { messageHistoryStore } from "./messageHistory.database";

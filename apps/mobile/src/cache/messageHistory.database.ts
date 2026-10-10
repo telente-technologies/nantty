@@ -1,11 +1,12 @@
 import { openDatabaseSync, type SQLiteDatabase } from "expo-sqlite";
 
 import type { Conversation, ConversationFilter, Message, UserSummary } from "@/types";
+import { openLocalText, sealLocalText } from "@/utils/localDataSealing.util";
 
 import { buildMessageSyncCursor, type LocalMessageDeliveryStatus, type LocallyStoredMessage, type MessageHistoryStore } from "./messageHistory.type";
 
 const MAXIMUM_SAVED_MESSAGES_PER_CONVERSATION = 500;
-const MESSAGE_HISTORY_SCHEMA_VERSION = 2;
+const MESSAGE_HISTORY_SCHEMA_VERSION = 3;
 
 interface SavedConversationRow {
   readonly id: string;
@@ -26,10 +27,11 @@ interface SavedMessageRow {
   readonly delivery_status: LocalMessageDeliveryStatus;
   readonly kind: string | null;
   readonly extra_json: string | null;
+  readonly expires_at?: string | null;
 }
 
 type ConversationExtras = Omit<Conversation, "id" | "peer" | "lastMessage" | "lastMessageAt" | "unread" | "isFriend">;
-type MessageExtras = Pick<Message, "sender" | "media" | "reactions" | "expiresAt" | "mediaExpiresAt" | "linkPreview" | "sharedContent" | "location" | "document" | "poll" | "readAt" | "encryption">;
+type MessageExtras = Pick<Message, "sender" | "media" | "reactions" | "expiresAt" | "mediaExpiresAt" | "linkPreview" | "sharedContent" | "location" | "document" | "poll" | "readAt" | "encryption" | "mentions" | "decryptionNotice" | "attachment">;
 
 let openedMessageHistoryDatabase: SQLiteDatabase | null = null;
 
@@ -72,8 +74,37 @@ function migrateMessageHistorySchemaToLatestVersion(database: SQLiteDatabase) {
         ALTER TABLE conversations ADD COLUMN extra_json TEXT;
       `);
     }
+    if (currentVersion < 3) {
+      database.execSync("ALTER TABLE messages ADD COLUMN expires_at TEXT;");
+      sealExistingPlaintextRows(database);
+    }
     database.execSync(`PRAGMA user_version = ${MESSAGE_HISTORY_SCHEMA_VERSION}`);
   });
+}
+
+const messageColumnContext = (id: string, column: string) => `messageHistory:message:${id}:${column}`;
+const conversationColumnContext = (id: string, column: string) => `messageHistory:conversation:${id}:${column}`;
+
+function sealExistingPlaintextRows(database: SQLiteDatabase) {
+  for (const row of database.getAllSync<SavedMessageRow>("SELECT * FROM messages")) {
+    const extras = parseJsonOrEmptyObject<MessageExtras>(row.extra_json);
+    database.runSync(
+      "UPDATE messages SET text = ?, extra_json = ?, expires_at = ? WHERE id = ?",
+      sealLocalText(row.text, messageColumnContext(row.id, "text")),
+      sealLocalText(row.extra_json ?? "{}", messageColumnContext(row.id, "extra")),
+      extras.expiresAt ?? null,
+      row.id,
+    );
+  }
+  for (const row of database.getAllSync<SavedConversationRow>("SELECT * FROM conversations")) {
+    database.runSync(
+      "UPDATE conversations SET peer_json = ?, last_message = ?, extra_json = ? WHERE id = ?",
+      sealLocalText(row.peer_json, conversationColumnContext(row.id, "peer")),
+      sealLocalText(row.last_message, conversationColumnContext(row.id, "lastMessage")),
+      sealLocalText(row.extra_json ?? "{}", conversationColumnContext(row.id, "extra")),
+      row.id,
+    );
+  }
 }
 
 const parseJsonOrEmptyObject = <T extends object>(json: string | null): Partial<T> => {
@@ -100,15 +131,18 @@ const extractMessageExtras = (message: Message): MessageExtras => ({
   poll: message.poll,
   readAt: message.readAt,
   encryption: message.encryption,
+  mentions: message.mentions,
+  decryptionNotice: message.decryptionNotice,
+  attachment: message.attachment,
 });
 
 const hasMessageExpired = (message: Pick<Message, "expiresAt">) => !!message.expiresAt && message.expiresAt <= new Date().toISOString();
 
 const convertRowToConversation = (row: SavedConversationRow): Conversation => ({
-  ...parseJsonOrEmptyObject<ConversationExtras>(row.extra_json),
+  ...parseJsonOrEmptyObject<ConversationExtras>(row.extra_json === null ? null : openLocalText(row.extra_json, conversationColumnContext(row.id, "extra"))),
   id: row.id,
-  peer: JSON.parse(row.peer_json) as UserSummary,
-  lastMessage: row.last_message,
+  peer: JSON.parse(openLocalText(row.peer_json, conversationColumnContext(row.id, "peer")) || "{}") as UserSummary,
+  lastMessage: openLocalText(row.last_message, conversationColumnContext(row.id, "lastMessage")),
   lastMessageAt: row.last_message_at,
   unread: row.unread,
   isFriend: row.is_friend === 1,
@@ -118,24 +152,25 @@ const convertRowToMessage = (row: SavedMessageRow): LocallyStoredMessage => ({
   id: row.id,
   conversationId: row.conversation_id,
   senderId: row.sender_id,
-  text: row.text,
+  text: openLocalText(row.text, messageColumnContext(row.id, "text")),
   createdAt: row.created_at,
   deliveryStatus: row.delivery_status,
   kind: (row.kind ?? "text") as Message["kind"],
-  ...parseJsonOrEmptyObject<MessageExtras>(row.extra_json),
+  ...parseJsonOrEmptyObject<MessageExtras>(row.extra_json === null ? null : openLocalText(row.extra_json, messageColumnContext(row.id, "extra"))),
 });
 
 function insertOrReplaceMessageRow(database: SQLiteDatabase, message: Message, deliveryStatus: LocalMessageDeliveryStatus) {
   database.runSync(
-    "INSERT OR REPLACE INTO messages (id, conversation_id, sender_id, text, created_at, delivery_status, kind, extra_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT OR REPLACE INTO messages (id, conversation_id, sender_id, text, created_at, delivery_status, kind, extra_json, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     message.id,
     message.conversationId,
     message.senderId,
-    message.text,
+    sealLocalText(message.text, messageColumnContext(message.id, "text")),
     message.createdAt,
     deliveryStatus,
     message.kind ?? "text",
-    JSON.stringify(extractMessageExtras(message)),
+    sealLocalText(JSON.stringify(extractMessageExtras(message)), messageColumnContext(message.id, "extra")),
+    message.expiresAt ?? null,
   );
 }
 
@@ -177,12 +212,12 @@ export const messageHistoryStore: MessageHistoryStore = {
           database.runSync(
             "INSERT OR REPLACE INTO conversations (id, peer_json, last_message, last_message_at, unread, is_friend, extra_json) VALUES (?, ?, ?, ?, ?, ?, ?)",
             conversation.id,
-            JSON.stringify(conversation.peer),
-            conversation.lastMessage,
+            sealLocalText(JSON.stringify(conversation.peer), conversationColumnContext(conversation.id, "peer")),
+            sealLocalText(conversation.lastMessage, conversationColumnContext(conversation.id, "lastMessage")),
             conversation.lastMessageAt,
             conversation.unread,
             conversation.isFriend ? 1 : 0,
-            JSON.stringify(extractConversationExtras(conversation)),
+            sealLocalText(JSON.stringify(extractConversationExtras(conversation)), conversationColumnContext(conversation.id, "extra")),
           );
         }
       });
@@ -233,7 +268,7 @@ export const messageHistoryStore: MessageHistoryStore = {
     runSafelyOrReturnFallback(
       (database) =>
         database.runSync(
-          "DELETE FROM messages WHERE json_extract(extra_json, '$.expiresAt') IS NOT NULL AND json_extract(extra_json, '$.expiresAt') <= ?",
+          "DELETE FROM messages WHERE expires_at IS NOT NULL AND expires_at <= ?",
           new Date().toISOString(),
         ),
       undefined,

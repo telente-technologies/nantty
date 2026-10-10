@@ -1,5 +1,5 @@
-import { api } from "@/services/apiClient.service";
-import { sendEncryptedTextMessage } from "@/services/messages.service";
+import { api } from "@/services/core/apiClient.service";
+import { sendEncryptedTextMessage } from "@/services/chat/messages.service";
 
 import { messageHistoryStore } from "./messageHistory.database";
 import type { QueuedOfflineMutation } from "./offlineMutation.type";
