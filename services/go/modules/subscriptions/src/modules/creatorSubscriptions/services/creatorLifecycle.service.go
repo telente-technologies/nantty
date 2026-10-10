@@ -63,6 +63,9 @@ func (service CreatorSubscriptions) changeOwnSubscription(ctx context.Context, s
 
 func (service CreatorSubscriptions) Cancel(ctx context.Context, subscriberId, subscriptionId string) (CreatorSubscriptionStateView, error) {
 	return service.changeOwnSubscription(ctx, subscriberId, subscriptionId, func(ctx context.Context, transaction *sql.Tx, row *ent.CreatorSubscription) (*ent.CreatorSubscription, error) {
+		if row.BillingChannel != creatorsubscription.BillingChannelWeb {
+			return nil, ErrManageInStore
+		}
 		if row.Status == creatorsubscription.StatusCancelled {
 			return row, nil
 		}
@@ -79,6 +82,9 @@ func (service CreatorSubscriptions) Cancel(ctx context.Context, subscriberId, su
 
 func (service CreatorSubscriptions) Resume(ctx context.Context, subscriberId, subscriptionId string) (CreatorSubscriptionStateView, error) {
 	return service.changeOwnSubscription(ctx, subscriberId, subscriptionId, func(ctx context.Context, transaction *sql.Tx, row *ent.CreatorSubscription) (*ent.CreatorSubscription, error) {
+		if row.BillingChannel != creatorsubscription.BillingChannelWeb {
+			return nil, ErrManageInStore
+		}
 		if row.Status == creatorsubscription.StatusActive {
 			return row, nil
 		}

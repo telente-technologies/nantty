@@ -20,7 +20,6 @@ type BillingProfile struct {
 type AccountSignals struct {
 	CreatedAt     time.Time
 	EmailVerified bool
-	PhoneHash     string
 	Email         string
 }
 
@@ -55,9 +54,9 @@ func (directory SqlIdentityDirectory) FindProfile(ctx context.Context, profileId
 }
 
 func (directory SqlIdentityDirectory) ReadAccountSignals(ctx context.Context, accountId string) (AccountSignals, bool, error) {
-	query := "SELECT created_at, email_verified_at IS NOT NULL, COALESCE(phone_hash, ''), COALESCE(email, '') FROM " + pgx.Identifier{directory.AuthSchema, "accounts"}.Sanitize() + " WHERE id::text = $1"
+	query := "SELECT created_at, email_verified_at IS NOT NULL, COALESCE(email, '') FROM " + pgx.Identifier{directory.AuthSchema, "accounts"}.Sanitize() + " WHERE id::text = $1"
 	var signals AccountSignals
-	err := directory.Database.QueryRowContext(ctx, query, accountId).Scan(&signals.CreatedAt, &signals.EmailVerified, &signals.PhoneHash, &signals.Email)
+	err := directory.Database.QueryRowContext(ctx, query, accountId).Scan(&signals.CreatedAt, &signals.EmailVerified, &signals.Email)
 	if errors.Is(err, sql.ErrNoRows) {
 		return AccountSignals{}, false, nil
 	}

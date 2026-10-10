@@ -59,6 +59,8 @@ type CreatorSubscriptionStateView struct {
 	CurrentPeriodEnd *time.Time `json:"currentPeriodEnd"`
 	RenewsAt         *time.Time `json:"renewsAt"`
 	CreatedAt        time.Time  `json:"createdAt"`
+	BillingChannel   string     `json:"billingChannel"`
+	StoreProductId   *string    `json:"storeProductId"`
 }
 
 type CreatorSubscriberView struct {
@@ -101,7 +103,15 @@ func ConvertCreatorSubscription(row *ent.CreatorSubscription) CreatorSubscriptio
 	return CreatorSubscriptionStateView{
 		SubscriptionId: row.ID.String(), CreatorId: row.CreatorID, SubscriberId: row.SubscriberID, PlanId: row.PlanID, Status: row.Status.String(),
 		Price: MoneyView{row.AmountMinor, row.Currency}, Interval: row.Interval.String(), CurrentPeriodEnd: row.CurrentPeriodEnd, RenewsAt: renewsAtOf(row), CreatedAt: row.CreatedAt,
+		BillingChannel: row.BillingChannel.String(), StoreProductId: storeProductIdOf(row),
 	}
+}
+
+func storeProductIdOf(row *ent.CreatorSubscription) *string {
+	if row.StoreProductID == "" {
+		return nil
+	}
+	return &row.StoreProductID
 }
 
 func ConvertCreatorSubscriber(row *ent.CreatorSubscription, user *repositories.UserSummary, planName string) CreatorSubscriberView {

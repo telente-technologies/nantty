@@ -11,6 +11,7 @@ import (
 
 	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
 	paymentstesting "zudomart/modules/payments/src/integrations/paymentsTesting"
+	"zudomart/modules/payments/src/interfaces"
 	"zudomart/modules/subscriptions/src"
 	"zudomart/modules/subscriptions/src/configs"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
@@ -24,11 +25,15 @@ type subscriptionsHarness struct {
 }
 
 func startSubscriptionsHarness(t *testing.T, identity repositories.StaticIdentityDirectory) *subscriptionsHarness {
+	return startSubscriptionsHarnessWithStores(t, identity, nil)
+}
+
+func startSubscriptionsHarnessWithStores(t *testing.T, identity repositories.StaticIdentityDirectory, stores map[string]interfaces.StoreReceiptVerifier) *subscriptionsHarness {
 	t.Helper()
 	if testing.Short() {
 		t.Skip("integration test: needs Postgres")
 	}
-	money := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
+	money := paymentstesting.StartMoneyHarnessWithPayments(t, stores)
 	settings := configs.SubscriptionsSettings{
 		Money:            moneytesting.MoneyModuleSettingsForTests("subscriptions", moneytesting.CreateEmptySchema(t, money.Database, "subscriptions"), money.LedgerSchema),
 		InternalApiToken: strings.Repeat("s", 32), DefaultCountry: "NG", FingerprintKey: "trial-key",

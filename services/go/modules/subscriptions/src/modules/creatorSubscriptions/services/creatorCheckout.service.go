@@ -35,39 +35,13 @@ func (service CreatorSubscriptions) StartSubscription(ctx context.Context, reque
 	if request.ClientPlatform == "ios" || request.ClientPlatform == "android" {
 		return CreatorCheckoutView{}, false, paymentservices.ErrWebBillingOnly
 	}
-	creator, found, err := service.Container.Creators.FindCreator(ctx, request.CreatorId)
+	plan, err := service.loadSubscribablePlan(ctx, request.SubscriberId, request.CreatorId, request.PlanId)
 	if err != nil {
-		return CreatorCheckoutView{}, false, err
-	}
-	if !found {
-		return CreatorCheckoutView{}, false, ErrCreatorPlanNotFound
-	}
-	if creator.AccountId == request.SubscriberId {
-		return CreatorCheckoutView{}, false, ErrCannotSubscribeToSelf
-	}
-	if !creator.Approved {
-		return CreatorCheckoutView{}, false, ErrCreatorNotApproved
-	}
-	planId, err := uuid.Parse(request.PlanId)
-	if err != nil {
-		return CreatorCheckoutView{}, false, ErrCreatorPlanNotFound
-	}
-	plan, err := service.Container.Client(service.Container.Resources.Database).CreatorSubscriptionPlan.Get(ctx, planId)
-	if ent.IsNotFound(err) || (err == nil && (plan.CreatorID != creator.AccountId || !plan.Active)) {
-		return CreatorCheckoutView{}, false, ErrCreatorPlanNotFound
-	}
-	if err != nil {
-		return CreatorCheckoutView{}, false, err
-	}
-	if blocked, err := service.Container.Creators.BlockedEitherWay(ctx, request.SubscriberId, creator.AccountId); err != nil || blocked {
-		if err == nil {
-			err = ErrSubscriptionBlocked
-		}
 		return CreatorCheckoutView{}, false, err
 	}
 	started, replayed, err := ledgerutils.RunIdempotentMoneyCommand(ctx, service.Container.Resources.Database, service.Container.Idempotency, ledgerutils.IdempotentCommand[startedCreatorSubscription]{
 		Scope: "user:" + request.SubscriberId + ":creatorSubscriptions.start", Key: request.IdempotencyKey,
-		RequestHash: ledgerutils.HashRequestFingerprint(creator.AccountId, plan.ID.String(), request.ReturnTo),
+		RequestHash: ledgerutils.HashRequestFingerprint(plan.CreatorID, plan.ID.String(), request.ReturnTo),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (startedCreatorSubscription, error) {
 			return service.createPendingSubscriptionInTransaction(ctx, transaction, request.SubscriberId, plan, request.ReturnTo)
 		},
@@ -92,29 +66,71 @@ func (service CreatorSubscriptions) StartSubscription(ctx context.Context, reque
 	return view, replayed, nil
 }
 
-func (service CreatorSubscriptions) createPendingSubscriptionInTransaction(ctx context.Context, transaction *sql.Tx, subscriberId string, plan *ent.CreatorSubscriptionPlan, returnTo string) (startedCreatorSubscription, error) {
-	client := service.Container.Client(transaction)
-	if _, err := client.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "creator-subscription:"+subscriberId+":"+plan.CreatorID); err != nil {
-		return startedCreatorSubscription{}, err
+func (service CreatorSubscriptions) loadSubscribablePlan(ctx context.Context, subscriberId, creatorId, planId string) (*ent.CreatorSubscriptionPlan, error) {
+	creator, found, err := service.Container.Creators.FindCreator(ctx, creatorId)
+	if err != nil {
+		return nil, err
+	}
+	if !found {
+		return nil, ErrCreatorPlanNotFound
+	}
+	if creator.AccountId == subscriberId {
+		return nil, ErrCannotSubscribeToSelf
+	}
+	if !creator.Approved {
+		return nil, ErrCreatorNotApproved
+	}
+	id, err := uuid.Parse(planId)
+	if err != nil {
+		return nil, ErrCreatorPlanNotFound
+	}
+	plan, err := service.Container.Client(service.Container.Resources.Database).CreatorSubscriptionPlan.Get(ctx, id)
+	if ent.IsNotFound(err) || (err == nil && (plan.CreatorID != creator.AccountId || !plan.Active)) {
+		return nil, ErrCreatorPlanNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	if blocked, err := service.Container.Creators.BlockedEitherWay(ctx, subscriberId, creator.AccountId); err != nil || blocked {
+		if err == nil {
+			err = ErrSubscriptionBlocked
+		}
+		return nil, err
+	}
+	return plan, nil
+}
+
+func (service CreatorSubscriptions) clearWayForNewSubscriptionInTransaction(ctx context.Context, client *ent.Client, subscriberId, creatorId string) error {
+	if _, err := client.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "creator-subscription:"+subscriberId+":"+creatorId); err != nil {
+		return err
 	}
 	now := service.Container.Now().UTC()
-	existing, err := client.CreatorSubscription.Query().Where(creatorsubscription.SubscriberID(subscriberId), creatorsubscription.CreatorID(plan.CreatorID),
+	existing, err := client.CreatorSubscription.Query().Where(creatorsubscription.SubscriberID(subscriberId), creatorsubscription.CreatorID(creatorId),
 		creatorsubscription.StatusIn(append(accessStatuses(), creatorsubscription.StatusPending)...)).All(ctx)
 	if err != nil {
-		return startedCreatorSubscription{}, err
+		return err
 	}
 	for _, row := range existing {
 		switch {
 		case row.Status == creatorsubscription.StatusPending:
 			if err := row.Update().SetStatus(creatorsubscription.StatusFailed).SetLastError("supersededByNewAttempt").Exec(ctx); err != nil {
-				return startedCreatorSubscription{}, err
+				return err
 			}
 		case models.HasCreatorSubscriberAccess(row.Status.String(), row.CurrentPeriodEnd, now) && row.Status == creatorsubscription.StatusCancelled:
-			return startedCreatorSubscription{}, ErrResumeInstead
+			return ErrResumeInstead
 		case models.HasCreatorSubscriberAccess(row.Status.String(), row.CurrentPeriodEnd, now):
-			return startedCreatorSubscription{}, ErrAlreadySubscribedCreator
+			return ErrAlreadySubscribedCreator
 		}
 	}
+	return nil
+}
+
+func (service CreatorSubscriptions) createPendingSubscriptionInTransaction(ctx context.Context, transaction *sql.Tx, subscriberId string, plan *ent.CreatorSubscriptionPlan, returnTo string) (startedCreatorSubscription, error) {
+	client := service.Container.Client(transaction)
+	if err := service.clearWayForNewSubscriptionInTransaction(ctx, client, subscriberId, plan.CreatorID); err != nil {
+		return startedCreatorSubscription{}, err
+	}
+	now := service.Container.Now().UTC()
 	subscription, err := client.CreatorSubscription.Create().SetID(uuid.Must(uuid.NewV7())).SetSubscriberID(subscriberId).SetCreatorID(plan.CreatorID).SetPlanID(plan.ID.String()).
 		SetAmountMinor(plan.AmountMinor).SetCurrency(plan.Currency).SetInterval(creatorsubscription.Interval(plan.Interval.String())).SetCreatedAt(now).Save(ctx)
 	if err != nil {

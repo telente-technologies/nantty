@@ -70,6 +70,9 @@ func (service CreatorSubscriptions) CreatePlan(ctx context.Context, plan NewCrea
 		}
 		return CreatorPlanView{}, ErrPriceOutsideBands
 	}
+	if _, isTier := regionpricing.FindCreatorTier(plan.AmountMinor, plan.Currency, plan.Interval); !isTier {
+		return CreatorPlanView{}, ErrPriceNotATier
+	}
 	var created *ent.CreatorSubscriptionPlan
 	err = databases.RunInMoneyTransaction(ctx, service.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		var err error
