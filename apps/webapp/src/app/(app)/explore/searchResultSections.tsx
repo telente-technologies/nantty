@@ -11,6 +11,7 @@ import type { SearchItem } from "@/types/search.type";
 import { buildPostPath, buildProfilePath, buildStorePath } from "@/utils/seoPaths.util";
 
 import styles from "./page.module.css";
+import { describeCount } from "@/utils/countLabel.util";
 
 type ItemOf<T extends SearchItem["type"]> = SearchItem & { readonly type: T };
 
@@ -92,7 +93,7 @@ export function SearchResultSections({ items, onOpenResult, onSearchHashtag }: {
           <ul className={styles.entityList}>
             {posts.map((post) => (
               <EntityRow key={post.id} href={post.type === "clip" ? `/clips?start=${encodeURIComponent(post.id)}` : buildPostPath(post.id)} name={post.caption || (post.type === "clip" ? "Clip" : "Post")}
-                meta={`${post.type === "clip" ? "Clip" : "Post"} · ${post.likes} likes`} avatarUrl={post.thumbnailUrl} onOpen={onOpenResult} />
+                meta={`${post.type === "clip" ? "Clip" : "Post"} · ${describeCount(post.likes, "like", "likes")}`} avatarUrl={post.thumbnailUrl} onOpen={onOpenResult} />
             ))}
           </ul>
         </Section>
