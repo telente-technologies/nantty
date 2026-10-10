@@ -14,7 +14,7 @@ const refundColumns: readonly DataTableColumn<RefundRecord>[] = [
   { key: "amount", header: "Amount", render: (refund) => <span className={styles.amount}>{formatMoneyForDisplay(refund.amount)}</span>, align: "end" },
   { key: "source", header: "Source", render: (refund) => humanizeConstantName(refund.source) },
   { key: "status", header: "Status", render: (refund) => <StatusBadge status={refund.status} /> },
-  { key: "by", header: "Issued", render: (refund) => <span className={styles.stack}><span>{refund.createdByName}</span><span className={styles.muted}>{formatDateTime(refund.createdAt)}</span></span> },
+  { key: "by", header: "Issued", render: (refund) => <span className={styles.stack}><span>{refund.createdByName || "System"}</span><span className={styles.muted}>{formatDateTime(refund.createdAt)}{refund.completedAt ? ` · done ${formatDateTime(refund.completedAt)}` : ""}</span></span> },
   { key: "reason", header: "Reason", render: (refund) => <span className={styles.muted}>{refund.reason}</span>, width: "30%" },
 ];
 

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { AuditHistoryList } from "@/components/audit/auditHistoryList";
 import { useAdminPermissions } from "@/components/session/adminSessionProvider";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { ErrorBlock, LoadingBlock } from "@/components/ui/feedback";
@@ -14,9 +13,9 @@ import { UserIdentity } from "@/components/ui/userIdentity";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { fetchOrderDetail } from "@/services/moneyApi.service";
 import type { OrderDetail } from "@/types/commerce.type";
-import { formatBasisPointsAsPercent, formatDateTime, formatMoneyForDisplay, humanizeConstantName } from "@/utils/formatting.util";
+import { formatDateTime, formatMoneyForDisplay, humanizeConstantName } from "@/utils/formatting.util";
 
-import { EscrowTimeline } from "./escrowTimeline";
+import { EscrowSummary, OrderTimeline } from "./escrowTimeline";
 import { IssueRefundDialog } from "./issueRefundDialog";
 import styles from "./money.module.css";
 import { RefundsTable } from "./refundsTable";
@@ -31,7 +30,7 @@ function OrderItemsCard({ order }: { readonly order: OrderDetail }) {
             <span className={styles.stack}>
               <strong>{item.productName}</strong>
               <span className={styles.muted}>
-                {item.quantity} × {formatMoneyForDisplay(item.unitPrice)}
+                {item.variant ? `${item.variant} · ` : ""}{item.quantity} × {formatMoneyForDisplay(item.unitPrice)}{item.attribution ? ` · via ${humanizeConstantName(item.attribution.source)}` : ""}
               </span>
             </span>
             <span className={styles.amount}>{formatMoneyForDisplay(item.lineTotal)}</span>
@@ -41,14 +40,14 @@ function OrderItemsCard({ order }: { readonly order: OrderDetail }) {
       <dl className={styles.totals}>
         <dt>Subtotal</dt>
         <dd>{formatMoneyForDisplay(order.subtotal)}</dd>
+        {order.discount.amountMinor > 0 ? <><dt>Discount</dt><dd>−{formatMoneyForDisplay(order.discount)}</dd></> : null}
+        {order.storeCredit.amountMinor > 0 ? <><dt>Store credit</dt><dd>−{formatMoneyForDisplay(order.storeCredit)}</dd></> : null}
         <dt>Delivery</dt>
         <dd>{formatMoneyForDisplay(order.deliveryFee)}</dd>
         <dt className={styles.grandTotal}>Buyer paid</dt>
         <dd className={styles.grandTotal}>{formatMoneyForDisplay(order.total)}</dd>
         <dt>Refunded</dt>
         <dd>{formatMoneyForDisplay(order.refundedTotal)}</dd>
-        <dt>Escrow fee ({formatBasisPointsAsPercent(order.commissionBasisPoints)})</dt>
-        <dd>{formatMoneyForDisplay(order.commission)}</dd>
       </dl>
     </Card>
   );
@@ -61,24 +60,25 @@ export function OrderDetailWorkspace({ orderId }: { readonly orderId: string }) 
 
   if (errorMessage) return <ErrorBlock message={errorMessage} onRetry={reload} />;
   if (isLoading || !order) return <LoadingBlock lines={8} />;
-  const canRefund = can("refunds:issue") && order.refundable.amountMinor > 0 && order.status !== "DISPUTED";
+  const canRefund = can("refunds:issue") && order.refundable.amountMinor > 0 && order.status !== "disputed";
 
   return (
     <>
       <PageHeader
         area="Money · Orders"
         title={<span className="mono">{order.orderNumber}</span>}
-        description={`${order.storeName} · placed ${formatDateTime(order.placedAt)} · delivering to ${order.deliveryCity}`}
+        description={`${order.storeName || "Store"} · placed ${formatDateTime(order.placedAt)} · delivering to ${[order.deliveryCity, order.deliveryState].filter(Boolean).join(", ") || "—"}`}
         meta={
           <>
             <StatusBadge status={order.status} />
-            <StatusBadge status={order.deliveryStatus} hasDot={false} />
+            <StatusBadge status={order.paymentStatus} hasDot={false} />
+            {order.deliveryStatus ? <StatusBadge status={order.deliveryStatus} hasDot={false} /> : null}
           </>
         }
         actions={
           <>
             <ButtonLink href="/commerce/orders" variant="ghost" iconName="arrowLeft24">All orders</ButtonLink>
-            {order.disputeId && can("disputes:resolve") ? <ButtonLink href={`/commerce/disputes/${order.disputeId}`} iconName="chatCircle24">Open dispute</ButtonLink> : null}
+            {order.status === "disputed" && can("disputes:resolve") ? <ButtonLink href="/commerce/disputes" iconName="chatCircle24">Disputes</ButtonLink> : null}
             {canRefund ? <Button variant="quietDanger" iconName="arrowLeft24" onClick={() => setIsRefundDialogOpen(true)}>Issue refund</Button> : null}
           </>
         }
@@ -87,8 +87,11 @@ export function OrderDetailWorkspace({ orderId }: { readonly orderId: string }) 
         main={
           <>
             <OrderItemsCard order={order} />
-            <Card title="Escrow timeline">
-              <EscrowTimeline escrow={order.escrow} />
+            <Card title="Escrow">
+              <EscrowSummary escrow={order.escrow} />
+            </Card>
+            <Card title="Timeline">
+              <OrderTimeline events={order.timeline} />
             </Card>
             <Card title="Refunds" isFlush>
               <RefundsTable refunds={order.refunds} emptyMessage="No refunds on this order." />
@@ -105,10 +108,12 @@ export function OrderDetailWorkspace({ orderId }: { readonly orderId: string }) 
                 ]}
               />
             </Card>
-            <Card title="Delivery">
+            <Card title="Payment and delivery">
               <KeyValueList
                 items={[
-                  { label: "Status", value: humanizeConstantName(order.deliveryStatus) },
+                  { label: "Invoice", value: order.invoiceNumber || "—", isMono: true },
+                  { label: "Payment", value: `${humanizeConstantName(order.paymentStatus)} · ${humanizeConstantName(order.paymentMode)}` },
+                  { label: "Delivery", value: order.deliveryStatus ? humanizeConstantName(order.deliveryStatus) : "—" },
                   { label: "Courier", value: order.courier ?? "Not shipped yet" },
                   { label: "Tracking", value: order.trackingNumber ?? "—", isMono: true },
                   { label: "Refundable now", value: formatMoneyForDisplay(order.refundable) },
@@ -116,7 +121,7 @@ export function OrderDetailWorkspace({ orderId }: { readonly orderId: string }) 
               />
             </Card>
             <Card title="Admin history">
-              <AuditHistoryList entries={order.history} />
+              <ButtonLink href={`/audit?targetType=order&targetId=${encodeURIComponent(order.id)}`} variant="ghost" iconName="arrowUpRight24">Open in audit log</ButtonLink>
             </Card>
           </>
         }

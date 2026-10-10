@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorBlock, InlineError } from "@/components/ui/feedback";
 import { TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { Card, Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
@@ -21,9 +21,13 @@ import styles from "./money.module.css";
 import { RefundsTable } from "./refundsTable";
 
 const sourceTabs = [
-  { key: "ALL", label: "All refunds" },
-  { key: "MANUAL", label: "Manual" },
-  { key: "DISPUTE", label: "From disputes" },
+  { key: "all", label: "All refunds" },
+  { key: "manual", label: "Manual" },
+  { key: "dispute", label: "From disputes" },
+  { key: "seller", label: "By sellers" },
+  { key: "return", label: "Returns" },
+  { key: "cancellation", label: "Cancellations" },
+  { key: "system", label: "Automatic" },
 ] as const;
 
 function ManualRefundFinder({ onRefunded }: { readonly onRefunded: () => void }) {
@@ -38,8 +42,8 @@ function ManualRefundFinder({ onRefunded }: { readonly onRefunded: () => void })
     setLookupError(null);
     try {
       const found = await fetchOrderDetail(orderReference.trim());
-      if (found.refundable.amountMinor <= 0) setLookupError(`${found.orderNumber} has nothing left in escrow to refund.`);
-      else if (found.status === "DISPUTED") setLookupError(`${found.orderNumber} has an open dispute. Resolve it from the dispute page.`);
+      if (found.refundable.amountMinor <= 0) setLookupError(`${found.orderNumber} has nothing refundable right now (unpaid, fully refunded or a refund is already running).`);
+      else if (found.status === "disputed") setLookupError(`${found.orderNumber} has an open dispute. Resolve it from the dispute page.`);
       else setOrder(found);
     } catch (error) {
       setLookupError(readErrorMessageForDisplay(error));
@@ -52,7 +56,7 @@ function ManualRefundFinder({ onRefunded }: { readonly onRefunded: () => void })
     <Card title="Issue a manual refund">
       <form onSubmit={findOrder}>
         <Toolbar>
-          <TextField label="Order number or ID" placeholder="ZM-24819" value={orderReference} onChange={(event) => setOrderReference(event.target.value)} className={styles.searchField} />
+          <TextField label="Order number or ID" placeholder="ZM-24819 or order ID" value={orderReference} onChange={(event) => setOrderReference(event.target.value)} className={styles.searchField} />
           <Button type="submit" isBusy={isLooking} disabled={orderReference.trim().length < 3}>Find order</Button>
         </Toolbar>
       </form>
@@ -65,9 +69,9 @@ function ManualRefundFinder({ onRefunded }: { readonly onRefunded: () => void })
 
 export function RefundsWorkspace() {
   const { can } = useAdminPermissions();
-  const [source, setSource] = useState<(typeof sourceTabs)[number]["key"]>("ALL");
-  const [page, setPage] = useState(1);
-  const filters = { source, page };
+  const [source, setSource] = useState<(typeof sourceTabs)[number]["key"]>("all");
+  const [cursor, setCursor] = useState<string | undefined>();
+  const filters = { source: source === "all" ? undefined : source, cursor };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchRefunds(filters, signal), JSON.stringify(filters));
 
   return (
@@ -75,11 +79,11 @@ export function RefundsWorkspace() {
       <PageHeader area="Money" title="Refunds" description="Every refund paid out of escrow, whether from a dispute decision or issued by hand." />
       {can("refunds:issue") ? <ManualRefundFinder onRefunded={reload} /> : null}
       <div className={styles.spacedTop}>
-        <SegmentedTabs label="Refund source" items={sourceTabs} activeKey={source} onChange={(key) => { setSource(key); setPage(1); }} />
+        <SegmentedTabs label="Refund source" items={sourceTabs} activeKey={source} onChange={(key) => { setSource(key); setCursor(undefined); }} />
       </div>
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <RefundsTable refunds={data?.items ?? []} isLoading={isLoading} emptyMessage="No refunds yet." />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} /> : null}
+      <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>
   );
 }

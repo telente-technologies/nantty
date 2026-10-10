@@ -18,8 +18,9 @@ export function IssueRefundDialog({ order, isOpen, onClose, onRefunded }: { read
   const mutation = useAdminMutation(issueManualRefund);
   const currency = order.refundable.currency;
   const amount = parseTypedMajorAmountToMoney(typedAmount, currency);
-  const amountError = typedAmount && !amount ? `Enter an amount in ${currency} with at most ${readMinorUnitDigitsForCurrency(currency)} decimals.` : amount && amount.amountMinor > order.refundable.amountMinor ? `At most ${formatMoneyForDisplay(order.refundable)} can be refunded.` : null;
-  const isAmountValid = amount !== null && amount.amountMinor > 0 && amount.amountMinor <= order.refundable.amountMinor;
+  const mustRefundInFull = order.escrow?.status === "released";
+  const amountError = typedAmount && !amount ? `Enter an amount in ${currency} with at most ${readMinorUnitDigitsForCurrency(currency)} decimals.` : amount && amount.amountMinor > order.refundable.amountMinor ? `At most ${formatMoneyForDisplay(order.refundable)} can be refunded.` : amount && mustRefundInFull && amount.amountMinor !== order.refundable.amountMinor ? `Escrow was released, so refund the full ${formatMoneyForDisplay(order.refundable)}.` : null;
+  const isAmountValid = amount !== null && amount.amountMinor > 0 && amount.amountMinor <= order.refundable.amountMinor && (!mustRefundInFull || amount.amountMinor === order.refundable.amountMinor);
 
   async function confirmRefund(reason: string) {
     if (!amount) return;
@@ -36,7 +37,7 @@ export function IssueRefundDialog({ order, isOpen, onClose, onRefunded }: { read
       isOpen={isOpen}
       title={`Refund order ${order.orderNumber}`}
       description={`Money goes back to @${order.buyer.username} through the original payment method. Refundable now: ${formatMoneyForDisplay(order.refundable)}.`}
-      consequences={["The refund comes out of escrow before the seller is paid.", "A full refund closes the order and stops auto-release."]}
+      consequences={mustRefundInFull ? ["Escrow was already released, so only a full refund is allowed. It is clawed back from the seller."] : ["The refund comes out of escrow before the seller is paid.", "A full refund closes the order and stops auto-release."]}
       confirmLabel={isAmountValid && amount ? `Refund ${formatMoneyForDisplay(amount)}` : "Issue refund"}
       tone="danger"
       requiresStepUp

@@ -8,8 +8,7 @@ import { useToast } from "@/components/ui/toastProvider";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { createIdempotencyKey } from "@/services/adminApiClient.service";
 import { resolveDispute, type ResolveDisputeInput } from "@/services/moneyApi.service";
-import type { Money } from "@/types/api.type";
-import type { DisputeDetail, DisputeOutcome } from "@/types/commerce.type";
+import type { DisputeDetail, DisputeEscrow, DisputeOutcome } from "@/types/commerce.type";
 import { formatBasisPointsAsPercent, formatMoneyForDisplay, parseTypedMajorAmountToMoney, readMinorUnitDigitsForCurrency } from "@/utils/formatting.util";
 
 import styles from "./money.module.css";
@@ -20,13 +19,14 @@ const outcomeOptions: readonly { value: DisputeOutcome; label: string; descripti
   { value: "RELEASE_TO_SELLER", label: "Release to seller", description: "The buyer's claim is not upheld. Escrow is released to the seller." },
 ];
 
-export function calculateDisputeSplit(escrow: Money, refundMinor: number, commissionBasisPoints: number) {
-  const sellerPortionMinor = Math.max(0, escrow.amountMinor - refundMinor);
-  const commissionMinor = Math.round((sellerPortionMinor * commissionBasisPoints) / 10_000);
+export function calculateDisputeSplit(escrow: DisputeEscrow, refundMinor: number, commissionBasisPoints: number) {
+  const currency = escrow.amount.currency;
+  const remainderMinor = Math.max(0, escrow.amount.amountMinor - refundMinor);
+  const commissionMinor = remainderMinor === 0 ? 0 : Math.min(Math.round((remainderMinor * commissionBasisPoints) / 10_000), escrow.commission.amountMinor);
   return {
-    buyerRefund: { amountMinor: refundMinor, currency: escrow.currency },
-    sellerPayout: { amountMinor: sellerPortionMinor - commissionMinor, currency: escrow.currency },
-    commission: { amountMinor: commissionMinor, currency: escrow.currency },
+    buyerRefund: { amountMinor: refundMinor, currency },
+    sellerPayout: { amountMinor: Math.max(remainderMinor - commissionMinor - (remainderMinor === 0 ? 0 : escrow.processingFee.amountMinor), 0), currency },
+    commission: { amountMinor: commissionMinor, currency },
   };
 }
 
@@ -36,17 +36,17 @@ export function ResolveDisputeDialog({ dispute, onClose, onResolved }: { readonl
   const [typedAmount, setTypedAmount] = useState("");
   const [idempotencyKey] = useState(createIdempotencyKey);
   const mutation = useAdminMutation((input: ResolveDisputeInput) => resolveDispute(dispute.id, input));
-  const escrow = dispute.escrow.heldAmount;
+  const escrow = dispute.escrow.amount;
   const typedRefund = parseTypedMajorAmountToMoney(typedAmount, escrow.currency);
   const refundMinor = outcome === "REFUND_FULL" ? escrow.amountMinor : outcome === "RELEASE_TO_SELLER" ? 0 : (typedRefund?.amountMinor ?? 0);
   const isPartialValid = typedRefund !== null && typedRefund.amountMinor > 0 && typedRefund.amountMinor < escrow.amountMinor;
   const partialError = outcome !== "REFUND_PARTIAL" || !typedAmount ? null : !typedRefund ? `Enter an amount in ${escrow.currency}.` : !isPartialValid ? `Must be more than zero and less than ${formatMoneyForDisplay(escrow)}.` : null;
-  const split = calculateDisputeSplit(escrow, refundMinor, dispute.commissionBasisPoints);
+  const split = calculateDisputeSplit(dispute.escrow, refundMinor, dispute.commissionBasisPoints);
 
   async function confirmResolution(reason: string) {
     const updated = await mutation.run({ outcome, reason, idempotencyKey, refundAmount: outcome === "REFUND_PARTIAL" && typedRefund ? typedRefund : undefined });
     if (updated) {
-      showToast(`Dispute ${dispute.id} resolved`);
+      showToast(`Dispute on ${dispute.orderNumber} resolved`);
       onResolved(updated);
       onClose();
     }
@@ -55,8 +55,8 @@ export function ResolveDisputeDialog({ dispute, onClose, onResolved }: { readonl
   return (
     <ConfirmActionDialog
       isOpen
-      title={`Resolve dispute ${dispute.id}`}
-      description={`Order ${dispute.orderNumber}. ${formatMoneyForDisplay(escrow)} is held in escrow. This moves real money and cannot be undone here.`}
+      title={`Resolve dispute on ${dispute.orderNumber}`}
+      description={`${dispute.productName}. ${formatMoneyForDisplay(dispute.escrow.heldAmount)} of ${formatMoneyForDisplay(escrow)} is held in escrow. This moves real money and cannot be undone here.`}
       confirmLabel="Resolve dispute"
       tone="danger"
       requiresStepUp

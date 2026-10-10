@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { ErrorBlock, LoadingBlock } from "@/components/ui/feedback";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
@@ -23,7 +23,7 @@ function JournalEntryCard({ journal }: { readonly journal: JournalEntry }) {
         <span className={styles.stack}>
           <strong>{journal.description}</strong>
           <span className={styles.muted}>
-            <span className="mono">{journal.id}</span> · {humanizeConstantName(journal.reference.type)} {journal.reference.label} · {formatDateTime(journal.occurredAt)}
+            <span className="mono">{journal.reference}</span> · {humanizeConstantName(journal.kind)} · {formatDateTime(journal.postedAt)}{journal.externalReference ? <> · <span className="mono">{journal.externalReference}</span></> : null}{journal.reversesEntryId ? <> · reverses <span className="mono">{journal.reversesEntryId}</span></> : null}
           </span>
         </span>
         {journal.isBalanced ? <StatusBadge label="Balanced" tone="success" /> : <StatusBadge label="Out of balance" tone="danger" />}
@@ -32,10 +32,10 @@ function JournalEntryCard({ journal }: { readonly journal: JournalEntry }) {
         <caption className="visuallyHidden">Journal legs</caption>
         <tbody>
           {journal.legs.map((leg, index) => (
-            <tr key={`${leg.accountId}-${index}`}>
-              <td>{leg.accountName} <span className={styles.muted}>{leg.accountId}</span></td>
-              <td>{leg.direction === "DEBIT" ? formatMoneyForDisplay(leg.amount) : ""}</td>
-              <td>{leg.direction === "CREDIT" ? formatMoneyForDisplay(leg.amount) : ""}</td>
+            <tr key={`${leg.accountCode}-${index}`}>
+              <td>{leg.accountName} <span className={styles.muted}>{leg.accountCode}</span></td>
+              <td>{leg.direction === "debit" ? formatMoneyForDisplay(leg.amount) : ""}</td>
+              <td>{leg.direction === "credit" ? formatMoneyForDisplay(leg.amount) : ""}</td>
             </tr>
           ))}
           <tr>
@@ -50,36 +50,44 @@ function JournalEntryCard({ journal }: { readonly journal: JournalEntry }) {
 }
 
 function LedgerForCurrency({ currency }: { readonly currency: string }) {
-  const [accountId, setAccountId] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const accounts = useAdminQuery((signal) => fetchLedgerAccounts(currency, signal), currency);
-  const entryFilters = { currency, accountId: accountId ?? undefined, page };
+  const [accountCode, setAccountCode] = useState<string | null>(null);
+  const [accountCursor, setAccountCursor] = useState<string | undefined>();
+  const [entryCursor, setEntryCursor] = useState<string | undefined>();
+  const accountFilters = { currency, cursor: accountCursor };
+  const accounts = useAdminQuery((signal) => fetchLedgerAccounts(accountFilters, signal), JSON.stringify(accountFilters));
+  const entryFilters = { currency, accountCode: accountCode ?? undefined, cursor: entryCursor };
   const entries = useAdminQuery((signal) => fetchLedgerEntries(entryFilters, signal), JSON.stringify(entryFilters));
+
+  function chooseAccount(code: string | null) {
+    setAccountCode(code);
+    setEntryCursor(undefined);
+  }
 
   return (
     <div className={ledgerStyles.ledgerLayout}>
       <Card title={`Accounts · ${currency}`} isFlush>
         {accounts.errorMessage ? <ErrorBlock message={accounts.errorMessage} onRetry={accounts.reload} /> : null}
         {accounts.isLoading && !accounts.data ? <LoadingBlock /> : null}
-        <button type="button" className={`${ledgerStyles.accountButton} ${accountId === null ? ledgerStyles.accountButtonActive : ""}`} onClick={() => { setAccountId(null); setPage(1); }} aria-pressed={accountId === null}>
+        <button type="button" className={`${ledgerStyles.accountButton} ${accountCode === null ? ledgerStyles.accountButtonActive : ""}`} onClick={() => chooseAccount(null)} aria-pressed={accountCode === null}>
           <strong>All accounts</strong>
         </button>
         {accounts.data?.items.map((account) => (
-          <button key={account.id} type="button" className={`${ledgerStyles.accountButton} ${accountId === account.id ? ledgerStyles.accountButtonActive : ""}`} onClick={() => { setAccountId(account.id); setPage(1); }} aria-pressed={accountId === account.id}>
+          <button key={account.code} type="button" className={`${ledgerStyles.accountButton} ${accountCode === account.code ? ledgerStyles.accountButtonActive : ""}`} onClick={() => chooseAccount(account.code)} aria-pressed={accountCode === account.code}>
             <span className={styles.stack}>
               <strong>{account.name}</strong>
-              <span className={styles.muted}>{humanizeConstantName(account.kind)} · {account.entryCount} legs</span>
+              <span className={styles.muted}>{humanizeConstantName(account.kind)} · {account.entryCount} legs{account.ownerId ? ` · ${account.ownerType ?? "owner"} ${account.ownerId}` : ""}</span>
             </span>
             <span className={styles.amount}>{formatMoneyForDisplay(account.balance)}</span>
           </button>
         ))}
+        <div className={ledgerStyles.journal}><CursorPagination cursor={accountCursor} nextCursor={accounts.data?.nextCursor} onCursorChange={setAccountCursor} /></div>
       </Card>
       <Card title="Journal entries" isFlush>
         {entries.errorMessage ? <ErrorBlock message={entries.errorMessage} onRetry={entries.reload} /> : null}
         {entries.isLoading && !entries.data ? <LoadingBlock lines={6} /> : null}
         {entries.data?.items.map((journal) => <JournalEntryCard key={journal.id} journal={journal} />)}
         {entries.data && entries.data.items.length === 0 ? <p className={ledgerStyles.journal}>No entries for this account.</p> : null}
-        {entries.data ? <div className={ledgerStyles.journal}><Pagination page={entries.data.page} pageSize={entries.data.pageSize} total={entries.data.total} onPageChange={setPage} /></div> : null}
+        <div className={ledgerStyles.journal}><CursorPagination cursor={entryCursor} nextCursor={entries.data?.nextCursor} onCursorChange={setEntryCursor} /></div>
       </Card>
     </div>
   );
