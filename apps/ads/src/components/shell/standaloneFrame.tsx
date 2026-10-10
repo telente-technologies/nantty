@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { ZudomartWordmark } from "@zudomart/web-kit";
 import { UserMenu } from "@/components/shell/userMenu";
+import { VerificationBanner } from "@/components/verification/verificationPrompt";
 import { buildContactMailtoLink, contactEmailDisplayText } from "@/constants/contact.constant";
 
 import styles from "./standaloneFrame.module.css";
@@ -20,6 +21,7 @@ export function StandaloneFrame({ children, showUserMenu = true, width = "regula
         {showUserMenu ? <UserMenu /> : null}
       </header>
       <main id="main-content" className={width === "narrow" ? `${styles.main} ${styles.narrow}` : styles.main}>
+        <VerificationBanner />
         {children}
       </main>
       <footer className={styles.footer}>

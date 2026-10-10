@@ -23,8 +23,9 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { InlineNotice } from "@/components/ui/feedback";
 import { PageHeader } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
+import { VerificationPrompt } from "@/components/verification/verificationPrompt";
 import { supportedAccountCountries } from "@/constants/locale.constant";
-import { AdsApiRequestError, readErrorMessageForDisplay } from "@/services/adsApiClient.service";
+import { AdsApiRequestError, isVerificationRequiredError, readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 import { campaignsApi } from "@/services/campaignsApi.service";
 import { createClientIdempotencyKey } from "@/utils/formValidation.util";
 
@@ -54,6 +55,7 @@ export function CampaignWizard() {
   const [state, dispatch] = useReducer(reduceCampaignWizardState, undefined, () => createInitialWizardState(createDefaultAudienceForCountry(account.countryCode, country?.name ?? account.countryCode)));
   const [errors, setErrors] = useState<WizardFieldErrors>({});
   const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
   const [submittingMode, setSubmittingMode] = useState<"draft" | "publish" | null>(null);
   const idempotencyKeyRef = useRef(createClientIdempotencyKey("campaign"));
   const headingRef = useRef<HTMLDivElement>(null);
@@ -78,6 +80,7 @@ export function CampaignWizard() {
 
   async function submitCampaign(submitForReview: boolean) {
     setSubmitErrorMessage(null);
+    setVerificationMessage(null);
     const firstInvalidStep = findFirstStepWithErrors(state, currency);
     if (firstInvalidStep) {
       dispatch({ type: "go_to_step", stepIndex: firstInvalidStep.stepIndex });
@@ -96,7 +99,8 @@ export function CampaignWizard() {
         setErrors(convertApiIssuesToFieldErrors(error));
       }
       if (!(error instanceof AdsApiRequestError && error.status === 409)) idempotencyKeyRef.current = createClientIdempotencyKey("campaign");
-      setSubmitErrorMessage(readErrorMessageForDisplay(error));
+      setSubmitErrorMessage(isVerificationRequiredError(error) ? null : readErrorMessageForDisplay(error));
+      setVerificationMessage(isVerificationRequiredError(error) ? error.message : null);
     } finally {
       setSubmittingMode(null);
     }
@@ -116,6 +120,7 @@ export function CampaignWizard() {
           <div ref={headingRef} tabIndex={-1} className={styles.stepCard} aria-label={`Step ${state.stepIndex + 1} of ${campaignWizardSteps.length}: ${campaignWizardSteps[state.stepIndex]?.label ?? ""}`}>
             <StepComponent {...stepProps} />
           </div>
+          {verificationMessage ? <VerificationPrompt message={verificationMessage} /> : null}
           {submitErrorMessage ? <InlineNotice tone="error" title="The campaign was not saved">{submitErrorMessage}</InlineNotice> : null}
           <div className={styles.actionBar}>
             <Button variant="ghost" iconName="arrowLeft24" disabled={state.stepIndex === 0} onClick={() => moveToStep(state.stepIndex - 1)}>

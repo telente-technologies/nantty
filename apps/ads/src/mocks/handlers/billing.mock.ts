@@ -4,6 +4,7 @@ import { findRecordInAccount, requireAccountAccess } from "@/mocks/mockAccountAc
 import { appendMockActivity, readMockDatabase, type MockAdAccountRecord } from "@/mocks/mockDatabase.mock";
 import { MockHttpError, createMockId, failValidation, paginateItems, readIsoNow, readJsonObjectBody, respondWithDownload, respondWithJson, respondWithNoContent } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
+import { requireMockAdsVerification } from "@/mocks/handlers/verificationAndWallet.mock";
 import type { BillingOverview, FundingMode } from "@/types/billing.type";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 
@@ -57,7 +58,8 @@ export function registerBillingMockHandlers(): void {
   registerMockRoute("GET", "/ads/accounts/:accountId/billing", (request) => respondWithJson(200, presentBillingOverview(requireAccountAccess(request, "billing:view").account)));
 
   registerMockRoute("POST", "/ads/accounts/:accountId/billing/top-ups", (request) => {
-    const { account } = requireAccountAccess(request, "billing:manage");
+    const { account, userId } = requireAccountAccess(request, "billing:manage");
+    requireMockAdsVerification(userId);
     if (!request.headers.get("idempotency-key")) throw new MockHttpError(400, "IDEMPOTENCY_KEY_REQUIRED", "Payments need an Idempotency-Key header.");
     const body = readJsonObjectBody(request);
     const amount = typeof body.amount === "object" && body.amount ? (body.amount as { amountMinor?: unknown; currency?: unknown }) : {};

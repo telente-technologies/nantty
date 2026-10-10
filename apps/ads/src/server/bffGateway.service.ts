@@ -9,7 +9,7 @@ import { isMutationProtectedAgainstCsrf, isSafeHttpMethod } from "@/server/reque
 const maximumForwardedBodyBytes = 12 * 1024 * 1024;
 const forwardedRequestHeaderNames = ["idempotency-key", "if-match"];
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
-const allowedApiPathPattern = /^\/(ads|media|topics|users)(\/[A-Za-z0-9._~:@%-]+)*$/;
+const allowedApiPathPattern = /^\/(ads|media|topics|users)(\/[A-Za-z0-9._~:@%-]+)*$|^\/wallets\/me$/;
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
   return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store" } });

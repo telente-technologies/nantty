@@ -2,6 +2,7 @@ import { buildAccountApiPath, sendAdsApiRequest } from "@/services/adsApiClient.
 import type { Page } from "@/types/api.type";
 import type { BillingOverview, BillingTransaction, CampaignCostEstimate, CampaignCostEstimateRequest, FundingMode, Invoice, PaymentProvider, RegionalAdPricing, TopUp, TopUpCheckout } from "@/types/billing.type";
 import type { Money } from "@/types/money.type";
+import type { EarningsFunding } from "@/types/zudomartWallet.type";
 
 export const billingApi = {
   estimateCampaignCost: (request: CampaignCostEstimateRequest) => sendAdsApiRequest<CampaignCostEstimate>("/ads/pricing/estimate", { method: "POST", body: request }),
@@ -9,6 +10,8 @@ export const billingApi = {
   fetchBillingOverview: (accountId: string) => sendAdsApiRequest<BillingOverview>(buildAccountApiPath(accountId, "/billing")),
   startTopUpCheckout: (accountId: string, amount: Money, provider: PaymentProvider, idempotencyKey: string) =>
     sendAdsApiRequest<TopUpCheckout>(buildAccountApiPath(accountId, "/billing/top-ups"), { method: "POST", body: { amount, provider, returnPath: `/accounts/${accountId}/billing/return` }, idempotencyKey }),
+  fundFromEarnings: (accountId: string, amount: Money, idempotencyKey: string) =>
+    sendAdsApiRequest<EarningsFunding>(buildAccountApiPath(accountId, "/billing/fund-from-earnings"), { method: "POST", body: { amount }, idempotencyKey }),
   fetchTopUpByReference: (accountId: string, reference: string) => sendAdsApiRequest<TopUp>(buildAccountApiPath(accountId, `/billing/top-ups/${encodeURIComponent(reference)}`)),
   listTransactions: (accountId: string, cursor: string | null = null) =>
     sendAdsApiRequest<Page<BillingTransaction>>(buildAccountApiPath(accountId, "/billing/transactions"), { query: { cursor, limit: 25 } }),

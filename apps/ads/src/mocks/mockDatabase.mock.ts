@@ -113,7 +113,7 @@ export interface MockAdsDatabase {
   readonly experiments: (Experiment & { readonly accountId: string })[];
   readonly rules: (AutomatedRule & { readonly accountId: string })[];
   readonly activity: (ActivityEntry & { readonly accountId: string })[];
-  readonly idempotentResponses: Map<string, { readonly status: number; readonly body: unknown }>;
+  readonly idempotentResponses: Map<string, { readonly status: number; readonly body: unknown; readonly requestBody?: string }>;
 }
 
 function buildFreshMockDatabase(): MockAdsDatabase {

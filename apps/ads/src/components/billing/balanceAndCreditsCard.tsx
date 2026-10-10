@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card } from "@/components/ui/surfaces";
 import type { AdsEntitlements } from "@/types/adAccount.type";
 import type { BillingOverview } from "@/types/billing.type";
+import type { Money } from "@/types/money.type";
 import { formatDateWithYear } from "@/utils/dateRange.util";
 import { formatMoneyForDisplay } from "@/utils/money.util";
 
@@ -16,6 +17,8 @@ interface BalanceAndCreditsCardProps {
   readonly entitlements: AdsEntitlements | null;
   readonly canManageBilling: boolean;
   readonly onRequestTopUp: () => void;
+  readonly availableToWithdraw: Money | null;
+  readonly onRequestPayFromBalance: () => void;
 }
 
 function describeEstimatedDaysOfDelivery(days: number | null): string {
@@ -24,7 +27,7 @@ function describeEstimatedDaysOfDelivery(days: number | null): string {
   return `At current daily budgets, this covers about ${days} day${days === 1 ? "" : "s"} of delivery.`;
 }
 
-export function BalanceAndCreditsCard({ overview, entitlements, canManageBilling, onRequestTopUp }: BalanceAndCreditsCardProps) {
+export function BalanceAndCreditsCard({ overview, entitlements, canManageBilling, onRequestTopUp, availableToWithdraw, onRequestPayFromBalance }: BalanceAndCreditsCardProps) {
   const isBalanceLow = overview.balance.amountMinor < overview.lowBalanceThreshold.amountMinor;
   const monthlyCredit = entitlements?.monthlyAdCredit ?? overview.credits.monthlyGrant;
   const renewsAt = entitlements?.creditRenewsAt ?? overview.credits.expiresAt;
@@ -56,6 +59,12 @@ export function BalanceAndCreditsCard({ overview, entitlements, canManageBilling
           <Button variant="primary" iconName="plus16" onClick={onRequestTopUp}>
             Add funds
           </Button>
+          <Button variant="secondary" disabled={!availableToWithdraw} onClick={onRequestPayFromBalance}>
+            Pay from my Zudomart balance
+          </Button>
+          <span className={styles.muted} style={{ alignSelf: "center" }}>
+            Available to withdraw: {availableToWithdraw ? formatMoneyForDisplay(availableToWithdraw) : "—"}
+          </span>
         </div>
       ) : (
         <p className={styles.muted} style={{ marginTop: 12 }}>

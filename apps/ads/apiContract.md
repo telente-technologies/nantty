@@ -161,6 +161,9 @@ Customer lists: the browser normalizes (emails trimmed + lowercased; phones to E
 | GET | /ads/accounts/:accountId/billing | billing:view | — | `BillingOverview` | 404 |
 | POST | /ads/accounts/:accountId/billing/top-ups **(mock-only)** | billing:manage | `{ amount: Money, provider: "paystack", returnPath }` + **Idempotency-Key** | 201 `TopUpCheckout` `{ topUpId, reference, provider: "paystack", authorizationUrl, accessCode }` — the app opens the Paystack Popup with `accessCode` and falls back to redirecting to `authorizationUrl`; the callback returns to `https://ads.<domain><returnPath>?reference=<ref>` | 400 (amount outside min/max, wrong currency), 400 IDEMPOTENCY_KEY_REQUIRED |
 | GET | /ads/accounts/:accountId/billing/top-ups/:reference **(mock-only)** | billing:view | — | `TopUp` — verify with the provider server-side (and via webhook); credit the balance exactly once | 404 |
+| POST | /ads/accounts/:accountId/billing/fund-from-earnings | billing:manage (and the account owner) | `{ amount: Money }` + **Idempotency-Key** | 201 `EarningsFunding` `{ fundingId, amount, status: "succeeded" }` — moves the caller's "Available to withdraw" (GET /wallets/me) into this ad account's prepaid balance. UI label "Pay from my Zudomart balance", next to the Paystack top-up; a new key per attempt, reused only to retry the same amount after a network/5xx failure | 403 VERIFICATION_REQUIRED, 403 FORBIDDEN (not the owner), 409 IDEMPOTENCY_KEY_REUSED, 422 INSUFFICIENT_FUNDS ("Amount is more than your available balance.") |
+| GET | /ads/verification | signed in | — | `AdsVerification` `{ level, verified, nextStep, message, verifyUrl }` — when `verified` is false the app shows a "Verify to advertise" prompt linking to `verifyUrl` (only http/https URLs are followed) | 503 VERIFICATION_UNAVAILABLE |
+| GET | /wallets/me (go-money) | signed in, GET only | — | `ZudomartWalletSummary` (apps/ads/src/types/zudomartWallet.type.ts). The billing page renders `lines` in order with the backend `label` and `description`, coins (currency `"COIN"`) as "N coins", never summed | 401 |
 | GET | /ads/accounts/:accountId/billing/transactions | billing:view | `?cursor=&limit=` | `Page<BillingTransaction>` (signed amounts) | 404 |
 | GET | /ads/accounts/:accountId/billing/transactions/:transactionId/receipt **(mock-only)** | billing:view | — | PDF (`Content-Disposition: attachment`) | 404 NO_RECEIPT |
 | GET | /ads/accounts/:accountId/billing/invoices **(mock-only)** | billing:view | `?cursor=&limit=` | `Page<Invoice>` monthly, with VAT | 404 |
@@ -206,3 +209,8 @@ Every row in this section is **mock-only**.
 | DELETE | /ads/accounts/:accountId/rules/:ruleId | tools:manage | — | 204 | 404 |
 
 Experiments split traffic by user (not impression) so a person only sees one arm; `result` carries the winner and statistical confidence. Rules run on the schedule in `checkEveryMinutes`, act only on items in the account, and log an `ActivityEntry` with the system actor "Automated rule".
+
+## Verification (L1 payout-verified required)
+
+Any ads-platform action by a user below L1 (ad account creation, campaign publish/submit, top-ups, paying from balance) returns `403 { code: "VERIFICATION_REQUIRED", message }`; `503 VERIFICATION_UNAVAILABLE` when the level cannot be read. The API client broadcasts VERIFICATION_REQUIRED so the app shell shows the same verify prompt as GET /ads/verification, and the create-account form, campaign wizard and top-up/pay-from-balance dialogs show the prompt instead of a generic error. Mock mode: `ibrahim@ifelifestyle.ng` is L0; every other demo user is L1.
+

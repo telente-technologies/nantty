@@ -7,6 +7,7 @@ import { MockHttpError, createMockId, paginateItems, readIsoNow, readJsonObjectB
 import { markAdAsSubmittedForReview } from "@/mocks/mockReviewQueue.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { applyBulkActionToRecords } from "@/mocks/handlers/bulkActions.mock";
+import { requireMockAdsVerification } from "@/mocks/handlers/verificationAndWallet.mock";
 import type { DeliveryStatus } from "@/types/campaign.type";
 
 function readRangeFromQuery(request: MockRequest) {
@@ -44,6 +45,7 @@ export function registerCampaignMockHandlers(): void {
   registerMockRoute("POST", "/ads/accounts/:accountId/campaigns", (request) => {
     const { account, userId, actorName } = requireAccountAccess(request, "campaigns:manage");
     const body = readJsonObjectBody(request);
+    if (body.submitForReview === true) requireMockAdsVerification(userId);
     const issues: { path: string; message: string }[] = [];
     const campaignInput = validateCampaignInput(body.campaign, account, issues);
     const adSetInput = validateAdSetInput(body.adSet, account, campaignInput.budgetLevel, issues);
@@ -118,6 +120,7 @@ export function registerCampaignMockHandlers(): void {
 
   registerMockRoute("POST", "/ads/accounts/:accountId/campaigns/:campaignId/submit", (request) => {
     const { account, userId, actorName } = requireAccountAccess(request, "campaigns:manage");
+    requireMockAdsVerification(userId);
     const campaign = findRecordInAccount(readMockDatabase().campaigns, account.id, request.params.campaignId, "campaign");
     const submittedCount = submitDraftAdsOfCampaignForReview(campaign);
     if (submittedCount === 0) throw new MockHttpError(409, "NOTHING_TO_SUBMIT", "There are no draft or rejected ads to send for review.");

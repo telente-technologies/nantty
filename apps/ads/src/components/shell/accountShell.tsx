@@ -11,6 +11,7 @@ import { AdAccountProvider, useAdAccount } from "@/components/session/adAccountP
 import { ButtonLink } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { VerificationBanner } from "@/components/verification/verificationPrompt";
 import { accountNavigationItems } from "@/config/navigation.config";
 import { doesRoleHavePermission } from "@/config/rolePermissions.config";
 import type { AdAccountRole } from "@/types/adAccount.type";
@@ -107,6 +108,7 @@ export function AccountShell({ accountId, role, children }: { readonly accountId
             <AccountTopBar />
           </header>
           <main id="main-content" className={styles.main}>
+            <VerificationBanner />
             {children}
           </main>
         </AdAccountProvider>

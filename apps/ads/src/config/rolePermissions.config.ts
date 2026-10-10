@@ -56,7 +56,10 @@ export type ApiCallRequirement = { readonly kind: "signed_in" } | { readonly kin
 
 const signedInOnlyPaths = [/^\/ads\/accounts$/, /^\/ads\/pricing(\/estimate)?$/, /^\/ads\/business-profiles$/, /^\/ads\/invites\/[A-Za-z0-9_-]+(\/accept)?$/, /^\/ads\/locations$/, /^\/ads\/behaviours$/, /^\/topics$/, /^\/ads\/policy$/, /^\/users\/me\/(preferences|consents)$/, /^\/media\/[A-Za-z0-9_-]+$/];
 
+const signedInReadOnlyPaths = [/^\/ads\/verification$/, /^\/wallets\/me$/];
+
 export function findRequirementForApiCall(method: string, apiPath: string): ApiCallRequirement {
+  if (signedInReadOnlyPaths.some((pattern) => pattern.test(apiPath))) return method === "GET" || method === "HEAD" ? { kind: "signed_in" } : { kind: "denied" };
   if (signedInOnlyPaths.some((pattern) => pattern.test(apiPath))) return { kind: "signed_in" };
   const accountMatch = /^\/ads\/accounts\/([A-Za-z0-9_-]{1,64})(\/.*)?$/.exec(apiPath);
   if (!accountMatch?.[1]) return { kind: "denied" };

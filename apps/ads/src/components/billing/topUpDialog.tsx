@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { InlineNotice } from "@/components/ui/feedback";
 import { TextField } from "@/components/ui/formFields";
 import { OverlayDialog } from "@/components/ui/overlayDialog";
+import { VerificationPrompt } from "@/components/verification/verificationPrompt";
 import { billingApi } from "@/services/billingApi.service";
-import { readErrorMessageForDisplay } from "@/services/adsApiClient.service";
+import { AdsApiRequestError, isVerificationRequiredError, readErrorMessageForDisplay } from "@/services/adsApiClient.service";
 import type { BillingOverview } from "@/types/billing.type";
 import type { Money } from "@/types/money.type";
 import { createClientIdempotencyKey } from "@/utils/formValidation.util";
@@ -33,10 +34,11 @@ function validateTopUpAmount(amount: Money | null, overview: BillingOverview): s
 export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialogProps) {
   const currency = overview.balance.currency;
   const [typedAmount, setTypedAmount] = useState(() => formatMajorAmountForInput(overview.suggestedTopUps[1] ?? overview.suggestedTopUps[0] ?? null));
-  const [idempotencyKey] = useState(() => createClientIdempotencyKey("topup"));
+  const [idempotencyKey, setIdempotencyKey] = useState(() => createClientIdempotencyKey("topup"));
   const [showErrors, setShowErrors] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
   const amount = parseTypedMajorAmountToMoney(typedAmount, currency);
   const amountError = validateTopUpAmount(amount, overview);
 
@@ -45,6 +47,7 @@ export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialo
     if (amountError || !amount) return;
     setIsStarting(true);
     setErrorMessage(null);
+    setVerificationMessage(null);
     try {
       const checkout = await billingApi.startTopUpCheckout(accountId, amount, "paystack", idempotencyKey);
       if (!(await openPaystackCheckoutIfSafe(checkout, `/accounts/${accountId}/billing/return?reference=${encodeURIComponent(checkout.reference)}`))) {
@@ -52,7 +55,9 @@ export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialo
         setIsStarting(false);
       }
     } catch (error) {
-      setErrorMessage(readErrorMessageForDisplay(error));
+      if (isVerificationRequiredError(error)) setVerificationMessage(error.message);
+      else setErrorMessage(readErrorMessageForDisplay(error));
+      if (error instanceof AdsApiRequestError && error.status >= 400 && error.status < 500) setIdempotencyKey(createClientIdempotencyKey("topup"));
       setIsStarting(false);
     }
   }
@@ -95,6 +100,7 @@ export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialo
         hint={`Between ${formatMoneyForDisplay(overview.minimumTopUp)} and ${formatMoneyForDisplay(overview.maximumTopUp)}.`}
       />
       <InlineNotice tone="info">Pay by card, bank transfer or USSD in Paystack&apos;s secure window. We never see your card number.</InlineNotice>
+      {verificationMessage ? <VerificationPrompt message={verificationMessage} /> : null}
       {errorMessage ? <InlineNotice tone="error">{errorMessage}</InlineNotice> : null}
     </OverlayDialog>
   );

@@ -50,6 +50,18 @@ export function buildQueryString(query: AdsApiRequestOptions["query"]): string {
   return queryText ? `?${queryText}` : "";
 }
 
+export const verificationRequiredErrorCode = "VERIFICATION_REQUIRED";
+export const verificationRequiredEventName = "zudomart-ads:verification-required";
+
+function announceVerificationRequired(message: string | undefined): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(verificationRequiredEventName, { detail: { message: message ?? null } }));
+}
+
+export function isVerificationRequiredError(error: unknown): error is AdsApiRequestError {
+  return error instanceof AdsApiRequestError && error.status === 403 && error.code === verificationRequiredErrorCode;
+}
+
 const sessionEndedErrorCodes = new Set(["SESSION_EXPIRED", "UNAUTHENTICATED", "UNAUTHORIZED"]);
 const genericValidationMessage = "Validation failed";
 
@@ -79,6 +91,7 @@ export async function sendRequestToAdsManagerServer<Payload>(bffPath: string, op
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
     if (response.status === 401 && sessionEndedErrorCodes.has(errorBody?.code ?? "")) redirectToLoginAfterSessionEnded();
+    if (response.status === 403 && errorBody?.code === verificationRequiredErrorCode) announceVerificationRequired(errorBody.message);
     throw new AdsApiRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.issues ?? []);
   }
   if (response.status === 204) return undefined as Payload;

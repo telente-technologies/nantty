@@ -2,6 +2,7 @@ import { supportedAccountCountries } from "@/constants/locale.constant";
 import { presentAccountDetail, presentAccountSummary, requireAccountAccess } from "@/mocks/mockAccountAccess.mock";
 import { appendMockActivity, readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { failValidation, paginateItems, readJsonObjectBody, readRequiredTrimmedString, requirePrincipal, respondWithJson } from "@/mocks/mockResponses.mock";
+import { requireMockAdsVerification } from "@/mocks/handlers/verificationAndWallet.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import type { LinkedBusinessProfile } from "@/types/adAccount.type";
 
@@ -37,6 +38,7 @@ export function registerAccountMockHandlers(): void {
 
   registerMockRoute("POST", "/ads/accounts", (request) => {
     const principal = requirePrincipal(request);
+    requireMockAdsVerification(principal.userId);
     const body = readJsonObjectBody(request);
     const database = readMockDatabase();
     const name = readRequiredTrimmedString(body, "name", 80);

@@ -9,6 +9,7 @@ import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { AdsSessionProvider } from "@/components/session/adsSessionProvider";
 import { AppThemeProvider } from "@/components/theme/appThemeProvider";
 import { ToastProvider } from "@/components/ui/toastProvider";
+import { AdsVerificationProvider } from "@/components/verification/adsVerificationProvider";
 import { adsManagerProductName, readPublicSiteUrl } from "@/config/siteMetadata.config";
 import { buildSessionViewFromCookies, readCsrfTokenForCookies } from "@/server/adsSessionView.service";
 
@@ -49,7 +50,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <OfflineBanner />
         <AdsSessionProvider initialSessionView={sessionView} csrfToken={readCsrfTokenForCookies(cookieStore)}>
           <AppThemeProvider initialPreference={themePreference} isSignedIn={sessionView !== null}>
-            <ToastProvider>{children}</ToastProvider>
+            <AdsVerificationProvider isSignedIn={sessionView !== null}>
+              <ToastProvider>{children}</ToastProvider>
+            </AdsVerificationProvider>
             <ConsentBannerHost isSignedIn={sessionView !== null} />
           </AppThemeProvider>
         </AdsSessionProvider>

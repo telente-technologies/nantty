@@ -38,10 +38,12 @@ function replayOrRememberIdempotentResponse(call: MockApiCall, principal: MockPr
   if (!idempotencyKey || call.method === "GET") return produce();
   const database = readMockDatabase();
   const storageKey = `${principal?.userId ?? "anonymous"}:${call.method}:${call.path}:${idempotencyKey}`;
+  const requestBody = call.body ? new TextDecoder().decode(call.body) : "";
   const remembered = database.idempotentResponses.get(storageKey);
+  if (remembered && remembered.requestBody !== undefined && remembered.requestBody !== requestBody) return Promise.resolve(respondWithError(409, "IDEMPOTENCY_KEY_REUSED", "This payment key was already used for a different request."));
   if (remembered) return Promise.resolve({ status: remembered.status, body: remembered.body, headers: { "Idempotent-Replayed": "true" } });
   return produce().then((response) => {
-    if (response.status < 500) database.idempotentResponses.set(storageKey, { status: response.status, body: response.body });
+    if (response.status < 500) database.idempotentResponses.set(storageKey, { status: response.status, body: response.body, requestBody });
     return response;
   });
 }
