@@ -12,10 +12,10 @@ import (
 func MountAppealsRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.AppealsController{Container: container}
 	reviewer := middlewares.RequireStaffWithAnyPermission(container.StaffVerifiers, []string{"moderation:appeals"}, false)
-	requireAccessToken := jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)
+	requireAccessTokenAllowingSuspended := jwtauth.RequireVerifiedAccessTokenAllowingSuspended(container.AccessVerifier)
 	mux.Handle("GET /api/v1/admin/appeals", reviewer(http.HandlerFunc(controller.List)))
 	mux.Handle("GET /api/v1/admin/appeals/{appealId}", reviewer(http.HandlerFunc(controller.Detail)))
 	mux.Handle("POST /api/v1/admin/appeals/{appealId}/decide", reviewer(http.HandlerFunc(controller.Decide)))
-	mux.Handle("GET /api/v1/moderation/decisions/me", requireAccessToken(http.HandlerFunc(controller.MyDecisions)))
-	mux.Handle("POST /api/v1/moderation/decisions/{reportId}/appeal", requireAccessToken(http.HandlerFunc(controller.Appeal)))
+	mux.Handle("GET /api/v1/moderation/decisions/me", requireAccessTokenAllowingSuspended(http.HandlerFunc(controller.MyDecisions)))
+	mux.Handle("POST /api/v1/moderation/decisions/{reportId}/appeal", requireAccessTokenAllowingSuspended(http.HandlerFunc(controller.Appeal)))
 }

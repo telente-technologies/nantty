@@ -12,9 +12,9 @@ type ActionRule struct {
 
 var ActionRules = map[string]ActionRule{
 	"DISMISS":        {Permission: "chat-reports:review", ReporterNotice: true, ReporterOutcome: "no_violation"},
-	"WARN_USER":      {Permission: "users:moderate", NeedsUser: true, ReporterNotice: true, ReporterOutcome: "action_taken"},
-	"RESTRICT_USER":  {Permission: "users:restrict", NeedsUser: true, ReporterNotice: true, ReporterOutcome: "action_taken"},
-	"SUSPEND_USER":   {Permission: "users:suspend", NeedsUser: true, ReporterNotice: true, ReporterOutcome: "action_taken"},
+	"WARN_USER":      {Permission: "users:moderate", NeedsStepUp: true, NeedsUser: true, ReporterNotice: true, ReporterOutcome: "action_taken"},
+	"RESTRICT_USER":  {Permission: "users:restrict", NeedsStepUp: true, NeedsUser: true, ReporterNotice: true, ReporterOutcome: "action_taken"},
+	"SUSPEND_USER":   {Permission: "users:suspend", NeedsStepUp: true, NeedsUser: true, ReporterNotice: true, ReporterOutcome: "action_taken"},
 	"BAN_USER":       {Permission: "users:ban", NeedsStepUp: true, NeedsUser: true, ReporterNotice: true, ReporterOutcome: "action_taken"},
 	"REMOVE_GROUP":   {Permission: "chat-reports:review", NeedsStepUp: true, ReporterNotice: true, ReporterOutcome: "action_taken"},
 	"ESCALATE_LEGAL": {Permission: "chat-reports:legal", NeedsStepUp: true},

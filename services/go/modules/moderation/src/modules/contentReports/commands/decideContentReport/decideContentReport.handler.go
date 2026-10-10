@@ -38,8 +38,8 @@ var actionRules = map[string]actionRule{
 	"DISMISS":                    {},
 	"HIDE":                       {visibility: "hidden"},
 	"RESTRICT":                   {visibility: "restricted"},
-	"REMOVE":                     {visibility: "removed", addsStrike: true},
-	"WARN_AUTHOR":                {addsStrike: true, needsAuthor: true},
+	"REMOVE":                     {visibility: "removed", addsStrike: true, needsStepUp: true},
+	"WARN_AUTHOR":                {addsStrike: true, needsAuthor: true, needsStepUp: true},
 	"SUSPEND_AUTHOR":             {visibility: "hidden", addsStrike: true, needsAuthor: true, needsStepUp: true},
 	"REVOKE_AUTHOR_VERIFICATION": {needsAuthor: true, needsStepUp: true, permission: "verification:revoke"},
 }
