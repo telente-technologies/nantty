@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ShieldIcon } from "@/components/ui/icons";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
@@ -75,6 +76,8 @@ export function CopyrightClaimDialog({ isOpen, onClose, targetType, targetId }: 
       onClose={onClose}
       title="File a copyright claim"
       description="Only the rights holder or their authorised agent should file this. Knowingly false claims can have legal consequences."
+      tone="caution"
+      icon={<ShieldIcon size={24} />}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
