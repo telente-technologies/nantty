@@ -1,11 +1,11 @@
 import { schema } from "@zudojs/schema";
 
-const savedItemTypeSchema = schema.enum(["post", "video", "clip", "product"]);
+const savedItemTypeSchema = schema.enum(["post", "video", "clip", "product", "comment"]);
 
 export const saveBodySchema = schema.object({ type: savedItemTypeSchema, targetId: schema.string().min(1).max(100), collectionId: schema.string().uuid().optional() });
 export const unsaveQuerySchema = schema.object({ type: savedItemTypeSchema.optional(), targetId: schema.string().min(1).max(100) });
 export const listSavesQuerySchema = schema.object({
-  type: schema.enum(["all", "post", "video", "clip", "product"]).optional(),
+  type: schema.enum(["all", "post", "video", "clip", "product", "comment"]).optional(),
   collectionId: schema.string().uuid().optional(),
   cursor: schema.string().uuid().optional(),
 });

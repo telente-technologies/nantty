@@ -4,6 +4,7 @@ import { extractHashtags } from "../../../internalSources/services/hashtags.serv
 import { notFound, unprocessable } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { loadPostVisibleToViewer } from "../../../posts/services/postAccess.service.js";
+import { commentRepository } from "../../../comments/repositories/comment.repository.js";
 import { saveCollectionRepository } from "../../repositories/saveCollection.repository.js";
 import { savedItemRepository } from "../../repositories/savedItem.repository.js";
 import type { SaveItemCommand } from "./saveItem.command.js";
@@ -13,8 +14,13 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 export function createSaveItemHandler(context: HandlerContext): Handler<SaveItemCommand, void> {
   return async ({ userId, type, targetId, collectionId }) => {
     const db = context.database.client;
-    const post = type === "product" ? null : uuidPattern.test(targetId) ? await loadPostVisibleToViewer(context, userId, targetId) : null;
-    if (type !== "product" && post === null) throw unprocessable("INVALID_TARGET", "targetId must be a post id.");
+    let post: Awaited<ReturnType<typeof loadPostVisibleToViewer>> | null = null;
+    if (type === "comment") {
+      if ((await commentRepository.findById(db, targetId)) === null) throw unprocessable("INVALID_TARGET", "targetId must be a visible comment id.");
+    } else {
+      post = type === "product" ? null : uuidPattern.test(targetId) ? await loadPostVisibleToViewer(context, userId, targetId) : null;
+      if (type !== "product" && post === null) throw unprocessable("INVALID_TARGET", "targetId must be a post id.");
+    }
     if (collectionId !== undefined && (await saveCollectionRepository.findOwned(db, userId, collectionId)) === null) throw notFound("COLLECTION_NOT_FOUND", "Collection not found.");
     const now = context.clock.now();
     await db.$transaction(async (transaction) => {

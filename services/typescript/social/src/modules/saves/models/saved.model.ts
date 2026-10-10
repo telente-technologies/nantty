@@ -1,6 +1,7 @@
 import type { PostView, TaggedProductView } from "../../posts/models/post.model.js";
+import type { CommentView } from "../../comments/models/comment.model.js";
 
-export type SavedItemTypeName = "post" | "video" | "clip" | "product";
+export type SavedItemTypeName = "post" | "video" | "clip" | "product" | "comment";
 export type SavedItemFilter = "all" | SavedItemTypeName;
 
 export interface SavedItemPreview {
@@ -22,6 +23,7 @@ export interface SavedItemView {
   readonly post?: PostView;
   readonly clip?: PostView;
   readonly product?: TaggedProductView;
+  readonly comment?: CommentView;
 }
 
 export interface SaveCollectionView {

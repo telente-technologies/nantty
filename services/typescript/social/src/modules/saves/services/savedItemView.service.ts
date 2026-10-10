@@ -1,13 +1,15 @@
 import type { HandlerContext } from "../../../types/handlerContext.type.js";
 import { filterAuthorsVisibleToViewer } from "../../follows/services/profileAccess.service.js";
 import type { PostView } from "../../posts/models/post.model.js";
+import { commentRepository } from "../../comments/repositories/comment.repository.js";
+import { buildCommentViews } from "../../comments/services/commentView.service.js";
 import { postRepository } from "../../posts/repositories/post.repository.js";
 import { buildPostViews } from "../../posts/services/postView.service.js";
 import type { SavedItemView } from "../models/saved.model.js";
 
 interface SavedRow {
   readonly id: string;
-  readonly type: "post" | "video" | "clip" | "product";
+  readonly type: "post" | "video" | "clip" | "product" | "comment";
   readonly targetId: string;
   readonly createdAt: Date;
   readonly collectionId: string | null;
@@ -33,6 +35,9 @@ export async function buildSavedItemViews(context: HandlerContext, viewerId: str
   const visibleAuthors = await filterAuthorsVisibleToViewer(context, viewerId, posts.map((post) => post.authorId));
   const visiblePosts = posts.filter((post) => visibleAuthors.has(post.authorId));
   const views = new Map((await buildPostViews(context, viewerId, visiblePosts)).map((view) => [view.id, view]));
+  const commentIds = rows.filter((row) => row.type === "comment").map((row) => row.targetId);
+  const commentRows = commentIds.length === 0 ? [] : await commentRepository.findManyByIds(context.database.client, commentIds);
+  const commentViews = new Map((await buildCommentViews(context, viewerId, commentRows)).map((view) => [view.id, view]));
   const productIds = rows.filter((row) => row.type === "product").map((row) => row.targetId);
   const products = productIds.length === 0 || context.products === undefined ? new Map() : await context.products.findProducts(productIds).catch(() => new Map());
   return rows.flatMap((row): SavedItemView[] => {
@@ -43,6 +48,22 @@ export async function buildSavedItemViews(context: HandlerContext, viewerId: str
       return [{ ...base, preview, ...(product === undefined ? {} : { product: { id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, stock: product.stock } }) }];
     }
     const view = views.get(row.targetId);
+    if (row.type === "comment") {
+      const comment = commentViews.get(row.targetId);
+      if (comment === undefined) return [];
+      return [{
+        ...base,
+        preview: {
+          title: comment.text.slice(0, 80) === "" ? null : comment.text.slice(0, 80),
+          thumbnailUrl: comment.author.avatarUrl,
+          href: `/post/${comment.postId}#${comment.id}`,
+          author: comment.author.username === "" ? null : comment.author.username,
+          price: null,
+          durationSeconds: null,
+        },
+        comment,
+      }];
+    }
     if (view === undefined) return [];
     return [{ ...base, preview: previewForPost(view), ...(row.type === "clip" ? { clip: view } : { post: view }) }];
   });

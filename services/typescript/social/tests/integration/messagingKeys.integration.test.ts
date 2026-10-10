@@ -1,4 +1,4 @@
-import { generateKeyPairSync, randomUUID, sign } from "node:crypto";
+import { generateKeyPairSync, type KeyObject, randomUUID, sign } from "node:crypto";
 
 import { describe, expect, it } from "vitest";
 
@@ -15,7 +15,7 @@ import { createRegisterDeviceHandler } from "../../src/modules/messagingKeys/com
 import { maximumClaimsPerTargetPerWindow } from "../../src/modules/messagingKeys/services/preKeyClaimLimit.service.js";
 
 const enabled = process.env["RUN_INTEGRATION"] === "1" && process.env["DATABASE_URL"] !== undefined;
-const rawKey = (key: ReturnType<typeof generateKeyPairSync>["publicKey"]) => Buffer.from(key.export({ format: "jwk" }).x as string, "base64url");
+const rawKey = (key: KeyObject) => Buffer.from(key.export({ format: "jwk" }).x as string, "base64url");
 
 function deviceRegistration(oneTimePreKeys: number) {
   const identity = generateKeyPairSync("ed25519");
@@ -34,6 +34,7 @@ const emptyDirectory: IdentityDirectory = {
   findUserSummaries: async (ids) => new Map(ids.map((id) => [id, { id, name: id, username: id.slice(0, 8), avatarUrl: null, verified: false, isCreator: false }])),
   findAccountIdsByUsernames: async () => new Map(), searchUserSummaries: async () => [], findPrivateAccountIds: async () => new Set(), findMentionPrivacy: async () => new Map(),
   findMentionTargetStatuses: async () => new Map(), hasPersonalizationConsent: async () => false, findAccountsAllowingPersonalizedAds: async () => new Set<string>(), findCheckmarkColors: async () => new Map(), findAccountCreatedAt: async () => undefined,
+  findOwnedPostableProfile: async () => null, findProfilesByIds: async () => new Map(),
 };
 
 describe.skipIf(!enabled)("messaging keys (needs Postgres with the social schema migrated)", () => {
