@@ -2,9 +2,7 @@ package controllers
 
 import (
 	"crypto/subtle"
-	"net"
 	"net/http"
-	"strings"
 
 	"zudomart/modules/moderation/src/container"
 	decidesuspensioncase "zudomart/modules/moderation/src/modules/suspensionCases/commands/decideSuspensionCase"
@@ -66,10 +64,7 @@ func (controller SuspensionCasesController) decide(action string) http.HandlerFu
 			return
 		}
 		staff, _ := staffauth.StaffFromContext(request.Context())
-		host, _, _ := net.SplitHostPort(request.RemoteAddr)
-		if forwarded := strings.TrimSpace(request.Header.Get("X-Real-Ip")); forwarded != "" {
-			host = forwarded
-		}
+		host := httpserver.ClientIP(request)
 		err := decidesuspensioncase.Handler{Container: controller.Container}.Execute(request.Context(), decidesuspensioncase.Command{
 			Staff: staff, IpAddress: host, RequestId: httpserver.RequestIdFromContext(request.Context()), CaseId: request.PathValue("caseId"), Action: action, ReasonCode: body.ReasonCode, Reason: body.Reason,
 		})

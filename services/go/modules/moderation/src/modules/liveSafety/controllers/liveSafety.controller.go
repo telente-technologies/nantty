@@ -1,10 +1,8 @@
 package controllers
 
 import (
-	"net"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"zudomart/modules/moderation/src/container"
 	appeallivehold "zudomart/modules/moderation/src/modules/liveSafety/commands/appealLiveHold"
@@ -30,11 +28,7 @@ func (controller LiveSafetyController) respond(writer http.ResponseWriter, reque
 }
 
 func clientIp(request *http.Request) string {
-	if forwarded := strings.TrimSpace(request.Header.Get("X-Real-Ip")); forwarded != "" {
-		return forwarded
-	}
-	host, _, _ := net.SplitHostPort(request.RemoteAddr)
-	return host
+	return httpserver.ClientIP(request)
 }
 
 func (controller LiveSafetyController) List(writer http.ResponseWriter, request *http.Request) {

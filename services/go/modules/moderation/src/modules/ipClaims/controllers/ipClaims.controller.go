@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -32,11 +31,7 @@ func (controller IpClaimsController) respond(writer http.ResponseWriter, request
 }
 
 func clientIp(request *http.Request) string {
-	if forwarded := strings.TrimSpace(request.Header.Get("X-Real-Ip")); forwarded != "" {
-		return forwarded
-	}
-	host, _, _ := net.SplitHostPort(request.RemoteAddr)
-	return host
+	return httpserver.ClientIP(request)
 }
 
 func (controller IpClaimsController) Intake(writer http.ResponseWriter, request *http.Request) {

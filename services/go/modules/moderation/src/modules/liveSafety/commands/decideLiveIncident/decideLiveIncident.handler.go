@@ -40,6 +40,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		return invalid("reason", "must be 5 to 1000 characters")
 	case command.Action == ActionEndAndSuspend && !command.Staff.SteppedUp:
 		return httpserver.NewApiError(http.StatusForbidden, "STEP_UP_REQUIRED", "Confirm your identity again to continue.")
+	case command.Action != ActionKeepLive && !command.Staff.SteppedUp:
+		return httpserver.NewApiError(http.StatusForbidden, "STEP_UP_REQUIRED", "Confirm your identity again to continue.")
 	case command.Action == ActionEndAndSuspend && (command.DurationDays == nil || !slices.Contains(suspensionDurations, *command.DurationDays)):
 		return invalid("durationDays", "must be 1, 3, 7 or 30")
 	}
