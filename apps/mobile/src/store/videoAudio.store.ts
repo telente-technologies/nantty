@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { claimAudioFocusForVideoPlayback, releaseAudioFocusForVideoPlayback } from "@/services/videoAudio.service";
+import { claimAudioFocusForVideoPlayback, releaseAudioFocusForVideoPlayback } from "@/services/clips/videoAudio.service";
 
 interface VideoAudioState {
   readonly isMuted: boolean;

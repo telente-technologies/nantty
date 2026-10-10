@@ -9,7 +9,8 @@ import {
   type QueuedOfflineMutation,
 } from "@/cache/offlineMutation.type";
 import { handleOfflineMutationPermanentlyDropped, sendQueuedOfflineMutationToServer } from "@/cache/offlineMutationExecutor.util";
-import { generateIdempotencyKey, isNetworkFailureError, isRetryableApiFailure } from "@/services/apiClient.service";
+import { generateIdempotencyKey, isNetworkFailureError, isRetryableApiFailure } from "@/services/core/apiClient.service";
+import { sealedAsyncStorage } from "@/utils/localDataSealing.util";
 
 const MAXIMUM_REPLAY_ATTEMPTS_BEFORE_DROPPING = 6;
 const MAXIMUM_REPLAY_BACKOFF_MS = 60_000;
@@ -106,7 +107,7 @@ export const useOfflineStore = create<OfflineState>()(
     }),
     {
       name: "zm.offlineMutationQueue",
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => sealedAsyncStorage(AsyncStorage)),
       partialize: (state) => ({ queuedMutations: state.queuedMutations }),
       onRehydrateStorage: () => (state) => {
         state?.replayQueuedMutationsInOrder().catch(() => undefined);

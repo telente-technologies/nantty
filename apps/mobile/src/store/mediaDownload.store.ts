@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import { ApiError } from "@/errors/api.error";
-import { saveBrandedPostMediaToDevice } from "@/services/brandedMediaSaving.service";
+import { saveBrandedPostMediaToDevice } from "@/services/ads/brandedMediaSaving.service";
 import { showToast } from "@/store/toast.store";
 import type { DownloadableMedia, Post } from "@/types";
 import { DownloadCancelledError } from "@/utils/brandedDownloadPolling.util";
