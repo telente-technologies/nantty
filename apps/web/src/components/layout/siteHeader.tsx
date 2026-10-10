@@ -17,6 +17,8 @@ export function SiteHeaderWithFloatingNavigation() {
   const currentPathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasScrolledPastTop, setHasScrolledPastTop] = useState(false);
+  const [mobileMenuTopOffset, setMobileMenuTopOffset] = useState<number | undefined>(undefined);
+  const headerPillRef = useRef<HTMLDivElement>(null);
   const menuToggleButtonRef = useRef<HTMLButtonElement>(null);
   const firstMobileMenuLinkRef = useRef<HTMLAnchorElement>(null);
 
@@ -37,6 +39,8 @@ export function SiteHeaderWithFloatingNavigation() {
     if (!isMobileMenuOpen) return;
     const previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const pillBottom = headerPillRef.current?.getBoundingClientRect().bottom;
+    setMobileMenuTopOffset(pillBottom === undefined ? undefined : Math.ceil(pillBottom) + 8);
     firstMobileMenuLinkRef.current?.focus();
     function closeMobileMenuOnEscapeKey(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
@@ -56,7 +60,7 @@ export function SiteHeaderWithFloatingNavigation() {
 
   return (
     <header className={`${styles.header} ${hasScrolledPastTop ? styles.scrolled : ""}`}>
-      <div className={styles.pill}>
+      <div ref={headerPillRef} className={styles.pill}>
         <ZudomartWordmarkHomeLink collapseOnSmallScreens />
         <nav aria-label="Main" className={styles.desktopNavigation}>
           <ul className={styles.navigationList}>
@@ -88,7 +92,7 @@ export function SiteHeaderWithFloatingNavigation() {
           <span className={styles.menuToggleBars} aria-hidden="true" />
         </button>
       </div>
-      <div id="mobile-navigation" className={styles.mobileMenu} hidden={!isMobileMenuOpen}>
+      <div id="mobile-navigation" className={styles.mobileMenu} style={mobileMenuTopOffset === undefined ? undefined : { top: mobileMenuTopOffset }} hidden={!isMobileMenuOpen}>
         <nav aria-label="Mobile">
           <ul className={styles.mobileNavigationList}>
             {siteConfig.primaryNavigation.map((navigationLink, linkIndex) => (
