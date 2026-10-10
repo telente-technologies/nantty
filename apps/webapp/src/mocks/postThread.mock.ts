@@ -70,7 +70,7 @@ const toThreadReply = (comment: Comment, postAuthorId: string | null, depth: num
 };
 
 const sortConversation = (comments: readonly Comment[], sort: ThreadSort) =>
-  [...comments].sort((a, b) => (sort === "latest" ? b.createdAt.localeCompare(a.createdAt) : b.likes + b.replyCount * 5 - (a.likes + a.replyCount * 5)));
+  [...comments].sort((a, b) => Number(b.pinned === true) - Number(a.pinned === true) || (sort === "latest" ? b.createdAt.localeCompare(a.createdAt) : b.likes + b.replyCount * 5 - (a.likes + a.replyCount * 5)));
 
 const paginate = <T>(items: readonly T[], cursor: string | null, pageSize: number): Page<T> => {
   const start = Number(cursor ?? 0);

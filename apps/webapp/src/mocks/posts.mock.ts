@@ -74,6 +74,24 @@ export const postsMocks: MockRoute[] = [
   ),
   createMockRoute("POST", "/api/v1/posts/:postId/repost", ({ params }) => updateMockPost(params.postId!, (p) => ({ ...p, reposts: p.reposts + 1 }))),
   createMockRoute("POST", "/api/v1/posts/:postId/share", () => undefined),
+  createMockRoute("PUT", "/api/v1/posts/:postId/pin", ({ params }) => {
+    const post = mockPostsState.get(params.postId!);
+    if (!post) throw new ApiError(404, "This post was removed");
+    if (post.author.id !== getSignedInMockUser().id) throw new ApiError(403, "You can only pin your own posts.", "FORBIDDEN");
+    if (post.pinned !== true) {
+      const pinnedCount = [...mockPostsState.values()].filter((candidate) => candidate.author.id === post.author.id && candidate.pinned === true).length;
+      if (pinnedCount >= 3) throw new ApiError(409, "You can only pin up to 3 posts on your profile.", "PIN_LIMIT_REACHED");
+      updateMockPost(params.postId!, (p) => ({ ...p, pinned: true }));
+    }
+    return mockPostsState.get(params.postId!);
+  }),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/pin", ({ params }) => {
+    const post = mockPostsState.get(params.postId!);
+    if (!post) throw new ApiError(404, "This post was removed");
+    if (post.author.id !== getSignedInMockUser().id) throw new ApiError(403, "You can only unpin your own posts.", "FORBIDDEN");
+    updateMockPost(params.postId!, (p) => ({ ...p, pinned: false }));
+    return mockPostsState.get(params.postId!);
+  }),
   createMockRoute("GET", "/api/v1/posts/:postId/analytics", ({ params }) => {
     const post = findPostIncludingSponsored(params.postId!) ?? findMockClipsByIds([params.postId!])[0];
     if (!post) throw new ApiError(404, "This post was removed");

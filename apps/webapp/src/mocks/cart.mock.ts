@@ -27,7 +27,8 @@ export const cartMocks: MockRoute[] = [
     const sum = (amounts: readonly number[]) => amounts.reduce((total, amount) => total + amount, 0);
     const shipping = { ...cart.shipping, amountMinor: sum(groups.map((group) => group.fee?.amountMinor ?? 0)) };
     const itemsMinor = sum(shippedItems.map((item) => item.product.price.amountMinor * item.quantity));
-    return { groups, shipping, total: { ...cart.total, amountMinor: itemsMinor + shipping.amountMinor } };
+    const wireGroups = groups.map(({ storeId, ...quote }) => ({ storeId, shipping: quote }));
+    return { ...cart, groups: wireGroups, shipping, total: { ...cart.total, amountMinor: itemsMinor + shipping.amountMinor } };
   }),
   createMockRoute("POST", "/api/v1/cart/items", ({ body }) => {
     const { productId, quantity, size, color } = body as AddToCartBody;

@@ -83,6 +83,9 @@ const withCurrentSound = (clip: Clip): Clip => ({
 export const findMockClipsByIds = (clipIds: readonly string[]): Clip[] =>
   clipIds.map((clipId) => allClips.find((clip) => clip.id === clipId)).filter((clip): clip is Clip => !!clip).map(withCurrentSound);
 
+export const listMockClipsByAuthorId = (authorId: string): Clip[] =>
+  allClips.filter((clip) => clip.author.id === authorId).map(withCurrentSound);
+
 const listClipsForFeedTab = (tab: string | null): readonly Clip[] =>
   tab === "following"
     ? [...allClips].filter((clip) => clip.isFollowingAuthor && !clip.sponsored).reverse()
@@ -96,4 +99,7 @@ const pageOfClips = (clips: readonly Clip[], cursor: string | null): Page<Clip> 
 
 export const clipsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/clips", ({ query }) => pageOfClips(listClipsForFeedTab(query.get("tab")), query.get("cursor"))),
+  createMockRoute("GET", "/api/v1/users/:userId/clips", ({ params, query }) =>
+    pageOfClips(listMockClipsByAuthorId(params.userId!), query.get("cursor")),
+  ),
 ];

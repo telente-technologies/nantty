@@ -1,4 +1,4 @@
-import { createMockKeyDirectoryBackend, type DeviceAddress, type DeviceRegistrationRequest, type WireOneTimePreKey, type WireSignedPreKey } from "@zudomart/chat-crypto";
+import { createMockKeyDirectoryBackend, type DeviceAddress, type DeviceRegistrationRequest, type MailboxEntryInput, type WireOneTimePreKey, type WireSignedPreKey } from "@zudomart/chat-crypto";
 
 import { ApiError } from "@/errors/api.error";
 
@@ -18,6 +18,16 @@ async function asApiError<T>(run: () => T | Promise<T>): Promise<T> {
 }
 
 export const chatKeysMocks: MockRoute[] = [
+  createMockRoute("POST", "/api/v1/chat/keys/mailbox", ({ body }) => {
+    const input = (body ?? {}) as { senderDeviceId?: string; conversationId?: string; entries?: MailboxEntryInput[] };
+    backend.depositMailbox(viewerId(), input.senderDeviceId ?? "", input.conversationId ?? "", input.entries ?? []);
+    return { accepted: input.entries?.length ?? 0 };
+  }),
+  createMockRoute("GET", "/api/v1/chat/keys/devices/:deviceId/mailbox", ({ params }) => backend.fetchMailbox(viewerId(), params.deviceId!)),
+  createMockRoute("POST", "/api/v1/chat/keys/devices/:deviceId/mailbox/ack", ({ params, body }) => {
+    backend.acknowledgeMailbox(viewerId(), params.deviceId!, ((body ?? {}) as { ids?: string[] }).ids ?? []);
+    return { removed: 0 };
+  }),
   createMockRoute("POST", "/api/v1/chat/keys/devices/query", ({ body }) => backend.listDevices(((body ?? {}) as { userIds?: string[] }).userIds ?? [])),
   createMockRoute("POST", "/api/v1/chat/keys/bundles", ({ body }) => backend.claimBundles(((body ?? {}) as { devices?: DeviceAddress[] }).devices ?? [])),
   createMockRoute("PUT", "/api/v1/chat/keys/devices/:deviceId", ({ params, body }) => asApiError(() => backend.register(viewerId(), params.deviceId!, body as DeviceRegistrationRequest))),

@@ -177,7 +177,7 @@ const collectDescendantIds = (postId: string, commentId: string): string[] =>
 export const commentsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId/comments", ({ params, query }) => {
     const postId = params.postId!;
-    const topLevel = commentsForPost(postId).filter((c) => c.parentCommentId === null);
+    const topLevel = commentsForPost(postId).filter((c) => c.parentCommentId === null).sort((a, b) => Number(b.pinned === true) - Number(a.pinned === true));
     const page = paginateByOffset(topLevel, query.get("cursor"), TOP_LEVEL_PAGE_SIZE);
     const withPreviews: CommentWithReplies[] = page.data.map((c) => ({
       ...c,
@@ -208,6 +208,24 @@ export const commentsMocks: MockRoute[] = [
   createMockRoute("DELETE", "/api/v1/comments/:commentId/like", ({ params }) =>
     replaceStoredComment(params.commentId!, (c) => (c.liked ? { ...c, liked: false, likes: c.likes - 1 } : c)),
   ),
+  createMockRoute("PUT", "/api/v1/posts/:postId/comments/:commentId/pin", ({ params }) => {
+    const post = mockPostsState.get(params.postId!);
+    const comment = findCommentAnywhere(params.commentId!);
+    if (!comment || comment.postId !== params.postId) throw new ApiError(404, "Comment not found", "COMMENT_NOT_FOUND");
+    if (!post || post.author.id !== me.id) throw new ApiError(403, "Only the post author can pin a comment.", "FORBIDDEN");
+    for (const other of commentsForPost(params.postId!)) {
+      if (other.pinned === true && other.id !== comment.id) replaceStoredComment(other.id, (c) => ({ ...c, pinned: false }));
+    }
+    replaceStoredComment(comment.id, (c) => ({ ...c, pinned: true }));
+    return findCommentAnywhere(comment.id);
+  }),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/comments/:commentId/pin", ({ params }) => {
+    const post = mockPostsState.get(params.postId!);
+    const comment = findCommentAnywhere(params.commentId!);
+    if (!comment || comment.postId !== params.postId) throw new ApiError(404, "Comment not found", "COMMENT_NOT_FOUND");
+    if (!post || post.author.id !== me.id) throw new ApiError(403, "Only the post author can unpin a comment.", "FORBIDDEN");
+    replaceStoredComment(comment.id, (c) => ({ ...c, pinned: false }));
+  }),
   createMockRoute("DELETE", "/api/v1/comments/:commentId", ({ params }) => {
     const comment = findCommentAnywhere(params.commentId!);
     if (!comment) throw new ApiError(404, "Comment not found");

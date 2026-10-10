@@ -1,6 +1,6 @@
 import { ApiError } from "@/errors/api.error";
-import type { ConnectionEntry, ConnectionTab } from "@/types/account.type";
-import type { User } from "@/types";
+import type { ConnectionEntry, ConnectionTab, FollowRequest } from "@/types/account.type";
+import type { Page, User } from "@/types";
 
 import { getSignedInMockUser } from "./fixtures.mock";
 import { SIGNED_IN_BUYER, mockOrderRecords } from "./orderFixtures.mock";
@@ -55,6 +55,21 @@ const setFollowingAuthor = (userId: string, following: boolean) => {
   }
 };
 
+const matchesConnectionQuery = (entry: ConnectionEntry, query: string | null): boolean => {
+  const term = (query ?? "").trim().toLowerCase();
+  if (!term) return true;
+  return entry.name.toLowerCase().includes(term) || entry.username.toLowerCase().includes(term);
+};
+
+const pageOfConnections = (entries: ConnectionEntry[], query: string | null, cursor: string | null): Page<ConnectionEntry> => {
+  const filtered = entries.filter((entry) => matchesConnectionQuery(entry, query));
+  const start = Number(cursor ?? 0) || 0;
+  const end = start + 20;
+  return { data: filtered.slice(start, end), nextCursor: end < filtered.length ? String(end) : null };
+};
+
+const emptyFollowRequestsPage: Page<FollowRequest> = { data: [], nextCursor: null };
+
 export const usersMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/users/me", () => signedInProfile()),
   createMockRoute("PATCH", "/api/v1/users/me", ({ body }) => {
@@ -82,6 +97,11 @@ export const usersMocks: MockRoute[] = [
     nextCursor: null,
   })),
   createMockRoute("GET", "/api/v1/users/:userId/connections", ({ query }) => listConnections((query.get("tab") as ConnectionTab) ?? "followers")),
+  createMockRoute("GET", "/api/v1/users/:userId/followers", ({ query }) => pageOfConnections(listConnections("followers"), query.get("q"), query.get("cursor"))),
+  createMockRoute("GET", "/api/v1/users/:userId/following", ({ query }) => pageOfConnections(listConnections("following"), query.get("q"), query.get("cursor"))),
+  createMockRoute("GET", "/api/v1/users/me/follow-requests", () => emptyFollowRequestsPage),
+  createMockRoute("POST", "/api/v1/follow-requests/:requestId/accept", () => undefined),
+  createMockRoute("POST", "/api/v1/follow-requests/:requestId/reject", () => undefined),
   createMockRoute("POST", "/api/v1/users/:userId/follow", ({ params }) => setFollowingAuthor(params.userId!, true)),
   createMockRoute("DELETE", "/api/v1/users/:userId/follow", ({ params }) => setFollowingAuthor(params.userId!, false)),
   createMockRoute("POST", "/api/v1/users/:userId/block", ({ params }) => {
