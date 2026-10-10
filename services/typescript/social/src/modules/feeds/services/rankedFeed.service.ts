@@ -79,11 +79,16 @@ export async function buildRankedFeedPage(context: HandlerContext, request: Rank
   ]);
   const trendingSet = new Set(trendingHashtags);
   const eligible = rows.filter((row) => !privateAuthors.has(row.authorId) && !hiddenAuthors.has(row.authorId) && !suspended.has(row.authorId) && !dismissed.has(row.id) && row.authorId !== request.viewerId && !isPostWithheldFromViewer(row, policy) && matchesExploreCategory(row, request.category, trendingSet) && matchesTopic(row, request.topicId));
+  const mutedTopics = request.viewerId === undefined || !request.personalized ? new Set<string>() : await feedRepository.mutedTopics(db, request.viewerId);
+  const sharesMutedTopic = (row: (typeof eligible)[number]) =>
+    mutedTopics.size > 0 && (row.topics.some((topic) => mutedTopics.has(topic.toLowerCase())) || extractHashtags(row.text).some((tag) => mutedTopics.has(tag)));
   const integrity = context.authorRanking === undefined ? new Map<string, EngagementIntegritySignals>() : await computeEngagementIntegritySignals(db, context.authorRanking, eligible, now);
   const candidates = eligible.map((row) => toRankingCandidate(row, followed, authorProfiles.get(row.authorId), integrity.get(row.id)));
   const ranked = await context.ranker.rank(candidates, { viewerId: request.viewerId ?? null, personalized: request.personalized, now, boostPolicy: settings.boostPolicy, trendingHashtags, viewerCountry });
+  const demoted = new Set(eligible.filter(sharesMutedTopic).map((row) => row.id));
+  const ordered = [...ranked.filter((candidate) => !demoted.has(candidate.postId)), ...ranked.filter((candidate) => demoted.has(candidate.postId))];
   const offset = decodeOffsetCursor(request.cursor);
-  const window = ranked.slice(offset, offset + request.limit);
+  const window = ordered.slice(offset, offset + request.limit);
   const rowById = new Map(eligible.map((row) => [row.id, row]));
   const pageRows = window.flatMap((candidate) => rowById.get(candidate.postId) ?? []);
   const nextOffset = offset + request.limit;

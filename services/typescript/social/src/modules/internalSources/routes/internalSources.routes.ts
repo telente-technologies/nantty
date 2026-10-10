@@ -9,5 +9,6 @@ export function registerInternalSourcesRoutes(router: HttpRouter, controller: Re
   router.get("/api/v1/internal/audience-sources/accounts/:accountId/followers", controller.followers);
   router.get("/api/v1/internal/audience-sources/accounts/:accountId/engagers", controller.engagers);
   router.get("/api/v1/internal/save-counts", controller.saveCounts);
+  router.get("/api/v1/internal/ownership/:kind/:id", controller.ownership);
   router.get("/api/v1/internal/accounts/:accountId/activity-counts", controller.activityCounts);
 }

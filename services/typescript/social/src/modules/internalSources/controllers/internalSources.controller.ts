@@ -1,6 +1,8 @@
 import { schema } from "@zudojs/schema";
 
+import { notFound } from "../../../errors/social.error.js";
 import { requireInternalToken } from "../../../middlewares/internalToken.middleware.js";
+import { postRepository } from "../../posts/repositories/post.repository.js";
 import type { HandlerContext } from "../../../types/handlerContext.type.js";
 import type { RouteFactory } from "../../../utils/route.util.js";
 import { createGetModerationTargetPreviewHandler } from "../queries/getModerationTargetPreview/getModerationTargetPreview.handler.js";
@@ -16,6 +18,8 @@ const identifier = schema.string().uuid();
 const searchSourceParams = schema.object({ collection: schema.enum(["posts", "sounds"]), id: identifier });
 const moderationParams = schema.object({ type: schema.enum(["post", "clip", "comment", "sound", "message"]), id: identifier });
 const accountParams = schema.object({ accountId: identifier });
+const ownershipParams = schema.object({ kind: schema.enum(["post", "clip"]), id: identifier });
+const ownershipQuery = schema.object({ ownerUserId: identifier, storeId: schema.string().max(64).optional() });
 const pageQuery = { cursor: schema.string().max(100).optional(), limit: schema.coerce.number().int().min(1).max(1000).optional() };
 const contentQuery = schema.object({ ownerUserId: identifier, storeId: schema.string().max(64).optional(), type: schema.enum(["post", "clip", "product", "live", "store"]).optional(), search: schema.string().max(100).optional(), ...pageQuery });
 const engagerQuery = schema.object({ source: schema.enum(["any_post", "clips_watched", "messaged"]), retentionDays: schema.coerce.number().int().min(1).max(365), ...pageQuery });
@@ -32,6 +36,11 @@ export function createInternalSourcesController(route: RouteFactory, internalTok
   const getSaveCounts = createGetSaveCountsHandler(context);
   const getActivityCounts = createGetAccountActivityCountsHandler(context);
   return {
+    ownership: requireInternalToken(internalToken, route({ authentication: "optional", params: ownershipParams, query: ownershipQuery }, async ({ params, query }) => {
+      const post = await postRepository.findById(context.database.client, params.id);
+      if (post === null || (params.kind === "clip" ? post.kind !== "clip" : post.kind !== "post" && post.kind !== "clip")) throw notFound("DESTINATION_NOT_FOUND", "That post is not available.");
+      return { owned: post.authorId === query.ownerUserId };
+    })),
     searchSource: requireInternalToken(internalToken, route({ authentication: "optional", params: searchSourceParams }, ({ params }) =>
       params.collection === "posts" ? getPost({ postId: params.id }) : getSound({ soundId: params.id }))),
     moderationTarget: requireInternalToken(internalToken, route({ authentication: "optional", params: moderationParams }, ({ params }) => getPreview({ targetType: params.type, targetId: params.id }))),

@@ -1,5 +1,6 @@
 import { popularFeedCandidateLimit } from "../../../constants/social.constant.js";
 import type { Db } from "../../../types/database.type.js";
+import { extractHashtags } from "../../internalSources/services/hashtags.service.js";
 import { postWithMedia, type PostRow } from "../../posts/repositories/post.repository.js";
 import { shownToViewers } from "../../../constants/moderation.constant.js";
 
@@ -26,5 +27,17 @@ export const feedRepository = {
   dismissedPostIds: async (db: Db, userId: string): Promise<Set<string>> => {
     const rows = await db.feedFeedback.findMany({ where: { userId, kind: { in: ["notInterested", "hide"] } }, select: { postId: true }, orderBy: { id: "desc" }, take: 500 });
     return new Set(rows.map((row) => row.postId));
+  },
+
+  mutedTopics: async (db: Db, userId: string): Promise<Set<string>> => {
+    const feedback = await db.feedFeedback.findMany({ where: { userId, kind: "notInterested" }, select: { postId: true }, orderBy: { id: "desc" }, take: 100 });
+    if (feedback.length === 0) return new Set<string>();
+    const posts = await db.post.findMany({ where: { id: { in: [...new Set(feedback.map((row) => row.postId))] } }, select: { topics: true, text: true } });
+    const muted = new Set<string>();
+    for (const post of posts) {
+      for (const topic of post.topics) muted.add(topic.toLowerCase());
+      for (const tag of extractHashtags(post.text)) muted.add(tag);
+    }
+    return muted;
   },
 };
