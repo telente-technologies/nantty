@@ -14,7 +14,7 @@ import type { GetPostConversationQuery } from "../queries/getPostConversation/ge
 import type { GetCommentQuery } from "../queries/getComment/getComment.query.js";
 import type { ListCommentRepliesQuery } from "../queries/listCommentReplies/listCommentReplies.query.js";
 import type { ListPostCommentsQuery } from "../queries/listPostComments/listPostComments.query.js";
-import { commentParamsSchema, commentsPageQuerySchema, conversationQuerySchema, newCommentBodySchema, postCommentParamsSchema, postCommentsParamsSchema } from "../validators/comments.validator.js";
+import { commentParamsSchema, commentsPageQuerySchema, conversationQuerySchema, newCommentBodySchema, postCommentParamsSchema, postCommentsParamsSchema, rankedCommentsQuerySchema } from "../validators/comments.validator.js";
 
 export interface CommentsHandlers {
   readonly createComment: Handler<CreateCommentCommand, CommentView>;
@@ -33,8 +33,8 @@ export interface CommentsHandlers {
 export function createCommentsController(route: RouteFactory, handlers: CommentsHandlers) {
   return {
     createComment: route({ authentication: "required", params: postCommentsParamsSchema, body: newCommentBodySchema, successStatus: 201 }, ({ principal, params, body }) =>
-      handlers.createComment({ authorId: principal.accountId, postId: params.postId, text: body.text, parentCommentId: body.parentCommentId, mentions: body.mentions })),
-    listPostComments: route({ authentication: "optional", params: postCommentsParamsSchema, query: commentsPageQuerySchema }, ({ principal, params, query }) =>
+      handlers.createComment({ authorId: principal.accountId, postId: params.postId, text: body.text, parentCommentId: body.parentCommentId, mentions: body.mentions, quotedPostId: body.quotedPostId })),
+    listPostComments: route({ authentication: "optional", params: postCommentsParamsSchema, query: rankedCommentsQuerySchema }, ({ principal, params, query }) =>
       handlers.listPostComments({ viewerId: principal?.accountId, postId: params.postId, cursor: query.cursor, limit: clampPageSize(query.limit, 20) })),
     listCommentReplies: route({ authentication: "optional", params: commentParamsSchema, query: commentsPageQuerySchema }, ({ principal, params, query }) =>
       handlers.listCommentReplies({ viewerId: principal?.accountId, commentId: params.commentId, cursor: query.cursor, limit: clampPageSize(query.limit, 20) })),

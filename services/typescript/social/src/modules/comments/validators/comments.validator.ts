@@ -6,13 +6,15 @@ export const postCommentsParamsSchema = schema.object({ postId: schema.string().
 export const commentParamsSchema = schema.object({ commentId: schema.string().uuid() });
 export const postCommentParamsSchema = schema.object({ postId: schema.string().uuid(), commentId: schema.string().uuid() });
 export const commentsPageQuerySchema = schema.object({ cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
+export const rankedCommentsQuerySchema = schema.object({ cursor: schema.string().max(300).optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
 export const newCommentBodySchema = schema.object({
   text: schema.string().min(1).max(1500),
   parentCommentId: schema.string().uuid().optional(),
   mentions: mentionEntitiesSchema.optional(),
+  quotedPostId: schema.optional(schema.nullable(schema.string().uuid())),
 });
 export const conversationQuerySchema = schema.object({
   sort: schema.enum(["relevant", "latest", "likes", "top"]).optional(),
-  cursor: schema.string().max(200).optional(),
+  cursor: schema.string().max(300).optional(),
   limit: schema.coerce.number().int().min(1).max(50).optional(),
 });

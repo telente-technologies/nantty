@@ -35,4 +35,5 @@ export interface CreatePostCommand {
   readonly replyPolicy?: "everyone" | "following" | "followers" | "mentioned" | "off" | undefined;
   readonly taggedUserIds?: readonly string[] | undefined;
   readonly sensitiveLabels?: readonly string[] | undefined;
+  readonly quotedPostId?: string | null | undefined;
 }

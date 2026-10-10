@@ -1,7 +1,7 @@
 ---
 title: Disputes and refunds
 summary: Open a dispute if an order is late, damaged, wrong or missing. Approved refunds go back to how you paid.
-tags: dispute, refund, damaged, wrong item, not received
+tags: dispute, refund, damaged, wrong item, not received, outside nigeria, ghana, kenya, south africa
 related: how-escrow-protects-your-order, confirm-delivery, contact-support
 ---
 
@@ -21,3 +21,16 @@ The payment stays frozen in escrow while the dispute is open.
 - We notify you when a refund is sent.
 
 If a refund hasn't arrived after 10 business days, [contact support](/help/contact-support/contact-support) with the order attached.
+
+## Orders outside Nigeria
+
+Escrow and buyer protection are only available in Nigeria. Outside Nigeria, you pay the seller directly through our payment partner, so you buy at your own risk.
+
+If something goes wrong, report the order. We can:
+
+- ask the seller to refund you
+- warn, restrict, suspend, freeze or ban the seller's account
+- report the seller to our payment partner and, where needed, the authorities
+- escalate your case to our payment partner so they can try to help
+
+We can't reverse a payment or guarantee a refund. If our payment partner, your bank or your card issuer can't recover the money, there may be nothing more we can do. See the [Terms of service](/terms).

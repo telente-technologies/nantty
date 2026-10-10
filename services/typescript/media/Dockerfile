@@ -12,6 +12,9 @@ RUN pnpm install --frozen-lockfile --filter @zudomart/media... && pnpm --filter 
 FROM node:24-alpine
 ENV NODE_ENV=production
 WORKDIR /app
+# The runtime only runs node; drop the bundled package managers (their own deps carry CVEs).
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-v* \
+    /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
 RUN apk add --no-cache ffmpeg libheif-tools fontconfig font-dejavu
 ENV FFMPEG_MODE=required
 COPY --from=build /out /app

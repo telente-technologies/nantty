@@ -1,26 +1,22 @@
-import { unprocessable } from "../../../../errors/social.error.js";
-import { socialEventTypes } from "../../../../events/eventTypes.event.js";
-import { appendDomainEventsToOutbox } from "../../../../events/outbox.event.js";
+import { resolveEventActor } from "../../../../events/actor.event.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import type { PostView } from "../../models/post.model.js";
 import { postRepository } from "../../repositories/post.repository.js";
-import { loadPostVisibleToViewer } from "../../services/postAccess.service.js";
 import { buildPostViews } from "../../services/postView.service.js";
+import { loadQuotableTarget, originalAuthorIdFor, quoteOriginalIdFor, recordReshareInTransaction } from "../../services/quoteTarget.service.js";
 import type { ResharePostCommand } from "./resharePost.command.js";
 
 export function createResharePostHandler(context: HandlerContext): Handler<ResharePostCommand, PostView> {
   return async ({ actorId, postId, text }) => {
-    const target = await loadPostVisibleToViewer(context, actorId, postId);
-    if (target.kind === "story") throw unprocessable("STORY_CANNOT_BE_RESHARED", "Stories can't be reshared.");
-    if (target.visibility === "subscribers" && target.authorId !== actorId) throw unprocessable("SUBSCRIBER_POST_CANNOT_BE_RESHARED", "Subscriber-only posts can't be reshared.");
+    const target = await loadQuotableTarget(context, actorId, postId);
     const isQuote = text.trim() !== "";
-    const originalId = target.isQuote ? target.id : (target.resharedFromId ?? target.id);
+    const originalId = quoteOriginalIdFor(target);
     const now = context.clock.now();
+    const actor = await resolveEventActor(context.directory, actorId);
+    const originalAuthorId = await originalAuthorIdFor(context, target);
     const created = await context.database.transaction(async (transaction) => {
       const post = await postRepository.create(transaction, { authorId: actorId, kind: "post", text, audience: "everyone", visibility: "public", resharedFromId: originalId, isQuote, createdAt: now });
-      await postRepository.incrementCounter(transaction, originalId, "repostCount", 1);
-      if (isQuote) await postRepository.incrementCounter(transaction, originalId, "quoteCount", 1);
-      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.postReshared, subject: post.id, occurredAt: now, data: { postId: post.id, originalPostId: originalId, authorId: actorId, originalAuthorId: target.authorId, isQuote } }]);
+      await recordReshareInTransaction(transaction, { postId: post.id, originalId, actorId, originalAuthorId, isQuote, now, actor });
       return post;
     });
     const [view] = await buildPostViews(context, actorId, [created]);

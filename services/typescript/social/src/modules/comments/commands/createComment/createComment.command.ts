@@ -6,4 +6,5 @@ export interface CreateCommentCommand {
   readonly text: string;
   readonly parentCommentId: string | undefined;
   readonly mentions: readonly MentionEntity[] | undefined;
+  readonly quotedPostId?: string | null | undefined;
 }

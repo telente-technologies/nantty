@@ -52,6 +52,20 @@ export const commentCreated: EventMapping = (event, data) => [
   }),
 ];
 
+export const postReshared: EventMapping = (event, data) => {
+  const recipientUserId = data.text("originalAuthorId");
+  if (recipientUserId === data.text("authorId")) return [];
+  const body = !data.bool("isQuote") ? "reposted your post." : data.text("surface", "post") === "comment" ? "quoted your post in a comment." : "quoted your post.";
+  const url = data.optionalText("url") ?? `/post/${data.text("postId")}`;
+  return [
+    intentFor(event, recipientUserId, {
+      category: "social",
+      inApp: { category: "social", kind: data.bool("isQuote") ? "quote" : "repost", title: actorNameOf(data), body, actor: readActor(data), data: { url, postId: data.text("postId"), originalPostId: data.text("originalPostId") } },
+      push: { title: actorNameOf(data), body, data: { url } },
+    }),
+  ];
+};
+
 export const videoReplyCreated: EventMapping = (event, data) => [
   intentFor(event, data.text("recipientUserId"), {
     category: "social",

@@ -160,11 +160,27 @@ describe("media routes", () => {
   });
 });
 
+describe("wallet and verification internals stay private", () => {
+  it.each([
+    ["GET", "/api/v1/internal/users/u_1/verification-level"],
+    ["POST", "/api/v1/internal/ads/accounts/acc_1/earnings-fundings"],
+    ["POST", "/api/v1/internal/ads/boost-earnings-debits"],
+  ])("%s %s is not routed", (method, path) => {
+    expect(resolveUpstreamRouteForRequest(method, path)).toBeUndefined();
+  });
+});
+
 describe("routes added after the full API sweep", () => {
   it.each([
     ["POST", "/api/v1/ads/decide", "ads", "required"],
     ["GET", "/api/v1/ads/accounts/acc_1/campaigns", "ads", "required"],
     ["GET", "/api/v1/ads/balance", "money", "required"],
+    ["GET", "/api/v1/wallets/me", "money", "required"],
+    ["GET", "/api/v1/payments/verification/me", "money", "required"],
+    ["POST", "/api/v1/payments/payout-onboarding/me/bank-validation", "money", "required"],
+    ["GET", "/api/v1/ads/verification", "ads", "required"],
+    ["POST", "/api/v1/ads/accounts/acc_1/billing/fund-from-earnings", "ads", "required"],
+    ["GET", "/api/v1/ads/boosts/options", "ads", "required"],
     ["GET", "/api/v1/admin/ads", "ads", "optional"],
     ["GET", "/api/v1/admin/advertisers", "ads", "optional"],
     ["GET", "/api/v1/admin/wallet/seller-reserves", "money", "optional"],

@@ -4,6 +4,7 @@ import { blockRepository } from "../../blocks/repositories/block.repository.js";
 import type { MentionEntity } from "../../mentions/models/mention.model.js";
 import type { CommentVideoReply, CommentView } from "../models/comment.model.js";
 import { commentRepository, type CommentRow } from "../repositories/comment.repository.js";
+import { loadQuotedPostSummaries } from "../../posts/services/quotedPostEmbed.service.js";
 
 const placeholderAuthor = (id: string): UserSummary => ({ id, name: "", username: "", avatarUrl: null, verified: false, isCreator: false });
 
@@ -12,10 +13,11 @@ export async function buildCommentViews(context: HandlerContext, viewerId: strin
   const db = context.database.client;
   const commentIds = rows.map((row) => row.id);
   const parentIds = [...new Set(rows.flatMap((row) => (row.parentCommentId === null ? [] : [row.parentCommentId])))];
-  const [parents, liked, videoReplyRows] = await Promise.all([
+  const [parents, liked, videoReplyRows, quotedPosts] = await Promise.all([
     parentIds.length === 0 ? [] : commentRepository.findManyByIds(db, parentIds),
     viewerId === undefined ? new Set<string>() : commentRepository.likedCommentIds(db, viewerId, commentIds),
     commentRepository.videoRepliesFor(db, commentIds),
+    loadQuotedPostSummaries(context, viewerId, rows.map((row) => row.quotedPostId)),
   ]);
   const savedIds =
     viewerId === undefined
@@ -63,6 +65,9 @@ export async function buildCommentViews(context: HandlerContext, viewerId: strin
       mentions: row.mentions as unknown as MentionEntity[],
       videoReplies: videoRepliesByComment.get(row.id) ?? [],
       videoReplyBlocked: blockedViewer.has(row.authorId),
+      isPostAuthor: postAuthorId !== undefined && row.authorId === postAuthorId,
+      quotedPost: row.quotedPostId === null ? null : (quotedPosts.get(row.quotedPostId) ?? null),
+      quotedPostUnavailable: row.quotedPostId !== null && !quotedPosts.has(row.quotedPostId),
     };
   });
 }

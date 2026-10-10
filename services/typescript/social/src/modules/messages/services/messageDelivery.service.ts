@@ -5,6 +5,7 @@ import type { Db } from "../../../types/database.type.js";
 import type { MentionPolicyResult } from "../../mentions/services/mentionPolicy.service.js";
 import type { ConversationRow } from "../../conversations/repositories/conversation.repository.js";
 import { conversationRepository } from "../../conversations/repositories/conversation.repository.js";
+import { chatSettingsRepository } from "../../chatSettings/repositories/chatSettings.repository.js";
 import { recordDirectSendForStreak } from "../../streaks/services/streakTracking.service.js";
 
 export interface DeliveryRequest {
@@ -27,6 +28,7 @@ export async function applyMessageDelivery(db: Db, request: DeliveryRequest): Pr
   const bothInChats = conversation.kind === "direct" && conversation.members.every((member) => member.inboxFolder === "chats");
   if (bothInChats && recipients[0] !== undefined) events.push(...(await recordDirectSendForStreak(db, conversation.id, senderId, recipients[0].accountId, now)));
   const recipientIds = recipients.map((member) => member.accountId);
+  const pushRecipients = await selectPushRecipients(db, conversation, recipients, now);
   events.push({
     eventType: socialEventTypes.messageSent,
     subject: conversation.id,
@@ -34,6 +36,7 @@ export async function applyMessageDelivery(db: Db, request: DeliveryRequest): Pr
     data: {
       conversationId: conversation.id, messageId: message.id, senderId, kind: message.kind, recipientIds, isNewConversation: request.isNewConversation,
       inboxFolderByRecipient: Object.fromEntries(recipients.map((member) => [member.accountId, member.inboxFolder])), sentAt: message.createdAt.toISOString(),
+      conversationKind: conversation.kind, conversationTitle: conversation.title ?? null, senderName: request.actor.name, pushRecipients,
     },
   });
   events.push({ eventType: socialEventTypes.messageCreated, subject: conversation.id, occurredAt: now, data: { conversationId: conversation.id, message: request.messageEnvelope as never, recipientIds } });
@@ -52,4 +55,17 @@ export async function applyMessageDelivery(db: Db, request: DeliveryRequest): Pr
     }
   }
   return events;
+}
+
+type Member = ConversationRow["members"][number];
+
+async function selectPushRecipients(db: Db, conversation: ConversationRow, recipients: readonly Member[], now: Date): Promise<{ readonly userId: string; readonly showPreview: boolean }[]> {
+  const audible = recipients.filter((member) => member.inboxFolder === "chats" && !member.mutedAlways && (member.mutedUntil === null || member.mutedUntil <= now));
+  if (audible.length === 0) return [];
+  const settings = new Map((await chatSettingsRepository.findMany(db, audible.map((member) => member.accountId))).map((row) => [row.accountId, row]));
+  return audible.flatMap((member) => {
+    const row = settings.get(member.accountId);
+    const wanted = row === undefined || (conversation.kind === "direct" || conversation.kind === "business" ? row.notifyMessages : row.notifyGroups);
+    return wanted ? [{ userId: member.accountId, showPreview: row?.showMessagePreview ?? true }] : [];
+  });
 }

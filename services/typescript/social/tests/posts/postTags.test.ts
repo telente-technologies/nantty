@@ -58,6 +58,7 @@ describe("tag writes", () => {
         createMany: async ({ data }: { data: unknown[] }) => created.push(...data),
         deleteMany: async ({ where }: { where: unknown }) => removed.push(where),
       },
+      postNotificationMute: { findMany: async () => [] },
       outboxEvent: { createMany: async ({ data }: { data: typeof events }) => events.push(...data) },
     };
     await syncPostTags(db as never, { postId: "p1", kind: "clip", authorId, actor: { id: authorId, name: "Ada" }, desiredUserIds: [active, taggingOff], now: new Date() });

@@ -137,6 +137,7 @@ export interface PostView {
   readonly isPinned: boolean;
   readonly pinnedAt: string | null;
   readonly pinnedCommentId: string | null;
+  readonly viewerNotificationsMuted: boolean;
   readonly sound?: SoundView;
   readonly mentions: readonly MentionEntity[];
   readonly linkPreview: LinkPreviewView | null;
@@ -145,6 +146,22 @@ export interface PostView {
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: StickerLayout;
   readonly ranking?: FeedRankingDisclosure;
+}
+
+export interface QuotedPostThumbnail {
+  readonly type: "image" | "video";
+  readonly url: string;
+  readonly blurhash: string | null;
+}
+
+export interface QuotedPostSummary {
+  readonly id: string;
+  readonly kind: "post" | "clip";
+  readonly author: UserSummary;
+  readonly text: string;
+  readonly thumbnail: QuotedPostThumbnail | null;
+  readonly mediaCount: number;
+  readonly createdAt: string;
 }
 
 export interface StoryView {

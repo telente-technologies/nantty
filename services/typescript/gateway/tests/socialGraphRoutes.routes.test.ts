@@ -20,6 +20,12 @@ describe("social graph routes", () => {
     expect(resolveUpstreamRouteForRequest("DELETE", `/api/v1/channels/${storeId}/subscribe`)).toMatchObject({ upstream: "social", authentication: "required" });
   });
 
+  it("requires sign-in for per-post notification mutes", () => {
+    for (const method of ["GET", "PUT", "DELETE"]) {
+      expect(resolveUpstreamRouteForRequest(method, `/api/v1/posts/${storeId}/notifications-mute`)).toMatchObject({ upstream: "social", authentication: "required" });
+    }
+  });
+
   it("never exposes social internal routes", () => {
     expect(resolveUpstreamRouteForRequest("GET", `/api/v1/internal/conversations/${storeId}/members/${storeId}`)).toBeUndefined();
     expect(resolveUpstreamRouteForRequest("GET", `/api/v1/internal/stores/${storeId}/follow-stats`)).toBeUndefined();

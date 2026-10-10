@@ -1,5 +1,6 @@
 import type { UserSummary } from "../../../interfaces/identityDirectory.interface.js";
 import type { MentionEntity } from "../../mentions/models/mention.model.js";
+import type { QuotedPostSummary } from "../../posts/models/post.model.js";
 
 export interface CommentVideoReply {
   readonly clipId: string;
@@ -26,6 +27,9 @@ export interface CommentView {
   readonly mentions: readonly MentionEntity[];
   readonly videoReplies: readonly CommentVideoReply[];
   readonly videoReplyBlocked: boolean;
+  readonly isPostAuthor: boolean;
+  readonly quotedPost: QuotedPostSummary | null;
+  readonly quotedPostUnavailable: boolean;
 }
 
 export interface CommentWithReplies extends CommentView {

@@ -419,6 +419,8 @@ export const ModelName = {
   Sound: 'Sound',
   SoundSave: 'SoundSave',
   ContentPreference: 'ContentPreference',
+  CommentRankSnapshot: 'CommentRankSnapshot',
+  PostNotificationMute: 'PostNotificationMute',
   DownloadSetting: 'DownloadSetting',
   Follow: 'Follow',
   Block: 'Block',
@@ -455,7 +457,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "downloadSetting" | "follow" | "block" | "storeFollow" | "linkPreviewCache" | "chatDeviceKey" | "chatOneTimePreKey" | "chatKeyMailboxEntry" | "chatPreKeyClaim" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration" | "postTag" | "taggingSetting"
+    modelProps: "conversation" | "conversationMember" | "message" | "messageReaction" | "messagePollOption" | "messagePollVote" | "chatSettings" | "senderBehaviourMetric" | "chatMediaExpiryRun" | "post" | "postMedia" | "postLike" | "postShare" | "comment" | "commentLike" | "feedFeedback" | "storyView" | "postViewer" | "postDailyStat" | "sound" | "soundSave" | "contentPreference" | "commentRankSnapshot" | "postNotificationMute" | "downloadSetting" | "follow" | "block" | "storeFollow" | "linkPreviewCache" | "chatDeviceKey" | "chatOneTimePreKey" | "chatKeyMailboxEntry" | "chatPreKeyClaim" | "outboxEvent" | "idempotencyRecord" | "reportIntake" | "saveCollection" | "savedItem" | "saveCounter" | "chatStreak" | "streakSenderDay" | "streakRestore" | "streakCelebration" | "postTag" | "taggingSetting"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2084,6 +2086,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ContentPreferenceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ContentPreferenceCountAggregateOutputType> | number
+        }
+      }
+    }
+    CommentRankSnapshot: {
+      payload: Prisma.$CommentRankSnapshotPayload<ExtArgs>
+      fields: Prisma.CommentRankSnapshotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CommentRankSnapshotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CommentRankSnapshotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload>
+        }
+        findFirst: {
+          args: Prisma.CommentRankSnapshotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CommentRankSnapshotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload>
+        }
+        findMany: {
+          args: Prisma.CommentRankSnapshotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload>[]
+        }
+        create: {
+          args: Prisma.CommentRankSnapshotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload>
+        }
+        createMany: {
+          args: Prisma.CommentRankSnapshotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CommentRankSnapshotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload>[]
+        }
+        delete: {
+          args: Prisma.CommentRankSnapshotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload>
+        }
+        update: {
+          args: Prisma.CommentRankSnapshotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload>
+        }
+        deleteMany: {
+          args: Prisma.CommentRankSnapshotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CommentRankSnapshotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CommentRankSnapshotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload>[]
+        }
+        upsert: {
+          args: Prisma.CommentRankSnapshotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentRankSnapshotPayload>
+        }
+        aggregate: {
+          args: Prisma.CommentRankSnapshotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCommentRankSnapshot>
+        }
+        groupBy: {
+          args: Prisma.CommentRankSnapshotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommentRankSnapshotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CommentRankSnapshotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommentRankSnapshotCountAggregateOutputType> | number
+        }
+      }
+    }
+    PostNotificationMute: {
+      payload: Prisma.$PostNotificationMutePayload<ExtArgs>
+      fields: Prisma.PostNotificationMuteFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PostNotificationMuteFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PostNotificationMuteFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload>
+        }
+        findFirst: {
+          args: Prisma.PostNotificationMuteFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PostNotificationMuteFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload>
+        }
+        findMany: {
+          args: Prisma.PostNotificationMuteFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload>[]
+        }
+        create: {
+          args: Prisma.PostNotificationMuteCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload>
+        }
+        createMany: {
+          args: Prisma.PostNotificationMuteCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PostNotificationMuteCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload>[]
+        }
+        delete: {
+          args: Prisma.PostNotificationMuteDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload>
+        }
+        update: {
+          args: Prisma.PostNotificationMuteUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload>
+        }
+        deleteMany: {
+          args: Prisma.PostNotificationMuteDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PostNotificationMuteUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PostNotificationMuteUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload>[]
+        }
+        upsert: {
+          args: Prisma.PostNotificationMuteUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostNotificationMutePayload>
+        }
+        aggregate: {
+          args: Prisma.PostNotificationMuteAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePostNotificationMute>
+        }
+        groupBy: {
+          args: Prisma.PostNotificationMuteGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostNotificationMuteGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PostNotificationMuteCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostNotificationMuteCountAggregateOutputType> | number
         }
       }
     }
@@ -3921,7 +4071,8 @@ export const CommentScalarFieldEnum = {
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   isPinned: 'isPinned',
-  pinnedAt: 'pinnedAt'
+  pinnedAt: 'pinnedAt',
+  quotedPostId: 'quotedPostId'
 } as const
 
 export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
@@ -4011,6 +4162,27 @@ export const ContentPreferenceScalarFieldEnum = {
 } as const
 
 export type ContentPreferenceScalarFieldEnum = (typeof ContentPreferenceScalarFieldEnum)[keyof typeof ContentPreferenceScalarFieldEnum]
+
+
+export const CommentRankSnapshotScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  viewerId: 'viewerId',
+  pinnedCommentId: 'pinnedCommentId',
+  commentIds: 'commentIds',
+  createdAt: 'createdAt'
+} as const
+
+export type CommentRankSnapshotScalarFieldEnum = (typeof CommentRankSnapshotScalarFieldEnum)[keyof typeof CommentRankSnapshotScalarFieldEnum]
+
+
+export const PostNotificationMuteScalarFieldEnum = {
+  userId: 'userId',
+  postId: 'postId',
+  createdAt: 'createdAt'
+} as const
+
+export type PostNotificationMuteScalarFieldEnum = (typeof PostNotificationMuteScalarFieldEnum)[keyof typeof PostNotificationMuteScalarFieldEnum]
 
 
 export const DownloadSettingScalarFieldEnum = {
@@ -4802,6 +4974,8 @@ export type GlobalOmitConfig = {
   sound?: Prisma.SoundOmit
   soundSave?: Prisma.SoundSaveOmit
   contentPreference?: Prisma.ContentPreferenceOmit
+  commentRankSnapshot?: Prisma.CommentRankSnapshotOmit
+  postNotificationMute?: Prisma.PostNotificationMuteOmit
   downloadSetting?: Prisma.DownloadSettingOmit
   follow?: Prisma.FollowOmit
   block?: Prisma.BlockOmit

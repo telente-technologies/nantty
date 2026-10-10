@@ -7,10 +7,15 @@ import { postRepository } from "../../posts/repositories/post.repository.js";
 const organicPostsBeforeFirstAd = 3;
 const minimumOrganicPostsForAd = 4;
 
+function placementLabel(label: string): SponsoredPlacementView["label"] {
+  if (label === "Promoted" || label === "Boosted") return label;
+  return "Sponsored";
+}
+
 export function toSponsoredPlacement(ad: DecidedAd): SponsoredPlacementView {
   const creative = ad.creative;
   return {
-    campaignId: ad.adId, label: ad.label === "Promoted" ? "Promoted" : "Sponsored", advertiserName: creative.identity.name,
+    campaignId: ad.adId, label: placementLabel(ad.label), advertiserName: creative.identity.name,
     ...(creative.callToAction === "" ? {} : { ctaLabel: creative.callToAction }),
     ...(creative.destination.url === null ? {} : { ctaUrl: creative.destination.url }),
     adType: creative.type, impressionToken: ad.impressionToken, destination: creative.destination, mediaClickable: creative.mediaClickable,
@@ -31,7 +36,7 @@ export function buildSponsoredPostView(ad: DecidedAd, now: Date): PostView {
     createdAt: now.toISOString(), text: creative.primaryText, media, likes: 0, comments: 0, reposts: 0, views: 0, liked: false, bookmarked: false, isSaved: false, saveCount: 0,
     isFollowingAuthor: false, shares: 0, durationSeconds: null, friendsLiked: null, products: [], sponsored: toSponsoredPlacement(ad), topics: [], location: null, slideshow: null,
     subscriberOnly: false, viewerHasAccess: true, resharedFrom: null, resharedFromUnavailable: false, isQuote: false, quotes: 0, replyPolicy: "off", viewerCanReply: false,
-    viewerCanDownload: false, replyRestriction: null, sensitive: null, isAiGenerated: false, isPinned: false, pinnedAt: null, pinnedCommentId: null, mentions: [], linkPreview: null, taggedUsers: [], taggedUsersCount: 0, look: null,
+    viewerCanDownload: false, replyRestriction: null, sensitive: null, isAiGenerated: false, isPinned: false, pinnedAt: null, pinnedCommentId: null, viewerNotificationsMuted: false, mentions: [], linkPreview: null, taggedUsers: [], taggedUsersCount: 0, look: null,
   };
 }
 

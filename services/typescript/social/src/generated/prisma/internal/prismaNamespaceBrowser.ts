@@ -73,6 +73,8 @@ export const ModelName = {
   Sound: 'Sound',
   SoundSave: 'SoundSave',
   ContentPreference: 'ContentPreference',
+  CommentRankSnapshot: 'CommentRankSnapshot',
+  PostNotificationMute: 'PostNotificationMute',
   DownloadSetting: 'DownloadSetting',
   Follow: 'Follow',
   Block: 'Block',
@@ -353,7 +355,8 @@ export const CommentScalarFieldEnum = {
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   isPinned: 'isPinned',
-  pinnedAt: 'pinnedAt'
+  pinnedAt: 'pinnedAt',
+  quotedPostId: 'quotedPostId'
 } as const
 
 export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
@@ -443,6 +446,27 @@ export const ContentPreferenceScalarFieldEnum = {
 } as const
 
 export type ContentPreferenceScalarFieldEnum = (typeof ContentPreferenceScalarFieldEnum)[keyof typeof ContentPreferenceScalarFieldEnum]
+
+
+export const CommentRankSnapshotScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  viewerId: 'viewerId',
+  pinnedCommentId: 'pinnedCommentId',
+  commentIds: 'commentIds',
+  createdAt: 'createdAt'
+} as const
+
+export type CommentRankSnapshotScalarFieldEnum = (typeof CommentRankSnapshotScalarFieldEnum)[keyof typeof CommentRankSnapshotScalarFieldEnum]
+
+
+export const PostNotificationMuteScalarFieldEnum = {
+  userId: 'userId',
+  postId: 'postId',
+  createdAt: 'createdAt'
+} as const
+
+export type PostNotificationMuteScalarFieldEnum = (typeof PostNotificationMuteScalarFieldEnum)[keyof typeof PostNotificationMuteScalarFieldEnum]
 
 
 export const DownloadSettingScalarFieldEnum = {

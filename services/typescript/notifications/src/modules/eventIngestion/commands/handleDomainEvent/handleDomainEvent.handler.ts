@@ -30,6 +30,7 @@ export class HandleDomainEventHandler {
       await this.policyPublished.handlePolicyPublished(command);
       return { handled: true, intents: 0 };
     }
+    if (event.data["notificationsMuted"] === true) return { handled: true, intents: 0, reason: "post_notifications_muted" };
     const mapping = eventMappings[event.type];
     if (mapping === undefined) return { handled: false, intents: 0, reason: "unhandled_event_type" };
     let intents;

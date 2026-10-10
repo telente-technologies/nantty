@@ -36,6 +36,10 @@ import { createListTagCandidatesHandler } from "./queries/listTagCandidates/list
 import { createPostTagsController } from "./controllers/postTags.controller.js";
 import { registerPostTagsRoutes } from "./routes/postTags.routes.js";
 import { registerPostAudienceRoutes } from "./routes/postAudience.routes.js";
+import { createPostNotificationMuteController } from "./controllers/postNotificationMute.controller.js";
+import { registerPostNotificationMuteRoutes } from "./routes/postNotificationMute.routes.js";
+import { createSetPostNotificationMuteHandler } from "./commands/setPostNotificationMute/setPostNotificationMute.handler.js";
+import { createGetPostNotificationMuteHandler } from "./queries/getPostNotificationMute/getPostNotificationMute.handler.js";
 
 export function mountPostsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
   registerPostsRoutes(router, createPostsController(route, {
@@ -63,6 +67,10 @@ export function mountPostsModule(router: HttpRouter, route: RouteFactory, contex
     updatePostSensitivity: createUpdatePostSensitivityHandler(context),
     listPostQuotes: createListPostQuotesHandler(context),
     setPostProducts: createSetPostProductsHandler(context),
+  }));
+  registerPostNotificationMuteRoutes(router, createPostNotificationMuteController(route, {
+    setPostNotificationMute: createSetPostNotificationMuteHandler(context),
+    getPostNotificationMute: createGetPostNotificationMuteHandler(context),
   }));
   registerPostTagsRoutes(router, createPostTagsController(route, {
     setPostTags: createSetPostTagsHandler(context),

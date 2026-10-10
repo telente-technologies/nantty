@@ -8,11 +8,17 @@ import * as milestones from "./milestones.mapping.js";
 import type { EventMapping } from "./mappingHelpers.js";
 import * as orders from "./orders.mapping.js";
 import * as social from "./social.mapping.js";
+import * as storeActivity from "./storeActivity.mapping.js";
 import * as subscriptionBilling from "./subscriptionBilling.mapping.js";
 import * as support from "./support.mapping.js";
 import * as verification from "./verification.mapping.js";
 
 export const eventMappings: Readonly<Record<string, EventMapping>> = {
+  "review.created": storeActivity.reviewCreated,
+  "review.replied": storeActivity.reviewReplied,
+  "sellerApplication.reviewed": storeActivity.sellerApplicationReviewed,
+  "creator.standingChanged": storeActivity.creatorStandingChanged,
+  "message.sent": storeActivity.messageSent,
   "order.placed": orders.orderPlaced,
   "order.paid": orders.orderPaid,
   "order.sellerAccepted": orders.orderSellerAccepted,
@@ -56,6 +62,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "account.deletionExecuted": identity.deletionExecuted,
   "mention.created": social.mentionCreated,
   "post.tagged": social.postTagged,
+  "post.reshared": social.postReshared,
   "follow.created": social.followCreated,
   "followRequest.created": social.followRequestCreated,
   "comment.created": social.commentCreated,

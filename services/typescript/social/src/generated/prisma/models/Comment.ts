@@ -54,6 +54,7 @@ export type CommentMinAggregateOutputType = {
   createdAt: Date | null
   isPinned: boolean | null
   pinnedAt: Date | null
+  quotedPostId: string | null
 }
 
 export type CommentMaxAggregateOutputType = {
@@ -72,6 +73,7 @@ export type CommentMaxAggregateOutputType = {
   createdAt: Date | null
   isPinned: boolean | null
   pinnedAt: Date | null
+  quotedPostId: string | null
 }
 
 export type CommentCountAggregateOutputType = {
@@ -91,6 +93,7 @@ export type CommentCountAggregateOutputType = {
   createdAt: number
   isPinned: number
   pinnedAt: number
+  quotedPostId: number
   _all: number
 }
 
@@ -123,6 +126,7 @@ export type CommentMinAggregateInputType = {
   createdAt?: true
   isPinned?: true
   pinnedAt?: true
+  quotedPostId?: true
 }
 
 export type CommentMaxAggregateInputType = {
@@ -141,6 +145,7 @@ export type CommentMaxAggregateInputType = {
   createdAt?: true
   isPinned?: true
   pinnedAt?: true
+  quotedPostId?: true
 }
 
 export type CommentCountAggregateInputType = {
@@ -160,6 +165,7 @@ export type CommentCountAggregateInputType = {
   createdAt?: true
   isPinned?: true
   pinnedAt?: true
+  quotedPostId?: true
   _all?: true
 }
 
@@ -266,6 +272,7 @@ export type CommentGroupByOutputType = {
   createdAt: Date
   isPinned: boolean
   pinnedAt: Date | null
+  quotedPostId: string | null
   _count: CommentCountAggregateOutputType | null
   _avg: CommentAvgAggregateOutputType | null
   _sum: CommentSumAggregateOutputType | null
@@ -308,6 +315,7 @@ export type CommentWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   isPinned?: Prisma.BoolFilter<"Comment"> | boolean
   pinnedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
+  quotedPostId?: Prisma.UuidNullableFilter<"Comment"> | string | null
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
   likes?: Prisma.CommentLikeListRelationFilter
 }
@@ -329,6 +337,7 @@ export type CommentOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   isPinned?: Prisma.SortOrder
   pinnedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  quotedPostId?: Prisma.SortOrderInput | Prisma.SortOrder
   post?: Prisma.PostOrderByWithRelationInput
   likes?: Prisma.CommentLikeOrderByRelationAggregateInput
 }
@@ -353,6 +362,7 @@ export type CommentWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   isPinned?: Prisma.BoolFilter<"Comment"> | boolean
   pinnedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
+  quotedPostId?: Prisma.UuidNullableFilter<"Comment"> | string | null
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
   likes?: Prisma.CommentLikeListRelationFilter
 }, "id">
@@ -374,6 +384,7 @@ export type CommentOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   isPinned?: Prisma.SortOrder
   pinnedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  quotedPostId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.CommentCountOrderByAggregateInput
   _avg?: Prisma.CommentAvgOrderByAggregateInput
   _max?: Prisma.CommentMaxOrderByAggregateInput
@@ -401,6 +412,7 @@ export type CommentScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Comment"> | Date | string
   isPinned?: Prisma.BoolWithAggregatesFilter<"Comment"> | boolean
   pinnedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Comment"> | Date | string | null
+  quotedPostId?: Prisma.UuidNullableWithAggregatesFilter<"Comment"> | string | null
 }
 
 export type CommentCreateInput = {
@@ -419,6 +431,7 @@ export type CommentCreateInput = {
   createdAt?: Date | string
   isPinned?: boolean
   pinnedAt?: Date | string | null
+  quotedPostId?: string | null
   post: Prisma.PostCreateNestedOneWithoutCommentsInput
   likes?: Prisma.CommentLikeCreateNestedManyWithoutCommentInput
 }
@@ -440,6 +453,7 @@ export type CommentUncheckedCreateInput = {
   createdAt?: Date | string
   isPinned?: boolean
   pinnedAt?: Date | string | null
+  quotedPostId?: string | null
   likes?: Prisma.CommentLikeUncheckedCreateNestedManyWithoutCommentInput
 }
 
@@ -459,6 +473,7 @@ export type CommentUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotedPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   post?: Prisma.PostUpdateOneRequiredWithoutCommentsNestedInput
   likes?: Prisma.CommentLikeUpdateManyWithoutCommentNestedInput
 }
@@ -480,6 +495,7 @@ export type CommentUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotedPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   likes?: Prisma.CommentLikeUncheckedUpdateManyWithoutCommentNestedInput
 }
 
@@ -500,6 +516,7 @@ export type CommentCreateManyInput = {
   createdAt?: Date | string
   isPinned?: boolean
   pinnedAt?: Date | string | null
+  quotedPostId?: string | null
 }
 
 export type CommentUpdateManyMutationInput = {
@@ -518,6 +535,7 @@ export type CommentUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotedPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CommentUncheckedUpdateManyInput = {
@@ -537,6 +555,7 @@ export type CommentUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotedPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CommentListRelationFilter = {
@@ -566,6 +585,7 @@ export type CommentCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   isPinned?: Prisma.SortOrder
   pinnedAt?: Prisma.SortOrder
+  quotedPostId?: Prisma.SortOrder
 }
 
 export type CommentAvgOrderByAggregateInput = {
@@ -590,6 +610,7 @@ export type CommentMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   isPinned?: Prisma.SortOrder
   pinnedAt?: Prisma.SortOrder
+  quotedPostId?: Prisma.SortOrder
 }
 
 export type CommentMinOrderByAggregateInput = {
@@ -608,6 +629,7 @@ export type CommentMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   isPinned?: Prisma.SortOrder
   pinnedAt?: Prisma.SortOrder
+  quotedPostId?: Prisma.SortOrder
 }
 
 export type CommentSumOrderByAggregateInput = {
@@ -693,6 +715,7 @@ export type CommentCreateWithoutPostInput = {
   createdAt?: Date | string
   isPinned?: boolean
   pinnedAt?: Date | string | null
+  quotedPostId?: string | null
   likes?: Prisma.CommentLikeCreateNestedManyWithoutCommentInput
 }
 
@@ -712,6 +735,7 @@ export type CommentUncheckedCreateWithoutPostInput = {
   createdAt?: Date | string
   isPinned?: boolean
   pinnedAt?: Date | string | null
+  quotedPostId?: string | null
   likes?: Prisma.CommentLikeUncheckedCreateNestedManyWithoutCommentInput
 }
 
@@ -761,6 +785,7 @@ export type CommentScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   isPinned?: Prisma.BoolFilter<"Comment"> | boolean
   pinnedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
+  quotedPostId?: Prisma.UuidNullableFilter<"Comment"> | string | null
 }
 
 export type CommentCreateWithoutLikesInput = {
@@ -779,6 +804,7 @@ export type CommentCreateWithoutLikesInput = {
   createdAt?: Date | string
   isPinned?: boolean
   pinnedAt?: Date | string | null
+  quotedPostId?: string | null
   post: Prisma.PostCreateNestedOneWithoutCommentsInput
 }
 
@@ -799,6 +825,7 @@ export type CommentUncheckedCreateWithoutLikesInput = {
   createdAt?: Date | string
   isPinned?: boolean
   pinnedAt?: Date | string | null
+  quotedPostId?: string | null
 }
 
 export type CommentCreateOrConnectWithoutLikesInput = {
@@ -833,6 +860,7 @@ export type CommentUpdateWithoutLikesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotedPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   post?: Prisma.PostUpdateOneRequiredWithoutCommentsNestedInput
 }
 
@@ -853,6 +881,7 @@ export type CommentUncheckedUpdateWithoutLikesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotedPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CommentCreateManyPostInput = {
@@ -871,6 +900,7 @@ export type CommentCreateManyPostInput = {
   createdAt?: Date | string
   isPinned?: boolean
   pinnedAt?: Date | string | null
+  quotedPostId?: string | null
 }
 
 export type CommentUpdateWithoutPostInput = {
@@ -889,6 +919,7 @@ export type CommentUpdateWithoutPostInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotedPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   likes?: Prisma.CommentLikeUpdateManyWithoutCommentNestedInput
 }
 
@@ -908,6 +939,7 @@ export type CommentUncheckedUpdateWithoutPostInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotedPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   likes?: Prisma.CommentLikeUncheckedUpdateManyWithoutCommentNestedInput
 }
 
@@ -927,6 +959,7 @@ export type CommentUncheckedUpdateManyWithoutPostInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotedPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -977,6 +1010,7 @@ export type CommentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdAt?: boolean
   isPinned?: boolean
   pinnedAt?: boolean
+  quotedPostId?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
   likes?: boolean | Prisma.Comment$likesArgs<ExtArgs>
   _count?: boolean | Prisma.CommentCountOutputTypeDefaultArgs<ExtArgs>
@@ -999,6 +1033,7 @@ export type CommentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdAt?: boolean
   isPinned?: boolean
   pinnedAt?: boolean
+  quotedPostId?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["comment"]>
 
@@ -1019,6 +1054,7 @@ export type CommentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdAt?: boolean
   isPinned?: boolean
   pinnedAt?: boolean
+  quotedPostId?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["comment"]>
 
@@ -1039,9 +1075,10 @@ export type CommentSelectScalar = {
   createdAt?: boolean
   isPinned?: boolean
   pinnedAt?: boolean
+  quotedPostId?: boolean
 }
 
-export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "parentCommentId" | "rootCommentId" | "authorId" | "text" | "mentions" | "likeCount" | "replyCount" | "depth" | "path" | "moderationVisibility" | "deletedAt" | "createdAt" | "isPinned" | "pinnedAt", ExtArgs["result"]["comment"]>
+export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "parentCommentId" | "rootCommentId" | "authorId" | "text" | "mentions" | "likeCount" | "replyCount" | "depth" | "path" | "moderationVisibility" | "deletedAt" | "createdAt" | "isPinned" | "pinnedAt" | "quotedPostId", ExtArgs["result"]["comment"]>
 export type CommentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
   likes?: boolean | Prisma.Comment$likesArgs<ExtArgs>
@@ -1077,6 +1114,7 @@ export type $CommentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdAt: Date
     isPinned: boolean
     pinnedAt: Date | null
+    quotedPostId: string | null
   }, ExtArgs["result"]["comment"]>
   composites: {}
 }
@@ -1518,6 +1556,7 @@ export interface CommentFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Comment", 'DateTime'>
   readonly isPinned: Prisma.FieldRef<"Comment", 'Boolean'>
   readonly pinnedAt: Prisma.FieldRef<"Comment", 'DateTime'>
+  readonly quotedPostId: Prisma.FieldRef<"Comment", 'String'>
 }
     
 

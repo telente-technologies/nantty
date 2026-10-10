@@ -1,6 +1,6 @@
 export interface SponsoredPlacementView {
   readonly campaignId: string;
-  readonly label: "Sponsored" | "Promoted";
+  readonly label: "Sponsored" | "Promoted" | "Boosted";
   readonly advertiserName: string;
   readonly ctaLabel?: string;
   readonly ctaUrl?: string;

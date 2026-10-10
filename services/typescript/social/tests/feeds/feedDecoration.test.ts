@@ -56,6 +56,10 @@ describe("sponsored posts", () => {
     expect(view).toMatchObject({ id: "ad-ad1", text: "Buy", sponsored: { campaignId: "ad1" }, viewerCanReply: false });
     expect(view.media[0]?.url).toBe("https://cdn/a.jpg");
   });
+  it("keeps boosted posts labelled Boosted, distinct from ads", () => {
+    expect(toSponsoredPlacement({ ...ad, label: "Boosted" }).label).toBe("Boosted");
+    expect(toSponsoredPlacement({ ...ad, label: "Ad" }).label).toBe("Sponsored");
+  });
 });
 
 describe("clip composer fields", () => {

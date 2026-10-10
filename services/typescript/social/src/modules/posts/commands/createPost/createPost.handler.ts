@@ -15,6 +15,8 @@ import { buildPostViews } from "../../services/postView.service.js";
 import { selectTaggableUserIds } from "../../services/postTagEligibility.service.js";
 import { syncPostTags } from "../../services/postTagWrite.service.js";
 import { assertMediaFitsPostKind } from "../../services/postRules.service.js";
+import { displayTextForQuote, recordReshareInTransaction, resolveQuoteForWrite } from "../../services/quoteTarget.service.js";
+import { keepMentionsWithinText } from "../../../mentions/services/mentionWrite.service.js";
 import { buildClipEdit, resolveOwnedPostMedia } from "../../services/postMediaResolution.service.js";
 import { assertProductsTaggable } from "../../services/postProducts.service.js";
 import { prepareAudienceSettingsForPublishing } from "../../services/postAudienceRules.service.js";
@@ -46,7 +48,10 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
       if (!canUseSound(sound, command.authorId)) throw forbidden("SOUND_NOT_REUSABLE", "This sound can't be used.");
     }
     const sensitiveLabels = await prepareAudienceSettingsForPublishing(context, command.authorId, { visibility: command.visibility, sensitiveLabels: command.sensitiveLabels });
-    const mentionResult = await prepareMentionsForWrite(context, { surface: "post", authorId: command.authorId, text: command.text, entities: command.mentions });
+    if (command.kind !== "post" && typeof command.quotedPostId === "string") throw unprocessable("QUOTE_REQUIRES_POST", "Only posts can quote another post.");
+    const quote = command.kind === "post" && command.replyToComment === undefined ? await resolveQuoteForWrite(context, command.authorId, { text: command.text, quotedPostId: command.quotedPostId }) : null;
+    const text = displayTextForQuote(command.text, quote);
+    const mentionResult = await prepareMentionsForWrite(context, { surface: "post", authorId: command.authorId, text, entities: keepMentionsWithinText(command.mentions, text) });
     const taggedUserIds = command.kind === "story" ? [] : await selectTaggableUserIds(context, command.authorId, command.taggedUserIds ?? []);
     let authorProfileId: string | null = null;
     let authorProfileKind: string | null = null;
@@ -64,7 +69,8 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
         ...(authorProfileId === null ? {} : { authorProfileId }),
         ...(authorProfileKind === null ? {} : { authorProfileKind }),
         kind: command.kind,
-        text: command.text,
+        text,
+        ...(quote === null ? {} : { resharedFromId: quote.originalId, isQuote: true }),
         audience: command.audience,
         visibility: command.visibility,
         replyPolicy: command.replyPolicy ?? "everyone",
@@ -89,18 +95,19 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
         },
       });
       if (command.soundId !== undefined) await soundRepository.incrementUsage(transaction, command.soundId, 1);
-      const events: DomainEventInput[] = [{ eventType: socialEventTypes.postCreated, subject: post.id, occurredAt: now, data: { postId: post.id, authorId: post.authorId, authorProfileId: post.authorProfileId, authorProfileKind: post.authorProfileKind, kind: post.kind, audience: post.audience, visibility: post.visibility, replyPolicy: post.replyPolicy, sensitiveLabels: post.sensitiveLabels, isAiGenerated: post.isAiGenerated, text: post.text.slice(0, 2000), mediaIds: post.media.map((media) => media.mediaId), topics: post.topics, productIds: post.productIds } }];
+      const events: DomainEventInput[] = [{ eventType: socialEventTypes.postCreated, subject: post.id, occurredAt: now, data: { postId: post.id, authorId: post.authorId, authorProfileId: post.authorProfileId, authorProfileKind: post.authorProfileKind, kind: post.kind, audience: post.audience, visibility: post.visibility, replyPolicy: post.replyPolicy, sensitiveLabels: post.sensitiveLabels, isAiGenerated: post.isAiGenerated, text: post.text.slice(0, 2000), mediaIds: post.media.map((media) => media.mediaId), topics: post.topics, productIds: post.productIds, quotedPostId: quote?.originalId ?? null } }];
       for (const userId of mentionResult.userIdsToNotify) {
-        events.push({ eventType: socialEventTypes.mentionCreated, subject: post.id, occurredAt: now, data: { recipientUserId: userId, mentionedUserId: userId, actor, authorId: command.authorId, surface: "post", postId: post.id, excerpt: buildExcerpt(command.text), url: `/post/${post.id}` } });
+        events.push({ eventType: socialEventTypes.mentionCreated, subject: post.id, occurredAt: now, data: { recipientUserId: userId, mentionedUserId: userId, actor, authorId: command.authorId, surface: "post", postId: post.id, excerpt: buildExcerpt(text), url: `/post/${post.id}` } });
       }
       if (comment !== undefined) {
         events.push({ eventType: socialEventTypes.videoReplyCreated, subject: post.id, occurredAt: now, data: { recipientUserId: comment.authorId, actor, url: `/clips/${post.id}`, replyClipId: post.id, originalClipId: comment.postId, commentId: comment.id, authorId: command.authorId, commenterId: comment.authorId } });
       }
       await appendDomainEventsToOutbox(transaction, events);
+      if (quote !== null) await recordReshareInTransaction(transaction, { postId: post.id, originalId: quote.originalId, actorId: command.authorId, originalAuthorId: quote.originalAuthorId, isQuote: true, now, actor });
       await syncPostTags(transaction, { postId: post.id, kind: post.kind, authorId: command.authorId, actor, desiredUserIds: taggedUserIds, now });
       return post;
     });
-    const withPreview = created.media.length === 0 && command.kind === "post" ? await attachLinkPreviewWithinBudget(context, created.id, created.text) : null;
+    const withPreview = created.media.length === 0 && command.kind === "post" && quote === null ? await attachLinkPreviewWithinBudget(context, created.id, created.text) : null;
     const [view] = await buildPostViews(context, command.authorId, [withPreview === null ? created : { ...created, linkPreview: withPreview as unknown as Prisma.JsonValue }]);
     return view as PostView;
   };

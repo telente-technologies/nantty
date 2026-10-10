@@ -59,6 +59,7 @@ export const createPostBodySchema = schema.object({
   location: locationTagSchema.optional(),
   topics: topicSlugsSchema.optional(),
   productIds: productIdsSchema.optional(),
+  quotedPostId: schema.optional(schema.nullable(schema.string().uuid())),
 });
 
 export const tagProductsBodySchema = schema.object({ productIds: productIdsSchema });

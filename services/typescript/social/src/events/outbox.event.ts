@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import type { Prisma } from "../generated/prisma/client.js";
 import type { Db } from "../types/database.type.js";
+import { markMutedPostNotifications } from "./postNotificationMutes.event.js";
 
 export const eventSource = "social";
 
@@ -14,8 +15,9 @@ export interface DomainEventInput {
 
 export async function appendDomainEventsToOutbox(db: Db, events: readonly DomainEventInput[]): Promise<void> {
   if (events.length === 0) return;
+  const annotated = await markMutedPostNotifications(db, events);
   await db.outboxEvent.createMany({
-    data: events.map((event) => {
+    data: annotated.map((event) => {
       const id = randomUUID();
       return {
         id,

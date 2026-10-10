@@ -152,6 +152,16 @@ export type SoundSave = Prisma.SoundSaveModel
  */
 export type ContentPreference = Prisma.ContentPreferenceModel
 /**
+ * Model CommentRankSnapshot
+ * 
+ */
+export type CommentRankSnapshot = Prisma.CommentRankSnapshotModel
+/**
+ * Model PostNotificationMute
+ * 
+ */
+export type PostNotificationMute = Prisma.PostNotificationMuteModel
+/**
  * Model DownloadSetting
  * 
  */

@@ -45,3 +45,7 @@ export async function prepareMentionsForWrite(context: HandlerContext, request: 
   };
   return applyMentionPolicy({ surface: request.surface, authorId: request.authorId, text: request.text, entities, lookups });
 }
+
+export function keepMentionsWithinText(entities: readonly MentionEntity[] | undefined, text: string): readonly MentionEntity[] | undefined {
+  return entities?.filter((entity) => entity.start + entity.length <= text.length);
+}

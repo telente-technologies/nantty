@@ -21,6 +21,7 @@ export function createDeleteCommentHandler(context: HandlerContext): Handler<Del
       if (comment.isPinned) await commentRepository.clearPins(transaction, [commentId]);
       await postRepository.incrementCounter(transaction, comment.postId, "commentCount", -removed.count);
       if (comment.parentCommentId !== null) await commentRepository.incrementReplies(transaction, comment.parentCommentId, -1);
+      await postRepository.decrementQuoteCountsForComments(transaction, ids);
       await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.commentDeleted, subject: commentId, occurredAt: now, data: { commentId, postId: comment.postId, deletedBy: actorId, removedCount: removed.count } }]);
     });
   };

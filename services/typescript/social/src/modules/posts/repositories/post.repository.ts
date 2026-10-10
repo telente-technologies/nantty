@@ -17,6 +17,11 @@ export const postRepository = {
   incrementCounterIfNotDeleted: async (db: Db, id: string, counter: "commentCount", by: number): Promise<boolean> =>
     (await db.post.updateMany({ where: { id, deletedAt: null }, data: { [counter]: { increment: by } } })).count === 1,
 
+  decrementQuoteCountsForComments: async (db: Db, commentIds: readonly string[]): Promise<void> => {
+    const quoting = await db.comment.findMany({ where: { id: { in: [...commentIds] }, quotedPostId: { not: null } }, select: { quotedPostId: true } });
+    for (const row of quoting) if (row.quotedPostId !== null) await db.post.updateMany({ where: { id: row.quotedPostId, quoteCount: { gt: 0 } }, data: { quoteCount: { decrement: 1 } } });
+  },
+
   incrementCounter: (db: Db, id: string, counter: "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "quoteCount", by: number) =>
     db.post.update({ where: { id }, data: { [counter]: { increment: by } } }),
 

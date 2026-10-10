@@ -15,6 +15,6 @@ Streamers can set a goal, for example 5,000 coins for a new mic, and a progress 
 
 ## ZudoPoints
 
-ZudoPoints measure support on a live. You earn them by gifting (1 coin = 1 point) and by liking, sharing, following and watching. Likes earn at most 10 points a minute. Points rank the top supporters on each live and on the Rankings screen (global, country and category).
+ZudoPoints measure support on a live. You earn them by gifting (1 coin = 1 point) and by liking, sharing, following and watching. Likes earn at most 10 points a minute. Points rank the top supporters on each live. A host's weekly global rank shows as a ring around their avatar in the live header; tap it to see their category rank too.
 
 ZudoPoints are **not money**. You can't buy, sell, withdraw or exchange them.

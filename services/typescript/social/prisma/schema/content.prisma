@@ -171,6 +171,7 @@ model Comment {
   createdAt        DateTime  @default(now())
   isPinned         Boolean   @default(false)
   pinnedAt         DateTime?
+  quotedPostId     String?   @db.Uuid
 
   post    Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
   likes   CommentLike[]
@@ -180,6 +181,7 @@ model Comment {
   @@index([rootCommentId, id])
   @@index([rootCommentId, path])
   @@index([authorId])
+  @@index([quotedPostId])
   @@map("comments")
 }
 
@@ -281,4 +283,26 @@ model ContentPreference {
   updatedAt                   DateTime @default(now()) @updatedAt
 
   @@map("content_preferences")
+}
+
+model CommentRankSnapshot {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  postId          String   @db.Uuid
+  viewerId        String?  @db.Uuid
+  pinnedCommentId String?  @db.Uuid
+  commentIds      String[] @default([])
+  createdAt       DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("comment_rank_snapshots")
+}
+
+model PostNotificationMute {
+  userId    String   @db.Uuid
+  postId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+  @@index([postId])
+  @@map("post_notification_mutes")
 }

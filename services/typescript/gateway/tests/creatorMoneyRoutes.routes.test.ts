@@ -15,6 +15,7 @@ describe("creator money routes", () => {
       ["GET", "/api/v1/seller/affiliates/overview"], ["PUT", "/api/v1/seller/affiliates/product-commissions/p1"], ["GET", "/api/v1/verification/plans"],
       ["POST", "/api/v1/verification/subscription/cancel"], [`POST`, `/api/v1/creators/${creatorId}/subscriptions/store`],
       ["POST", "/api/v1/creator-subscriptions/store-receipts"], ["GET", "/api/v1/creators/me/subscription-plans/price-tiers"],
+      ["GET", "/api/v1/creators/brand-deals"], ["POST", "/api/v1/creators/brand-deals"], ["DELETE", "/api/v1/creators/brand-deals/d1"],
     ];
     for (const [method, path] of signedIn) {
       expect(resolveUpstreamRouteForRequest(method, path), `${method} ${path}`).toMatchObject({ upstream: "money", authentication: "required" });
