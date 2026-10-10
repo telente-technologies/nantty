@@ -31,8 +31,8 @@ func NewStoreVerifiersFromSettings(settings configs.PaymentsSettings) (map[strin
 		google := settings.GooglePlay
 		verifier, err := integrations.NewGooglePlayVerifier(integrations.GooglePlaySettings{
 			PackageName: google.PackageName, ServiceAccountJson: []byte(google.ServiceAccountJson), ApiBaseUrl: google.ApiBaseUrl,
-			ProductPrices: ParseGooglePlayProductPrices(google.ProductPrices), SubscriptionProductIds: google.SubscriptionProductIds,
-			PushToken: google.PushToken, StoreFeeBasisPoints: settings.GooglePlayBillingFeeBps,
+			ProductPrices: ParseGooglePlayProductPrices(google.ProductPrices), SubscriptionProductIds: google.SubscriptionProductIds, SubscriptionPrefixes: google.SubscriptionPrefixes,
+			PushToken: google.PushToken, PushAudience: google.PushAudience, PushServiceAccountEmail: google.PushServiceAccount, StoreFeeBasisPoints: settings.GooglePlayBillingFeeBps,
 		})
 		if err != nil {
 			return nil, err

@@ -48,6 +48,24 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		}
 		return gateway.HandleCreatorApproved(ctx, data.AccountId)
 	})
+	loaders.RegisterMoneyDomainEventHandler("businessVerification.approved", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var data struct {
+			AccountId string `json:"accountId"`
+		}
+		if err := loaders.DecodeEventData(envelope, &data); err != nil {
+			return err
+		}
+		return gateway.RecordSellerVerification(ctx, data.AccountId, envelope.Id, envelope.OccurredAt)
+	})
+	loaders.RegisterMoneyDomainEventHandler("businessVerification.revoked", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var data struct {
+			AccountId string `json:"accountId"`
+		}
+		if err := loaders.DecodeEventData(envelope, &data); err != nil {
+			return err
+		}
+		return gateway.RevokeSellerVerification(ctx, data.AccountId, envelope.Id, envelope.OccurredAt)
+	})
 	ledgerjobs.RegisterProviderMirrorReconciler(module.Application.Gateway)
 	return module, nil
 }

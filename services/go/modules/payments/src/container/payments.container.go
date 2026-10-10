@@ -91,7 +91,7 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{
 			BillingAuthorization: schema, BillingSubscription: schema, ConnectedAccount: schema, IdempotentRequest: schema, OrderPayable: schema, OutboxEvent: schema,
-			PaymentIntent: schema, PaymentRefund: schema, PayoutOnboarding: schema, PayoutTransfer: schema, ConnectedAccountJob: schema, ProviderCustomer: schema, ProviderDispute: schema, ProviderPayoutDestination: schema, SavedCardSetup: schema,
+			PaymentIntent: schema, PaymentRefund: schema, PayoutOnboarding: schema, PayoutTransfer: schema, ConnectedAccountJob: schema, ProviderCustomer: schema, ProviderDispute: schema, ProviderPayoutDestination: schema, SavedCardSetup: schema, SellerVerification: schema,
 			StorePurchase: schema, WebhookEvent: schema,
 		},
 	}, nil

@@ -2,6 +2,7 @@ package configs
 
 import (
 	"encoding/base64"
+	"os"
 	"strings"
 
 	"zudomart/modules/ledger/src/loaders"
@@ -25,6 +26,8 @@ type PaymentsSettings struct {
 	CheckoutExpiryMinutes       int
 	AccountDirectorySchema      string
 	OrderStatusSchema           string
+	UsersSchema                 string
+	UnverifiedSellerSalesCaps   map[string]int64
 	WebSubscriptionPlanProducts map[string]string
 	AppleInAppPurchaseFeeBps    int64
 	GooglePlayBillingFeeBps     int64
@@ -72,7 +75,10 @@ type GooglePlaySettings struct {
 	ApiBaseUrl             string
 	ProductPrices          string
 	SubscriptionProductIds []string
+	SubscriptionPrefixes   []string
 	PushToken              string
+	PushAudience           string
+	PushServiceAccount     string
 }
 
 func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) PaymentsSettings {
@@ -102,19 +108,23 @@ func ReadPaymentsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 		CheckoutExpiryMinutes:       reader.ReadIntegerOrDefault("CHECKOUT_SESSION_EXPIRY_MINUTES", 15),
 		AccountDirectorySchema:      reader.ReadStringOrDefault("PAYMENTS_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
 		OrderStatusSchema:           reader.ReadStringOrDefault("PAYMENTS_ORDER_STATUS_SCHEMA", "orders"),
+		UsersSchema:                 reader.ReadStringOrDefault("PAYMENTS_USERS_SCHEMA", "users"),
+		UnverifiedSellerSalesCaps:   loaders.ParseCurrencyAmountMap(reader.ReadStringOrDefault("UNVERIFIED_SELLER_SALES_CAPS", "NGN:20000000")),
 		WebSubscriptionPlanProducts: parsePlanProducts(reader.ReadStringOrDefault("PAYSTACK_PLAN_CODES", "")),
 		AppleInAppPurchaseFeeBps:    int64(reader.ReadIntegerOrDefault("APPLE_IAP_STORE_FEE_BPS", 3000)),
 		GooglePlayBillingFeeBps:     int64(reader.ReadIntegerOrDefault("GOOGLE_PLAY_STORE_FEE_BPS", 1500)),
 		AppleStore: AppleStoreSettings{
 			BundleId: reader.ReadStringOrDefault("APPLE_IAP_BUNDLE_ID", ""), Environment: reader.ReadStringOrDefault("APPLE_IAP_ENVIRONMENT", "Sandbox"),
-			RootCertificatesPem: reader.ReadStringOrDefault("APPLE_IAP_ROOT_CERTIFICATES_PEM", ""), IssuerId: reader.ReadStringOrDefault("APPLE_IAP_ISSUER_ID", ""),
-			KeyId: reader.ReadStringOrDefault("APPLE_IAP_KEY_ID", ""), PrivateKeyPem: reader.ReadStringOrDefault("APPLE_IAP_PRIVATE_KEY_PEM", ""),
+			RootCertificatesPem: readValueOrFile(reader, "APPLE_IAP_ROOT_CERTIFICATES_PEM", "APPLE_IAP_ROOT_CERTIFICATES_PATH"), IssuerId: reader.ReadStringOrDefault("APPLE_IAP_ISSUER_ID", ""),
+			KeyId: reader.ReadStringOrDefault("APPLE_IAP_KEY_ID", ""), PrivateKeyPem: readValueOrFile(reader, "APPLE_IAP_PRIVATE_KEY_PEM", "APPLE_IAP_PRIVATE_KEY_PATH"),
 			ApiBaseUrl: reader.ReadStringOrDefault("APPLE_IAP_API_BASE_URL", "https://api.storekit-sandbox.itunes.apple.com"),
 		},
 		GooglePlay: GooglePlaySettings{
-			PackageName: reader.ReadStringOrDefault("GOOGLE_PLAY_PACKAGE_NAME", ""), ServiceAccountJson: reader.ReadStringOrDefault("GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", ""),
+			PackageName: reader.ReadStringOrDefault("GOOGLE_PLAY_PACKAGE_NAME", ""), ServiceAccountJson: readValueOrFile(reader, "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH"),
 			ApiBaseUrl: reader.ReadStringOrDefault("GOOGLE_PLAY_API_BASE_URL", "https://androidpublisher.googleapis.com"), ProductPrices: reader.ReadStringOrDefault("GOOGLE_PLAY_PRODUCT_PRICES", ""),
 			SubscriptionProductIds: reader.ReadCommaSeparatedListOrDefault("GOOGLE_PLAY_SUBSCRIPTION_PRODUCTS", nil), PushToken: reader.ReadStringOrDefault("GOOGLE_PLAY_RTDN_PUSH_TOKEN", ""),
+			SubscriptionPrefixes: reader.ReadCommaSeparatedListOrDefault("GOOGLE_PLAY_SUBSCRIPTION_PRODUCT_PREFIXES", []string{"zudomart.creatorsub."}),
+			PushAudience:         reader.ReadStringOrDefault("GOOGLE_PLAY_RTDN_PUSH_AUDIENCE", ""), PushServiceAccount: reader.ReadStringOrDefault("GOOGLE_PLAY_RTDN_PUSH_SERVICE_ACCOUNT", ""),
 		},
 		SavedCardFingerprintKey:     reader.ReadStringOrDefault("SAVED_CARD_FINGERPRINT_KEY", ""),
 		ConnectContactEmailDomain:   reader.ReadStringOrDefault("CONNECT_CONTACT_EMAIL_DOMAIN", ""),
@@ -173,4 +183,20 @@ func readOptionalEncryptionKey(reader *platformconfig.EnvironmentReader, require
 		return nil
 	}
 	return decoded
+}
+
+func readValueOrFile(reader *platformconfig.EnvironmentReader, valueKey, pathKey string) string {
+	if value := reader.ReadStringOrDefault(valueKey, ""); value != "" {
+		return value
+	}
+	path := reader.ReadStringOrDefault(pathKey, "")
+	if path == "" {
+		return ""
+	}
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		reader.ReportProblem(pathKey + " must point to a readable file")
+		return ""
+	}
+	return string(contents)
 }

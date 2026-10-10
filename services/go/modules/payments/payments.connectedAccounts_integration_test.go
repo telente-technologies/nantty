@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -14,6 +15,11 @@ import (
 func registerOrder(t *testing.T, harness *paymentstesting.MoneyHarness, buyer, seller string, amount int64, mode string, verified bool) string {
 	t.Helper()
 	orderId := uuid.NewString()
+	if verified {
+		if err := harness.Payments.Application.Gateway.RecordSellerVerification(context.Background(), seller, "test", time.Now()); err != nil {
+			t.Fatal(err)
+		}
+	}
 	err := harness.Payments.Application.Gateway.RegisterCheckoutPayables(context.Background(), []models.OrderPayable{{
 		CheckoutId: uuid.NewString(), OrderId: orderId, OrderReference: "ZM-" + orderId[:5], BuyerUserId: buyer, StoreId: "store-1", SellerUserId: seller,
 		AmountMinor: amount, Currency: "NGN", PaymentMode: mode, StoreVerified: verified,
