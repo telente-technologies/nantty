@@ -25,9 +25,10 @@ export function ThreadedCommentList({ listHeader, contentContainerStyle, comment
     .map((comment): CommentWithReplies => ({ ...comment, previewReplies: [] }));
   const listRef = useRef<FlatList<CommentWithReplies>>(null);
   const scrolledToCommentId = useRef<string | null>(null);
-  const visibleTopLevelComments = mergeServerAndLocalComments(topLevelComments, locallyPostedTopLevel, true).filter(
-    (comment) => !thread.isCommentDeleted(comment.id),
-  );
+  const visibleTopLevelComments = mergeServerAndLocalComments(topLevelComments, locallyPostedTopLevel, true)
+    .filter((comment) => !thread.isCommentDeleted(comment.id))
+    .map((comment) => thread.applyLocalOverridesToComment(comment));
+  visibleTopLevelComments.sort((a, b) => Number(b.isPinned === true) - Number(a.isPinned === true));
 
   const highlightedCommentId = thread.highlightedCommentId;
   const highlightedIndex = highlightedCommentId

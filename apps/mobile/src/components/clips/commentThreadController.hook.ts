@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-import { postCommentsService } from "@/services/postComments.service";
+import { postCommentsService } from "@/services/content/postComments.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Comment, UserSummary } from "@/types";
 import type { MentionEntity } from "@/types/mention.type";
@@ -19,6 +19,7 @@ interface LikeOverride {
 interface CommentThreadLocalState {
   readonly locallyPostedCommentsByParentKey: Record<string, readonly Comment[]>;
   readonly likeOverridesByCommentId: Record<string, LikeOverride>;
+  readonly pinOverridesByCommentId: Record<string, boolean>;
   readonly deletedCommentIds: Record<string, true>;
   readonly replyThreadVisibilityByCommentId: Record<string, ReplyThreadVisibility>;
   readonly replyTarget: Comment | null;
@@ -27,6 +28,7 @@ interface CommentThreadLocalState {
 const EMPTY_THREAD_STATE: CommentThreadLocalState = {
   locallyPostedCommentsByParentKey: {},
   likeOverridesByCommentId: {},
+  pinOverridesByCommentId: {},
   deletedCommentIds: {},
   replyThreadVisibilityByCommentId: {},
   replyTarget: null,
@@ -41,7 +43,7 @@ export interface VideoReplyOptions {
   readonly onStartVideoReply: (comment: Comment) => void;
 }
 
-export function useCommentThreadController(postId: string | null, closeContainingModal?: () => void, videoReply?: VideoReplyOptions) {
+export function useCommentThreadController(postId: string | null, closeContainingModal?: () => void, videoReply?: VideoReplyOptions, postAuthorId?: string | null) {
   const signedInUser = useAuthStore((s) => s.user);
   const [isPickingVideoReplyComment, setIsPickingVideoReplyComment] = useState(false);
   const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(null);
@@ -64,9 +66,14 @@ export function useCommentThreadController(postId: string | null, closeContainin
   const applyLocalOverridesToComment = useCallback(
     <T extends Comment>(comment: T): T => {
       const override = threadState.likeOverridesByCommentId[comment.id];
-      return override ? { ...comment, ...override } : comment;
+      const pinOverride = threadState.pinOverridesByCommentId[comment.id];
+      const pinnedByAnotherOverride = pinOverride === undefined && Object.values(threadState.pinOverridesByCommentId).some((pinned) => pinned);
+      const withLike = override ? { ...comment, ...override } : comment;
+      if (pinOverride !== undefined) return { ...withLike, isPinned: pinOverride };
+      if (pinnedByAnotherOverride && comment.isPinned) return { ...withLike, isPinned: false };
+      return withLike;
     },
-    [threadState.likeOverridesByCommentId],
+    [threadState.likeOverridesByCommentId, threadState.pinOverridesByCommentId],
   );
 
   const setLikeOverride = (commentId: string, override: LikeOverride) =>
@@ -103,6 +110,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
       createdAt: new Date().toISOString(),
       likes: 0,
       liked: false,
+      bookmarked: false,
       replyCount: 0,
       replyingTo: parent ? { userId: parent.author.id, username: parent.author.username } : undefined,
     };
@@ -151,6 +159,26 @@ export function useCommentThreadController(postId: string | null, closeContainin
     });
   };
 
+  const canPinComment = (comment: Comment) =>
+    !isPendingComment(comment) && comment.parentCommentId === null && !!postAuthorId && signedInUser?.id === postAuthorId;
+
+  const togglePinOnComment = (comment: Comment) => {
+    if (!postId || !canPinComment(comment)) return;
+    const pinning = !(applyLocalOverridesToComment(comment).isPinned === true);
+    setThreadState((s) => ({
+      ...s,
+      pinOverridesByCommentId: {
+        ...(pinning ? Object.fromEntries(Object.keys(s.pinOverridesByCommentId).map((commentId) => [commentId, false])) : s.pinOverridesByCommentId),
+        [comment.id]: pinning,
+      },
+    }));
+    const request = pinning ? postCommentsService.pinComment(postId, comment.id) : postCommentsService.unpinComment(postId, comment.id);
+    request.catch(() => {
+      setThreadState((s) => ({ ...s, pinOverridesByCommentId: { ...s.pinOverridesByCommentId, [comment.id]: !pinning } }));
+      showAlertWithButtons(pinning ? "Could not pin comment" : "Could not unpin comment", "Please try again.");
+    });
+  };
+
   const setReplyThreadVisibility = (commentId: string, visibility: ReplyThreadVisibility) =>
     setThreadState((s) => ({ ...s, replyThreadVisibilityByCommentId: { ...s.replyThreadVisibilityByCommentId, [commentId]: visibility } }));
 
@@ -179,6 +207,8 @@ export function useCommentThreadController(postId: string | null, closeContainin
     submitCommentOrReplyText,
     deleteOwnComment,
     canDeleteComment,
+    canPinComment,
+    togglePinOnComment,
     setReplyThreadVisibility,
     replyThreadVisibilityFor,
     startReplyingToComment,

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { ArrowLeft24Icon, MagnifyingGlass24Icon } from "@/components/icons";
+import { MagnifyingGlass24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import type { ClipsFeedTab } from "@/types";
 import { spacing } from "@/constants/spacing.constant";
@@ -9,18 +9,15 @@ import { typeScale } from "@/constants/typography.constant";
 export interface ClipsHeaderProps {
   readonly tab: ClipsFeedTab;
   readonly onChangeTab: (tab: ClipsFeedTab) => void;
-  readonly onBack: () => void;
   readonly onSearch: () => void;
   readonly showTabs?: boolean;
   readonly foregroundColor?: string;
 }
 
-export function ClipsHeader({ tab, onChangeTab, onBack, onSearch, showTabs = true, foregroundColor }: ClipsHeaderProps) {
+export function ClipsHeader({ tab, onChangeTab, onSearch, showTabs = true, foregroundColor }: ClipsHeaderProps) {
   return (
     <View style={styles.bar}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={12} onPress={onBack}>
-        <ArrowLeft24Icon color={foregroundColor} />
-      </Pressable>
+      <View style={styles.side} />
       {showTabs ? (
         <View style={styles.tabs} accessibilityRole="tablist">
           {(["forYou", "following"] as const).map((value) => (
@@ -48,5 +45,6 @@ export function ClipsHeader({ tab, onChangeTab, onBack, onSearch, showTabs = tru
 
 const styles = StyleSheet.create({
   bar: { height: 48, paddingHorizontal: spacing[4], flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  side: { width: 24 },
   tabs: { position: "absolute", left: 0, right: 0, flexDirection: "row", justifyContent: "center", gap: spacing[3], zIndex: -1 },
 });

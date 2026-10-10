@@ -5,7 +5,7 @@ import { StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import type { MainStackParamList } from "@/navigation/navigation.types";
-import { postCommentsService } from "@/services/postComments.service";
+import { postCommentsService } from "@/services/content/postComments.service";
 import { ApiError } from "@/errors/api.error";
 import type { Post } from "@/types";
 

@@ -41,7 +41,7 @@ export function ClipCommentsSheet({ postId, myAvatarUrl, clip, highlightCommentI
       onClose();
       navigation.navigate("CreatePost", { mode: "clip", videoReply: buildVideoReplyTarget(comment, clip) });
     },
-  });
+  }, clip?.author.id);
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
   const isClipAuthor = !!clip && !!signedInUserId && clip.author.id === signedInUserId;
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { Heart20Icon, HeartFill72Icon, Trash24Icon, VideoCamera24Icon, Warning20Icon } from "@/components/icons";
+import { Heart20Icon, HeartFill72Icon, PushPin24Icon, Trash24Icon, VideoCamera24Icon, Warning20Icon } from "@/components/icons";
 import { MentionText } from "@/components/mentions/mentionText";
 import { VideoReplyChip } from "./videoReply/videoReplyChip";
 import { ReportSheet } from "@/components/moderation/reportSheet";
@@ -22,9 +22,11 @@ export interface CommentRowProps {
   readonly showReplyingToPrefix?: boolean;
   readonly isPending?: boolean;
   readonly canDelete?: boolean;
+  readonly canPin?: boolean;
   readonly onToggleLike: () => void;
   readonly onReply: () => void;
   readonly onDelete?: () => void;
+  readonly onTogglePin?: () => void;
   readonly onReplyWithVideo?: () => void;
   readonly isPickingForVideoReply?: boolean;
   readonly isHighlighted?: boolean;
@@ -42,6 +44,8 @@ export function CommentRow({
   onToggleLike,
   onReply,
   onDelete,
+  canPin,
+  onTogglePin,
   onReplyWithVideo,
   isPickingForVideoReply,
   isHighlighted,
@@ -53,8 +57,8 @@ export function CommentRow({
   const openUserProfile = useOpenUserProfile();
   const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
   const offerToReportComment = () => setIsOptionsSheetOpen(true);
-  const confirmDeletingOwnComment = () => {
-    if (!canDelete || !onDelete) return;
+  const openCommentOptions = () => {
+    if (!canDelete && !canPin) return;
     setIsOptionsSheetOpen(true);
   };
   const askBeforeDeleting = () =>
@@ -64,6 +68,13 @@ export function CommentRow({
     ]);
   const commentOptions: ActionSheetOption[] = [
     ...(onReplyWithVideo ? [{ label: "Reply with video", icon: <VideoCamera24Icon size={20} color={colors.text} />, onPress: onReplyWithVideo }] : []),
+    ...(canPin && onTogglePin
+      ? [{
+        label: comment.isPinned === true ? "Unpin comment" : "Pin comment",
+        icon: <PushPin24Icon size={20} color={colors.text} />,
+        onPress: onTogglePin,
+      }]
+      : []),
     ...(canDelete && onDelete
       ? [{ label: "Delete comment", icon: <Trash24Icon size={20} />, destructive: true, onPress: askBeforeDeleting }]
       : [{ label: "Report comment", icon: <Warning20Icon />, destructive: true, onPress: () => requireAuthThen(() => setIsReportSheetOpen(true), undefined, "report") }]),
@@ -71,15 +82,17 @@ export function CommentRow({
   return (
     <Pressable
       onPress={isPickingForVideoReply && onReplyWithVideo ? onReplyWithVideo : undefined}
-      onLongPress={canDelete ? confirmDeletingOwnComment : isPending ? undefined : offerToReportComment}
-      accessibilityHint={canDelete ? "Long press to delete your comment" : "Long press to report this comment"}
+      onLongPress={(canDelete || canPin) ? openCommentOptions : isPending ? undefined : offerToReportComment}
+      accessibilityHint={canDelete || canPin ? "Long press for comment options" : "Long press to report this comment"}
       accessibilityActions={[
         ...(canDelete || isPending ? [] : [{ name: "report", label: "Report comment" }]),
         ...(onReplyWithVideo ? [{ name: "replyWithVideo", label: "Reply with video" }] : []),
+        ...(canPin && onTogglePin ? [{ name: "togglePin", label: comment.isPinned === true ? "Unpin comment" : "Pin comment" }] : []),
       ]}
       onAccessibilityAction={(event) => {
         if (event.nativeEvent.actionName === "replyWithVideo") onReplyWithVideo?.();
         if (event.nativeEvent.actionName === "report") requireAuthThen(() => setIsReportSheetOpen(true), undefined, "report");
+        if (event.nativeEvent.actionName === "togglePin") onTogglePin?.();
       }}
       style={[styles.row, isPending && styles.pending, (isHighlighted || (isPickingForVideoReply && onReplyWithVideo)) && styles.pickable]}
     >
@@ -92,6 +105,14 @@ export function CommentRow({
             {comment.author.username}
           </Text>
           <VerificationBadge verification={comment.author.verification} legacyVerified={comment.author.verified} size={12} />
+          {comment.isPinned === true ? (
+            <View style={styles.pinnedBadge} accessibilityLabel="Pinned by author">
+              <PushPin24Icon size={12} color={colors.primary} />
+              <Text size={12} weight={600} lineHeight={16.8} color={colors.primary}>
+                Pinned by author
+              </Text>
+            </View>
+          ) : null}
           <Text size={12} weight={500} lineHeight={14.4} color={colors.textMuted}>
             {isPending ? "Posting…" : formatTimeSincePosted(comment.createdAt)}
           </Text>
@@ -145,6 +166,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   pickable: { backgroundColor: colors.primaryTint, borderRadius: 8 },
   actions: { flexDirection: "row", alignItems: "center", gap: 12 },
   body: { flex: 1, gap: 4 },
+  pinnedBadge: { flexDirection: "row", alignItems: "center", gap: 2 },
   meta: { flexDirection: "row", alignItems: "center", gap: 4 },
   like: { width: 32, gap: 4, alignItems: "center", alignSelf: "center" },
 }));

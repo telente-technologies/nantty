@@ -1,8 +1,9 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
-import { Cancel20Icon, Gif24Icon } from "@/components/icons";
+import { Cancel20Icon, Gif24Icon, PaperPlaneTilt24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
+import { ComposerSlot } from "@/components/ui/composerSlot";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -12,6 +13,7 @@ import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
 import type { Comment } from "@/types";
 import type { MentionEntity } from "@/types/mention.type";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
+import { hasSendableContent } from "@/utils/sendableContent.util";
 
 export const QUICK_REACTION_EMOJI = ["😂", "😍", "💕", "😊", "🥰", "😆", "😎", "🤔"] as const;
 
@@ -50,8 +52,9 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
     if (replyTarget) inputRef.current?.focus();
   }, [replyTarget]);
 
+  const hasContent = hasSendableContent(text);
   const submitTypedComment = () => {
-    if (!text.trim()) return;
+    if (!hasContent) return;
     const trimmed = shiftMentionsAfterTrimmingStart(text, mentions);
     onSubmit(trimmed.text, trimmed.mentions);
     setText("");
@@ -100,7 +103,19 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
             accessibilityLabel={effectivePlaceholder}
             style={styles.input}
           />
-          <Gif24Icon />
+          {hasContent ? (
+            <ComposerSlot slotKey="send">
+              <Pressable accessibilityRole="button" accessibilityLabel={replyTarget ? "Send reply" : "Send comment"} hitSlop={8} onPress={submitTypedComment}>
+                <PaperPlaneTilt24Icon color={colors.primary} />
+              </Pressable>
+            </ComposerSlot>
+          ) : (
+            <ComposerSlot slotKey="gif">
+              <View accessible accessibilityLabel="Add GIF">
+                <Gif24Icon />
+              </View>
+            </ComposerSlot>
+          )}
         </View>
       </View>
       <MentionCountLabel mentionCount={mentionComposer.mentionCount} />

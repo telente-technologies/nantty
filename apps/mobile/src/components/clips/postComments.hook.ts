@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { postCommentsService } from "@/services/postComments.service";
+import { postCommentsService } from "@/services/content/postComments.service";
 import type { Comment, CommentWithReplies } from "@/types";
 
 export const topLevelCommentsQueryKey = (postId: string | null) => ["post-comments", postId] as const;

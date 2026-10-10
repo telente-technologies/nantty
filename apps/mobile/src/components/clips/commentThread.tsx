@@ -62,9 +62,11 @@ export function CommentThread({ comment, nestingDepth, previewReplies = [] }: Co
           showReplyingToPrefix={nestingDepth > MAXIMUM_VISUAL_INDENT_LEVEL}
           isPending={isPendingComment(comment)}
           canDelete={thread.canDeleteComment(comment)}
+          canPin={thread.canPinComment(commentWithLocalChanges)}
           onToggleLike={() => thread.toggleLikeOnComment(comment)}
           onReply={() => thread.startReplyingToComment(comment)}
           onDelete={() => thread.deleteOwnComment(comment)}
+          onTogglePin={() => thread.togglePinOnComment(commentWithLocalChanges)}
           onReplyWithVideo={thread.canReplyWithVideoTo(comment) ? () => thread.startVideoReplyTo(comment) : undefined}
           isPickingForVideoReply={thread.isPickingVideoReplyComment}
           isHighlighted={thread.highlightedCommentId === comment.id}

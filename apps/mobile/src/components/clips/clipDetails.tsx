@@ -1,7 +1,7 @@
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { MentionText } from "@/components/mentions/mentionText";
+import { ExpandableText, CLIP_CAPTION_WORD_LIMIT } from "@/components/ui/expandableText";
 import { AiGeneratedLabel } from "@/components/feed/aiGeneratedLabel";
 import { SponsoredCallToAction, SponsoredLabel } from "@/components/feed/sponsoredContent";
 import { Group1234Icon } from "@/components/icons";
@@ -66,7 +66,7 @@ export function ClipDetails({ clip, isFollowing, onToggleFollow, onPressAuthor, 
       {clip.replyToComment ? <ReplyingToCommentLink clip={clip} foregroundColor={foregroundColor} /> : null}
       {clip.isAiGenerated ? <AiGeneratedLabel onVideo /> : null}
       {onOpenTaggedPeople ? <ClipTaggedPill post={clip} onPress={onOpenTaggedPeople} /> : null}
-      <MentionText text={clip.text} mentions={clip.mentions} size={13} lineHeight={16.9} numberOfLines={2} color={foregroundColor} mentionColor={foregroundColor} style={readableTextStyle} />
+      <ExpandableText text={clip.text} mentions={clip.mentions} wordLimit={CLIP_CAPTION_WORD_LIMIT} size={13} lineHeight={16.9} color={foregroundColor} mentionColor={foregroundColor} style={readableTextStyle} expandOnTextPress />
       {clip.sound ? (
         <ClipSoundRow
           sound={clip.sound}

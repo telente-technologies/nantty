@@ -27,6 +27,7 @@ export interface ClipActionRailProps {
   readonly savedAccordingToServer?: boolean;
   readonly saveCount?: number;
   readonly foregroundColor?: string;
+  readonly minimal?: boolean;
 }
 
 function RailButton({
@@ -55,6 +56,15 @@ function RailButton({
 export function ClipActionRail(props: ClipActionRailProps) {
   const color = props.foregroundColor;
   const likeTint = usePostActionTint("like");
+  if (props.minimal) {
+    return (
+      <View style={styles.rail}>
+        <Pressable accessibilityRole="button" accessibilityLabel="More options" hitSlop={{ top: 11, bottom: 11 }} onPress={props.onMore} style={clipRailStyles.item}>
+          <DotsThreeVertical24Icon size={22} color={color} />
+        </Pressable>
+      </View>
+    );
+  }
   return (
     <View style={styles.rail}>
       <RailButton label={props.liked ? "Unlike" : "Like"} count={props.likes} onPress={props.onToggleLike} foregroundColor={color}>

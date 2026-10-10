@@ -2,6 +2,7 @@ import { memo, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { BoxArrowDown24Icon, Play24Icon } from "@/components/icons";
+import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
 import { Text } from "@/components/ui/text";
 import { ClipVideoPlayer, VideoPosterOnly, type VideoPlaybackProgress } from "@/components/media/clipVideoPlayer";
 import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
@@ -20,7 +21,6 @@ import { useAuthStore } from "@/store/auth.store";
 import type { Clip } from "@/types";
 
 import { ClipActionRail } from "./clipActionRail";
-import { ClipCommentBar } from "./clipCommentBar";
 import { ClipDetails } from "./clipDetails";
 import { ClipPlaybackControls } from "./clipPlaybackControls";
 import { ClipReadabilityScrim } from "./clipReadabilityScrim";
@@ -57,7 +57,6 @@ export interface ClipPageProps {
 }
 
 const DOUBLE_TAP_WINDOW_MS = 280;
-const COMMENT_BAR_HEIGHT = 50;
 const PLAYBACK_SPEED_STEPS = [1, 1.5, 2, 0.5] as const;
 const FOREGROUND_ON_VIDEO = colors.white;
 
@@ -109,7 +108,7 @@ function ClipPageComponent(props: ClipPageProps) {
 
   const showPlaybackControls = isActive && isPausedByUser;
   const durationSeconds = playbackProgress.durationSeconds || clip.durationSeconds;
-  const bottomChromeHeight = COMMENT_BAR_HEIGHT + props.bottomInset;
+  const overlayBottomOffset = props.bottomInset + 16;
 
   return (
     <View style={[styles.page, { height: props.height }]}>
@@ -139,7 +138,7 @@ function ClipPageComponent(props: ClipPageProps) {
         ) : null}
         {clip.replyToComment ? <CommentStickerOverlay clip={clip} /> : null}
         <ClipReadabilityScrim edge="top" height={props.topInset + 96} />
-        <ClipReadabilityScrim edge="bottom" height={bottomChromeHeight + 260} />
+        <ClipReadabilityScrim edge="bottom" height={overlayBottomOffset + 260} />
         {showPlaybackControls ? (
           <View pointerEvents="none" style={styles.centerPlayIcon}>
             <Play24Icon size={48} color={FOREGROUND_ON_VIDEO} />
@@ -153,6 +152,7 @@ function ClipPageComponent(props: ClipPageProps) {
           </View>
         ) : null}
         <LikeBurst burstKey={burstKey} />
+        <ClipLookOverlay look={isClipLookId(clip.look) ? clip.look : "none"} />
       </Pressable>
       {clip.promotedLive ? (
         <PromotedLiveOverlay
@@ -166,7 +166,7 @@ function ClipPageComponent(props: ClipPageProps) {
           <ViewFullScreenButton onPress={() => setIsFullScreenPlayerOpen(true)} />
         </View>
       ) : null}
-      <View style={[styles.overlay, { bottom: bottomChromeHeight + 16 }]} pointerEvents="box-none">
+      <View style={[styles.overlay, { bottom: overlayBottomOffset }]} pointerEvents="box-none">
         <ClipDetails
           isActive={isActive}
           clip={clip}
@@ -191,10 +191,11 @@ function ClipPageComponent(props: ClipPageProps) {
           savedAccordingToServer={clip.bookmarked}
           saveCount={clip.saveCount ?? 0}
           foregroundColor={FOREGROUND_ON_VIDEO}
+          minimal={!!clip.sponsored}
         />
       </View>
-      <View style={[styles.bottomChrome, { paddingBottom: props.bottomInset, backgroundColor: themeColors.surface }]}>
-        {showPlaybackControls ? (
+      {showPlaybackControls ? (
+        <View style={[styles.bottomChrome, { paddingBottom: props.bottomInset, backgroundColor: themeColors.surface }]}>
           <ClipPlaybackControls
             remainingSeconds={Math.max(durationSeconds - playbackProgress.currentSeconds, 0)}
             progress={durationSeconds > 0 ? playbackProgress.currentSeconds / durationSeconds : 0}
@@ -205,10 +206,8 @@ function ClipPageComponent(props: ClipPageProps) {
             onPressVolume={props.onToggleMute}
             onPressFullscreen={() => (isLandscapeVideo ? setIsFullScreenPlayerOpen(true) : setIsPausedByUser(false))}
           />
-        ) : (
-          <ClipCommentBar myAvatarUrl={props.myAvatarUrl} onPress={props.onOpenComments} />
-        )}
-      </View>
+        </View>
+      ) : null}
       {hasOpenedOptionsSheet ? (
         <ContentOptionsSheet
           target={
@@ -226,6 +225,7 @@ function ClipPageComponent(props: ClipPageProps) {
         savedAccordingToServer={clip.bookmarked}
         isMuted={props.isMuted}
         onClose={() => setIsFullScreenPlayerOpen(false)}
+        look={clip.look}
       />
       {isTaggedSheetOpen ? <TaggedPeopleSheet post={clip} visible onClose={() => setIsTaggedSheetOpen(false)} /> : null}
       {isTipSheetOpen ? (
