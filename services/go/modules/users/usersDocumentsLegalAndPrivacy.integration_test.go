@@ -106,6 +106,16 @@ func TestBusinessDocumentsUploadReviewAndGoldEligibility(t *testing.T) {
 		t.Fatalf("approval plus a paid plan grants Gold: %v", after)
 	}
 	harness.waitForPublishedEvents("sellerDocuments.submitted", "sellerDocuments.rejected", "sellerDocuments.approved", "businessVerification.approved")
+	if strings.Contains(strings.Join(harness.publisher.PublishedEventTypes(), ","), "businessVerification.revoked") {
+		t.Fatal("rejecting a document before the first approval is not a revocation")
+	}
+	approvedDocument := after[0].(map[string]any)["documents"].([]any)[0].(map[string]any)["id"].(string)
+	revoked := harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+approvedDocument+"/reject", reviewer, map[string]string{"reason": "The CAC registration was struck off"}, http.StatusOK)
+	if revoked["overallStatus"] != "REJECTED" {
+		t.Fatalf("revoking an approved document leaves the business unverified: %v", revoked)
+	}
+	harness.expect("POST", "/api/v1/admin/business-documents/"+submissionId+"/documents/"+approvedDocument+"/reject", reviewer, map[string]string{"reason": "The CAC registration was struck off"}, http.StatusConflict)
+	harness.waitForPublishedEvents("businessVerification.revoked")
 }
 
 func TestLegalVersionsMakerCheckerNoticesAndAcceptance(t *testing.T) {
@@ -200,6 +210,9 @@ func TestNotificationDirectoryServesRecipientsAudienceAndUnsubscribe(t *testing.
 	recipient := harness.expect("GET", "/api/v1/internal/users/"+firstId+"/notification-recipient", "", nil, http.StatusOK, internalToken...)
 	if recipient["firstName"] != "Mail" || recipient["marketingConsent"] != true || recipient["emailVerified"] != true || recipient["email"] != "mail.one@example.com" {
 		t.Fatalf("unexpected recipient %v", recipient)
+	}
+	if recipient["pushEnabled"] != true || recipient["marketingFrequency"] != "weekly" {
+		t.Fatalf("recipient carries push and marketing frequency settings: %v", recipient)
 	}
 	harness.expect("GET", "/api/v1/internal/users/"+firstId+"/notification-recipient", "", nil, http.StatusUnauthorized)
 	byName := harness.expect("GET", "/api/v1/internal/users/by-username/mail.two/notification-recipient", "", nil, http.StatusOK, internalToken...)

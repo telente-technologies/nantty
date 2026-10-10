@@ -61,7 +61,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.User
 		}
 		return types.UserView{}, err
 	}
-	updated, err := handler.recordChange(ctx, row.ID, owner, row.Handle, username)
+	updated, err := handler.recordChange(ctx, row.ID, owner, row.Handle, username, window.Rules.Quarantine)
 	if err != nil {
 		if revertErr := directory.RenameAccountUsername(ctx, owner, row.Handle); revertErr != nil {
 			handler.Container.Logger.ErrorContext(ctx, "username rename could not be reverted", "accountId", owner.String(), "error", revertErr.Error())
@@ -72,7 +72,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.User
 	return types.BuildUserView(updated, summary, true), err
 }
 
-func (handler Handler) recordChange(ctx context.Context, profileId, owner uuid.UUID, previous, username string) (*ent.Profile, error) {
+func (handler Handler) recordChange(ctx context.Context, profileId, owner uuid.UUID, previous, username string, quarantine time.Duration) (*ent.Profile, error) {
 	var updated *ent.Profile
 	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		var err error
@@ -87,7 +87,7 @@ func (handler Handler) recordChange(ctx context.Context, profileId, owner uuid.U
 			return err
 		}
 		if err := tx.UsernameHold.Create().SetUsername(previous).SetKind(usernamehold.KindQuarantine).SetHeldForAccountID(owner).SetReason("released").
-			SetExpiresAt(now.Add(handler.Container.Settings.UsernameQuarantine)).Exec(ctx); err != nil {
+			SetExpiresAt(now.Add(quarantine)).Exec(ctx); err != nil {
 			return err
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, "username.changed", owner.String(), now, events.UsernameChangedEventData{

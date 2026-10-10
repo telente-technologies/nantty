@@ -38,6 +38,26 @@ func TestChangeUsernameEnforcesRulesCooldownAndQuarantine(t *testing.T) {
 	harness.waitForPublishedEvents("username.changed")
 }
 
+func TestChangedUsernameRulesSettingTakesEffect(t *testing.T) {
+	harness := startUsersModuleAgainstFreshSchema(t)
+	_, adaToken := harness.newAccount("ada.lovelace", "Ada")
+	harness.settings.usernameRules = `{"changesAllowedPerWindow":2,"changeWindowDays":10,"minimumLength":3,"maximumLength":30,"allowedCharacterClasses":["LOWERCASE_LETTERS"],"mustStartWithLetter":false,"releasedUsernameCooldownDays":5}`
+	policy := harness.expect("GET", "/api/v1/users/me/username-policy", adaToken, nil, http.StatusOK)
+	if policy["cooldownDays"] != float64(10) || policy["quarantineDays"] != float64(5) {
+		t.Fatalf("policy must follow the admin setting, got %v", policy)
+	}
+	harness.expect("PATCH", "/api/v1/users/me/username", adaToken, map[string]string{"username": "ada.first"}, http.StatusOK)
+	harness.expect("PATCH", "/api/v1/users/me/username", adaToken, map[string]string{"username": "ada.second"}, http.StatusOK)
+	harness.expect("PATCH", "/api/v1/users/me/username", adaToken, map[string]string{"username": "ada.third"}, http.StatusTooManyRequests)
+	harness.settings.usernameRules = `{"changesAllowedPerWindow":3,"changeWindowDays":10,"releasedUsernameCooldownDays":5}`
+	harness.expect("PATCH", "/api/v1/users/me/username", adaToken, map[string]string{"username": "ada.third"}, http.StatusOK)
+	harness.settings.usernameRules = `not json`
+	fallback := harness.expect("GET", "/api/v1/users/me/username-policy", adaToken, nil, http.StatusOK)
+	if fallback["cooldownDays"] != float64(30) || fallback["quarantineDays"] != float64(120) || fallback["canChangeNow"] != false {
+		t.Fatalf("an unreadable setting must fall back to the environment, got %v", fallback)
+	}
+}
+
 func TestStaffCanReserveAndWithholdUsernamesWithAudit(t *testing.T) {
 	harness := startUsersModuleAgainstFreshSchema(t)
 	_, adaToken := harness.newAccount("ada.lovelace", "Ada")

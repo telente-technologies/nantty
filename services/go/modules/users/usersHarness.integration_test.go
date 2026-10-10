@@ -57,11 +57,15 @@ func (recorder *recordingAuditRecorder) RecordAuditEvent(_ context.Context, even
 
 type fixedPlatformSettings struct {
 	creatorRequirements string
+	usernameRules       string
 }
 
 func (settings *fixedPlatformSettings) ReadSettingValue(_ context.Context, key string) (json.RawMessage, int, error) {
 	if key == "creator.requirements" {
 		return json.RawMessage(settings.creatorRequirements), 1, nil
+	}
+	if key == "username-rules" && settings.usernameRules != "" {
+		return json.RawMessage(settings.usernameRules), 1, nil
 	}
 	return nil, 0, identityports.ErrSettingNotFound
 }
@@ -96,6 +100,8 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 		audit: &recordingAuditRecorder{}, settings: &fixedPlatformSettings{creatorRequirements: `{"minimumAccountAgeDays":30}`}, databaseUrl: databaseUrl, schema: schema,
 	}
 	identityports.Default.RegisterStaffTokenService(harness.tokens)
+	identityports.Default.RegisterStaffSessionChecker(identitytest.ActiveStaffSessionChecker{})
+	identityports.Default.RegisterStaffNetworkPolicy(identitytest.PermissiveStaffNetworkPolicy{})
 	identityports.Default.RegisterAccountDirectory(harness.accounts)
 	identityports.Default.RegisterAccountEnforcement(harness.accounts)
 	identityports.Default.RegisterCurrencyResolver(fixedCurrencies{})
@@ -104,6 +110,7 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 	settings := configs.UsersSettings{
 		Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema, TokenIssuer: identitytest.FakeIssuer, TokenAudience: identitytest.FakeAccountAudience,
 		UsernameChangeCooldown: 30 * 24 * time.Hour, UsernameMaximumChangesYear: 3, UsernameQuarantine: 120 * 24 * time.Hour,
+		CatalogSchema:      schema + "_catalog",
 		MediaPublicBaseUrl: "https://media.zudomart.test", MediaUploadBaseUrl: "https://upload.zudomart.test", MediaUploadSigningKey: bytes.Repeat([]byte{3}, 32), MediaUploadIntentTimeToLive: 10 * time.Minute,
 		AddressPhoneKey: bytes.Repeat([]byte{4}, 32),
 		Privacy: configs.PrivacySettings{

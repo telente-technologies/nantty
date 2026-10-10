@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"net"
 	"net/http"
-	"strings"
 
 	"zudomart/modules/users/src/types"
 	"zudomart/platform/httpserver"
@@ -17,11 +15,7 @@ func AccountIdFromRequest(request *http.Request) string {
 }
 
 func ReadClientIpAddress(request *http.Request) string {
-	ipAddress := strings.TrimSpace(request.Header.Get("X-Real-Ip"))
-	if ipAddress == "" {
-		ipAddress, _, _ = net.SplitHostPort(request.RemoteAddr)
-	}
-	return ipAddress
+	return httpserver.ClientIP(request)
 }
 
 func StaffActorFromRequest(request *http.Request) types.StaffActor {

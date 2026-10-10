@@ -28,5 +28,12 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.UserView
 	view := types.BuildUserView(row, summary, true)
 	flags := celebrationservices.ComputePublicFlags(ctx, handler.Container, summary, true)
 	view.BirthdayToday, view.AnniversaryToday = flags.BirthdayToday, flags.AnniversaryToday
+	if handler.Container.OwnedStores != nil {
+		storeId, err := handler.Container.OwnedStores.FindOwnedStoreId(ctx, owner)
+		if err != nil {
+			handler.Container.Logger.WarnContext(ctx, "owned store lookup failed; /users/me is served without storeId", "accountId", owner.String(), "error", err.Error())
+		}
+		view.StoreId = storeId
+	}
 	return view, nil
 }
