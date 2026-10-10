@@ -35,7 +35,7 @@ jobs:
 
       - uses: pnpm/action-setup@v6.1.0
 
-      - uses: actions/setup-node@v7.0.0
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
           cache: pnpm
@@ -66,7 +66,7 @@ jobs:
         working-directory: apps/mobile/android/app/build/outputs/apk/release
         run: mv app-release.apk "zudomart-${GITHUB_SHA::7}.apk"
 
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: zudomart-android-apk
           path: apps/mobile/android/app/build/outputs/apk/release/*.apk

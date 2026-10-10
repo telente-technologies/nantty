@@ -6,9 +6,58 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    # apps/mobile follows the Expo SDK: these versions move with `npx expo install --fix`
+    # or an SDK upgrade, never on their own. react/react-dom are pinned to the SDK there.
+    ignore:
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "expo-*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@expo/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "babel-preset-expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "jest-expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-native-*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@react-native/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@react-native-async-storage/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@react-native-community/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       zudojs:
         patterns: ["@zudojs/*"]
+      expo-sdk:
+        patterns:
+          - "expo"
+          - "expo-*"
+          - "@expo/*"
+          - "babel-preset-expo"
+          - "jest-expo"
+          - "react-native"
+          - "react-native-*"
+          - "@react-native/*"
+          - "@react-native-async-storage/*"
+          - "@react-native-community/*"
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      next:
+        patterns: ["next", "@next/*"]
+      aws-sdk:
+        patterns: ["@aws-sdk/*"]
+      tanstack:
+        patterns: ["@tanstack/*"]
+      prisma:
+        patterns: ["prisma", "@prisma/*"]
   - package-ecosystem: docker
     directory: /apps/api
     schedule:
@@ -17,3 +66,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]

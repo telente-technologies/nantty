@@ -31,7 +31,7 @@ jobs:
       mobile: ${{ steps.filter.outputs.mobile }}
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -82,16 +82,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: pnpm/action-setup@v6.1.0
-      - uses: actions/setup-node@v7.0.0
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
           cache: pnpm
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: apps/${{ matrix.app }}/.next/cache
           key: next-${{ matrix.app }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
           restore-keys: next-${{ matrix.app }}-${{ hashFiles('pnpm-lock.yaml') }}-
-      - run: pnpm install --frozen-lockfile --filter "./apps/${{ matrix.app }}..."
+      - run: pnpm install --frozen-lockfile --filter "{./apps/${{ matrix.app }}}..."
       - name: Typecheck
         run: pnpm --filter "./apps/${{ matrix.app }}" exec tsc --noEmit
       - name: Lint
@@ -112,11 +112,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: pnpm/action-setup@v6.1.0
-      - uses: actions/setup-node@v7.0.0
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter "./apps/mobile..."
+      - run: pnpm install --frozen-lockfile --filter "{./apps/mobile}..."
       - run: pnpm --filter ./apps/mobile exec tsc --noEmit
       - run: pnpm --filter ./apps/mobile run --if-present lint
       - run: pnpm --filter ./apps/mobile test -- --ci
