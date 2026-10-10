@@ -54,7 +54,7 @@ const accountResourcePermissions: readonly { readonly pattern: RegExp; readonly 
 
 export type ApiCallRequirement = { readonly kind: "signed_in" } | { readonly kind: "account"; readonly accountId: string; readonly permission: AdsPermission } | { readonly kind: "denied" };
 
-const signedInOnlyPaths = [/^\/ads\/accounts$/, /^\/ads\/business-profiles$/, /^\/ads\/invites\/[A-Za-z0-9_-]+(\/accept)?$/, /^\/ads\/locations$/, /^\/ads\/behaviours$/, /^\/topics$/, /^\/ads\/policy$/, /^\/users\/me\/(preferences|consents)$/, /^\/media\/[A-Za-z0-9_-]+$/];
+const signedInOnlyPaths = [/^\/ads\/accounts$/, /^\/ads\/pricing(\/estimate)?$/, /^\/ads\/business-profiles$/, /^\/ads\/invites\/[A-Za-z0-9_-]+(\/accept)?$/, /^\/ads\/locations$/, /^\/ads\/behaviours$/, /^\/topics$/, /^\/ads\/policy$/, /^\/users\/me\/(preferences|consents)$/, /^\/media\/[A-Za-z0-9_-]+$/];
 
 export function findRequirementForApiCall(method: string, apiPath: string): ApiCallRequirement {
   if (signedInOnlyPaths.some((pattern) => pattern.test(apiPath))) return { kind: "signed_in" };

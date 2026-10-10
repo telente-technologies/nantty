@@ -14,7 +14,7 @@ function validateAdDraft(ad: WizardAdDraft, index: number, placements: readonly 
   const prefix = `ads.${index}`;
   const usesContentSource = ad.creativeType === "single" || ad.creativeType === "promoted_post";
   if (ad.creativeType === "carousel") {
-    for (const [field, message] of Object.entries(validateCarouselFields(buildCreativeInputFromAdDraft(ad).cards))) errors[`${prefix}.${field}`] = message;
+    for (const [field, message] of Object.entries(validateCarouselFields(buildCreativeInputFromAdDraft(ad, { profileId: "own-profile", storeId: "own-store" }).cards))) errors[`${prefix}.${field}`] = message;
   }
   if (ad.creativeType === "app_install") {
     for (const [field, message] of Object.entries(validateAppInstallFields(buildAppFromDraft(ad.app)))) errors[`${prefix}.${field}`] = message;
@@ -27,6 +27,7 @@ function validateAdDraft(ad: WizardAdDraft, index: number, placements: readonly 
   if (ad.headline.trim().length > headlineMaximumLength) errors[`${prefix}.headline`] = `Keep the headline under ${headlineMaximumLength} characters.`;
   if (ad.primaryText.trim().length > primaryTextMaximumLength) errors[`${prefix}.primaryText`] = `Keep the text under ${primaryTextMaximumLength} characters.`;
   if (ad.creativeType === "single" && ad.destinationType === "url" && !isSafeHttpsUrl(ad.destinationUrl.trim())) errors[`${prefix}.destinationUrl`] = "Enter a full https:// website address.";
+  if (ad.creativeType === "single" && ad.sourceType === "upload" && (ad.destinationType === "post" || ad.destinationType === "product")) errors[`${prefix}.destinationType`] = "An uploaded photo or video has no post or product to open. Choose where the button takes people.";
   const hasCreative = ad.creativeType === "carousel" ? ad.cards.some((card) => card.media) : ad.sourceType === "upload" ? ad.uploadedMedia.length > 0 : Boolean(ad.selectedSource);
   const placementProblem = hasCreative ? describeWhyCreativeCannotRunAnywhere(buildCreativeShapeFromAdDraft(ad), placements) : null;
   if (placementProblem) errors[`${prefix}.placements`] = placementProblem;

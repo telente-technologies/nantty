@@ -87,8 +87,22 @@ export async function sendRequestToAdsManagerServer<Payload>(bffPath: string, op
   return adaptListEnvelope((await response.json()) as Payload);
 }
 
+const mutationsInFlight = new Map<string, Promise<unknown>>();
+
+function describeMutation(apiPath: string, options: AdsApiRequestOptions): string | null {
+  const method = options.method ?? "GET";
+  if (method === "GET" || options.rawBody !== undefined) return null;
+  return `${method} ${apiPath}${buildQueryString(options.query)} ${options.body === undefined ? "" : JSON.stringify(options.body)}`;
+}
+
 export function sendAdsApiRequest<Payload>(apiPath: string, options: AdsApiRequestOptions = {}): Promise<Payload> {
-  return sendRequestToAdsManagerServer<Payload>(`/bff${apiPath}`, options);
+  const mutationKey = describeMutation(apiPath, options);
+  if (mutationKey === null) return sendRequestToAdsManagerServer<Payload>(`/bff${apiPath}`, options);
+  const pending = mutationsInFlight.get(mutationKey);
+  if (pending) return pending as Promise<Payload>;
+  const request = sendRequestToAdsManagerServer<Payload>(`/bff${apiPath}`, options).finally(() => mutationsInFlight.delete(mutationKey));
+  mutationsInFlight.set(mutationKey, request);
+  return request;
 }
 
 export function buildAccountApiPath(accountId: string, resourcePath = ""): string {
