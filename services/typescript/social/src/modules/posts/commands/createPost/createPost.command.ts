@@ -15,6 +15,7 @@ export interface MediaReferenceInput {
 
 export interface CreatePostCommand {
   readonly authorId: string;
+  readonly asProfileId?: string | undefined;
   readonly kind: "post" | "clip" | "story";
   readonly text: string;
   readonly mediaIds: readonly string[];
@@ -28,6 +29,7 @@ export interface CreatePostCommand {
   readonly isAiGenerated: boolean;
   readonly soundId: string | undefined;
   readonly mentions: readonly MentionEntity[] | undefined;
+  readonly look?: string | undefined;
   readonly replyToComment: ReplyToComment | undefined;
   readonly stickerLayout: StickerLayout | undefined;
   readonly replyPolicy?: "everyone" | "following" | "followers" | "mentioned" | "off" | undefined;

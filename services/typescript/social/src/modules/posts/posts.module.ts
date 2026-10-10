@@ -5,6 +5,7 @@ import type { RouteFactory } from "../../utils/route.util.js";
 import { createCreatePostHandler } from "./commands/createPost/createPost.handler.js";
 import { createDeletePostHandler } from "./commands/deletePost/deletePost.handler.js";
 import { createLikePostHandler } from "./commands/likePost/likePost.handler.js";
+import { createPinPostHandler } from "./commands/pinPost/pinPost.handler.js";
 import { createMarkStorySeenHandler } from "./commands/markStorySeen/markStorySeen.handler.js";
 import { createPublishStoryHandler } from "./commands/publishStory/publishStory.handler.js";
 import { createResharePostHandler } from "./commands/resharePost/resharePost.handler.js";
@@ -13,11 +14,13 @@ import { createRecordProfileVisitFromPostHandler } from "./commands/recordProfil
 import { createGetPostAnalyticsHandler } from "./queries/getPostAnalytics/getPostAnalytics.handler.js";
 import { createSharePostHandler } from "./commands/sharePost/sharePost.handler.js";
 import { createUnlikePostHandler } from "./commands/unlikePost/unlikePost.handler.js";
+import { createUnpinPostHandler } from "./commands/unpinPost/unpinPost.handler.js";
 import { createPostsController } from "./controllers/posts.controller.js";
 import { createGetPostHandler } from "./queries/getPost/getPost.handler.js";
 import { createListStoryTrayHandler } from "./queries/listStoryTray/listStoryTray.handler.js";
 import { createListUserPostsHandler } from "./queries/listUserPosts/listUserPosts.handler.js";
 import { createListUserStoriesHandler } from "./queries/listUserStories/listUserStories.handler.js";
+import { createListStoryViewersHandler } from "./queries/listStoryViewers/listStoryViewers.handler.js";
 import { registerPostsRoutes } from "./routes/posts.routes.js";
 import { createUpdatePostSensitivityHandler } from "./commands/updatePostSensitivity/updatePostSensitivity.handler.js";
 import { createUpdateReplySettingsHandler } from "./commands/updateReplySettings/updateReplySettings.handler.js";
@@ -44,6 +47,8 @@ export function mountPostsModule(router: HttpRouter, route: RouteFactory, contex
     resharePost: createResharePostHandler(context),
     likePost: createLikePostHandler(context),
     unlikePost: createUnlikePostHandler(context),
+    pinPost: createPinPostHandler(context),
+    unpinPost: createUnpinPostHandler(context),
     sharePost: createSharePostHandler(context),
     publishStory: createPublishStoryHandler(context),
     markStorySeen: createMarkStorySeenHandler(context),
@@ -51,6 +56,7 @@ export function mountPostsModule(router: HttpRouter, route: RouteFactory, contex
     listUserPosts: createListUserPostsHandler(context),
     listStoryTray: createListStoryTrayHandler(context),
     listUserStories: createListUserStoriesHandler(context),
+    listStoryViewers: createListStoryViewersHandler(context),
   }));
   registerPostAudienceRoutes(router, createPostAudienceController(route, {
     updateReplySettings: createUpdateReplySettingsHandler(context),

@@ -33,7 +33,8 @@ export function createGetPostAnalyticsHandler(context: HandlerContext): Handler<
     const db = context.database.client;
     const post = await postRepository.findById(db, postId);
     if (post === null) throw notFound("POST_NOT_FOUND", "Post not found.");
-    if (post.authorId !== viewerId) throw forbidden("NOT_POST_OWNER", "Only the author can see these analytics.");
+    const isOwner = post.authorId === viewerId || (post.authorProfileId !== null && (await context.directory.findOwnedPostableProfile(viewerId, post.authorProfileId)) !== null);
+    if (!isOwner) throw forbidden("NOT_POST_OWNER", "Only the author can see these analytics.");
     const now = context.clock.now();
     const since = new Date(now.getTime() - 6 * 86_400_000).toISOString().slice(0, 10);
     const [stats, totals, uniqueViewers, saves, authors, viewerKeys] = await Promise.all([

@@ -44,8 +44,10 @@ export const createPostBodySchema = schema.object({
   media: schema.array(mediaReferenceSchema).max(10).optional(),
   audience: schema.enum(["everyone", "followers"]).optional(),
   kind: schema.enum(["post", "clip", "story"]).optional(),
+  asProfileId: schema.string().uuid().optional(),
   visibility: schema.enum(["public", "subscribers"]).optional(),
   soundId: schema.string().uuid().optional(),
+  look: schema.string().min(1).max(24).optional(),
   isAiGenerated: schema.boolean().optional(),
   mentions: mentionEntitiesSchema.optional(),
   replyToComment: replyToCommentSchema.optional(),
@@ -68,9 +70,13 @@ export const replySettingsBodySchema = schema.object({ replyPolicy: replyPolicyS
 export const sensitiveLabelsBodySchema = schema.object({ sensitiveLabels: schema.array(sensitiveLabelSchema).max(4) });
 export const quotesQuerySchema = schema.object({ cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
 
-export const publishStoryBodySchema = schema.object({ mediaId: schema.string().uuid() });
+export const publishStoryBodySchema = schema.object({ mediaId: schema.string().uuid(), soundId: schema.string().uuid().optional(), look: schema.string().min(1).max(24).optional() });
 export const postIdParamsSchema = schema.object({ postId: schema.string().uuid() });
 export const storyIdParamsSchema = schema.object({ storyId: schema.string().uuid() });
+export const storyViewersQuerySchema = schema.object({
+  cursor: schema.string().max(100).optional(),
+  limit: schema.coerce.number().int().min(1).max(50).optional(),
+});
 export const userIdParamsSchema = schema.object({ userId: schema.string().min(1).max(64) });
 export const repostBodySchema = schema.object({ text: schema.string().max(2200).optional() });
 export const shareBodySchema = schema.object({ channel: schema.string().max(30).optional() });

@@ -11,11 +11,14 @@ export function registerPostsRoutes(router: HttpRouter, controller: ReturnType<t
   router.get("/api/v1/posts/:postId/analytics", controller.analytics);
   router.post("/api/v1/posts/:postId/like", controller.likePost);
   router.delete("/api/v1/posts/:postId/like", controller.unlikePost);
+  router.put("/api/v1/posts/:postId/pin", controller.pinPost);
+  router.delete("/api/v1/posts/:postId/pin", controller.unpinPost);
   router.post("/api/v1/posts/:postId/share", controller.sharePost);
   router.post("/api/v1/posts/:postId/repost", controller.resharePost);
   router.get("/api/v1/users/:userId/posts", controller.listUserPosts);
   router.post("/api/v1/stories", controller.publishStory);
   router.get("/api/v1/stories/tray", controller.listStoryTray);
   router.post("/api/v1/stories/:storyId/seen", controller.markStorySeen);
+  router.get("/api/v1/stories/:storyId/viewers", controller.listStoryViewers);
   router.get("/api/v1/users/:userId/stories", controller.listUserStories);
 }

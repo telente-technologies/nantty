@@ -13,7 +13,7 @@ export function createListUserPostsHandler(context: HandlerContext): Handler<Lis
     await assertViewerMaySeeConnections(context, viewerId, ownerId);
     const db = context.database.client;
     const isFollower = viewerId !== undefined && (viewerId === ownerId || (await followRepository.find(db, viewerId, ownerId))?.state === "accepted");
-    const rows = await postRepository.pageByAuthor(db, ownerId, kind === undefined ? ["post", "clip"] : [kind], limit, cursor, isFollower ? ["everyone", "followers"] : ["everyone"], context.clock.now());
+    const rows = await postRepository.pageByAuthorOrProfile(db, ownerId, kind === undefined ? ["post", "clip"] : [kind], limit, cursor, isFollower ? ["everyone", "followers"] : ["everyone"], context.clock.now());
     const page = buildPageFromOverfetchedRows(rows, limit);
     return { data: await buildPostViews(context, viewerId, page.data), nextCursor: page.nextCursor };
   };

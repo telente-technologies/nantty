@@ -12,7 +12,7 @@ export const postRepository = {
 
   findManyByIds: (db: Db, ids: readonly string[]): Promise<PostRow[]> => db.post.findMany({ where: { id: { in: [...ids] }, ...shownToViewers }, include: postWithMedia }),
 
-  softDelete: (db: Db, id: string, at: Date) => db.post.update({ where: { id }, data: { deletedAt: at } }),
+  softDelete: (db: Db, id: string, at: Date) => db.post.update({ where: { id }, data: { deletedAt: at, isPinned: false, pinnedAt: null } }),
 
   incrementCounterIfNotDeleted: async (db: Db, id: string, counter: "commentCount", by: number): Promise<boolean> =>
     (await db.post.updateMany({ where: { id, deletedAt: null }, data: { [counter]: { increment: by } } })).count === 1,
@@ -28,6 +28,23 @@ export const postRepository = {
       include: postWithMedia,
       ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
     }),
+
+  pageByAuthorOrProfile: (db: Db, ownerId: string, kinds: readonly ("post" | "clip" | "story")[], limit: number, cursor: string | undefined, audiences: readonly ("everyone" | "followers")[], now: Date): Promise<PostRow[]> =>
+    db.post.findMany({
+      where: { AND: [{ OR: [{ authorId: ownerId }, { authorProfileId: ownerId }] }, { ...shownToViewers, kind: { in: [...kinds] }, audience: { in: [...audiences] } }, { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }] },
+      orderBy: [{ isPinned: "desc" }, { pinnedAt: { sort: "desc", nulls: "last" } }, { id: "desc" }],
+      take: limit + 1,
+      include: postWithMedia,
+      ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
+    }),
+
+  countPinnedByAuthor: (db: Db, authorId: string) => db.post.count({ where: { authorId, isPinned: true, ...shownToViewers, kind: { in: ["post", "clip"] } } }),
+
+  setPinned: (db: Db, id: string, pinnedAt: Date | null): Promise<PostRow> => db.post.update({ where: { id }, data: { isPinned: pinnedAt !== null, pinnedAt }, include: postWithMedia }),
+
+  setPinnedComment: (db: Db, id: string, commentId: string | null) => db.post.update({ where: { id }, data: { pinnedCommentId: commentId } }),
+
+  clearProfilePin: (db: Db, id: string) => db.post.updateMany({ where: { id, isPinned: true }, data: { isPinned: false, pinnedAt: null } }),
 
   updateReplyPolicy: (db: Db, id: string, replyPolicy: "everyone" | "following" | "followers" | "mentioned" | "off"): Promise<PostRow> =>
     db.post.update({ where: { id }, data: { replyPolicy }, include: postWithMedia }),

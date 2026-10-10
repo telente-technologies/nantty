@@ -7,10 +7,10 @@ import type { PublishStoryCommand } from "./publishStory.command.js";
 
 export function createPublishStoryHandler(context: HandlerContext): Handler<PublishStoryCommand, StoryView> {
   const createPost = createCreatePostHandler(context);
-  return async ({ authorId, mediaId }) => {
+  return async ({ authorId, mediaId, soundId, look }) => {
     const view = await createPost({
       authorId, kind: "story", text: "", mediaIds: [mediaId], audience: "everyone", visibility: "public",
-      isAiGenerated: false, soundId: undefined, mentions: undefined, replyToComment: undefined, stickerLayout: undefined,
+      isAiGenerated: false, soundId, look, mentions: undefined, replyToComment: undefined, stickerLayout: undefined,
     });
     const row = await postRepository.findById(context.database.client, view.id);
     const [story] = await buildStoryViews(context, authorId, row === null ? [] : [row]);

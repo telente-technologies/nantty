@@ -42,9 +42,14 @@ export interface PostLocationTag {
   readonly area?: string | null;
 }
 
+export const CLIP_LOOKS = ["warm", "cool", "rose", "aqua", "sunset"] as const;
+
+export type ClipLook = (typeof CLIP_LOOKS)[number];
+
 export interface PostClipEdit {
   readonly trims?: Readonly<Record<string, MediaTrim>>;
   readonly slideshow?: ClipSlideshow;
+  readonly look?: ClipLook;
 }
 
 export interface TaggedProductView {
@@ -83,10 +88,19 @@ export interface TaggedUserView {
   readonly isFollowing?: boolean;
 }
 
+export interface PostedAsView {
+  readonly id: string;
+  readonly kind: string;
+  readonly name: string;
+  readonly handle: string;
+  readonly avatarUrl: string | null;
+}
+
 export interface PostView {
   readonly id: string;
   readonly kind: "post" | "clip";
   readonly author: UserSummary;
+  readonly postedAs: PostedAsView | null;
   readonly createdAt: string;
   readonly text: string;
   readonly media: readonly MediaView[];
@@ -107,6 +121,7 @@ export interface PostView {
   readonly topics: readonly string[];
   readonly location: PostLocationTag | null;
   readonly slideshow: ClipSlideshow | null;
+  readonly look: ClipLook | null;
   readonly subscriberOnly: boolean;
   readonly viewerHasAccess: boolean;
   readonly resharedFrom: PostView | null;
@@ -119,6 +134,9 @@ export interface PostView {
   readonly replyRestriction: { readonly reason: ReplyRestrictionReason; readonly message: string } | null;
   readonly sensitive: SensitiveContentView | null;
   readonly isAiGenerated: boolean;
+  readonly isPinned: boolean;
+  readonly pinnedAt: string | null;
+  readonly pinnedCommentId: string | null;
   readonly sound?: SoundView;
   readonly mentions: readonly MentionEntity[];
   readonly linkPreview: LinkPreviewView | null;
@@ -135,4 +153,6 @@ export interface StoryView {
   readonly media: MediaView;
   readonly createdAt: string;
   readonly seen: boolean;
+  readonly sound: SoundView | null;
+  readonly look: ClipLook | null;
 }

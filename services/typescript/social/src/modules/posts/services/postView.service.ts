@@ -48,8 +48,10 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
   const everyRow = [...rows, ...originals];
   const postIds = everyRow.map((row) => row.id);
   const authorIds = [...new Set(everyRow.map((row) => row.authorId))];
-  const [authors, liked, saved, followed, followingViewer, tagged, downloadsOff, privateAuthors, products] = await Promise.all([
+  const postedAsIds = [...new Set(everyRow.flatMap((row) => (row.authorProfileId === null ? [] : [row.authorProfileId])))];
+  const [authors, postedAsProfiles, liked, saved, followed, followingViewer, tagged, downloadsOff, privateAuthors, products] = await Promise.all([
     context.directory.findUserSummaries(authorIds),
+    postedAsIds.length === 0 ? new Map() : await (context.directory.findProfilesByIds?.(postedAsIds) ?? new Map()),
     viewerId === undefined ? new Set<string>() : postRepository.likedPostIds(db, viewerId, postIds),
     viewerId === undefined ? new Set<string>() : savedItemRepository.savedTargetIds(db, viewerId, postIds),
     viewerId === undefined ? new Set<string>() : followRepository.followedAccountIds(db, viewerId, authorIds),
@@ -73,6 +75,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
     const subscriberOnly = row.visibility === "subscribers";
     const hasAccess = !subscriberOnly || viewerId === row.authorId || subscribed.get(row.authorId) === true;
     const original = embedded || row.resharedFromId === null ? undefined : originals.find((candidate) => candidate.id === row.resharedFromId);
+    const postedAsProfile = row.authorProfileId === null ? undefined : postedAsProfiles.get(row.authorProfileId);
     const clipEdit = row.clipEdit as PostClipEdit | null;
     const replyPermission = decideReplyPermission({
       policy: row.replyPolicy, viewerId, authorId: row.authorId, viewerFollowsAuthor: followed.has(row.authorId), authorFollowsViewer: followingViewer.has(row.authorId),
@@ -82,6 +85,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
       id: row.id,
       kind: row.kind === "clip" ? "clip" : "post",
       author: authors.get(row.authorId) ?? placeholderAuthor(row.authorId),
+      postedAs: postedAsProfile === undefined ? null : { id: postedAsProfile.id, kind: postedAsProfile.kind, name: postedAsProfile.displayName, handle: postedAsProfile.handle, avatarUrl: postedAsProfile.avatarUrl },
       createdAt: row.createdAt.toISOString(),
       text: hasAccess ? row.text : "",
       media: hasAccess ? row.media.map((media) => toMediaView(media, clipEdit)) : [],
@@ -102,6 +106,7 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
       topics: row.topics,
       location: row.location as PostLocationTag | null,
       slideshow: clipEdit?.slideshow ?? null,
+      look: clipEdit?.look ?? null,
       subscriberOnly,
       viewerHasAccess: hasAccess,
       resharedFrom: original === undefined ? null : toView(original, true),
@@ -117,6 +122,9 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
       }).allowed,
       sensitive: buildSensitiveContentView(row, policy),
       isAiGenerated: row.isAiGenerated,
+      isPinned: row.isPinned,
+      pinnedAt: row.pinnedAt?.toISOString() ?? null,
+      pinnedCommentId: row.pinnedCommentId,
       ...(row.soundId === null || sounds.get(row.soundId) === undefined ? {} : { sound: sounds.get(row.soundId) as SoundView }),
       mentions: row.mentions as unknown as MentionEntity[],
       taggedUsers: hasAccess ? (tagged.get(row.id)?.users ?? []) : [],
