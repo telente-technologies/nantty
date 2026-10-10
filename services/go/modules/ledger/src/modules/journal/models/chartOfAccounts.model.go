@@ -158,6 +158,10 @@ func CreatorEarningsPayableAccount(userId, currency string) AccountRef {
 
 func CreatorEarningsPayableAccountCodeSuffix() string { return ":earningsPayable" }
 
+func CreatorEarningsDebtAccount(userId, currency string) AccountRef {
+	return AccountRef{Code: "creator:" + userId + ":earningsDebt", Currency: currency, Kind: AccountKindAsset, OwnerType: OwnerTypeUser, OwnerId: userId}
+}
+
 func PlatformProviderBalanceAccount(provider, currency string) AccountRef {
 	return platformAccount(fmt.Sprintf("asset:providerBalance:%s", provider), currency, AccountKindAsset)
 }

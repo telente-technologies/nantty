@@ -21,7 +21,7 @@ type SellerBalancesView struct {
 }
 
 func (view SellerBalancesView) WithdrawableMinor() int64 {
-	return max(view.AvailableMinor, 0)
+	return max(view.AvailableMinor-max(view.DebtMinor, 0), 0)
 }
 
 func (balances SellerBalances) ReadSellerBalances(ctx context.Context, executor databases.ExecutorQuerier, sellerUserId, currency string) (SellerBalancesView, error) {

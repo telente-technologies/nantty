@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"zudomart/modules/ledger/src/modules/journal/models"
+	"zudomart/platform/viewerregion"
 )
 
 func ValidateJournalEntryRequest(request models.JournalEntryRequest) error {
@@ -71,16 +72,5 @@ func validateJournalLine(index int, line models.JournalLineRequest) error {
 }
 
 func IsValidCurrencyOrCoinUnit(currency string) bool {
-	if currency == models.CoinUnit {
-		return true
-	}
-	if len(currency) != 3 {
-		return false
-	}
-	for _, character := range currency {
-		if character < 'A' || character > 'Z' {
-			return false
-		}
-	}
-	return true
+	return currency == models.CoinUnit || viewerregion.IsSupportedCurrency(currency)
 }
