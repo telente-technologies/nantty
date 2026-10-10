@@ -17,6 +17,7 @@ require (
 require (
 	github.com/apparentlymart/go-textseg/v17 v17.0.1 // indirect
 	github.com/rabbitmq/amqp091-go v1.15.0 // indirect
+	github.com/rogpeppe/go-internal v1.16.0 // indirect
 	golang.org/x/tools v0.51.0 // indirect
 )
 
