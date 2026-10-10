@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
 
@@ -23,14 +24,13 @@ from src.modules.audio.services.audio_landmark_fingerprint_service import (
     FINGERPRINT_ALGORITHM_VERSION,
     SECONDS_PER_FRAME,
     AudioFingerprint,
-    AudioTooQuietOrShortError,
     compute_audio_fingerprint,
 )
 from src.repositories.online_feature_repository import OnlineFeatureStore
 
 MAXIMUM_SOUNDS_PER_LANDMARK = 400
 MINIMUM_ALIGNED_LANDMARKS = 8
-EXCERPT_CLAIM_RETENTION_SECONDS = 20 * 365 * 86_400
+EXCERPT_CLAIM_RETENTION_SECONDS = 10 * 60
 
 
 class AudioSoundAlreadyRegisteredError(ValueError):
@@ -140,33 +140,34 @@ class AudioFingerprintIndexService:
             fingerprint = await asyncio.to_thread(
                 compute_audio_fingerprint, request.audio.decode_pcm_bytes(), MINIMUM_EXCERPT_SECONDS
             )
-        except AudioTooQuietOrShortError:
-            await self.backend.delete_keys([excerpt_claim_key])
+            existing_metadata = (await self.read_sound_metadata([request.sound_id]))[request.sound_id]
+            prior_matches = await self.match_fingerprint(fingerprint, {request.sound_id}, 0.05, 10)
+            frame_shift = round(request.excerpt_start_seconds / SECONDS_PER_FRAME)
+            ownership_priority = -request.registered_at.timestamp()
+            operations: list[FeatureWriteOperation] = []
+            for landmark in fingerprint.landmarks:
+                landmark_key = self.keyspace.audio_landmark_key(landmark.landmark_hash)
+                member = f"{request.sound_id}|{landmark.anchor_frame + frame_shift}"
+                operations += [
+                    SortedSetAssignScore(landmark_key, member, ownership_priority),
+                    SortedSetKeepHighestScores(landmark_key, MAXIMUM_SOUNDS_PER_LANDMARK),
+                ]
+            metadata_key = self.keyspace.audio_sound_metadata_key(request.sound_id)
+            if not existing_metadata:
+                operations += [
+                    HashFieldAssign(metadata_key, "registered_at", request.registered_at.timestamp()),
+                    HashFieldAssign(metadata_key, "is_verified_original", 1.0 if request.is_verified_original else 0.0),
+                    HashFieldAssign(metadata_key, "is_flagged_copyright", 0.0),
+                ]
+            operations += [
+                HashFieldIncrement(metadata_key, "landmark_count", float(len(fingerprint.landmarks))),
+                HashFieldIncrement(metadata_key, "fingerprinted_seconds", fingerprint.duration_seconds),
+            ]
+            await self.backend.apply_write_operations(operations)
+        except BaseException:
+            with contextlib.suppress(Exception):
+                await self.backend.delete_keys([excerpt_claim_key])
             raise
-        existing_metadata = (await self.read_sound_metadata([request.sound_id]))[request.sound_id]
-        prior_matches = await self.match_fingerprint(fingerprint, {request.sound_id}, 0.05, 10)
-        frame_shift = round(request.excerpt_start_seconds / SECONDS_PER_FRAME)
-        ownership_priority = -request.registered_at.timestamp()
-        operations: list[FeatureWriteOperation] = []
-        for landmark in fingerprint.landmarks:
-            landmark_key = self.keyspace.audio_landmark_key(landmark.landmark_hash)
-            member = f"{request.sound_id}|{landmark.anchor_frame + frame_shift}"
-            operations += [
-                SortedSetAssignScore(landmark_key, member, ownership_priority),
-                SortedSetKeepHighestScores(landmark_key, MAXIMUM_SOUNDS_PER_LANDMARK),
-            ]
-        metadata_key = self.keyspace.audio_sound_metadata_key(request.sound_id)
-        if not existing_metadata:
-            operations += [
-                HashFieldAssign(metadata_key, "registered_at", request.registered_at.timestamp()),
-                HashFieldAssign(metadata_key, "is_verified_original", 1.0 if request.is_verified_original else 0.0),
-                HashFieldAssign(metadata_key, "is_flagged_copyright", 0.0),
-            ]
-        operations += [
-            HashFieldIncrement(metadata_key, "landmark_count", float(len(fingerprint.landmarks))),
-            HashFieldIncrement(metadata_key, "fingerprinted_seconds", fingerprint.duration_seconds),
-        ]
-        await self.backend.apply_write_operations(operations)
         return AudioFingerprintRegistrationResponse(
             sound_id=request.sound_id,
             landmark_count=len(fingerprint.landmarks),

@@ -220,7 +220,7 @@ class ClipRankingService:
                 request_id=request_id,
                 ranking_source=f"clips:{prediction.ranking_source}",
                 model_version=prediction.model_version,
-                degraded=degraded,
+                degraded=degraded or prediction.model_version is None,
                 generated_at=now,
             ),
         )

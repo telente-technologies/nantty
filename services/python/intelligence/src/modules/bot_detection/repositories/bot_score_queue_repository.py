@@ -12,15 +12,21 @@ BOT_SCORE_MESSAGE_TYPE = "security.botScoreComputed"
 
 
 class BotScorePublisher(Protocol):
+    delivers: bool
+
     async def publish_bot_score(self, advisory: BotScoreAdvisory) -> None: ...
 
 
 class NullBotScorePublisher:
+    delivers = False
+
     async def publish_bot_score(self, _advisory: BotScoreAdvisory) -> None:
         return None
 
 
 class AmqpBotScorePublisher:
+    delivers = True
+
     def __init__(self, channels: RabbitMqChannelProvider, queue_name: str) -> None:
         self.channels = channels
         self.queue_name = queue_name
@@ -39,6 +45,8 @@ class AmqpBotScorePublisher:
 
 
 class SqsBotScorePublisher:
+    delivers = True
+
     def __init__(self, sqs_client: SqsClientProtocol, queue_url: str) -> None:
         self.sqs_client = sqs_client
         self.queue_url = queue_url

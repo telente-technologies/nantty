@@ -83,18 +83,27 @@ class ChatSpamScoringService:
         now = resolve_request_time(request.now)
         behaviour = request.behaviour
         degraded = False
-        if request.use_stored_behaviour and self.feature_store is not None:
-            try:
-                stored = await read_account_behaviour_snapshot(
-                    self.feature_store.feature_backend, self.feature_store.keyspace, request.sender_id, now
-                )
-                behaviour = merge_stored_behaviour(behaviour, stored, now)
-            except FeatureBackendUnavailableError:
-                degraded = True
+        stored_unavailable = False
+        if request.use_stored_behaviour:
+            if self.feature_store is None:
+                stored_unavailable = True
+            else:
+                try:
+                    stored = await read_account_behaviour_snapshot(
+                        self.feature_store.feature_backend, self.feature_store.keyspace, request.sender_id, now
+                    )
+                    behaviour = merge_stored_behaviour(behaviour, stored, now)
+                except FeatureBackendUnavailableError:
+                    stored_unavailable = True
+        degraded = stored_unavailable
         reasons = evaluate_chat_spam_rules(behaviour)
         score = combine_rule_weights_with_noisy_or(reasons)
         level, risk_action = classify_risk_score(score)
         action = {"allow": "allow", "review": "throttle", "hold_for_manual_review": "review"}[risk_action]
+        if degraded and action == "allow":
+            action = "throttle"
+            level = "medium" if level == "low" else level
+            reasons = [*reasons, RiskReason(code="stored_behaviour_unavailable", weight=0.3)]
         suggested = await self.suggestion_service.suggest_if_warranted(
             request.sender_id, "intelligence.chat_spam", score, reasons, now
         )

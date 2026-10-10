@@ -74,7 +74,7 @@ class AdClickPredictionService:
                 request_id=resolve_request_identifier(request.request_id),
                 ranking_source=f"ad_ctr:{prediction.ranking_source}",
                 model_version=prediction.model_version,
-                degraded=degraded,
+                degraded=degraded or prediction.model_version is None,
                 generated_at=now,
             ),
         )

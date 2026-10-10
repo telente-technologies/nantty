@@ -72,6 +72,21 @@ def describe_missing_slot_reason(request: AdSelectionRequest) -> str:
     return "no_brand_safe_slot"
 
 
+def resolve_reserve_price_or_reject(
+    reserve: MoneyAmount | None,
+    eligible_ads: list[EligibleAd],
+    usd_rate_lookup: dict[str, Decimal],
+) -> tuple[Decimal, list[RejectedAd]]:
+    if reserve is None:
+        return Decimal(0), []
+    converted = convert_money_to_usd_micros(reserve, usd_rate_lookup)
+    if converted is None:
+        return Decimal(0), [
+            RejectedAd(ad_id=eligible.candidate.ad_id, reason="reserve_unavailable") for eligible in eligible_ads
+        ]
+    return converted, []
+
+
 class AdSelectionService:
     def __init__(
         self,
@@ -172,15 +187,16 @@ class AdSelectionService:
             AD_CLICK_HEURISTIC_HEADS,
         )
         entries = []
+        reserve_usd_micros, reserve_rejections = resolve_reserve_price_or_reject(
+            request.reserve_price_per_mille, eligible_ads, usd_rate_lookup
+        )
+        rejected += reserve_rejections
+        if reserve_rejections:
+            eligible_ads = []
         for index, eligible in enumerate(eligible_ads):
             click_rate = float(prediction.probabilities_by_head["click"][index])
             entries.append(AuctionEntry(eligible, click_rate, calculate_effective_cpm_usd_micros(eligible, click_rate)))
         slots = calculate_ad_slots_for_request(request)
-        reserve_usd_micros = Decimal(0)
-        if request.reserve_price_per_mille is not None:
-            reserve_usd_micros = convert_money_to_usd_micros(
-                request.reserve_price_per_mille, usd_rate_lookup
-            ) or Decimal(0)
         auction = run_generalized_second_price_auction(entries, len(slots), reserve_usd_micros, usd_rate_lookup)
         missing_slot_reason = describe_missing_slot_reason(request)
         rejected += [
@@ -226,7 +242,7 @@ class AdSelectionService:
                 request_id=auction_id,
                 ranking_source=f"ads:{prediction.ranking_source}",
                 model_version=prediction.model_version,
-                degraded=degraded,
+                degraded=degraded or prediction.model_version is None,
                 generated_at=now,
             ),
         )

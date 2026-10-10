@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import hashlib
 import logging
@@ -117,10 +118,15 @@ class BotScoringService:
                     generated_at=now,
                 )
             )
+        except asyncio.CancelledError:
+            if claim_key is not None and self.backend is not None:
+                with contextlib.suppress(Exception):
+                    await self.backend.delete_keys([claim_key])
+            raise
         except Exception:
             bot_logger.exception("bot_score_publish_failed")
             if claim_key is not None and self.backend is not None:
                 with contextlib.suppress(Exception):
                     await self.backend.delete_keys([claim_key])
             return False
-        return True
+        return self.publisher.delivers
