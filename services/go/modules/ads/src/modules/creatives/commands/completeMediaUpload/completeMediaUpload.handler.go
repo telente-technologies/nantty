@@ -1,7 +1,12 @@
 package completemediaupload
 
 import (
+	"bytes"
 	"context"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 
 	"zudomart/modules/ads/src/container"
 	adserrors "zudomart/modules/ads/src/errors"
@@ -40,7 +45,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Compl
 	if !exists || size != media.SizeBytes {
 		return dtos.CompletedUpload{}, adserrors.UploadIncomplete
 	}
+	width, height, probed := probeImageDimensions(ctx, deployed, media)
 	err = deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		if probed {
+			return tx.AdMedia.UpdateOne(media).SetStatus(admedia.StatusReady).SetWidth(width).SetHeight(height).Exec(ctx)
+		}
 		if err := tx.AdMedia.UpdateOne(media).SetStatus(admedia.StatusProcessing).Exec(ctx); err != nil {
 			return err
 		}
@@ -48,5 +57,25 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Compl
 			MediaId: media.ID.String(), AccountId: media.AccountID.String(), ObjectKey: media.ObjectKey, MimeType: media.MimeType, Kind: string(media.Kind), SizeBytes: media.SizeBytes,
 		})
 	})
+	if probed {
+		return dtos.CompletedUpload{MediaId: media.ID.String(), Status: "ready"}, err
+	}
 	return dtos.CompletedUpload{MediaId: media.ID.String(), Status: "processing"}, err
+}
+
+const imageHeaderProbeBytes = 512 * 1024
+
+func probeImageDimensions(ctx context.Context, deployed *container.Container, media *ent.AdMedia) (int, int, bool) {
+	if media.Kind != admedia.KindImage {
+		return 0, 0, false
+	}
+	header, err := deployed.Storage.ReadPrefix(ctx, media.ObjectKey, imageHeaderProbeBytes)
+	if err != nil {
+		return 0, 0, false
+	}
+	config, _, err := image.DecodeConfig(bytes.NewReader(header))
+	if err != nil || config.Width < 1 || config.Height < 1 {
+		return 0, 0, false
+	}
+	return config.Width, config.Height, true
 }

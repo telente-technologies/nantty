@@ -54,7 +54,7 @@ func (controller BillingController) GetRegionalPricing(writer http.ResponseWrite
 		"suggestedCpm": money(floors.SuggestedCpmMinor, currency), "suggestedCpc": money(floors.SuggestedCpcMinor, currency), "suggestedCpv": money(floors.SuggestedCpvMinor, currency),
 		"minimumDailyBudget": money(floors.MinimumDailyBudgetMinor, currency), "suggestedDailyBudget": money(floors.SuggestedDailyBudgetMinor, currency),
 		"boostMinimumDailyBudget": money(floors.BoostMinimumDailyMinor, currency), "boostPackages": packages,
-		"creatorRevenueSharePercent": controller.Container.Settings.CreatorShareBps / 100,
+		"creatorRevenueSharePercent": controller.Container.Policies.CreatorShareBps(request.Context()) / 100,
 		"regions":                    pricing.Table(request.Context()),
 	})
 }

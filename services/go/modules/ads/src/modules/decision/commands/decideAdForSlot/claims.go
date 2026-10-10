@@ -22,11 +22,10 @@ func (handler Handler) buildClaims(ctx context.Context, slot *slotContext, winne
 	if slot.signal != nil && services.IsContentAdjacentSlot(slot.command.Slot.Kind) {
 		claims.CreatorUserId, claims.AiGenerated = slot.signal.CreatorUserId, slot.signal.AiGenerated
 		rows, err := handler.Container.Policies.MonetizationRows(ctx)
-		if err == nil {
-			claims.CreatorShareBps, claims.MultiplierBps = services.ResolveCreatorShare(rows, slot.signal.AiGenerated, slot.now)
-		} else {
-			claims.CreatorShareBps, claims.MultiplierBps = services.ResolveCreatorShare(nil, slot.signal.AiGenerated, slot.now)
+		if err != nil {
+			rows = nil
 		}
+		claims.CreatorShareBps, claims.MultiplierBps = services.ResolveCreatorShareWithDefault(rows, slot.signal.AiGenerated, slot.now, handler.Container.Policies.CreatorShareBps(ctx))
 	}
 	return claims
 }
