@@ -3100,6 +3100,22 @@
       "vhost": "zudomart",
       "destination": "money-domain-events",
       "destination_type": "queue",
+      "routing_key": "businessVerification.approved",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "businessVerification.revoked",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
       "routing_key": "creatorApplication.approved",
       "arguments": {}
     },
@@ -3133,6 +3149,14 @@
       "destination": "money-domain-events",
       "destination_type": "queue",
       "routing_key": "creatorSubscription.paid",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "creatorSubscription.refunded",
       "arguments": {}
     },
     {

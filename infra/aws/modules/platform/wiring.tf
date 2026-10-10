@@ -28,6 +28,7 @@ locals {
       ADMIN_INTERNAL_URL           = local.internal_url["go-identity"]
       SELLER_PLAN_ENTITLEMENTS_URL = local.internal_url["go-money"]
       CATALOG_SOCIAL_INTERNAL_URL  = local.internal_url["social"]
+      CATALOG_ADS_INTERNAL_URL     = local.internal_url["go-ads"]
       ORDERS_EVENTS_QUEUE          = "commerce-domain-events"
       CATALOG_EVENTS_QUEUE         = "catalog-domain-events"
     }

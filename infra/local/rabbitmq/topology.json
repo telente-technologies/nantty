@@ -28,7 +28,7 @@
       "consent.granted", "consent.withdrawn"
     ],
     "support-domain-events": ["account.deletionExecuted"],
-    "money-domain-events": ["orderGroup.refundRequested", "creatorApplication.approved", "adSpend.batched", "verificationCase.refundRequested", "accountHealth.changed", "creatorSubscription.paid", "adCreatorEarnings.posted", "orderGroup.completed", "escrow.refunded", "escrow.partiallyRefunded"],
+    "money-domain-events": ["orderGroup.refundRequested", "businessVerification.approved", "businessVerification.revoked", "creatorApplication.approved", "adSpend.batched", "verificationCase.refundRequested", "accountHealth.changed", "creatorSubscription.paid", "creatorSubscription.refunded", "adCreatorEarnings.posted", "orderGroup.completed", "escrow.refunded", "escrow.partiallyRefunded"],
     "ads-domain-events": ["accountHealth.changed", "adBalance.toppedUp", "adBalance.topUpFailed"],
     "commerce-domain-events": [
       "escrow.held", "escrow.released", "escrow.refunded", "escrow.partiallyRefunded",
