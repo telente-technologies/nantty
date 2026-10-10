@@ -96,7 +96,7 @@ Rules: TOTP is RFC 6238 (SHA-1, 6 digits, 30 s, ±1 step), secrets encrypted at 
 
 | Method & path | Rules | Body → response |
 |---|---|---|
-| `GET /api/v1/admin/admins?search&status&role&page&pageSize` | superadmin | `PagedList<AdminAccountSummary>` |
+| `GET /api/v1/admin/admins?search&status&role&cursor&limit` | superadmin | `PagedList<AdminAccountSummary>` |
 | `GET /api/v1/admin/admins/:adminId` | superadmin | `{ admin, activeSessionCount, history: AuditLogEntry[] }` |
 | `POST /api/v1/admin/admins` | superadmin, **step-up** | `{ email (must be on a server-configured allow-list of work domains), name, role: "ADMIN"\|"SUPPORT", permissions[], reason }` → `201 { admin, invitationSentTo, invitationExpiresInHours }`. Sends a one-time invitation link (48 h) to set a password and enroll MFA. `409 ADMIN_EXISTS`. Audit `admin.created`. |
 | `PUT /api/v1/admin/admins/:adminId/permissions` | superadmin, **step-up** | `{ role, permissions[], reason }` → `{ admin }`. Audit `admin.permissions_changed` with before/after lists. |
@@ -110,7 +110,7 @@ Unknown permission keys → `400`. Acting on yourself → `409 CANNOT_CHANGE_SEL
 
 | Method & path | Permission | Notes |
 |---|---|---|
-| `GET /api/v1/admin/audit?search&area&actorId&targetType&targetId&from&to&page&pageSize` | `audit:read` | `PagedList<AuditLogEntry>`, newest first. `search` matches action, actor name, target label/ID and reason. |
+| `GET /api/v1/admin/audit?search&area&actorId&targetType&targetId&from&to&cursor&limit` | `audit:read` | `PagedList<AuditLogEntry>`, newest first. `search` matches action, actor name, target label/ID and reason. |
 | `GET /api/v1/admin/audit/facets` | `audit:read` | `{ areas: string[], actors: [{ id, name }] }` for filters. |
 | `GET /api/v1/admin/audit/:entryId` | `audit:read` | `AuditLogEntry` |
 | `GET /api/v1/admin/audit/export?format=csv&<same filters>` | `audit:export` | `text/csv` attachment. Cells starting with `= + - @` are prefixed with `'` (formula-injection safe). The export itself is audited (`audit.exported`). |
@@ -135,13 +135,13 @@ The store is append-only (no update or delete endpoints exist; enforce with data
 Queue keys used by the console: `verification`, `sellerApplications`, `creatorApplications`, `reports`, `appeals`, `copyright`, `adsReview`, `disputes`, `payouts`, `coinReviews`, `supportTickets`, `brandVerification`, `ipClaims`. Each money list has one entry per currency with activity; the console never assumes a currency.
 ## Users
 
-Shared shapes: `PlatformUserSummary` (`id`, `username`, `displayName`, `avatarUrl`, `country`, `currency`, `status` ACTIVE|WARNED|SUSPENDED|BANNED|DEACTIVATED, `verification` {color BLUE|GOLD|BLACK, tier ESSENTIAL|VERIFIED|PREMIUM|PRO|OFFICIAL, status, badgeVisible} | null, `isSeller`, `isCreator`, `followerCount`, `joinedAt`, `lastActiveAt`, `strikeCount`, `riskLevel` LOW|MEDIUM|HIGH, `emailMasked`, `phoneMasked`). Personal data is never included in list/detail responses.
+Shared shapes: `PlatformUserSummary` (`id`, `username`, `displayName`, `avatarUrl`, `country`, `currency`, `status` ACTIVE|WARNED|SUSPENDED|BANNED|DEACTIVATED, `verification` {color BLUE|GOLD|BLACK, tier ESSENTIAL|VERIFIED|PREMIUM|ONLY|PRO|BUSINESS|OFFICIAL, status, badgeVisible} | null, `isSeller`, `isCreator`, `followerCount`, `joinedAt`, `lastActiveAt`, `strikeCount`, `riskLevel` LOW|MEDIUM|HIGH, `emailMasked`, `phoneMasked`). Personal data is never included in list/detail responses.
 
 `UserDetail` = `{ user, bio, restriction: {kind SUSPENSION|BAN, reason, startedAt, endsAt|null} | null, wallet: { balances: [{currency, available: Money, pending: Money, inEscrow: Money}], coinBalance, pendingWithdrawalCount }, strikes: [{id, policy, reason, source MODERATION|COPYRIGHT|MANUAL, issuedAt, expiresAt, issuedByName}], sessions: [{id, device, platform IOS|ANDROID|WEB, ipAddress, location, startedAt, lastSeenAt}], usernameHistory: [UsernameHistoryEntry], withheldUsername: WithheldUsername | null, history: AuditLogEntry[] }`.
 
 | Method | Path | Permission | Step-up | Body | Response | Audit action |
 |---|---|---|---|---|---|---|
-| GET | `/api/v1/admin/users?search&status&verification=BLUE\|GOLD\|BLACK\|NONE&role=seller\|creator&risk&page&pageSize` | any of `users:read`, `support:tickets`, `verification:review`, `moderation:reports` | no | — | `PagedList<PlatformUserSummary>` | — |
+| GET | `/api/v1/admin/users?search&status&verification=BLUE\|GOLD\|BLACK\|NONE&role=seller\|creator&risk&cursor&limit` | any of `users:read`, `support:tickets`, `verification:review`, `moderation:reports` | no | — | `PagedList<PlatformUserSummary>` | — |
 | GET | `/api/v1/admin/users/:userId` | same as above | no | — | `UserDetail` | — |
 | GET | `/api/v1/admin/users/:userId/personal-data?purpose=` | `users:read-pii` | no | — | `{ email, phone, legalName, dateOfBirth, revealedAt, expiresInSeconds }` | `user.personal_data_revealed` (reason = purpose) |
 | POST | `/api/v1/admin/users/:userId/warn` | `users:moderate` | no | `{ reason, policy?, addStrike? }` | `UserDetail` | `user.warned` |
@@ -180,7 +180,7 @@ Errors: `400 VALIDATION_FAILED`, `422 RULE_EXISTS`, `404 NOT_FOUND`. Not served 
 
 ## Verification
 
-Colors: **Blue** personal (ESSENTIAL / VERIFIED / PREMIUM; Essential never shows a public badge), **Gold** business/store (PRO / PREMIUM; verified Gold grants Zudomart Dashboard access), **Black** government (OFFICIAL; never purchasable, manual official process — confirm from the agency's official domain).
+Colors: **Blue** personal (ESSENTIAL / VERIFIED / PREMIUM; Essential never shows a public badge), **Gold** business/store (ONLY / PRO / BUSINESS; verified Gold grants Zudomart Dashboard access), **Black** government (OFFICIAL; never purchasable, manual official process — confirm from the agency's official domain).
 
 State machine (server-enforced, `409 INVALID_TRANSITION` otherwise):
 
@@ -196,7 +196,7 @@ State machine (server-enforced, `409 INVALID_TRANSITION` otherwise):
 
 | Method | Path | Permission | Step-up | Body | Response | Audit action |
 |---|---|---|---|---|---|---|
-| GET | `/api/v1/admin/verifications?status&color&search&page` | `verification:review` or `verification:revoke` | no | — | `PagedList<VerificationApplication>` (pending first, oldest first) | — |
+| GET | `/api/v1/admin/verifications?status&color&search&cursor` | `verification:review` or `verification:revoke` | no | — | `PagedList<VerificationApplication>` (pending first, oldest first) | — |
 | GET | `/api/v1/admin/verifications/:verificationId` | same | no | — | `VerificationApplication & { history: AuditLogEntry[] }` | — |
 | GET | `/api/v1/admin/verifications/:verificationId/documents/:documentId` | `verification:documents` | no | — | `{ documentId, kind, label, viewUrl, expiresAt, watermarkText }` — `viewUrl` is a signed private-media URL valid ≤ 2 minutes; `watermarkText` = `Zudomart Admin — confidential · <admin email> · <timestamp>` | `verification.document_viewed` |
 | POST | `/api/v1/admin/verifications/:verificationId/approve` | `verification:review` | no | `{ reason }` | detail | `verification.approved` |
@@ -215,7 +215,7 @@ Seller eligibility: identity (NIN/BVN) verified, payout bank account name match,
 
 | Method | Path | Permission | Step-up | Body | Response | Audit action |
 |---|---|---|---|---|---|---|
-| GET | `/api/v1/admin/applications/sellers?status&search&page` | `applications:sellers` | no | — | `PagedList<ProgramApplication>` | — |
+| GET | `/api/v1/admin/applications/sellers?status&search&cursor` | `applications:sellers` | no | — | `PagedList<ProgramApplication>` | — |
 | GET | `/api/v1/admin/applications/sellers/:applicationId` | `applications:sellers` | no | — | `ProgramApplication & { history }` | — |
 | POST | `/api/v1/admin/applications/sellers/:applicationId/approve` | `applications:sellers` | no | `{ reason }` | detail; user gains seller capability | `seller_application.approved` |
 | POST | `/api/v1/admin/applications/sellers/:applicationId/reject` | `applications:sellers` | no | `{ reason }` | detail | `seller_application.rejected` |
@@ -252,7 +252,7 @@ interface ReportDetail extends ReportSummary {
 `ReportReason` = SPAM, SCAM, HARASSMENT, HATE, NUDITY, VIOLENCE, COUNTERFEIT, IMPERSONATION, MISINFORMATION, SELF_HARM, OTHER. SLA: URGENT 1 h, HIGH 4 h, NORMAL 24 h, LOW 72 h from the first report.
 
 ### GET /api/v1/admin/reports
-Permission `moderation:reports`. Query: `status` (`OPEN` = OPEN+IN_REVIEW, default; `RESOLVED`, `DISMISSED`, `ALL`), `targetType`, `reason`, `priority`, `search` (content text, @author, report or target ID), `page`, `pageSize`. Sorted by priority, then SLA due time. Response `PagedList<ReportSummary>`.
+Permission `moderation:reports`. Query: `status` (`OPEN` = OPEN+IN_REVIEW, default; `RESOLVED`, `DISMISSED`, `ALL`), `targetType`, `reason`, `priority`, `search` (content text, @author, report or target ID), `cursor`, `limit`. Sorted by priority, then SLA due time. Response `PagedList<ReportSummary>`.
 
 ### GET /api/v1/admin/reports/{reportId}
 Permission `moderation:reports`. Response `ReportDetail`. 404 `NOT_FOUND`.
@@ -290,7 +290,7 @@ interface AppealDetail extends AppealSummary { decision: { outcome: "UPHELD" | "
 ```
 
 ### GET /api/v1/admin/appeals
-Permission `moderation:appeals`. Query `status` (default PENDING, or `ALL`), `decisionType`, `search`, `page`. Oldest SLA first. Response `PagedList<AppealSummary>`.
+Permission `moderation:appeals`. Query `status` (default PENDING, or `ALL`), `decisionType`, `search`, `cursor`. Oldest SLA first. Response `PagedList<AppealSummary>`.
 
 ### GET /api/v1/admin/appeals/{appealId}
 Permission `moderation:appeals`. Response `AppealDetail`.
@@ -326,7 +326,7 @@ interface CopyrightClaimDetail extends CopyrightClaimSummary {
 ```
 
 ### GET /api/v1/admin/copyright-claims
-Permission `copyright:review`. Query `status` (`OPEN` = PENDING+NEEDS_INFO+COUNTER_NOTICE, default; any status; `ALL`), `workType`, `search`, `page`. Oldest first. Response `PagedList<CopyrightClaimSummary>`.
+Permission `copyright:review`. Query `status` (`OPEN` = PENDING+NEEDS_INFO+COUNTER_NOTICE, default; any status; `ALL`), `workType`, `search`, `cursor`. Oldest first. Response `PagedList<CopyrightClaimSummary>`.
 
 ### GET /api/v1/admin/copyright-claims/{claimId}
 Permission `copyright:review`. Response `CopyrightClaimDetail`.
@@ -405,7 +405,7 @@ Brands are profiles that own trademarks. Members are platform users with a brand
 
 | Method & path | Permission | Notes |
 |---|---|---|
-| `GET /api/v1/admin/brands?search&official&country&page&pageSize` | `brands:review`, `brands:revoke` or `ip-claims:review` | `PagedList<BrandSummary>`; `PENDING` requests sort first. `official` filters by `officialStatus`. |
+| `GET /api/v1/admin/brands?search&official&country&cursor&limit` | `brands:review`, `brands:revoke` or `ip-claims:review` | `PagedList<BrandSummary>`; `PENDING` requests sort first. `official` filters by `officialStatus`. |
 | `GET /api/v1/admin/brands/:brandId` | same | `BrandDetail`. `allowedOfficialActions` is computed by the server from the state machine below; the console only shows those. |
 
 ## Official Store verification
@@ -440,7 +440,7 @@ State machine: `OPEN → UPHELD | REJECTED | NEEDS_INFO`, `NEEDS_INFO → UPHELD
 
 | Method & path | Permission | Step-up | Body → response | Audit action |
 |---|---|---|---|---|
-| `GET /api/v1/admin/ip-claims?status&type&search&page&pageSize` | `ip-claims:review` | no | `PagedList<IpClaimSummary>`, soonest SLA first | — |
+| `GET /api/v1/admin/ip-claims?status&type&search&cursor&limit` | `ip-claims:review` | no | `PagedList<IpClaimSummary>`, soonest SLA first | — |
 | `GET /api/v1/admin/ip-claims/:claimId` | `ip-claims:review` | no | `IpClaimDetail` | — |
 | `POST /api/v1/admin/ip-claims/:claimId/uphold` | `ip-claims:review` | **yes** | `{ reason, addStrike?: boolean = true }` → `{ claim: IpClaimDetail, sellerStrikeCount, isRepeatInfringer }`. Delists the listing; if `addStrike`, adds a strike (policy "Counterfeit goods" or "Trademark infringement", 12-month expiry) to the seller. `isRepeatInfringer` is true at 3+ strikes so the console can prompt a suspension. Notifies claimant and seller. | `ip_claim.uphold` |
 | `POST /api/v1/admin/ip-claims/:claimId/reject` | `ip-claims:review` | no | `{ reason }` → same shape | `ip_claim.reject` |
@@ -451,133 +451,75 @@ Audit `before`/`after` = `{ status, listingStatus, sellerStrikeCount }`.
 Queue counters (metrics overview): `brandVerification` (Official Store requests in `PENDING`, SLA 72 h, href `/brands?official=PENDING`) and `ipClaims` (claims in `OPEN`, breaching = past `slaDueAt`, href `/ip-claims`).
 # Money: commerce operations
 
-All amounts are `Money = { amountMinor: integer, currency: ISO 4217 }`. The API never converts currencies; an amount sent for an order must be in that order's currency. `PlatformUserSummary` is the user shape defined in the Users section. Lists return `{ items, page, pageSize, total }` and accept `page`, `pageSize` (max 200). Money-moving endpoints require an `Idempotency-Key` header (8–128 chars); a repeated key with the same admin, method and path replays the first response with `Idempotent-Replayed: true`. Missing key → `400 IDEMPOTENCY_KEY_REQUIRED`. Step-up endpoints require a valid `X-Step-Up-Token` token bound to the admin session, else `403 STEP_UP_REQUIRED`. Every mutation writes an audit entry with `before` / `after`.
+All amounts are `Money = { amountMinor: integer, currency: ISO 4217 }`. The API never converts currencies. Every money list pages by `?cursor=` (opaque) and `?limit=` (default 20–25, max 100) and returns `{ data, nextCursor }`, plus `counts` where noted. Statuses are lowercase. `PartySummary = { id, name: string|null, username: string|null }`. Money-moving endpoints require an `Idempotency-Key` header (8–128 chars); a repeated key with the same body replays the first response with `Idempotent-Replayed: true`, a reused key with a different body is refused. Missing key → `400 IDEMPOTENCY_KEY_REQUIRED`. Step-up endpoints answer `403 STEP_UP_REQUIRED` without a fresh step-up.
 
-## Orders & escrow
+## Orders & refunds (orders module)
 
 ### GET /api/v1/admin/orders
-Permission: any of `orders:read`, `disputes:resolve`, `refunds:issue`, `support:tickets`.
-Query: `search` (order number, order id, store name, buyer/seller id, name or username), `status` (`PAID|SHIPPED|DELIVERED|COMPLETED|CANCELLED|REFUNDED|PARTIALLY_REFUNDED|DISPUTED`), `currency`, `page`, `pageSize`. Newest first.
-Response: `PagedList<OrderSummary>`
-```ts
-OrderSummary { id, orderNumber, buyer: PlatformUserSummary, seller: PlatformUserSummary, storeName, status, escrowStatus: "FUNDED"|"HELD"|"RELEASED"|"REFUNDED"|"PARTIALLY_REFUNDED"|"DISPUTED", deliveryStatus: "AWAITING_SHIPMENT"|"IN_TRANSIT"|"DELIVERED"|"RETURNED"|"CANCELLED", total: Money, itemCount, placedAt, disputeId: string|null }
-```
+Any of `orders:read`, `disputes:resolve`, `refunds:issue`, `support:tickets`. Query: `search` (≤80), `status` (`pending|new|processing|ready|shipped|delivered|completed|cancelled|returned|refunded|disputed`), `currency`, `storeId`, `cursor`, `limit`. Newest first.
+`OrderSummary = { id, orderNumber, invoiceNumber, buyer: OrderParty, seller: OrderParty, storeId, storeName, status, paymentStatus, paymentMode, escrowStatus (awaiting_payment|held|disputed|refunded|partially_refunded|released), deliveryStatus, total: Money, itemCount, placedAt }`, `OrderParty = { id, username, displayName, avatarUrl|null }`.
 
-### GET /api/v1/admin/orders/:orderIdOrNumber
-Same permission. Accepts the order id or the order number.
-Response: `OrderDetail = OrderSummary & { items: { id, productName, imageUrl, quantity, unitPrice: Money, lineTotal: Money }[], subtotal, deliveryFee, commission, commissionBasisPoints, refundedTotal, refundable: Money, deliveryCity, courier, trackingNumber, escrow: EscrowState, refunds: RefundRecord[], history: AuditLogEntry[] }`
-```ts
-EscrowState { status, heldAmount: Money, autoReleaseAt: string|null, timeline: EscrowTimelineEvent[] }
-EscrowTimelineEvent { id, kind: "FUNDED"|"HELD"|"SHIPPED"|"DELIVERED"|"AUTO_RELEASE_SCHEDULED"|"DISPUTED"|"RELEASED"|"REFUNDED"|"PARTIALLY_REFUNDED", occurredAt, actorName, actorKind: "BUYER"|"SELLER"|"ADMIN"|"SYSTEM", note: string|null, amount: Money|null }
-```
-`refundable` is what is still held in escrow (0 once released). Errors: `404 NOT_FOUND`.
-
-### GET /api/v1/admin/escrows/:orderId
-Permission: `orders:read` or `disputes:resolve`. Response: `EscrowState`.
-
-## Disputes
-
-### GET /api/v1/admin/disputes
-Permission: `disputes:resolve`. Query: `status` (`OPEN|AWAITING_SELLER|IN_REVIEW|RESOLVED`), `search`, `page`. Sorted by priority (`URGENT`, `HIGH`, `NORMAL`) then SLA due time.
-Response: `PagedList<DisputeSummary> & { counts: Record<DisputeStatus, number> }`
-```ts
-DisputeSummary { id, orderId, orderNumber, buyer, seller, reasonCategory: "NOT_AS_DESCRIBED"|"NOT_RECEIVED"|"DAMAGED"|"WRONG_ITEM"|string, status, priority, escrowAmount: Money, openedAt, slaDueAt }
-```
-
-### GET /api/v1/admin/disputes/:disputeId
-Permission: `disputes:resolve`.
-Response: `DisputeDetail = DisputeSummary & { buyerClaim, sellerResponse: string|null, evidence: { id, imageUrl (signed, short-lived), caption, submittedBy: "BUYER"|"SELLER" }[], messages: { id, authorName, authorRole: "BUYER"|"SELLER"|"ADMIN", body, sentAt }[], commissionBasisPoints, resolution: DisputeResolution|null, escrow: EscrowState, history: AuditLogEntry[] }`
-```ts
-DisputeResolution { outcome, buyerRefund: Money, sellerPayout: Money, commission: Money, reason, resolvedAt, resolvedByName }
-```
-
-### POST /api/v1/admin/disputes/:disputeId/resolve
-Permission: `disputes:resolve`. **Step-up required. Idempotency-Key required.**
-Body: `{ outcome: "REFUND_FULL"|"REFUND_PARTIAL"|"RELEASE_TO_SELLER", refundAmount?: Money (required for REFUND_PARTIAL), reason: string (5–1000) }`
-Rules: works on the amount still held in escrow. `REFUND_PARTIAL` needs `0 < refundAmount.amountMinor < held` and `refundAmount.currency` equal to the order currency. Seller portion = held − refund; commission = round(seller portion × commissionBasisPoints / 10 000); seller payout = seller portion − commission. The server computes the split; client previews are informational only. Ledger: refund journal (debit escrow_holding, credit provider_clearing) and release journal (debit escrow_holding, credit seller wallet, credit platform_commission) in one transaction. A refund record is created (`source: "DISPUTE"`, status `PROCESSING` until the provider confirms). Order escrow becomes `REFUNDED` / `PARTIALLY_REFUNDED` / `RELEASED`, order status `REFUNDED` / `PARTIALLY_REFUNDED` / `COMPLETED`, and a timeline event is appended. Buyer and seller are notified with the reason.
-Response: `DisputeDetail`.
-Errors: `400 VALIDATION_FAILED` (`refundAmount.amountMinor`, `refundAmount.currency`, `reason`, `outcome`), `400 IDEMPOTENCY_KEY_REQUIRED`, `403 STEP_UP_REQUIRED`, `404`, `409 DISPUTE_ALREADY_RESOLVED`, `409 ESCROW_EMPTY`.
-Audit: `dispute.resolved` (target dispute) and `escrow.settled` (target order), before `{ disputeStatus, orderStatus, escrowStatus, escrowHeld }`, after `{ disputeStatus, orderStatus, escrowStatus, outcome, buyerRefund, sellerPayout, commission }`.
-
-## Refunds
+### GET /api/v1/admin/orders/{idOrNumber}
+Same permissions. Accepts the order UUID or the order number. Response `OrderSummary & { items: { id, productId, productName, variant, imageUrl, quantity, unitPrice, lineTotal, attribution: {source,id}|null }[], subtotal, discount, storeCredit, deliveryFee, refundedTotal, refundable, deliveryCity, deliveryState, courier|null, trackingNumber|null, escrow: { status, heldAmount, commission, sellerAmount, refunded, autoReleaseAt, releasedAt, refundedAt }|null, refunds: RefundRecord[], timeline: { id, kind, summary, actorKind, actorName, occurredAt }[] }`. `refundable` is zero when the order is unpaid or a refund is already running.
 
 ### GET /api/v1/admin/refunds
-Permission: `refunds:issue`. Query: `source` (`MANUAL|DISPUTE`), `search`, `page`. Newest first.
-Response: `PagedList<RefundRecord>`
-```ts
-RefundRecord { id, orderId, orderNumber, buyer: PlatformUserSummary, amount: Money, source: "DISPUTE"|"MANUAL", status: "PROCESSING"|"COMPLETED"|"FAILED", reason, createdAt, createdByName }
-```
+`refunds:issue`. Query: `source` (`manual|seller|return|cancellation|dispute|system`), `status` (`processing|completed|failed`), `orderId`, `search`, `cursor`, `limit`. `RefundRecord = { id, orderId, orderNumber, storeId, buyer: OrderParty, amount, source, status, reason, createdAt, completedAt|null, createdByName }`.
 
 ### POST /api/v1/admin/refunds
-Permission: `refunds:issue`. **Step-up required. Idempotency-Key required.**
-Body: `{ orderId: string, amount: Money, reason: string (5–1000) }`
-Rules: amount in order currency, `0 < amount ≤ refundable`. Orders with an open dispute must be resolved through the dispute (`409 DISPUTE_OPEN`). A full refund of what is held sets escrow `REFUNDED` and stops auto-release; a partial one sets order status `PARTIALLY_REFUNDED` and keeps the rest held. Ledger: debit escrow_holding, credit provider_clearing.
-Response `201`: `RefundRecord`. Errors: `400 VALIDATION_FAILED`, `400 IDEMPOTENCY_KEY_REQUIRED`, `403 STEP_UP_REQUIRED`, `404`, `409 DISPUTE_OPEN`, `409 NOTHING_REFUNDABLE`.
-Audit: `refund.issued` (target order), before/after `{ orderStatus, escrowStatus, escrowHeld }` plus `refund` in after.
+`refunds:issue`, step-up, `Idempotency-Key`. Body `{ orderId, amount: Money, reason (5–1000) }`. `201 RefundRecord`. Errors: `DISPUTE_OPEN` (resolve the dispute instead), `NOTHING_REFUNDABLE`, `REFUND_IN_PROGRESS`, `400` when the currency is not the order's, the amount exceeds what is refundable, or the escrow was released and the amount is not the full remainder.
 
-## Payouts
+## Disputes (escrow module)
 
-### GET /api/v1/admin/payouts
-Permission: `payouts:approve`. Query: `status` (`PENDING|ON_HOLD|APPROVED|REJECTED|PAID`), `search`, `page`. Sorted by fraud score (highest first) then oldest request.
-Response: `PagedList<PayoutRequest> & { counts: Record<PayoutStatus, number> }`
-```ts
-PayoutRequest { id, user: PlatformUserSummary, amount: Money, providerFee: Money, netAmount: Money, provider: string, destination: PayoutDestination, source: "CREATOR_EARNINGS"|"SELLER_SALES"|"WALLET", status, requestedAt, fraud: FraudAssessment, walletBalanceAfter: Money }
-PayoutDestination { kind: "BANK_ACCOUNT"|"MOBILE_MONEY", institutionName, accountMasked (last 4 only), accountName, addedAt }
-FraudAssessment { score: 0-100, riskLevel: "LOW"|"MEDIUM"|"HIGH", reasons: string[], modelVersion, evaluatedAt }
-```
-`fraud` comes from the intelligence service (services/python/intelligence) at request time; the provider fee is the payment provider's pass-through fee (the user receives `netAmount`). Full account numbers are never returned.
+### GET /api/v1/admin/disputes
+`disputes:resolve`. Query: `status` (`open` = awaiting_seller+under_review, `resolved` = resolved_refunded+resolved_released+closed, a single status, or `all`), `search` (≤120), `cursor`, `limit`. Newest first. Response `{ data: DisputeSummary[], nextCursor, counts: Record<status, number> }`.
+`DisputeSummary = { id, orderId, orderNumber, productName, buyer: PartySummary, seller: PartySummary, store: { id, name|null }, reason (not_received|not_as_described|damaged|wrong_item|other), status, priority (normal|high|urgent), escrowAmount, openedAt, slaDueAt|null, isSlaBreached }`.
 
-### GET /api/v1/admin/payouts/:payoutId
-Permission: `payouts:approve`. Response: `PayoutRequest & { recentPayouts: { id, amount, status, requestedAt }[], history: AuditLogEntry[] }`.
+### GET /api/v1/admin/disputes/{disputeId}
+Staff view: `DisputeSummary & { description, evidenceUrls[], sellerResponse|null, commissionBasisPoints, escrow: { escrowId, status, amount, heldAmount, refundedAmount, releasedAmount, commission, processingFee, paymentReference, deliveredAt }, resolution: { outcome (release|refund|partial|withdrawn), buyerRefund, sellerPayout, commission, note, resolvedAt, resolvedByStaffId }|null, messages: { id, authorRole (buyer|seller|support), authorName, authorAvatarUrl, text, attachmentUrls[], createdAt }[], history: { status, label, occurredAt }[] }`.
 
-### POST /api/v1/admin/payouts/:payoutId/approve
-Permission: `payouts:approve`. **Step-up required. Idempotency-Key required.** Body: `{ reason: string (5–1000) }`. Allowed from `PENDING` or `ON_HOLD`. Debits the user wallet and sends the transfer through the provider (status becomes `PAID` on the provider webhook). Response: payout detail. Errors: `403 STEP_UP_REQUIRED`, `400 IDEMPOTENCY_KEY_REQUIRED`, `409 PAYOUT_NOT_ACTIONABLE`. Audit `payout.approved` with before/after `{ status }`, `amount`, `fraudScore`.
+### POST /api/v1/admin/disputes/{disputeId}/resolve
+`disputes:resolve`, step-up, `Idempotency-Key`. Body `{ outcome: "REFUND_FULL"|"REFUND_PARTIAL"|"RELEASE_TO_SELLER" (or refund|partial|release), reason (3–2000, alias of note), refundAmount?: Money }`. `refundAmount` is required for `REFUND_PARTIAL` (above zero, below the order total) and refused otherwise. Response: the staff view above.
 
-### POST /api/v1/admin/payouts/:payoutId/hold
-Permission: `payouts:approve`. No step-up. Body `{ reason }`. Allowed from `PENDING`. Audit `payout.held`.
+## Withdrawals (wallet module)
 
-### POST /api/v1/admin/payouts/:payoutId/reject
-Permission: `payouts:approve`. No step-up. Body `{ reason }`. Allowed from `PENDING` or `ON_HOLD`; the amount returns to the wallet and the user is told the reason. Audit `payout.rejected`.
+### GET /api/v1/admin/withdrawals
+`payouts:approve`. Query: `status` (`pending_review|on_hold|queued|processing|paid|failed|cancelled`), `search` (withdrawal ID, user ID or reference), `cursor`, `limit`. Newest first. Response `{ data: StaffWithdrawal[], nextCursor, counts }`.
+`StaffWithdrawal = { id, kind, amount, description, createdAt, status, reference, fee, netAmount, withdrawalStatus, payoutAccountId, failureReason|null, processedAt|null, userId, user: PartySummary, provider, destination: { payoutAccountId, bankName, accountLast4, accountName, countryCode, addedAt, removed }|null, reviewedByStaffId, reviewedAt, reviewNote }`.
 
-## Coins
+### GET /api/v1/admin/withdrawals/{withdrawalId}
+`StaffWithdrawal & { availableBalance: Money, recentWithdrawals: { id, amount, withdrawalStatus, createdAt }[] }` (last five).
 
-### GET /api/v1/admin/coins
-Permission: `coins:review`. Query: `status` (`PENDING_REVIEW|REVIEWED|REVERSED`), `kind` (`PURCHASE|TRANSFER|GIFT`), `search`, `page`.
-Response: `PagedList<CoinTransaction> & { counts: Record<CoinTransactionStatus, number> }`
-```ts
-CoinTransaction { id, kind, sender: PlatformUserSummary, receiver: PlatformUserSummary|null, coins: integer, fiatValue: Money, platformFee: Money|null, platformFeeBasisPoints: integer|null, context, paymentProvider: string|null, status, flags: string[], chargebackRisk: "LOW"|"MEDIUM"|"HIGH", createdAt }
-```
-`platformFeeBasisPoints` is read from revenue rules at transaction time (coin transfers 2 500 = 25%; gifts use 10 000 − creator gift share).
+### POST /api/v1/admin/withdrawals/{withdrawalId}/review
+`payouts:approve`, step-up for every decision, `Idempotency-Key`. Body `{ decision: "approve"|"hold"|"reject", reason }`; `reason` is 3–300 characters for hold and reject, optional for approve. Approve and reject work from `pending_review` or `on_hold`; hold works from `pending_review` or `queued`. Approve → `queued`, hold → `on_hold`, reject → `failed` with the money returned to the available balance. `409 WITHDRAWAL_NOT_CHANGEABLE` otherwise. Response: the detail above.
 
-### GET /api/v1/admin/coins/:transactionId
-Permission: `coins:review`. Response: `CoinTransaction & { history: AuditLogEntry[] }`.
+## Coins (wallet module)
 
-### POST /api/v1/admin/coins/:transactionId/mark-reviewed
-Permission: `coins:review`. Body `{ reason?: string }`. Only from `PENDING_REVIEW` (`409 COIN_TRANSACTION_NOT_PENDING`). Audit `coins.reviewed`.
+### GET /api/v1/admin/coins/transactions
+`coins:review`. Query: `kind` (`purchase|transfer`; live gifts are transfers), `status` (`not_required|pending_review|reviewed|reversed`), `search`, `cursor`, `limit`. Response `{ data: CoinTransaction[], nextCursor, counts }`.
+`CoinTransaction = { id, kind, reference|null, sender: PartySummary, receiver: PartySummary|null, coins, feeCoins|null, platformFeeBasisPoints|null, fiatValue: Money|null, paymentProvider|null, channel|null (web_checkout|store_iap), transactionStatus, reviewStatus, reviewFlags: string[] (coin rules hit), flags: string[] (open wallet risk flags on the people involved), chargebackRisk (low|medium|high), clawbackShortfallCoins, createdAt, reviewedAt, reviewedByStaffId, reviewNote }`.
 
-### POST /api/v1/admin/coins/:transactionId/reverse
-Permission: `coins:review`. **Step-up required. Idempotency-Key required.** Body `{ reason }`. Purchases are refunded to the payment method (debit coin_float, credit provider_clearing); transfers and gifts take coins back from the receiver and return the platform fee (debit coin_fees, credit coin_float). A negative receiver balance pauses their withdrawals. Errors `409 COIN_TRANSACTION_REVERSED`. Audit `coins.reversed`.
+### GET /api/v1/admin/coins/transactions/{transactionId}
+`CoinTransaction & { history: { action, occurredAt, staffId|null, note|null }[] }`.
 
-## Ledger
+### POST /api/v1/admin/coins/transactions/{transactionId}/mark-reviewed
+`coins:review`. Body `{ reason }` (0–1000). Response: the detail.
 
-Read-only double-entry ledger. Permission for all: `ledger:read`.
+### POST /api/v1/admin/coins/transactions/{transactionId}/reverse
+`coins:review`, step-up, `Idempotency-Key`. Body `{ reason }` (3–1000). Response: the detail.
+
+## Ledger (ledger module, read-only)
+
+`ledger:read` for all. Currencies are ISO 4217 codes or `COIN`.
 
 ### GET /api/v1/admin/ledger/currencies
-Response: `{ items: string[] }` — currencies that have ledger accounts.
+`{ data: string[], nextCursor: null }`.
 
-### GET /api/v1/admin/ledger/accounts?currency=NGN
-`currency` required (`400 VALIDATION_FAILED`). Response: `{ items: LedgerAccount[] }`
-```ts
-LedgerAccount { id (e.g. "escrow_holding:NGN", "user_wallet:usr_0001:NGN", "provider_clearing:NGN", "platform_commission:NGN", "coin_float:NGN", "coin_fees:NGN"), name, kind: "ASSET"|"LIABILITY"|"REVENUE"|"EXPENSE", currency, balance: Money, ownerUserId: string|null, entryCount }
-```
-Balance is debit-normal for ASSET/EXPENSE and credit-normal for LIABILITY/REVENUE.
+### GET /api/v1/admin/ledger/accounts?currency=&ownerId=&cursor=&limit=
+`{ data: { code, name, kind (asset|liability|equity|revenue|expense), currency, balance, ownerType|null, ownerId|null, entryCount }[], nextCursor }`, ordered by code.
 
-### GET /api/v1/admin/ledger/entries?currency=NGN&accountId=&referenceId=&page=
-Response: `PagedList<JournalEntry>`, newest first.
-```ts
-JournalEntry { id, occurredAt, description, currency, reference: { type: "ORDER"|"PAYOUT"|"DISPUTE"|"REFUND"|"COIN", id, label }, legs: { accountId, accountName, direction: "DEBIT"|"CREDIT", amount: Money }[], totalDebits: Money, totalCredits: Money, isBalanced: boolean }
-```
-Every journal is single-currency; `isBalanced` must always be true — the UI flags any journal where it is not.
+### GET /api/v1/admin/ledger/journal-entries?currency=&accountCode=&reference=&cursor=&limit=
+Newest first. `{ data: { id, reference, externalReference|null, kind, description, reversesEntryId|null, postedAt, legs: { accountCode, accountName, direction (debit|credit), amount }[], totalDebits, totalCredits, isBalanced }[], nextCursor }`. Totals cover legs in the requested currency.
+
 # Configuration
 
 Every configuration object is a **versioned record**. Writes never overwrite: each save appends a new immutable version.
@@ -630,9 +572,9 @@ interface PlansConfiguration {
   plans: VerificationPlan[];
 }
 interface VerificationPlan {
-  planKey: "BLUE_ESSENTIAL" | "BLUE_VERIFIED" | "BLUE_PREMIUM" | "GOLD_PRO" | "GOLD_PREMIUM" | "BLACK_OFFICIAL";
+  planKey: "BLUE_ESSENTIAL" | "BLUE_VERIFIED" | "BLUE_PREMIUM" | "GOLD_ONLY" | "GOLD_PRO" | "GOLD_BUSINESS" | "BLACK_OFFICIAL";
   color: "BLUE" | "GOLD" | "BLACK";               // read-only
-  tier: "ESSENTIAL" | "VERIFIED" | "PREMIUM" | "PRO" | "OFFICIAL"; // read-only
+  tier: "ESSENTIAL" | "VERIFIED" | "PREMIUM" | "ONLY" | "PRO" | "BUSINESS" | "OFFICIAL"; // read-only
   displayName: string;                           // 2–40
   badgeVisible: boolean;                         // read-only; ESSENTIAL is always false
   isPurchasable: boolean;                        // BLACK is always false
@@ -645,6 +587,21 @@ interface VerificationPlan {
 Server rules: plans cannot be added or removed via this endpoint (all current `planKey`s must be present); a purchasable plan needs ≥1 priced currency; each price row needs monthly or yearly; `BLACK_OFFICIAL` with `isPurchasable: true` → `400 OFFICIAL_NOT_PURCHASABLE` (Black is granted only through the manual official process). Price changes apply to new subscriptions and renewals; the API must never reprice an active billing period.
 
 Audit actions: `config.document.updated`, `config.document.restored` (target `{ type: "configDocument", id: "plans" }`).
+
+## App store fees
+
+`GET/PUT /api/v1/admin/config/appStore.fees` (read: any config permission; write: `config:revenue`, step-up). Public setting read by the subscriptions module to take the store's cut before revenue shares.
+
+```ts
+interface AppStoreFeeSettings {
+  appleFeeBps: number;                // 0–5000, default 3000
+  appleSmallBusinessProgram: boolean; // when true, iOS purchases use appleSmallBusinessFeeBps
+  appleSmallBusinessFeeBps: number;   // 0–5000, default 1500
+  googleSubscriptionFeeBps: number;   // 0–5000, default 1500
+}
+```
+
+Unknown keys and values outside 0–5000 → `400 VALIDATION_FAILED`. The console edits this under Configuration → Regional pricing → App store fees.
 
 ## Revenue rules
 
@@ -900,12 +857,12 @@ Permission: `users:moderate`. **Every write needs step-up** (`X-Step-Up-Token`) 
 
 | Method | Path | Body / query | Response | Audit action |
 |---|---|---|---|---|
-| GET | `/api/v1/admin/suspensions/cases` | `status=OPEN|DECIDED|ALL|<status>`, `source?`, `search?`, `page` | `PagedList<SuspensionCaseSummary>` by risk score | — |
+| GET | `/api/v1/admin/suspensions/cases` | `status=OPEN|DECIDED|ALL|<status>`, `source?`, `search?`, `cursor` | `PagedList<SuspensionCaseSummary>` by risk score | — |
 | GET | `/api/v1/admin/suspensions/cases/{caseId}` | — | `SuspensionCaseDetail` | — |
 | POST | `/api/v1/admin/suspensions/cases/{caseId}/approve` | `{ reasonCode, reason (note, 5–1000) }` | `SuspensionCaseDetail`; user becomes SUSPENDED, deletion clock starts | `suspension.approved` |
 | POST | `/api/v1/admin/suspensions/cases/{caseId}/dismiss` | `{ reason }` | `SuspensionCaseDetail` | `suspension.dismissed` |
 | POST | `/api/v1/admin/suspensions/cases/{caseId}/escalate` | `{ reason }` | `SuspensionCaseDetail` (stays open, flagged) | `suspension.escalated` |
-| GET | `/api/v1/admin/suspensions/accounts` | `appeal=PENDING?` (appeal queue), `search?`, `page` | `PagedList<SuspendedAccount>` soonest deletion first | — |
+| GET | `/api/v1/admin/suspensions/accounts` | `appeal=PENDING?` (appeal queue), `search?`, `cursor` | `PagedList<SuspendedAccount>` soonest deletion first | — |
 | POST | `/api/v1/admin/suspensions/accounts/{caseId}/reinstate` | `{ reason }` | `{ reinstated: true }` | `suspension.reinstated` |
 | POST | `/api/v1/admin/suspensions/accounts/{caseId}/appeal/decide` | `{ outcome: "UPHELD"|"OVERTURNED", reason }` | `{ outcome }`; OVERTURNED reinstates | `suspension.appeal_upheld` / `suspension.appeal_overturned` |
 
@@ -931,9 +888,9 @@ Errors: `403 STEP_UP_REQUIRED`, `403 FORBIDDEN` (missing the action's permission
 
 | Method | Path | Body / query | Response | Audit action |
 |---|---|---|---|---|
-| GET | `/api/v1/admin/accounts/created` | `page` | `PagedList<AdminCreatedAccount>` `{ id, user, profileType, createdAt, createdByName, reason, mustChangePassword, bypassedReservedEntries[] }` | — |
+| GET | `/api/v1/admin/accounts/created` | `cursor` | `PagedList<AdminCreatedAccount>` `{ id, user, profileType, createdAt, createdByName, reason, mustChangePassword, bypassedReservedEntries[] }` | — |
 | POST | `/api/v1/admin/accounts` | `{ username, displayName, email, password (≥12, mixed), country, profileType, reason }` | `201 AdminCreatedAccount`. Skips the reserved-name check (matches are recorded), forces a password change at first login, never logs the password. | `account.created_by_admin` |
-| GET | `/api/v1/admin/checkmark-grants` | `status=ACTIVE|REVOKED|ALL`, `page` | `PagedList<CheckmarkGrant>` `{ id, user, color, reason, grantedByName, grantedAt, revokedAt, revokedByName, revokedReason }` | — |
+| GET | `/api/v1/admin/checkmark-grants` | `status=ACTIVE|REVOKED|ALL`, `cursor` | `PagedList<CheckmarkGrant>` `{ id, user, color, reason, grantedByName, grantedAt, revokedAt, revokedByName, revokedReason }` | — |
 | POST | `/api/v1/admin/checkmark-grants` | `{ username, color, reason }` | `201 CheckmarkGrant` | `checkmark.lifetime_granted` |
 | POST | `/api/v1/admin/checkmark-grants/{grantId}/revoke` | `{ reason }` | `CheckmarkGrant`; the earlier verification is restored | `checkmark.lifetime_revoked` |
 
@@ -945,7 +902,7 @@ Permission: `verification:review` (opening a file needs `verification:documents`
 
 | Method | Path | Body / query | Response | Audit action |
 |---|---|---|---|---|
-| GET | `/api/v1/admin/business-documents` | `status=PENDING|REJECTED|APPROVED|ALL`, `search?`, `page` | `PagedList<BusinessDocumentSubmission>` | — |
+| GET | `/api/v1/admin/business-documents` | `status=PENDING|REJECTED|APPROVED|ALL`, `search?`, `cursor` | `PagedList<BusinessDocumentSubmission>` | — |
 | GET | `/api/v1/admin/business-documents/{id}/documents/{documentId}/access` | — | `{ documentId, fileName, viewUrl (2 min), expiresAt, watermarkText }` | `business_document.viewed` |
 | POST | `.../documents/{documentId}/approve` | `{ reason }` | `BusinessDocumentSubmission` | `business_document.approved` |
 | POST | `.../documents/{documentId}/reject` | `{ reason }` (shown to the seller) | `BusinessDocumentSubmission` | `business_document.rejected` |
@@ -958,7 +915,7 @@ Permission: `verification:review` (revoke: `verification:revoke`). Approve, reje
 
 | Method | Path | Body / query | Response | Audit action |
 |---|---|---|---|---|
-| GET | `/api/v1/admin/black-applications` | `status=OPEN|REVERIFY|ALL|<status>`, `search?`, `page` | `PagedList<BlackApplication>` | — |
+| GET | `/api/v1/admin/black-applications` | `status=OPEN|REVERIFY|ALL|<status>`, `search?`, `cursor` | `PagedList<BlackApplication>` | — |
 | POST | `/api/v1/admin/black-applications/{id}/checklist` | `{ key, isVerified, note? }` | `BlackApplication` | `black_application.checklist_updated` |
 | POST | `/api/v1/admin/black-applications/{id}/approve` | `{ reason }` | `BlackApplication` | `black_application.first_approval` / `.approved` |
 | POST | `/api/v1/admin/black-applications/{id}/reject` | `{ reason }` | `BlackApplication` | `black_application.rejected` |
@@ -1098,7 +1055,7 @@ Permissions: `chat-reports:review` (queue, detail, dismiss, remove group), `chat
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/admin/chat-reports` | Query `status` (OPEN default, ALL), `targetType`, `reason`, `priority`, `search`, `page`. Child-safety first, then priority, then SLA |
+| GET | `/admin/chat-reports` | Query `status` (OPEN default, ALL), `targetType`, `reason`, `priority`, `search`, `cursor`. Child-safety first, then priority, then SLA |
 | GET | `/admin/chat-reports/:reportId` | Detail with `transcript[]` (only reporter-submitted messages, `isReportedUser`), `evidenceHash`, `isEvidenceHashVerified`, `evidenceRetainedUntil`, `spamScore { score, signals[], source }`, `decision`, `reporterOutcome`, `history` |
 | POST | `/admin/chat-reports/:reportId/actions` | `{ action: DISMISS \| WARN_USER \| RESTRICT_USER \| SUSPEND_USER \| BAN_USER \| REMOVE_GROUP \| ESCALATE_LEGAL, reason, durationDays? }`. Per-action permission, step-up for BAN_USER, REMOVE_GROUP and ESCALATE_LEGAL. 409 `REPORT_ALREADY_DECIDED`, `NO_REPORTED_USER`, `NOT_A_GROUP_REPORT`. Audited on the report and the user. Reporter is notified "We took action" or "No violation found" (not on escalation) |
 | GET | `/admin/chat-reports/retention` | `{ retentionDays, legalHoldDays, label: "LEGAL REVIEW" }` |
