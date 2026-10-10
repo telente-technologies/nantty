@@ -6,32 +6,33 @@ import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import {
-  BellRinging24Icon,
-  BookmarkSimple24Icon,
+  Bell24Icon,
   BuildingStore20Icon,
   CaretRight24Icon,
   CreditCard24Icon,
+  Document24Icon,
+  EyeSlash24Icon,
   Frame83032Icon,
   Headset24Icon,
+  Info24Icon,
   MagnifyingGlass24Icon,
-  Question24Icon,
+  MapPin24Icon,
   SealCheck20Icon,
-  Shield24Icon,
-  SquaresFour24Icon,
+  ShieldCheck24Icon,
+  ShieldStar24Icon,
+  SlidersHorizontal24Icon,
   Tag24Icon,
-  Truck24Icon,
+  TrademarkRegistered24Icon,
   UserCircle24Icon,
-  VideoCamera24Icon,
 } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { HeaderAction } from "@/components/ui/header";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { useCreatorEntry } from "@/hooks/useCreatorStatus.hook";
 import { useMyAccountHealth } from "@/components/accountHealth/accountHealth.hook";
-import { describeAccountStanding } from "@/services/accountHealth.service";
-import { authService } from "@/services/auth.service";
+import { describeAccountStanding } from "@/services/account/accountHealth.service";
+import { authService } from "@/services/auth/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { spacing } from "@/constants/spacing.constant";
@@ -41,7 +42,6 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { data: profile } = useMyProfileQuery();
-  const creatorEntry = useCreatorEntry();
   const { data: accountHealth } = useMyAccountHealth();
   const accountStatusTrailing = accountHealth ? { text: describeAccountStanding(accountHealth.status) } : undefined;
   const refreshToken = useAuthStore((s) => s.refreshToken);
@@ -97,37 +97,30 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
       <SettingsGroup>
         <SettingsRow label="Account" icon={<UserCircle24Icon color={colors.text} />} onPress={() => navigation.navigate("SettingsAccount")} />
         <SettingsRow label="Account status" icon={<SealCheck20Icon size={24} color={colors.text} />} trailing={accountStatusTrailing} onPress={() => navigation.navigate("AccountStatus")} />
-        <SettingsRow label="Security & Password" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsSecurity")} />
-        <SettingsRow label="Privacy" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsPrivacy")} />
-        <SettingsRow label="Privacy & Data" icon={<Shield24Icon />} onPress={() => navigation.navigate("SettingsPrivacyData")} />
-        <SettingsRow label="Notification" icon={<BellRinging24Icon />} onPress={() => navigation.navigate("SettingsNotifications")} />
+        <SettingsRow label="Security & Password" icon={<ShieldStar24Icon />} onPress={() => navigation.navigate("SettingsSecurity")} />
+        <SettingsRow label="Privacy" icon={<EyeSlash24Icon />} onPress={() => navigation.navigate("SettingsPrivacy")} />
+        <SettingsRow label="Privacy & Data" icon={<ShieldCheck24Icon />} onPress={() => navigation.navigate("SettingsPrivacyData")} />
+        <SettingsRow label="Notification" icon={<Bell24Icon />} onPress={() => navigation.navigate("SettingsNotifications")} />
       </SettingsGroup>
 
       <SettingsGroup>
-        <SettingsRow label="App Preference" icon={<SquaresFour24Icon />} onPress={() => navigation.navigate("SettingsAppPreference")} />
+        <SettingsRow label="App Preference" icon={<SlidersHorizontal24Icon />} onPress={() => navigation.navigate("SettingsAppPreference")} />
         <SettingsRow label="Payment Methods" icon={<CreditCard24Icon />} onPress={() => navigation.navigate("SettingsPaymentMethods")} />
-        <SettingsRow label="Shipping Address" icon={<Truck24Icon />} onPress={() => navigation.navigate("ShippingAddresses")} />
-        <SettingsRow label="Saved" icon={<BookmarkSimple24Icon />} onPress={() => navigation.navigate("Saved")} />
+        <SettingsRow label="Shipping Address" icon={<MapPin24Icon />} onPress={() => navigation.navigate("ShippingAddresses")} />
       </SettingsGroup>
 
       <SettingsGroup>
-        {profile?.isSeller ? (
-          <SettingsRow label="Seller Dashboard" icon={<Tag24Icon />} onPress={() => navigation.navigate("SellerDashboard")} />
-        ) : (
+        {profile?.isSeller ? null : (
           <SettingsRow label="Start selling on Zudomart" icon={<Tag24Icon />} trailing={{ text: "Free to apply" }} onPress={() => navigation.navigate("SellerApplication")} />
         )}
-        {profile?.isSeller ? <SettingsRow label="Business documents" icon={<Tag24Icon />} onPress={() => navigation.navigate("BusinessDocuments")} /> : null}
-        <SettingsRow label={creatorEntry.label} icon={<VideoCamera24Icon />} onPress={() => {
-          if (!creatorEntry.isLoading) navigation.navigate(creatorEntry.route);
-        }} />
-        <SettingsRow label="Verification" icon={<SealCheck20Icon size={24} color={colors.text} />} onPress={() => navigation.navigate("Verification")} />
+        {profile?.isSeller ? <SettingsRow label="Business documents" icon={<Document24Icon />} onPress={() => navigation.navigate("BusinessDocuments")} /> : null}
         <SettingsRow label="Create business profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBusinessProfile")} />
-        <SettingsRow label="Create a brand profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBrand")} />
+        <SettingsRow label="Create a brand profile" icon={<TrademarkRegistered24Icon />} onPress={() => navigation.navigate("CreateBrand")} />
       </SettingsGroup>
 
       <SettingsGroup>
         <SettingsRow label="Support" icon={<Headset24Icon />} onPress={() => navigation.navigate("SettingsSupport")} />
-        <SettingsRow label="About" icon={<Question24Icon />} onPress={() => navigation.navigate("SettingsAbout")} />
+        <SettingsRow label="About" icon={<Info24Icon />} onPress={() => navigation.navigate("SettingsAbout")} />
       </SettingsGroup>
 
       <Pressable accessibilityRole="button" onPress={confirmLogOut} style={styles.logOut}>

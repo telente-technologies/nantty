@@ -7,12 +7,13 @@ import { AddressGeoFields } from "@/components/settings/addressGeoFields";
 import { useGeoCountries } from "@/components/settings/geoQueries.hook";
 import { SettingsCenteredAction, SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
+import { PushPin24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { usersService } from "@/services/users.service";
+import { usersService } from "@/services/account/users.service";
 import type { ShippingAddressInput } from "@/types/account.type";
 
 const EMPTY_ADDRESS: ShippingAddressInput = {
@@ -65,6 +66,7 @@ export function AddressFormScreen({ navigation, route }: MainScreenProps<"Addres
       <SettingsGroup>
         <SettingsRow
           label="Use as default address"
+          icon={<PushPin24Icon />}
           trailing={{ text: form.isDefault ? "Yes" : "No", color: form.isDefault ? colors.primary : colors.textSubtle }}
           onPress={() => setForm((f) => ({ ...f, isDefault: !f.isDefault }))}
         />

@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { InfoSheet } from "@/components/settings/infoSheet";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
+import { Bank24Icon, CreditCard24Icon, Crown24Icon } from "@/components/icons";
 import type { SavedCardDisplay } from "@/types/commerce.type";
 import { readSavedCardDisplay, removeSavedCardFromThisDevice } from "@/utils/savedCard.util";
 import type { MainScreenProps } from "@/navigation/navigation.types";
@@ -24,10 +25,9 @@ export function SettingsPaymentMethodsScreen({ navigation }: MainScreenProps<"Se
   return (
     <SettingsPage title="Payment Methods">
       <SettingsGroup>
-        <SettingsRow label="Card" trailing={savedCard ? { text: `${savedCard.brand} ${savedCard.last4}` } : "chevron"} onPress={() => setCardInfoVisible(true)} />
-        <SettingsRow label="Wallets" onPress={() => navigation.navigate("Wallet")} />
-        <SettingsRow label="Subscriptions" onPress={() => navigation.navigate("MySubscriptions")} />
-        <SettingsRow label="Payout for Sellers" onPress={() => navigation.navigate("PayoutAccounts")} />
+        <SettingsRow label="Card" icon={<CreditCard24Icon />} trailing={savedCard ? { text: `${savedCard.brand} ${savedCard.last4}` } : "chevron"} onPress={() => setCardInfoVisible(true)} />
+        <SettingsRow label="Subscriptions" icon={<Crown24Icon />} onPress={() => navigation.navigate("MySubscriptions")} />
+        <SettingsRow label="Payout for Sellers" icon={<Bank24Icon />} onPress={() => navigation.navigate("PayoutAccounts")} />
       </SettingsGroup>
       <InfoSheet
         visible={cardInfoVisible}

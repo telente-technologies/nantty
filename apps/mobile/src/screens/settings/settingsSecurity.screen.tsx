@@ -4,6 +4,7 @@ import { Linking } from "react-native";
 import { InfoSheet } from "@/components/settings/infoSheet";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
+import { DownloadSimple24Icon, Fingerprint24Icon, LockKey24Icon, Prohibit24Icon } from "@/components/icons";
 import { useAccountSettingsQuery, useUpdateAccountSettingsMutation } from "@/components/settings/settingsQueries.hook";
 import { buildContactMailtoUrl, ZUDOMART_EMAIL_ADDRESSES } from "@/constants/contactEmails.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
@@ -17,14 +18,15 @@ export function SettingsSecurityScreen({ navigation }: MainScreenProps<"Settings
   return (
     <SettingsPage title="Security">
       <SettingsGroup>
-        <SettingsRow label="Password" onPress={() => navigation.navigate("ChangePassword")} />
-        <SettingsRow label="Blocked users" onPress={() => navigation.navigate("BlockedUsers")} />
+        <SettingsRow label="Password" icon={<LockKey24Icon />} onPress={() => navigation.navigate("ChangePassword")} />
+        <SettingsRow label="Blocked users" icon={<Prohibit24Icon />} onPress={() => navigation.navigate("BlockedUsers")} />
         <SettingsRow
           label="Two-factor authentication"
+          icon={<Fingerprint24Icon />}
           trailing={settings ? { text: twoFactorEnabled ? "ON" : "OFF", weight: 400 } : "chevron"}
           onPress={settings ? () => setOpenSheet("twoFactor") : undefined}
         />
-        <SettingsRow label="Data" onPress={() => setOpenSheet("data")} />
+        <SettingsRow label="Data" icon={<DownloadSimple24Icon />} onPress={() => setOpenSheet("data")} />
       </SettingsGroup>
       <InfoSheet
         visible={openSheet === "twoFactor"}

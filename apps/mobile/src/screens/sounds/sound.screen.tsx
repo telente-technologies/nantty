@@ -73,7 +73,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
                 sound={soundData}
                 onPressOwner={() => openUserProfileOrMyProfile(navigation, soundData.owner.id, signedInUserId)}
                 onToggleSaved={() => requireAuthThen(() => toggleSavedSound.mutate(!!soundData.savedByViewer), undefined, "save sounds")}
-                onUseSound={() => requireAuthThen(() => navigation.navigate("CreatePost", { mode: "post", soundId: soundData.id }), undefined, "create clips")}
+                onUseSound={() => requireAuthThen(() => navigation.navigate("CreatePost", { mode: "clip", soundId: soundData.id }), undefined, "create clips")}
               />
               {isViewerTheOwner ? (
                 <SoundOwnerControls

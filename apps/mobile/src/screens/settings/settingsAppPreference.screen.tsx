@@ -7,8 +7,9 @@ import { CountryPickerSheet } from "@/components/settings/countryPickerSheet";
 import { describeThemePreference, ThemePreferenceSheet } from "@/components/settings/themePreferenceSheet";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
-import { localeService } from "@/services/locale.service";
-import { usersService } from "@/services/users.service";
+import { GlobeHemisphereWest24Icon, Palette24Icon, PersonArmsSpread24Icon, Translate24Icon } from "@/components/icons";
+import { localeService } from "@/services/geo/locale.service";
+import { usersService } from "@/services/account/users.service";
 import { useLocaleStore } from "@/store/locale.store";
 import { useThemePreferenceStore, type ThemePreference } from "@/store/themePreference.store";
 import { useTheme } from "@/theme";
@@ -48,10 +49,10 @@ export function SettingsAppPreferenceScreen() {
   return (
     <SettingsPage title="App Preference">
       <SettingsGroup>
-        <SettingsRow label="Theme" trailing={{ text: describeThemePreference(themePreference) }} onPress={() => setThemeSheetVisible(true)} />
-        <SettingsRow label="Language" trailing={{ text: "English", color: colors.textMuted, weight: 400 }} />
-        <SettingsRow label="Country & Currency" trailing={{ text: currencyLabel }} onPress={() => setPickerVisible(true)} />
-        <SettingsRow label="Accessibility" onPress={() => Linking.openSettings()} />
+        <SettingsRow label="Theme" icon={<Palette24Icon />} trailing={{ text: describeThemePreference(themePreference) }} onPress={() => setThemeSheetVisible(true)} />
+        <SettingsRow label="Language" icon={<Translate24Icon />} trailing={{ text: "English", color: colors.textMuted, weight: 400 }} />
+        <SettingsRow label="Country & Currency" icon={<GlobeHemisphereWest24Icon />} trailing={{ text: currencyLabel }} onPress={() => setPickerVisible(true)} />
+        <SettingsRow label="Accessibility" icon={<PersonArmsSpread24Icon />} onPress={() => Linking.openSettings()} />
       </SettingsGroup>
       <ThemePreferenceSheet
         visible={themeSheetVisible}

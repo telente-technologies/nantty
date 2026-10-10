@@ -4,10 +4,11 @@ import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
 import { PhoneNumberSheet } from "@/components/settings/phoneNumberSheet";
 import { SettingsCenteredAction, SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
+import { At24Icon, EnvelopeSimple24Icon, Phone24Icon, UserMinus24Icon } from "@/components/icons";
 import { useAccountSettingsQuery, useUpdateAccountSettingsMutation } from "@/components/settings/settingsQueries.hook";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { usersService } from "@/services/users.service";
+import { usersService } from "@/services/account/users.service";
 import { useAuthStore } from "@/store/auth.store";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
@@ -38,15 +39,16 @@ export function SettingsAccountScreen({ navigation }: MainScreenProps<"SettingsA
   return (
     <SettingsPage title="Account">
       <SettingsGroup>
-        <SettingsRow label="Username" trailing={{ text: profile ? `@${profile.username}` : "", color: colors.textMuted, weight: 400 }} onPress={() => navigation.navigate("SettingsUsername")} />
-        <SettingsRow label="Email" trailing={{ text: settings?.email ?? "", color: colors.textMuted, weight: 400 }} />
+        <SettingsRow label="Username" icon={<At24Icon />} trailing={{ text: profile ? `@${profile.username}` : "", color: colors.textMuted, weight: 400 }} onPress={() => navigation.navigate("SettingsUsername")} />
+        <SettingsRow label="Email" icon={<EnvelopeSimple24Icon />} trailing={{ text: settings?.email ?? "", color: colors.textMuted, weight: 400 }} />
         <SettingsRow
           label="Phone number"
+          icon={<Phone24Icon />}
           trailing={{ text: settings?.phone ?? "Set Up" }}
           onPress={() => setPhoneSheetVisible(true)}
         />
       </SettingsGroup>
-      <SettingsCenteredAction label="Deactivate account" onPress={confirmAndDeactivateAccount} />
+      <SettingsCenteredAction label="Deactivate account" icon={<UserMinus24Icon size={20} color={colors.error} />} onPress={confirmAndDeactivateAccount} />
       <PhoneNumberSheet
         key={settings?.phone ?? "none"}
         visible={phoneSheetVisible}

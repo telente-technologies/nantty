@@ -10,6 +10,7 @@ import { DeleteAccountSheet } from "@/components/settings/deleteAccountSheet";
 import { useConsentsQuery, useUpdateConsentMutation } from "@/components/settings/privacyQueries.hook";
 import { SettingsCenteredAction, SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
+import { Cookie24Icon, EyeSlash24Icon, FileLock24Icon, IdentificationCard24Icon, Scales24Icon, Trash24Icon } from "@/components/icons";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Text } from "@/components/ui/text";
@@ -34,8 +35,8 @@ export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"Setti
   return (
     <SettingsPage title="Privacy & Data" gap={32}>
       <SettingsGroup>
-        <SettingsRow label="Personal information" onPress={() => navigation.navigate("SettingsAccount")} />
-        <SettingsRow label="Private profile" onPress={() => navigation.navigate("SettingsPrivacy")} accessibilityHint="Choose who can see your profile" />
+        <SettingsRow label="Personal information" icon={<IdentificationCard24Icon />} onPress={() => navigation.navigate("SettingsAccount")} />
+        <SettingsRow label="Private profile" icon={<EyeSlash24Icon />} onPress={() => navigation.navigate("SettingsPrivacy")} accessibilityHint="Choose who can see your profile" />
       </SettingsGroup>
 
       <View style={styles.block}>
@@ -62,12 +63,12 @@ export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"Setti
       <DataExportSection />
 
       <SettingsGroup>
-        <SettingsRow label="Privacy Policy" trailing="external" onPress={() => openTrustedWebPage(legalLinks.privacyPolicy, inAppBrowserColorsFromTheme(colors))} />
-        <SettingsRow label="Cookie Policy" trailing="external" onPress={() => openTrustedWebPage(legalLinks.cookiePolicy, inAppBrowserColorsFromTheme(colors))} />
-        <SettingsRow label="Terms of Service" trailing="external" onPress={() => openTrustedWebPage(legalLinks.terms, inAppBrowserColorsFromTheme(colors))} />
+        <SettingsRow label="Privacy Policy" icon={<FileLock24Icon />} trailing="external" onPress={() => openTrustedWebPage(legalLinks.privacyPolicy, inAppBrowserColorsFromTheme(colors))} />
+        <SettingsRow label="Cookie Policy" icon={<Cookie24Icon />} trailing="external" onPress={() => openTrustedWebPage(legalLinks.cookiePolicy, inAppBrowserColorsFromTheme(colors))} />
+        <SettingsRow label="Terms of Service" icon={<Scales24Icon />} trailing="external" onPress={() => openTrustedWebPage(legalLinks.terms, inAppBrowserColorsFromTheme(colors))} />
       </SettingsGroup>
 
-      <SettingsCenteredAction label="Delete my account" onPress={() => setDeleteSheetVisible(true)} />
+      <SettingsCenteredAction label="Delete my account" icon={<Trash24Icon size={20} color={colors.error} />} onPress={() => setDeleteSheetVisible(true)} />
       <DeleteAccountSheet visible={deleteSheetVisible} onClose={() => setDeleteSheetVisible(false)} />
     </SettingsPage>
   );

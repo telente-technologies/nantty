@@ -12,7 +12,7 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { usersService } from "@/services/users.service";
+import { usersService } from "@/services/account/users.service";
 import { useAuthStore } from "@/store/auth.store";
 import { BulletLine } from "@/components/ui/bulletLine";
 

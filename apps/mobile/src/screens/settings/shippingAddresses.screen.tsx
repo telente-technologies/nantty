@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { usersService } from "@/services/users.service";
+import { usersService } from "@/services/account/users.service";
 import { ErrorState } from "@/components/ui/errorState";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Skeleton } from "@/components/ui/skeleton";

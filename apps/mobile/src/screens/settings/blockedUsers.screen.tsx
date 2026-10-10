@@ -10,7 +10,7 @@ import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { showToast } from "@/store/toast.store";
 import { useTheme } from "@/theme";
-import { followsService } from "@/services/follows.service";
+import { followsService } from "@/services/social/follows.service";
 import { spacing } from "@/constants/spacing.constant";
 
 const BLOCKED_USERS_QUERY_KEY = ["users", "me", "blocked"] as const;

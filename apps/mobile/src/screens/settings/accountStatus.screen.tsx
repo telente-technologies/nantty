@@ -7,6 +7,7 @@ import { useMyAccountHealth } from "@/components/accountHealth/accountHealth.hoo
 import { CounterNoticeSheet } from "@/components/accountHealth/counterNoticeSheet";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
+import { BookOpenText24Icon } from "@/components/icons";
 import { ErrorState } from "@/components/ui/errorState";
 import { Text } from "@/components/ui/text";
 import type { MainScreenProps } from "@/navigation/navigation.types";
@@ -38,7 +39,7 @@ export function AccountStatusScreen({ navigation }: MainScreenProps<"AccountStat
             {health.warnings.map((warning) => <StrikeItem key={warning.id} strike={warning} onAppeal={() => setAppealTarget(warning)} />)}
           </Section>
           <SettingsGroup>
-            <SettingsRow label="Learn about copyright and strikes" onPress={() => navigation.navigate("HelpArticle", { topicSlug: HELP_TOPIC_SLUG })} />
+            <SettingsRow label="Learn about copyright and strikes" icon={<BookOpenText24Icon />} onPress={() => navigation.navigate("HelpArticle", { topicSlug: HELP_TOPIC_SLUG })} />
           </SettingsGroup>
         </>
       ) : null}

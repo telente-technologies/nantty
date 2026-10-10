@@ -1,11 +1,11 @@
 import { StyleSheet, View } from "react-native";
 
-import { useFollowRequestsQuery } from "@/components/profile/followRequests.hook";
 import { useMyProfileQuery, useSaveProfileDetailsMutation } from "@/components/profile/profileQueries.hook";
 import { DownloadPrivacySection } from "@/components/settings/downloadPrivacySection";
 import { MentionPrivacySection } from "@/components/settings/mentionPrivacySection";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
+import { Funnel24Icon } from "@/components/icons";
 import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -17,7 +17,6 @@ export function SettingsPrivacyScreen({ navigation }: MainScreenProps<"SettingsP
   const { colors } = useTheme();
   const { data: profile } = useMyProfileQuery();
   const saveProfile = useSaveProfileDetailsMutation();
-  const pendingRequests = useFollowRequestsQuery().data?.data.length ?? 0;
   const isPrivate = profile?.isPrivate ?? false;
 
   return (
@@ -32,17 +31,13 @@ export function SettingsPrivacyScreen({ navigation }: MainScreenProps<"SettingsP
           {isPrivate
             ? "Only approved followers can see your posts, followers and following. New followers need your approval."
             : "Anyone can see your posts and follow you."}
+          {" Review follow requests from the menu on your profile."}
         </Text>
       </View>
       <MentionPrivacySection />
       <DownloadPrivacySection />
       <SettingsGroup>
-        <SettingsRow
-          label="Follow requests"
-          trailing={pendingRequests > 0 ? { text: String(pendingRequests), color: colors.primary } : "chevron"}
-          onPress={() => navigation.navigate("FollowRequests")}
-        />
-        <SettingsRow label="Content preferences" trailing="chevron" onPress={() => navigation.navigate("ContentPreferences")} />
+        <SettingsRow label="Content preferences" icon={<Funnel24Icon />} trailing="chevron" onPress={() => navigation.navigate("ContentPreferences")} />
       </SettingsGroup>
     </SettingsPage>
   );

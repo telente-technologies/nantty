@@ -183,7 +183,9 @@ export interface Post {
   readonly replyRestriction?: ReplyRestriction | null;
   readonly sensitive?: SensitiveContent | null;
   readonly isAiGenerated?: boolean;
-  readonly pinned?: boolean;
+  readonly isPinned?: boolean;
+  readonly pinnedAt?: ISODate | null;
+  readonly pinnedCommentId?: ID | null;
   readonly location?: PostLocationTag | null;
   readonly mentions?: readonly MentionEntity[];
   readonly taggedUsers?: readonly TaggedUser[];
@@ -233,7 +235,8 @@ export interface Comment {
   readonly liked: boolean;
   readonly bookmarked: boolean;
   readonly replyCount: number;
-  readonly pinned?: boolean;
+  readonly isPinned?: boolean;
+  readonly pinnedAt?: ISODate | null;
   readonly replyingTo?: { readonly userId: ID; readonly username: string };
   readonly mentions?: readonly MentionEntity[];
   readonly videoReplies?: readonly CommentVideoReply[];
