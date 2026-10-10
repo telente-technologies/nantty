@@ -83,8 +83,22 @@ export async function sendRequestToDashboardServer<Payload>(bffPath: string, opt
   return (await response.json()) as Payload;
 }
 
+const mutationsInFlight = new Map<string, Promise<unknown>>();
+
+function describeMutation(apiPath: string, options: SellerApiRequestOptions): string | null {
+  const method = options.method ?? "GET";
+  if (method === "GET" || options.rawBody !== undefined) return null;
+  return `${method} ${apiPath}${buildQueryString(options.query)} ${options.body === undefined ? "" : JSON.stringify(options.body)}`;
+}
+
 export function sendSellerApiRequest<Payload>(apiPath: string, options: SellerApiRequestOptions = {}): Promise<Payload> {
-  return sendRequestToDashboardServer<Payload>(`/bff${apiPath}`, options);
+  const mutationKey = describeMutation(apiPath, options);
+  if (mutationKey === null) return sendRequestToDashboardServer<Payload>(`/bff${apiPath}`, options);
+  const pending = mutationsInFlight.get(mutationKey);
+  if (pending) return pending as Promise<Payload>;
+  const request = sendRequestToDashboardServer<Payload>(`/bff${apiPath}`, options).finally(() => mutationsInFlight.delete(mutationKey));
+  mutationsInFlight.set(mutationKey, request);
+  return request;
 }
 
 export function createIdempotencyKey(prefix = "idem"): string {
