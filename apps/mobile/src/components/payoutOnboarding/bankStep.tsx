@@ -7,8 +7,8 @@ import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { BankPickerField } from "@/components/wallet/bankPickerSheet";
 import { useTheme } from "@/theme";
-import { banksService } from "@/services/banks.service";
-import { payoutOnboardingService } from "@/services/payoutOnboarding.service";
+import { banksService } from "@/services/commerce/banks.service";
+import { payoutOnboardingService } from "@/services/commerce/payoutOnboarding.service";
 import type { PayoutOnboardingState } from "@/types/payoutOnboarding.type";
 import { payoutNamesMatch } from "@/utils/payoutName.util";
 

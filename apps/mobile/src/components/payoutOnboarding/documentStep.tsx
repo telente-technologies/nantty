@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
-import { payoutOnboardingService } from "@/services/payoutOnboarding.service";
+import { payoutOnboardingService } from "@/services/commerce/payoutOnboarding.service";
 import type { PayoutOnboardingState } from "@/types/payoutOnboarding.type";
 
 import { AccountSetupPanel } from "./accountSetupPanel";

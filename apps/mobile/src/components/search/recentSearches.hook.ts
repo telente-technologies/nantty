@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { searchService } from "@/services/search.service";
+import { searchService } from "@/services/feed/search.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { SearchScopeKey } from "@/types/search.type";
 

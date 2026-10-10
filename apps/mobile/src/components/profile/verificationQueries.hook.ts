@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { verificationService } from "@/services/verification.service";
+import { verificationService } from "@/services/auth/verification.service";
 
 export const verificationQueryKeys = { plans: ["verification", "plans"] as const, suggestions: ["verification", "suggestions"] as const, mine: ["verification", "me"] as const };
 

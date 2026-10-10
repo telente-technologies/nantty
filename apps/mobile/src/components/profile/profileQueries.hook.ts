@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { followsService } from "@/services/follows.service";
-import { usersService, type ProfileDetailsUpdate } from "@/services/users.service";
+import { followsService } from "@/services/social/follows.service";
+import { usersService, type ProfileDetailsUpdate } from "@/services/account/users.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { ConnectionTab } from "@/types/account.type";
 

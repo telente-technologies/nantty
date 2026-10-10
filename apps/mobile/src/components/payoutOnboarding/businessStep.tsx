@@ -7,7 +7,7 @@ import { Chip } from "@/components/ui/chip";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { payoutOnboardingService } from "@/services/payoutOnboarding.service";
+import { payoutOnboardingService } from "@/services/commerce/payoutOnboarding.service";
 import type { PayoutBusinessInput } from "@/types/payoutOnboarding.type";
 
 import { StepFrame } from "./stepFrame";

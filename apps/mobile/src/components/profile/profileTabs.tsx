@@ -37,7 +37,7 @@ export function ProfileTabs({ tabs, activeTab, onChangeTab }: ProfileTabsProps) 
             style={[styles.tab, active && styles.activeTab]}
           >
             {definition.icon()}
-            {active && tab === "posts" ? (
+            {active ? (
               <Text size={14} lineHeight={16.8}>
                 {definition.label}
               </Text>

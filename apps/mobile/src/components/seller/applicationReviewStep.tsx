@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { categoriesService } from "@/services/categories.service";
+import { categoriesService } from "@/services/catalog/categories.service";
 import type { SellerApplicationDraft } from "@/types/account.type";
 
 import { IDENTITY_DOCUMENT_OPTIONS } from "./applicationIdentityStep";

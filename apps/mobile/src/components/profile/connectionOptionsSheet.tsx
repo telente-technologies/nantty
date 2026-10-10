@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import { ChatCircle24Icon, UserCircle24Icon, Warning20Icon } from "@/components/icons";
 import { ActionSheet, type ActionSheetOption } from "@/components/ui/actionSheet";
-import { followsService } from "@/services/follows.service";
+import { followsService } from "@/services/social/follows.service";
 import { showToast } from "@/store/toast.store";
 import type { ConnectionEntry } from "@/types/account.type";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";

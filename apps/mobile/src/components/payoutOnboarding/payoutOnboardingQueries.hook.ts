@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { payoutOnboardingService } from "@/services/payoutOnboarding.service";
+import { payoutOnboardingService } from "@/services/commerce/payoutOnboarding.service";
 
 export const payoutQueryKeys = {
   state: ["payoutOnboarding", "state"] as const,

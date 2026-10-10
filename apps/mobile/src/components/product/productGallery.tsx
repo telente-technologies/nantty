@@ -24,9 +24,13 @@ export function ProductGallery({ images, promo }: ProductGalleryProps) {
       <FlatList
         data={pages}
         horizontal
-        pagingEnabled
         showsHorizontalScrollIndicator={false}
+        snapToInterval={pageWidth}
+        snapToAlignment="start"
+        decelerationRate="fast"
+        disableIntervalMomentum
         keyExtractor={(_, index) => String(index)}
+        getItemLayout={(_, index) => ({ length: pageWidth, offset: pageWidth * index, index })}
         onMomentumScrollEnd={(e) => setActiveImageIndex(Math.round(e.nativeEvent.contentOffset.x / pageWidth))}
         renderItem={({ item, index }) => (
           <Pressable
@@ -71,5 +75,5 @@ const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   },
   indicator: { marginTop: 11, marginLeft: 12, flexDirection: "row", alignItems: "center", gap: 4 },
   bar: { width: 12, height: 4, borderRadius: 21, backgroundColor: colors.placeholder },
-  activeBar: { width: 24, height: 4, borderRadius: 21, backgroundColor: scheme === "dark" ? colors.text : "#0D0D0D" },
+  activeBar: { width: 24, height: 4, borderRadius: 21, backgroundColor: colors.primary },
 }));

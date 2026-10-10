@@ -8,7 +8,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { brandsService } from "@/services/brands.service";
+import { brandsService } from "@/services/sellers/brands.service";
 import type { BrandSummary } from "@/types/brand.type";
 
 export function BrandPickerField({ selectedBrandName, onSelectBrand }: { selectedBrandName: string | null; onSelectBrand: (brand: BrandSummary | null) => void }) {

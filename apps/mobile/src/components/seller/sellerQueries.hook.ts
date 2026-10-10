@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { sellerService } from "@/services/seller.service";
+import { sellerService } from "@/services/sellers/seller.service";
 import type { SellerDashboardPeriod } from "@/types/account.type";
 
 export const sellerQueryKeys = {

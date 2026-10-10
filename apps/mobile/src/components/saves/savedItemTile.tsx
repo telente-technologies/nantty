@@ -17,6 +17,7 @@ const coverImageForPost = (post: Post) => {
 const describeSavedItem = (item: SavedItem) => {
   if (item.type === "product") return `Saved product, ${item.product.name}, ${formatMoneyForDisplay(item.product.price)}`;
   if (item.type === "clip") return `Saved clip by ${item.clip.author.name}`;
+  if (item.type === "comment") return `Saved reply by ${item.comment.author.name}: ${item.comment.text.slice(0, 80)}`;
   return `Saved ${item.type} by ${item.post.author.name}${item.post.text ? `: ${item.post.text.slice(0, 80)}` : ""}`;
 };
 
@@ -29,8 +30,8 @@ export interface SavedItemTileProps {
 export function SavedItemTile({ item, width, onPress }: SavedItemTileProps) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const coverUrl = item.type === "product" ? item.product.imageUrl : item.type === "clip" ? coverImageForPost(item.clip) : coverImageForPost(item.post);
-  const textOnlyPost = item.type === "post" && !coverUrl ? item.post.text : null;
+  const coverUrl = item.type === "product" ? item.product.imageUrl : item.type === "clip" ? coverImageForPost(item.clip) : item.type === "comment" ? null : coverImageForPost(item.post);
+  const textOnlyPost = item.type === "comment" ? `@${item.comment.author.username}: ${item.comment.text}` : item.type === "post" && !coverUrl ? item.post.text : null;
   return (
     <Pressable
       accessibilityRole="button"

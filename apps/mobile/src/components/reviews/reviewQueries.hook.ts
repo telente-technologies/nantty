@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { reviewsService } from "@/services/reviews.service";
+import { reviewsService } from "@/services/catalog/reviews.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useReviewedProductsStore } from "@/store/reviewedProducts.store";
 import { showToast } from "@/store/toast.store";

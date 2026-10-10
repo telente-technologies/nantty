@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View, type DimensionValue } from "react-native";
 import { Like16Icon, Plus16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { adEventsService } from "@/services/adEvents.service";
+import { adEventsService } from "@/services/ads/adEvents.service";
 import type { AdPlacement, ProductSummary } from "@/types";
 import { formatProductPriceForDisplay } from "@/utils/formatMoney.util";
 

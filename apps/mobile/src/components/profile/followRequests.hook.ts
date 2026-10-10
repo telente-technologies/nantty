@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { followsService } from "@/services/follows.service";
+import { followsService } from "@/services/social/follows.service";
 
 export const followRequestsQueryKey = ["users", "me", "follow-requests"] as const;
 

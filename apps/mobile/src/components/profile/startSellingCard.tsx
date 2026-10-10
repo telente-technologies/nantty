@@ -7,7 +7,7 @@ import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { sellerService } from "@/services/seller.service";
+import { sellerService } from "@/services/sellers/seller.service";
 
 export function StartSellingCard({ compact = false }: { compact?: boolean }) {
   const { colors } = useTheme();

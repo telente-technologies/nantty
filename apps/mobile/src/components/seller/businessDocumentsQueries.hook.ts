@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { businessDocumentsService } from "@/services/businessDocuments.service";
+import { businessDocumentsService } from "@/services/moderation/businessDocuments.service";
 import type { BusinessDocumentKind } from "@/types/trust.type";
 
 export const businessDocumentsQueryKey = ["seller", "businessDocuments"] as const;

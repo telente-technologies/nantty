@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { SpeakerHigh24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { soundsService } from "@/services/sounds.service";
+import { soundsService } from "@/services/clips/sounds.service";
 import type { User } from "@/types";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";

@@ -6,7 +6,7 @@ import { Chip } from "@/components/ui/chip";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { categoriesService } from "@/services/categories.service";
+import { categoriesService } from "@/services/catalog/categories.service";
 import type { SellerApplicationDraft } from "@/types/account.type";
 
 import { NIGERIAN_STATES } from "./nigerianStates.constant";

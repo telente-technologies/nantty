@@ -5,7 +5,7 @@ import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { BankPickerField } from "@/components/wallet/bankPickerSheet";
 import { useTheme } from "@/theme";
-import { banksService } from "@/services/banks.service";
+import { banksService } from "@/services/commerce/banks.service";
 
 import type { ApplicationStepProps } from "./applicationStoreAndContactSteps";
 

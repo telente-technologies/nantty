@@ -82,7 +82,7 @@ export function ProfileView(props: ProfileViewProps) {
         </View>
       }
       renderItem={({ item }) => (
-        <PostCard post={item} onPress={() => props.onPressPost(item)} onPressMore={props.onPressPostMore ? () => props.onPressPostMore!(item) : undefined} />
+        <PostCard post={item} showPinnedBadge onPress={() => props.onPressPost(item)} onPressMore={props.onPressPostMore ? () => props.onPressPostMore!(item) : undefined} />
       )}
       ListEmptyComponent={
         props.isLocked ? (

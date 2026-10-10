@@ -10,6 +10,7 @@ export const SAVED_ITEM_FILTERS: readonly { readonly value: SavedItemFilter; rea
   { value: "video", label: "Videos" },
   { value: "clip", label: "Clips" },
   { value: "product", label: "Products" },
+  { value: "comment", label: "Replies" },
 ];
 
 export interface SavedFilterTabsProps {

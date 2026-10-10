@@ -10,7 +10,7 @@ import type { SaveTarget } from "@/types";
 import { formatCompactCount } from "@/utils/formatCount.util";
 import { clipRailStyles } from "@/components/clips/clipRail.constant";
 
-const SAVED_ITEM_NOUN: Record<SaveTarget["type"], string> = { post: "post", video: "video", clip: "clip", product: "product" };
+const SAVED_ITEM_NOUN: Record<SaveTarget["type"], string> = { post: "post", video: "video", clip: "clip", product: "product", comment: "reply" };
 
 export interface SaveToggleButtonProps {
   readonly target: SaveTarget;

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { Package24Icon, Truck24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -30,10 +31,16 @@ export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose,
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Mark as shipped">
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <Truck24Icon size={22} color={colors.textMuted} />
+        </View>
         <Text size={13} lineHeight={17.5} color={colors.textMuted}>
           Add the courier and tracking number so the buyer can follow the parcel. The escrow release countdown starts when it's delivered.
         </Text>
-        <Text size={14} lineHeight={16.8}>Courier</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Package24Icon size={20} color={colors.textMuted} />
+          <Text size={14} lineHeight={16.8}>Courier</Text>
+        </View>
         <View style={styles.chips}>
           {COMMON_COURIERS.map((courier) => (
             <Chip key={courier} kind="topic" label={courier} selected={selectedCourier === courier} onPress={() => setSelectedCourier(courier)} />

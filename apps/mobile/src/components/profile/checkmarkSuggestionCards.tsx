@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useActingProfileType } from "@/hooks/useActingProfileType.hook";
-import { webHandoffService } from "@/services/webHandoff.service";
+import { webHandoffService } from "@/services/core/webHandoff.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import { COLOR_BY_PROFILE_TYPE, MANAGE_ON_THE_WEB_LABEL } from "@/utils/verificationProfile.util";
-import { verificationService } from "@/services/verification.service";
+import { verificationService } from "@/services/auth/verification.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CheckmarkSuggestion } from "@/types/trust.type";
 
