@@ -291,6 +291,7 @@ export class ChatCryptoClient {
 
   public identityChanges(userIds: readonly string[]): Promise<string[]> {
     return this.exclusive(async () => {
+      await this.recipients.resolve(userIds);
       const changed: string[] = [];
       for (const userId of new Set(userIds)) if (hasUnacknowledgedChange(await this.store.loadTrust(userId))) changed.push(userId);
       return changed;

@@ -94,3 +94,16 @@ describe("disappearing messages", () => {
     expect((await alice.client.decryptMessage(message)).status).toBe("failed");
   });
 });
+
+describe("identity changes on the receiving side", () => {
+  it("flags a contact's new device without the viewer having to send first", async () => {
+    let clock = new Date("2026-10-06T10:00:00Z");
+    const world = createWorld(() => clock);
+    const alice = await world.device("alice", "idc-a");
+    await world.device("bob", "idc-b");
+    expect(await alice.client.identityChanges(["bob"])).toEqual([]);
+    await world.device("bob", "idc-b2");
+    clock = new Date(clock.getTime() + 31_000);
+    expect(await alice.client.identityChanges(["bob"])).toEqual(["bob"]);
+  });
+});

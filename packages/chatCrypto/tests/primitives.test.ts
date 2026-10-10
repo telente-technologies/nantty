@@ -80,3 +80,16 @@ describe("primitive vectors", () => {
     expect(() => decodeBase64("Zm9")).toThrow();
   });
 });
+
+describe("sealed local strings", () => {
+  it("round-trips, binds the context and passes legacy plaintext through", async () => {
+    const { openString, sealString } = await import("../src/storage");
+    const random = seededRandom("local");
+    const key = random(32);
+    const sealed = sealString(key, "hello", "msg:1:text", random);
+    expect(sealed.startsWith("z1:")).toBe(true);
+    expect(openString(key, sealed, "msg:1:text")).toBe("hello");
+    expect(() => openString(key, sealed, "msg:2:text")).toThrow();
+    expect(openString(key, "legacy plaintext", "msg:1:text")).toBe("legacy plaintext");
+  });
+});

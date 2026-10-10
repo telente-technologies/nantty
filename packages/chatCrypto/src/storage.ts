@@ -86,3 +86,22 @@ export function deserializeRecord<T>(text: string): T {
     return candidate;
   }) as T;
 }
+
+const sealedStringPrefix = "z1:";
+
+export function sealString(key: Bytes, plaintext: string, associatedData: string, random: RandomSource): string {
+  const nonce = random(aeadNonceLength);
+  const sealed = sealAead(key, nonce, utf8Encode(plaintext), utf8Encode(associatedData));
+  const output = new Uint8Array(nonce.length + sealed.length);
+  output.set(nonce);
+  output.set(sealed, nonce.length);
+  return `${sealedStringPrefix}${encodeBase64(output)}`;
+}
+
+export const isSealedString = (stored: string): boolean => stored.startsWith(sealedStringPrefix);
+
+export function openString(key: Bytes, stored: string, associatedData: string): string {
+  if (!isSealedString(stored)) return stored;
+  const bytes = decodeBase64(stored.slice(sealedStringPrefix.length));
+  return utf8Decode(openAead(key, bytes.slice(0, aeadNonceLength), bytes.slice(aeadNonceLength), utf8Encode(associatedData)));
+}
