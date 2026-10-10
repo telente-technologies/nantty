@@ -25,12 +25,14 @@ import type { PaymentMode } from "@/types";
 import { groupCartItemsByStore } from "@/utils/groupCartItemsByStore.util";
 import { isDirectPaymentStore, toPaymentModeChoices } from "@/utils/paymentMode.util";
 import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
+import { forgetPendingValue, paymentReturnUrl, pendingSubscriptionStorageKey } from "@/utils/paymentReturn.util";
 
 import styles from "./page.module.css";
 import { AppIcon } from "@/components/ui/appIcon";
 
 const channelLabels: Record<PaymentChannel, { readonly name: string; readonly note: string }> = {
   card: { name: "Card", note: "Debit or credit card" },
+  bank: { name: "Bank account", note: "Pay directly from your bank account" },
   bank_transfer: { name: "Bank transfer", note: "Pay from your bank app" },
   ussd: { name: "USSD", note: "Pay with a code from your phone" },
 };
@@ -45,6 +47,7 @@ export default function CheckoutPage() {
   const channelsQuery = useQuery({ queryKey: ["payments", "channels"], queryFn: paymentsService.fetchPaymentChannels, retry: false });
   const [error, setError] = useState<string | null>(null);
   const checkoutKey = useRef(createIdempotencyKey("checkout"));
+  const placeOrderInFlight = useRef(false);
   const [paymentModes, setPaymentModes] = useState<Record<string, PaymentMode>>({});
   const choosePaymentMode = (storeId: string, mode: PaymentMode) => {
     checkoutKey.current = createIdempotencyKey("checkout");
@@ -73,12 +76,13 @@ export default function CheckoutPage() {
       });
       const payment = await sendRequestToWebappServer<PaymentInitialization>("/api/v1/payments/initialize", {
         method: "POST",
-        body: { orderId: result.payableOrderId, provider: "paystack" },
+        body: { orderId: result.payableOrderId, provider: "paystack", returnTo: paymentReturnUrl() },
         idempotencyKey: `${checkoutKey.current}-pay`,
       });
       return payment;
     },
     onSuccess: async (payment) => {
+      forgetPendingValue(pendingSubscriptionStorageKey);
       sessionStorage.setItem(
         "zd_pending_payment",
         JSON.stringify({ orderId: payment.orderId, authorizationUrl: payment.authorizationUrl, reference: payment.reference }),
@@ -165,7 +169,7 @@ export default function CheckoutPage() {
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Payment method</h2>
             <ul className={styles.optionList}>
-              {(channelsQuery.data?.channels ?? []).map((channel) => (
+              {(channelsQuery.data?.channels ?? []).filter((channel) => channel in channelLabels).map((channel) => (
                 <li key={channel}>
                   <div className={styles.optionRow}>
                     <span className={styles.optionText}>
@@ -224,7 +228,11 @@ export default function CheckoutPage() {
               Verify your email to continue. <Link href="/verify-email?next=/checkout">Verify email</Link>
             </p>
           ) : (
-            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId || quoteQuery.isFetching || !hasShippableGroup} onClick={() => placeOrder.mutate()}>
+            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId || quoteQuery.isFetching || !hasShippableGroup} onClick={() => {
+              if (placeOrderInFlight.current) return;
+              placeOrderInFlight.current = true;
+              placeOrder.mutate(undefined, { onSettled: () => { placeOrderInFlight.current = false; } });
+            }}>
               {addressId ? "Pay now" : "Choose an address"}
             </Button>
           )}
