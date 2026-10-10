@@ -30,6 +30,7 @@ goEnv() {
   export ORDERS_MONEY_GRPC_ADDRESS=localhost:9103 AUTH_SESSION_DENYLIST_URL=redis://127.0.0.1:16379
   export LIVE_MONEY_GRPC_ADDRESS=127.0.0.1:9103 ADS_MONEY_GRPC_ADDRESS=127.0.0.1:9103
   export SELLER_PLAN_ENTITLEMENTS_URL=http://127.0.0.1:8103 SELLER_PLAN_ENTITLEMENTS_TOKEN="$MONEY_INTERNAL_API_TOKEN"
+  export CATALOG_ADS_INTERNAL_URL=http://127.0.0.1:8110 ORDERS_ADS_INTERNAL_URL=http://127.0.0.1:8110
   if [ "${SANDBOX_RELAXED_LIMITS:-0}" = 1 ]; then export LEDGER_SELLER_CREDIT_MATURING_INTERVAL=5s; fi
 }
 for spec in goIdentity:8101:go-identity goLive:8102:go-live goMoney:8103:go-money goTrust:8106:go-trust goCommerce:8107:go-commerce goAds:8110:go-ads; do
@@ -61,6 +62,8 @@ docker rm -f zudomart-realtime-smoke >/dev/null 2>&1 || true
 docker run -d --name zudomart-realtime-smoke --network host --user "$(id -u):$(id -g)" \
   -e HOME=/tmp/home -e MIX_HOME=/tmp/home/.mix -e HEX_HOME=/tmp/home/.hex -e MIX_ENV=dev -e PHX_SERVER=true \
   -e REALTIME_HTTP_IP=127.0.0.1 -e PORT=4000 -e LIVE_INTERNAL_API_TOKEN=local-only-live-internal-api-token-0123456 \
+  -e LIVE_INTERNAL_URL=http://127.0.0.1:8102 -e SOCIAL_INTERNAL_URL=http://127.0.0.1:8105 \
+  -e SOCIAL_INTERNAL_TOKEN=local-only-social-internal-token-0123456789 \
   -v "$ROOT/services/elixir/realtime:/work" -w /work elixir:1.19 \
   bash -c 'mkdir -p /tmp/home && mix local.hex --force >/dev/null && mix local.rebar --force >/dev/null && mix deps.get >/dev/null && mix phx.server' >/dev/null
 ( docker logs -f zudomart-realtime-smoke >"$ZLOGS/realtime.log" 2>&1 & echo $! >"$ZLOGS/realtimeLogs.pid" )
