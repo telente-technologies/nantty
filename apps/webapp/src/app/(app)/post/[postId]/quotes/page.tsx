@@ -20,8 +20,8 @@ export default function PostQuotesPage({ params }: { readonly params: Promise<{ 
   const quotesQuery = useInfiniteQuery({
     queryKey: ["feed", "quotes", postId],
     queryFn: ({ pageParam }) => postsService.fetchPostQuotes(postId, pageParam),
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
   const sentinelRef = useInfiniteScrollSentinel({ hasNextPage: quotesQuery.hasNextPage, isFetchingNextPage: quotesQuery.isFetchingNextPage, fetchNextPage: quotesQuery.fetchNextPage });
   const quotes = quotesQuery.data?.pages.flatMap((page) => page.data) ?? [];
