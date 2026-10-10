@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 
 import { AppIcon } from "@/components/ui/appIcon";
 import { authService } from "@/services/auth.service";
-import { WebappRequestError, readErrorMessageForDisplay, sendRequestToWebappServer } from "@/services/clientApi.service";
+import { WebappRequestError, readErrorMessageForDisplay, rememberCsrfTokenForRequests, sendRequestToWebappServer } from "@/services/clientApi.service";
 import type { User } from "@/types";
 
 import { SocialSignInButtons } from "../socialSignIn";
@@ -33,6 +33,7 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const submissionInFlight = useRef(false);
   const [registered, setRegistered] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [customisingFeed, setCustomisingFeed] = useState(false);
@@ -100,6 +101,8 @@ export default function SignUpPage() {
   }
 
   async function resendCode(successMessage: string) {
+    if (submissionInFlight.current) return;
+    submissionInFlight.current = true;
     setError(null);
     try {
       await authService.sendOneTimeCode(destination, "signup");
@@ -107,6 +110,8 @@ export default function SignUpPage() {
       setMessage(successMessage);
     } catch {
       setError("We couldn't resend the code. Please try again.");
+    } finally {
+      submissionInFlight.current = false;
     }
   }
 
@@ -119,7 +124,7 @@ export default function SignUpPage() {
     setConflictSuggestions([]);
     setBusy(true);
     try {
-      await sendRequestToWebappServer<{ user: User }>("/auth/register", {
+      const createdAccount = await sendRequestToWebappServer<{ user: User; csrfToken?: string }>("/auth/register", {
         method: "POST",
         body: {
           email: destination,
@@ -129,6 +134,7 @@ export default function SignUpPage() {
           otpToken,
         },
       });
+      if (createdAccount.csrfToken) rememberCsrfTokenForRequests(createdAccount.csrfToken);
       setRegistered(true);
       setStep("topics");
     } catch (caught) {
@@ -140,6 +146,16 @@ export default function SignUpPage() {
 
   async function handleCreateAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submissionInFlight.current) return;
+    submissionInFlight.current = true;
+    try {
+      await advanceSignUpStep(event);
+    } finally {
+      submissionInFlight.current = false;
+    }
+  }
+
+  async function advanceSignUpStep(event: FormEvent<HTMLFormElement>) {
     setError(null);
     if (step === "contact") {
       await handleContactSubmit(event);
