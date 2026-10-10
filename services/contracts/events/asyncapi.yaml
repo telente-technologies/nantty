@@ -158,6 +158,10 @@ channels:
         $ref: '#/components/messages/usernameChanged'
       usernameWithheld:
         $ref: '#/components/messages/usernameWithheld'
+      businessVerificationApproved:
+        $ref: '#/components/messages/businessVerificationApproved'
+      businessVerificationRevoked:
+        $ref: '#/components/messages/businessVerificationRevoked'
       topicsSelected:
         $ref: '#/components/messages/topicsSelected'
       suspensionAppealSubmitted:
@@ -534,6 +538,8 @@ operations:
       - $ref: '#/channels/domainEvents/messages/profileVisibilityChanged'
       - $ref: '#/channels/domainEvents/messages/usernameChanged'
       - $ref: '#/channels/domainEvents/messages/usernameWithheld'
+      - $ref: '#/channels/domainEvents/messages/businessVerificationApproved'
+      - $ref: '#/channels/domainEvents/messages/businessVerificationRevoked'
       - $ref: '#/channels/domainEvents/messages/topicsSelected'
       - $ref: '#/channels/domainEvents/messages/suspensionAppealSubmitted'
       - $ref: '#/channels/domainEvents/messages/businessProfileCreated'
@@ -963,6 +969,20 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/profile.visibilityChanged.v1.json' } }
+    businessVerificationApproved:
+      name: businessVerification.approved
+      headers: { type: object, properties: { eventType: { const: businessVerification.approved } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/businessVerification.approved.v1.json' } }
+    businessVerificationRevoked:
+      name: businessVerification.revoked
+      headers: { type: object, properties: { eventType: { const: businessVerification.revoked } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/businessVerification.revoked.v1.json' } }
     usernameChanged:
       name: username.changed
       headers: { type: object, properties: { eventType: { const: username.changed } } }
