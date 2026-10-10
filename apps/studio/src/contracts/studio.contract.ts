@@ -25,6 +25,12 @@ const payoutState = c.object({
   bankSummary: c.nullable(c.object({ bankName: c.string(), accountLast4: c.string(), accountName: c.string() })), earningsPendingTransfer: c.nullable(money), pendingWithdrawable: c.nullable(money),
 });
 
+const walletVerification = c.object({ level: c.number(), withdrawalsUnlocked: c.boolean(), waitingForVerification: money, nextStep: c.nullable(c.string(["payout_setup", "bank_validation", "identity_check", "business_verification"])), message: c.nullable(c.string()) });
+const walletSummary = c.object({
+  available: money, pending: money, locked: money, inEscrow: money, payoutRequested: money, negativeBalance: money, nextAvailableAt: c.nullable(c.string()), adCredit: money, earningsPayable: money, debts: money,
+  coins: c.object({ spendable: c.number(), earned: c.number() }), lines: c.array(c.object({ key: c.string(), label: c.string(), description: c.string(), amount: money })), verification: walletVerification,
+});
+
 export const studioContracts: readonly EndpointContract[] = [
   { domain: "auth", method: "POST", path: "/api/v1/auth/login", body: { identifier: "creator@zudomart.com", password: "x" }, schema: session },
   { domain: "auth", method: "POST", path: "/api/v1/auth/google", body: { idToken: "a.b.c", nonce: "raw" }, schema: session },
@@ -46,4 +52,5 @@ export const studioContracts: readonly EndpointContract[] = [
   { domain: "catalog", method: "GET", path: "/api/v1/seller/products?status=active&limit=100", schema: c.page(sellerProduct) },
   { domain: "payments", method: "GET", path: "/api/v1/banks?country=NG", schema: c.page(bank) },
   { domain: "payments", method: "GET", path: "/api/v1/payments/payout-onboarding/me", schema: payoutState },
+  { domain: "payments", method: "GET", path: "/api/v1/wallets/me", schema: walletSummary },
 ];

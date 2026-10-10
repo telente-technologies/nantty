@@ -6,5 +6,6 @@ import { liveSafetyMocks } from "./liveSafety.mock";
 import { payoutOnboardingMocks } from "./payoutOnboarding.mock";
 import { preferencesMocks } from "./preferences.mock";
 import type { MockRoute } from "./registry.mock";
+import { walletMocks } from "./wallet.mock";
 
-export const routes: MockRoute[] = [...authMocks, ...consentsMocks, ...preferencesMocks, ...liveSafetyMocks, ...liveMocks, ...payoutOnboardingMocks, ...accountHealthMocks];
+export const routes: MockRoute[] = [...authMocks, ...consentsMocks, ...preferencesMocks, ...liveSafetyMocks, ...liveMocks, ...payoutOnboardingMocks, ...accountHealthMocks, ...walletMocks];

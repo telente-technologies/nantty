@@ -65,6 +65,8 @@ function guard(record: PayoutOnboardingRecord, step: PayoutOnboardingStep): void
 
 const ok = <T,>(value: T) => value;
 
+export const readMockPayoutOnboardingState = (): PayoutOnboardingState => settle(read());
+
 export const payoutOnboardingMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/banks", () => ({ nextCursor: null, data: [
     { code: "044", name: "Access Bank" }, { code: "058", name: "Guaranty Trust Bank" }, { code: "011", name: "First Bank of Nigeria" }, { code: "033", name: "United Bank for Africa" },
