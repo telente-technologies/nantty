@@ -27,9 +27,9 @@ func NewLedgerModule(ctx context.Context, dependencies servicemodule.Dependencie
 	settings := loaders.ReadMoneyModuleSettingsFromEnvironment(dependencies.Environment, "ledger")
 	interval := dependencies.Environment.ReadDurationOrDefault("LEDGER_INTEGRITY_CHECK_INTERVAL", 24*time.Hour)
 	maturingInterval := dependencies.Environment.ReadDurationOrDefault("LEDGER_SELLER_CREDIT_MATURING_INTERVAL", 5*time.Minute)
-	grpcAddress := dependencies.Environment.ReadStringOrDefault("MONEY_GRPC_ADDRESS", ":9103")
+	grpcAddress := dependencies.Environment.ReadStringOrDefault("MONEY_GRPC_ADDRESS", "127.0.0.1:9103")
 	grpcToken := dependencies.Environment.ReadStringOrDefault("MONEY_INTERNAL_GRPC_TOKEN", "")
-	if settings.IsProduction() && len(grpcToken) < 32 {
+	if settings.IsProduction() && (len(grpcToken) < 32 || grpcToken == "local-only-money-internal-grpc-token-0123") {
 		dependencies.Environment.ReadRequiredString("MONEY_INTERNAL_GRPC_TOKEN_OF_AT_LEAST_32_CHARACTERS")
 	}
 	if err := dependencies.Environment.CombinedConfigurationError(); err != nil {

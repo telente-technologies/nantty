@@ -14,9 +14,10 @@ import (
 
 const platformSettingsReadTimeout = time.Second
 
+type PlatformSettingFetcher func(ctx context.Context, key string) (json.RawMessage, error)
+
 type PlatformSettingsSource struct {
-	database   *sql.DB
-	schema     string
+	fetch      PlatformSettingFetcher
 	timeToLive time.Duration
 	now        func() time.Time
 	logger     *slog.Logger
@@ -31,11 +32,26 @@ type cachedPlatformSetting struct {
 }
 
 func NewPlatformSettingsSource(database *sql.DB, adminSchema string, timeToLive time.Duration, logger *slog.Logger) *PlatformSettingsSource {
-	return &PlatformSettingsSource{database: database, schema: adminSchema, timeToLive: timeToLive, now: time.Now, logger: logger, entries: map[string]cachedPlatformSetting{}}
+	if adminSchema == "" {
+		return NewPlatformSettingsSourceFromFetcher(nil, timeToLive, logger)
+	}
+	query := `SELECT value FROM ` + pgx.Identifier{adminSchema, "platform_settings"}.Sanitize() + ` WHERE key = $1`
+	return NewPlatformSettingsSourceFromFetcher(func(ctx context.Context, key string) (json.RawMessage, error) {
+		var value []byte
+		err := database.QueryRowContext(ctx, query, key).Scan(&value)
+		return value, err
+	}, timeToLive, logger)
+}
+
+func NewPlatformSettingsSourceFromFetcher(fetch PlatformSettingFetcher, timeToLive time.Duration, logger *slog.Logger) *PlatformSettingsSource {
+	if logger == nil {
+		logger = slog.Default()
+	}
+	return &PlatformSettingsSource{fetch: fetch, timeToLive: timeToLive, now: time.Now, logger: logger, entries: map[string]cachedPlatformSetting{}}
 }
 
 func (source *PlatformSettingsSource) ReadValue(ctx context.Context, key string) (json.RawMessage, bool) {
-	if source == nil || source.schema == "" {
+	if source == nil || source.fetch == nil {
 		return nil, false
 	}
 	source.mutex.Lock()
@@ -49,6 +65,7 @@ func (source *PlatformSettingsSource) ReadValue(ctx context.Context, key string)
 	case err == nil:
 		cached = fetched
 	case errors.Is(err, sql.ErrNoRows):
+		source.logger.Warn("platform setting missing, using the environment fallback", slog.String("key", key))
 		cached = cachedPlatformSetting{fetchedAt: source.now()}
 	default:
 		source.logger.Warn("platform setting unavailable, using the last known value or the environment fallback", slog.String("key", key), slog.Any("error", err))
@@ -61,9 +78,8 @@ func (source *PlatformSettingsSource) ReadValue(ctx context.Context, key string)
 func (source *PlatformSettingsSource) fetchValue(ctx context.Context, key string) (cachedPlatformSetting, error) {
 	ctx, cancel := context.WithTimeout(ctx, platformSettingsReadTimeout)
 	defer cancel()
-	var value []byte
-	query := `SELECT value FROM ` + pgx.Identifier{source.schema, "platform_settings"}.Sanitize() + ` WHERE key = $1`
-	if err := source.database.QueryRowContext(ctx, query, key).Scan(&value); err != nil {
+	value, err := source.fetch(ctx, key)
+	if err != nil {
 		return cachedPlatformSetting{}, err
 	}
 	return cachedPlatformSetting{value: value, found: true, fetchedAt: source.now()}, nil
