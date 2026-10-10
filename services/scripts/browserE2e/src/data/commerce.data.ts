@@ -24,7 +24,7 @@ export async function seedStoreWithProduct(label: string, priceMinor = 250_000, 
   const store = await callApi("POST", "/api/v1/stores", { token: owner.accessToken, body: { businessProfileId, name: `E2E ${label} ${suffix}`, description: "Browser e2e store", countryCode: "NG" } });
   must(store.status === 201, "store", store);
   const storeId: string = store.body.id ?? store.body.store?.id;
-  const headers = { "x-store-id": storeId };
+  const headers = { "X-Seller-Store": storeId };
   await callApi("POST", "/api/v1/seller/shipping/rules", { token: owner.accessToken, headers, body: { zoneName: "Nationwide", destinations: [{ level: "country", countryCode: "NG" }], type: "flat_fee", feeMinor: 150000, active: true } });
   const locations = await callApi("GET", "/api/v1/seller/locations", { token: owner.accessToken, headers });
   const locationId = locations.body?.data?.[0]?.id;

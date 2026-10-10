@@ -27,7 +27,7 @@ export async function expectDarkRendering(page: Page, testInfo: TestInfo, label:
   await page.waitForTimeout(300);
   const luminance = await readBackgroundLuminance(page);
   const themeAttribute = await page.evaluate(() => document.documentElement.getAttribute("data-theme") ?? document.documentElement.className);
-  await testInfo.attach(`dark-${label}.png`, { body: await page.screenshot({ fullPage: false }), contentType: "image/png" });
+  await testInfo.attach(`dark-${label}.png`, { body: await page.screenshot({ fullPage: false, caret: "initial" }), contentType: "image/png" });
   expect(luminance, `dark mode background is dark on ${label} (theme marker: ${themeAttribute})`).toBeLessThan(0.2);
   const textColorIsLight = await page.evaluate(() => {
     const color = getComputedStyle(document.body).color.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0];

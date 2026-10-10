@@ -4,7 +4,7 @@ async function relaxCreatorThresholds(staff: StaffActor): Promise<() => Promise<
   const current = await callApi("GET", "/api/v1/admin/config/creator-thresholds", { token: staff.accessToken });
   if (current.status !== 200) throw new Error(`creator thresholds: ${describeResponse(current)}`);
   const original = current.body.value;
-  const value = { ...original, autoApprove: { ...original.autoApprove, minimumAccountAgeDays: 0, requiresVerifiedPhone: false, minimumRealFollowers: 0, minimumOriginalPostsInLast60Days: 0 }, manualReview: { ...original.manualReview, minimumRealFollowers: 0 } };
+  const value = { ...original, autoApprove: { ...original.autoApprove, minimumAccountAgeDays: 0, minimumRealFollowers: 0, minimumOriginalPostsInLast60Days: 0 }, manualReview: { ...original.manualReview, minimumRealFollowers: 0 } };
   const relaxed = await callApi("PUT", "/api/v1/admin/config/creator-thresholds", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { value, expectedVersion: current.body.version, reason: "Browser e2e needs instant creators" } });
   if (relaxed.status !== 200) throw new Error(`relax thresholds: ${describeResponse(relaxed)}`);
   return async () => {
@@ -29,7 +29,13 @@ export async function approvePendingCreator(user: UserActor, staff: StaffActor):
 export async function createSubscriptionPlan(creator: UserActor, name: string, amountMinor = 150_000): Promise<string> {
   const login = await callApi("POST", "/api/v1/auth/refresh", { body: { refreshToken: creator.refreshToken } });
   const token = login.body?.accessToken ?? creator.accessToken;
-  const created = await callApi("POST", "/api/v1/creators/me/subscription-plans", { token, body: { name, description: "Browser e2e plan", price: { amountMinor, currency: "NGN" }, interval: "month", benefits: [{ name: "Shout-out", description: "Monthly shout-out" }] } });
+  const body = { name, description: "Browser e2e plan", price: { amountMinor, currency: "NGN" }, interval: "month", benefits: [{ name: "Shout-out", description: "Monthly shout-out" }] };
+  const deadline = Date.now() + 70_000;
+  let created = await callApi("POST", "/api/v1/creators/me/subscription-plans", { token, body });
+  while (created.status === 403 && Date.now() < deadline) {
+    await new Promise((done) => setTimeout(done, 3_000));
+    created = await callApi("POST", "/api/v1/creators/me/subscription-plans", { token, body });
+  }
   if (created.status !== 201 && created.status !== 200) throw new Error(`plan: ${describeResponse(created)}`);
   return created.body.id ?? created.body.plan?.id;
 }

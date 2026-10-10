@@ -54,12 +54,12 @@ export async function signUpThroughUi(page: Page, prefix: string, options: { rea
   await enterSignupCode(page, await readLatestSignupCode(email));
   await expect(page.getByRole("heading", { name: /birthday/i })).toBeVisible();
   await page.getByLabel("Birthday").pressSequentially("17051994");
-  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByLabel("Password", { exact: true }).fill(smokePassword.slice(0, 20));
-  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Create username" })).toBeVisible();
   const username = options.username ?? `e2e${uniqueSuffix()}`.slice(0, 20);
-  await page.getByLabel("Username").fill(username);
+  await page.getByRole("textbox", { name: "Username" }).fill(username);
   await expect(page.getByRole("button", { name: "Confirm" })).toBeEnabled({ timeout: 15_000 });
   await page.getByRole("button", { name: "Confirm" }).click();
   await expect(page.getByRole("heading", { name: "Personalize your feed" })).toBeVisible({ timeout: 30_000 });

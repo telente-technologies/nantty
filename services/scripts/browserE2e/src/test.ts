@@ -8,7 +8,7 @@ export interface GuardOptions {
 }
 
 export async function presetConsentCookie(context: BrowserContext): Promise<void> {
-  const choice = { policyVersion: "0.1-draft", decidedAt: new Date().toISOString(), categories: { analytics: false, personalization: true, advertising: false } };
+  const choice = { policyVersion: "1.0", decidedAt: new Date().toISOString(), categories: { analytics: false, personalization: true, advertising: false } };
   await context.addCookies([{ name: "zudomart_consent", value: encodeURIComponent(JSON.stringify(choice)), domain: "localhost", path: "/", sameSite: "Lax" }]);
 }
 

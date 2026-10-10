@@ -20,8 +20,9 @@ export async function routePaystackToFake(page: Page, returnPath: string, card: 
   await page.route(/^https:\/\/(js|checkout)\.paystack\.(co|com)\//, (route) => route.abort("blockedbyclient"));
   await page.route(/\/(bff|api)\/.*/, async (route: Route) => {
     if (route.request().method() === "GET") return route.fallback();
-    const response = await route.fetch();
-    const text = await response.text();
+    const response = await route.fetch().catch(() => null);
+    const text = response === null ? null : await response.text().catch(() => null);
+    if (response === null || text === null) return route.abort().catch(() => undefined);
     if (!text.includes("checkout.paystack.test")) return route.fulfill({ response, body: text });
     const body = JSON.parse(text) as Record<string, unknown>;
     const strip = (value: unknown): unknown => {
@@ -34,8 +35,10 @@ export async function routePaystackToFake(page: Page, returnPath: string, card: 
   await page.route("https://checkout.paystack.test/**", async (route) => {
     const reference = decodeURIComponent(new URL(route.request().url()).pathname.split("/").filter(Boolean).at(-1) ?? "");
     handle.references.push(reference);
-    await payCheckoutThroughFakePaystack(reference, 0, card);
-    if (card === "good") await createFakeSubscription(reference);
+    if (card === "good") {
+      await payCheckoutThroughFakePaystack(reference, 0, card);
+      await createFakeSubscription(reference);
+    }
     const origin = new URL(page.url()).origin;
     const separator = returnPath.includes("?") ? "&" : "?";
     await route.fulfill({ status: 302, headers: { location: `${origin}${returnPath}${separator}reference=${encodeURIComponent(reference)}&trxref=${encodeURIComponent(reference)}` } });

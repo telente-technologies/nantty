@@ -11,7 +11,7 @@ export interface PendingStaff {
 
 export function bootstrapUnenrolledSuperadmin(): PendingStaff {
   const email = `e2e.staff.${uniqueSuffix()}@zudomart.com`;
-  const password = "E2E-Staff-Pass-2026!";
+  const password = "Copper-Harbor-Signal-2026!";
   const env = { ...process.env, ADMIN_DATABASE_URL: process.env["SMOKE_ADMIN_DATABASE_URL"] ?? "postgres://svc_admin:svc_admin_local_only@localhost:15432/zudomart?sslmode=disable", ADMIN_BOOTSTRAP_PASSWORD: password };
   const binary = process.env["SMOKE_BOOTSTRAP_SUPERADMIN_BINARY"];
   if (binary !== undefined && binary !== "") execFileSync(binary, ["-email", email, "-name", "E2E Staff"], { env, stdio: "pipe" });

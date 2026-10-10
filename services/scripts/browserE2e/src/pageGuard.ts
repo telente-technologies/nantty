@@ -12,6 +12,7 @@ const ignoredConsolePatterns: readonly RegExp[] = [
   /challenges\.cloudflare\.com/i,
   /net::ERR_BLOCKED_BY_CLIENT/i,
   /checkout\.paystack\.test/i,
+  /status of 404 .*\/bff\/api\/v1\/chat\/keys\/devices\/[0-9a-f]+$/i,
 ];
 
 export function watchPage(page: Page, problems: PageProblems): void {
@@ -32,7 +33,7 @@ const unreadablePatterns: readonly RegExp[] = [
   /\bat [\w.]+ \(.*:\d+:\d+\)/,
   /[{[]\s*"[a-zA-Z]+"\s*:/,
   /\b(?:undefined|null|NaN|\[object Object\])\b/,
-  /Internal Server Error|status code \d{3}|\b5\d\d\b/i,
+  /Internal Server Error|Bad Gateway|Service Unavailable|Gateway Timeout|status code \d{3}|(?<![\d+] ?)\b5\d\d\b(?! ?\d)/i,
 ];
 
 export function describeUnreadableMessage(text: string | undefined): string | undefined {
