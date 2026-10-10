@@ -63,7 +63,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
       { label: "Orders", href: "/commerce/orders", icon: "shoppingCart24", requirement: "orders:read" },
       { label: "Disputes", href: "/commerce/disputes", icon: "chatCircle24", requirement: "disputes:resolve", goShortcutKey: "d" },
       { label: "Refunds", href: "/commerce/refunds", icon: "arrowLeft24", requirement: "refunds:issue" },
-      { label: "Payouts", href: "/commerce/payouts", icon: "creditCard24", requirement: "payouts:approve", goShortcutKey: "p" },
+      { label: "Withdrawals", href: "/commerce/payouts", icon: "creditCard24", requirement: "payouts:approve", goShortcutKey: "p" },
       { label: "Coins", href: "/commerce/coins", icon: "star16", requirement: "coins:review" },
       { label: "Ledger", href: "/commerce/ledger", icon: "bookmarkSimple24", requirement: "ledger:read" },
     ],

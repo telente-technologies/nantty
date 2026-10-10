@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { paginateItems } from "@/mocks/mockResponses.mock";
+import { paginateByCursor, paginateItems } from "@/mocks/mockResponses.mock";
 import type { MockRequest } from "@/mocks/mockRouter.mock";
 import { adaptListEnvelope, toServerListEnvelope } from "@/utils/listEnvelope.util";
 
@@ -24,5 +24,19 @@ describe("admin list envelopes", () => {
     assert.deepEqual(cursor.items, [1]);
     assert.equal(cursor.page, 1);
     assert.equal(cursor.nextCursor, "n");
+  });
+
+  it("cursor-paged mocks emit {data, nextCursor} and walk every row once", () => {
+    const rows = [1, 2, 3, 4, 5];
+    const first = toServerListEnvelope(paginateByCursor(rows, { query: new URLSearchParams("limit=2") } as unknown as MockRequest)) as { data: number[]; nextCursor: string | null };
+    assert.deepEqual(validateAgainstContract(c.page(c.number()), first), []);
+    const seen = [...first.data];
+    let cursor = first.nextCursor;
+    while (cursor) {
+      const next = paginateByCursor(rows, { query: new URLSearchParams(`limit=2&cursor=${cursor}`) } as unknown as MockRequest);
+      seen.push(...next.items);
+      cursor = next.nextCursor;
+    }
+    assert.deepEqual(seen, rows);
   });
 });
