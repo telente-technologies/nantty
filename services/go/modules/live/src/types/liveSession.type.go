@@ -70,6 +70,7 @@ type LiveSessionView struct {
 	GiftsEnabled               bool            `json:"giftsEnabled"`
 	HostIsCreator              bool            `json:"hostIsCreator"`
 	IsFollowingHost            bool            `json:"isFollowingHost"`
+	StoreId                    *string         `json:"storeId"`
 	Products                   []any           `json:"products"`
 	PinnedProductId            *string         `json:"pinnedProductId"`
 	LiveAdSettings             map[string]any  `json:"liveAdSettings"`

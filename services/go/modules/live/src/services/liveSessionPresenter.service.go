@@ -38,8 +38,11 @@ func (service *LiveService) presentLiveSession(ctx context.Context, session *ent
 	if err != nil {
 		service.Logger.WarnContext(ctx, "host follow counts unavailable", "error", err)
 	}
-	status := "live"
-	if session.State == "ended" {
+	status := "upcoming"
+	switch session.State {
+	case "live", "connecting":
+		status = "live"
+	case "ended":
 		status = "ended"
 	}
 	return types.LiveSessionView{
@@ -47,7 +50,7 @@ func (service *LiveService) presentLiveSession(ctx context.Context, session *ent
 		Title: session.Title, Category: string(session.Category), State: string(session.State), Status: status, Visibility: string(session.Visibility),
 		Viewers: session.Viewers, PeakViewers: session.PeakViewers, StartedAt: formatOptionalTime(session.StartedAt), EndedAt: formatOptionalTime(session.EndedAt),
 		CoverUrl: session.CoverURL, Media: types.MediaConnection{LivekitUrl: service.Settings.LiveKitPublicUrl},
-		GiftsEnabled: session.GiftsEnabled, HostIsCreator: session.HostIsCreator, Products: []any{},
+		GiftsEnabled: session.GiftsEnabled, HostIsCreator: session.HostIsCreator, StoreId: formatOptionalUuid(session.StoreID), Products: []any{},
 		PinnedProductId: formatOptionalUuid(session.PinnedProductID), LiveAdSettings: session.LiveAdSettings,
 		AcceptedLiveAdTermsVersion: session.AcceptedLiveAdTermsVersion, SponsorshipLine: session.SponsorshipLine,
 		TopSupporterUserId: formatOptionalUuid(session.TopSupporterUserID),

@@ -101,6 +101,9 @@ func TestStoreLivesAndPinsOnlyUseTheHostsOwnStoreAndProducts(t *testing.T) {
 	harness.catalog.SetUnavailable(false)
 	live := create(seller, map[string]any{"storeId": storeId, "productIds": []string{ownId.String(), draftId.String()}}, http.StatusCreated)
 	liveId := live["id"].(string)
+	if live["storeId"] != storeId {
+		t.Fatalf("the live view must name its store: %v", live["storeId"])
+	}
 	products := harness.expect("GET", "/api/v1/lives/"+liveId+"/products", &seller, "", nil, http.StatusOK)["data"].([]any)
 	if len(products) != 2 || products[0].(map[string]any)["title"] == nil {
 		t.Fatalf("own products are listed with their snapshot: %v", products)
@@ -110,7 +113,9 @@ func TestStoreLivesAndPinsOnlyUseTheHostsOwnStoreAndProducts(t *testing.T) {
 		t.Fatalf("a foreign product must not be pinned: %v", refused)
 	}
 	harness.expect("POST", pins, &seller, "", map[string]any{"productId": uuid.NewString()}, http.StatusForbidden)
-	harness.expect("POST", pins, &seller, "", map[string]any{"productId": draftId.String()}, http.StatusUnprocessableEntity)
+	if refused := harness.expect("POST", pins, &seller, "", map[string]any{"productId": draftId.String()}, http.StatusUnprocessableEntity); refused["code"] != "PRODUCT_NOT_PUBLISHED" {
+		t.Fatalf("a draft product must not be pinned: %v", refused)
+	}
 	harness.catalog.SetUnavailable(true)
 	harness.expect("POST", pins, &seller, "", map[string]any{"productId": ownId.String()}, http.StatusServiceUnavailable)
 	harness.catalog.SetUnavailable(false)

@@ -57,7 +57,7 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 		return types.LiveSessionView{}, liveerrors.CreatorProgramNeeded
 	}
 	isSeller := actor.HasRole("seller")
-	if input.Category == "shopping" && !isSeller {
+	if input.Category == "shopping" && !isSeller && input.StoreId == nil {
 		return types.LiveSessionView{}, liveerrors.ShoppingNeedsStore
 	}
 	if len(input.ProductIds) > 0 && input.StoreId == nil {

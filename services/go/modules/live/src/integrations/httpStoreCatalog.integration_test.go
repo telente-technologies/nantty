@@ -30,7 +30,7 @@ func TestHttpStoreCatalogSendsTheTokenParsesSnapshotsAndFailsClosed(t *testing.T
 				writer.WriteHeader(http.StatusBadRequest)
 				return
 			}
-			_, _ = writer.Write([]byte(`{"owned":["` + productId.String() + `"],"products":[{"id":"` + productId.String() + `","title":"Shoe","price":{"amountMinor":5000,"currency":"NGN"},"imageUrl":null}]}`))
+			_, _ = writer.Write([]byte(`{"owned":["` + productId.String() + `"],"products":[{"id":"` + productId.String() + `","title":"Shoe","price":{"amountMinor":5000,"currency":"NGN"},"imageUrl":null,"status":"draft"}]}`))
 		default:
 			writer.WriteHeader(http.StatusInternalServerError)
 		}
@@ -42,7 +42,7 @@ func TestHttpStoreCatalogSendsTheTokenParsesSnapshotsAndFailsClosed(t *testing.T
 		t.Fatalf("membership: %v %v", member, err)
 	}
 	owned, err := catalog.OwnedProducts(ctx, storeId, []uuid.UUID{productId, uuid.New()})
-	if err != nil || len(owned) != 1 || owned[productId].Title != "Shoe" || owned[productId].PriceMinor != 5000 || owned[productId].Currency != "NGN" {
+	if err != nil || len(owned) != 1 || owned[productId].Title != "Shoe" || owned[productId].PriceMinor != 5000 || owned[productId].Currency != "NGN" || owned[productId].Status != "draft" {
 		t.Fatalf("ownership: %v %v", owned, err)
 	}
 	for name, broken := range map[string]HttpStoreCatalog{
