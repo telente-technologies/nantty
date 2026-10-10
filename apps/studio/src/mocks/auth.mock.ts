@@ -11,6 +11,7 @@ const studioViewer: User = {
   email: "creator@zudomart.com",
   isCreator: true,
   hasStore: true,
+  storeId: "store_1",
   channelHandle: "@temi.creates",
 };
 

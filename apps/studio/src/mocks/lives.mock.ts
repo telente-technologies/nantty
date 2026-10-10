@@ -20,6 +20,8 @@ const SELLER_PRODUCTS: readonly SellerProductWire[] = [
   { id: "prod_4", name: "Shea & Black Soap Bar Duo", status: "active", images: [], variants: [{ price: { amountMinor: 975000, currency: "NGN" } }] },
 ];
 
+const MY_STORES = [{ storeId: "store_1", storeName: "Temi's Pottery", role: "owner", isCurrent: true }] as const;
+
 const LIVE_CATEGORY_VALUES: readonly LiveCategory[] = ["justChatting", "gaming", "music", "irl", "education", "shopping"];
 
 const DEFAULT_LAYERS: readonly OverlayLayer[] = [
@@ -42,6 +44,7 @@ interface MockLive {
   readonly topSupporters: readonly { readonly id: ID; readonly name: string; readonly coins: number }[];
   readonly streamKey: string | null;
   readonly pins: readonly LiveProductPinWire[];
+  readonly storeId: ID | null;
 }
 
 const buildScene = (liveId: ID): OverlayScene => ({ id: `scene_${liveId}`, liveId, name: "Main scene", layers: [...DEFAULT_LAYERS] });
@@ -63,7 +66,7 @@ const toStudioLiveWire = (live: MockLive): StudioLiveWire => ({
 
 const toLiveSessionWire = (live: MockLive): LiveSessionWire => ({
   id: live.id, title: live.title, category: live.category, state: live.state, viewers: live.viewers, peakViewers: live.peakViewers,
-  startedAt: live.startedAt, endedAt: live.endedAt, playbackUrl: hlsUrlFor(live),
+  startedAt: live.startedAt, endedAt: live.endedAt, playbackUrl: hlsUrlFor(live), storeId: live.storeId,
 });
 
 const toStreamKeyWire = (live: MockLive, streamKey: string): StreamKeyWire => ({
@@ -85,7 +88,7 @@ seedLive(
     id: "live_1", title: "Sunday pots restock — live from Ibadan", category: "shopping", state: "live", createdAt: hoursAgo(2), startedAt: minutesAgo(38), endedAt: null,
     viewers: 1284, peakViewers: 2140, coins: 18400, giftCount: 212,
     topSupporters: [{ id: "g_1", name: "Kemi", coins: 4200 }, { id: "g_2", name: "Chidi", coins: 3100 }, { id: "g_3", name: "Bola", coins: 1750 }],
-    streamKey: buildStreamKey("live_1"), pins: [{ productId: "prod_3", pinned: false }, { productId: "prod_2", pinned: true }],
+    streamKey: buildStreamKey("live_1"), pins: [{ productId: "prod_3", pinned: false }, { productId: "prod_2", pinned: true }], storeId: "store_1",
   },
   [
     { id: "c_1", authorName: "Kemi", text: "Is the medium pot still in stock?", createdAt: minutesAgo(6) },
@@ -98,14 +101,14 @@ seedLive(
     id: "live_2", title: "Late night beats and freestyle with guests", category: "music", state: "ended", createdAt: hoursAgo(52), startedAt: hoursAgo(51), endedAt: hoursAgo(50),
     viewers: 0, peakViewers: 6120, coins: 52300, giftCount: 640,
     topSupporters: [{ id: "g_4", name: "Tobi", coins: 9800 }, { id: "g_5", name: "Amaka", coins: 7400 }, { id: "g_6", name: "Sade", coins: 5200 }],
-    streamKey: null, pins: [],
+    streamKey: null, pins: [], storeId: null,
   },
   [{ id: "c_3", authorName: "Bola", text: "That gold gele is everything", createdAt: hoursAgo(50) }],
 );
 
 seedLive({
   id: "live_3", title: "Ranked grind: Rocket League with chat", category: "gaming", state: "idle", createdAt: minutesAgo(4), startedAt: null, endedAt: null,
-  viewers: 0, peakViewers: 0, coins: 0, giftCount: 0, topSupporters: [], streamKey: buildStreamKey("live_3"), pins: [],
+  viewers: 0, peakViewers: 0, coins: 0, giftCount: 0, topSupporters: [], streamKey: buildStreamKey("live_3"), pins: [], storeId: null,
 });
 
 const findLiveOrThrow = (liveId: string): MockLive => {
@@ -132,15 +135,20 @@ export const liveMocks: MockRoute[] = [
   })),
   createMockRoute("GET", "/api/v1/lives/:liveId", ({ params }) => toLiveSessionWire(findLiveOrThrow(params.liveId!))),
   createMockRoute("POST", "/api/v1/lives", ({ body }) => {
-    const payload = (body ?? {}) as { title?: unknown; category?: unknown; startNow?: unknown };
+    const payload = (body ?? {}) as { title?: unknown; category?: unknown; startNow?: unknown; storeId?: unknown; productIds?: unknown };
     const title = String(payload.title ?? "").trim();
     if (!title || title.length > 140) throw new ApiError(400, "title must be 1-140 characters", "VALIDATION_FAILED");
     if (!LIVE_CATEGORY_VALUES.includes(payload.category as LiveCategory)) throw new ApiError(400, "category is not supported", "VALIDATION_FAILED");
+    const storeId = typeof payload.storeId === "string" && payload.storeId ? payload.storeId : null;
+    const productIds = Array.isArray(payload.productIds) ? (payload.productIds as string[]) : [];
+    if (productIds.length > 0 && !storeId) throw new ApiError(422, "Start the live for a store to show products.", "PRODUCTS_REQUIRE_STORE");
+    if (storeId && !MY_STORES.some((store) => store.storeId === storeId)) throw new ApiError(403, "You are not a member of this store.", "NOT_STORE_MEMBER");
+    if (productIds.some((productId) => !SELLER_PRODUCTS.some((product) => product.id === productId))) throw new ApiError(403, "That product is not in this store.", "PRODUCT_NOT_IN_STORE");
     const id = `live_${liveState.size + 1}_${Date.now()}`;
     const startNow = payload.startNow !== false;
     const live: MockLive = {
       id, title, category: payload.category as LiveCategory, state: startNow ? "live" : "idle", createdAt: new Date().toISOString(), startedAt: startNow ? new Date().toISOString() : null, endedAt: null,
-      viewers: 0, peakViewers: 0, coins: 0, giftCount: 0, topSupporters: [], streamKey: null, pins: [],
+      viewers: 0, peakViewers: 0, coins: 0, giftCount: 0, topSupporters: [], streamKey: null, pins: productIds.map((productId) => ({ productId, pinned: false })), storeId,
     };
     seedLive(live);
     return toLiveSessionWire(live);
@@ -191,13 +199,17 @@ export const liveMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/lives/:liveId/products", ({ params }) => ({ data: findLiveOrThrow(params.liveId!).pins, nextCursor: null })),
   createMockRoute("POST", "/api/v1/lives/:liveId/pins", ({ params, body }) => {
     const productId = String((body as { productId?: unknown } | null)?.productId ?? "");
-    if (!SELLER_PRODUCTS.some((product) => product.id === productId)) throw new ApiError(404, "That product is not available.", "PRODUCT_NOT_FOUND");
+    if (!findLiveOrThrow(params.liveId!).storeId) throw new ApiError(422, "Start the live for a store to show products.", "PRODUCTS_REQUIRE_STORE");
+    const product = SELLER_PRODUCTS.find((candidate) => candidate.id === productId);
+    if (!product) throw new ApiError(403, "That product is not in this store.", "PRODUCT_NOT_IN_STORE");
+    if (product.status !== "active") throw new ApiError(422, "Publish the product before showing it on screen.", "PRODUCT_NOT_PUBLISHED");
     const live = patchLive(params.liveId!, (current) => ({
       ...current,
       pins: [...current.pins.filter((pin) => pin.productId !== productId).map((pin) => ({ ...pin, pinned: false })), { productId, pinned: true }],
     }));
     return { data: live.pins, nextCursor: null };
   }),
+  createMockRoute("GET", "/api/v1/seller/stores/mine", () => ({ data: MY_STORES, nextCursor: null })),
   createMockRoute("GET", "/api/v1/seller/products", () => ({ data: SELLER_PRODUCTS, nextCursor: null })),
   createMockRoute("GET", "/api/v1/seller/products/:productId", ({ params }) => {
     const product = SELLER_PRODUCTS.find((candidate) => candidate.id === params.productId);

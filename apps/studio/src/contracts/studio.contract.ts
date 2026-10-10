@@ -12,7 +12,8 @@ const studioLive = c.object({
   viewers: c.number(), peakViewers: c.number(), streamKeyHint: c.nullable(c.string()), ingestProtocol: c.nullable(c.string()), hlsUrl: c.nullable(c.string()),
   earnings: c.object({ coins: c.number(), giftCount: c.number() }), recordEnabled: c.boolean(), visibility: c.string(), products: c.array(productPin),
 });
-const liveSession = c.object({ id: c.string(), title: c.string(), category: c.string(), state: liveState, viewers: c.number(), peakViewers: c.number(), startedAt: c.nullable(c.string()), endedAt: c.nullable(c.string()), playbackUrl: c.nullable(c.string()) });
+const liveSession = c.object({ id: c.string(), title: c.string(), category: c.string(), state: liveState, viewers: c.number(), peakViewers: c.number(), startedAt: c.nullable(c.string()), endedAt: c.nullable(c.string()), playbackUrl: c.nullable(c.string()), storeId: c.nullable(c.string()) });
+const myStore = c.object({ storeId: c.string(), storeName: c.string(), role: c.string(), isCurrent: c.boolean() });
 const streamKey = c.object({ liveId: c.string(), protocol: c.string(), ingestUrl: c.string(), streamKey: c.string(), streamKeyHint: c.string(), issuedAt: c.string() });
 const streamStats = c.object({ liveId: c.string(), giftCount: c.number(), totalCoins: c.number(), creatorCoins: c.number(), topSupporters: c.array(c.object({ rank: c.number(), user: c.object({ id: c.string(), name: c.string(), username: c.string() }), coins: c.number() })) });
 const sellerProduct = c.object({ id: c.string(), name: c.string(), status: c.string(), images: c.array(c.object({ url: c.string() })), variants: c.array(c.object({ price: money })) });
@@ -32,6 +33,7 @@ export const studioContracts: readonly EndpointContract[] = [
   { domain: "live", method: "GET", path: "/api/v1/lives", schema: c.page(studioLive) },
   { domain: "live", method: "GET", path: "/api/v1/lives/live_1", schema: liveSession },
   { domain: "live", method: "POST", path: "/api/v1/lives", body: { title: "Contract live", category: "music", startNow: false }, schema: liveSession },
+  { domain: "live", method: "POST", path: "/api/v1/lives", body: { title: "Store live", category: "shopping", startNow: false, storeId: "store_1", productIds: ["prod_1"] }, schema: liveSession },
   { domain: "live", method: "GET", path: "/api/v1/lives/live_1/stream-key", schema: streamKey },
   { domain: "live", method: "POST", path: "/api/v1/lives/live_1/stream-key", schema: streamKey },
   { domain: "live", method: "GET", path: "/api/v1/creators/me/analytics/gifts/streams/live_1", schema: streamStats },
@@ -40,6 +42,7 @@ export const studioContracts: readonly EndpointContract[] = [
   { domain: "live", method: "POST", path: "/api/v1/lives/live_1/pins", body: { productId: "prod_1" }, schema: c.page(productPin) },
   { domain: "live", method: "GET", path: "/api/v1/lives/live_1/overlays", schema: overlayScene },
   { domain: "live", method: "GET", path: "/api/v1/overlay-scenes/scene_live_1", schema: c.object({ scene: overlayScene, live: c.object({ id: c.string(), title: c.string(), state: liveState }) }) },
+  { domain: "catalog", method: "GET", path: "/api/v1/seller/stores/mine", schema: c.page(myStore) },
   { domain: "catalog", method: "GET", path: "/api/v1/seller/products?status=active&limit=100", schema: c.page(sellerProduct) },
   { domain: "payments", method: "GET", path: "/api/v1/banks?country=NG", schema: c.page(bank) },
   { domain: "payments", method: "GET", path: "/api/v1/payments/payout-onboarding/me", schema: payoutState },
