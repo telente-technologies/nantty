@@ -12,8 +12,8 @@ import { usePayoutFeesQuery, usePayoutOnboardingQuery } from "@/components/payou
 import { usePayoutAccountsQuery, useWalletBalanceQuery } from "@/components/wallet/walletQueries.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { walletsService } from "@/services/wallets.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { walletsService } from "@/services/money/wallets.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";

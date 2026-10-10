@@ -11,7 +11,7 @@ import { Text } from "@/components/ui/text";
 import { BankPickerField } from "@/components/wallet/bankPickerSheet";
 import { usePayoutAccountsQuery, walletQueryKeys } from "@/components/wallet/walletQueries.hook";
 import { useTheme } from "@/theme";
-import { walletsService } from "@/services/wallets.service";
+import { walletsService } from "@/services/money/wallets.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { ErrorState } from "@/components/ui/errorState";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";

@@ -12,7 +12,7 @@ import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { coinsService } from "@/services/coins.service";
+import { coinsService } from "@/services/money/coins.service";
 import type { CoinActivityEntry } from "@/types";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
