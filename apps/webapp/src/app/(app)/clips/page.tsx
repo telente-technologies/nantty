@@ -9,8 +9,14 @@ import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedb
 import { SegmentedControl } from "@/components/ui/controls";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
 import { discoveryService } from "@/services/discovery.service";
+import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { SpeakerHighIcon, SpeakerMutedIcon } from "@/components/ui/icons";
+import { showToast } from "@/components/ui/toast";
+import { buildAbsoluteSiteUrl } from "@/utils/seoPaths.util";
+import type { Clip } from "@/types";
 
-import { ClipPlayerCard } from "./clipPlayerCard";
+import { ClipPlayerCard, type ClipEngagement } from "./clipPlayerCard";
+import { ClipCommentsSheet } from "./clipCommentsSheet";
 import styles from "./page.module.css";
 import { AppIcon } from "@/components/ui/appIcon";
 
@@ -21,6 +27,10 @@ export default function ClipsPage() {
   const startClipId = searchParams.get("start");
   const [tab, setTab] = useState<ClipsTab>("forYou");
   const [activeClipId, setActiveClipId] = useState<string | null>(startClipId);
+  const [isMuted, setIsMuted] = useState(true);
+  const [engagementByClipId, setEngagementByClipId] = useState<Record<string, ClipEngagement>>({});
+  const [shareCountByClipId, setShareCountByClipId] = useState<Record<string, number>>({});
+  const [commentsForClip, setCommentsForClip] = useState<Clip | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
   const clipsQuery = useInfiniteQuery({
     queryKey: ["clips", tab],
@@ -65,6 +75,57 @@ export default function ClipsPage() {
       event.preventDefault();
       scrollByOneClip(-1);
     }
+    if (event.key === "m") setIsMuted((muted) => !muted);
+  }
+
+  function engagementFor(clip: Clip): ClipEngagement {
+    return engagementByClipId[clip.id] ?? { liked: clip.liked, likes: clip.likes, isFollowing: clip.isFollowingAuthor };
+  }
+
+  function toggleLikeOnClip(clip: Clip) {
+    requireAuthThen(() => {
+      const wasLiked = engagementFor(clip).liked;
+      setEngagementByClipId((all) => ({
+        ...all,
+        [clip.id]: { ...engagementFor(clip), liked: !wasLiked, likes: Math.max(0, engagementFor(clip).likes + (wasLiked ? -1 : 1)) },
+      }));
+      void (wasLiked ? discoveryService.unlikeClip(clip.id) : discoveryService.likeClip(clip.id)).catch(() =>
+        setEngagementByClipId((all) => ({ ...all, [clip.id]: engagementFor(clip) })),
+      );
+    }, "Sign in to like clips.");
+  }
+
+  function likeClipWithDoubleTap(clip: Clip) {
+    if (!engagementFor(clip).liked) toggleLikeOnClip(clip);
+  }
+
+  function toggleFollowOnClipAuthor(clip: Clip) {
+    requireAuthThen(() => {
+      const wasFollowing = engagementFor(clip).isFollowing;
+      setEngagementByClipId((all) => ({ ...all, [clip.id]: { ...engagementFor(clip), isFollowing: !wasFollowing } }));
+      if (!wasFollowing) {
+        void discoveryService.followClipAuthor(clip.author.id).catch(() =>
+          setEngagementByClipId((all) => ({ ...all, [clip.id]: { ...engagementFor(clip), isFollowing: false } })),
+        );
+      }
+    }, "Sign in to follow creators.");
+  }
+
+  function shareClipLink(clip: Clip) {
+    const url = buildAbsoluteSiteUrl(`/clips?start=${clip.id}`);
+    const copyAndRecord = async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast({ text: "Link copied" });
+      } catch {
+        showToast({ text: "Couldn't copy the link", tone: "error" });
+      }
+      setShareCountByClipId((all) => ({ ...all, [clip.id]: (all[clip.id] ?? clip.shares) + 1 }));
+      void discoveryService.recordClipShare(clip.id).catch(() =>
+        setShareCountByClipId((all) => ({ ...all, [clip.id]: all[clip.id] ?? clip.shares })),
+      );
+    };
+    void copyAndRecord();
   }
 
   return (
@@ -80,6 +141,16 @@ export default function ClipsPage() {
             { value: "following", label: "Following" },
           ]}
         />
+        <button
+          type="button"
+          className={[styles.stepButton, styles.muteToggle].join(" ")}
+          aria-pressed={isMuted}
+          aria-label={isMuted ? "Unmute clips" : "Mute clips"}
+          title={isMuted ? "Unmute (M)" : "Mute (M)"}
+          onClick={() => setIsMuted((muted) => !muted)}
+        >
+          {isMuted ? <SpeakerMutedIcon size={20} /> : <SpeakerHighIcon size={20} />}
+        </button>
         <div className={styles.stepButtons}>
           <button type="button" className={styles.stepButton} onClick={() => scrollByOneClip(-1)} aria-label="Previous clip">
             <AppIcon name="arrowUp24" size={20} />
@@ -101,13 +172,32 @@ export default function ClipsPage() {
       ) : (
         <div ref={feedRef} className={styles.feed} tabIndex={0} onKeyDown={handleFeedKeys} aria-label="Clips. Use the arrow keys to move between clips.">
           {clips.map((clip, index) => (
-            <ClipPlayerCard key={clip.id} clip={clip} isActive={activeClipId ? activeClipId === clip.id : index === 0} />
+            <ClipPlayerCard
+              key={clip.id}
+              clip={clip}
+              isActive={activeClipId ? activeClipId === clip.id : index === 0}
+              isMuted={isMuted}
+              engagement={engagementFor(clip)}
+              shareCount={shareCountByClipId[clip.id] ?? clip.shares}
+              onToggleMute={() => setIsMuted((muted) => !muted)}
+              onToggleLike={() => toggleLikeOnClip(clip)}
+              onLikeByDoubleTap={() => likeClipWithDoubleTap(clip)}
+              onToggleFollow={() => toggleFollowOnClipAuthor(clip)}
+              onOpenComments={() => setCommentsForClip(clip)}
+              onShareLink={() => shareClipLink(clip)}
+            />
           ))}
           <div ref={sentinelRef} className={styles.sentinel}>
             {clipsQuery.isFetchingNextPage ? <Spinner label="Loading more clips" /> : null}
           </div>
         </div>
       )}
+      <ClipCommentsSheet
+        postId={commentsForClip?.id ?? null}
+        postAuthorId={commentsForClip?.author.id}
+        totalComments={commentsForClip?.comments ?? 0}
+        onClose={() => setCommentsForClip(null)}
+      />
     </div>
   );
 }
