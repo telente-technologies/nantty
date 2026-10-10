@@ -35,8 +35,23 @@ function hasUtm(ad: WizardAdDraft): boolean {
   return Object.values(ad.utm).some((value) => Boolean(value?.trim()));
 }
 
-function buildDestinationFromParts(ad: WizardAdDraft, type: CreativeDestination["type"], url: string, targetId: string | null): CreativeDestination {
-  return { type, targetId, url: type === "url" ? url.trim() : null, ...(type === "url" && hasUtm(ad) ? { utm: ad.utm } : {}) };
+export interface OwnDestinationTargets {
+  readonly profileId: string | null;
+  readonly storeId: string | null;
+}
+
+const noOwnTargets: OwnDestinationTargets = { profileId: null, storeId: null };
+
+function resolveDestinationTargetId(ad: WizardAdDraft, type: CreativeDestination["type"], own: OwnDestinationTargets): string | null {
+  if (type === "profile") return own.profileId;
+  if (type === "store") return own.storeId;
+  if (type === "post") return ad.sourceType === "upload" || ad.sourceType === "product" ? null : (ad.selectedSource?.id ?? null);
+  if (type === "product") return ad.sourceType === "product" ? (ad.selectedSource?.id ?? null) : (ad.selectedSource?.product?.productId ?? null);
+  return null;
+}
+
+function buildDestinationFromParts(ad: WizardAdDraft, type: CreativeDestination["type"], url: string, own: OwnDestinationTargets): CreativeDestination {
+  return { type, targetId: resolveDestinationTargetId(ad, type, own), url: type === "url" ? url.trim() : null, ...(type === "url" && hasUtm(ad) ? { utm: ad.utm } : {}) };
 }
 
 export function buildAppFromDraft(app: WizardAppDraft): CreativeApp {
@@ -53,21 +68,21 @@ export function buildAppFromDraft(app: WizardAppDraft): CreativeApp {
   };
 }
 
-function buildCardInput(ad: WizardAdDraft, card: WizardCardDraft): CreativeCardInput {
-  return { mediaId: card.media?.id ?? "", headline: card.headline.trim(), description: card.description.trim(), callToAction: card.callToAction, destination: buildDestinationFromParts(ad, card.destinationType, card.destinationUrl, null) };
+function buildCardInput(ad: WizardAdDraft, card: WizardCardDraft, own: OwnDestinationTargets): CreativeCardInput {
+  return { mediaId: card.media?.id ?? "", headline: card.headline.trim(), description: card.description.trim(), callToAction: card.callToAction, destination: buildDestinationFromParts(ad, card.destinationType, card.destinationUrl, own) };
 }
 
-function buildPreviewCard(ad: WizardAdDraft, card: WizardCardDraft, index: number): CreativeCard {
+function buildPreviewCard(ad: WizardAdDraft, card: WizardCardDraft, index: number, own: OwnDestinationTargets): CreativeCard {
   const placeholderMedia = { id: `empty-${index}`, kind: "image" as const, url: "", posterUrl: null, width: 1, height: 1, durationSeconds: null };
-  return { media: card.media ?? placeholderMedia, headline: card.headline || `Card ${index + 1}`, description: card.description, callToAction: card.callToAction, destination: buildDestinationFromParts(ad, card.destinationType, card.destinationUrl, null) };
+  return { media: card.media ?? placeholderMedia, headline: card.headline || `Card ${index + 1}`, description: card.description, callToAction: card.callToAction, destination: buildDestinationFromParts(ad, card.destinationType, card.destinationUrl, own) };
 }
 
-export function buildCreativeInputFromAdDraft(ad: WizardAdDraft): CreativeInput {
+export function buildCreativeInputFromAdDraft(ad: WizardAdDraft, own: OwnDestinationTargets = noOwnTargets): CreativeInput {
   const isInstall = ad.creativeType === "app_install";
   return {
     type: ad.creativeType,
     mediaClickable: ad.creativeType === "single" && ad.mediaClickable,
-    cards: ad.creativeType === "carousel" ? ad.cards.map((card) => buildCardInput(ad, card)) : [],
+    cards: ad.creativeType === "carousel" ? ad.cards.map((card) => buildCardInput(ad, card, own)) : [],
     app: isInstall ? buildAppFromDraft(ad.app) : null,
     format: ad.format,
     source: { type: ad.sourceType, id: ad.sourceType === "upload" ? "" : (ad.selectedSource?.id ?? "") },
@@ -75,15 +90,20 @@ export function buildCreativeInputFromAdDraft(ad: WizardAdDraft): CreativeInput 
     headline: ad.headline.trim(),
     primaryText: ad.primaryText.trim(),
     callToAction: ad.callToAction,
-    destination: isInstall ? { type: "app_store", targetId: null, url: null } : buildDestinationFromParts(ad, ad.destinationType, ad.destinationUrl, ad.selectedSource?.id ?? null),
+    destination: isInstall ? { type: "app_store", targetId: null, url: null } : buildDestinationFromParts(ad, ad.destinationType, ad.destinationUrl, own),
   };
 }
 
+export function readOwnDestinationTargets(account: AdAccount): OwnDestinationTargets {
+  return { profileId: account.owner.id, storeId: account.business?.storeId ?? null };
+}
+
 export function buildPreviewCreativeFromAdDraft(ad: WizardAdDraft, account: AdAccount): Creative {
+  const own = readOwnDestinationTargets(account);
   return {
     type: ad.creativeType,
     mediaClickable: ad.creativeType === "single" && ad.mediaClickable,
-    cards: ad.creativeType === "carousel" ? ad.cards.map((card, index) => buildPreviewCard(ad, card, index)) : [],
+    cards: ad.creativeType === "carousel" ? ad.cards.map((card, index) => buildPreviewCard(ad, card, index, own)) : [],
     app: ad.creativeType === "app_install" ? buildAppFromDraft(ad.app) : null,
     format: ad.format,
     source: { type: ad.sourceType, id: ad.selectedSource?.id ?? "" },
@@ -91,7 +111,7 @@ export function buildPreviewCreativeFromAdDraft(ad: WizardAdDraft, account: AdAc
     headline: ad.headline || "Your headline",
     primaryText: ad.primaryText,
     callToAction: ad.callToAction,
-    destination: ad.creativeType === "app_install" ? { type: "app_store", targetId: null, url: null } : buildDestinationFromParts(ad, ad.destinationType, ad.destinationUrl, ad.selectedSource?.id ?? null),
+    destination: ad.creativeType === "app_install" ? { type: "app_store", targetId: null, url: null } : buildDestinationFromParts(ad, ad.destinationType, ad.destinationUrl, own),
     identity: {
       name: account.business?.storeName ?? account.name,
       handle: account.business?.handle ?? account.name.toLowerCase().replace(/[^a-z0-9]+/g, "."),
@@ -103,7 +123,7 @@ export function buildPreviewCreativeFromAdDraft(ad: WizardAdDraft, account: AdAc
   };
 }
 
-export function buildCampaignSubmissionFromWizard(state: CampaignWizardState, currency: string, submitForReview: boolean): CampaignDraftSubmission {
+export function buildCampaignSubmissionFromWizard(state: CampaignWizardState, currency: string, submitForReview: boolean, own: OwnDestinationTargets = noOwnTargets): CampaignDraftSubmission {
   const schedule = buildScheduleFromWizard(state);
   const budget = buildBudgetFromWizard(state, currency);
   const spendCap = state.spendCapText.trim() ? parseTypedMajorAmountToMoney(state.spendCapText, currency) : null;
@@ -120,7 +140,7 @@ export function buildCampaignSubmissionFromWizard(state: CampaignWizardState, cu
       frequencyCap: state.isFrequencyCapEnabled ? { impressions: Number(state.frequencyImpressionsText), perDays: Number(state.frequencyPerDaysText) } : null,
       conversionEventId: state.objective === "sales" && state.conversionEventId ? state.conversionEventId : null,
     },
-    ads: state.ads.map((ad) => ({ name: ad.name.trim() || "Ad", creative: buildCreativeInputFromAdDraft(ad) })),
+    ads: state.ads.map((ad) => ({ name: ad.name.trim() || "Ad", creative: buildCreativeInputFromAdDraft(ad, own) })),
     submitForReview,
   };
 }

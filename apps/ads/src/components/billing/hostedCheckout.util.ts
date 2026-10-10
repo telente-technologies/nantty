@@ -1,6 +1,7 @@
 import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
 
-const allowedHostedCheckoutHosts = ["checkout.paystack.com"];
+const configuredCheckoutHosts = (process.env.NEXT_PUBLIC_ADS_CHECKOUT_HOSTS ?? "").split(",").map((host) => host.trim().toLowerCase()).filter(Boolean);
+const allowedHostedCheckoutHosts = configuredCheckoutHosts.length > 0 ? configuredCheckoutHosts : ["checkout.paystack.com"];
 
 export function isAuthorizationUrlSafeToOpen(authorizationUrl: string): boolean {
   if (authorizationUrl.startsWith("/accounts/") && !authorizationUrl.startsWith("//") && !authorizationUrl.includes("\\")) return true;

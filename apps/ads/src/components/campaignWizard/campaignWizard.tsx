@@ -11,7 +11,7 @@ import { BudgetScheduleStep } from "@/components/campaignWizard/budgetScheduleSt
 import { CampaignSettingsStep } from "@/components/campaignWizard/campaignSettingsStep";
 import { createInitialWizardState, reduceCampaignWizardState } from "@/components/campaignWizard/campaignWizardState.store";
 import { campaignWizardSteps, findStepIndexForApiIssuePath } from "@/components/campaignWizard/campaignWizardSteps.constant";
-import { buildCampaignSubmissionFromWizard } from "@/components/campaignWizard/campaignWizardSubmission.util";
+import { buildCampaignSubmissionFromWizard, readOwnDestinationTargets } from "@/components/campaignWizard/campaignWizardSubmission.util";
 import { findFirstStepWithErrors, validateWizardStep, type WizardFieldErrors } from "@/components/campaignWizard/campaignWizardValidation.util";
 import { ObjectiveStep } from "@/components/campaignWizard/objectiveStep";
 import { ReviewStep } from "@/components/campaignWizard/reviewStep";
@@ -86,7 +86,7 @@ export function CampaignWizard() {
     }
     setSubmittingMode(submitForReview ? "publish" : "draft");
     try {
-      const result = await campaignsApi.createCampaignWithAdSetAndAds(accountId, buildCampaignSubmissionFromWizard(state, currency, submitForReview), idempotencyKeyRef.current);
+      const result = await campaignsApi.createCampaignWithAdSetAndAds(accountId, buildCampaignSubmissionFromWizard(state, currency, submitForReview, readOwnDestinationTargets(account)), idempotencyKeyRef.current);
       showToast(submitForReview ? "Campaign published and sent for review" : "Campaign saved as a draft");
       router.push(buildAccountPagePath(`/campaigns/${result.campaign.id}`));
     } catch (error) {
