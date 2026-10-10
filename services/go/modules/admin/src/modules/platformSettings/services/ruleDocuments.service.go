@@ -40,13 +40,15 @@ type CheckmarkSuggestionRules struct {
 
 type CreatorProgramThresholds struct {
 	AutoApprove struct {
-		MinimumAccountAgeDays            int  `json:"minimumAccountAgeDays"`
-		RequiresVerifiedEmail            bool `json:"requiresVerifiedEmail"`
-		RequiresVerifiedPhone            bool `json:"requiresVerifiedPhone"`
-		MinimumRealFollowers             int  `json:"minimumRealFollowers"`
-		MinimumOriginalPostsInLast60Days int  `json:"minimumOriginalPostsInLast60Days"`
-		NoViolationsInDays               int  `json:"noViolationsInDays"`
-		MaximumFraudScore                int  `json:"maximumFraudScore"`
+		MinimumAccountAgeDays            int      `json:"minimumAccountAgeDays"`
+		RequiresVerifiedEmail            bool     `json:"requiresVerifiedEmail"`
+		MinimumRealFollowers             int      `json:"minimumRealFollowers"`
+		MinimumOriginalPostsInLast60Days int      `json:"minimumOriginalPostsInLast60Days"`
+		NoViolationsInDays               int      `json:"noViolationsInDays"`
+		MaximumFraudScore                int      `json:"maximumFraudScore"`
+		MaximumActiveStrikes             int      `json:"maximumActiveStrikes"`
+		RequiresIdentityVerification     bool     `json:"requiresIdentityVerification"`
+		AllowedCountries                 []string `json:"allowedCountries"`
 	} `json:"autoApprove"`
 	ManualReview struct {
 		MinimumRealFollowers             int  `json:"minimumRealFollowers"`
@@ -64,7 +66,6 @@ type TrialRules struct {
 	OnePerPerson           bool   `json:"onePerPerson"`
 	OnePerCard             bool   `json:"onePerCard"`
 	OnePerDevice           bool   `json:"onePerDevice"`
-	OnePerPhone            bool   `json:"onePerPhone"`
 	MaximumRiskScore       int    `json:"maximumRiskScore"`
 	MinimumCompletedOrders int    `json:"minimumCompletedOrders"`
 }
@@ -77,7 +78,7 @@ type CheckmarkPricingRules struct {
 
 func defaultCreatorThresholds() CreatorProgramThresholds {
 	thresholds := CreatorProgramThresholds{}
-	thresholds.AutoApprove.MinimumAccountAgeDays, thresholds.AutoApprove.RequiresVerifiedEmail, thresholds.AutoApprove.RequiresVerifiedPhone = 30, true, true
+	thresholds.AutoApprove.MinimumAccountAgeDays, thresholds.AutoApprove.RequiresVerifiedEmail, thresholds.AutoApprove.AllowedCountries = 30, true, []string{}
 	thresholds.AutoApprove.MinimumRealFollowers, thresholds.AutoApprove.MinimumOriginalPostsInLast60Days = 1000, 10
 	thresholds.AutoApprove.NoViolationsInDays, thresholds.AutoApprove.MaximumFraudScore = 90, 30
 	thresholds.ManualReview.MinimumRealFollowers, thresholds.ManualReview.AllowsPastViolation = 500, true
@@ -99,7 +100,7 @@ func init() {
 		CheckmarkSuggestionsKey: {Validate: validateCheckmarkSuggestionRules, DefaultValue: defaultCheckmarkSuggestionRules(), WritePermission: "config:rules"},
 		CreatorThresholdsKey:    {Validate: validateCreatorThresholds, DefaultValue: defaultCreatorThresholds(), WritePermission: "config:rules"},
 		TrialRulesKey: {Validate: validateTrialRules, WritePermission: "config:rules", DefaultValue: TrialRules{
-			TrialLength: "DAYS_7", YearlyDiscountPercent: 20, MinimumAccountAgeDays: 7, RequiresVerifiedEmail: true, OnePerPerson: true, OnePerCard: true, OnePerDevice: true, OnePerPhone: true, MaximumRiskScore: 50,
+			TrialLength: "DAYS_7", YearlyDiscountPercent: 20, MinimumAccountAgeDays: 7, RequiresVerifiedEmail: true, OnePerPerson: true, OnePerCard: true, OnePerDevice: true, MaximumRiskScore: 50,
 		}},
 		CheckmarkPricingKey: {Validate: validateCheckmarkPricing, WritePermission: "config:plans", DefaultValue: CheckmarkPricingRules{
 			BundleDiscountPercent: 15, BundleMaximumBusinesses: 3, BlackGraceDays: 14,
@@ -141,8 +142,13 @@ func validateCreatorThresholds(raw json.RawMessage) (json.RawMessage, error) {
 	if err := decodeStrictly(raw, &value); err != nil {
 		return nil, err
 	}
+	if value.AutoApprove.AllowedCountries == nil {
+		value.AutoApprove.AllowedCountries = []string{}
+	}
 	auto, review := value.AutoApprove, value.ManualReview
 	for _, check := range []error{
+		requireWithin("autoApprove.maximumActiveStrikes", auto.MaximumActiveStrikes, 0, 100),
+		requireCodes("autoApprove.allowedCountries", auto.AllowedCountries, isoCountryPattern, 0),
 		requireWithin("autoApprove.minimumAccountAgeDays", auto.MinimumAccountAgeDays, 0, 3650),
 		requireWithin("autoApprove.minimumRealFollowers", auto.MinimumRealFollowers, 0, 100_000_000),
 		requireWithin("autoApprove.minimumOriginalPostsInLast60Days", auto.MinimumOriginalPostsInLast60Days, 0, 100_000),

@@ -124,3 +124,14 @@ func validateRegionalPricing(raw json.RawMessage) (json.RawMessage, error) {
 	}
 	return canonicalJson(value)
 }
+
+func validateAppStoreFees(raw json.RawMessage) (json.RawMessage, error) {
+	var value regionpricing.StoreFeeSettings
+	if err := decodeStrictly(raw, &value); err != nil {
+		return nil, err
+	}
+	if err := regionpricing.ValidateStoreFeeSettings(value); err != nil {
+		return nil, adminerrors.Unprocessable(err.Error())
+	}
+	return canonicalJson(value)
+}

@@ -17,7 +17,7 @@ type PlatformSettingsReader struct {
 }
 
 func (reader PlatformSettingsReader) GetSettingView(ctx context.Context, key string) (models.PlatformSettingView, error) {
-	row, err := reader.Container.Client.PlatformSetting.Query().Where(platformsetting.Key(key)).Only(ctx)
+	row, err := reader.Container.Client.PlatformSetting.Query().Where(platformsetting.Key(StorageKeyFor(key))).Only(ctx)
 	if ent.IsNotFound(err) {
 		return models.PlatformSettingView{}, adminerrors.SettingNotFound
 	}
@@ -28,16 +28,20 @@ func (reader PlatformSettingsReader) GetSettingView(ctx context.Context, key str
 	if err != nil {
 		return models.PlatformSettingView{}, err
 	}
-	return views[0], nil
+	return ProjectSettingView(key, views[0])
 }
 
 func (reader PlatformSettingsReader) ReadSettingValue(ctx context.Context, key string) (json.RawMessage, int, error) {
-	row, err := reader.Container.Client.PlatformSetting.Query().Where(platformsetting.Key(key)).Only(ctx)
+	row, err := reader.Container.Client.PlatformSetting.Query().Where(platformsetting.Key(StorageKeyFor(key))).Only(ctx)
 	if ent.IsNotFound(err) {
 		return nil, 0, identityports.ErrSettingNotFound
 	}
 	if err != nil {
 		return nil, 0, err
+	}
+	if projection := PlatformSettingDefinitions[key].Projection; projection != nil {
+		value, err := projection.Project(row.Value)
+		return value, row.Version, err
 	}
 	return row.Value, row.Version, nil
 }

@@ -13,6 +13,7 @@ const (
 	GiftShareTiersKey      = "gift.shareTiers"
 	EscrowPolicyKey        = "escrow.policy"
 	RegionalPricingKey     = regionpricing.SettingKey
+	AppStoreFeesKey        = regionpricing.StoreFeesSettingKey
 	maximumCreatorShareBps = 7000
 )
 
@@ -22,6 +23,7 @@ type SettingDefinition struct {
 	Public                bool
 	WritePermission       string
 	ExtraWritePermissions []string
+	Projection            *SettingProjection
 }
 
 var PlatformSettingDefinitions = map[string]SettingDefinition{
@@ -40,7 +42,9 @@ var PlatformSettingDefinitions = map[string]SettingDefinition{
 	FeedRankingKey:        {Validate: validateFeedRankingPolicy, WritePermission: "config:rules", DefaultValue: DefaultFeedRankingPolicy},
 	TrendingModerationKey: {Validate: validateTrendingModeration, WritePermission: "content:review", ExtraWritePermissions: []string{"moderation:reports"}, DefaultValue: TrendingModeration{Removals: []TrendRemoval{}}},
 	EscrowPolicyKey:       {Validate: validateEscrowPolicy, WritePermission: "config:revenue", DefaultValue: EscrowPolicy{AutoReleaseDays: 3, SellerCreditHoldHours: 24, SellerReserveBps: 0}},
+	SellerSalesCapKey:     {Validate: validateSellerSalesCap, WritePermission: "config:revenue", DefaultValue: SellerSalesCap{CapsMinor: map[string]int64{"NGN": 20_000_000}}},
 	RegionalPricingKey:    {Validate: validateRegionalPricing, Public: true, WritePermission: "config:revenue", DefaultValue: regionpricing.DefaultSettingDocument()},
+	AppStoreFeesKey:       {Validate: validateAppStoreFees, Public: true, WritePermission: "config:revenue", DefaultValue: regionpricing.DefaultStoreFeeSettings()},
 }
 
 type CreatorRequirements struct {

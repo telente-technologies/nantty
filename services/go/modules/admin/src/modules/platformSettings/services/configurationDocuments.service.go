@@ -65,16 +65,6 @@ type RevenueRulesConfiguration struct {
 	} `json:"escrowFee"`
 }
 
-type CreatorEligibilityRules struct {
-	MinimumFollowers             int      `json:"minimumFollowers"`
-	MinimumPostsInLast30Days     int      `json:"minimumPostsInLast30Days"`
-	MaximumActiveStrikes         int      `json:"maximumActiveStrikes"`
-	MinimumAccountAgeDays        int      `json:"minimumAccountAgeDays"`
-	RequiresVerifiedPhone        bool     `json:"requiresVerifiedPhone"`
-	RequiresIdentityVerification bool     `json:"requiresIdentityVerification"`
-	AllowedCountries             []string `json:"allowedCountries"`
-}
-
 type UsernameRules struct {
 	ChangesAllowedPerWindow      int      `json:"changesAllowedPerWindow"`
 	ChangeWindowDays             int      `json:"changeWindowDays"`
@@ -89,7 +79,7 @@ func init() {
 	for key, definition := range map[string]SettingDefinition{
 		PlansKey:              {Validate: validatePlansConfiguration, WritePermission: "config:plans", DefaultValue: defaultPlansConfiguration()},
 		RevenueRulesKey:       {Validate: validateRevenueRules, WritePermission: "config:revenue", DefaultValue: defaultRevenueRules()},
-		CreatorEligibilityKey: {Validate: validateCreatorEligibility, WritePermission: "config:rules", DefaultValue: defaultCreatorEligibility()},
+		CreatorEligibilityKey: {Validate: validateCreatorEligibility, WritePermission: "config:rules", Projection: &SettingProjection{SourceKey: CreatorThresholdsKey, Project: projectCreatorEligibility, Merge: mergeCreatorEligibility}},
 		UsernameRulesKey:      {Validate: validateUsernameRules, WritePermission: "config:rules", DefaultValue: defaultUsernameRules()},
 	} {
 		PlatformSettingDefinitions[key] = definition
@@ -131,10 +121,6 @@ func defaultRevenueRules() RevenueRulesConfiguration {
 	rules.WithdrawalFee.Mode, rules.WithdrawalFee.Note = "PASS_THROUGH", "Daily automatic payouts are free; any provider transfer fee is passed through at cost with no Zudomart margin."
 	rules.EscrowFee.DefaultBasisPoints, rules.EscrowFee.BusinessPlanBasisPoints = 150, 100
 	return rules
-}
-
-func defaultCreatorEligibility() CreatorEligibilityRules {
-	return CreatorEligibilityRules{MinimumFollowers: 1000, MinimumPostsInLast30Days: 10, MaximumActiveStrikes: 0, MinimumAccountAgeDays: 30, AllowedCountries: []string{}}
 }
 
 func defaultUsernameRules() UsernameRules {
@@ -217,23 +203,6 @@ func validateRevenueRules(raw json.RawMessage) (json.RawMessage, error) {
 		if !currencyCodePattern.MatchString(unit.Currency) || unit.AmountMinor <= 0 {
 			return nil, adminerrors.Unprocessable("Each coin unit value needs a currency and a positive amountMinor.")
 		}
-	}
-	return canonicalJson(value)
-}
-
-func validateCreatorEligibility(raw json.RawMessage) (json.RawMessage, error) {
-	var value CreatorEligibilityRules
-	if err := decodeStrictly(raw, &value); err != nil {
-		return nil, err
-	}
-	if err := firstFailure(
-		requireWithin("minimumFollowers", value.MinimumFollowers, 0, 10_000_000),
-		requireWithin("minimumPostsInLast30Days", value.MinimumPostsInLast30Days, 0, 10_000),
-		requireWithin("maximumActiveStrikes", value.MaximumActiveStrikes, 0, 100),
-		requireWithin("minimumAccountAgeDays", value.MinimumAccountAgeDays, 0, 3650),
-		requireCodes("allowedCountries", value.AllowedCountries, isoCountryPattern, 0),
-	); err != nil {
-		return nil, err
 	}
 	return canonicalJson(value)
 }
