@@ -1,5 +1,6 @@
 import type {
   Comment,
+  CoinActivityEntry,
   CoinBalance,
   CoinPackage,
   ID,
@@ -37,7 +38,7 @@ export interface AccountEmailStatus {
 }
 
 export const commentsService = {
-  fetchReplies: (commentId: ID, cursor: string | null) =>
+  fetchReplies: (commentId: ID, cursor: string | null | undefined) =>
     sendRequestToWebappServer<Page<Comment>>(`/api/v1/comments/${commentId}/replies`, { query: { cursor: cursor ?? undefined } }),
   addComment: (postId: ID, text: string, parentCommentId: ID | undefined, mentions: readonly MentionEntity[]) =>
     sendRequestToWebappServer<Comment>(`/api/v1/posts/${postId}/comments`, { method: "POST", body: { text, parentCommentId, mentions }, idempotencyKey: createIdempotencyKey("comment") }),
@@ -72,6 +73,7 @@ export const liveService = {
 export const coinsService = {
   fetchCoinBalance: () => sendRequestToWebappServer<CoinBalance>("/api/v1/coins/balance"),
   fetchWebCoinPackages: () => sendListRequestToWebappServer<CoinPackage>("/api/v1/coins/packages"),
+  fetchCoinActivity: () => sendListRequestToWebappServer<CoinActivityEntry>("/api/v1/coins/transactions"),
   startCoinPurchase: (packageId: ID) =>
     sendRequestToWebappServer<CoinPurchaseCheckout>("/api/v1/coins/purchases", { method: "POST", body: { packageId }, idempotencyKey: createIdempotencyKey("coins") }),
   confirmCoinPurchase: (reference: string) =>

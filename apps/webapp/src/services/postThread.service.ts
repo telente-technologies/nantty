@@ -6,9 +6,9 @@ import { sendRequestToWebappServer } from "./clientApi.service";
 const adSessionId = `ads_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 
 export const postThreadService = {
-  fetchConversation: (postId: ID, sort: ThreadSort, cursor: string | null) =>
+  fetchConversation: (postId: ID, sort: ThreadSort, cursor: string | null | undefined) =>
     sendRequestToWebappServer<Page<ThreadReply>>(`/api/v1/posts/${postId}/thread`, { query: { sort, cursor: cursor ?? undefined } }),
-  fetchThreadReplies: (commentId: ID, cursor: string | null) =>
+  fetchThreadReplies: (commentId: ID, cursor: string | null | undefined) =>
     sendRequestToWebappServer<Page<ThreadReply>>(`/api/v1/comments/${commentId}/thread`, { query: { cursor: cursor ?? undefined } }),
   decideThreadAd: (postId: ID, slotIndex: number, slotsSinceLastAd: number, neighbourContentIds: readonly ID[]) =>
     sendRequestToWebappServer<ThreadAdDecision>("/api/v1/ads/decide", {

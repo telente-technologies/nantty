@@ -11,6 +11,8 @@ export const ordersService = {
     sendRequestToWebappServer<CheckoutResult>("/api/v1/orders/checkout", { method: "POST", body: { addressId, paymentModes: toPaymentModeChoices(paymentModes) }, idempotencyKey }),
   fetchMyOrders: (status: OrderStatus | null) => sendListRequestToWebappServer<Order>("/api/v1/orders", { query: { status: status ?? undefined } }),
   fetchOrderById: (orderId: string) => sendRequestToWebappServer<Order>(`/api/v1/orders/${orderId}`),
+  cancelMyOrder: (orderId: string, idempotencyKey: string) =>
+    sendRequestToWebappServer<Order>(`/api/v1/orders/${orderId}/cancel`, { method: "POST", body: { reason: "Cancelled by buyer" }, idempotencyKey }),
   confirmOrderReceipt: (orderId: string, idempotencyKey: string) =>
     sendRequestToWebappServer<Order>(`/api/v1/orders/${orderId}/confirm-receipt`, { method: "POST", idempotencyKey }),
 };
