@@ -18,6 +18,11 @@ func TestLiveSourcesConfirmMembershipAndProductOwnership(t *testing.T) {
 	other := harness.store(uuid.New(), "Other Store")
 	mine := harness.product(store, "Ankara Dress", 1_500_000, true)
 	theirs := harness.product(other, "Not Mine", 100, true)
+	draft := harness.product(store, "Draft Wrapper", 900, false)
+	archived := harness.product(store, "Old Stock", 700, true)
+	if err := harness.client().Product.UpdateOne(archived).SetStatus("archived").Exec(context.Background()); err != nil {
+		t.Fatal(err)
+	}
 	token := []string{"X-Internal-Token", harnessInternalToken}
 
 	harness.expect("GET", "/internal/v1/stores/"+store.ID.String()+"/members/"+ownerId.String(), "", nil, 401)
@@ -50,7 +55,20 @@ func TestLiveSourcesConfirmMembershipAndProductOwnership(t *testing.T) {
 	}
 	snapshot := products[0].(map[string]any)
 	price := snapshot["price"].(map[string]any)
-	if snapshot["title"] != "Ankara Dress" || price["amountMinor"] != float64(1_500_000) || price["currency"] != "NGN" || snapshot["imageUrl"] != nil {
+	if snapshot["title"] != "Ankara Dress" || price["amountMinor"] != float64(1_500_000) || price["currency"] != "NGN" || snapshot["imageUrl"] != nil || snapshot["status"] != "active" {
 		t.Fatalf("snapshot: %v", snapshot)
+	}
+
+	mixed := harness.expect("POST", path, "", map[string]any{"productIds": []string{mine.ID.String(), draft.ID.String(), archived.ID.String()}}, 200, token...)
+	statuses := map[string]any{}
+	for _, item := range mixed["products"].([]any) {
+		row := item.(map[string]any)
+		statuses[row["id"].(string)] = row["status"]
+	}
+	if len(statuses) != 2 || statuses[mine.ID.String()] != "active" || statuses[draft.ID.String()] != "draft" {
+		t.Fatalf("statuses: %v", mixed)
+	}
+	if _, found := statuses[archived.ID.String()]; found {
+		t.Fatalf("archived products must not be owned: %v", mixed)
 	}
 }

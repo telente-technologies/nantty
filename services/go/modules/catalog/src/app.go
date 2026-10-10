@@ -26,8 +26,8 @@ import (
 	featuredproducts "zudomart/modules/catalog/src/modules/featuredProducts"
 	"zudomart/modules/catalog/src/modules/follows"
 	"zudomart/modules/catalog/src/modules/interactions"
-	martfeatures "zudomart/modules/catalog/src/modules/martFeatures"
 	internalsources "zudomart/modules/catalog/src/modules/internalSources"
+	martfeatures "zudomart/modules/catalog/src/modules/martFeatures"
 	productimports "zudomart/modules/catalog/src/modules/productImports"
 	"zudomart/modules/catalog/src/modules/products"
 	"zudomart/modules/catalog/src/modules/reviews"
@@ -45,8 +45,8 @@ import (
 	"zudomart/platform/jwtauth"
 	"zudomart/platform/postgres"
 	"zudomart/platform/sellerplans"
-	"zudomart/platform/staffauth"
 	"zudomart/platform/servicemodule"
+	"zudomart/platform/staffauth"
 	"zudomart/platform/usersdirectory"
 	"zudomart/platform/viewerregion"
 )
@@ -59,6 +59,7 @@ type Collaborators struct {
 	Identity     interfaces.IdentityDirectory
 	PrivateMedia interfaces.PrivateMediaSigner
 	StoreFollows interfaces.StoreFollowStats
+	MartAds      interfaces.MartAdDecider
 }
 
 type Module struct {
@@ -95,6 +96,7 @@ func NewCatalogModule(ctx context.Context, dependencies servicemodule.Dependenci
 		Identity:     integrations.NewHttpIdentityDirectory(settings.AdminInternalUrl, settings.UsersInternalToken),
 		PrivateMedia: integrations.NewHttpPrivateMediaSigner(settings.MediaInternalUrl, settings.MediaInternalToken),
 		StoreFollows: integrations.NewSocialStoreFollows(settings.SocialInternalUrl, settings.SocialInternalToken),
+		MartAds:      integrations.NewHttpMartAds(settings.AdsInternalUrl, settings.AdsInternalSecret),
 	}, dependencies)
 }
 
@@ -117,7 +119,7 @@ func StartCatalogModuleWithSettings(ctx context.Context, settings configs.Catalo
 		Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Database: database,
 		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Rates: &viewerregion.RateReader{Database: database, Schema: "currency"}, Settings: settings, Logger: logger, Now: time.Now,
 		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger),
-		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia, StoreFollows: collaborators.StoreFollows,
+		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia, StoreFollows: collaborators.StoreFollows, MartAds: collaborators.MartAds,
 	}
 	commerceports.Default.RegisterCatalogReader(integrations.CommerceCatalog{Container: module.Container})
 	commerceports.Default.RegisterStoreShippingCountries(integrations.CommerceCatalog{Container: module.Container})

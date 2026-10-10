@@ -46,7 +46,7 @@ func TestStoreSettingsAndStorefrontSaveMergeAndAudit(t *testing.T) {
 		Tagline: pointer("Hand-dyed adire"), LogoMediaId: dtos.NullableText{Present: true, Value: pointer("media123")}, OpeningHours: &hours,
 		SocialLinks: &map[string]*string{"instagram": pointer("@adafabrics"), "website": nil}, FeaturedProductIds: &[]string{},
 	}})
-	if err != nil || front.Tagline != "Hand-dyed adire" || front.LogoUrl == nil || !strings.HasSuffix(*front.LogoUrl, "/media123") || *front.SocialLinks["instagram"] != "@adafabrics" || front.SocialLinks["website"] != nil {
+	if err != nil || front.Tagline != "Hand-dyed adire" || front.LogoUrl == nil || !strings.HasSuffix(*front.LogoUrl, "/m/media123/display.jpg") || *front.SocialLinks["instagram"] != "@adafabrics" || front.SocialLinks["website"] != nil {
 		t.Fatalf("storefront: %+v %v", front, err)
 	}
 	if len(front.OpeningHours) != 7 || !strings.Contains(front.PublicUrl, fixture.store.ID.String()) {

@@ -34,6 +34,8 @@ type CatalogSettings struct {
 	DataEncryptionKey      []byte
 	MartImageLibrary       string
 	MartCountries          []string
+	AdsInternalUrl         string
+	AdsInternalSecret      string
 }
 
 func (settings CatalogSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -48,7 +50,7 @@ func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		TokenIssuer:            reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
 		TokenAudience:          reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
 		RedisUrl:               reader.ReadStringOrDefault("CATALOG_REDIS_URL", ""),
-		MediaPublicBaseUrl:     reader.ReadStringOrDefault("MEDIA_PUBLIC_BASE_URL", "http://localhost:18333/zudomart-media"),
+		MediaPublicBaseUrl:     reader.ReadStringOrDefault("MEDIA_PUBLIC_BASE_URL", "http://localhost:18333/zudomart-media-public"),
 		InternalApiToken:       reader.ReadStringOrDefault("CATALOG_INTERNAL_API_TOKEN", ""),
 		EventsQueueName:        reader.ReadStringOrDefault("CATALOG_EVENTS_QUEUE", ""),
 		SocialInternalUrl:      reader.ReadStringOrDefault("CATALOG_SOCIAL_INTERNAL_URL", ""),
@@ -63,6 +65,8 @@ func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		MediaInternalToken:     reader.ReadStringOrDefault("MEDIA_INTERNAL_TOKEN", ""),
 		MartImageLibrary:       reader.ReadStringOrDefault("CATALOG_MART_IMAGE_LIBRARY", ""),
 		MartCountries:          reader.ReadCommaSeparatedListOrDefault("CATALOG_MART_COUNTRIES", []string{"NG", "GH", "KE", "ZA", "GB", "US"}),
+		AdsInternalUrl:         reader.ReadStringOrDefault("CATALOG_ADS_INTERNAL_URL", ""),
+		AdsInternalSecret:      reader.ReadStringOrDefault("ADS_INTERNAL_SHARED_SECRET", ""),
 	}
 	settings.DataEncryptionKey = ReadDataEncryptionKey(reader, settings.IsProduction())
 	return settings

@@ -30,6 +30,7 @@ type Container struct {
 	Identity         interfaces.IdentityDirectory
 	PrivateMedia     interfaces.PrivateMediaSigner
 	StoreFollows     interfaces.StoreFollowStats
+	MartAds          interfaces.MartAdDecider
 }
 
 type StaffVerifiers struct {
