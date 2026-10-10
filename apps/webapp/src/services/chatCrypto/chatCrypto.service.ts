@@ -35,6 +35,7 @@ export const chatCryptoService = {
     return getClient().encryptMessage({ kind: "direct", conversationId: null, memberUserIds: [userId] }, input);
   },
   decryptMessages: async (messages: readonly Message[], viewerId: ID): Promise<Message[]> => {
+    void client?.purgeExpiredPlaintext().catch(() => undefined);
     if (!messages.some((message) => message.encryption?.ciphertext)) return messages.map((message) => (typeof message.linkPreview === "string" ? { ...message, linkPreview: null } : message));
     await getClient().ensureReady(viewerId);
     const results = await getClient().decryptMessages(messages);
@@ -43,9 +44,10 @@ export const chatCryptoService = {
       const plainPreview = typeof message.linkPreview === "string" ? null : (message.linkPreview ?? null);
       if (result === undefined || result.status === "unencrypted") return { ...message, linkPreview: plainPreview };
       if (result.status === "failed") return { ...message, text: "", linkPreview: null, decryptionNotice: describeDecryptionFailure(result.reason) };
-      return { ...message, text: result.payload.text, linkPreview: result.payload.linkPreview ?? null, decryptionNotice: null };
+      return { ...message, text: result.payload.text, linkPreview: result.payload.linkPreview ?? null, attachment: result.payload.attachment ?? null, decryptionNotice: null };
     });
   },
+  purgeExpiredPlaintext: () => client?.purgeExpiredPlaintext() ?? Promise.resolve(0),
   identityChanges: (userIds: readonly ID[]) => getClient().identityChanges(userIds),
   acknowledgeIdentityChange: (userId: ID) => getClient().acknowledgeIdentityChange(userId),
   securityCode: (userId: ID) => getClient().securityCode(userId),

@@ -6,7 +6,8 @@ import { createIdempotencyKey, sendListRequestToWebappServer, sendRequestToWebap
 
 export const messagesService = {
   fetchConversationList: (filter: ConversationFilter) =>
-    sendListRequestToWebappServer<Conversation>("/api/v1/conversations", { query: { filter } }),
+    sendListRequestToWebappServer<Conversation>("/api/v1/conversations", { query: filter === "requests" ? { folder: "requests" } : { filter } }),
+  acceptMessageRequest: (conversationId: string) => sendRequestToWebappServer<Conversation>(`/api/v1/conversations/${conversationId}/accept`, { method: "POST" }),
   fetchConversationById: (conversationId: string) => sendRequestToWebappServer<Conversation>(`/api/v1/conversations/${conversationId}`),
   fetchMessagesInConversation: (conversationId: string, options: { readonly cursor?: string; readonly after?: string } = {}) =>
     sendRequestToWebappServer<Page<Message>>(`/api/v1/conversations/${conversationId}/messages`, {
@@ -20,7 +21,7 @@ export const messagesService = {
       body: { kind: "text", encryption: encrypted.encryption },
       idempotencyKey: createIdempotencyKey("msg"),
     });
-    await encrypted.confirmSent(message.id);
+    await encrypted.confirmSent(message.id, message.expiresAt ?? null);
     return { ...message, text };
   },
   fetchDecryptedMessagesInConversation: async (conversationId: string, viewerId: string, options: { readonly cursor?: string; readonly after?: string } = {}): Promise<Page<Message>> => {
