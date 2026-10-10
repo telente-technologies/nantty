@@ -98,6 +98,8 @@ async def test_stored_behaviour_from_events_raises_the_score(
 
 
 class RecordingPublisher:
+    delivers = True
+
     def __init__(self) -> None:
         self.published: list[SuspensionSuggestion] = []
 
@@ -136,6 +138,8 @@ async def test_publisher_failure_never_breaks_scoring(
     application_container: ApplicationContainer, reference_now: datetime
 ) -> None:
     class FailingPublisher:
+        delivers = True
+
         async def publish_suspension_suggestion(self, _suggestion: SuspensionSuggestion) -> None:
             raise RuntimeError("queue down")
 

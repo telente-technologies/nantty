@@ -1,7 +1,11 @@
+import asyncio
 import json
 import time
 from datetime import datetime
 from typing import Any
+from unittest.mock import patch
+
+import pytest
 
 from src.container import ApplicationContainer
 from src.databases.in_memory_feature_database import InMemoryFeatureBackend
@@ -278,3 +282,18 @@ async def test_contract_post_created_and_media_processed_reach_content_scoring(
         [application_container.feature_store.keyspace.media_post_link_key("media_9")], 1
     )
     assert links[0][0][0] == "post_9|author_9|post"
+
+
+async def test_cancelled_processing_releases_the_claim_for_redelivery(
+    application_container: ApplicationContainer, reference_now: datetime
+) -> None:
+    consumer = application_container.domain_event_consumer_service
+    body = product_viewed("evt_cancel_1", "author_cancel_1", reference_now)
+
+    async def cancelled(_event: object) -> object:
+        raise asyncio.CancelledError
+
+    with patch.object(consumer, "apply_event", cancelled), pytest.raises(asyncio.CancelledError):
+        await consumer.process_message_body(body)
+    redelivery = await consumer.process_message_body(body)
+    assert redelivery.status == "processed"

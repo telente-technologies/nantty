@@ -38,6 +38,8 @@ SHARED_SECRET = "test-shared-secret-that-is-long-enough-000"
 
 
 class RecordingLiveSafetyPublisher:
+    delivers = True
+
     def __init__(self) -> None:
         self.messages: list[LiveSafetyScoreMessage] = []
 
@@ -221,7 +223,7 @@ class FakeSession:
     def get_credentials(self) -> object | None:
         return object() if self.has_credentials else None
 
-    def client(self, _name: str) -> RecordedRekognitionClient:
+    def client(self, _name: str, **_kwargs: object) -> RecordedRekognitionClient:
         return RecordedRekognitionClient("rekognition_safe_frame.json")
 
 

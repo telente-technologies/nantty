@@ -1,17 +1,21 @@
 import base64
+from collections.abc import Sequence
 from datetime import datetime, timedelta
+from unittest.mock import patch
 
 import numpy as np
 import numpy.typing as npt
 import pytest
 
 from src.container import ApplicationContainer
+from src.interfaces.feature_backend_interface import FeatureWriteOperation
 from src.modules.audio.dtos.audio_fingerprint_dto import (
     AudioFingerprintRegistrationRequest,
     AudioMatchRequest,
     AudioSoundStatusUpdateRequest,
 )
 from src.modules.audio.services.audio_fingerprint_index_service import (
+    EXCERPT_CLAIM_RETENTION_SECONDS,
     AudioFingerprintIndexService,
     AudioSoundAlreadyRegisteredError,
 )
@@ -185,3 +189,27 @@ async def test_long_sound_can_be_registered_as_several_excerpts(
     response = await index.match_audio(build_match_request(song[33 * SAMPLE_RATE_HZ : 41 * SAMPLE_RATE_HZ]))
     assert response.matches[0].sound_id == "sound_long_mix"
     assert abs(response.matches[0].matched_position_seconds - 33.0) < 0.1
+
+
+async def test_failed_registration_releases_the_excerpt_claim_for_retry(
+    application_container: ApplicationContainer, reference_now: datetime
+) -> None:
+    assert EXCERPT_CLAIM_RETENTION_SECONDS <= 15 * 60
+    index = AudioFingerprintIndexService(application_container.feature_store)
+    backend = application_container.feature_store.feature_backend
+    song = synthesize_chord_melody(9, 12)
+    registration = build_registration("sound_retry_mix", song, reference_now, verified=True)
+    original_apply = backend.apply_write_operations
+    calls = 0
+
+    async def fail_once(operations: Sequence[FeatureWriteOperation]) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise RuntimeError("boom")
+        await original_apply(operations)
+
+    with patch.object(backend, "apply_write_operations", fail_once), pytest.raises(RuntimeError):
+        await index.register_sound(registration)
+    response = await index.register_sound(registration)
+    assert response.sound_id == "sound_retry_mix"

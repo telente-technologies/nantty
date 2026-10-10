@@ -68,15 +68,16 @@ async def test_clean_order_is_low_risk_and_allowed(signed_client: SignedIntellig
     assert (body["level"], body["recommendedAction"], body["score"]) == ("low", "allow", 0.0)
 
 
-async def test_missing_exchange_rate_adds_zero_weight_reason(signed_client: SignedIntelligenceClient) -> None:
+async def test_missing_exchange_rate_adds_floor_weight_reason(signed_client: SignedIntelligenceClient) -> None:
     payload = build_risk_request(
         "order",
         {"amount": {"amountMinor": 100, "currency": "GHS"}, "accountAgeHours": 1, "buyerPreviousOrderCount": 0},
     )
     body = await score(signed_client, payload)
     weights = {reason["code"]: reason["weight"] for reason in body["reasons"]}
-    assert weights["exchange_rate_unavailable"] == 0.0
+    assert weights["exchange_rate_unavailable"] == 0.35
     assert "new_account_high_value" not in weights
+    assert body["recommendedAction"] == "review"
 
 
 async def test_random_orders_never_produce_an_action_outside_allow_review_or_hold(

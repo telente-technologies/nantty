@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 
-from src.dtos.common_dto import ExchangeRateToUsd, ViewerContext
+from src.dtos.common_dto import ExchangeRateToUsd, MoneyAmount, ViewerContext
 from src.modules.ads.dtos.ad_selection_dto import AdCandidate
 from src.modules.ads.services.ad_auction_service import (
     AuctionEntry,
@@ -10,6 +10,7 @@ from src.modules.ads.services.ad_auction_service import (
     run_generalized_second_price_auction,
 )
 from src.modules.ads.services.ad_eligibility_service import AdEligibilityContext, EligibleAd, evaluate_ad_eligibility
+from src.modules.ads.services.ad_selection_service import resolve_reserve_price_or_reject
 from src.services.currency_conversion_service import build_usd_rate_lookup, convert_money_to_usd_micros
 
 NAIRA_TO_USD_RATES = build_usd_rate_lookup([ExchangeRateToUsd(currency="NGN", usd_per_major_unit=Decimal("0.00065"))])
@@ -152,3 +153,25 @@ def test_eligible_naira_ad_converts_bid_to_usd_micros() -> None:
     outcome = evaluate_ad_eligibility(candidate, build_eligibility_context(NAIRA_TO_USD_RATES))
     assert isinstance(outcome, EligibleAd)
     assert outcome.bid_usd_micros == Decimal("65000.00000")
+
+
+def test_unrated_reserve_currency_rejects_every_ad_instead_of_zeroing_the_floor() -> None:
+    candidate = build_ad_candidate("ad_gh", "advertiser_gh", "cpm", 900, "GHS")
+    eligible = [EligibleAd(candidate, Decimal(585_000), 0.0)]
+    reserve, rejected = resolve_reserve_price_or_reject(
+        MoneyAmount(amount_minor=500, currency="GHS"), eligible, NAIRA_TO_USD_RATES
+    )
+    assert reserve == Decimal(0)
+    assert [item.ad_id for item in rejected] == ["ad_gh"]
+    assert all(item.reason == "reserve_unavailable" for item in rejected)
+
+
+def test_rated_reserve_and_absent_reserve_pass_through() -> None:
+    candidate = build_ad_candidate("ad_ng", "advertiser_ng", "cpm", 900, "NGN")
+    eligible = [EligibleAd(candidate, Decimal(585_000), 0.0)]
+    reserve, rejected = resolve_reserve_price_or_reject(
+        MoneyAmount(amount_minor=500_000, currency="NGN"), eligible, NAIRA_TO_USD_RATES
+    )
+    assert rejected == []
+    assert reserve == Decimal(3_250_000)
+    assert resolve_reserve_price_or_reject(None, eligible, NAIRA_TO_USD_RATES) == (Decimal(0), [])

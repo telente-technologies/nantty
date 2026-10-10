@@ -20,6 +20,8 @@ NOW = datetime(2026, 10, 4, 9, 0, tzinfo=UTC)
 
 
 class RecordingPublisher:
+    delivers = True
+
     def __init__(self) -> None:
         self.messages: list[ContentScoreMessage] = []
 
@@ -141,3 +143,20 @@ async def test_scores_are_routed_to_the_content_scores_job_queue() -> None:
     sent, routing_key = provider.exchange.published[0]
     assert routing_key == "intelligence-trust-content-scores"
     assert sent.message_id == message.score_id
+
+
+class ExplodingImageModel:
+    version = "image-test-exploding-v1"
+
+    def classify_image(self, _request: ImageModerationRequest) -> dict[str, float]:
+        raise RuntimeError("rekognition down")
+
+
+def test_failing_image_model_floors_the_action_at_review_with_unavailable_version() -> None:
+    holder = ImageModerationModelHolder()
+    holder.register_model(ExplodingImageModel())
+    service = ImageModerationService(holder)
+    response = service.classify_image(ImageModerationRequest(media_id="media-9"))
+    assert response.suggested_action == "review"
+    assert response.model_version == "unavailable"
+    assert response.no_signal is True

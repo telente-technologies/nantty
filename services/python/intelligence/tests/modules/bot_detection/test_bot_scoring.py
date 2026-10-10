@@ -9,6 +9,8 @@ NOW = datetime(2026, 10, 4, 12, 0, tzinfo=UTC)
 
 
 class RecordingBotScorePublisher:
+    delivers = True
+
     def __init__(self) -> None:
         self.published: list[BotScoreAdvisory] = []
 

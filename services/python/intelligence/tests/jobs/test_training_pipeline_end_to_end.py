@@ -1,12 +1,13 @@
 import asyncio
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-from src.configs.settings_config import IntelligenceSettings
+from src.configs.settings_config import IntelligenceSettings, load_intelligence_settings
 from src.container import build_application_container
 from src.databases.in_memory_feature_database import InMemoryFeatureBackend
 from src.integrations.dataset_storage_integration import build_local_dataset_storage_location
@@ -25,9 +26,18 @@ def trained_workspace(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Any
     storage = workspace / "data"
     registry = workspace / "registry"
     summary = asyncio.run(generate_synthetic_dataset(storage, user_count=24, sessions_per_user=3, seed=11))
-    exit_code = run_pipeline_command(
-        ["--storage", str(storage), "--registry", str(registry), "train", "--force-activation"]
-    )
+    previous_env = dict(os.environ)
+    os.environ["INTELLIGENCE_SHARED_SECRET"] = "pipeline-test-secret-00000000000000000000"
+    os.environ["INTELLIGENCE_MODEL_SIGNING_SECRET"] = "pipeline-test-model-signing-secret-000000"
+    load_intelligence_settings.cache_clear()
+    try:
+        exit_code = run_pipeline_command(
+            ["--storage", str(storage), "--registry", str(registry), "train", "--force-activation"]
+        )
+    finally:
+        os.environ.clear()
+        os.environ.update(previous_env)
+        load_intelligence_settings.cache_clear()
     return {"storage": storage, "registry": registry, "summary": summary, "exit_code": exit_code}
 
 

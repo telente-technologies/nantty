@@ -19,6 +19,8 @@ NOW = datetime(2026, 10, 4, 9, 0, tzinfo=UTC)
 
 
 class RecordingScorePublisher:
+    delivers = True
+
     def __init__(self) -> None:
         self.messages: list[ContentScoreMessage] = []
 
@@ -27,6 +29,8 @@ class RecordingScorePublisher:
 
 
 class RecordingSensitivityPublisher:
+    delivers = True
+
     def __init__(self) -> None:
         self.events: list[SensitivityAdvisedEvent] = []
 

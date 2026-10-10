@@ -96,7 +96,18 @@ async def test_holder_keeps_serving_previous_model_when_new_artifact_is_corrupt(
     registry.activate_model_version("ad_click", good_version)
     await holder.reload_changed_models()
     bad_version = register_bundle(registry, 0.9, second=2)
-    (tmp_path / "ad_click" / bad_version / "artifact.pkl").write_bytes(b"corrupt")
     registry.activate_model_version("ad_click", bad_version)
+    (tmp_path / "ad_click" / bad_version / "artifact.pkl").write_bytes(b"corrupt")
     await holder.reload_changed_models()
     assert holder.get_active_version("ad_click") == good_version
+
+
+def test_activation_verifies_artifact_before_writing_pointer(tmp_path: Path) -> None:
+    registry = ModelRegistry(tmp_path, SIGNING_SECRET)
+    good_version = register_bundle(registry, 0.2, second=1)
+    registry.activate_model_version("ad_click", good_version)
+    bad_version = register_bundle(registry, 0.9, second=2)
+    (tmp_path / "ad_click" / bad_version / "artifact.pkl").write_bytes(b"corrupt")
+    with pytest.raises(ModelArtifactRejectedError, match="artifact_digest_mismatch"):
+        registry.activate_model_version("ad_click", bad_version)
+    assert registry.read_active_version("ad_click") == good_version
