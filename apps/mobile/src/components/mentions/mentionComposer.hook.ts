@@ -4,7 +4,7 @@ import { Text as NativeText, type NativeSyntheticEvent, type TextInput, type Tex
 
 import { useTheme } from "@/theme";
 
-import { mentionsService } from "@/services/mentions.service";
+import { mentionsService } from "@/services/content/mentions.service";
 import { useAuthStore } from "@/store/auth.store";
 import { showToast } from "@/store/toast.store";
 import type { MentionCandidate, MentionEntity, MentionEveryoneOption, MentionSurface } from "@/types/mention.type";

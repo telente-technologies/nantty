@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { retryFailedUpload } from "@/services/mediaUploadQueue.service";
+import { retryFailedUpload } from "@/services/media/mediaUploadQueue.service";
 import { useUploadJobProgress } from "@/store/uploadQueue.store";
 import type { ID } from "@/types";
 

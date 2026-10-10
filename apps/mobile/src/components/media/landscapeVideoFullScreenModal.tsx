@@ -12,6 +12,7 @@ import type { Media, SaveTarget } from "@/types";
 
 import { ClipVideoPlayer } from "./clipVideoPlayer";
 import { isLandscapeMedia } from "./videoOrientation.util";
+import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
 
 export interface LandscapeVideoFullScreenModalProps {
   readonly media: Media | null;
@@ -19,11 +20,12 @@ export interface LandscapeVideoFullScreenModalProps {
   readonly onClose: () => void;
   readonly saveTarget?: SaveTarget;
   readonly savedAccordingToServer?: boolean;
+  readonly look?: string | null;
 }
 
 const canLockScreenOrientation = Platform.OS === "ios" || Platform.OS === "android";
 
-export function LandscapeVideoFullScreenModal({ media, isMuted, onClose, saveTarget, savedAccordingToServer = false }: LandscapeVideoFullScreenModalProps) {
+export function LandscapeVideoFullScreenModal({ media, isMuted, onClose, saveTarget, savedAccordingToServer = false, look }: LandscapeVideoFullScreenModalProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const isOpen = media !== null;
@@ -69,6 +71,7 @@ export function LandscapeVideoFullScreenModal({ media, isMuted, onClose, saveTar
       <View style={styles.root}>
         <View style={stageStyle}>
           {media ? <ClipVideoPlayer media={media} isActive isMuted={isMuted} contentFit="contain" style={StyleSheet.absoluteFill} /> : null}
+          <ClipLookOverlay look={isClipLookId(look) ? look : "none"} />
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel="Exit full screen" hitSlop={12} onPress={onClose} style={styles.close}>
           <Cancel20Icon color={colors.white} />

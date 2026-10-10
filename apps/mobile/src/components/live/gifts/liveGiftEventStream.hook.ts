@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
 import { shouldUseMockForPath } from "@/config/api.config";
-import { startMockLiveGiftEmitter } from "@/services/liveGiftMockEmitter.service";
-import { realtimeService } from "@/services/realtime.service";
+import { startMockLiveGiftEmitter } from "@/services/live/liveGiftMockEmitter.service";
+import { realtimeService } from "@/services/core/realtime.service";
 import type { LiveGiftSentEvent } from "@/types";
 
 export type LiveGiftSentListener = (event: LiveGiftSentEvent) => void;

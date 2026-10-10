@@ -2,6 +2,7 @@ import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
+import { Eye24Icon, VideoCamera24Icon } from "@/components/icons";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
 import { ModalActionStack } from "@/components/ui/modalActions";
@@ -52,9 +53,12 @@ export function JoinLiveCard({ session, showHost, onWatch, onDismiss }: JoinLive
                 </Text>
                 <VerificationBadge verification={session.host.verification} legacyVerified={session.host.verified} size={14} />
               </View>
-              <Text size={13} lineHeight={18} color={colors.textMuted} numberOfLines={1}>
-                @{session.host.username} · {othersWatching}
-              </Text>
+              <View style={styles.viewerRow}>
+                <Eye24Icon size={20} color={colors.textMuted} />
+                <Text size={13} lineHeight={18} color={colors.textMuted} numberOfLines={1}>
+                  @{session.host.username} · {othersWatching}
+                </Text>
+              </View>
             </View>
           </View>
         ) : (
@@ -69,6 +73,7 @@ export function JoinLiveCard({ session, showHost, onWatch, onDismiss }: JoinLive
         ) : null}
         {session.category ? (
           <View style={styles.chip}>
+            <VideoCamera24Icon size={20} color={colors.textMuted} />
             <Text size={12} weight={600} lineHeight={16} color={colors.textMuted}>
               {LIVE_CATEGORY_LABELS[session.category]}
             </Text>
@@ -96,9 +101,10 @@ const useStyles = makeThemedStyles((colors, scheme) => {
     body: { padding: 16, gap: 10 },
     hostRow: { flexDirection: "row", alignItems: "center", gap: 12 },
     hostText: { flex: 1, gap: 2 },
+    viewerRow: { flexDirection: "row", alignItems: "center", gap: 6 },
     nameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
     shrink: { flexShrink: 1 },
-    chip: { alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: palette.inset },
+    chip: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: palette.inset },
     actions: { marginTop: 6 },
   });
 });

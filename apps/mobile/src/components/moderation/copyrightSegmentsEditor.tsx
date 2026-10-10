@@ -1,7 +1,7 @@
 import { Pressable, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { parseTimestampToSeconds } from "@/services/accountHealth.service";
+import { parseTimestampToSeconds } from "@/services/account/accountHealth.service";
 import { useTheme } from "@/theme";
 
 import { ClaimTextField, useClaimFieldStyles } from "./copyrightClaimFields";

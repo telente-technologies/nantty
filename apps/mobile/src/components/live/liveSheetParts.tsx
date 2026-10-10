@@ -50,16 +50,26 @@ export function LiveSheetPersonRow({ user, caption, children }: { user: UserSumm
   );
 }
 
-export function LiveSheetSectionTitle({ children }: { children: string }) {
+export function LiveSheetSectionTitle({ children, icon }: { children: string; icon?: ReactNode }) {
   const { colors } = useTheme();
+  if (!icon) {
+    return (
+      <Text size={12} weight={600} lineHeight={16} letterSpacing={0.4} color={colors.textMuted} style={sectionTitleStyle.title} accessibilityRole="header">
+        {children.toUpperCase()}
+      </Text>
+    );
+  }
   return (
-    <Text size={12} weight={600} lineHeight={16} letterSpacing={0.4} color={colors.textMuted} style={sectionTitleStyle.title} accessibilityRole="header">
-      {children.toUpperCase()}
-    </Text>
+    <View style={sectionTitleStyle.row}>
+      {icon}
+      <Text size={12} weight={600} lineHeight={16} letterSpacing={0.4} color={colors.textMuted} accessibilityRole="header">
+        {children.toUpperCase()}
+      </Text>
+    </View>
   );
 }
 
-const sectionTitleStyle = StyleSheet.create({ title: { marginTop: 10 } });
+const sectionTitleStyle = StyleSheet.create({ title: { marginTop: 10 }, row: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10 } });
 
 const useStyles = makeThemedStyles((colors, scheme) => {
   const palette = buildModalPalette(colors, scheme);

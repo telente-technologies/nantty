@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
-import { giftsService, type LiveGiftGoalInput } from "@/services/gifts.service";
+import { giftsService, type LiveGiftGoalInput } from "@/services/money/gifts.service";
 
 import { useLiveGiftSentEvents } from "./liveGiftEventStream.hook";
 

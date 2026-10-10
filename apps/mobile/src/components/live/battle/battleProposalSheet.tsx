@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
+import { SealCheck20Icon, Swords24Icon, UserCircle24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { ModalActionStack } from "@/components/ui/modalActions";
 import { buildModalPalette } from "@/components/ui/modalChrome.constant";
@@ -34,6 +35,9 @@ export function BattleProposalSheet(props: BattleProposalSheetProps) {
   return (
     <BottomSheet visible={props.isVisible} onClose={props.onClose} title="Winner takes all?" subtitle={`${minutes}-minute battle`} floating>
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <Swords24Icon size={22} color={colors.textMuted} />
+        </View>
         <Text size={13} lineHeight={18} color={colors.textMuted}>
           {props.isHostView ? "You" : props.hostName} proposed a {minutes}-minute winner-takes-all battle. When it ends, every coin gifted to the other streamers goes to the
           winner. A draw means everyone keeps their own coins. Every guest has to accept first.
@@ -41,6 +45,11 @@ export function BattleProposalSheet(props: BattleProposalSheetProps) {
         {props.isHostView
           ? proposal.consents.map((consent) => (
               <View key={consent.userId} style={styles.row}>
+                {consent.state === "accepted" ? (
+                  <SealCheck20Icon size={20} color={colors.successText} />
+                ) : (
+                  <UserCircle24Icon size={20} color={colors.textMuted} />
+                )}
                 <Text size={14} lineHeight={17} style={styles.flex} numberOfLines={1}>
                   {nameOf(consent.userId)}
                 </Text>

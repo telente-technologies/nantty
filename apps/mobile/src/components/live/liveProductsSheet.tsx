@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { Storefront24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
 import type { ProductSummary } from "@/types";
@@ -16,9 +17,13 @@ export interface LiveProductsSheetProps {
 
 export function LiveProductsSheet({ visible, products, onClose, onOpenProduct }: LiveProductsSheetProps) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <BottomSheet visible={visible} onClose={onClose} title="In this live" floating>
       <View style={styles.list}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <Storefront24Icon size={22} color={colors.textMuted} />
+        </View>
         {products.map((product) => (
           <Pressable key={product.id} accessibilityRole="button" accessibilityLabel={product.name} onPress={() => onOpenProduct(product.id)} style={styles.item}>
             <View style={styles.row}>

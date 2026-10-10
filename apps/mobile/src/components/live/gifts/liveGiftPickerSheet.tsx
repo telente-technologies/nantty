@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
+import { Flame24Icon, Medal24Icon, Trophy24Icon } from "@/components/icons";
 import { BuyCoinsSheet } from "@/components/coins/buyCoinsSheet";
 import { CoinBalanceChip } from "@/components/coins/coinBalanceChip";
 import { useCoinBalance } from "@/components/coins/coinWallet.hook";
@@ -68,6 +69,13 @@ export function LiveGiftPickerSheet({ liveId, recipientUserId, visible, onClose 
           <View style={styles.tabs} accessibilityRole="tablist">
             {PANEL_SECTIONS.map((tab) => (
               <Pressable key={tab.key} accessibilityRole="tab" accessibilityState={{ selected: section === tab.key }} onPress={() => setSection(tab.key)} style={styles.tab}>
+                {tab.key === "popular" ? (
+                  <Flame24Icon size={20} color={section === tab.key ? colors.text : colors.textMuted} />
+                ) : tab.key === "premium" ? (
+                  <Medal24Icon size={20} color={section === tab.key ? colors.text : colors.textMuted} />
+                ) : (
+                  <Trophy24Icon size={20} color={section === tab.key ? colors.text : colors.textMuted} />
+                )}
                 <Text size={14} weight={section === tab.key ? 700 : 500} lineHeight={18} color={section === tab.key ? colors.text : colors.textMuted}>
                   {tab.label}
                 </Text>
@@ -122,7 +130,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   balanceRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   recharge: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.primarySolid },
   tabs: { flexDirection: "row", gap: 20, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.divider },
-  tab: { paddingBottom: 8 },
+  tab: { flexDirection: "row", alignItems: "center", gap: 6, paddingBottom: 8 },
   tabUnderline: { position: "absolute", left: 0, right: 0, bottom: -1, height: 2, borderRadius: 1, backgroundColor: colors.primary },
   grid: { flexDirection: "row", flexWrap: "wrap", columnGap: "2%", rowGap: 6, minHeight: 180 },
   quantityRow: { flexDirection: "row", gap: 8 },

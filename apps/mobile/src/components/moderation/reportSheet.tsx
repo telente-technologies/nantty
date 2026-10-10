@@ -8,15 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { isCopyrightClaimTargetType } from "@/services/copyrightClaims.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { isCopyrightClaimTargetType } from "@/services/moderation/copyrightClaims.service";
 import {
   MAXIMUM_REPORT_DETAILS_LENGTH,
   REPORT_REASON_OPTIONS,
   reportsService,
   type ReportReason,
   type ReportTargetType,
-} from "@/services/reports.service";
+} from "@/services/moderation/reports.service";
 import type { ID } from "@/types";
 
 import { CopyrightClaimForm } from "./copyrightClaimForm";

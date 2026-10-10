@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { liveGiftLeaderboardQueryKey } from "@/components/live/gifts/liveGiftStats.hook";
-import { pointsService } from "@/services/points.service";
+import { pointsService } from "@/services/social/points.service";
 import type { LivePointsAction, LiveViewerPoints } from "@/types/socialGraph.type";
 
 const WATCH_TIME_POINTS_INTERVAL_MS = 60_000;

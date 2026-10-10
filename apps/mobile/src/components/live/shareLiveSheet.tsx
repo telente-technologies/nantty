@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
-import { liveService } from "@/services/live.service";
+import { liveService } from "@/services/live/live.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { webAppLinks } from "@/config/webAppLinks.config";
 

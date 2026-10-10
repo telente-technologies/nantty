@@ -2,8 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { shouldUseMockForPath } from "@/config/api.config";
-import { liveSafetyService } from "@/services/liveSafety.service";
-import { realtimeService } from "@/services/realtime.service";
+import { liveSafetyService } from "@/services/live/liveSafety.service";
+import { realtimeService } from "@/services/core/realtime.service";
 import type { LiveSafetyHostNoticeRealtimeEvent, LiveSafetyState } from "@/types";
 
 const SAFETY_POLL_INTERVAL_MS = 10_000;

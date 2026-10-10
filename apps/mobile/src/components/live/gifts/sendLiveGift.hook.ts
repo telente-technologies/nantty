@@ -3,8 +3,8 @@ import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { COIN_BALANCE_QUERY_KEY } from "@/components/coins/coinWallet.hook";
-import { ApiError, generateIdempotencyKey } from "@/services/apiClient.service";
-import { giftsService } from "@/services/gifts.service";
+import { ApiError, generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { giftsService } from "@/services/money/gifts.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CoinBalance, LiveGift, LiveGiftSentEvent, SentLiveGiftReceipt, UserSummary } from "@/types";
 

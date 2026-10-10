@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { liveService } from "@/services/live.service";
+import { liveService } from "@/services/live/live.service";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 
 export function useLiveSessionWithActions(liveId: string, hasJoined: boolean) {

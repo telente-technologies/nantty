@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
+import { UserPlus24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { ModalActionStack } from "@/components/ui/modalActions";
@@ -26,6 +27,9 @@ export function LiveStageInvitePrompt({ invite, host, isResponding, onAccept, on
         <LiveAvatarRing size={64}>
           <Avatar uri={host.avatarUrl} size={64} />
         </LiveAvatarRing>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <UserPlus24Icon size={22} color={colors.textMuted} />
+        </View>
         <Text size={18} weight={600} lineHeight={24} align="center" accessibilityRole="header" style={styles.title}>
           {host.name} invited you to join the LIVE
         </Text>

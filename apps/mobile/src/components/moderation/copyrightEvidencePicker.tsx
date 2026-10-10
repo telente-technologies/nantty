@@ -3,7 +3,7 @@ import { Pressable, View } from "react-native";
 
 import { pickPhotosAndVideosFromLibrary } from "@/components/create/pickMedia.util";
 import { Text } from "@/components/ui/text";
-import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
+import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/media/mediaUploadQueue.service";
 import { useTheme } from "@/theme";
 import type { ID } from "@/types";
 

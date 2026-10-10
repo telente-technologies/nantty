@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { ApiError } from "@/services/apiClient.service";
-import { liveGuestsService } from "@/services/liveGuests.service";
+import { ApiError } from "@/services/core/apiClient.service";
+import { liveGuestsService } from "@/services/live/liveGuests.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CreateLiveBattleInput, LiveStage } from "@/types/liveStage.type";
 import { requireAuthThen } from "@/utils/requireAuth.util";

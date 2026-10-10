@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { Trophy24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { ApiError } from "@/services/apiClient.service";
+import { ApiError } from "@/services/core/apiClient.service";
 import type { LiveGiftGoal } from "@/types";
 import { makeThemedStyles, useTheme } from "@/theme";
 
@@ -33,6 +34,9 @@ export function LiveGiftGoalEditorSheet({ liveId, goal, visible, onClose }: { li
   return (
     <BottomSheet visible={visible} onClose={onClose} title={editableGoal ? "Edit gift goal" : "Set a gift goal"} floating>
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <Trophy24Icon size={22} color={colors.textMuted} />
+        </View>
         <Text size={13} lineHeight={18} color={colors.textMuted}>
           Viewers see a progress bar and everyone celebrates when you reach it.
         </Text>

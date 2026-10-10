@@ -3,15 +3,15 @@ import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 
-import { Check16Icon } from "@/components/icons";
+import { Check16Icon, Flag24Icon, Lifebuoy24Icon, SealCheck20Icon } from "@/components/icons";
 import type { MainStackParamList } from "@/navigation/navigation.types";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { ApiError } from "@/errors/api.error";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { reportsService, type LiveReportReason } from "@/services/reports.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { reportsService, type LiveReportReason } from "@/services/moderation/reports.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { ID } from "@/types";
 
@@ -93,6 +93,9 @@ export function LiveReportSheet({ target, onClose }: LiveReportSheetProps) {
     <BottomSheet visible={!!target} onClose={onClose} title={submitReport.isSuccess ? "Thanks for letting us know" : `Report ${subject}`}>
       {submitReport.isSuccess ? (
         <View style={styles.body}>
+          <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+            <SealCheck20Icon size={22} color={colors.textMuted} />
+          </View>
           <Text size={14} lineHeight={19.6} color={colors.textMuted}>
             {selectedOption?.isUrgent ? "Our safety team is reviewing this live now." : "Our safety team will review this live."} We won't tell the host who reported it.
           </Text>
@@ -105,6 +108,9 @@ export function LiveReportSheet({ target, onClose }: LiveReportSheetProps) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+          <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+            <Flag24Icon size={22} color={colors.error} />
+          </View>
           <Text size={14} weight={500} lineHeight={16.8}>What's happening on {subject}?</Text>
           <View accessibilityRole="radiogroup">
             {LIVE_REPORT_REASON_OPTIONS.map((option) => {
@@ -128,12 +134,14 @@ export function LiveReportSheet({ target, onClose }: LiveReportSheetProps) {
             })}
           </View>
           {selectedReason === "self_harm" ? (
-            <View style={styles.notice} accessibilityLiveRegion="polite">
-              <Text size={13} lineHeight={18}>{LIVE_SELF_HARM_SUPPORT_NOTICE}</Text>
+            <View style={styles.noticeWithIcon} accessibilityLiveRegion="polite">
+              <Lifebuoy24Icon size={20} color={colors.textMuted} />
+              <Text size={13} lineHeight={18} style={styles.noticeText}>{LIVE_SELF_HARM_SUPPORT_NOTICE}</Text>
             </View>
           ) : selectedOption?.isUrgent ? (
-            <View style={styles.notice} accessibilityLiveRegion="polite">
-              <Text size={13} lineHeight={18}>{LIVE_URGENT_REPORT_NOTICE}</Text>
+            <View style={styles.noticeWithIcon} accessibilityLiveRegion="polite">
+              <Flag24Icon size={20} color={colors.error} />
+              <Text size={13} lineHeight={18} style={styles.noticeText}>{LIVE_URGENT_REPORT_NOTICE}</Text>
             </View>
           ) : null}
           <TextInput
@@ -173,6 +181,8 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   reasonRow: { minHeight: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.divider },
   reasonLabel: { flexDirection: "row", alignItems: "center", gap: 8 },
   notice: { padding: 12, borderRadius: 8, backgroundColor: colors.chip },
+  noticeWithIcon: { flexDirection: "row", gap: 10, padding: 12, borderRadius: 8, backgroundColor: colors.chip },
+  noticeText: { flex: 1 },
   detailsInput: {
     minHeight: 88,
     padding: 12,

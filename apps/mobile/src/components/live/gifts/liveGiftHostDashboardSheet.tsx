@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, View } from "react-native";
 
+import { Analytics24Icon, Gift24Icon, Trophy24Icon, Users24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -45,30 +46,42 @@ export function LiveGiftHostDashboardSheet(props: LiveGiftHostDashboardSheetProp
   return (
     <BottomSheet visible={props.visible} onClose={props.onClose} title="Gifts on this live" floating>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <Analytics24Icon size={22} color={colors.textMuted} />
+        </View>
         <View style={styles.tiles}>
           <StatTile label="Gifts" value={(stats.data?.giftCount ?? 0).toLocaleString("en-US")} />
           <StatTile label="Coins received" value={(stats.data?.totalCoins ?? 0).toLocaleString("en-US")} />
           <StatTile label="Your earnings" value={earnings ? formatMoneyForDisplay(earnings, { showDecimals: false }) : "—"} />
         </View>
         <View style={styles.section}>
-          <Text size={14} weight={600} lineHeight={18}>
-            Gift goal
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Trophy24Icon size={20} color={colors.textMuted} />
+            <Text size={14} weight={600} lineHeight={18}>
+              Gift goal
+            </Text>
+          </View>
           <Text size={13} lineHeight={18} color={colors.textMuted}>
             {props.goal ? `${props.goal.title}: ${props.goal.progressCoins.toLocaleString("en-US")} of ${props.goal.targetCoins.toLocaleString("en-US")} coins${props.goal.status === "completed" ? " (reached)" : ""}` : "No goal yet."}
           </Text>
           <Button title={props.goal?.status === "active" ? "Edit goal" : "Set a new goal"} variant="outline" height={40} onPress={props.onEditGoal} />
         </View>
         <View style={styles.section}>
-          <Text size={14} weight={600} lineHeight={18}>
-            Top supporters
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Users24Icon size={20} color={colors.textMuted} />
+            <Text size={14} weight={600} lineHeight={18}>
+              Top supporters
+            </Text>
+          </View>
           <LiveGiftLeaderboardList entries={stats.data?.topSupporters ?? []} emptyMessage="Your supporters will show up here." />
         </View>
         <View style={styles.section}>
-          <Text size={14} weight={600} lineHeight={18}>
-            Recent gifts
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Gift24Icon size={20} color={colors.textMuted} />
+            <Text size={14} weight={600} lineHeight={18}>
+              Recent gifts
+            </Text>
+          </View>
           {props.recentGifts.length === 0 ? (
             <Text size={13} lineHeight={18} color={colors.textMuted}>
               No gifts yet.

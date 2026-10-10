@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
+import { BookOpenText24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import type { ModalAction } from "@/components/ui/modalActions";
 import { Text } from "@/components/ui/text";
@@ -41,6 +42,9 @@ export function PolicyWhatChangedSheet({ visible, versions, onClose, onDismissBa
   return (
     <BottomSheet visible={visible} onClose={onClose} title="What changed" subtitle={`Updates to our ${joinPolicyTitles(versions)}`} scrollable footerActions={actions}>
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <BookOpenText24Icon size={22} color={colors.textMuted} />
+        </View>
         {versions.map((version) => (
           <PolicyDocumentCard key={version.policyVersionId} version={version} />
         ))}

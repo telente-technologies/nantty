@@ -1,14 +1,16 @@
 import { useNavigation } from "@react-navigation/native";
 import { useQueryClient } from "@tanstack/react-query";
+import * as Clipboard from "expo-clipboard";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Share } from "react-native";
 
-import { ArrowUpRight24Icon, EyeClosed20Icon, Share24Icon, Warning20Icon } from "@/components/icons";
+import { ArrowUpRight24Icon, Copy24Icon, EyeClosed20Icon, EyeSlash24Icon, Share24Icon, Warning20Icon } from "@/components/icons";
 import { ActionSheet } from "@/components/ui/actionSheet";
-import { feedFeedbackService, hidePostFromAllCachedFeeds, type FeedFeedbackType } from "@/services/feedFeedback.service";
-import type { ReportTargetType } from "@/services/reports.service";
+import { feedFeedbackService, hidePostFromAllCachedFeeds, type FeedFeedbackType } from "@/services/feed/feedFeedback.service";
+import type { ReportTargetType } from "@/services/moderation/reports.service";
 import { useAuthStore } from "@/store/auth.store";
+import { showToast } from "@/store/toast.store";
 import type { ID } from "@/types";
 import { requireAuthAfterClosingModal } from "@/utils/requireAuth.util";
 
@@ -80,6 +82,13 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
     Share.share({ message: target.shareUrl }).catch(() => undefined);
   };
 
+  const copyLinkToContent = () => {
+    if (!target?.shareUrl) return;
+    Clipboard.setStringAsync(target.shareUrl)
+      .then(() => showToast("Link copied", { tone: "success" }))
+      .catch(() => undefined);
+  };
+
   const promoteOwnPost = () => {
     if (!target) return;
     onClose();
@@ -95,16 +104,17 @@ export function ContentOptionsSheet({ target, onClose, onContentHidden, addition
         onClose={onClose}
         closeBeforeSelect={false}
         options={[
-          ...additionalActions.map((action) => ({ label: action.label, icon: action.icon, onPress: () => { onClose(); action.onPress(); } })),
           ...(canPromote ? [{ label: "Promote post", icon: <ArrowUpRight24Icon />, onPress: promoteOwnPost }] : []),
+          ...(target?.shareUrl ? [{ label: "Copy link", icon: <Copy24Icon />, onPress: copyLinkToContent }] : []),
+          ...additionalActions.map((action) => ({ label: action.label, icon: action.icon, onPress: () => { onClose(); action.onPress(); } })),
           ...(canGiveFeedFeedback
             ? [
-                { label: `Hide ${noun}`, icon: <EyeClosed20Icon />, onPress: () => requireAuthAfterClosingModal(onClose, () => hideContentAndSendFeedback("hide"), "tune your feed") },
-                { label: "Not interested", icon: <EyeClosed20Icon />, onPress: () => requireAuthAfterClosingModal(onClose, () => hideContentAndSendFeedback("not_interested"), "tune your feed") },
+                { label: "Not interested", detail: `See fewer ${noun}s like this`, icon: <EyeClosed20Icon />, onPress: () => requireAuthAfterClosingModal(onClose, () => hideContentAndSendFeedback("not_interested"), "tune your feed") },
+                { label: `Hide this ${noun}`, icon: <EyeSlash24Icon />, onPress: () => requireAuthAfterClosingModal(onClose, () => hideContentAndSendFeedback("hide"), "tune your feed") },
               ]
             : []),
-          ...(target?.shareUrl ? [{ label: "Copy or share link", icon: <Share24Icon />, onPress: shareLinkToContent }] : []),
-          ...(!isOwnContent ? [{ label: "Report", icon: <Warning20Icon />, destructive: true, onPress: () => openReportSheetForTarget() }] : []),
+          ...(target?.shareUrl ? [{ label: "Share via…", icon: <Share24Icon />, onPress: shareLinkToContent }] : []),
+          ...(!isOwnContent ? [{ label: "Report", detail: "Let us know what's wrong", icon: <Warning20Icon />, destructive: true, onPress: () => openReportSheetForTarget() }] : []),
           ...(!isOwnContent && canClaimCopyright ? [{ label: "Report copyright", icon: <Warning20Icon />, destructive: true, onPress: () => openReportSheetForTarget("intellectual_property") }] : []),
         ]}
       />

@@ -7,8 +7,8 @@ import { Chip } from "@/components/ui/chip";
 import { Text } from "@/components/ui/text";
 import { COPYRIGHT_ACCURACY_DECLARATION, COPYRIGHT_GOOD_FAITH_DECLARATION, COPYRIGHT_SIGNATURE_EXPLANATION } from "@/constants/copyrightLegal.constant";
 import { useTheme } from "@/theme";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { copyrightClaimsService, isValidContactEmailAddress, isValidEvidenceLink, splitEvidenceLinks } from "@/services/copyrightClaims.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { copyrightClaimsService, isValidContactEmailAddress, isValidEvidenceLink, splitEvidenceLinks } from "@/services/moderation/copyrightClaims.service";
 import type { CopyrightClaimScope, CopyrightClaimTargetType, ID } from "@/types";
 
 import { ClaimCheckbox, ClaimTextField, useClaimFieldStyles } from "./copyrightClaimFields";

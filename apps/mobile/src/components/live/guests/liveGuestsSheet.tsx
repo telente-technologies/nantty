@@ -2,12 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { UserPlus24Icon, Users24Icon, VideoCamera24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
-import { liveGuestsService } from "@/services/liveGuests.service";
+import { liveGuestsService } from "@/services/live/liveGuests.service";
 import { MAXIMUM_STREAMERS_ON_STAGE } from "@/types/liveStage.type";
 
 import { LiveSheetActionButton as SmallActionButton, LiveSheetPersonRow as PersonRow, LiveSheetSectionTitle as SectionTitle } from "../liveSheetParts";
@@ -36,7 +37,7 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
             {controller.actionErrorMessage}
           </Text>
         ) : null}
-        <SectionTitle>On stage</SectionTitle>
+        <SectionTitle icon={<VideoCamera24Icon size={20} color={colors.textMuted} />}>On stage</SectionTitle>
         {stage.streamers.map((streamer) => (
           <PersonRow key={streamer.user.id} user={streamer.user} caption={streamer.role === "host" ? "Host (you)" : `${streamer.audioMuted ? "Muted" : "Mic on"} · ${streamer.videoMuted ? "Camera off" : "Camera on"}${streamer.isCreatorProgramMember ? "" : " · gifts paid to you"}`}>
             <SmallActionButton
@@ -59,14 +60,14 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
               /> : null}
           </PersonRow>
         ))}
-        {stage.joinRequests.length > 0 ? <SectionTitle>{`Requests to join (${stage.joinRequests.length})`}</SectionTitle> : null}
+        {stage.joinRequests.length > 0 ? <SectionTitle icon={<UserPlus24Icon size={20} color={colors.textMuted} />}>{`Requests to join (${stage.joinRequests.length})`}</SectionTitle> : null}
         {stage.joinRequests.map((request) => (
           <PersonRow key={request.id} user={request.user} caption="Wants to join you on stage">
             <SmallActionButton label="Decline" onPress={() => controller.declineJoinRequest(request.id)} />
             <SmallActionButton label="Approve" tone="primary" disabled={stage.streamers.length >= MAXIMUM_STREAMERS_ON_STAGE} onPress={() => controller.approveJoinRequest(request.id)} />
           </PersonRow>
         ))}
-        <SectionTitle>Invite viewers</SectionTitle>
+        <SectionTitle icon={<Users24Icon size={20} color={colors.textMuted} />}>Invite viewers</SectionTitle>
         <TextField placeholder="Search viewers" value={searchText} onChangeText={setSearchText} autoCapitalize="none" accessibilityLabel="Search viewers" />
         {isStageFull ? (
           <Text size={12} lineHeight={16} color={colors.textMuted}>

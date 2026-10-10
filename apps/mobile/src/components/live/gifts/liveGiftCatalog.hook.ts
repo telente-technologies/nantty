@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { giftsService } from "@/services/gifts.service";
+import { giftsService } from "@/services/money/gifts.service";
 import type { LiveGift, LiveGiftTier } from "@/types";
 
 export const LIVE_GIFT_CATALOG_QUERY_KEY = ["live-gift-catalog"] as const;

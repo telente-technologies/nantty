@@ -2,26 +2,30 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
+import { Check16Icon, PushPin24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { creatorsService } from "@/services/creators.service";
+import { creatorsService } from "@/services/creators/creators.service";
+import { storesService } from "@/services/sellers/stores.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { readLiveErrorMessage } from "@/utils/liveStoreErrors.util";
 import { makeThemedStyles, useTheme } from "@/theme";
 
 export interface LivePinProductsSheetProps {
   readonly visible: boolean;
   readonly liveId: string;
+  readonly storeId: string;
   readonly pinnedProductId: string | null;
   readonly onClose: () => void;
 }
 
-export function LivePinProductsSheet({ visible, liveId, pinnedProductId, onClose }: LivePinProductsSheetProps) {
+export function LivePinProductsSheet({ visible, liveId, storeId, pinnedProductId, onClose }: LivePinProductsSheetProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const queryClient = useQueryClient();
-  const affiliatedProducts = useQuery({
-    queryKey: ["creator-affiliated-products"],
-    queryFn: creatorsService.fetchMyAffiliatedProducts,
+  const storeProducts = useQuery({
+    queryKey: ["products", "store", storeId],
+    queryFn: () => storesService.fetchStoreProducts(storeId),
     enabled: visible,
     staleTime: 5 * 60_000,
   });
@@ -33,13 +37,13 @@ export function LivePinProductsSheet({ visible, liveId, pinnedProductId, onClose
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Pin a product" floating>
       <View style={styles.list}>
-        {affiliatedProducts.isPending ? <ActivityIndicator color={colors.primary} /> : null}
-        {affiliatedProducts.data?.length === 0 ? (
+        {storeProducts.isPending ? <ActivityIndicator color={colors.primary} /> : null}
+        {storeProducts.data?.length === 0 ? (
           <Text size={13} lineHeight={16.9} color={colors.textMuted}>
-            You're not affiliated with any sellers yet.
+            Your store has no published products yet.
           </Text>
         ) : null}
-        {(affiliatedProducts.data ?? []).map((product) => {
+        {(storeProducts.data ?? []).map((product) => {
           const isPinned = product.id === pinnedProductId;
           return (
             <Pressable
@@ -60,15 +64,18 @@ export function LivePinProductsSheet({ visible, liveId, pinnedProductId, onClose
               <Text size={14} weight={600} lineHeight={16.8}>
                 {formatMoneyForDisplay(product.price, { showDecimals: false })}
               </Text>
-              <Text size={12} weight={600} lineHeight={14.4} color={isPinned ? colors.primary : colors.textMuted}>
-                {isPinned ? "Pinned" : "Pin"}
-              </Text>
+              <View style={styles.pinState}>
+                {isPinned ? <Check16Icon color={colors.primary} /> : <PushPin24Icon size={20} color={colors.textMuted} />}
+                <Text size={12} weight={600} lineHeight={14.4} color={isPinned ? colors.primary : colors.textMuted}>
+                  {isPinned ? "Pinned" : "Pin"}
+                </Text>
+              </View>
             </Pressable>
           );
         })}
         {pinProduct.isError ? (
           <Text size={12} lineHeight={16.8} color={colors.error}>
-            We couldn't pin that product. Try again.
+            {readLiveErrorMessage(pinProduct.error, "We couldn't pin that product. Try again.")}
           </Text>
         ) : null}
       </View>
@@ -81,4 +88,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { height: 48, flexDirection: "row", alignItems: "center", gap: 8, borderBottomWidth: 1, borderBottomColor: colors.divider },
   thumb: { width: 40, height: 40, borderRadius: 4, overflow: "hidden", backgroundColor: colors.placeholder },
   name: { flex: 1 },
+  pinState: { flexDirection: "row", alignItems: "center", gap: 4 },
 }));

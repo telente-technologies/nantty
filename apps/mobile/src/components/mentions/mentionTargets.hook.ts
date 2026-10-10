@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { mentionsService } from "@/services/mentions.service";
+import { mentionsService } from "@/services/content/mentions.service";
 import type { MentionEntity, MentionTargetsByUserId } from "@/types/mention.type";
 import { isUserMention } from "@/utils/mentions.util";
 

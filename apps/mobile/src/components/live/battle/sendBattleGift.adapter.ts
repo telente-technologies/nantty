@@ -4,7 +4,7 @@ import { useLiveGiftCatalog } from "@/components/live/gifts/liveGiftCatalog.hook
 import { useLiveGiftSentEvents } from "@/components/live/gifts/liveGiftEventStream.hook";
 import { useSendLiveGift } from "@/components/live/gifts/sendLiveGift.hook";
 import { shouldUseMockForPath } from "@/config/api.config";
-import { liveGuestsService } from "@/services/liveGuests.service";
+import { liveGuestsService } from "@/services/live/liveGuests.service";
 import type { LiveStage } from "@/types/liveStage.type";
 
 export interface UseSendBattleGiftToStreamerOptions {

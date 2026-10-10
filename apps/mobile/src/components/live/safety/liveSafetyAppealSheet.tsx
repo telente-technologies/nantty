@@ -2,12 +2,13 @@ import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
+import { SealCheck20Icon, ShieldCheck24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { liveSafetyService } from "@/services/liveSafety.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { liveSafetyService } from "@/services/live/liveSafety.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 
 const MAXIMUM_APPEAL_LENGTH = 1000;
@@ -38,6 +39,9 @@ export function LiveSafetyAppealSheet({ liveId, onClose, onAppealed }: LiveSafet
   return (
     <BottomSheet visible={!!liveId} onClose={onClose} title={appeal.isSuccess ? "Appeal sent" : "Appeal this pause"}>
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          {appeal.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <ShieldCheck24Icon size={22} color={colors.textMuted} />}
+        </View>
         {appeal.isSuccess ? (
           <>
             <Text size={14} lineHeight={19.6} color={colors.textMuted}>A safety specialist will review your live first. You'll see the result here and in your notifications.</Text>

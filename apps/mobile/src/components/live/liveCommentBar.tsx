@@ -2,8 +2,10 @@ import { useState, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { Coin24Icon, Gift24Icon, PaperPlaneTilt24Icon, Smiley24Icon, ViewProducts24Icon } from "@/components/icons";
+import { ComposerSlot } from "@/components/ui/composerSlot";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { useTheme } from "@/theme";
+import { hasSendableContent } from "@/utils/sendableContent.util";
 
 import { liveAccent, useLiveForeground } from "./liveSurface.constant";
 
@@ -17,6 +19,7 @@ export interface LiveCommentBarProps {
   readonly onPressTip?: () => void;
   readonly isShownOverVideo?: boolean;
   readonly isSending?: boolean;
+  readonly hideComposer?: boolean;
 }
 
 function RoundAction({ label, onPress, background, border, children }: { label: string; onPress: () => void; background: string; border?: string; children: ReactNode }) {
@@ -33,11 +36,11 @@ function RoundAction({ label, onPress, background, border, children }: { label: 
   );
 }
 
-export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onPressGift, onPressTip, isShownOverVideo = true, isSending = false }: LiveCommentBarProps) {
+export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onPressGift, onPressTip, isShownOverVideo = true, isSending = false, hideComposer = false }: LiveCommentBarProps) {
   const [text, setText] = useState("");
   const { colors, isDark } = useTheme();
   const foreground = useLiveForeground(isShownOverVideo);
-  const hasText = text.trim().length > 0;
+  const hasText = hasSendableContent(text);
   const placeholderInk = isShownOverVideo ? "rgba(255, 255, 255, 0.72)" : colors.inputPlaceholderText;
   const sendTypedLiveComment = () => {
     if (!hasText || isSending) return;
@@ -46,6 +49,7 @@ export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onP
   };
   return (
     <View style={styles.bar}>
+      {hideComposer ? null : (
       <View style={[styles.pill, { backgroundColor: foreground.chip, borderColor: foreground.chipBorder }]}>
         <TextInput
           value={text}
@@ -62,23 +66,28 @@ export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onP
           style={[styles.input, { color: foreground.ink }]}
         />
         {hasText ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Send comment"
-            accessibilityState={{ busy: isSending, disabled: isSending }}
-            disabled={isSending}
-            hitSlop={6}
-            onPress={sendTypedLiveComment}
-            style={[styles.sendButton, { backgroundColor: colors.primarySolid }]}
-          >
-            {isSending ? <ActivityIndicator size="small" color="#FFFFFF" /> : <PaperPlaneTilt24Icon size={16} color="#FFFFFF" />}
-          </Pressable>
+          <ComposerSlot slotKey="send">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Send comment"
+              accessibilityState={{ busy: isSending, disabled: isSending }}
+              disabled={isSending}
+              hitSlop={6}
+              onPress={sendTypedLiveComment}
+              style={[styles.sendButton, { backgroundColor: colors.primarySolid }]}
+            >
+              {isSending ? <ActivityIndicator size="small" color="#FFFFFF" /> : <PaperPlaneTilt24Icon size={16} color="#FFFFFF" />}
+            </Pressable>
+          </ComposerSlot>
         ) : (
-          <Pressable accessibilityRole="button" accessibilityLabel="Reactions" hitSlop={6} onPress={onToggleReactions} style={styles.emojiButton}>
-            <Smiley24Icon size={22} color={foreground.inkMuted} />
-          </Pressable>
+          <ComposerSlot slotKey="reactions">
+            <Pressable accessibilityRole="button" accessibilityLabel="Reactions" hitSlop={6} onPress={onToggleReactions} style={styles.emojiButton}>
+              <Smiley24Icon size={22} color={foreground.inkMuted} />
+            </Pressable>
+          </ComposerSlot>
         )}
       </View>
+      )}
       {onPressGift ? (
         <RoundAction label="Send a gift" onPress={onPressGift} background={liveAccent.gold}>
           <Gift24Icon size={20} color={liveAccent.goldInk} />

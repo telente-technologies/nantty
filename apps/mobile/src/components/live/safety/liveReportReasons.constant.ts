@@ -1,4 +1,4 @@
-import type { LiveReportReason } from "@/services/reports.service";
+import type { LiveReportReason } from "@/services/moderation/reports.service";
 
 export interface LiveReportReasonOption {
   readonly reason: LiveReportReason;
