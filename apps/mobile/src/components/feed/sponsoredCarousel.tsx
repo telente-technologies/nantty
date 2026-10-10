@@ -4,8 +4,8 @@ import { useRef } from "react";
 import { FlatList, Pressable, StyleSheet, View, useWindowDimensions, type ViewToken } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { adEventsService } from "@/services/adEvents.service";
-import { openSponsoredTarget } from "@/services/adClick.service";
+import { adEventsService } from "@/services/ads/adEvents.service";
+import { openSponsoredTarget } from "@/services/ads/adClick.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { AdCard, AdPlacement, ID, SponsoredPlacement } from "@/types";
 

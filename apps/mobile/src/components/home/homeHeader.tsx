@@ -35,13 +35,12 @@ export function HomeHeader({ activeSection, onChangeSection, onPressSearch, onPr
 
   return (
     <View style={styles.bar}>
-      <View style={styles.lead}>
+      <View style={styles.tabs} accessibilityRole="tablist">
+        {sectionTab("feed", "Feed")}
+        {sectionTab("mart", "Mart")}
+      </View>
+      <View style={styles.wordmark} pointerEvents="none">
         {width >= FULL_WORDMARK_MIN_WIDTH ? <ZudomartWordmark height={20} /> : <ZudomartLogoMark size={24} />}
-        <View style={styles.divider} />
-        <View style={styles.tabs} accessibilityRole="tablist">
-          {sectionTab("feed", "Feed")}
-          {sectionTab("mart", "Mart")}
-        </View>
       </View>
       <View style={styles.actions}>
         <Pressable accessibilityRole="button" accessibilityLabel="Search" hitSlop={10} onPress={onPressSearch}>
@@ -68,5 +67,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   lead: { flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 1 },
   divider: { width: StyleSheet.hairlineWidth * 2, height: 16, borderRadius: 1, backgroundColor: colors.divider },
   tabs: { flexDirection: "row", alignItems: "center", gap: 8 },
+  wordmark: { position: "absolute", left: 0, right: 0, alignItems: "center", justifyContent: "center" },
   actions: { flexDirection: "row", alignItems: "center", gap: 16 },
 }));

@@ -4,8 +4,8 @@ import { useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View, type NativeScrollEvent } from "react-native";
 
 import { makeThemedStyles, useTheme } from "@/theme";
-import { adEventsService } from "@/services/adEvents.service";
-import { productsService } from "@/services/products.service";
+import { adEventsService } from "@/services/ads/adEvents.service";
+import { productsService } from "@/services/sellers/products.service";
 import type { MartHighlight } from "@/types/martHighlight.type";
 
 import { CategoryTabs } from "./categoryTabs";

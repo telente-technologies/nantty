@@ -5,16 +5,17 @@ import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 
 import { GuestFeedBanner } from "@/components/auth/guestFeedBanner";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
-import { SwipeablePostCard } from "@/components/feed/swipeablePostCard";
+import { PostCard } from "@/components/feed/postCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useCartActions } from "@/hooks/useCart.hook";
 import { feedQueryKeyPrefix, usePostInteractions } from "@/hooks/usePostInteractions.hook";
-import { feedsService } from "@/services/feeds.service";
+import { feedsService } from "@/services/feed/feeds.service";
 import type { Post, ProductSummary } from "@/types";
 import { requireAuthAfterClosingModal, requireAuthThen } from "@/utils/requireAuth.util";
 
 import { PostProductsSheet } from "./postProductsSheet";
+import { VariantPickerSheet } from "@/components/product/variantPickerSheet";
 import { SuggestedClipsRow } from "./suggestedClipsRow";
 import { TopicFilterRow } from "./topicFilterRow";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -26,7 +27,7 @@ import { spacing } from "@/constants/spacing.constant";
 type FeedRow = { type: "post"; post: Post } | { type: "suggestedClips" };
 type FeedMode = "for-you" | "following";
 
-const SUGGESTED_CLIPS_POSITION = 2;
+const SUGGESTED_CLIPS_POSITION = 4;
 
 export function FeedTab() {
   const { colors } = useTheme();
@@ -35,8 +36,8 @@ export function FeedTab() {
   const [feedMode, setFeedMode] = useState<FeedMode>("for-you");
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [productsInOpenPost, setProductsInOpenPost] = useState<readonly ProductSummary[] | null>(null);
+  const [variantPickerProductId, setVariantPickerProductId] = useState<string | null>(null);
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
-  const [isSwipingPost, setIsSwipingPost] = useState(false);
   const { togglePostLike, followPostAuthor, sharePost } = usePostInteractions();
   const { addProductToCart } = useCartActions();
   const { offerSendInChat, sendInChatElement } = useShareToChat();
@@ -86,6 +87,19 @@ export function FeedTab() {
       "add to cart",
     );
 
+  const addSinglePostProductToCart = (product: ProductSummary) =>
+    requireAuthThen(
+      () => {
+        if (product.hasVariants || (product.variantGroups?.length ?? 0) > 0) {
+          setVariantPickerProductId(product.id);
+          return;
+        }
+        addProductToCart.mutate({ productId: product.id, quantity: 1 });
+      },
+      undefined,
+      "add to cart",
+    );
+
   return (
     <View style={styles.root}>
       <GuestFeedBanner />
@@ -109,16 +123,13 @@ export function FeedTab() {
           />
         }
         stickyHeaderIndices={[0]}
-        scrollEnabled={!isSwipingPost}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) =>
           item.type === "suggestedClips" ? (
             <SuggestedClipsRow clips={suggestedClips.data ?? []} onPressClip={(clipId) => navigation.navigate("Tabs", { screen: "Clips", params: { startId: clipId } })} />
           ) : (
-            <SwipeablePostCard
+            <PostCard
               post={item.post}
-              onOpenComments={() => navigation.navigate("PostDetail", { postId: item.post.id })}
-              onSwipeActiveChange={setIsSwipingPost}
               onPressAuthor={() => navigation.navigate("UserProfile", { userId: item.post.author.id })}
               onToggleFollow={() => followPostAuthor(item.post)}
               onToggleLike={() => togglePostLike(item.post)}
@@ -155,8 +166,17 @@ export function FeedTab() {
           setProductsInOpenPost(null);
           navigation.navigate("ProductDetail", { productId });
         }}
+        onAddProduct={addSinglePostProductToCart}
         onAddAllToCart={addEveryPostProductToCart}
         adding={addProductToCart.isPending}
+      />
+      <VariantPickerSheet
+        productId={variantPickerProductId}
+        onClose={() => setVariantPickerProductId(null)}
+        onAddedToCart={() => {
+          setVariantPickerProductId(null);
+          navigation.navigate("Cart");
+        }}
       />
       <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
       {sendInChatElement}

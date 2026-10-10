@@ -1,41 +1,56 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { CaretDown24Icon, Check16Icon } from "@/components/icons";
+import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import type { ThreadSort } from "@/types/postThread.type";
+import { THREAD_SORT_LABELS, type ThreadSort } from "@/types/postThread.type";
+import { useState } from "react";
 
 import { THREAD_AVATAR_SIZE } from "./threadReplyRow";
 
-const SORT_OPTIONS: readonly { readonly value: ThreadSort; readonly label: string }[] = [
-  { value: "top", label: "Top" },
-  { value: "latest", label: "Latest" },
-];
+const SORT_OPTIONS: readonly ThreadSort[] = ["relevant", "latest", "likes"];
 
-export function ThreadSortTabs({ sort, onChange }: { readonly sort: ThreadSort; readonly onChange: (sort: ThreadSort) => void }) {
+export function ThreadSortDropdown({ sort, onChange }: { readonly sort: ThreadSort; readonly onChange: (sort: ThreadSort) => void }) {
   const { colors } = useTheme();
   const styles = useStyles();
+  const [open, setOpen] = useState(false);
   return (
-    <View style={styles.tabs} accessibilityRole="tablist">
-      {SORT_OPTIONS.map((option) => {
-        const isSelected = option.value === sort;
-        return (
-          <Pressable
-            key={option.value}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: isSelected }}
-            accessibilityLabel={`Sort replies by ${option.label}`}
-            onPress={() => onChange(option.value)}
-            style={styles.tab}
-          >
-            <Text size={15} weight={isSelected ? 600 : 500} lineHeight={20} color={isSelected ? colors.text : colors.textMuted}>
-              {option.label}
-            </Text>
-            <View style={[styles.indicator, isSelected ? { backgroundColor: colors.primary } : null]} />
-          </Pressable>
-        );
-      })}
-    </View>
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Sort replies, currently ${THREAD_SORT_LABELS[sort]}`}
+        onPress={() => setOpen(true)}
+        style={styles.trigger}
+      >
+        <Text size={15} weight={600} lineHeight={20}>
+          {THREAD_SORT_LABELS[sort]}
+        </Text>
+        <CaretDown24Icon size={16} color={colors.textMuted} />
+      </Pressable>
+      <BottomSheet visible={open} onClose={() => setOpen(false)} title="Sort replies">
+        <View style={styles.options}>
+          {SORT_OPTIONS.map((option) => (
+            <Pressable
+              key={option}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: option === sort }}
+              onPress={() => {
+                onChange(option);
+                setOpen(false);
+              }}
+              style={styles.option}
+            >
+              <Text size={15} weight={option === sort ? 600 : 400} lineHeight={20}>
+                {THREAD_SORT_LABELS[option]}
+              </Text>
+              {option === sort ? <Check16Icon color={colors.primary} /> : null}
+            </Pressable>
+          ))}
+        </View>
+      </BottomSheet>
+    </>
   );
 }
 
@@ -98,9 +113,9 @@ export function ThreadErrorState({ onRetry }: { readonly onRetry: () => void }) 
 
 const useStyles = makeThemedStyles((colors) =>
   StyleSheet.create({
-    tabs: { flexDirection: "row", borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider, backgroundColor: colors.surface },
-    tab: { flex: 1, alignItems: "center", paddingTop: 12, gap: 10, minHeight: 44 },
-    indicator: { height: 3, width: 48, borderRadius: 2 },
+    trigger: { flexDirection: "row", alignItems: "center", gap: 4, minHeight: 44, paddingRight: 8 },
+    options: { paddingHorizontal: 16, paddingBottom: 16 },
+    option: { minHeight: 52, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.divider },
     skeletonRow: { flexDirection: "row", gap: 12, paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
     skeletonBody: { flex: 1, gap: 8 },
     skeletonActions: { flexDirection: "row", gap: 24, marginTop: 4 },

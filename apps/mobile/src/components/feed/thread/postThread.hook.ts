@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { postThreadService } from "@/services/postThread.service";
+import { postThreadService } from "@/services/content/postThread.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Comment } from "@/types";
 import type { ThreadReply, ThreadRow, ThreadSort } from "@/types/postThread.type";
@@ -20,7 +20,7 @@ export const adSlotPositionsFor = (replyCount: number): number[] => {
 
 export const toLocalThreadReply = (comment: Comment, postAuthorId: string | undefined, hasParentAbove: boolean): ThreadReply => ({
   ...comment,
-  isPostAuthor: comment.author.id === postAuthorId,
+  isPostAuthor: comment.author?.id === postAuthorId,
   connector: { depth: hasParentAbove ? 1 : 0, hasParentAbove, hasChildBelow: false, isLastInChain: true },
   inlineReplies: [],
 });
@@ -75,6 +75,6 @@ export function useThreadReplies(commentId: string, isExpanded: boolean) {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: isExpanded && !commentId.startsWith("pending_"),
   });
-  const replies: readonly ThreadReply[] = query.data?.pages.flatMap((page) => page.data) ?? [];
+  const replies: readonly ThreadReply[] = query.data?.pages.flatMap((page) => page.data ?? []) ?? [];
   return { query, replies };
 }

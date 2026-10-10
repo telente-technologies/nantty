@@ -1,8 +1,10 @@
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, Share, StyleSheet, View } from "react-native";
 
+import { CaretRight24Icon } from "@/components/icons";
 import { isPendingComment, mergeServerAndLocalComments, useCommentThreadContext } from "@/components/clips/commentThreadController.hook";
 import { Text } from "@/components/ui/text";
+import { webAppLinks } from "@/config/webAppLinks.config";
 import type { MainStackParamList } from "@/navigation/navigation.types";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { ThreadReply } from "@/types/postThread.type";
@@ -16,6 +18,7 @@ export interface ThreadReplyBranchProps {
   readonly hasParentAbove: boolean;
   readonly showReplyingTo: boolean;
   readonly nestingLevel?: number;
+  readonly onRepostReply?: (reply: ThreadReply) => void;
 }
 
 export const MAXIMUM_THREAD_INDENT_LEVELS = 3;
@@ -27,7 +30,7 @@ const describeShowRepliesLabel = (hiddenCount: number, isExpanded: boolean, isLo
   return hiddenCount === 1 ? "Show 1 reply" : `Show ${hiddenCount} replies`;
 };
 
-export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showReplyingTo, nestingLevel = 0 }: ThreadReplyBranchProps) {
+export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showReplyingTo, nestingLevel = 0, onRepostReply }: ThreadReplyBranchProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const thread = useCommentThreadContext();
@@ -38,10 +41,10 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
   const { query, replies } = useThreadReplies(reply.id, isExpanded);
   if (thread.isCommentDeleted(reply.id)) return null;
 
-  const serverChildren = isExpanded && query.data ? replies : reply.inlineReplies;
+  const serverChildren = isExpanded && query.data ? replies : (reply.inlineReplies ?? []);
   const localChildren = thread.locallyPostedCommentsFor(reply.id).map((comment) => toLocalThreadReply(comment, postAuthorId, true));
   const visibleChildren = mergeServerAndLocalComments(serverChildren, localChildren, false).filter((child) => !thread.isCommentDeleted(child.id));
-  const hiddenCount = Math.max(0, reply.replyCount - serverChildren.length);
+  const hiddenCount = Math.max(0, (reply.replyCount ?? 0) - serverChildren.length);
   const opensThreadInstead = isAtIndentLimit && hiddenCount > 0 && !isExpanded && (reply.continuesInThread ?? true);
   const canShowMore = !opensThreadInstead && ((!isExpanded && hiddenCount > 0) || (isExpanded && (query.hasNextPage || query.isLoading)));
   const replyWithLocalChanges = thread.applyLocalOverridesToComment(reply);
@@ -49,6 +52,10 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
   const expandOrLoadMore = () => {
     if (!isExpanded) thread.setReplyThreadVisibility(reply.id, "expanded");
     else if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage().catch(() => undefined);
+  };
+
+  const shareReply = () => {
+    Share.share({ message: `${reply.author?.name ?? "Someone"} on Zudomart: ${webAppLinks.post(reply.postId)}#${reply.id}` }).catch(() => undefined);
   };
 
   return (
@@ -60,8 +67,13 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
         showReplyingTo={showReplyingTo}
         isPending={isPendingComment(reply)}
         canDelete={thread.canDeleteComment(reply)}
+        canPin={thread.canPinComment(reply)}
+        onTogglePin={() => thread.togglePinOnComment(reply)}
         onReply={() => thread.startReplyingToComment(reply)}
         onToggleLike={() => thread.toggleLikeOnComment(reply)}
+        onRepost={() => onRepostReply?.(reply)}
+        onShare={shareReply}
+        onOpenThread={() => navigation.navigate("CommentThread", { commentId: reply.id, postId: reply.postId })}
         onDelete={() => thread.deleteOwnComment(reply)}
       />
       <View style={childrenAreIndented && visibleChildren.length > 0 ? styles.indented : null}>
@@ -73,13 +85,14 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
             hasParentAbove={index === 0}
             showReplyingTo={!childrenAreIndented || index > 0}
             nestingLevel={nestingLevel + 1}
+            onRepostReply={onRepostReply}
           />
         ))}
       </View>
       {opensThreadInstead ? (
         <Pressable
           accessibilityRole="link"
-          accessibilityLabel={`View thread, ${hiddenCount} more ${hiddenCount === 1 ? "reply" : "replies"} to ${reply.author.name}`}
+          accessibilityLabel={`View thread, ${hiddenCount} more ${hiddenCount === 1 ? "reply" : "replies"} to ${reply.author?.name ?? "this reply"}`}
           onPress={() => navigation.navigate("CommentThread", { commentId: reply.id, postId: reply.postId })}
           style={styles.showMore}
         >
@@ -89,6 +102,7 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
           <Text size={14} weight={500} lineHeight={18} color={colors.primary}>
             View thread
           </Text>
+          <CaretRight24Icon size={20} color={colors.primary} />
         </Pressable>
       ) : null}
       {canShowMore ? (
@@ -107,6 +121,7 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
           <Text size={14} weight={500} lineHeight={18} color={colors.primary}>
             {describeShowRepliesLabel(hiddenCount, isExpanded, query.isFetching && isExpanded)}
           </Text>
+          <CaretRight24Icon size={20} color={colors.primary} />
         </Pressable>
       ) : null}
     </View>

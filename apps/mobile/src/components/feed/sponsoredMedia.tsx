@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Pressable } from "react-native";
 
 import { SponsoredCarousel } from "@/components/feed/sponsoredCarousel";
-import { openSponsoredTarget } from "@/services/adClick.service";
+import { openSponsoredTarget } from "@/services/ads/adClick.service";
 import type { AdPlacement, ID, SponsoredPlacement } from "@/types";
 
 interface SponsoredMediaProps {

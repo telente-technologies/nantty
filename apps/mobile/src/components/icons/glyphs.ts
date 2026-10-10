@@ -7,7 +7,7 @@ import {
   BellIcon,
   BellRingingIcon,
   BellSlashIcon,
-  BookmarkSimpleIcon,
+  BookmarkIcon,
   BoxArrowDownIcon,
   CalendarDotsIcon,
   CameraIcon,
@@ -63,6 +63,7 @@ import {
   RepeatIcon,
   SealCheckIcon,
   SelectionIcon,
+  ShareFatIcon,
   ShareNetworkIcon,
   ShieldIcon,
   ShoppingCartIcon,
@@ -89,6 +90,36 @@ import {
   WarningIcon,
   WifiSlashIcon,
   XIcon,
+  AtIcon,
+  BankIcon,
+  BookOpenTextIcon,
+  BugIcon,
+  ChatTeardropTextIcon,
+  CookieIcon,
+  DownloadSimpleIcon,
+  EnvelopeSimpleIcon,
+  EyeSlashIcon,
+  FileLockIcon,
+  FingerprintIcon,
+  FunnelIcon,
+  GlobeHemisphereWestIcon,
+  HashIcon,
+  IdentificationCardIcon,
+  InfoIcon,
+  LifebuoyIcon,
+  LockKeyIcon,
+  PaletteIcon,
+  PersonArmsSpreadIcon,
+  PhoneIcon,
+  ProhibitIcon,
+  PushPinIcon,
+  ScalesIcon,
+  ShieldCheckIcon,
+  ShieldStarIcon,
+  TicketIcon,
+  TrademarkRegisteredIcon,
+  TranslateIcon,
+  UserMinusIcon,
 } from "./phosphorGlyphs";
 import { phosphorIcon } from "./phosphorIcon";
 
@@ -98,7 +129,7 @@ export const ArrowUpRight24Icon = phosphorIcon(ArrowUpRightIcon);
 export const ArrowsOutSimple24Icon = phosphorIcon(ArrowsOutSimpleIcon);
 export const Bell24Icon = phosphorIcon(BellIcon);
 export const BellRinging24Icon = phosphorIcon(BellRingingIcon);
-export const BookmarkSimple24Icon = phosphorIcon(BookmarkSimpleIcon);
+export const BookmarkSimple24Icon = phosphorIcon(BookmarkIcon);
 export const BoxArrowDown24Icon = phosphorIcon(BoxArrowDownIcon, { ink: "#5B5B5B" });
 export const BrandBilibili20Icon = phosphorIcon(TelevisionSimpleIcon, { width: 20 });
 export const BuildingStore20Icon = phosphorIcon(StorefrontIcon, { width: 20 });
@@ -116,6 +147,7 @@ export const ChatsCircle48Icon = phosphorIcon(ChatsCircleIcon, { weight: "fill",
 export const Check16Icon = phosphorIcon(CheckIcon, { ink: "#D9D9D9", width: 16 });
 export const Coin24Icon = phosphorIcon(CoinIcon);
 export const Copy16Icon = phosphorIcon(CopyIcon, { ink: "#FFFFFF", width: 16 });
+export const Copy24Icon = phosphorIcon(CopyIcon);
 export const CreditCard24Icon = phosphorIcon(CreditCardIcon);
 export const DotsThreeVertical24Icon = phosphorIcon(DotsThreeVerticalIcon);
 export const Export24Icon = phosphorIcon(ExportIcon);
@@ -187,11 +219,12 @@ export const VideoCamera24Icon = phosphorIcon(VideoCameraIcon);
 export const Warning20Icon = phosphorIcon(WarningIcon, { ink: "#EF4444", width: 20 });
 export const Analytics24Icon = phosphorIcon(ChartBarIcon);
 export const BellSlash24Icon = phosphorIcon(BellSlashIcon);
-export const BookmarkFill24Icon = phosphorIcon(BookmarkSimpleIcon, { weight: "fill" });
+export const BookmarkFill24Icon = phosphorIcon(BookmarkIcon, { weight: "fill" });
 export const Crown24Icon = phosphorIcon(CrownIcon);
 export const Document24Icon = phosphorIcon(FileTextIcon);
 export const Flag24Icon = phosphorIcon(FlagIcon);
-export const Flame24Icon = phosphorIcon(FlameIcon);
+export const Flame24Icon = phosphorIcon(FlameIcon, { weight: "fill" });
+export const Storefront24Icon = phosphorIcon(StorefrontIcon);
 export const Hand24Icon = phosphorIcon(HandPalmIcon);
 export const Handshake24Icon = phosphorIcon(HandshakeIcon);
 export const HeartBroken24Icon = phosphorIcon(HeartBreakIcon);
@@ -210,3 +243,33 @@ export const Package24Icon = phosphorIcon(PackageIcon);
 export const UserPlus24Icon = phosphorIcon(UserPlusIcon);
 export const Wallet24Icon = phosphorIcon(WalletIcon);
 export const WifiSlash24Icon = phosphorIcon(WifiSlashIcon);
+export const At24Icon = phosphorIcon(AtIcon);
+export const Bank24Icon = phosphorIcon(BankIcon);
+export const BookOpenText24Icon = phosphorIcon(BookOpenTextIcon);
+export const Bug24Icon = phosphorIcon(BugIcon);
+export const ChatTeardropText24Icon = phosphorIcon(ChatTeardropTextIcon);
+export const Cookie24Icon = phosphorIcon(CookieIcon);
+export const DownloadSimple24Icon = phosphorIcon(DownloadSimpleIcon);
+export const EnvelopeSimple24Icon = phosphorIcon(EnvelopeSimpleIcon);
+export const EyeSlash24Icon = phosphorIcon(EyeSlashIcon);
+export const FileLock24Icon = phosphorIcon(FileLockIcon);
+export const Fingerprint24Icon = phosphorIcon(FingerprintIcon);
+export const Funnel24Icon = phosphorIcon(FunnelIcon);
+export const GlobeHemisphereWest24Icon = phosphorIcon(GlobeHemisphereWestIcon);
+export const Hash24Icon = phosphorIcon(HashIcon);
+export const IdentificationCard24Icon = phosphorIcon(IdentificationCardIcon);
+export const Info24Icon = phosphorIcon(InfoIcon);
+export const Lifebuoy24Icon = phosphorIcon(LifebuoyIcon);
+export const LockKey24Icon = phosphorIcon(LockKeyIcon);
+export const Palette24Icon = phosphorIcon(PaletteIcon);
+export const PersonArmsSpread24Icon = phosphorIcon(PersonArmsSpreadIcon);
+export const Phone24Icon = phosphorIcon(PhoneIcon);
+export const Prohibit24Icon = phosphorIcon(ProhibitIcon);
+export const PushPin24Icon = phosphorIcon(PushPinIcon);
+export const Scales24Icon = phosphorIcon(ScalesIcon);
+export const ShieldCheck24Icon = phosphorIcon(ShieldCheckIcon);
+export const ShieldStar24Icon = phosphorIcon(ShieldStarIcon);
+export const Ticket24Icon = phosphorIcon(TicketIcon);
+export const TrademarkRegistered24Icon = phosphorIcon(TrademarkRegisteredIcon);
+export const Translate24Icon = phosphorIcon(TranslateIcon);
+export const UserMinus24Icon = phosphorIcon(UserMinusIcon);

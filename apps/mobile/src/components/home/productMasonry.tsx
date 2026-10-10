@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import { ProductCard } from "@/components/product/productCard";
+import { VariantPickerSheet } from "@/components/product/variantPickerSheet";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import { useCartActions } from "@/hooks/useCart.hook";
-import { trackProductInteraction } from "@/services/productInteractions.service";
+import { trackProductInteraction } from "@/services/sellers/productInteractions.service";
 import type { AdPlacement, ProductSummary } from "@/types";
 
 const TALL_IMAGE = 227;
@@ -13,8 +15,23 @@ const SHORT_IMAGE = 183;
 export function ProductMasonry({ products, adPlacement = "mart" }: { products: readonly ProductSummary[]; adPlacement?: AdPlacement }) {
   const navigation = useNavigation();
   const { addProductToCart } = useCartActions();
+  const [pickerProductId, setPickerProductId] = useState<string | null>(null);
   const columns: [ProductSummary[], ProductSummary[]] = [[], []];
   products.forEach((product, index) => columns[index % 2]!.push(product));
+
+  const quickAdd = (product: ProductSummary) => {
+    requireAuthThen(
+      () => {
+        if (product.hasVariants || (product.variantGroups?.length ?? 0) > 0) {
+          setPickerProductId(product.id);
+          return;
+        }
+        addProductToCart.mutate({ productId: product.id, quantity: 1 });
+      },
+      undefined,
+      "add to cart",
+    );
+  };
 
   return (
     <View style={styles.grid}>
@@ -32,11 +49,16 @@ export function ProductMasonry({ products, adPlacement = "mart" }: { products: r
                 void trackProductInteraction("product.clicked", { productId: product.id });
                 navigation.navigate("ProductDetail", { productId: product.id });
               }}
-              onAddToCart={() => requireAuthThen(() => addProductToCart.mutate({ productId: product.id, quantity: 1 }), undefined, "add to cart")}
+              onAddToCart={() => quickAdd(product)}
             />
           ))}
         </View>
       ))}
+      <VariantPickerSheet
+        productId={pickerProductId}
+        onClose={() => setPickerProductId(null)}
+        onAddedToCart={() => navigation.navigate("Cart")}
+      />
     </View>
   );
 }

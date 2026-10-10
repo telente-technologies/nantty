@@ -4,7 +4,7 @@ import { Pressable, StyleSheet } from "react-native";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { SponsoredAppInstallRow } from "@/components/feed/sponsoredAppInstall";
-import { openSponsoredTarget } from "@/services/adClick.service";
+import { openSponsoredTarget } from "@/services/ads/adClick.service";
 import type { AdPlacement, ID, SponsoredPlacement } from "@/types";
 
 export function SponsoredLabel({ sponsored, color }: { sponsored: SponsoredPlacement; color?: string }) {

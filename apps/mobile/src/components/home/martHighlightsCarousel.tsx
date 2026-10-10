@@ -5,7 +5,7 @@ import { AccessibilityInfo, AppState, FlatList, Pressable, StyleSheet, View, typ
 
 import { Text } from "@/components/ui/text";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
-import { adEventsService } from "@/services/adEvents.service";
+import { adEventsService } from "@/services/ads/adEvents.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MartHighlight } from "@/types/martHighlight.type";
 
@@ -58,8 +58,13 @@ export function MartHighlightsCarousel({ highlights, loading, visible, onPressHi
   const highlightIds = highlights.map((highlight) => highlight.id).join("|");
   const current = count > 0 ? highlights[Math.min(index, count - 1)] : undefined;
 
-  useEffect(() => {
+  const [shownIds, setShownIds] = useState(highlightIds);
+  if (shownIds !== highlightIds) {
+    setShownIds(highlightIds);
     setIndex(0);
+  }
+
+  useEffect(() => {
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
   }, [highlightIds]);
 

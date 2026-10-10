@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 
+import { At24Icon, BellSlash24Icon, GlobeHemisphereWest24Icon, UserPlus24Icon, Users24Icon } from "@/components/icons";
 import { ActionSheet } from "@/components/ui/actionSheet";
 import { replyPolicyOptions } from "@/constants/postAudienceCopy.constant";
-import { postsService } from "@/services/posts.service";
+import { postsService } from "@/services/content/posts.service";
 import type { Page, Post, ReplyPolicy } from "@/types";
 
 export interface ReplySettingsSheetProps {
@@ -32,6 +33,18 @@ export function ReplySettingsSheet({ post, onClose }: ReplySettingsSheetProps) {
       options={replyPolicyOptions.map((option) => ({
         label: option.value === current ? `${option.label} (current)` : option.label,
         detail: option.detail,
+        icon:
+          option.value === "everyone" ? (
+            <GlobeHemisphereWest24Icon size={20} />
+          ) : option.value === "following" ? (
+            <Users24Icon size={20} />
+          ) : option.value === "followers" ? (
+            <UserPlus24Icon size={20} />
+          ) : option.value === "mentioned" ? (
+            <At24Icon size={20} />
+          ) : (
+            <BellSlash24Icon size={20} />
+          ),
         onPress: () => {
           if (option.value !== current) update.mutate(option.value);
           onClose();

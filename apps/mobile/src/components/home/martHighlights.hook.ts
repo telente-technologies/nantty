@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { AppState } from "react-native";
 
-import { productsService } from "@/services/products.service";
+import { productsService } from "@/services/sellers/products.service";
 
 import { orderMartHighlightsForSession } from "./martHighlightsOrder.util";
 

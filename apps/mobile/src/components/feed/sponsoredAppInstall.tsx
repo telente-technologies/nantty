@@ -3,7 +3,7 @@ import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { openSponsoredTarget } from "@/services/adClick.service";
+import { openSponsoredTarget } from "@/services/ads/adClick.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { AdPlacement, ID, SponsoredPlacement } from "@/types";
 

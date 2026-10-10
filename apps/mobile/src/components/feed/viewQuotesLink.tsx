@@ -23,4 +23,4 @@ export function ViewQuotesLink({ post }: { readonly post: Post }) {
   );
 }
 
-const styles = StyleSheet.create({ link: { alignSelf: "flex-start", marginHorizontal: 16, minHeight: 32, justifyContent: "center" } });
+const styles = StyleSheet.create({ link: { alignSelf: "flex-end", minHeight: 44, justifyContent: "center" } });

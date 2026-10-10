@@ -5,6 +5,7 @@ import { Cancel20Icon, LockSimple24Icon } from "@/components/icons";
 import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
 import { MentionCountLabel, MentionSuggestionList } from "@/components/mentions/mentionSuggestionList";
 import { Avatar } from "@/components/ui/avatar";
+import { ComposerSlot } from "@/components/ui/composerSlot";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
@@ -14,6 +15,7 @@ import type { Comment, ReplyRestriction } from "@/types";
 import type { MentionEntity } from "@/types/mention.type";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 import { requireAuthThen } from "@/utils/requireAuth.util";
+import { hasSendableContent } from "@/utils/sendableContent.util";
 
 const MAXIMUM_REPLY_LENGTH = 1000;
 
@@ -53,7 +55,7 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
   }, [replyTarget]);
 
   const replyingToUsername = replyTarget?.author.username ?? postAuthorUsername;
-  const canSubmit = text.trim().length > 0;
+  const canSubmit = hasSendableContent(text);
   const submitReply = () => {
     if (!canSubmit) return;
     const trimmed = shiftMentionsAfterTrimmingStart(text, mentions);
@@ -104,18 +106,15 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
               accessibilityLabel={replyingToUsername ? `Post your reply to @${replyingToUsername}` : "Post your reply"}
               style={styles.input}
             />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Reply"
-              accessibilityState={{ disabled: !canSubmit }}
-              disabled={!canSubmit}
-              onPress={submitReply}
-              style={[styles.send, !canSubmit ? styles.sendDisabled : null]}
-            >
-              <Text size={14} weight={600} lineHeight={18} color={colors.onPrimary}>
-                Reply
-              </Text>
-            </Pressable>
+            {canSubmit ? (
+              <ComposerSlot slotKey="send">
+                <Pressable accessibilityRole="button" accessibilityLabel="Reply" onPress={submitReply} style={styles.send}>
+                  <Text size={14} weight={600} lineHeight={18} color={colors.onPrimary}>
+                    Reply
+                  </Text>
+                </Pressable>
+              </ComposerSlot>
+            ) : null}
           </View>
         ) : (
           <Pressable
@@ -159,7 +158,6 @@ const useStyles = makeThemedStyles((colors) =>
       color: colors.text,
     },
     send: { minHeight: 36, paddingHorizontal: 16, borderRadius: 18, backgroundColor: colors.primarySolid, alignItems: "center", justifyContent: "center" },
-    sendDisabled: { opacity: 0.45 },
     restricted: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 44 },
     guestPrompt: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 44 },
   }),

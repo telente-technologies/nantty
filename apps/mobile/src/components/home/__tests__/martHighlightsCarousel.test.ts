@@ -3,12 +3,12 @@ import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
 import { MART_CAROUSEL_AUTO_ADVANCE_MS, MartHighlightsCarousel } from "@/components/home/martHighlightsCarousel";
 import { orderMartHighlightsForSession } from "@/components/home/martHighlightsOrder.util";
-import { adEventsService } from "@/services/adEvents.service";
+import { adEventsService } from "@/services/ads/adEvents.service";
 import type { MartHighlight } from "@/types/martHighlight.type";
 
 jest.setTimeout(30_000);
 jest.mock("@react-navigation/native", () => ({ useIsFocused: () => true }));
-jest.mock("@/services/adEvents.service", () => ({ adEventsService: { recordSponsoredImpressionOncePerSession: jest.fn() } }));
+jest.mock("@/services/ads/adEvents.service", () => ({ adEventsService: { recordSponsoredImpressionOncePerSession: jest.fn() } }));
 
 const boosted = (id: string): MartHighlight => ({
   id,
