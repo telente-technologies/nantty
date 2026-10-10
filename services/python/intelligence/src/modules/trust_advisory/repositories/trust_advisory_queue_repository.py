@@ -10,15 +10,21 @@ from src.modules.trust_advisory.dtos.suspension_suggestion_dto import Suspension
 
 
 class TrustAdvisoryPublisher(Protocol):
+    delivers: bool
+
     async def publish_suspension_suggestion(self, suggestion: SuspensionSuggestion) -> None: ...
 
 
 class NullTrustAdvisoryPublisher:
+    delivers = False
+
     async def publish_suspension_suggestion(self, _suggestion: SuspensionSuggestion) -> None:
         return None
 
 
 class SqsTrustAdvisoryPublisher:
+    delivers = True
+
     def __init__(self, sqs_client: SqsClientProtocol, queue_url: str) -> None:
         self.sqs_client = sqs_client
         self.queue_url = queue_url
@@ -34,6 +40,8 @@ class SqsTrustAdvisoryPublisher:
 
 
 class AmqpTrustAdvisoryPublisher:
+    delivers = True
+
     def __init__(self, channels: RabbitMqChannelProvider, queue_name: str) -> None:
         self.channels = channels
         self.queue_name = queue_name

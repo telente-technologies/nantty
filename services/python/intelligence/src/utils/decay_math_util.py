@@ -61,7 +61,10 @@ def calculate_forward_decay_write_weight(
 ) -> tuple[int, float]:
     generation = find_forward_decay_generation(event_unix_time_seconds, half_life_seconds)
     elapsed_half_lives = (event_unix_time_seconds - generation.epoch_seconds) / half_life_seconds
-    return generation.generation_index, base_weight * math.pow(2.0, elapsed_half_lives)
+    try:
+        return generation.generation_index, base_weight * math.pow(2.0, elapsed_half_lives)
+    except OverflowError:
+        return generation.generation_index, 0.0
 
 
 def calculate_forward_decay_read_multiplier(
@@ -70,7 +73,10 @@ def calculate_forward_decay_read_multiplier(
     generation_span_seconds = half_life_seconds * HALF_LIVES_PER_FORWARD_DECAY_GENERATION
     epoch_seconds = FORWARD_DECAY_BASE_EPOCH_SECONDS + generation_index * generation_span_seconds
     elapsed_half_lives = (read_unix_time_seconds - epoch_seconds) / half_life_seconds
-    return math.pow(2.0, -elapsed_half_lives)
+    try:
+        return math.pow(2.0, -elapsed_half_lives)
+    except OverflowError:
+        return 0.0
 
 
 def list_readable_forward_decay_generations(read_unix_time_seconds: float, half_life_seconds: float) -> list[int]:

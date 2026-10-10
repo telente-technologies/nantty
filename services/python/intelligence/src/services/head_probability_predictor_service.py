@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
@@ -50,7 +51,7 @@ def predict_heads_with_model_or_heuristic(
                 trained_bundle.predict_head_probabilities(feature_matrix), "model", trained_model_version
             )
         except ValueError, AttributeError, TypeError:
-            pass
+            logging.getLogger("intelligence.models").exception("head_model_inference_failed")
     return HeadPredictionResult(heuristic_heads.predict_head_probabilities(feature_matrix), "heuristic", None)
 
 

@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import hashlib
 import logging
@@ -46,9 +47,13 @@ class SuspensionSuggestionService:
                     generated_at=now,
                 )
             )
+        except asyncio.CancelledError:
+            with contextlib.suppress(Exception):
+                await self.backend.delete_keys([claim_key])
+            raise
         except Exception:
             advisory_logger.exception("suspension_suggestion_publish_failed")
             with contextlib.suppress(Exception):
                 await self.backend.delete_keys([claim_key])
             return False
-        return True
+        return self.publisher.delivers

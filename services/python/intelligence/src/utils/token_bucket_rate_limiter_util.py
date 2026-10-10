@@ -28,7 +28,11 @@ class TokenBucketRateLimiter:
         bucket = self._bucket_by_client.get(client_key)
         if bucket is None:
             if len(self._bucket_by_client) >= MAXIMUM_TRACKED_CLIENTS:
-                self._bucket_by_client.clear()
+                stalest_key = min(
+                    self._bucket_by_client,
+                    key=lambda key: self._bucket_by_client[key].last_refill_time,
+                )
+                del self._bucket_by_client[stalest_key]
             bucket = TokenBucketState(float(self.burst_size), now)
             self._bucket_by_client[client_key] = bucket
         elapsed_seconds = max(now - bucket.last_refill_time, 0.0)

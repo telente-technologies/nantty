@@ -1,7 +1,7 @@
 import logging
 import uuid
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from src.enums.ranking_surface_enum import RankingSurface
 from src.interfaces.feature_backend_interface import FeatureBackendUnavailableError
@@ -12,10 +12,22 @@ from src.repositories.online_feature_repository import OnlineFeatureStore
 ranking_logger = logging.getLogger("intelligence.ranking")
 
 
+REQUEST_TIME_PAST_SKEW_TOLERANCE = timedelta(hours=24)
+REQUEST_TIME_FUTURE_SKEW_TOLERANCE = timedelta(minutes=5)
+
+
 def resolve_request_time(requested_now: datetime | None) -> datetime:
     if requested_now is None:
         return datetime.now(UTC)
-    return requested_now.astimezone(UTC)
+    server_now = datetime.now(UTC)
+    earliest = server_now - REQUEST_TIME_PAST_SKEW_TOLERANCE
+    latest = server_now + REQUEST_TIME_FUTURE_SKEW_TOLERANCE
+    normalized = requested_now.astimezone(UTC)
+    if normalized < earliest:
+        return earliest
+    if normalized > latest:
+        return latest
+    return normalized
 
 
 def resolve_request_identifier(requested_identifier: str | None) -> str:

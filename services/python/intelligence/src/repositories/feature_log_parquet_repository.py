@@ -86,17 +86,35 @@ class FeatureLogParquetSink:
             write_parquet_table_atomically(self.storage_location, table, partition_directory)
         return len(rows)
 
+    def rebuffer_rows(self, rows: Sequence[LoggedFeatureRow]) -> None:
+        room = max(self.maximum_buffered_rows - len(self._buffered_rows), 0)
+        kept = list(rows[:room])
+        self.dropped_row_count += max(len(rows) - room, 0)
+        self._buffered_rows = kept + self._buffered_rows
+
     async def flush_buffered_rows(self) -> int:
         rows = self.take_buffered_rows()
         if not rows:
             return 0
         try:
             return await asyncio.to_thread(self.write_rows_synchronously, rows)
-        except OSError:
-            feature_log_logger.exception("feature_log_flush_failed", extra={"row_count": len(rows)})
+        except asyncio.CancelledError:
+            self.rebuffer_rows(rows)
+            raise
+        except Exception:
+            feature_log_logger.exception(
+                "feature_log_flush_failed",
+                extra={"row_count": len(rows), "dropped_row_count": self.dropped_row_count},
+            )
+            self.rebuffer_rows(rows)
             return 0
 
     async def run_periodic_flush_loop(self, flush_interval_seconds: float) -> None:
         while True:
             await asyncio.sleep(flush_interval_seconds)
-            await self.flush_buffered_rows()
+            try:
+                await self.flush_buffered_rows()
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                feature_log_logger.exception("feature_log_flush_loop_iteration_failed")

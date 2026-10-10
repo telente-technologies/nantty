@@ -1,3 +1,5 @@
+import asyncio
+
 from src.interfaces.cqrs_interface import QueryHandler
 from src.modules.trending.dtos.headline_dto import HeadlineResponse
 from src.modules.trending.queries.build_headlines.build_headlines_query import BuildHeadlinesQuery
@@ -8,4 +10,4 @@ class BuildHeadlinesHandler(QueryHandler[BuildHeadlinesQuery, HeadlineResponse])
     query_type = "trending.buildHeadlines"
 
     async def execute(self, query: BuildHeadlinesQuery) -> HeadlineResponse:
-        return build_headlines_from_posts(query.request)
+        return await asyncio.to_thread(build_headlines_from_posts, query.request)
