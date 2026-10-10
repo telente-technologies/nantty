@@ -11,7 +11,7 @@ import { CommentComposer } from "./commentComposer";
 import { CommentThread } from "./commentThread";
 import styles from "./commentsPanel.module.css";
 
-export function CommentsPanel({ postId, totalComments }: { readonly postId: string; readonly totalComments: number }) {
+export function CommentsPanel({ postId, postAuthorId, totalComments }: { readonly postId: string; readonly postAuthorId?: string; readonly totalComments: number }) {
   const commentsQuery = useInfiniteQuery({
     queryKey: ["comments", postId],
     queryFn: ({ pageParam }) => postsService.fetchCommentsPage(postId, pageParam),
@@ -19,6 +19,7 @@ export function CommentsPanel({ postId, totalComments }: { readonly postId: stri
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
   const comments = (commentsQuery.data?.pages ?? []).flatMap((page) => page.data);
+  const orderedComments = [...comments].sort((a, b) => Number(b.pinned === true) - Number(a.pinned === true));
 
   return (
     <section className={styles.panel} id="comments" aria-labelledby={`comments-${postId}`}>
@@ -38,8 +39,8 @@ export function CommentsPanel({ postId, totalComments }: { readonly postId: stri
         <EmptyState title="No comments yet" description="Start the conversation." />
       ) : (
         <div className={styles.list}>
-          {comments.map((comment) => (
-            <CommentThread key={comment.id} comment={comment} postId={postId} />
+          {orderedComments.map((comment) => (
+            <CommentThread key={comment.id} comment={comment} postId={postId} postAuthorId={postAuthorId} />
           ))}
           {commentsQuery.hasNextPage ? (
             <button type="button" className={styles.more} onClick={() => commentsQuery.fetchNextPage()} disabled={commentsQuery.isFetchingNextPage}>

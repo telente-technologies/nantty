@@ -25,6 +25,7 @@ import type { Post, SaveTargetType } from "@/types";
 import { formatCompactCount } from "@/utils/formatDate.util";
 
 import styles from "./postActions.module.css";
+import { describeCount } from "@/utils/countLabel.util";
 
 const ICON_SIZE = 19;
 
@@ -76,14 +77,14 @@ export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCoun
 
   return (
     <div className={styles.row}>
-      <Link href={`/post/${post.id}#comments`} className={actionClassName("reply")} aria-label={`Reply, ${post.comments} replies`}>
+      <Link href={`/post/${post.id}#comments`} className={actionClassName("reply")} aria-label={`Reply, ${describeCount(post.comments, "reply", "replies")}`}>
         <ActionContent icon={<ReplyActionIcon size={ICON_SIZE} />} count={post.comments} />
       </Link>
       <button
         type="button"
         className={actionClassName("repost", hasReposted, lastToggledTone === "repost")}
         aria-pressed={hasReposted}
-        aria-label={`Repost, ${repostCount} reposts`}
+        aria-label={`Repost, ${describeCount(repostCount, "repost", "reposts")}`}
         onClick={() =>
           requireAuthThen(() => {
             if (hasReposted) return;
@@ -98,7 +99,7 @@ export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCoun
         type="button"
         className={actionClassName("like", isLiked, lastToggledTone === "like")}
         aria-pressed={isLiked}
-        aria-label={`${isLiked ? "Unlike" : "Like"}, ${likeCount} likes`}
+        aria-label={`${isLiked ? "Unlike" : "Like"}, ${describeCount(likeCount, "like", "likes")}`}
         onClick={() => {
           setLastToggledTone("like");
           onToggleLike();
@@ -107,11 +108,11 @@ export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCoun
         <ActionContent icon={isLiked ? <LikeFilledActionIcon size={ICON_SIZE} /> : <LikeActionIcon size={ICON_SIZE} />} count={likeCount} />
       </button>
       {isOwnPost ? (
-        <Link href={`/analytics/post/${post.id}`} className={actionClassName("reply")} aria-label={`View post analytics, ${post.views} views`}>
+        <Link href={`/analytics/post/${post.id}`} className={actionClassName("reply")} aria-label={`View post analytics, ${describeCount(post.views, "view", "views")}`}>
           <ActionContent icon={<ViewsActionIcon size={ICON_SIZE} />} count={post.views} />
         </Link>
       ) : (
-        <button type="button" className={actionClassName("reply")} aria-haspopup="dialog" aria-label={`Views, ${post.views} views. What are views`} onClick={() => setViewsInfoOpen(true)}>
+        <button type="button" className={actionClassName("reply")} aria-haspopup="dialog" aria-label={`Views, ${describeCount(post.views, "view", "views")}. What are views`} onClick={() => setViewsInfoOpen(true)}>
           <ActionContent icon={<ViewsActionIcon size={ICON_SIZE} />} count={post.views} />
         </button>
       )}

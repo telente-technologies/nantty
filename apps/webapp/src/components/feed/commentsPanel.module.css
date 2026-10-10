@@ -59,6 +59,18 @@
   color: var(--ink-faint);
 }
 
+.commentMeta .pinnedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-tint);
+  color: var(--color-brand);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+}
+
 .commentText {
   font-size: var(--text-base);
   overflow-wrap: anywhere;

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ReportDialog } from "@/components/actions/reportDialog";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { useSession } from "@/components/providers/sessionProvider";
-import { HeartIcon } from "@/components/ui/icons";
+import { HeartIcon, PinIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
 import { showToast } from "@/components/ui/toast";
 import { commentsService } from "@/services/webActions.service";
@@ -18,12 +18,14 @@ import { MentionText } from "@/components/mentions/mentionText";
 import { CommentComposer } from "./commentComposer";
 import styles from "./commentsPanel.module.css";
 
-function CommentRow({ comment, postId, isReply, onReply }: { readonly comment: Comment; readonly postId: string; readonly isReply: boolean; readonly onReply: (comment: Comment) => void }) {
+function CommentRow({ comment, postId, postAuthorId, isReply, onReply }: { readonly comment: Comment; readonly postId: string; readonly postAuthorId?: string; readonly isReply: boolean; readonly onReply: (comment: Comment) => void }) {
   const { viewer } = useSession();
   const queryClient = useQueryClient();
   const [isLiked, setIsLiked] = useState(comment.liked);
   const [likeCount, setLikeCount] = useState(comment.likes);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [optimisticPinned, setOptimisticPinned] = useState(comment.pinned === true);
+  const canPin = postAuthorId !== undefined && viewer?.id === postAuthorId;
   const likeMutation = useMutation({
     mutationFn: (likeNow: boolean) => (likeNow ? commentsService.likeComment(comment.id) : commentsService.unlikeComment(comment.id)),
     onMutate: (likeNow) => {
@@ -43,6 +45,21 @@ function CommentRow({ comment, postId, isReply, onReply }: { readonly comment: C
       void queryClient.invalidateQueries({ queryKey: ["commentReplies"] });
     },
   });
+  const pinMutation = useMutation({
+    mutationFn: async () => {
+      if (optimisticPinned) await commentsService.unpinComment(postId, comment.id);
+      else await commentsService.pinComment(postId, comment.id);
+    },
+    onMutate: () => setOptimisticPinned((pinned) => !pinned),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      void queryClient.invalidateQueries({ queryKey: ["post-thread", postId] });
+    },
+    onError: () => {
+      setOptimisticPinned(comment.pinned === true);
+      showToast({ text: "Couldn't update the pin. Try again.", tone: "error" });
+    },
+  });
   const isOwnComment = viewer?.id === comment.author.id;
 
   return (
@@ -51,6 +68,11 @@ function CommentRow({ comment, postId, isReply, onReply }: { readonly comment: C
       <div className={styles.commentBody}>
         <p className={styles.commentMeta}>
           <strong>{comment.author.name}</strong>
+          {optimisticPinned ? (
+            <span className={styles.pinnedBadge} aria-label="Pinned comment">
+              <PinIcon size={12} /> Pinned
+            </span>
+          ) : null}
           <span>{formatTimeSincePosted(comment.createdAt)}</span>
         </p>
         <p className={styles.commentText}>
@@ -69,6 +91,11 @@ function CommentRow({ comment, postId, isReply, onReply }: { readonly comment: C
           <button type="button" className={styles.commentAction} onClick={() => requireAuthThen(() => onReply(comment), "Sign in to reply.")}>
             Reply
           </button>
+          {canPin ? (
+            <button type="button" className={styles.commentAction} onClick={() => pinMutation.mutate()} disabled={pinMutation.isPending}>
+              {optimisticPinned ? "Unpin" : "Pin"}
+            </button>
+          ) : null}
           {isOwnComment ? (
             <button type="button" className={styles.commentAction} onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
               Delete
@@ -85,7 +112,7 @@ function CommentRow({ comment, postId, isReply, onReply }: { readonly comment: C
   );
 }
 
-export function CommentThread({ comment, postId }: { readonly comment: CommentWithReplies; readonly postId: string }) {
+export function CommentThread({ comment, postId, postAuthorId }: { readonly comment: CommentWithReplies; readonly postId: string; readonly postAuthorId?: string }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
   const repliesQuery = useInfiniteQuery({
@@ -96,13 +123,14 @@ export function CommentThread({ comment, postId }: { readonly comment: CommentWi
     enabled: isExpanded,
   });
   const replies = isExpanded ? (repliesQuery.data?.pages ?? []).flatMap((page) => page.data) : comment.previewReplies;
+  const orderedReplies = [...replies].sort((a, b) => Number(b.pinned === true) - Number(a.pinned === true));
   const hiddenReplyCount = Math.max(0, comment.replyCount - replies.length);
 
   return (
     <div className={styles.thread}>
-      <CommentRow comment={comment} postId={postId} isReply={false} onReply={setReplyTarget} />
-      {replies.map((reply) => (
-        <CommentRow key={reply.id} comment={reply} postId={postId} isReply onReply={setReplyTarget} />
+      <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={false} onReply={setReplyTarget} />
+      {orderedReplies.map((reply) => (
+        <CommentRow key={reply.id} comment={reply} postId={postId} postAuthorId={postAuthorId} isReply onReply={setReplyTarget} />
       ))}
       {hiddenReplyCount > 0 || (isExpanded && repliesQuery.hasNextPage) ? (
         <button

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { LikeFilledActionIcon, ReplyActionIcon, TagIcon } from "@/components/ui/icons";
+import { LikeFilledActionIcon, PinIcon, ReplyActionIcon, TagIcon } from "@/components/ui/icons";
+import { showToast } from "@/components/ui/toast";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { MentionText } from "@/components/mentions/mentionText";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
@@ -16,6 +17,7 @@ import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postsService } from "@/services/posts.service";
+import { WebappRequestError } from "@/services/clientApi.service";
 import type { Post } from "@/types";
 
 import styles from "./postCard.module.css";
@@ -53,6 +55,22 @@ export function PostCard({ post, priority = false, swipeable = false }: { readon
   });
 
   const toggleLike = () => requireAuthThen(() => likeMutation.mutate(optimisticLiked), "Sign in to like posts.");
+  const isOwnPost = viewer?.id === post.author.id;
+  const [optimisticPinned, setOptimisticPinned] = useState(post.pinned === true);
+  const pinMutation = useMutation({
+    mutationFn: () => (optimisticPinned ? postsService.unpinPost(post.id) : postsService.pinPost(post.id)),
+    onMutate: () => setOptimisticPinned((pinned) => !pinned),
+    onSuccess: (updated) => {
+      setOptimisticPinned(updated.pinned === true);
+      void queryClient.invalidateQueries({ queryKey: ["profile", "posts", post.author.id] });
+      void queryClient.invalidateQueries({ queryKey: ["profile", "clips", post.author.id] });
+      void queryClient.invalidateQueries({ queryKey: ["post", post.id] });
+    },
+    onError: (error) => {
+      setOptimisticPinned(post.pinned === true);
+      showToast({ text: error instanceof WebappRequestError && error.status === 409 ? "You can pin up to 3 posts." : "Couldn't update the pin. Try again.", tone: "error" });
+    },
+  });
   const swipe = usePostSwipe({
     enabled: swipeable && !post.sponsored,
     isLiked: optimisticLiked,
@@ -78,6 +96,11 @@ export function PostCard({ post, priority = false, swipeable = false }: { readon
           </span>
         </Link>
         {post.sponsored ? <span className={styles.sponsored}>{post.sponsored.label}</span> : null}
+        {optimisticPinned ? (
+          <span className={styles.pinned} aria-label="Pinned post">
+            <PinIcon size={12} /> Pinned
+          </span>
+        ) : null}
         <Link href={`/post/${post.id}`} className={styles.timestamp}>
           <time dateTime={post.createdAt}>{formatTimeSincePosted(post.createdAt)}</time>
         </Link>
@@ -88,6 +111,7 @@ export function PostCard({ post, priority = false, swipeable = false }: { readon
           canonicalPath={`/post/${post.id}`}
           isOwnContent={viewer?.id === post.author.id}
           downloadTarget={findDownloadTargetForPost(post)}
+          pinAction={isOwnPost ? { pinned: optimisticPinned, onTogglePin: () => requireAuthThen(() => pinMutation.mutate(), "Sign in to pin posts."), disabled: pinMutation.isPending } : undefined}
         />
       </header>
 
