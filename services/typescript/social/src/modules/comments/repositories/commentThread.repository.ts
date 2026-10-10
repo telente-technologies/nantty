@@ -4,7 +4,11 @@ import type { Db } from "../../../types/database.type.js";
 import { descendantPathPrefix, threadRootIdOf, type ThreadPlacementSource } from "../services/commentThread.service.js";
 import type { CommentRow } from "./comment.repository.js";
 
-const topConversationOrder = [{ likeCount: "desc" }, { replyCount: "desc" }, { id: "desc" }] as const;
+const topConversationOrder = [{ isPinned: "desc" }, { likeCount: "desc" }, { replyCount: "desc" }, { id: "desc" }] as const;
+const likesConversationOrder = [{ isPinned: "desc" }, { likeCount: "desc" }, { id: "desc" }] as const;
+const latestConversationOrder = { isPinned: "desc" as const, id: "desc" as const };
+
+export type ConversationSort = "relevant" | "latest" | "likes";
 
 export const commentThreadRepository = {
   descendantsWithinDepth: (db: Db, focus: ThreadPlacementSource, subtreeRoots: readonly ThreadPlacementSource[], maximumDepth: number): Promise<CommentRow[]> =>
@@ -24,12 +28,12 @@ export const commentThreadRepository = {
   allDescendantIds: async (db: Db, comment: ThreadPlacementSource): Promise<string[]> =>
     (await db.comment.findMany({ where: { rootCommentId: threadRootIdOf(comment), path: { startsWith: descendantPathPrefix(comment) }, deletedAt: null }, select: { id: true } })).map((row) => row.id),
 
-  pageConversationRoots: (db: Db, postId: string, sort: "top" | "latest", limit: number, offset: number, cursor: string | undefined): Promise<CommentRow[]> =>
+  pageConversationRoots: (db: Db, postId: string, sort: ConversationSort, limit: number, offset: number, cursor: string | undefined): Promise<CommentRow[]> =>
     db.comment.findMany({
       where: { postId, parentCommentId: null, ...shownToViewers },
-      orderBy: sort === "top" ? [...topConversationOrder] : { id: "desc" },
+      orderBy: sort === "latest" ? [latestConversationOrder] : sort === "likes" ? [...likesConversationOrder] : [...topConversationOrder],
       take: limit + 1,
-      ...(sort === "top" ? { skip: offset } : cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
+      ...(sort === "latest" ? (cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }) : { skip: offset }),
     }),
 
   previewDescendants: (db: Db, roots: readonly ThreadPlacementSource[], maximumDepth: number): Promise<CommentRow[]> =>

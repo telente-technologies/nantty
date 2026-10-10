@@ -23,13 +23,14 @@ export function createGetPostConversationHandler(context: HandlerContext): Handl
     const db = context.database.client;
     const post = await loadPostVisibleToViewer(context, viewerId, postId);
     await assertViewerMayReadConversation(context, viewerId, post);
-    const offset = sort === "top" ? decodeOffsetCursor(cursor) : 0;
-    const rows = await commentThreadRepository.pageConversationRoots(db, postId, sort, limit, offset, sort === "top" ? undefined : cursor);
+    const normalizedSort = sort === "top" ? "relevant" : sort;
+    const offset = normalizedSort === "latest" ? 0 : decodeOffsetCursor(cursor);
+    const rows = await commentThreadRepository.pageConversationRoots(db, postId, normalizedSort, limit, offset, normalizedSort === "latest" ? cursor : undefined);
     const page = buildPageFromOverfetchedRows(rows, limit);
     const descendants = await commentThreadRepository.previewDescendants(db, page.data, inlinePreviewDepth);
     const tree = assembleThreadTree(page.data, descendants, { baseDepth: 0, maximumRelativeDepth: inlinePreviewDepth, chooseChildren: preferAuthorReply(post.authorId) });
     const views = new Map((await buildCommentViews(context, viewerId, flattenThreadNodeSources(tree), post.authorId)).map((view) => [view.id, view]));
-    const nextCursor = page.nextCursor === null ? null : sort === "top" ? encodeOffsetCursor(offset + limit) : page.nextCursor;
+    const nextCursor = page.nextCursor === null ? null : normalizedSort === "latest" ? page.nextCursor : encodeOffsetCursor(offset + limit);
     return { data: toThreadReplyViews(tree, views, post.authorId, false), nextCursor };
   };
 }

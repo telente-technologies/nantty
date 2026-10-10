@@ -12,4 +12,6 @@ export function registerCommentsRoutes(router: HttpRouter, controller: ReturnTyp
   router.delete("/api/v1/comments/:commentId", controller.deleteComment);
   router.post("/api/v1/comments/:commentId/like", controller.likeComment);
   router.delete("/api/v1/comments/:commentId/like", controller.unlikeComment);
+  router.put("/api/v1/posts/:postId/comments/:commentId/pin", controller.pinComment);
+  router.delete("/api/v1/posts/:postId/comments/:commentId/pin", controller.unpinComment);
 }

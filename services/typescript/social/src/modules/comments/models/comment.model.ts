@@ -17,8 +17,11 @@ export interface CommentView {
   readonly createdAt: string;
   readonly likes: number;
   readonly liked: boolean;
+  readonly bookmarked: boolean;
   readonly replyCount: number;
   readonly depth: number;
+  readonly isPinned: boolean;
+  readonly pinnedAt: string | null;
   readonly replyingTo?: { readonly userId: string; readonly username: string };
   readonly mentions: readonly MentionEntity[];
   readonly videoReplies: readonly CommentVideoReply[];

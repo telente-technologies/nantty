@@ -18,6 +18,7 @@ export function createDeleteCommentHandler(context: HandlerContext): Handler<Del
     const now = context.clock.now();
     await context.database.transaction(async (transaction) => {
       const removed = await commentRepository.softDeleteMany(transaction, ids, now);
+      if (comment.isPinned) await commentRepository.clearPins(transaction, [commentId]);
       await postRepository.incrementCounter(transaction, comment.postId, "commentCount", -removed.count);
       if (comment.parentCommentId !== null) await commentRepository.incrementReplies(transaction, comment.parentCommentId, -1);
       await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.commentDeleted, subject: commentId, occurredAt: now, data: { commentId, postId: comment.postId, deletedBy: actorId, removedCount: removed.count } }]);

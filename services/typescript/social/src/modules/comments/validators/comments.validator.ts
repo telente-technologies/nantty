@@ -4,6 +4,7 @@ import { mentionEntitiesSchema } from "../../mentions/validators/mentions.valida
 
 export const postCommentsParamsSchema = schema.object({ postId: schema.string().uuid() });
 export const commentParamsSchema = schema.object({ commentId: schema.string().uuid() });
+export const postCommentParamsSchema = schema.object({ postId: schema.string().uuid(), commentId: schema.string().uuid() });
 export const commentsPageQuerySchema = schema.object({ cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
 export const newCommentBodySchema = schema.object({
   text: schema.string().min(1).max(1500),
@@ -11,7 +12,7 @@ export const newCommentBodySchema = schema.object({
   mentions: mentionEntitiesSchema.optional(),
 });
 export const conversationQuerySchema = schema.object({
-  sort: schema.enum(["top", "latest"]).optional(),
+  sort: schema.enum(["relevant", "latest", "likes", "top"]).optional(),
   cursor: schema.string().max(200).optional(),
   limit: schema.coerce.number().int().min(1).max(50).optional(),
 });

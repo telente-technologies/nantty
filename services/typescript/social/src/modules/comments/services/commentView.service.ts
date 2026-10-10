@@ -17,6 +17,17 @@ export async function buildCommentViews(context: HandlerContext, viewerId: strin
     viewerId === undefined ? new Set<string>() : commentRepository.likedCommentIds(db, viewerId, commentIds),
     commentRepository.videoRepliesFor(db, commentIds),
   ]);
+  const savedIds =
+    viewerId === undefined
+      ? new Set<string>()
+      : new Set(
+          (
+            await db.savedItem.findMany({
+              where: { userId: viewerId, type: "comment", targetId: { in: commentIds } },
+              select: { targetId: true },
+            })
+          ).map((row) => row.targetId),
+        );
   const authorIds = [...new Set([...rows.map((row) => row.authorId), ...parents.map((parent) => parent.authorId)])];
   const [authors, blockedViewer] = await Promise.all([
     context.directory.findUserSummaries(authorIds),
@@ -43,8 +54,11 @@ export async function buildCommentViews(context: HandlerContext, viewerId: strin
       createdAt: row.createdAt.toISOString(),
       likes: row.likeCount,
       liked: liked.has(row.id),
+      bookmarked: savedIds.has(row.id),
       replyCount: row.replyCount,
       depth: row.depth,
+      isPinned: row.isPinned,
+      pinnedAt: row.pinnedAt?.toISOString() ?? null,
       ...(parentAuthor === undefined ? {} : { replyingTo: { userId: parentAuthor.id, username: parentAuthor.username } }),
       mentions: row.mentions as unknown as MentionEntity[],
       videoReplies: videoRepliesByComment.get(row.id) ?? [],

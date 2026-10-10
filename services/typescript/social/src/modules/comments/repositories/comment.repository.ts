@@ -21,7 +21,7 @@ export const commentRepository = {
   pageTopLevel: (db: Db, postId: string, limit: number, cursor: string | undefined): Promise<CommentRow[]> =>
     db.comment.findMany({
       where: { postId, parentCommentId: null, ...shownToViewers },
-      orderBy: { id: "desc" },
+      orderBy: [{ isPinned: "desc" }, { id: "desc" }],
       take: limit + 1,
       ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
     }),
@@ -50,6 +50,16 @@ export const commentRepository = {
   addLike: async (db: Db, commentId: string, userId: string): Promise<boolean> => (await db.commentLike.createMany({ data: [{ commentId, userId }], skipDuplicates: true })).count === 1,
 
   removeLike: async (db: Db, commentId: string, userId: string): Promise<boolean> => (await db.commentLike.deleteMany({ where: { commentId, userId } })).count === 1,
+
+  unpinOthersInPost: (db: Db, postId: string, keepCommentId: string) =>
+    db.comment.updateMany({ where: { postId, isPinned: true, id: { not: keepCommentId } }, data: { isPinned: false, pinnedAt: null } }),
+
+  setPinned: (db: Db, commentId: string, pinnedAt: Date | null): Promise<CommentRow> => db.comment.update({ where: { id: commentId }, data: { isPinned: pinnedAt !== null, pinnedAt } }),
+
+  clearPins: async (db: Db, commentIds: readonly string[]): Promise<void> => {
+    await db.comment.updateMany({ where: { id: { in: [...commentIds] }, isPinned: true }, data: { isPinned: false, pinnedAt: null } });
+    await db.post.updateMany({ where: { pinnedCommentId: { in: [...commentIds] } }, data: { pinnedCommentId: null } });
+  },
 
   videoRepliesFor: (db: Db, commentIds: readonly string[]) =>
     db.post.findMany({
