@@ -12,7 +12,7 @@ import { ErrorState } from "@/components/ui/errorState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { liveService } from "@/services/live.service";
+import { liveService } from "@/services/live/live.service";
 import { webAppLinks } from "@/config/webAppLinks.config";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { spacing } from "@/constants/spacing.constant";

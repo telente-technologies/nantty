@@ -6,7 +6,7 @@ import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
-import { authService } from "@/services/auth.service";
+import { authService } from "@/services/auth/auth.service";
 import { isValidEmailAddress } from "@/utils/validators.util";
 
 export function ForgotPasswordScreen({ navigation }: AuthScreenProps<"ForgotPassword">) {

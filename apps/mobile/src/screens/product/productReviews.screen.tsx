@@ -13,7 +13,7 @@ import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { reviewsService } from "@/services/reviews.service";
+import { reviewsService } from "@/services/catalog/reviews.service";
 
 export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews">) {
   const { colors } = useTheme();

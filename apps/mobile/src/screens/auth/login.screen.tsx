@@ -8,7 +8,7 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { ApiError } from "@/errors/api.error";
-import { authService } from "@/services/auth.service";
+import { authService } from "@/services/auth/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 
 export function LoginScreen({ navigation }: AuthScreenProps<"Login">) {

@@ -11,7 +11,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { notificationsService } from "@/services/notifications.service";
+import { notificationsService } from "@/services/account/notifications.service";
 import type { CategorizedNotification } from "@/types/commerce.type";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";

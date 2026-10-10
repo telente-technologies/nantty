@@ -1,9 +1,12 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useCameraPermissions } from "expo-camera";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { showToast } from "@/store/toast.store";
+import { ErrorState } from "@/components/ui/errorState";
+import { Header } from "@/components/ui/header";
 
 import { DotsThreeVertical24Icon, MagnifyingGlass24Icon, PaperPlaneTilt24Icon, Warning20Icon } from "@/components/icons";
 import { JoinLiveCard } from "@/components/live/joinLiveCard";
@@ -34,7 +37,7 @@ import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet
 import { ReportSheet, type ReportTarget } from "@/components/moderation/reportSheet";
 import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { liveService } from "@/services/live.service";
+import { liveService } from "@/services/live/live.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { requireAuthAfterClosingModal, requireAuthThen } from "@/utils/requireAuth.util";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -66,13 +69,12 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const livePoints = useLiveEngagementPoints(liveId, hasJoined && !isHost);
   const liveStage = useLiveStageWithActions(liveId, hasJoined);
   const giftComments = useLiveGiftComments(liveId, live.session.data ? [live.session.data.host] : []);
-  const { canGoLive, isApprovedCreator, isCreatorStatusLoading } = useCreatorStatus();
+  const { canGoLive, isCreatorStatusLoading } = useCreatorStatus();
   const creatorEntry = useCreatorEntry();
   const session = live.session.data;
   const liveSafety = useLiveSafety(liveId, session?.safety, isHost, hasJoined && session?.status === "live");
   const isHostBlockedFromGoingLive = isHost && !isCreatorStatusLoading && !canGoLive;
   const viewerCanSendGifts = !isHost && (session?.giftsEnabled ?? session?.hostIsCreator ?? false);
-  const hostCanPinAffiliatedProducts = isHost && isApprovedCreator;
   const [likeBurstKey, setLikeBurstKey] = useState(0);
   const lastStageTapAt = useRef(0);
   const likeLiveByDoubleTap = () => {
@@ -99,7 +101,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
 
   useEffect(() => {
     if (!hasJoined || isHost) return;
-    liveService.joinLiveSession(liveId).catch(() => undefined);
+    liveService.joinLiveSession(liveId).catch(() => showToast("Couldn't join this live. Try again.", { tone: "error" }));
     return () => {
       liveService.leaveLiveSession(liveId).catch(() => undefined);
     };
@@ -126,6 +128,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const openHostReport = () => {
     if (session) setHostReportTarget({ targetType: "user", targetId: session.host.id });
   };
+  const isSponsoredLive = session != null && (session.liveAdSettings != null || (session.sponsorshipLine?.length ?? 0) > 0);
 
   useEffect(() => {
     if (!liveSafety.isPaused) setHasAppealedHold(false);
@@ -145,15 +148,31 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       }
       onClose={() => setShowViewerLiveOptions(false)}
       additionalActions={[
-        { label: "Send in chat", icon: <PaperPlaneTilt24Icon />, onPress: () => openSendInChat({ kind: "live", id: liveId }) },
-        { label: "Share with people", icon: <PaperPlaneTilt24Icon />, onPress: () => requireAuthAfterClosingModal(() => undefined, () => setShowShare(true), "share with people") },
+        ...(isSponsoredLive
+          ? []
+          : [
+              { label: "Send in chat", icon: <PaperPlaneTilt24Icon />, onPress: () => openSendInChat({ kind: "live", id: liveId }) },
+              { label: "Share with people", icon: <PaperPlaneTilt24Icon />, onPress: () => requireAuthAfterClosingModal(() => undefined, () => setShowShare(true), "share with people") },
+            ]),
         ...(session ? [{ label: `Report @${session.host.username}`, icon: <Warning20Icon />, onPress: () => requireAuthThen(openHostReport, undefined, "report") }] : []),
       ]}
     />
     </>
   );
 
-  if (!session) return <View style={[styles.root, { paddingTop: insets.top }]} />;
+  if (!session) {
+    const sessionQuery = live.session;
+    return (
+      <View style={[styles.root, { paddingTop: insets.top }]}>
+        <Header title="Live" onBack={() => navigation.goBack()} />
+        {sessionQuery.isError ? (
+          <ErrorState message="Couldn't load this live." onRetry={() => sessionQuery.refetch()} retrying={sessionQuery.isRefetching} />
+        ) : (
+          <ActivityIndicator style={styles.loading} color={colors.primary} accessibilityLabel="Loading live" />
+        )}
+      </View>
+    );
+  }
 
   if (!hasJoined) {
     return (
@@ -178,13 +197,14 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const isHostCameraAllowed = !!cameraPermission?.granted;
   const isShownOverVideo = liveStage.isMultiGuestLayout || doesLiveStageShowVideo(session, isHost, isHostCameraAllowed);
   const liveHasProducts = session.products.length > 0;
-  const hostCanPinProductsToThisLive = hostCanPinAffiliatedProducts && (liveHasProducts || session.category === "shopping");
+  const liveStoreId = session.storeId ?? null;
+  const hostCanPinProductsToThisLive = isHost && liveStoreId !== null;
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       {liveStage.isMultiGuestLayout ? null : (
         <LiveVideoStage session={session} isHost={isHost} isHostCameraAllowed={isHostCameraAllowed} isPlaybackAllowed={isScreenFocused} />
       )}
-      {isHost ? null : (
+      {isHost || isSponsoredLive ? null : (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Double tap to like this live"
@@ -192,7 +212,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           style={StyleSheet.absoluteFill}
         />
       )}
-      {isHost ? null : <LikeBurst burstKey={likeBurstKey} />}
+      {isHost || isSponsoredLive ? null : <LikeBurst burstKey={likeBurstKey} />}
       <LiveStageLayer
         liveId={liveId}
         session={session}
@@ -222,12 +242,13 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       <View style={styles.flex} />
       <View style={styles.bottomRow}>
         <LiveCommentsFeed comments={[...(live.comments.data?.data ?? []), ...giftComments]} isShownOverVideo={isShownOverVideo} />
-        <LiveReactionRail expanded={reactionsExpanded} onReact={live.sendReaction} isShownOverVideo={isShownOverVideo} />
+        {isSponsoredLive ? null : <LiveReactionRail expanded={reactionsExpanded} onReact={live.sendReaction} isShownOverVideo={isShownOverVideo} />}
       </View>
       <View style={isShownOverVideo ? null : styles.commentBarArea}>
         <LiveCommentBar
           isShownOverVideo={isShownOverVideo}
           isSending={live.sendComment.isPending}
+          hideComposer={isSponsoredLive}
           onSend={(text) => requireAuthThen(() => live.sendComment.mutate(text), undefined, "comment on lives")}
           onToggleReactions={() => setReactionsExpanded((e) => !e)}
           onPressProducts={
@@ -245,10 +266,11 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       {viewerCanSendGifts ? (
         <LiveGiftPickerSheet liveId={liveId} recipientUserId={session.host.id} visible={showGiftPicker} onClose={() => setShowGiftPicker(false)} />
       ) : null}
-      {hostCanPinProductsToThisLive ? (
+      {hostCanPinProductsToThisLive && liveStoreId ? (
         <LivePinProductsSheet
           visible={showPinProducts}
           liveId={liveId}
+          storeId={liveStoreId}
           pinnedProductId={session.pinnedProductId ?? null}
           onClose={() => setShowPinProducts(false)}
         />
@@ -287,4 +309,5 @@ const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   topButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: scheme === "dark" ? "#2C2C2C" : "#F0F2FA" },
   commentBarArea: { backgroundColor: colors.background, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.divider },
   bottomRow: { paddingHorizontal: 12, paddingBottom: 8, flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 8 },
+  loading: { flex: 1, alignItems: "center", justifyContent: "center" },
 }));

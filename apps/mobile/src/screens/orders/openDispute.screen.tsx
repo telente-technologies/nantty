@@ -13,8 +13,8 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { disputesService } from "@/services/disputes.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { disputesService } from "@/services/moderation/disputes.service";
 import type { DisputeReason } from "@/types/commerce.type";
 
 const MINIMUM_DESCRIPTION_LENGTH = 20;

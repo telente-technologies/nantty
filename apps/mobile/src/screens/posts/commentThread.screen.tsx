@@ -1,34 +1,87 @@
-import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { CommentThreadContext, useCommentThreadController } from "@/components/clips/commentThreadController.hook";
 import { toLocalThreadReply } from "@/components/feed/thread/postThread.hook";
 import { ThreadComposer } from "@/components/feed/thread/threadComposer";
-import { ThreadSkeleton } from "@/components/feed/thread/threadListParts";
 import { ThreadReplyBranch } from "@/components/feed/thread/threadReplyBranch";
+import { ThreadSkeleton } from "@/components/feed/thread/threadListParts";
+import { PostCard } from "@/components/feed/postCard";
+import { ReshareSheet } from "@/components/feed/reshareSheet";
+import { ChatTeardropText24Icon } from "@/components/icons";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { Screen } from "@/components/ui/screen";
+import { Text } from "@/components/ui/text";
+import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { postCommentsService } from "@/services/postComments.service";
-import { postsService } from "@/services/posts.service";
+import { postCommentsService } from "@/services/content/postComments.service";
+import { postsService } from "@/services/content/posts.service";
+import { postThreadService } from "@/services/content/postThread.service";
+import { ApiError } from "@/services/core/apiClient.service";
 import { useTheme } from "@/theme";
+import type { Post } from "@/types";
 
-export function CommentThreadScreen({ route }: MainScreenProps<"CommentThread">) {
+const statusOf = (error: unknown) => (error instanceof ApiError ? error.status : null);
+const isGoneError = (error: unknown) => {
+  const status = statusOf(error);
+  return status === 404 || status === 410;
+};
+const isDeniedError = (error: unknown) => {
+  const status = statusOf(error);
+  return status === 401 || status === 403;
+};
+
+export function CommentThreadScreen({ navigation, route }: MainScreenProps<"CommentThread">) {
   const { colors } = useTheme();
+  const styles = useStyles();
   const { commentId, postId } = route.params;
-  const commentThread = useCommentThreadController(postId);
+  const openUserProfile = useOpenUserProfile();
+  const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const focus = useQuery({ queryKey: ["comment", commentId], queryFn: () => postCommentsService.fetchComment(commentId) });
   const post = useQuery({ queryKey: ["post", postId], queryFn: () => postsService.fetchPostById(postId) });
-  const postAuthorId = post.data?.author.id;
+  const thread = useInfiniteQuery({
+    queryKey: ["comment-thread", commentId],
+    queryFn: ({ pageParam }) => postThreadService.fetchCommentThread(commentId, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+  });
+  const postAuthorId = post.data?.author?.id;
+  const commentThread = useCommentThreadController(postId, undefined, undefined, postAuthorId);
   const { setReplyThreadVisibility, startReplyingToComment, replyTarget } = commentThread;
   useEffect(() => {
     setReplyThreadVisibility(commentId, "expanded");
-  }, [commentId]);
+  }, [commentId, setReplyThreadVisibility]);
   useEffect(() => {
     if (focus.data && !replyTarget) startReplyingToComment(focus.data);
-  }, [focus.data, replyTarget]);
+  }, [focus.data, replyTarget, startReplyingToComment]);
+
+  const pages = thread.data?.pages ?? [];
+  const ancestors = useMemo(() => pages[0]?.ancestors ?? [], [pages]);
+  const subtree = useMemo(() => {
+    const seen = new Set<string>();
+    return pages
+      .flatMap((page) => page.data ?? [])
+      .filter((reply) => (seen.has(reply.id) ? false : (seen.add(reply.id), true)));
+  }, [pages]);
+  const focusComment = pages[0]?.focus ?? focus.data ?? null;
+  const initialLoading = focus.isLoading || thread.isLoading || post.isLoading;
+  const retrying = (focus.isFetching || thread.isFetching || post.isFetching) && !initialLoading;
+  const commentGone = isGoneError(focus.error) || isGoneError(thread.error);
+  const commentDenied = !commentGone && (isDeniedError(focus.error) || isDeniedError(thread.error));
+  const commentFailed = (focus.isError || thread.isError) && !commentGone && !commentDenied;
+  const commentMissing = !initialLoading && !commentGone && !commentDenied && !commentFailed && !focusComment;
+  const showCommentGone = !initialLoading && (commentGone || commentMissing);
+  const postGone = isGoneError(post.error);
+  const postDenied = !postGone && isDeniedError(post.error);
+  const postFailed = post.isError && !postGone && !postDenied;
+  const showThreadBody = !initialLoading && !commentGone && !commentDenied && !commentFailed && !commentMissing;
+  const retryAll = () => {
+    post.refetch();
+    focus.refetch();
+    thread.refetch();
+  };
 
   return (
     <Screen background={colors.surface}>
@@ -36,23 +89,131 @@ export function CommentThreadScreen({ route }: MainScreenProps<"CommentThread">)
         <View style={styles.flex}>
           <Header title="Thread" />
           <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            {focus.isLoading ? <ThreadSkeleton rows={2} /> : null}
-            {focus.isError ? <ErrorState message="This reply isn't available." onRetry={() => focus.refetch()} /> : null}
-            {focus.data ? (
-              <ThreadReplyBranch reply={toLocalThreadReply(focus.data, postAuthorId, false)} postAuthorId={postAuthorId} hasParentAbove={false} showReplyingTo />
+            {initialLoading ? <ThreadSkeleton rows={2} /> : null}
+            {showCommentGone ? (
+              <ErrorState message="This reply is no longer available." detail="It may have been deleted." />
+            ) : null}
+            {commentDenied && !initialLoading ? (
+              <ErrorState message="You can't view this reply." detail="You don't have permission to see it." />
+            ) : null}
+            {commentFailed && !initialLoading ? (
+              <ErrorState
+                message="Couldn't load this reply."
+                detail="Check your connection, then try again."
+                onRetry={retryAll}
+                retrying={retrying}
+              />
+            ) : null}
+            {!initialLoading && showThreadBody && post.data ? (
+              <PostCard
+                post={post.data}
+                onPress={() => navigation.navigate("PostDetail", { postId })}
+                onPressAuthor={() => openUserProfile(post.data!.author.id)}
+                onPressComments={() => navigation.navigate("PostDetail", { postId })}
+                onRepost={() => setReshareTarget(post.data ?? null)}
+              />
+            ) : null}
+            {!initialLoading && showThreadBody && postGone ? (
+              <View style={styles.postNotice} accessibilityRole="text" accessibilityLabel="This post is no longer available.">
+                <ChatTeardropText24Icon size={28} color={colors.textMuted} />
+                <Text size={15} weight={600} lineHeight={20} align="center">
+                  This post is no longer available.
+                </Text>
+                <Text size={14} lineHeight={19} color={colors.textMuted} align="center">
+                  The original post may have been deleted.
+                </Text>
+              </View>
+            ) : null}
+            {!initialLoading && showThreadBody && postDenied ? (
+              <View style={styles.postNotice} accessibilityRole="text" accessibilityLabel="You can't view this post.">
+                <ChatTeardropText24Icon size={28} color={colors.textMuted} />
+                <Text size={15} weight={600} lineHeight={20} align="center">
+                  You can&apos;t view this post.
+                </Text>
+                <Text size={14} lineHeight={19} color={colors.textMuted} align="center">
+                  You don&apos;t have permission to see it.
+                </Text>
+              </View>
+            ) : null}
+            {!initialLoading && showThreadBody && postFailed ? (
+              <ErrorState
+                compact
+                message="Couldn't load this post."
+                detail="Check your connection, then try again."
+                onRetry={retryAll}
+                retrying={retrying}
+              />
+            ) : null}
+            {showThreadBody
+              ? ancestors.map((ancestor, index) => (
+                  <ThreadReplyBranch
+                    key={ancestor.id}
+                    reply={toLocalThreadReply(ancestor, postAuthorId, index > 0)}
+                    postAuthorId={postAuthorId}
+                    hasParentAbove={index > 0}
+                    showReplyingTo
+                    onRepostReply={() => setReshareTarget(post.data ?? null)}
+                  />
+                ))
+              : null}
+            {showThreadBody && focusComment ? (
+              <View style={styles.focus}>
+                <ThreadReplyBranch
+                  reply={toLocalThreadReply(focusComment, postAuthorId, ancestors.length > 0)}
+                  postAuthorId={postAuthorId}
+                  hasParentAbove={ancestors.length > 0}
+                  showReplyingTo
+                  onRepostReply={() => setReshareTarget(post.data ?? null)}
+                />
+              </View>
+            ) : null}
+            {showThreadBody && subtree.length > 0 ? (
+              <View style={styles.repliesHeader}>
+                <Text size={13} weight={600} lineHeight={16} color={colors.textMuted}>
+                  Replies
+                </Text>
+              </View>
+            ) : null}
+            {showThreadBody
+              ? subtree.map((reply) => (
+                  <ThreadReplyBranch
+                    key={reply.id}
+                    reply={reply}
+                    postAuthorId={postAuthorId}
+                    hasParentAbove={false}
+                    showReplyingTo={false}
+                    onRepostReply={() => setReshareTarget(post.data ?? null)}
+                  />
+                ))
+              : null}
+            {showThreadBody && thread.hasNextPage && !thread.isFetchingNextPage ? (
+              <Text size={14} weight={500} lineHeight={18} color={colors.primary} accessibilityRole="button" onPress={() => thread.fetchNextPage()} style={styles.loadMore}>
+                Show more replies
+              </Text>
             ) : null}
           </ScrollView>
           <ThreadComposer
-            postAuthorUsername={focus.data?.author.username}
-            replyTarget={replyTarget ?? focus.data ?? null}
-            onCancelReply={() => (focus.data ? startReplyingToComment(focus.data) : undefined)}
+            postAuthorUsername={focusComment?.author?.username}
+            replyTarget={replyTarget ?? focusComment}
+            onCancelReply={() => (focusComment ? startReplyingToComment(focusComment) : undefined)}
             onSubmit={commentThread.submitCommentOrReplyText}
             replyRestriction={post.data?.viewerCanReply === false ? (post.data.replyRestriction ?? null) : null}
           />
+          <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />
         </View>
       </CommentThreadContext.Provider>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({ flex: { flex: 1 }, content: { paddingBottom: 24 } });
+const useStyles = () => {
+  const { colors } = useTheme();
+  return StyleSheet.create({
+    flex: { flex: 1 },
+    content: { paddingBottom: 24 },
+    focus: { backgroundColor: colors.primaryTint, borderTopWidth: StyleSheet.hairlineWidth, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
+    repliesHeader: { paddingHorizontal: 16, paddingTop: 12 },
+    loadMore: { paddingHorizontal: 16, paddingVertical: 12 },
+    postNotice: { paddingHorizontal: 32, paddingVertical: 24, gap: 8, alignItems: "center" },
+  });
+};

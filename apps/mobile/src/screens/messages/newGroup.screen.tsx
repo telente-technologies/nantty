@@ -13,9 +13,9 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { channelsService } from "@/services/channels.service";
-import { groupsService } from "@/services/groups.service";
-import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
+import { channelsService } from "@/services/social/channels.service";
+import { groupsService } from "@/services/social/groups.service";
+import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/media/mediaUploadQueue.service";
 import type { UserSummary } from "@/types";
 
 const MAXIMUM_GROUP_NAME_LENGTH = 60;

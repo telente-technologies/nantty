@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Linking, Platform, ScrollView, StyleSheet, View } from "react-native";
 
 import { creatorQueryKeys, useMySubscriptionsQuery } from "@/components/creator/creatorQueries.hook";
 import { StatusPill, type StatusTone } from "@/components/escrow/statusPill";
@@ -16,7 +16,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { creatorProgramService } from "@/services/creatorProgram.service";
+import { creatorProgramService } from "@/services/creators/creatorProgram.service";
 import type { CreatorSubscriptionState } from "@/types/creator.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
@@ -34,6 +34,7 @@ const STATUS_PRESENTATION: Record<CreatorSubscriptionState["status"], { label: s
 
 const canCancel = (status: CreatorSubscriptionState["status"]) => status === "active" || status === "past_due";
 const canResume = (status: CreatorSubscriptionState["status"]) => status === "cancelled";
+const STORE_SUBSCRIPTION_SETTINGS = { apple_iap: "https://apps.apple.com/account/subscriptions", google_play: "https://play.google.com/store/account/subscriptions" } as const;
 
 function formatDay(isoDate: string | null): string | null {
   if (!isoDate) return null;
@@ -137,10 +138,22 @@ function SubscriptionCard({
         ) : null}
       </View>
 
-      {canCancel(subscription.status) ? (
+      {subscription.billingChannel && subscription.billingChannel !== "web" ? (
+        <Button
+          title={subscription.billingChannel === "apple_iap" ? "Manage in the App Store" : "Manage in Google Play"}
+          variant="outline"
+          height={40}
+          onPress={() => {
+            const settingsUrl = STORE_SUBSCRIPTION_SETTINGS[subscription.billingChannel as keyof typeof STORE_SUBSCRIPTION_SETTINGS];
+            const packageQuery = Platform.OS === "android" && subscription.storeProductId ? `?sku=${encodeURIComponent(subscription.storeProductId)}&package=com.zudomart.app` : "";
+            void Linking.openURL(settingsUrl + packageQuery);
+          }}
+        />
+      ) : null}
+      {canCancel(subscription.status) && (subscription.billingChannel ?? "web") === "web" ? (
         <Button title="Cancel subscription" variant="outline" height={40} disabled={busy} loading={busy} onPress={onCancel} />
       ) : null}
-      {canResume(subscription.status) ? (
+      {canResume(subscription.status) && (subscription.billingChannel ?? "web") === "web" ? (
         <Button title="Resume subscription" height={40} disabled={busy} loading={busy} onPress={onResume} />
       ) : null}
     </View>

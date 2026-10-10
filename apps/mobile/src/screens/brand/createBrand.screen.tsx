@@ -14,10 +14,10 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { brandsService } from "@/services/brands.service";
-import { categoriesService } from "@/services/categories.service";
-import { mediaService } from "@/services/media.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { brandsService } from "@/services/sellers/brands.service";
+import { categoriesService } from "@/services/catalog/categories.service";
+import { mediaService } from "@/services/media/media.service";
 
 export function CreateBrandScreen({ navigation }: MainScreenProps<"CreateBrand">) {
   const { colors } = useTheme();

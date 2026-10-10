@@ -22,10 +22,10 @@ import { useCartActions } from "@/hooks/useCart.hook";
 import { useSaveToggle } from "@/hooks/useSaveToggle.hook";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { trackProductInteraction } from "@/services/productInteractions.service";
-import { productsService } from "@/services/products.service";
-import { ApiError } from "@/services/apiClient.service";
-import { storesService } from "@/services/stores.service";
+import { trackProductInteraction } from "@/services/sellers/productInteractions.service";
+import { productsService } from "@/services/sellers/products.service";
+import { ApiError } from "@/services/core/apiClient.service";
+import { storesService } from "@/services/sellers/stores.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 import { webAppLinks } from "@/config/webAppLinks.config";
@@ -42,6 +42,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   }, [productId]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [variantSelections, setVariantSelections] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const { offerSendInChat, sendInChatElement } = useShareToChat();
   const productSave = useSaveToggle({ type: "product", targetId: productId }, product.data?.savedByViewer ?? false);
@@ -60,8 +61,17 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   const addSelectedProductToCart = () => {
     const detail = product.data;
     if (!detail) return;
-    if ((detail.sizes.length > 0 && !selectedSize) || (detail.colors.length > 0 && !selectedColor)) {
-      setCartError("Choose a size and color first.");
+    if (detail.sizes.length > 0 && !selectedSize) {
+      setCartError("Choose a size first.");
+      return;
+    }
+    if (detail.colors.length > 0 && !selectedColor) {
+      setCartError("Choose a color first.");
+      return;
+    }
+    const missingGroup = (detail.variantGroups ?? []).find((group) => !variantSelections[group.name]);
+    if (missingGroup) {
+      setCartError(`Choose ${missingGroup.name} first.`);
       return;
     }
     setCartError(null);
@@ -70,7 +80,13 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
 
   const addValidatedProductToCart = async () => {
     try {
-      await addProductToCart.mutateAsync({ productId, quantity, size: selectedSize, color: selectedColor });
+      await addProductToCart.mutateAsync({
+        productId,
+        quantity,
+        size: selectedSize,
+        color: selectedColor,
+        variants: Object.keys(variantSelections).length > 0 ? variantSelections : null,
+      });
       navigation.navigate("Cart");
     } catch {
       setCartError("Couldn't add to cart. Try again.");
@@ -126,8 +142,18 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
           <ProductBrandRow brand={detail.brand} isOfficialStore={detail.isOfficialStore ?? false} onPress={() => navigation.navigate("BrandProfile", { brandId: detail.brand!.id })} />
         ) : null}
         <View style={styles.selectors}>
-          <OptionSelect label="Size" placeholder="Size (UK)" options={detail.sizes} value={selectedSize} onChange={setSelectedSize} />
-          <OptionSelect label="Color" placeholder="Select an option" options={detail.colors} value={selectedColor} onChange={setSelectedColor} />
+          {detail.sizes.length > 0 ? <OptionSelect label="Size" placeholder="Size (UK)" options={detail.sizes} value={selectedSize} onChange={setSelectedSize} /> : null}
+          {detail.colors.length > 0 ? <OptionSelect label="Color" placeholder="Select an option" options={detail.colors} value={selectedColor} onChange={setSelectedColor} /> : null}
+          {(detail.variantGroups ?? []).map((group) => (
+            <OptionSelect
+              key={group.name}
+              label={group.name}
+              placeholder={`Select ${group.name.toLowerCase()}`}
+              options={group.options}
+              value={variantSelections[group.name] ?? null}
+              onChange={(value) => setVariantSelections((prev) => ({ ...prev, [group.name]: value }))}
+            />
+          ))}
           <OptionSelect
             label="Quantity"
             placeholder="Number of items"

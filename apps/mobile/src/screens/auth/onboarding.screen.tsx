@@ -10,8 +10,8 @@ import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
 import { SocialSignInCancelledError, type SocialSignInProvider } from "@/errors/socialSignIn.error";
-import { checkIfAppleSignInIsAvailableOnThisDevice } from "@/services/appleSignIn.service";
-import { authService } from "@/services/auth.service";
+import { checkIfAppleSignInIsAvailableOnThisDevice } from "@/services/auth/appleSignIn.service";
+import { authService } from "@/services/auth/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useGuestSessionStore } from "@/store/guestSession.store";
 

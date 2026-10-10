@@ -12,8 +12,8 @@ import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { productsService } from "@/services/products.service";
-import { trackProductInteraction } from "@/services/productInteractions.service";
+import { productsService } from "@/services/sellers/products.service";
+import { trackProductInteraction } from "@/services/sellers/productInteractions.service";
 import { spacing } from "@/constants/spacing.constant";
 
 export function CategoryScreen({ navigation, route }: MainScreenProps<"Category">) {

@@ -18,7 +18,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { creatorProgramService } from "@/services/creatorProgram.service";
+import { creatorProgramService } from "@/services/creators/creatorProgram.service";
 import type { CreatorDashboardPeriod } from "@/types/creator.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";

@@ -9,7 +9,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { boostsService } from "@/services/boosts.service";
+import { boostsService } from "@/services/feed/boosts.service";
 import type { Boost } from "@/types/boost.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";

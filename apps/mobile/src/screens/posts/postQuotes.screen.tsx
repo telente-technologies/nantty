@@ -10,7 +10,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { postsService } from "@/services/posts.service";
+import { postsService } from "@/services/content/posts.service";
 import { useTheme } from "@/theme";
 
 export const postQuotesQueryKey = (postId: string) => ["feed", "quotes", postId] as const;

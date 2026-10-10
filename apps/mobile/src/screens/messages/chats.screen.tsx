@@ -14,7 +14,7 @@ import { InboxFolderMenu } from "@/components/chatSafety/inboxFolderMenu";
 import { InboxRequestActions } from "@/components/chatSafety/inboxRequestActions";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
-import { messagesService } from "@/services/messages.service";
+import { messagesService } from "@/services/chat/messages.service";
 import { ChatsSkeleton } from "@/components/chat/chatsSkeleton";
 import { ConversationRow } from "@/components/chat/conversationRow";
 import { SmallTab } from "@/components/chat/smallTab";
@@ -23,7 +23,7 @@ import { ArrowLeft24Icon, DotsThreeVertical24Icon, MagnifyingGlass24Icon, Wechat
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { storiesService } from "@/services/stories.service";
+import { storiesService } from "@/services/clips/stories.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { ConversationFilter, InboxFolder } from "@/types";
 

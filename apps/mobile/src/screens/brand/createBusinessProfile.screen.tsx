@@ -13,8 +13,8 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { brandsService } from "@/services/brands.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { brandsService } from "@/services/sellers/brands.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import type { BusinessCategorySelection } from "@/types/socialGraph.type";
 

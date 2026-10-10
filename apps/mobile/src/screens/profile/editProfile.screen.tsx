@@ -13,7 +13,7 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { uploadProfileImageAndReturnMediaId } from "@/services/profileImageUpload.service";
+import { uploadProfileImageAndReturnMediaId } from "@/services/chat/profileImageUpload.service";
 
 const KEYBOARD_BOTTOM_OFFSET = 24;
 

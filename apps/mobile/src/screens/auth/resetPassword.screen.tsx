@@ -7,7 +7,7 @@ import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { AuthScreenProps } from "@/navigation/navigation.types";
-import { authService } from "@/services/auth.service";
+import { authService } from "@/services/auth/auth.service";
 import { useSignUpStore } from "@/store/signup.store";
 import { isPasswordStrongEnoughForAccount } from "@/utils/validators.util";
 

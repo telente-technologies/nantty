@@ -22,7 +22,7 @@ import { Screen } from "@/components/ui/screen";
 import { useTheme } from "@/theme";
 import { ApiError } from "@/errors/api.error";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { followsService } from "@/services/follows.service";
+import { followsService } from "@/services/social/follows.service";
 import { useAuthStore } from "@/store/auth.store";
 import { DEFAULT_CONNECTION_PREFERENCE, useListViewPreferencesStore } from "@/store/listViewPreferences.store";
 import type { ConnectionEntry, ConnectionTab } from "@/types/account.type";

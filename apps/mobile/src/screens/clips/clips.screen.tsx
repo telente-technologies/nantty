@@ -15,9 +15,9 @@ import { rememberClipGestureTipsSeen, shouldShowClipGestureTips } from "@/compon
 import { GestureTipsOverlay } from "@/components/clips/gestureTipsOverlay";
 import { colors } from "@/constants/colors.constant";
 import type { MainStackParamList, MainTabParamList } from "@/navigation/navigation.types";
-import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabilityConfig } from "@/services/adEvents.service";
-import { clipsService } from "@/services/clips.service";
-import { claimAudioFocusForVideoPlayback } from "@/services/videoAudio.service";
+import { recordImpressionsForViewableSponsoredItems, sponsoredImpressionViewabilityConfig } from "@/services/ads/adEvents.service";
+import { clipsService } from "@/services/clips/clips.service";
+import { claimAudioFocusForVideoPlayback } from "@/services/clips/videoAudio.service";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { useAuthStore } from "@/store/auth.store";
 import { useVideoAudioStore } from "@/store/videoAudio.store";
@@ -63,10 +63,6 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
   const clips = useMemo(() => clipsFeed.data?.pages.flatMap((page) => page.data) ?? [], [clipsFeed.data]);
-
-  useEffect(() => {
-    navigation.setOptions({ tabBarStyle: { display: "none" } });
-  }, [navigation]);
 
   useEffect(() => {
     if (!requestedStartClipId || pageHeight === 0 || !clipsFeed.isSuccess) return;
@@ -135,6 +131,7 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
   const toggleLikeOnClip = (clip: Clip) => requireAuthThen(() => applyLikeToggleOnClip(clip), undefined, "like clips");
 
   const likeClipWithDoubleTap = (clip: Clip) => {
+    if (clip.sponsored) return;
     if (!engagementFor(clip).liked) toggleLikeOnClip(clip);
   };
 
@@ -233,7 +230,6 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
         <ClipsHeader
           tab={tab}
           onChangeTab={switchFeedTabAndScrollToTop}
-          onBack={() => navigation.navigate("Home")}
           onSearch={() => navigation.navigate("Search", { scope: "global" })}
           foregroundColor={colors.white}
         />

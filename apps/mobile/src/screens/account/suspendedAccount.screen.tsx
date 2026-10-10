@@ -10,9 +10,9 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { legalLinks } from "@/config/legalLinks.config";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { accountStatusService } from "@/services/accountStatus.service";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { supportService } from "@/services/support.service";
+import { accountStatusService } from "@/services/account/accountStatus.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { supportService } from "@/services/support/support.service";
 import { useAuthStore } from "@/store/auth.store";
 
 export function SuspendedAccountScreen() {

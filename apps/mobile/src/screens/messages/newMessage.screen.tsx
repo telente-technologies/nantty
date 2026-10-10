@@ -12,7 +12,7 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { messagesService } from "@/services/messages.service";
+import { messagesService } from "@/services/chat/messages.service";
 import { spacing } from "@/constants/spacing.constant";
 
 export function NewMessageScreen({ navigation }: MainScreenProps<"NewMessage">) {

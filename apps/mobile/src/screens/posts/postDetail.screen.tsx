@@ -8,10 +8,11 @@ import { CommentThreadContext, TOP_LEVEL_PARENT_KEY, useCommentThreadController 
 import { ReplyingToCommentLink } from "@/components/clips/videoReply/commentStickerOverlay";
 import { PostCard } from "@/components/feed/postCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
+import { ViewQuotesLink } from "@/components/feed/viewQuotesLink";
 import { toLocalThreadReply, usePostConversation } from "@/components/feed/thread/postThread.hook";
 import { SponsoredThreadItem } from "@/components/feed/thread/sponsoredThreadItem";
 import { ThreadComposer } from "@/components/feed/thread/threadComposer";
-import { ThreadEmptyState, ThreadErrorState, ThreadSkeleton, ThreadSortTabs } from "@/components/feed/thread/threadListParts";
+import { ThreadEmptyState, ThreadErrorState, ThreadSkeleton, ThreadSortDropdown } from "@/components/feed/thread/threadListParts";
 import { ThreadReplyBranch } from "@/components/feed/thread/threadReplyBranch";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
@@ -21,7 +22,7 @@ import { Text } from "@/components/ui/text";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { useScreenshotSharePrompt } from "@/hooks/useScreenshotSharePrompt.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { postsService } from "@/services/posts.service";
+import { postsService } from "@/services/content/posts.service";
 import { useAuthStore } from "@/store/auth.store";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Post } from "@/types";
@@ -48,12 +49,12 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const post = useQuery({ queryKey: ["post", postId], queryFn: () => postsService.fetchPostById(postId) });
   const isScreenFocused = useIsFocused();
   useScreenshotSharePrompt(post.data, isScreenFocused);
-  const [sort, setSort] = useState<ThreadSort>("top");
+  const [sort, setSort] = useState<ThreadSort>("relevant");
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
-  const commentThread = useCommentThreadController(postId);
+  const postAuthorId = post.data?.author.id;
+  const commentThread = useCommentThreadController(postId, undefined, undefined, postAuthorId);
   const conversation = usePostConversation(postId, sort);
   const { offerSendInChat, sendInChatElement } = useShareToChat();
-  const postAuthorId = post.data?.author.id;
 
   const updateCachedPost = (change: (p: Post) => Post) => queryClient.setQueryData<Post>(["post", postId], (p) => (p ? change(p) : p));
 
@@ -72,9 +73,10 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
     .locallyPostedCommentsFor(TOP_LEVEL_PARENT_KEY)
     .map((comment) => ({ kind: "reply", key: comment.id, reply: toLocalThreadReply(comment, postAuthorId, false) }));
   const serverIds = new Set(conversation.rows.map((row) => row.key));
-  const rows = [...locallyPostedRows.filter((row) => !serverIds.has(row.key)), ...conversation.rows].filter(
-    (row) => row.kind === "sponsored" || !commentThread.isCommentDeleted(row.reply.id),
-  );
+  const isPinnedRow = (row: ThreadRow) => row.kind === "reply" && commentThread.applyLocalOverridesToComment(row.reply).isPinned === true;
+  const rows = [...locallyPostedRows.filter((row) => !serverIds.has(row.key)), ...conversation.rows]
+    .filter((row) => row.kind === "sponsored" || !commentThread.isCommentDeleted(row.reply.id))
+    .sort((a, b) => Number(isPinnedRow(b)) - Number(isPinnedRow(a)));
   const threadQuery = conversation.query;
 
   const postBlock = post.isLoading ? (
@@ -114,7 +116,10 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
           </Text>
         ) : null}
       </Text>
-      <ThreadSortTabs sort={sort} onChange={setSort} />
+      <View style={styles.threadHeader}>
+        <ThreadSortDropdown sort={sort} onChange={setSort} />
+        <ViewQuotesLink post={post.data} />
+      </View>
     </View>
   ) : (
     <ErrorState message="This post isn't available." onRetry={() => post.refetch()} />
@@ -149,7 +154,13 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
                 <SponsoredThreadItem ad={item.ad} postId={postId} />
               ) : (
                 <View style={styles.conversation}>
-                  <ThreadReplyBranch reply={item.reply} postAuthorId={postAuthorId} hasParentAbove={false} showReplyingTo={false} />
+                  <ThreadReplyBranch
+                    reply={item.reply}
+                    postAuthorId={postAuthorId}
+                    hasParentAbove={false}
+                    showReplyingTo={false}
+                    onRepostReply={() => setReshareTarget(post.data ?? null)}
+                  />
                 </View>
               )
             }
@@ -185,6 +196,7 @@ const useStyles = makeThemedStyles((colors) =>
     flex: { flex: 1 },
     replyLink: { paddingHorizontal: 16, paddingBottom: 12 },
     timestamp: { paddingHorizontal: 16, paddingVertical: 12 },
+    threadHeader: { paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
     conversation: { paddingBottom: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
     footer: { height: 24 },
   }),

@@ -6,7 +6,9 @@ import { CreateHeader } from "@/components/create/createHeader";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { buildLiveMonetizationInput, DEFAULT_LIVE_MONETIZATION_DRAFT, type LiveMonetizationDraft } from "@/components/create/liveMonetization.constant";
 import { LiveSetupPanel, type LiveStreamCredentials } from "@/components/create/liveSetupPanel";
-import { ClipComposer } from "@/components/create/clip/clipComposer";
+import { ClipComposer, type ClipComposerSeed } from "@/components/create/clip/clipComposer";
+import type { ClipLookId } from "@/components/create/clip/clipLook.constant";
+import { DraftsButton, DraftsSheet } from "@/components/create/draftsSheet";
 import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
 import { usePostDraftMediaUploads } from "@/components/create/postDraftUploads.hook";
 import { usePublishPost } from "@/components/create/publishPost.hook";
@@ -16,18 +18,22 @@ import { StoryCapturePanel } from "@/components/create/storyCapturePanel";
 import { VideoReplyStage } from "@/components/clips/videoReply/videoReplyStage";
 import { DEFAULT_STICKER_LAYOUT } from "@/components/clips/videoReply/videoReply.util";
 import { LiveBadge } from "@/components/live/liveBadge";
+import { useLiveHostStore } from "@/components/live/liveHostStore.hook";
 import { Screen } from "@/components/ui/screen";
 import { RoleGateScreen } from "@/components/roleGate/roleGateScreen";
 import { useCreateMenuAccess } from "@/hooks/useCreateMenuAccess.hook";
 import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { useTheme } from "@/theme";
-import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { liveService } from "@/services/live.service";
-import type { LocalMediaFile } from "@/services/mediaPreparation.service";
-import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
-import { storiesService } from "@/services/stories.service";
-import type { CommentStickerLayout, CreateMode, LiveCategory, LiveSource } from "@/types";
+import { liveService } from "@/services/live/live.service";
+import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
+import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/media/mediaUploadQueue.service";
+import { storiesService } from "@/services/clips/stories.service";
+import { useActingProfileStore } from "@/store/actingProfile.store";
+import { useComposerDraftsStore, type ComposerDraft } from "@/store/composerDrafts.store";
+import { useToastStore } from "@/store/toast.store";
+import type { CommentStickerLayout, CreateMode, ID, LiveCategory, LiveSource } from "@/types";
+import { readLiveErrorMessage } from "@/utils/liveStoreErrors.util";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
 
 const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", mentions: [], audience: "everyone", kind: "photo", ...DEFAULT_POST_SETTINGS };
@@ -65,9 +71,76 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const [isEditingLiveTitle, setIsEditingLiveTitle] = useState(false);
   const [liveSource, setLiveSource] = useState<LiveSource>("camera");
   const [liveCategory, setLiveCategory] = useState<LiveCategory>("justChatting");
-  const canSellDuringLive = Boolean(useMyProfileQuery().data?.isSeller);
+  const hostStore = useLiveHostStore();
+  const canSellDuringLive = Boolean(hostStore.storeId);
+  const showToast = useToastStore((state) => state.showToast);
   const [liveMonetization, setLiveMonetization] = useState<LiveMonetizationDraft>(DEFAULT_LIVE_MONETIZATION_DRAFT);
   const [liveCredentials, setLiveCredentials] = useState<LiveStreamCredentials | null>(null);
+  const actingProfileId = useActingProfileStore((s) => s.actingProfile?.id ?? null);
+  const saveDraft = useComposerDraftsStore((s) => s.saveDraft);
+  const closeDraftsSheet = useComposerDraftsStore((s) => s.closeDraftsSheet);
+  const [clipSeed, setClipSeed] = useState<{ seed: ClipComposerSeed; key: number } | null>(null);
+
+  const savePostDraft = () => {
+    const { text, mentions, audience, kind: _kind, ...settings } = postDraft;
+    const files = postDraftUploads.draftMediaItems.map((item) => ({
+      uri: item.previewUri,
+      mediaType: item.mediaType,
+      mimeType: null,
+      fileName: null,
+      sizeBytes: null,
+      width: item.width,
+      height: item.height,
+      durationSeconds: item.durationSeconds,
+    }));
+    saveDraft({ kind: "post", text, mentions, audience, settings, soundId: null, files, photoDurations: [], trim: null, transition: "crossfade", look: "none" });
+    showToast("Draft saved");
+    navigation.goBack();
+  };
+
+  const saveClipDraft = (seed: ClipComposerSeed) => {
+    saveDraft({
+      kind: "clip",
+      text: seed.text,
+      mentions: seed.mentions,
+      audience: "everyone",
+      settings: seed.settings,
+      soundId: seed.soundId,
+      files: seed.files.map((file) => ({ ...file })),
+      photoDurations: seed.photoDurations,
+      trim: seed.trim,
+      transition: seed.transition,
+      look: seed.look,
+    });
+    showToast("Draft saved");
+    navigation.goBack();
+  };
+
+  const resumeDraft = (draft: ComposerDraft) => {
+    closeDraftsSheet();
+    if (draft.kind === "clip") {
+      setClipSeed({
+        seed: {
+          text: draft.text,
+          mentions: draft.mentions,
+          soundId: draft.soundId,
+          settings: draft.settings,
+          files: draft.files.map((file) => ({ ...file })),
+          photoDurations: [...draft.photoDurations],
+          trim: draft.trim,
+          transition: draft.transition,
+          look: draft.look,
+        },
+        key: Date.now(),
+      });
+      setMode("clip");
+      return;
+    }
+    setMode("post");
+    setPostStage("compose");
+    setPostDraft({ ...draft.settings, text: draft.text, mentions: draft.mentions, audience: draft.audience, kind: "photo" });
+    if (draft.files.length > 0) void postDraftUploads.addPickedMediaAndStartUploading(draft.files.map((file) => ({ ...file })));
+  };
 
   const publishPost = usePublishPost({
     draftMediaItems: postDraftUploads.draftMediaItems,
@@ -82,6 +155,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
         audience: postDraft.audience,
         mediaIds,
         kind: postDraft.kind === "clip" ? "clip" : "post",
+        ...(actingProfileId ? { asProfileId: actingProfileId } : {}),
         ...buildPostSettingsFields(postDraft),
         ...(videoReply
           ? { replyToComment: { commentId: videoReply.commentId, clipId: videoReply.clipId, commenterUserId: videoReply.commenterUserId }, stickerLayout }
@@ -91,10 +165,15 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     },
   });
   const publishStory = useMutation({
-    mutationFn: async (capturedFile: LocalMediaFile) => {
-      const jobId = await enqueueLocalMediaForUpload(capturedFile, "story");
+    mutationFn: async ({ file, soundId, look }: { file: LocalMediaFile; soundId: ID | null; look: ClipLookId }) => {
+      const jobId = await enqueueLocalMediaForUpload(file, "story");
       const mediaId = await waitForUploadedMediaId(jobId);
-      return storiesService.publishStory({ mediaId, media: { id: mediaId, type: capturedFile.mediaType === "video" ? "video" : "image", url: null } });
+      return storiesService.publishStory({
+        mediaId,
+        media: { id: mediaId, type: file.mediaType === "video" ? "video" : "image", url: null },
+        ...(soundId ? { soundId } : {}),
+        ...(look !== "none" ? { look } : {}),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["story-tray"] });
@@ -114,7 +193,8 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const goLive = useMutation({
     mutationFn: async () => {
       if (!canGoLive) throw new Error("Join the Creator Program to go live");
-      const session = await liveService.startLiveSessionWithTitle(liveTitle || "Live on Zudomart", liveCategory, buildLiveMonetizationInput(liveMonetization));
+      const category = liveCategory === "shopping" && !hostStore.storeId ? "justChatting" : liveCategory;
+      const session = await liveService.startLiveSessionWithTitle(liveTitle || "Live on Zudomart", category, buildLiveMonetizationInput(liveMonetization), hostStore.storeId);
       if (liveSource !== "external") return { session, credentials: null as LiveStreamCredentials | null };
       const issued = await liveService.issueStreamKey(session.id);
       return { session, credentials: { liveId: session.id, ...issued } satisfies LiveStreamCredentials };
@@ -126,6 +206,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       }
       navigation.replace("Live", { liveId: session.id, host: true });
     },
+    onError: (error) => showToast(readLiveErrorMessage(error, error instanceof Error && error.message ? error.message : "We couldn't start your live. Try again.")),
   });
   const openLiveRoom = (liveId: string) => navigation.replace("Live", { liveId, host: true });
 
@@ -160,12 +241,16 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     return (
       <Screen background={colors.surface} edges={["top"]}>
         <ClipComposer
+          key={clipSeed?.key ?? "fresh"}
           mode={mode}
           initialSoundId={selectedSoundId}
+          initialDraft={clipSeed?.seed ?? null}
           onChangeMode={switchCreateMode}
           onClose={() => navigation.goBack()}
           onPublished={(post) => navigation.replace("PostDetail", { postId: post.id })}
+          onSaveDraft={saveClipDraft}
         />
+        <DraftsSheet onResume={resumeDraft} />
         <KeyboardSpacer />
       </Screen>
     );
@@ -185,6 +270,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
           <CreateHeader
             title={videoReply ? `Reply to @${videoReply.commenterUsername}'s comment` : mode === "story" ? "Story" : mode === "clip" ? "Clip" : "Post"}
             onClose={closeOrStepBack}
+            afterTitle={mode === "post" && !videoReply ? <DraftsButton /> : undefined}
             actionLabel={(mode === "post" || mode === "clip") && postStage === "compose" ? "Next" : undefined}
             actionDisabled={!canContinuePost}
             onAction={() => setPostStage("settings")}
@@ -216,10 +302,11 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
               ) : undefined
             }
             onPublish={() => publishPost.mutation.mutate()}
+            onSaveDraft={videoReply ? undefined : savePostDraft}
             soundPicker={videoReply ? <SoundPickerRow selectedSoundId={selectedSoundId} onChangeSelectedSoundId={setSelectedSoundId} /> : null}
           />
         ) : mode === "story" ? (
-          <StoryCapturePanel publishing={publishStory.isPending} onChangeMode={switchCreateMode} onCaptured={(m) => publishStory.mutate(m)} />
+          <StoryCapturePanel publishing={publishStory.isPending} onChangeMode={switchCreateMode} onCaptured={(captured) => publishStory.mutate(captured)} />
         ) : (
           <LiveSetupPanel
             title={liveTitle}
@@ -238,13 +325,14 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             }}
             credentials={liveCredentials}
             onOpenLiveRoom={openLiveRoom}
-            starting={goLive.isPending}
+            starting={goLive.isPending || hostStore.isLoading}
             onGoLive={() => goLive.mutate()}
             monetization={liveMonetization}
             onChangeMonetization={setLiveMonetization}
           />
         )}
       </View>
+      <DraftsSheet onResume={resumeDraft} />
       <KeyboardSpacer />
     </Screen>
   );

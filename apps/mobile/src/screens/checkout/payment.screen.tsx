@@ -8,7 +8,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { paymentsService } from "@/services/payments.service";
+import { paymentsService } from "@/services/commerce/payments.service";
 import { saveCardOnThisDevice } from "@/utils/savedCard.util";
 
 type PaymentStatus = "opening" | "checking" | "waiting" | "failed";

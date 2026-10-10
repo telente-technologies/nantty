@@ -15,8 +15,8 @@ import { Text } from "@/components/ui/text";
 import { usePayoutAccountsQuery } from "@/components/wallet/walletQueries.hook";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { creatorProgramService } from "@/services/creatorProgram.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { creatorProgramService } from "@/services/creators/creatorProgram.service";
 import type { CreatorContentCategory, CreatorSocialLink } from "@/types/creator.type";
 
 const CREATOR_TERMS_VERSION = "2026-09";
