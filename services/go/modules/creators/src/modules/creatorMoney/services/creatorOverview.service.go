@@ -94,8 +94,8 @@ func NormalizeCurrency(currency string) string {
 	return currency
 }
 
-func (money CreatorMoney) RevenueRules(currency string) RevenueRulesView {
-	revenue := money.Container.Settings.Revenue
+func (money CreatorMoney) RevenueRules(ctx context.Context, currency string) RevenueRulesView {
+	revenue, platform := money.Container.Settings.Revenue, money.Container.Resources.Platform
 	currency = NormalizeCurrency(currency)
 	orDefault := func(value, fallback int64) int64 {
 		if value <= 0 {
@@ -103,18 +103,19 @@ func (money CreatorMoney) RevenueRules(currency string) RevenueRulesView {
 		}
 		return value
 	}
+	giftCeiling := platform.GiftCreatorShareCeilingBps(ctx, models.MaximumCreatorGiftShareBps) / 100
 	return RevenueRulesView{
-		GiftCreatorSharePercentUpTo: models.MaximumCreatorGiftShareBps / 100, TipCreatorSharePercent: models.MaximumCreatorGiftShareBps / 100,
-		SubscriptionCreatorSharePercent: 80, SubscriptionShareBasis: "net", AdsRevenueCreatorSharePercent: orDefault(revenue.AdsCreatorShareBps, 4000) / 100,
-		CoinTransferPlatformFeePercent: orDefault(revenue.CoinTransferFeeBps, 2500) / 100, AffiliateCommissionReleasedAfterEscrow: true,
+		GiftCreatorSharePercentUpTo: giftCeiling, TipCreatorSharePercent: giftCeiling,
+		SubscriptionCreatorSharePercent: 80, SubscriptionShareBasis: "net", AdsRevenueCreatorSharePercent: platform.CreatorAdShareBps(ctx, orDefault(revenue.AdsCreatorShareBps, 4000)) / 100,
+		CoinTransferPlatformFeePercent: platform.CoinTransferFeeBps(ctx, orDefault(revenue.CoinTransferFeeBps, 2500)) / 100, AffiliateCommissionReleasedAfterEscrow: true,
 		AffiliateCommissionMaximumPercent: orDefault(revenue.MaximumAffiliateBps, 5000) / 100,
-		CoinCashValue:                     Money{money.coinCashValue(currency), currency}, MinimumPayout: Money{orDefault(revenue.MinimumPayoutMinorByCurrency[currency], 1000), currency},
+		CoinCashValue:                     Money{money.coinCashValue(ctx, currency), currency}, MinimumPayout: Money{orDefault(revenue.MinimumPayoutMinorByCurrency[currency], 1000), currency},
 		WithdrawalFeeDescription: "Withdrawals pass on the payment provider's bank transfer fee; the exact fee is shown before you confirm.",
 	}
 }
 
-func (money CreatorMoney) coinCashValue(currency string) int64 {
-	if value, found := money.Container.Settings.Revenue.CoinCashValueMinorByCurrency[currency]; found {
+func (money CreatorMoney) coinCashValue(ctx context.Context, currency string) int64 {
+	if value, found := money.Container.Resources.Platform.CoinCashValuesMinor(ctx, money.Container.Settings.Revenue.CoinCashValueMinorByCurrency)[currency]; found {
 		return value
 	}
 	return map[string]int64{"NGN": 1000, "GHS": 10, "KES": 100, "ZAR": 15, "GBP": 1, "EUR": 1, "USD": 1}[currency]

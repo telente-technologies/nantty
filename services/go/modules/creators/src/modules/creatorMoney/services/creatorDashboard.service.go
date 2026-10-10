@@ -83,9 +83,10 @@ func (money CreatorMoney) BuildDashboard(ctx context.Context, creatorId, period,
 	if err != nil {
 		return DashboardView{}, err
 	}
+	coinValue := money.coinCashValue(ctx, currency)
 	toCash := func(row *ent.CreatorEarning) int64 {
 		if row.Unit == "COIN" {
-			return row.NetMinor * money.coinCashValue(currency)
+			return row.NetMinor * coinValue
 		}
 		if row.Unit == currency {
 			return row.NetMinor
@@ -111,7 +112,7 @@ func (money CreatorMoney) BuildDashboard(ctx context.Context, creatorId, period,
 	if err != nil {
 		return DashboardView{}, err
 	}
-	view.Coins.Earned, view.PendingBalance, view.AvailableBalance = earnedCoins, cash(earnedCoins*money.coinCashValue(currency)), cash(available)
+	view.Coins.Earned, view.PendingBalance, view.AvailableBalance = earnedCoins, cash(earnedCoins*coinValue), cash(available)
 	if view.Followers.Total, err = money.Container.Directory.FollowerCount(ctx, creatorId); err != nil {
 		return DashboardView{}, err
 	}
@@ -142,7 +143,7 @@ func (money CreatorMoney) topLives(ctx context.Context, creatorId string, since 
 		if err != nil {
 			return nil, err
 		}
-		top = append(top, TopContentView{Id: sum.LiveId, Kind: "live", Title: live.Title, Earnings: Money{sum.Coins * money.coinCashValue(currency), currency}})
+		top = append(top, TopContentView{Id: sum.LiveId, Kind: "live", Title: live.Title, Earnings: Money{sum.Coins * money.coinCashValue(ctx, currency), currency}})
 	}
 	return top, nil
 }
