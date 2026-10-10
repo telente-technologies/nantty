@@ -56,6 +56,7 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [{ protocol: "https", hostname: "**" }, ...(isDevelopmentBuild ? [{ protocol: "http" as const, hostname: "**" }] : [])],
+    dangerouslyAllowLocalIP: isDevelopmentBuild,
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }, { source: "/settings/verification", headers: identityVerificationHeaders }];
