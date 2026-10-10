@@ -47,7 +47,13 @@ jobs:
         with:
           go-version-file: services/go/platform/go.mod
           cache-dependency-path: services/go/**/go.sum
-      - run: go run golang.org/x/vuln/cmd/govulncheck@latest $(go list -m -f '{{.Dir}}/...')
+      - name: govulncheck (per module; it needs a go.mod in the working directory)
+        run: |
+          status=0
+          for dir in $(go list -m -f '{{.Dir}}'); do
+            (cd "$dir" && go run golang.org/x/vuln/cmd/govulncheck@latest ./...) || status=1
+          done
+          exit $status
         working-directory: services/go
       - uses: astral-sh/setup-uv@v10.3.0
       - run: uv export --frozen --no-dev --no-emit-project -o /tmp/requirements.txt && uvx pip-audit -r /tmp/requirements.txt --no-deps --disable-pip

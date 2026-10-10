@@ -17,6 +17,9 @@ coverage/
 *.p12
 *.jks
 *.keystore
+# Self-signed test fixtures the payments integration tests read.
+!services/go/modules/payments/src/integrations/testdata/appStore/rootCertificate.pem
+!services/go/modules/payments/src/integrations/testdata/appStore/apiSigningKey.p8
 *.mobileprovision
 google-services.json
 GoogleService-Info.plist

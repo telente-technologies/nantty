@@ -199,7 +199,6 @@ Real screens from the mobile design, shown on the marketing site (`apps/web/publ
 - A **BFF** (`src/app/bff/[...path]/route.ts`): the browser only talks to its own origin, tokens live in `__Host-` httpOnly cookies (15 min access, 30 day refresh), mutations carry an HMAC CSRF token bound to the session.
 - `src/proxy.ts` (Next 16 middleware) guards routes; security headers and CSP in each `next.config.ts`.
 - Shared packages: `@zudomart/design-tokens` (light and dark tokens), `@zudomart/web-kit` (wordmark, skeletons, empty and error states), `packages/emailTemplates` (React Email, sent through AWS SES).
-- `apps/api` is the old Zudojs modular monolith. It is a **reference only** (validators, state machines, tests to port) and is never deployed.
 
 </details>
 
@@ -487,7 +486,6 @@ zudomart/
 │   ├── admin/           admin console + BFF (apiContract.md)
 │   ├── web/             marketing site
 │   ├── intelligence/    Python scoring service (apiContract.md)
-│   ├── api/             legacy Zudojs monolith, reference only
 │   └── gift/            gift animation drafts (assets only)
 ├── services/
 │   ├── go/              go.work: platform/ libraries, modules/<service>/, deployables/ (6 binaries)

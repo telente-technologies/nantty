@@ -119,4 +119,4 @@ jobs:
       - run: pnpm install --frozen-lockfile --filter "{./apps/mobile}..."
       - run: pnpm --filter ./apps/mobile exec tsc --noEmit
       - run: pnpm --filter ./apps/mobile run --if-present lint
-      - run: pnpm --filter ./apps/mobile test -- --ci
+      - run: pnpm --filter ./apps/mobile test --ci

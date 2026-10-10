@@ -25,7 +25,6 @@ CLAUDE.md
 services/python/intelligence/**/__pycache__/
 
 services/python/intelligence/
-apps/api/src/generated/
 apps/mobile/design/
 apps/web/public/
 apps/seller/public/

@@ -1,0 +1,7 @@
+# Reviewed Terraform findings (trivy fs/config in security.yml and deploy.yml).
+# By design: the edge ALB is internet-facing; port 80 only redirects to 443 and the
+# internal ALB listens on HTTP inside the VPC.
+AWS-0053
+AWS-0054
+# Tasks need outbound 443 to AWS APIs, Paystack and push providers (no fixed IP ranges).
+AWS-0104

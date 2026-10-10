@@ -2,10 +2,10 @@ name: Backend
 
 on:
   pull_request:
-    paths: ["services/**", "apps/api/**", "services/python/intelligence/**", "infra/local/**", "docs/architecture/microservicesPlan.json", ".github/workflows/backend.yml"]
+    paths: ["services/**", "services/python/intelligence/**", "infra/local/**", "docs/architecture/microservicesPlan.json", ".github/workflows/backend.yml"]
   push:
     branches: [main]
-    paths: ["services/**", "apps/api/**", "services/python/intelligence/**", "infra/local/**"]
+    paths: ["services/**", "services/python/intelligence/**", "infra/local/**"]
 
 permissions:
   contents: read
@@ -39,7 +39,6 @@ jobs:
               - "infra/local/**"
             typescript:
               - "services/typescript/**"
-              - "apps/api/**"
               - "packages/**"
               - "pnpm-lock.yaml"
             elixir:
@@ -76,7 +75,13 @@ jobs:
           go build $packages
           go vet $packages
           go test -short -race $packages
-      - run: go run golang.org/x/vuln/cmd/govulncheck@latest $(go list -m -f '{{.Dir}}/...')
+      - name: govulncheck (per module; it needs a go.mod in the working directory)
+        run: |
+          status=0
+          for dir in $(go list -m -f '{{.Dir}}'); do
+            (cd "$dir" && go run golang.org/x/vuln/cmd/govulncheck@latest ./...) || status=1
+          done
+          exit $status
         working-directory: services/go
 
   integration:
@@ -198,7 +203,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: ["@zudomart/gateway", "@zudomart/social", "@zudomart/notifications", "@zudomart/media", "@zudomart/search", "@zudomart/support", "@zudomart/api"]
+        package: ["@zudomart/gateway", "@zudomart/social", "@zudomart/notifications", "@zudomart/media", "@zudomart/search", "@zudomart/support"]
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: pnpm/action-setup@v6.1.0

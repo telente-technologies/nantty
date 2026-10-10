@@ -58,10 +58,6 @@ updates:
         patterns: ["@tanstack/*"]
       prisma:
         patterns: ["prisma", "@prisma/*"]
-  - package-ecosystem: docker
-    directory: /apps/api
-    schedule:
-      interval: weekly
   - package-ecosystem: github-actions
     directory: /
     schedule:

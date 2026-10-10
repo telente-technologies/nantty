@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches: [main]
-    paths: ["services/**", "apps/api/**", "services/python/intelligence/**", "pnpm-lock.yaml", ".github/workflows/deploy.yml", ".github/scripts/**"]
+    paths: ["services/**", "services/python/intelligence/**", "pnpm-lock.yaml", ".github/workflows/deploy.yml", ".github/scripts/**"]
   workflow_dispatch:
 
 permissions:
@@ -54,6 +54,8 @@ jobs:
         with:
           image-ref: scan/${{ matrix.service }}:${{ env.IMAGE_TAG }}
           severity: HIGH,CRITICAL
+          # TypeScript 7's native tsc arrives only as Prisma's optional peer and never runs in the services.
+          skip-files: "**/@typescript/typescript-linux-*/lib/tsc"
           ignore-unfixed: true
           exit-code: "1"
       - uses: aws-actions/configure-aws-credentials@v6
