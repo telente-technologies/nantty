@@ -110,6 +110,13 @@ func (harness *escrowHarness) registerCheckoutWithMode(buyer string, orders map[
 			SellerUserId: "seller-" + orderId[:4], AmountMinor: amount, Currency: "NGN", ProductSummary: "Ankara dress", PaymentMode: mode, StoreVerified: storeVerified,
 		})
 	}
+	if storeVerified {
+		for _, payable := range payables {
+			if err := harness.Payments.Application.Gateway.RecordSellerVerification(context.Background(), payable.SellerUserId, "test", time.Now()); err != nil {
+				harness.T.Fatal(err)
+			}
+		}
+	}
 	if err := harness.Payments.Application.Gateway.RegisterCheckoutPayables(context.Background(), payables); err != nil {
 		harness.T.Fatal(err)
 	}

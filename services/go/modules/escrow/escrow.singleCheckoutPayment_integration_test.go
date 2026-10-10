@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -15,6 +16,9 @@ func TestOneCheckoutPaymentSplitsDirectGroupsAndHoldsEscrowGroupsWithPerGroupRef
 	harness := startEscrowHarness(t)
 	buyer, checkoutId, escrowOrder, directOrder := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
 	escrowSeller, directSeller := "seller-"+escrowOrder[:4], "seller-"+directOrder[:4]
+	if err := harness.Payments.Application.Gateway.RecordSellerVerification(context.Background(), directSeller, "test", time.Now()); err != nil {
+		t.Fatal(err)
+	}
 	err := harness.Payments.Application.Gateway.RegisterCheckoutPayables(context.Background(), []paymentmodels.OrderPayable{
 		{CheckoutId: checkoutId, OrderId: escrowOrder, OrderReference: "ZM-E1", BuyerUserId: buyer, StoreId: "store-e", SellerUserId: escrowSeller, AmountMinor: 100_000, Currency: "NGN", PaymentMode: "escrow"},
 		{CheckoutId: checkoutId, OrderId: directOrder, OrderReference: "ZM-D1", BuyerUserId: buyer, StoreId: "store-d", SellerUserId: directSeller, AmountMinor: 140_000, Currency: "NGN", PaymentMode: "direct", StoreVerified: true},

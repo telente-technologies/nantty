@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"zudomart/platform/httpserver"
+	"zudomart/platform/money"
 )
 
 type EscrowStatus string
@@ -47,8 +48,12 @@ func SplitAmountBetweenSellerAndPlatform(amountMinor, commissionBps int64) (Escr
 		return EscrowSplit{}, fmt.Errorf("invalid split of %d at %d bps", amountMinor, commissionBps)
 	}
 	sellerShareBps := 10_000 - commissionBps
-	seller := amountMinor/10_000*sellerShareBps + amountMinor%10_000*sellerShareBps/10_000
-	return EscrowSplit{SellerAmountMinor: seller, CommissionMinor: amountMinor - seller}, nil
+	amount := money.Money{AmountMinor: amountMinor, Currency: "USD"}
+	shares, err := amount.AllocateByWeightsWithoutLosingMinorUnits([]int64{sellerShareBps, commissionBps})
+	if err != nil {
+		return EscrowSplit{}, fmt.Errorf("invalid split of %d at %d bps: %w", amountMinor, commissionBps, err)
+	}
+	return EscrowSplit{SellerAmountMinor: shares[0].AmountMinor, CommissionMinor: shares[1].AmountMinor}, nil
 }
 
 type PartialResolution struct {

@@ -147,7 +147,11 @@ func (service EscrowService) postEscrowSplit(ctx context.Context, transaction *s
 		{Account: ledgermodels.SellerEscrowAccount(held.SellerUserID, held.ID.String(), held.Currency), Direction: ledgermodels.Debit, AmountMinor: held.SellerAmountMinor},
 	}
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformFeesUnearnedAccount(held.Currency), ledgermodels.Debit, held.CommissionMinor)
-	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(held.Currency), ledgermodels.Debit, absorbedProcessingFee)
+	if absorbedProcessingFee >= 0 {
+		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(held.Currency), ledgermodels.Debit, absorbedProcessingFee)
+	} else {
+		lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundedProcessingFeesExpenseAccount(held.Currency), ledgermodels.Credit, -absorbedProcessingFee)
+	}
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformEscrowFeeRevenueAccount(held.Currency), ledgermodels.Credit, commissionKeptMinor)
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.RefundsPayableAccount(held.Provider, held.Currency), ledgermodels.Credit, refundMinor)
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.SellerPendingAccount(held.SellerUserID, held.Currency), ledgermodels.Credit, sellerMinor)

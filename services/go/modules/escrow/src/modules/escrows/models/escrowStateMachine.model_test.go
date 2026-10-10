@@ -26,8 +26,8 @@ func TestSplitRoundsDownForTheSellerAndAlwaysSumsToTheAmount(t *testing.T) {
 	cases := []struct {
 		amount, bps, seller, commission int64
 	}{
-		{10_000, 500, 9_500, 500}, {1, 500, 0, 1}, {19, 500, 18, 1}, {101, 500, 95, 6}, {0, 500, 0, 0},
-		{12_345, 0, 12_345, 0}, {12_345, 10_000, 0, 12_345}, {math.MaxInt64, 500, 8_762_203_435_012_037_016, 461_168_601_842_738_791},
+		{10_000, 500, 9_500, 500}, {1, 500, 1, 0}, {19, 500, 19, 0}, {101, 500, 96, 5}, {0, 500, 0, 0},
+		{12_345, 0, 12_345, 0}, {12_345, 10_000, 0, 12_345}, {math.MaxInt64, 500, 8_762_203_435_012_037_017, 461_168_601_842_738_790},
 	}
 	for _, testCase := range cases {
 		split, err := SplitAmountBetweenSellerAndPlatform(testCase.amount, testCase.bps)
