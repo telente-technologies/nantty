@@ -1,15 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, PanResponder, Platform, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MessageComposerBar } from "@/components/chat/messageComposerBar";
-import { DotsThreeVertical24Icon } from "@/components/icons";
+import { DotsThreeVertical24Icon, SpeakerHigh24Icon } from "@/components/icons";
 import { ClipVideoPlayer } from "@/components/media/clipVideoPlayer";
+import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
 import { useStoryAutoAdvance } from "@/components/story/storyAutoAdvance.hook";
+import { SponsoredStoryPage } from "@/components/story/sponsoredStoryPage";
 import { StoryOptionsSheet } from "@/components/story/storyOptionsSheet";
 import { StoryProgressBar } from "@/components/story/storyProgressBar";
+import { openTrustedWebPage } from "@/components/links/openLink.util";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
@@ -17,15 +20,22 @@ import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import { Text } from "@/components/ui/text";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
-import { storiesService } from "@/services/stories.service";
+import { storiesService } from "@/services/clips/stories.service";
+import { storyAdsService } from "@/services/clips/storyAds.service";
 import { showToast } from "@/store/toast.store";
+import { isStoryAdSlot, useStoryAdSessionStore } from "@/store/storyAdSession.store";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
+import type { StoryDecidedAd } from "@/types/social.type";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
 
 export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
+  return <StoryViewer key={route.params.userId} navigation={navigation} route={route} />;
+}
+
+function StoryViewer({ navigation, route }: MainScreenProps<"Story">) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useStyles();
@@ -35,20 +45,99 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
   const [isReplying, setIsReplying] = useState(false);
   const stories = useQuery({ queryKey: ["stories", route.params.userId], queryFn: () => storiesService.fetchStoriesForUser(route.params.userId) });
   const list = stories.data ?? [];
-  const closeStoryViewer = useCallback(() => navigation.goBack(), [navigation]);
+  const storyTray = useQuery({ queryKey: ["story-tray"], queryFn: storiesService.fetchStoryTray });
+  const closeStoryViewer = useCallback(() => {
+    useStoryAdSessionStore.getState().reset();
+    navigation.goBack();
+  }, [navigation]);
+  const advanceToNextPersonsStories = useCallback(() => {
+    const tray = storyTray.data ?? [];
+    const currentPosition = tray.findIndex((item) => item.user.id === route.params.userId);
+    const ordered = currentPosition >= 0 ? [...tray.slice(currentPosition + 1), ...tray.slice(0, currentPosition)] : tray;
+    const next = ordered.find((item) => item.hasUnseen && item.user.id !== route.params.userId)
+      ?? ordered.find((item) => item.user.id !== route.params.userId);
+    if (next) navigation.replace("Story", { userId: next.user.id });
+    else {
+      useStoryAdSessionStore.getState().reset();
+      navigation.goBack();
+    }
+  }, [navigation, route.params.userId, storyTray.data]);
   const [videoStoryProgress, setVideoStoryProgress] = useState(0);
+  const sessionOffsetRef = useRef(0);
+  const listLengthRef = useRef(0);
+  if (list.length > 0 && listLengthRef.current === 0) {
+    listLengthRef.current = list.length;
+    sessionOffsetRef.current = useStoryAdSessionStore.getState().viewedCount;
+  }
+  const sessionOffset = sessionOffsetRef.current;
+  const adsBySlot = useStoryAdSessionStore((s) => s.adsBySlot);
+  const requestedSlots = useStoryAdSessionStore((s) => s.requestedSlots);
+
+  useEffect(() => {
+    if (list.length === 0) return;
+    const session = useStoryAdSessionStore.getState();
+    for (let index = 0; index < list.length; index++) {
+      const slot = sessionOffset + index + 1;
+      if (!isStoryAdSlot(slot) || session.adsBySlot[slot] || session.requestedSlots.includes(slot)) continue;
+      session.markSlotRequested(slot);
+      const storyId = list[index]?.id ?? "";
+      const neighbours = [list[index - 1]?.id, list[index + 1]?.id].filter((id): id is string => !!id);
+      storyAdsService
+        .decideStoryAd(storyId, slot - session.lastAdViewedAt - 1, neighbours, slot)
+        .then((decision) => {
+          if (decision.ad) useStoryAdSessionStore.getState().cacheAdForSlot(slot, decision.ad);
+        })
+        .catch(() => undefined);
+    }
+  }, [list, sessionOffset, adsBySlot, requestedSlots]);
   const isFirstStoryVideo = list[0]?.media.type === "video";
   const [isActiveStoryVideo, setIsActiveStoryVideo] = useState(isFirstStoryVideo);
-  const { activeIndex, progress, goToNextStory, goToPreviousStory } = useStoryAutoAdvance(
+  const [adPage, setAdPage] = useState<{ ad: StoryDecidedAd; slot: number } | null>(null);
+  const shownAdSlots = useRef(new Set<number>());
+  const { activeIndex, progress, goToNextStory: advanceStoryIndex, goToPreviousStory: rewindStoryIndex } = useStoryAutoAdvance(
     list.length,
-    isReplying || isOptionsOpen || isActiveStoryVideo,
-    closeStoryViewer,
+    isReplying || isOptionsOpen || isActiveStoryVideo || adPage !== null,
+    advanceToNextPersonsStories,
   );
-  const story = list[activeIndex];
+  const goToNextPage = useCallback(() => {
+    if (adPage) {
+      setAdPage(null);
+      advanceStoryIndex();
+      return;
+    }
+    const slot = sessionOffsetRef.current + activeIndex + 1;
+    const ad = useStoryAdSessionStore.getState().adsBySlot[slot];
+    if (ad && !shownAdSlots.current.has(slot)) {
+      shownAdSlots.current.add(slot);
+      useStoryAdSessionStore.getState().markAdViewed(slot);
+      setAdPage({ ad, slot });
+      return;
+    }
+    advanceStoryIndex();
+  }, [adPage, activeIndex, advanceStoryIndex]);
+  const goToPreviousPage = useCallback(() => {
+    if (adPage) {
+      setAdPage(null);
+      return;
+    }
+    rewindStoryIndex();
+  }, [adPage, rewindStoryIndex]);
+  const story = adPage ? undefined : list[activeIndex];
+
+  const openAdDestination = useCallback((ad: StoryDecidedAd) => {
+    const destination = ad.creative.destination;
+    if (destination.type === "url" && destination.url) openTrustedWebPage(destination.url);
+    else if (destination.type === "product" && destination.targetId) navigation.navigate("ProductDetail", { productId: destination.targetId });
+    else if (destination.type === "store" && destination.targetId) navigation.navigate("Store", { storeId: destination.targetId });
+    else if (destination.type === "post" && destination.targetId) navigation.navigate("PostDetail", { postId: destination.targetId });
+    else if (destination.type === "profile" && destination.targetId) openUserProfile(destination.targetId);
+    else showToast("This link opens in the Zudomart app");
+  }, [navigation, openUserProfile]);
 
   useEffect(() => {
     setIsActiveStoryVideo(story?.media.type === "video");
     setVideoStoryProgress(0);
+    if (story) useStoryAdSessionStore.getState().recordStoryViewed();
   }, [story]);
 
   useEffect(() => {
@@ -76,7 +165,15 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
   };
 
   if (stories.isPending || stories.isError || list.length === 0) {
+  if (adPage) {
     return (
+      <View style={styles.root}>
+        <SponsoredStoryPage ad={adPage.ad} onFinished={goToNextPage} onOpenDestination={openAdDestination} />
+      </View>
+    );
+  }
+
+  return (
       <View style={[styles.root, styles.centered, { paddingTop: insets.top }]}>
         {stories.isPending ? (
           <ActivityIndicator color={colors.primary} accessibilityLabel="Loading stories" />
@@ -134,6 +231,20 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
         </View>
       </View>
       <View style={styles.media} {...dragDownToClose.panHandlers}>
+        {story?.sound ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Sound: ${story.sound.title}. Open sound`}
+            onPress={() => navigation.navigate("Sound", { soundId: story.sound!.id })}
+            style={styles.soundPill}
+          >
+            <SpeakerHigh24Icon size={14} color={colors.white} />
+            <Text size={12} weight={600} lineHeight={16} color={colors.white} numberOfLines={1} style={styles.soundText}>
+              {story.sound.title}{story.sound.owner ? ` · @${story.sound.owner.username}` : ""}
+            </Text>
+          </Pressable>
+        ) : null}
+        <ClipLookOverlay look={isClipLookId(story?.look) ? story.look : "none"} />
         {story?.media.type === "video" ? (
           <ClipVideoPlayer
             key={story.id}
@@ -145,7 +256,7 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
             onPlaybackProgress={({ currentSeconds, durationSeconds }) =>
               setVideoStoryProgress(durationSeconds > 0 ? Math.min(currentSeconds / durationSeconds, 1) : 0)
             }
-            onPlaybackFinished={goToNextStory}
+            onPlaybackFinished={goToNextPage}
           />
         ) : story?.media.url ? (
           <Image source={{ uri: story.media.url }} style={StyleSheet.absoluteFill} contentFit="cover" cachePolicy="memory-disk" />
@@ -153,13 +264,13 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Previous story"
-          onPress={goToPreviousStory}
+          onPress={goToPreviousPage}
           style={[styles.tapZone, { left: 0, width: width * 0.3 }]}
         />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Next story"
-          onPress={goToNextStory}
+          onPress={goToNextPage}
           style={[styles.tapZone, { right: 0, width: width * 0.7 }]}
         />
       </View>
@@ -174,6 +285,10 @@ export function StoryScreen({ navigation, route }: MainScreenProps<"Story">) {
         visible={isOptionsOpen}
         onClose={() => setIsOptionsOpen(false)}
         onOpenProfile={openUserProfile}
+        onOpenAnalytics={(storyId) => {
+          setIsOptionsOpen(false);
+          navigation.navigate("StoryAnalytics", { storyId });
+        }}
         onReportClosed={() => setIsOptionsOpen(false)}
       />
     </View>
@@ -192,5 +307,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.white },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.avatar },
   media: { flex: 1, marginTop: spacing[3] },
+  soundPill: { position: "absolute", left: 12, bottom: 12, zIndex: 2, maxWidth: "70%", flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, backgroundColor: "rgba(0,0,0,0.55)" },
+  soundText: { flexShrink: 1 },
   tapZone: { position: "absolute", top: 0, bottom: 0 },
 }));
