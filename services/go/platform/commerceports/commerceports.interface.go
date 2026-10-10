@@ -34,6 +34,7 @@ type ProductSnapshot struct {
 	Sku             string
 	Size            string
 	Color           string
+	OptionValues    map[string]string
 	ImageUrl        string
 	UnitPrice       money.Money
 	CostPrice       *money.Money

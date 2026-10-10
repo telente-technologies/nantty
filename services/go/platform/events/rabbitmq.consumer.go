@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"runtime/debug"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -86,7 +87,15 @@ func (consumer *RabbitQueueConsumer) consumeUntilChannelCloses(ctx context.Conte
 }
 
 func (consumer *RabbitQueueConsumer) settleDelivery(ctx context.Context, queueName string, delivery amqp.Delivery, handler MessageHandler, retries retrySink, logger *slog.Logger) {
-	failure := handler(contextWithTraceFromHeaders(ctx, delivery.Headers), delivery.Body)
+	var failure error
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				failure = fmt.Errorf("panic in message handler: %v\nstack:\n%s", r, debug.Stack())
+			}
+		}()
+		failure = handler(contextWithTraceFromHeaders(ctx, delivery.Headers), delivery.Body)
+	}()
 	attributes := []any{slog.String("queue", queueName), slog.String("messageId", delivery.MessageId), slog.String("type", delivery.Type)}
 	switch {
 	case failure == nil:

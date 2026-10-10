@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"runtime/debug"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -39,17 +41,35 @@ func (queues *SqsQueues) ConsumeQueueUntilContextDone(ctx context.Context, queue
 	if err != nil {
 		return err
 	}
+	receiveErrCount := 0
 	for ctx.Err() == nil {
 		output, err := queues.client.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{QueueUrl: aws.String(queueUrl), MaxNumberOfMessages: 10, WaitTimeSeconds: 20})
 		if err != nil {
 			if ctx.Err() == nil {
 				logger.WarnContext(ctx, "receive from queue failed", slog.String("queue", queueName), slog.Any("error", err))
+				receiveErrCount++
+				sleepDuration := time.Duration(min(receiveErrCount, 5)) * time.Second
+				select {
+				case <-ctx.Done():
+					return nil
+				case <-time.After(sleepDuration):
+				}
 			}
 			continue
 		}
+		receiveErrCount = 0
 		for _, message := range output.Messages {
-			if err := handler(ctx, []byte(aws.ToString(message.Body))); err != nil {
-				logger.WarnContext(ctx, "message handling failed; it will be redelivered and dead-lettered after the redrive limit", slog.String("queue", queueName), slog.Any("error", err))
+			var handlerErr error
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						handlerErr = fmt.Errorf("panic in sqs handler: %v\nstack:\n%s", r, debug.Stack())
+					}
+				}()
+				handlerErr = handler(ctx, []byte(aws.ToString(message.Body)))
+			}()
+			if handlerErr != nil {
+				logger.WarnContext(ctx, "message handling failed; it will be redelivered and dead-lettered after the redrive limit", slog.String("queue", queueName), slog.Any("error", handlerErr))
 				continue
 			}
 			if _, err := queues.client.DeleteMessage(ctx, &sqs.DeleteMessageInput{QueueUrl: aws.String(queueUrl), ReceiptHandle: message.ReceiptHandle}); err != nil {

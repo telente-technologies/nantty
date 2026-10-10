@@ -55,6 +55,10 @@ func (reader *EnvironmentReader) ReadDurationOrDefault(name string, fallback tim
 		reader.problems = append(reader.problems, fmt.Sprintf("%s must be a duration such as 15m", name))
 		return fallback
 	}
+	if value <= 0 {
+		reader.problems = append(reader.problems, fmt.Sprintf("%s must be greater than zero", name))
+		return fallback
+	}
 	return value
 }
 
@@ -76,6 +80,10 @@ func (reader *EnvironmentReader) RequireMinimumLength(name, value string, minimu
 	if value != "" && len(value) < minimum {
 		reader.problems = append(reader.problems, fmt.Sprintf("%s must be at least %d characters", name, minimum))
 	}
+}
+
+func (reader *EnvironmentReader) ReportProblem(problem string) {
+	reader.problems = append(reader.problems, problem)
 }
 
 func (reader *EnvironmentReader) CombinedConfigurationError() error {

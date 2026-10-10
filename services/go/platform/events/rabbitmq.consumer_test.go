@@ -96,6 +96,22 @@ func TestFailedHandlingSchedulesTheFirstRetryTierAndAcknowledgesTheOriginal(t *t
 	}
 }
 
+func TestHandlerPanicSchedulesRetryInsteadOfCrashingConsumer(t *testing.T) {
+	harness := newConsumerHarness()
+	harness.deliver(harness.channel, 1, 0)
+	cancel, done := harness.run(t, func(context.Context, []byte) error { panic("unexpected handler panic") })
+	defer func() { cancel(); <-done }()
+	if entry := harness.awaitSettlement(t); !entry.acked {
+		t.Fatalf("panic delivery should be acknowledged after confirmed retry, got %+v", entry)
+	}
+	if len(harness.retries.published) != 1 {
+		t.Fatalf("scheduled retries = %d, want 1", len(harness.retries.published))
+	}
+	if got := harness.retries.published[0].publishing.Headers[lastErrorHeader]; got == nil {
+		t.Fatal("panic retry should preserve panic details for diagnosis")
+	}
+}
+
 func TestBackoffGrowsWithEachFailedAttempt(t *testing.T) {
 	harness := newConsumerHarness()
 	harness.deliver(harness.channel, 1, 2)
