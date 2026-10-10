@@ -1,23 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
-import { PaperPlaneTilt24Icon } from "@/components/icons";
 import { SupportRecordingNotice } from "@/components/support/supportRecordingNotice";
 import { TicketRatingCard } from "@/components/support/ticketRatingCard";
 import { supportUnreadQueryKey } from "@/hooks/useSupportUnread.hook";
 import { TICKET_STATUS_APPEARANCE } from "@/components/settings/supportAppearance.util";
 import { Header } from "@/components/ui/header";
+import { PillComposer } from "@/components/ui/pillComposer";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { fontFamily, typeScale } from "@/constants/typography.constant";
+import { typeScale } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { supportService } from "@/services/support.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { supportService } from "@/services/support/support.service";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { spacing } from "@/constants/spacing.constant";
@@ -88,12 +88,17 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
           {details.agentTyping ? <Text size={typeScale.xs} lineHeight={16.8} color={colors.textSubtle} accessibilityLiveRegion="polite">Zudomart Support is typing…</Text> : null}
         </ScrollView>
         {closed ? null : (
-          <View style={styles.composer}>
-            <TextInput value={draft} onChangeText={setDraft} onFocus={() => { isComposing.current = true; }} onBlur={() => { isComposing.current = false; }} placeholder="Message Zudomart Support…" placeholderTextColor={colors.textSubtle} multiline accessibilityLabel="Reply" style={styles.input} />
-            <Pressable accessibilityRole="button" accessibilityLabel="Send reply" disabled={!draft.trim() || reply.isPending} onPress={() => reply.mutate(draft.trim())} style={[styles.send, !draft.trim() && styles.sendDisabled]}>
-              <PaperPlaneTilt24Icon size={20} color={colors.white} />
-            </Pressable>
-          </View>
+          <PillComposer
+            value={draft}
+            onChangeText={setDraft}
+            onSend={(text) => reply.mutate(text)}
+            isSending={reply.isPending}
+            onFocus={() => { isComposing.current = true; }}
+            onBlur={() => { isComposing.current = false; }}
+            placeholder="Message Zudomart Support…"
+            inputLabel="Reply"
+            sendLabel="Send reply"
+          />
         )}
         <KeyboardSpacer style={styles.keyboardArea} />
       </View>
@@ -109,8 +114,4 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   bubbleWrap: { maxWidth: "85%", gap: spacing[1] },
   mine: { alignSelf: "flex-end", alignItems: "flex-end" },
   bubble: { borderRadius: 12, paddingHorizontal: spacing[3], paddingVertical: spacing[2] },
-  composer: { flexDirection: "row", alignItems: "flex-end", gap: spacing[2], paddingHorizontal: spacing[4], paddingVertical: 10, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.divider },
-  input: { flex: 1, minHeight: 40, maxHeight: 120, borderRadius: 20, borderWidth: 1, borderColor: colors.divider, paddingHorizontal: 14, paddingVertical: 10, fontFamily: fontFamily[400], fontSize: 14, color: colors.text },
-  send: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primarySolid, alignItems: "center", justifyContent: "center" },
-  sendDisabled: { backgroundColor: colors.disabled },
 }));

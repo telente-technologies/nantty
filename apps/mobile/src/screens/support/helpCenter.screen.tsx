@@ -12,7 +12,7 @@ import { Text } from "@/components/ui/text";
 import { useSupportUnreadCount } from "@/hooks/useSupportUnread.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { helpCenterService } from "@/services/helpCenter.service";
+import { helpCenterService } from "@/services/support/helpCenter.service";
 import type { HelpCategory, HelpTopicSummary } from "@/types/helpCentre.type";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 

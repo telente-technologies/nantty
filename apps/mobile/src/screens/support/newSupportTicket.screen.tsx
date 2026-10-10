@@ -12,9 +12,9 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { ordersService } from "@/services/orders.service";
-import { supportService } from "@/services/support.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { ordersService } from "@/services/commerce/orders.service";
+import { supportService } from "@/services/support/support.service";
 import type { SupportLinkedReference, SupportTicketCategory } from "@/types/support.type";
 
 import { supportTicketsQueryKey } from "./supportTickets.screen";
