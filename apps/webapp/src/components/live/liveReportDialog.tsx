@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import styles from "@/components/actions/actionDialogs.module.css";
 import { Button } from "@/components/ui/button";
+import { FlagIcon } from "@/components/ui/icons";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
@@ -78,6 +79,7 @@ export function LiveReportDialog({ isOpen, onClose, liveId, startedAt }: LiveRep
       onClose={onClose}
       title="Report this live"
       description="Reports are anonymous. The host won't know it was you."
+      icon={<FlagIcon size={24} />}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>

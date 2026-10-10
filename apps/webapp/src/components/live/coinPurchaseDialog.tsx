@@ -38,6 +38,8 @@ export function CoinPurchaseDialog({ isOpen, onClose, coinsNeeded }: { readonly 
       onClose={onClose}
       title="Get coins"
       description={coinsNeeded ? `You need ${coinsNeeded} more coins for this gift.` : "Coins pay for live gifts. Pay by card, bank transfer or USSD in a secure window."}
+      tone="brand"
+      icon={<CoinIcon size={24} />}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>

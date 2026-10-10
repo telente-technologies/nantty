@@ -33,7 +33,7 @@ function WhatChangedDialog({ versions, isOpen, onClose, onRemindLater, onAcknowl
         ]
       : [{ label: "Got it", variant: "primary" as const, busy: isAccepting, onClick: onAcknowledge }];
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="What changed" description={`Updates to our ${joinPolicyTitles(versions)}`} layout="sheet" size="medium" showCloseButton actions={actions}>
+    <Dialog isOpen={isOpen} onClose={onClose} title="What changed" description={`Updates to our ${joinPolicyTitles(versions)}`} layout="sheet" size="medium" showCloseButton tone="brand" icon={<ShieldIcon size={24} />} actions={actions}>
       <div className={styles.documentStack}>
         {versions.map((version) => (
           <PolicyDocumentCard key={version.policyVersionId} version={version} />
