@@ -111,5 +111,23 @@ export function createIdentityDirectory(client: IdentityReadClient, logger: Logg
       const row = await client.identityAccount.findUnique({ where: { id: accountId }, select: { createdAt: true } });
       return row?.createdAt;
     },
+
+    async findOwnedPostableProfile(accountId, profileId) {
+      const row = await client.identityProfile.findFirst({
+        where: { id: profileId, accountId, status: "active", kind: { in: ["personal", "business", "brand", "store"] } },
+        select: { id: true, accountId: true, kind: true, displayName: true, handle: true, avatarUrl: true },
+      });
+      return row === null ? null : { id: row.id, accountId: row.accountId, kind: row.kind, displayName: row.displayName, handle: row.handle, avatarUrl: row.avatarUrl };
+    },
+
+    async findProfilesByIds(profileIds) {
+      const unique = [...new Set(profileIds)];
+      if (unique.length === 0) return new Map();
+      const rows = await client.identityProfile.findMany({
+        where: { id: { in: unique }, status: "active" },
+        select: { id: true, accountId: true, kind: true, displayName: true, handle: true, avatarUrl: true },
+      });
+      return new Map(rows.map((row) => [row.id, { id: row.id, accountId: row.accountId, kind: row.kind, displayName: row.displayName, handle: row.handle, avatarUrl: row.avatarUrl }]));
+    },
   };
 }

@@ -51,6 +51,8 @@ export type PostSumAggregateOutputType = {
 export type PostMinAggregateOutputType = {
   id: string | null
   authorId: string | null
+  authorProfileId: string | null
+  authorProfileKind: string | null
   kind: $Enums.PostKind | null
   text: string | null
   audience: $Enums.PostAudience | null
@@ -76,11 +78,16 @@ export type PostMinAggregateOutputType = {
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date | null
+  isPinned: boolean | null
+  pinnedAt: Date | null
+  pinnedCommentId: string | null
 }
 
 export type PostMaxAggregateOutputType = {
   id: string | null
   authorId: string | null
+  authorProfileId: string | null
+  authorProfileKind: string | null
   kind: $Enums.PostKind | null
   text: string | null
   audience: $Enums.PostAudience | null
@@ -106,11 +113,16 @@ export type PostMaxAggregateOutputType = {
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date | null
+  isPinned: boolean | null
+  pinnedAt: Date | null
+  pinnedCommentId: string | null
 }
 
 export type PostCountAggregateOutputType = {
   id: number
   authorId: number
+  authorProfileId: number
+  authorProfileKind: number
   kind: number
   text: number
   audience: number
@@ -147,6 +159,9 @@ export type PostCountAggregateOutputType = {
   expiresAt: number
   deletedAt: number
   createdAt: number
+  isPinned: number
+  pinnedAt: number
+  pinnedCommentId: number
   _all: number
 }
 
@@ -176,6 +191,8 @@ export type PostSumAggregateInputType = {
 export type PostMinAggregateInputType = {
   id?: true
   authorId?: true
+  authorProfileId?: true
+  authorProfileKind?: true
   kind?: true
   text?: true
   audience?: true
@@ -201,11 +218,16 @@ export type PostMinAggregateInputType = {
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
+  isPinned?: true
+  pinnedAt?: true
+  pinnedCommentId?: true
 }
 
 export type PostMaxAggregateInputType = {
   id?: true
   authorId?: true
+  authorProfileId?: true
+  authorProfileKind?: true
   kind?: true
   text?: true
   audience?: true
@@ -231,11 +253,16 @@ export type PostMaxAggregateInputType = {
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
+  isPinned?: true
+  pinnedAt?: true
+  pinnedCommentId?: true
 }
 
 export type PostCountAggregateInputType = {
   id?: true
   authorId?: true
+  authorProfileId?: true
+  authorProfileKind?: true
   kind?: true
   text?: true
   audience?: true
@@ -272,6 +299,9 @@ export type PostCountAggregateInputType = {
   expiresAt?: true
   deletedAt?: true
   createdAt?: true
+  isPinned?: true
+  pinnedAt?: true
+  pinnedCommentId?: true
   _all?: true
 }
 
@@ -364,6 +394,8 @@ export type PostGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type PostGroupByOutputType = {
   id: string
   authorId: string
+  authorProfileId: string | null
+  authorProfileKind: string | null
   kind: $Enums.PostKind
   text: string
   audience: $Enums.PostAudience
@@ -400,6 +432,9 @@ export type PostGroupByOutputType = {
   expiresAt: Date | null
   deletedAt: Date | null
   createdAt: Date
+  isPinned: boolean
+  pinnedAt: Date | null
+  pinnedCommentId: string | null
   _count: PostCountAggregateOutputType | null
   _avg: PostAvgAggregateOutputType | null
   _sum: PostSumAggregateOutputType | null
@@ -428,6 +463,8 @@ export type PostWhereInput = {
   NOT?: Prisma.PostWhereInput | Prisma.PostWhereInput[]
   id?: Prisma.UuidFilter<"Post"> | string
   authorId?: Prisma.UuidFilter<"Post"> | string
+  authorProfileId?: Prisma.UuidNullableFilter<"Post"> | string | null
+  authorProfileKind?: Prisma.StringNullableFilter<"Post"> | string | null
   kind?: Prisma.EnumPostKindFilter<"Post"> | $Enums.PostKind
   text?: Prisma.StringFilter<"Post"> | string
   audience?: Prisma.EnumPostAudienceFilter<"Post"> | $Enums.PostAudience
@@ -464,6 +501,9 @@ export type PostWhereInput = {
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
+  isPinned?: Prisma.BoolFilter<"Post"> | boolean
+  pinnedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
+  pinnedCommentId?: Prisma.UuidNullableFilter<"Post"> | string | null
   media?: Prisma.PostMediaListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   likes?: Prisma.PostLikeListRelationFilter
@@ -475,6 +515,8 @@ export type PostWhereInput = {
 export type PostOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
+  authorProfileId?: Prisma.SortOrderInput | Prisma.SortOrder
+  authorProfileKind?: Prisma.SortOrderInput | Prisma.SortOrder
   kind?: Prisma.SortOrder
   text?: Prisma.SortOrder
   audience?: Prisma.SortOrder
@@ -511,6 +553,9 @@ export type PostOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pinnedCommentId?: Prisma.SortOrderInput | Prisma.SortOrder
   media?: Prisma.PostMediaOrderByRelationAggregateInput
   comments?: Prisma.CommentOrderByRelationAggregateInput
   likes?: Prisma.PostLikeOrderByRelationAggregateInput
@@ -525,6 +570,8 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.PostWhereInput[]
   NOT?: Prisma.PostWhereInput | Prisma.PostWhereInput[]
   authorId?: Prisma.UuidFilter<"Post"> | string
+  authorProfileId?: Prisma.UuidNullableFilter<"Post"> | string | null
+  authorProfileKind?: Prisma.StringNullableFilter<"Post"> | string | null
   kind?: Prisma.EnumPostKindFilter<"Post"> | $Enums.PostKind
   text?: Prisma.StringFilter<"Post"> | string
   audience?: Prisma.EnumPostAudienceFilter<"Post"> | $Enums.PostAudience
@@ -561,6 +608,9 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
+  isPinned?: Prisma.BoolFilter<"Post"> | boolean
+  pinnedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
+  pinnedCommentId?: Prisma.UuidNullableFilter<"Post"> | string | null
   media?: Prisma.PostMediaListRelationFilter
   comments?: Prisma.CommentListRelationFilter
   likes?: Prisma.PostLikeListRelationFilter
@@ -572,6 +622,8 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
 export type PostOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
+  authorProfileId?: Prisma.SortOrderInput | Prisma.SortOrder
+  authorProfileKind?: Prisma.SortOrderInput | Prisma.SortOrder
   kind?: Prisma.SortOrder
   text?: Prisma.SortOrder
   audience?: Prisma.SortOrder
@@ -608,6 +660,9 @@ export type PostOrderByWithAggregationInput = {
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pinnedCommentId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PostCountOrderByAggregateInput
   _avg?: Prisma.PostAvgOrderByAggregateInput
   _max?: Prisma.PostMaxOrderByAggregateInput
@@ -621,6 +676,8 @@ export type PostScalarWhereWithAggregatesInput = {
   NOT?: Prisma.PostScalarWhereWithAggregatesInput | Prisma.PostScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"Post"> | string
   authorId?: Prisma.UuidWithAggregatesFilter<"Post"> | string
+  authorProfileId?: Prisma.UuidNullableWithAggregatesFilter<"Post"> | string | null
+  authorProfileKind?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
   kind?: Prisma.EnumPostKindWithAggregatesFilter<"Post"> | $Enums.PostKind
   text?: Prisma.StringWithAggregatesFilter<"Post"> | string
   audience?: Prisma.EnumPostAudienceWithAggregatesFilter<"Post"> | $Enums.PostAudience
@@ -657,11 +714,16 @@ export type PostScalarWhereWithAggregatesInput = {
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
+  isPinned?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
+  pinnedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
+  pinnedCommentId?: Prisma.UuidNullableWithAggregatesFilter<"Post"> | string | null
 }
 
 export type PostCreateInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -697,6 +759,9 @@ export type PostCreateInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
@@ -708,6 +773,8 @@ export type PostCreateInput = {
 export type PostUncheckedCreateInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -744,6 +811,9 @@ export type PostUncheckedCreateInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
@@ -754,6 +824,8 @@ export type PostUncheckedCreateInput = {
 export type PostUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -789,6 +861,9 @@ export type PostUpdateInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
@@ -800,6 +875,8 @@ export type PostUpdateInput = {
 export type PostUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -836,6 +913,9 @@ export type PostUncheckedUpdateInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
@@ -846,6 +926,8 @@ export type PostUncheckedUpdateInput = {
 export type PostCreateManyInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -882,11 +964,16 @@ export type PostCreateManyInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
 }
 
 export type PostUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -922,11 +1009,16 @@ export type PostUpdateManyMutationInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PostUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -963,6 +1055,9 @@ export type PostUncheckedUpdateManyInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type EnumSensitiveLabelNullableListFilter<$PrismaModel = never> = {
@@ -999,6 +1094,8 @@ export type PostOrderByRelationAggregateInput = {
 export type PostCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
+  authorProfileId?: Prisma.SortOrder
+  authorProfileKind?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   text?: Prisma.SortOrder
   audience?: Prisma.SortOrder
@@ -1035,6 +1132,9 @@ export type PostCountOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrder
+  pinnedCommentId?: Prisma.SortOrder
 }
 
 export type PostAvgOrderByAggregateInput = {
@@ -1051,6 +1151,8 @@ export type PostAvgOrderByAggregateInput = {
 export type PostMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
+  authorProfileId?: Prisma.SortOrder
+  authorProfileKind?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   text?: Prisma.SortOrder
   audience?: Prisma.SortOrder
@@ -1076,11 +1178,16 @@ export type PostMaxOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrder
+  pinnedCommentId?: Prisma.SortOrder
 }
 
 export type PostMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
+  authorProfileId?: Prisma.SortOrder
+  authorProfileKind?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   text?: Prisma.SortOrder
   audience?: Prisma.SortOrder
@@ -1106,6 +1213,9 @@ export type PostMinOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrder
+  pinnedCommentId?: Prisma.SortOrder
 }
 
 export type PostSumOrderByAggregateInput = {
@@ -1315,6 +1425,8 @@ export type PostUpdateOneRequiredWithoutTagsNestedInput = {
 export type PostCreateWithoutResharesInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -1350,6 +1462,9 @@ export type PostCreateWithoutResharesInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
@@ -1360,6 +1475,8 @@ export type PostCreateWithoutResharesInput = {
 export type PostUncheckedCreateWithoutResharesInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -1396,6 +1513,9 @@ export type PostUncheckedCreateWithoutResharesInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
@@ -1410,6 +1530,8 @@ export type PostCreateOrConnectWithoutResharesInput = {
 export type PostCreateWithoutResharedFromInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -1445,6 +1567,9 @@ export type PostCreateWithoutResharedFromInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
@@ -1455,6 +1580,8 @@ export type PostCreateWithoutResharedFromInput = {
 export type PostUncheckedCreateWithoutResharedFromInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -1490,6 +1617,9 @@ export type PostUncheckedCreateWithoutResharedFromInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
@@ -1521,6 +1651,8 @@ export type PostUpdateToOneWithWhereWithoutResharesInput = {
 export type PostUpdateWithoutResharesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -1556,6 +1688,9 @@ export type PostUpdateWithoutResharesInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
@@ -1566,6 +1701,8 @@ export type PostUpdateWithoutResharesInput = {
 export type PostUncheckedUpdateWithoutResharesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -1602,6 +1739,9 @@ export type PostUncheckedUpdateWithoutResharesInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
@@ -1630,6 +1770,8 @@ export type PostScalarWhereInput = {
   NOT?: Prisma.PostScalarWhereInput | Prisma.PostScalarWhereInput[]
   id?: Prisma.UuidFilter<"Post"> | string
   authorId?: Prisma.UuidFilter<"Post"> | string
+  authorProfileId?: Prisma.UuidNullableFilter<"Post"> | string | null
+  authorProfileKind?: Prisma.StringNullableFilter<"Post"> | string | null
   kind?: Prisma.EnumPostKindFilter<"Post"> | $Enums.PostKind
   text?: Prisma.StringFilter<"Post"> | string
   audience?: Prisma.EnumPostAudienceFilter<"Post"> | $Enums.PostAudience
@@ -1666,11 +1808,16 @@ export type PostScalarWhereInput = {
   expiresAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
+  isPinned?: Prisma.BoolFilter<"Post"> | boolean
+  pinnedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
+  pinnedCommentId?: Prisma.UuidNullableFilter<"Post"> | string | null
 }
 
 export type PostCreateWithoutMediaInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -1706,6 +1853,9 @@ export type PostCreateWithoutMediaInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
   tags?: Prisma.PostTagCreateNestedManyWithoutPostInput
@@ -1716,6 +1866,8 @@ export type PostCreateWithoutMediaInput = {
 export type PostUncheckedCreateWithoutMediaInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -1752,6 +1904,9 @@ export type PostUncheckedCreateWithoutMediaInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
   tags?: Prisma.PostTagUncheckedCreateNestedManyWithoutPostInput
@@ -1777,6 +1932,8 @@ export type PostUpdateToOneWithWhereWithoutMediaInput = {
 export type PostUpdateWithoutMediaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -1812,6 +1969,9 @@ export type PostUpdateWithoutMediaInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
   tags?: Prisma.PostTagUpdateManyWithoutPostNestedInput
@@ -1822,6 +1982,8 @@ export type PostUpdateWithoutMediaInput = {
 export type PostUncheckedUpdateWithoutMediaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -1858,6 +2020,9 @@ export type PostUncheckedUpdateWithoutMediaInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
   tags?: Prisma.PostTagUncheckedUpdateManyWithoutPostNestedInput
@@ -1867,6 +2032,8 @@ export type PostUncheckedUpdateWithoutMediaInput = {
 export type PostCreateWithoutLikesInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -1902,6 +2069,9 @@ export type PostCreateWithoutLikesInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   tags?: Prisma.PostTagCreateNestedManyWithoutPostInput
@@ -1912,6 +2082,8 @@ export type PostCreateWithoutLikesInput = {
 export type PostUncheckedCreateWithoutLikesInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -1948,6 +2120,9 @@ export type PostUncheckedCreateWithoutLikesInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   tags?: Prisma.PostTagUncheckedCreateNestedManyWithoutPostInput
@@ -1973,6 +2148,8 @@ export type PostUpdateToOneWithWhereWithoutLikesInput = {
 export type PostUpdateWithoutLikesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -2008,6 +2185,9 @@ export type PostUpdateWithoutLikesInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   tags?: Prisma.PostTagUpdateManyWithoutPostNestedInput
@@ -2018,6 +2198,8 @@ export type PostUpdateWithoutLikesInput = {
 export type PostUncheckedUpdateWithoutLikesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -2054,6 +2236,9 @@ export type PostUncheckedUpdateWithoutLikesInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   tags?: Prisma.PostTagUncheckedUpdateManyWithoutPostNestedInput
@@ -2063,6 +2248,8 @@ export type PostUncheckedUpdateWithoutLikesInput = {
 export type PostCreateWithoutCommentsInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -2098,6 +2285,9 @@ export type PostCreateWithoutCommentsInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
   tags?: Prisma.PostTagCreateNestedManyWithoutPostInput
@@ -2108,6 +2298,8 @@ export type PostCreateWithoutCommentsInput = {
 export type PostUncheckedCreateWithoutCommentsInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -2144,6 +2336,9 @@ export type PostUncheckedCreateWithoutCommentsInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
   tags?: Prisma.PostTagUncheckedCreateNestedManyWithoutPostInput
@@ -2169,6 +2364,8 @@ export type PostUpdateToOneWithWhereWithoutCommentsInput = {
 export type PostUpdateWithoutCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -2204,6 +2401,9 @@ export type PostUpdateWithoutCommentsInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
   tags?: Prisma.PostTagUpdateManyWithoutPostNestedInput
@@ -2214,6 +2414,8 @@ export type PostUpdateWithoutCommentsInput = {
 export type PostUncheckedUpdateWithoutCommentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -2250,6 +2452,9 @@ export type PostUncheckedUpdateWithoutCommentsInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
   tags?: Prisma.PostTagUncheckedUpdateManyWithoutPostNestedInput
@@ -2259,6 +2464,8 @@ export type PostUncheckedUpdateWithoutCommentsInput = {
 export type PostCreateWithoutTagsInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -2294,6 +2501,9 @@ export type PostCreateWithoutTagsInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeCreateNestedManyWithoutPostInput
@@ -2304,6 +2514,8 @@ export type PostCreateWithoutTagsInput = {
 export type PostUncheckedCreateWithoutTagsInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -2340,6 +2552,9 @@ export type PostUncheckedCreateWithoutTagsInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
   media?: Prisma.PostMediaUncheckedCreateNestedManyWithoutPostInput
   comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   likes?: Prisma.PostLikeUncheckedCreateNestedManyWithoutPostInput
@@ -2365,6 +2580,8 @@ export type PostUpdateToOneWithWhereWithoutTagsInput = {
 export type PostUpdateWithoutTagsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -2400,6 +2617,9 @@ export type PostUpdateWithoutTagsInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
@@ -2410,6 +2630,8 @@ export type PostUpdateWithoutTagsInput = {
 export type PostUncheckedUpdateWithoutTagsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -2446,6 +2668,9 @@ export type PostUncheckedUpdateWithoutTagsInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
@@ -2455,6 +2680,8 @@ export type PostUncheckedUpdateWithoutTagsInput = {
 export type PostCreateManyResharedFromInput = {
   id?: string
   authorId: string
+  authorProfileId?: string | null
+  authorProfileKind?: string | null
   kind: $Enums.PostKind
   text?: string
   audience?: $Enums.PostAudience
@@ -2490,11 +2717,16 @@ export type PostCreateManyResharedFromInput = {
   expiresAt?: Date | string | null
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
+  pinnedCommentId?: string | null
 }
 
 export type PostUpdateWithoutResharedFromInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -2530,6 +2762,9 @@ export type PostUpdateWithoutResharedFromInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUpdateManyWithoutPostNestedInput
@@ -2540,6 +2775,8 @@ export type PostUpdateWithoutResharedFromInput = {
 export type PostUncheckedUpdateWithoutResharedFromInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -2575,6 +2812,9 @@ export type PostUncheckedUpdateWithoutResharedFromInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   media?: Prisma.PostMediaUncheckedUpdateManyWithoutPostNestedInput
   comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   likes?: Prisma.PostLikeUncheckedUpdateManyWithoutPostNestedInput
@@ -2585,6 +2825,8 @@ export type PostUncheckedUpdateWithoutResharedFromInput = {
 export type PostUncheckedUpdateManyWithoutResharedFromInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  authorProfileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorProfileKind?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   kind?: Prisma.EnumPostKindFieldUpdateOperationsInput | $Enums.PostKind
   text?: Prisma.StringFieldUpdateOperationsInput | string
   audience?: Prisma.EnumPostAudienceFieldUpdateOperationsInput | $Enums.PostAudience
@@ -2620,6 +2862,9 @@ export type PostUncheckedUpdateManyWithoutResharedFromInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinnedCommentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -2692,6 +2937,8 @@ export type PostCountOutputTypeCountResharesArgs<ExtArgs extends runtime.Types.E
 export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   authorId?: boolean
+  authorProfileId?: boolean
+  authorProfileKind?: boolean
   kind?: boolean
   text?: boolean
   audience?: boolean
@@ -2728,6 +2975,9 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
+  isPinned?: boolean
+  pinnedAt?: boolean
+  pinnedCommentId?: boolean
   media?: boolean | Prisma.Post$mediaArgs<ExtArgs>
   comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
   likes?: boolean | Prisma.Post$likesArgs<ExtArgs>
@@ -2740,6 +2990,8 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type PostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   authorId?: boolean
+  authorProfileId?: boolean
+  authorProfileKind?: boolean
   kind?: boolean
   text?: boolean
   audience?: boolean
@@ -2776,12 +3028,17 @@ export type PostSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
+  isPinned?: boolean
+  pinnedAt?: boolean
+  pinnedCommentId?: boolean
   resharedFrom?: boolean | Prisma.Post$resharedFromArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
 export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   authorId?: boolean
+  authorProfileId?: boolean
+  authorProfileKind?: boolean
   kind?: boolean
   text?: boolean
   audience?: boolean
@@ -2818,12 +3075,17 @@ export type PostSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
+  isPinned?: boolean
+  pinnedAt?: boolean
+  pinnedCommentId?: boolean
   resharedFrom?: boolean | Prisma.Post$resharedFromArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
 export type PostSelectScalar = {
   id?: boolean
   authorId?: boolean
+  authorProfileId?: boolean
+  authorProfileKind?: boolean
   kind?: boolean
   text?: boolean
   audience?: boolean
@@ -2860,9 +3122,12 @@ export type PostSelectScalar = {
   expiresAt?: boolean
   deletedAt?: boolean
   createdAt?: boolean
+  isPinned?: boolean
+  pinnedAt?: boolean
+  pinnedCommentId?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "kind" | "text" | "audience" | "visibility" | "isAiGenerated" | "soundId" | "resharedFromId" | "replyToCommentId" | "replyToClipId" | "replyToCommenterId" | "stickerLayout" | "mentions" | "linkPreview" | "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "profileVisitCount" | "saveCount" | "quoteCount" | "isQuote" | "replyPolicy" | "sensitiveLabels" | "authorSensitiveLabels" | "moderationSensitiveLabels" | "advisorySensitiveLabels" | "sensitiveLabelsReviewed" | "moderationVisibility" | "topics" | "productIds" | "clipEdit" | "location" | "expiresAt" | "deletedAt" | "createdAt", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "authorId" | "authorProfileId" | "authorProfileKind" | "kind" | "text" | "audience" | "visibility" | "isAiGenerated" | "soundId" | "resharedFromId" | "replyToCommentId" | "replyToClipId" | "replyToCommenterId" | "stickerLayout" | "mentions" | "linkPreview" | "likeCount" | "commentCount" | "repostCount" | "shareCount" | "viewCount" | "profileVisitCount" | "saveCount" | "quoteCount" | "isQuote" | "replyPolicy" | "sensitiveLabels" | "authorSensitiveLabels" | "moderationSensitiveLabels" | "advisorySensitiveLabels" | "sensitiveLabelsReviewed" | "moderationVisibility" | "topics" | "productIds" | "clipEdit" | "location" | "expiresAt" | "deletedAt" | "createdAt" | "isPinned" | "pinnedAt" | "pinnedCommentId", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   media?: boolean | Prisma.Post$mediaArgs<ExtArgs>
   comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
@@ -2892,6 +3157,8 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     authorId: string
+    authorProfileId: string | null
+    authorProfileKind: string | null
     kind: $Enums.PostKind
     text: string
     audience: $Enums.PostAudience
@@ -2928,6 +3195,9 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     expiresAt: Date | null
     deletedAt: Date | null
     createdAt: Date
+    isPinned: boolean
+    pinnedAt: Date | null
+    pinnedCommentId: string | null
   }, ExtArgs["result"]["post"]>
   composites: {}
 }
@@ -3359,6 +3629,8 @@ export interface Prisma__PostClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface PostFieldRefs {
   readonly id: Prisma.FieldRef<"Post", 'String'>
   readonly authorId: Prisma.FieldRef<"Post", 'String'>
+  readonly authorProfileId: Prisma.FieldRef<"Post", 'String'>
+  readonly authorProfileKind: Prisma.FieldRef<"Post", 'String'>
   readonly kind: Prisma.FieldRef<"Post", 'PostKind'>
   readonly text: Prisma.FieldRef<"Post", 'String'>
   readonly audience: Prisma.FieldRef<"Post", 'PostAudience'>
@@ -3395,6 +3667,9 @@ export interface PostFieldRefs {
   readonly expiresAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>
+  readonly isPinned: Prisma.FieldRef<"Post", 'Boolean'>
+  readonly pinnedAt: Prisma.FieldRef<"Post", 'DateTime'>
+  readonly pinnedCommentId: Prisma.FieldRef<"Post", 'String'>
 }
     
 

@@ -159,7 +159,8 @@ export const SavedItemType = {
   post: 'post',
   video: 'video',
   clip: 'clip',
-  product: 'product'
+  product: 'product',
+  comment: 'comment'
 } as const
 
 export type SavedItemType = (typeof SavedItemType)[keyof typeof SavedItemType]

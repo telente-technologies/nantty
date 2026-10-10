@@ -52,6 +52,8 @@ export type CommentMinAggregateOutputType = {
   moderationVisibility: $Enums.ModerationVisibility | null
   deletedAt: Date | null
   createdAt: Date | null
+  isPinned: boolean | null
+  pinnedAt: Date | null
 }
 
 export type CommentMaxAggregateOutputType = {
@@ -68,6 +70,8 @@ export type CommentMaxAggregateOutputType = {
   moderationVisibility: $Enums.ModerationVisibility | null
   deletedAt: Date | null
   createdAt: Date | null
+  isPinned: boolean | null
+  pinnedAt: Date | null
 }
 
 export type CommentCountAggregateOutputType = {
@@ -85,6 +89,8 @@ export type CommentCountAggregateOutputType = {
   moderationVisibility: number
   deletedAt: number
   createdAt: number
+  isPinned: number
+  pinnedAt: number
   _all: number
 }
 
@@ -115,6 +121,8 @@ export type CommentMinAggregateInputType = {
   moderationVisibility?: true
   deletedAt?: true
   createdAt?: true
+  isPinned?: true
+  pinnedAt?: true
 }
 
 export type CommentMaxAggregateInputType = {
@@ -131,6 +139,8 @@ export type CommentMaxAggregateInputType = {
   moderationVisibility?: true
   deletedAt?: true
   createdAt?: true
+  isPinned?: true
+  pinnedAt?: true
 }
 
 export type CommentCountAggregateInputType = {
@@ -148,6 +158,8 @@ export type CommentCountAggregateInputType = {
   moderationVisibility?: true
   deletedAt?: true
   createdAt?: true
+  isPinned?: true
+  pinnedAt?: true
   _all?: true
 }
 
@@ -252,6 +264,8 @@ export type CommentGroupByOutputType = {
   moderationVisibility: $Enums.ModerationVisibility
   deletedAt: Date | null
   createdAt: Date
+  isPinned: boolean
+  pinnedAt: Date | null
   _count: CommentCountAggregateOutputType | null
   _avg: CommentAvgAggregateOutputType | null
   _sum: CommentSumAggregateOutputType | null
@@ -292,6 +306,8 @@ export type CommentWhereInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Comment"> | $Enums.ModerationVisibility
   deletedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
+  isPinned?: Prisma.BoolFilter<"Comment"> | boolean
+  pinnedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
   likes?: Prisma.CommentLikeListRelationFilter
 }
@@ -311,6 +327,8 @@ export type CommentOrderByWithRelationInput = {
   moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   post?: Prisma.PostOrderByWithRelationInput
   likes?: Prisma.CommentLikeOrderByRelationAggregateInput
 }
@@ -333,6 +351,8 @@ export type CommentWhereUniqueInput = Prisma.AtLeast<{
   moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Comment"> | $Enums.ModerationVisibility
   deletedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
+  isPinned?: Prisma.BoolFilter<"Comment"> | boolean
+  pinnedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
   likes?: Prisma.CommentLikeListRelationFilter
 }, "id">
@@ -352,6 +372,8 @@ export type CommentOrderByWithAggregationInput = {
   moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.CommentCountOrderByAggregateInput
   _avg?: Prisma.CommentAvgOrderByAggregateInput
   _max?: Prisma.CommentMaxOrderByAggregateInput
@@ -377,6 +399,8 @@ export type CommentScalarWhereWithAggregatesInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityWithAggregatesFilter<"Comment"> | $Enums.ModerationVisibility
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Comment"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Comment"> | Date | string
+  isPinned?: Prisma.BoolWithAggregatesFilter<"Comment"> | boolean
+  pinnedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Comment"> | Date | string | null
 }
 
 export type CommentCreateInput = {
@@ -393,6 +417,8 @@ export type CommentCreateInput = {
   moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
   post: Prisma.PostCreateNestedOneWithoutCommentsInput
   likes?: Prisma.CommentLikeCreateNestedManyWithoutCommentInput
 }
@@ -412,6 +438,8 @@ export type CommentUncheckedCreateInput = {
   moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
   likes?: Prisma.CommentLikeUncheckedCreateNestedManyWithoutCommentInput
 }
 
@@ -429,6 +457,8 @@ export type CommentUpdateInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   post?: Prisma.PostUpdateOneRequiredWithoutCommentsNestedInput
   likes?: Prisma.CommentLikeUpdateManyWithoutCommentNestedInput
 }
@@ -448,6 +478,8 @@ export type CommentUncheckedUpdateInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   likes?: Prisma.CommentLikeUncheckedUpdateManyWithoutCommentNestedInput
 }
 
@@ -466,6 +498,8 @@ export type CommentCreateManyInput = {
   moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
 }
 
 export type CommentUpdateManyMutationInput = {
@@ -482,6 +516,8 @@ export type CommentUpdateManyMutationInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type CommentUncheckedUpdateManyInput = {
@@ -499,6 +535,8 @@ export type CommentUncheckedUpdateManyInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type CommentListRelationFilter = {
@@ -526,6 +564,8 @@ export type CommentCountOrderByAggregateInput = {
   moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrder
 }
 
 export type CommentAvgOrderByAggregateInput = {
@@ -548,6 +588,8 @@ export type CommentMaxOrderByAggregateInput = {
   moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrder
 }
 
 export type CommentMinOrderByAggregateInput = {
@@ -564,6 +606,8 @@ export type CommentMinOrderByAggregateInput = {
   moderationVisibility?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isPinned?: Prisma.SortOrder
+  pinnedAt?: Prisma.SortOrder
 }
 
 export type CommentSumOrderByAggregateInput = {
@@ -647,6 +691,8 @@ export type CommentCreateWithoutPostInput = {
   moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
   likes?: Prisma.CommentLikeCreateNestedManyWithoutCommentInput
 }
 
@@ -664,6 +710,8 @@ export type CommentUncheckedCreateWithoutPostInput = {
   moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
   likes?: Prisma.CommentLikeUncheckedCreateNestedManyWithoutCommentInput
 }
 
@@ -711,6 +759,8 @@ export type CommentScalarWhereInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFilter<"Comment"> | $Enums.ModerationVisibility
   deletedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
+  isPinned?: Prisma.BoolFilter<"Comment"> | boolean
+  pinnedAt?: Prisma.DateTimeNullableFilter<"Comment"> | Date | string | null
 }
 
 export type CommentCreateWithoutLikesInput = {
@@ -727,6 +777,8 @@ export type CommentCreateWithoutLikesInput = {
   moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
   post: Prisma.PostCreateNestedOneWithoutCommentsInput
 }
 
@@ -745,6 +797,8 @@ export type CommentUncheckedCreateWithoutLikesInput = {
   moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
 }
 
 export type CommentCreateOrConnectWithoutLikesInput = {
@@ -777,6 +831,8 @@ export type CommentUpdateWithoutLikesInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   post?: Prisma.PostUpdateOneRequiredWithoutCommentsNestedInput
 }
 
@@ -795,6 +851,8 @@ export type CommentUncheckedUpdateWithoutLikesInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type CommentCreateManyPostInput = {
@@ -811,6 +869,8 @@ export type CommentCreateManyPostInput = {
   moderationVisibility?: $Enums.ModerationVisibility
   deletedAt?: Date | string | null
   createdAt?: Date | string
+  isPinned?: boolean
+  pinnedAt?: Date | string | null
 }
 
 export type CommentUpdateWithoutPostInput = {
@@ -827,6 +887,8 @@ export type CommentUpdateWithoutPostInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   likes?: Prisma.CommentLikeUpdateManyWithoutCommentNestedInput
 }
 
@@ -844,6 +906,8 @@ export type CommentUncheckedUpdateWithoutPostInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   likes?: Prisma.CommentLikeUncheckedUpdateManyWithoutCommentNestedInput
 }
 
@@ -861,6 +925,8 @@ export type CommentUncheckedUpdateManyWithoutPostInput = {
   moderationVisibility?: Prisma.EnumModerationVisibilityFieldUpdateOperationsInput | $Enums.ModerationVisibility
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPinned?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pinnedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -909,6 +975,8 @@ export type CommentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   moderationVisibility?: boolean
   deletedAt?: boolean
   createdAt?: boolean
+  isPinned?: boolean
+  pinnedAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
   likes?: boolean | Prisma.Comment$likesArgs<ExtArgs>
   _count?: boolean | Prisma.CommentCountOutputTypeDefaultArgs<ExtArgs>
@@ -929,6 +997,8 @@ export type CommentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   moderationVisibility?: boolean
   deletedAt?: boolean
   createdAt?: boolean
+  isPinned?: boolean
+  pinnedAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["comment"]>
 
@@ -947,6 +1017,8 @@ export type CommentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   moderationVisibility?: boolean
   deletedAt?: boolean
   createdAt?: boolean
+  isPinned?: boolean
+  pinnedAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["comment"]>
 
@@ -965,9 +1037,11 @@ export type CommentSelectScalar = {
   moderationVisibility?: boolean
   deletedAt?: boolean
   createdAt?: boolean
+  isPinned?: boolean
+  pinnedAt?: boolean
 }
 
-export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "parentCommentId" | "rootCommentId" | "authorId" | "text" | "mentions" | "likeCount" | "replyCount" | "depth" | "path" | "moderationVisibility" | "deletedAt" | "createdAt", ExtArgs["result"]["comment"]>
+export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "parentCommentId" | "rootCommentId" | "authorId" | "text" | "mentions" | "likeCount" | "replyCount" | "depth" | "path" | "moderationVisibility" | "deletedAt" | "createdAt" | "isPinned" | "pinnedAt", ExtArgs["result"]["comment"]>
 export type CommentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
   likes?: boolean | Prisma.Comment$likesArgs<ExtArgs>
@@ -1001,6 +1075,8 @@ export type $CommentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     moderationVisibility: $Enums.ModerationVisibility
     deletedAt: Date | null
     createdAt: Date
+    isPinned: boolean
+    pinnedAt: Date | null
   }, ExtArgs["result"]["comment"]>
   composites: {}
 }
@@ -1440,6 +1516,8 @@ export interface CommentFieldRefs {
   readonly moderationVisibility: Prisma.FieldRef<"Comment", 'ModerationVisibility'>
   readonly deletedAt: Prisma.FieldRef<"Comment", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Comment", 'DateTime'>
+  readonly isPinned: Prisma.FieldRef<"Comment", 'Boolean'>
+  readonly pinnedAt: Prisma.FieldRef<"Comment", 'DateTime'>
 }
     
 

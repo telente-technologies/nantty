@@ -3820,6 +3820,8 @@ export type ChatMediaExpiryRunScalarFieldEnum = (typeof ChatMediaExpiryRunScalar
 export const PostScalarFieldEnum = {
   id: 'id',
   authorId: 'authorId',
+  authorProfileId: 'authorProfileId',
+  authorProfileKind: 'authorProfileKind',
   kind: 'kind',
   text: 'text',
   audience: 'audience',
@@ -3855,7 +3857,10 @@ export const PostScalarFieldEnum = {
   location: 'location',
   expiresAt: 'expiresAt',
   deletedAt: 'deletedAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  isPinned: 'isPinned',
+  pinnedAt: 'pinnedAt',
+  pinnedCommentId: 'pinnedCommentId'
 } as const
 
 export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
@@ -3914,7 +3919,9 @@ export const CommentScalarFieldEnum = {
   path: 'path',
   moderationVisibility: 'moderationVisibility',
   deletedAt: 'deletedAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  isPinned: 'isPinned',
+  pinnedAt: 'pinnedAt'
 } as const
 
 export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]

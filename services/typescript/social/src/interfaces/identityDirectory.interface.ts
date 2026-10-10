@@ -12,6 +12,15 @@ export interface UserSummary {
   readonly isCreator: boolean;
 }
 
+export interface OwnedProfileSummary {
+  readonly id: string;
+  readonly accountId: string;
+  readonly kind: string;
+  readonly displayName: string;
+  readonly handle: string;
+  readonly avatarUrl: string | null;
+}
+
 export interface IdentityDirectory {
   findUserSummaries(accountIds: readonly string[]): Promise<ReadonlyMap<string, UserSummary>>;
   findAccountIdsByUsernames(usernames: readonly string[]): Promise<ReadonlyMap<string, string>>;
@@ -23,4 +32,6 @@ export interface IdentityDirectory {
   findAccountsAllowingPersonalizedAds(accountIds: readonly string[]): Promise<ReadonlySet<string>>;
   findCheckmarkColors(accountIds: readonly string[]): Promise<ReadonlyMap<string, CheckmarkColor>>;
   findAccountCreatedAt(accountId: string): Promise<Date | undefined>;
+  findOwnedPostableProfile(accountId: string, profileId: string): Promise<OwnedProfileSummary | null>;
+  findProfilesByIds(profileIds: readonly string[]): Promise<ReadonlyMap<string, OwnedProfileSummary>>;
 }
