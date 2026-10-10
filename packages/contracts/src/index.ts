@@ -10,3 +10,4 @@ export interface PaginatedResponse<T> {
   readonly page: number;
   readonly limit: number;
 }
+export * from "./posts.contract";
