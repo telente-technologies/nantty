@@ -47,6 +47,19 @@ def normalize_comment_created(data: dict[str, Any], flat: dict[str, Any]) -> dic
     return flat
 
 
+def normalize_product_purchased(data: dict[str, Any]) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "orderId": data.get("orderGroupId"),
+        "storeId": data.get("storeId"),
+        "items": [
+            {"productId": data.get("productId"), "quantity": data.get("quantity"), "unitPrice": data.get("unitPrice")}
+        ],
+    }
+    if data.get("sourcePostId"):
+        payload["sourcePostId"] = data["sourcePostId"]
+    return {"actorId": data.get("actorId"), "payload": payload}
+
+
 def normalize_social_engagement(event_type: Any, data: dict[str, Any], flat: dict[str, Any]) -> dict[str, Any] | None:
     if event_type == "post.liked":
         flat["actorId"] = data.get("likedBy")
@@ -149,6 +162,8 @@ def normalize_contract_envelope(body: Any) -> Any:
             "imageKey": select_rekognition_compatible_image_key(data),
         }
         return flat
+    if event_type == "product.purchased":
+        return {**flat, **normalize_product_purchased(data)}
     if event_type == "report.created":
         return {**flat, **normalize_report_created(data, body)}
     social = normalize_social_engagement(event_type, data, flat)
@@ -173,6 +188,14 @@ def normalize_contract_envelope(body: Any) -> Any:
     flat["actorId"] = data.get("accountId") or body.get("subject")
     flat["payload"] = {"consentType": data["consentType"]} if "consentType" in data else {}
     return flat
+
+
+def is_unattributed_purchase(normalized_body: Any) -> bool:
+    return (
+        isinstance(normalized_body, dict)
+        and normalized_body.get("eventType") == "product.purchased"
+        and not normalized_body.get("actorId")
+    )
 
 
 def unwrap_queue_message_body(parsed_body: Any) -> Any:

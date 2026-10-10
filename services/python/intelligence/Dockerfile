@@ -25,7 +25,8 @@ ENV PATH="/app/.venv/bin:${PATH}" \
     INTELLIGENCE_EVENT_STORAGE_URI=/app/data \
     INTELLIGENCE_MODEL_REGISTRY_PATH=/app/model_registry \
     OMP_NUM_THREADS=2
-RUN groupadd --system --gid 10001 intelligence \
+RUN python -m pip uninstall --yes --quiet pip \
+    && groupadd --system --gid 10001 intelligence \
     && useradd --system --uid 10001 --gid intelligence --home-dir /app --shell /usr/sbin/nologin intelligence
 WORKDIR /app
 COPY --from=builder /app /app

@@ -832,8 +832,9 @@ Social engagement (contract envelope `data`, personalization-gated, translated w
 | content.saved | accountId, targetType (`post` \| `video` \| `clip` \| `product`), targetId, authorId? | `saved` (`video` => `post`) |
 | post.viewed | postId, authorId, viewerId, dwellMs?, position?, isProductPost? | `post_viewed` (impression; seen set + dwell) |
 | clip.watched | clipId, creatorId, viewerId, watchFraction, loopCount?, durationMs | `clip_watched` |
+| product.purchased (go-commerce, one per order item) | productId, storeId, variantId, quantity, orderGroupId, unitPrice (Money), actorId (only when the buyer allows personalization), sourcePostId? | `purchased` with one item (actor `actorId`); events without `actorId` are acked as `skipped_unattributed` (never attributed, never dead-lettered) |
 `message.sent` carries metadata only: `{recipientId, conversationId, containsLink?, linkReported?, deviceId?, ipHash?}`; extra fields reject the event.
-Personalization-gated: product.viewed, follow.created, ad.impressionRecorded, report.created affinity. Safety counters (messages, logins, reports, blocks, posts) are kept for abuse scoring.
+Personalization-gated: product.viewed, product.purchased, follow.created, ad.impressionRecorded, report.created affinity. Safety counters (messages, logins, reports, blocks, posts) are kept for abuse scoring.
 
 Idempotent by `eventId` (7 days); a message is acked once processed or a duplicate; malformed (poison) messages are rejected to `intelligence-domain-events.dlq`;
 backend failures are republished to the retry queues (30 s, 2 m, 10 m, 30 m) and dead-lettered after the fifth attempt. Opted-out users get no affinity/seen features and

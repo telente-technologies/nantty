@@ -12,6 +12,7 @@ from src.events.event_payload_dto import (
     PostLikedPayload,
     PostViewedPayload,
     ProductViewedPayload,
+    PurchasedPayload,
     ReportedPayload,
     SavedPayload,
     SharedPayload,
@@ -74,6 +75,11 @@ class EmptyPayload(ContractModel):
 class ProductViewedDomainEvent(DomainEnvelopeBase):
     event_type: Literal["product.viewed"]
     payload: ProductViewedPayload
+
+
+class ProductPurchasedDomainEvent(DomainEnvelopeBase):
+    event_type: Literal["product.purchased"]
+    payload: PurchasedPayload
 
 
 class FollowCreatedDomainEvent(DomainEnvelopeBase):
@@ -178,6 +184,7 @@ class ClipWatchedDomainEvent(DomainEnvelopeBase):
 
 type DomainEvent = Annotated[
     ProductViewedDomainEvent
+    | ProductPurchasedDomainEvent
     | FollowCreatedDomainEvent
     | PostCreatedDomainEvent
     | MediaProcessedDomainEvent

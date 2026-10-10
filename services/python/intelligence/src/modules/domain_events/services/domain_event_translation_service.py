@@ -11,6 +11,7 @@ from src.events.domain_event_dto import (
     PostLikedDomainEvent,
     PostSharedDomainEvent,
     PostViewedDomainEvent,
+    ProductPurchasedDomainEvent,
     ProductViewedDomainEvent,
     ReportCreatedDomainEvent,
 )
@@ -19,6 +20,7 @@ from src.services.identifier_hashing_service import OpaqueIdentifierHasher
 PERSONALIZATION_DOMAIN_EVENT_TYPES = frozenset(
     {
         "product.viewed",
+        "product.purchased",
         "follow.created",
         "ad.impressionRecorded",
         "post.liked",
@@ -48,6 +50,8 @@ def resolve_intelligence_event_type(event: DomainEvent) -> str | None:
     match event:
         case ProductViewedDomainEvent():
             return "product_viewed"
+        case ProductPurchasedDomainEvent():
+            return "purchased"
         case FollowCreatedDomainEvent():
             return "followed"
         case AdImpressionRecordedDomainEvent():

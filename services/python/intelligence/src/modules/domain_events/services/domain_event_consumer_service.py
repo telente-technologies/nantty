@@ -7,7 +7,7 @@ from typing import Literal
 
 from pydantic import ValidationError
 
-from src.events.contract_envelope_normalizer import unwrap_queue_message_body
+from src.events.contract_envelope_normalizer import is_unattributed_purchase, unwrap_queue_message_body
 from src.events.domain_event_dto import (
     AccountDeletionExecutedDomainEvent,
     AccountDeletionRequestedDomainEvent,
@@ -29,7 +29,7 @@ from src.services.identifier_hashing_service import OpaqueIdentifierHasher
 
 consumer_logger = logging.getLogger("intelligence.domain_events")
 
-type ProcessingStatus = Literal["processed", "duplicate", "rejected", "skipped_deleted_account"]
+type ProcessingStatus = Literal["processed", "duplicate", "rejected", "skipped_deleted_account", "skipped_unattributed"]
 DOMAIN_CLAIM_PREFIX = "domain:"
 DOMAIN_CLAIM_TTL_SECONDS = 7 * 24 * 3600
 
@@ -83,9 +83,18 @@ class DomainEventConsumerService:
             consumer_logger.warning("domain_event_rejected", extra={"error_type": error_type})
             return None
 
+    @staticmethod
+    def is_unattributed_purchase_body(message_body: str) -> bool:
+        try:
+            return is_unattributed_purchase(unwrap_queue_message_body(json.loads(message_body)))
+        except ValueError, TypeError:
+            return False
+
     async def process_message_body(self, message_body: str) -> DomainEventProcessingOutcome:
         event = self.parse_message_body(message_body)
         if event is None:
+            if self.is_unattributed_purchase_body(message_body):
+                return DomainEventProcessingOutcome("skipped_unattributed")
             return DomainEventProcessingOutcome("rejected")
         backend = self.feature_store.feature_backend
         keyspace = self.feature_store.keyspace
