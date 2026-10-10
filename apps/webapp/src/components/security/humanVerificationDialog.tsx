@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Dialog } from "@/components/ui/dialog";
+import { ShieldIcon } from "@/components/ui/icons";
 import { WebappRequestError } from "@/services/clientApi.service";
 import { submitHumanVerificationToken } from "@/services/humanVerification.service";
 
@@ -39,7 +40,7 @@ export function HumanVerificationDialog() {
     : "We noticed unusual activity on your account. Confirm you're a person to keep going.";
 
   return (
-    <Dialog isOpen={isOpen} onClose={() => finishHumanVerification(false)} title="Quick security check" description={description} layout="sheet" showCloseButton>
+    <Dialog isOpen={isOpen} onClose={() => finishHumanVerification(false)} title="Quick security check" description={description} layout="sheet" showCloseButton tone="brand" icon={<ShieldIcon size={24} />}>
       <div className={styles.body}>
         {errorMessage ? <p className={styles.error} role="alert">{errorMessage}</p> : null}
         {siteKey === "" ? <p className={styles.error} role="alert">Security checks are not set up on this site yet.</p> : null}

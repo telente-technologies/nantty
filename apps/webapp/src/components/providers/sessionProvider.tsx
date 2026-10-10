@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import { rememberCsrfTokenForRequests } from "@/services/clientApi.service";
@@ -15,8 +16,20 @@ interface SessionContextValue {
 const SessionContext = createContext<SessionContextValue>({ viewer: null, csrfToken: null });
 
 export function SessionProvider({ viewer, csrfToken, children }: SessionContextValue & { readonly children: ReactNode }) {
-  const value = useMemo<SessionContextValue>(() => ({ viewer, csrfToken }), [viewer, csrfToken]);
+  const value = useMemo<SessionContextValue>(() => {
+    rememberCsrfTokenForRequests(csrfToken);
+    return { viewer, csrfToken };
+  }, [viewer, csrfToken]);
   const syncAuthStore = useAuthStore((state) => state.setViewerFromSession);
+  const queryClient = useQueryClient();
+  const previousViewerId = useRef(viewer?.id ?? null);
+
+  useEffect(() => {
+    const currentViewerId = viewer?.id ?? null;
+    if (previousViewerId.current === currentViewerId) return;
+    previousViewerId.current = currentViewerId;
+    void queryClient.invalidateQueries();
+  }, [viewer?.id, queryClient]);
 
   useEffect(() => {
     rememberCsrfTokenForRequests(csrfToken);
