@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"net"
 	"net/http"
-	"strings"
 
 	"github.com/google/uuid"
 
 	"zudomart/modules/orders/src/container"
 	"zudomart/platform/commerceports"
+	"zudomart/platform/httpserver"
 	"zudomart/platform/money"
 )
 
@@ -50,10 +49,5 @@ func RecordSellerMoneyAudit(ctx context.Context, deployed *container.Container, 
 }
 
 func clientAddress(request *http.Request) string {
-	for _, header := range []string{"X-Real-Ip", "X-Forwarded-For"} {
-		if value := strings.TrimSpace(strings.Split(request.Header.Get(header), ",")[0]); net.ParseIP(value) != nil {
-			return value
-		}
-	}
-	return ""
+	return httpserver.ClientIP(request)
 }

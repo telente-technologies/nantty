@@ -118,7 +118,7 @@ func (handler Handler) resolveVariant(ctx context.Context, command Command) (com
 	}
 	matches := []commerceports.ProductSnapshot{}
 	for _, variant := range variants {
-		if matchesRequest(variant, command.Request.VariantId, command.Request.Size, command.Request.Color) {
+		if matchesRequest(variant, command.Request.VariantId, command.Request.Size, command.Request.Color, command.Request.Options) {
 			matches = append(matches, variant)
 		}
 	}
@@ -131,12 +131,21 @@ func (handler Handler) resolveVariant(ctx context.Context, command Command) (com
 	return commerceports.ProductSnapshot{}, ordererrors.VariantRequired
 }
 
-func matchesRequest(variant commerceports.ProductSnapshot, variantId, size, color *string) bool {
+func matchesRequest(variant commerceports.ProductSnapshot, variantId, size, color *string, options map[string]string) bool {
 	if variantId != nil {
 		return variant.VariantId.String() == *variantId
 	}
 	if size != nil && !strings.EqualFold(variant.Size, *size) {
 		return false
 	}
-	return color == nil || strings.EqualFold(variant.Color, *color)
+	if color != nil && !strings.EqualFold(variant.Color, *color) {
+		return false
+	}
+	for name, value := range options {
+		actual, found := variant.OptionValues[name]
+		if !found || !strings.EqualFold(actual, value) {
+			return false
+		}
+	}
+	return true
 }

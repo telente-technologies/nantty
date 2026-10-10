@@ -1,12 +1,13 @@
 package dtos
 
 type AddCartItemRequest struct {
-	ProductId   string           `json:"productId"`
-	VariantId   *string          `json:"variantId"`
-	Size        *string          `json:"size"`
-	Color       *string          `json:"color"`
-	Quantity    int              `json:"quantity"`
-	Attribution *SaleAttribution `json:"attribution"`
+	ProductId   string            `json:"productId"`
+	VariantId   *string           `json:"variantId"`
+	Size        *string           `json:"size"`
+	Color       *string           `json:"color"`
+	Options     map[string]string `json:"options"`
+	Quantity    int               `json:"quantity"`
+	Attribution *SaleAttribution  `json:"attribution"`
 }
 
 type SaleAttribution struct {
