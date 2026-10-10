@@ -19,5 +19,9 @@ func (handler Handler) Execute(ctx context.Context, _ Query) ([]models.PlatformS
 	if err != nil {
 		return nil, err
 	}
-	return services.BuildSettingViews(ctx, handler.Container.Client, rows)
+	views, err := services.BuildSettingViews(ctx, handler.Container.Client, rows)
+	if err != nil {
+		return nil, err
+	}
+	return services.AddProjectedSettingViews(views)
 }

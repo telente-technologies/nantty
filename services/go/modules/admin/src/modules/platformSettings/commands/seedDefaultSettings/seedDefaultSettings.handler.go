@@ -16,6 +16,9 @@ type Handler struct {
 
 func (handler Handler) Execute(ctx context.Context, _ Command) error {
 	for key, definition := range services.PlatformSettingDefinitions {
+		if definition.Projection != nil {
+			continue
+		}
 		raw, err := json.Marshal(definition.DefaultValue)
 		if err != nil {
 			return err

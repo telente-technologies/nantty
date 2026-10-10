@@ -27,7 +27,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Page, error) {
 	if _, known := services.PlatformSettingDefinitions[query.Key]; !known {
 		return Page{}, adminerrors.SettingNotFound
 	}
-	request := handler.Container.Client.PlatformSettingRevision.Query().Where(platformsettingrevision.Key(query.Key))
+	request := handler.Container.Client.PlatformSettingRevision.Query().Where(platformsettingrevision.Key(services.StorageKeyFor(query.Key)))
 	if query.Cursor != "" {
 		before, err := strconv.Atoi(query.Cursor)
 		if err != nil || before < 1 {
@@ -46,5 +46,9 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Page, error) {
 		next = &cursor
 	}
 	views, err := services.BuildRevisionViews(ctx, handler.Container.Client, rows)
+	if err != nil {
+		return Page{}, err
+	}
+	views, err = services.ProjectSettingViews(query.Key, views)
 	return Page{Data: views, NextCursor: next}, err
 }

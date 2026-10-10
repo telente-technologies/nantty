@@ -35,17 +35,10 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Pla
 	if len(reason) < 5 || len(reason) > 500 {
 		return models.PlatformSettingView{}, adminerrors.Unprocessable("Give a reason of 5-500 characters.")
 	}
+	storageKey := services.StorageKeyFor(command.Key)
 	var updated *ent.PlatformSetting
 	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		value, err := handler.resolveValueInTransaction(ctx, tx, command)
-		if err != nil {
-			return err
-		}
-		canonical, err := definition.Validate(value)
-		if err != nil {
-			return err
-		}
-		current, err := tx.PlatformSetting.Query().Where(platformsetting.Key(command.Key)).ForUpdate().Only(ctx)
+		current, err := tx.PlatformSetting.Query().Where(platformsetting.Key(storageKey)).ForUpdate().Only(ctx)
 		if ent.IsNotFound(err) {
 			return adminerrors.SettingNotFound
 		}
@@ -55,15 +48,23 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Pla
 		if current.Version != command.ExpectedVersion {
 			return adminerrors.VersionConflict
 		}
+		value, err := handler.resolveValueInTransaction(ctx, tx, storageKey, definition, current, command)
+		if err != nil {
+			return err
+		}
+		canonical, err := services.PlatformSettingDefinitions[storageKey].Validate(value)
+		if err != nil {
+			return err
+		}
 		now := handler.Container.Now()
 		if updated, err = current.Update().SetValue(canonical).SetVersion(current.Version + 1).SetUpdatedBy(command.Actor.Id).SetUpdatedAt(now).Save(ctx); err != nil {
 			return err
 		}
-		if err := tx.PlatformSettingRevision.Create().SetKey(command.Key).SetVersion(updated.Version).SetValue(canonical).SetReason(reason).SetActor(command.Actor.Id).Exec(ctx); err != nil {
+		if err := tx.PlatformSettingRevision.Create().SetKey(storageKey).SetVersion(updated.Version).SetValue(canonical).SetReason(reason).SetActor(command.Actor.Id).Exec(ctx); err != nil {
 			return err
 		}
-		if err := adminevents.EnqueueOutboxEventInTransaction(ctx, tx, "platformSetting.changed", command.Key, now,
-			settingevents.PlatformSettingChangedEventData{Key: command.Key, Version: updated.Version, ChangedBy: command.Actor.Id}); err != nil {
+		if err := adminevents.EnqueueOutboxEventInTransaction(ctx, tx, "platformSetting.changed", storageKey, now,
+			settingevents.PlatformSettingChangedEventData{Key: storageKey, Version: updated.Version, ChangedBy: command.Actor.Id}); err != nil {
 			return err
 		}
 		action := "platform_setting.changed"
@@ -71,7 +72,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Pla
 			action = "platform_setting.restored"
 		}
 		return repositories.RecordAuditEventInTransaction(ctx, tx, identityports.AuditEvent{
-			ActorId: command.Actor.Id, ActorRole: command.Actor.Role, Action: action, SubjectType: "platform_setting", SubjectId: command.Key, SubjectLabel: command.Key,
+			ActorId: command.Actor.Id, ActorRole: command.Actor.Role, Action: action, SubjectType: "platform_setting", SubjectId: storageKey, SubjectLabel: command.Key,
 			Before: current.Value, After: canonical, Reason: reason, StepUpVerified: command.Actor.SteppedUp,
 		})
 	})
@@ -82,16 +83,26 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Pla
 	if err != nil {
 		return models.PlatformSettingView{}, err
 	}
-	return views[0], nil
+	return services.ProjectSettingView(command.Key, views[0])
 }
 
-func (handler Handler) resolveValueInTransaction(ctx context.Context, tx *ent.Tx, command Command) (json.RawMessage, error) {
-	if command.RestoreVersion <= 0 {
+func (handler Handler) resolveValueInTransaction(ctx context.Context, tx *ent.Tx, storageKey string, definition services.SettingDefinition, current *ent.PlatformSetting, command Command) (json.RawMessage, error) {
+	if command.RestoreVersion > 0 {
+		revision, err := tx.PlatformSettingRevision.Query().Where(platformsettingrevision.Key(storageKey), platformsettingrevision.Version(command.RestoreVersion)).Only(ctx)
+		if ent.IsNotFound(err) {
+			return nil, adminerrors.VersionNotFound
+		}
+		if err != nil {
+			return nil, err
+		}
+		return revision.Value, nil
+	}
+	if definition.Projection == nil {
 		return command.Value, nil
 	}
-	revision, err := tx.PlatformSettingRevision.Query().Where(platformsettingrevision.Key(command.Key), platformsettingrevision.Version(command.RestoreVersion)).Only(ctx)
-	if ent.IsNotFound(err) {
-		return nil, adminerrors.VersionNotFound
+	projected, err := definition.Validate(command.Value)
+	if err != nil {
+		return nil, err
 	}
-	return revision.Value, err
+	return definition.Projection.Merge(current.Value, projected)
 }
