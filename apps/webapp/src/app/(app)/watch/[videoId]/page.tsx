@@ -2,19 +2,24 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { use } from "react";
+import { use, useState } from "react";
 
 import { CommentsPanel } from "@/components/feed/commentsPanel";
 import { formatVideoDuration } from "@/components/feed/postCardMedia";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { RetryButton } from "@/components/ui/controls";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
-import { HeartIcon } from "@/components/ui/icons";
+import { HeartIcon, LikeFilledActionIcon, ShareActionIcon } from "@/components/ui/icons";
+import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { ShareToChatButton } from "@/components/actions/shareToChatButton";
 import { Avatar, MediaImage } from "@/components/ui/media";
+import { showToast } from "@/components/ui/toast";
 import { discoveryService } from "@/services/discovery.service";
+import { followsService, postsService } from "@/services/posts.service";
+import { findDownloadTargetForPost } from "@/utils/brandedDownload.util";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
+import { buildAbsoluteSiteUrl } from "@/utils/seoPaths.util";
 import type { Post } from "@/types";
 
 import styles from "./page.module.css";
@@ -49,6 +54,48 @@ function UpNextList({ currentVideoId }: { readonly currentVideoId: string }) {
 
 function VideoDetails({ video }: { readonly video: Post }) {
   const media = video.media[0];
+  const [isLiked, setIsLiked] = useState(video.liked);
+  const [likeCount, setLikeCount] = useState(video.likes);
+  const [isFollowing, setIsFollowing] = useState(video.isFollowingAuthor);
+  const [shareCount, setShareCount] = useState(video.reposts);
+
+  function toggleLike() {
+    requireAuthThen(() => {
+      const likeNow = !isLiked;
+      setIsLiked(likeNow);
+      setLikeCount((count) => Math.max(0, count + (likeNow ? 1 : -1)));
+      void (likeNow ? postsService.likePost(video.id) : postsService.unlikePost(video.id)).catch(() => {
+        setIsLiked(!likeNow);
+        setLikeCount((count) => Math.max(0, count + (likeNow ? -1 : 1)));
+      });
+    }, "Sign in to like videos.");
+  }
+
+  function toggleFollow() {
+    requireAuthThen(() => {
+      const followNow = !isFollowing;
+      setIsFollowing(followNow);
+      if (followNow) {
+        void followsService.followUser(video.author.id).catch(() => setIsFollowing(false));
+      }
+    }, "Sign in to follow creators.");
+  }
+
+  function shareVideoLink() {
+    const url = buildAbsoluteSiteUrl(`/watch/${video.id}`);
+    const copyAndRecord = async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast({ text: "Link copied" });
+      } catch {
+        showToast({ text: "Couldn't copy the link", tone: "error" });
+      }
+      setShareCount((count) => count + 1);
+      void postsService.recordPostShare(video.id).catch(() => setShareCount(video.reposts));
+    };
+    void copyAndRecord();
+  }
+
   return (
     <div className={styles.main}>
       <div className={styles.player}>
@@ -58,25 +105,38 @@ function VideoDetails({ video }: { readonly video: Post }) {
       </div>
       <h1 className={styles.caption}>{video.text}</h1>
       <div className={styles.bar}>
-        <Link href={`/user/${video.author.id}`} className={styles.author}>
-          <Avatar name={video.author.name} src={video.author.avatarUrl} size="md" />
-          <span className={styles.authorText}>
-            <span className={styles.authorName}>{video.author.name}</span>
-            <span className={styles.authorMeta}>
-              {formatCountWithThousandsSuffix(video.views)} views · {formatTimeSincePosted(video.createdAt)}
+        <div className={styles.authorWrap}>
+          <Link href={`/user/${video.author.id}`} className={styles.author}>
+            <Avatar name={video.author.name} src={video.author.avatarUrl} size="md" />
+            <span className={styles.authorText}>
+              <span className={styles.authorName}>{video.author.name}</span>
+              <span className={styles.authorMeta}>
+                {formatCountWithThousandsSuffix(video.views)} views · {formatTimeSincePosted(video.createdAt)}
+              </span>
             </span>
-          </span>
-        </Link>
+          </Link>
+          <button
+            type="button"
+            className={[styles.followPill, isFollowing ? styles.followPillActive : ""].join(" ")}
+            aria-pressed={isFollowing}
+            onClick={toggleFollow}
+          >
+            {isFollowing ? "Following" : "Follow"}
+          </button>
+        </div>
         <div className={styles.actions}>
-          <span className={styles.stat}>
-            <HeartIcon size={18} /> {formatCountWithThousandsSuffix(video.likes)}
-          </span>
+          <button type="button" className={styles.stat} aria-pressed={isLiked} aria-label={isLiked ? "Unlike this video" : "Like this video"} onClick={toggleLike}>
+            {isLiked ? <LikeFilledActionIcon size={18} /> : <HeartIcon size={18} />} {formatCountWithThousandsSuffix(likeCount)}
+          </button>
+          <button type="button" className={styles.stat} aria-label="Copy link to this video" onClick={shareVideoLink}>
+            <ShareActionIcon size={18} /> {formatCountWithThousandsSuffix(shareCount)}
+          </button>
           <ShareToChatButton kind="video" referenceId={video.id} className={styles.stat} label={formatCountWithThousandsSuffix(video.reposts)} />
           <SaveToggleButton targetType="video" targetId={video.id} initiallySaved={video.bookmarked} appearance="pill" saveCount={video.saveCount ?? 0} />
-          <ContentActionsMenu shareKind={null} reportTargetType="post" targetId={video.id} canonicalPath={`/watch/${video.id}`} />
+          <ContentActionsMenu shareKind={null} reportTargetType="post" targetId={video.id} canonicalPath={`/watch/${video.id}`} downloadTarget={findDownloadTargetForPost(video)} />
         </div>
       </div>
-      <CommentsPanel postId={video.id} totalComments={video.comments} />
+      <CommentsPanel postId={video.id} postAuthorId={video.author.id} totalComments={video.comments} />
     </div>
   );
 }

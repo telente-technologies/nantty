@@ -50,6 +50,34 @@
   border-radius: var(--radius-medium);
 }
 
+.authorWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.followPill {
+  min-height: 32px;
+  padding-inline: var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.followPill:hover {
+  filter: brightness(0.94);
+}
+
+.followPillActive {
+  background: var(--surface-sunken);
+  color: var(--ink-strong);
+}
+
 .authorText {
   display: flex;
   flex-direction: column;
