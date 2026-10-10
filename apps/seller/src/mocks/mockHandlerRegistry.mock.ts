@@ -9,6 +9,7 @@ import { registerBillingOfferMockHandlers } from "@/mocks/handlers/billingOffer.
 import { registerAccountHealthMockHandlers } from "@/mocks/handlers/accountHealth.mock";
 import { registerBusinessDocumentMockHandlers } from "@/mocks/handlers/businessDocuments.mock";
 import { registerPayoutOnboardingMockHandlers } from "@/mocks/handlers/payoutOnboarding.mock";
+import { registerZudomartWalletMockHandlers } from "@/mocks/handlers/zudomartWallet.mock";
 import { registerAffiliatesMockHandlers } from "@/mocks/handlers/affiliates.mock";
 import { registerBrandsMockHandlers } from "@/mocks/handlers/brands.mock";
 import { registerConsentsMockHandlers } from "@/mocks/handlers/consentsHandlers.mock";
@@ -23,6 +24,7 @@ export function registerEveryMockHandler(): void {
   registerBusinessDocumentMockHandlers();
   registerAccountHealthMockHandlers();
   registerPayoutOnboardingMockHandlers();
+  registerZudomartWalletMockHandlers();
   registerConsentsMockHandlers();
   registerTeamAndSettingsMockHandlers();
   registerCatalogMockHandlers();

@@ -9,6 +9,8 @@ const auditEntry = c.object({ id: c.string(), actor: c.object({ id: c.string(), 
 const policies = c.object({ returns: c.string(), shipping: c.string(), privacy: c.string() });
 const escrowEntry = c.object({ orderId: c.string(), orderNumber: c.string(), buyerName: c.string(), buyerUsername: c.string(), gross: money, fees: money, net: money, status: c.string(["held", "released", "refunded", "disputed"]), heldAt: c.string(), releaseExpectedAt: nullableText, releasedAt: nullableText, settlementId: nullableText });
 const periodSales = c.object({ label: c.string(), current: money, previous: money, ordersCount: c.number() });
+const walletLine = c.object({ key: c.string(), label: c.string(), description: c.string(), amount: c.object({ amountMinor: c.number(), currency: c.string() }) });
+const walletVerification = c.object({ level: c.number(), withdrawalsUnlocked: c.boolean(), waitingForVerification: money, nextStep: c.nullable(c.string(["payout_setup", "bank_validation", "identity_check", "business_verification"])), message: nullableText });
 const comparable = { grossSales: money, netSales: money, ordersCount: c.number(), averageOrderValue: money, conversionRateBasisPoints: c.number() };
 
 export const sellerDomainContracts: readonly EndpointContract[] = [
@@ -18,6 +20,7 @@ export const sellerDomainContracts: readonly EndpointContract[] = [
   { domain: "staff", method: "GET", path: "/api/v1/seller/audit-log", schema: c.page(auditEntry) },
   { domain: "staff", method: "GET", path: "/api/v1/seller/zudomart-users?q=ad", schema: c.object({ data: c.array(c.object({ userId: c.string(), name: c.string(), username: c.string(), avatarUrl: nullableText })) }) },
   { domain: "wallet", method: "GET", path: "/api/v1/seller/wallet/balances", schema: balances },
+  { domain: "wallet", method: "GET", path: "/api/v1/wallets/me", schema: c.object({ available: money, pending: money, locked: money, inEscrow: money, payoutRequested: money, negativeBalance: money, nextAvailableAt: nullableText, adCredit: money, earningsPayable: money, debts: money, coins: c.object({ spendable: c.number(), earned: c.number() }), lines: c.array(walletLine), verification: walletVerification }) },
   { domain: "wallet", method: "GET", path: "/api/v1/seller/wallet/transactions", schema: c.page(c.object({ id: c.string(), kind: c.string(), description: c.string(), amount: money, direction: c.string(["credit", "debit"]), balanceBucket: c.string(), reference: c.string(), createdAt: c.string() })) },
   { domain: "wallet", method: "GET", path: "/api/v1/seller/wallet/payout-settings", schema: c.object({ minimumPayout: money, fee: money, schedule: c.string() }) },
   { domain: "wallet", method: "GET", path: "/api/v1/seller/wallet/payouts", schema: c.page(c.object({ id: c.string(), amount: money, fee: money, accountId: c.string(), accountSummary: c.string(), status: c.string(["processing", "paid", "failed"]), reference: c.string(), requestedAt: c.string(), completedAt: nullableText })) },

@@ -7,6 +7,7 @@ import { WalletBalanceCards } from "@/components/wallet/walletBalanceCards";
 import { walletBalanceBucketLabels, walletTransactionKindLabels } from "@/components/wallet/walletPresentation.constant";
 import { PayoutSetupBanner } from "@/components/payouts/payoutSetupBanner";
 import { WalletTabs } from "@/components/wallet/walletTabs";
+import { WalletVerificationCallout, ZudomartBalancePanel } from "@/components/wallet/zudomartBalancePanel";
 import { useWalletCursorPages } from "@/components/wallet/useWalletCursorPages.hook";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { ButtonLink } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { useMoneyFormatter } from "@/hooks/useMoneyFormatter.hook";
 import { useSellerQuery } from "@/hooks/useSellerQuery.hook";
 import type { FinanceSummary } from "@/types/finance.type";
 import type { WalletBalances, WalletTransaction } from "@/types/wallet.type";
+import type { ZudomartWalletSummary } from "@/types/zudomartWallet.type";
 import { buildDateRangeEndingToday, formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
 
 import styles from "./wallet.module.css";
@@ -78,6 +80,7 @@ export function WalletOverviewView() {
   const { can } = useSellerSession();
   const balancesQuery = useSellerQuery<WalletBalances>("/seller/wallet/balances");
   const summaryQuery = useSellerQuery<FinanceSummary>("/seller/finance/summary");
+  const walletQuery = useSellerQuery<ZudomartWalletSummary>(can("wallet:view") ? "/wallets/me" : null);
 
   return (
     <PageStack>
@@ -92,12 +95,14 @@ export function WalletOverviewView() {
         }
       />
       <WalletTabs />
+      <WalletVerificationCallout summary={walletQuery.data} />
       <PayoutSetupBanner />
       {balancesQuery.data ? <WalletBalanceCards balances={balancesQuery.data} /> : balancesQuery.errorMessage ? <ErrorCallout message={balancesQuery.errorMessage} onRetry={balancesQuery.reload} /> : <LoadingBlock label="Loading balances" />}
       <FinanceSummarySection summary={summaryQuery.data} isLoading={summaryQuery.isLoading} errorMessage={summaryQuery.errorMessage} onRetry={summaryQuery.reload} />
       <div className={styles.overviewGrid}>
         <WalletTransactionsPanel />
         <div className={styles.sideStack}>
+          {can("wallet:view") ? <ZudomartBalancePanel walletQuery={walletQuery} /> : null}
           {summaryQuery.data ? <UpcomingEscrowReleasesPanel summary={summaryQuery.data} /> : null}
           <AccountingExportPanel />
         </div>

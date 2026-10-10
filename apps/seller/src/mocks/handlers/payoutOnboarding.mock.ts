@@ -66,6 +66,10 @@ function guard(record: PayoutOnboardingRecord, step: PayoutOnboardingStep): void
   if (step !== "identity" && !record.state.completedSteps.includes("identity")) throw new MockHttpError(409, "STEP_ORDER", "Start with your personal details.");
 }
 
+export function readMockPayoutOnboardingState(storeId: string): PayoutOnboardingState {
+  return settle(read(storeId));
+}
+
 export function registerPayoutOnboardingMockHandlers(): void {
   registerMockRoute("GET", "/payments/payout-onboarding/me", (request) => respondWithJson(200, settle(read(requireMockStorePrincipal(request).storeId))));
 

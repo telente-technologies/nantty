@@ -19,7 +19,7 @@ import { decideSellerAccessDestination } from "@/utils/sellerAccessDestination.u
 const maximumForwardedBodyBytes = 12 * 1024 * 1024;
 const forwardedRequestHeaderNames = ["idempotency-key", "x-chunk-sha256", "if-match"];
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
-const allowedApiPathPattern = /^\/(seller|media)(\/[A-Za-z0-9._~:@%-]+)+$|^\/payments\/(payout-onboarding\/me(\/[A-Za-z0-9._~:@%-]+)*|payout-fees)$/;
+const allowedApiPathPattern = /^\/(seller|media)(\/[A-Za-z0-9._~:@%-]+)+$|^\/payments\/(payout-onboarding\/me(\/[A-Za-z0-9._~:@%-]+)*|payout-fees)$|^\/wallets\/me$/;
 const readOnlyAccountApiPaths: ReadonlySet<string> = new Set(["/account/status"]);
 const accountWriteApiCalls: ReadonlySet<string> = new Set(["PATCH /users/me/preferences", "PUT /users/me/consents"]);
 const gateApiPathPattern = /^\/seller\/(access|verification|subscription|stores\/mine)(\/|$)/;

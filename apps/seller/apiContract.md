@@ -676,6 +676,12 @@ Errors: 400 VALIDATION_FAILED (bad dates/location), 402 PLAN_FEATURE_REQUIRED, 4
 Permission: wallet:view
 Response 200: WalletBalances { escrow, pending (released, clearing — shown as "pending settlement"), available, nextEscrowReleaseAt }. Balances come only from the ledger.
 
+### GET /api/v1/wallets/me (go-money, the signed-in user's Zudomart balance)
+Permission: wallet:view (the BFF allows GET only). Type: `apps/seller/src/types/zudomartWallet.type.ts`.
+Response 200: `{ available, pending (escrow only), locked, inEscrow, payoutRequested, negativeBalance, nextAvailableAt, adCredit, earningsPayable, debts, coins: { spendable, earned }, lines: [{ key, label, description, amount }], verification: { level, withdrawalsUnlocked, waitingForVerification: Money, nextStep: "payout_setup"|"bank_validation"|"identity_check"|"business_verification"|null, message: string|null } }`.
+- `lines` keys in order: available ("Available to withdraw"), pending ("Pending (escrow)"), locked, earningsPayable ("Creator earnings"), adCredit ("Ad credit"), coins ("Coins", currency `"COIN"`, `amountMinor` = whole coins), debts ("Owed to Zudomart"). The dashboard renders them in order with the backend `label` (description as secondary text), formats coins as "N coins" and never sums the lines. Older backends without `lines` fall back to available + pending.
+- `verification.message` (e.g. "Verify to withdraw ₦12,500") is null once withdrawals are unlocked (L1). When set, the finance page shows it as a banner with a "Get paid" link to `/settings/payouts`, or "Verify business" to `/settings/business-documents` when `nextStep` is `"business_verification"` (payout details verified, business verification pending). Unknown `nextStep` values fall back to payout setup. The message may read "Verify to withdraw your earnings" when the amount is zero.
+
 ### GET /api/v1/seller/wallet/transactions
 Permission: wallet:view
 Query: kind?: WalletTransactionKind (`escrow_hold | escrow_release | payout | refund | fee | affiliate_commission | ads_charge | subscription_charge | adjustment` — `pos_settlement` is removed); from?: date; to?: date; cursor?; limit? (≤ 200, default 25)

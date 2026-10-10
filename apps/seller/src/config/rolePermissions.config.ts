@@ -151,6 +151,7 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "WRITE", pathPattern: /^\/seller\/brands\//, permission: "settings:manage" },
   { method: "ANY", pathPattern: /^\/media\//, permission: "media:upload" },
   { method: "ANY", pathPattern: /^\/payments\/(payout-onboarding\/me|payout-fees)/, permission: "wallet:withdraw" },
+  { method: "GET", pathPattern: /^\/wallets\/me$/, permission: "wallet:view" },
 ];
 
 function doesMethodMatchPattern(method: string, pattern: HttpMethodPattern): boolean {
