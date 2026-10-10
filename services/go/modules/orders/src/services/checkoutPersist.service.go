@@ -19,6 +19,7 @@ import (
 	"zudomart/modules/orders/src/generated/ent/ordergroup"
 	"zudomart/modules/orders/src/generated/ent/predicate"
 	"zudomart/modules/orders/src/generated/ent/promotion"
+	"zudomart/platform/httpserver"
 	"zudomart/platform/usersdirectory"
 )
 
@@ -112,6 +113,13 @@ func persistOrderGroup(ctx context.Context, deployed *container.Container, tx *e
 		return nil, err
 	}
 	if planned.CreditMinor > 0 {
+		state, err := CreditStateInTransaction(ctx, tx, group.StoreID, group.BuyerAccountID, now)
+		if err != nil {
+			return nil, err
+		}
+		if state.BalanceMinor < planned.CreditMinor {
+			return nil, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "creditMinor", Message: "insufficient store credit balance"}})
+		}
 		if err := recordCredit(ctx, tx, creditMovement{StoreId: group.StoreID, BuyerId: group.BuyerAccountID, GroupId: &group.ID, Kind: enums.CreditRedeem, AmountMinor: planned.CreditMinor,
 			Currency: group.Currency, DedupeKey: "redeem:" + group.ID.String(), EventType: "storeCredit.redeemed"}, now); err != nil {
 			return nil, err

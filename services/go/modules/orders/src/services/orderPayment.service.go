@@ -72,10 +72,6 @@ func confirmStockReservation(ctx context.Context, deployed *container.Container,
 		lines = append(lines, commerceports.StockLine{VariantId: item.VariantID, StoreId: item.StoreID, Quantity: item.Quantity})
 	}
 	if reserveError := stock.Reserve(ctx, commerceports.ReserveStockRequest{Reference: group.ID.String(), Lines: lines}); reserveError != nil {
-		var shortage commerceports.InsufficientStockError
-		if errors.As(reserveError, &shortage) {
-			return nil
-		}
 		return reserveError
 	}
 	return nil

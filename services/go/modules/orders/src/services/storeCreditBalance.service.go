@@ -36,7 +36,7 @@ func LoadCreditStatesForBuyer(ctx context.Context, client *ent.Client, buyerId u
 }
 
 func CreditStateInTransaction(ctx context.Context, tx *ent.Tx, storeId, buyerId uuid.UUID, now time.Time) (CreditState, error) {
-	rows, err := tx.StoreCreditEntry.Query().Where(storecreditentry.StoreID(storeId), storecreditentry.BuyerAccountID(buyerId)).Order(ent.Asc(storecreditentry.FieldID)).All(ctx)
+	rows, err := tx.StoreCreditEntry.Query().Where(storecreditentry.StoreID(storeId), storecreditentry.BuyerAccountID(buyerId)).Order(ent.Asc(storecreditentry.FieldID)).ForUpdate().All(ctx)
 	if err != nil {
 		return CreditState{}, err
 	}

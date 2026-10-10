@@ -135,6 +135,9 @@ func (service CheckoutService) registerAndRespond(ctx context.Context, row *ent.
 			if abortError := AbortCheckout(ctx, service.Container, row.ID, enums.CheckoutFailed, "Payment could not be prepared"); abortError != nil {
 				return types.CheckoutResultView{}, abortError
 			}
+			if refusal := PaymentRegistrationRefusal(err); refusal != nil {
+				return types.CheckoutResultView{}, refusal
+			}
 			return types.CheckoutResultView{}, ordererrors.PaymentServiceFailed
 		}
 		if err := service.Container.Client.Checkout.UpdateOneID(row.ID).SetStatus(enums.CheckoutPayable).Exec(ctx); err != nil {

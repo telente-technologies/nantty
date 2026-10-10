@@ -119,7 +119,7 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 		if useCredit {
 			credit = RedeemableCreditMinor(loaded.credits[group.StoreId].BalanceMinor, group.SubtotalMinor-discount)
 		}
-		planned := PlannedGroup{GroupId: uuid.New(), Group: group, Store: store, Shipping: result, CreditMinor: credit, DiscountMinor: discount, Promotion: chosen, Campaigns: campaigns,
+		planned := PlannedGroup{GroupId: uuid.Must(uuid.NewV7()), Group: group, Store: store, Shipping: result, CreditMinor: credit, DiscountMinor: discount, Promotion: chosen, Campaigns: campaigns,
 			TotalMinor: group.SubtotalMinor - discount - credit + result.FeeMinor}
 		plan.Groups = append(plan.Groups, planned)
 		plan.TotalMinor += planned.TotalMinor
