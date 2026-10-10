@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { PauseIcon, PlayIcon } from "@/components/ui/icons";
+import { adEventsService } from "@/services/adEvents.service";
 import type { MartHighlight } from "@/types/martHighlight.type";
 
 import styles from "./martHighlightsCarousel.module.css";
@@ -11,7 +12,10 @@ import styles from "./martHighlightsCarousel.module.css";
 export const MART_CAROUSEL_AUTO_ADVANCE_MS = 5000;
 
 const hrefForHighlight = ({ target }: MartHighlight) =>
-  target.type === "collection" ? `/collections/${target.collection}` : `/category/${encodeURIComponent(target.categoryId)}`;
+  target.type === "product" ? `/product/${encodeURIComponent(target.productId)}` : target.type === "collection" ? `/collections/${target.collection}` : `/category/${encodeURIComponent(target.categoryId)}`;
+
+const reasonForHighlight = (highlight: MartHighlight) =>
+  highlight.sponsored ? `${highlight.sponsored.label} · ${highlight.sponsored.advertiserName}` : highlight.ranking.reason.label;
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -66,6 +70,12 @@ export function MartHighlightsCarousel({ highlights, loading }: { readonly highl
     setIndex(target);
   }, [count, reducedMotion]);
 
+  const current = highlights[index];
+  useEffect(() => {
+    if (!visible || !current?.sponsored || current.target.type !== "product") return;
+    void adEventsService.recordImpressionOncePerSession(current.sponsored, "mart", current.target.productId);
+  }, [visible, current]);
+
   const autoAdvance = visible && !interacting && !userPaused && !reducedMotion && count > 1;
   useEffect(() => {
     if (!autoAdvance) return;
@@ -103,13 +113,16 @@ export function MartHighlightsCarousel({ highlights, loading }: { readonly highl
             className={styles.slide}
             role="group"
             aria-roledescription="slide"
-            aria-label={`${slideIndex + 1} of ${count}: ${highlight.title}. ${highlight.ranking.reason.label}`}
+            aria-label={`${slideIndex + 1} of ${count}: ${highlight.title}. ${reasonForHighlight(highlight)}`}
             tabIndex={slideIndex === index ? 0 : -1}
+            onClick={() => {
+              if (highlight.sponsored && highlight.target.type === "product") void adEventsService.recordClick(highlight.sponsored, "mart", highlight.target.productId);
+            }}
           >
             {highlight.imageUrl ? <img src={highlight.imageUrl} alt="" className={styles.image} loading={slideIndex === 0 ? "eager" : "lazy"} /> : null}
             <span className={styles.caption}>
               <span className={styles.title}>{highlight.title}</span>
-              <span className={styles.reason}>{highlight.ranking.reason.label}</span>
+              <span className={styles.reason}>{reasonForHighlight(highlight)}</span>
             </span>
           </Link>
         ))}

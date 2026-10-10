@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { Button } from "@/components/ui/button";
-import { MoreIcon } from "@/components/ui/icons";
+import { FlagIcon, MoreIcon, ProhibitIcon } from "@/components/ui/icons";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { usePopoverMenu } from "@/components/ui/popoverMenu.hook";
 import sheetStyles from "@/components/ui/popoverMenu.module.css";
@@ -45,12 +45,12 @@ export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenu
     );
   };
   const items = isGroupLike
-    ? [{ label: conversation.kind === "channel" ? "Report channel" : "Report group", onSelect: () => startReport("group") }]
+    ? [{ label: conversation.kind === "channel" ? "Report channel" : "Report group", icon: <FlagIcon size={18} aria-hidden="true" />, onSelect: () => startReport("group") }]
     : [
-        { label: "Report user", onSelect: () => startReport("user") },
-        { label: "Report and block", onSelect: () => startReport("user", true) },
-        { label: "Report conversation", onSelect: () => startReport("conversation") },
-        { label: "Block", onSelect: () => { menuClose(true); setIsBlockDialogOpen(true); } },
+        { label: "Report user", icon: <FlagIcon size={18} aria-hidden="true" />, onSelect: () => startReport("user") },
+        { label: "Report and block", icon: <FlagIcon size={18} aria-hidden="true" />, onSelect: () => startReport("user", true) },
+        { label: "Report conversation", icon: <FlagIcon size={18} aria-hidden="true" />, onSelect: () => startReport("conversation") },
+        { label: "Block", icon: <ProhibitIcon size={18} aria-hidden="true" />, onSelect: () => { menuClose(true); setIsBlockDialogOpen(true); } },
       ];
 
   return (
@@ -63,7 +63,8 @@ export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenu
         <div className={`${menuStyles.menu} ${sheetStyles.sheet}`} aria-label="Conversation options" ref={menuMenuRef} {...menuMenuProps}>
           {items.map((item) => (
             <button key={item.label} type="button" role="menuitem" className={`${menuStyles.item} ${menuStyles.itemDanger}`} onClick={item.onSelect}>
-              {item.label}
+              {item.icon}
+              <span>{item.label}</span>
             </button>
           ))}
         </div>
@@ -72,11 +73,13 @@ export function ChatActionsMenu({ conversation, onStartReport }: ChatActionsMenu
         isOpen={isBlockDialogOpen}
         onClose={() => setIsBlockDialogOpen(false)}
         title={`Block ${conversation.peer.name}?`}
-        description="They won't be able to message you. They won't be told you blocked them."
+        description="They won't be able to message you. You can unblock them in chat settings. They won't be told you blocked them."
+        tone="danger"
+        icon={<ProhibitIcon size={24} />}
         footer={
           <>
             <Button variant="secondary" onClick={() => setIsBlockDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => block.mutate()} busy={block.isPending}>Block</Button>
+            <Button variant="danger" onClick={() => block.mutate()} busy={block.isPending}>Block</Button>
           </>
         }
       >

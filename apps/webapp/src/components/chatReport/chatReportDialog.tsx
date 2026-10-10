@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
+import { FlagIcon } from "@/components/ui/icons";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { createIdempotencyKey, readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { chatReportsService } from "@/services/chatReports.service";
@@ -90,6 +91,7 @@ export function ChatReportDialog({ target, messages, viewerId, onClose }: ChatRe
       onClose={closeAndReset}
       title={step === "done" ? "Thanks, we'll review this" : target ? `Report ${describeChatReportTarget(target)}` : "Report"}
       description={step === "done" ? undefined : "Reports are anonymous. The other person won't be told who reported them."}
+      icon={step === "done" ? undefined : <FlagIcon size={24} />}
       footer={
         step === "done" ? (
           <>
@@ -102,13 +104,13 @@ export function ChatReportDialog({ target, messages, viewerId, onClose }: ChatRe
             {carriesEvidence ? (
               <Button onClick={() => setStep("evidence")} disabled={!canContinue}>Next</Button>
             ) : (
-              <Button onClick={submitReport} disabled={!canContinue} busy={submission.isPending}>{target?.alsoBlock ? "Report and block" : "Send report"}</Button>
+              <Button variant={target?.alsoBlock ? "danger" : "primary"} onClick={submitReport} disabled={!canContinue} busy={submission.isPending}>{target?.alsoBlock ? "Report and block" : "Send report"}</Button>
             )}
           </>
         ) : (
           <>
             <Button variant="secondary" onClick={() => setStep("reason")}>Back</Button>
-            <Button onClick={submitReport} disabled={evidenceMessages.length === 0} busy={submission.isPending}>{target?.alsoBlock ? "Send and block" : "Send report"}</Button>
+            <Button variant={target?.alsoBlock ? "danger" : "primary"} onClick={submitReport} disabled={evidenceMessages.length === 0} busy={submission.isPending}>{target?.alsoBlock ? "Send and block" : "Send report"}</Button>
           </>
         )
       }
