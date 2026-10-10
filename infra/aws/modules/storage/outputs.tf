@@ -5,3 +5,5 @@ output "media_distribution_id" { value = aws_cloudfront_distribution.media.id }
 output "media_distribution_domain_name" { value = aws_cloudfront_distribution.media.domain_name }
 output "media_distribution_zone_id" { value = aws_cloudfront_distribution.media.hosted_zone_id }
 output "media_key_group_id" { value = try(aws_cloudfront_key_group.media_signing[0].id, null) }
+output "media_kms_key_arn" { value = aws_kms_key.media.arn }
+output "media_distribution_arn" { value = aws_cloudfront_distribution.media.arn }

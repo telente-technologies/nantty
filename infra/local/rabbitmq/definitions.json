@@ -3192,6 +3192,22 @@
       "arguments": {}
     },
     {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "verificationCase.decided",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "money-domain-events",
+      "destination_type": "queue",
+      "routing_key": "checkmark.revoked",
+      "arguments": {}
+    },
+    {
       "source": "zudomart.dlx",
       "vhost": "zudomart",
       "destination": "ads-domain-events.dlq",
@@ -3733,6 +3749,46 @@
       "destination": "notifications-domain-events",
       "destination_type": "queue",
       "routing_key": "report.closed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "review.created",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "review.replied",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "sellerApplication.reviewed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "creator.standingChanged",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "notifications-domain-events",
+      "destination_type": "queue",
+      "routing_key": "message.sent",
       "arguments": {}
     },
     {
@@ -4733,6 +4789,14 @@
       "destination": "intelligence-domain-events",
       "destination_type": "queue",
       "routing_key": "product.viewed",
+      "arguments": {}
+    },
+    {
+      "source": "zudomart.events",
+      "vhost": "zudomart",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "product.purchased",
       "arguments": {}
     },
     {

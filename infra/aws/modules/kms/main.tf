@@ -44,6 +44,29 @@ data "aws_iam_policy_document" "key" {
   }
 
   dynamic "statement" {
+    for_each = length(lookup(var.key_user_role_arns, each.key, [])) > 0 ? [1] : []
+    content {
+      sid       = "ServiceTasksThroughS3"
+      actions   = ["kms:Decrypt", "kms:GenerateDataKey", "kms:Encrypt"]
+      resources = ["*"]
+      principals {
+        type        = "AWS"
+        identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+      }
+      condition {
+        test     = "ArnEquals"
+        variable = "aws:PrincipalArn"
+        values   = var.key_user_role_arns[each.key]
+      }
+      condition {
+        test     = "StringEquals"
+        variable = "kms:ViaService"
+        values   = ["s3.${data.aws_region.current.name}.amazonaws.com"]
+      }
+    }
+  }
+
+  dynamic "statement" {
     for_each = each.key == "sns" ? [1] : []
     content {
       sid       = "ServicesPublishToEncryptedTopics"

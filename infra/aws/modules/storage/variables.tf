@@ -31,3 +31,16 @@ variable "media_signing_public_key_pem" {
   type        = string
   default     = null
 }
+variable "dr_region" {
+  type    = string
+  default = null
+}
+variable "media_key_user_role_arns" {
+  description = "Task role ARNs allowed to use the media CMK through S3 (matched on aws:PrincipalArn, so the roles may not exist yet)."
+  type        = list(string)
+  default     = []
+}
+variable "web_acl_arn" {
+  description = "CLOUDFRONT-scope WAF web ACL (us-east-1) attached to the media distribution."
+  type        = string
+}

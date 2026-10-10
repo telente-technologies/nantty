@@ -9,8 +9,9 @@ locals {
 }
 
 module "kms" {
-  source      = "../kms"
-  environment = var.environment
+  source             = "../kms"
+  environment        = var.environment
+  key_user_role_arns = { kyc = [for name in local.kyc_key_users : local.task_role_arn[name]] }
 }
 
 module "kms_dr" {
@@ -20,14 +21,25 @@ module "kms_dr" {
   providers   = { aws = aws.dr }
 }
 
+module "cloudfront_waf" {
+  source                      = "../cloudfront-waf"
+  environment                 = var.environment
+  rate_limit_per_five_minutes = var.cdn_rate_limit_per_five_minutes
+  log_retention_days          = var.log_retention_days
+  providers                   = { aws = aws.us_east_1 }
+}
+
 module "storage" {
   source                       = "../storage"
   environment                  = var.environment
   media_domain                 = local.media_domain
   media_certificate_arn        = module.dns.media_certificate_arn
+  web_acl_arn                  = module.cloudfront_waf.web_acl_arn
   kyc_kms_key_arn              = module.kms.key_arns["kyc"]
   kyc_dr_kms_key_arn           = var.enable_dr ? module.kms_dr[0].key_arns["kyc"] : null
+  media_key_user_role_arns     = [for name in local.media_key_users : local.task_role_arn[name]]
   enable_dr                    = var.enable_dr
+  dr_region                    = var.dr_region
   upload_cors_origins          = values(var.app_origins)
   media_signing_public_key_pem = var.media_signing_public_key_pem
   providers                    = { aws = aws, aws.dr = aws.dr }

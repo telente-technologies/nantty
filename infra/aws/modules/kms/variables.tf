@@ -4,3 +4,8 @@ variable "multi_region_purposes" {
   type        = list(string)
   default     = []
 }
+variable "key_user_role_arns" {
+  description = "Per purpose, task roles allowed to use that key through S3."
+  type        = map(list(string))
+  default     = {}
+}

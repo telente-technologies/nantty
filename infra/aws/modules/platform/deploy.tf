@@ -2,6 +2,10 @@ locals {
   media_bucket_arn = module.storage.media_bucket.arn
   kyc_bucket_arn   = module.storage.kyc_bucket.arn
   s3_object_access = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:AbortMultipartUpload"]
+  media_key_users  = ["media", "go-live", "intelligence", "go-trust"]
+  kyc_key_users    = ["go-identity", "go-trust"]
+  task_role_arn    = { for name in distinct(concat(local.media_key_users, local.kyc_key_users)) : name => "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/zudomart-${var.environment}-${name}-task" }
+  media_key_access = { sid = "MediaKey", actions = ["kms:Decrypt", "kms:GenerateDataKey"], resources = [module.storage.media_kms_key_arn] }
 
   task_policies = {
     go-identity = [
@@ -12,16 +16,19 @@ locals {
     media = [
       { sid = "MediaObjects", actions = local.s3_object_access, resources = ["${local.media_bucket_arn}/*"] },
       { sid = "MediaList", actions = ["s3:ListBucket"], resources = [local.media_bucket_arn] },
+      local.media_key_access,
     ]
     go-live = [
       { sid = "LiveRecordings", actions = ["s3:GetObject", "s3:PutObject"], resources = ["${local.media_bucket_arn}/uploads/live-recordings/*"] },
       { sid = "LiveSafetyCaptureList", actions = ["s3:ListBucket"], resources = [local.media_bucket_arn], conditions = [{ test = "StringLike", variable = "s3:prefix", values = ["live-safety/frames/*", "live-safety/audio/*"] }] },
+      local.media_key_access,
     ]
     intelligence = [
       { sid = "EventLog", actions = ["s3:GetObject", "s3:PutObject"], resources = ["${local.media_bucket_arn}/intelligence/*"] },
       { sid = "EventLogList", actions = ["s3:ListBucket"], resources = [local.media_bucket_arn] },
       { sid = "LiveSafetyCaptureRead", actions = ["s3:GetObject"], resources = ["${local.media_bucket_arn}/live-safety/frames/*", "${local.media_bucket_arn}/live-safety/audio/*"] },
       { sid = "LiveSafetyTranscripts", actions = ["s3:GetObject", "s3:PutObject"], resources = ["${local.media_bucket_arn}/live-safety/transcripts/*"] },
+      local.media_key_access,
       { sid = "LiveSafetyRekognition", actions = ["rekognition:DetectModerationLabels"], resources = ["*"] },
       { sid = "LiveSafetyTranscribe", actions = ["transcribe:StartTranscriptionJob", "transcribe:GetTranscriptionJob"], resources = ["arn:aws:transcribe:${var.region}:${data.aws_caller_identity.current.account_id}:transcription-job/live-safety-*"] },
     ]
@@ -29,6 +36,7 @@ locals {
       { sid = "LiveSafetyFramePreviews", actions = ["s3:GetObject"], resources = ["${local.media_bucket_arn}/live-safety/frames/*"] },
       { sid = "LiveSafetyEvidenceWrite", actions = ["s3:PutObject", "s3:PutObjectTagging", "s3:PutObjectLegalHold"], resources = ["${local.kyc_bucket_arn}/trust-evidence/live/*"] },
       { sid = "LiveSafetyEvidenceKey", actions = ["kms:Encrypt", "kms:GenerateDataKey"], resources = [module.kms.key_arns["kyc"]] },
+      { sid = "LiveSafetyFrameKey", actions = ["kms:Decrypt"], resources = [module.storage.media_kms_key_arn] },
     ]
     notifications = [
       { sid = "SendMail", actions = ["ses:SendEmail", "ses:SendRawEmail"], resources = [module.ses.identity_arn, "arn:aws:ses:${var.region}:${data.aws_caller_identity.current.account_id}:configuration-set/${module.ses.configuration_set_name}"] },

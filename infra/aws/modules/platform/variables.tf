@@ -134,3 +134,8 @@ variable "promotion_source_account_id" {
   type        = string
   default     = ""
 }
+variable "cdn_rate_limit_per_five_minutes" {
+  description = "Per-IP request limit (5-minute window) on the media CloudFront WAF."
+  type        = number
+  default     = 10000
+}

@@ -24,6 +24,7 @@ resource "aws_cloudfront_distribution" "media" {
   comment         = "zudomart ${var.environment} media"
   aliases         = [var.media_domain]
   price_class     = var.cloudfront_price_class
+  web_acl_id      = var.web_acl_arn
 
   origin {
     origin_id                = "primary"

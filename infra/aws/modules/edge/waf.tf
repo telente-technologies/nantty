@@ -194,9 +194,12 @@ resource "aws_wafv2_web_acl_logging_configuration" "this" {
       name = "authorization"
     }
   }
-  redacted_fields {
-    single_header {
-      name = "x-paystack-signature"
+  dynamic "redacted_fields" {
+    for_each = toset(["x-paystack-signature", "cookie", "x-step-up-token"])
+    content {
+      single_header {
+        name = redacted_fields.value
+      }
     }
   }
 }

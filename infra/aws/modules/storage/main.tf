@@ -43,6 +43,7 @@ resource "aws_s3_bucket_public_access_block" "logs" {
   restrict_public_buckets = true
 }
 
+# S3 server access logs and ALB access logs can only be delivered to an SSE-S3 bucket.
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
   rule {
@@ -154,7 +155,11 @@ resource "aws_s3_bucket_public_access_block" "media" {
 resource "aws_s3_bucket_server_side_encryption_configuration" "media" {
   bucket = aws_s3_bucket.media.id
   rule {
-    apply_server_side_encryption_by_default { sse_algorithm = "AES256" }
+    bucket_key_enabled = true
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.media.arn
+    }
   }
 }
 
@@ -314,7 +319,7 @@ data "aws_iam_policy_document" "kyc" {
       identifiers = ["*"]
     }
     condition {
-      test     = "StringNotEquals"
+      test     = "StringNotEqualsIfExists"
       variable = "s3:x-amz-server-side-encryption"
       values   = ["aws:kms"]
     }

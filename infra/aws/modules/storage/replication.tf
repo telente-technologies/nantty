@@ -35,11 +35,25 @@ resource "aws_s3_bucket_public_access_block" "dr" {
   restrict_public_buckets = true
 }
 
+resource "aws_s3_bucket_server_side_encryption_configuration" "media_dr" {
+  provider = aws.dr
+  count    = var.enable_dr ? 1 : 0
+  bucket   = aws_s3_bucket.media_dr[0].id
+  rule {
+    bucket_key_enabled = true
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.media_dr[0].arn
+    }
+  }
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "kyc_dr" {
   provider = aws.dr
   count    = var.enable_dr ? 1 : 0
   bucket   = aws_s3_bucket.kyc_dr[0].id
   rule {
+    bucket_key_enabled = true
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
       kms_master_key_id = var.kyc_dr_kms_key_arn
@@ -73,11 +87,11 @@ data "aws_iam_policy_document" "replication" {
   }
   statement {
     actions   = ["kms:Decrypt"]
-    resources = [var.kyc_kms_key_arn]
+    resources = [var.kyc_kms_key_arn, aws_kms_key.media.arn]
   }
   statement {
     actions   = ["kms:Encrypt", "kms:GenerateDataKey"]
-    resources = [var.kyc_dr_kms_key_arn]
+    resources = [var.kyc_dr_kms_key_arn, aws_kms_key.media_dr[0].arn]
   }
 }
 
@@ -104,9 +118,13 @@ resource "aws_s3_bucket_replication_configuration" "media" {
     priority = 1
     filter {}
     delete_marker_replication { status = "Disabled" }
+    source_selection_criteria {
+      sse_kms_encrypted_objects { status = "Enabled" }
+    }
     destination {
       bucket        = aws_s3_bucket.media_dr[0].arn
       storage_class = "STANDARD_IA"
+      encryption_configuration { replica_kms_key_id = aws_kms_key.media_dr[0].arn }
       metrics {
         status = "Enabled"
         event_threshold { minutes = 15 }

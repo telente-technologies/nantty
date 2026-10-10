@@ -28,7 +28,7 @@
       "consent.granted", "consent.withdrawn"
     ],
     "support-domain-events": ["account.deletionExecuted"],
-    "money-domain-events": ["orderGroup.refundRequested", "businessVerification.approved", "businessVerification.revoked", "creatorApplication.approved", "adSpend.batched", "verificationCase.refundRequested", "accountHealth.changed", "creatorSubscription.paid", "creatorSubscription.refunded", "adCreatorEarnings.posted", "orderGroup.completed", "escrow.refunded", "escrow.partiallyRefunded"],
+    "money-domain-events": ["orderGroup.refundRequested", "businessVerification.approved", "businessVerification.revoked", "creatorApplication.approved", "adSpend.batched", "verificationCase.refundRequested", "accountHealth.changed", "creatorSubscription.paid", "creatorSubscription.refunded", "adCreatorEarnings.posted", "orderGroup.completed", "escrow.refunded", "escrow.partiallyRefunded", "verificationCase.decided", "checkmark.revoked"],
     "ads-domain-events": ["accountHealth.changed", "adBalance.toppedUp", "adBalance.topUpFailed"],
     "commerce-domain-events": [
       "escrow.held", "escrow.released", "escrow.refunded", "escrow.partiallyRefunded",
@@ -39,7 +39,7 @@
       "creatorApplication.*", "creatorSubscription.started", "affiliateCommission.credited", "dataExport.*", "dispute.*", "disputeMessage.*", "escrow.*", "follow.created",
       "followRequest.created", "gift.sent", "live.started", "mention.created", "messageRequest.received",
       "order.*", "otp.issued", "post.tagged", "payment.*", "paymentRefund.bankDetailsRequired", "payout.*", "payoutAccount.*", "planInvoice.*", "planTrial.*", "subscriptionInvoice.*", "subscriptionPayment.*", "subscriptionTrial.*", "subscriptionRenewal.*", "subscriptionGrace.*", "subscriptionCard.*", "subscriptionPrice.*", "subscription.downgraded", "tip.sent", "policyVersion.published",
-      "report.closed", "sellerDocuments.*", "session.*", "signIn.*", "ticket.created", "ticket.replied", "ticket.resolved", "twoFactor.*", "videoReply.created",
+      "report.closed", "review.created", "review.replied", "sellerApplication.reviewed", "creator.standingChanged", "message.sent", "sellerDocuments.*", "session.*", "signIn.*", "ticket.created", "ticket.replied", "ticket.resolved", "twoFactor.*", "videoReply.created",
       "withdrawal.*", "copyrightClaim.warningIssued", "copyrightClaim.audioMuteOrdered", "copyrightClaim.contentTakenDown", "copyrightClaim.counterNoticeReceived",
       "copyrightClaim.restored", "strike.issued", "strike.expired",
       "verification.eligible", "verification.underReview", "verification.approved", "verification.rejectedRefunded"
@@ -59,7 +59,7 @@
     "intelligence-domain-events": [
       "account.registered", "account.loggedIn", "account.deletionRequested", "account.deletionExecuted",
       "ad.impressionRecorded", "block.created", "consent.granted", "consent.withdrawn", "follow.created",
-      "gift.sent", "media.processed", "message.sent", "post.created", "product.viewed", "report.created",
+      "gift.sent", "media.processed", "message.sent", "post.created", "product.viewed", "product.purchased", "report.created",
       "post.liked", "post.shared", "comment.created", "content.saved", "post.viewed", "clip.watched"
     ]
   },
