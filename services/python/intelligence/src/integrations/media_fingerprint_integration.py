@@ -14,6 +14,10 @@ class UnavailableAudioFingerprintSource:
         return None
 
 
+MEDIA_FINGERPRINT_CONCURRENCY_LIMIT = 8
+media_fingerprint_semaphore = asyncio.Semaphore(MEDIA_FINGERPRINT_CONCURRENCY_LIMIT)
+
+
 class HttpMediaAudioFingerprintSource:
     source_name = "chromaprint"
 
@@ -39,7 +43,8 @@ class HttpMediaAudioFingerprintSource:
             return None
 
     async def fetch_chromaprint(self, media_id: str) -> ChromaprintFingerprint | None:
-        payload = await asyncio.to_thread(self.request_fingerprint, media_id)
+        async with media_fingerprint_semaphore:
+            payload = await asyncio.to_thread(self.request_fingerprint, media_id)
         fingerprint = (payload or {}).get("fingerprint")
         if not isinstance(fingerprint, dict) or not isinstance(fingerprint.get("fingerprint"), list):
             return None

@@ -25,8 +25,15 @@ async def respond_to_http_error(_request: Request, error: Exception) -> JSONResp
     return JSONResponse(status_code=status_code, content={"error": {"code": str(detail)}})
 
 
-async def respond_to_unexpected_error(_request: Request, error: Exception) -> JSONResponse:
-    error_logger.error("unhandled_error", extra={"error_type": type(error).__name__})
+async def respond_to_unexpected_error(request: Request, error: Exception) -> JSONResponse:
+    error_logger.exception(
+        "unhandled_error",
+        extra={
+            "error_type": type(error).__name__,
+            "method": request.method,
+            "path": request.url.path,
+        },
+    )
     return JSONResponse(status_code=500, content={"error": {"code": "internal_error"}})
 
 

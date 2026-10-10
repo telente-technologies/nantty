@@ -22,6 +22,7 @@ class ContractModel(BaseModel):
         extra="forbid",
         frozen=True,
         str_strip_whitespace=False,
+        allow_inf_nan=False,
     )
 
 

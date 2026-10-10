@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 
 from src.configs.settings_config import IntelligenceSettings
@@ -71,6 +72,8 @@ from src.repositories.online_feature_repository import OnlineFeatureStore
 from src.services.identifier_hashing_service import OpaqueIdentifierHasher, derive_identifier_hash_key
 from src.utils.cqrs_util import CommandBus, QueryBus
 
+container_logger = logging.getLogger("intelligence.container")
+
 
 @dataclass(frozen=True)
 class ApplicationContainer:
@@ -120,6 +123,10 @@ def build_content_score_publisher(
 ) -> ContentScorePublisher:
     if settings.event_bus == "rabbitmq" and channels is not None:
         return AmqpContentScorePublisher(channels, settings.trust_content_scores_queue)
+    container_logger.error(
+        "null_content_score_publisher",
+        extra={"event_bus": settings.event_bus, "reason": "no_usable_message_bus"},
+    )
     return NullContentScorePublisher()
 
 
@@ -128,6 +135,10 @@ def build_sensitivity_advisory_publisher(
 ) -> SensitivityAdvisoryPublisher:
     if settings.event_bus == "rabbitmq" and channels is not None:
         return AmqpSensitivityAdvisoryPublisher(channels)
+    container_logger.error(
+        "null_sensitivity_advisory_publisher",
+        extra={"event_bus": settings.event_bus, "reason": "no_usable_message_bus"},
+    )
     return NullSensitivityAdvisoryPublisher()
 
 
@@ -138,6 +149,10 @@ def build_bot_score_publisher(
         return AmqpBotScorePublisher(channels, settings.trust_bot_scores_queue)
     if settings.event_bus == "sqs" and settings.trust_bot_scores_queue_url:
         return SqsBotScorePublisher(build_sqs_client(settings), settings.trust_bot_scores_queue_url)
+    container_logger.error(
+        "null_bot_score_publisher",
+        extra={"event_bus": settings.event_bus, "reason": "no_usable_message_bus"},
+    )
     return NullBotScorePublisher()
 
 
@@ -148,6 +163,10 @@ def build_trust_advisory_publisher(
         return AmqpTrustAdvisoryPublisher(channels, settings.trust_advisory_queue)
     if settings.event_bus == "sqs" and settings.trust_advisory_queue_url:
         return SqsTrustAdvisoryPublisher(build_sqs_client(settings), settings.trust_advisory_queue_url)
+    container_logger.error(
+        "null_trust_advisory_publisher",
+        extra={"event_bus": settings.event_bus, "reason": "no_usable_message_bus"},
+    )
     return NullTrustAdvisoryPublisher()
 
 
@@ -168,7 +187,11 @@ def build_application_container(
     feature_store = OnlineFeatureStore(backend, OnlineFeatureKeyspace(settings.redis_key_prefix))
     storage_location = build_dataset_storage_location(settings)
     model_holder = ActiveModelHolder(
-        ModelRegistry(settings.model_registry_path, settings.model_signing_secret.get_secret_value())
+        ModelRegistry(
+            settings.model_registry_path,
+            settings.model_signing_secret.get_secret_value(),
+            settings.environment,
+        )
     )
     feature_log_sink = FeatureLogParquetSink(storage_location, settings.feature_log_max_buffered_rows)
     clip_ranking_service = ClipRankingService(feature_store, model_holder, feature_log_sink)

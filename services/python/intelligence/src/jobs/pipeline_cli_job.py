@@ -1,6 +1,5 @@
 import argparse
 import json
-import os
 import sys
 from datetime import timedelta
 from pathlib import Path
@@ -43,11 +42,6 @@ def build_argument_parser() -> argparse.ArgumentParser:
 
 
 def resolve_storage_and_registry(arguments: argparse.Namespace) -> tuple[DatasetStorageLocation, ModelRegistry]:
-    if arguments.storage and arguments.registry:
-        signing_secret = os.environ.get("INTELLIGENCE_MODEL_SIGNING_SECRET", "")
-        return build_local_dataset_storage_location(arguments.storage), ModelRegistry(
-            Path(arguments.registry), signing_secret
-        )
     settings = load_intelligence_settings()
     location = (
         build_local_dataset_storage_location(arguments.storage)
@@ -55,7 +49,9 @@ def resolve_storage_and_registry(arguments: argparse.Namespace) -> tuple[Dataset
         else build_dataset_storage_location(settings)
     )
     registry_path = Path(arguments.registry) if arguments.registry else settings.model_registry_path
-    return location, ModelRegistry(registry_path, settings.model_signing_secret.get_secret_value())
+    return location, ModelRegistry(
+        registry_path, settings.model_signing_secret.get_secret_value(), settings.environment
+    )
 
 
 def train_requested_models(

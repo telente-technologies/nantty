@@ -7,6 +7,8 @@ from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from fastapi import FastAPI
 
 from src.container import ApplicationContainer
+from src.integrations.dataset_storage_integration import build_dataset_storage_location
+from src.jobs.compact_datasets_job import run_periodic_retention_loop
 from src.modules.domain_events.repositories.amqp_domain_event_queue_repository import AmqpDomainEventQueueConsumer
 from src.modules.domain_events.repositories.sqs_domain_event_queue_repository import (
     SqsDomainEventQueuePoller,
@@ -15,6 +17,13 @@ from src.modules.domain_events.repositories.sqs_domain_event_queue_repository im
 from src.modules.live_safety.live_safety_module import start_live_safety_consumers
 
 lifespan_logger = logging.getLogger("intelligence.application")
+
+
+def log_background_task_exit(task: asyncio.Task[None]) -> None:
+    if task.cancelled():
+        return
+    if (error := task.exception()) is not None:
+        lifespan_logger.exception("background_job_died", extra={"error_type": type(error).__name__})
 
 
 def build_application_lifespan(
@@ -33,6 +42,13 @@ def build_application_lifespan(
                 asyncio.create_task(
                     container.feature_log_sink.run_periodic_flush_loop(settings.feature_log_flush_interval_seconds)
                 ),
+                asyncio.create_task(
+                    run_periodic_retention_loop(
+                        build_dataset_storage_location(settings),
+                        settings.dataset_retention_days,
+                        settings.dataset_retention_interval_seconds,
+                    )
+                ),
             ]
             if container.rabbitmq_channels is not None:
                 amqp_consumer = AmqpDomainEventQueueConsumer(
@@ -50,8 +66,12 @@ def build_application_lifespan(
                     build_sqs_client(settings),
                     settings.domain_events_queue_url,
                     container.domain_event_consumer_service,
+                    dlq_queue_url=settings.domain_events_dlq_queue_url,
+                    max_delivery_attempts=settings.sqs_max_delivery_attempts,
                 )
                 background_jobs.append(asyncio.create_task(poller.run_poll_loop()))
+            for background_job in background_jobs:
+                background_job.add_done_callback(log_background_task_exit)
         lifespan_logger.info("intelligence_started", extra={"environment": container.settings.environment})
         try:
             yield
@@ -60,9 +80,12 @@ def build_application_lifespan(
                 background_job.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
                     await background_job
-            await container.feature_log_sink.flush_buffered_rows()
-            await container.feature_backend.close_backend_connections()
+            with contextlib.suppress(Exception):
+                await container.feature_log_sink.flush_buffered_rows()
+            with contextlib.suppress(Exception):
+                await container.feature_backend.close_backend_connections()
             if container.rabbitmq_channels is not None:
-                await container.rabbitmq_channels.close()
+                with contextlib.suppress(Exception):
+                    await container.rabbitmq_channels.close()
 
     return application_lifespan

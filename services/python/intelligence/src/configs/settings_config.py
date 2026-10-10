@@ -70,6 +70,8 @@ class IntelligenceSettings(BaseSettings):
     sqs_access_key_id: SecretStr = SecretStr("")
     sqs_secret_access_key: SecretStr = SecretStr("")
     domain_events_queue_url: str = ""
+    domain_events_dlq_queue_url: str = ""
+    sqs_max_delivery_attempts: int = Field(default=5, ge=1, le=20)
     trust_advisory_queue_url: str = ""
     trust_bot_scores_queue_url: str = ""
 
@@ -86,6 +88,8 @@ class IntelligenceSettings(BaseSettings):
     feature_log_flush_interval_seconds: float = Field(default=10.0, gt=0)
     feature_log_max_buffered_rows: int = Field(default=20_000, ge=100)
     event_deduplication_retention_seconds: int = Field(default=7 * 24 * 3600, ge=3600)
+    dataset_retention_days: int = Field(default=90, ge=1, le=3650)
+    dataset_retention_interval_seconds: float = Field(default=24 * 3600.0, ge=60.0)
 
     @model_validator(mode="after")
     def reject_weak_configuration_outside_development(self) -> IntelligenceSettings:
@@ -105,6 +109,23 @@ class IntelligenceSettings(BaseSettings):
     def require_nonce_retention_to_cover_signature_window(self) -> IntelligenceSettings:
         if self.nonce_retention_seconds < 2 * self.signature_max_clock_skew_seconds:
             raise ValueError("nonce retention must be at least twice the allowed clock skew")
+        return self
+
+    @model_validator(mode="after")
+    def reject_unusable_event_bus_configuration(self) -> IntelligenceSettings:
+        if self.environment not in {"staging", "production"}:
+            return self
+        if self.event_bus == "rabbitmq":
+            if not self.rabbitmq_url.get_secret_value():
+                raise ValueError("INTELLIGENCE_RABBITMQ_URL is required when EVENT_BUS=rabbitmq")
+        elif not self.domain_events_queue_url:
+            raise ValueError("INTELLIGENCE_DOMAIN_EVENTS_QUEUE_URL is required when EVENT_BUS=sqs")
+        return self
+
+    @model_validator(mode="after")
+    def reject_undistributed_replay_protection(self) -> IntelligenceSettings:
+        if self.environment != "test" and not self.redis_url and self.server_workers > 1:
+            raise ValueError("INTELLIGENCE_SERVER_WORKERS must be 1 without INTELLIGENCE_REDIS_URL")
         return self
 
     @property

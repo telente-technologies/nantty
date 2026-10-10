@@ -21,6 +21,7 @@ class JsonLogFormatter(logging.Formatter):
                 log_entry[attribute_name] = attribute_value
         if record.exc_info and record.exc_info[0] is not None:
             log_entry["exception_type"] = record.exc_info[0].__name__
+            log_entry["stack_trace"] = self.formatException(record.exc_info)
         return json.dumps(log_entry, default=str, separators=(",", ":"))
 
 
