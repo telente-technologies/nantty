@@ -6,6 +6,7 @@ from typing import Any
 import boto3
 
 from src.configs.settings_config import IntelligenceSettings
+from src.integrations.aws_client_config import AWS_CLIENT_CONFIG
 from src.integrations.rabbitmq_channel_integration import RabbitMqChannelProvider
 from src.modules.content_scoring.services.image_moderation_interface_service import ImageModerationModelHolder
 from src.modules.live_safety.repositories.amqp_live_safety_job_queue_repository import AmqpLiveSafetyJobQueueConsumer
@@ -56,7 +57,10 @@ def register_rekognition_when_available(
         live_safety_module_logger.info("rekognition_disabled_no_aws_credentials")
         return None
     image_models.register_model(
-        RekognitionImageModerationModel(session.client("rekognition"), settings.live_safety_rekognition_min_confidence)
+        RekognitionImageModerationModel(
+            session.client("rekognition", config=AWS_CLIENT_CONFIG),
+            settings.live_safety_rekognition_min_confidence,
+        )
     )
     return session
 
@@ -69,8 +73,8 @@ def build_segment_transcriber(settings: IntelligenceSettings, session: Any | Non
     ):
         return DisabledSegmentTranscriber()
     return TranscribeBatchTranscriber(
-        session.client("transcribe"),
-        session.client("s3"),
+        session.client("transcribe", config=AWS_CLIENT_CONFIG),
+        session.client("s3", config=AWS_CLIENT_CONFIG),
         settings.live_safety_transcribe_output_bucket,
         language_code=settings.live_safety_transcribe_language_code,
     )
@@ -81,6 +85,10 @@ def build_live_safety_publisher(
 ) -> LiveSafetyScorePublisher:
     if settings.event_bus == "rabbitmq" and channels is not None:
         return AmqpLiveSafetyScorePublisher(channels, settings.trust_live_safety_queue)
+    logging.getLogger("intelligence.live_safety").error(
+        "null_live_safety_score_publisher",
+        extra={"event_bus": settings.event_bus, "reason": "no_usable_message_bus"},
+    )
     return NullLiveSafetyScorePublisher()
 
 

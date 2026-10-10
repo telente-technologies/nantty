@@ -1,3 +1,5 @@
+import logging
+
 from src.dtos.common_dto import RankingResponseMetadata
 from src.modules.moderation.dtos.content_moderation_dto import (
     CategoryScore,
@@ -33,6 +35,9 @@ class ContentModerationService:
                     signals.setdefault(category, []).append(f"model:{model.version}")
                 sources.append(f"model:{model.version}")
             except Exception:
+                logging.getLogger("intelligence.moderation").exception(
+                    "text_moderation_model_failed", extra={"content_id": request.content_id}
+                )
                 degraded = True
         categories = sorted(
             (
@@ -51,6 +56,8 @@ class ContentModerationService:
             if top_score >= REVIEW_SCORE_THRESHOLD
             else "allow"
         )
+        if degraded and action == "allow":
+            action = "review"
         return ContentModerationResponse(
             content_id=request.content_id,
             categories=categories,

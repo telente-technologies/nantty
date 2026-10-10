@@ -122,10 +122,14 @@ class AccountAndClipRecommendationService:
                 metadata=ranked.metadata,
             )
         items, degraded = await self.read_popular_clips_for_viewer_topics(request)
+        bundle_missing = self.clip_ranking_service.model_holder.get_loaded_model("clip_watch") is None
         return RecommendationResponse(
             items=items,
             metadata=RankingResponseMetadata(
-                request_id=request_id, ranking_source="clips:topic_popularity", degraded=degraded, generated_at=now
+                request_id=request_id,
+                ranking_source="clips:topic_popularity",
+                degraded=degraded or bundle_missing,
+                generated_at=now,
             ),
         )
 

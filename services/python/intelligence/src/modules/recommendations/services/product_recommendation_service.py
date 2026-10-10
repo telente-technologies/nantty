@@ -164,7 +164,7 @@ class ProductRecommendationService:
                 request_id=resolve_request_identifier(request.request_id),
                 ranking_source=f"products:{request.surface}:{source}",
                 model_version=self.model_holder.get_active_version("item_similarity"),
-                degraded=degraded,
+                degraded=degraded or bundle is None,
                 generated_at=now,
             ),
         )

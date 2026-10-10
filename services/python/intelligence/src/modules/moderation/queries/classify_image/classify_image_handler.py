@@ -1,3 +1,5 @@
+import asyncio
+
 from src.interfaces.cqrs_interface import QueryHandler
 from src.modules.content_scoring.dtos.content_score_dto import ImageModerationResponse
 from src.modules.content_scoring.services.image_moderation_interface_service import ImageModerationService
@@ -11,4 +13,4 @@ class ClassifyImageHandler(QueryHandler[ClassifyImageQuery, ImageModerationRespo
         self.service = service
 
     async def execute(self, query: ClassifyImageQuery) -> ImageModerationResponse:
-        return self.service.classify_image(query.request)
+        return await asyncio.to_thread(self.service.classify_image, query.request)

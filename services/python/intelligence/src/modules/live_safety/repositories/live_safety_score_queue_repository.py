@@ -8,15 +8,21 @@ from src.modules.live_safety.dtos.live_safety_dto import LiveSafetyScoreMessage
 
 
 class LiveSafetyScorePublisher(Protocol):
+    delivers: bool
+
     async def publish_live_safety_score(self, message: LiveSafetyScoreMessage) -> None: ...
 
 
 class NullLiveSafetyScorePublisher:
+    delivers = False
+
     async def publish_live_safety_score(self, _message: LiveSafetyScoreMessage) -> None:
         return None
 
 
 class AmqpLiveSafetyScorePublisher:
+    delivers = True
+
     def __init__(self, channels: RabbitMqChannelProvider, queue_name: str) -> None:
         self.channels = channels
         self.queue_name = queue_name

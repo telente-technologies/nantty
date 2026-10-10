@@ -1,3 +1,4 @@
+import math
 from decimal import Decimal
 from typing import Literal
 
@@ -66,6 +67,8 @@ def evaluate_rules_for_subject(
 def classify_risk_score(
     final_score: float,
 ) -> tuple[Literal["low", "medium", "high"], Literal["allow", "review", "hold_for_manual_review"]]:
+    if not math.isfinite(final_score):
+        return "high", "hold_for_manual_review"
     if final_score >= HIGH_RISK_THRESHOLD:
         return "high", "hold_for_manual_review"
     if final_score >= MEDIUM_RISK_THRESHOLD:
@@ -104,8 +107,11 @@ class RiskScoringService:
             feature_values = build_order_risk_feature_values(request.order, usd_rate_lookup)
             bundle = loaded_model.bundle if loaded_model else None
             if isinstance(bundle, MultiHeadClassifierBundle) and bundle.feature_names == ORDER_RISK_FEATURE_NAMES:
-                probabilities = bundle.predict_head_probabilities(np.asarray([feature_values], dtype=np.float64))
-                model_score = float(probabilities["fraud"][0])
+                try:
+                    probabilities = bundle.predict_head_probabilities(np.asarray([feature_values], dtype=np.float64))
+                    model_score = float(probabilities["fraud"][0])
+                except KeyError, ValueError, AttributeError, TypeError, IndexError:
+                    model_score = None
             log_served_feature_rows(
                 self.feature_log_sink,
                 request_id,
@@ -121,6 +127,7 @@ class RiskScoringService:
         if model_score is not None:
             final_score = max(rule_score, (1 - MODEL_BLEND_WEIGHT) * rule_score + MODEL_BLEND_WEIGHT * model_score)
         level, action = classify_risk_score(final_score)
+        model_missing = request.order is not None and model_score is None
         return RiskScoringResponse(
             subject_type=request.subject_type,
             subject_id=request.subject_id,
@@ -134,7 +141,7 @@ class RiskScoringService:
                 request_id=request_id,
                 ranking_source="risk:rules+model" if model_score is not None else "risk:rules",
                 model_version=loaded_model.version if loaded_model and model_score is not None else None,
-                degraded=needs_flow and not flow.available,
+                degraded=(needs_flow and not flow.available) or model_missing,
                 generated_at=now,
             ),
         )

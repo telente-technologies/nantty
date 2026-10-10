@@ -77,7 +77,7 @@ def evaluate_order_risk_rules(signals: OrderRiskSignals, usd_rate_lookup: dict[s
         ("buyer_and_seller_share_device", 0.5, signals.buyer_and_seller_share_device),
         ("new_seller_high_value", 0.2, signals.seller_account_age_hours < 72 and is_at_least(amount_usd, 300)),
         ("seller_dispute_rate_high", 0.25, signals.seller_dispute_rate >= 0.1),
-        ("exchange_rate_unavailable", 0.0, amount_usd is None),
+        ("exchange_rate_unavailable", 0.35, amount_usd is None),
     ]
     return convert_triggered_rules_to_reasons(rules)
 

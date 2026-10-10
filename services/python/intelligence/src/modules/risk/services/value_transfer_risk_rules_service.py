@@ -32,13 +32,14 @@ def evaluate_coin_purchase_risk_rules(
         ),
         ("device_shared_by_many_accounts", 0.3, signals.device_account_count >= 4),
         ("payment_country_mismatch", 0.15, countries_known and signals.payment_country != signals.account_country),
-        ("exchange_rate_unavailable", 0.0, amount_usd is None),
+        ("exchange_rate_unavailable", 0.35, amount_usd is None),
     ]
     return convert_triggered_rules_to_reasons(rules)
 
 
 def evaluate_coin_transfer_risk_rules(signals: CoinTransferRiskSignals, flow: ValueFlowSignals) -> list[RiskReason]:
     rules: list[RiskRule] = [
+        ("value_flow_unavailable", 0.25, not flow.available),
         ("sender_and_recipient_share_device", 0.45, signals.sender_and_recipient_share_device),
         ("reciprocal_transfer_ring", 0.35, flow.counterparty_previously_sent_to_actor),
         ("rapid_forwarding_of_received_coins", 0.3, is_below(signals.minutes_since_sender_received_these_coins, 30)),
@@ -67,6 +68,7 @@ def evaluate_coin_transfer_risk_rules(signals: CoinTransferRiskSignals, flow: Va
 
 def evaluate_gift_risk_rules(signals: GiftRiskSignals, flow: ValueFlowSignals) -> list[RiskReason]:
     rules: list[RiskRule] = [
+        ("value_flow_unavailable", 0.25, not flow.available),
         ("sender_and_creator_share_device", 0.5, signals.sender_and_creator_share_device),
         ("gift_reciprocity_laundering", 0.4, flow.counterparty_previously_sent_to_actor),
         ("creator_income_concentrated_on_sender", 0.3, signals.sender_share_of_creator_gift_income_last_week >= 0.6),
