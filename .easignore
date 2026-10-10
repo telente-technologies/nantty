@@ -35,3 +35,24 @@ docs/
 **/*.tsbuildinfo
 **/.venv/
 **/__pycache__/
+
+# Mobile builds only need apps/mobile, packages/ and the workspace manifests.
+# Other workspace projects keep just their package.json so pnpm's frozen lockfile still resolves.
+infra/
+security/
+.kilo/
+apps/*/**
+!apps/*/
+!apps/*/package.json
+!apps/mobile/**
+apps/mobile/design/
+services/go/
+services/elixir/
+services/python/
+services/contracts/
+services/*.md
+services/scripts/*.sh
+services/typescript/*/**
+!services/typescript/*/package.json
+services/scripts/*/**
+!services/scripts/*/package.json
