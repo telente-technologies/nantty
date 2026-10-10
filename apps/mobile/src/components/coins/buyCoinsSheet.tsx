@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
+import { Coin24Icon, CreditCard24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -23,7 +24,12 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Buy coins" floating>
       <View style={styles.body}>
-        <CoinBalanceChip />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+            <Coin24Icon size={22} color={colors.textMuted} />
+          </View>
+          <CoinBalanceChip />
+        </View>
         {coinPackages.isLoading ? <ActivityIndicator color={colors.primary} /> : null}
         {(coinPackages.data ?? []).map((coinPackage) => (
           <Pressable
@@ -34,13 +40,16 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
             onPress={() => buyCoinPackage.mutate(coinPackage)}
             style={styles.packageRow}
           >
-            <View>
-              <CoinAmountWithIcon label={formatCoinAmount(coinPackage.coins)} />
-              {coinPackage.bonusCoins ? (
-                <Text size={12} lineHeight={14.4} color={colors.success}>
-                  +{coinPackage.bonusCoins.toLocaleString("en-US")} bonus
-                </Text>
-              ) : null}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <CreditCard24Icon size={20} color={colors.textMuted} />
+              <View>
+                <CoinAmountWithIcon label={formatCoinAmount(coinPackage.coins)} />
+                {coinPackage.bonusCoins ? (
+                  <Text size={12} lineHeight={14.4} color={colors.success}>
+                    +{coinPackage.bonusCoins.toLocaleString("en-US")} bonus
+                  </Text>
+                ) : null}
+              </View>
             </View>
             <Text size={14} weight={600} lineHeight={16.8} color={colors.primary}>
               {formatMoneyForDisplay(coinPackage.price)}

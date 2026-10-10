@@ -2,13 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { SealCheck20Icon, Wallet24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { coinsService } from "@/services/coins.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { coinsService } from "@/services/money/coins.service";
 import type { UserSummary } from "@/types";
 
 import { CoinBalanceChip } from "./coinBalanceChip";
@@ -59,6 +60,9 @@ export function TransferCoinsSheet({ visible, recipient, onClose }: TransferCoin
   return (
     <BottomSheet visible={visible} onClose={closeAndReset} title={`Send coins to ${recipient?.name ?? ""}`} floating>
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          {transfer.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Wallet24Icon size={22} color={colors.textMuted} />}
+        </View>
         <CoinBalanceChip />
         {transfer.isSuccess ? (
           <Text size={14} lineHeight={16.8} color={colors.success} accessibilityLiveRegion="polite">

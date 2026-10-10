@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { CaretRight24Icon, SpeakerHigh24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { describeClipSoundForDisplay, soundsService } from "@/services/sounds.service";
+import { describeClipSoundForDisplay, soundsService } from "@/services/clips/sounds.service";
 import type { ID } from "@/types";
 
 import { SoundPickerSheet } from "./soundPickerSheet";

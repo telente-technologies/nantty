@@ -1,5 +1,7 @@
 import type { ClipMediaInput, ClipSlideshowInput, ClipTransition, ID } from "@/types";
 
+import type { ClipLookId } from "./clipLook.constant";
+
 export const CLIP_MAXIMUM_SECONDS = 180;
 export const CLIP_MAXIMUM_PHOTOS = 10;
 export const PHOTO_SECONDS_DEFAULT = 3;
@@ -22,9 +24,10 @@ export interface ClipEdits {
   readonly photoSeconds: Readonly<Record<ID, number>>;
   readonly trim: ClipTrim | null;
   readonly transition: ClipTransition;
+  readonly look: ClipLookId;
 }
 
-export const EMPTY_CLIP_EDITS: ClipEdits = { photoSeconds: {}, trim: null, transition: "crossfade" };
+export const EMPTY_CLIP_EDITS: ClipEdits = { photoSeconds: {}, trim: null, transition: "crossfade", look: "none" };
 
 export type ClipSource = "video" | "photos";
 

@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 
-import type { LocalMediaFile } from "@/services/mediaPreparation.service";
-import { MediaValidationError } from "@/services/mediaPreparation.service";
-import { cancelAndRemoveUpload, enqueueLocalMediaForUpload, waitForReservedMediaId } from "@/services/mediaUploadQueue.service";
+import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
+import { MediaValidationError } from "@/services/media/mediaPreparation.service";
+import { cancelAndRemoveUpload, enqueueLocalMediaForUpload, waitForReservedMediaId } from "@/services/media/mediaUploadQueue.service";
 import { useCombinedUploadProgress } from "@/store/uploadQueue.store";
 import type { ID, Media, MediaUploadPurpose, Post } from "@/types";
 
@@ -28,12 +28,14 @@ export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
   const combinedUploadedFraction = useCombinedUploadProgress(draftMediaItems.map((item) => item.jobId));
 
   const addPickedMediaAndStartUploading = useCallback(
-    async (pickedFiles: readonly LocalMediaFile[]) => {
+    async (pickedFiles: readonly LocalMediaFile[]): Promise<readonly ID[]> => {
       const rejectedMessages: string[] = [];
+      const jobIds: ID[] = [];
       for (const pickedFile of pickedFiles) {
         if (latestDraftMediaItems.current.length >= MAXIMUM_MEDIA_PER_POST) break;
         try {
           const jobId = await enqueueLocalMediaForUpload(pickedFile, purpose);
+          jobIds.push(jobId);
           const newItem: PostDraftMediaItem = { jobId, previewUri: pickedFile.uri, mediaType: pickedFile.mediaType === "video" ? "video" : "image", width: pickedFile.width, height: pickedFile.height, durationSeconds: pickedFile.durationSeconds };
           setDraftMediaItems([...latestDraftMediaItems.current, newItem]);
         } catch (error) {
@@ -41,6 +43,7 @@ export function usePostDraftMediaUploads(purpose: MediaUploadPurpose = "post") {
         }
       }
       if (rejectedMessages.length > 0) showAlertWithButtons("Some files weren't added", [...new Set(rejectedMessages)].join("\n"));
+      return jobIds;
     },
     [purpose, setDraftMediaItems],
   );

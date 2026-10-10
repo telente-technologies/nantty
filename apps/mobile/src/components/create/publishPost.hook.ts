@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { storiesService } from "@/services/stories.service";
+import { storiesService } from "@/services/clips/stories.service";
 import type { ID, NewPostInput, Post } from "@/types";
 
 import { fillProcessingPostMediaWithLocalPreviews, type PostDraftMediaItem } from "./postDraftUploads.hook";

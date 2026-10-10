@@ -7,7 +7,7 @@ import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
-import { describeClipSoundForDisplay, explainWhySoundCannotBeReused, soundsService } from "@/services/sounds.service";
+import { describeClipSoundForDisplay, explainWhySoundCannotBeReused, soundsService } from "@/services/clips/sounds.service";
 import type { ClipSound } from "@/types";
 
 type SoundListTab = "trending" | "saved";

@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from "react-native";
 
-import { Check16Icon, MapPin24Icon } from "@/components/icons";
+import { Check16Icon, MapPin24Icon, Trash24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { placesService } from "@/services/places.service";
+import { placesService } from "@/services/geo/places.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { PostLocationTag } from "@/types";
 
@@ -34,9 +34,12 @@ export function PlaceSearchSheet({ visible, selected, onSelect, onClose }: Place
       <View style={styles.body}>
         <SearchField value={search.typed} onChangeText={search.setTyped} label="Search places" />
         {selected ? (
-          <Text size={14} weight={500} lineHeight={16.8} color={colors.error} accessibilityRole="button" onPress={() => onSelect(null)} style={styles.remove}>
-            Remove {selected.name}
-          </Text>
+          <View style={styles.removeRow}>
+            <Trash24Icon size={20} color={colors.error} />
+            <Text size={14} weight={500} lineHeight={16.8} color={colors.error} accessibilityRole="button" onPress={() => onSelect(null)} style={styles.remove}>
+              Remove {selected.name}
+            </Text>
+          </View>
         ) : null}
         {places.isFetching ? (
           <ActivityIndicator color={colors.primary} style={styles.message} />
@@ -71,7 +74,8 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   body: { paddingHorizontal: 16, paddingBottom: 16, gap: 12, maxHeight: 520 },
   list: { maxHeight: 340 },
   message: { marginVertical: 24 },
-  remove: { paddingVertical: 6 },
+  remove: { paddingVertical: 6, flex: 1 },
+  removeRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   row: { minHeight: 52, flexDirection: "row", alignItems: "center", gap: 12, borderBottomWidth: 1, borderBottomColor: colors.divider },
   texts: { flex: 1, gap: 2 },
 }));

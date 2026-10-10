@@ -2,13 +2,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { Repeat24Icon, SealCheck20Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { coinsService } from "@/services/coins.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { coinsService } from "@/services/money/coins.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 import { COIN_BALANCE_QUERY_KEY, describeCoinError, formatCoinAmount, useCoinBalance } from "./coinWallet.hook";
@@ -50,6 +51,9 @@ export function ConvertEarnedCoinsSheet({ visible, onClose }: ConvertEarnedCoins
   return (
     <BottomSheet visible={visible} onClose={closeAndReset} title="Convert earned coins" floating>
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          {convert.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Repeat24Icon size={22} color={colors.textMuted} />}
+        </View>
         {convert.isSuccess ? (
           <View style={styles.receipt} accessibilityLiveRegion="polite">
             <Text size={16} weight={600} lineHeight={19.2} color={colors.success}>Converted</Text>

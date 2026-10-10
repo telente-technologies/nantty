@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 
-import type { LocalMediaFile } from "@/services/mediaPreparation.service";
+import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
 
 export const MAXIMUM_MEDIA_PER_POST = 10;
 const CLIP_RECORDING_MAXIMUM_SECONDS = 180;

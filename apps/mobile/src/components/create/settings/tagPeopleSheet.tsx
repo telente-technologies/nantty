@@ -5,7 +5,7 @@ import { Cancel20Icon, Check16Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { tagCandidatesService } from "@/services/tagCandidates.service";
+import { tagCandidatesService } from "@/services/content/tagCandidates.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { MAXIMUM_TAGGED_PEOPLE, type UserSummary } from "@/types";
 

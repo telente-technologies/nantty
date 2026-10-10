@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
 import { ImageSquare24Icon, Play24Icon, VideoCamera24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import type { LocalMediaFile } from "@/services/mediaPreparation.service";
+import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { CreateMode } from "@/types";
 

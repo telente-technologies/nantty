@@ -11,6 +11,7 @@ import type { ClipTransition, ID } from "@/types";
 
 import { convertDraftItemsToPreviewMedia, type PostDraftMediaItem } from "../postDraftUploads.hook";
 import { CLIP_MAXIMUM_SECONDS, formatClipSeconds, type ClipTrim } from "./clipDraft.util";
+import { CLIP_LOOK_LABELS, CLIP_LOOKS, ClipLookOverlay, type ClipLookId } from "./clipLook.constant";
 import { ClipPhotoTimeline } from "./clipPhotoTimeline";
 import { ClipSlideshowPreview } from "./clipSlideshowPreview";
 import { ClipTrimControls } from "./clipTrimControls";
@@ -28,14 +29,67 @@ export interface ClipPreviewStageProps {
   readonly onChangeSeconds: (jobId: ID, seconds: number) => void;
   readonly onMove: (jobId: ID, offset: -1 | 1) => void;
   readonly onRemove: (jobId: ID) => void;
+  readonly look: ClipLookId;
+  readonly onChangeLook: (look: ClipLookId) => void;
 }
 
-function ClipPlayer({ items, source, transition, secondsFor, isPlaying }: Pick<ClipPreviewStageProps, "items" | "source" | "transition" | "secondsFor"> & { isPlaying: boolean }) {
+function ClipPlayer({ items, source, transition, secondsFor, isPlaying, look }: Pick<ClipPreviewStageProps, "items" | "source" | "transition" | "secondsFor" | "look"> & { isPlaying: boolean }) {
   if (source === "video") {
     const media = convertDraftItemsToPreviewMedia(items)[0];
-    return media ? <ClipVideoPlayer media={media} isActive isMuted={false} isPausedByUser={!isPlaying} contentFit="contain" style={StyleSheet.absoluteFill} /> : null;
+    return media ? (
+      <View style={StyleSheet.absoluteFill}>
+        <ClipVideoPlayer media={media} isActive isMuted={false} isPausedByUser={!isPlaying} contentFit="contain" style={StyleSheet.absoluteFill} />
+        <ClipLookOverlay look={look} />
+      </View>
+    ) : null;
   }
-  return <ClipSlideshowPreview uris={items.map((item) => item.previewUri)} secondsPerImage={items.map((item) => secondsFor(item.jobId))} transition={transition} isPlaying={isPlaying} />;
+  return (
+    <View style={StyleSheet.absoluteFill}>
+      <ClipSlideshowPreview uris={items.map((item) => item.previewUri)} secondsPerImage={items.map((item) => secondsFor(item.jobId))} transition={transition} isPlaying={isPlaying} />
+      <ClipLookOverlay look={look} />
+    </View>
+  );
+}
+
+const LOOK_SWATCHES: Record<ClipLookId, string> = {
+  none: "transparent",
+  warm: "#FF9E3C",
+  cool: "#4D8DFF",
+  rose: "#FF6EA0",
+  aqua: "#2DC8BE",
+  sunset: "#FF5A28",
+};
+
+function ClipLooksRow({ look, onChangeLook }: Pick<ClipPreviewStageProps, "look" | "onChangeLook">) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  return (
+    <View>
+      <Text size={13} weight={600} lineHeight={16.9} color={colors.textMuted}>
+        Effects · Look
+      </Text>
+      <View style={styles.lookRow} accessibilityRole="radiogroup" accessibilityLabel="Choose a color look">
+        {CLIP_LOOKS.map((option) => {
+          const selected = option === look;
+          return (
+            <Pressable
+              key={option}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: selected }}
+              accessibilityLabel={`${CLIP_LOOK_LABELS[option]} look`}
+              onPress={() => onChangeLook(option)}
+              style={[styles.swatch, selected ? { borderColor: colors.primary } : null]}
+            >
+              <View style={[styles.swatchFill, option === "none" ? styles.swatchNone : { backgroundColor: LOOK_SWATCHES[option] }]} />
+              <Text size={11} lineHeight={14} color={selected ? colors.text : colors.textMuted}>
+                {CLIP_LOOK_LABELS[option]}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
 }
 
 export function ClipPreviewStage(props: ClipPreviewStageProps) {
@@ -82,6 +136,7 @@ export function ClipPreviewStage(props: ClipPreviewStageProps) {
           />
         )}
         {props.validationMessage ? <Text size={12} lineHeight={16.8} color={colors.error}>{props.validationMessage}</Text> : null}
+        <ClipLooksRow look={props.look} onChangeLook={props.onChangeLook} />
       </ScrollView>
       <Modal visible={isFullScreen} animationType="fade" presentationStyle="fullScreen" supportedOrientations={["portrait"]} onRequestClose={() => setIsFullScreen(false)}>
         <View style={[styles.fullScreen, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
@@ -100,11 +155,15 @@ export function ClipPreviewStage(props: ClipPreviewStageProps) {
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { flex: 1 },
-  canvas: { flex: 1, minHeight: 280, backgroundColor: colors.media, overflow: "hidden" },
+  canvas: { flex: 3, minHeight: 200, backgroundColor: colors.media, overflow: "hidden" },
   overlayRow: { position: "absolute", left: 12, right: 12, bottom: 12, flexDirection: "row", justifyContent: "space-between" },
   overlayButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: "rgba(0,0,0,0.55)", alignItems: "center", justifyContent: "center" },
-  panel: { flexGrow: 0, maxHeight: "45%" },
+  panel: { flex: 2, flexShrink: 1, minHeight: 180 },
   panelContent: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 16, gap: 12 },
+  lookRow: { flexDirection: "row", gap: 10, marginTop: 8 },
+  swatch: { alignItems: "center", gap: 4, padding: 4, borderRadius: 10, borderWidth: 2, borderColor: "transparent" },
+  swatchFill: { width: 40, height: 40, borderRadius: 20 },
+  swatchNone: { borderWidth: 1, borderColor: colors.divider, backgroundColor: colors.surface },
   fullScreen: { flex: 1, backgroundColor: "#000000" },
   fullScreenTop: { position: "absolute", left: 16, right: 16, flexDirection: "row", justifyContent: "space-between" },
 }));

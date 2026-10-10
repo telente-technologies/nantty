@@ -11,6 +11,7 @@ import type { MentionEntity } from "@/types/mention.type";
 
 import { AiGeneratedToggleRow } from "../aiGeneratedToggleRow";
 import { PostAudienceSettings } from "../postAudienceSettings";
+import { PostAsIdentityRow } from "../postAsIdentityRow";
 import { PlaceSearchSheet } from "./placeSearchSheet";
 import type { PostSettingsValue } from "./postSettings.type";
 import { SettingsLinkRow } from "./settingsLinkRow";
@@ -28,6 +29,7 @@ export interface PostSettingsStepProps {
   readonly publishButtonTitle: string;
   readonly publishErrorMessage: string | null;
   readonly onPublish: () => void;
+  readonly onSaveDraft?: () => void;
 }
 
 const describeTagged = (value: PostSettingsValue) => {
@@ -46,6 +48,7 @@ export function PostSettingsStep(props: PostSettingsStepProps) {
   return (
     <View style={styles.flex}>
       <ScrollView style={styles.flex} contentContainerStyle={styles.content}>
+        <PostAsIdentityRow />
         {props.preview ?? (
           <View style={styles.summary}>
             {props.thumbnailUri ? <Image source={{ uri: props.thumbnailUri }} style={styles.thumbnail} contentFit="cover" accessibilityLabel={props.mediaSummary ?? "Media"} /> : null}
@@ -80,6 +83,9 @@ export function PostSettingsStep(props: PostSettingsStepProps) {
           <Text size={13} lineHeight={16.9} color={colors.error} accessibilityLiveRegion="polite">{props.publishErrorMessage}</Text>
         ) : null}
         <Button title={props.publishButtonTitle} disabled={props.publishing} loading={props.publishing} onPress={props.onPublish} />
+        {props.onSaveDraft ? (
+          <Button variant="subtle" title="Save as draft" disabled={props.publishing} onPress={props.onSaveDraft} />
+        ) : null}
       </View>
       <TagPeopleSheet visible={openSheet === "tags"} tagged={value.tagged} onChange={(tagged) => onChange({ ...value, tagged })} onClose={() => setOpenSheet(null)} />
       <PlaceSearchSheet

@@ -2,13 +2,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { Gift24Icon, SealCheck20Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { coinsService } from "@/services/coins.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { coinsService } from "@/services/money/coins.service";
 import type { ID, TipTargetType } from "@/types";
 
 import { BuyCoinsSheet } from "./buyCoinsSheet";
@@ -63,6 +64,9 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
     <>
       <BottomSheet visible={!!target && !isBuyCoinsOpen} onClose={closeAndReset} title={`Tip ${target?.creatorName ?? ""}`} floating>
         <View style={styles.body}>
+          <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+            {sendTip.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Gift24Icon size={22} color={colors.textMuted} />}
+          </View>
           <CoinBalanceChip onPress={() => setIsBuyCoinsOpen(true)} />
           {sendTip.isSuccess ? (
             <Text size={14} lineHeight={16.8} color={colors.success} accessibilityLiveRegion="polite">

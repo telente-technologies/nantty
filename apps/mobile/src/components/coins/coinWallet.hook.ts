@@ -2,9 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as WebBrowser from "expo-web-browser";
 import { useRef, useState } from "react";
 
-import { ApiError, generateIdempotencyKey } from "@/services/apiClient.service";
-import { coinsService } from "@/services/coins.service";
-import { finishStoreTransaction, isStoreBillingAvailable, purchaseStoreProduct, readStorePlatformName } from "@/services/storeBilling.service";
+import { ApiError, generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { coinsService } from "@/services/money/coins.service";
+import { finishStoreTransaction, isStoreBillingAvailable, purchaseStoreProduct, readStorePlatformName } from "@/services/money/storeBilling.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CoinPackage, VerifiedCoinPurchase } from "@/types";
 

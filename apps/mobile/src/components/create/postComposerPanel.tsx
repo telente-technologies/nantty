@@ -6,7 +6,8 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import type { CreateMode, ID, PostAudience } from "@/types";
 import type { MentionEntity } from "@/types/mention.type";
 
-import { useCaptionField } from "./captionField.hook";
+import { useCaptionField, FREE_POST_TEXT_LIMIT, PREMIUM_POST_TEXT_LIMIT } from "./captionField.hook";
+import { useAuthStore } from "@/store/auth.store";
 import { CreateModePill } from "./createModePill";
 import { DismissKeyboardScrollView } from "./dismissKeyboardScrollView";
 import { DraftMediaStrip } from "./draftMediaStrip";
@@ -37,6 +38,7 @@ export interface PostComposerPanelProps {
   readonly publishErrorMessage: string | null;
   readonly validationHint: string | null;
   readonly onPublish: () => void;
+  readonly onSaveDraft?: () => void;
   readonly soundPicker?: ReactNode;
   readonly videoReplyStage?: ReactNode;
 }
@@ -52,11 +54,14 @@ export function PostComposerPanel(props: PostComposerPanelProps) {
   const { draft, onChangeDraft, draftMediaItems, onAddPickedMedia, videoReplyStage } = props;
   const { colors } = useTheme();
   const styles = useStyles();
+  const isPremium = useAuthStore((s) => s.user?.isPremium ?? false);
   const caption = useCaptionField({
     text: draft.text,
     mentions: draft.mentions,
     placeholder: "What’s happening?",
     onChange: (text, mentions) => onChangeDraft({ ...draft, text, mentions }),
+    maxLength: isPremium ? PREMIUM_POST_TEXT_LIMIT : FREE_POST_TEXT_LIMIT,
+    showCount: true,
   });
   const remainingMediaSlots = MAXIMUM_MEDIA_PER_POST - draftMediaItems.length;
 
@@ -74,6 +79,7 @@ export function PostComposerPanel(props: PostComposerPanelProps) {
         publishButtonTitle={props.publishButtonTitle}
         publishErrorMessage={props.publishErrorMessage}
         onPublish={props.onPublish}
+        onSaveDraft={props.onSaveDraft}
       />
     );
   }
