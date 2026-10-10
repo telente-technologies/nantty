@@ -30,6 +30,10 @@ type RevenueSplit struct {
 }
 
 func ResolveCreatorShare(rows []MonetizationPolicyRow, aiGenerated bool, at time.Time) (shareBps, multiplierBps int64) {
+	return ResolveCreatorShareWithDefault(rows, aiGenerated, at, DefaultCreatorShareBps)
+}
+
+func ResolveCreatorShareWithDefault(rows []MonetizationPolicyRow, aiGenerated bool, at time.Time, defaultShareBps int64) (shareBps, multiplierBps int64) {
 	contentType := ContentTypeOriginal
 	fallbackMultiplier := DefaultOriginalMultiplier
 	if aiGenerated {
@@ -45,7 +49,7 @@ func ResolveCreatorShare(rows []MonetizationPolicyRow, aiGenerated bool, at time
 		}
 	}
 	if best < 0 {
-		return DefaultCreatorShareBps, fallbackMultiplier
+		return defaultShareBps, fallbackMultiplier
 	}
 	return rows[best].CreatorShareBps, rows[best].MultiplierBps
 }

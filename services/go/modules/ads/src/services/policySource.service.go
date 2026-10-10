@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -17,13 +18,17 @@ type PlatformSettingReader interface {
 	ReadValue(ctx context.Context, key string) (json.RawMessage, bool)
 }
 
-const MonetizationSettingKey = "monetization.policy"
+const (
+	MonetizationSettingKey = "monetization.policy"
+	RevenueSettingKey      = "revenue"
+)
 
 type PolicySource struct {
 	Client   *ent.Client
 	Now      func() time.Time
 	Settings PlatformSettingReader
 	ShareBps int64
+	Logger   *slog.Logger
 	mutex    sync.Mutex
 	loaded   time.Time
 	freq     map[string]FrequencyPolicy
@@ -66,7 +71,28 @@ func (source *PolicySource) MonetizationRows(ctx context.Context) ([]Monetizatio
 	if !found {
 		return nil, nil
 	}
-	return ParseMonetizationSetting(raw, source.shareBps()), nil
+	return ParseMonetizationSetting(raw, source.CreatorShareBps(ctx)), nil
+}
+
+func (source *PolicySource) CreatorShareBps(ctx context.Context) int64 {
+	fallback := source.shareBps()
+	if source.Settings == nil {
+		return fallback
+	}
+	raw, found := source.Settings.ReadValue(ctx, RevenueSettingKey)
+	if !found {
+		return fallback
+	}
+	var revenue struct {
+		CreatorAdShareBasisPoints *int64 `json:"creatorAdShareBasisPoints"`
+	}
+	if json.Unmarshal(raw, &revenue) != nil || revenue.CreatorAdShareBasisPoints == nil || *revenue.CreatorAdShareBasisPoints < 0 || *revenue.CreatorAdShareBasisPoints > 10_000 {
+		if source.Logger != nil {
+			source.Logger.Warn("revenue setting has no readable creator ad share, using the environment value")
+		}
+		return fallback
+	}
+	return *revenue.CreatorAdShareBasisPoints
 }
 
 func (source *PolicySource) shareBps() int64 {

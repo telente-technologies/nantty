@@ -55,3 +55,30 @@ func TestMalformedAdminSettingIsIgnoredRatherThanBreakingServing(t *testing.T) {
 		t.Fatalf("got %v %v", rows, err)
 	}
 }
+
+type keyedSettings map[string]string
+
+func (settings keyedSettings) ReadValue(_ context.Context, key string) (json.RawMessage, bool) {
+	value, found := settings[key]
+	return json.RawMessage(value), found
+}
+
+func TestCreatorAdShareFollowsTheAdminRevenueSetting(t *testing.T) {
+	settings := keyedSettings{MonetizationSettingKey: `{"rows":[{"id":"original","multiplierBps":10000,"active":true}]}`}
+	source := &PolicySource{ShareBps: 4000, Settings: settings}
+	if share := source.CreatorShareBps(context.Background()); share != 4000 {
+		t.Fatalf("a missing revenue setting must use the environment share, got %d", share)
+	}
+	settings[RevenueSettingKey] = `{"creatorAdShareBasisPoints":5500}`
+	rows, _ := source.MonetizationRows(context.Background())
+	if share, _ := ResolveCreatorShare(rows, false, time.Now()); share != 5500 {
+		t.Fatalf("a changed revenue setting must take effect, got %d", share)
+	}
+	if share, _ := ResolveCreatorShareWithDefault(nil, true, time.Now(), source.CreatorShareBps(context.Background())); share != 5500 {
+		t.Fatalf("content without a policy row must use the configured share, got %d", share)
+	}
+	settings[RevenueSettingKey] = `not json`
+	if share := source.CreatorShareBps(context.Background()); share != 4000 {
+		t.Fatalf("an unreadable revenue setting must use the environment share, got %d", share)
+	}
+}

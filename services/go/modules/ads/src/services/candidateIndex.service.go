@@ -159,11 +159,15 @@ func (index *CandidateIndex) seedSpendCounters(ctx context.Context, candidates [
 }
 
 func buildCandidate(row *ent.Ad, group *ent.AdGroup, campaign *ent.AdCampaign, account *ent.AdAccount, history adHistory) types.CandidateAd {
+	creditMinor := account.CreditMinor
+	if account.CreditExpiresAt != nil && !account.CreditExpiresAt.After(time.Now()) {
+		creditMinor = 0
+	}
 	candidate := types.CandidateAd{
 		AdId: row.ID.String(), AdGroupId: group.ID.String(), CampaignId: campaign.ID.String(), AccountId: account.ID.String(),
 		Format: row.Format, Creative: row.Creative.Resolved, Audience: group.Audience, Placements: resolvePlacements(group),
 		BidType: string(group.BidType), StartAt: group.StartAt, EndAt: group.EndAt, Currency: account.Currency, Timezone: account.Timezone,
-		AvailableFundsMicros: (account.BalanceMinor + account.CreditMinor) * types.MicrosPerMinorUnit,
+		AvailableFundsMicros: (account.BalanceMinor + creditMinor) * types.MicrosPerMinorUnit,
 		MonthlySpendLimit:    account.SpendLimitMinor, HistoricalImpressions: history.impressions, HistoricalClicks: history.clicks,
 		VideoDurationSeconds: videoDurationSeconds(row.Creative.Resolved),
 	}
