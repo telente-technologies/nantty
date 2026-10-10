@@ -18,7 +18,7 @@ Static read of the tree (rg and sed only; no builds, tests or docker were run). 
 12. Backend for most feature sections (13 to 52) is "mock UI" for mobile and webapp; gateway wiring is partial (see frontendWiring.md).
 13. Comments rule: cleaned on 5 Oct (108 files); only directives and the copyright legal notice remain.
 14. Emoji rule: remaining emoji literals are user content (reaction pickers, emoji keyboard, mocks); stray scripts `m1.py`, `m2.py` deleted.
-15. `apps/api` is legacy (Prisma) and still has type errors; it is not in the new service layout. Count not measured (typechecks forbidden for this pass).
+15. The old monolith was legacy (Prisma) with type errors; it was removed on 2026-10-10 after its live features were ported.
 
 ## Payments
 

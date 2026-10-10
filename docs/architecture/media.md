@@ -1,12 +1,12 @@
 # Media architecture
 
-As of 2026-10-03. Sources: `inventory.md` (media rows, compose `object-storage` SeaweedFS), `apps/api/src/modules/media/**` (reference implementation), `apps/mobile/src/services/mediaUploadTransport.service.ts`, `docs/backendPlan.md` 2.4, 4.2. Labels: EXISTING, MOCK-ONLY, PROPOSED, OPTIONAL FUTURE.
+As of 2026-10-03. Sources: `inventory.md` (media rows, compose `object-storage` SeaweedFS), the old monolith's `media` module (reference implementation), `apps/mobile/src/services/mediaUploadTransport.service.ts`, `docs/backendPlan.md` 2.4, 4.2. Labels: EXISTING, MOCK-ONLY, PROPOSED, OPTIONAL FUTURE.
 
 ## 1. What exists
 
 | Item | Status | Evidence |
 | --- | --- | --- |
-| Chunked upload API in the legacy monolith: `POST /media/uploads`, `PUT /media/uploads/:id/chunks/:i` (raw bytes, `X-Chunk-Sha256`), `POST .../complete`, `GET /media/:id`; assembly, processing queue, maintenance job | EXISTING (reference only, never deployed) | `apps/api/src/modules/media/*` |
+| Chunked upload API in the legacy monolith: `POST /media/uploads`, `PUT /media/uploads/:id/chunks/:i` (raw bytes, `X-Chunk-Sha256`), `POST .../complete`, `GET /media/:id`; assembly, processing queue, maintenance job | EXISTING (reference only, never deployed) | the old monolith's `media` module |
 | Purposes: `post, clip, story, avatar, banner, product, chat, kyc, voice`; MIME allow-list (jpeg, png, webp, heic, mp4, quicktime, pdf, audio types); `sizeBytes` validated only as positive integer | EXISTING | `media/models/mediaUpload.model.ts`, `validators/media.validator.ts` |
 | Image processing with sharp: AVIF/WebP/JPEG variants, blurhash, auto-orient `.rotate()`, `MAX_INPUT_PIXELS` 100M; video: ffmpeg variants, poster, HLS master key | EXISTING (reference) | `sharpImageProcessor.service.ts`, `videoVariants.service.ts` |
 | `kyc` purpose treated private (`isPrivatePurpose`); responses carry `nosniff` and immutable cache headers for public assets | EXISTING (reference) | `mediaProcessing.service.ts`, `mediaFiles.controller.ts` |

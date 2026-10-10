@@ -1,8 +1,8 @@
 # Zudomart — Backend Plan
 
-Status: **draft (3 Oct 2026)**. Nothing here is built unless marked **ref** (logic exists in `apps/api` and can be ported). Items marked **[CONFIRM]** need an owner decision before that piece starts.
+Status: **draft (3 Oct 2026)**. Nothing here is built unless marked **ref** (logic existed in the old Zudojs monolith; it has been ported and the monolith was removed on 2026-10-10). Items marked **[CONFIRM]** need an owner decision before that piece starts.
 
-Inputs read: `docs/plans.md` (incl. §5.4 contract debt, §8 Studio, §13 checkmarks, §20 creator live), `docs/CHANGELOG.md`, `docs/architecture/microservicesPlan.json`, `SECURITY.md`, `apps/api` (Zudojs reference monolith), `apps/{seller,ads,admin,intelligence}/apiContract.md`, `apps/mobile/src/services` + `src/mocks`, and the BFF layers of `apps/webapp` and `apps/studio`.
+Inputs read: `docs/plans.md` (incl. §5.4 contract debt, §8 Studio, §13 checkmarks, §20 creator live), `docs/CHANGELOG.md`, `docs/architecture/microservicesPlan.json`, `SECURITY.md`, the old monolith (Zudojs reference monolith), `apps/{seller,ads,admin,intelligence}/apiContract.md`, `apps/mobile/src/services` + `src/mocks`, and the BFF layers of `apps/webapp` and `apps/studio`.
 
 ---
 
@@ -27,7 +27,7 @@ These apply to every backend file, whether a person or an agent writes it.
 | Stack | Owns | Why this stack |
 | --- | --- | --- |
 | **Go** | users/accounts (auth, profiles, verification/KYB), wallet + ledger, payments, marketplace (catalog, inventory, stores), orders + escrow, subscriptions, creators (gifts, earnings), ZudoPoints, live (sessions, guests, battles), ads decision + attribution, admin | Strong typing and simple concurrency for money and the core state machines |
-| **TypeScript (Zudojs)** | gateway, social orchestration (posts, comments, clips, stories, sounds, follows, privacy), feed orchestration, notifications, media, support, integrations (webhooks, couriers, partner APIs) | I/O-heavy fan-out; the existing Zudojs code in `apps/api` ports almost line for line |
+| **TypeScript (Zudojs)** | gateway, social orchestration (posts, comments, clips, stories, sounds, follows, privacy), feed orchestration, notifications, media, support, integrations (webhooks, couriers, partner APIs) | I/O-heavy fan-out; the existing Zudojs code in the old monolith ports almost line for line |
 | **Elixir / Phoenix** | realtime: chat, presence, typing, live activity (comments, gifts, goals, scores, viewer counts), in-app notification stream | Cheap processes, built-in presence and pub/sub, made for socket fan-out. **Never touches money** |
 | **Python** | `services/python/intelligence`: ranking, recommendations, risk/fraud and moderation **scores**, ads pCTR, analytics pipelines | ML ecosystem. **Python returns scores; Go/TS make the deterministic policy decision** (thresholds live in config tables) |
 | **OpenSearch** | search (products, people, businesses, posts, sounds) | Fed from domain events, later |
@@ -41,11 +41,11 @@ These apply to every backend file, whether a person or an agent writes it.
 
 **Feed pipeline** (TS orchestrates, Python scores, TS/Go decide): `candidates` (follow graph, interests, trending, ads slots reserved) → `safety/integrity` (fraud, policy, quality scores → deterministic filters: drop/downrank/label) → `ranking` (py `/v1/feed/rank`, deterministic fallback) → `diversity rules` (author/format/topic caps, no two ads adjacent) → ad insertion by the Ad Decision Engine (§4.4).
 
-### 1.1 Role of `apps/api`
+### 1.1 The old monolith (removed on 2026-10-10)
 
-`apps/api` becomes a **reference implementation**. It does not get deployed. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, legacy card gateways (replaced by the Paystack adapter in the new stack), coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
+The old Zudojs monolith was a **reference implementation** and was never deployed; it was deleted on 2026-10-10 once the audit showed every live route, job, event and model had an owner in the services (brand deals, chat pushes, review/seller-application/creator-standing notifications and purchase signals were ported in that last pass). The table below is kept as the port map. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, legacy card gateways (replaced by the Paystack adapter in the new stack), coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
 
-| `apps/api` module | Ports to | Reuse |
+| Old monolith module | Ported to | Reuse |
 | --- | --- | --- |
 | auth, users (+ usernames), verifications, currency, admin, audit | go.auth, go.users, go.currency, go.admin | Rules and validators translate 1:1. Admin has commands but no routes yet |
 | stores, products, categories, carts, orders, reviews | go.catalog, go.inventory, go.orders | Reviews go to go.catalog (product engagement) |
@@ -93,7 +93,7 @@ Frontend paths stay exactly as they are (`/api/v1/...`). The gateway's route tab
 
 ## 2. Contract inventory
 
-Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard, Ad = ads manager, Adm = admin, L = landing (`apps/web`). **Ref**: ✅ = logic exists in `apps/api` to port, ◐ = partial, ✗ = missing. **Owner** = JSON service (`go.x` / `ts.x` / `ex.realtime` / `py.intelligence`). All paths are under `/api/v1`.
+Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard, Ad = ads manager, Adm = admin, L = landing (`apps/web`). **Ref**: ✅ = logic exists in the old monolith to port, ◐ = partial, ✗ = missing. **Owner** = JSON service (`go.x` / `ts.x` / `ex.realtime` / `py.intelligence`). All paths are under `/api/v1`.
 
 ### 2.1 Auth and session — owner **go.auth**
 
@@ -132,7 +132,7 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | --- | --- | --- | --- |
 | GET /feeds/for-you, /feeds/following, /feeds/suggested-clips, /clips?tab | M W | ✅ | **Envelope mismatch** (§5.1): server pages are `{data,nextCursor}` and mobile `apiClient.service.ts:65` unwraps `payload.data`, so mobile loses `nextCursor` | **✅ built (ts-social)** plus `GET /feeds/popular` (guest fallback), honours personalization consent; `/clips?tab=`.
 | POST /feeds/feedback, /feeds/interactions | M | ✅ | | **✅ feedback built (ts-social).**
-| POST /posts `{text,mediaIds,audience,kind,soundId,visibility?}` | M | ✅ | **`audience: "followers"` is rejected**: server is `schema.enum(["everyone"])` (`apps/api/src/modules/posts/validators/posts.validator.ts:22`), mobile sends `everyone\|followers` (`apps/mobile/src/components/create/postToolbar.tsx`). Decision §3.3 | **✅ built (ts-social):** `audience everyone|followers`, `visibility`, `kind post|clip|story`, `isAiGenerated`, `replyToComment`+`stickerLayout`; media descriptors are read from the request body until ts.media exists.
+| POST /posts `{text,mediaIds,audience,kind,soundId,visibility?}` | M | ✅ | **`audience: "followers"` is rejected**: server is `schema.enum(["everyone"])` (the old monolith's `posts` module), mobile sends `everyone\|followers` (`apps/mobile/src/components/create/postToolbar.tsx`). Decision §3.3 | **✅ built (ts-social):** `audience everyone|followers`, `visibility`, `kind post|clip|story`, `isAiGenerated`, `replyToComment`+`stickerLayout`; media descriptors are read from the request body until ts.media exists.
 | GET/DELETE /posts/:id, like/unlike, share, /posts/:id/products | M W | ✅ | | **✅ built (ts-social).**
 | POST /posts/:id/repost `{text?}` | M W | ✅ | Server must create a new post with `resharedFrom` (plans §7). Confirm `RepostBodySchema` accepts `text` | **✅ built (ts-social).**
 | GET /posts/:id/analytics | M W | ✗ | Owner-only, `403 NOT_POST_OWNER` (plans §11). Read model from ClickHouse via ts.feed |
@@ -141,6 +141,7 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | Stories: /stories/tray, /users/:id/stories, POST /stories, seen, replies | M | ✅ | Mobile sends both `mediaId` and a full `media` object: server reads `mediaId` only | **✅ tray, user stories, publish, seen built (ts-social); story replies not built.**
 | Sounds: GET /sounds, /sounds/trending, /saved, /:id, /:id/clips; PATCH /sounds/:id; POST/DELETE /sounds/:id/save | M | ✗ | ts.social.sounds |
 | POST /posts/:id/gifts, POST /tips `{targetType,targetId,coins}` | M | ✅ | → go.creators. Tip balance field is `balance`, live gift receipt is `coinBalance`: unify on `coinBalance` |
+| GET/POST /creators/brand-deals, DELETE /creators/brand-deals/:id `{brandName,amountMinor,currency,startsAt,endsAt?,disclosure,notes?}` | none yet | ✅ | **✅ built (go-money creators, 2026-10-10).** A private log of an approved creator's paid partnerships; POST needs `Idempotency-Key` (a reused key with a different body is `409 IDEMPOTENCY_KEY_REUSED`), non-creators get `403 CREATOR_PROGRAM_REQUIRED`, cursor-paged list |
 
 ### 2.4 Media — owner **ts.media**
 
@@ -213,17 +214,17 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 
 ### 2.9 Seller dashboard — owner mostly **go.catalog / go.inventory / go.orders / go.money**, analytics **ClickHouse**
 
-Contract: `apps/seller/apiContract.md`, types in `apps/seller/src/types/*.type.ts`, mock toggle `SELLER_USE_MOCKS`. `apps/api` has only a thin slice (access, verification, dashboard, orders + ship/deliver, `GET /seller/inventory`, products CRUD + variants, affiliate commissions, conversations).
+Contract: `apps/seller/apiContract.md`, types in `apps/seller/src/types/*.type.ts`, mock toggle `SELLER_USE_MOCKS`. The old monolith has only a thin slice (access, verification, dashboard, orders + ship/deliver, `GET /seller/inventory`, products CRUD + variants, affiliate commissions, conversations).
 
 | Endpoint group | Ref | Owner | Mismatch / change |
 | --- | --- | --- | --- |
-| GET /seller/access | ◐ | go.catalog | **Must change**. Today `SellerAccessService.assertStoreHasActiveSellerAccess` (`apps/api/src/modules/subscriptions/services/sellerAccess.service.ts`) requires Gold verification + an active Gold subscription. The seller frontend does the same (`apps/seller/src/utils/sellerAccessDestination.util.ts` → `billing`). The new rule: **any approved seller on any plan, including Free, gets in** (§4.3.1). The route is also guarded by `orders:fulfil` in apps/api, which is not in the contract |
+| GET /seller/access | ◐ | go.catalog | **Must change**. Today `SellerAccessService.assertStoreHasActiveSellerAccess` (the old monolith's `subscriptions` module) requires Gold verification + an active Gold subscription. The seller frontend does the same (`apps/seller/src/utils/sellerAccessDestination.util.ts` → `billing`). The new rule: **any approved seller on any plan, including Free, gets in** (§4.3.1). The route is also guarded by `orders:fulfil` in the old monolith, which is not in the contract |
 | /seller/subscription/plans, /subscription, checkout, verify, cancel, resume | ◐ | go.subscriptions | Plans become **Free / Pro / Business** (seller plans), not `GOLD_PRO/GOLD_PREMIUM`. Paid plans grant the Gold business checkmark once the business passes KYB |
 | /seller/verification | ✅ | go.users.verification | KYB documents → Gold badge for Pro/Business stores; never gates dashboard access |
 | **POS:** /seller/pos/*, /seller/staff/pin-roster, /pin-sessions, /:id/pin, /:id/unlock-pin, `X-Seller-Operator` header | — | **REMOVE** | Delete from the contract, mocks, types and UI (§4.3.9) |
 | /seller/categories, /seller/products (CRUD, publish, bulk, barcodes, import ≤2000 rows, export) | ◐ | go.catalog | Contract PATCH is full replace. Import prices arrive as major-unit decimals in CSV: convert on the server with the store currency's exponent |
-| /seller/inventory/levels, adjustments, transfers (+receive/cancel) | ◐ | go.inventory | apps/api has `GET /seller/inventory`, which is renamed to `/levels`. `available = onHand − reserved` |
-| /seller/orders (+`countsByStatus`), /:id, /:id/fulfilment, /:id/cancel | ◐ | go.orders | apps/api uses `/ship` + `/deliver`. Contract uses `/fulfilment`. Lifecycle in §4.3.5 |
+| /seller/inventory/levels, adjustments, transfers (+receive/cancel) | ◐ | go.inventory | The old monolith has `GET /seller/inventory`, which is renamed to `/levels`. `available = onHand − reserved` |
+| /seller/orders (+`countsByStatus`), /:id, /:id/fulfilment, /:id/cancel | ◐ | go.orders | The old monolith uses `/ship` + `/deliver`. Contract uses `/fulfilment`. Lifecycle in §4.3.5 |
 | /seller/returns (+approve/decline/receive), /seller/disputes (+responses) | ✗ | go.orders.returns / go.escrow.disputes | |
 | /seller/customers (+export, notes, purchases) | ✗ | go.orders (customer read model) | New `customers` module (not in JSON) |
 | /seller/promotions (+validate-code) | ✗ | go.orders (pricing) | Drop the `pos` channel; channels = `app`, `storefront` |
@@ -237,7 +238,7 @@ Contract: `apps/seller/apiContract.md`, types in `apps/seller/src/types/*.type.t
 
 ### 2.10 Ads manager — owner **go.ads** (decision engine + attribution §4.4; pCTR/fraud scores **py.intelligence**)
 
-Contract: `apps/ads/apiContract.md`, mock toggle `ADS_USE_MOCKS`. apps/api has 16 account routes (memberships, accounts, business profiles, entitlements, members, invites, activity), and they are **not registered** in `src/routes/index.ts`.
+Contract: `apps/ads/apiContract.md`, mock toggle `ADS_USE_MOCKS`. The old monolith has 16 account routes (memberships, accounts, business profiles, entitlements, members, invites, activity), and they are **not registered** in `src/routes/index.ts`.
 
 | Endpoint group | Ref | Mismatch / change |
 | --- | --- | --- |
@@ -252,7 +253,7 @@ Contract: `apps/ads/apiContract.md`, mock toggle `ADS_USE_MOCKS`. apps/api has 1
 
 ### 2.11 Admin console — owner **go.admin** (+ each domain's admin commands)
 
-Contract: `apps/admin/apiContract.md`, mock toggle `ADMIN_USE_MOCKS`. apps/api has admin commands/queries (login, TOTP, passkeys, step-up, invites, sessions, audit) and **no routes**, plus per-module admin routes (disputes, refunds, withdrawals, moderation, creator/seller applications, subscription plans, coin packs, automation, waitlist, exchange rates).
+Contract: `apps/admin/apiContract.md`, mock toggle `ADMIN_USE_MOCKS`. The old monolith has admin commands/queries (login, TOTP, passkeys, step-up, invites, sessions, audit) and **no routes**, plus per-module admin routes (disputes, refunds, withdrawals, moderation, creator/seller applications, subscription plans, coin packs, automation, waitlist, exchange rates).
 
 | Endpoint group | Ref | Notes |
 | --- | --- | --- |
@@ -271,7 +272,7 @@ Contract: `apps/admin/apiContract.md`, mock toggle `ADMIN_USE_MOCKS`. apps/api h
 
 ### 2.12 Intelligence (internal) — owner **py.intelligence**
 
-Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by services, never by frontends. Endpoints: `/v1/events`, `/v1/feed/rank`, `/v1/clips/rank`, `/v1/social-proof/select`, `/v1/ads/select`, `/v1/recommendations/{products,accounts,clips}`, `/v1/trending`, `/v1/search/rerank`, `/v1/risk/score`, `/v1/experiments/*`, `/v1/audio/*`. The `apps/api` client only calls events, feed/clips rank, ads select, product recs, rerank and trending. **Risk scoring is not wired**, and it must score `gift`, `coin_purchase`, `coin_transfer` and `payout` before those go live. Error envelope `{error:{code}}` stays internal (the gateway never exposes it). The JSON `python` block lacks an `intelligence` entry; the foundation agent should add it, mapping to `services/python/intelligence`.
+Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by services, never by frontends. Endpoints: `/v1/events`, `/v1/feed/rank`, `/v1/clips/rank`, `/v1/social-proof/select`, `/v1/ads/select`, `/v1/recommendations/{products,accounts,clips}`, `/v1/trending`, `/v1/search/rerank`, `/v1/risk/score`, `/v1/experiments/*`, `/v1/audio/*`. The the old monolith client only calls events, feed/clips rank, ads select, product recs, rerank and trending. **Risk scoring is not wired**, and it must score `gift`, `coin_purchase`, `coin_transfer` and `payout` before those go live. Error envelope `{error:{code}}` stays internal (the gateway never exposes it). The JSON `python` block lacks an `intelligence` entry; the foundation agent should add it, mapping to `services/python/intelligence`.
 
 | Intelligence endpoint or consumer | Status | Notes |
 |---|---|---|
@@ -291,7 +292,7 @@ Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by s
 
 1. **List envelope.** Server `{data,nextCursor}` vs mobile unwrap in `apps/mobile/src/services/apiClient.service.ts:65` (`payload.data ?? payload`), which drops `nextCursor`. Ads uses `{items,nextCursor,total}`. Admin uses `{items,page,pageSize,total}`. Fix in §5.1.
 2. **Post audience.** `audience: "followers"` (mobile `postToolbar.tsx`) vs server `enum(["everyone"])` (`posts.validator.ts:22`). The subscriber tier is `visibility: "subscribers"`. Fix in §3.3.
-3. **Gift ids and catalogue.** `apps/api/src/modules/creators/constants/giftCatalog.constant.ts` (5 gifts, no animation field) vs webapp mock `gift_*` ids vs mobile 6 gifts vs `apps/gift/{rose,heart,star}.mp4` (`star` matches nothing; the owner rejected these mp4s as final art). Fix in §4.1.
+3. **Gift ids and catalogue.** the old monolith's `creators` module (5 gifts, no animation field) vs webapp mock `gift_*` ids vs mobile 6 gifts vs `apps/gift/{rose,heart,star}.mp4` (`star` matches nothing; the owner rejected these mp4s as final art). Fix in §4.1.
 4. **Live session shape.** Studio `apps/studio/src/types/index.ts` (`state`, `streamKey`, `ingestUrl`, `hlsUrl`, `earnings`) vs mobile `LiveSessionDetails` (`status`, `playbackUrl`, `giftsEnabled`, …) vs server `LiveSession` model (no media fields, no category).
 5. **Live comments.** Studio expects a bare array with `authorName`; others expect `Page` with `author{}`.
 6. **Live products.** Studio needs `GET /lives/:id/products` and `GET /live-products`; mobile uses `POST /lives/:id/pins`; server has only `POST /lives/:id/products {productId, pin}`.
@@ -302,7 +303,7 @@ Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by s
 11. **Bare arrays.** `GET /notifications`, `GET /orders`, `GET /lives/:id/comments` (Studio).
 12. **Verify reference placement.** Coin verify uses the path; subscription verify uses the body.
 13. **Topic ids.** Webapp mock `t_1` vs server uuid.
-14. **Seller access.** Gold + subscription gate in `apps/api` `sellerAccess.service.ts` and `apps/seller/src/utils/sellerAccessDestination.util.ts` vs the new Free-plan rule.
+14. **Seller access.** Gold + subscription gate in the old monolith's `sellerAccess.service.ts` and `apps/seller/src/utils/sellerAccessDestination.util.ts` vs the new Free-plan rule.
 15. **Seller roles.** `cashier` and `pos:*` permissions in `apps/seller/src/config/rolePermissions.config.ts` must go.
 16. **Ad-account invites by email** vs the existing-users-only rule (open question).
 17. **Idempotency-Key length.** Ads ≤256 vs 8–128.
@@ -614,7 +615,7 @@ GiftTransaction { id, senderUserId, receiverUserId, liveId, battleId?, giftId, q
 **4.1.5 Creator split**
 
 - Platform cut is configurable: `live_gift_platform_cut_bps`, default 3000, which gives **the creator 70%**. "Up to 70%" means creator tiers may get less: `creatorGiftShareBps` comes from a `CreatorTier` table (e.g. starter 5000, partner 6000, top 7000) and is **capped at 7000**. Admin edits it under `/admin/config/revenue`.
-- The share is computed in **whole coins, rounding down for the creator**, with the remainder to the platform (`splitCoinsByBasisPoints` in `apps/api/src/modules/coins/services/coinLedger.service.ts`).
+- The share is computed in **whole coins, rounding down for the creator**, with the remainder to the platform (`splitCoinsByBasisPoints` in the old monolith's `coins` module).
 - Earned coins convert to cash through `POST /creators/earnings/convert` (cash value per coin per currency, minimum payout).
 
 **4.1.6 Ledger entries (double entry, unit `COIN`)**
@@ -965,7 +966,7 @@ The pipeline runs `raw impression` (client `POST /ads/events`, batched and idemp
 
 > **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
 
-> **Live part built in go-live (3 Oct 2026).** `points_entries` / `points_rules` live in the `live` schema (not a separate `points` schema). Like points cap at 10/min per user via the `like` rule (`perMinuteCap`), share/follow once per live, watch once a minute; gifts award `support` points to the sender and `stream` points to the receiver (1 per coin, rules `gift`/`giftReceived`). Per-stream boards are stored at `live.ended`; `GET /rankings` aggregates on demand (no hourly rebuild yet); the country scope uses `X-Client-Region` captured when the live starts. Profiles, social graph and follow awards from the users service are not part of this batch.
+> **Live part built in go-live (3 Oct 2026).** `points_entries` / `points_rules` live in the `live` schema (not a separate `points` schema). Like points cap at 10/min per user via the `like` rule (`perMinuteCap`), share/follow once per live, watch once a minute; gifts award `support` points to the sender and `stream` points to the receiver (1 per coin, rules `gift`/`giftReceived`). Per-stream boards are stored at `live.ended`; `GET /rankings` aggregates on demand (no hourly rebuild yet); the country scope uses `X-Client-Region` captured when the live starts. Profiles, social graph and follow awards from the users service are not part of this batch. **Host rank in live (10 Oct 2026):** `GET /api/v1/lives/{liveId}` returns `hostRanking: { globalRank, categoryRank, category, period: "week" } | null` for lives that have not ended, from the weekly streamer board (global, and the live's category). It is `null` when the host has no stream points this week or the lookup fails, so the session still loads. The standalone Rankings page in the apps was removed; `GET /api/v1/rankings` stays.
 
 **4.5.1 ZudoPoints** (Go `points` schema; Redis for rate limits and live boards)
 
@@ -1053,7 +1054,7 @@ Built to support **GDPR where it applies and Nigeria's NDPA 2023**. The plan **n
 
 ### 5.1 Response envelopes
 
-- **Single resource:** the object itself (current `apps/api` behaviour).
+- **Single resource:** the object itself (the old monolith's behaviour).
 - **Cursor list (all user-facing lists):** `{ "data": [...], "nextCursor": string|null, "total"?: number }`.
 - **Admin tables:** `{ "data": [...], "page", "pageSize", "total" }`.
 - **Errors:** `{ "message", "code", "issues"?: [{path, message}] }`, with HTTP status as today.
@@ -1131,7 +1132,7 @@ Append-only `AuditEvent { actor, actingAs (store/admin), action, subjectType, su
 - **Integration:** per service against real Postgres/Redis (Testcontainers) and RabbitMQ (Docker, `infra/local/rabbitmq/definitions.json`), including Paystack test-mode webhooks (`sk_test_` keys) and a LiveKit dev server.
 - **End-to-end:** staging scripts for signup → post → follow → chat → buy coins → gift → battle with WTA → checkout → fulfil → confirm → payout, asserting trial balance = 0 at the end.
 - **Load:** k6 for checkout and gift bursts; LiveKit load tester for 10 publishers + 1,000 subscribers.
-- **Security:** the existing `apps/api/tests/security` cases ported (enumeration, refresh reuse, webhook signature, idempotency conflicts, IDOR on store resources), plus `pnpm audit` / `govulncheck` / `pip-audit` in CI.
+- **Security:** the old monolith's security test cases, ported (enumeration, refresh reuse, webhook signature, idempotency conflicts, IDOR on store resources), plus `pnpm audit` / `govulncheck` / `pip-audit` in CI.
 
 ---
 

@@ -24,7 +24,7 @@ flowchart LR
   valkey[("Valkey")]:::existing
   bus["RabbitMQ topic exchange<br/>zudomart.events"]:::existing
   qRealtime["quorum queue realtime-domain-events"]:::existing
-  legacy["apps/api monolith<br/>reference, never deployed"]:::ref
+  legacy["the old monolith<br/>reference, never deployed"]:::ref
 
   nextApps -. "auth only when mocks off" .-> gateway
   mobile -. "auth only when mocks off" .-> gateway
@@ -176,7 +176,7 @@ LiveKit is EXISTING only as a local compose container (`infra/local/docker-compo
 | Edge | CloudFront, WAF, ALB | PROPOSED | `infra/aws/README.md` |
 | Gateway | Zudojs proxy, JWKS, CORS, 1 MiB body, 10 s upstream timeout | EXISTING | `services/typescript/gateway/src` |
 | Go | 6 deployables, platform libs | EXISTING (only auth routes) | `services/go/deployables/*`, `services/go/platform` |
-| TS services | social, feed, notifications, media, search, support, integrations, campaigns | PROPOSED (reference logic in `apps/api`) | `microservicesPlan.json` `typescript` |
+| TS services | social, feed, notifications, media, search, support, integrations, campaigns | PROPOSED (reference logic in the old monolith) | `microservicesPlan.json` `typescript` |
 | Realtime | Phoenix raw WebSocket, AMQP consumer, topic authorizer | EXISTING | `services/elixir/realtime` |
 | Intelligence | FastAPI scoring, 12 modules, AMQP domain event consumer + trust advisory producer | EXISTING, no callers | `services/python/intelligence` |
 | DB | Postgres 17 + PostGIS locally; 29 schemas and roles | EXISTING (local); Aurora PROPOSED | `infra/local/postgres/create-databases.sh` |
@@ -185,7 +185,7 @@ LiveKit is EXISTING only as a local compose container (`infra/local/docker-compo
 | Media | SeaweedFS (S3 API) locally | EXISTING (local); S3 + CloudFront PROPOSED | compose |
 | Search / analytics | OpenSearch, ClickHouse compose profiles | OPTIONAL FUTURE | compose profiles `search`, `analytics` |
 | Observability | OTLP traces from Go, collector, Jaeger | EXISTING (local, opt-in) | `services/go/platform/telemetry`, `infra/local/otel` |
-| Payments, IAP, email/SMS/push | providers | PROPOSED (legacy reference in `apps/api`) | `apps/api/src/modules/payments` |
+| Payments, IAP, email/SMS/push | providers | PROPOSED (legacy reference in the old monolith) | the old monolith's `payments` module |
 
 ## 4. Recommendations
 

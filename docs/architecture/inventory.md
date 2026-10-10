@@ -15,7 +15,7 @@ Status legend: **EXISTING** implemented code; **MOCK-ONLY** frontend mock contra
 | `apps/webapp`, `apps/studio` | Next 16 buyer web app and creator live studio, each with a BFF | EXISTING UI, MOCK-ONLY data |
 | `apps/seller`, `apps/ads`, `apps/admin` | Next 16 seller dashboard, ads manager, admin console, each with a BFF | EXISTING UI, MOCK-ONLY data |
 | `apps/web` | Next 16 marketing site (6 pages, no BFF) | EXISTING |
-| `apps/api` | Zudojs modular monolith, reference only, "never deployed" per `services/README.md` | EXISTING (reference) |
+| old monolith | Zudojs modular monolith; removed on 2026-10-10 after everything still in use was ported to the services | REMOVED |
 | `services/python/intelligence` | FastAPI scoring service (Python 3.14) | EXISTING (stateless scoring), no event consumer |
 | `apps/gift` | three mp4 files (`heart.mp4`, `rose.mp4`, `star.mp4`), no code | assets only |
 | `services/go` | Go 1.26 workspace: 14 platform libs, 18 module dirs, 6 deployables | EXISTING, one module complete |
@@ -37,7 +37,7 @@ Root `package.json`: pnpm 11 workspace over `apps/*`, `packages/*`, `services/ty
 | Concern | Finding | Evidence |
 | --- | --- | --- |
 | Data layer | Every app calls `/api/v1/*`; all five Next apps and mobile switch to in-process mocks by env flag defaulting to true | `apps/*/.env.example` (`WEBAPP_USE_MOCKS=true`, `STUDIO_/SELLER_/ADS_/ADMIN_USE_MOCKS=true`); `apps/mobile/src/config/api.config.ts` (`useMocks` default true); `apps/mobile/src/services/apiClient.service.ts:45` |
-| API base URL | Env examples point at `http://localhost:3000` (the old `apps/api` port), not the gateway on `:8080` | `apps/webapp/.env.example`, `apps/mobile/.env.example`; gateway port in `services/README.md` |
+| API base URL | Env examples point at `http://localhost:3000` (the old monolith's port), not the gateway on `:8080` | `apps/webapp/.env.example`, `apps/mobile/.env.example`; gateway port in `services/README.md` |
 | Mock size | webapp 57 mock files, mobile ~60, ads 15, seller 12, admin 11, studio 5 | `apps/*/src/mocks` |
 | BFF pattern (Next apps except web) | Browser calls same-origin `/bff/*`; route handlers keep tokens in httpOnly cookies and forward to the API with a bearer token | `apps/*/src/app/bff/[...path]/route.ts`, `apps/webapp/src/server/{gateway,session,signedCookie,requestOriginGuard}.service.ts` |
 | Cookies | `__Host-` prefixed in production (`zd_at`, `zd_rt`, `zd_sid`, `zd_viewer`), `httpOnly`, `sameSite: lax`, 15 min access / 30 day refresh | `apps/webapp/src/config/sessionCookies.config.ts` |
@@ -45,7 +45,7 @@ Root `package.json`: pnpm 11 workspace over `apps/*`, `packages/*`, `services/ty
 | Route guard | `src/proxy.ts` (Next 16 middleware) redirects unauthenticated users; webapp redirects to `/bff/auth/access-refresh` when access cookie is missing | `apps/{webapp,studio,seller,ads,admin}/src/proxy.ts` |
 | Security headers | CSP / frame / HSTS configured in each `next.config.ts` (admin has a dedicated `contentSecurityPolicy.service.ts`) | `apps/*/next.config.ts`, `apps/admin/src/server/contentSecurityPolicy.service.ts` |
 | Admin extras | MFA enrollment, passkey (WebAuthn) options, step-up, keep-alive BFF routes | `apps/admin/src/app/bff/auth/{mfa,step-up,keep-alive}/**` |
-| Tests | No frontend test files exist. Only `apps/mobile` has a `test` script (`jest`) and `apps/mobile/tests/` holds `.gitkeep` only. The other Next apps only define `typecheck` (web has none). `pnpm test` therefore runs nothing for the UI | `apps/*/package.json`, `find` of `*.test.*` (48 files, all under `apps/api`) |
+| Tests | No frontend test files exist. Only `apps/mobile` has a `test` script (`jest`) and `apps/mobile/tests/` holds `.gitkeep` only. The other Next apps only define `typecheck` (web has none). `pnpm test` therefore runs nothing for the UI | `apps/*/package.json`, `find` of `*.test.*` (48 files, all under the old monolith) |
 | Error/empty/loading kit | Web: `@zudomart/web-kit` has `skeleton`, `emptyState`, `errorState`; mobile has own `ui/{errorState,skeleton,listSkeleton}`; webapp `components/ui/feedback.tsx`; admin/ads `ui/feedback.module.css`. Next `error.tsx`/`loading.tsx`: webapp 2/1, studio 2/1, ads 2/2, admin 2/1, seller 1/0, web 1/0 | `packages/webKit/src/*`, `apps/mobile/src/components/ui/*`, find of `error.tsx`, `loading.tsx` |
 | Realtime client | Mobile opens `wss://<apiBase>/ws`, sends `{type:"auth",accessToken}`, heartbeat 25 s, backoff 1-30 s, with a mock emitter in mocks mode | `apps/mobile/src/services/realtime.service.ts`; matches `services/elixir/realtime/lib/realtime_web/client_socket.ex` |
 
@@ -65,7 +65,7 @@ Root `package.json`: pnpm 11 workspace over `apps/*`, `packages/*`, `services/ty
 
 | Item | Finding | Evidence |
 | --- | --- | --- |
-| Cursor pages | webapp and mobile use `useInfiniteQuery`; list envelope `{data,nextCursor}` in `apps/api`, mobile unwraps `payload.data ?? payload` and drops `nextCursor` | `docs/backendPlan.md` 2.13 item 1, `apps/mobile/src/services/apiClient.service.ts:65` |
+| Cursor pages | webapp and mobile use `useInfiniteQuery`; list envelope `{data,nextCursor}` in the old monolith, mobile unwraps `payload.data ?? payload` and drops `nextCursor` | `docs/backendPlan.md` 2.13 item 1, `apps/mobile/src/services/apiClient.service.ts:65` |
 | Go cursor helper | `services/go/platform/httpserver/cursor.page.go` EXISTING, unused by any implemented module endpoint | file list |
 | Envelope divergence | ads `{items,nextCursor,total}`, admin `{items,page,pageSize,total}` | `docs/backendPlan.md` 2.13 |
 
@@ -178,11 +178,11 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 | Callers | No Go/TS service calls it yet; `services/python/README.md` says it reads SQS queue `intelligence-domain-events`, but no SQS/boto code exists in `src` (grep). It ingests via `POST /v1/events` | `services/python/README.md`, grep |
 | Location | Plan says to move to `services/python/intelligence` later; currently `services/python/` is only a README | `services/python/README.md` |
 
-### 2.7 Legacy monolith (`apps/api`, Zudojs)
+### 2.7 Legacy monolith (Zudojs, removed on 2026-10-10)
 
 | Item | Count / finding | Evidence |
 | --- | --- | --- |
-| Modules (34 dirs) | admin ads audit auth automation carts categories coins creators creatorSubscriptions currency escrows feeds follows intelligence media messages moderation notifications orders payments posts products reviews search stores subscriptions support users verifications waitlist wallets | `apps/api/src/modules` |
+| Modules (34 dirs) | admin ads audit auth automation carts categories coins creators creatorSubscriptions currency escrows feeds follows intelligence media messages moderation notifications orders payments posts products reviews search stores subscriptions support users verifications waitlist wallets | the old monolith's modules |
 | Routes | 355 route registrations in 34 `*.routes.ts` files (plan quotes 354); admin has commands but 0 routes; intelligence has 0 routes | grep of `.get(/.post(...` in `src/modules/**/routes`, `docs/backendPlan.md` 1.1 |
 | Heaviest modules | posts 35, subscriptions 26, messages 25, creators 25, products 20, ads 16, users 15, auth 14, follows 14, stores 14 | same grep |
 | Prisma | 124 models in 40 files under `prisma/schema/`, 1 migration (`20260929112825_init`), Prisma 7 with `@prisma/adapter-pg` | `prisma/schema/*.prisma`, `prisma/migrations` |
@@ -192,7 +192,7 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 
 ## 3. Data model inventory
 
-Legend: A = `apps/api` Prisma model (124 total, reference), G = Go ent entity (EXISTING, `services/go/modules/*/internal/ent/schema`), P = PROPOSED only (microservicesPlan.json / backendPlan.md).
+Legend: A = the old monolith Prisma model (124 total, reference), G = Go ent entity (EXISTING, `services/go/modules/*/internal/ent/schema`), P = PROPOSED only (microservicesPlan.json / backendPlan.md).
 
 | Domain | Prisma (A) | ent (G) | Status in services |
 | --- | --- | --- | --- |
@@ -234,7 +234,7 @@ Legend: A = `apps/api` Prisma model (124 total, reference), G = Go ent entity (E
 | idempotency | `IdempotencyRecord` | Redis store in `platform/idempotency` | EXISTING (Redis, not a table) |
 | intelligence outbox | `IntelligenceOutboxEvent` | `outbox_event` in `auth` and `live` | EXISTING |
 | currency | `ExchangeRate` | none | PROPOSED |
-| waitlist | `WaitlistEntry` (legacy `apps/api` only) | none | **DROPPED** by the owner on 2026-10-05; not ported |
+| waitlist | `WaitlistEntry` (the old monolith only) | none | **DROPPED** by the owner on 2026-10-05; not ported |
 
 ent totals: auth 7 entities (6 domain + outbox), live 14 entities (13 domain + outbox); 2 outbox tables, one per module schema. `live_sessions` table has 28 columns including `livekit_room`, `live_ad_settings`, `sponsorship_line`.
 
@@ -254,7 +254,7 @@ DB layout: one Postgres, per-service schema and `svc_<service>` login role for 2
 | Local topology | SNS `zudomart-domain-events`; consumer queues `users-`, `notifications-`, `realtime-`, `intelligence-domain-events` subscribed with RawMessageDelivery; job queues `jobs-email`, `jobs-media`, `jobs-reports`, `jobs-payouts`, `jobs-search-indexing`; each with a `-dlq`, `maxReceiveCount=5`, visibility timeout 60 s | `infra/local/localstack/create-topics-and-queues.sh` |
 | Filter policies | AsyncAPI says consumers subscribe "with a filter policy on eventType"; the local script subscribes **without** filter policy (`RawMessageDelivery=true` only), and raw delivery drops the `eventType` message attribute envelope that a filter would need | script vs `asyncapi.yaml` description |
 | Consumers (real) | Only Elixir `SqsConsumer` (queue `realtime-domain-events`). No Go SQS consumer in use (`SqsQueues.ConsumeQueueUntilContextDone` exists in `platform/events/sqs.queue.go`, with no caller). Intelligence has no consumer | grep |
-| Job queues | `SqsQueues.EnqueueJob` exists in platform; nothing enqueues or consumes jobs; legacy `apps/api` used an in-process scheduler | `sqs.queue.go`, `apps/api/src/jobs` |
+| Job queues | `SqsQueues.EnqueueJob` exists in platform; nothing enqueues or consumes jobs; the old monolith used an in-process scheduler | `sqs.queue.go`, the old monolith's scheduler |
 | Retry/DLQ | Handled by SQS redrive (5 receives, `sqs.queue.go` log message); no application-level backoff, no DLQ consumer or replay tooling | |
 | AWS messaging infra | PROPOSED (`infra/aws/README.md` `messaging/` module); EventBridge "later" | |
 | Proto contracts | `account_directory.proto` (auth), `live_money.proto` (money), `money.proto` (common); generated Go/TS/Python committed under `contracts/gen`; `live_money` is the live-to-money gift/battle settlement interface, **with no server or client implementation** | `services/contracts/proto`, grep `grpc` |
@@ -272,8 +272,8 @@ See 2.5. Contract for clients: `/ws` JSON frames; topics `user:*`, `conversation
 | Bootstrap | schemas and roles per service, `zudomart_test` and `atlas_dev` DBs, PostGIS | `infra/local/postgres/create-databases.sh` |
 | Observability | Go OTLP/gRPC tracing opt-in by env, collector config at `infra/local/otel/collector.yaml`, Jaeger UI :16686; Elixir has `telemetry.ex` metrics only; gateway has no tracing; no metrics backend, no log shipping | `platform/telemetry`, `infra/local/otel` |
 | AWS | `infra/aws/README.md` only: planned Terraform modules (network, ecs-cluster, ecs-service, alb, aurora-postgres, elasticache, messaging, step-functions, media, livekit, secrets, observability, opensearch, clickhouse), envs staging/production; "Nothing here is applied" | README |
-| Dockerfiles | 6 Go (one per deployable), gateway, realtime, `apps/api`, `services/python/intelligence`. None for the Next apps | find |
-| CI | `.github/workflows/backend.yml`: file-length and no-raw-SQL checks; Go build/vet/test with compose Postgres plus `govulncheck`; gateway typecheck+test; realtime tests in Docker. `androidApk.yml`: mobile APK build. No CI for the Next apps (no lint/typecheck/build job), `apps/api`, or `services/python/intelligence`; no deploy pipeline; no `pnpm audit` job though root script exists | workflows |
+| Dockerfiles | 6 Go (one per deployable), gateway, realtime, `services/python/intelligence`. None for the Next apps | find |
+| CI | `.github/workflows/backend.yml`: file-length and no-raw-SQL checks; Go build/vet/test with compose Postgres plus `govulncheck`; gateway typecheck+test; realtime tests in Docker. `androidApk.yml`: mobile APK build. No CI for the Next apps (no lint/typecheck/build job) or `services/python/intelligence`; no deploy pipeline; no `pnpm audit` job though root script exists | workflows |
 | Scripts | `services/scripts/{check-backend-file-lengths,check-no-raw-sql-in-typescript,test-go-workspace,test-realtime-in-docker}.sh` | |
 | Env handling | `*.example` env files per app and service; real `.env*` ignored by `.gitignore`; Go config reader fails fast on missing required vars; BFFs require a session secret; no secrets-manager client code (AWS Secrets Manager only in the AWS README plan) | `.gitignore`, `services/go/platform/config` |
 
@@ -289,12 +289,12 @@ See 2.5. Contract for clients: `/ws` JSON frames; topics `user:*`, `conversation
 | Rate limits | gateway global in-memory only; intelligence token bucket; none per-endpoint on login/OTP in Go (SECURITY.md requires it); none in Go platform | grep |
 | CORS | gateway allow-list; realtime `check_origin` allow-list; Go services none (internal) | |
 | Headers | gateway: nosniff, referrer-policy, HSTS; Next apps: CSP etc. in `next.config.ts`; Go services none | |
-| Webhook verification | **ABSENT** in new services (no payments module). Legacy `apps/api` has `verify-webhook-signature.middleware.ts` per SECURITY.md | |
+| Webhook verification | **ABSENT** in new services (no payments module). The old monolith has `verify-webhook-signature.middleware.ts` per SECURITY.md | |
 | Service-to-service auth | Python HMAC EXISTING; Go-to-Go none; gateway-to-Go uses plain forwarded `x-zudomart-*` headers with no signing visible, so go-identity trust relies on network isolation | `upstreamProxy.service.ts` |
 | Idempotency | Redis middleware in Go platform, not wired to any module route | `platform/idempotency` |
 | DB access | one role per service plus read-only group role (`zudomart_readers`); `auth` migration `grant_read_access_to_other_services` | |
 | CI guards | 300-line limit, no raw SQL in TS, govulncheck | `backend.yml` |
-| SECURITY.md | 50 lines of baseline rules (secrets, deps, auth, authorization, money, data, transport). Written against `apps/api` paths (`src/loggers/redact.ts`, `compose.yaml`, `modules/audit`, `verify-webhook-signature.middleware.ts`, `RATE_LIMIT_MAX`); none map to `services/**` | `SECURITY.md` |
+| SECURITY.md | 50 lines of baseline rules (secrets, deps, auth, authorization, money, data, transport). Written against the old monolith paths (`src/loggers/redact.ts`, `compose.yaml`, `modules/audit`, `verify-webhook-signature.middleware.ts`, `RATE_LIMIT_MAX`); none map to `services/**` | `SECURITY.md` |
 
 ## 8. Test suites
 
@@ -304,7 +304,6 @@ See 2.5. Contract for clients: `/ws` JSON frames; topics `user:*`, `conversation
 | Gateway | vitest | 1 file |
 | Realtime | ExUnit | 6 files |
 | Intelligence | pytest | 15 files |
-| `apps/api` | vitest | 48 files |
 | Mobile | jest script, `tests/.gitkeep` only | 0 |
 | Next apps (webapp, studio, seller, ads, admin, web) | none | 0 |
 | E2E, contract, load tests | none | 0 |
@@ -331,7 +330,7 @@ See 2.5. Contract for clients: `/ws` JSON frames; topics `user:*`, `conversation
 
 ## 10. Quick reference for writer agents
 
-- Authoritative "what runs": go-identity (auth), gateway (identity proxy), realtime (`/ws`), intelligence (`/v1/*`), `apps/api` (reference only).
-- Everything commerce, money, social, media, notifications, search, support is **PROPOSED**; use `apps/api` Prisma models and routes as the reference spec, `microservicesPlan.json` as the service map.
+- Authoritative "what runs": go-identity (auth), gateway (identity proxy), realtime (`/ws`), intelligence (`/v1/*`).
+- Everything commerce, money, social, media, notifications, search, support is **PROPOSED**; the old monolith's Prisma models and routes were the reference spec until it was removed on 2026-10-10; `microservicesPlan.json` is the service map.
 - Live: ent schema and migration exist (`services/go/modules/live/internal/{ent,migrations}`), proto `live_money.proto` exists, Elixir routes live events, but no Go live code. Treat as the first wiring candidate.
 - When citing counts, re-run the greps: services/** is changing under the audit.

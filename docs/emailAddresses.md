@@ -84,7 +84,7 @@ Prod values; the Terraform module `infra/aws/modules/ses` creates the SES record
 | `EXPO_PUBLIC_MAIL_DOMAIN`, `EXPO_PUBLIC_SUPPORT_EMAIL`, `EXPO_PUBLIC_PRIVACY_EMAIL` | mobile | `zudomart.com` |
 | `ZUDOMART_MAIL_DOMAIN`, `ZUDOMART_MAIL_SENDING_DOMAIN`, `ZUDOMART_SUPPORT_EMAILS` | notifications service (email templates brand) | `zudomart.com`, `mail.zudomart.com`, `support@zudomart.com` |
 | `SES_FROM_ADDRESS` | notifications service | `Zudomart <noreply@mail.zudomart.com>` (fallback; templates choose the sender) |
-| `SUPPORT_NOTIFICATION_EMAILS` | apps/api | `support@zudomart.com` |
+| `SUPPORT_NOTIFICATION_EMAILS` | ts-notifications | `support@zudomart.com` |
 | `ZUDOMART_EMAIL_ASSET_BASE_URL` | notifications service | `https://cdn.zudomart.com/email` (hosts the 2x store badge PNGs from `packages/emailTemplates/assets/storeBadges/`) |
 
 Store badges follow Apple's and Google's guidelines; sources and rules are in `packages/emailTemplates/assets/storeBadges/NOTICE.md`.

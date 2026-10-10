@@ -255,7 +255,6 @@ Status 2026-10-03: implemented in go-money (see `docs/integrations/paystack.md` 
 - `apps/seller/src/components/settings/billingSettingsView.tsx`, `app/billing-checkout/demo/page.tsx`, `mocks/handlers/billingOffer.mock.ts`: provider label and demo copy.
 - `apps/seller/apiContract.md` (free trials section): Paystack plan + verification charge + `start_date`.
 - `apps/admin/src/components/configuration/rules/trustRulesEditors.tsx`: trial copy ("card saved on the web through Bachs").
-- `apps/api/src/generated/prisma/internal/class.ts`: generated from the reference monolith schema; regenerate if the schema enum mentions Bachs (the monolith is never deployed).
 - Mobile and Studio "Get paid" (plans.md §38): replace the hosted `document-link` step with in-app upload; payout fee from `GET payout-fees` (Paystack bands).
 
 **Docs:** `services/README.md` (money section, dev command note), `services/zudojsStructure.md` (`bachsConnect` example), `docs/plans.md` (§38 title and wording, coin and subscription rows, billing bullets), `docs/CHANGELOG.md` (add an entry; keep history). Done in this change: `docs/integrations/bachs.md` deleted, `docs/integrations/paystack.md` added, this plan, `docs/architecture/{payments,marketplace,system,security,privacy,backend,devops,disaster-recovery}.md`, `docs/database/{schema,domains,transactions}.md`, `docs/backendPlan.md`.

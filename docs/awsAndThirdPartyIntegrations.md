@@ -31,10 +31,10 @@ Production replicates to a disaster-recovery (DR) region.
 | **VPC** (subnets, IGW, NAT, route tables, endpoints) | Public, private and data subnets. NAT is a single gateway, or one per AZ in prod. S3 gateway endpoint plus interface endpoints. | In Terraform (`network`) |
 | **VPC Flow Logs** | Logs rejected traffic | In Terraform |
 | **Application Load Balancer** (public + internal) | Public: `/ws*` → realtime, `/*` → gateway. Internal: host-based routing to each service. | In Terraform (`edge`) |
-| **AWS WAF v2** | Managed rule sets, rate rules for auth and global traffic, Paystack source IPs only on `/webhooks/paystack`, `/internal` blocked. The admin IP allow-list can also be an IP set. | In Terraform (`edge`) |
+| **AWS WAF v2** | ALB (regional): managed rule sets, rate rules for auth and global traffic, Paystack source IPs only on `/webhooks/paystack`, `/internal` blocked. The admin IP allow-list can also be an IP set. CloudFront (us-east-1): IP reputation, anonymous IP (count mode until tuned), common, known bad inputs and SQLi rule groups, plus a per-IP rate limit (`cdn_rate_limit_per_five_minutes`, default 10,000). Both log to KMS-encrypted `aws-waf-logs-*` groups with `authorization`, `cookie` and `x-step-up-token` redacted (the CloudFront ACL logs only blocked and counted requests). | In Terraform (`edge`, `cloudfront-waf`) |
 | **Route 53** | Public zone, private zone, alias records, API health check | In Terraform (`dns`) |
 | **ACM** | TLS certificates: regional for the ALB, plus us-east-1 for CloudFront | In Terraform (`dns`) |
-| **CloudFront** | Public media CDN with Origin Access Control. Signed URLs (key group + public key) for private media. | In Terraform (`storage`) |
+| **CloudFront** | Public media CDN with Origin Access Control and the CloudFront WAF web ACL. Signed URLs (key group + public key) for private media. OAC decrypts KMS-encrypted media through a key-policy grant scoped to the distribution ARN. | In Terraform (`storage`) |
 | **Shield Standard** | DDoS protection (free with CloudFront and ALB). Shield Advanced is optional later. | Automatic |
 
 ### Data
@@ -60,7 +60,7 @@ Production replicates to a disaster-recovery (DR) region.
 
 | Service | Used for | Status |
 | --- | --- | --- |
-| **KMS** | One rotated key per purpose: data, secrets, logs, kyc, ecr, backup, sns. Also encrypts private media and live-safety evidence. | In Terraform (`kms`) |
+| **KMS** | One rotated key per purpose: data, secrets, logs, kyc, ecr, backup, sns. A media key (plus a DR-region one) encrypts the media buckets, and a us-east-1 key encrypts the CloudFront WAF logs. The kyc and media keys only let the task roles that use those buckets call them through S3. The logs bucket stays SSE-S3, because S3 access logs and ALB access logs can't be delivered to an SSE-KMS bucket. | In Terraform (`kms`, `storage`, `cloudfront-waf`) |
 | **Secrets Manager** | Every service secret: DB URLs, Paystack keys, internal tokens, signing keys, LiveKit, Apple and Google keys, and more. Each service reads only its own secrets. | In Terraform |
 | **IAM** (+ **GitHub OIDC**) | One task role per service (least privilege), execution roles, a CI push role (main branch only) and a deploy role (per environment) | In Terraform (`github-oidc`) |
 | **AWS Backup** | Aurora backups, with a cross-region copy | In Terraform (`aurora`) |

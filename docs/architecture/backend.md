@@ -94,7 +94,7 @@ flowchart LR
 | go-ads | ads | PROPOSED | decision QPS, p99 < 50 ms | Redis pacing/caps, Python pCTR, go-money |
 | go-trust | moderation | PROPOSED | SQS queue depth | Python moderation scores |
 | ts-gateway | routing, auth, edge controls | EXISTING (`services/typescript/gateway`) | RPS | JWKS from go-identity |
-| ts-social | social, feed | PROPOSED (port from `apps/api/src/modules/{posts,feeds,follows}`) | RPS, feed p95 | Aurora `social/feed`, Redis timelines, Python |
+| ts-social | social, feed | PROPOSED (port from the old monolith's `posts,feeds,follows` modules) | RPS, feed p95 | Aurora `social/feed`, Redis timelines, Python |
 | ts-io | media, notifications, search, support, integrations, campaigns | PROPOSED | queue depth | S3, SES, SMS, FCM/APNs, OpenSearch later |
 | ex-realtime | sockets, presence, live fan-out, chat | EXISTING transport + SQS consumer (`services/elixir/realtime`); chat PROPOSED | socket count per task | SQS `realtime-domain-events`, Redis (PubSub across nodes PROPOSED) |
 | py-intelligence | 12 scoring modules | EXISTING (`services/python/intelligence`), no callers | RPS, CPU | Redis features, Parquet logs |
@@ -168,7 +168,7 @@ tests/                                       (mirrors src/, files <name>.<kind>_
 | Versioning | Path `/api/v1`; event envelope `version` field; Python `/v1` | Path major only; additive changes within v1; events versioned per type (`.v1` schema file) | Document deprecation window (one mobile release cycle min) | P2 |
 | WebSocket | Raw JSON `/ws`, first-frame auth within 10 s, 64 KB frames, max 50 subs (`client_socket.ex`) | Keep; add `seq` per topic, browser tickets | Gap recovery relies on `seq` which no producer sets | P1 |
 | Internal gRPC | Protos only (`services/contracts/proto/{account_directory,live_money,money}.proto`), no server/client; no gRPC wiring in Go platform | gRPC for go-live -> go-money, go-commerce -> go-money; deadlines 300 ms; mTLS not needed inside VPC if JWT/service token verified | Add `platform/grpcserver` with deadlines, auth interceptor, OTel | P1 |
-| Webhooks inbound | ABSENT in services; legacy `apps/api` has verifier | Verify signature on raw body before parse, store `webhook_events(provider, provider_event_id UNIQUE)`, ack 200 fast, process via SQS | Build in payments before any money route | P0 |
+| Webhooks inbound | ABSENT in services; the old monolith has verifier | Verify signature on raw body before parse, store `webhook_events(provider, provider_event_id UNIQUE)`, ack 200 fast, process via SQS | Build in payments before any money route | P0 |
 | Webhooks outbound | PROPOSED (ts-io integrations) | HMAC `X-Zudomart-Signature`, timestamp, backoff 24 h, DLQ, replay | | P2 |
 | Pagination | Go `CursorPage {data,nextCursor,total?}` (`platform/httpserver/cursor.page.go`), unused; mobile drops `nextCursor` (`apiClient.service.ts:65`); ads `{items,...}`, admin `{items,page,...}` (MOCK-ONLY) | `{data,nextCursor,total?}`; admin tables `{data,page,pageSize,total}`; opaque base64 cursor of `(sort key, id)` | Fix mobile unwrap and ads/admin envelopes before wiring | P1 |
 | Filtering / sorting | Not specified in services | Query params `?status=&from=&to=&sort=-createdAt`; whitelist per endpoint; each sort has a matching composite index ending in `id` | Add a shared validator helper | P2 |

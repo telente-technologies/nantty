@@ -7,8 +7,8 @@ Status date: 2026-10-03. Labels: **EXISTING**, **MOCK-ONLY**, **PROPOSED**, **OP
 | Item | State | Evidence |
 | --- | --- | --- |
 | go-commerce (catalog, inventory, orders modules) | EXISTING skeletons, routeless, no ent | `services/go/modules/{catalog,inventory,orders}` |
-| Cart, checkout, order, escrow, dispute, shipping data model | PROPOSED in new services. Reference only in the monolith (Prisma `Checkout`, `Order`, `OrderItem`, `Escrow`, `Dispute`, `Address`) | `apps/api/prisma/schema`, inventory section 3 |
-| Escrow auto-release job | EXISTING in the reference monolith only | `apps/api/src/modules/escrows/jobs/escrowAutoRelease.job.ts` |
+| Cart, checkout, order, escrow, dispute, shipping data model | PROPOSED in new services. Reference only in the monolith (Prisma `Checkout`, `Order`, `OrderItem`, `Escrow`, `Dispute`, `Address`) | the old monolith's Prisma schema, inventory section 3 |
+| Escrow auto-release job | EXISTING in go-money (`RunAutoReleaseSweepUntilContextDone`) | `services/go/modules/escrow/src/app.go` |
 | Buyer cart, checkout, orders, escrow, disputes screens | MOCK-ONLY | `apps/mobile/src/screens/{cart,checkout,orders,escrow,disputes}`, `apps/webapp` cart, checkout, orders |
 | Seller dashboard: orders, products, inventory, delivery, wallet (escrow, settlements, withdraw), disputes, returns | MOCK-ONLY, 88 pages | `apps/seller` (inventory 1.1) |
 | Shipping profiles, zones, rules | PROPOSED (`backendPlan.md` 4.6); seller delivery pages MOCK-ONLY | `apps/seller` delivery |

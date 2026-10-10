@@ -13,7 +13,7 @@ As of 2026-10-03. Labels: **EXISTING** (path cited) · **PARTIAL** (some tables 
 | 3 | Profiles (personal / business; creator = status on personal) | EXISTING | `users` | users | `profiles`, `profile_categories`, `business_categories` | Partial unique: one personal profile per account; `creator_status` on the personal profile |
 | 4 | Creators (program membership, tiers) | EXISTING | `creators` | creators (goMoney) | `creators/src/migrations/20261003112651_*` | Creator status lives on the personal row in `users.profiles` (`creator_status`) |
 | 5 | Businesses (business profile, KYB, verified checkmark) | PARTIAL | `users` (+ `payments.connected_accounts` in ent only) | users; payments | business profile = `profiles.kind`; KYB/checkmark PLANNED (`docs/checkoutPaymentFlowPlan.md` §1) | No KYB/verification table yet |
-| 6 | Social graph (follow, block, mute) | PLANNED | `social` | ts-social | `docs/architecture/database.md` §3; legacy `apps/api/prisma/schema/follows.prisma` | No `blocks` table exists anywhere yet |
+| 6 | Social graph (follow, block, mute) | PLANNED | `social` | ts-social | `docs/architecture/database.md` §3; the old monolith's Prisma schema | No `blocks` table exists anywhere yet |
 | 7 | Marketplace (stores, members) | PLANNED | `catalog` | catalog (goCommerce) | `catalog/catalog.module.go` stub; legacy `stores.prisma` | `escrow`/`payments` carry `store_id` as an unvalidated string |
 | 8 | Products | PLANNED | `catalog` | catalog | legacy `products.prisma` | `live.live_products.product_id` is a dangling logical ref |
 | 9 | Variants | PLANNED | `catalog` | catalog | legacy `ProductVariant` (stock column; replaced by inventory) | |

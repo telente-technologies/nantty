@@ -9,11 +9,11 @@ As of 2026-10-03. Labels: **EXISTING** (cite path), **PROPOSED**, **OPTIONAL FUT
 | `Backend` workflow: file-length (300) and no-raw-SQL checks; Go build/vet/test against compose Postgres; `govulncheck`; gateway typecheck + vitest; realtime tests in Docker | EXISTING (`backend.yml` untracked in git at audit time) | `.github/workflows/backend.yml` |
 | `androidApk.yml`: mobile APK build | EXISTING | `.github/workflows/androidApk.yml` |
 | Scripts | EXISTING | `services/scripts/{check-backend-file-lengths,check-no-raw-sql-in-typescript,test-go-workspace,test-realtime-in-docker}.sh` |
-| Dockerfiles: 6 Go (distroless nonroot), gateway, realtime, `apps/api`, `services/python/intelligence` | EXISTING | `services/go/deployables/*/Dockerfile` |
+| Dockerfiles: 6 Go (distroless nonroot), gateway, realtime, `services/python/intelligence` | EXISTING | `services/go/deployables/*/Dockerfile` |
 | Local stack: Postgres/PostGIS 17, Valkey 9, RabbitMQ 4 (management UI 127.0.0.1:15672, definitions from `infra/local/rabbitmq`), LocalStack (SES only), SeaweedFS, LiveKit, OTel collector, Jaeger; ports on 127.0.0.1 | EXISTING | `infra/local/docker-compose.yml` |
 | Atlas migrations embedded and applied at service start | EXISTING | `platform/postgres` `ApplyPendingMigrationsFromEmbeddedDirectory` |
 | Terraform layout | PROPOSED, README only | `infra/aws/README.md` |
-| Not present | CI for 6 Next apps, mobile (lint/typecheck/build), `apps/api`, `services/python/intelligence`; Dockerfiles for Next apps; deploy pipeline; `pnpm audit`, SAST, secret scan, container scan; E2E, contract, load tests; frontend tests (0) | `inventory.md` s6, s8 |
+| Not present | CI for 6 Next apps, mobile (lint/typecheck/build), `services/python/intelligence`; Dockerfiles for Next apps; deploy pipeline; `pnpm audit`, SAST, secret scan, container scan; E2E, contract, load tests; frontend tests (0) | `inventory.md` s6, s8 |
 
 ## 2. DevOps architecture
 
@@ -161,7 +161,7 @@ Service-to-service HTTP goes through an internal ALB (host rule `<service>.svc.<
 | Frontend | component and BFF route tests | vitest + Testing Library, jest (mobile) | PR | 0 today |
 | E2E | signup, post, follow, chat, buy coins, gift, battle, checkout, fulfil, payout; ends with trial balance 0 | Playwright (web), Maestro (mobile) | staging | PROPOSED |
 | Load | checkout, gift bursts, feed, 1,000 live viewers | k6, LiveKit load tester | staging nightly | PROPOSED |
-| Security | IDOR, refresh reuse, webhook signature, idempotency conflict, enumeration; ZAP baseline | ported from `apps/api/tests/security`, OWASP ZAP | PR + nightly | PROPOSED |
+| Security | IDOR, refresh reuse, webhook signature, idempotency conflict, enumeration; ZAP baseline | ported from the old monolith's security tests, OWASP ZAP | PR + nightly | PROPOSED |
 | Migration | apply all migrations to empty DB and to previous release snapshot, run expand-compat tests against N-1 image | Atlas + CI | PR | PROPOSED |
 | Failure / chaos | kill Redis, reboot a RabbitMQ broker, 500 from Python, payment provider timeout, DB failover | toxiproxy, AWS FIS in staging | staging weekly | PROPOSED |
 
@@ -184,7 +184,7 @@ Service-to-service HTTP goes through an internal ALB (host rule `<service>.svc.<
 ## 9. Recommendations
 
 ### D1. CI for every app and service
-- **Problem:** six Next apps, mobile, `apps/api`, `services/python/intelligence` have no CI job; frontend has 0 tests.
+- **Problem:** six Next apps, mobile, `services/python/intelligence` have no CI job; frontend has 0 tests.
 - **Current:** `backend.yml` covers Go, gateway, realtime only; `pnpm test` runs nothing for the UI.
 - **Why it matters:** regressions in BFFs (cookies, CSRF) reach main unseen.
 - **Recommendation:** matrix job with typecheck, lint, build per Next app, path-filtered; add intelligence pytest and ruff; add gitleaks and `pnpm audit`.

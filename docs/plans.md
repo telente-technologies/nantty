@@ -97,7 +97,7 @@ The backend and most of the client already exist. This plan is the gap list, not
 
 ### 4.1 What already exists **[DONE]**
 
-**API** (`apps/api/src/modules/creatorSubscriptions`, `apps/api/src/modules/creators`):
+**API** (the old monolith's `creatorSubscriptions` module, the old monolith's `creators` module):
 
 | Endpoint | Purpose |
 | --- | --- |
@@ -229,7 +229,7 @@ Existing `PostAudience` is `everyone | followers` (`postToolbar.tsx` toggle: "Ev
 - `subscribers` is only offered when the author has ≥1 active plan **and** the viewer set is resolved server-side (already modelled by `subscriberOnly` / `viewerHasAccess` on posts and clips).
 - Toolbar chip cycles through the three values with the same 25px pill; keep `Everyone`/`Followers` copy exactly as-is and add `Subscribers`.
 - Server contract: confirm `storiesService.publishPost` accepts `audience: "subscribers"` before exposing the option — **do not ship the chip until that is verified** (no inventing API fields).
-- **[DONE — §16] Contract verification (the gate this item required): NOT supported as written.** `CreatePostBodySchema` (apps/api `posts.validator.ts`) is `audience: schema.enum(["everyone"]).optional()` — there is no `subscribers` value. The subscriber tier exists instead as a separate field: `visibility: schema.enum(["public", "subscribers"])`, guarded server-side by `assertApprovedCreator` (approved creators only). **The chip stays unshipped.** Ship in a deliberate follow-up as: approved creator + ≥1 active plan → chip offers "Subscribers" → publish sends `visibility: "subscribers"` (with `audience: "everyone"`), not `audience: "subscribers"`.
+- **[DONE — §16] Contract verification (the gate this item required): NOT supported as written.** `CreatePostBodySchema` (the old monolith `posts.validator.ts`) is `audience: schema.enum(["everyone"]).optional()` — there is no `subscribers` value. The subscriber tier exists instead as a separate field: `visibility: schema.enum(["public", "subscribers"])`, guarded server-side by `assertApprovedCreator` (approved creators only). **The chip stays unshipped.** Ship in a deliberate follow-up as: approved creator + ≥1 active plan → chip offers "Subscribers" → publish sends `visibility: "subscribers"` (with `audience: "everyone"`), not `audience: "subscribers"`.
   - **Debt flagged:** mobile already sends `audience: "followers"` today — invalid against the real API (mock casts the body, so it only works in mock). Needs a decision: extend the server enum, or drop/replace the client value.
 
 ### 5.5 Thumbnails **[LATER]**
@@ -334,10 +334,10 @@ Requirement: a dedicated **`studio.zudomart.com`** web app where creators **go l
 
 ### 8.1 What already exists **[DONE]**
 
-- **Live session metadata in the API** — `apps/api/src/modules/posts/`: `controllers/live.controller.ts`, `registerLiveRoutes()` (`routes/posts.routes.ts:72–90`), commands `startLiveSession` / `endLiveSession` / `joinLiveSession` / `leaveLiveSession` / `commentOnLiveSession` / `reactToLiveSession` / `shareLiveSession` / `addLiveProduct`, queries `getLiveSession` / `listLiveSessions` / `listLiveComments`, model `posts.model.ts:75–98`, DTOs `posts.dto.ts:90–111`, `repositories/live.repository.ts` + `live.prisma.repository.ts`. Endpoints: `/api/v1/lives/*`.
+- **Live session metadata in the API** — the old monolith's `posts` module: `controllers/live.controller.ts`, `registerLiveRoutes()` (`routes/posts.routes.ts:72–90`), commands `startLiveSession` / `endLiveSession` / `joinLiveSession` / `leaveLiveSession` / `commentOnLiveSession` / `reactToLiveSession` / `shareLiveSession` / `addLiveProduct`, queries `getLiveSession` / `listLiveSessions` / `listLiveComments`, model `posts.model.ts:75–98`, DTOs `posts.dto.ts:90–111`, `repositories/live.repository.ts` + `live.prisma.repository.ts`. Endpoints: `/api/v1/lives/*`.
 - **Gifting** lives in the `creators` module.
 - **Mobile live surfaces** — `src/screens/live/*`, `components/create/liveSetupPanel.tsx`, `Live` / `LiveEnded` nav params, `liveShoppingScreen.webp` asset.
-- **Nothing else exists yet:** no RTMP / WebRTC / HLS / ingest infrastructure anywhere in the repo (only `apps/api/compose.yaml`), **no overlay/graphics feature anywhere**, no `studio` app, no live surface in the webapp.
+- **Nothing else exists yet:** no RTMP / WebRTC / HLS / ingest infrastructure anywhere in the repo (only the old monolith's compose file), **no overlay/graphics feature anywhere**, no `studio` app, no live surface in the webapp.
 
 ### 8.2 Architecture **[DONE (frontend) / LATER (ingest)]**
 
@@ -351,7 +351,7 @@ Requirement: a dedicated **`studio.zudomart.com`** web app where creators **go l
                      session + stream key   overlay scene JSON
                                      │            ▼
                           ┌────────────────────────────────┐
-                          │  apps/api  /api/v1/lives/*     │  (metadata already exists)
+                          │  the old monolith  /api/v1/lives/*     │  (metadata already exists)
                           └────────────────────────────────┘
 ```
 

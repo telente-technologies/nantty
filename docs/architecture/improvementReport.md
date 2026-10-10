@@ -28,7 +28,7 @@ flowchart LR
   PY[services/python/intelligence<br/>no consumer]
   PG[(Postgres + PostGIS<br/>local compose)]
   Q[[LocalStack SNS/SQS]]
-  LEG[apps/api monolith<br/>reference only]
+  LEG[the old monolith<br/>reference only]
   M & W & S & ST & AD & AM -.mocks.-> M
   W & ST & S & AD & AM --> G --> ID --> PG
   ID --> Q

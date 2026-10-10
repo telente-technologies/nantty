@@ -344,11 +344,11 @@ Grouped by area (the per-app tables have the full list):
 | `PUT /api/v1/payments/payout-onboarding/me/business` | matches |  |
 | `PUT /api/v1/payments/payout-onboarding/me/identity` | matches |  |
 | `POST /api/v1/payments/payout-onboarding/me/retry` | matches |  |
-| `POST /api/v1/posts` | matches |  |
+| `POST /api/v1/posts` | matches | 2026-10-10: optional `quotedPostId` (uuid or null). A Zudomart post link in `text` becomes a quote server-side; a trailing link is stripped; `null` keeps the link as text. Errors: 422 `QUOTED_POST_UNAVAILABLE`, 422 `QUOTE_REQUIRES_POST`. |
 | `GET /api/v1/posts/:p` | matches |  |
 | `GET /api/v1/posts/:p/analytics` | matches |  |
-| `GET /api/v1/posts/:p/comments` | matches |  |
-| `POST /api/v1/posts/:p/comments` | matches |  |
+| `GET /api/v1/posts/:p/comments` | matches | 2026-10-10: ranked (pinned, author, author-joined, engagement plus recency) with an opaque snapshot cursor (string, max 300); 400 `CURSOR_EXPIRED` after 6 h. `previewReplies` is the conversation chain (max 3). Comments carry `isPostAuthor`, `quotedPost`, `quotedPostUnavailable`. |
+| `POST /api/v1/posts/:p/comments` | matches | 2026-10-10: optional `quotedPostId` (uuid or null), same rules as posts. |
 | `DELETE /api/v1/posts/:p/like` | matches |  |
 | `POST /api/v1/posts/:p/like` | matches |  |
 | `POST /api/v1/posts/:p/link-preview` | matches |  |
@@ -359,7 +359,7 @@ Grouped by area (the per-app tables have the full list):
 | `PATCH /api/v1/posts/:p/sensitivity` | matches |  |
 | `POST /api/v1/posts/:p/share` | matches |  |
 | `GET /api/v1/posts/:p/tagged-users` | matches |  |
-| `GET /api/v1/posts/:p/thread` | matches |  |
+| `GET /api/v1/posts/:p/thread` | matches | 2026-10-10: `sort=relevant` (and `top`) uses the ranked snapshot cursor and returns each root with its chain as nested `inlineReplies`. |
 | `GET /api/v1/products` | matches |  |
 | `GET /api/v1/products/:p` | matches |  |
 | `DELETE /api/v1/products/:p/like` | matches |  |
@@ -367,7 +367,7 @@ Grouped by area (the per-app tables have the full list):
 | `GET /api/v1/products/:p/reviews` | matches |  |
 | `POST /api/v1/products/:p/reviews` | matches |  |
 | `GET /api/v1/products/featured` | matches |  |
-| `GET /api/v1/rankings` | matches |  |
+| `GET /api/v1/rankings` | matches | No client caller since the Rankings page was removed (2026-10-10); kept for future use. The live header reads `hostRanking` from `GET /api/v1/lives/{liveId}` instead. |
 | `POST /api/v1/reports` | matches |  |
 | `GET /api/v1/reports/me` | matches |  |
 | `DELETE /api/v1/saves` | matches |  |
@@ -583,8 +583,8 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/payments/orders/:p/verify` | matches |  |
 | `GET /api/v1/posts/:p` | matches |  |
 | `GET /api/v1/posts/:p/analytics` | matches |  |
-| `GET /api/v1/posts/:p/comments` | matches |  |
-| `POST /api/v1/posts/:p/comments` | matches |  |
+| `GET /api/v1/posts/:p/comments` | matches | 2026-10-10: ranked (pinned, author, author-joined, engagement plus recency) with an opaque snapshot cursor (string, max 300); 400 `CURSOR_EXPIRED` after 6 h. `previewReplies` is the conversation chain (max 3). Comments carry `isPostAuthor`, `quotedPost`, `quotedPostUnavailable`. |
+| `POST /api/v1/posts/:p/comments` | matches | 2026-10-10: optional `quotedPostId` (uuid or null), same rules as posts. |
 | `DELETE /api/v1/posts/:p/like` | matches |  |
 | `POST /api/v1/posts/:p/like` | matches |  |
 | `POST /api/v1/posts/:p/link-preview` | matches |  |
@@ -594,7 +594,7 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/posts/:p/repost` | matches |  |
 | `POST /api/v1/posts/:p/share` | matches |  |
 | `GET /api/v1/posts/:p/tagged-users` | matches |  |
-| `GET /api/v1/posts/:p/thread` | matches |  |
+| `GET /api/v1/posts/:p/thread` | matches | 2026-10-10: `sort=relevant` (and `top`) uses the ranked snapshot cursor and returns each root with its chain as nested `inlineReplies`. |
 | `GET /api/v1/products` | matches |  |
 | `GET /api/v1/products/:p` | matches |  |
 | `POST /api/v1/products/:p/bookmark` | matches |  |

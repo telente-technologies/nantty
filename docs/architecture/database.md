@@ -11,7 +11,7 @@ Fixed decisions: one Aurora PostgreSQL + PostGIS cluster, one schema per owning 
 | 29 schemas + roles, `zudomart_readers`, `REVOKE CREATE ON SCHEMA public` | EXISTING (local) | `infra/local/postgres/create-databases.sh` |
 | `auth` schema: account, session, refresh_token, one_time_code, signing_key, social_identity, outbox_event | EXISTING, serving | `services/go/modules/auth/internal/ent/schema` |
 | `users`, `admin`, `currency`, `ledger`, `live` ent schemas + Atlas migrations | EXISTING (uncommitted WIP, no routes) | `services/go/modules/<m>/internal/{ent/schema,migrations}` |
-| Everything else | PROPOSED; `apps/api/prisma/schema` (124 models) is the reference spec | |
+| Everything else | PROPOSED; the old monolith's Prisma schema (124 models) is the reference spec | |
 
 ERD conventions: PK, FK, UK markers; quoted text lists key indexes or constraints. Cross-schema FKs are **logical only** (no DB constraint across owners); they are drawn but labelled `ref`. Every table also has `created_at`; omitted.
 
@@ -198,7 +198,7 @@ erDiagram
   }
 ```
 
-Status: PROPOSED (`social` schema, ts-social). Reference: `apps/api/prisma/schema` `Follow`, `Post`, `PostLike`, `Comment`, `CommentLike`, `Block`. Counters (`like_count`, `follower_count`) are denormalised columns updated by event consumers, never `COUNT(*)` on read. Blocking overrides every follow state; `BLOCK` is owned by users and read by social via grant.
+Status: PROPOSED (`social` schema, ts-social). Reference: the old monolith's Prisma schema `Follow`, `Post`, `PostLike`, `Comment`, `CommentLike`, `Block`. Counters (`like_count`, `follower_count`) are denormalised columns updated by event consumers, never `COUNT(*)` on read. Blocking overrides every follow state; `BLOCK` is owned by users and read by social via grant.
 
 ## 4. Marketplace
 
@@ -312,7 +312,7 @@ erDiagram
   }
 ```
 
-Status: PROPOSED. Schemas: `catalog` (store, member, category, product, variant), `inventory` (location, level, movement, reservation; ABSENT even in `apps/api`), `orders` (cart, checkout, order group, item, event). Cart rows key on `store_id` so the cart API groups by seller. Inventory and orders share the go-commerce deployable so reservation + order creation commit in one tx (one tx across two schemas owned by the same deployable; today each module has its own `svc_<module>` role, so go-commerce needs one connection role with write grants on both, or the reservation must become a sync call. Decide before orders is built).
+Status: PROPOSED. Schemas: `catalog` (store, member, category, product, variant), `inventory` (location, level, movement, reservation; ABSENT even in the old monolith), `orders` (cart, checkout, order group, item, event). Cart rows key on `store_id` so the cart API groups by seller. Inventory and orders share the go-commerce deployable so reservation + order creation commit in one tx (one tx across two schemas owned by the same deployable; today each module has its own `svc_<module>` role, so go-commerce needs one connection role with write grants on both, or the reservation must become a sync call. Decide before orders is built).
 
 ## 5. Payments, ledger, escrow, wallets, payouts
 
@@ -423,7 +423,7 @@ erDiagram
   }
 ```
 
-Status: LEDGER_ACCOUNT, JOURNAL_ENTRY, JOURNAL_LINE, RECONCILIATION_RUN/BREAK EXISTING WIP (`services/go/modules/ledger/internal/ent/schema`); the rest PROPOSED (`payments`, `wallet`, `escrow` schemas; reference `apps/api` `Payment`, `WebhookEvent`, `Escrow`, `LedgerAccount`, `LedgerEntry`, `PayoutAccount`, `Withdrawal`). Balances change only by journal lines in the same tx, with `SELECT ... FOR UPDATE` on the affected ledger accounts in a fixed order (by id) to avoid deadlocks, plus `version` check. Detailed money flows: [payments.md](payments.md).
+Status: LEDGER_ACCOUNT, JOURNAL_ENTRY, JOURNAL_LINE, RECONCILIATION_RUN/BREAK EXISTING WIP (`services/go/modules/ledger/internal/ent/schema`); the rest PROPOSED (`payments`, `wallet`, `escrow` schemas; reference the old monolith `Payment`, `WebhookEvent`, `Escrow`, `LedgerAccount`, `LedgerEntry`, `PayoutAccount`, `Withdrawal`). Balances change only by journal lines in the same tx, with `SELECT ... FOR UPDATE` on the affected ledger accounts in a fixed order (by id) to avoid deadlocks, plus `version` check. Detailed money flows: [payments.md](payments.md).
 
 ## 6. Livestream
 
@@ -635,7 +635,7 @@ erDiagram
   }
 ```
 
-Status: PROPOSED (`ads` schema; reference 22 `Ad*` Prisma models in `apps/api`). `AD_IMPRESSION` is the highest-volume OLTP table: range-partition by `day` from the start (monthly partitions, drop/archive after attribution window + dispute window), and move raw events to ClickHouse when it lands.
+Status: PROPOSED (`ads` schema; reference 22 `Ad*` Prisma models in the old monolith). `AD_IMPRESSION` is the highest-volume OLTP table: range-partition by `day` from the start (monthly partitions, drop/archive after attribution window + dispute window), and move raw events to ClickHouse when it lands.
 
 ## 9. Shipping and geo
 

@@ -1,12 +1,12 @@
 # Search architecture
 
-As of 2026-10-03. Sources: `inventory.md` (compose profile `search`, `jobs-search-indexing` queue, `apps/api` search module), `docs/backendPlan.md`. Labels: EXISTING, MOCK-ONLY, PROPOSED, OPTIONAL FUTURE.
+As of 2026-10-03. Sources: `inventory.md` (compose profile `search`, `jobs-search-indexing` queue, the old monolith search module), `docs/backendPlan.md`. Labels: EXISTING, MOCK-ONLY, PROPOSED, OPTIONAL FUTURE.
 
 ## 1. What exists
 
 | Item | Status | Evidence |
 | --- | --- | --- |
-| Legacy `GET /search?q&scope` (1 route, reference only, "never deployed") returning `{products,stores,people,brands?}` | EXISTING (reference) | `apps/api/src/modules/search` |
+| Legacy `GET /search?q&scope` (1 route, reference only, "never deployed") returning `{products,stores,people,brands?}` | EXISTING (reference) | the old monolith's `search` module |
 | Frontend search services and mocks | MOCK-ONLY | `apps/webapp/src/services/search.service.ts`, `apps/mobile/src/services` |
 | OpenSearch 3 in local compose (profile `search`) | EXISTING (local) | `infra/local/docker-compose.yml` |
 | RabbitMQ job queue `jobs-search-indexing` (+retry tiers and `.dlq`, 5 attempts) | EXISTING (local topology) | `infra/local/rabbitmq/topology.json` |

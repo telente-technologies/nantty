@@ -10,10 +10,10 @@ Labels: **EXISTING** / **MOCK-ONLY** / **PROPOSED** / **OPTIONAL FUTURE**.
 | --- | --- | --- |
 | Consent model (`UserConsent`, `TermsAcceptance`, `PolicyVersion`) | **ABSENT** in `services/**`; designed only | `backendPlan.md` 4.7, `inventory.md` s3 |
 | Retention policy table and purge jobs | ABSENT | none |
-| Data export / deletion endpoints | ABSENT in services; legacy `apps/api` has none verified | none |
+| Data export / deletion endpoints | ABSENT in services; the old monolith has none verified | none |
 | Privacy and terms pages | EXISTING static pages | `apps/web` (`/privacy`, `/terms`) |
 | Consent banner | ABSENT | none |
-| Log redaction | PROPOSED; legacy `apps/api/src/loggers/redact.ts` | `SECURITY.md` |
+| Log redaction | PROPOSED; the old monolith's log redactor | `SECURITY.md` |
 | Python receives opaque IDs only | EXISTING contract | `services/python/intelligence/apiContract.md` |
 | Auth events carry no password material | EXISTING | `services/go/modules/auth/internal/application/outbox.events.go` |
 | OTP delivery | `log` only, so no real email/SMS processor yet | `one_time_code.delivery.go` |

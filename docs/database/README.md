@@ -83,9 +83,8 @@ gRPC contracts touching money data: `services/contracts/proto/zudomart/money/v1/
 | Elixir realtime | None (no Ecto/Postgrex) | `services/elixir/realtime/mix.exs` |
 | Python intelligence | Redis client only | `services/python/intelligence/pyproject.toml` |
 | Valkey/Redis | Live HTTP idempotency (`live:idempotency` prefix); platform store `services/go/platform/idempotency/idempotency.store.go` | `services/go/modules/live/src/app.go` |
-| Legacy monolith (reference spec only, not deployed by the new stack) | Prisma, 124 models, 1 init migration, seeds | `apps/api/prisma/{schema/*.prisma,migrations,seeds,seed.ts}` |
 
-Seed data: `apps/api/prisma/seeds/{coinPacks,subscriptionPlans}.seed.ts` (legacy); Go seeders run at module start: `admin/.../seedDefaultSettings`, `currency/.../seedDefaultRates`, `users/src/modules/geo/services/geoSeed.service.go`, `users/src/modules/retention/services/retentionPolicies.service.go`, `wallet/src/modules/coins/services/coinCatalog.service.go`, `live/src/services/defaultCatalog.service.go`.
+Seed data: Go seeders run at module start: `admin/.../seedDefaultSettings`, `currency/.../seedDefaultRates`, `users/src/modules/geo/services/geoSeed.service.go`, `users/src/modules/retention/services/retentionPolicies.service.go`, `wallet/src/modules/coins/services/coinCatalog.service.go`, `live/src/services/defaultCatalog.service.go`.
 
 ## 5. Adding or changing a table (EXISTING workflow)
 

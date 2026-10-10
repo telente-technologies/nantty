@@ -10,7 +10,7 @@ Status date: 2026-10-03. Labels: **EXISTING**, **MOCK-ONLY**, **PROPOSED**, **OP
 | Python receives opaque ids and HMAC-signed requests | EXISTING | `services/python/intelligence/apiContract.md` section 2 |
 | `go-trust` deployable and `moderation` module | EXISTING skeleton, routeless | `services/go/cmd/go-trust`, `services/go/modules/moderation` |
 | Fraud tables, review queue, policy engine, thresholds | PROPOSED, none exist (inventory section 3 "fraud: none") | `microservicesPlan.json` |
-| Moderation models (`ModerationReport/Case/Decision/Appeal`, `AccountSuspension`, `Automation*`) | PROPOSED in Go; reference in Prisma | `apps/api/prisma/schema` |
+| Moderation models (`ModerationReport/Case/Decision/Appeal`, `AccountSuspension`, `Automation*`) | PROPOSED in Go; reference in Prisma | the old monolith's Prisma schema |
 | Admin moderation, ads review, ip-claims, support, verification pages | MOCK-ONLY | `apps/admin` |
 | `HELD_FOR_REVIEW` gift status | EXISTING in proto | `live_money.proto` |
 | Rate limiting | Gateway global, in-memory only; none per endpoint in Go | inventory section 7 |

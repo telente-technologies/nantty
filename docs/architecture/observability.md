@@ -75,7 +75,7 @@ All PROPOSED except local OTLP from Go. Collector runs as a sidecar per task (`i
 | Audit | audit events go to the `AuditEvent` table, not only logs |
 | Retention vs privacy | Logs are PII-light by design; see `privacy.md` class `security` |
 
-Status: slog JSON with key-based redaction EXISTING in Go (`services/go/platform/logging/structured.logger.go`, `redactSensitiveAttribute`); extending the deny-list, email/phone masking, tests, and TS/Elixir/Python redaction are PROPOSED (legacy `apps/api/src/loggers/redact.ts` is the reference).
+Status: slog JSON with key-based redaction EXISTING in Go (`services/go/platform/logging/structured.logger.go`, `redactSensitiveAttribute`); extending the deny-list, email/phone masking, tests, and TS/Elixir/Python redaction are PROPOSED (the old monolith's log redactor is the reference).
 
 ## 5. Metrics
 

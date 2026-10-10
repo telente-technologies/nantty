@@ -86,7 +86,7 @@ Compose stack started with `docker compose up -d --wait postgres valkey rabbitmq
 | 3 | Realtime `mix format --check-formatted`, `compile --warnings-as-errors`, `mix test` | 59 / 59 (one test file reformatted) |
 | 3 | Terraform `init -backend=false && validate` | dev, staging, prod valid (staging/prod initialised offline with `-plugin-dir` from dev's aws 5.100.0 after the network drop; this left untracked `.terraform.lock.hcl` files in each env) |
 | 4 | `tsc --noEmit`: mobile, webapp, web, studio, seller, ads, admin; gateway, social, notifications, media, search, support (+ test tsconfigs), apiSmoke | 0 errors |
-| 4 | `apps/api` (legacy) typecheck | 4 errors, not trivial (missing `loaders/admin.loader.js` and `modules/admin/routes`, `SocialSharedServices.discovery`, `AudienceSpec` shape); left |
+| 4 | The old monolith (legacy) typecheck | 4 errors, not trivial (missing `loaders/admin.loader.js` and `modules/admin/routes`, `SocialSharedServices.discovery`, `AudienceSpec` shape); left, and the monolith was removed on 2026-10-10 |
 | 4 | Vitest: gateway 1051, social 183 (`RUN_INTEGRATION=1`), notifications 183, media 89, search 50, support 62, email templates 205; mobile jest 98; app contract tests admin 7, seller 4, webapp 20, studio 5, ads 8 | all pass after fixes |
 | 4 | Intelligence: pytest 233 passed / 2 skipped, ruff, ruff format, mypy (483 files) | pass |
 | 4 | `backend:check` (300-line limit, no raw SQL in TS) | pass |
@@ -159,7 +159,7 @@ Limits: one seller refund per order (escrow allows one partial settlement); rele
 | --- | --- |
 | `services/go/platform/zzsumcheck/main.go` breaks `go build/vet ./...` for the platform module and `pnpm backend:test:go` (imports `ariga.io/atlas/cmd/atlas/x`, calls undefined `sqltoolDir`) | committed scratch file; deleting it was blocked by the permission classifier. Owner: delete it |
 | `order.cancelled` from checkout abort has no `buyerUserId`, so notifications drop it (WARN, not DLQ) | known 6.2 item: producer/consumer contract |
-| `apps/api` type errors | legacy, not trivial |
+| The old monolith type errors | moot: the monolith was removed on 2026-10-10 |
 | Docker bridge DNS | `test-realtime-in-docker.sh` cannot fetch hex without `--network host` on this machine |
 | Payments ent schema/migration files changed during this pass by the billing agent | not part of these results; re-run payments tests after that work lands |
 

@@ -1,6 +1,6 @@
 # Security architecture
 
-As of 2026-10-03. Labels: **EXISTING** (cite path), **MOCK-ONLY**, **PROPOSED**, **OPTIONAL FUTURE**. Sources: `inventory.md` section 7, `SECURITY.md` (written against the legacy `apps/api` paths), `docs/backendPlan.md` 5.4-5.8.
+As of 2026-10-03. Labels: **EXISTING** (cite path), **MOCK-ONLY**, **PROPOSED**, **OPTIONAL FUTURE**. Sources: `inventory.md` section 7, `SECURITY.md` (written against the the old monolith paths), `docs/backendPlan.md` 5.4-5.8.
 Privacy is in `privacy.md`; pipeline and network in `devops.md`; logging in `observability.md`.
 
 ## 1. Trust zones and request path
@@ -121,7 +121,7 @@ sequenceDiagram
 | Audit log | Append-only `AuditEvent` (actor, actingAs, action, subject, before/after, reason, ip, UA, requestId). Required for escrow release, refunds, disputes, payouts, role/staff/plan changes, API keys, admin config. DB role for writers is INSERT only | PROPOSED (`backendPlan.md` 5.7); events via outbox EXISTING in auth |
 | Inbound webhooks | Gateway forwards `/webhooks/*` to go-money byte-for-byte (WAF limits `/webhooks/paystack` to Paystack IPs). Verify signature on raw body before parsing, unique provider event id, process once, ack fast, process async. Providers: Paystack, couriers, LiveKit, App Store/Play | Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03). PROPOSED in go-money (`POST /webhooks/paystack`): hex HMAC-SHA512 of the raw body with the Paystack secret key compared in constant time with `x-paystack-signature` (old and new key accepted during a key rotation), source IPs 52.31.139.75, 52.49.173.169, 52.214.14.220 allowlisted at the edge, no signed timestamp so dedupe on `event + data.id + status` in `webhook_events`, object re-fetched with `verify` before any ledger posting. The Bachs handler in code is deleted by `checkoutPaymentFlowPlan.md` §12. Couriers, LiveKit, stores ABSENT |
 | Outbound webhooks | HMAC-SHA256 `X-Zudomart-Signature`, backoff for 24 h, replay, SSRF guard (deny private/link-local ranges, resolve then pin IP, no redirects) | PROPOSED |
-| File uploads | Presigned S3 multipart URLs with size and content-type limits; server re-checks magic bytes; objects land in a quarantine prefix, malware scan, then moved to the processed bucket; processed media served by CloudFront with OAC and signed URLs; buckets block public access; strip EXIF GPS | PROPOSED (`backendPlan.md` media rows; legacy `apps/api` media module) |
+| File uploads | Presigned S3 multipart URLs with size and content-type limits; server re-checks magic bytes; objects land in a quarantine prefix, malware scan, then moved to the processed bucket; processed media served by CloudFront with OAC and signed URLs; buckets block public access; strip EXIF GPS | PROPOSED (`backendPlan.md` media rows; the old monolith media module) |
 | Logging | Central redaction (passwords, tokens, OTPs, card, bank). See `observability.md` | Go key-based redaction EXISTING (`platform/logging`); other stacks PROPOSED |
 | Dependencies | pnpm 24 h release age block, frozen lockfile, `govulncheck` EXISTING in CI; `pnpm audit`, `pip-audit`, Trivy, SAST, secret scan PROPOSED | see `devops.md` |
 
@@ -180,7 +180,7 @@ sequenceDiagram
 ### R3. Webhook verification library before the payments module
 - **Problem:** no verification code in `services/**`.
 - **Why it matters:** forged "paid" events credit wallets.
-- **Recommendation:** `platform/webhooks` with HMAC verify on raw body, constant-time compare, timestamp tolerance, `webhook_events` unique `(provider, event_id)`; port tests from `apps/api/tests/security`.
+- **Recommendation:** `platform/webhooks` with HMAC verify on raw body, constant-time compare, timestamp tolerance, `webhook_events` unique `(provider, event_id)`; port tests from the old monolith's security tests.
 - **Complexity:** S. **Risk:** low. **Priority: P0**, a hard prerequisite for any payment endpoint.
 - **Tag:** MVP.
 
