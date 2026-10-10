@@ -43,8 +43,8 @@ func TestSettingsWritesNeedStepUpVersionAndValidValues(t *testing.T) {
 	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("config@zudomart.com")
 
 	listed := harness.expect("GET", "/api/v1/admin/config", nil, bearer(accessToken), http.StatusOK)
-	if len(listed["data"].([]any)) != 16 {
-		t.Fatalf("expected the sixteen seeded settings, got %v", listed)
+	if len(listed["data"].([]any)) != 18 {
+		t.Fatalf("expected the eighteen settings, got %v", listed)
 	}
 	tiers := map[string]any{"tiers": []map[string]any{{"minimumMonthlyGiftCoins": 0, "creatorShareBps": 5500}, {"minimumMonthlyGiftCoins": 1000, "creatorShareBps": 7000}}}
 	update := func(value any, version int, reason string) map[string]any {
