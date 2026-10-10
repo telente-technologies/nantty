@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { ProductCard } from "@/components/commerce/productCard";
@@ -44,6 +44,7 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState<string | null>(null);
+  const addToCartInFlight = useRef(false);
 
   const addToCart = useMutation({
     mutationFn: () =>
@@ -69,10 +70,15 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
       setMessage("Choose an option first.");
       return;
     }
+    if (addToCartInFlight.current) return;
+    addToCartInFlight.current = true;
     setMessage(null);
     addToCart.mutate(undefined, {
       onSuccess: () => {
         if (goToCart) router.push("/checkout");
+      },
+      onSettled: () => {
+        addToCartInFlight.current = false;
       },
     });
   }
