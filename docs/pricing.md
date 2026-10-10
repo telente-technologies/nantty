@@ -80,6 +80,8 @@ Store product ids: `com.zudomart.app.coins.tier1` … `tier6` (one id per tier; 
 
 The creator keeps 80% of net (after the store or Paystack fee) everywhere. US bands mirror Patreon/YouTube norms ($4.99 is YouTube's lowest membership price point).
 
+Since 2026-10-05 creators pick a plan price from a fixed tier ladder (₦500, ₦1,000, ₦1,500, ₦2,000, ₦3,000, ₦4,000, ₦5,000 and the regional equivalents; yearly = 10 months) instead of typing one, so each price maps to an App Store / Google Play product. In the apps the price is grossed up by the store fee (admin setting `appStore.fees`: Apple 30%, or 15% in the Small Business Program; Google 15%), so the creator's net matches the web. Ladder, product ids and store setup: [integrations/appStoreProducts.md](integrations/appStoreProducts.md).
+
 ## 5. Ads and boosts (per targeted region)
 
 ### 5.1 Benchmarks (2025–2026, USD; ranges as published)

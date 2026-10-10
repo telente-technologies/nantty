@@ -196,7 +196,7 @@ Requirement: a dedicated studio for users **accepted into the creator program**,
 ### 5.1 Gating **[DONE — §16]**
 
 - Exists: `screens/creator/creatorProgram.screen.tsx` (apply), `creatorApplicationStatus.screen.tsx` (review states), `creatorProgramService.fetchMyCreatorEligibility / fetchMyCreatorApplication / submitCreatorApplication`, and `CreatorDashboardScreen` already degrades to "See the Creator Program" when the dashboard call fails.
-- **[DONE — §16]** Gating is now explicit at the entry point via one shared helper: `useCreatorEntry()` in `hooks/useCreatorStatus.hook.ts` resolves `CreatorDashboard` (status or application `approved`) → `CreatorApplicationStatus` (`pending` / `rejected`) → `CreatorProgram` (otherwise, incl. ineligible — which already renders "Apply when you're eligible"). Applied at every entry: profile shortcuts (`ownProfileShortcuts.tsx`), Settings row, and `openCreatorProgramOrSettings(navigation, destination)` (create/live lock paths). Studio is never surfaced for ineligible accounts.
+- **[DONE — §16]** Gating is now explicit at the entry point via one shared helper: `useCreatorEntry()` in `hooks/useCreatorStatus.hook.ts` resolves `CreatorDashboard` (status or application `approved`) → `CreatorApplicationStatus` (`pending` / `rejected`) → `CreatorProgram` (otherwise, incl. ineligible — which already renders "Apply when you're eligible"). Applied at every entry: the own-profile more menu (`ownProfileMenu.util.ts`), Settings row, and `openCreatorProgramOrSettings(navigation, destination)` (create/live lock paths). Studio is never surfaced for ineligible accounts.
 
 ### 5.2 Studio surface **[DONE — §16]**
 
@@ -826,7 +826,7 @@ Contracts: backendPlan §4.5 (ZudoPoints, social graph) and §4.4 (live ads). Mo
 
 | # | Feature | Mobile scope | Marker |
 | --- | --- | --- | --- |
-| 1 | Private profiles | Public/Private chips in Settings > Privacy (`PATCH /users/me { isPrivate }`); follow states `none/requested/accepted/rejected/blocked`; button reads Follow / Requested / Following; private profile hides posts and shows "This account is private"; Follow requests inbox (approve/decline) from the own-profile shortcuts and Privacy | **[DONE]** |
+| 1 | Private profiles | Public/Private chips in Settings > Privacy (`PATCH /users/me { isPrivate }`); follow states `none/requested/accepted/rejected/blocked`; button reads Follow / Requested / Following; private profile hides posts and shows "This account is private"; Follow requests inbox (approve/decline) from the own-profile more menu (shown for private accounts or when requests are pending) | **[DONE]** |
 | 2 | Followers / Following | Profile counts open a searchable list (`GET /users/:id/followers\|following?q=` returning `{ data, nextCursor }`); private lists return 403 for non-followers and render the private state | **[DONE]** |
 | 3 | Profile switching | Existing switcher sheet extended: Personal / Business (creator is a status on the Personal profile, not a switchable profile; owner correction 2026-10-03); "Create business profile" form with category > subcategory, several allowed, plus custom (pending review); open to any organisation | **[DONE]** |
 | 4 | AI-generated label | "AI generated" switch in the composer sends `isAiGenerated: true`; label on posts and clips | **[DONE]** |
