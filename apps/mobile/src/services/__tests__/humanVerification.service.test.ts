@@ -1,6 +1,6 @@
 import * as WebBrowser from "expo-web-browser";
 
-import { readTokenFromSecurityCheckReturnUrl, runHumanVerificationInAppBrowser } from "../humanVerification.service";
+import { readTokenFromSecurityCheckReturnUrl, runHumanVerificationInAppBrowser } from "../auth/humanVerification.service";
 
 jest.mock("expo-web-browser", () => ({ openAuthSessionAsync: jest.fn() }));
 

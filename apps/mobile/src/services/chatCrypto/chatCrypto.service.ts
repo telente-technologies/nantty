@@ -3,7 +3,7 @@ import { ChatCryptoClient, type ChatPayloadInput, createHttpKeyDirectory, descri
 import { registerSignOutHook, useAuthStore } from "@/store/auth.store";
 import type { Conversation, Message } from "@/types";
 
-import { api, ApiError } from "../apiClient.service";
+import { api, ApiError } from "../core/apiClient.service";
 import { createMobileChatCryptoStorage, randomBytesFromDevice } from "./mobileKeyStore";
 
 let client: ChatCryptoClient | null = null;
@@ -48,6 +48,7 @@ export const chatCryptoService = {
   encryptForUser: async (userId: string, input: ChatPayloadInput): Promise<EncryptedOutgoingMessage> =>
     (await readyClient()).encryptMessage({ kind: "direct", conversationId: null, memberUserIds: [userId] }, input),
   decryptMessages: async <T extends Message>(messages: readonly T[]): Promise<T[]> => {
+    void client?.purgeExpiredPlaintext().catch(() => undefined);
     if (!messages.some((message) => message.encryption?.ciphertext)) return messages.map((message) => (typeof message.linkPreview === "string" ? { ...message, linkPreview: null } : message));
     const results = await (await readyClient()).decryptMessages(messages);
     return messages.map((message) => {
@@ -55,7 +56,9 @@ export const chatCryptoService = {
       const plainPreview = typeof message.linkPreview === "string" ? null : (message.linkPreview ?? null);
       if (result === undefined || result.status === "unencrypted") return { ...message, linkPreview: plainPreview };
       if (result.status === "failed") return { ...message, text: "", linkPreview: null, decryptionNotice: describeDecryptionFailure(result.reason) };
-      return { ...message, text: result.payload.text, linkPreview: result.payload.linkPreview ?? null, decryptionNotice: null };
+      const attachment = result.payload.attachment ?? null;
+      const document = attachment && message.kind === "document" ? { fileName: attachment.fileName ?? "Document", mimeType: attachment.contentType, sizeBytes: attachment.sizeBytes, pageCount: attachment.pageCount ?? null, url: message.document?.url ?? null } : message.document;
+      return { ...message, text: result.payload.text, linkPreview: result.payload.linkPreview ?? null, decryptionNotice: null, attachment, ...(document === undefined ? {} : { document }) };
     });
   },
   forgetMessages: (messageIds: readonly string[]) => client?.forgetMessages(messageIds) ?? Promise.resolve(),
