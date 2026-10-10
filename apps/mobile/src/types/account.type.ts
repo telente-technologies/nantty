@@ -1,4 +1,4 @@
-import type { ID, ISODate, ProductSummary, UserSummary } from "./models.type";
+import type { ID, ISODate, ProductSummary, ProductVariantGroup, UserSummary } from "./models.type";
 import type { FollowState } from "./socialGraph.type";
 import type { CurrencyCode, Money } from "./money.type";
 
@@ -96,6 +96,7 @@ export interface StoreProductInput {
   readonly stock: number;
   readonly sizes: readonly string[];
   readonly colors: readonly string[];
+  readonly variants: readonly ProductVariantGroup[];
   readonly imageUrls: readonly string[];
   readonly brandId?: string | null;
 }

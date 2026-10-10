@@ -1,7 +1,17 @@
 import type { AdAppInstall, AdClickLinks, AdCreativeType, AdDestination } from "./adCreative.type";
 import type { Comment, ID, Media } from "./models.type";
 
-export type ThreadSort = "top" | "latest";
+export type ThreadSort = "relevant" | "latest" | "likes";
+
+export const THREAD_SORT_LABELS: Record<ThreadSort, string> = { relevant: "Relevant", latest: "Latest", likes: "Most liked" };
+
+export interface CommentThreadPage {
+  readonly data: readonly ThreadReply[];
+  readonly nextCursor: string | null;
+  readonly focus: Comment;
+  readonly ancestors: readonly Comment[];
+  readonly maximumVisibleDepth: number;
+}
 
 export interface ThreadConnector {
   readonly depth: number;

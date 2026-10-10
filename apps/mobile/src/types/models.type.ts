@@ -43,6 +43,7 @@ export interface UserSummary {
   readonly avatarUrl: string | null;
   readonly verified: boolean;
   readonly isCreator?: boolean;
+  readonly isPremium?: boolean;
   readonly verification?: Verification | null;
   readonly live?: CreatorLiveStatus | null;
 }
@@ -87,6 +88,11 @@ export interface StoreSummary {
   readonly earnBackBasisPoints?: number | null;
 }
 
+export interface ProductVariantGroup {
+  readonly name: string;
+  readonly options: readonly string[];
+}
+
 export interface ProductSummary {
   readonly id: ID;
   readonly name: string;
@@ -97,6 +103,8 @@ export interface ProductSummary {
   readonly liked?: boolean;
   readonly stock?: number;
   readonly sponsored?: SponsoredPlacement | null;
+  readonly hasVariants: boolean;
+  readonly variantGroups?: readonly ProductVariantGroup[] | null;
 }
 
 export interface Product extends ProductSummary {
@@ -107,6 +115,7 @@ export interface Product extends ProductSummary {
   readonly promo: string | null;
   readonly sizes: readonly string[];
   readonly colors: readonly string[];
+  readonly variantGroups: readonly ProductVariantGroup[];
   readonly shippingInfo: string;
   readonly description: string;
   readonly store: StoreSummary;
@@ -147,6 +156,7 @@ export interface Post {
   readonly id: ID;
   readonly kind: "post" | "clip";
   readonly author: UserSummary;
+  readonly postedAs?: { readonly id: ID; readonly kind: string; readonly name: string; readonly handle: string; readonly avatarUrl: string | null } | null;
   readonly createdAt: ISODate;
   readonly text: string;
   readonly media: readonly Media[];
@@ -173,12 +183,14 @@ export interface Post {
   readonly replyRestriction?: ReplyRestriction | null;
   readonly sensitive?: SensitiveContent | null;
   readonly isAiGenerated?: boolean;
+  readonly pinned?: boolean;
   readonly location?: PostLocationTag | null;
   readonly mentions?: readonly MentionEntity[];
   readonly taggedUsers?: readonly TaggedUser[];
   readonly taggedUsersCount?: number;
   readonly replyToComment?: ReplyToComment;
   readonly stickerLayout?: CommentStickerLayout;
+  readonly look?: string | null;
   readonly linkPreview?: import("./chatSafety.type").LinkPreview | null;
 }
 
@@ -219,7 +231,9 @@ export interface Comment {
   readonly createdAt: ISODate;
   readonly likes: number;
   readonly liked: boolean;
+  readonly bookmarked: boolean;
   readonly replyCount: number;
+  readonly pinned?: boolean;
   readonly replyingTo?: { readonly userId: ID; readonly username: string };
   readonly mentions?: readonly MentionEntity[];
   readonly videoReplies?: readonly CommentVideoReply[];
@@ -252,6 +266,8 @@ export interface Story {
   readonly media: Media;
   readonly createdAt: ISODate;
   readonly seen: boolean;
+  readonly sound?: { readonly id: ID; readonly title: string; readonly owner?: UserSummary | null } | null;
+  readonly look?: string | null;
 }
 
 export interface LiveSession {
@@ -259,7 +275,7 @@ export interface LiveSession {
   readonly host: UserSummary & { readonly followers: number; readonly following: number };
   readonly title: string;
   readonly viewers: number;
-  readonly status: "live" | "ended";
+  readonly status: "upcoming" | "live" | "ended";
   readonly products: readonly ProductSummary[];
 }
 

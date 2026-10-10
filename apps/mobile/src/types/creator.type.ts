@@ -123,6 +123,35 @@ export interface CreatorSubscriptionPlan {
   readonly benefits: readonly string[];
   readonly subscriberCount: number;
   readonly active: boolean;
+  readonly tier?: string;
+  readonly channel?: CreatorBillingChannel;
+  readonly channelPrice?: Money;
+  readonly storeProductId?: string | null;
+}
+
+export type CreatorBillingChannel = "web" | "ios" | "android";
+
+export interface CreatorSubscriptionPriceTier {
+  readonly tier: string;
+  readonly prices: Readonly<Record<CreatorBillingChannel, Money>>;
+  readonly default: boolean;
+}
+
+export interface CreatorStorePurchaseIntent {
+  readonly subscriptionId: ID;
+  readonly platform: "ios" | "android";
+  readonly productId: string;
+  readonly appAccountToken: string;
+  readonly obfuscatedAccountId: string;
+  readonly channelPrice: Money;
+  readonly subscription: CreatorSubscriptionState;
+}
+
+export interface CreatorStoreReceipt {
+  readonly platform: "ios" | "android";
+  readonly productId: string;
+  readonly receipt: string;
+  readonly transactionId: string;
 }
 
 export interface CreatorSubscriptionPlanInput {
@@ -156,4 +185,6 @@ export interface CreatorSubscriptionState {
   readonly interval: "month" | "year";
   readonly currentPeriodEnd: ISODate | null;
   readonly renewsAt: ISODate | null;
+  readonly billingChannel?: "web" | "apple_iap" | "google_play";
+  readonly storeProductId?: string | null;
 }

@@ -1,3 +1,5 @@
+import type { AttachmentPointer } from "@zudomart/chat-crypto";
+
 import type { ChatStreak, InboxFolder, LinkPreview, MessageEncryptionEnvelope, SharedContentCard } from "./chatSafety.type";
 import type { MentionEntity } from "./mention.type";
 import type { ID, ISODate, UserSummary } from "./models.type";
@@ -87,4 +89,5 @@ export interface Message {
   readonly encryption?: MessageEncryptionEnvelope | null;
   readonly mentions?: readonly MentionEntity[];
   readonly decryptionNotice?: string | null;
+  readonly attachment?: AttachmentPointer | null;
 }

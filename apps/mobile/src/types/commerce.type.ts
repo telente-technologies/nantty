@@ -239,3 +239,10 @@ export interface ResolvedBankAccount {
 }
 
 export type ProductCollection = "sales_of_the_day" | "featured_brands" | "new_arrivals";
+
+export interface MyStoreSummary {
+  readonly storeId: string;
+  readonly storeName: string;
+  readonly role: string;
+  readonly isCurrent: boolean;
+}

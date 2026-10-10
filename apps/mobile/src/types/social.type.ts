@@ -81,7 +81,9 @@ export interface NewPostInput {
   readonly mediaIds: readonly ID[];
   readonly audience: PostAudience;
   readonly kind?: "post" | "clip";
+  readonly asProfileId?: ID;
   readonly soundId?: ID;
+  readonly look?: string;
   readonly isAiGenerated?: boolean;
   readonly mentions?: readonly MentionEntity[];
   readonly replyToComment?: ReplyToComment;
@@ -110,6 +112,42 @@ export interface AdEvent {
 export interface NewStoryInput {
   readonly mediaId: ID;
   readonly media: Media;
+  readonly soundId?: ID;
+  readonly look?: string;
+}
+
+export interface StoryAdCreativeMedia {
+  readonly id: ID;
+  readonly kind: "image" | "video";
+  readonly url: string;
+  readonly posterUrl?: string | null;
+  readonly width?: number | null;
+  readonly height?: number | null;
+  readonly durationSeconds?: number | null;
+}
+
+export interface StoryDecidedAd {
+  readonly adId: ID;
+  readonly impressionToken: string;
+  readonly expiresAt: string;
+  readonly placement: "stories";
+  readonly slotKind: "story";
+  readonly format: string;
+  readonly label: "Sponsored" | "Ad";
+  readonly skipAfterSeconds?: number | null;
+  readonly creative: {
+    readonly media: readonly StoryAdCreativeMedia[];
+    readonly headline: string;
+    readonly primaryText: string;
+    readonly callToAction: string;
+    readonly destination: import("./adCreative.type").AdDestination;
+    readonly identity: { readonly name: string; readonly handle: string; readonly avatarUrl: string | null };
+  };
+}
+
+export interface StoryAdDecision {
+  readonly ad: StoryDecidedAd | null;
+  readonly declinedReason?: string;
 }
 
 export type CreatorProgramStatus = "none" | "pending" | "approved" | "rejected" | "suspended";
@@ -127,6 +165,7 @@ export interface LiveSessionDetails {
   readonly giftsEnabled?: boolean;
   readonly hostIsCreator?: boolean;
   readonly pinnedProductId?: ID | null;
+  readonly storeId?: ID | null;
 }
 
 export interface CoinBalance {
