@@ -4,6 +4,8 @@ import { createSuperadmin, stepUpStaff, type StaffActor, type UserActor } from "
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { addToCart, checkout, createBuyerWithAddress, createStoreWithProduct, onboardPayoutAccount, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
 import { payCheckoutThroughFakePaystack, readFakePaystackState, settleTransferThroughFakePaystack } from "../src/fakePaystack.util.js";
+import { expectClearError } from "../src/journeyChecks.util.js";
+import { verifySellerBusiness } from "../src/sellerVerification.util.js";
 
 const processingFeeMinor = 60_000;
 const itemPriceMinor = 1_000_000;
@@ -88,11 +90,14 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     expect(wallet.body.locked?.amountMinor ?? 0, "locked view").toBe(expectedNet);
   });
 
-  it("refuses a withdrawal during the lock, then pays out after the lock passes", { timeout: 240_000 }, async () => {
+  it("refuses a withdrawal before business verification and during the lock, then pays out after the lock passes", { timeout: 240_000 }, async () => {
     await onboardPayoutAccount(storeA.seller);
     const created = await callApi("POST", "/api/v1/wallets/me/payout-accounts", { token: storeA.seller.accessToken, headers: ngn, body: { bankCode: "058", accountNumber: "0123456789", countryCode: "NG" } });
     expect([200, 201], describeResponse(created)).toContain(created.status);
     const payoutAccountId: string = created.body.id ?? created.body.payoutAccount?.id;
+    const unverified = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: ngn, body: { payoutAccountId, amount: { amountMinor: 500_000, currency: "NGN" } } });
+    expectClearError(unverified, 403, "SELLER_VERIFICATION_REQUIRED");
+    await verifySellerBusiness(staff, storeA.seller);
     const early = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: ngn, body: { payoutAccountId, amount: { amountMinor: 500_000, currency: "NGN" } } });
     expect(early.status, `withdrawal during the 24h lock must be refused: ${describeResponse(early)}`).toBeGreaterThanOrEqual(400);
     psql(`update ledger.seller_credit_maturities set available_at = now() - interval '1 minute' where matured_at is null`);
@@ -154,6 +159,7 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     expect(refusedDirect.status, describeResponse(refusedDirect)).toBe(422);
     expect(refusedDirect.body?.error?.code ?? refusedDirect.body?.code).toBe("DIRECT_PAYMENT_NOT_ALLOWED");
     psql(`update catalog.stores set verified = true where id = '${direct.storeId}'`);
+    await verifySellerBusiness(staff, direct.seller);
     await onboardPayoutAccount(direct.seller, "seller");
     const placed = await checkout(buyer, addressId, { [direct.storeId]: "direct" });
     const orderId = placed.orderIds[0]!;

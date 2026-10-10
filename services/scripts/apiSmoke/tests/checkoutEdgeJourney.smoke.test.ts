@@ -1,10 +1,11 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import type { UserActor } from "../src/actors.util.js";
+import { createSuperadmin, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { addToCart, adjustStock, changeVariantPrice, createBuyerWithAddress, createStoreWithProduct, psql, type SmokeStore } from "../src/commerceFixtures.util.js";
 import { payCheckoutThroughFakePaystack, readFakePaystackState } from "../src/fakePaystack.util.js";
 import { expectClearError, expectLedgerBalancedSince } from "../src/journeyChecks.util.js";
+import { revokeSellerBusinessVerification, verifySellerBusiness } from "../src/sellerVerification.util.js";
 
 const shippingMinor = 150_000;
 
@@ -138,5 +139,24 @@ describe("buying when real life gets in the way: stock, prices, double taps, lat
     const cancel = await callApi("POST", `/api/v1/orders/${placed.orderId}/cancel`, { token: buyer.accessToken, body: { reason: "Changed my mind" } });
     expectClearError(cancel, 409, "ORDER_NOT_CANCELLABLE");
     expect(escrowOf(placed.orderId)?.status, "money stays held until delivery or a dispute").toBe("held");
+  });
+
+  it("caps an unverified seller at the ₦200,000 sales limit, lifts it on business verification and restores it on revocation", { timeout: 120_000 }, async () => {
+    const staff = await createSuperadmin();
+    const capSetting = await callApi("GET", "/api/v1/admin/config/seller.unverifiedSalesCap", { token: staff.accessToken });
+    expect(capSetting.status, describeResponse(capSetting)).toBe(200);
+    const capMinor = Number(capSetting.body.value?.capsMinor?.NGN ?? 20_000_000);
+    const pricey = await createStoreWithProduct("edgecap", capMinor, 5);
+    const capBuyer = await createBuyerWithAddress();
+    await addToCart(capBuyer.buyer, pricey, 1);
+    const capped = await callApi("POST", "/api/v1/orders/checkout", { token: capBuyer.buyer.accessToken, body: { addressId: capBuyer.addressId } });
+    expectClearError(capped, 409, "SELLER_SALES_CAP_REACHED");
+    await verifySellerBusiness(staff, pricey.seller);
+    const allowed = await placeOrder(capBuyer.buyer, capBuyer.addressId);
+    expect(allowed.totalMinor, "a verified seller sells past the cap").toBeGreaterThan(capMinor);
+    await revokeSellerBusinessVerification(staff, pricey.seller, "The CAC registration was struck off");
+    await addToCart(capBuyer.buyer, pricey, 1);
+    const cappedAgain = await callApi("POST", "/api/v1/orders/checkout", { token: capBuyer.buyer.accessToken, body: { addressId: capBuyer.addressId } });
+    expectClearError(cappedAgain, 409, "SELLER_SALES_CAP_REACHED");
   });
 });

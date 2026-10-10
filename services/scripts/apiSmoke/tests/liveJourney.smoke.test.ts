@@ -54,7 +54,7 @@ describe("live journey: creator approval → live start → coins → gift with 
     originalRequirements = { value: current.body.value, version: current.body.version };
     const relaxed = await callApi("PUT", "/api/v1/admin/config/creator-thresholds", {
       token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) },
-      body: { value: { ...current.body.value, autoApprove: { ...current.body.value.autoApprove, minimumAccountAgeDays: 0, requiresVerifiedPhone: false, minimumRealFollowers: 0, minimumOriginalPostsInLast60Days: 0 }, manualReview: { ...current.body.value.manualReview, minimumRealFollowers: 0 } }, expectedVersion: current.body.version, reason: "API smoke run needs instant creators" },
+      body: { value: { ...current.body.value, autoApprove: { ...current.body.value.autoApprove, minimumAccountAgeDays: 0, minimumRealFollowers: 0, minimumOriginalPostsInLast60Days: 0 }, manualReview: { ...current.body.value.manualReview, minimumRealFollowers: 0 } }, expectedVersion: current.body.version, reason: "API smoke run needs instant creators" },
     });
     expect(relaxed.status, describeResponse(relaxed)).toBe(200);
     for (const creator of [host, rival]) {

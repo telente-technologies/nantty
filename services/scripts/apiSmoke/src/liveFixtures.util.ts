@@ -13,7 +13,7 @@ export async function refreshAccessToken(actor: UserActor): Promise<UserActor> {
 export async function withRelaxedCreatorThresholds<T>(staff: StaffActor, work: () => Promise<T>): Promise<T> {
   const current = await callApi("GET", "/api/v1/admin/config/creator-thresholds", { token: staff.accessToken });
   expect(current.status, describeResponse(current)).toBe(200);
-  const relaxedValue = { ...current.body.value, autoApprove: { ...current.body.value.autoApprove, minimumAccountAgeDays: 0, requiresVerifiedPhone: false, minimumRealFollowers: 0, minimumOriginalPostsInLast60Days: 0 }, manualReview: { ...current.body.value.manualReview, minimumRealFollowers: 0 } };
+  const relaxedValue = { ...current.body.value, autoApprove: { ...current.body.value.autoApprove, minimumAccountAgeDays: 0, minimumRealFollowers: 0, minimumOriginalPostsInLast60Days: 0 }, manualReview: { ...current.body.value.manualReview, minimumRealFollowers: 0 } };
   const relaxed = await callApi("PUT", "/api/v1/admin/config/creator-thresholds", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { value: relaxedValue, expectedVersion: current.body.version, reason: "API smoke run needs instant creators" } });
   expect(relaxed.status, describeResponse(relaxed)).toBe(200);
   try {

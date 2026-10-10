@@ -95,7 +95,7 @@ describe("seller dashboard journey: product → stock → order → fulfil → p
     const accountId = accounts.body.data[0]?.id;
     expect(accountId, describeResponse(accounts)).toBeDefined();
     const payout = await seller("POST", "/api/v1/seller/wallet/payouts", { body: { amountMinor: 100_000_000, accountId }, idempotencyKey: `payout-${uniqueSuffix()}` });
-    expectClearError(payout, [403, 422], ["PAYOUT_ACCOUNT_NOT_VERIFIED", "INSUFFICIENT_AVAILABLE_BALANCE"]);
+    expectClearError(payout, [403, 422], ["PAYOUT_ACCOUNT_NOT_VERIFIED", "SELLER_VERIFICATION_REQUIRED", "INSUFFICIENT_AVAILABLE_BALANCE"]);
     const payouts = await seller("GET", "/api/v1/seller/wallet/payouts");
     expect(payouts.status, describeResponse(payouts)).toBe(200);
     const schedule = await seller("PUT", "/api/v1/seller/wallet/payouts/schedule", { body: { mode: "weekly", weekday: 5, dayOfMonth: 1, keepMinimumBalanceMinor: 0, accountId } });

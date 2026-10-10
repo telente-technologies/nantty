@@ -33,7 +33,7 @@ describe("subscriptions and trials when people cancel early or their card fails"
     staff = await createSuperadmin();
     const current = await callApi("GET", "/api/v1/admin/config/trial-rules", { token: staff.accessToken });
     if (current.status === 200) original = { value: current.body.value, version: current.body.version };
-    const base = (original?.value as Record<string, unknown> | undefined) ?? { trialLength: "7d", yearlyDiscountPercent: 20, requiresVerifiedEmail: true, onePerPerson: true, onePerCard: true, onePerDevice: true, onePerPhone: true, maximumRiskScore: 50, minimumCompletedOrders: 0 };
+    const base = (original?.value as Record<string, unknown> | undefined) ?? { trialLength: "7d", yearlyDiscountPercent: 20, requiresVerifiedEmail: true, onePerPerson: true, onePerCard: true, onePerDevice: true, maximumRiskScore: 50, minimumCompletedOrders: 0 };
     const relaxed = await callApi("PUT", "/api/v1/admin/config/trial-rules", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { value: { ...base, minimumAccountAgeDays: 0, onePerCard: false, minimumCompletedOrders: 0 }, expectedVersion: original?.version ?? 0, reason: "API smoke run needs new accounts to try a trial" } });
     expect([200, 201], describeResponse(relaxed)).toContain(relaxed.status);
   });

@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import { createSuperadmin, registerUser, stepUpStaff, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix } from "../src/apiClient.util.js";
+import { verifySellerBusiness } from "../src/sellerVerification.util.js";
 
 const outputPath = process.env["LOAD_FIXTURES_PATH"] ?? resolve(import.meta.dirname, "../reports/loadFixtures.json");
 const userCount = Number(process.env["LOAD_USER_COUNT"] ?? "10");
@@ -36,7 +37,7 @@ async function createBuyerAddress(buyer: UserActor): Promise<string> {
 async function main(): Promise<void> {
   const staff = await createSuperadmin();
   const current = await callApi("GET", "/api/v1/admin/config/creator-thresholds", { token: staff.accessToken });
-  await callApi("PUT", "/api/v1/admin/config/creator-thresholds", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { value: { ...current.body.value, autoApprove: { ...current.body.value.autoApprove, minimumAccountAgeDays: 0, requiresVerifiedPhone: false, minimumRealFollowers: 0, minimumOriginalPostsInLast60Days: 0 }, manualReview: { ...current.body.value.manualReview, minimumRealFollowers: 0 } }, expectedVersion: current.body.version, reason: "Load fixtures need an instant creator" } });
+  await callApi("PUT", "/api/v1/admin/config/creator-thresholds", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { value: { ...current.body.value, autoApprove: { ...current.body.value.autoApprove, minimumAccountAgeDays: 0, minimumRealFollowers: 0, minimumOriginalPostsInLast60Days: 0 }, manualReview: { ...current.body.value.manualReview, minimumRealFollowers: 0 } }, expectedVersion: current.body.version, reason: "Load fixtures need an instant creator" } });
   let host = await registerUser("loadhost");
   await expectOk("creator application", await callApi("POST", "/api/v1/users/me/creator-application", { token: host.accessToken, body: {} }));
   const refreshed = await expectOk("refresh", await callApi("POST", "/api/v1/auth/refresh", { body: { refreshToken: host.refreshToken } }));
@@ -48,6 +49,7 @@ async function main(): Promise<void> {
   await expectOk("gift", await callApi("POST", "/api/v1/admin/gifts", { token: staff.accessToken, body: { id: giftId, name: "Load Rose", tier: "basic", priceCoins: 1, animationEngine: "lottie", animationAssetKey: "gifts/rose.json", previewAssetKey: "gifts/rose.png", durationMs: 1000, displayLevel: "micro", comboable: true, isActive: true, sortOrder: 1 } }));
   const seller = await registerUser("loadseller");
   const store = await createStoreWithProduct(seller);
+  await verifySellerBusiness(staff, seller);
   const users: Array<UserActor & { addressId: string }> = [];
   for (let index = 0; index < userCount; index += 1) {
     const user = await registerUser("loaduser");
