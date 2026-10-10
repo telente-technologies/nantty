@@ -78,12 +78,15 @@ func ServeAccountDirectoryUntilContextDone(ctx context.Context, address, interna
 
 func requireInternalBearerToken(expected string) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, request any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+		if expected == "" {
+			return nil, status.Error(codes.Unauthenticated, "internal token required")
+		}
 		values := metadata.ValueFromIncomingContext(ctx, "authorization")
 		presented := ""
 		if len(values) > 0 {
 			presented = strings.TrimPrefix(values[0], "Bearer ")
 		}
-		if expected != "" && subtle.ConstantTimeCompare([]byte(presented), []byte(expected)) != 1 {
+		if presented == "" || subtle.ConstantTimeCompare([]byte(presented), []byte(expected)) != 1 {
 			return nil, status.Error(codes.Unauthenticated, "internal token required")
 		}
 		return handler(ctx, request)

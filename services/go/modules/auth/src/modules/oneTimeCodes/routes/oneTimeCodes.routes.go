@@ -5,10 +5,12 @@ import (
 
 	"zudomart/modules/auth/src/container"
 	"zudomart/modules/auth/src/modules/oneTimeCodes/controllers"
+	"zudomart/platform/httpserver"
 )
 
 func MountOneTimeCodesRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.OneTimeCodesController{Container: container}
-	mux.HandleFunc("POST /api/v1/auth/otp/send", controller.SendOneTimeCode)
-	mux.HandleFunc("POST /api/v1/auth/otp/verify", controller.VerifyOneTimeCode)
+	rateLimitAuth := httpserver.RateLimitAuthEndpoints()
+	mux.Handle("POST /api/v1/auth/otp/send", rateLimitAuth(http.HandlerFunc(controller.SendOneTimeCode)))
+	mux.Handle("POST /api/v1/auth/otp/verify", rateLimitAuth(http.HandlerFunc(controller.VerifyOneTimeCode)))
 }

@@ -21,6 +21,7 @@ var (
 	ErrSocialEmailNotVerified    = httpserver.NewApiError(http.StatusUnprocessableEntity, "SOCIAL_EMAIL_NOT_VERIFIED", "The provider has not verified your email address.")
 	ErrSignupBlocked             = httpserver.NewApiError(http.StatusForbidden, "SIGNUP_BLOCKED", "We cannot create an account with these details.")
 	ErrAccountBanned             = httpserver.NewApiError(http.StatusForbidden, "ACCOUNT_BANNED", "This account has been banned.")
+	ErrAccountSuspended          = httpserver.NewApiError(http.StatusForbidden, "ACCOUNT_SUSPENDED", "This account has been suspended.")
 	ErrAccountDeleted            = httpserver.NewApiError(http.StatusForbidden, "ACCOUNT_DELETED", "This account was deleted. Create a new account to come back.")
 	ErrSessionNotFound           = httpserver.NewApiError(http.StatusNotFound, "SESSION_NOT_FOUND", "That session was not found.")
 )
