@@ -20,6 +20,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
+	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
@@ -1653,6 +1654,67 @@ func init() {
 	savedcardsetupDescID := savedcardsetupMixinFields0[0].Descriptor()
 	// savedcardsetup.DefaultID holds the default value on creation for the id field.
 	savedcardsetup.DefaultID = savedcardsetupDescID.Default.(func() uuid.UUID)
+	sellerverificationMixin := schema.SellerVerification{}.Mixin()
+	sellerverificationMixinFields0 := sellerverificationMixin[0].Fields()
+	_ = sellerverificationMixinFields0
+	sellerverificationFields := schema.SellerVerification{}.Fields()
+	_ = sellerverificationFields
+	// sellerverificationDescCreatedAt is the schema descriptor for created_at field.
+	sellerverificationDescCreatedAt := sellerverificationMixinFields0[1].Descriptor()
+	// sellerverification.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sellerverification.DefaultCreatedAt = sellerverificationDescCreatedAt.Default.(func() time.Time)
+	// sellerverificationDescAccountID is the schema descriptor for account_id field.
+	sellerverificationDescAccountID := sellerverificationFields[0].Descriptor()
+	// sellerverification.AccountIDValidator is a validator for the "account_id" field. It is called by the builders before save.
+	sellerverification.AccountIDValidator = func() func(string) error {
+		validators := sellerverificationDescAccountID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(account_id string) error {
+			for _, fn := range fns {
+				if err := fn(account_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerverificationDescSource is the schema descriptor for source field.
+	sellerverificationDescSource := sellerverificationFields[1].Descriptor()
+	// sellerverification.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	sellerverification.SourceValidator = func() func(string) error {
+		validators := sellerverificationDescSource.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(source string) error {
+			for _, fn := range fns {
+				if err := fn(source); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// sellerverificationDescEventID is the schema descriptor for event_id field.
+	sellerverificationDescEventID := sellerverificationFields[2].Descriptor()
+	// sellerverification.DefaultEventID holds the default value on creation for the event_id field.
+	sellerverification.DefaultEventID = sellerverificationDescEventID.Default.(string)
+	// sellerverification.EventIDValidator is a validator for the "event_id" field. It is called by the builders before save.
+	sellerverification.EventIDValidator = sellerverificationDescEventID.Validators[0].(func(string) error)
+	// sellerverificationDescRevokedEventID is the schema descriptor for revoked_event_id field.
+	sellerverificationDescRevokedEventID := sellerverificationFields[5].Descriptor()
+	// sellerverification.DefaultRevokedEventID holds the default value on creation for the revoked_event_id field.
+	sellerverification.DefaultRevokedEventID = sellerverificationDescRevokedEventID.Default.(string)
+	// sellerverification.RevokedEventIDValidator is a validator for the "revoked_event_id" field. It is called by the builders before save.
+	sellerverification.RevokedEventIDValidator = sellerverificationDescRevokedEventID.Validators[0].(func(string) error)
+	// sellerverificationDescID is the schema descriptor for id field.
+	sellerverificationDescID := sellerverificationMixinFields0[0].Descriptor()
+	// sellerverification.DefaultID holds the default value on creation for the id field.
+	sellerverification.DefaultID = sellerverificationDescID.Default.(func() uuid.UUID)
 	storepurchaseMixin := schema.StorePurchase{}.Mixin()
 	storepurchaseMixinFields0 := storepurchaseMixin[0].Fields()
 	_ = storepurchaseMixinFields0

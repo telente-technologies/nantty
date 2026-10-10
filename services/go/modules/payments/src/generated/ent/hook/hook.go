@@ -188,6 +188,18 @@ func (f SavedCardSetupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SavedCardSetupMutation", m)
 }
 
+// The SellerVerificationFunc type is an adapter to allow the use of ordinary
+// function as SellerVerification mutator.
+type SellerVerificationFunc func(context.Context, *ent.SellerVerificationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SellerVerificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SellerVerificationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SellerVerificationMutation", m)
+}
+
 // The StorePurchaseFunc type is an adapter to allow the use of ordinary
 // function as StorePurchase mutator.
 type StorePurchaseFunc func(context.Context, *ent.StorePurchaseMutation) (ent.Value, error)

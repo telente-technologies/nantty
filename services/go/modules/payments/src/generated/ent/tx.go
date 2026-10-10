@@ -44,6 +44,8 @@ type Tx struct {
 	ProviderPayoutDestination *ProviderPayoutDestinationClient
 	// SavedCardSetup is the client for interacting with the SavedCardSetup builders.
 	SavedCardSetup *SavedCardSetupClient
+	// SellerVerification is the client for interacting with the SellerVerification builders.
+	SellerVerification *SellerVerificationClient
 	// StorePurchase is the client for interacting with the StorePurchase builders.
 	StorePurchase *StorePurchaseClient
 	// WebhookEvent is the client for interacting with the WebhookEvent builders.
@@ -194,6 +196,7 @@ func (tx *Tx) init() {
 	tx.ProviderDispute = NewProviderDisputeClient(tx.config)
 	tx.ProviderPayoutDestination = NewProviderPayoutDestinationClient(tx.config)
 	tx.SavedCardSetup = NewSavedCardSetupClient(tx.config)
+	tx.SellerVerification = NewSellerVerificationClient(tx.config)
 	tx.StorePurchase = NewStorePurchaseClient(tx.config)
 	tx.WebhookEvent = NewWebhookEventClient(tx.config)
 }

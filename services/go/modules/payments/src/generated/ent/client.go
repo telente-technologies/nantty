@@ -26,6 +26,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
+	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
@@ -73,6 +74,8 @@ type Client struct {
 	ProviderPayoutDestination *ProviderPayoutDestinationClient
 	// SavedCardSetup is the client for interacting with the SavedCardSetup builders.
 	SavedCardSetup *SavedCardSetupClient
+	// SellerVerification is the client for interacting with the SellerVerification builders.
+	SellerVerification *SellerVerificationClient
 	// StorePurchase is the client for interacting with the StorePurchase builders.
 	StorePurchase *StorePurchaseClient
 	// WebhookEvent is the client for interacting with the WebhookEvent builders.
@@ -103,6 +106,7 @@ func (c *Client) init() {
 	c.ProviderDispute = NewProviderDisputeClient(c.config)
 	c.ProviderPayoutDestination = NewProviderPayoutDestinationClient(c.config)
 	c.SavedCardSetup = NewSavedCardSetupClient(c.config)
+	c.SellerVerification = NewSellerVerificationClient(c.config)
 	c.StorePurchase = NewStorePurchaseClient(c.config)
 	c.WebhookEvent = NewWebhookEventClient(c.config)
 }
@@ -214,6 +218,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ProviderDispute:           NewProviderDisputeClient(cfg),
 		ProviderPayoutDestination: NewProviderPayoutDestinationClient(cfg),
 		SavedCardSetup:            NewSavedCardSetupClient(cfg),
+		SellerVerification:        NewSellerVerificationClient(cfg),
 		StorePurchase:             NewStorePurchaseClient(cfg),
 		WebhookEvent:              NewWebhookEventClient(cfg),
 	}, nil
@@ -250,6 +255,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ProviderDispute:           NewProviderDisputeClient(cfg),
 		ProviderPayoutDestination: NewProviderPayoutDestinationClient(cfg),
 		SavedCardSetup:            NewSavedCardSetupClient(cfg),
+		SellerVerification:        NewSellerVerificationClient(cfg),
 		StorePurchase:             NewStorePurchaseClient(cfg),
 		WebhookEvent:              NewWebhookEventClient(cfg),
 	}, nil
@@ -285,7 +291,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.ConnectedAccountJob, c.IdempotentRequest, c.OrderPayable, c.OutboxEvent,
 		c.PaymentIntent, c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer,
 		c.ProviderCustomer, c.ProviderDispute, c.ProviderPayoutDestination,
-		c.SavedCardSetup, c.StorePurchase, c.WebhookEvent,
+		c.SavedCardSetup, c.SellerVerification, c.StorePurchase, c.WebhookEvent,
 	} {
 		n.Use(hooks...)
 	}
@@ -299,7 +305,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.ConnectedAccountJob, c.IdempotentRequest, c.OrderPayable, c.OutboxEvent,
 		c.PaymentIntent, c.PaymentRefund, c.PayoutOnboarding, c.PayoutTransfer,
 		c.ProviderCustomer, c.ProviderDispute, c.ProviderPayoutDestination,
-		c.SavedCardSetup, c.StorePurchase, c.WebhookEvent,
+		c.SavedCardSetup, c.SellerVerification, c.StorePurchase, c.WebhookEvent,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -338,6 +344,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ProviderPayoutDestination.mutate(ctx, m)
 	case *SavedCardSetupMutation:
 		return c.SavedCardSetup.mutate(ctx, m)
+	case *SellerVerificationMutation:
+		return c.SellerVerification.mutate(ctx, m)
 	case *StorePurchaseMutation:
 		return c.StorePurchase.mutate(ctx, m)
 	case *WebhookEventMutation:
@@ -2342,6 +2350,139 @@ func (c *SavedCardSetupClient) mutate(ctx context.Context, m *SavedCardSetupMuta
 	}
 }
 
+// SellerVerificationClient is a client for the SellerVerification schema.
+type SellerVerificationClient struct {
+	config
+}
+
+// NewSellerVerificationClient returns a client for the SellerVerification from the given config.
+func NewSellerVerificationClient(c config) *SellerVerificationClient {
+	return &SellerVerificationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sellerverification.Hooks(f(g(h())))`.
+func (c *SellerVerificationClient) Use(hooks ...Hook) {
+	c.hooks.SellerVerification = append(c.hooks.SellerVerification, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sellerverification.Intercept(f(g(h())))`.
+func (c *SellerVerificationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SellerVerification = append(c.inters.SellerVerification, interceptors...)
+}
+
+// Create returns a builder for creating a SellerVerification entity.
+func (c *SellerVerificationClient) Create() *SellerVerificationCreate {
+	mutation := newSellerVerificationMutation(c.config, OpCreate)
+	return &SellerVerificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SellerVerification entities.
+func (c *SellerVerificationClient) CreateBulk(builders ...*SellerVerificationCreate) *SellerVerificationCreateBulk {
+	return &SellerVerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SellerVerificationClient) MapCreateBulk(slice any, setFunc func(*SellerVerificationCreate, int)) *SellerVerificationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SellerVerificationCreateBulk{err: fmt.Errorf("calling to SellerVerificationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SellerVerificationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SellerVerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SellerVerification.
+func (c *SellerVerificationClient) Update() *SellerVerificationUpdate {
+	mutation := newSellerVerificationMutation(c.config, OpUpdate)
+	return &SellerVerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SellerVerificationClient) UpdateOne(_m *SellerVerification) *SellerVerificationUpdateOne {
+	mutation := newSellerVerificationMutation(c.config, OpUpdateOne, withSellerVerification(_m))
+	return &SellerVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SellerVerificationClient) UpdateOneID(id uuid.UUID) *SellerVerificationUpdateOne {
+	mutation := newSellerVerificationMutation(c.config, OpUpdateOne, withSellerVerificationID(id))
+	return &SellerVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SellerVerification.
+func (c *SellerVerificationClient) Delete() *SellerVerificationDelete {
+	mutation := newSellerVerificationMutation(c.config, OpDelete)
+	return &SellerVerificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SellerVerificationClient) DeleteOne(_m *SellerVerification) *SellerVerificationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SellerVerificationClient) DeleteOneID(id uuid.UUID) *SellerVerificationDeleteOne {
+	builder := c.Delete().Where(sellerverification.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SellerVerificationDeleteOne{builder}
+}
+
+// Query returns a query builder for SellerVerification.
+func (c *SellerVerificationClient) Query() *SellerVerificationQuery {
+	return &SellerVerificationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSellerVerification},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SellerVerification entity by its id.
+func (c *SellerVerificationClient) Get(ctx context.Context, id uuid.UUID) (*SellerVerification, error) {
+	return c.Query().Where(sellerverification.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SellerVerificationClient) GetX(ctx context.Context, id uuid.UUID) *SellerVerification {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SellerVerificationClient) Hooks() []Hook {
+	return c.hooks.SellerVerification
+}
+
+// Interceptors returns the client interceptors.
+func (c *SellerVerificationClient) Interceptors() []Interceptor {
+	return c.inters.SellerVerification
+}
+
+func (c *SellerVerificationClient) mutate(ctx context.Context, m *SellerVerificationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SellerVerificationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SellerVerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SellerVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SellerVerificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SellerVerification mutation op: %q", m.Op())
+	}
+}
+
 // StorePurchaseClient is a client for the StorePurchase schema.
 type StorePurchaseClient struct {
 	config
@@ -2615,14 +2756,14 @@ type (
 		ConnectedAccountJob, IdempotentRequest, OrderPayable, OutboxEvent,
 		PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
 		ProviderCustomer, ProviderDispute, ProviderPayoutDestination, SavedCardSetup,
-		StorePurchase, WebhookEvent []ent.Hook
+		SellerVerification, StorePurchase, WebhookEvent []ent.Hook
 	}
 	inters struct {
 		BillingAuthorization, BillingSubscription, ConnectedAccount,
 		ConnectedAccountJob, IdempotentRequest, OrderPayable, OutboxEvent,
 		PaymentIntent, PaymentRefund, PayoutOnboarding, PayoutTransfer,
 		ProviderCustomer, ProviderDispute, ProviderPayoutDestination, SavedCardSetup,
-		StorePurchase, WebhookEvent []ent.Interceptor
+		SellerVerification, StorePurchase, WebhookEvent []ent.Interceptor
 	}
 )
 

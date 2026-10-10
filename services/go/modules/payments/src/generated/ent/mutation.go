@@ -24,6 +24,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
+	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
@@ -56,6 +57,7 @@ const (
 	TypeProviderDispute           = "ProviderDispute"
 	TypeProviderPayoutDestination = "ProviderPayoutDestination"
 	TypeSavedCardSetup            = "SavedCardSetup"
+	TypeSellerVerification        = "SellerVerification"
 	TypeStorePurchase             = "StorePurchase"
 	TypeWebhookEvent              = "WebhookEvent"
 )
@@ -17238,6 +17240,684 @@ func (m *SavedCardSetupMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *SavedCardSetupMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown SavedCardSetup edge %s", name)
+}
+
+// SellerVerificationMutation represents an operation that mutates the SellerVerification nodes in the graph.
+type SellerVerificationMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	created_at       *time.Time
+	account_id       *string
+	source           *string
+	event_id         *string
+	verified_at      *time.Time
+	revoked_at       *time.Time
+	revoked_event_id *string
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*SellerVerification, error)
+	predicates       []predicate.SellerVerification
+}
+
+var _ ent.Mutation = (*SellerVerificationMutation)(nil)
+
+// sellerverificationOption allows management of the mutation configuration using functional options.
+type sellerverificationOption func(*SellerVerificationMutation)
+
+// newSellerVerificationMutation creates new mutation for the SellerVerification entity.
+func newSellerVerificationMutation(c config, op Op, opts ...sellerverificationOption) *SellerVerificationMutation {
+	m := &SellerVerificationMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSellerVerification,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSellerVerificationID sets the ID field of the mutation.
+func withSellerVerificationID(id uuid.UUID) sellerverificationOption {
+	return func(m *SellerVerificationMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SellerVerification
+		)
+		m.oldValue = func(ctx context.Context) (*SellerVerification, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SellerVerification.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSellerVerification sets the old SellerVerification of the mutation.
+func withSellerVerification(node *SellerVerification) sellerverificationOption {
+	return func(m *SellerVerificationMutation) {
+		m.oldValue = func(context.Context) (*SellerVerification, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SellerVerificationMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SellerVerificationMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SellerVerification entities.
+func (m *SellerVerificationMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SellerVerificationMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SellerVerificationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SellerVerification.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *SellerVerificationMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *SellerVerificationMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the SellerVerification entity.
+// If the SellerVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerVerificationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *SellerVerificationMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *SellerVerificationMutation) SetAccountID(s string) {
+	m.account_id = &s
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *SellerVerificationMutation) AccountID() (r string, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the SellerVerification entity.
+// If the SellerVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerVerificationMutation) OldAccountID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *SellerVerificationMutation) ResetAccountID() {
+	m.account_id = nil
+}
+
+// SetSource sets the "source" field.
+func (m *SellerVerificationMutation) SetSource(s string) {
+	m.source = &s
+}
+
+// Source returns the value of the "source" field in the mutation.
+func (m *SellerVerificationMutation) Source() (r string, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSource returns the old "source" field's value of the SellerVerification entity.
+// If the SellerVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerVerificationMutation) OldSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSource: %w", err)
+	}
+	return oldValue.Source, nil
+}
+
+// ResetSource resets all changes to the "source" field.
+func (m *SellerVerificationMutation) ResetSource() {
+	m.source = nil
+}
+
+// SetEventID sets the "event_id" field.
+func (m *SellerVerificationMutation) SetEventID(s string) {
+	m.event_id = &s
+}
+
+// EventID returns the value of the "event_id" field in the mutation.
+func (m *SellerVerificationMutation) EventID() (r string, exists bool) {
+	v := m.event_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEventID returns the old "event_id" field's value of the SellerVerification entity.
+// If the SellerVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerVerificationMutation) OldEventID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEventID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEventID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEventID: %w", err)
+	}
+	return oldValue.EventID, nil
+}
+
+// ResetEventID resets all changes to the "event_id" field.
+func (m *SellerVerificationMutation) ResetEventID() {
+	m.event_id = nil
+}
+
+// SetVerifiedAt sets the "verified_at" field.
+func (m *SellerVerificationMutation) SetVerifiedAt(t time.Time) {
+	m.verified_at = &t
+}
+
+// VerifiedAt returns the value of the "verified_at" field in the mutation.
+func (m *SellerVerificationMutation) VerifiedAt() (r time.Time, exists bool) {
+	v := m.verified_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVerifiedAt returns the old "verified_at" field's value of the SellerVerification entity.
+// If the SellerVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerVerificationMutation) OldVerifiedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVerifiedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVerifiedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVerifiedAt: %w", err)
+	}
+	return oldValue.VerifiedAt, nil
+}
+
+// ResetVerifiedAt resets all changes to the "verified_at" field.
+func (m *SellerVerificationMutation) ResetVerifiedAt() {
+	m.verified_at = nil
+}
+
+// SetRevokedAt sets the "revoked_at" field.
+func (m *SellerVerificationMutation) SetRevokedAt(t time.Time) {
+	m.revoked_at = &t
+}
+
+// RevokedAt returns the value of the "revoked_at" field in the mutation.
+func (m *SellerVerificationMutation) RevokedAt() (r time.Time, exists bool) {
+	v := m.revoked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedAt returns the old "revoked_at" field's value of the SellerVerification entity.
+// If the SellerVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerVerificationMutation) OldRevokedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedAt: %w", err)
+	}
+	return oldValue.RevokedAt, nil
+}
+
+// ClearRevokedAt clears the value of the "revoked_at" field.
+func (m *SellerVerificationMutation) ClearRevokedAt() {
+	m.revoked_at = nil
+	m.clearedFields[sellerverification.FieldRevokedAt] = struct{}{}
+}
+
+// RevokedAtCleared returns if the "revoked_at" field was cleared in this mutation.
+func (m *SellerVerificationMutation) RevokedAtCleared() bool {
+	_, ok := m.clearedFields[sellerverification.FieldRevokedAt]
+	return ok
+}
+
+// ResetRevokedAt resets all changes to the "revoked_at" field.
+func (m *SellerVerificationMutation) ResetRevokedAt() {
+	m.revoked_at = nil
+	delete(m.clearedFields, sellerverification.FieldRevokedAt)
+}
+
+// SetRevokedEventID sets the "revoked_event_id" field.
+func (m *SellerVerificationMutation) SetRevokedEventID(s string) {
+	m.revoked_event_id = &s
+}
+
+// RevokedEventID returns the value of the "revoked_event_id" field in the mutation.
+func (m *SellerVerificationMutation) RevokedEventID() (r string, exists bool) {
+	v := m.revoked_event_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedEventID returns the old "revoked_event_id" field's value of the SellerVerification entity.
+// If the SellerVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SellerVerificationMutation) OldRevokedEventID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedEventID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedEventID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedEventID: %w", err)
+	}
+	return oldValue.RevokedEventID, nil
+}
+
+// ResetRevokedEventID resets all changes to the "revoked_event_id" field.
+func (m *SellerVerificationMutation) ResetRevokedEventID() {
+	m.revoked_event_id = nil
+}
+
+// Where appends a list predicates to the SellerVerificationMutation builder.
+func (m *SellerVerificationMutation) Where(ps ...predicate.SellerVerification) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SellerVerificationMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SellerVerificationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SellerVerification, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SellerVerificationMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SellerVerificationMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SellerVerification).
+func (m *SellerVerificationMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SellerVerificationMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, sellerverification.FieldCreatedAt)
+	}
+	if m.account_id != nil {
+		fields = append(fields, sellerverification.FieldAccountID)
+	}
+	if m.source != nil {
+		fields = append(fields, sellerverification.FieldSource)
+	}
+	if m.event_id != nil {
+		fields = append(fields, sellerverification.FieldEventID)
+	}
+	if m.verified_at != nil {
+		fields = append(fields, sellerverification.FieldVerifiedAt)
+	}
+	if m.revoked_at != nil {
+		fields = append(fields, sellerverification.FieldRevokedAt)
+	}
+	if m.revoked_event_id != nil {
+		fields = append(fields, sellerverification.FieldRevokedEventID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SellerVerificationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case sellerverification.FieldCreatedAt:
+		return m.CreatedAt()
+	case sellerverification.FieldAccountID:
+		return m.AccountID()
+	case sellerverification.FieldSource:
+		return m.Source()
+	case sellerverification.FieldEventID:
+		return m.EventID()
+	case sellerverification.FieldVerifiedAt:
+		return m.VerifiedAt()
+	case sellerverification.FieldRevokedAt:
+		return m.RevokedAt()
+	case sellerverification.FieldRevokedEventID:
+		return m.RevokedEventID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SellerVerificationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case sellerverification.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case sellerverification.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case sellerverification.FieldSource:
+		return m.OldSource(ctx)
+	case sellerverification.FieldEventID:
+		return m.OldEventID(ctx)
+	case sellerverification.FieldVerifiedAt:
+		return m.OldVerifiedAt(ctx)
+	case sellerverification.FieldRevokedAt:
+		return m.OldRevokedAt(ctx)
+	case sellerverification.FieldRevokedEventID:
+		return m.OldRevokedEventID(ctx)
+	}
+	return nil, fmt.Errorf("unknown SellerVerification field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SellerVerificationMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case sellerverification.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case sellerverification.FieldAccountID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case sellerverification.FieldSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSource(v)
+		return nil
+	case sellerverification.FieldEventID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEventID(v)
+		return nil
+	case sellerverification.FieldVerifiedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVerifiedAt(v)
+		return nil
+	case sellerverification.FieldRevokedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedAt(v)
+		return nil
+	case sellerverification.FieldRevokedEventID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedEventID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SellerVerification field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SellerVerificationMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SellerVerificationMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SellerVerificationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SellerVerification numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SellerVerificationMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(sellerverification.FieldRevokedAt) {
+		fields = append(fields, sellerverification.FieldRevokedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SellerVerificationMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SellerVerificationMutation) ClearField(name string) error {
+	switch name {
+	case sellerverification.FieldRevokedAt:
+		m.ClearRevokedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown SellerVerification nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SellerVerificationMutation) ResetField(name string) error {
+	switch name {
+	case sellerverification.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case sellerverification.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case sellerverification.FieldSource:
+		m.ResetSource()
+		return nil
+	case sellerverification.FieldEventID:
+		m.ResetEventID()
+		return nil
+	case sellerverification.FieldVerifiedAt:
+		m.ResetVerifiedAt()
+		return nil
+	case sellerverification.FieldRevokedAt:
+		m.ResetRevokedAt()
+		return nil
+	case sellerverification.FieldRevokedEventID:
+		m.ResetRevokedEventID()
+		return nil
+	}
+	return fmt.Errorf("unknown SellerVerification field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SellerVerificationMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SellerVerificationMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SellerVerificationMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SellerVerificationMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SellerVerificationMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SellerVerificationMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SellerVerificationMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SellerVerification unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SellerVerificationMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SellerVerification edge %s", name)
 }
 
 // StorePurchaseMutation represents an operation that mutates the StorePurchase nodes in the graph.

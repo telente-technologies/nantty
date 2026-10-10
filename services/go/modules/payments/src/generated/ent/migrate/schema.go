@@ -251,6 +251,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{OrderPayablesColumns[2]},
 			},
+			{
+				Name:    "orderpayable_seller_user_id_currency_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{OrderPayablesColumns[7], OrderPayablesColumns[9], OrderPayablesColumns[1]},
+			},
 		},
 	}
 	// OutboxEventsColumns holds the columns for the "outbox_events" table.
@@ -622,6 +627,30 @@ var (
 			},
 		},
 	}
+	// SellerVerificationsColumns holds the columns for the "seller_verifications" table.
+	SellerVerificationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeString, Size: 80},
+		{Name: "source", Type: field.TypeString, Size: 60},
+		{Name: "event_id", Type: field.TypeString, Size: 80, Default: ""},
+		{Name: "verified_at", Type: field.TypeTime},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "revoked_event_id", Type: field.TypeString, Size: 80, Default: ""},
+	}
+	// SellerVerificationsTable holds the schema information for the "seller_verifications" table.
+	SellerVerificationsTable = &schema.Table{
+		Name:       "seller_verifications",
+		Columns:    SellerVerificationsColumns,
+		PrimaryKey: []*schema.Column{SellerVerificationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "sellerverification_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{SellerVerificationsColumns[2]},
+			},
+		},
+	}
 	// StorePurchasesColumns holds the columns for the "store_purchases" table.
 	StorePurchasesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -707,6 +736,7 @@ var (
 		ProviderDisputesTable,
 		ProviderPayoutDestinationsTable,
 		SavedCardSetupsTable,
+		SellerVerificationsTable,
 		StorePurchasesTable,
 		WebhookEventsTable,
 	}

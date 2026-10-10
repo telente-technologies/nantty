@@ -23,6 +23,7 @@ import (
 	"zudomart/modules/payments/src/generated/ent/providerdispute"
 	"zudomart/modules/payments/src/generated/ent/providerpayoutdestination"
 	"zudomart/modules/payments/src/generated/ent/savedcardsetup"
+	"zudomart/modules/payments/src/generated/ent/sellerverification"
 	"zudomart/modules/payments/src/generated/ent/storepurchase"
 	"zudomart/modules/payments/src/generated/ent/webhookevent"
 
@@ -104,6 +105,7 @@ func checkColumn(t, c string) error {
 			providerdispute.Table:           providerdispute.ValidColumn,
 			providerpayoutdestination.Table: providerpayoutdestination.ValidColumn,
 			savedcardsetup.Table:            savedcardsetup.ValidColumn,
+			sellerverification.Table:        sellerverification.ValidColumn,
 			storepurchase.Table:             storepurchase.ValidColumn,
 			webhookevent.Table:              webhookevent.ValidColumn,
 		})

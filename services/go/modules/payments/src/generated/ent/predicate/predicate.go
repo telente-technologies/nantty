@@ -51,6 +51,9 @@ type ProviderPayoutDestination func(*sql.Selector)
 // SavedCardSetup is the predicate function for savedcardsetup builders.
 type SavedCardSetup func(*sql.Selector)
 
+// SellerVerification is the predicate function for sellerverification builders.
+type SellerVerification func(*sql.Selector)
+
 // StorePurchase is the predicate function for storepurchase builders.
 type StorePurchase func(*sql.Selector)
 

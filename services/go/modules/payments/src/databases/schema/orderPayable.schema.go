@@ -37,5 +37,5 @@ func (OrderPayable) Fields() []ent.Field {
 }
 
 func (OrderPayable) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("order_id").Unique(), index.Fields("checkout_id")}
+	return []ent.Index{index.Fields("order_id").Unique(), index.Fields("checkout_id"), index.Fields("seller_user_id", "currency", "created_at")}
 }

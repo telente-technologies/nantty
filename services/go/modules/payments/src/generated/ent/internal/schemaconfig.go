@@ -22,6 +22,7 @@ type SchemaConfig struct {
 	ProviderDispute           string // ProviderDispute table.
 	ProviderPayoutDestination string // ProviderPayoutDestination table.
 	SavedCardSetup            string // SavedCardSetup table.
+	SellerVerification        string // SellerVerification table.
 	StorePurchase             string // StorePurchase table.
 	WebhookEvent              string // WebhookEvent table.
 }
