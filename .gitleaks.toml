@@ -1,0 +1,24 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Test fixtures, local-only example config and migration integrity sums"
+paths = [
+  '''(^|/)testdata/''',
+  '''_test\.go$''',
+  '''\.test\.ts$''',
+  '''(^|/)tests/fixtures/''',
+  '''(^|/)\.env\.example$''',
+  '''^infra/local/''',
+  '''(^|/)atlas\.sum$''',
+]
+
+[[allowlists]]
+description = "KDF info label, not a secret"
+regexTarget = "match"
+regexes = ['''"ZudomartRatchetv1"''']
+
+[[allowlists]]
+description = "Default guest login of the throwaway RabbitMQ CI service container"
+regexTarget = "match"
+regexes = ['''-u guest:guest''']
