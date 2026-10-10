@@ -14,7 +14,10 @@ interface SessionContextValue {
 const SessionContext = createContext<SessionContextValue>({ viewer: null, csrfToken: null });
 
 export function SessionProvider({ viewer, csrfToken, children }: SessionContextValue & { readonly children: ReactNode }) {
-  const value = useMemo<SessionContextValue>(() => ({ viewer, csrfToken }), [viewer, csrfToken]);
+  const value = useMemo<SessionContextValue>(() => {
+    rememberCsrfTokenForRequests(csrfToken);
+    return { viewer, csrfToken };
+  }, [viewer, csrfToken]);
   const syncAuthStore = useAuthStore((state) => state.setViewerFromSession);
 
   useEffect(() => {
