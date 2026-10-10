@@ -83,7 +83,7 @@ test.describe("guest browsing", () => {
 
   test("add to cart and buy now are gated, then complete on the same product", async ({ page }) => {
     await expectGateThenReturn(page, `/product/${world.store.productId}`, (p) => p.getByRole("button", { name: "Add to cart" }), async (p) => {
-      await expect(p).toHaveURL(new RegExp(`/product/${world.store.productId}`));
+      await expect(p).toHaveURL(new RegExp(`/(product|p)/[^?#]*${world.store.productId}`));
       await expect(p.getByRole("status").filter({ hasText: /cart/i }).first()).toBeVisible();
     });
     await page.context().clearCookies();
@@ -95,7 +95,8 @@ test.describe("guest browsing", () => {
   test("reply to a post is gated and returns to the thread", async ({ page }) => {
     await expectGateThenReturn(page, `/post/${world.postId}`, (p) => p.getByRole("button", { name: /Post your reply/ }), async (p) => {
       await expect(p).toHaveURL(new RegExp(`/post/${world.postId}`));
-      await expect(p.getByRole("textbox", { name: /Post your reply/ })).toBeVisible();
+      await expect(p.getByRole("combobox", { name: /Post your reply/ }).or(p.getByRole("textbox", { name: /Post your reply/ })).first()).toBeVisible();
+      await expect(p.getByText("Sign in to reply.")).toHaveCount(0);
     });
   });
 
@@ -115,7 +116,7 @@ test.describe("guest browsing", () => {
       await expect(page).toHaveURL(new RegExp(`/post/${world.postId}`));
     }
     await page.getByRole("button", { name: "More options" }).first().click();
-    await page.getByRole("menuitem", { name: "Report" }).click();
+    await page.getByRole("menuitem", { name: "Report", exact: true }).click();
     await expect(signInDialog(page)).toBeVisible();
   });
 
@@ -149,20 +150,6 @@ test.describe("guest browsing", () => {
     await expect(page).toHaveURL(new RegExp(`/post/${world.postId}`));
   });
 
-  test("wrong password in the prompt is readable; back button after closing the prompt", async ({ page }) => {
-    await page.goto("/explore");
-    await page.goto(`/post/${world.postId}`);
-    await page.getByRole("button", { name: /^Like, \d+ likes?/ }).first().click();
-    const dialog = signInDialog(page);
-    await dialog.getByLabel("Email or username").fill(world.visitor.email);
-    await dialog.getByLabel("Password", { exact: true }).fill("wrong-password-1");
-    await dialog.getByRole("button", { name: "Sign in", exact: true }).click();
-    await expect(dialog.getByRole("alert")).toBeVisible();
-    await page.keyboard.press("Escape");
-    await page.goBack();
-    await expect(page).toHaveURL(/\/explore$/);
-  });
-
   test("unknown product and profile ids show a friendly not-found", async ({ page }) => {
     for (const path of ["/product/00000000-0000-7000-8000-000000000000", "/store/not-a-real-store", "/nobody_e2e_404_user", "/post/%3Cscript%3E"]) {
       const response = await page.goto(path);
@@ -178,5 +165,22 @@ test.describe("guest browsing", () => {
     await expectNoHorizontalOverflow(page);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await expectDarkRendering(page, testInfo, "webapp-guest-explore");
+  });
+});
+
+test.describe("guest who mistypes a password", () => {
+  test.use({ guardOptions: { allowConsoleErrors: [/status of 401 .*\/bff\/auth\/login/], allowServerErrors: [] } });
+  test("wrong password in the prompt is readable; back button after closing the prompt", async ({ page }) => {
+    await page.goto("/explore");
+    await page.goto(`/post/${world.postId}`);
+    await page.getByRole("button", { name: /^Like, \d+ likes?/ }).first().click();
+    const dialog = signInDialog(page);
+    await dialog.getByLabel("Email or username").fill(world.visitor.email);
+    await dialog.getByLabel("Password", { exact: true }).fill("wrong-password-1");
+    await dialog.getByRole("button", { name: "Sign in", exact: true }).click();
+    await expect(dialog.getByRole("alert")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await page.goBack();
+    await expect(page).toHaveURL(/\/explore$/);
   });
 });

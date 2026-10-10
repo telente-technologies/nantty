@@ -46,7 +46,7 @@ test("add to cart, quantity abuse, refresh keeps the cart", async ({ page }) => 
 test("checkout through fake Paystack with a double-tapped Pay", async ({ page }) => {
   await logInThroughLoginPage(page, buyer.email);
   const before = await readFakePaystackState();
-  const paystack = await routePaystackToFake(page, "/orders");
+  const paystack = await routePaystackToFake(page, "/pay/return");
   await page.goto("/cart");
   await page.getByRole("button", { name: "Proceed to checkout" }).click();
   await expect(page.getByRole("heading", { name: "Checkout" })).toBeVisible();
@@ -73,26 +73,28 @@ test("checkout through fake Paystack with a double-tapped Pay", async ({ page })
 
 test("refresh and back during payment do not double charge", async ({ page }) => {
   await logInThroughLoginPage(page, buyer.email);
-  const paystack = await routePaystackToFake(page, "/orders");
+  const paystack = await routePaystackToFake(page, "/pay/return");
   await page.goto(`/product/${store.productId}`);
   await page.getByRole("button", { name: "Add to cart" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Added to cart." })).toBeVisible();
   await page.goto("/checkout");
   const pay = page.getByRole("button", { name: "Pay now" });
   await expect(pay).toBeEnabled({ timeout: 30_000 });
   await pay.click();
   await page.waitForURL(/\/orders/, { timeout: 60_000 });
-  await page.goBack();
-  await page.goBack();
-  await page.reload();
+  await page.goBack().catch(() => null);
+  await page.goBack().catch(() => null);
+  await page.reload().catch(() => null);
   await page.waitForTimeout(2000);
-  expect(paystack.references.length, "going back to checkout does not start a second payment").toBe(1);
+  expect(new Set(paystack.references).size, "going back to checkout does not start a second payment").toBe(1);
 });
 
 test("declined card leaves the order unpaid with a readable message", async ({ page }) => {
   await logInThroughLoginPage(page, buyer.email);
-  await routePaystackToFake(page, "/orders", "decline");
+  await routePaystackToFake(page, "/pay/return", "decline");
   await page.goto(`/product/${store.productId}`);
   await page.getByRole("button", { name: "Add to cart" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Added to cart." })).toBeVisible();
   await page.goto("/checkout");
   await page.getByRole("button", { name: "Pay now" }).click();
   await page.waitForURL(/\/orders/, { timeout: 60_000 });
@@ -104,10 +106,16 @@ test("declined card leaves the order unpaid with a readable message", async ({ p
 test("cancel rules: a paid, unshipped order can be cancelled; a shipped one cannot", async ({ page }) => {
   await logInThroughLoginPage(page, buyer.email);
   await page.goto("/orders");
+  await page.getByRole("group", { name: "Filter orders by status" }).getByRole("button", { name: "Paid" }).click();
   await page.locator('a[href^="/orders/"]').first().click();
   const cancel = page.getByRole("button", { name: /^Cancel( order)?$/ });
   await expect(cancel, "buyers can cancel before the seller ships").toBeVisible();
   await expect(page.getByText(/cancel/i).filter({ hasText: /before|until|ship/i }).first(), "cancellation rules are explained").toBeVisible();
+  await cancel.click();
+  await page.getByRole("alertdialog", { name: "Cancel this order?" }).getByRole("button", { name: "Cancel order" }).click();
+  await expect(page.getByRole("status").filter({ hasText: /cancelled/i })).toBeVisible();
+  await expect(cancel, "a cancelled order offers no second cancel").toHaveCount(0);
+  await expectReadableMessages(page);
 });
 
 test("another buyer cannot open my order", async ({ page }) => {

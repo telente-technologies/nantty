@@ -8,6 +8,7 @@ import { callApi, createSuperadmin, registerUser, uniqueSuffix } from "../../src
 import { expect, test } from "../../src/test.js";
 
 test.describe.configure({ mode: "serial" });
+test.use({ guardOptions: { allowConsoleErrors: [/status of 401 .*\/bff\/auth\/(login|mfa\/[a-z-]+|step-up[a-z/-]*)$/, /status of 403 .*\/bff\/admin\/usernames\/reserved$/], allowServerErrors: [] } });
 
 let staff: PendingStaff;
 let totpSecret = "";
@@ -67,14 +68,18 @@ test("first sign-in enrols MFA and shows recovery codes", async ({ page }) => {
 
 test("TOTP sign-in, then a recovery code works once only", async ({ page }) => {
   await signInWithTotp(page);
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Sign out" }).click();
+  await page.waitForURL(/\/login/);
   await passwordStep(page, staff.email, staff.password);
   await page.getByRole("button", { name: "Lost your phone? Use a recovery code" }).click();
   const code = recoveryCodes[0] ?? "";
   await page.getByLabel("Recovery code").fill(code);
   await page.getByRole("button", { name: "Verify and sign in" }).click();
   await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+  await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Sign out" }).click();
+  await page.waitForURL(/\/login/);
   await passwordStep(page, staff.email, staff.password);
   await page.getByRole("button", { name: "Lost your phone? Use a recovery code" }).click();
   await page.getByLabel("Recovery code").fill(code);
@@ -94,7 +99,8 @@ test("reserved usernames: add with step-up, reject malformed, page past the firs
   const dialog = page.getByRole("dialog", { name: "Reserve a name" });
   for (const bad of ["a", malformedInputs[0] ?? "<x>", "x".repeat(40)]) {
     await dialog.getByLabel("Name").fill(bad);
-    await dialog.getByRole("button", { name: "Reserve" }).click();
+    const reserveButton = dialog.getByRole("button", { name: "Reserve" });
+    if (await reserveButton.isEnabled()) await reserveButton.click();
     await expect(dialog, `"${bad.slice(0, 10)}" is refused`).toBeVisible();
   }
   await expectReadableMessages(page);
@@ -152,8 +158,7 @@ test("suspending a user (step-up when asked) signs them out everywhere", async (
   await page.goto(`/users/${target.accountId}`);
   await page.getByRole("button", { name: "Suspend", exact: true }).click();
   const confirm = page.getByRole("dialog", { name: "Suspend user" });
-  await confirm.getByRole("button", { name: "Suspend", exact: true }).click();
-  await expect(confirm, "an empty reason is refused").toBeVisible();
+  await expect(confirm.getByRole("button", { name: "Suspend", exact: true }), "an empty reason cannot be submitted").toBeDisabled();
   await confirm.getByLabel(/Reason/).fill("E2E suspension check");
   await confirm.getByRole("button", { name: "Suspend", exact: true }).click();
   const stepUp = page.getByRole("dialog", { name: "Confirm it's you" });

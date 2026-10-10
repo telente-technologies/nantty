@@ -49,6 +49,24 @@ test.describe("guest on the marketing site", () => {
     await page.keyboard.press("Escape");
   });
 
+  test("mobile width has no horizontal scroll and the menu toggles", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto("/");
+    await expectNoHorizontalOverflow(page);
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await expect(page.getByRole("navigation", { name: "Mobile" })).toBeVisible();
+    await page.getByRole("button", { name: "Close menu" }).click();
+    await expect(page.getByRole("navigation", { name: "Mobile" })).toBeHidden();
+  });
+
+  test("dark mode renders", async ({ page }, testInfo) => {
+    await page.goto("/");
+    await toggleDarkModeOnce(page, testInfo, "web-home");
+  });
+});
+
+test.describe("guest who mistypes a URL", () => {
+  test.use({ guardOptions: { allowConsoleErrors: [/status of 404 .*this-page-does-not-exist-e2e/], allowServerErrors: [] } });
   test("unknown path shows a friendly 404 and the back button works", async ({ page }) => {
     await page.goto("/about");
     const missing = await page.goto("/this-page-does-not-exist-e2e");
@@ -58,19 +76,6 @@ test.describe("guest on the marketing site", () => {
     await expect(page).toHaveURL(/\/about$/);
   });
 
-  test("mobile width has no horizontal scroll and the menu toggles", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 800 });
-    await page.goto("/");
-    await expectNoHorizontalOverflow(page);
-    await page.getByRole("button", { name: "Open menu" }).click();
-    await expect(page.getByRole("navigation", { name: "Mobile" })).toBeVisible();
-    await page.getByRole("button", { name: "Close menu" }).click();
-  });
-
-  test("dark mode renders", async ({ page }, testInfo) => {
-    await page.goto("/");
-    await toggleDarkModeOnce(page, testInfo, "web-home");
-  });
 });
 
 test.describe("cookie banner", () => {

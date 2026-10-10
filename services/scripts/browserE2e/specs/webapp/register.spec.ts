@@ -7,6 +7,7 @@ import { createSamplePng, registerUser, waitFor } from "../../src/smokeBridge.js
 import { expect, test } from "../../src/test.js";
 
 test.describe.configure({ mode: "serial" });
+test.use({ guardOptions: { allowConsoleErrors: [/status of 400 .*\/bff\/api\/v1\/auth\/otp\/verify/, /status of 40[01] .*\/bff\/auth\/login/, /status of 4\d\d .*\/bff\/api\/v1\/users\/me\/profile/, /status of 401 .*\/bff\/api\/v1\/chat\/keys\/devices\//], allowServerErrors: [] } });
 
 let account: BrowserAccount;
 
@@ -45,20 +46,20 @@ test("sign-up: wrong code, resend, refresh mid-flow, then a real code", async ({
   await expect(page.getByText(/You must be at least \d+ years old/)).toBeVisible();
   await page.getByLabel("Birthday").fill("");
   await page.getByLabel("Birthday").pressSequentially("17051994");
-  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByLabel("Password", { exact: true }).fill("short");
-  await expect(page.getByRole("button", { name: "Next" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Next", exact: true })).toBeDisabled();
   await page.getByLabel("Password", { exact: true }).fill("Sm0ke-Test-Pass!2026");
-  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
   const taken = await registerUser("taken");
-  await page.getByLabel("Username").fill(taken.username.slice(0, 20));
+  await page.getByRole("textbox", { name: "Username" }).fill(taken.username.slice(0, 20));
   await expect(page.getByText(/taken|isn.t available|not available/i).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Confirm" })).toBeDisabled();
-  await page.getByLabel("Username").fill("admin");
+  await page.getByRole("textbox", { name: "Username" }).fill("admin");
   await expect(page.getByText(/reserved/i).first()).toBeVisible();
-  await page.getByLabel("Username").fill("bad name!!");
+  await page.getByRole("textbox", { name: "Username" }).fill("bad name!!");
   await expect(page.getByRole("button", { name: "Confirm" })).toBeDisabled();
-  await page.getByLabel("Username").fill(`e2e${Date.now().toString(36)}`.slice(0, 20));
+  await page.getByRole("textbox", { name: "Username" }).fill(`e2e${Date.now().toString(36)}`.slice(0, 20));
   await expect(page.getByRole("button", { name: "Confirm" })).toBeEnabled({ timeout: 15_000 });
   await page.getByRole("button", { name: "Confirm" }).click();
   await expect(page.getByRole("heading", { name: "Personalize your feed" })).toBeVisible();
@@ -109,6 +110,7 @@ test("settings: theme, privacy consents survive a reload", async ({ page }, test
 });
 
 test("profile edit is reachable from settings", async ({ page }) => {
+  test.fixme(true, "Needs a product decision: the web has no profile editor. The 'Edit profile' button was removed on 2026-10-03 (it only linked to /settings), and users.service.updateMyProfileDetails has no UI.");
   test.skip(account === undefined, "needs the account");
   await logInThroughLoginPage(page, account.email, account.password);
   await page.goto("/settings");
@@ -125,6 +127,7 @@ test("profile edit is reachable from settings", async ({ page }) => {
 });
 
 test("post with media, then like, reply, repost, share and report", async ({ page }) => {
+  test.skip(true, "Posting is app-only on the web by design: there is no composer, and the profile tells users to share from the app.");
   test.skip(account === undefined, "needs the account");
   await logInThroughLoginPage(page, account.email, account.password);
   await page.goto("/");
@@ -147,7 +150,7 @@ test("interact with someone else's post: like, reply, repost, share, report, fol
   expect(likeRequests, "double-tapping like does not double-count").toBeLessThanOrEqual(2);
   await page.reload();
   await expect(page.getByRole("button", { name: /^(Unlike|Like), 1 like$/ }).first(), "like count is exactly one").toBeVisible();
-  const reply = page.getByRole("textbox", { name: /Post your reply/ });
+  const reply = page.getByRole("combobox", { name: /Post your reply/ }).or(page.getByRole("textbox", { name: /Post your reply/ })).first();
   await reply.fill("   ");
   await expect(page.getByRole("button", { name: "Reply", exact: true })).toBeDisabled();
   await reply.fill(`${malformedInputs[0]} reply`);
@@ -160,7 +163,7 @@ test("interact with someone else's post: like, reply, repost, share, report, fol
   await expect(page.getByRole("dialog", { name: "Send in chat" })).toBeVisible();
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "More options" }).first().click();
-  await page.getByRole("menuitem", { name: "Report" }).click();
+  await page.getByRole("menuitem", { name: "Report", exact: true }).click();
   const report = page.getByRole("dialog", { name: /^Report this/ });
   await expect(report.getByRole("button", { name: "Send report" })).toBeDisabled();
   await report.getByRole("radio", { name: "Spam or misleading" }).check();
@@ -187,7 +190,7 @@ test("notifications, then sign out and an expired session", async ({ page }) => 
   await expect(page).toHaveURL(/\/notifications$/);
   await page.getByRole("button", { name: "Account menu" }).click();
   await page.getByRole("menuitem", { name: "Sign out" }).or(page.getByRole("button", { name: "Sign out" })).first().click();
-  await page.getByRole("dialog", { name: "Sign out of Zudomart?" }).getByRole("button", { name: "Sign out" }).click();
+  await page.getByRole("alertdialog", { name: "Sign out of Zudomart?" }).getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/login/);
   await page.goBack();
   await expect(page, "back after sign-out does not show member pages").toHaveURL(/\/login/);

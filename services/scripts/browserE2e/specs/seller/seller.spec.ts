@@ -10,6 +10,7 @@ import { createSamplePng, registerUser, uniqueSuffix, type UserActor } from "../
 import { expect, test } from "../../src/test.js";
 
 test.describe.configure({ mode: "serial" });
+test.use({ guardOptions: { allowConsoleErrors: [/status of 404 .*\/bff\/seller\/brands(\/directory)?$/, /status of 409 .*\/bff\/seller\/inventory\/adjustments$/, /status of 400 .*\/bff\/seller\/business-documents\/[a-z_]+\/upload-intents$/], allowServerErrors: [] } });
 
 let freeStore: SeededStore;
 let secondStore: SeededStore;
@@ -35,14 +36,14 @@ test("signed-out deep links, and a buyer without a store is sent to apply", asyn
 test("switch between the seller's stores", async ({ page }) => {
   await logIn(page);
   await page.goto("/dashboard");
-  await page.locator('button[aria-haspopup="menu"]').filter({ hasText: /E2E/ }).first().click();
+  await page.locator('button[aria-haspopup="menu"]').filter({ hasText: /E2E/, visible: true }).first().click();
   const menu = page.getByRole("menu", { name: "Switch store" });
   const other = menu.getByRole("menuitemradio", { checked: false }).first();
-  const otherName = (await other.innerText()).split("·")[0]?.trim() ?? "";
+  const otherName = (await other.innerText()).split(/\n|·/)[0]?.trim() ?? "";
   await other.click();
-  await expect(page.locator('button[aria-haspopup="menu"]').filter({ hasText: otherName }).first()).toBeVisible();
+  await expect(page.locator('button[aria-haspopup="menu"]').filter({ hasText: otherName, visible: true }).first()).toBeVisible();
   await page.reload();
-  await expect(page.locator('button[aria-haspopup="menu"]').filter({ hasText: otherName }).first(), "store choice survives a reload").toBeVisible();
+  await expect(page.locator('button[aria-haspopup="menu"]').filter({ hasText: otherName, visible: true }).first(), "store choice survives a reload").toBeVisible();
 });
 
 test("create a product with photo upload; validation and double submit", async ({ page }) => {
@@ -62,6 +63,10 @@ test("create a product with photo upload; validation and double submit", async (
   await page.getByLabel(/Default price|price$/).first().fill("-50");
   await page.getByRole("button", { name: "Create product" }).click();
   await expectReadableMessages(page);
+  await page.getByLabel("Default SKU").fill("bad sku!!");
+  await page.getByRole("button", { name: "Create product" }).click();
+  await expect(page.getByText(/SKU needs 1 to 64/).first(), "an invalid SKU is explained").toBeVisible();
+  await page.getByLabel("Default SKU").fill(`E2E-${uniqueSuffix()}`.toUpperCase());
   await page.getByLabel(/Default price|price$/).first().fill("4500");
   await page.getByLabel(/opening stock/).first().fill("12");
   const creates = await doubleClickSubmit(page, page.getByRole("button", { name: "Create product" }), /\/bff\/seller\/products$/);
@@ -125,7 +130,7 @@ test("customers, promotions and reports pages work", async ({ page }) => {
   await add.getByLabel("Phone number").fill("not a phone");
   await add.getByRole("button", { name: "Add customer" }).click();
   await expectReadableMessages(page);
-  await add.getByLabel("Phone number").fill("+2348012345678");
+  await add.getByLabel("Phone number").fill(`+234803${String(Date.now()).slice(-7)}`);
   await add.getByRole("button", { name: "Add customer" }).click();
   await expect(page.getByText("E2E Customer").first()).toBeVisible();
   await page.goto("/promotions/new");
@@ -173,6 +178,9 @@ test("staff roles: a sales staff member is blocked from finance and settings", a
   await page.getByLabel("Find a Zudomart user").fill(`@${member.username}`);
   await page.getByRole("list", { name: "Matching Zudomart users" }).getByText(member.username).first().click();
   await page.getByLabel("Role").selectOption({ label: "Sales staff" });
+  await page.getByRole("button", { name: "Send team request" }).click();
+  await expect(page.getByRole("group", { name: "Works at" }).getByRole("alert"), "a location is required").toHaveText("Pick at least one location.");
+  await page.getByRole("group", { name: "Works at" }).getByRole("checkbox").first().check();
   await page.getByRole("button", { name: "Send team request" }).click();
   await expect(page.getByText(`Team request sent to @${member.username}`)).toBeVisible();
   await acceptTeamRequest(member);

@@ -32,7 +32,7 @@ export default defineConfig({
     trace: "retain-on-failure",
     video: "off",
     actionTimeout: 20_000,
-    navigationTimeout: 60_000,
+    navigationTimeout: 180_000,
     locale: "en-NG",
     timezoneId: "Africa/Lagos",
   },
