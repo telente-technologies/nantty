@@ -7,6 +7,7 @@ import type { ProductSummary, User } from "@/types";
 
 import { callWebappBackend, readJsonFromBackendResult } from "./apiTransport.service";
 import { readApiTokensFromCookies } from "./session.service";
+import { mergeFollowStatusIntoProfile, type FollowStatusWire } from "@/utils/followStatus.util";
 
 export type SitemapKind = "products" | "stores" | "profiles";
 
@@ -44,7 +45,11 @@ export const fetchPublicStoreProducts = cache(async (storeId: string): Promise<r
 export const fetchPublicProfileById = cache(async (userId: string): Promise<User | null> => {
   if (!safeIdPattern.test(userId) || userId === "me") return null;
   const { accessToken } = readApiTokensFromCookies(await cookies());
-  return fetchPublicJson<User>(`/api/v1/users/${encodeURIComponent(userId)}`, undefined, accessToken);
+  const [user, status] = await Promise.all([
+    fetchPublicJson<User>(`/api/v1/users/${encodeURIComponent(userId)}`, undefined, accessToken),
+    fetchPublicJson<FollowStatusWire>(`/api/v1/users/${encodeURIComponent(userId)}/follow-status`, undefined, accessToken),
+  ]);
+  return user ? mergeFollowStatusIntoProfile(user, status) : null;
 });
 
 export const fetchPublicProfileByUsername = cache(async (username: string): Promise<User | null> => {

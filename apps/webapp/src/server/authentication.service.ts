@@ -26,11 +26,11 @@ export function readAuthEndpointResult(result: BackendResult): AuthEndpointResul
   };
 }
 
-export function beginSessionWithAuthResult(response: NextResponse, session: AuthSession): void {
-  const sessionId = createNewSessionId();
+export function beginSessionWithAuthResult(response: NextResponse, session: AuthSession, sessionId: string = createNewSessionId()): string {
   writeSessionIdCookie(response, sessionId);
   writeApiTokenCookies(response, session);
   writeCachedViewerCookie(response, sessionId, session.user);
+  return sessionId;
 }
 
 
