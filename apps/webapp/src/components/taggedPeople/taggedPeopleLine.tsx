@@ -22,7 +22,7 @@ export function TaggedPeopleLine({ post }: { readonly post: Pick<Post, "id" | "t
         <PersonTagIcon size={16} />
         <span className={styles.truncate}>{summary}</span>
       </button>
-      <Dialog isOpen={isOpen} onClose={() => setIsOpen(false)} title="Tagged in this post" layout="sheet" size="small" showCloseButton>
+      <Dialog isOpen={isOpen} onClose={() => setIsOpen(false)} title="Tagged in this post" layout="sheet" size="small" showCloseButton icon={<PersonTagIcon size={24} />}>
         <TaggedPeopleList post={post} isOpen={isOpen} onClose={() => setIsOpen(false)} />
       </Dialog>
     </>

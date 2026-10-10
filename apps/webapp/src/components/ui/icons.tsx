@@ -1,7 +1,7 @@
 import {
-  ArrowSquareOutIcon, BookmarkSimpleIcon, CaretLeftIcon, ChartBarIcon, ChatCircleIcon, CompassIcon as PhCompass, DownloadSimpleIcon, EnvelopeIcon,
-  ExportIcon, FileTextIcon, GearIcon, GiftIcon as PhGift, HeartIcon as PhHeart, MonitorIcon as PhMonitor, MoonIcon as PhMoon, PackageIcon as PhPackage,
-  PaperPlaneTiltIcon, PauseIcon as PhPause, PhoneIcon as PhPhone, RepeatIcon, ShieldCheckIcon, SignOutIcon, SunIcon as PhSun, TrendUpIcon,
+  ArrowSquareOutIcon, BookmarkSimpleIcon, CaretLeftIcon, ChartBarIcon, ChatCircleIcon, CheckCircleIcon as PhCheckCircle, CompassIcon as PhCompass, CopyIcon as PhCopy, CopyrightIcon as PhCopyright, DownloadSimpleIcon, EnvelopeIcon,
+  ExportIcon, FileTextIcon, FlagIcon as PhFlag, GearIcon, GiftIcon as PhGift, HeartIcon as PhHeart, LinkSimpleIcon as PhLinkSimple, MonitorIcon as PhMonitor, MoonIcon as PhMoon, PackageIcon as PhPackage,
+  PaperPlaneTiltIcon, PauseIcon as PhPause, PhoneIcon as PhPhone, ProhibitIcon as PhProhibit, PushPinIcon as PhPushPin, RepeatIcon, ShieldCheckIcon, SignInIcon as PhSignIn, SignOutIcon, SpeakerHighIcon as PhSpeakerHigh, SpeakerXIcon as PhSpeakerX, SunIcon as PhSun, TrendUpIcon,
   UsersIcon, WarningIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon, IconProps as PhosphorIconProps, IconWeight } from "@phosphor-icons/react";
@@ -90,3 +90,13 @@ export const ShareActionIcon = createIcon(ExportIcon);
 export const SendActionIcon = createIcon(PaperPlaneTiltIcon);
 export const GiftActionIcon = createIcon(PhGift);
 export const PersonTagIcon = createIcon(UsersIcon);
+export const PinIcon = createIcon(PhPushPin);
+export const FlagIcon = createIcon(PhFlag);
+export const LinkIcon = createIcon(PhLinkSimple);
+export const CopyIcon = createIcon(PhCopy);
+export const CopyrightIcon = createIcon(PhCopyright);
+export const SignInIcon = createIcon(PhSignIn);
+export const ProhibitIcon = createIcon(PhProhibit);
+export const SuccessIcon = createIcon(PhCheckCircle);
+export const SpeakerHighIcon = createIcon(PhSpeakerHigh);
+export const SpeakerMutedIcon = createIcon(PhSpeakerX);

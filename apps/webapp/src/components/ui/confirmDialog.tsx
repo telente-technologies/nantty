@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { create } from "zustand";
 
 import { Dialog, type DialogTone } from "./dialog";
-import { AlertIcon, TrashIcon } from "./icons";
+import { AlertIcon, ShieldIcon, SuccessIcon, TrashIcon } from "./icons";
 
 export interface ConfirmationRequest {
   readonly title: string;
@@ -46,6 +46,8 @@ export function requestConfirmation(request: ConfirmationRequest): Promise<boole
 function DefaultToneIcon({ tone }: { readonly tone: DialogTone }) {
   if (tone === "danger") return <TrashIcon size={24} />;
   if (tone === "caution") return <AlertIcon size={24} />;
+  if (tone === "success") return <SuccessIcon size={24} />;
+  if (tone === "brand") return <ShieldIcon size={24} />;
   return null;
 }
 
