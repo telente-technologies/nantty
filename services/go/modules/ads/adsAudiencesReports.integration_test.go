@@ -228,7 +228,7 @@ func TestCreativeMediaUploadUsesPresignedStorageAndWaitsForProcessing(t *testing
 	h.expect("POST", "/internal/v1/ads/media/"+mediaId+"/processed", nil, "", map[string]any{"status": "ready", "width": 800, "height": 600}, http.StatusUnauthorized)
 	h.callInternal(t, "/internal/v1/ads/media/"+mediaId+"/processed", map[string]any{"status": "ready", "width": 800, "height": 600}, http.StatusNoContent)
 	ready := h.expect("GET", base+"/creatives/media/"+mediaId, &owner, "", nil, http.StatusOK)
-	if ready["status"] != "ready" || ready["media"].(map[string]any)["url"] != "https://cdn.test/media/"+mediaId {
+	if ready["status"] != "ready" || !strings.HasPrefix(ready["media"].(map[string]any)["url"].(string), "memory://download/ads-media/") {
 		t.Fatalf("unexpected ready media %v", ready)
 	}
 

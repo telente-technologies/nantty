@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"sync"
 	"time"
 
@@ -77,6 +79,16 @@ func (storage *S3ObjectStorage) Exists(ctx context.Context, key string) (bool, i
 	return true, aws.ToInt64(head.ContentLength), nil
 }
 
+func (storage *S3ObjectStorage) ReadPrefix(ctx context.Context, key string, maximumBytes int64) ([]byte, error) {
+	byteRange := fmt.Sprintf("bytes=0-%d", maximumBytes-1)
+	object, err := storage.client.GetObject(ctx, &s3.GetObjectInput{Bucket: &storage.bucket, Key: &key, Range: &byteRange})
+	if err != nil {
+		return nil, err
+	}
+	defer object.Body.Close()
+	return io.ReadAll(io.LimitReader(object.Body, maximumBytes))
+}
+
 type MemoryObjectStorage struct {
 	mutex   sync.Mutex
 	Objects map[string][]byte
@@ -121,4 +133,14 @@ func (storage *S3ObjectStorage) EnsureBucketForBrowserUploads(ctx context.Contex
 		AllowedOrigins: origins, AllowedMethods: []string{"PUT", "GET", "HEAD"}, AllowedHeaders: []string{"*"}, ExposeHeaders: []string{"ETag"}, MaxAgeSeconds: aws.Int32(3600),
 	}}}})
 	return err
+}
+
+func (storage *MemoryObjectStorage) ReadPrefix(_ context.Context, key string, maximumBytes int64) ([]byte, error) {
+	storage.mutex.Lock()
+	defer storage.mutex.Unlock()
+	body := storage.Objects[key]
+	if int64(len(body)) > maximumBytes {
+		body = body[:maximumBytes]
+	}
+	return append([]byte(nil), body...), nil
 }

@@ -49,6 +49,7 @@ func (source *PlatformSettingsSource) ReadValue(ctx context.Context, key string)
 	case err == nil:
 		cached = fetched
 	case errors.Is(err, sql.ErrNoRows):
+		source.logger.Warn("platform setting missing, using the environment fallback", slog.String("key", key))
 		cached = cachedPlatformSetting{fetchedAt: source.now()}
 	default:
 		source.logger.Warn("platform setting unavailable, using the last known value or the environment fallback", slog.String("key", key), slog.Any("error", err))

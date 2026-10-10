@@ -88,6 +88,7 @@ type ObjectStorage interface {
 	PresignDownload(ctx context.Context, key string, timeToLive time.Duration) (string, error)
 	PutObject(ctx context.Context, key, contentType string, body []byte) error
 	Exists(ctx context.Context, key string) (bool, int64, error)
+	ReadPrefix(ctx context.Context, key string, maximumBytes int64) ([]byte, error)
 }
 
 type OwnershipQuery struct {
