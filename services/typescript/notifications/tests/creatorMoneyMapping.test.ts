@@ -56,3 +56,13 @@ describe("ad account invites", () => {
     expect(harness.sender.sent).toHaveLength(1);
   });
 });
+
+describe("account push switch", () => {
+  it("keeps the in-app notification but sends no push when the account turned push off", async () => {
+    const { harness, handler } = await setup();
+    harness.identity.accounts.set(creatorId, makeRecipient({ accountId: creatorId, pushEnabled: false }));
+    await handler.execute({ event: makeEvent("tip.sent", { tipId: "t3", senderUserId: "u9", creatorUserId: creatorId, targetType: "post", targetId: "x", coins: 5 }) });
+    expect(harness.notifications.rows).toHaveLength(1);
+    expect(harness.pushSender.sent).toHaveLength(0);
+  });
+});

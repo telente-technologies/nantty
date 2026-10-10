@@ -37,7 +37,11 @@ export interface Recipient {
   readonly username: string;
   readonly marketingConsent: boolean;
   readonly status: string;
+  readonly pushEnabled?: boolean;
+  readonly marketingFrequency?: MarketingFrequency;
 }
+
+export type MarketingFrequency = "weekly" | "important_only" | "off";
 
 export interface EmailPlan {
   readonly templateKey: EmailTemplateKey;

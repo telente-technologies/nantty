@@ -62,3 +62,18 @@ describe("legal and security mail", () => {
     expect(decide({ recipient: { ...base.recipient, email: null } })).toEqual({ allowed: false, reason: "no_email_on_account" });
   });
 });
+
+describe("marketing frequency from account settings", () => {
+  const consenting = { ...base.recipient, marketingConsent: true };
+
+  it("sends no marketing when the user chose off or important only, but keeps transactional mail", () => {
+    expect(decide({ mailKind: "marketing", recipient: { ...consenting, marketingFrequency: "off" } })).toEqual({ allowed: false, reason: "marketing_frequency_off" });
+    expect(decide({ mailKind: "marketing", recipient: { ...consenting, marketingFrequency: "important_only" } })).toEqual({ allowed: false, reason: "marketing_frequency_important_only" });
+    expect(decide({ recipient: { ...consenting, marketingFrequency: "off" } })).toEqual({ allowed: true });
+  });
+
+  it("allows one marketing email a week for weekly", () => {
+    expect(decide({ mailKind: "marketing", recipient: { ...consenting, marketingFrequency: "weekly" } })).toEqual({ allowed: true });
+    expect(decide({ mailKind: "marketing", recipient: { ...consenting, marketingFrequency: "weekly" }, marketingEmailsSentInWindow: 1 })).toEqual({ allowed: false, reason: "frequency_cap" });
+  });
+});

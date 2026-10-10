@@ -62,6 +62,8 @@ export class IdentityHttpDirectory implements IdentityDirectory {
       username: typeof value["username"] === "string" ? value["username"] : "",
       marketingConsent: value["marketingConsent"] === true,
       status: typeof value["status"] === "string" ? value["status"] : "active",
+      ...(typeof value["pushEnabled"] === "boolean" ? { pushEnabled: value["pushEnabled"] } : {}),
+      ...(value["marketingFrequency"] === "weekly" || value["marketingFrequency"] === "important_only" || value["marketingFrequency"] === "off" ? { marketingFrequency: value["marketingFrequency"] } : {}),
     };
   }
 

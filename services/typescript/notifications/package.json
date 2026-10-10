@@ -7,8 +7,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "tsx src/server.ts",
-    "build": "tsc --noEmit",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
+    "build": "prisma generate && tsc --noEmit",
+    "typecheck": "prisma generate && tsc --noEmit && tsc -p tsconfig.test.json",
     "test": "prisma generate && vitest run",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
@@ -17,8 +17,8 @@
     "lint": "eslint -c ../../../packages/eslintConfig/node.config.mjs src"
   },
   "dependencies": {
-    "@aws-sdk/client-sesv2": "^3.1000.0",
-    "@aws-sdk/client-sqs": "^3.1000.0",
+    "@aws-sdk/client-sesv2": "^3.1148.0",
+    "@aws-sdk/client-sqs": "^3.1148.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@zudojs/http": "^1.5.0",

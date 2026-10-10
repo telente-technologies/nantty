@@ -99,6 +99,7 @@ export class NotificationDispatcherService {
     if (intent.push === undefined) return "none";
     const preference = (await this.deps.preferences.list(intent.recipientUserId)).find((row) => row.category === intent.preferenceCategory);
     if (!(preference?.push ?? defaultPushEnabledByCategory[intent.preferenceCategory])) return "skipped:preference_disabled";
+    if ((await this.deps.identity.getRecipient(intent.recipientUserId))?.pushEnabled === false) return "skipped:push_turned_off";
     const claim = await this.deps.deliveries.claim({ dedupeKey: `${baseKey}:push:${variant}`, eventId: intent.eventId, userId: intent.recipientUserId, channel: "push", templateKey: null, mailKind: null });
     if (claim.alreadyProcessed) return "duplicate";
     const tokens = await this.deps.deviceTokens.listTokens(intent.recipientUserId);
