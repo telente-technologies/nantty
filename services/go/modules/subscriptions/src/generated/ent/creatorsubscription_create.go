@@ -172,6 +172,62 @@ func (_c *CreatorSubscriptionCreate) SetNillableLastError(v *string) *CreatorSub
 	return _c
 }
 
+// SetBillingChannel sets the "billing_channel" field.
+func (_c *CreatorSubscriptionCreate) SetBillingChannel(v creatorsubscription.BillingChannel) *CreatorSubscriptionCreate {
+	_c.mutation.SetBillingChannel(v)
+	return _c
+}
+
+// SetNillableBillingChannel sets the "billing_channel" field if the given value is not nil.
+func (_c *CreatorSubscriptionCreate) SetNillableBillingChannel(v *creatorsubscription.BillingChannel) *CreatorSubscriptionCreate {
+	if v != nil {
+		_c.SetBillingChannel(*v)
+	}
+	return _c
+}
+
+// SetStoreProductID sets the "store_product_id" field.
+func (_c *CreatorSubscriptionCreate) SetStoreProductID(v string) *CreatorSubscriptionCreate {
+	_c.mutation.SetStoreProductID(v)
+	return _c
+}
+
+// SetNillableStoreProductID sets the "store_product_id" field if the given value is not nil.
+func (_c *CreatorSubscriptionCreate) SetNillableStoreProductID(v *string) *CreatorSubscriptionCreate {
+	if v != nil {
+		_c.SetStoreProductID(*v)
+	}
+	return _c
+}
+
+// SetStoreOriginalTransactionID sets the "store_original_transaction_id" field.
+func (_c *CreatorSubscriptionCreate) SetStoreOriginalTransactionID(v string) *CreatorSubscriptionCreate {
+	_c.mutation.SetStoreOriginalTransactionID(v)
+	return _c
+}
+
+// SetNillableStoreOriginalTransactionID sets the "store_original_transaction_id" field if the given value is not nil.
+func (_c *CreatorSubscriptionCreate) SetNillableStoreOriginalTransactionID(v *string) *CreatorSubscriptionCreate {
+	if v != nil {
+		_c.SetStoreOriginalTransactionID(*v)
+	}
+	return _c
+}
+
+// SetStoreSlot sets the "store_slot" field.
+func (_c *CreatorSubscriptionCreate) SetStoreSlot(v int) *CreatorSubscriptionCreate {
+	_c.mutation.SetStoreSlot(v)
+	return _c
+}
+
+// SetNillableStoreSlot sets the "store_slot" field if the given value is not nil.
+func (_c *CreatorSubscriptionCreate) SetNillableStoreSlot(v *int) *CreatorSubscriptionCreate {
+	if v != nil {
+		_c.SetStoreSlot(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *CreatorSubscriptionCreate) SetUpdatedAt(v time.Time) *CreatorSubscriptionCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -254,6 +310,22 @@ func (_c *CreatorSubscriptionCreate) defaults() {
 	if _, ok := _c.mutation.LastError(); !ok {
 		v := creatorsubscription.DefaultLastError
 		_c.mutation.SetLastError(v)
+	}
+	if _, ok := _c.mutation.BillingChannel(); !ok {
+		v := creatorsubscription.DefaultBillingChannel
+		_c.mutation.SetBillingChannel(v)
+	}
+	if _, ok := _c.mutation.StoreProductID(); !ok {
+		v := creatorsubscription.DefaultStoreProductID
+		_c.mutation.SetStoreProductID(v)
+	}
+	if _, ok := _c.mutation.StoreOriginalTransactionID(); !ok {
+		v := creatorsubscription.DefaultStoreOriginalTransactionID
+		_c.mutation.SetStoreOriginalTransactionID(v)
+	}
+	if _, ok := _c.mutation.StoreSlot(); !ok {
+		v := creatorsubscription.DefaultStoreSlot
+		_c.mutation.SetStoreSlot(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := creatorsubscription.DefaultUpdatedAt()
@@ -344,6 +416,33 @@ func (_c *CreatorSubscriptionCreate) check() error {
 		if err := creatorsubscription.LastErrorValidator(v); err != nil {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.last_error": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.BillingChannel(); !ok {
+		return &ValidationError{Name: "billing_channel", err: errors.New(`ent: missing required field "CreatorSubscription.billing_channel"`)}
+	}
+	if v, ok := _c.mutation.BillingChannel(); ok {
+		if err := creatorsubscription.BillingChannelValidator(v); err != nil {
+			return &ValidationError{Name: "billing_channel", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.billing_channel": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.StoreProductID(); !ok {
+		return &ValidationError{Name: "store_product_id", err: errors.New(`ent: missing required field "CreatorSubscription.store_product_id"`)}
+	}
+	if v, ok := _c.mutation.StoreProductID(); ok {
+		if err := creatorsubscription.StoreProductIDValidator(v); err != nil {
+			return &ValidationError{Name: "store_product_id", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.store_product_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.StoreOriginalTransactionID(); !ok {
+		return &ValidationError{Name: "store_original_transaction_id", err: errors.New(`ent: missing required field "CreatorSubscription.store_original_transaction_id"`)}
+	}
+	if v, ok := _c.mutation.StoreOriginalTransactionID(); ok {
+		if err := creatorsubscription.StoreOriginalTransactionIDValidator(v); err != nil {
+			return &ValidationError{Name: "store_original_transaction_id", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.store_original_transaction_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.StoreSlot(); !ok {
+		return &ValidationError{Name: "store_slot", err: errors.New(`ent: missing required field "CreatorSubscription.store_slot"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "CreatorSubscription.updated_at"`)}
@@ -440,6 +539,22 @@ func (_c *CreatorSubscriptionCreate) createSpec() (*CreatorSubscription, *sqlgra
 	if value, ok := _c.mutation.LastError(); ok {
 		_spec.SetField(creatorsubscription.FieldLastError, field.TypeString, value)
 		_node.LastError = value
+	}
+	if value, ok := _c.mutation.BillingChannel(); ok {
+		_spec.SetField(creatorsubscription.FieldBillingChannel, field.TypeEnum, value)
+		_node.BillingChannel = value
+	}
+	if value, ok := _c.mutation.StoreProductID(); ok {
+		_spec.SetField(creatorsubscription.FieldStoreProductID, field.TypeString, value)
+		_node.StoreProductID = value
+	}
+	if value, ok := _c.mutation.StoreOriginalTransactionID(); ok {
+		_spec.SetField(creatorsubscription.FieldStoreOriginalTransactionID, field.TypeString, value)
+		_node.StoreOriginalTransactionID = value
+	}
+	if value, ok := _c.mutation.StoreSlot(); ok {
+		_spec.SetField(creatorsubscription.FieldStoreSlot, field.TypeInt, value)
+		_node.StoreSlot = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(creatorsubscription.FieldUpdatedAt, field.TypeTime, value)
@@ -605,6 +720,48 @@ func (u *CreatorSubscriptionUpsert) UpdateLastError() *CreatorSubscriptionUpsert
 	return u
 }
 
+// SetStoreProductID sets the "store_product_id" field.
+func (u *CreatorSubscriptionUpsert) SetStoreProductID(v string) *CreatorSubscriptionUpsert {
+	u.Set(creatorsubscription.FieldStoreProductID, v)
+	return u
+}
+
+// UpdateStoreProductID sets the "store_product_id" field to the value that was provided on create.
+func (u *CreatorSubscriptionUpsert) UpdateStoreProductID() *CreatorSubscriptionUpsert {
+	u.SetExcluded(creatorsubscription.FieldStoreProductID)
+	return u
+}
+
+// SetStoreOriginalTransactionID sets the "store_original_transaction_id" field.
+func (u *CreatorSubscriptionUpsert) SetStoreOriginalTransactionID(v string) *CreatorSubscriptionUpsert {
+	u.Set(creatorsubscription.FieldStoreOriginalTransactionID, v)
+	return u
+}
+
+// UpdateStoreOriginalTransactionID sets the "store_original_transaction_id" field to the value that was provided on create.
+func (u *CreatorSubscriptionUpsert) UpdateStoreOriginalTransactionID() *CreatorSubscriptionUpsert {
+	u.SetExcluded(creatorsubscription.FieldStoreOriginalTransactionID)
+	return u
+}
+
+// SetStoreSlot sets the "store_slot" field.
+func (u *CreatorSubscriptionUpsert) SetStoreSlot(v int) *CreatorSubscriptionUpsert {
+	u.Set(creatorsubscription.FieldStoreSlot, v)
+	return u
+}
+
+// UpdateStoreSlot sets the "store_slot" field to the value that was provided on create.
+func (u *CreatorSubscriptionUpsert) UpdateStoreSlot() *CreatorSubscriptionUpsert {
+	u.SetExcluded(creatorsubscription.FieldStoreSlot)
+	return u
+}
+
+// AddStoreSlot adds v to the "store_slot" field.
+func (u *CreatorSubscriptionUpsert) AddStoreSlot(v int) *CreatorSubscriptionUpsert {
+	u.Add(creatorsubscription.FieldStoreSlot, v)
+	return u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (u *CreatorSubscriptionUpsert) SetUpdatedAt(v time.Time) *CreatorSubscriptionUpsert {
 	u.Set(creatorsubscription.FieldUpdatedAt, v)
@@ -654,6 +811,9 @@ func (u *CreatorSubscriptionUpsertOne) UpdateNewValues() *CreatorSubscriptionUps
 		}
 		if _, exists := u.create.mutation.Interval(); exists {
 			s.SetIgnore(creatorsubscription.FieldInterval)
+		}
+		if _, exists := u.create.mutation.BillingChannel(); exists {
+			s.SetIgnore(creatorsubscription.FieldBillingChannel)
 		}
 	}))
 	return u
@@ -809,6 +969,55 @@ func (u *CreatorSubscriptionUpsertOne) SetLastError(v string) *CreatorSubscripti
 func (u *CreatorSubscriptionUpsertOne) UpdateLastError() *CreatorSubscriptionUpsertOne {
 	return u.Update(func(s *CreatorSubscriptionUpsert) {
 		s.UpdateLastError()
+	})
+}
+
+// SetStoreProductID sets the "store_product_id" field.
+func (u *CreatorSubscriptionUpsertOne) SetStoreProductID(v string) *CreatorSubscriptionUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.SetStoreProductID(v)
+	})
+}
+
+// UpdateStoreProductID sets the "store_product_id" field to the value that was provided on create.
+func (u *CreatorSubscriptionUpsertOne) UpdateStoreProductID() *CreatorSubscriptionUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.UpdateStoreProductID()
+	})
+}
+
+// SetStoreOriginalTransactionID sets the "store_original_transaction_id" field.
+func (u *CreatorSubscriptionUpsertOne) SetStoreOriginalTransactionID(v string) *CreatorSubscriptionUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.SetStoreOriginalTransactionID(v)
+	})
+}
+
+// UpdateStoreOriginalTransactionID sets the "store_original_transaction_id" field to the value that was provided on create.
+func (u *CreatorSubscriptionUpsertOne) UpdateStoreOriginalTransactionID() *CreatorSubscriptionUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.UpdateStoreOriginalTransactionID()
+	})
+}
+
+// SetStoreSlot sets the "store_slot" field.
+func (u *CreatorSubscriptionUpsertOne) SetStoreSlot(v int) *CreatorSubscriptionUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.SetStoreSlot(v)
+	})
+}
+
+// AddStoreSlot adds v to the "store_slot" field.
+func (u *CreatorSubscriptionUpsertOne) AddStoreSlot(v int) *CreatorSubscriptionUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.AddStoreSlot(v)
+	})
+}
+
+// UpdateStoreSlot sets the "store_slot" field to the value that was provided on create.
+func (u *CreatorSubscriptionUpsertOne) UpdateStoreSlot() *CreatorSubscriptionUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.UpdateStoreSlot()
 	})
 }
 
@@ -1030,6 +1239,9 @@ func (u *CreatorSubscriptionUpsertBulk) UpdateNewValues() *CreatorSubscriptionUp
 			if _, exists := b.mutation.Interval(); exists {
 				s.SetIgnore(creatorsubscription.FieldInterval)
 			}
+			if _, exists := b.mutation.BillingChannel(); exists {
+				s.SetIgnore(creatorsubscription.FieldBillingChannel)
+			}
 		}
 	}))
 	return u
@@ -1185,6 +1397,55 @@ func (u *CreatorSubscriptionUpsertBulk) SetLastError(v string) *CreatorSubscript
 func (u *CreatorSubscriptionUpsertBulk) UpdateLastError() *CreatorSubscriptionUpsertBulk {
 	return u.Update(func(s *CreatorSubscriptionUpsert) {
 		s.UpdateLastError()
+	})
+}
+
+// SetStoreProductID sets the "store_product_id" field.
+func (u *CreatorSubscriptionUpsertBulk) SetStoreProductID(v string) *CreatorSubscriptionUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.SetStoreProductID(v)
+	})
+}
+
+// UpdateStoreProductID sets the "store_product_id" field to the value that was provided on create.
+func (u *CreatorSubscriptionUpsertBulk) UpdateStoreProductID() *CreatorSubscriptionUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.UpdateStoreProductID()
+	})
+}
+
+// SetStoreOriginalTransactionID sets the "store_original_transaction_id" field.
+func (u *CreatorSubscriptionUpsertBulk) SetStoreOriginalTransactionID(v string) *CreatorSubscriptionUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.SetStoreOriginalTransactionID(v)
+	})
+}
+
+// UpdateStoreOriginalTransactionID sets the "store_original_transaction_id" field to the value that was provided on create.
+func (u *CreatorSubscriptionUpsertBulk) UpdateStoreOriginalTransactionID() *CreatorSubscriptionUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.UpdateStoreOriginalTransactionID()
+	})
+}
+
+// SetStoreSlot sets the "store_slot" field.
+func (u *CreatorSubscriptionUpsertBulk) SetStoreSlot(v int) *CreatorSubscriptionUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.SetStoreSlot(v)
+	})
+}
+
+// AddStoreSlot adds v to the "store_slot" field.
+func (u *CreatorSubscriptionUpsertBulk) AddStoreSlot(v int) *CreatorSubscriptionUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.AddStoreSlot(v)
+	})
+}
+
+// UpdateStoreSlot sets the "store_slot" field to the value that was provided on create.
+func (u *CreatorSubscriptionUpsertBulk) UpdateStoreSlot() *CreatorSubscriptionUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionUpsert) {
+		s.UpdateStoreSlot()
 	})
 }
 

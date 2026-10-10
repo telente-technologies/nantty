@@ -52,30 +52,35 @@ const (
 // CreatorSubscriptionMutation represents an operation that mutates the CreatorSubscription nodes in the graph.
 type CreatorSubscriptionMutation struct {
 	config
-	op                       Op
-	typ                      string
-	id                       *uuid.UUID
-	created_at               *time.Time
-	subscriber_id            *string
-	creator_id               *string
-	plan_id                  *string
-	status                   *creatorsubscription.Status
-	amount_minor             *int64
-	addamount_minor          *int64
-	currency                 *string
-	interval                 *creatorsubscription.Interval
-	billing_authorization_id *string
-	current_period_start     *time.Time
-	current_period_end       *time.Time
-	next_charge_at           *time.Time
-	renewal_attempts         *int
-	addrenewal_attempts      *int
-	last_error               *string
-	updated_at               *time.Time
-	clearedFields            map[string]struct{}
-	done                     bool
-	oldValue                 func(context.Context) (*CreatorSubscription, error)
-	predicates               []predicate.CreatorSubscription
+	op                            Op
+	typ                           string
+	id                            *uuid.UUID
+	created_at                    *time.Time
+	subscriber_id                 *string
+	creator_id                    *string
+	plan_id                       *string
+	status                        *creatorsubscription.Status
+	amount_minor                  *int64
+	addamount_minor               *int64
+	currency                      *string
+	interval                      *creatorsubscription.Interval
+	billing_authorization_id      *string
+	current_period_start          *time.Time
+	current_period_end            *time.Time
+	next_charge_at                *time.Time
+	renewal_attempts              *int
+	addrenewal_attempts           *int
+	last_error                    *string
+	billing_channel               *creatorsubscription.BillingChannel
+	store_product_id              *string
+	store_original_transaction_id *string
+	store_slot                    *int
+	addstore_slot                 *int
+	updated_at                    *time.Time
+	clearedFields                 map[string]struct{}
+	done                          bool
+	oldValue                      func(context.Context) (*CreatorSubscription, error)
+	predicates                    []predicate.CreatorSubscription
 }
 
 var _ ent.Mutation = (*CreatorSubscriptionMutation)(nil)
@@ -765,6 +770,170 @@ func (m *CreatorSubscriptionMutation) ResetLastError() {
 	m.last_error = nil
 }
 
+// SetBillingChannel sets the "billing_channel" field.
+func (m *CreatorSubscriptionMutation) SetBillingChannel(cc creatorsubscription.BillingChannel) {
+	m.billing_channel = &cc
+}
+
+// BillingChannel returns the value of the "billing_channel" field in the mutation.
+func (m *CreatorSubscriptionMutation) BillingChannel() (r creatorsubscription.BillingChannel, exists bool) {
+	v := m.billing_channel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBillingChannel returns the old "billing_channel" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldBillingChannel(ctx context.Context) (v creatorsubscription.BillingChannel, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBillingChannel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBillingChannel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBillingChannel: %w", err)
+	}
+	return oldValue.BillingChannel, nil
+}
+
+// ResetBillingChannel resets all changes to the "billing_channel" field.
+func (m *CreatorSubscriptionMutation) ResetBillingChannel() {
+	m.billing_channel = nil
+}
+
+// SetStoreProductID sets the "store_product_id" field.
+func (m *CreatorSubscriptionMutation) SetStoreProductID(s string) {
+	m.store_product_id = &s
+}
+
+// StoreProductID returns the value of the "store_product_id" field in the mutation.
+func (m *CreatorSubscriptionMutation) StoreProductID() (r string, exists bool) {
+	v := m.store_product_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreProductID returns the old "store_product_id" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldStoreProductID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreProductID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreProductID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreProductID: %w", err)
+	}
+	return oldValue.StoreProductID, nil
+}
+
+// ResetStoreProductID resets all changes to the "store_product_id" field.
+func (m *CreatorSubscriptionMutation) ResetStoreProductID() {
+	m.store_product_id = nil
+}
+
+// SetStoreOriginalTransactionID sets the "store_original_transaction_id" field.
+func (m *CreatorSubscriptionMutation) SetStoreOriginalTransactionID(s string) {
+	m.store_original_transaction_id = &s
+}
+
+// StoreOriginalTransactionID returns the value of the "store_original_transaction_id" field in the mutation.
+func (m *CreatorSubscriptionMutation) StoreOriginalTransactionID() (r string, exists bool) {
+	v := m.store_original_transaction_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreOriginalTransactionID returns the old "store_original_transaction_id" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldStoreOriginalTransactionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreOriginalTransactionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreOriginalTransactionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreOriginalTransactionID: %w", err)
+	}
+	return oldValue.StoreOriginalTransactionID, nil
+}
+
+// ResetStoreOriginalTransactionID resets all changes to the "store_original_transaction_id" field.
+func (m *CreatorSubscriptionMutation) ResetStoreOriginalTransactionID() {
+	m.store_original_transaction_id = nil
+}
+
+// SetStoreSlot sets the "store_slot" field.
+func (m *CreatorSubscriptionMutation) SetStoreSlot(i int) {
+	m.store_slot = &i
+	m.addstore_slot = nil
+}
+
+// StoreSlot returns the value of the "store_slot" field in the mutation.
+func (m *CreatorSubscriptionMutation) StoreSlot() (r int, exists bool) {
+	v := m.store_slot
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStoreSlot returns the old "store_slot" field's value of the CreatorSubscription entity.
+// If the CreatorSubscription object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionMutation) OldStoreSlot(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStoreSlot is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStoreSlot requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStoreSlot: %w", err)
+	}
+	return oldValue.StoreSlot, nil
+}
+
+// AddStoreSlot adds i to the "store_slot" field.
+func (m *CreatorSubscriptionMutation) AddStoreSlot(i int) {
+	if m.addstore_slot != nil {
+		*m.addstore_slot += i
+	} else {
+		m.addstore_slot = &i
+	}
+}
+
+// AddedStoreSlot returns the value that was added to the "store_slot" field in this mutation.
+func (m *CreatorSubscriptionMutation) AddedStoreSlot() (r int, exists bool) {
+	v := m.addstore_slot
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStoreSlot resets all changes to the "store_slot" field.
+func (m *CreatorSubscriptionMutation) ResetStoreSlot() {
+	m.store_slot = nil
+	m.addstore_slot = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *CreatorSubscriptionMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -835,7 +1004,7 @@ func (m *CreatorSubscriptionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CreatorSubscriptionMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 19)
 	if m.created_at != nil {
 		fields = append(fields, creatorsubscription.FieldCreatedAt)
 	}
@@ -878,6 +1047,18 @@ func (m *CreatorSubscriptionMutation) Fields() []string {
 	if m.last_error != nil {
 		fields = append(fields, creatorsubscription.FieldLastError)
 	}
+	if m.billing_channel != nil {
+		fields = append(fields, creatorsubscription.FieldBillingChannel)
+	}
+	if m.store_product_id != nil {
+		fields = append(fields, creatorsubscription.FieldStoreProductID)
+	}
+	if m.store_original_transaction_id != nil {
+		fields = append(fields, creatorsubscription.FieldStoreOriginalTransactionID)
+	}
+	if m.store_slot != nil {
+		fields = append(fields, creatorsubscription.FieldStoreSlot)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, creatorsubscription.FieldUpdatedAt)
 	}
@@ -917,6 +1098,14 @@ func (m *CreatorSubscriptionMutation) Field(name string) (ent.Value, bool) {
 		return m.RenewalAttempts()
 	case creatorsubscription.FieldLastError:
 		return m.LastError()
+	case creatorsubscription.FieldBillingChannel:
+		return m.BillingChannel()
+	case creatorsubscription.FieldStoreProductID:
+		return m.StoreProductID()
+	case creatorsubscription.FieldStoreOriginalTransactionID:
+		return m.StoreOriginalTransactionID()
+	case creatorsubscription.FieldStoreSlot:
+		return m.StoreSlot()
 	case creatorsubscription.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -956,6 +1145,14 @@ func (m *CreatorSubscriptionMutation) OldField(ctx context.Context, name string)
 		return m.OldRenewalAttempts(ctx)
 	case creatorsubscription.FieldLastError:
 		return m.OldLastError(ctx)
+	case creatorsubscription.FieldBillingChannel:
+		return m.OldBillingChannel(ctx)
+	case creatorsubscription.FieldStoreProductID:
+		return m.OldStoreProductID(ctx)
+	case creatorsubscription.FieldStoreOriginalTransactionID:
+		return m.OldStoreOriginalTransactionID(ctx)
+	case creatorsubscription.FieldStoreSlot:
+		return m.OldStoreSlot(ctx)
 	case creatorsubscription.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -1065,6 +1262,34 @@ func (m *CreatorSubscriptionMutation) SetField(name string, value ent.Value) err
 		}
 		m.SetLastError(v)
 		return nil
+	case creatorsubscription.FieldBillingChannel:
+		v, ok := value.(creatorsubscription.BillingChannel)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBillingChannel(v)
+		return nil
+	case creatorsubscription.FieldStoreProductID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreProductID(v)
+		return nil
+	case creatorsubscription.FieldStoreOriginalTransactionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreOriginalTransactionID(v)
+		return nil
+	case creatorsubscription.FieldStoreSlot:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStoreSlot(v)
+		return nil
 	case creatorsubscription.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -1086,6 +1311,9 @@ func (m *CreatorSubscriptionMutation) AddedFields() []string {
 	if m.addrenewal_attempts != nil {
 		fields = append(fields, creatorsubscription.FieldRenewalAttempts)
 	}
+	if m.addstore_slot != nil {
+		fields = append(fields, creatorsubscription.FieldStoreSlot)
+	}
 	return fields
 }
 
@@ -1098,6 +1326,8 @@ func (m *CreatorSubscriptionMutation) AddedField(name string) (ent.Value, bool) 
 		return m.AddedAmountMinor()
 	case creatorsubscription.FieldRenewalAttempts:
 		return m.AddedRenewalAttempts()
+	case creatorsubscription.FieldStoreSlot:
+		return m.AddedStoreSlot()
 	}
 	return nil, false
 }
@@ -1120,6 +1350,13 @@ func (m *CreatorSubscriptionMutation) AddField(name string, value ent.Value) err
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddRenewalAttempts(v)
+		return nil
+	case creatorsubscription.FieldStoreSlot:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStoreSlot(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CreatorSubscription numeric field %s", name)
@@ -1211,6 +1448,18 @@ func (m *CreatorSubscriptionMutation) ResetField(name string) error {
 	case creatorsubscription.FieldLastError:
 		m.ResetLastError()
 		return nil
+	case creatorsubscription.FieldBillingChannel:
+		m.ResetBillingChannel()
+		return nil
+	case creatorsubscription.FieldStoreProductID:
+		m.ResetStoreProductID()
+		return nil
+	case creatorsubscription.FieldStoreOriginalTransactionID:
+		m.ResetStoreOriginalTransactionID()
+		return nil
+	case creatorsubscription.FieldStoreSlot:
+		m.ResetStoreSlot()
+		return nil
 	case creatorsubscription.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
@@ -1294,6 +1543,7 @@ type CreatorSubscriptionChargeMutation struct {
 	period_start            *time.Time
 	failure_reason          *string
 	paid_at                 *time.Time
+	refunded_at             *time.Time
 	updated_at              *time.Time
 	clearedFields           map[string]struct{}
 	done                    bool
@@ -2143,6 +2393,55 @@ func (m *CreatorSubscriptionChargeMutation) ResetPaidAt() {
 	delete(m.clearedFields, creatorsubscriptioncharge.FieldPaidAt)
 }
 
+// SetRefundedAt sets the "refunded_at" field.
+func (m *CreatorSubscriptionChargeMutation) SetRefundedAt(t time.Time) {
+	m.refunded_at = &t
+}
+
+// RefundedAt returns the value of the "refunded_at" field in the mutation.
+func (m *CreatorSubscriptionChargeMutation) RefundedAt() (r time.Time, exists bool) {
+	v := m.refunded_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRefundedAt returns the old "refunded_at" field's value of the CreatorSubscriptionCharge entity.
+// If the CreatorSubscriptionCharge object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorSubscriptionChargeMutation) OldRefundedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRefundedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRefundedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRefundedAt: %w", err)
+	}
+	return oldValue.RefundedAt, nil
+}
+
+// ClearRefundedAt clears the value of the "refunded_at" field.
+func (m *CreatorSubscriptionChargeMutation) ClearRefundedAt() {
+	m.refunded_at = nil
+	m.clearedFields[creatorsubscriptioncharge.FieldRefundedAt] = struct{}{}
+}
+
+// RefundedAtCleared returns if the "refunded_at" field was cleared in this mutation.
+func (m *CreatorSubscriptionChargeMutation) RefundedAtCleared() bool {
+	_, ok := m.clearedFields[creatorsubscriptioncharge.FieldRefundedAt]
+	return ok
+}
+
+// ResetRefundedAt resets all changes to the "refunded_at" field.
+func (m *CreatorSubscriptionChargeMutation) ResetRefundedAt() {
+	m.refunded_at = nil
+	delete(m.clearedFields, creatorsubscriptioncharge.FieldRefundedAt)
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *CreatorSubscriptionChargeMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -2213,7 +2512,7 @@ func (m *CreatorSubscriptionChargeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CreatorSubscriptionChargeMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 19)
 	if m.created_at != nil {
 		fields = append(fields, creatorsubscriptioncharge.FieldCreatedAt)
 	}
@@ -2265,6 +2564,9 @@ func (m *CreatorSubscriptionChargeMutation) Fields() []string {
 	if m.paid_at != nil {
 		fields = append(fields, creatorsubscriptioncharge.FieldPaidAt)
 	}
+	if m.refunded_at != nil {
+		fields = append(fields, creatorsubscriptioncharge.FieldRefundedAt)
+	}
 	if m.updated_at != nil {
 		fields = append(fields, creatorsubscriptioncharge.FieldUpdatedAt)
 	}
@@ -2310,6 +2612,8 @@ func (m *CreatorSubscriptionChargeMutation) Field(name string) (ent.Value, bool)
 		return m.FailureReason()
 	case creatorsubscriptioncharge.FieldPaidAt:
 		return m.PaidAt()
+	case creatorsubscriptioncharge.FieldRefundedAt:
+		return m.RefundedAt()
 	case creatorsubscriptioncharge.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -2355,6 +2659,8 @@ func (m *CreatorSubscriptionChargeMutation) OldField(ctx context.Context, name s
 		return m.OldFailureReason(ctx)
 	case creatorsubscriptioncharge.FieldPaidAt:
 		return m.OldPaidAt(ctx)
+	case creatorsubscriptioncharge.FieldRefundedAt:
+		return m.OldRefundedAt(ctx)
 	case creatorsubscriptioncharge.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -2485,6 +2791,13 @@ func (m *CreatorSubscriptionChargeMutation) SetField(name string, value ent.Valu
 		}
 		m.SetPaidAt(v)
 		return nil
+	case creatorsubscriptioncharge.FieldRefundedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRefundedAt(v)
+		return nil
 	case creatorsubscriptioncharge.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -2591,6 +2904,9 @@ func (m *CreatorSubscriptionChargeMutation) ClearedFields() []string {
 	if m.FieldCleared(creatorsubscriptioncharge.FieldPaidAt) {
 		fields = append(fields, creatorsubscriptioncharge.FieldPaidAt)
 	}
+	if m.FieldCleared(creatorsubscriptioncharge.FieldRefundedAt) {
+		fields = append(fields, creatorsubscriptioncharge.FieldRefundedAt)
+	}
 	return fields
 }
 
@@ -2610,6 +2926,9 @@ func (m *CreatorSubscriptionChargeMutation) ClearField(name string) error {
 		return nil
 	case creatorsubscriptioncharge.FieldPaidAt:
 		m.ClearPaidAt()
+		return nil
+	case creatorsubscriptioncharge.FieldRefundedAt:
+		m.ClearRefundedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown CreatorSubscriptionCharge nullable field %s", name)
@@ -2669,6 +2988,9 @@ func (m *CreatorSubscriptionChargeMutation) ResetField(name string) error {
 		return nil
 	case creatorsubscriptioncharge.FieldPaidAt:
 		m.ResetPaidAt()
+		return nil
+	case creatorsubscriptioncharge.FieldRefundedAt:
+		m.ResetRefundedAt()
 		return nil
 	case creatorsubscriptioncharge.FieldUpdatedAt:
 		m.ResetUpdatedAt()

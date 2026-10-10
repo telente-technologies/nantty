@@ -206,6 +206,20 @@ func (_c *CreatorSubscriptionChargeCreate) SetNillablePaidAt(v *time.Time) *Crea
 	return _c
 }
 
+// SetRefundedAt sets the "refunded_at" field.
+func (_c *CreatorSubscriptionChargeCreate) SetRefundedAt(v time.Time) *CreatorSubscriptionChargeCreate {
+	_c.mutation.SetRefundedAt(v)
+	return _c
+}
+
+// SetNillableRefundedAt sets the "refunded_at" field if the given value is not nil.
+func (_c *CreatorSubscriptionChargeCreate) SetNillableRefundedAt(v *time.Time) *CreatorSubscriptionChargeCreate {
+	if v != nil {
+		_c.SetRefundedAt(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *CreatorSubscriptionChargeCreate) SetUpdatedAt(v time.Time) *CreatorSubscriptionChargeCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -516,6 +530,10 @@ func (_c *CreatorSubscriptionChargeCreate) createSpec() (*CreatorSubscriptionCha
 		_spec.SetField(creatorsubscriptioncharge.FieldPaidAt, field.TypeTime, value)
 		_node.PaidAt = &value
 	}
+	if value, ok := _c.mutation.RefundedAt(); ok {
+		_spec.SetField(creatorsubscriptioncharge.FieldRefundedAt, field.TypeTime, value)
+		_node.RefundedAt = &value
+	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(creatorsubscriptioncharge.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
@@ -713,6 +731,24 @@ func (u *CreatorSubscriptionChargeUpsert) UpdatePaidAt() *CreatorSubscriptionCha
 // ClearPaidAt clears the value of the "paid_at" field.
 func (u *CreatorSubscriptionChargeUpsert) ClearPaidAt() *CreatorSubscriptionChargeUpsert {
 	u.SetNull(creatorsubscriptioncharge.FieldPaidAt)
+	return u
+}
+
+// SetRefundedAt sets the "refunded_at" field.
+func (u *CreatorSubscriptionChargeUpsert) SetRefundedAt(v time.Time) *CreatorSubscriptionChargeUpsert {
+	u.Set(creatorsubscriptioncharge.FieldRefundedAt, v)
+	return u
+}
+
+// UpdateRefundedAt sets the "refunded_at" field to the value that was provided on create.
+func (u *CreatorSubscriptionChargeUpsert) UpdateRefundedAt() *CreatorSubscriptionChargeUpsert {
+	u.SetExcluded(creatorsubscriptioncharge.FieldRefundedAt)
+	return u
+}
+
+// ClearRefundedAt clears the value of the "refunded_at" field.
+func (u *CreatorSubscriptionChargeUpsert) ClearRefundedAt() *CreatorSubscriptionChargeUpsert {
+	u.SetNull(creatorsubscriptioncharge.FieldRefundedAt)
 	return u
 }
 
@@ -965,6 +1001,27 @@ func (u *CreatorSubscriptionChargeUpsertOne) UpdatePaidAt() *CreatorSubscription
 func (u *CreatorSubscriptionChargeUpsertOne) ClearPaidAt() *CreatorSubscriptionChargeUpsertOne {
 	return u.Update(func(s *CreatorSubscriptionChargeUpsert) {
 		s.ClearPaidAt()
+	})
+}
+
+// SetRefundedAt sets the "refunded_at" field.
+func (u *CreatorSubscriptionChargeUpsertOne) SetRefundedAt(v time.Time) *CreatorSubscriptionChargeUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionChargeUpsert) {
+		s.SetRefundedAt(v)
+	})
+}
+
+// UpdateRefundedAt sets the "refunded_at" field to the value that was provided on create.
+func (u *CreatorSubscriptionChargeUpsertOne) UpdateRefundedAt() *CreatorSubscriptionChargeUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionChargeUpsert) {
+		s.UpdateRefundedAt()
+	})
+}
+
+// ClearRefundedAt clears the value of the "refunded_at" field.
+func (u *CreatorSubscriptionChargeUpsertOne) ClearRefundedAt() *CreatorSubscriptionChargeUpsertOne {
+	return u.Update(func(s *CreatorSubscriptionChargeUpsert) {
+		s.ClearRefundedAt()
 	})
 }
 
@@ -1386,6 +1443,27 @@ func (u *CreatorSubscriptionChargeUpsertBulk) UpdatePaidAt() *CreatorSubscriptio
 func (u *CreatorSubscriptionChargeUpsertBulk) ClearPaidAt() *CreatorSubscriptionChargeUpsertBulk {
 	return u.Update(func(s *CreatorSubscriptionChargeUpsert) {
 		s.ClearPaidAt()
+	})
+}
+
+// SetRefundedAt sets the "refunded_at" field.
+func (u *CreatorSubscriptionChargeUpsertBulk) SetRefundedAt(v time.Time) *CreatorSubscriptionChargeUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionChargeUpsert) {
+		s.SetRefundedAt(v)
+	})
+}
+
+// UpdateRefundedAt sets the "refunded_at" field to the value that was provided on create.
+func (u *CreatorSubscriptionChargeUpsertBulk) UpdateRefundedAt() *CreatorSubscriptionChargeUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionChargeUpsert) {
+		s.UpdateRefundedAt()
+	})
+}
+
+// ClearRefundedAt clears the value of the "refunded_at" field.
+func (u *CreatorSubscriptionChargeUpsertBulk) ClearRefundedAt() *CreatorSubscriptionChargeUpsertBulk {
+	return u.Update(func(s *CreatorSubscriptionChargeUpsert) {
+		s.ClearRefundedAt()
 	})
 }
 

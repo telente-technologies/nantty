@@ -130,6 +130,11 @@ func PaidAt(v time.Time) predicate.CreatorSubscriptionCharge {
 	return predicate.CreatorSubscriptionCharge(sql.FieldEQ(FieldPaidAt, v))
 }
 
+// RefundedAt applies equality check predicate on the "refunded_at" field. It's identical to RefundedAtEQ.
+func RefundedAt(v time.Time) predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldEQ(FieldRefundedAt, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.CreatorSubscriptionCharge {
 	return predicate.CreatorSubscriptionCharge(sql.FieldEQ(FieldUpdatedAt, v))
@@ -968,6 +973,56 @@ func PaidAtIsNil() predicate.CreatorSubscriptionCharge {
 // PaidAtNotNil applies the NotNil predicate on the "paid_at" field.
 func PaidAtNotNil() predicate.CreatorSubscriptionCharge {
 	return predicate.CreatorSubscriptionCharge(sql.FieldNotNull(FieldPaidAt))
+}
+
+// RefundedAtEQ applies the EQ predicate on the "refunded_at" field.
+func RefundedAtEQ(v time.Time) predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldEQ(FieldRefundedAt, v))
+}
+
+// RefundedAtNEQ applies the NEQ predicate on the "refunded_at" field.
+func RefundedAtNEQ(v time.Time) predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldNEQ(FieldRefundedAt, v))
+}
+
+// RefundedAtIn applies the In predicate on the "refunded_at" field.
+func RefundedAtIn(vs ...time.Time) predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldIn(FieldRefundedAt, vs...))
+}
+
+// RefundedAtNotIn applies the NotIn predicate on the "refunded_at" field.
+func RefundedAtNotIn(vs ...time.Time) predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldNotIn(FieldRefundedAt, vs...))
+}
+
+// RefundedAtGT applies the GT predicate on the "refunded_at" field.
+func RefundedAtGT(v time.Time) predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldGT(FieldRefundedAt, v))
+}
+
+// RefundedAtGTE applies the GTE predicate on the "refunded_at" field.
+func RefundedAtGTE(v time.Time) predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldGTE(FieldRefundedAt, v))
+}
+
+// RefundedAtLT applies the LT predicate on the "refunded_at" field.
+func RefundedAtLT(v time.Time) predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldLT(FieldRefundedAt, v))
+}
+
+// RefundedAtLTE applies the LTE predicate on the "refunded_at" field.
+func RefundedAtLTE(v time.Time) predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldLTE(FieldRefundedAt, v))
+}
+
+// RefundedAtIsNil applies the IsNil predicate on the "refunded_at" field.
+func RefundedAtIsNil() predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldIsNull(FieldRefundedAt))
+}
+
+// RefundedAtNotNil applies the NotNil predicate on the "refunded_at" field.
+func RefundedAtNotNil() predicate.CreatorSubscriptionCharge {
+	return predicate.CreatorSubscriptionCharge(sql.FieldNotNull(FieldRefundedAt))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

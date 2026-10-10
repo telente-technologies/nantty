@@ -49,6 +49,8 @@ const (
 	FieldFailureReason = "failure_reason"
 	// FieldPaidAt holds the string denoting the paid_at field in the database.
 	FieldPaidAt = "paid_at"
+	// FieldRefundedAt holds the string denoting the refunded_at field in the database.
+	FieldRefundedAt = "refunded_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the creatorsubscriptioncharge in the database.
@@ -75,6 +77,7 @@ var Columns = []string{
 	FieldPeriodStart,
 	FieldFailureReason,
 	FieldPaidAt,
+	FieldRefundedAt,
 	FieldUpdatedAt,
 }
 
@@ -161,6 +164,7 @@ const (
 	StatusPending   Status = "pending"
 	StatusSucceeded Status = "succeeded"
 	StatusFailed    Status = "failed"
+	StatusRefunded  Status = "refunded"
 )
 
 func (s Status) String() string {
@@ -170,7 +174,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPending, StatusSucceeded, StatusFailed:
+	case StatusPending, StatusSucceeded, StatusFailed, StatusRefunded:
 		return nil
 	default:
 		return fmt.Errorf("creatorsubscriptioncharge: invalid enum value for status field: %q", s)
@@ -268,6 +272,11 @@ func ByFailureReason(opts ...sql.OrderTermOption) OrderOption {
 // ByPaidAt orders the results by the paid_at field.
 func ByPaidAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPaidAt, opts...).ToFunc()
+}
+
+// ByRefundedAt orders the results by the refunded_at field.
+func ByRefundedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRefundedAt, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

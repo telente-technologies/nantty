@@ -46,6 +46,14 @@ type CreatorSubscription struct {
 	RenewalAttempts int `json:"renewal_attempts,omitempty"`
 	// LastError holds the value of the "last_error" field.
 	LastError string `json:"last_error,omitempty"`
+	// BillingChannel holds the value of the "billing_channel" field.
+	BillingChannel creatorsubscription.BillingChannel `json:"billing_channel,omitempty"`
+	// StoreProductID holds the value of the "store_product_id" field.
+	StoreProductID string `json:"store_product_id,omitempty"`
+	// StoreOriginalTransactionID holds the value of the "store_original_transaction_id" field.
+	StoreOriginalTransactionID string `json:"store_original_transaction_id,omitempty"`
+	// StoreSlot holds the value of the "store_slot" field.
+	StoreSlot int `json:"store_slot,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -56,9 +64,9 @@ func (*CreatorSubscription) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case creatorsubscription.FieldAmountMinor, creatorsubscription.FieldRenewalAttempts:
+		case creatorsubscription.FieldAmountMinor, creatorsubscription.FieldRenewalAttempts, creatorsubscription.FieldStoreSlot:
 			values[i] = new(sql.NullInt64)
-		case creatorsubscription.FieldSubscriberID, creatorsubscription.FieldCreatorID, creatorsubscription.FieldPlanID, creatorsubscription.FieldStatus, creatorsubscription.FieldCurrency, creatorsubscription.FieldInterval, creatorsubscription.FieldBillingAuthorizationID, creatorsubscription.FieldLastError:
+		case creatorsubscription.FieldSubscriberID, creatorsubscription.FieldCreatorID, creatorsubscription.FieldPlanID, creatorsubscription.FieldStatus, creatorsubscription.FieldCurrency, creatorsubscription.FieldInterval, creatorsubscription.FieldBillingAuthorizationID, creatorsubscription.FieldLastError, creatorsubscription.FieldBillingChannel, creatorsubscription.FieldStoreProductID, creatorsubscription.FieldStoreOriginalTransactionID:
 			values[i] = new(sql.NullString)
 		case creatorsubscription.FieldCreatedAt, creatorsubscription.FieldCurrentPeriodStart, creatorsubscription.FieldCurrentPeriodEnd, creatorsubscription.FieldNextChargeAt, creatorsubscription.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -172,6 +180,30 @@ func (_m *CreatorSubscription) assignValues(columns []string, values []any) erro
 			} else if value.Valid {
 				_m.LastError = value.String
 			}
+		case creatorsubscription.FieldBillingChannel:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field billing_channel", values[i])
+			} else if value.Valid {
+				_m.BillingChannel = creatorsubscription.BillingChannel(value.String)
+			}
+		case creatorsubscription.FieldStoreProductID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field store_product_id", values[i])
+			} else if value.Valid {
+				_m.StoreProductID = value.String
+			}
+		case creatorsubscription.FieldStoreOriginalTransactionID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field store_original_transaction_id", values[i])
+			} else if value.Valid {
+				_m.StoreOriginalTransactionID = value.String
+			}
+		case creatorsubscription.FieldStoreSlot:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field store_slot", values[i])
+			} else if value.Valid {
+				_m.StoreSlot = int(value.Int64)
+			}
 		case creatorsubscription.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -261,6 +293,18 @@ func (_m *CreatorSubscription) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_error=")
 	builder.WriteString(_m.LastError)
+	builder.WriteString(", ")
+	builder.WriteString("billing_channel=")
+	builder.WriteString(fmt.Sprintf("%v", _m.BillingChannel))
+	builder.WriteString(", ")
+	builder.WriteString("store_product_id=")
+	builder.WriteString(_m.StoreProductID)
+	builder.WriteString(", ")
+	builder.WriteString("store_original_transaction_id=")
+	builder.WriteString(_m.StoreOriginalTransactionID)
+	builder.WriteString(", ")
+	builder.WriteString("store_slot=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StoreSlot))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

@@ -26,6 +26,10 @@ var (
 		{Name: "next_charge_at", Type: field.TypeTime, Nullable: true},
 		{Name: "renewal_attempts", Type: field.TypeInt, Default: 0},
 		{Name: "last_error", Type: field.TypeString, Size: 300, Default: ""},
+		{Name: "billing_channel", Type: field.TypeEnum, Enums: []string{"web", "apple_iap", "google_play"}, Default: "web"},
+		{Name: "store_product_id", Type: field.TypeString, Size: 120, Default: ""},
+		{Name: "store_original_transaction_id", Type: field.TypeString, Size: 1024, Default: ""},
+		{Name: "store_slot", Type: field.TypeInt, Default: 0},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// CreatorSubscriptionsTable holds the schema information for the "creator_subscriptions" table.
@@ -34,6 +38,14 @@ var (
 		Columns:    CreatorSubscriptionsColumns,
 		PrimaryKey: []*schema.Column{CreatorSubscriptionsColumns[0]},
 		Indexes: []*schema.Index{
+			{
+				Name:    "creator_subscriptions_store_original_transaction",
+				Unique:  false,
+				Columns: []*schema.Column{CreatorSubscriptionsColumns[17]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "store_original_transaction_id <> ''",
+				},
+			},
 			{
 				Name:    "creatorsubscription_subscriber_id_creator_id",
 				Unique:  false,
@@ -72,13 +84,14 @@ var (
 		{Name: "attempt_count", Type: field.TypeInt, Default: 0},
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "succeeded", "failed"}, Default: "pending"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "succeeded", "failed", "refunded"}, Default: "pending"},
 		{Name: "provider_fee_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "creator_share_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "platform_share_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "period_start", Type: field.TypeTime, Nullable: true},
 		{Name: "failure_reason", Type: field.TypeString, Size: 300, Default: ""},
 		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "refunded_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// CreatorSubscriptionChargesTable holds the schema information for the "creator_subscription_charges" table.
@@ -417,7 +430,7 @@ var (
 	TrialClaimsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "kind", Type: field.TypeEnum, Enums: []string{"person", "card", "device", "phone"}},
+		{Name: "kind", Type: field.TypeEnum, Enums: []string{"person", "card", "device", "email"}},
 		{Name: "fingerprint_hash", Type: field.TypeString, Size: 80},
 		{Name: "subscription_id", Type: field.TypeString, Size: 80},
 		{Name: "owner_user_id", Type: field.TypeString, Size: 80},

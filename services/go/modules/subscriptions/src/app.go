@@ -56,6 +56,8 @@ func StartSubscriptionsModuleWithSettings(ctx context.Context, settings configs.
 	payments.RegisterStoreRefundHandler(paymentconstants.PurposeSubscription, billing)
 	creatorSubscriptions := creatorservices.CreatorSubscriptions{Container: billing.Container}
 	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeCreatorSubscription, creatorSubscriptions)
+	payments.RegisterStoreRefundHandler(paymentconstants.PurposeCreatorSubscription, creatorSubscriptions)
+	payments.RegisterStoreSubscriptionNotificationHandler(creatorSubscriptions)
 	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeSubscriptionRenewal, billingservices.RenewalPayments{Billing: billing, Fallback: creatorSubscriptions})
 	paymentservices.RegisterSellerPlanLookup(billing.SellerPlanOf)
 	loaders.RegisterMoneyDomainEventHandler("verificationCase.refundRequested", func(ctx context.Context, envelope platformevents.EventEnvelope) error {

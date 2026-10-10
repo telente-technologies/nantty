@@ -152,6 +152,55 @@ func (_u *CreatorSubscriptionUpdate) SetNillableLastError(v *string) *CreatorSub
 	return _u
 }
 
+// SetStoreProductID sets the "store_product_id" field.
+func (_u *CreatorSubscriptionUpdate) SetStoreProductID(v string) *CreatorSubscriptionUpdate {
+	_u.mutation.SetStoreProductID(v)
+	return _u
+}
+
+// SetNillableStoreProductID sets the "store_product_id" field if the given value is not nil.
+func (_u *CreatorSubscriptionUpdate) SetNillableStoreProductID(v *string) *CreatorSubscriptionUpdate {
+	if v != nil {
+		_u.SetStoreProductID(*v)
+	}
+	return _u
+}
+
+// SetStoreOriginalTransactionID sets the "store_original_transaction_id" field.
+func (_u *CreatorSubscriptionUpdate) SetStoreOriginalTransactionID(v string) *CreatorSubscriptionUpdate {
+	_u.mutation.SetStoreOriginalTransactionID(v)
+	return _u
+}
+
+// SetNillableStoreOriginalTransactionID sets the "store_original_transaction_id" field if the given value is not nil.
+func (_u *CreatorSubscriptionUpdate) SetNillableStoreOriginalTransactionID(v *string) *CreatorSubscriptionUpdate {
+	if v != nil {
+		_u.SetStoreOriginalTransactionID(*v)
+	}
+	return _u
+}
+
+// SetStoreSlot sets the "store_slot" field.
+func (_u *CreatorSubscriptionUpdate) SetStoreSlot(v int) *CreatorSubscriptionUpdate {
+	_u.mutation.ResetStoreSlot()
+	_u.mutation.SetStoreSlot(v)
+	return _u
+}
+
+// SetNillableStoreSlot sets the "store_slot" field if the given value is not nil.
+func (_u *CreatorSubscriptionUpdate) SetNillableStoreSlot(v *int) *CreatorSubscriptionUpdate {
+	if v != nil {
+		_u.SetStoreSlot(*v)
+	}
+	return _u
+}
+
+// AddStoreSlot adds value to the "store_slot" field.
+func (_u *CreatorSubscriptionUpdate) AddStoreSlot(v int) *CreatorSubscriptionUpdate {
+	_u.mutation.AddStoreSlot(v)
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CreatorSubscriptionUpdate) SetUpdatedAt(v time.Time) *CreatorSubscriptionUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -216,6 +265,16 @@ func (_u *CreatorSubscriptionUpdate) check() error {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.last_error": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.StoreProductID(); ok {
+		if err := creatorsubscription.StoreProductIDValidator(v); err != nil {
+			return &ValidationError{Name: "store_product_id", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.store_product_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StoreOriginalTransactionID(); ok {
+		if err := creatorsubscription.StoreOriginalTransactionIDValidator(v); err != nil {
+			return &ValidationError{Name: "store_original_transaction_id", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.store_original_transaction_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -263,6 +322,18 @@ func (_u *CreatorSubscriptionUpdate) sqlSave(ctx context.Context) (_node int, er
 	}
 	if value, ok := _u.mutation.LastError(); ok {
 		_spec.SetField(creatorsubscription.FieldLastError, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StoreProductID(); ok {
+		_spec.SetField(creatorsubscription.FieldStoreProductID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StoreOriginalTransactionID(); ok {
+		_spec.SetField(creatorsubscription.FieldStoreOriginalTransactionID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StoreSlot(); ok {
+		_spec.SetField(creatorsubscription.FieldStoreSlot, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStoreSlot(); ok {
+		_spec.AddField(creatorsubscription.FieldStoreSlot, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(creatorsubscription.FieldUpdatedAt, field.TypeTime, value)
@@ -412,6 +483,55 @@ func (_u *CreatorSubscriptionUpdateOne) SetNillableLastError(v *string) *Creator
 	return _u
 }
 
+// SetStoreProductID sets the "store_product_id" field.
+func (_u *CreatorSubscriptionUpdateOne) SetStoreProductID(v string) *CreatorSubscriptionUpdateOne {
+	_u.mutation.SetStoreProductID(v)
+	return _u
+}
+
+// SetNillableStoreProductID sets the "store_product_id" field if the given value is not nil.
+func (_u *CreatorSubscriptionUpdateOne) SetNillableStoreProductID(v *string) *CreatorSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetStoreProductID(*v)
+	}
+	return _u
+}
+
+// SetStoreOriginalTransactionID sets the "store_original_transaction_id" field.
+func (_u *CreatorSubscriptionUpdateOne) SetStoreOriginalTransactionID(v string) *CreatorSubscriptionUpdateOne {
+	_u.mutation.SetStoreOriginalTransactionID(v)
+	return _u
+}
+
+// SetNillableStoreOriginalTransactionID sets the "store_original_transaction_id" field if the given value is not nil.
+func (_u *CreatorSubscriptionUpdateOne) SetNillableStoreOriginalTransactionID(v *string) *CreatorSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetStoreOriginalTransactionID(*v)
+	}
+	return _u
+}
+
+// SetStoreSlot sets the "store_slot" field.
+func (_u *CreatorSubscriptionUpdateOne) SetStoreSlot(v int) *CreatorSubscriptionUpdateOne {
+	_u.mutation.ResetStoreSlot()
+	_u.mutation.SetStoreSlot(v)
+	return _u
+}
+
+// SetNillableStoreSlot sets the "store_slot" field if the given value is not nil.
+func (_u *CreatorSubscriptionUpdateOne) SetNillableStoreSlot(v *int) *CreatorSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetStoreSlot(*v)
+	}
+	return _u
+}
+
+// AddStoreSlot adds value to the "store_slot" field.
+func (_u *CreatorSubscriptionUpdateOne) AddStoreSlot(v int) *CreatorSubscriptionUpdateOne {
+	_u.mutation.AddStoreSlot(v)
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CreatorSubscriptionUpdateOne) SetUpdatedAt(v time.Time) *CreatorSubscriptionUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -489,6 +609,16 @@ func (_u *CreatorSubscriptionUpdateOne) check() error {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.last_error": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.StoreProductID(); ok {
+		if err := creatorsubscription.StoreProductIDValidator(v); err != nil {
+			return &ValidationError{Name: "store_product_id", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.store_product_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StoreOriginalTransactionID(); ok {
+		if err := creatorsubscription.StoreOriginalTransactionIDValidator(v); err != nil {
+			return &ValidationError{Name: "store_original_transaction_id", err: fmt.Errorf(`ent: validator failed for field "CreatorSubscription.store_original_transaction_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -553,6 +683,18 @@ func (_u *CreatorSubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Cre
 	}
 	if value, ok := _u.mutation.LastError(); ok {
 		_spec.SetField(creatorsubscription.FieldLastError, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StoreProductID(); ok {
+		_spec.SetField(creatorsubscription.FieldStoreProductID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StoreOriginalTransactionID(); ok {
+		_spec.SetField(creatorsubscription.FieldStoreOriginalTransactionID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StoreSlot(); ok {
+		_spec.SetField(creatorsubscription.FieldStoreSlot, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStoreSlot(); ok {
+		_spec.AddField(creatorsubscription.FieldStoreSlot, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(creatorsubscription.FieldUpdatedAt, field.TypeTime, value)

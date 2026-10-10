@@ -70,7 +70,7 @@ const (
 	KindPerson Kind = "person"
 	KindCard   Kind = "card"
 	KindDevice Kind = "device"
-	KindPhone  Kind = "phone"
+	KindEmail  Kind = "email"
 )
 
 func (k Kind) String() string {
@@ -80,7 +80,7 @@ func (k Kind) String() string {
 // KindValidator is a validator for the "kind" field enum values. It is called by the builders before save.
 func KindValidator(k Kind) error {
 	switch k {
-	case KindPerson, KindCard, KindDevice, KindPhone:
+	case KindPerson, KindCard, KindDevice, KindEmail:
 		return nil
 	default:
 		return fmt.Errorf("trialclaim: invalid enum value for kind field: %q", k)

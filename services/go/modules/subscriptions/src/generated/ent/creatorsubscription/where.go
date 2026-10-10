@@ -115,6 +115,21 @@ func LastError(v string) predicate.CreatorSubscription {
 	return predicate.CreatorSubscription(sql.FieldEQ(FieldLastError, v))
 }
 
+// StoreProductID applies equality check predicate on the "store_product_id" field. It's identical to StoreProductIDEQ.
+func StoreProductID(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldEQ(FieldStoreProductID, v))
+}
+
+// StoreOriginalTransactionID applies equality check predicate on the "store_original_transaction_id" field. It's identical to StoreOriginalTransactionIDEQ.
+func StoreOriginalTransactionID(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldEQ(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreSlot applies equality check predicate on the "store_slot" field. It's identical to StoreSlotEQ.
+func StoreSlot(v int) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldEQ(FieldStoreSlot, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.CreatorSubscription {
 	return predicate.CreatorSubscription(sql.FieldEQ(FieldUpdatedAt, v))
@@ -818,6 +833,196 @@ func LastErrorEqualFold(v string) predicate.CreatorSubscription {
 // LastErrorContainsFold applies the ContainsFold predicate on the "last_error" field.
 func LastErrorContainsFold(v string) predicate.CreatorSubscription {
 	return predicate.CreatorSubscription(sql.FieldContainsFold(FieldLastError, v))
+}
+
+// BillingChannelEQ applies the EQ predicate on the "billing_channel" field.
+func BillingChannelEQ(v BillingChannel) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldEQ(FieldBillingChannel, v))
+}
+
+// BillingChannelNEQ applies the NEQ predicate on the "billing_channel" field.
+func BillingChannelNEQ(v BillingChannel) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldNEQ(FieldBillingChannel, v))
+}
+
+// BillingChannelIn applies the In predicate on the "billing_channel" field.
+func BillingChannelIn(vs ...BillingChannel) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldIn(FieldBillingChannel, vs...))
+}
+
+// BillingChannelNotIn applies the NotIn predicate on the "billing_channel" field.
+func BillingChannelNotIn(vs ...BillingChannel) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldNotIn(FieldBillingChannel, vs...))
+}
+
+// StoreProductIDEQ applies the EQ predicate on the "store_product_id" field.
+func StoreProductIDEQ(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldEQ(FieldStoreProductID, v))
+}
+
+// StoreProductIDNEQ applies the NEQ predicate on the "store_product_id" field.
+func StoreProductIDNEQ(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldNEQ(FieldStoreProductID, v))
+}
+
+// StoreProductIDIn applies the In predicate on the "store_product_id" field.
+func StoreProductIDIn(vs ...string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldIn(FieldStoreProductID, vs...))
+}
+
+// StoreProductIDNotIn applies the NotIn predicate on the "store_product_id" field.
+func StoreProductIDNotIn(vs ...string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldNotIn(FieldStoreProductID, vs...))
+}
+
+// StoreProductIDGT applies the GT predicate on the "store_product_id" field.
+func StoreProductIDGT(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldGT(FieldStoreProductID, v))
+}
+
+// StoreProductIDGTE applies the GTE predicate on the "store_product_id" field.
+func StoreProductIDGTE(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldGTE(FieldStoreProductID, v))
+}
+
+// StoreProductIDLT applies the LT predicate on the "store_product_id" field.
+func StoreProductIDLT(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldLT(FieldStoreProductID, v))
+}
+
+// StoreProductIDLTE applies the LTE predicate on the "store_product_id" field.
+func StoreProductIDLTE(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldLTE(FieldStoreProductID, v))
+}
+
+// StoreProductIDContains applies the Contains predicate on the "store_product_id" field.
+func StoreProductIDContains(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldContains(FieldStoreProductID, v))
+}
+
+// StoreProductIDHasPrefix applies the HasPrefix predicate on the "store_product_id" field.
+func StoreProductIDHasPrefix(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldHasPrefix(FieldStoreProductID, v))
+}
+
+// StoreProductIDHasSuffix applies the HasSuffix predicate on the "store_product_id" field.
+func StoreProductIDHasSuffix(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldHasSuffix(FieldStoreProductID, v))
+}
+
+// StoreProductIDEqualFold applies the EqualFold predicate on the "store_product_id" field.
+func StoreProductIDEqualFold(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldEqualFold(FieldStoreProductID, v))
+}
+
+// StoreProductIDContainsFold applies the ContainsFold predicate on the "store_product_id" field.
+func StoreProductIDContainsFold(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldContainsFold(FieldStoreProductID, v))
+}
+
+// StoreOriginalTransactionIDEQ applies the EQ predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDEQ(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldEQ(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDNEQ applies the NEQ predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDNEQ(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldNEQ(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDIn applies the In predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDIn(vs ...string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldIn(FieldStoreOriginalTransactionID, vs...))
+}
+
+// StoreOriginalTransactionIDNotIn applies the NotIn predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDNotIn(vs ...string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldNotIn(FieldStoreOriginalTransactionID, vs...))
+}
+
+// StoreOriginalTransactionIDGT applies the GT predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDGT(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldGT(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDGTE applies the GTE predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDGTE(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldGTE(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDLT applies the LT predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDLT(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldLT(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDLTE applies the LTE predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDLTE(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldLTE(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDContains applies the Contains predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDContains(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldContains(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDHasPrefix applies the HasPrefix predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDHasPrefix(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldHasPrefix(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDHasSuffix applies the HasSuffix predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDHasSuffix(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldHasSuffix(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDEqualFold applies the EqualFold predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDEqualFold(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldEqualFold(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreOriginalTransactionIDContainsFold applies the ContainsFold predicate on the "store_original_transaction_id" field.
+func StoreOriginalTransactionIDContainsFold(v string) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldContainsFold(FieldStoreOriginalTransactionID, v))
+}
+
+// StoreSlotEQ applies the EQ predicate on the "store_slot" field.
+func StoreSlotEQ(v int) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldEQ(FieldStoreSlot, v))
+}
+
+// StoreSlotNEQ applies the NEQ predicate on the "store_slot" field.
+func StoreSlotNEQ(v int) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldNEQ(FieldStoreSlot, v))
+}
+
+// StoreSlotIn applies the In predicate on the "store_slot" field.
+func StoreSlotIn(vs ...int) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldIn(FieldStoreSlot, vs...))
+}
+
+// StoreSlotNotIn applies the NotIn predicate on the "store_slot" field.
+func StoreSlotNotIn(vs ...int) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldNotIn(FieldStoreSlot, vs...))
+}
+
+// StoreSlotGT applies the GT predicate on the "store_slot" field.
+func StoreSlotGT(v int) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldGT(FieldStoreSlot, v))
+}
+
+// StoreSlotGTE applies the GTE predicate on the "store_slot" field.
+func StoreSlotGTE(v int) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldGTE(FieldStoreSlot, v))
+}
+
+// StoreSlotLT applies the LT predicate on the "store_slot" field.
+func StoreSlotLT(v int) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldLT(FieldStoreSlot, v))
+}
+
+// StoreSlotLTE applies the LTE predicate on the "store_slot" field.
+func StoreSlotLTE(v int) predicate.CreatorSubscription {
+	return predicate.CreatorSubscription(sql.FieldLTE(FieldStoreSlot, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

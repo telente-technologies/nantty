@@ -141,7 +141,7 @@ func (TrialClaim) Mixin() []ent.Mixin {
 
 func (TrialClaim) Fields() []ent.Field {
 	return []ent.Field{
-		field.Enum("kind").Values("person", "card", "device", "phone").Immutable(),
+		field.Enum("kind").Values("person", "card", "device", "email").Immutable(),
 		field.String("fingerprint_hash").NotEmpty().MaxLen(80).Immutable(),
 		field.String("subscription_id").NotEmpty().MaxLen(80).Immutable(),
 		field.String("owner_user_id").NotEmpty().MaxLen(80).Immutable(),

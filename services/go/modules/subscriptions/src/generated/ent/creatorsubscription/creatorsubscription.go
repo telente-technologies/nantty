@@ -43,6 +43,14 @@ const (
 	FieldRenewalAttempts = "renewal_attempts"
 	// FieldLastError holds the string denoting the last_error field in the database.
 	FieldLastError = "last_error"
+	// FieldBillingChannel holds the string denoting the billing_channel field in the database.
+	FieldBillingChannel = "billing_channel"
+	// FieldStoreProductID holds the string denoting the store_product_id field in the database.
+	FieldStoreProductID = "store_product_id"
+	// FieldStoreOriginalTransactionID holds the string denoting the store_original_transaction_id field in the database.
+	FieldStoreOriginalTransactionID = "store_original_transaction_id"
+	// FieldStoreSlot holds the string denoting the store_slot field in the database.
+	FieldStoreSlot = "store_slot"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the creatorsubscription in the database.
@@ -66,6 +74,10 @@ var Columns = []string{
 	FieldNextChargeAt,
 	FieldRenewalAttempts,
 	FieldLastError,
+	FieldBillingChannel,
+	FieldStoreProductID,
+	FieldStoreOriginalTransactionID,
+	FieldStoreSlot,
 	FieldUpdatedAt,
 }
 
@@ -102,6 +114,16 @@ var (
 	DefaultLastError string
 	// LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
 	LastErrorValidator func(string) error
+	// DefaultStoreProductID holds the default value on creation for the "store_product_id" field.
+	DefaultStoreProductID string
+	// StoreProductIDValidator is a validator for the "store_product_id" field. It is called by the builders before save.
+	StoreProductIDValidator func(string) error
+	// DefaultStoreOriginalTransactionID holds the default value on creation for the "store_original_transaction_id" field.
+	DefaultStoreOriginalTransactionID string
+	// StoreOriginalTransactionIDValidator is a validator for the "store_original_transaction_id" field. It is called by the builders before save.
+	StoreOriginalTransactionIDValidator func(string) error
+	// DefaultStoreSlot holds the default value on creation for the "store_slot" field.
+	DefaultStoreSlot int
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -160,6 +182,33 @@ func IntervalValidator(i Interval) error {
 		return nil
 	default:
 		return fmt.Errorf("creatorsubscription: invalid enum value for interval field: %q", i)
+	}
+}
+
+// BillingChannel defines the type for the "billing_channel" enum field.
+type BillingChannel string
+
+// BillingChannelWeb is the default value of the BillingChannel enum.
+const DefaultBillingChannel = BillingChannelWeb
+
+// BillingChannel values.
+const (
+	BillingChannelWeb        BillingChannel = "web"
+	BillingChannelAppleIap   BillingChannel = "apple_iap"
+	BillingChannelGooglePlay BillingChannel = "google_play"
+)
+
+func (bc BillingChannel) String() string {
+	return string(bc)
+}
+
+// BillingChannelValidator is a validator for the "billing_channel" field enum values. It is called by the builders before save.
+func BillingChannelValidator(bc BillingChannel) error {
+	switch bc {
+	case BillingChannelWeb, BillingChannelAppleIap, BillingChannelGooglePlay:
+		return nil
+	default:
+		return fmt.Errorf("creatorsubscription: invalid enum value for billing_channel field: %q", bc)
 	}
 }
 
@@ -239,6 +288,26 @@ func ByRenewalAttempts(opts ...sql.OrderTermOption) OrderOption {
 // ByLastError orders the results by the last_error field.
 func ByLastError(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastError, opts...).ToFunc()
+}
+
+// ByBillingChannel orders the results by the billing_channel field.
+func ByBillingChannel(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBillingChannel, opts...).ToFunc()
+}
+
+// ByStoreProductID orders the results by the store_product_id field.
+func ByStoreProductID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStoreProductID, opts...).ToFunc()
+}
+
+// ByStoreOriginalTransactionID orders the results by the store_original_transaction_id field.
+func ByStoreOriginalTransactionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStoreOriginalTransactionID, opts...).ToFunc()
+}
+
+// ByStoreSlot orders the results by the store_slot field.
+func ByStoreSlot(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStoreSlot, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

@@ -195,6 +195,26 @@ func (_u *CreatorSubscriptionChargeUpdate) ClearPaidAt() *CreatorSubscriptionCha
 	return _u
 }
 
+// SetRefundedAt sets the "refunded_at" field.
+func (_u *CreatorSubscriptionChargeUpdate) SetRefundedAt(v time.Time) *CreatorSubscriptionChargeUpdate {
+	_u.mutation.SetRefundedAt(v)
+	return _u
+}
+
+// SetNillableRefundedAt sets the "refunded_at" field if the given value is not nil.
+func (_u *CreatorSubscriptionChargeUpdate) SetNillableRefundedAt(v *time.Time) *CreatorSubscriptionChargeUpdate {
+	if v != nil {
+		_u.SetRefundedAt(*v)
+	}
+	return _u
+}
+
+// ClearRefundedAt clears the value of the "refunded_at" field.
+func (_u *CreatorSubscriptionChargeUpdate) ClearRefundedAt() *CreatorSubscriptionChargeUpdate {
+	_u.mutation.ClearRefundedAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CreatorSubscriptionChargeUpdate) SetUpdatedAt(v time.Time) *CreatorSubscriptionChargeUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -318,6 +338,12 @@ func (_u *CreatorSubscriptionChargeUpdate) sqlSave(ctx context.Context) (_node i
 	}
 	if _u.mutation.PaidAtCleared() {
 		_spec.ClearField(creatorsubscriptioncharge.FieldPaidAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.RefundedAt(); ok {
+		_spec.SetField(creatorsubscriptioncharge.FieldRefundedAt, field.TypeTime, value)
+	}
+	if _u.mutation.RefundedAtCleared() {
+		_spec.ClearField(creatorsubscriptioncharge.FieldRefundedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(creatorsubscriptioncharge.FieldUpdatedAt, field.TypeTime, value)
@@ -510,6 +536,26 @@ func (_u *CreatorSubscriptionChargeUpdateOne) ClearPaidAt() *CreatorSubscription
 	return _u
 }
 
+// SetRefundedAt sets the "refunded_at" field.
+func (_u *CreatorSubscriptionChargeUpdateOne) SetRefundedAt(v time.Time) *CreatorSubscriptionChargeUpdateOne {
+	_u.mutation.SetRefundedAt(v)
+	return _u
+}
+
+// SetNillableRefundedAt sets the "refunded_at" field if the given value is not nil.
+func (_u *CreatorSubscriptionChargeUpdateOne) SetNillableRefundedAt(v *time.Time) *CreatorSubscriptionChargeUpdateOne {
+	if v != nil {
+		_u.SetRefundedAt(*v)
+	}
+	return _u
+}
+
+// ClearRefundedAt clears the value of the "refunded_at" field.
+func (_u *CreatorSubscriptionChargeUpdateOne) ClearRefundedAt() *CreatorSubscriptionChargeUpdateOne {
+	_u.mutation.ClearRefundedAt()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CreatorSubscriptionChargeUpdateOne) SetUpdatedAt(v time.Time) *CreatorSubscriptionChargeUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -663,6 +709,12 @@ func (_u *CreatorSubscriptionChargeUpdateOne) sqlSave(ctx context.Context) (_nod
 	}
 	if _u.mutation.PaidAtCleared() {
 		_spec.ClearField(creatorsubscriptioncharge.FieldPaidAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.RefundedAt(); ok {
+		_spec.SetField(creatorsubscriptioncharge.FieldRefundedAt, field.TypeTime, value)
+	}
+	if _u.mutation.RefundedAtCleared() {
+		_spec.ClearField(creatorsubscriptioncharge.FieldRefundedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(creatorsubscriptioncharge.FieldUpdatedAt, field.TypeTime, value)

@@ -126,8 +126,24 @@ func init() {
 	creatorsubscription.DefaultLastError = creatorsubscriptionDescLastError.Default.(string)
 	// creatorsubscription.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
 	creatorsubscription.LastErrorValidator = creatorsubscriptionDescLastError.Validators[0].(func(string) error)
+	// creatorsubscriptionDescStoreProductID is the schema descriptor for store_product_id field.
+	creatorsubscriptionDescStoreProductID := creatorsubscriptionFields[14].Descriptor()
+	// creatorsubscription.DefaultStoreProductID holds the default value on creation for the store_product_id field.
+	creatorsubscription.DefaultStoreProductID = creatorsubscriptionDescStoreProductID.Default.(string)
+	// creatorsubscription.StoreProductIDValidator is a validator for the "store_product_id" field. It is called by the builders before save.
+	creatorsubscription.StoreProductIDValidator = creatorsubscriptionDescStoreProductID.Validators[0].(func(string) error)
+	// creatorsubscriptionDescStoreOriginalTransactionID is the schema descriptor for store_original_transaction_id field.
+	creatorsubscriptionDescStoreOriginalTransactionID := creatorsubscriptionFields[15].Descriptor()
+	// creatorsubscription.DefaultStoreOriginalTransactionID holds the default value on creation for the store_original_transaction_id field.
+	creatorsubscription.DefaultStoreOriginalTransactionID = creatorsubscriptionDescStoreOriginalTransactionID.Default.(string)
+	// creatorsubscription.StoreOriginalTransactionIDValidator is a validator for the "store_original_transaction_id" field. It is called by the builders before save.
+	creatorsubscription.StoreOriginalTransactionIDValidator = creatorsubscriptionDescStoreOriginalTransactionID.Validators[0].(func(string) error)
+	// creatorsubscriptionDescStoreSlot is the schema descriptor for store_slot field.
+	creatorsubscriptionDescStoreSlot := creatorsubscriptionFields[16].Descriptor()
+	// creatorsubscription.DefaultStoreSlot holds the default value on creation for the store_slot field.
+	creatorsubscription.DefaultStoreSlot = creatorsubscriptionDescStoreSlot.Default.(int)
 	// creatorsubscriptionDescUpdatedAt is the schema descriptor for updated_at field.
-	creatorsubscriptionDescUpdatedAt := creatorsubscriptionFields[13].Descriptor()
+	creatorsubscriptionDescUpdatedAt := creatorsubscriptionFields[17].Descriptor()
 	// creatorsubscription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	creatorsubscription.DefaultUpdatedAt = creatorsubscriptionDescUpdatedAt.Default.(func() time.Time)
 	// creatorsubscription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -268,7 +284,7 @@ func init() {
 	// creatorsubscriptioncharge.FailureReasonValidator is a validator for the "failure_reason" field. It is called by the builders before save.
 	creatorsubscriptioncharge.FailureReasonValidator = creatorsubscriptionchargeDescFailureReason.Validators[0].(func(string) error)
 	// creatorsubscriptionchargeDescUpdatedAt is the schema descriptor for updated_at field.
-	creatorsubscriptionchargeDescUpdatedAt := creatorsubscriptionchargeFields[16].Descriptor()
+	creatorsubscriptionchargeDescUpdatedAt := creatorsubscriptionchargeFields[17].Descriptor()
 	// creatorsubscriptioncharge.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	creatorsubscriptioncharge.DefaultUpdatedAt = creatorsubscriptionchargeDescUpdatedAt.Default.(func() time.Time)
 	// creatorsubscriptioncharge.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

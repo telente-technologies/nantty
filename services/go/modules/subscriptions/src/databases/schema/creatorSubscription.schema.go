@@ -60,12 +60,17 @@ func (CreatorSubscription) Fields() []ent.Field {
 		field.Time("next_charge_at").Optional().Nillable(),
 		field.Int("renewal_attempts").Default(0),
 		field.String("last_error").MaxLen(300).Default(""),
+		field.Enum("billing_channel").Values("web", "apple_iap", "google_play").Default("web").Immutable(),
+		field.String("store_product_id").MaxLen(120).Default(""),
+		field.String("store_original_transaction_id").MaxLen(1024).Default(""),
+		field.Int("store_slot").Default(0),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
 func (CreatorSubscription) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("store_original_transaction_id").Annotations(entsql.IndexWhere("store_original_transaction_id <> ''")).StorageKey("creator_subscriptions_store_original_transaction"),
 		index.Fields("subscriber_id", "creator_id"),
 		index.Fields("creator_id", "status"),
 		index.Fields("status", "current_period_end"),
@@ -92,13 +97,14 @@ func (CreatorSubscriptionCharge) Fields() []ent.Field {
 		field.Int("attempt_count").Default(0),
 		field.Int64("amount_minor").Positive().Immutable(),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
-		field.Enum("status").Values("pending", "succeeded", "failed").Default("pending"),
+		field.Enum("status").Values("pending", "succeeded", "failed", "refunded").Default("pending"),
 		field.Int64("provider_fee_minor").Default(0),
 		field.Int64("creator_share_minor").Default(0),
 		field.Int64("platform_share_minor").Default(0),
 		field.Time("period_start").Optional().Nillable(),
 		field.String("failure_reason").MaxLen(300).Default(""),
 		field.Time("paid_at").Optional().Nillable(),
+		field.Time("refunded_at").Optional().Nillable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

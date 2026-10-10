@@ -52,6 +52,8 @@ type CreatorSubscriptionCharge struct {
 	FailureReason string `json:"failure_reason,omitempty"`
 	// PaidAt holds the value of the "paid_at" field.
 	PaidAt *time.Time `json:"paid_at,omitempty"`
+	// RefundedAt holds the value of the "refunded_at" field.
+	RefundedAt *time.Time `json:"refunded_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -66,7 +68,7 @@ func (*CreatorSubscriptionCharge) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case creatorsubscriptioncharge.FieldSubscriptionID, creatorsubscriptioncharge.FieldSubscriberID, creatorsubscriptioncharge.FieldCreatorID, creatorsubscriptioncharge.FieldKind, creatorsubscriptioncharge.FieldIdempotencyKey, creatorsubscriptioncharge.FieldPaymentReference, creatorsubscriptioncharge.FieldCurrency, creatorsubscriptioncharge.FieldStatus, creatorsubscriptioncharge.FieldFailureReason:
 			values[i] = new(sql.NullString)
-		case creatorsubscriptioncharge.FieldCreatedAt, creatorsubscriptioncharge.FieldPeriodStart, creatorsubscriptioncharge.FieldPaidAt, creatorsubscriptioncharge.FieldUpdatedAt:
+		case creatorsubscriptioncharge.FieldCreatedAt, creatorsubscriptioncharge.FieldPeriodStart, creatorsubscriptioncharge.FieldPaidAt, creatorsubscriptioncharge.FieldRefundedAt, creatorsubscriptioncharge.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case creatorsubscriptioncharge.FieldID:
 			values[i] = new(uuid.UUID)
@@ -195,6 +197,13 @@ func (_m *CreatorSubscriptionCharge) assignValues(columns []string, values []any
 				_m.PaidAt = new(time.Time)
 				*_m.PaidAt = value.Time
 			}
+		case creatorsubscriptioncharge.FieldRefundedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field refunded_at", values[i])
+			} else if value.Valid {
+				_m.RefundedAt = new(time.Time)
+				*_m.RefundedAt = value.Time
+			}
 		case creatorsubscriptioncharge.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -289,6 +298,11 @@ func (_m *CreatorSubscriptionCharge) String() string {
 	builder.WriteString(", ")
 	if v := _m.PaidAt; v != nil {
 		builder.WriteString("paid_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.RefundedAt; v != nil {
+		builder.WriteString("refunded_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
