@@ -6,6 +6,7 @@ import { use, useEffect, useState } from "react";
 import { Badge, ErrorState } from "@/components/ui/feedback";
 import { RetryButton } from "@/components/ui/controls";
 import { Button } from "@/components/ui/button";
+import { requestConfirmation } from "@/components/ui/confirmDialog";
 import { MediaImage } from "@/components/ui/media";
 import { ordersService } from "@/services/orders.service";
 import { readErrorMessageForDisplay, sendRequestToWebappServer } from "@/services/clientApi.service";
@@ -32,6 +33,8 @@ const statusTone: Record<OrderStatus, "neutral" | "brand" | "success" | "warning
   cancelled: "error",
   disputed: "error",
 };
+
+const buyerCancellableStatuses = new Set(["pending", "new"]);
 
 const statusSteps: readonly { readonly status: OrderStatus; readonly label: string }[] = [
   { status: "pending", label: "Order placed" },
@@ -88,6 +91,21 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
       await queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
   });
+
+  const cancelOrder = useMutation({
+    mutationFn: () => ordersService.cancelMyOrder(orderId, `cancel-${orderId}`),
+    onSuccess: () => setNotice("Your order is cancelled. Any payment held in escrow is returned to you."),
+    onError: (error) => setNotice(readErrorMessageForDisplay(error)),
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
+  });
+
+  async function confirmAndCancelOrder() {
+    if (cancelOrder.isPending) return;
+    const confirmed = await requestConfirmation({ title: "Cancel this order?", description: "The seller won't ship it. Any payment held in escrow is returned to you.", confirmLabel: "Cancel order", cancelLabel: "Keep order", tone: "danger" });
+    if (confirmed) cancelOrder.mutate();
+  }
 
   if (orderQuery.isLoading) return <DetailSkeleton label="Loading order" blocks={3} />;
   if (orderQuery.isError || !orderQuery.data) {
@@ -191,6 +209,14 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
         <Button size="lg" busy={confirmReceipt.isPending} onClick={() => confirmReceipt.mutate()}>
           Confirm delivery
         </Button>
+      ) : null}
+      {order.fulfilmentStatus && buyerCancellableStatuses.has(order.fulfilmentStatus) ? (
+        <div className={styles.escrowNote}>
+          <p>You can cancel until the seller starts preparing your order. After that, ask the seller or open a dispute.</p>
+          <Button variant="secondary" busy={cancelOrder.isPending} onClick={() => void confirmAndCancelOrder()}>
+            Cancel order
+          </Button>
+        </div>
       ) : null}
       <Link href={`/help/tickets/new?category=order&linkKind=order&linkId=${encodeURIComponent(order.id)}&linkLabel=${encodeURIComponent(`Order ${order.reference}`)}`}>Get help with this order</Link>
     </div>
