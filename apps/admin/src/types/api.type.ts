@@ -22,6 +22,12 @@ export interface Money {
   readonly currency: string;
 }
 
+export interface PartySummary {
+  readonly id: string;
+  readonly name: string | null;
+  readonly username: string | null;
+}
+
 export interface ActorReference {
   readonly id: string;
   readonly name: string;

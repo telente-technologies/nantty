@@ -8,7 +8,7 @@ export interface ChatReportQueueFilters {
   readonly reason?: string;
   readonly priority?: string;
   readonly search?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export function fetchChatReports(filters: ChatReportQueueFilters, signal?: AbortSignal): Promise<PagedList<ChatReportSummary>> {

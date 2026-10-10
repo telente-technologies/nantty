@@ -65,5 +65,5 @@ export interface VerificationListFilters {
   readonly status?: string;
   readonly color?: string;
   readonly search?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }

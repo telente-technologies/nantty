@@ -1,21 +1,22 @@
 import { sendAdminApiRequest } from "@/services/adminApiClient.service";
 import type { Money, PagedList } from "@/types/api.type";
+import type { CoinTransactionDetail, CoinTransactionList } from "@/types/coins.type";
 import type { DisputeDetail, DisputeList, DisputeOutcome, OrderDetail, OrderSummary, RefundRecord } from "@/types/commerce.type";
 import type { JournalEntryList, LedgerAccount } from "@/types/ledger.type";
-import type { CoinTransactionDetail, CoinTransactionList, PayoutDetail, PayoutList } from "@/types/payouts.type";
+import type { StaffWithdrawalDetail, StaffWithdrawalList, WithdrawalDecision } from "@/types/withdrawals.type";
 
 export interface MoneyListFilters {
   readonly search?: string;
   readonly status?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export function fetchOrders(filters: MoneyListFilters & { readonly currency?: string }, signal?: AbortSignal): Promise<PagedList<OrderSummary>> {
   return sendAdminApiRequest("/admin/orders", { query: { ...filters }, signal });
 }
 
-export function fetchOrderDetail(orderId: string, signal?: AbortSignal): Promise<OrderDetail> {
-  return sendAdminApiRequest(`/admin/orders/${encodeURIComponent(orderId)}`, { signal });
+export function fetchOrderDetail(orderIdOrNumber: string, signal?: AbortSignal): Promise<OrderDetail> {
+  return sendAdminApiRequest(`/admin/orders/${encodeURIComponent(orderIdOrNumber)}`, { signal });
 }
 
 export function fetchDisputes(filters: MoneyListFilters, signal?: AbortSignal): Promise<DisputeList> {
@@ -37,7 +38,7 @@ export function resolveDispute(disputeId: string, { idempotencyKey, ...body }: R
   return sendAdminApiRequest(`/admin/disputes/${encodeURIComponent(disputeId)}/resolve`, { method: "POST", body, idempotencyKey });
 }
 
-export function fetchRefunds(filters: MoneyListFilters & { readonly source?: string }, signal?: AbortSignal): Promise<PagedList<RefundRecord>> {
+export function fetchRefunds(filters: MoneyListFilters & { readonly source?: string; readonly orderId?: string }, signal?: AbortSignal): Promise<PagedList<RefundRecord>> {
   return sendAdminApiRequest("/admin/refunds", { query: { ...filters }, signal });
 }
 
@@ -46,42 +47,43 @@ export function issueManualRefund(input: { readonly orderId: string; readonly am
   return sendAdminApiRequest("/admin/refunds", { method: "POST", body, idempotencyKey });
 }
 
-export function fetchPayouts(filters: MoneyListFilters, signal?: AbortSignal): Promise<PayoutList> {
-  return sendAdminApiRequest("/admin/payouts", { query: { ...filters }, signal });
+export function fetchWithdrawals(filters: MoneyListFilters, signal?: AbortSignal): Promise<StaffWithdrawalList> {
+  return sendAdminApiRequest("/admin/withdrawals", { query: { ...filters }, signal });
 }
 
-export function fetchPayoutDetail(payoutId: string, signal?: AbortSignal): Promise<PayoutDetail> {
-  return sendAdminApiRequest(`/admin/payouts/${encodeURIComponent(payoutId)}`, { signal });
+export function fetchWithdrawalDetail(withdrawalId: string, signal?: AbortSignal): Promise<StaffWithdrawalDetail> {
+  return sendAdminApiRequest(`/admin/withdrawals/${encodeURIComponent(withdrawalId)}`, { signal });
 }
 
-export function decidePayout(payoutId: string, decision: "approve" | "hold" | "reject", reason: string, idempotencyKey?: string): Promise<PayoutDetail> {
-  return sendAdminApiRequest(`/admin/payouts/${encodeURIComponent(payoutId)}/${decision}`, { method: "POST", body: { reason }, idempotencyKey });
+export function reviewWithdrawal(withdrawalId: string, input: { readonly decision: WithdrawalDecision; readonly reason: string; readonly idempotencyKey: string }): Promise<StaffWithdrawalDetail> {
+  const { idempotencyKey, ...body } = input;
+  return sendAdminApiRequest(`/admin/withdrawals/${encodeURIComponent(withdrawalId)}/review`, { method: "POST", body, idempotencyKey });
 }
 
 export function fetchCoinTransactions(filters: MoneyListFilters & { readonly kind?: string }, signal?: AbortSignal): Promise<CoinTransactionList> {
-  return sendAdminApiRequest("/admin/coins", { query: { ...filters }, signal });
+  return sendAdminApiRequest("/admin/coins/transactions", { query: { ...filters }, signal });
 }
 
 export function fetchCoinTransactionDetail(transactionId: string, signal?: AbortSignal): Promise<CoinTransactionDetail> {
-  return sendAdminApiRequest(`/admin/coins/${encodeURIComponent(transactionId)}`, { signal });
+  return sendAdminApiRequest(`/admin/coins/transactions/${encodeURIComponent(transactionId)}`, { signal });
 }
 
 export function markCoinTransactionReviewed(transactionId: string, note: string): Promise<CoinTransactionDetail> {
-  return sendAdminApiRequest(`/admin/coins/${encodeURIComponent(transactionId)}/mark-reviewed`, { method: "POST", body: { reason: note } });
+  return sendAdminApiRequest(`/admin/coins/transactions/${encodeURIComponent(transactionId)}/mark-reviewed`, { method: "POST", body: { reason: note } });
 }
 
 export function reverseCoinTransaction(transactionId: string, reason: string, idempotencyKey: string): Promise<CoinTransactionDetail> {
-  return sendAdminApiRequest(`/admin/coins/${encodeURIComponent(transactionId)}/reverse`, { method: "POST", body: { reason }, idempotencyKey });
+  return sendAdminApiRequest(`/admin/coins/transactions/${encodeURIComponent(transactionId)}/reverse`, { method: "POST", body: { reason }, idempotencyKey });
 }
 
-export function fetchLedgerCurrencies(signal?: AbortSignal): Promise<{ items: string[] }> {
+export function fetchLedgerCurrencies(signal?: AbortSignal): Promise<PagedList<string>> {
   return sendAdminApiRequest("/admin/ledger/currencies", { signal });
 }
 
-export function fetchLedgerAccounts(currency: string, signal?: AbortSignal): Promise<{ items: LedgerAccount[] }> {
-  return sendAdminApiRequest("/admin/ledger/accounts", { query: { currency }, signal });
+export function fetchLedgerAccounts(filters: { readonly currency: string; readonly cursor?: string }, signal?: AbortSignal): Promise<PagedList<LedgerAccount>> {
+  return sendAdminApiRequest("/admin/ledger/accounts", { query: { ...filters, limit: 100 }, signal });
 }
 
-export function fetchLedgerEntries(filters: { readonly currency: string; readonly accountId?: string; readonly page?: number }, signal?: AbortSignal): Promise<JournalEntryList> {
-  return sendAdminApiRequest("/admin/ledger/entries", { query: { ...filters }, signal });
+export function fetchLedgerEntries(filters: { readonly currency: string; readonly accountCode?: string; readonly cursor?: string }, signal?: AbortSignal): Promise<JournalEntryList> {
+  return sendAdminApiRequest("/admin/ledger/journal-entries", { query: { ...filters }, signal });
 }

@@ -82,7 +82,7 @@ export interface UserListFilters {
   readonly verification?: string;
   readonly role?: string;
   readonly risk?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export interface UserPersonalDataResponse extends PlatformUserPersonalData {

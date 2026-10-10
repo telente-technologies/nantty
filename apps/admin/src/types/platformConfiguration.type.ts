@@ -17,7 +17,7 @@ export interface VersionedRecord<Content> {
   readonly content: Content;
 }
 
-export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules" | "checkmark-suggestions" | "creator-thresholds" | "trial-rules" | "checkmark-pricing" | "regional-pricing" | "feed.ranking";
+export type ConfigurationDocumentKey = "plans" | "revenue" | "creator-eligibility" | "username-rules" | "checkmark-suggestions" | "creator-thresholds" | "trial-rules" | "checkmark-pricing" | "regional-pricing" | "feed.ranking" | "appStore.fees";
 
 export interface DashboardEntitlement {
   readonly key: string;
@@ -85,6 +85,9 @@ export interface CreatorAutoApproveRules {
   readonly minimumOriginalPostsInLast60Days: number;
   readonly noViolationsInDays: number;
   readonly maximumFraudScore: number;
+  readonly maximumActiveStrikes?: number;
+  readonly requiresIdentityVerification?: boolean;
+  readonly allowedCountries?: readonly string[];
 }
 
 export interface CreatorManualReviewRules {
@@ -130,4 +133,12 @@ export interface ConfigurationDocumentContentByKey {
   readonly "checkmark-pricing": CheckmarkPricingRules;
   readonly "regional-pricing": RegionalPricingDocument;
   readonly "feed.ranking": import("./ranking.type").FeedRankingPolicy;
+  readonly "appStore.fees": AppStoreFeeSettings;
+}
+
+export interface AppStoreFeeSettings {
+  readonly appleFeeBps: number;
+  readonly appleSmallBusinessProgram: boolean;
+  readonly appleSmallBusinessFeeBps: number;
+  readonly googleSubscriptionFeeBps: number;
 }

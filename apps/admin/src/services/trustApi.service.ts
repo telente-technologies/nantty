@@ -9,7 +9,7 @@ export interface ReportQueueFilters {
   readonly reason?: string;
   readonly priority?: string;
   readonly search?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export function fetchModerationReports(filters: ReportQueueFilters, signal?: AbortSignal): Promise<PagedList<ReportSummary>> {
@@ -36,7 +36,7 @@ export interface AppealQueueFilters {
   readonly status?: string;
   readonly decisionType?: string;
   readonly search?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export function fetchModerationAppeals(filters: AppealQueueFilters, signal?: AbortSignal): Promise<PagedList<AppealSummary>> {
@@ -55,7 +55,7 @@ export interface CopyrightClaimFilters {
   readonly status?: string;
   readonly workType?: string;
   readonly search?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export function fetchCopyrightClaims(filters: CopyrightClaimFilters, signal?: AbortSignal): Promise<PagedList<CopyrightClaimSummary>> {

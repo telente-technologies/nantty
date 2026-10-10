@@ -37,5 +37,5 @@ export interface BusinessDocumentAccess {
 export interface BusinessDocumentFilters {
   readonly status?: string;
   readonly search?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }

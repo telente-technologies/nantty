@@ -21,7 +21,7 @@ export function applyVerificationTransition(verificationId: string, transition: 
   return sendAdminApiRequest(verificationPath(verificationId, `/${transition}`), { method: "POST", body: { reason } });
 }
 
-export function fetchProgramApplications(kind: ApplicationKind, filters: { status?: string; search?: string; page?: number }, signal?: AbortSignal): Promise<PagedList<ProgramApplication>> {
+export function fetchProgramApplications(kind: ApplicationKind, filters: { status?: string; search?: string; cursor?: string }, signal?: AbortSignal): Promise<PagedList<ProgramApplication>> {
   return sendAdminApiRequest(`/admin/applications/${kind}`, { query: { ...filters }, signal });
 }
 

@@ -13,7 +13,7 @@ export interface AdminListFilters {
   readonly search?: string;
   readonly status?: string;
   readonly role?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export function fetchAdminAccounts(filters: AdminListFilters, signal?: AbortSignal): Promise<PagedList<AdminAccountSummary>> {
@@ -53,7 +53,7 @@ export interface AuditLogFilters {
   readonly targetId?: string;
   readonly from?: string;
   readonly to?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export function fetchAuditLog(filters: AuditLogFilters, signal?: AbortSignal): Promise<PagedList<AuditLogEntry>> {

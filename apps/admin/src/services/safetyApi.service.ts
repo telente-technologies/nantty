@@ -65,7 +65,7 @@ export function reviewBusinessDocument(submissionId: string, documentId: string,
 
 const blackPath = (applicationId: string, suffix: string) => `/admin/black-applications/${encodeURIComponent(applicationId)}/${suffix}`;
 
-export function fetchBlackApplications(filters: { status: string; search?: string; page?: number }, signal?: AbortSignal): Promise<PagedList<BlackApplication>> {
+export function fetchBlackApplications(filters: { status: string; search?: string; cursor?: string }, signal?: AbortSignal): Promise<PagedList<BlackApplication>> {
   return sendAdminApiRequest("/admin/black-applications", { query: { ...filters }, signal });
 }
 

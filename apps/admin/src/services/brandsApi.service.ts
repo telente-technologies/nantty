@@ -7,7 +7,7 @@ export interface BrandDirectoryFilters {
   readonly search?: string;
   readonly official?: string;
   readonly country?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export function fetchBrandDirectory(filters: BrandDirectoryFilters, signal?: AbortSignal): Promise<PagedList<BrandSummary>> {
@@ -30,7 +30,7 @@ export interface IpClaimFilters {
   readonly search?: string;
   readonly status?: string;
   readonly type?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export function fetchIpClaims(filters: IpClaimFilters, signal?: AbortSignal): Promise<PagedList<IpClaimSummary>> {

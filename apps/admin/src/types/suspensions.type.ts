@@ -76,11 +76,11 @@ export interface SuspensionQueueFilters {
   readonly status?: string;
   readonly source?: string;
   readonly search?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
 
 export interface SuspendedAccountFilters {
   readonly appeal?: string;
   readonly search?: string;
-  readonly page?: number;
+  readonly cursor?: string;
 }
