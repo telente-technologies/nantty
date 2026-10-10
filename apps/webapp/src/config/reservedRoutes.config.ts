@@ -1,6 +1,6 @@
 export const topLevelRouteSegments: readonly string[] = [
   "analytics", "cart", "category", "chats", "checkout", "clips", "coins", "collections", "creator", "explore", "live", "mart", "me",
-  "notifications", "orders", "p", "post", "product", "saved", "settings", "store", "store-rewards", "subscriptions", "u", "user",
+  "notifications", "orders", "p", "pay", "post", "product", "saved", "settings", "store", "store-rewards", "subscriptions", "u", "user",
   "verify-email", "watch", "forgot-password", "help", "login", "reset-password", "signup", "welcome", "bff", "api", "sitemap.xml", "sitemaps", "robots.txt", "security-check",
 ];
 
