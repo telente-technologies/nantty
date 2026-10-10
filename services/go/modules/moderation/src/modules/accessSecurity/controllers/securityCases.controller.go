@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"net"
 	"net/http"
-	"strings"
 
 	decidesecuritycase "zudomart/modules/moderation/src/modules/accessSecurity/commands/decideSecurityCase"
 	getsecuritycase "zudomart/modules/moderation/src/modules/accessSecurity/queries/getSecurityCase"
@@ -40,10 +38,7 @@ func (controller AccessSecurityController) DecideCase(writer http.ResponseWriter
 		return
 	}
 	staff, _ := staffauth.StaffFromContext(request.Context())
-	host, _, _ := net.SplitHostPort(request.RemoteAddr)
-	if forwarded := strings.TrimSpace(request.Header.Get("X-Real-Ip")); forwarded != "" {
-		host = forwarded
-	}
+	host := httpserver.ClientIP(request)
 	err := decidesecuritycase.Handler{Container: controller.Container}.Execute(request.Context(), decidesecuritycase.Command{
 		Staff: staff, IpAddress: host, RequestId: httpserver.RequestIdFromContext(request.Context()), CaseId: request.PathValue("caseId"),
 		Action: body.Action, Reason: body.Reason, DurationDays: body.DurationDays, Features: body.Features, ConfirmUsername: body.ConfirmUsername,

@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"net"
 	"net/http"
-	"strings"
 
 	"zudomart/modules/moderation/src/container"
 	appealstrike "zudomart/modules/moderation/src/modules/accountHealth/commands/appealStrike"
@@ -33,11 +31,7 @@ func (controller AccountHealthController) respond(writer http.ResponseWriter, re
 }
 
 func clientIp(request *http.Request) string {
-	if forwarded := strings.TrimSpace(request.Header.Get("X-Real-Ip")); forwarded != "" {
-		return forwarded
-	}
-	host, _, _ := net.SplitHostPort(request.RemoteAddr)
-	return host
+	return httpserver.ClientIP(request)
 }
 
 func (controller AccountHealthController) Mine(writer http.ResponseWriter, request *http.Request) {

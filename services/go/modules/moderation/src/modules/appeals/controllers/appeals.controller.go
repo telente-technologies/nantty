@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"net"
 	"net/http"
-	"strings"
 
 	"zudomart/modules/moderation/src/container"
 	decideappeal "zudomart/modules/moderation/src/modules/appeals/commands/decideAppeal"
@@ -29,11 +27,7 @@ func (controller AppealsController) respond(writer http.ResponseWriter, request 
 }
 
 func clientIp(request *http.Request) string {
-	if forwarded := strings.TrimSpace(request.Header.Get("X-Real-Ip")); forwarded != "" {
-		return forwarded
-	}
-	host, _, _ := net.SplitHostPort(request.RemoteAddr)
-	return host
+	return httpserver.ClientIP(request)
 }
 
 func (controller AppealsController) List(writer http.ResponseWriter, request *http.Request) {

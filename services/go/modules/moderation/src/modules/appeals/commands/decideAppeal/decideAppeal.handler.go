@@ -50,6 +50,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "outcome", Message: "must be UPHELD or OVERTURNED"}})
 	case len([]rune(reason)) < 5 || len([]rune(reason)) > 1000:
 		return httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "reason", Message: "must be 5 to 1000 characters"}})
+	case outcome == appeal.StatusOverturned && !command.Staff.SteppedUp:
+		return httpserver.NewApiError(http.StatusForbidden, "STEP_UP_REQUIRED", "Confirm your identity again to continue.")
 	}
 	identifier, err := uuid.Parse(command.AppealId)
 	if err != nil {
