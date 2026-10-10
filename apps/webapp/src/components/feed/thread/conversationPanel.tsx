@@ -87,7 +87,7 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
       <div id={panelId} role="tabpanel" className={panelStyles.list}>
         {focusedReply ? (
           <div className={panelStyles.conversation}>
-            <ThreadReplyBranch key={focusedReply.id} reply={{ ...focusedReply, inlineReplies: [] }} postId={post.id} hasParentAbove={false} showReplyingTo onReply={setReplyTarget} startExpanded onOpenThread={setFocusedReply} />
+            <ThreadReplyBranch key={focusedReply.id} reply={{ ...focusedReply, inlineReplies: [] }} postId={post.id} postAuthorId={post.author.id} hasParentAbove={false} showReplyingTo onReply={setReplyTarget} startExpanded onOpenThread={setFocusedReply} />
           </div>
         ) : query.isLoading ? (
           <ThreadSkeleton rows={4} />
@@ -101,7 +101,7 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
               <SponsoredThreadItem key={row.key} ad={row.ad} postId={post.id} />
             ) : (
               <div key={row.key} className={panelStyles.conversation}>
-                <ThreadReplyBranch reply={row.reply} postId={post.id} hasParentAbove={false} showReplyingTo={false} onReply={setReplyTarget} onOpenThread={setFocusedReply} />
+                <ThreadReplyBranch reply={row.reply} postId={post.id} postAuthorId={post.author.id} hasParentAbove={false} showReplyingTo={false} onReply={setReplyTarget} onOpenThread={setFocusedReply} />
               </div>
             ),
           )

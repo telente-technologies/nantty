@@ -84,6 +84,19 @@ a.name:hover {
   font-weight: 700;
 }
 
+.pinnedBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: var(--radius-small);
+  background: color-mix(in srgb, var(--color-brand) 14%, transparent);
+  color: var(--color-brand);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
 .handle {
   overflow: hidden;
   color: var(--ink-muted);

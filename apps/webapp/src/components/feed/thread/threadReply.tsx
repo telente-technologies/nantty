@@ -8,35 +8,44 @@ import { ReportDialog } from "@/components/actions/reportDialog";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { MentionText } from "@/components/mentions/mentionText";
 import { useSession } from "@/components/providers/sessionProvider";
+import { useSaveToggle } from "@/components/saves/useSaveToggle.hook";
 import { AppIcon } from "@/components/ui/appIcon";
-import { LikeActionIcon, LikeFilledActionIcon, ReplyActionIcon } from "@/components/ui/icons";
+import { BookmarkActionIcon, BookmarkFilledActionIcon, LikeActionIcon, LikeFilledActionIcon, PinIcon, ReplyActionIcon, RepostActionIcon, ShareActionIcon } from "@/components/ui/icons";
 import { Avatar, MediaImage } from "@/components/ui/media";
 import { showToast } from "@/components/ui/toast";
 import { commentsService } from "@/services/webActions.service";
+import { postsService } from "@/services/posts.service";
+import { buildAbsoluteSiteUrl } from "@/utils/seoPaths.util";
 import type { ThreadReply as ThreadReplyModel } from "@/types/postThread.type";
 import { formatCompactCount, formatTimeSincePosted } from "@/utils/formatDate.util";
 
 import { useThreadReplies } from "./postThread.hook";
 import styles from "./thread.module.css";
+import { describeCount } from "@/utils/countLabel.util";
 
 const ACTION_ICON_SIZE = 17;
 
 interface ThreadReplyRowProps {
   readonly reply: ThreadReplyModel;
   readonly postId: string;
+  readonly postAuthorId?: string;
   readonly hasParentAbove: boolean;
   readonly hasChildBelow: boolean;
   readonly showReplyingTo: boolean;
   readonly onReply: (reply: ThreadReplyModel) => void;
+  readonly onRepostReply?: (reply: ThreadReplyModel) => void;
 }
 
-function ThreadReplyRow({ reply, postId, hasParentAbove, hasChildBelow, showReplyingTo, onReply }: ThreadReplyRowProps) {
+function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildBelow, showReplyingTo, onReply, onRepostReply }: ThreadReplyRowProps) {
   const { viewer } = useSession();
   const queryClient = useQueryClient();
   const [isLiked, setIsLiked] = useState(reply.liked);
   const [likeCount, setLikeCount] = useState(reply.likes);
   const [shouldPopLike, setShouldPopLike] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [optimisticPinned, setOptimisticPinned] = useState(reply.pinned === true);
+  const { isSaved, toggleSaved } = useSaveToggle("comment", reply.id, reply.bookmarked ?? false);
+  const canPin = postAuthorId !== undefined && viewer?.id === postAuthorId;
   const firstImage = reply.media?.find((item) => item.type === "image" && item.url);
   const likeMutation = useMutation({
     mutationFn: (likeNow: boolean) => (likeNow ? commentsService.likeComment(reply.id) : commentsService.unlikeComment(reply.id)),
@@ -59,7 +68,32 @@ function ThreadReplyRow({ reply, postId, hasParentAbove, hasChildBelow, showRepl
     },
     onError: () => showToast({ text: "Couldn't delete the reply. Try again.", tone: "error" }),
   });
+  const pinMutation = useMutation({
+    mutationFn: async () => {
+      if (optimisticPinned) await commentsService.unpinComment(postId, reply.id);
+      else await commentsService.pinComment(postId, reply.id);
+    },
+    onMutate: () => setOptimisticPinned((pinned) => !pinned),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["post-thread", postId] });
+      void queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    },
+    onError: () => {
+      setOptimisticPinned(reply.pinned === true);
+      showToast({ text: "Couldn't update the pin. Try again.", tone: "error" });
+    },
+  });
   const isOwnReply = viewer?.id === reply.author.id;
+
+  async function copyReplyLinkToClipboard() {
+    try {
+      await navigator.clipboard.writeText(buildAbsoluteSiteUrl(`/post/${postId}#${reply.id}`));
+      showToast({ text: "Link copied" });
+      postsService.recordPostShare(postId).catch(() => undefined);
+    } catch {
+      showToast({ text: "Couldn't copy the link", tone: "error" });
+    }
+  }
 
   return (
     <article className={styles.row} aria-label={`Reply from ${reply.author.name}`}>
@@ -81,6 +115,11 @@ function ThreadReplyRow({ reply, postId, hasParentAbove, hasChildBelow, showRepl
             </span>
           ) : null}
           {reply.isPostAuthor ? <span className={styles.authorBadge}>Author</span> : null}
+          {optimisticPinned ? (
+            <span className={styles.pinnedBadge} aria-label="Pinned reply">
+              <PinIcon size={12} /> Pinned
+            </span>
+          ) : null}
           <span className={styles.handle}>
             @{reply.author.username} · <time dateTime={reply.createdAt}>{formatTimeSincePosted(reply.createdAt)}</time>
           </span>
@@ -99,21 +138,42 @@ function ThreadReplyRow({ reply, postId, hasParentAbove, hasChildBelow, showRepl
           </div>
         ) : null}
         <div className={styles.actions}>
-          <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label={`Reply, ${reply.replyCount} replies`} onClick={() => requireAuthThen(() => onReply(reply), "Sign in to reply.")}>
+          <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label={`Reply, ${describeCount(reply.replyCount, "reply", "replies")}`} onClick={() => requireAuthThen(() => onReply(reply), "Sign in to reply.")}>
             <span className={styles.halo}>
               <ReplyActionIcon size={ACTION_ICON_SIZE} />
             </span>
             {reply.replyCount > 0 ? <span className={styles.count}>{formatCompactCount(reply.replyCount)}</span> : null}
           </button>
+          {onRepostReply ? (
+            <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label="Repost" onClick={() => requireAuthThen(() => onRepostReply(reply), "Sign in to repost.")}>
+              <span className={styles.halo}>
+                <RepostActionIcon size={ACTION_ICON_SIZE} />
+              </span>
+            </button>
+          ) : null}
           <button
             type="button"
             className={[styles.action, styles.likeTone, isLiked ? styles.active : "", isLiked && shouldPopLike ? styles.pop : ""].join(" ")}
             aria-pressed={isLiked}
-            aria-label={`${isLiked ? "Unlike" : "Like"} reply, ${likeCount} likes`}
+            aria-label={`${isLiked ? "Unlike" : "Like"} reply, ${describeCount(likeCount, "like", "likes")}`}
             onClick={() => requireAuthThen(() => likeMutation.mutate(!isLiked), "Sign in to like replies.")}
           >
             <span className={styles.halo}>{isLiked ? <LikeFilledActionIcon size={ACTION_ICON_SIZE} /> : <LikeActionIcon size={ACTION_ICON_SIZE} />}</span>
             {likeCount > 0 ? <span className={styles.count}>{formatCompactCount(likeCount)}</span> : null}
+          </button>
+          <button
+            type="button"
+            className={[styles.action, isSaved ? styles.active : ""].join(" ")}
+            aria-pressed={isSaved}
+            aria-label={isSaved ? "Remove reply from saved" : "Save reply"}
+            onClick={() => toggleSaved()}
+          >
+            <span className={styles.halo}>{isSaved ? <BookmarkFilledActionIcon size={ACTION_ICON_SIZE} /> : <BookmarkActionIcon size={ACTION_ICON_SIZE} />}</span>
+          </button>
+          <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label="Share reply" onClick={() => requireAuthThen(() => void copyReplyLinkToClipboard(), "Sign in to share replies.")}>
+            <span className={styles.halo}>
+              <ShareActionIcon size={ACTION_ICON_SIZE} />
+            </span>
           </button>
           {isOwnReply ? (
             <button type="button" className={styles.textAction} onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
@@ -124,6 +184,11 @@ function ThreadReplyRow({ reply, postId, hasParentAbove, hasChildBelow, showRepl
               Report
             </button>
           )}
+          {canPin ? (
+            <button type="button" className={styles.textAction} onClick={() => pinMutation.mutate()} disabled={pinMutation.isPending}>
+              {optimisticPinned ? "Unpin" : "Pin"}
+            </button>
+          ) : null}
         </div>
       </div>
       <ReportDialog isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} targetType="comment" targetId={reply.id} />
@@ -134,9 +199,11 @@ function ThreadReplyRow({ reply, postId, hasParentAbove, hasChildBelow, showRepl
 interface ThreadReplyBranchProps {
   readonly reply: ThreadReplyModel;
   readonly postId: string;
+  readonly postAuthorId?: string;
   readonly hasParentAbove: boolean;
   readonly showReplyingTo: boolean;
   readonly onReply: (reply: ThreadReplyModel) => void;
+  readonly onRepostReply?: (reply: ThreadReplyModel) => void;
   readonly nestingLevel?: number;
   readonly startExpanded?: boolean;
   readonly onOpenThread?: (reply: ThreadReplyModel) => void;
@@ -144,11 +211,13 @@ interface ThreadReplyBranchProps {
 
 export const MAXIMUM_THREAD_INDENT_LEVELS = 3;
 
-export function ThreadReplyBranch({ reply, postId, hasParentAbove, showReplyingTo, onReply, nestingLevel = 0, startExpanded = false, onOpenThread }: ThreadReplyBranchProps) {
+const orderPinnedFirst = (replies: readonly ThreadReplyModel[]): ThreadReplyModel[] => [...replies].sort((a, b) => Number(b.pinned === true) - Number(a.pinned === true));
+
+export function ThreadReplyBranch({ reply, postId, postAuthorId, hasParentAbove, showReplyingTo, onReply, onRepostReply, nestingLevel = 0, startExpanded = false, onOpenThread }: ThreadReplyBranchProps) {
   const [isExpanded, setIsExpanded] = useState(startExpanded);
   const childrenAreIndented = nestingLevel + 1 <= MAXIMUM_THREAD_INDENT_LEVELS;
   const { query, replies } = useThreadReplies(reply.id, isExpanded);
-  const children = isExpanded && query.data ? replies : reply.inlineReplies;
+  const children = orderPinnedFirst(isExpanded && query.data ? replies : reply.inlineReplies);
   const hiddenCount = Math.max(0, reply.replyCount - children.length);
   const opensThreadInstead = onOpenThread !== undefined && nestingLevel >= MAXIMUM_THREAD_INDENT_LEVELS && hiddenCount > 0 && !isExpanded;
   const canShowMore = !opensThreadInstead && ((!isExpanded && hiddenCount > 0) || (isExpanded && (query.hasNextPage || query.isLoading)));
@@ -156,7 +225,7 @@ export function ThreadReplyBranch({ reply, postId, hasParentAbove, showReplyingT
 
   return (
     <>
-      <ThreadReplyRow reply={reply} postId={postId} hasParentAbove={hasParentAbove} hasChildBelow={children.length > 0 || canShowMore || opensThreadInstead} showReplyingTo={showReplyingTo} onReply={onReply} />
+      <ThreadReplyRow reply={reply} postId={postId} postAuthorId={postAuthorId} hasParentAbove={hasParentAbove} hasChildBelow={children.length > 0 || canShowMore || opensThreadInstead} showReplyingTo={showReplyingTo} onReply={onReply} onRepostReply={onRepostReply} />
       {children.length > 0 ? (
         <div className={childrenAreIndented ? styles.nested : undefined}>
           {children.map((child, index) => (
@@ -164,9 +233,11 @@ export function ThreadReplyBranch({ reply, postId, hasParentAbove, showReplyingT
               key={child.id}
               reply={child}
               postId={postId}
+              postAuthorId={postAuthorId}
               hasParentAbove={index === 0}
               showReplyingTo={!childrenAreIndented || index > 0}
               onReply={onReply}
+              onRepostReply={onRepostReply}
               nestingLevel={nestingLevel + 1}
               onOpenThread={onOpenThread}
             />

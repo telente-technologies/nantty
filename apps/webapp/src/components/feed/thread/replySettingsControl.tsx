@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { Dialog } from "@/components/ui/dialog";
+import { ReplyActionIcon } from "@/components/ui/icons";
 import { showToast } from "@/components/ui/toast";
 import { replyPolicyLabel, replyPolicyOptions } from "@/config/postAudience.config";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
@@ -34,7 +35,7 @@ export function ReplySettingsControl({ post }: { readonly post: Post }) {
       <button type="button" className={styles.textAction} onClick={() => setIsOpen(true)} aria-haspopup="dialog">
         Change
       </button>
-      <Dialog isOpen={isOpen} onClose={() => setIsOpen(false)} title="Who can reply?" description="Choose who can reply to this post. You can always reply." layout="sheet" size="small">
+      <Dialog isOpen={isOpen} onClose={() => setIsOpen(false)} title="Who can reply?" description="Choose who can reply to this post. You can always reply." layout="sheet" size="small" icon={<ReplyActionIcon size={24} />}>
         <fieldset className={settingsStyles.radioGroup} disabled={update.isPending}>
           <legend className="visuallyHidden">Who can reply</legend>
           {replyPolicyOptions.map((option) => (

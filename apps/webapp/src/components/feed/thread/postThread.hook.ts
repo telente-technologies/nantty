@@ -24,8 +24,8 @@ export function usePostConversation(postId: string, sort: ThreadSort) {
   const query = useInfiniteQuery({
     queryKey: postThreadQueryKey(postId, sort),
     queryFn: ({ pageParam }) => postThreadService.fetchConversation(postId, sort, pageParam),
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
   const conversations = useMemo(() => {
     const seen = new Set<string>();
@@ -63,8 +63,8 @@ export function useThreadReplies(commentId: string, isExpanded: boolean) {
   const query = useInfiniteQuery({
     queryKey: threadRepliesQueryKey(commentId),
     queryFn: ({ pageParam }) => postThreadService.fetchThreadReplies(commentId, pageParam),
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: isExpanded,
   });
   const replies: readonly ThreadReply[] = query.data?.pages.flatMap((page) => page.data) ?? [];
