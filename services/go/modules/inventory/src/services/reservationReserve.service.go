@@ -51,7 +51,10 @@ func (service ReservationService) Reserve(ctx context.Context, request commercep
 }
 
 func (service ReservationService) reserveInTransaction(ctx context.Context, tx *ent.Tx, lines []commerceports.StockLine, request commerceports.ReserveStockRequest) error {
-	existing, err := tx.StockReservation.Query().Where(stockreservation.Reference(request.Reference)).All(ctx)
+	existing, err := tx.StockReservation.Query().Where(
+		stockreservation.Reference(request.Reference),
+		stockreservation.StatusIn(enums.ReservationActive, enums.ReservationConfirmed),
+	).All(ctx)
 	if err != nil {
 		return err
 	}
