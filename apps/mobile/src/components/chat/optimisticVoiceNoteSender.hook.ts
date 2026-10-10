@@ -3,10 +3,10 @@ import { useCallback } from "react";
 
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import { markPendingMessageAsFailedLocally, replacePendingMessageWithDeliveredMessageLocally } from "@/cache/messageSync.util";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import type { LocalMediaFile } from "@/services/mediaPreparation.service";
-import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
-import { messagesService } from "@/services/messages.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { uploadEncryptedAttachment } from "@/services/chatCrypto/encryptedAttachments.service";
+import { type LocalMediaFile, validateLocalMediaBeforeUpload } from "@/services/media/mediaPreparation.service";
+import { messagesService } from "@/services/chat/messages.service";
 import type { Message } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
@@ -22,32 +22,32 @@ export function useOptimisticVoiceNoteSender(conversationId: string | undefined,
   return useCallback(
     async (recordedVoiceNote: LocalMediaFile) => {
       if (!conversationId) return;
-      let uploadJobId: string;
       try {
-        uploadJobId = await enqueueLocalMediaForUpload(recordedVoiceNote, "voice");
+        validateLocalMediaBeforeUpload(recordedVoiceNote, "voice");
       } catch (error) {
         showAlertWithButtons("Voice note not sent", error instanceof Error ? error.message : "Please try again.");
         return;
       }
+      const localId = generateIdempotencyKey();
       const durationSeconds = Math.round(recordedVoiceNote.durationSeconds ?? 0);
       const pendingMessage: LocallyStoredMessage = {
-        id: `local_${uploadJobId}`,
+        id: `local_${localId}`,
         conversationId,
         senderId: myUserId,
         text: "",
         createdAt: new Date().toISOString(),
         kind: "voice",
-        media: { id: uploadJobId, type: "voice", url: recordedVoiceNote.uri, durationSeconds },
+        media: { id: localId, type: "voice", url: recordedVoiceNote.uri, durationSeconds },
         deliveryStatus: "pending",
       };
       updateCachedMessages((messages) => [...messages, pendingMessage]);
       const replacePendingMessage = (replacement: LocallyStoredMessage) =>
         updateCachedMessages((messages) => messages.map((message) => (message.id === pendingMessage.id ? replacement : message)));
       try {
-        const mediaId = await waitForUploadedMediaId(uploadJobId);
+        const { mediaId, pointer } = await uploadEncryptedAttachment(recordedVoiceNote.uri, { contentType: recordedVoiceNote.mimeType ?? "audio/mp4", durationSeconds }, "voice");
         const delivered = await messagesService.sendVoiceNoteToConversation(
           conversationId,
-          { kind: "voice", mediaId, durationSeconds },
+          { kind: "voice", mediaId, durationSeconds, attachment: pointer },
           generateIdempotencyKey(),
         );
         const deliveredWithPlayableUrl: Message = {

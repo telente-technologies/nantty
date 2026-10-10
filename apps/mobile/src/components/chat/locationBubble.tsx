@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Linking, Pressable, StyleSheet, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { stopSharingLiveLocation } from "@/services/liveLocationSharing.service";
+import { stopSharingLiveLocation } from "@/services/live/liveLocationSharing.service";
 import { useIsSharingLiveLocation } from "@/store/liveLocationShares.store";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Message } from "@/types";

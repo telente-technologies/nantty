@@ -3,10 +3,10 @@ import { useCallback } from "react";
 
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import { markPendingMessageAsFailedLocally, replacePendingMessageWithDeliveredMessageLocally } from "@/cache/messageSync.util";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import type { LocalMediaFile } from "@/services/mediaPreparation.service";
-import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/mediaUploadQueue.service";
-import { messagesService } from "@/services/messages.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { buildEncryptedThumbnail, uploadEncryptedAttachment } from "@/services/chatCrypto/encryptedAttachments.service";
+import { type LocalMediaFile, resizeAndReencodeImageWithoutMetadata, validateLocalMediaBeforeUpload } from "@/services/media/mediaPreparation.service";
+import { messagesService } from "@/services/chat/messages.service";
 import type { Message } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
@@ -22,29 +22,31 @@ export function useOptimisticImageMessageSender(conversationId: string | undefin
   return useCallback(
     async (photo: LocalMediaFile) => {
       if (!conversationId) return;
-      let uploadJobId: string;
       try {
-        uploadJobId = await enqueueLocalMediaForUpload(photo, "chat");
+        validateLocalMediaBeforeUpload(photo, "chat");
       } catch (error) {
         showAlertWithButtons("Photo not sent", error instanceof Error ? error.message : "Please try again.");
         return;
       }
+      const localId = generateIdempotencyKey();
       const pendingMessage: LocallyStoredMessage = {
-        id: `local_${uploadJobId}`,
+        id: `local_${localId}`,
         conversationId,
         senderId: myUserId,
         text: "",
         createdAt: new Date().toISOString(),
         kind: "image",
-        media: { id: uploadJobId, type: "image", url: photo.uri },
+        media: { id: localId, type: "image", url: photo.uri },
         deliveryStatus: "pending",
       };
       updateCachedMessages((messages) => [...messages, pendingMessage]);
       const replacePendingMessage = (replacement: LocallyStoredMessage) =>
         updateCachedMessages((messages) => messages.map((message) => (message.id === pendingMessage.id ? replacement : message)));
       try {
-        const mediaId = await waitForUploadedMediaId(uploadJobId);
-        const delivered = await messagesService.sendImageToConversation(conversationId, { mediaId }, generateIdempotencyKey());
+        const prepared = await resizeAndReencodeImageWithoutMetadata(photo);
+        const thumbnail = await buildEncryptedThumbnail(prepared.uri);
+        const { mediaId, pointer } = await uploadEncryptedAttachment(prepared.uri, { contentType: "image/jpeg", width: prepared.width, height: prepared.height, thumbnail }, "chat");
+        const delivered = await messagesService.sendImageToConversation(conversationId, { mediaId, attachment: pointer }, generateIdempotencyKey());
         const deliveredWithLocalUrl: Message = {
           ...delivered,
           media: delivered.media ? { ...delivered.media, url: delivered.media.url ?? photo.uri } : pendingMessage.media,

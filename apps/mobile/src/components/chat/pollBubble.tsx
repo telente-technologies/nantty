@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { Check16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { messagesService } from "@/services/messages.service";
+import { messagesService } from "@/services/chat/messages.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { LocalMessageDeliveryStatus } from "@/cache/messageHistory.type";
 import type { Message } from "@/types";

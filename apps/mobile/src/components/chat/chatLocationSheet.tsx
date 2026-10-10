@@ -5,7 +5,7 @@ import { MapPin24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { readChatLocationConsent, readCurrentSharedLocation, requestLocationAccess, saveChatLocationConsent } from "@/services/locationSharing.service";
+import { readChatLocationConsent, readCurrentSharedLocation, requestLocationAccess, saveChatLocationConsent } from "@/services/chat/locationSharing.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { SharedLocation } from "@/types";
 

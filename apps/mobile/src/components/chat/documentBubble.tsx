@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { Cancel20Icon } from "@/components/icons";
+import { Cancel20Icon, Document24Icon, Refresh20Icon, Trash24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
-import { cancelDocumentUpload } from "@/services/documentUpload.service";
-import { openChatDocument, saveChatDocumentToDevice } from "@/services/documentOpening.service";
+import { cancelDocumentUpload } from "@/services/chat/documentUpload.service";
+import { openChatDocument, saveChatDocumentToDevice } from "@/services/core/documentOpening.service";
 import { useDocumentUploadProgress } from "@/store/documentUploads.store";
 import { makeThemedStyles, useTheme, type ThemeColors } from "@/theme";
 import type { LocalMessageDeliveryStatus } from "@/cache/messageHistory.type";
@@ -85,10 +85,12 @@ export function DocumentBubble({ message, deliveryStatus, isExpired, onRetry, on
           <Text size={12} lineHeight={15.6} letterSpacing={0} color={colors.error} style={styles.failedLabel}>
             {upload?.wasCancelled ? "Upload cancelled" : "Upload failed"}
           </Text>
-          <Pressable accessibilityRole="button" hitSlop={14} onPress={onRetry}>
+          <Pressable accessibilityRole="button" hitSlop={14} onPress={onRetry} style={styles.failedAction}>
+            <Refresh20Icon size={20} color={colors.primary} />
             <Text size={13} weight={600} lineHeight={16.9} color={colors.primary}>Retry</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" hitSlop={14} onPress={onDiscard}>
+          <Pressable accessibilityRole="button" hitSlop={14} onPress={onDiscard} style={styles.failedAction}>
+            <Trash24Icon size={20} color={colors.textMuted} />
             <Text size={13} weight={600} lineHeight={16.9} color={colors.textMuted}>Discard</Text>
           </Pressable>
         </View>
@@ -103,6 +105,9 @@ export function DocumentBubble({ message, deliveryStatus, isExpired, onRetry, on
           { label: "Save to device", style: "secondary", onPress: closeSheetThen(saveDocument) },
         ]}
       >
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <Document24Icon size={22} color={colors.textMuted} />
+        </View>
         <Text size={14} lineHeight={19.6} color={colors.textMuted}>Open this file or save it to your device.</Text>
       </BottomSheet>
     </View>
@@ -118,5 +123,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   track: { height: 4, borderRadius: 2, backgroundColor: colors.placeholder, overflow: "hidden" },
   fill: { height: 4, borderRadius: 2, backgroundColor: colors.primary },
   failedRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  failedAction: { flexDirection: "row", alignItems: "center", gap: 4 },
   failedLabel: { flex: 1 },
 }));

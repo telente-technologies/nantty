@@ -3,7 +3,7 @@ import { useCallback } from "react";
 
 import { replaceCachedMessageReactions } from "@/cache/messageRealtimeCache.util";
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
-import { messagesService } from "@/services/messages.service";
+import { messagesService } from "@/services/chat/messages.service";
 import type { MessageReactionSummary } from "@/types";
 
 const applyReactionToggleLocally = (reactions: readonly MessageReactionSummary[], emoji: string, shouldReact: boolean) => {

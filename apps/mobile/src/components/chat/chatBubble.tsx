@@ -13,6 +13,7 @@ import { MessageReactionsRow } from "./messageReactionsRow";
 import { isRichMessage, RichMessageContent } from "./richMessageContent";
 import { VoiceNoteBubble } from "./voiceNoteBubble";
 import { useImagePreview } from "@/components/ui/previewableImage";
+import { useMessageWithDecryptedMedia } from "@/components/chat/decryptedMedia.hook";
 import { LinkPreviewCard } from "@/components/chatSafety/linkPreviewCard";
 import { SharedContentCardView } from "@/components/chatSafety/sharedContentCardView";
 import { findFirstExternalUrl, findFirstInternalReference } from "./chatLinks.util";
@@ -42,7 +43,7 @@ export function SystemNoticeRow({ text }: { text: string }) {
 }
 
 export function ChatBubble({
-  message,
+  message: storedMessage,
   isMine,
   deliveryStatus = "sent",
   showSenderIdentity = false,
@@ -52,6 +53,7 @@ export function ChatBubble({
   onRetryDocument,
   onDiscardDocument,
 }: ChatBubbleProps) {
+  const message = useMessageWithDecryptedMedia(storedMessage);
   const { colors } = useTheme();
   const styles = useStyles();
   const { openImagePreview, imagePreviewElement } = useImagePreview();

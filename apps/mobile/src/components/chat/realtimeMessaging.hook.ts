@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import { applyRealtimeEventToLocalCaches } from "@/cache/messageRealtimeCache.util";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
-import { realtimeService } from "@/services/realtime.service";
+import { realtimeService } from "@/services/core/realtime.service";
 import { useAuthStore } from "@/store/auth.store";
 
 import { useTypingIndicatorsStore } from "./typingIndicators.store";

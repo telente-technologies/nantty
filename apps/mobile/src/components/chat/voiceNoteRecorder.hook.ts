@@ -2,7 +2,7 @@ import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, 
 import { useCallback, useRef, useState } from "react";
 import { Platform } from "react-native";
 
-import type { LocalMediaFile } from "@/services/mediaPreparation.service";
+import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 const MINIMUM_VOICE_NOTE_SECONDS = 1;

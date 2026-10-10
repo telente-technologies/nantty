@@ -7,6 +7,7 @@ import { scheduleOnRN } from "react-native-worklets";
 import { Plus24Icon, PaperPlaneTilt24Icon, Smiley24Icon, Microphone24Icon } from "@/components/icons";
 import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
 import { MentionCountLabel, MentionSuggestionList } from "@/components/mentions/mentionSuggestionList";
+import { ComposerSlot } from "@/components/ui/composerSlot";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
 import { useLastKeyboardHeight } from "@/hooks/useLastKeyboardHeight.hook";
@@ -14,6 +15,7 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import type { MentionEntity } from "@/types/mention.type";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
+import { hasSendableContent } from "@/utils/sendableContent.util";
 
 const CHAT_EMOJI = [
   "😀", "😂", "🥰", "😍", "🤩", "😎", "🤔", "😅",
@@ -76,7 +78,8 @@ export function MessageComposerBar({
       setMentions(nextMentions);
     },
   });
-  const canSend = text.trim().length > 0 && !sending;
+  const hasContent = hasSendableContent(text);
+  const canSend = hasContent && !sending;
 
   const sendTypedMessage = () => {
     if (!canSend) return;
@@ -156,16 +159,28 @@ export function MessageComposerBar({
             >
               <Smiley24Icon color={showEmojiPanel ? colors.primary : undefined} />
             </Pressable>
-            {canSend ? (
-              <Pressable accessibilityRole="button" accessibilityLabel="Send message" hitSlop={8} onPress={sendTypedMessage}>
-                <PaperPlaneTilt24Icon color={colors.primary} />
-              </Pressable>
+            {hasContent ? (
+              <ComposerSlot slotKey="send">
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Send message"
+                  accessibilityState={{ disabled: !canSend, busy: sending }}
+                  disabled={!canSend}
+                  hitSlop={8}
+                  onPress={sendTypedMessage}
+                  style={!canSend ? styles.sendDisabled : null}
+                >
+                  <PaperPlaneTilt24Icon color={colors.primary} />
+                </Pressable>
+              </ComposerSlot>
             ) : focused && !plusOnRight ? (
-              <Pressable accessibilityRole="button" accessibilityLabel="Add attachment" hitSlop={8} onPress={onPressPlus}>
-                <Plus24Icon />
-              </Pressable>
+              <ComposerSlot slotKey="attach">
+                <Pressable accessibilityRole="button" accessibilityLabel="Add attachment" hitSlop={8} onPress={onPressPlus}>
+                  <Plus24Icon />
+                </Pressable>
+              </ComposerSlot>
             ) : onPressMicrophone && !plusOnRight ? (
-              microphoneButton
+              <ComposerSlot slotKey="mic">{microphoneButton}</ComposerSlot>
             ) : null}
           </View>
         </View>
@@ -229,6 +244,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   },
   mentionCount: { paddingHorizontal: 16, paddingTop: 4, backgroundColor: colors.surface },
   actions: { flexDirection: "row", alignItems: "center", gap: 8 },
+  sendDisabled: { opacity: 0.45 },
   keyboardArea: { backgroundColor: colors.surface },
   emojiPanel: { position: "absolute", top: 0, left: 0, right: 0, borderTopWidth: 1, borderTopColor: colors.divider },
   emojiGrid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 8, paddingTop: 8, paddingBottom: 4 },

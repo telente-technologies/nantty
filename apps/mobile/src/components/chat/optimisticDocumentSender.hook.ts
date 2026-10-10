@@ -7,9 +7,9 @@ import {
   replacePendingMessageWithDeliveredMessageLocally,
   savePendingOutgoingMessageLocally,
 } from "@/cache/messageSync.util";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { uploadDocumentWithProgress } from "@/services/documentUpload.service";
-import { messagesService } from "@/services/messages.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { uploadDocumentWithProgress } from "@/services/chat/documentUpload.service";
+import { messagesService } from "@/services/chat/messages.service";
 import { useDocumentUploadsStore } from "@/store/documentUploads.store";
 import type { MessageDocument } from "@/types";
 
@@ -25,15 +25,16 @@ export function useOptimisticDocumentSender(conversationId: string | undefined, 
         markPendingMessageAsFailedLocally(pendingMessage.id);
         replaceCachedMessage(pendingMessage.id, { ...pendingMessage, deliveryStatus: "failed" });
       };
-      let mediaId: string;
+      let uploaded: Awaited<ReturnType<typeof uploadDocumentWithProgress>>;
       try {
-        mediaId = await uploadDocumentWithProgress(pendingMessage.id, document);
+        uploaded = await uploadDocumentWithProgress(pendingMessage.id, document);
       } catch {
         markFailed();
         return;
       }
       try {
-        const delivered = await messagesService.sendDocumentToConversation(pendingMessage.conversationId, document, mediaId, generateIdempotencyKey());
+        const sent = await messagesService.sendDocumentToConversation(pendingMessage.conversationId, uploaded.mediaId, uploaded.pointer, generateIdempotencyKey());
+        const delivered = { ...sent, document: sent.document ? { ...sent.document, url: document.url } : document };
         replacePendingMessageWithDeliveredMessageLocally(pendingMessage.id, delivered);
         replaceCachedMessage(pendingMessage.id, { ...delivered, deliveryStatus: "sent" });
         queryClient.invalidateQueries({ queryKey: ["conversations"] });

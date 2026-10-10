@@ -6,9 +6,9 @@ import {
   replacePendingMessageWithDeliveredMessageLocally,
   savePendingOutgoingMessageLocally,
 } from "@/cache/messageSync.util";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { startLiveLocationUpdates } from "@/services/liveLocationSharing.service";
-import { messagesService } from "@/services/messages.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { startLiveLocationUpdates } from "@/services/live/liveLocationSharing.service";
+import { messagesService } from "@/services/chat/messages.service";
 import type { Message, SharedLocation } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 

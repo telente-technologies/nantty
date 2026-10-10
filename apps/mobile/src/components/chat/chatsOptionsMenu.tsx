@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { GearSix24Icon, Share24Icon, Users24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { makeThemedStyles } from "@/theme";
+import { makeThemedStyles, useTheme } from "@/theme";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
 import { buildPopoverMenuSurface } from "@/components/ui/modalChrome.constant";
 
@@ -16,10 +17,11 @@ export interface ChatsOptionsMenuProps {
 
 export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, onCreateChannel, onOpenSettings }: ChatsOptionsMenuProps) {
   const styles = useStyles();
+  const { colors } = useTheme();
   const menuItems = [
-    { label: "New group", onPress: onCreateGroup },
-    { label: "New channel", onPress: onCreateChannel },
-    { label: "Chat settings", onPress: onOpenSettings },
+    { label: "New group", onPress: onCreateGroup, icon: <Users24Icon size={20} color={colors.textMuted} /> },
+    { label: "New channel", onPress: onCreateChannel, icon: <Share24Icon size={20} color={colors.textMuted} /> },
+    { label: "Chat settings", onPress: onOpenSettings, icon: <GearSix24Icon size={20} color={colors.textMuted} /> },
   ];
   return (
     <FrameAwareModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -35,6 +37,7 @@ export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, o
               }}
               style={styles.item}
             >
+              {item.icon}
               <Text size={14} weight={500} lineHeight={16.8}>
                 {item.label}
               </Text>
@@ -49,5 +52,5 @@ export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, o
 const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
   backdrop: { flex: 1 },
   menu: { position: "absolute", right: 12, ...buildPopoverMenuSurface(colors, scheme) },
-  item: { minHeight: 48, paddingHorizontal: 16, justifyContent: "center" },
+  item: { minHeight: 48, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 12, justifyContent: "flex-start" },
 }));

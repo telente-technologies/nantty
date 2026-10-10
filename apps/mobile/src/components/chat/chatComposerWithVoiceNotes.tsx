@@ -6,7 +6,7 @@ import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { pickPhotosAndVideosFromLibrary, takePhotoWithSystemCamera } from "@/components/create/pickMedia.util";
-import type { LocalMediaFile } from "@/services/mediaPreparation.service";
+import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
 import type { MessageDocument, SharedLocation } from "@/types";
 import type { MentionEntity } from "@/types/mention.type";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";

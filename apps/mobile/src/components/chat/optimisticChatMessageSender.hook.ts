@@ -7,9 +7,9 @@ import {
   replacePendingMessageWithDeliveredMessageLocally,
   savePendingOutgoingMessageLocally,
 } from "@/cache/messageSync.util";
-import { generateIdempotencyKey } from "@/services/apiClient.service";
-import { buildLocalPendingMessageFromDraft, messagesService } from "@/services/messages.service";
-import { buildLinkPreviewOnSenderDevice } from "@/services/linkPreviews.service";
+import { generateIdempotencyKey } from "@/services/core/apiClient.service";
+import { buildLocalPendingMessageFromDraft, messagesService } from "@/services/chat/messages.service";
+import { buildLinkPreviewOnSenderDevice } from "@/services/content/linkPreviews.service";
 import type { Message } from "@/types";
 import type { MentionEntity } from "@/types/mention.type";
 

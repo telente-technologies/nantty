@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { Flag24Icon, Smiley24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { buildModalPalette } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
@@ -20,6 +21,9 @@ export function MessageReactionPicker({ visible, onPickEmoji, onClose, onReportM
   return (
     <BottomSheet visible={visible} onClose={onClose} title="React to message">
       <View style={styles.body}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
+          <Smiley24Icon size={22} color={colors.textMuted} />
+        </View>
         <View style={styles.bar} accessibilityRole="menu">
           {MESSAGE_REACTION_EMOJI.map((emoji) => (
             <Pressable
@@ -37,6 +41,7 @@ export function MessageReactionPicker({ visible, onPickEmoji, onClose, onReportM
         </View>
         {onReportMessage ? (
           <Pressable accessibilityRole="button" accessibilityLabel="Report message" onPress={onReportMessage} style={({ pressed }) => [styles.reportRow, pressed ? styles.emojiPressed : null]}>
+            <Flag24Icon size={20} color={buildModalPalette(colors, scheme).destructiveInk} />
             <Text size={15} weight={600} lineHeight={20} color={buildModalPalette(colors, scheme).destructiveInk}>
               Report message
             </Text>
@@ -54,6 +59,6 @@ const useStyles = makeThemedStyles((colors, scheme) => {
     bar: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4 },
     emoji: { minWidth: 48, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: 24 },
     emojiPressed: { backgroundColor: palette.inset },
-    reportRow: { minHeight: 48, justifyContent: "center", paddingHorizontal: 4, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.divider },
+    reportRow: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 4, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.divider },
   });
 });

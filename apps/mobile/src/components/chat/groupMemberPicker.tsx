@@ -6,7 +6,7 @@ import { Check16Icon, MagnifyingGlass20Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
-import { messagesService } from "@/services/messages.service";
+import { messagesService } from "@/services/chat/messages.service";
 import type { UserSummary } from "@/types";
 
 import { PersonRow } from "./personRow";
