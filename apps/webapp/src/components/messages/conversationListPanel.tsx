@@ -18,6 +18,7 @@ import { AppIcon } from "@/components/ui/appIcon";
 const filters: readonly { readonly value: ConversationFilter; readonly label: string }[] = [
   { value: "all", label: "All" },
   { value: "direct", label: "Direct" },
+  { value: "requests", label: "Requests" },
 ];
 
 function ConversationListSkeleton() {
@@ -116,7 +117,11 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
           </>
         )
       ) : conversations.length === 0 ? (
-        <EmptyState icon={<AppIcon name="chatCircle24" size={28} />} title="No chats yet" description="Message a seller or a friend to get started." action={<InlineLink href="/explore">Find people</InlineLink>} />
+        filter === "requests" ? (
+          <EmptyState icon={<AppIcon name="chatCircle24" size={28} />} title="No message requests" description="Messages from people you don't follow show up here first." />
+        ) : (
+          <EmptyState icon={<AppIcon name="chatCircle24" size={28} />} title="No chats yet" description="Message a seller or a friend to get started." action={<InlineLink href="/explore">Find people</InlineLink>} />
+        )
       ) : (
         <ul className={styles.list}>
           {conversations.map((conversation) => (

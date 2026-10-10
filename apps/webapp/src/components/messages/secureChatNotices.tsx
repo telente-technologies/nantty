@@ -1,9 +1,11 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
+import type { SharedContentCard } from "@/types";
 import type { ChatLinkPreview } from "@zudomart/chat-crypto";
 
 import styles from "./secureChatNotices.module.css";
@@ -59,4 +61,37 @@ export function EncryptedLinkPreviewCard({ preview }: { readonly preview: ChatLi
 
 export function DecryptionNotice({ text }: { readonly text: string }) {
   return <p className={styles.notice}>{text}</p>;
+}
+
+const sharedKindLabels: Record<SharedContentCard["reference"]["kind"], string> = { post: "Post", clip: "Clip", story: "Story", product: "Product", store: "Store", profile: "Profile", live: "Live" };
+
+function sharedContentHref(card: SharedContentCard): string | null {
+  const { kind, id } = card.reference;
+  if (kind === "post" || kind === "clip") return `/post/${id}`;
+  if (kind === "product") return `/product/${id}`;
+  if (kind === "store") return `/store/${id}`;
+  if (kind === "live") return `/live/${id}`;
+  if (kind === "profile" && card.subtitle?.startsWith("@")) return `/${card.subtitle.slice(1)}`;
+  return null;
+}
+
+export function SharedContentPreviewCard({ card }: { readonly card: SharedContentCard }) {
+  const label = card.isLive ? "Live now" : sharedKindLabels[card.reference.kind];
+  if (card.availability !== "available") {
+    return (
+      <div className={styles.linkCard}>
+        <span className={styles.linkDomain}>{label}</span>
+        <span className={styles.linkDescription}>{card.availability === "private" ? "This is only visible to the owner's followers." : "This is no longer available."}</span>
+      </div>
+    );
+  }
+  const href = sharedContentHref(card);
+  const body = (
+    <>
+      <span className={styles.linkDomain}>{label}</span>
+      {card.title ? <span className={styles.linkTitle}>{card.title}</span> : null}
+      {card.subtitle ? <span className={styles.linkDescription}>{card.subtitle}</span> : null}
+    </>
+  );
+  return href === null ? <div className={styles.linkCard}>{body}</div> : <Link className={styles.linkCard} href={href}>{body}</Link>;
 }
