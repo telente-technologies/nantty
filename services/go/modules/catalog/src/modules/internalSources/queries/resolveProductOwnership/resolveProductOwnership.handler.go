@@ -23,6 +23,7 @@ type OwnedProduct struct {
 	Title    string      `json:"title"`
 	Price    money.Money `json:"price"`
 	ImageUrl *string     `json:"imageUrl"`
+	Status   string      `json:"status"`
 }
 
 type Result struct {
@@ -60,7 +61,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Result, error)
 		}
 	}
 	for _, row := range rows {
-		view := OwnedProduct{Id: row.ID.String(), Title: row.Name, Price: money.Money{AmountMinor: row.MinPriceMinor, Currency: money.CurrencyCode(row.Currency)}}
+		view := OwnedProduct{Id: row.ID.String(), Title: row.Name, Price: money.Money{AmountMinor: row.MinPriceMinor, Currency: money.CurrencyCode(row.Currency)}, Status: row.Status}
 		if url, found := firstImage[row.ID]; found {
 			view.ImageUrl = &url
 		}

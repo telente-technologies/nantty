@@ -16,4 +16,5 @@ func MountInternalSourcesRoutes(mux *http.ServeMux, deployed *container.Containe
 	mux.Handle("GET /api/v1/internal/audience-sources/stores/{storeId}/visitors", internal(controller.ListStoreVisitors))
 	mux.Handle("GET /internal/v1/stores/{storeId}/members/{userId}", internal(controller.GetStoreMembership))
 	mux.Handle("POST /internal/v1/stores/{storeId}/products/ownership", internal(controller.ResolveProductOwnership))
+	mux.Handle("GET /api/v1/internal/ownership/{kind}/{id}", internal(controller.GetDestinationOwnership))
 }

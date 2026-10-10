@@ -3,6 +3,7 @@ package dtos
 import (
 	"time"
 
+	"zudomart/modules/catalog/src/interfaces"
 	"zudomart/modules/catalog/src/utils"
 )
 
@@ -61,12 +62,23 @@ type HighlightRanking struct {
 	Reason HighlightReason `json:"reason"`
 }
 
+type SponsoredPlacement struct {
+	CampaignId      string                       `json:"campaignId"`
+	Label           string                       `json:"label"`
+	AdvertiserName  string                       `json:"advertiserName"`
+	CtaLabel        string                       `json:"ctaLabel,omitempty"`
+	AdType          string                       `json:"adType"`
+	ImpressionToken string                       `json:"impressionToken"`
+	ClickLinks      *interfaces.MartAdClickLinks `json:"clickLinks,omitempty"`
+}
+
 type MartHighlight struct {
-	Id       string           `json:"id"`
-	Kind     string           `json:"kind"`
-	Title    string           `json:"title"`
-	Subtitle *string          `json:"subtitle"`
-	ImageUrl *string          `json:"imageUrl"`
-	Target   map[string]any   `json:"target"`
-	Ranking  HighlightRanking `json:"ranking"`
+	Id        string              `json:"id"`
+	Kind      string              `json:"kind"`
+	Title     string              `json:"title"`
+	Subtitle  *string             `json:"subtitle"`
+	ImageUrl  *string             `json:"imageUrl"`
+	Target    map[string]any      `json:"target"`
+	Ranking   HighlightRanking    `json:"ranking"`
+	Sponsored *SponsoredPlacement `json:"sponsored,omitempty"`
 }

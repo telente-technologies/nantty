@@ -186,7 +186,7 @@ func (catalog CommerceCatalog) ResolveProductsForCheckoutInCountry(ctx context.C
 		currency := money.CurrencyCode(parent.Currency)
 		snapshot := commerceports.ProductSnapshot{
 			ProductId: parent.ID, VariantId: variant.ID, StoreId: variant.StoreID, SellerAccountId: owner.OwnerAccountId, ProductTitle: parent.Name,
-			VariantTitle: variant.Title, Sku: variant.Sku, Size: variant.Size, Color: variant.Color, ImageUrl: images[parent.ID],
+			VariantTitle: variant.Title, Sku: variant.Sku, Size: variant.Size, Color: variant.Color, OptionValues: variant.OptionValues, ImageUrl: images[parent.ID],
 			UnitPrice: money.Money{AmountMinor: variant.PriceMinor, Currency: currency}, Taxable: parent.Taxable, TrackInventory: parent.TrackInventory,
 			CategoryId: parent.CategoryID, CategoryName: categoryNames[parent.ID], Purchasable: parent.Status == enums.ProductActive && parent.PublishedOnline && owner.Active && enums.IsShownToBuyers(parent.ModerationVisibility),
 		}

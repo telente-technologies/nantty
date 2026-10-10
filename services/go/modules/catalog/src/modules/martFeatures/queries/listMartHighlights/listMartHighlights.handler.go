@@ -8,6 +8,7 @@ import (
 
 	"zudomart/modules/catalog/src/container"
 	"zudomart/modules/catalog/src/generated/ent/category"
+	"zudomart/modules/catalog/src/interfaces"
 	"zudomart/modules/catalog/src/modules/martFeatures/dtos"
 	featureservices "zudomart/modules/catalog/src/modules/martFeatures/services"
 	"zudomart/modules/catalog/src/services"
@@ -42,7 +43,8 @@ func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.Cur
 			return httpserver.CursorPage[dtos.MartHighlight]{}, httpserver.NewApiError(400, "INVALID_CURSOR", "The cursor is not valid.")
 		}
 	}
-	highlights, err := handler.candidates(ctx, services.ViewerCountry(ctx, handler.Container, query.Viewer))
+	country := services.ViewerCountry(ctx, handler.Container, query.Viewer)
+	highlights, err := handler.candidates(ctx, country)
 	if err != nil {
 		return httpserver.CursorPage[dtos.MartHighlight]{}, err
 	}
@@ -54,7 +56,12 @@ func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.Cur
 	if end < len(highlights) {
 		nextCursor = utils.EncodeCursor(strconv.Itoa(end))
 	}
-	return httpserver.NewCursorPage(highlights[start:end], nextCursor), nil
+	page := highlights[start:end]
+	if offset == 0 && query.Viewer != nil {
+		request := interfaces.MartAdRequest{Viewer: *query.Viewer, Country: country}
+		page = insertSponsored(page, sponsoredHighlight(ctx, handler.Container.MartAds, request, handler.listedProductName, handler.Container.Logger))
+	}
+	return httpserver.NewCursorPage(page, nextCursor), nil
 }
 
 func (handler Handler) candidates(ctx context.Context, country string) ([]dtos.MartHighlight, error) {
@@ -114,4 +121,3 @@ func (handler Handler) fromTarget(ctx context.Context, id, title string, subtitl
 	}
 	return highlight, false
 }
-
