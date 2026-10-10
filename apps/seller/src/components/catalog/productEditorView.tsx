@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ProductAttributesSection } from "@/components/catalog/productAttributesSection";
 import { ProductBasicsSection } from "@/components/catalog/productBasicsSection";
@@ -38,6 +38,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
   const [draft, setDraft] = useState<ProductDraft | null>(productId ? null : createEmptyProductDraft());
   const [issues, setIssues] = useState<ValidationIssue[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const saveInFlight = useRef(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
@@ -87,7 +88,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
   }
 
   async function saveProduct(saveAsDraft = false) {
-    if (!draft || !settings) return;
+    if (!draft || !settings || saveInFlight.current) return;
     const draftToSave = saveAsDraft ? { ...draft, status: "draft" as const, publishedOnline: false } : draft;
     if (saveAsDraft) setDraft(draftToSave);
     const { request, parseIssues } = convertDraftToUpsertRequest(draftToSave, settings.currency, isNewProduct);
@@ -100,6 +101,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
       return;
     }
     setIsSaving(true);
+    saveInFlight.current = true;
     try {
       const savedProduct = await sendSellerApiRequest<Product>(isNewProduct ? "/seller/products" : `/seller/products/${encodeURIComponent(productId ?? "")}`, { method: isNewProduct ? "POST" : "PATCH", body: request });
       showToast(saveAsDraft ? "Saved as a draft." : isNewProduct ? `${savedProduct.name} created.` : "Changes saved.");
@@ -109,6 +111,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
       if (error instanceof SellerApiRequestError && error.issues && error.issues.length > 0) setIssues(error.issues);
       showToast(readErrorMessageForDisplay(error), "error");
     } finally {
+      saveInFlight.current = false;
       setIsSaving(false);
     }
   }

@@ -24,7 +24,7 @@ export function ToastProvider({ children }: { readonly children: ReactNode }) {
 
   const showToast = useCallback((text: string, tone: ToastTone = "success") => {
     const id = nextToastId++;
-    setToasts((current) => [...current.slice(-3), { id, tone, text }]);
+    setToasts((current) => (current.some((toast) => toast.text === text && toast.tone === tone) ? current : [...current.slice(-3), { id, tone, text }]));
     window.setTimeout(() => setToasts((current) => current.filter((toast) => toast.id !== id)), tone === "error" ? 7000 : 4000);
   }, []);
 
