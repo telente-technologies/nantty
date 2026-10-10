@@ -1,0 +1,5162 @@
+{
+  "description": "Creator subscription store products. One product per price tier, interval and slot; each product is its own iOS subscription group so a fan can hold several creator subscriptions at once. Generated from services/go/platform/regionpricing/regionPricing.creatorTiers.go and checked by regionPricing.storeProducts_test.go.",
+  "productIdPattern": "zudomart.creatorsub.tier_<tier>.s<slot>.<monthly|yearly>",
+  "slotsPerTierAndInterval": 5,
+  "storeFeeBps": {
+    "ios": 3000,
+    "iosSmallBusiness": 1500,
+    "android": 1500
+  },
+  "priceRule": "appMinor = webMinor / (1 - storeFee), rounded up to the regional price point; pick the nearest store price point at or above it",
+  "fallbackRegion": {
+    "region": "US",
+    "currency": "USD",
+    "note": "Every other storefront uses the US tier price, converted by the store"
+  },
+  "regions": [
+    {
+      "region": "NG",
+      "currency": "NGN"
+    },
+    {
+      "region": "GH",
+      "currency": "GHS"
+    },
+    {
+      "region": "KE",
+      "currency": "KES"
+    },
+    {
+      "region": "ZA",
+      "currency": "ZAR"
+    },
+    {
+      "region": "GB",
+      "currency": "GBP"
+    },
+    {
+      "region": "EU",
+      "currency": "EUR"
+    },
+    {
+      "region": "US",
+      "currency": "USD"
+    }
+  ],
+  "notificationUrls": {
+    "apple": "https://api.zudomart.com/webhooks/store-notifications/apple_iap",
+    "google": "https://api.zudomart.com/webhooks/store-notifications/google_play"
+  },
+  "products": [
+    {
+      "productId": "zudomart.creatorsub.tier_500.s1.monthly",
+      "tier": "500",
+      "interval": "month",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s1.monthly",
+        "referenceName": "Creator subscription ₦500 tier monthly slot 1",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s1.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 50000,
+          "appleMinor": 80000,
+          "appleSmallBusinessMinor": 60000,
+          "googleMinor": 60000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 600,
+          "appleMinor": 900,
+          "appleSmallBusinessMinor": 800,
+          "googleMinor": 800
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 10000,
+          "appleMinor": 15000,
+          "appleSmallBusinessMinor": 12000,
+          "googleMinor": 12000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_500.s2.monthly",
+      "tier": "500",
+      "interval": "month",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s2.monthly",
+        "referenceName": "Creator subscription ₦500 tier monthly slot 2",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s2.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 50000,
+          "appleMinor": 80000,
+          "appleSmallBusinessMinor": 60000,
+          "googleMinor": 60000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 600,
+          "appleMinor": 900,
+          "appleSmallBusinessMinor": 800,
+          "googleMinor": 800
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 10000,
+          "appleMinor": 15000,
+          "appleSmallBusinessMinor": 12000,
+          "googleMinor": 12000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_500.s3.monthly",
+      "tier": "500",
+      "interval": "month",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s3.monthly",
+        "referenceName": "Creator subscription ₦500 tier monthly slot 3",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s3.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 50000,
+          "appleMinor": 80000,
+          "appleSmallBusinessMinor": 60000,
+          "googleMinor": 60000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 600,
+          "appleMinor": 900,
+          "appleSmallBusinessMinor": 800,
+          "googleMinor": 800
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 10000,
+          "appleMinor": 15000,
+          "appleSmallBusinessMinor": 12000,
+          "googleMinor": 12000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_500.s4.monthly",
+      "tier": "500",
+      "interval": "month",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s4.monthly",
+        "referenceName": "Creator subscription ₦500 tier monthly slot 4",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s4.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 50000,
+          "appleMinor": 80000,
+          "appleSmallBusinessMinor": 60000,
+          "googleMinor": 60000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 600,
+          "appleMinor": 900,
+          "appleSmallBusinessMinor": 800,
+          "googleMinor": 800
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 10000,
+          "appleMinor": 15000,
+          "appleSmallBusinessMinor": 12000,
+          "googleMinor": 12000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_500.s5.monthly",
+      "tier": "500",
+      "interval": "month",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s5.monthly",
+        "referenceName": "Creator subscription ₦500 tier monthly slot 5",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s5.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 50000,
+          "appleMinor": 80000,
+          "appleSmallBusinessMinor": 60000,
+          "googleMinor": 60000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 600,
+          "appleMinor": 900,
+          "appleSmallBusinessMinor": 800,
+          "googleMinor": 800
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 10000,
+          "appleMinor": 15000,
+          "appleSmallBusinessMinor": 12000,
+          "googleMinor": 12000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 199,
+          "appleMinor": 289,
+          "appleSmallBusinessMinor": 239,
+          "googleMinor": 239
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s1.monthly",
+      "tier": "1000",
+      "interval": "month",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s1.monthly",
+        "referenceName": "Creator subscription ₦1,000 tier monthly slot 1",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s1.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 100000,
+          "appleMinor": 150000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1200,
+          "appleMinor": 1800,
+          "appleSmallBusinessMinor": 1500,
+          "googleMinor": 1500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 20000,
+          "appleMinor": 29000,
+          "appleSmallBusinessMinor": 24000,
+          "googleMinor": 24000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 2999,
+          "appleMinor": 4299,
+          "appleSmallBusinessMinor": 3599,
+          "googleMinor": 3599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 399,
+          "appleMinor": 579,
+          "appleSmallBusinessMinor": 479,
+          "googleMinor": 479
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 449,
+          "appleMinor": 649,
+          "appleSmallBusinessMinor": 529,
+          "googleMinor": 529
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 499,
+          "appleMinor": 719,
+          "appleSmallBusinessMinor": 589,
+          "googleMinor": 589
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s2.monthly",
+      "tier": "1000",
+      "interval": "month",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s2.monthly",
+        "referenceName": "Creator subscription ₦1,000 tier monthly slot 2",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s2.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 100000,
+          "appleMinor": 150000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1200,
+          "appleMinor": 1800,
+          "appleSmallBusinessMinor": 1500,
+          "googleMinor": 1500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 20000,
+          "appleMinor": 29000,
+          "appleSmallBusinessMinor": 24000,
+          "googleMinor": 24000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 2999,
+          "appleMinor": 4299,
+          "appleSmallBusinessMinor": 3599,
+          "googleMinor": 3599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 399,
+          "appleMinor": 579,
+          "appleSmallBusinessMinor": 479,
+          "googleMinor": 479
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 449,
+          "appleMinor": 649,
+          "appleSmallBusinessMinor": 529,
+          "googleMinor": 529
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 499,
+          "appleMinor": 719,
+          "appleSmallBusinessMinor": 589,
+          "googleMinor": 589
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s3.monthly",
+      "tier": "1000",
+      "interval": "month",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s3.monthly",
+        "referenceName": "Creator subscription ₦1,000 tier monthly slot 3",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s3.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 100000,
+          "appleMinor": 150000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1200,
+          "appleMinor": 1800,
+          "appleSmallBusinessMinor": 1500,
+          "googleMinor": 1500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 20000,
+          "appleMinor": 29000,
+          "appleSmallBusinessMinor": 24000,
+          "googleMinor": 24000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 2999,
+          "appleMinor": 4299,
+          "appleSmallBusinessMinor": 3599,
+          "googleMinor": 3599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 399,
+          "appleMinor": 579,
+          "appleSmallBusinessMinor": 479,
+          "googleMinor": 479
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 449,
+          "appleMinor": 649,
+          "appleSmallBusinessMinor": 529,
+          "googleMinor": 529
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 499,
+          "appleMinor": 719,
+          "appleSmallBusinessMinor": 589,
+          "googleMinor": 589
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s4.monthly",
+      "tier": "1000",
+      "interval": "month",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s4.monthly",
+        "referenceName": "Creator subscription ₦1,000 tier monthly slot 4",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s4.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 100000,
+          "appleMinor": 150000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1200,
+          "appleMinor": 1800,
+          "appleSmallBusinessMinor": 1500,
+          "googleMinor": 1500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 20000,
+          "appleMinor": 29000,
+          "appleSmallBusinessMinor": 24000,
+          "googleMinor": 24000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 2999,
+          "appleMinor": 4299,
+          "appleSmallBusinessMinor": 3599,
+          "googleMinor": 3599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 399,
+          "appleMinor": 579,
+          "appleSmallBusinessMinor": 479,
+          "googleMinor": 479
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 449,
+          "appleMinor": 649,
+          "appleSmallBusinessMinor": 529,
+          "googleMinor": 529
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 499,
+          "appleMinor": 719,
+          "appleSmallBusinessMinor": 589,
+          "googleMinor": 589
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s5.monthly",
+      "tier": "1000",
+      "interval": "month",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s5.monthly",
+        "referenceName": "Creator subscription ₦1,000 tier monthly slot 5",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s5.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 100000,
+          "appleMinor": 150000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1200,
+          "appleMinor": 1800,
+          "appleSmallBusinessMinor": 1500,
+          "googleMinor": 1500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 20000,
+          "appleMinor": 29000,
+          "appleSmallBusinessMinor": 24000,
+          "googleMinor": 24000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 2999,
+          "appleMinor": 4299,
+          "appleSmallBusinessMinor": 3599,
+          "googleMinor": 3599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 399,
+          "appleMinor": 579,
+          "appleSmallBusinessMinor": 479,
+          "googleMinor": 479
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 449,
+          "appleMinor": 649,
+          "appleSmallBusinessMinor": 529,
+          "googleMinor": 529
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 499,
+          "appleMinor": 719,
+          "appleSmallBusinessMinor": 589,
+          "googleMinor": 589
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s1.monthly",
+      "tier": "1500",
+      "interval": "month",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s1.monthly",
+        "referenceName": "Creator subscription ₦1,500 tier monthly slot 1",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s1.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 150000,
+          "appleMinor": 220000,
+          "appleSmallBusinessMinor": 180000,
+          "googleMinor": 180000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1800,
+          "appleMinor": 2600,
+          "appleSmallBusinessMinor": 2200,
+          "googleMinor": 2200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 30000,
+          "appleMinor": 43000,
+          "appleSmallBusinessMinor": 36000,
+          "googleMinor": 36000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 599,
+          "appleMinor": 859,
+          "appleSmallBusinessMinor": 709,
+          "googleMinor": 709
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 699,
+          "appleMinor": 999,
+          "appleSmallBusinessMinor": 829,
+          "googleMinor": 829
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 749,
+          "appleMinor": 1099,
+          "appleSmallBusinessMinor": 889,
+          "googleMinor": 889
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s2.monthly",
+      "tier": "1500",
+      "interval": "month",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s2.monthly",
+        "referenceName": "Creator subscription ₦1,500 tier monthly slot 2",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s2.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 150000,
+          "appleMinor": 220000,
+          "appleSmallBusinessMinor": 180000,
+          "googleMinor": 180000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1800,
+          "appleMinor": 2600,
+          "appleSmallBusinessMinor": 2200,
+          "googleMinor": 2200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 30000,
+          "appleMinor": 43000,
+          "appleSmallBusinessMinor": 36000,
+          "googleMinor": 36000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 599,
+          "appleMinor": 859,
+          "appleSmallBusinessMinor": 709,
+          "googleMinor": 709
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 699,
+          "appleMinor": 999,
+          "appleSmallBusinessMinor": 829,
+          "googleMinor": 829
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 749,
+          "appleMinor": 1099,
+          "appleSmallBusinessMinor": 889,
+          "googleMinor": 889
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s3.monthly",
+      "tier": "1500",
+      "interval": "month",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s3.monthly",
+        "referenceName": "Creator subscription ₦1,500 tier monthly slot 3",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s3.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 150000,
+          "appleMinor": 220000,
+          "appleSmallBusinessMinor": 180000,
+          "googleMinor": 180000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1800,
+          "appleMinor": 2600,
+          "appleSmallBusinessMinor": 2200,
+          "googleMinor": 2200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 30000,
+          "appleMinor": 43000,
+          "appleSmallBusinessMinor": 36000,
+          "googleMinor": 36000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 599,
+          "appleMinor": 859,
+          "appleSmallBusinessMinor": 709,
+          "googleMinor": 709
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 699,
+          "appleMinor": 999,
+          "appleSmallBusinessMinor": 829,
+          "googleMinor": 829
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 749,
+          "appleMinor": 1099,
+          "appleSmallBusinessMinor": 889,
+          "googleMinor": 889
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s4.monthly",
+      "tier": "1500",
+      "interval": "month",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s4.monthly",
+        "referenceName": "Creator subscription ₦1,500 tier monthly slot 4",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s4.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 150000,
+          "appleMinor": 220000,
+          "appleSmallBusinessMinor": 180000,
+          "googleMinor": 180000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1800,
+          "appleMinor": 2600,
+          "appleSmallBusinessMinor": 2200,
+          "googleMinor": 2200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 30000,
+          "appleMinor": 43000,
+          "appleSmallBusinessMinor": 36000,
+          "googleMinor": 36000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 599,
+          "appleMinor": 859,
+          "appleSmallBusinessMinor": 709,
+          "googleMinor": 709
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 699,
+          "appleMinor": 999,
+          "appleSmallBusinessMinor": 829,
+          "googleMinor": 829
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 749,
+          "appleMinor": 1099,
+          "appleSmallBusinessMinor": 889,
+          "googleMinor": 889
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s5.monthly",
+      "tier": "1500",
+      "interval": "month",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s5.monthly",
+        "referenceName": "Creator subscription ₦1,500 tier monthly slot 5",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s5.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 150000,
+          "appleMinor": 220000,
+          "appleSmallBusinessMinor": 180000,
+          "googleMinor": 180000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 1800,
+          "appleMinor": 2600,
+          "appleSmallBusinessMinor": 2200,
+          "googleMinor": 2200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 30000,
+          "appleMinor": 43000,
+          "appleSmallBusinessMinor": 36000,
+          "googleMinor": 36000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 599,
+          "appleMinor": 859,
+          "appleSmallBusinessMinor": 709,
+          "googleMinor": 709
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 699,
+          "appleMinor": 999,
+          "appleSmallBusinessMinor": 829,
+          "googleMinor": 829
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 749,
+          "appleMinor": 1099,
+          "appleSmallBusinessMinor": 889,
+          "googleMinor": 889
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s1.monthly",
+      "tier": "2000",
+      "interval": "month",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s1.monthly",
+        "referenceName": "Creator subscription ₦2,000 tier monthly slot 1",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s1.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 2500,
+          "appleMinor": 3600,
+          "appleSmallBusinessMinor": 3000,
+          "googleMinor": 3000
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 40000,
+          "appleMinor": 58000,
+          "appleSmallBusinessMinor": 48000,
+          "googleMinor": 48000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 799,
+          "appleMinor": 1199,
+          "appleSmallBusinessMinor": 949,
+          "googleMinor": 949
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 899,
+          "appleMinor": 1299,
+          "appleSmallBusinessMinor": 1099,
+          "googleMinor": 1099
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 999,
+          "appleMinor": 1499,
+          "appleSmallBusinessMinor": 1199,
+          "googleMinor": 1199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s2.monthly",
+      "tier": "2000",
+      "interval": "month",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s2.monthly",
+        "referenceName": "Creator subscription ₦2,000 tier monthly slot 2",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s2.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 2500,
+          "appleMinor": 3600,
+          "appleSmallBusinessMinor": 3000,
+          "googleMinor": 3000
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 40000,
+          "appleMinor": 58000,
+          "appleSmallBusinessMinor": 48000,
+          "googleMinor": 48000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 799,
+          "appleMinor": 1199,
+          "appleSmallBusinessMinor": 949,
+          "googleMinor": 949
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 899,
+          "appleMinor": 1299,
+          "appleSmallBusinessMinor": 1099,
+          "googleMinor": 1099
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 999,
+          "appleMinor": 1499,
+          "appleSmallBusinessMinor": 1199,
+          "googleMinor": 1199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s3.monthly",
+      "tier": "2000",
+      "interval": "month",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s3.monthly",
+        "referenceName": "Creator subscription ₦2,000 tier monthly slot 3",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s3.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 2500,
+          "appleMinor": 3600,
+          "appleSmallBusinessMinor": 3000,
+          "googleMinor": 3000
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 40000,
+          "appleMinor": 58000,
+          "appleSmallBusinessMinor": 48000,
+          "googleMinor": 48000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 799,
+          "appleMinor": 1199,
+          "appleSmallBusinessMinor": 949,
+          "googleMinor": 949
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 899,
+          "appleMinor": 1299,
+          "appleSmallBusinessMinor": 1099,
+          "googleMinor": 1099
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 999,
+          "appleMinor": 1499,
+          "appleSmallBusinessMinor": 1199,
+          "googleMinor": 1199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s4.monthly",
+      "tier": "2000",
+      "interval": "month",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s4.monthly",
+        "referenceName": "Creator subscription ₦2,000 tier monthly slot 4",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s4.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 2500,
+          "appleMinor": 3600,
+          "appleSmallBusinessMinor": 3000,
+          "googleMinor": 3000
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 40000,
+          "appleMinor": 58000,
+          "appleSmallBusinessMinor": 48000,
+          "googleMinor": 48000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 799,
+          "appleMinor": 1199,
+          "appleSmallBusinessMinor": 949,
+          "googleMinor": 949
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 899,
+          "appleMinor": 1299,
+          "appleSmallBusinessMinor": 1099,
+          "googleMinor": 1099
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 999,
+          "appleMinor": 1499,
+          "appleSmallBusinessMinor": 1199,
+          "googleMinor": 1199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s5.monthly",
+      "tier": "2000",
+      "interval": "month",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s5.monthly",
+        "referenceName": "Creator subscription ₦2,000 tier monthly slot 5",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s5.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 2500,
+          "appleMinor": 3600,
+          "appleSmallBusinessMinor": 3000,
+          "googleMinor": 3000
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 40000,
+          "appleMinor": 58000,
+          "appleSmallBusinessMinor": 48000,
+          "googleMinor": 48000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 799,
+          "appleMinor": 1199,
+          "appleSmallBusinessMinor": 949,
+          "googleMinor": 949
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 899,
+          "appleMinor": 1299,
+          "appleSmallBusinessMinor": 1099,
+          "googleMinor": 1099
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 999,
+          "appleMinor": 1499,
+          "appleSmallBusinessMinor": 1199,
+          "googleMinor": 1199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s1.monthly",
+      "tier": "3000",
+      "interval": "month",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s1.monthly",
+        "referenceName": "Creator subscription ₦3,000 tier monthly slot 1",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s1.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 360000,
+          "googleMinor": 360000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 3600,
+          "appleMinor": 5200,
+          "appleSmallBusinessMinor": 4300,
+          "googleMinor": 4300
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 60000,
+          "appleMinor": 86000,
+          "appleSmallBusinessMinor": 71000,
+          "googleMinor": 71000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1199,
+          "appleMinor": 1799,
+          "appleSmallBusinessMinor": 1499,
+          "googleMinor": 1499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1349,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1599,
+          "googleMinor": 1599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s2.monthly",
+      "tier": "3000",
+      "interval": "month",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s2.monthly",
+        "referenceName": "Creator subscription ₦3,000 tier monthly slot 2",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s2.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 360000,
+          "googleMinor": 360000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 3600,
+          "appleMinor": 5200,
+          "appleSmallBusinessMinor": 4300,
+          "googleMinor": 4300
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 60000,
+          "appleMinor": 86000,
+          "appleSmallBusinessMinor": 71000,
+          "googleMinor": 71000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1199,
+          "appleMinor": 1799,
+          "appleSmallBusinessMinor": 1499,
+          "googleMinor": 1499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1349,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1599,
+          "googleMinor": 1599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s3.monthly",
+      "tier": "3000",
+      "interval": "month",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s3.monthly",
+        "referenceName": "Creator subscription ₦3,000 tier monthly slot 3",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s3.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 360000,
+          "googleMinor": 360000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 3600,
+          "appleMinor": 5200,
+          "appleSmallBusinessMinor": 4300,
+          "googleMinor": 4300
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 60000,
+          "appleMinor": 86000,
+          "appleSmallBusinessMinor": 71000,
+          "googleMinor": 71000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1199,
+          "appleMinor": 1799,
+          "appleSmallBusinessMinor": 1499,
+          "googleMinor": 1499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1349,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1599,
+          "googleMinor": 1599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s4.monthly",
+      "tier": "3000",
+      "interval": "month",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s4.monthly",
+        "referenceName": "Creator subscription ₦3,000 tier monthly slot 4",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s4.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 360000,
+          "googleMinor": 360000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 3600,
+          "appleMinor": 5200,
+          "appleSmallBusinessMinor": 4300,
+          "googleMinor": 4300
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 60000,
+          "appleMinor": 86000,
+          "appleSmallBusinessMinor": 71000,
+          "googleMinor": 71000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1199,
+          "appleMinor": 1799,
+          "appleSmallBusinessMinor": 1499,
+          "googleMinor": 1499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1349,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1599,
+          "googleMinor": 1599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s5.monthly",
+      "tier": "3000",
+      "interval": "month",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s5.monthly",
+        "referenceName": "Creator subscription ₦3,000 tier monthly slot 5",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s5.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 360000,
+          "googleMinor": 360000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 3600,
+          "appleMinor": 5200,
+          "appleSmallBusinessMinor": 4300,
+          "googleMinor": 4300
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 60000,
+          "appleMinor": 86000,
+          "appleSmallBusinessMinor": 71000,
+          "googleMinor": 71000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1199,
+          "appleMinor": 1799,
+          "appleSmallBusinessMinor": 1499,
+          "googleMinor": 1499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1349,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1599,
+          "googleMinor": 1599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1499,
+          "appleMinor": 2199,
+          "appleSmallBusinessMinor": 1799,
+          "googleMinor": 1799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s1.monthly",
+      "tier": "4000",
+      "interval": "month",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s1.monthly",
+        "referenceName": "Creator subscription ₦4,000 tier monthly slot 1",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s1.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 400000,
+          "appleMinor": 580000,
+          "appleSmallBusinessMinor": 480000,
+          "googleMinor": 480000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 4800,
+          "appleMinor": 6900,
+          "appleSmallBusinessMinor": 5700,
+          "googleMinor": 5700
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 80000,
+          "appleMinor": 115000,
+          "appleSmallBusinessMinor": 95000,
+          "googleMinor": 95000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1399,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1699,
+          "googleMinor": 1699
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s2.monthly",
+      "tier": "4000",
+      "interval": "month",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s2.monthly",
+        "referenceName": "Creator subscription ₦4,000 tier monthly slot 2",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s2.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 400000,
+          "appleMinor": 580000,
+          "appleSmallBusinessMinor": 480000,
+          "googleMinor": 480000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 4800,
+          "appleMinor": 6900,
+          "appleSmallBusinessMinor": 5700,
+          "googleMinor": 5700
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 80000,
+          "appleMinor": 115000,
+          "appleSmallBusinessMinor": 95000,
+          "googleMinor": 95000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1399,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1699,
+          "googleMinor": 1699
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s3.monthly",
+      "tier": "4000",
+      "interval": "month",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s3.monthly",
+        "referenceName": "Creator subscription ₦4,000 tier monthly slot 3",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s3.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 400000,
+          "appleMinor": 580000,
+          "appleSmallBusinessMinor": 480000,
+          "googleMinor": 480000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 4800,
+          "appleMinor": 6900,
+          "appleSmallBusinessMinor": 5700,
+          "googleMinor": 5700
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 80000,
+          "appleMinor": 115000,
+          "appleSmallBusinessMinor": 95000,
+          "googleMinor": 95000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1399,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1699,
+          "googleMinor": 1699
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s4.monthly",
+      "tier": "4000",
+      "interval": "month",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s4.monthly",
+        "referenceName": "Creator subscription ₦4,000 tier monthly slot 4",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s4.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 400000,
+          "appleMinor": 580000,
+          "appleSmallBusinessMinor": 480000,
+          "googleMinor": 480000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 4800,
+          "appleMinor": 6900,
+          "appleSmallBusinessMinor": 5700,
+          "googleMinor": 5700
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 80000,
+          "appleMinor": 115000,
+          "appleSmallBusinessMinor": 95000,
+          "googleMinor": 95000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1399,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1699,
+          "googleMinor": 1699
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s5.monthly",
+      "tier": "4000",
+      "interval": "month",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s5.monthly",
+        "referenceName": "Creator subscription ₦4,000 tier monthly slot 5",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s5.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 400000,
+          "appleMinor": 580000,
+          "appleSmallBusinessMinor": 480000,
+          "googleMinor": 480000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 4800,
+          "appleMinor": 6900,
+          "appleSmallBusinessMinor": 5700,
+          "googleMinor": 5700
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 80000,
+          "appleMinor": 115000,
+          "appleSmallBusinessMinor": 95000,
+          "googleMinor": 95000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1399,
+          "appleMinor": 1999,
+          "appleSmallBusinessMinor": 1699,
+          "googleMinor": 1699
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s1.monthly",
+      "tier": "5000",
+      "interval": "month",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s1.monthly",
+        "referenceName": "Creator subscription ₦5,000 tier monthly slot 1",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s1.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s2.monthly",
+      "tier": "5000",
+      "interval": "month",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s2.monthly",
+        "referenceName": "Creator subscription ₦5,000 tier monthly slot 2",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s2.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s3.monthly",
+      "tier": "5000",
+      "interval": "month",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s3.monthly",
+        "referenceName": "Creator subscription ₦5,000 tier monthly slot 3",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s3.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s4.monthly",
+      "tier": "5000",
+      "interval": "month",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s4.monthly",
+        "referenceName": "Creator subscription ₦5,000 tier monthly slot 4",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s4.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s5.monthly",
+      "tier": "5000",
+      "interval": "month",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s5.monthly",
+        "referenceName": "Creator subscription ₦5,000 tier monthly slot 5",
+        "duration": "1 month",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s5.monthly",
+        "basePlanId": "monthly",
+        "billingPeriod": "P1M",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1599,
+          "appleMinor": 2299,
+          "appleSmallBusinessMinor": 1899,
+          "googleMinor": 1899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1799,
+          "appleMinor": 2599,
+          "appleSmallBusinessMinor": 2199,
+          "googleMinor": 2199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_500.s1.yearly",
+      "tier": "500",
+      "interval": "year",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s1.yearly",
+        "referenceName": "Creator subscription ₦500 tier yearly slot 1",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s1.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_500.s2.yearly",
+      "tier": "500",
+      "interval": "year",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s2.yearly",
+        "referenceName": "Creator subscription ₦500 tier yearly slot 2",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s2.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_500.s3.yearly",
+      "tier": "500",
+      "interval": "year",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s3.yearly",
+        "referenceName": "Creator subscription ₦500 tier yearly slot 3",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s3.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_500.s4.yearly",
+      "tier": "500",
+      "interval": "year",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s4.yearly",
+        "referenceName": "Creator subscription ₦500 tier yearly slot 4",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s4.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_500.s5.yearly",
+      "tier": "500",
+      "interval": "year",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_500.s5.yearly",
+        "referenceName": "Creator subscription ₦500 tier yearly slot 5",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_500.s5.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 500000,
+          "appleMinor": 720000,
+          "appleSmallBusinessMinor": 590000,
+          "googleMinor": 590000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 6000,
+          "appleMinor": 8600,
+          "appleSmallBusinessMinor": 7100,
+          "googleMinor": 7100
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 100000,
+          "appleMinor": 145000,
+          "appleSmallBusinessMinor": 120000,
+          "googleMinor": 120000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 1999,
+          "appleMinor": 2899,
+          "appleSmallBusinessMinor": 2399,
+          "googleMinor": 2399
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s1.yearly",
+      "tier": "1000",
+      "interval": "year",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s1.yearly",
+        "referenceName": "Creator subscription ₦1,000 tier yearly slot 1",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s1.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1000000,
+          "appleMinor": 1450000,
+          "appleSmallBusinessMinor": 1200000,
+          "googleMinor": 1200000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 12000,
+          "appleMinor": 17200,
+          "appleSmallBusinessMinor": 14200,
+          "googleMinor": 14200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 29999,
+          "appleMinor": 42899,
+          "appleSmallBusinessMinor": 35299,
+          "googleMinor": 35299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 3999,
+          "appleMinor": 5799,
+          "appleSmallBusinessMinor": 4799,
+          "googleMinor": 4799
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 4999,
+          "appleMinor": 7199,
+          "appleSmallBusinessMinor": 5899,
+          "googleMinor": 5899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s2.yearly",
+      "tier": "1000",
+      "interval": "year",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s2.yearly",
+        "referenceName": "Creator subscription ₦1,000 tier yearly slot 2",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s2.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1000000,
+          "appleMinor": 1450000,
+          "appleSmallBusinessMinor": 1200000,
+          "googleMinor": 1200000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 12000,
+          "appleMinor": 17200,
+          "appleSmallBusinessMinor": 14200,
+          "googleMinor": 14200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 29999,
+          "appleMinor": 42899,
+          "appleSmallBusinessMinor": 35299,
+          "googleMinor": 35299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 3999,
+          "appleMinor": 5799,
+          "appleSmallBusinessMinor": 4799,
+          "googleMinor": 4799
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 4999,
+          "appleMinor": 7199,
+          "appleSmallBusinessMinor": 5899,
+          "googleMinor": 5899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s3.yearly",
+      "tier": "1000",
+      "interval": "year",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s3.yearly",
+        "referenceName": "Creator subscription ₦1,000 tier yearly slot 3",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s3.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1000000,
+          "appleMinor": 1450000,
+          "appleSmallBusinessMinor": 1200000,
+          "googleMinor": 1200000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 12000,
+          "appleMinor": 17200,
+          "appleSmallBusinessMinor": 14200,
+          "googleMinor": 14200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 29999,
+          "appleMinor": 42899,
+          "appleSmallBusinessMinor": 35299,
+          "googleMinor": 35299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 3999,
+          "appleMinor": 5799,
+          "appleSmallBusinessMinor": 4799,
+          "googleMinor": 4799
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 4999,
+          "appleMinor": 7199,
+          "appleSmallBusinessMinor": 5899,
+          "googleMinor": 5899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s4.yearly",
+      "tier": "1000",
+      "interval": "year",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s4.yearly",
+        "referenceName": "Creator subscription ₦1,000 tier yearly slot 4",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s4.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1000000,
+          "appleMinor": 1450000,
+          "appleSmallBusinessMinor": 1200000,
+          "googleMinor": 1200000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 12000,
+          "appleMinor": 17200,
+          "appleSmallBusinessMinor": 14200,
+          "googleMinor": 14200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 29999,
+          "appleMinor": 42899,
+          "appleSmallBusinessMinor": 35299,
+          "googleMinor": 35299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 3999,
+          "appleMinor": 5799,
+          "appleSmallBusinessMinor": 4799,
+          "googleMinor": 4799
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 4999,
+          "appleMinor": 7199,
+          "appleSmallBusinessMinor": 5899,
+          "googleMinor": 5899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1000.s5.yearly",
+      "tier": "1000",
+      "interval": "year",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s5.yearly",
+        "referenceName": "Creator subscription ₦1,000 tier yearly slot 5",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1000.s5.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1000000,
+          "appleMinor": 1450000,
+          "appleSmallBusinessMinor": 1200000,
+          "googleMinor": 1200000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 12000,
+          "appleMinor": 17200,
+          "appleSmallBusinessMinor": 14200,
+          "googleMinor": 14200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 200000,
+          "appleMinor": 290000,
+          "appleSmallBusinessMinor": 240000,
+          "googleMinor": 240000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 29999,
+          "appleMinor": 42899,
+          "appleSmallBusinessMinor": 35299,
+          "googleMinor": 35299
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 3999,
+          "appleMinor": 5799,
+          "appleSmallBusinessMinor": 4799,
+          "googleMinor": 4799
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 4499,
+          "appleMinor": 6499,
+          "appleSmallBusinessMinor": 5299,
+          "googleMinor": 5299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 4999,
+          "appleMinor": 7199,
+          "appleSmallBusinessMinor": 5899,
+          "googleMinor": 5899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s1.yearly",
+      "tier": "1500",
+      "interval": "year",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s1.yearly",
+        "referenceName": "Creator subscription ₦1,500 tier yearly slot 1",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s1.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1500000,
+          "appleMinor": 2150000,
+          "appleSmallBusinessMinor": 1800000,
+          "googleMinor": 1800000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 18000,
+          "appleMinor": 25800,
+          "appleSmallBusinessMinor": 21200,
+          "googleMinor": 21200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 355000,
+          "googleMinor": 355000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 44999,
+          "appleMinor": 64299,
+          "appleSmallBusinessMinor": 52999,
+          "googleMinor": 52999
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 6999,
+          "appleMinor": 9999,
+          "appleSmallBusinessMinor": 8299,
+          "googleMinor": 8299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 7499,
+          "appleMinor": 10799,
+          "appleSmallBusinessMinor": 8899,
+          "googleMinor": 8899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s2.yearly",
+      "tier": "1500",
+      "interval": "year",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s2.yearly",
+        "referenceName": "Creator subscription ₦1,500 tier yearly slot 2",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s2.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1500000,
+          "appleMinor": 2150000,
+          "appleSmallBusinessMinor": 1800000,
+          "googleMinor": 1800000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 18000,
+          "appleMinor": 25800,
+          "appleSmallBusinessMinor": 21200,
+          "googleMinor": 21200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 355000,
+          "googleMinor": 355000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 44999,
+          "appleMinor": 64299,
+          "appleSmallBusinessMinor": 52999,
+          "googleMinor": 52999
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 6999,
+          "appleMinor": 9999,
+          "appleSmallBusinessMinor": 8299,
+          "googleMinor": 8299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 7499,
+          "appleMinor": 10799,
+          "appleSmallBusinessMinor": 8899,
+          "googleMinor": 8899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s3.yearly",
+      "tier": "1500",
+      "interval": "year",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s3.yearly",
+        "referenceName": "Creator subscription ₦1,500 tier yearly slot 3",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s3.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1500000,
+          "appleMinor": 2150000,
+          "appleSmallBusinessMinor": 1800000,
+          "googleMinor": 1800000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 18000,
+          "appleMinor": 25800,
+          "appleSmallBusinessMinor": 21200,
+          "googleMinor": 21200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 355000,
+          "googleMinor": 355000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 44999,
+          "appleMinor": 64299,
+          "appleSmallBusinessMinor": 52999,
+          "googleMinor": 52999
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 6999,
+          "appleMinor": 9999,
+          "appleSmallBusinessMinor": 8299,
+          "googleMinor": 8299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 7499,
+          "appleMinor": 10799,
+          "appleSmallBusinessMinor": 8899,
+          "googleMinor": 8899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s4.yearly",
+      "tier": "1500",
+      "interval": "year",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s4.yearly",
+        "referenceName": "Creator subscription ₦1,500 tier yearly slot 4",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s4.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1500000,
+          "appleMinor": 2150000,
+          "appleSmallBusinessMinor": 1800000,
+          "googleMinor": 1800000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 18000,
+          "appleMinor": 25800,
+          "appleSmallBusinessMinor": 21200,
+          "googleMinor": 21200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 355000,
+          "googleMinor": 355000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 44999,
+          "appleMinor": 64299,
+          "appleSmallBusinessMinor": 52999,
+          "googleMinor": 52999
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 6999,
+          "appleMinor": 9999,
+          "appleSmallBusinessMinor": 8299,
+          "googleMinor": 8299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 7499,
+          "appleMinor": 10799,
+          "appleSmallBusinessMinor": 8899,
+          "googleMinor": 8899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_1500.s5.yearly",
+      "tier": "1500",
+      "interval": "year",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s5.yearly",
+        "referenceName": "Creator subscription ₦1,500 tier yearly slot 5",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_1500.s5.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 1500000,
+          "appleMinor": 2150000,
+          "appleSmallBusinessMinor": 1800000,
+          "googleMinor": 1800000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 18000,
+          "appleMinor": 25800,
+          "appleSmallBusinessMinor": 21200,
+          "googleMinor": 21200
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 300000,
+          "appleMinor": 430000,
+          "appleSmallBusinessMinor": 355000,
+          "googleMinor": 355000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 44999,
+          "appleMinor": 64299,
+          "appleSmallBusinessMinor": 52999,
+          "googleMinor": 52999
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 5999,
+          "appleMinor": 8599,
+          "appleSmallBusinessMinor": 7099,
+          "googleMinor": 7099
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 6999,
+          "appleMinor": 9999,
+          "appleSmallBusinessMinor": 8299,
+          "googleMinor": 8299
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 7499,
+          "appleMinor": 10799,
+          "appleSmallBusinessMinor": 8899,
+          "googleMinor": 8899
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s1.yearly",
+      "tier": "2000",
+      "interval": "year",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s1.yearly",
+        "referenceName": "Creator subscription ₦2,000 tier yearly slot 1",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s1.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 2000000,
+          "appleMinor": 2900000,
+          "appleSmallBusinessMinor": 2400000,
+          "googleMinor": 2400000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 25000,
+          "appleMinor": 35800,
+          "appleSmallBusinessMinor": 29500,
+          "googleMinor": 29500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 400000,
+          "appleMinor": 575000,
+          "appleSmallBusinessMinor": 475000,
+          "googleMinor": 475000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 59999,
+          "appleMinor": 85799,
+          "appleSmallBusinessMinor": 70599,
+          "googleMinor": 70599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 7999,
+          "appleMinor": 11499,
+          "appleSmallBusinessMinor": 9499,
+          "googleMinor": 9499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 9999,
+          "appleMinor": 14299,
+          "appleSmallBusinessMinor": 11799,
+          "googleMinor": 11799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s2.yearly",
+      "tier": "2000",
+      "interval": "year",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s2.yearly",
+        "referenceName": "Creator subscription ₦2,000 tier yearly slot 2",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s2.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 2000000,
+          "appleMinor": 2900000,
+          "appleSmallBusinessMinor": 2400000,
+          "googleMinor": 2400000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 25000,
+          "appleMinor": 35800,
+          "appleSmallBusinessMinor": 29500,
+          "googleMinor": 29500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 400000,
+          "appleMinor": 575000,
+          "appleSmallBusinessMinor": 475000,
+          "googleMinor": 475000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 59999,
+          "appleMinor": 85799,
+          "appleSmallBusinessMinor": 70599,
+          "googleMinor": 70599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 7999,
+          "appleMinor": 11499,
+          "appleSmallBusinessMinor": 9499,
+          "googleMinor": 9499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 9999,
+          "appleMinor": 14299,
+          "appleSmallBusinessMinor": 11799,
+          "googleMinor": 11799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s3.yearly",
+      "tier": "2000",
+      "interval": "year",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s3.yearly",
+        "referenceName": "Creator subscription ₦2,000 tier yearly slot 3",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s3.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 2000000,
+          "appleMinor": 2900000,
+          "appleSmallBusinessMinor": 2400000,
+          "googleMinor": 2400000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 25000,
+          "appleMinor": 35800,
+          "appleSmallBusinessMinor": 29500,
+          "googleMinor": 29500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 400000,
+          "appleMinor": 575000,
+          "appleSmallBusinessMinor": 475000,
+          "googleMinor": 475000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 59999,
+          "appleMinor": 85799,
+          "appleSmallBusinessMinor": 70599,
+          "googleMinor": 70599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 7999,
+          "appleMinor": 11499,
+          "appleSmallBusinessMinor": 9499,
+          "googleMinor": 9499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 9999,
+          "appleMinor": 14299,
+          "appleSmallBusinessMinor": 11799,
+          "googleMinor": 11799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s4.yearly",
+      "tier": "2000",
+      "interval": "year",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s4.yearly",
+        "referenceName": "Creator subscription ₦2,000 tier yearly slot 4",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s4.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 2000000,
+          "appleMinor": 2900000,
+          "appleSmallBusinessMinor": 2400000,
+          "googleMinor": 2400000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 25000,
+          "appleMinor": 35800,
+          "appleSmallBusinessMinor": 29500,
+          "googleMinor": 29500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 400000,
+          "appleMinor": 575000,
+          "appleSmallBusinessMinor": 475000,
+          "googleMinor": 475000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 59999,
+          "appleMinor": 85799,
+          "appleSmallBusinessMinor": 70599,
+          "googleMinor": 70599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 7999,
+          "appleMinor": 11499,
+          "appleSmallBusinessMinor": 9499,
+          "googleMinor": 9499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 9999,
+          "appleMinor": 14299,
+          "appleSmallBusinessMinor": 11799,
+          "googleMinor": 11799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_2000.s5.yearly",
+      "tier": "2000",
+      "interval": "year",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s5.yearly",
+        "referenceName": "Creator subscription ₦2,000 tier yearly slot 5",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_2000.s5.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 2000000,
+          "appleMinor": 2900000,
+          "appleSmallBusinessMinor": 2400000,
+          "googleMinor": 2400000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 25000,
+          "appleMinor": 35800,
+          "appleSmallBusinessMinor": 29500,
+          "googleMinor": 29500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 400000,
+          "appleMinor": 575000,
+          "appleSmallBusinessMinor": 475000,
+          "googleMinor": 475000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 59999,
+          "appleMinor": 85799,
+          "appleSmallBusinessMinor": 70599,
+          "googleMinor": 70599
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 7999,
+          "appleMinor": 11499,
+          "appleSmallBusinessMinor": 9499,
+          "googleMinor": 9499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 8999,
+          "appleMinor": 12899,
+          "appleSmallBusinessMinor": 10599,
+          "googleMinor": 10599
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 9999,
+          "appleMinor": 14299,
+          "appleSmallBusinessMinor": 11799,
+          "googleMinor": 11799
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s1.yearly",
+      "tier": "3000",
+      "interval": "year",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s1.yearly",
+        "referenceName": "Creator subscription ₦3,000 tier yearly slot 1",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s1.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 3000000,
+          "appleMinor": 4300000,
+          "appleSmallBusinessMinor": 3550000,
+          "googleMinor": 3550000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 36000,
+          "appleMinor": 51500,
+          "appleSmallBusinessMinor": 42400,
+          "googleMinor": 42400
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 600000,
+          "appleMinor": 860000,
+          "appleSmallBusinessMinor": 710000,
+          "googleMinor": 710000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 89999,
+          "appleMinor": 128599,
+          "appleSmallBusinessMinor": 105899,
+          "googleMinor": 105899
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 13499,
+          "appleMinor": 19299,
+          "appleSmallBusinessMinor": 15899,
+          "googleMinor": 15899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s2.yearly",
+      "tier": "3000",
+      "interval": "year",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s2.yearly",
+        "referenceName": "Creator subscription ₦3,000 tier yearly slot 2",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s2.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 3000000,
+          "appleMinor": 4300000,
+          "appleSmallBusinessMinor": 3550000,
+          "googleMinor": 3550000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 36000,
+          "appleMinor": 51500,
+          "appleSmallBusinessMinor": 42400,
+          "googleMinor": 42400
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 600000,
+          "appleMinor": 860000,
+          "appleSmallBusinessMinor": 710000,
+          "googleMinor": 710000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 89999,
+          "appleMinor": 128599,
+          "appleSmallBusinessMinor": 105899,
+          "googleMinor": 105899
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 13499,
+          "appleMinor": 19299,
+          "appleSmallBusinessMinor": 15899,
+          "googleMinor": 15899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s3.yearly",
+      "tier": "3000",
+      "interval": "year",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s3.yearly",
+        "referenceName": "Creator subscription ₦3,000 tier yearly slot 3",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s3.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 3000000,
+          "appleMinor": 4300000,
+          "appleSmallBusinessMinor": 3550000,
+          "googleMinor": 3550000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 36000,
+          "appleMinor": 51500,
+          "appleSmallBusinessMinor": 42400,
+          "googleMinor": 42400
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 600000,
+          "appleMinor": 860000,
+          "appleSmallBusinessMinor": 710000,
+          "googleMinor": 710000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 89999,
+          "appleMinor": 128599,
+          "appleSmallBusinessMinor": 105899,
+          "googleMinor": 105899
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 13499,
+          "appleMinor": 19299,
+          "appleSmallBusinessMinor": 15899,
+          "googleMinor": 15899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s4.yearly",
+      "tier": "3000",
+      "interval": "year",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s4.yearly",
+        "referenceName": "Creator subscription ₦3,000 tier yearly slot 4",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s4.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 3000000,
+          "appleMinor": 4300000,
+          "appleSmallBusinessMinor": 3550000,
+          "googleMinor": 3550000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 36000,
+          "appleMinor": 51500,
+          "appleSmallBusinessMinor": 42400,
+          "googleMinor": 42400
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 600000,
+          "appleMinor": 860000,
+          "appleSmallBusinessMinor": 710000,
+          "googleMinor": 710000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 89999,
+          "appleMinor": 128599,
+          "appleSmallBusinessMinor": 105899,
+          "googleMinor": 105899
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 13499,
+          "appleMinor": 19299,
+          "appleSmallBusinessMinor": 15899,
+          "googleMinor": 15899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_3000.s5.yearly",
+      "tier": "3000",
+      "interval": "year",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s5.yearly",
+        "referenceName": "Creator subscription ₦3,000 tier yearly slot 5",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_3000.s5.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 3000000,
+          "appleMinor": 4300000,
+          "appleSmallBusinessMinor": 3550000,
+          "googleMinor": 3550000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 36000,
+          "appleMinor": 51500,
+          "appleSmallBusinessMinor": 42400,
+          "googleMinor": 42400
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 600000,
+          "appleMinor": 860000,
+          "appleSmallBusinessMinor": 710000,
+          "googleMinor": 710000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 89999,
+          "appleMinor": 128599,
+          "appleSmallBusinessMinor": 105899,
+          "googleMinor": 105899
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 11999,
+          "appleMinor": 17199,
+          "appleSmallBusinessMinor": 14199,
+          "googleMinor": 14199
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 13499,
+          "appleMinor": 19299,
+          "appleSmallBusinessMinor": 15899,
+          "googleMinor": 15899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 14999,
+          "appleMinor": 21499,
+          "appleSmallBusinessMinor": 17699,
+          "googleMinor": 17699
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s1.yearly",
+      "tier": "4000",
+      "interval": "year",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s1.yearly",
+        "referenceName": "Creator subscription ₦4,000 tier yearly slot 1",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s1.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 4000000,
+          "appleMinor": 5750000,
+          "appleSmallBusinessMinor": 4750000,
+          "googleMinor": 4750000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 48000,
+          "appleMinor": 68600,
+          "appleSmallBusinessMinor": 56500,
+          "googleMinor": 56500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 800000,
+          "appleMinor": 1145000,
+          "appleSmallBusinessMinor": 945000,
+          "googleMinor": 945000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 119999,
+          "appleMinor": 171499,
+          "appleSmallBusinessMinor": 141199,
+          "googleMinor": 141199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 13999,
+          "appleMinor": 19999,
+          "appleSmallBusinessMinor": 16499,
+          "googleMinor": 16499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s2.yearly",
+      "tier": "4000",
+      "interval": "year",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s2.yearly",
+        "referenceName": "Creator subscription ₦4,000 tier yearly slot 2",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s2.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 4000000,
+          "appleMinor": 5750000,
+          "appleSmallBusinessMinor": 4750000,
+          "googleMinor": 4750000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 48000,
+          "appleMinor": 68600,
+          "appleSmallBusinessMinor": 56500,
+          "googleMinor": 56500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 800000,
+          "appleMinor": 1145000,
+          "appleSmallBusinessMinor": 945000,
+          "googleMinor": 945000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 119999,
+          "appleMinor": 171499,
+          "appleSmallBusinessMinor": 141199,
+          "googleMinor": 141199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 13999,
+          "appleMinor": 19999,
+          "appleSmallBusinessMinor": 16499,
+          "googleMinor": 16499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s3.yearly",
+      "tier": "4000",
+      "interval": "year",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s3.yearly",
+        "referenceName": "Creator subscription ₦4,000 tier yearly slot 3",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s3.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 4000000,
+          "appleMinor": 5750000,
+          "appleSmallBusinessMinor": 4750000,
+          "googleMinor": 4750000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 48000,
+          "appleMinor": 68600,
+          "appleSmallBusinessMinor": 56500,
+          "googleMinor": 56500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 800000,
+          "appleMinor": 1145000,
+          "appleSmallBusinessMinor": 945000,
+          "googleMinor": 945000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 119999,
+          "appleMinor": 171499,
+          "appleSmallBusinessMinor": 141199,
+          "googleMinor": 141199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 13999,
+          "appleMinor": 19999,
+          "appleSmallBusinessMinor": 16499,
+          "googleMinor": 16499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s4.yearly",
+      "tier": "4000",
+      "interval": "year",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s4.yearly",
+        "referenceName": "Creator subscription ₦4,000 tier yearly slot 4",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s4.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 4000000,
+          "appleMinor": 5750000,
+          "appleSmallBusinessMinor": 4750000,
+          "googleMinor": 4750000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 48000,
+          "appleMinor": 68600,
+          "appleSmallBusinessMinor": 56500,
+          "googleMinor": 56500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 800000,
+          "appleMinor": 1145000,
+          "appleSmallBusinessMinor": 945000,
+          "googleMinor": 945000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 119999,
+          "appleMinor": 171499,
+          "appleSmallBusinessMinor": 141199,
+          "googleMinor": 141199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 13999,
+          "appleMinor": 19999,
+          "appleSmallBusinessMinor": 16499,
+          "googleMinor": 16499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_4000.s5.yearly",
+      "tier": "4000",
+      "interval": "year",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s5.yearly",
+        "referenceName": "Creator subscription ₦4,000 tier yearly slot 5",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_4000.s5.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 4000000,
+          "appleMinor": 5750000,
+          "appleSmallBusinessMinor": 4750000,
+          "googleMinor": 4750000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 48000,
+          "appleMinor": 68600,
+          "appleSmallBusinessMinor": 56500,
+          "googleMinor": 56500
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 800000,
+          "appleMinor": 1145000,
+          "appleSmallBusinessMinor": 945000,
+          "googleMinor": 945000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 119999,
+          "appleMinor": 171499,
+          "appleSmallBusinessMinor": 141199,
+          "googleMinor": 141199
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 13999,
+          "appleMinor": 19999,
+          "appleSmallBusinessMinor": 16499,
+          "googleMinor": 16499
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s1.yearly",
+      "tier": "5000",
+      "interval": "year",
+      "slot": 1,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s1.yearly",
+        "referenceName": "Creator subscription ₦5,000 tier yearly slot 1",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s1.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 5000000,
+          "appleMinor": 7150000,
+          "appleSmallBusinessMinor": 5900000,
+          "googleMinor": 5900000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 60000,
+          "appleMinor": 85800,
+          "appleSmallBusinessMinor": 70600,
+          "googleMinor": 70600
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 1000000,
+          "appleMinor": 1430000,
+          "appleSmallBusinessMinor": 1180000,
+          "googleMinor": 1180000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 149999,
+          "appleMinor": 214299,
+          "appleSmallBusinessMinor": 176499,
+          "googleMinor": 176499
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 19999,
+          "appleMinor": 28599,
+          "appleSmallBusinessMinor": 23599,
+          "googleMinor": 23599
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s2.yearly",
+      "tier": "5000",
+      "interval": "year",
+      "slot": 2,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s2.yearly",
+        "referenceName": "Creator subscription ₦5,000 tier yearly slot 2",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s2.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 5000000,
+          "appleMinor": 7150000,
+          "appleSmallBusinessMinor": 5900000,
+          "googleMinor": 5900000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 60000,
+          "appleMinor": 85800,
+          "appleSmallBusinessMinor": 70600,
+          "googleMinor": 70600
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 1000000,
+          "appleMinor": 1430000,
+          "appleSmallBusinessMinor": 1180000,
+          "googleMinor": 1180000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 149999,
+          "appleMinor": 214299,
+          "appleSmallBusinessMinor": 176499,
+          "googleMinor": 176499
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 19999,
+          "appleMinor": 28599,
+          "appleSmallBusinessMinor": 23599,
+          "googleMinor": 23599
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s3.yearly",
+      "tier": "5000",
+      "interval": "year",
+      "slot": 3,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s3.yearly",
+        "referenceName": "Creator subscription ₦5,000 tier yearly slot 3",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s3.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 5000000,
+          "appleMinor": 7150000,
+          "appleSmallBusinessMinor": 5900000,
+          "googleMinor": 5900000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 60000,
+          "appleMinor": 85800,
+          "appleSmallBusinessMinor": 70600,
+          "googleMinor": 70600
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 1000000,
+          "appleMinor": 1430000,
+          "appleSmallBusinessMinor": 1180000,
+          "googleMinor": 1180000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 149999,
+          "appleMinor": 214299,
+          "appleSmallBusinessMinor": 176499,
+          "googleMinor": 176499
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 19999,
+          "appleMinor": 28599,
+          "appleSmallBusinessMinor": 23599,
+          "googleMinor": 23599
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s4.yearly",
+      "tier": "5000",
+      "interval": "year",
+      "slot": 4,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s4.yearly",
+        "referenceName": "Creator subscription ₦5,000 tier yearly slot 4",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s4.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 5000000,
+          "appleMinor": 7150000,
+          "appleSmallBusinessMinor": 5900000,
+          "googleMinor": 5900000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 60000,
+          "appleMinor": 85800,
+          "appleSmallBusinessMinor": 70600,
+          "googleMinor": 70600
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 1000000,
+          "appleMinor": 1430000,
+          "appleSmallBusinessMinor": 1180000,
+          "googleMinor": 1180000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 149999,
+          "appleMinor": 214299,
+          "appleSmallBusinessMinor": 176499,
+          "googleMinor": 176499
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 19999,
+          "appleMinor": 28599,
+          "appleSmallBusinessMinor": 23599,
+          "googleMinor": 23599
+        }
+      }
+    },
+    {
+      "productId": "zudomart.creatorsub.tier_5000.s5.yearly",
+      "tier": "5000",
+      "interval": "year",
+      "slot": 5,
+      "apple": {
+        "type": "auto-renewable subscription",
+        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s5.yearly",
+        "referenceName": "Creator subscription ₦5,000 tier yearly slot 5",
+        "duration": "1 year",
+        "displayName": "Creator subscription",
+        "familySharable": false
+      },
+      "google": {
+        "productId": "zudomart.creatorsub.tier_5000.s5.yearly",
+        "basePlanId": "yearly",
+        "billingPeriod": "P1Y",
+        "renewalType": "auto-renewing",
+        "gracePeriod": "P3D",
+        "accountHold": "P30D"
+      },
+      "prices": {
+        "NG": {
+          "currency": "NGN",
+          "webMinor": 5000000,
+          "appleMinor": 7150000,
+          "appleSmallBusinessMinor": 5900000,
+          "googleMinor": 5900000
+        },
+        "GH": {
+          "currency": "GHS",
+          "webMinor": 60000,
+          "appleMinor": 85800,
+          "appleSmallBusinessMinor": 70600,
+          "googleMinor": 70600
+        },
+        "KE": {
+          "currency": "KES",
+          "webMinor": 1000000,
+          "appleMinor": 1430000,
+          "appleSmallBusinessMinor": 1180000,
+          "googleMinor": 1180000
+        },
+        "ZA": {
+          "currency": "ZAR",
+          "webMinor": 149999,
+          "appleMinor": 214299,
+          "appleSmallBusinessMinor": 176499,
+          "googleMinor": 176499
+        },
+        "GB": {
+          "currency": "GBP",
+          "webMinor": 15999,
+          "appleMinor": 22899,
+          "appleSmallBusinessMinor": 18899,
+          "googleMinor": 18899
+        },
+        "EU": {
+          "currency": "EUR",
+          "webMinor": 17999,
+          "appleMinor": 25799,
+          "appleSmallBusinessMinor": 21199,
+          "googleMinor": 21199
+        },
+        "US": {
+          "currency": "USD",
+          "webMinor": 19999,
+          "appleMinor": 28599,
+          "appleSmallBusinessMinor": 23599,
+          "googleMinor": 23599
+        }
+      }
+    }
+  ]
+}
