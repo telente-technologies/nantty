@@ -33,6 +33,29 @@ func (gateway *PaymentGateway) VerifyStoreReceipt(ctx context.Context, store str
 	return verified, nil
 }
 
+func (gateway *PaymentGateway) StoreBillingConfigured(store string) bool {
+	verifier, err := gateway.Container.StoreVerifier(store)
+	if err != nil {
+		return false
+	}
+	placeholder, isPlaceholder := verifier.(interface{ IsPlaceholder() bool })
+	return !isPlaceholder || !placeholder.IsPlaceholder()
+}
+
+func (gateway *PaymentGateway) AcknowledgeStoreSubscription(ctx context.Context, store string, verified interfaces.VerifiedStorePurchase) error {
+	if !verified.NeedsAcknowledgement {
+		return nil
+	}
+	verifier, err := gateway.Container.StoreVerifier(store)
+	if err != nil {
+		return err
+	}
+	if acknowledger, canAcknowledge := verifier.(interfaces.StoreSubscriptionAcknowledger); canAcknowledge {
+		return acknowledger.AcknowledgeSubscription(ctx, verified.ProductId, verified.OriginalTransactionId)
+	}
+	return nil
+}
+
 type RecordedStorePurchase struct {
 	models.VerifiedStorePurchaseRecord
 	SubjectId string
@@ -41,6 +64,13 @@ type RecordedStorePurchase struct {
 func (gateway *PaymentGateway) RecordVerifiedStorePurchaseInTransaction(ctx context.Context, transaction *sql.Tx, store, userId, purpose, subjectId string, verified interfaces.VerifiedStorePurchase) (RecordedStorePurchase, error) {
 	verifier, err := gateway.Container.StoreVerifier(store)
 	if err != nil {
+		return RecordedStorePurchase{}, err
+	}
+	return gateway.RecordVerifiedStorePurchaseWithFeeInTransaction(ctx, transaction, store, userId, purpose, subjectId, verified, verifier.StoreFeeBasisPoints())
+}
+
+func (gateway *PaymentGateway) RecordVerifiedStorePurchaseWithFeeInTransaction(ctx context.Context, transaction *sql.Tx, store, userId, purpose, subjectId string, verified interfaces.VerifiedStorePurchase, feeBasisPoints int64) (RecordedStorePurchase, error) {
+	if _, err := gateway.Container.StoreVerifier(store); err != nil {
 		return RecordedStorePurchase{}, err
 	}
 	client := gateway.Container.Client(transaction)
@@ -56,7 +86,7 @@ func (gateway *PaymentGateway) RecordVerifiedStorePurchaseInTransaction(ctx cont
 	if !ent.IsNotFound(err) {
 		return RecordedStorePurchase{}, err
 	}
-	fee := StoreFeeRoundedUp(verified.PriceMinor, verifier.StoreFeeBasisPoints())
+	fee := StoreFeeRoundedUp(verified.PriceMinor, feeBasisPoints)
 	created, err := client.StorePurchase.Create().
 		SetStore(storepurchase.Store(store)).SetStoreTransactionID(verified.StoreTransactionId).SetOriginalTransactionID(verified.OriginalTransactionId).
 		SetProductID(verified.ProductId).SetUserID(userId).SetPurpose(purpose).SetSubjectID(subjectId).
@@ -114,7 +144,7 @@ func (gateway *PaymentGateway) ApplyVerifiedStoreSubscriptionNotice(ctx context.
 		}
 		return gateway.notifyStoreSubscriptionHandlers(ctx, transaction, models.StoreSubscriptionNotice{
 			Store: store, Kind: string(notification.Kind), StoreTransactionId: notification.StoreTransactionId, OriginalTransactionId: notification.OriginalTransactionId,
-			ProductId: notification.ProductId, ExpiresAt: notification.ExpiresAt, OccurredAt: now,
+			ProductId: notification.ProductId, ExpiresAt: notification.ExpiresAt, OccurredAt: now, AccountToken: notification.AccountToken, Transaction: notification.Transaction,
 		})
 	})
 }

@@ -3,7 +3,6 @@ package controllers
 import (
 	"errors"
 	"io"
-	"net"
 	"net/http"
 	"slices"
 	"strings"
@@ -31,12 +30,9 @@ func (controller WebhooksController) readRawBody(writer http.ResponseWriter, req
 func (controller WebhooksController) sourceAllowed(request *http.Request) bool {
 	allowlist := controller.Application.Container.Settings.Paystack.WebhookIpAllowlist
 	if len(allowlist) == 0 {
-		return true
+		return false
 	}
-	source := strings.TrimSpace(strings.Split(request.Header.Get("X-Forwarded-For"), ",")[0])
-	if source == "" {
-		source, _, _ = net.SplitHostPort(request.RemoteAddr)
-	}
+	source := httpserver.ClientIP(request)
 	return slices.Contains(allowlist, source)
 }
 

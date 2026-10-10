@@ -134,6 +134,8 @@ type VerifiedStorePurchase struct {
 	PurchasedAt           time.Time
 	ExpiresAt             *time.Time
 	IsSubscription        bool
+	AccountToken          string
+	NeedsAcknowledgement  bool
 }
 
 type StoreNotificationKind string
@@ -144,6 +146,8 @@ const (
 	StoreNotificationExpired       StoreNotificationKind = "expired"
 	StoreNotificationRenewalFailed StoreNotificationKind = "renewalFailed"
 	StoreNotificationGrace         StoreNotificationKind = "grace"
+	StoreNotificationCancelled     StoreNotificationKind = "cancelled"
+	StoreNotificationResumed       StoreNotificationKind = "resumed"
 	StoreNotificationOther         StoreNotificationKind = "other"
 )
 
@@ -155,6 +159,8 @@ type StoreRefundNotification struct {
 	OriginalTransactionId string
 	ProductId             string
 	ExpiresAt             *time.Time
+	AccountToken          string
+	Transaction           *VerifiedStorePurchase
 }
 
 func (notification StoreRefundNotification) IsRefund() bool {
@@ -166,6 +172,10 @@ type StoreReceiptVerifier interface {
 	StoreFeeBasisPoints() int64
 	VerifyPurchaseReceipt(ctx context.Context, receipt StoreReceipt) (VerifiedStorePurchase, error)
 	VerifySignedRefundNotification(ctx context.Context, rawBody []byte, headers http.Header) (StoreRefundNotification, error)
+}
+
+type StoreSubscriptionAcknowledger interface {
+	AcknowledgeSubscription(ctx context.Context, productId, purchaseToken string) error
 }
 
 var (

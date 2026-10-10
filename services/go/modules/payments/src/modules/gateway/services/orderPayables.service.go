@@ -37,8 +37,17 @@ func (gateway *PaymentGateway) RegisterCheckoutPayables(ctx context.Context, pay
 			return fmt.Errorf("every order in a checkout must share checkout, buyer and currency and have a positive amount")
 		}
 	}
+	err := gateway.registerCheckoutPayablesOnce(ctx, payables)
+	if ent.IsConstraintError(err) {
+		err = gateway.registerCheckoutPayablesOnce(ctx, payables)
+	}
+	return err
+}
+
+func (gateway *PaymentGateway) registerCheckoutPayablesOnce(ctx context.Context, payables []models.OrderPayable) error {
 	return databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		client := gateway.Container.Client(transaction)
+		fresh := []models.OrderPayable{}
 		for _, payable := range payables {
 			existing, err := client.OrderPayable.Query().Where(orderpayable.OrderID(payable.OrderId)).Only(ctx)
 			if err == nil {
@@ -50,7 +59,13 @@ func (gateway *PaymentGateway) RegisterCheckoutPayables(ctx context.Context, pay
 			if !ent.IsNotFound(err) {
 				return err
 			}
-			err = client.OrderPayable.Create().
+			fresh = append(fresh, payable)
+		}
+		if err := gateway.enforceUnverifiedSellerRulesInTransaction(ctx, transaction, fresh); err != nil {
+			return err
+		}
+		for _, payable := range fresh {
+			err := client.OrderPayable.Create().
 				SetCheckoutID(payable.CheckoutId).SetOrderID(payable.OrderId).SetOrderReference(payable.OrderReference).
 				SetBuyerUserID(payable.BuyerUserId).SetStoreID(payable.StoreId).SetSellerUserID(payable.SellerUserId).
 				SetAmountMinor(payable.AmountMinor).SetCurrency(payable.Currency).SetProductSummary(truncate(payable.ProductSummary, 300)).

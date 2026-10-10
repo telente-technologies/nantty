@@ -98,6 +98,9 @@ func (gateway *PaymentGateway) sendPayoutToProvider(ctx context.Context, provide
 	case err != nil && !isDefinitiveProviderRejection(err):
 		return PayoutTransferStatus{Reference: transfer.Reference, Status: string(payouttransfer.StatusProcessing)}, nil
 	case err != nil:
+		if vResult, vErr := provider.VerifyTransfer(ctx, transfer.Reference); vErr == nil && (vResult.Outcome == interfaces.OutcomeSucceeded || vResult.Outcome == interfaces.OutcomePending) {
+			return gateway.recordTransferOutcome(ctx, transfer.Reference, transferOutcome{ProviderCode: vResult.ProviderTransferId, Outcome: vResult.Outcome, FailureReason: vResult.FailureReason})
+		}
 		return gateway.recordTransferOutcome(ctx, transfer.Reference, transferOutcome{Outcome: interfaces.OutcomeFailed, FailureReason: truncateReason(err.Error())})
 	}
 	if result.Outcome == interfaces.OutcomeSucceeded {

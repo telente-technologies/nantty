@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"zudomart/modules/payments/src/interfaces"
 )
 
 type BillingSubscriptionChange struct {
@@ -51,6 +53,8 @@ type StoreSubscriptionNotice struct {
 	ProductId             string
 	ExpiresAt             *time.Time
 	OccurredAt            time.Time
+	AccountToken          string
+	Transaction           *interfaces.VerifiedStorePurchase
 }
 
 type StoreSubscriptionNotificationHandler interface {

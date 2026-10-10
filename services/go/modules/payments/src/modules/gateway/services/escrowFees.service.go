@@ -26,10 +26,12 @@ func (gateway *PaymentGateway) EscrowFeeBpsForSeller(ctx context.Context, seller
 	sellerPlanLookupMutex.RLock()
 	lookup := sellerPlanLookup
 	sellerPlanLookupMutex.RUnlock()
+	settings := gateway.Container.Settings
+	standard, business := gateway.Container.Resources.Platform.EscrowFeeBps(ctx, settings.EscrowFeeBps, settings.BusinessEscrowFeeBps)
 	if lookup != nil && lookup(ctx, sellerUserId) == "business" {
-		return gateway.Container.Settings.BusinessEscrowFeeBps
+		return business
 	}
-	return gateway.Container.Settings.EscrowFeeBps
+	return standard
 }
 
 func EscrowFeeForAmount(amountMinor, feeBps int64) int64 {
