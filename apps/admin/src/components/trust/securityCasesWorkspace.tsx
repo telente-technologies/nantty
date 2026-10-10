@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
@@ -52,10 +52,7 @@ export function SecurityCasesWorkspace() {
       </Toolbar>
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Security cases" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} readRowTone={(item) => (item.autoSuspended && item.status === "open" ? "danger" : item.severity === "high" ? "caution" : null)} emptyMessage={status === "open" ? "No security cases waiting." : "Nothing here yet."} />
-      <Toolbar>
-        {filters.cursor ? <Button size="small" variant="ghost" onClick={() => setFilters({ ...filters, cursor: undefined })}>First page</Button> : null}
-        {data?.nextCursor ? <Button size="small" variant="secondary" onClick={() => setFilters({ ...filters, cursor: data.nextCursor ?? undefined })}>Next page</Button> : null}
-      </Toolbar>
+      <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters({ ...filters, cursor })} />
       {selectedId ? <SecurityCasePanel key={selectedId} caseId={selectedId} onClose={() => setSelectedId(null)} onChanged={reload} /> : null}
     </>
   );

@@ -6,7 +6,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
@@ -59,17 +59,17 @@ function buildColumns(kind: ApplicationKind): DataTableColumn<ProgramApplication
 export function ProgramApplicationsWorkspace({ kind }: { readonly kind: ApplicationKind }) {
   const [statusTab, setStatusTab] = useState<StatusTabKey>("PENDING");
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const [cursor, setCursor] = useState<string | undefined>();
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
-  const filters = { status: statusTab, search: search.trim() || undefined, page };
+  const filters = { status: statusTab, search: search.trim() || undefined, cursor };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchProgramApplications(kind, filters, signal), `${kind}:${JSON.stringify(filters)}`);
 
   return (
     <>
       <PageHeader area="People · Applications" title={pageCopy[kind].title} description={pageCopy[kind].description} />
-      <SegmentedTabs label="Application status" items={applicationStatusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setPage(1); }} />
+      <SegmentedTabs label="Application status" items={applicationStatusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setCursor(undefined); }} />
       <Toolbar>
-        <TextField label="Search" isLabelHidden type="search" placeholder="Search @username or name" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
+        <TextField label="Search" isLabelHidden type="search" placeholder="Search @username or name" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
       </Toolbar>
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable
@@ -82,7 +82,7 @@ export function ProgramApplicationsWorkspace({ kind }: { readonly kind: Applicat
         isLoading={isLoading}
         emptyMessage="No applications here."
       />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} /> : null}
+      <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
       {selectedApplicationId ? <ProgramApplicationPanel kind={kind} applicationId={selectedApplicationId} onClose={() => setSelectedApplicationId(null)} onDecided={reload} /> : null}
     </>
   );

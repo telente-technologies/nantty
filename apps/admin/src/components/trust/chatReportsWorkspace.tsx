@@ -6,7 +6,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
@@ -46,20 +46,20 @@ const chatReportColumns: readonly DataTableColumn<ChatReportSummary>[] = [
 
 export function ChatReportsWorkspace() {
   const [statusTab, setStatusTab] = useState<StatusTabKey>("OPEN");
-  const [filters, setFilters] = useState<Omit<ChatReportQueueFilters, "status">>({ page: 1 });
+  const [filters, setFilters] = useState<Omit<ChatReportQueueFilters, "status">>({});
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const queryFilters: ChatReportQueueFilters = { ...filters, status: statusTab };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchChatReports(queryFilters, signal), JSON.stringify(queryFilters));
 
   function updateFilter(name: keyof ChatReportQueueFilters, value: string) {
-    setFilters((current) => ({ ...current, [name]: value || undefined, page: 1 }));
+    setFilters((current) => ({ ...current, [name]: value || undefined, cursor: undefined }));
   }
 
   return (
     <>
       <PageHeader area="Trust & safety" title="Chat reports" description="Chats are end-to-end encrypted. You only see the messages the reporter chose to send. Child-safety reports are always first." />
       <ChatEvidenceRetentionCard />
-      <SegmentedTabs label="Chat report status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, page: 1 })); }} />
+      <SegmentedTabs label="Chat report status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, cursor: undefined })); }} />
       <Toolbar>
         <div className={styles.filters}>
           <TextField label="Search" isLabelHidden placeholder="Search report ID, chat or details" value={filters.search ?? ""} onChange={(event) => updateFilter("search", event.target.value)} type="search" />
@@ -80,7 +80,7 @@ export function ChatReportsWorkspace() {
         readRowTone={(report) => (report.priority === "URGENT" ? "danger" : report.priority === "HIGH" ? "caution" : null)}
         emptyMessage={statusTab === "OPEN" ? "Queue is clear. Nice work." : "No chat reports match these filters."}
       />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={(page) => setFilters((current) => ({ ...current, page }))} /> : null}
+      <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters((current) => ({ ...current, cursor }))} />
       {selectedReportId ? <ChatReportDetailPanel key={selectedReportId} reportId={selectedReportId} onClose={() => setSelectedReportId(null)} onReportChanged={reload} /> : null}
     </>
   );

@@ -6,7 +6,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
@@ -41,7 +41,7 @@ const columns: readonly DataTableColumn<SuspensionCaseSummary>[] = [
 ];
 
 function CaseQueue({ status }: { readonly status: "OPEN" | "DECIDED" }) {
-  const [filters, setFilters] = useState<Omit<SuspensionQueueFilters, "status">>({ page: 1 });
+  const [filters, setFilters] = useState<Omit<SuspensionQueueFilters, "status">>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const queryFilters = { ...filters, status };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchSuspensionCases(queryFilters, signal), JSON.stringify(queryFilters));
@@ -49,13 +49,13 @@ function CaseQueue({ status }: { readonly status: "OPEN" | "DECIDED" }) {
     <>
       <Toolbar>
         <div className={styles.filters}>
-          <TextField label="Search" isLabelHidden type="search" placeholder="Search @username or case ID" value={filters.search ?? ""} onChange={(event) => setFilters({ ...filters, search: event.target.value || undefined, page: 1 })} />
-          <SelectField label="Source" isLabelHidden options={suspensionSourceOptions} value={filters.source ?? ""} onChange={(event) => setFilters({ ...filters, source: event.target.value || undefined, page: 1 })} />
+          <TextField label="Search" isLabelHidden type="search" placeholder="Search @username or case ID" value={filters.search ?? ""} onChange={(event) => setFilters({ ...filters, search: event.target.value || undefined, cursor: undefined })} />
+          <SelectField label="Source" isLabelHidden options={suspensionSourceOptions} value={filters.source ?? ""} onChange={(event) => setFilters({ ...filters, source: event.target.value || undefined, cursor: undefined })} />
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Suspension cases" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} readRowTone={(item) => (item.status === "ESCALATED" ? "danger" : item.riskScore >= 80 ? "caution" : null)} emptyMessage={status === "OPEN" ? "No suspension cases waiting." : "Nothing decided yet."} />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={(page) => setFilters({ ...filters, page })} /> : null}
+      <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters({ ...filters, cursor })} />
       {selectedId ? <SuspensionCasePanel key={selectedId} caseId={selectedId} onClose={() => setSelectedId(null)} onChanged={reload} /> : null}
     </>
   );

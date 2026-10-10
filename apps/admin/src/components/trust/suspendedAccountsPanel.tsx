@@ -7,7 +7,7 @@ import { ConfirmActionDialog } from "@/components/ui/confirmActionDialog";
 import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock, NoticeBanner } from "@/components/ui/feedback";
 import { TextField } from "@/components/ui/formFields";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
@@ -35,9 +35,9 @@ function CountdownLabel({ account }: { readonly account: SuspendedAccount }) {
 
 export function SuspendedAccountsPanel({ appealsOnly }: { readonly appealsOnly: boolean }) {
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const [cursor, setCursor] = useState<string | undefined>();
   const [action, setAction] = useState<AccountAction | null>(null);
-  const filters = { appeal: appealsOnly ? "PENDING" : undefined, search: search || undefined, page };
+  const filters = { appeal: appealsOnly ? "PENDING" : undefined, search: search || undefined, cursor };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchSuspendedAccounts(filters, signal), JSON.stringify(filters));
   const { showToast } = useToast();
   const mutation = useAdminMutation(async (input: { action: AccountAction; reason: string }) => {
@@ -79,12 +79,12 @@ export function SuspendedAccountsPanel({ appealsOnly }: { readonly appealsOnly: 
       </NoticeBanner>
       <Toolbar>
         <div className={styles.filters}>
-          <TextField label="Search" isLabelHidden type="search" placeholder="Search @username or name" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
+          <TextField label="Search" isLabelHidden type="search" placeholder="Search @username or name" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption={appealsOnly ? "Appeal queue" : "Suspended accounts"} columns={columns} rows={data?.items ?? []} readRowKey={(account) => account.caseId} isLoading={isLoading} readRowTone={(account) => (account.daysUntilDeletion <= 14 ? "danger" : account.appeal?.status === "PENDING" ? "caution" : null)} emptyMessage={appealsOnly ? "No appeals waiting." : "No suspended accounts."} />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} /> : null}
+      <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
       {action ? (
         <ConfirmActionDialog isOpen title={actionCopy[action.kind].title} consequences={actionCopy[action.kind].consequences(action.account.user.username)} confirmLabel={actionCopy[action.kind].confirm} tone={actionCopy[action.kind].danger ? "danger" : "default"} requiresStepUp isBusy={mutation.isRunning} errorMessage={mutation.errorMessage} onConfirm={confirm} onClose={() => { mutation.clearError(); setAction(null); }}>
           {action.account.appeal ? <p className={styles.statement}>{action.account.appeal.message}</p> : null}

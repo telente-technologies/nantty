@@ -7,7 +7,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { UserIdentity } from "@/components/ui/userIdentity";
 import { VerificationBadge } from "@/components/ui/verificationBadge";
@@ -49,7 +49,7 @@ export function UsersListWorkspace({ initialSearch }: { readonly initialSearch: 
   const [verification, setVerification] = useState("");
   const [role, setRole] = useState("");
   const [risk, setRisk] = useState("");
-  const [page, setPage] = useState(1);
+  const [cursor, setCursor] = useState<string | undefined>();
 
   useEffect(() => {
     setSearchText(initialSearch);
@@ -59,18 +59,18 @@ export function UsersListWorkspace({ initialSearch }: { readonly initialSearch: 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setDebouncedSearch(searchText);
-      setPage(1);
+      setCursor(undefined);
     }, 250);
     return () => window.clearTimeout(timer);
   }, [searchText]);
 
-  const filters = { search: debouncedSearch.trim() || undefined, status, verification, role, risk, page };
+  const filters = { search: debouncedSearch.trim() || undefined, status, verification, role, risk, cursor };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchPlatformUsers(filters, signal), JSON.stringify(filters));
 
   function updateFilter(setter: (value: string) => void) {
     return (value: string) => {
       setter(value);
-      setPage(1);
+      setCursor(undefined);
     };
   }
 
@@ -95,7 +95,7 @@ export function UsersListWorkspace({ initialSearch }: { readonly initialSearch: 
         emptyMessage="No users match these filters."
         readRowTone={(user) => (user.status === "BANNED" || user.status === "SUSPENDED" ? "danger" : user.riskLevel === "HIGH" ? "caution" : null)}
       />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} /> : null}
+      <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>
   );
 }

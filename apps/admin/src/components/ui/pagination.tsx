@@ -19,3 +19,13 @@ export function Pagination({ page, pageSize, total, onPageChange }: { readonly p
     </nav>
   );
 }
+
+export function CursorPagination({ cursor, nextCursor, onCursorChange }: { readonly cursor: string | undefined; readonly nextCursor: string | null | undefined; readonly onCursorChange: (cursor: string | undefined) => void }) {
+  if (!cursor && !nextCursor) return null;
+  return (
+    <nav className={styles.pagination} aria-label="Pagination">
+      {cursor ? <Button size="small" variant="ghost" onClick={() => onCursorChange(undefined)}>First page</Button> : null}
+      {nextCursor ? <Button size="small" variant="secondary" onClick={() => onCursorChange(nextCursor)}>Next page</Button> : null}
+    </nav>
+  );
+}

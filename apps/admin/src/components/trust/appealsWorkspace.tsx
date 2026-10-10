@@ -6,7 +6,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
@@ -40,7 +40,7 @@ const appealColumns: readonly DataTableColumn<AppealSummary>[] = [
 
 export function AppealsWorkspace() {
   const [statusTab, setStatusTab] = useState<(typeof statusTabs)[number]["key"]>("PENDING");
-  const [filters, setFilters] = useState<Omit<AppealQueueFilters, "status">>({ page: 1 });
+  const [filters, setFilters] = useState<Omit<AppealQueueFilters, "status">>({});
   const [selectedAppealId, setSelectedAppealId] = useState<string | null>(null);
   const queryFilters: AppealQueueFilters = { ...filters, status: statusTab };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchModerationAppeals(queryFilters, signal), JSON.stringify(queryFilters));
@@ -48,16 +48,16 @@ export function AppealsWorkspace() {
   return (
     <>
       <PageHeader area="Trust & safety" title="Appeals" description="People asking us to look again at removals, strikes and suspensions. Decide within 48 hours." />
-      <SegmentedTabs label="Appeal status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, page: 1 })); }} />
+      <SegmentedTabs label="Appeal status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, cursor: undefined })); }} />
       <Toolbar>
         <div className={styles.filters}>
-          <TextField label="Search" isLabelHidden type="search" placeholder="Search @username, statement or appeal ID" value={filters.search ?? ""} onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value || undefined, page: 1 }))} />
-          <SelectField label="Decision type" isLabelHidden options={appealDecisionTypeOptions} value={filters.decisionType ?? ""} onChange={(event) => setFilters((current) => ({ ...current, decisionType: event.target.value || undefined, page: 1 }))} />
+          <TextField label="Search" isLabelHidden type="search" placeholder="Search @username, statement or appeal ID" value={filters.search ?? ""} onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value || undefined, cursor: undefined }))} />
+          <SelectField label="Decision type" isLabelHidden options={appealDecisionTypeOptions} value={filters.decisionType ?? ""} onChange={(event) => setFilters((current) => ({ ...current, decisionType: event.target.value || undefined, cursor: undefined }))} />
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Appeals queue" columns={appealColumns} rows={data?.items ?? []} readRowKey={(appeal) => appeal.id} onRowOpen={(appeal) => setSelectedAppealId(appeal.id)} selectedRowKey={selectedAppealId} isLoading={isLoading} emptyMessage="No appeals waiting." />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={(page) => setFilters((current) => ({ ...current, page }))} /> : null}
+      <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters((current) => ({ ...current, cursor }))} />
       {selectedAppealId ? <AppealDetailPanel key={selectedAppealId} appealId={selectedAppealId} onClose={() => setSelectedAppealId(null)} onAppealChanged={reload} /> : null}
     </>
   );

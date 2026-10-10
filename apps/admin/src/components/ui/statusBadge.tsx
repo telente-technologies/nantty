@@ -10,10 +10,11 @@ const toneByStatus: Record<string, BadgeTone> = {
   REJECTED: "danger", BANNED: "danger", DELETED: "night", SUSPENDED: "danger", REVOKED: "night", DISABLED: "neutral", LOCKED: "danger", FAILED: "danger", DOWN: "danger", REFUNDED: "info", PARTIALLY_REFUNDED: "info", CANCELLED: "neutral", DISMISSED: "neutral", REMOVED: "danger", HIDDEN: "caution", RESTRICTED: "caution", WITHHELD: "night", EXPIRED: "neutral",
   LOW: "success", MEDIUM: "caution", HIGH: "danger", CRITICAL: "danger", URGENT: "danger", NORMAL: "neutral",
   SUPERADMIN: "night", ADMIN: "brand", SUPPORT: "info",
+  PENDING_REVIEW: "caution", AWAITING_SELLER: "caution", UNDER_REVIEW: "caution", DISPUTED: "danger", REVIEWED: "success", REVERSED: "night", SUCCEEDED: "success", RESOLVED_RELEASED: "success", RESOLVED_REFUNDED: "info", NEW: "info", READY: "info", SHIPPED: "info",
 };
 
 export function readToneForStatus(status: string): BadgeTone {
-  return toneByStatus[status] ?? "neutral";
+  return toneByStatus[status.toUpperCase()] ?? "neutral";
 }
 
 interface StatusBadgeProps {

@@ -7,7 +7,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
@@ -43,7 +43,7 @@ const claimColumns: readonly DataTableColumn<CopyrightClaimSummary>[] = [
 export function CopyrightClaimsWorkspace() {
   const router = useRouter();
   const [statusTab, setStatusTab] = useState<(typeof statusTabs)[number]["key"]>("OPEN");
-  const [filters, setFilters] = useState<Omit<CopyrightClaimFilters, "status">>({ page: 1 });
+  const [filters, setFilters] = useState<Omit<CopyrightClaimFilters, "status">>({});
   const queryFilters: CopyrightClaimFilters = { ...filters, status: statusTab };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchCopyrightClaims(queryFilters, signal), JSON.stringify(queryFilters));
 
@@ -51,16 +51,16 @@ export function CopyrightClaimsWorkspace() {
     <>
       <PageHeader area="Trust & safety" title="Copyright claims" description="Takedown requests from rights holders, counter-notices from creators, and audio fingerprint matches from the intelligence service." />
       <CopyrightPolicyCard />
-      <SegmentedTabs label="Claim status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, page: 1 })); }} />
+      <SegmentedTabs label="Claim status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, cursor: undefined })); }} />
       <Toolbar>
         <div className={styles.filters}>
-          <TextField label="Search" isLabelHidden type="search" placeholder="Search work, claimant, @uploader or claim ID" value={filters.search ?? ""} onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value || undefined, page: 1 }))} />
-          <SelectField label="Work type" isLabelHidden options={copyrightWorkTypeOptions} value={filters.workType ?? ""} onChange={(event) => setFilters((current) => ({ ...current, workType: event.target.value || undefined, page: 1 }))} />
+          <TextField label="Search" isLabelHidden type="search" placeholder="Search work, claimant, @uploader or claim ID" value={filters.search ?? ""} onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value || undefined, cursor: undefined }))} />
+          <SelectField label="Work type" isLabelHidden options={copyrightWorkTypeOptions} value={filters.workType ?? ""} onChange={(event) => setFilters((current) => ({ ...current, workType: event.target.value || undefined, cursor: undefined }))} />
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Copyright claims" columns={claimColumns} rows={data?.items ?? []} readRowKey={(claim) => claim.id} onRowOpen={(claim) => router.push(`/moderation/copyright/${claim.id}`)} isLoading={isLoading} readRowTone={(claim) => (claim.infringerStrikeCount >= 2 && claim.status === "PENDING" ? "caution" : null)} emptyMessage="No claims here." />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={(page) => setFilters((current) => ({ ...current, page }))} /> : null}
+      <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters((current) => ({ ...current, cursor }))} />
     </>
   );
 }

@@ -6,7 +6,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
@@ -42,19 +42,19 @@ const reportColumns: readonly DataTableColumn<ReportSummary>[] = [
 
 export function ReportsWorkspace() {
   const [statusTab, setStatusTab] = useState<StatusTabKey>("OPEN");
-  const [filters, setFilters] = useState<Omit<ReportQueueFilters, "status">>({ page: 1 });
+  const [filters, setFilters] = useState<Omit<ReportQueueFilters, "status">>({});
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const queryFilters: ReportQueueFilters = { ...filters, status: statusTab };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchModerationReports(queryFilters, signal), JSON.stringify(queryFilters));
 
   function updateFilter(name: keyof ReportQueueFilters, value: string) {
-    setFilters((current) => ({ ...current, [name]: value || undefined, page: 1 }));
+    setFilters((current) => ({ ...current, [name]: value || undefined, cursor: undefined }));
   }
 
   return (
     <>
       <PageHeader area="Trust & safety" title="Reports" description="Reported posts, comments, clips, lives, profiles, products and messages. Highest priority and oldest first." />
-      <SegmentedTabs label="Report status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, page: 1 })); }} />
+      <SegmentedTabs label="Report status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, cursor: undefined })); }} />
       <Toolbar>
         <div className={styles.filters}>
           <TextField label="Search" isLabelHidden placeholder="Search content, @author or report ID" value={filters.search ?? ""} onChange={(event) => updateFilter("search", event.target.value)} type="search" />
@@ -75,7 +75,7 @@ export function ReportsWorkspace() {
         readRowTone={(report) => (report.priority === "URGENT" ? "danger" : report.priority === "HIGH" ? "caution" : null)}
         emptyMessage={statusTab === "OPEN" ? "Queue is clear. Nice work." : "No reports match these filters."}
       />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={(page) => setFilters((current) => ({ ...current, page }))} /> : null}
+      <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters((current) => ({ ...current, cursor }))} />
       {selectedReportId ? <ReportDetailPanel key={selectedReportId} reportId={selectedReportId} onClose={() => setSelectedReportId(null)} onReportChanged={reload} /> : null}
     </>
   );

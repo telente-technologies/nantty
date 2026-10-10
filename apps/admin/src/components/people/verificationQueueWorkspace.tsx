@@ -7,7 +7,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/dataTable";
 import { ErrorBlock } from "@/components/ui/feedback";
 import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
-import { Pagination } from "@/components/ui/pagination";
+import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { LinkTabs, SegmentedTabs } from "@/components/ui/tabs";
@@ -47,18 +47,18 @@ export function VerificationQueueWorkspace() {
   const [statusTab, setStatusTab] = useState<StatusTabKey>("PENDING");
   const [color, setColor] = useState("");
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const filters = { status: statusTab, color: color || undefined, search: search.trim() || undefined, page };
+  const [cursor, setCursor] = useState<string | undefined>();
+  const filters = { status: statusTab, color: color || undefined, search: search.trim() || undefined, cursor };
   const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchVerificationApplications(filters, signal), JSON.stringify(filters));
 
   return (
     <>
       <PageHeader area="People" title="Verification reviews" description="Blue is personal (including creator accounts), Gold is business and unlocks the Zudomart Dashboard, Black is government and only granted through the official process." />
       <LinkTabs label="Verification views" items={verificationViewTabs} />
-      <SegmentedTabs label="Verification status" items={verificationStatusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setPage(1); }} />
+      <SegmentedTabs label="Verification status" items={verificationStatusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setCursor(undefined); }} />
       <Toolbar>
-        <TextField label="Search" isLabelHidden type="search" placeholder="Search @username, legal or business name" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
-        <SelectField label="Badge" isLabelHidden options={verificationColorOptions} value={color} onChange={(event) => { setColor(event.target.value); setPage(1); }} />
+        <TextField label="Search" isLabelHidden type="search" placeholder="Search @username, legal or business name" value={search} onChange={(event) => { setSearch(event.target.value); setCursor(undefined); }} />
+        <SelectField label="Badge" isLabelHidden options={verificationColorOptions} value={color} onChange={(event) => { setColor(event.target.value); setCursor(undefined); }} />
       </Toolbar>
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable
@@ -71,7 +71,7 @@ export function VerificationQueueWorkspace() {
         emptyMessage="No verification requests here."
         readRowTone={(application) => (application.status === "PENDING" && application.checks.some((check) => check.result === "FAIL") ? "caution" : null)}
       />
-      {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} /> : null}
+      <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
     </>
   );
 }
