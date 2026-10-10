@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"strings"
 
 	"zudomart/modules/subscriptions/src/generated/ent"
 	"zudomart/modules/subscriptions/src/generated/ent/subscription"
@@ -25,9 +26,9 @@ func (billing Billing) TrialIneligibility(ctx context.Context, client *ent.Clien
 			return nil, err
 		}
 	}
-	phoneUsed := false
-	if account.PhoneHash != "" {
-		if phoneUsed, err = client.TrialClaim.Query().Where(trialclaim.KindEQ(trialclaim.KindPhone), trialclaim.FingerprintHash(billing.fingerprint("phone:"+account.PhoneHash))).Exist(ctx); err != nil {
+	emailUsed := false
+	if strings.TrimSpace(account.Email) != "" {
+		if emailUsed, err = client.TrialClaim.Query().Where(trialclaim.KindEQ(trialclaim.KindEmail), trialclaim.FingerprintHash(billing.emailFingerprint(account.Email))).Exist(ctx); err != nil {
 			return nil, err
 		}
 	}
@@ -36,7 +37,7 @@ func (billing Billing) TrialIneligibility(ctx context.Context, client *ent.Clien
 		return nil, err
 	}
 	signals := models.TrialSignals{
-		AccountCreatedAt: account.CreatedAt, EmailVerified: account.EmailVerified, PersonUsedTrial: personUsed, DeviceUsedTrial: deviceUsed, PhoneUsedTrial: phoneUsed,
+		AccountCreatedAt: account.CreatedAt, EmailVerified: account.EmailVerified, PersonUsedTrial: personUsed, DeviceUsedTrial: deviceUsed, EmailUsedTrial: emailUsed,
 		CompletedOrders: trialRules.MinimumCompletedOrders, AlreadySubscribed: subscribed, PlanAllowsTrial: planAllowsTrial,
 	}
 	if counter := billing.Container.TrialSignals; counter != nil {

@@ -117,12 +117,17 @@ func (controller CreatorSubscriptionsController) MyPlans(writer http.ResponseWri
 }
 
 func (controller CreatorSubscriptionsController) CreatorPlans(writer http.ResponseWriter, request *http.Request) {
-	plans, err := controller.Service.ListPlans(request.Context(), request.PathValue("creatorId"), false)
+	channel := request.URL.Query().Get("channel")
+	if channel == "" {
+		channel = request.Header.Get("X-Client-Platform")
+	}
+	plans, err := controller.Service.ListPlansForChannel(request.Context(), request.PathValue("creatorId"), services.NormalizeChannel(channel))
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
 	}
 	writer.Header().Set("Cache-Control", "public, max-age=30")
+	writer.Header().Set("Vary", "X-Client-Platform")
 	httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(plans, ""))
 }
 

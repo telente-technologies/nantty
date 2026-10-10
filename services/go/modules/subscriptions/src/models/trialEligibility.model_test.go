@@ -7,7 +7,7 @@ import (
 
 func TestTrialEligibilityFollowsTheAdminRules(t *testing.T) {
 	now := time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
-	rules := TrialRules{TrialDays: 7, MinimumAccountAgeDays: 7, RequiresVerifiedEmail: true, OnePerPerson: true, OnePerCard: true, OnePerDevice: true, OnePerPhone: true, MaximumRiskScore: 50, MinimumCompletedOrders: 2}
+	rules := TrialRules{TrialDays: 7, MinimumAccountAgeDays: 7, RequiresVerifiedEmail: true, OnePerPerson: true, OnePerCard: true, OnePerDevice: true, MaximumRiskScore: 50, MinimumCompletedOrders: 2}
 	good := TrialSignals{AccountCreatedAt: now.Add(-30 * 24 * time.Hour), EmailVerified: true, CompletedOrders: 5, PlanAllowsTrial: true}
 	risky := 80
 	calm := 10
@@ -22,7 +22,7 @@ func TestTrialEligibilityFollowsTheAdminRules(t *testing.T) {
 		{"second trial", func(signals *TrialSignals) { signals.PersonUsedTrial = true }, "TRIAL_ALREADY_USED"},
 		{"same device", func(signals *TrialSignals) { signals.DeviceUsedTrial = true }, "DEVICE_ALREADY_USED"},
 		{"same card", func(signals *TrialSignals) { signals.CardUsedTrial = true }, "CARD_ALREADY_USED"},
-		{"same phone", func(signals *TrialSignals) { signals.PhoneUsedTrial = true }, "PHONE_ALREADY_USED"},
+		{"same email on another account", func(signals *TrialSignals) { signals.EmailUsedTrial = true }, "TRIAL_ALREADY_USED"},
 		{"risky", func(signals *TrialSignals) { signals.RiskScore = &risky }, "RISK_TOO_HIGH"},
 		{"calm score", func(signals *TrialSignals) { signals.RiskScore = &calm }, ""},
 		{"too few orders", func(signals *TrialSignals) { signals.CompletedOrders = 1 }, "NOT_ENOUGH_COMPLETED_ORDERS"},

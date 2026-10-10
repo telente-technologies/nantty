@@ -9,7 +9,6 @@ type TrialRules struct {
 	OnePerPerson           bool
 	OnePerCard             bool
 	OnePerDevice           bool
-	OnePerPhone            bool
 	MaximumRiskScore       int
 	MinimumCompletedOrders int
 }
@@ -20,7 +19,7 @@ type TrialSignals struct {
 	PersonUsedTrial   bool
 	DeviceUsedTrial   bool
 	CardUsedTrial     bool
-	PhoneUsedTrial    bool
+	EmailUsedTrial    bool
 	RiskScore         *int
 	CompletedOrders   int
 	AlreadySubscribed bool
@@ -47,7 +46,7 @@ func EvaluateTrialEligibility(rules TrialRules, signals TrialSignals, now time.T
 	if rules.RequiresVerifiedEmail && !signals.EmailVerified {
 		add("EMAIL_NOT_VERIFIED", "Verify your email to start a free trial.")
 	}
-	if rules.OnePerPerson && signals.PersonUsedTrial {
+	if rules.OnePerPerson && (signals.PersonUsedTrial || signals.EmailUsedTrial) {
 		add("TRIAL_ALREADY_USED", "You've already used your free trial.")
 	}
 	if rules.OnePerDevice && signals.DeviceUsedTrial {
@@ -55,9 +54,6 @@ func EvaluateTrialEligibility(rules TrialRules, signals TrialSignals, now time.T
 	}
 	if rules.OnePerCard && signals.CardUsedTrial {
 		add("CARD_ALREADY_USED", "This card was already used for a free trial.")
-	}
-	if rules.OnePerPhone && signals.PhoneUsedTrial {
-		add("PHONE_ALREADY_USED", "A free trial was already used with this phone number.")
 	}
 	if signals.RiskScore != nil && rules.MaximumRiskScore > 0 && *signals.RiskScore > rules.MaximumRiskScore {
 		add("RISK_TOO_HIGH", "We can't offer a free trial on this account right now.")

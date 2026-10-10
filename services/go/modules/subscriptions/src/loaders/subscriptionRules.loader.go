@@ -15,7 +15,7 @@ type CheckmarkPricing struct {
 }
 
 func ReadTrialRules(ctx context.Context, source *ledgerloaders.PlatformSettingsSource) (models.TrialRules, int64) {
-	rules := models.TrialRules{TrialDays: 7, MinimumAccountAgeDays: 7, RequiresVerifiedEmail: true, OnePerPerson: true, OnePerCard: true, OnePerDevice: true, OnePerPhone: true, MaximumRiskScore: 50}
+	rules := models.TrialRules{TrialDays: 7, MinimumAccountAgeDays: 7, RequiresVerifiedEmail: true, OnePerPerson: true, OnePerCard: true, OnePerDevice: true, MaximumRiskScore: 50}
 	yearlyBps := int64(2000)
 	raw, found := source.ReadValue(ctx, constants.TrialRulesSettingKey)
 	if !found {
@@ -29,7 +29,6 @@ func ReadTrialRules(ctx context.Context, source *ledgerloaders.PlatformSettingsS
 		OnePerPerson           bool   `json:"onePerPerson"`
 		OnePerCard             bool   `json:"onePerCard"`
 		OnePerDevice           bool   `json:"onePerDevice"`
-		OnePerPhone            bool   `json:"onePerPhone"`
 		MaximumRiskScore       int    `json:"maximumRiskScore"`
 		MinimumCompletedOrders int    `json:"minimumCompletedOrders"`
 	}
@@ -41,7 +40,7 @@ func ReadTrialRules(ctx context.Context, source *ledgerloaders.PlatformSettingsS
 	}
 	return models.TrialRules{
 		TrialDays: models.TrialDaysFor(stored.TrialLength), MinimumAccountAgeDays: stored.MinimumAccountAgeDays, RequiresVerifiedEmail: stored.RequiresVerifiedEmail,
-		OnePerPerson: stored.OnePerPerson, OnePerCard: stored.OnePerCard, OnePerDevice: stored.OnePerDevice, OnePerPhone: stored.OnePerPhone,
+		OnePerPerson: stored.OnePerPerson, OnePerCard: stored.OnePerCard, OnePerDevice: stored.OnePerDevice,
 		MaximumRiskScore: stored.MaximumRiskScore, MinimumCompletedOrders: stored.MinimumCompletedOrders,
 	}, yearlyBps
 }

@@ -64,3 +64,15 @@ func ConvertBenefits(benefits []BenefitDto) []models.CreatorPlanBenefit {
 	}
 	return converted
 }
+
+type StartStorePurchaseRequestDto struct {
+	PlanId   string `json:"planId"`
+	Platform string `json:"platform"`
+}
+
+type StoreReceiptRequestDto struct {
+	Platform      string `json:"platform"`
+	ProductId     string `json:"productId"`
+	Receipt       string `json:"receipt"`
+	TransactionId string `json:"transactionId"`
+}

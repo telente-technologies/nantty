@@ -186,13 +186,17 @@ func (billing Billing) fingerprint(value string) string {
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
+func (billing Billing) emailFingerprint(email string) string {
+	return billing.fingerprint("email:" + strings.TrimSpace(email))
+}
+
 func (billing Billing) claimTrialFingerprintsInTransaction(ctx context.Context, transaction *sql.Tx, subscriptionId string, request CheckoutRequest) error {
 	claims := map[trialclaim.Kind]string{trialclaim.KindPerson: billing.fingerprint("person:" + request.UserId)}
 	if request.DeviceId != "" {
 		claims[trialclaim.KindDevice] = billing.fingerprint("device:" + request.DeviceId)
 	}
-	if account, found, err := billing.Container.Identity.ReadAccountSignals(ctx, request.UserId); err == nil && found && account.PhoneHash != "" {
-		claims[trialclaim.KindPhone] = billing.fingerprint("phone:" + account.PhoneHash)
+	if account, found, err := billing.Container.Identity.ReadAccountSignals(ctx, request.UserId); err == nil && found && strings.TrimSpace(account.Email) != "" {
+		claims[trialclaim.KindEmail] = billing.emailFingerprint(account.Email)
 	}
 	for kind, hash := range claims {
 		if err := billing.Container.Client(transaction).TrialClaim.Create().SetKind(kind).SetFingerprintHash(hash).SetSubscriptionID(subscriptionId).SetOwnerUserID(request.UserId).
