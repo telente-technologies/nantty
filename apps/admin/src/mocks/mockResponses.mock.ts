@@ -77,6 +77,12 @@ export function paginateItems<Item>(items: readonly Item[], request: MockRequest
   return { items: items.slice((page - 1) * pageSize, page * pageSize), page, pageSize, total: items.length };
 }
 
+export function paginateByCursor<Item>(items: readonly Item[], request: MockRequest, defaultLimit = 25) {
+  const limit = Math.min(Math.max(Number(request.query.get("limit") ?? defaultLimit) || defaultLimit, 1), 100);
+  const offset = Math.max(Number(request.query.get("cursor") ?? 0) || 0, 0);
+  return { items: items.slice(offset, offset + limit), nextCursor: offset + limit < items.length ? String(offset + limit) : null };
+}
+
 export function matchesSearchText(searchText: string | null, ...fields: readonly (string | null | undefined)[]): boolean {
   if (!searchText) return true;
   const needle = searchText.trim().toLowerCase();

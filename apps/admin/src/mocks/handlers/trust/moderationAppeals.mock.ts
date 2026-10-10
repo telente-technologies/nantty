@@ -1,6 +1,6 @@
 import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission } from "@/mocks/mockGuards.mock";
-import { MockHttpError, matchesSearchText, paginateItems, readEnumValue, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, matchesSearchText, paginateByCursor, readEnumValue, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import type { MockAppealRecord } from "@/mocks/seed/trustAppeals.mock";
 import type { AppealDetail, AppealSummary } from "@/types/moderation.type";
@@ -41,7 +41,7 @@ export function registerModerationAppealMockHandlers(): void {
       .filter((record) => matchesSearchText(search, record.id, record.userStatement, findPlatformUserRecordOrFail(record.appellantUserId).username))
       .sort((first, second) => first.slaDueAt.localeCompare(second.slaDueAt))
       .map(presentAppealSummary);
-    return respondWithJson(200, paginateItems(appeals, request));
+    return respondWithJson(200, paginateByCursor(appeals, request));
   });
 
   registerMockRoute("GET", "/admin/appeals/:appealId", (request) => {

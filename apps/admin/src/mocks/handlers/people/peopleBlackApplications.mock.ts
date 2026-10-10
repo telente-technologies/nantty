@@ -1,7 +1,7 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { readMockAreaStore } from "@/mocks/mockDatabase.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, createMockId, failNotFound, matchesSearchText, paginateItems, readEnumValue, readIsoNow, readJsonObjectBody, readOptionalTrimmedString, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, createMockId, failNotFound, matchesSearchText, paginateByCursor, readEnumValue, readIsoNow, readJsonObjectBody, readOptionalTrimmedString, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockQueueCounter } from "@/mocks/mockQueueCounters.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { presentPlatformUserSummary } from "@/mocks/seed/demoPlatformUsers.mock";
@@ -72,7 +72,7 @@ export function registerPeopleBlackApplicationMockHandlers(): void {
     const status = request.query.get("status") ?? "OPEN";
     const search = request.query.get("search");
     const items = readRecords().map(present).filter((item) => (status === "OPEN" ? item.status === "IN_REVIEW" || item.status === "AWAITING_SECOND_APPROVAL" : status === "REVERIFY" ? item.status === "APPROVED" : status === "ALL" || item.status === status)).filter((item) => matchesSearchText(search, item.agencyName, item.handle, item.id)).sort((first, second) => first.submittedAt.localeCompare(second.submittedAt));
-    return respondWithJson(200, paginateItems(items, request));
+    return respondWithJson(200, paginateByCursor(items, request));
   });
 
   registerMockRoute("POST", "/admin/black-applications/:applicationId/checklist", (request) => {

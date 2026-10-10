@@ -1,7 +1,7 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { readMockAreaStore } from "@/mocks/mockDatabase.mock";
 import { requireMockPermission } from "@/mocks/mockGuards.mock";
-import { MockHttpError, failNotFound, matchesSearchText, paginateItems, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, failNotFound, matchesSearchText, paginateByCursor, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockQueueCounter } from "@/mocks/mockQueueCounters.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { presentPlatformUserSummary } from "@/mocks/seed/demoPlatformUsers.mock";
@@ -28,7 +28,7 @@ function presentSubmission(record: MockBusinessSubmissionRecord): BusinessDocume
 function grantGoldIfEligible(record: MockBusinessSubmissionRecord): boolean {
   if (record.goldGranted || readOverallStatus(record) !== "APPROVED" || record.plan === "FREE") return false;
   const user = asMutablePlatformUser(findPlatformUserForPeopleOrFail(record.userId));
-  user.verification = { color: "GOLD", tier: record.plan === "BUSINESS" ? "PREMIUM" : "PRO", status: "VERIFIED", badgeVisible: true };
+  user.verification = { color: "GOLD", tier: record.plan === "BUSINESS" ? "BUSINESS" : "PRO", status: "VERIFIED", badgeVisible: true };
   user.isSeller = true;
   record.goldGranted = true;
   return true;
@@ -64,7 +64,7 @@ export function registerPeopleBusinessDocumentMockHandlers(): void {
     const status = request.query.get("status") ?? "PENDING";
     const search = request.query.get("search");
     const items = readSubmissions().map(presentSubmission).filter((item) => (status === "ALL" || item.overallStatus === status) && matchesSearchText(search, item.storeName, item.user.username, item.user.displayName, item.id)).sort((first, second) => first.submittedAt.localeCompare(second.submittedAt));
-    return respondWithJson(200, paginateItems(items, request));
+    return respondWithJson(200, paginateByCursor(items, request));
   });
 
   registerMockRoute("GET", "/admin/business-documents/:submissionId/documents/:documentId/access", (request) => {

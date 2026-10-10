@@ -1,6 +1,6 @@
 import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission } from "@/mocks/mockGuards.mock";
-import { MockHttpError, matchesSearchText, paginateItems, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, matchesSearchText, paginateByCursor, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { MockCopyrightClaimRecord } from "@/mocks/seed/trustCopyright.mock";
 import type { CopyrightClaimDetail, CopyrightClaimStatus, CopyrightClaimSummary } from "@/types/copyright.type";
@@ -58,7 +58,7 @@ export function registerCopyrightClaimMockHandlers(): void {
       .filter((record) => matchesSearchText(search, record.id, record.workTitle, record.claimant.name, record.claimant.organization, findPlatformUserRecordOrFail(record.infringerUserId).username))
       .sort((first, second) => first.filedAt.localeCompare(second.filedAt))
       .map(presentClaimSummary);
-    return respondWithJson(200, paginateItems(claims, request));
+    return respondWithJson(200, paginateByCursor(claims, request));
   });
 
   registerMockRoute("GET", "/admin/copyright-claims/:claimId", (request) => {

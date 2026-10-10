@@ -1,6 +1,6 @@
 import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, failValidation, matchesSearchText, paginateItems, readEnumValue, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, failValidation, matchesSearchText, paginateByCursor, readEnumValue, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { MockChatReportRecord } from "@/mocks/seed/trustChatReports.mock";
 import { chatReportActions } from "@/constants/chatReportOptions.constant";
@@ -123,7 +123,7 @@ export function registerChatReportMockHandlers(): void {
       .filter((record) => matchesSearchText(search, record.id, record.conversationLabel, record.details))
       .sort((first, second) => Number(isChildSafety(second)) - Number(isChildSafety(first)) || priorityRank[first.priority] - priorityRank[second.priority] || first.slaDueAt.localeCompare(second.slaDueAt))
       .map(presentSummary);
-    return respondWithJson(200, paginateItems(reports, request));
+    return respondWithJson(200, paginateByCursor(reports, request));
   });
 
   registerMockRoute("GET", "/admin/chat-reports/:reportId", (request) => {

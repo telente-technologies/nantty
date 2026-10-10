@@ -22,8 +22,9 @@ const majorMonthlyPriceByCurrency: Record<string, Record<string, number>> = {
   BLUE_ESSENTIAL: { NGN: 2_500, GHS: 30, KES: 350, ZAR: 45, GBP: 2.5, USD: 3 },
   BLUE_VERIFIED: { NGN: 5_000, GHS: 60, KES: 700, ZAR: 90, GBP: 5, USD: 6 },
   BLUE_PREMIUM: { NGN: 12_000, GHS: 140, KES: 1_600, ZAR: 210, GBP: 11, USD: 13 },
+  GOLD_ONLY: { NGN: 3_000, GHS: 35, KES: 400, ZAR: 55, GBP: 3, USD: 4 },
   GOLD_PRO: { NGN: 45_000, GHS: 520, KES: 6_000, ZAR: 780, GBP: 40, USD: 48 },
-  GOLD_PREMIUM: { NGN: 120_000, GHS: 1_400, KES: 16_000, ZAR: 2_100, GBP: 105, USD: 125 },
+  GOLD_BUSINESS: { NGN: 120_000, GHS: 1_400, KES: 16_000, ZAR: 2_100, GBP: 105, USD: 125 },
 };
 
 export function readDemoVerificationPlanPrice(color: VerificationColor, tier: VerificationTier, currency: string): { planCode: string; price: { amountMinor: number; currency: string } } | null {
@@ -62,7 +63,7 @@ const seedRows: readonly SeedRow[] = [
   { username: "jide.kicks", color: "BLUE", tier: "ESSENTIAL", status: "PENDING", daysAgo: 0.4, category: "Sneaker reseller" },
   { username: "ken.otieno", color: "BLACK", tier: "OFFICIAL", status: "PENDING", daysAgo: 5, agency: { name: "Kenya Film Commission", contact: "kenya.film.commission@example.com" }, category: "Government agency" },
   { username: "adaeze.styles", color: "GOLD", tier: "PRO", status: "VERIFIED", daysAgo: 400, business: { name: "Adaeze Styles Ltd", registration: "RC 1654420" }, category: "Fashion" },
-  { username: "kemi.kitchen", color: "GOLD", tier: "PREMIUM", status: "VERIFIED", daysAgo: 300, business: { name: "Kemi's Kitchen Foods", registration: "BN 2987711" }, category: "Food" },
+  { username: "kemi.kitchen", color: "GOLD", tier: "BUSINESS", status: "VERIFIED", daysAgo: 300, business: { name: "Kemi's Kitchen Foods", registration: "BN 2987711" }, category: "Food" },
   { username: "funke.naturals", color: "GOLD", tier: "PRO", status: "VERIFIED", daysAgo: 250, business: { name: "Funke Naturals Cosmetics", registration: "RC 1720093" }, category: "Beauty" },
   { username: "lagosstate.gov", color: "BLACK", tier: "OFFICIAL", status: "VERIFIED", daysAgo: 600, agency: { name: "Lagos State Government", contact: "lagos.state.digital@example.com" }, category: "State government" },
   { username: "tunde_eats", color: "BLUE", tier: "PREMIUM", status: "VERIFIED", daysAgo: 320, category: "Food creator" },

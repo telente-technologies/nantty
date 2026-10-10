@@ -1,6 +1,5 @@
-import type { MockOrderItemRecord, MockOrderRecord } from "@/mocks/handlers/money/moneyRecords.mock";
+import type { MockEscrowTimelineEvent, MockOrderItemRecord, MockOrderRecord } from "@/mocks/handlers/money/moneyRecords.mock";
 import { buildUnsplashImageUrl, unsplashPhotoIds } from "@/mocks/seed/unsplashPhotoIds.mock";
-import type { EscrowTimelineEvent } from "@/types/commerce.type";
 
 type ProductKey = keyof typeof unsplashPhotoIds.products;
 type OrderStage = "PAID" | "SHIPPED" | "DELIVERED" | "COMPLETED" | "DISPUTED" | "REFUNDED" | "PARTIALLY_REFUNDED";
@@ -49,9 +48,9 @@ function isoHoursAgo(hours: number): string {
   return new Date(Date.now() - hours * 3_600_000).toISOString();
 }
 
-function buildTimelineForStage(row: OrderSeedRow, totalMinor: number, buyerName: string, sellerName: string): { timeline: EscrowTimelineEvent[]; autoReleaseAt: string | null } {
-  const events: EscrowTimelineEvent[] = [];
-  const add = (kind: EscrowTimelineEvent["kind"], hoursAfterPlacing: number, actorName: string, actorKind: EscrowTimelineEvent["actorKind"], note: string | null, amountMinor: number | null = null) =>
+function buildTimelineForStage(row: OrderSeedRow, totalMinor: number, buyerName: string, sellerName: string): { timeline: MockEscrowTimelineEvent[]; autoReleaseAt: string | null } {
+  const events: MockEscrowTimelineEvent[] = [];
+  const add = (kind: MockEscrowTimelineEvent["kind"], hoursAfterPlacing: number, actorName: string, actorKind: MockEscrowTimelineEvent["actorKind"], note: string | null, amountMinor: number | null = null) =>
     events.push({ id: `${row.number}-${events.length + 1}`, kind, occurredAt: isoHoursAgo(row.hoursAgo - hoursAfterPlacing), actorName, actorKind, note, amount: amountMinor === null ? null : { amountMinor, currency: row.currency } });
   add("FUNDED", 0, buyerName, "BUYER", "Payment verified with the provider.", totalMinor);
   add("HELD", 0.02, "Escrow service", "SYSTEM", "Funds held until delivery is confirmed.", totalMinor);

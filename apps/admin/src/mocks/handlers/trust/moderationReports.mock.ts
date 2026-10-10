@@ -1,6 +1,6 @@
 import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, failValidation, matchesSearchText, paginateItems, readEnumValue, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, failValidation, matchesSearchText, paginateByCursor, readEnumValue, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { MockReportRecord } from "@/mocks/seed/trustReports.mock";
 import type { ContentModerationAction, ContentVisibility, ModerationAction, ReportDetail, ReportSummary } from "@/types/moderation.type";
@@ -76,7 +76,7 @@ export function registerModerationReportMockHandlers(): void {
       .filter((record) => matchesSearchText(search, record.id, record.target.id, record.target.text, record.target.title, findPlatformUserRecordOrFail(record.authorUserId).username))
       .sort((first, second) => priorityRank[first.priority] - priorityRank[second.priority] || first.slaDueAt.localeCompare(second.slaDueAt))
       .map(presentReportSummary);
-    return respondWithJson(200, paginateItems(reports, request));
+    return respondWithJson(200, paginateByCursor(reports, request));
   });
 
   registerMockRoute("GET", "/admin/reports/:reportId", (request) => {

@@ -1,7 +1,7 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { requireMockPermission } from "@/mocks/mockGuards.mock";
-import { failNotFound, matchesSearchText, paginateItems, respondWithDownload, respondWithJson } from "@/mocks/mockResponses.mock";
+import { failNotFound, matchesSearchText, paginateByCursor, respondWithDownload, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { AuditLogEntry } from "@/types/audit.type";
 
@@ -33,7 +33,7 @@ function escapeCsvCell(value: string): string {
 export function registerAuditLogMockHandlers(): void {
   registerMockRoute("GET", "/admin/audit", (request) => {
     requireMockPermission(request, "audit:read");
-    return respondWithJson(200, paginateItems(filterAuditEntries(request), request, 50));
+    return respondWithJson(200, paginateByCursor(filterAuditEntries(request), request, 50));
   });
 
   registerMockRoute("GET", "/admin/audit/facets", (request) => {

@@ -1,38 +1,70 @@
-import type { MockCoinRecord, MockPayoutRecord } from "@/mocks/handlers/money/moneyRecords.mock";
-import type { FraudAssessment } from "@/types/payouts.type";
+import type { MockCoinRecord, MockWithdrawalRecord } from "@/mocks/handlers/money/moneyRecords.mock";
+import type { WithdrawalStatus } from "@/types/withdrawals.type";
 
 function isoHoursAgo(hours: number): string {
   return new Date(Date.now() - hours * 3_600_000).toISOString();
 }
 
-function assessFraud(score: number, reasons: string[], hoursAgo: number): FraudAssessment {
-  return { score, riskLevel: score >= 70 ? "HIGH" : score >= 40 ? "MEDIUM" : "LOW", reasons, modelVersion: "payout-risk-2026.09.2", evaluatedAt: isoHoursAgo(hoursAgo) };
+interface WithdrawalSeedRow {
+  readonly user: string;
+  readonly amountMinor: number;
+  readonly feeMinor: number;
+  readonly currency: string;
+  readonly provider: string;
+  readonly bank: readonly [string, string, string, string, number];
+  readonly hoursAgo: number;
+  readonly availableMinor: number;
+  readonly status: WithdrawalStatus;
+  readonly note?: string;
 }
 
-const bank = (institutionName: string, lastFour: string, accountName: string, addedHoursAgo: number) => ({ kind: "BANK_ACCOUNT" as const, institutionName, accountMasked: `••••${lastFour}`, accountName, addedAt: isoHoursAgo(addedHoursAgo) });
-const mobileMoney = (institutionName: string, lastFour: string, accountName: string, addedHoursAgo: number) => ({ kind: "MOBILE_MONEY" as const, institutionName, accountMasked: `••• ••• ${lastFour}`, accountName, addedAt: isoHoursAgo(addedHoursAgo) });
+const withdrawalSeedRows: readonly WithdrawalSeedRow[] = [
+  { user: "usr_0001", amountMinor: 1_250_000_00, feeMinor: 50_00, currency: "NGN", provider: "paystack", bank: ["GTBank", "4821", "ADAEZE NNAMDI OKONKWO", "NG", 9_000], hoursAgo: 3, availableMinor: 214_300_00, status: "pending_review" },
+  { user: "usr_0012", amountMinor: 890_000_00, feeMinor: 50_00, currency: "NGN", provider: "paystack", bank: ["Opay", "0937", "ADEDAYO AKINOLA", "NG", 2], hoursAgo: 1.5, availableMinor: 0, status: "pending_review" },
+  { user: "usr_0002", amountMinor: 340_500_00, feeMinor: 50_00, currency: "NGN", provider: "flutterwave", bank: ["Access Bank", "1170", "BABATUNDE OLALEKAN BAKARE", "NG", 4_000], hoursAgo: 7, availableMinor: 58_000_00, status: "pending_review" },
+  { user: "usr_0007", amountMinor: 2_150_00, feeMinor: 15_00, currency: "GHS", provider: "flutterwave", bank: ["MTN MoMo", "4410", "KWAME MENSAH ASANTE", "GH", 3_000], hoursAgo: 12, availableMinor: 180_00, status: "pending_review" },
+  { user: "usr_0005", amountMinor: 410_000_00, feeMinor: 50_00, currency: "NGN", provider: "paystack", bank: ["Zenith Bank", "6602", "CHUKWUEMEKA OBI", "NG", 30], hoursAgo: 26, availableMinor: 12_000_00, status: "on_hold", note: "Open dispute on a recent order; waiting for it to close." },
+  { user: "usr_0008", amountMinor: 18_500_00, feeMinor: 110_00, currency: "KES", provider: "flutterwave", bank: ["M-Pesa", "7781", "WANJIRU KAMAU", "KE", 5_000], hoursAgo: 40, availableMinor: 2_200_00, status: "paid" },
+  { user: "usr_0025", amountMinor: 780_000_00, feeMinor: 50_00, currency: "NGN", provider: "paystack", bank: ["Kuda", "2290", "OLUWAYEMI AFOLABI", "NG", 6_000], hoursAgo: 9, availableMinor: 95_000_00, status: "pending_review" },
+  { user: "usr_0022", amountMinor: 420_00, feeMinor: 25, currency: "GBP", provider: "flutterwave", bank: ["Monzo", "3308", "OLUWATOMISIN AJAYI", "GB", 7_000], hoursAgo: 60, availableMinor: 31_00, status: "queued" },
+  { user: "usr_0020", amountMinor: 150_000_00, feeMinor: 50_00, currency: "NGN", provider: "paystack", bank: ["Moniepoint", "0001", "DANGOTE GIVEAWAY", "NG", 20], hoursAgo: 300, availableMinor: 0, status: "failed", note: "Account banned for impersonation." },
+];
 
-export function buildDemoPayouts(): MockPayoutRecord[] {
-  return [
-    { id: "pyt_0001", userId: "usr_0001", amountMinor: 1_250_000_00, providerFeeMinor: 50_00, currency: "NGN", provider: "Paystack", destination: bank("GTBank", "4821", "ADAEZE NNAMDI OKONKWO", 9_000), source: "SELLER_SALES", requestedAt: isoHoursAgo(3), fraud: assessFraud(8, ["Destination used for 14 earlier payouts", "Amount within usual range"], 3), walletBalanceAfterMinor: 214_300_00, status: "PENDING" },
-    { id: "pyt_0002", userId: "usr_0012", amountMinor: 890_000_00, providerFeeMinor: 50_00, currency: "NGN", provider: "Paystack", destination: bank("Opay", "0937", "ADEDAYO AKINOLA", 2), source: "SELLER_SALES", requestedAt: isoHoursAgo(1.5), fraud: assessFraud(91, ["New bank account added 2h ago", "Account name differs from verified legal name", "Seller is suspended with 3 strikes", "Velocity 5x the 30-day baseline"], 1.4), walletBalanceAfterMinor: 0, status: "PENDING" },
-    { id: "pyt_0003", userId: "usr_0002", amountMinor: 340_500_00, providerFeeMinor: 50_00, currency: "NGN", provider: "Flutterwave", destination: bank("Access Bank", "1170", "BABATUNDE OLALEKAN BAKARE", 4_000), source: "CREATOR_EARNINGS", requestedAt: isoHoursAgo(7), fraud: assessFraud(22, ["Creator ad-share payout", "Device unchanged"], 7), walletBalanceAfterMinor: 58_000_00, status: "PENDING" },
-    { id: "pyt_0004", userId: "usr_0007", amountMinor: 2_150_00, providerFeeMinor: 15_00, currency: "GHS", provider: "Flutterwave", destination: mobileMoney("MTN MoMo", "4410", "KWAME MENSAH ASANTE", 3_000), source: "CREATOR_EARNINGS", requestedAt: isoHoursAgo(12), fraud: assessFraud(35, ["Gifts from 3 accounts created this week"], 12), walletBalanceAfterMinor: 180_00, status: "PENDING" },
-    { id: "pyt_0005", userId: "usr_0005", amountMinor: 410_000_00, providerFeeMinor: 50_00, currency: "NGN", provider: "Paystack", destination: bank("Zenith Bank", "6602", "CHUKWUEMEKA OBI", 30), source: "SELLER_SALES", requestedAt: isoHoursAgo(26), fraud: assessFraud(64, ["Device change since last login", "Open dispute on a recent order", "Bank account added 30h ago"], 26), walletBalanceAfterMinor: 12_000_00, status: "ON_HOLD" },
-    { id: "pyt_0006", userId: "usr_0008", amountMinor: 18_500_00, providerFeeMinor: 110_00, currency: "KES", provider: "M-Pesa", destination: mobileMoney("M-Pesa", "7781", "WANJIRU KAMAU", 5_000), source: "SELLER_SALES", requestedAt: isoHoursAgo(40), fraud: assessFraud(12, ["Consistent weekly payout pattern"], 40), walletBalanceAfterMinor: 2_200_00, status: "PAID" },
-    { id: "pyt_0007", userId: "usr_0025", amountMinor: 780_000_00, providerFeeMinor: 50_00, currency: "NGN", provider: "Paystack", destination: bank("Kuda", "2290", "OLUWAYEMI AFOLABI", 6_000), source: "CREATOR_EARNINGS", requestedAt: isoHoursAgo(9), fraud: assessFraud(46, ["Gift income 3x last month after a viral live", "Destination verified"], 9), walletBalanceAfterMinor: 95_000_00, status: "PENDING" },
-    { id: "pyt_0008", userId: "usr_0022", amountMinor: 420_00, providerFeeMinor: 25, currency: "GBP", provider: "Flutterwave", destination: bank("Monzo", "3308", "OLUWATOMISIN AJAYI", 7_000), source: "CREATOR_EARNINGS", requestedAt: isoHoursAgo(60), fraud: assessFraud(5, ["Long-standing destination"], 60), walletBalanceAfterMinor: 31_00, status: "APPROVED" },
-    { id: "pyt_0009", userId: "usr_0020", amountMinor: 150_000_00, providerFeeMinor: 50_00, currency: "NGN", provider: "Paystack", destination: bank("Moniepoint", "0001", "DANGOTE GIVEAWAY", 20), source: "WALLET", requestedAt: isoHoursAgo(300), fraud: assessFraud(98, ["Account banned for impersonation", "Coins received from 212 new accounts"], 300), walletBalanceAfterMinor: 0, status: "REJECTED" },
-  ];
+export function buildDemoWithdrawals(): MockWithdrawalRecord[] {
+  return withdrawalSeedRows.map((row, index) => {
+    const [bankName, accountLast4, accountName, countryCode, addedHoursAgo] = row.bank;
+    const id = `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+    const isDecided = row.status !== "pending_review";
+    return {
+      id,
+      reference: `WD-${String(240_100 + index)}`,
+      userId: row.user,
+      amountMinor: row.amountMinor,
+      feeMinor: row.feeMinor,
+      currency: row.currency,
+      provider: row.provider,
+      destination: { payoutAccountId: `pac_${index + 1}`, bankName, accountLast4, accountName, countryCode, addedAt: isoHoursAgo(addedHoursAgo), removed: false },
+      createdAt: isoHoursAgo(row.hoursAgo),
+      availableBalanceMinor: row.availableMinor,
+      withdrawalStatus: row.status,
+      failureReason: row.status === "failed" ? `rejected: ${row.note ?? ""}` : null,
+      processedAt: row.status === "paid" || row.status === "failed" ? isoHoursAgo(row.hoursAgo - 2) : null,
+      reviewedByStaffId: isDecided ? "adm_0002" : null,
+      reviewedAt: isDecided ? isoHoursAgo(row.hoursAgo - 1) : null,
+      reviewNote: row.note ?? null,
+    };
+  });
 }
+
+const coin = (record: Omit<MockCoinRecord, "reviewedAt" | "reviewedByStaffId" | "reviewNote" | "clawbackShortfallCoins"> & Partial<MockCoinRecord>): MockCoinRecord => ({ reviewedAt: null, reviewedByStaffId: null, reviewNote: null, clawbackShortfallCoins: 0, ...record });
 
 export function buildDemoCoinTransactions(): MockCoinRecord[] {
   return [
-    { id: "coin_0001", kind: "PURCHASE", senderId: "usr_0018", receiverId: null, coins: 25_000, fiatMinor: 250_000_00, currency: "NGN", feeBasisPoints: null, context: "Coin pack: 25,000 coins", paymentProvider: "Paystack card •••• 1123", flags: ["First purchase over 10x usual size", "Card issued abroad"], chargebackRisk: "HIGH", createdAt: isoHoursAgo(2), status: "PENDING_REVIEW" },
-    { id: "coin_0002", kind: "GIFT", senderId: "usr_0018", receiverId: "usr_0025", coins: 20_000, fiatMinor: 200_000_00, currency: "NGN", feeBasisPoints: 3_000, context: "Gift in live: “Friday night studio session”", paymentProvider: null, flags: ["Sender funded minutes before gifting", "Coins bought with high-risk card"], chargebackRisk: "HIGH", createdAt: isoHoursAgo(1.6), status: "PENDING_REVIEW" },
-    { id: "coin_0003", kind: "TRANSFER", senderId: "usr_0016", receiverId: "usr_0011", coins: 4_000, fiatMinor: 40_000_00, currency: "NGN", feeBasisPoints: 2_500, context: "Direct coin transfer", paymentProvider: null, flags: [], chargebackRisk: "LOW", createdAt: isoHoursAgo(20), status: "REVIEWED" },
-    { id: "coin_0004", kind: "PURCHASE", senderId: "usr_0027", receiverId: null, coins: 1_200, fiatMinor: 1_500_00, currency: "KES", feeBasisPoints: null, context: "Coin pack: 1,200 coins", paymentProvider: "M-Pesa", flags: [], chargebackRisk: "LOW", createdAt: isoHoursAgo(30), status: "REVIEWED" },
-    { id: "coin_0005", kind: "TRANSFER", senderId: "usr_0020", receiverId: "usr_0012", coins: 90_000, fiatMinor: 900_000_00, currency: "NGN", feeBasisPoints: 2_500, context: "Direct coin transfer", paymentProvider: null, flags: ["Sender banned", "Receiver suspended", "Transfer ring: 212 linked accounts"], chargebackRisk: "HIGH", createdAt: isoHoursAgo(290), status: "REVERSED" },
-    { id: "coin_0006", kind: "GIFT", senderId: "usr_0002", receiverId: "usr_0007", coins: 800, fiatMinor: 60_00, currency: "GHS", feeBasisPoints: 3_000, context: "Gift in live: “Afrobeats production Q&A”", paymentProvider: null, flags: ["Cross-border gift"], chargebackRisk: "MEDIUM", createdAt: isoHoursAgo(5), status: "PENDING_REVIEW" },
+    coin({ id: "c0000000-0000-4000-8000-000000000001", kind: "purchase", senderId: "usr_0018", receiverId: null, coins: 25_000, feeCoins: null, feeBasisPoints: null, fiatMinor: 250_000_00, currency: "NGN", reference: "CP-77120", paymentProvider: "paystack", channel: "web_checkout", reviewFlags: ["coin_purchase_velocity", "chargeback_history"], flags: [], createdAt: isoHoursAgo(2), transactionStatus: "succeeded", reviewStatus: "pending_review" }),
+    coin({ id: "c0000000-0000-4000-8000-000000000002", kind: "transfer", senderId: "usr_0018", receiverId: "usr_0025", coins: 20_000, feeCoins: 6_000, feeBasisPoints: 3_000, fiatMinor: null, currency: "NGN", reference: null, paymentProvider: null, channel: null, reviewFlags: ["transfer_burst"], flags: ["chargeback_risk"], createdAt: isoHoursAgo(1.6), transactionStatus: "completed", reviewStatus: "pending_review" }),
+    coin({ id: "c0000000-0000-4000-8000-000000000003", kind: "transfer", senderId: "usr_0016", receiverId: "usr_0011", coins: 4_000, feeCoins: 1_000, feeBasisPoints: 2_500, fiatMinor: null, currency: "NGN", reference: null, paymentProvider: null, channel: null, reviewFlags: [], flags: [], createdAt: isoHoursAgo(20), transactionStatus: "completed", reviewStatus: "not_required" }),
+    coin({ id: "c0000000-0000-4000-8000-000000000004", kind: "purchase", senderId: "usr_0027", receiverId: null, coins: 1_200, feeCoins: null, feeBasisPoints: null, fiatMinor: 1_500_00, currency: "KES", reference: "CP-77001", paymentProvider: "apple", channel: "store_iap", reviewFlags: ["coin_purchase_velocity"], flags: [], createdAt: isoHoursAgo(30), transactionStatus: "succeeded", reviewStatus: "reviewed", reviewedAt: isoHoursAgo(28), reviewedByStaffId: "adm_0002", reviewNote: "Normal top-up pattern for this buyer." }),
+    coin({ id: "c0000000-0000-4000-8000-000000000005", kind: "transfer", senderId: "usr_0020", receiverId: "usr_0012", coins: 90_000, feeCoins: 22_500, feeBasisPoints: 2_500, fiatMinor: null, currency: "NGN", reference: null, paymentProvider: null, channel: null, reviewFlags: ["transfer_fan_out", "open_wallet_risk_flag"], flags: ["impersonation"], createdAt: isoHoursAgo(290), transactionStatus: "reversed", reviewStatus: "reversed", reviewedAt: isoHoursAgo(280), reviewedByStaffId: "adm_0002", reviewNote: "Transfer ring of 212 linked accounts.", clawbackShortfallCoins: 12_000 }),
+    coin({ id: "c0000000-0000-4000-8000-000000000006", kind: "transfer", senderId: "usr_0002", receiverId: "usr_0007", coins: 800, feeCoins: 240, feeBasisPoints: 3_000, fiatMinor: null, currency: "NGN", reference: null, paymentProvider: null, channel: null, reviewFlags: ["transfer_burst"], flags: [], createdAt: isoHoursAgo(5), transactionStatus: "completed", reviewStatus: "pending_review" }),
   ];
 }

@@ -21,8 +21,9 @@ export function buildInitialPlansConfiguration(): PlansConfiguration {
       plan("BLUE_ESSENTIAL", { color: "BLUE", tier: "ESSENTIAL", displayName: "Blue Essential", badgeVisible: false, isPurchasable: true, perks: ["Priority account recovery", "Impersonation protection", "Edit posts within 1 hour"] }),
       plan("BLUE_VERIFIED", { color: "BLUE", tier: "VERIFIED", displayName: "Blue Verified", badgeVisible: true, isPurchasable: true, perks: ["Blue badge on profile and posts", "Priority ranking in comments", "Longer clips (up to 10 minutes)", "Custom app icons"] }),
       plan("BLUE_PREMIUM", { color: "BLUE", tier: "PREMIUM", displayName: "Blue Premium", badgeVisible: true, isPurchasable: true, perks: ["Everything in Blue Verified", "Fewer ads in feed", "Monthly boost credit", "Priority support"] }),
+      plan("GOLD_ONLY", { color: "GOLD", tier: "ONLY", displayName: "Gold", badgeVisible: true, isPurchasable: true, perks: ["Gold business badge", "Verified store label on products"] }),
       plan("GOLD_PRO", { color: "GOLD", tier: "PRO", displayName: "Gold Pro", badgeVisible: true, isPurchasable: true, perks: ["Gold business badge", "Zudomart Dashboard access", "Verified store label on products"], dashboardEntitlements: goldEntitlements(false) }),
-      plan("GOLD_PREMIUM", { color: "GOLD", tier: "PREMIUM", displayName: "Gold Premium", badgeVisible: true, isPurchasable: true, perks: ["Everything in Gold Pro", "Dedicated account manager", "Lower payout hold period"], dashboardEntitlements: goldEntitlements(true) }),
+      plan("GOLD_BUSINESS", { color: "GOLD", tier: "BUSINESS", displayName: "Gold Business", badgeVisible: true, isPurchasable: true, perks: ["Everything in Gold Pro", "Dedicated account manager", "Lower escrow fee"], dashboardEntitlements: goldEntitlements(true) }),
       plan("BLACK_OFFICIAL", { color: "BLACK", tier: "OFFICIAL", displayName: "Black Official", badgeVisible: true, isPurchasable: false, perks: ["Government and public institution badge", "Granted only through the manual official process"] }),
     ],
   };

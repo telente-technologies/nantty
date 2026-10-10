@@ -1,7 +1,7 @@
 import type { AdminPermission } from "@/constants/adminPermissions.constant";
 import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, failNotFound, matchesSearchText, paginateItems, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, failNotFound, matchesSearchText, paginateByCursor, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { presentPlatformUserSummary } from "@/mocks/seed/demoPlatformUsers.mock";
 import { readDemoVerificationPlanPrice, type MockVerificationRecord } from "@/mocks/seed/peopleVerifications.mock";
@@ -97,7 +97,7 @@ export function registerPeopleVerificationMockHandlers(): void {
       .map(presentVerificationApplication)
       .filter((application) => matchesSearchText(search, application.user.username, application.user.displayName, application.applicant.legalName, application.applicant.businessName, application.id))
       .sort((first, second) => (first.status === "PENDING" ? 0 : 1) - (second.status === "PENDING" ? 0 : 1) || first.submittedAt.localeCompare(second.submittedAt));
-    return respondWithJson(200, paginateItems(records, request));
+    return respondWithJson(200, paginateByCursor(records, request));
   });
 
   registerMockRoute("GET", "/admin/verifications/:verificationId", (request) => {

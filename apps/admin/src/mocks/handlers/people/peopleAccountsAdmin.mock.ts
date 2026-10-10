@@ -1,7 +1,7 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { readMockAreaStore, readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { requireMockPermission, requireMockStepUp, requireMockSuperadmin } from "@/mocks/mockGuards.mock";
-import { MockHttpError, createMockId, failConflict, failValidation, paginateItems, readEnumValue, readIsoNow, readJsonObjectBody, readRequiredReason, readRequiredTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, createMockId, failConflict, failValidation, paginateByCursor, readEnumValue, readIsoNow, readJsonObjectBody, readRequiredReason, readRequiredTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import { maskEmailAddress, presentPlatformUserSummary, type MockPlatformUserRecord } from "@/mocks/seed/demoPlatformUsers.mock";
 import type { AdminCreatedAccount, CheckmarkGrant, ProfileType } from "@/types/accountsAdmin.type";
@@ -71,7 +71,7 @@ export function registerPeopleAccountsAdminMockHandlers(): void {
   registerMockRoute("GET", "/admin/accounts/created", (request) => {
     requireMockPermission(request, "users:read");
     const items = readStore().created.map((record): AdminCreatedAccount => ({ ...record, user: presentPlatformUserSummary(findPlatformUserForPeopleOrFail(record.userId)) }));
-    return respondWithJson(200, paginateItems(items, request));
+    return respondWithJson(200, paginateByCursor(items, request));
   });
 
   registerMockRoute("POST", "/admin/accounts", (request) => {
@@ -109,7 +109,7 @@ export function registerPeopleAccountsAdminMockHandlers(): void {
     requireMockPermission(request, "verification:grant", "verification:revoke");
     const status = request.query.get("status") ?? "ACTIVE";
     const items = readStore().grants.filter((record) => status === "ALL" || (status === "ACTIVE" ? record.revokedAt === null : record.revokedAt !== null)).map(presentGrant);
-    return respondWithJson(200, paginateItems(items, request));
+    return respondWithJson(200, paginateByCursor(items, request));
   });
 
   registerMockRoute("POST", "/admin/checkmark-grants", (request) => {

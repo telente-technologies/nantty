@@ -2,7 +2,7 @@ import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/moc
 import { revokeEveryMockSessionForAdmin } from "@/mocks/mockAuthTokens.mock";
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, createMockId, failConflict, failNotFound, failValidation, matchesSearchText, paginateItems, readEnumValue, readIsoNow, readJsonObjectBody, readRequiredReason, readRequiredTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, createMockId, failConflict, failNotFound, failValidation, matchesSearchText, paginateByCursor, readEnumValue, readIsoNow, readJsonObjectBody, readRequiredReason, readRequiredTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { MockAdminRecord } from "@/mocks/seed/demoAdmins.mock";
 import type { AdminAccountSummary } from "@/types/admin.type";
@@ -59,7 +59,7 @@ export function registerAdminAccountMockHandlers(): void {
     const admins = readMockDatabase()
       .admins.map(presentAdminAccountSummary)
       .filter((admin) => matchesSearchText(search, admin.name, admin.email) && (!status || admin.status === status) && (!role || admin.role === role));
-    return respondWithJson(200, paginateItems(admins, request));
+    return respondWithJson(200, paginateByCursor(admins, request));
   });
 
   registerMockRoute("GET", "/admin/admins/:adminId", (request) => {

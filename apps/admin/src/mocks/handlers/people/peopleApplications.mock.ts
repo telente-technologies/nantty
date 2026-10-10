@@ -1,6 +1,6 @@
 import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission } from "@/mocks/mockGuards.mock";
-import { MockHttpError, failNotFound, matchesSearchText, paginateItems, readIsoNow, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, failNotFound, matchesSearchText, paginateByCursor, readIsoNow, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { presentPlatformUserSummary } from "@/mocks/seed/demoPlatformUsers.mock";
 import { evaluateApplicationEligibility, type MockProgramApplicationRecord } from "@/mocks/seed/peopleApplications.mock";
@@ -65,7 +65,7 @@ export function registerPeopleApplicationMockHandlers(): void {
         .map(presentProgramApplication)
         .filter((application) => matchesSearchText(request.query.get("search"), application.user.username, application.user.displayName, application.storeName, application.id))
         .sort((first, second) => first.submittedAt.localeCompare(second.submittedAt));
-      return respondWithJson(200, paginateItems(items, request));
+      return respondWithJson(200, paginateByCursor(items, request));
     });
     registerMockRoute("GET", `/admin/applications/${kind}/:applicationId`, (request) => {
       requireMockPermission(request, permissionByKind[kind]);

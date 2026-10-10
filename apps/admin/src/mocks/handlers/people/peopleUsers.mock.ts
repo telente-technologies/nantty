@@ -1,7 +1,7 @@
 import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, failValidation, matchesSearchText, paginateItems, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readOptionalTrimmedString, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, failValidation, matchesSearchText, paginateByCursor, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readOptionalTrimmedString, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { presentPlatformUserSummary, type MockPlatformUserRecord } from "@/mocks/seed/demoPlatformUsers.mock";
 import type { UserDetail } from "@/types/peopleUsers.type";
@@ -58,7 +58,7 @@ export function registerPeopleUserMockHandlers(): void {
   registerMockRoute("GET", "/admin/users", (request) => {
     requireMockPermission(request, "users:read", "support:tickets", "verification:review", "moderation:reports");
     const users = readMockDatabase().platformUsers.filter((user) => matchesUserFilters(user, request)).map(presentPlatformUserSummary);
-    return respondWithJson(200, paginateItems(users, request));
+    return respondWithJson(200, paginateByCursor(users, request));
   });
 
   registerMockRoute("GET", "/admin/users/:userId", (request) => {

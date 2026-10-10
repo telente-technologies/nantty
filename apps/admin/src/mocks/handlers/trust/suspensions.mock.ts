@@ -1,6 +1,6 @@
 import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, matchesSearchText, paginateItems, readEnumValue, readJsonObjectBody, readRequiredReason, readIsoNow, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, matchesSearchText, paginateByCursor, readEnumValue, readJsonObjectBody, readRequiredReason, readIsoNow, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockQueueCounter } from "@/mocks/mockQueueCounters.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { readMockAreaStore } from "@/mocks/mockDatabase.mock";
@@ -123,7 +123,7 @@ export function registerSuspensionMockHandlers(): void {
       .filter((record) => (!source || record.source === source) && matchesSearchText(search, record.id, findPlatformUserRecordOrFail(record.userId).username, findPlatformUserRecordOrFail(record.userId).displayName))
       .sort((first, second) => second.riskScore - first.riskScore)
       .map(presentSummary);
-    return respondWithJson(200, paginateItems(items, request));
+    return respondWithJson(200, paginateByCursor(items, request));
   });
 
   registerMockRoute("GET", "/admin/suspensions/cases/:caseId", (request) => {
@@ -145,7 +145,7 @@ export function registerSuspensionMockHandlers(): void {
       .filter((record) => matchesSearchText(search, findPlatformUserRecordOrFail(record.userId).username, findPlatformUserRecordOrFail(record.userId).displayName))
       .map(presentSuspendedAccount)
       .sort((first, second) => first.daysUntilDeletion - second.daysUntilDeletion);
-    return respondWithJson(200, paginateItems(items, request));
+    return respondWithJson(200, paginateByCursor(items, request));
   });
 
   registerMockRoute("POST", "/admin/suspensions/accounts/:caseId/reinstate", (request) => {
