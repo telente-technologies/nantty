@@ -2,7 +2,7 @@ import { findMockPlatformUser, readMockAreaStore } from "@/mocks/mockDatabase.mo
 import { MockHttpError, createMockId, readIsoNow } from "@/mocks/mockResponses.mock";
 import { buildDemoDisputes, buildDemoRefunds } from "@/mocks/seed/moneyDisputes.mock";
 import { buildDemoOrders, calculateOrderTotalInMinorUnits } from "@/mocks/seed/moneyOrders.mock";
-import { buildDemoCoinTransactions, buildDemoPayouts } from "@/mocks/seed/moneyPayouts.mock";
+import { buildDemoCoinTransactions, buildDemoWithdrawals } from "@/mocks/seed/moneyPayouts.mock";
 import type { LedgerAccountKind } from "@/types/ledger.type";
 
 import type { MockJournalLegRecord, MockJournalRecord, MockLedgerAccountRecord, MockMoneyStore, MockOrderRecord } from "./moneyRecords.mock";
@@ -32,14 +32,14 @@ export function calculateEscrowHeldMinor(order: MockOrderRecord): number {
 function describeLedgerAccount(accountId: string): Omit<MockLedgerAccountRecord, "id" | "currency"> {
   const [prefix = "", middle = ""] = accountId.split(":");
   const definitions: Record<string, { name: string; kind: LedgerAccountKind }> = {
-    provider_clearing: { name: "Payment provider clearing", kind: "ASSET" },
-    escrow_holding: { name: "Escrow holding", kind: "LIABILITY" },
-    platform_commission: { name: "Escrow fees", kind: "REVENUE" },
-    coin_float: { name: "Coins in circulation", kind: "LIABILITY" },
-    coin_fees: { name: "Coin transfer and gift fees", kind: "REVENUE" },
+    provider_clearing: { name: "Payment provider clearing", kind: "asset" },
+    escrow_holding: { name: "Escrow holding", kind: "liability" },
+    platform_commission: { name: "Escrow fees", kind: "revenue" },
+    coin_float: { name: "Coins in circulation", kind: "liability" },
+    coin_fees: { name: "Coin transfer and gift fees", kind: "revenue" },
   };
-  if (prefix === "user_wallet") return { name: `Wallet · @${findMockPlatformUser(middle)?.username ?? middle}`, kind: "LIABILITY", ownerUserId: middle };
-  const definition = definitions[prefix] ?? { name: prefix, kind: "ASSET" as const };
+  if (prefix === "user_wallet") return { name: `Wallet · @${findMockPlatformUser(middle)?.username ?? middle}`, kind: "liability", ownerUserId: middle };
+  const definition = definitions[prefix] ?? { name: prefix, kind: "asset" as const };
   return { ...definition, ownerUserId: null };
 }
 
@@ -84,23 +84,17 @@ function createInitialMoneyStore(): MockMoneyStore {
     orders: buildDemoOrders(readUserDisplayNameOrUnknown),
     disputes: buildDemoDisputes(),
     refunds: buildDemoRefunds(),
-    payouts: buildDemoPayouts(),
+    withdrawals: buildDemoWithdrawals(),
     coinTransactions: buildDemoCoinTransactions(),
     ledgerAccounts: new Map(),
     journals: [],
   };
   for (const order of store.orders) postSeedJournalsForOrder(store, order);
-  for (const payout of store.payouts.filter((candidate) => candidate.status === "PAID" || candidate.status === "APPROVED")) {
-    postMockLedgerJournal(store, { currency: payout.currency, occurredAt: payout.requestedAt, description: `Withdrawal to ${payout.destination.institutionName} ${payout.destination.accountMasked}`, reference: { type: "PAYOUT", id: payout.id, label: payout.id }, legs: [{ accountId: `user_wallet:${payout.userId}`, direction: "DEBIT", amountMinor: payout.amountMinor }, { accountId: "provider_clearing", direction: "CREDIT", amountMinor: payout.amountMinor }] });
+  for (const withdrawal of store.withdrawals.filter((candidate) => candidate.withdrawalStatus === "paid" || candidate.withdrawalStatus === "queued")) {
+    postMockLedgerJournal(store, { currency: withdrawal.currency, occurredAt: withdrawal.createdAt, description: `Withdrawal to ${withdrawal.destination.bankName} ••••${withdrawal.destination.accountLast4}`, reference: { type: "PAYOUT", id: withdrawal.id, label: withdrawal.reference }, legs: [{ accountId: `user_wallet:${withdrawal.userId}`, direction: "DEBIT", amountMinor: withdrawal.amountMinor }, { accountId: "provider_clearing", direction: "CREDIT", amountMinor: withdrawal.amountMinor }] });
   }
-  for (const coin of store.coinTransactions.filter((candidate) => candidate.status !== "REVERSED")) {
-    const reference = { type: "COIN" as const, id: coin.id, label: coin.context };
-    if (coin.kind === "PURCHASE") {
-      postMockLedgerJournal(store, { currency: coin.currency, occurredAt: coin.createdAt, description: `Coin purchase: ${coin.coins.toLocaleString("en-NG")} coins`, reference, legs: [{ accountId: "provider_clearing", direction: "DEBIT", amountMinor: coin.fiatMinor }, { accountId: "coin_float", direction: "CREDIT", amountMinor: coin.fiatMinor }] });
-    } else {
-      const feeMinor = Math.round((coin.fiatMinor * (coin.feeBasisPoints ?? 0)) / 10_000);
-      postMockLedgerJournal(store, { currency: coin.currency, occurredAt: coin.createdAt, description: `Platform fee on coin ${coin.kind.toLowerCase()}`, reference, legs: [{ accountId: "coin_float", direction: "DEBIT", amountMinor: feeMinor }, { accountId: "coin_fees", direction: "CREDIT", amountMinor: feeMinor }] });
-    }
+  for (const coin of store.coinTransactions.filter((candidate) => candidate.kind === "purchase" && candidate.fiatMinor !== null && candidate.reviewStatus !== "reversed")) {
+    postMockLedgerJournal(store, { currency: coin.currency, occurredAt: coin.createdAt, description: `Coin purchase: ${coin.coins.toLocaleString("en-NG")} coins`, reference: { type: "COIN", id: coin.id, label: coin.reference ?? coin.id }, legs: [{ accountId: "provider_clearing", direction: "DEBIT", amountMinor: coin.fiatMinor ?? 0 }, { accountId: "coin_float", direction: "CREDIT", amountMinor: coin.fiatMinor ?? 0 }] });
   }
   store.journals.sort((first, second) => second.occurredAt.localeCompare(first.occurredAt));
   return store;

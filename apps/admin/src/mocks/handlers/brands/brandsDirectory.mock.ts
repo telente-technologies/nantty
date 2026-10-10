@@ -1,6 +1,6 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, failNotFound, matchesSearchText, paginateItems, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, failNotFound, matchesSearchText, paginateByCursor, readIsoNow, readIsoTimeOffset, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { MockBrandRecord } from "@/mocks/seed/brandsDirectory.mock";
 import { presentBrandDetail, presentBrandSummary, readAllowedOfficialActions } from "@/mocks/handlers/brands/brandsPresenters.mock";
@@ -46,7 +46,7 @@ export function registerBrandDirectoryMockHandlers(): void {
       .brands.filter((brand) => matchesSearchText(search, brand.name, brand.slug, brand.category, brand.id) && (!official || brand.officialStatus === official) && (!country || brand.country === country))
       .sort((first, second) => Number(second.officialStatus === "PENDING") - Number(first.officialStatus === "PENDING") || first.name.localeCompare(second.name))
       .map(presentBrandSummary);
-    return respondWithJson(200, paginateItems(brands, request));
+    return respondWithJson(200, paginateByCursor(brands, request));
   });
 
   registerMockRoute("GET", "/admin/brands/:brandId", (request) => {

@@ -3,8 +3,8 @@ import { registerDisputeMockHandlers } from "@/mocks/handlers/money/disputes.moc
 import { registerLedgerMockHandlers } from "@/mocks/handlers/money/ledger.mock";
 import { readMockMoneyStore } from "@/mocks/handlers/money/moneyStore.mock";
 import { registerOrderAndEscrowMockHandlers } from "@/mocks/handlers/money/ordersAndEscrow.mock";
-import { registerPayoutMockHandlers } from "@/mocks/handlers/money/payouts.mock";
 import { registerRefundMockHandlers } from "@/mocks/handlers/money/refunds.mock";
+import { registerWithdrawalMockHandlers } from "@/mocks/handlers/money/withdrawals.mock";
 import { registerMockQueueCounter } from "@/mocks/mockQueueCounters.mock";
 
 function findOldestTimestamp(timestamps: readonly string[]): string | null {
@@ -27,9 +27,9 @@ function registerMoneyQueueCounters(): void {
     label: "Payouts to approve",
     href: "/commerce/payouts",
     readCount: () => {
-      const waiting = readMockMoneyStore().payouts.filter((payout) => payout.status === "PENDING" || payout.status === "ON_HOLD");
+      const waiting = readMockMoneyStore().withdrawals.filter((withdrawal) => withdrawal.withdrawalStatus === "pending_review" || withdrawal.withdrawalStatus === "on_hold");
       const dayAgo = new Date(Date.now() - 86_400_000).toISOString();
-      return { count: waiting.length, oldestAt: findOldestTimestamp(waiting.map((payout) => payout.requestedAt)), breachingSla: waiting.filter((payout) => payout.requestedAt < dayAgo).length };
+      return { count: waiting.length, oldestAt: findOldestTimestamp(waiting.map((withdrawal) => withdrawal.createdAt)), breachingSla: waiting.filter((withdrawal) => withdrawal.createdAt < dayAgo).length };
     },
   });
   registerMockQueueCounter({
@@ -37,7 +37,7 @@ function registerMoneyQueueCounters(): void {
     label: "Coin reviews",
     href: "/commerce/coins",
     readCount: () => {
-      const pending = readMockMoneyStore().coinTransactions.filter((coin) => coin.status === "PENDING_REVIEW");
+      const pending = readMockMoneyStore().coinTransactions.filter((coin) => coin.reviewStatus === "pending_review");
       return { count: pending.length, oldestAt: findOldestTimestamp(pending.map((coin) => coin.createdAt)) };
     },
   });
@@ -47,7 +47,7 @@ export function registerMoneyMockHandlers(): void {
   registerOrderAndEscrowMockHandlers();
   registerDisputeMockHandlers();
   registerRefundMockHandlers();
-  registerPayoutMockHandlers();
+  registerWithdrawalMockHandlers();
   registerCoinMockHandlers();
   registerLedgerMockHandlers();
   registerMoneyQueueCounters();

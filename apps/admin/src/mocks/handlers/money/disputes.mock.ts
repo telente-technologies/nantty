@@ -1,16 +1,17 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { createMockId, failConflict, failNotFound, failValidation, matchesSearchText, paginateItems, readEnumValue, readIsoNow, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { createMockId, failConflict, failNotFound, failValidation, matchesSearchText, paginateByCursor, readIsoNow, readJsonObjectBody, readRequiredTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { DisputeOutcome, DisputeStatus } from "@/types/commerce.type";
 
 import type { MockDisputeRecord } from "./moneyRecords.mock";
 import { findMockOrderOrFail, presentDisputeDetail, presentDisputeSummary } from "./moneyPresenters.mock";
-import { calculateCommissionInMinorUnits, calculateEscrowHeldMinor, postMockLedgerJournal, readMockMoneyStore, readUserSearchableText, requireIdempotencyKeyHeader } from "./moneyStore.mock";
+import { calculateCommissionInMinorUnits, calculateEscrowHeldMinor, postMockLedgerJournal, readMockMoneyStore, requireIdempotencyKeyHeader } from "./moneyStore.mock";
 import { appendEscrowTimelineEvent, readMoneyAmountInOrderCurrency, readPageFilterValue } from "./moneyValidation.mock";
 
-const disputeStatuses: readonly DisputeStatus[] = ["OPEN", "AWAITING_SELLER", "IN_REVIEW", "RESOLVED"];
-const priorityRank = { URGENT: 0, HIGH: 1, NORMAL: 2 } as const;
+const disputeStatuses: readonly DisputeStatus[] = ["awaiting_seller", "under_review", "resolved_refunded", "resolved_released", "closed"];
+const statusGroups: Record<string, readonly DisputeStatus[]> = { open: ["awaiting_seller", "under_review"], resolved: ["resolved_refunded", "resolved_released", "closed"], ...Object.fromEntries(disputeStatuses.map((status) => [status, [status]])) };
+const outcomeAliases: Record<string, DisputeOutcome> = { REFUND_FULL: "REFUND_FULL", REFUND_PARTIAL: "REFUND_PARTIAL", RELEASE_TO_SELLER: "RELEASE_TO_SELLER", refund: "REFUND_FULL", partial: "REFUND_PARTIAL", release: "RELEASE_TO_SELLER" };
 
 function findMockDisputeOrFail(disputeId: string): MockDisputeRecord {
   const dispute = readMockMoneyStore().disputes.find((candidate) => candidate.id === disputeId);
@@ -24,7 +25,7 @@ function settleDisputeEscrow(request: MockRequest, dispute: MockDisputeRecord, o
   const heldMinor = calculateEscrowHeldMinor(order);
   if (heldMinor <= 0) failConflict("ESCROW_EMPTY", "There is no money left in escrow for this order.");
   const refundMinor = outcome === "REFUND_FULL" ? heldMinor : outcome === "RELEASE_TO_SELLER" ? 0 : (requestedRefundMinor ?? 0);
-  if (outcome === "REFUND_PARTIAL" && (refundMinor <= 0 || refundMinor >= heldMinor)) failValidation("refundAmount.amountMinor", "A partial refund must be more than zero and less than the amount in escrow.");
+  if (outcome === "REFUND_PARTIAL" && (refundMinor <= 0 || refundMinor >= heldMinor)) failConflict("INVALID_PARTIAL_REFUND", "A partial refund must be more than zero and less than the order total.");
   const sellerPortionMinor = heldMinor - refundMinor;
   const commissionMinor = calculateCommissionInMinorUnits(sellerPortionMinor, order.commissionBasisPoints);
   const reference = { type: "DISPUTE" as const, id: dispute.id, label: `${dispute.id} · ${order.orderNumber}` };
@@ -57,18 +58,17 @@ export function registerDisputeMockHandlers(): void {
   registerMockRoute("GET", "/admin/disputes", (request) => {
     requireMockPermission(request, "disputes:resolve");
     const store = readMockMoneyStore();
-    const status = readPageFilterValue(request, "status");
+    const statusFilter = readPageFilterValue(request, "status");
+    if (statusFilter && !statusGroups[statusFilter]) failValidation("status", "is not an allowed value");
+    const allowed = statusFilter ? statusGroups[statusFilter] : null;
     const search = request.query.get("search");
-    const disputes = store.disputes
-      .filter((dispute) => !status || dispute.status === status)
-      .filter((dispute) => {
-        const order = findMockOrderOrFail(dispute.orderId);
-        return matchesSearchText(search, dispute.id, order.orderNumber, order.storeName, readUserSearchableText(order.buyerId), readUserSearchableText(order.sellerId));
-      })
-      .sort((first, second) => priorityRank[first.priority] - priorityRank[second.priority] || first.slaDueAt.localeCompare(second.slaDueAt))
-      .map(presentDisputeSummary);
-    const counts = Object.fromEntries(disputeStatuses.map((candidate) => [candidate, store.disputes.filter((dispute) => dispute.status === candidate).length]));
-    return respondWithJson(200, { ...paginateItems(disputes, request), counts });
+    const presented = store.disputes.map(presentDisputeSummary);
+    const disputes = presented
+      .filter((dispute) => !allowed || allowed.includes(dispute.status))
+      .filter((dispute) => matchesSearchText(search, dispute.id, dispute.orderNumber, dispute.productName))
+      .sort((first, second) => second.openedAt.localeCompare(first.openedAt));
+    const counts = Object.fromEntries(disputeStatuses.map((candidate) => [candidate, presented.filter((dispute) => dispute.status === candidate).length]));
+    return respondWithJson(200, { ...paginateByCursor(disputes, request), counts });
   });
 
   registerMockRoute("GET", "/admin/disputes/:disputeId", (request) => {
@@ -83,8 +83,9 @@ export function registerDisputeMockHandlers(): void {
     const dispute = findMockDisputeOrFail(request.params.disputeId ?? "");
     if (dispute.status === "RESOLVED") failConflict("DISPUTE_ALREADY_RESOLVED", "This dispute has already been resolved.");
     const body = readJsonObjectBody(request);
-    const outcome = readEnumValue(body, "outcome", ["REFUND_FULL", "REFUND_PARTIAL", "RELEASE_TO_SELLER"] as const);
-    const reason = readRequiredReason(body);
+    const outcome = outcomeAliases[String(body["outcome"])];
+    if (!outcome) failValidation("outcome", "must be one of release, refund, partial");
+    const reason = readRequiredTrimmedString(body, body["note"] !== undefined ? "note" : "reason", 2000, 3);
     const order = findMockOrderOrFail(dispute.orderId);
     const requestedRefundMinor = outcome === "REFUND_PARTIAL" ? readMoneyAmountInOrderCurrency(body, "refundAmount", order.currency) : null;
     const before = { disputeStatus: dispute.status, orderStatus: order.status, escrowStatus: order.escrowStatus, escrowHeld: { amountMinor: calculateEscrowHeldMinor(order), currency: order.currency } };

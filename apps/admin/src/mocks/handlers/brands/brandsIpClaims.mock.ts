@@ -1,7 +1,7 @@
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, createMockId, matchesSearchText, paginateItems, readIsoNow, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, createMockId, matchesSearchText, paginateByCursor, readIsoNow, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import { asMutablePlatformUser, readUserExtrasForPeople } from "@/mocks/handlers/people/peopleStore.mock";
 import type { MockIpClaimRecord } from "@/mocks/seed/brandsIpClaims.mock";
@@ -60,7 +60,7 @@ export function registerIpClaimMockHandlers(): void {
       .claims.map((claim) => presentIpClaimSummary(claim))
       .filter((claim) => matchesSearchText(search, claim.id, claim.listing.title, claim.claimantBrand.name, claim.accusedSeller.username) && (!status || status === "ALL" || claim.status === status) && (!type || claim.type === type))
       .sort((first, second) => first.slaDueAt.localeCompare(second.slaDueAt));
-    return respondWithJson(200, paginateItems(claims, request));
+    return respondWithJson(200, paginateByCursor(claims, request));
   });
 
   registerMockRoute("GET", "/admin/ip-claims/:claimId", (request) => {

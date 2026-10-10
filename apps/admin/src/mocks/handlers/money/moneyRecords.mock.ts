@@ -1,7 +1,37 @@
-import type { DeliveryStatus, DisputeEvidence, DisputeMessage, DisputeOutcome, DisputeStatus, EscrowStatus, EscrowTimelineEvent, OrderStatus } from "@/types/commerce.type";
-import type { CoinTransactionKind, CoinTransactionStatus, FraudAssessment, PayoutDestination, PayoutStatus } from "@/types/payouts.type";
+import type { CoinReviewStatus, CoinTransactionKind } from "@/types/coins.type";
+import type { DisputeOutcome } from "@/types/commerce.type";
 import type { LedgerAccountKind } from "@/types/ledger.type";
-import type { RiskLevel } from "@/types/platformUser.type";
+import type { WithdrawalStatus } from "@/types/withdrawals.type";
+
+export type MockOrderStatus = "PAID" | "SHIPPED" | "DELIVERED" | "COMPLETED" | "CANCELLED" | "REFUNDED" | "PARTIALLY_REFUNDED" | "DISPUTED";
+export type MockEscrowStatus = "FUNDED" | "HELD" | "RELEASED" | "REFUNDED" | "PARTIALLY_REFUNDED" | "DISPUTED";
+export type MockDeliveryStatus = "AWAITING_SHIPMENT" | "IN_TRANSIT" | "DELIVERED" | "RETURNED" | "CANCELLED";
+export type MockDisputeStatus = "OPEN" | "AWAITING_SELLER" | "IN_REVIEW" | "RESOLVED";
+
+export interface MockEscrowTimelineEvent {
+  readonly id: string;
+  readonly kind: "FUNDED" | "HELD" | "SHIPPED" | "DELIVERED" | "AUTO_RELEASE_SCHEDULED" | "DISPUTED" | "RELEASED" | "REFUNDED" | "PARTIALLY_REFUNDED";
+  readonly occurredAt: string;
+  readonly actorName: string;
+  readonly actorKind: "BUYER" | "SELLER" | "ADMIN" | "SYSTEM";
+  readonly note: string | null;
+  readonly amount: { readonly amountMinor: number; readonly currency: string } | null;
+}
+
+export interface MockDisputeEvidence {
+  readonly id: string;
+  readonly imageUrl: string;
+  readonly caption: string;
+  readonly submittedBy: "BUYER" | "SELLER";
+}
+
+export interface MockDisputeMessage {
+  readonly id: string;
+  readonly authorName: string;
+  readonly authorRole: "BUYER" | "SELLER" | "ADMIN";
+  readonly body: string;
+  readonly sentAt: string;
+}
 
 export interface MockOrderItemRecord {
   readonly id: string;
@@ -25,11 +55,11 @@ export interface MockOrderRecord {
   readonly courier: string | null;
   readonly trackingNumber: string | null;
   readonly placedAt: string;
-  status: OrderStatus;
-  deliveryStatus: DeliveryStatus;
-  escrowStatus: EscrowStatus;
+  status: MockOrderStatus;
+  deliveryStatus: MockDeliveryStatus;
+  escrowStatus: MockEscrowStatus;
   autoReleaseAt: string | null;
-  timeline: EscrowTimelineEvent[];
+  timeline: MockEscrowTimelineEvent[];
   refundedMinor: number;
   disputeId: string | null;
 }
@@ -53,9 +83,9 @@ export interface MockDisputeRecord {
   readonly slaDueAt: string;
   readonly buyerClaim: string;
   readonly sellerResponse: string | null;
-  readonly evidence: readonly DisputeEvidence[];
-  readonly messages: DisputeMessage[];
-  status: DisputeStatus;
+  readonly evidence: readonly MockDisputeEvidence[];
+  readonly messages: MockDisputeMessage[];
+  status: MockDisputeStatus;
   resolution: MockDisputeResolutionRecord | null;
 }
 
@@ -71,19 +101,23 @@ export interface MockRefundRecord {
   status: "PROCESSING" | "COMPLETED" | "FAILED";
 }
 
-export interface MockPayoutRecord {
+export interface MockWithdrawalRecord {
   readonly id: string;
+  readonly reference: string;
   readonly userId: string;
   readonly amountMinor: number;
-  readonly providerFeeMinor: number;
+  readonly feeMinor: number;
   readonly currency: string;
   readonly provider: string;
-  readonly destination: PayoutDestination;
-  readonly source: "CREATOR_EARNINGS" | "SELLER_SALES" | "WALLET";
-  readonly requestedAt: string;
-  readonly fraud: FraudAssessment;
-  readonly walletBalanceAfterMinor: number;
-  status: PayoutStatus;
+  readonly destination: { readonly payoutAccountId: string; readonly bankName: string; readonly accountLast4: string; readonly accountName: string; readonly countryCode: string; readonly addedAt: string; readonly removed: boolean };
+  readonly createdAt: string;
+  availableBalanceMinor: number;
+  withdrawalStatus: WithdrawalStatus;
+  failureReason: string | null;
+  processedAt: string | null;
+  reviewedByStaffId: string | null;
+  reviewedAt: string | null;
+  reviewNote: string | null;
 }
 
 export interface MockCoinRecord {
@@ -92,15 +126,22 @@ export interface MockCoinRecord {
   readonly senderId: string;
   readonly receiverId: string | null;
   readonly coins: number;
-  readonly fiatMinor: number;
-  readonly currency: string;
+  readonly feeCoins: number | null;
   readonly feeBasisPoints: number | null;
-  readonly context: string;
+  readonly fiatMinor: number | null;
+  readonly currency: string;
+  readonly reference: string | null;
   readonly paymentProvider: string | null;
+  readonly channel: string | null;
+  readonly reviewFlags: readonly string[];
   readonly flags: readonly string[];
-  readonly chargebackRisk: RiskLevel;
   readonly createdAt: string;
-  status: CoinTransactionStatus;
+  transactionStatus: string;
+  reviewStatus: CoinReviewStatus;
+  reviewedAt: string | null;
+  reviewedByStaffId: string | null;
+  reviewNote: string | null;
+  clawbackShortfallCoins: number;
 }
 
 export interface MockLedgerAccountRecord {
@@ -130,7 +171,7 @@ export interface MockMoneyStore {
   readonly orders: MockOrderRecord[];
   readonly disputes: MockDisputeRecord[];
   readonly refunds: MockRefundRecord[];
-  readonly payouts: MockPayoutRecord[];
+  readonly withdrawals: MockWithdrawalRecord[];
   readonly coinTransactions: MockCoinRecord[];
   readonly ledgerAccounts: Map<string, MockLedgerAccountRecord>;
   readonly journals: MockJournalRecord[];

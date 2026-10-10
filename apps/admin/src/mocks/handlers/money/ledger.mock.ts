@@ -1,5 +1,5 @@
 import { requireMockPermission } from "@/mocks/mockGuards.mock";
-import { failValidation, paginateItems, respondWithJson } from "@/mocks/mockResponses.mock";
+import { failValidation, paginateByCursor, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { JournalEntry, LedgerAccount } from "@/types/ledger.type";
 
@@ -18,7 +18,7 @@ function calculateAccountBalanceMinor(account: MockLedgerAccountRecord, journals
       else credits += leg.amountMinor;
     }
   }
-  const isDebitNormal = account.kind === "ASSET" || account.kind === "EXPENSE";
+  const isDebitNormal = account.kind === "asset" || account.kind === "expense";
   return { balanceMinor: isDebitNormal ? debits - credits : credits - debits, entryCount };
 }
 
@@ -29,11 +29,13 @@ function presentJournal(journal: MockJournalRecord): JournalEntry {
   const totalCredits = sumFor("CREDIT");
   return {
     id: journal.id,
-    occurredAt: journal.occurredAt,
+    reference: `${journal.reference.type.toLowerCase()}:${journal.reference.id}`,
+    externalReference: journal.reference.label,
+    kind: `${journal.reference.type.toLowerCase()}.posted`,
     description: journal.description,
-    currency: journal.currency,
-    reference: journal.reference,
-    legs: journal.legs.map((leg) => ({ accountId: leg.accountId, accountName: accounts.get(leg.accountId)?.name ?? leg.accountId, direction: leg.direction, amount: { amountMinor: leg.amountMinor, currency: journal.currency } })),
+    reversesEntryId: null,
+    postedAt: journal.occurredAt,
+    legs: journal.legs.map((leg) => ({ accountCode: leg.accountId, accountName: accounts.get(leg.accountId)?.name ?? leg.accountId, direction: leg.direction === "DEBIT" ? "debit" : "credit", amount: { amountMinor: leg.amountMinor, currency: journal.currency } })),
     totalDebits: { amountMinor: totalDebits, currency: journal.currency },
     totalCredits: { amountMinor: totalCredits, currency: journal.currency },
     isBalanced: totalDebits === totalCredits,
@@ -42,7 +44,7 @@ function presentJournal(journal: MockJournalRecord): JournalEntry {
 
 function readRequiredCurrency(request: MockRequest): string {
   const currency = request.query.get("currency") ?? "";
-  if (!/^[A-Z]{3}$/.test(currency)) failValidation("currency", "Choose a currency.");
+  if (!/^([A-Z]{3}|COIN)$/.test(currency)) failValidation("currency", "must be an ISO 4217 code or COIN");
   return currency;
 }
 
@@ -50,7 +52,7 @@ export function registerLedgerMockHandlers(): void {
   registerMockRoute("GET", "/admin/ledger/currencies", (request) => {
     requireMockPermission(request, "ledger:read");
     const currencies = [...new Set([...readMockMoneyStore().ledgerAccounts.values()].map((account) => account.currency))].sort((first, second) => (first === "NGN" ? -1 : second === "NGN" ? 1 : first.localeCompare(second)));
-    return respondWithJson(200, { items: currencies });
+    return respondWithJson(200, { items: currencies, nextCursor: null });
   });
 
   registerMockRoute("GET", "/admin/ledger/accounts", (request) => {
@@ -61,20 +63,21 @@ export function registerLedgerMockHandlers(): void {
       .filter((account) => account.currency === currency)
       .map((account) => {
         const { balanceMinor, entryCount } = calculateAccountBalanceMinor(account, store.journals);
-        return { ...account, balance: { amountMinor: balanceMinor, currency }, entryCount };
+        return { code: account.id, name: account.name, kind: account.kind, currency, balance: { amountMinor: balanceMinor, currency }, ownerType: account.ownerUserId ? "user" : null, ownerId: account.ownerUserId, entryCount };
       })
-      .sort((first, second) => Number(first.ownerUserId !== null) - Number(second.ownerUserId !== null) || first.name.localeCompare(second.name));
-    return respondWithJson(200, { items: accounts });
+      .sort((first, second) => first.code.localeCompare(second.code));
+    return respondWithJson(200, paginateByCursor(accounts, request, 20));
   });
 
-  registerMockRoute("GET", "/admin/ledger/entries", (request) => {
+  registerMockRoute("GET", "/admin/ledger/journal-entries", (request) => {
     requireMockPermission(request, "ledger:read");
     const currency = readRequiredCurrency(request);
-    const accountId = request.query.get("accountId");
-    const referenceId = request.query.get("referenceId");
+    const accountCode = request.query.get("accountCode");
+    const reference = request.query.get("reference");
     const journals = readMockMoneyStore()
-      .journals.filter((journal) => journal.currency === currency && (!accountId || journal.legs.some((leg) => leg.accountId === accountId)) && (!referenceId || journal.reference.id === referenceId))
-      .map(presentJournal);
-    return respondWithJson(200, paginateItems(journals, request, 25));
+      .journals.filter((journal) => journal.currency === currency && (!accountCode || journal.legs.some((leg) => leg.accountId === accountCode)))
+      .map(presentJournal)
+      .filter((journal) => !reference || journal.reference === reference);
+    return respondWithJson(200, paginateByCursor(journals, request, 20));
   });
 }

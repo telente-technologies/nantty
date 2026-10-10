@@ -1,8 +1,7 @@
 import { failValidation } from "@/mocks/mockResponses.mock";
 import type { MockRequest } from "@/mocks/mockRouter.mock";
-import type { EscrowTimelineEvent } from "@/types/commerce.type";
 
-import type { MockOrderRecord } from "./moneyRecords.mock";
+import type { MockEscrowTimelineEvent, MockOrderRecord } from "./moneyRecords.mock";
 
 export function readMoneyAmountInOrderCurrency(body: Record<string, unknown>, fieldName: string, currency: string): number {
   const value = body[fieldName] as { amountMinor?: unknown; currency?: unknown } | null | undefined;
@@ -12,7 +11,7 @@ export function readMoneyAmountInOrderCurrency(body: Record<string, unknown>, fi
   return value.amountMinor;
 }
 
-export function appendEscrowTimelineEvent(order: MockOrderRecord, request: MockRequest, kind: EscrowTimelineEvent["kind"], note: string, amountMinor: number | null): void {
+export function appendEscrowTimelineEvent(order: MockOrderRecord, request: MockRequest, kind: MockEscrowTimelineEvent["kind"], note: string, amountMinor: number | null): void {
   order.timeline = [
     ...order.timeline,
     {
@@ -29,5 +28,5 @@ export function appendEscrowTimelineEvent(order: MockOrderRecord, request: MockR
 
 export function readPageFilterValue(request: MockRequest, name: string): string | null {
   const value = request.query.get(name);
-  return value && value !== "ALL" ? value : null;
+  return value && value !== "all" ? value : null;
 }
