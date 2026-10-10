@@ -2,12 +2,10 @@ package integrations
 
 import (
 	"context"
-	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/url"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -23,19 +21,24 @@ type GooglePlayProductPrice struct {
 }
 
 type GooglePlaySettings struct {
-	PackageName            string
-	ServiceAccountJson     []byte
-	ApiBaseUrl             string
-	ProductPrices          map[string]GooglePlayProductPrice
-	SubscriptionProductIds []string
-	PushToken              string
-	StoreFeeBasisPoints    int64
-	HttpClient             *http.Client
+	PackageName             string
+	ServiceAccountJson      []byte
+	ApiBaseUrl              string
+	ProductPrices           map[string]GooglePlayProductPrice
+	SubscriptionProductIds  []string
+	SubscriptionPrefixes    []string
+	PushToken               string
+	PushAudience            string
+	PushServiceAccountEmail string
+	PushCertificatesUrl     string
+	StoreFeeBasisPoints     int64
+	HttpClient              *http.Client
 }
 
 type GooglePlayVerifier struct {
 	settings GooglePlaySettings
 	tokens   *googleAccessTokenSource
+	oidc     googleOidcKeys
 	Now      func() time.Time
 }
 
@@ -61,12 +64,15 @@ func (verifier *GooglePlayVerifier) StoreFeeBasisPoints() int64 {
 }
 
 func (verifier *GooglePlayVerifier) VerifyPurchaseReceipt(ctx context.Context, receipt interfaces.StoreReceipt) (interfaces.VerifiedStorePurchase, error) {
-	price, priced := verifier.settings.ProductPrices[receipt.ProductId]
-	if !priced || receipt.ReceiptData == "" {
+	if receipt.ReceiptData == "" {
 		return interfaces.VerifiedStorePurchase{}, interfaces.ErrStoreReceiptInvalid
 	}
-	if slices.Contains(verifier.settings.SubscriptionProductIds, receipt.ProductId) {
-		return verifier.verifySubscription(ctx, receipt.ReceiptData, receipt.ProductId, price)
+	if verifier.isSubscriptionProduct(receipt.ProductId) {
+		return verifier.verifySubscription(ctx, receipt.ReceiptData, receipt.ProductId)
+	}
+	price, priced := verifier.settings.ProductPrices[receipt.ProductId]
+	if !priced {
+		return interfaces.VerifiedStorePurchase{}, interfaces.ErrStoreReceiptInvalid
 	}
 	var purchase struct {
 		PurchaseState      int    `json:"purchaseState"`
@@ -89,40 +95,6 @@ func (verifier *GooglePlayVerifier) VerifyPurchaseReceipt(ctx context.Context, r
 	}, nil
 }
 
-func (verifier *GooglePlayVerifier) verifySubscription(ctx context.Context, purchaseToken, productId string, price GooglePlayProductPrice) (interfaces.VerifiedStorePurchase, error) {
-	var subscription struct {
-		SubscriptionState string    `json:"subscriptionState"`
-		LatestOrderId     string    `json:"latestOrderId"`
-		StartTime         time.Time `json:"startTime"`
-		TestPurchase      *struct{} `json:"testPurchase"`
-		LineItems         []struct {
-			ProductId  string    `json:"productId"`
-			ExpiryTime time.Time `json:"expiryTime"`
-		} `json:"lineItems"`
-	}
-	if err := verifier.getPublisherResource(ctx, "/purchases/subscriptionsv2/tokens/"+url.PathEscape(purchaseToken), &subscription); err != nil {
-		return interfaces.VerifiedStorePurchase{}, err
-	}
-	active := subscription.SubscriptionState == "SUBSCRIPTION_STATE_ACTIVE" || subscription.SubscriptionState == "SUBSCRIPTION_STATE_IN_GRACE_PERIOD"
-	if !active || subscription.LatestOrderId == "" {
-		return interfaces.VerifiedStorePurchase{}, interfaces.ErrStoreReceiptInvalid
-	}
-	verified := interfaces.VerifiedStorePurchase{
-		StoreTransactionId: subscription.LatestOrderId, OriginalTransactionId: purchaseToken, ProductId: productId, PriceMinor: price.AmountMinor,
-		Currency: price.Currency, Environment: googleEnvironment(subscription.TestPurchase != nil), PurchasedAt: subscription.StartTime.UTC(), IsSubscription: true,
-	}
-	for _, item := range subscription.LineItems {
-		if item.ProductId == productId {
-			expires := item.ExpiryTime.UTC()
-			verified.ExpiresAt = &expires
-		}
-	}
-	if verified.ExpiresAt == nil {
-		return interfaces.VerifiedStorePurchase{}, interfaces.ErrStoreReceiptInvalid
-	}
-	return verified, nil
-}
-
 func (verifier *GooglePlayVerifier) getPublisherResource(ctx context.Context, path string, destination any) error {
 	token, err := verifier.tokens.AccessToken(ctx)
 	if err != nil {
@@ -142,8 +114,7 @@ func (verifier *GooglePlayVerifier) getPublisherResource(ctx context.Context, pa
 }
 
 func (verifier *GooglePlayVerifier) VerifySignedRefundNotification(ctx context.Context, rawBody []byte, headers http.Header) (interfaces.StoreRefundNotification, error) {
-	presented := headers.Get(GooglePlayPushTokenHeader)
-	if verifier.settings.PushToken == "" || subtle.ConstantTimeCompare([]byte(presented), []byte(verifier.settings.PushToken)) != 1 {
+	if !verifier.pushAuthorized(ctx, headers.Get(GooglePlayPushTokenHeader)) {
 		return interfaces.StoreRefundNotification{}, interfaces.ErrInvalidWebhookSignature
 	}
 	var push struct {
@@ -184,27 +155,6 @@ func (verifier *GooglePlayVerifier) VerifySignedRefundNotification(ctx context.C
 		notification.RefundedAt = time.UnixMilli(eventMillis).UTC()
 	case developer.SubscriptionNotification != nil:
 		return verifier.convertSubscriptionNotification(ctx, notification, developer.SubscriptionNotification.NotificationType, developer.SubscriptionNotification.PurchaseToken, developer.SubscriptionNotification.SubscriptionId)
-	}
-	return notification, nil
-}
-
-func (verifier *GooglePlayVerifier) convertSubscriptionNotification(ctx context.Context, notification interfaces.StoreRefundNotification, notificationType int, purchaseToken, productId string) (interfaces.StoreRefundNotification, error) {
-	notification.OriginalTransactionId, notification.ProductId = purchaseToken, productId
-	switch notificationType {
-	case 1, 2, 4, 7:
-		notification.Kind = interfaces.StoreNotificationRenewed
-		price := verifier.settings.ProductPrices[productId]
-		verified, err := verifier.verifySubscription(ctx, purchaseToken, productId, price)
-		if err != nil {
-			return interfaces.StoreRefundNotification{}, err
-		}
-		notification.StoreTransactionId, notification.ExpiresAt = verified.StoreTransactionId, verified.ExpiresAt
-	case 12, 13:
-		notification.Kind = interfaces.StoreNotificationExpired
-	case 5:
-		notification.Kind = interfaces.StoreNotificationRenewalFailed
-	case 6:
-		notification.Kind = interfaces.StoreNotificationGrace
 	}
 	return notification, nil
 }

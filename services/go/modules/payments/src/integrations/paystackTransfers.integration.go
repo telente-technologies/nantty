@@ -42,7 +42,7 @@ func (provider *PaystackProvider) CreateTransfer(ctx context.Context, request in
 		"reference": strings.ToLower(request.Reference), "reason": truncate(request.Reason, 100),
 	}
 	var transfer paystackTransfer
-	if err := provider.http.send(ctx, paystackRequest{method: http.MethodPost, path: "/transfer", body: body, retrySafe: true}, &transfer); err != nil {
+	if err := provider.http.send(ctx, paystackRequest{method: http.MethodPost, path: "/transfer", body: body, retrySafe: false}, &transfer); err != nil {
 		return interfaces.TransferResult{}, err
 	}
 	if transfer.Status == "otp" {

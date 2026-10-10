@@ -12,13 +12,20 @@ import (
 )
 
 func (verifier *GooglePlayVerifier) RevokeSubscriptionWithFullRefund(ctx context.Context, purchaseToken string) error {
+	return verifier.postPublisherAction(ctx, "/purchases/subscriptionsv2/tokens/"+url.PathEscape(purchaseToken)+":revoke", `{"revokeContext":{"fullRefund":{}}}`)
+}
+
+func (verifier *GooglePlayVerifier) AcknowledgeSubscription(ctx context.Context, productId, purchaseToken string) error {
+	return verifier.postPublisherAction(ctx, "/purchases/subscriptions/"+url.PathEscape(productId)+"/tokens/"+url.PathEscape(purchaseToken)+":acknowledge", `{}`)
+}
+
+func (verifier *GooglePlayVerifier) postPublisherAction(ctx context.Context, path, body string) error {
 	token, err := verifier.tokens.AccessToken(ctx)
 	if err != nil {
 		return err
 	}
-	target := strings.TrimRight(verifier.settings.ApiBaseUrl, "/") + "/androidpublisher/v3/applications/" + url.PathEscape(verifier.settings.PackageName) +
-		"/purchases/subscriptionsv2/tokens/" + url.PathEscape(purchaseToken) + ":revoke"
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, target, bytes.NewReader([]byte(`{"revokeContext":{"fullRefund":{}}}`)))
+	target := strings.TrimRight(verifier.settings.ApiBaseUrl, "/") + "/androidpublisher/v3/applications/" + url.PathEscape(verifier.settings.PackageName) + path
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, target, bytes.NewReader([]byte(body)))
 	if err != nil {
 		return err
 	}
@@ -30,7 +37,7 @@ func (verifier *GooglePlayVerifier) RevokeSubscriptionWithFullRefund(ctx context
 	}
 	defer response.Body.Close()
 	if response.StatusCode/100 != 2 {
-		return fmt.Errorf("%w: google play revoke returned %d", interfaces.ErrProviderUnavailable, response.StatusCode)
+		return fmt.Errorf("%w: google play %s returned %d", interfaces.ErrProviderUnavailable, path[strings.LastIndex(path, ":")+1:], response.StatusCode)
 	}
 	return nil
 }

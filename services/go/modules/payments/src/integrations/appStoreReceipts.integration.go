@@ -25,6 +25,8 @@ func NewGooglePlayBillingVerifier(configured bool, storeFeeBasisPoints int64) *A
 	return &AppStoreReceiptVerifier{settings: AppStoreReceiptVerifierSettings{Store: "google_play", Configured: configured, StoreFeeBasisPoints: storeFeeBasisPoints}}
 }
 
+func (verifier *AppStoreReceiptVerifier) IsPlaceholder() bool { return !verifier.settings.Configured }
+
 func (verifier *AppStoreReceiptVerifier) Store() string { return verifier.settings.Store }
 
 func (verifier *AppStoreReceiptVerifier) StoreFeeBasisPoints() int64 {

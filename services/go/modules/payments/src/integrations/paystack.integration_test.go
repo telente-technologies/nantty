@@ -181,6 +181,28 @@ func TestTransfersUseTheReferenceAndSurfaceOtpAndLowBalance(t *testing.T) {
 	}
 }
 
+func TestCreateTransferDoesNotRetryUncertainProviderFailures(t *testing.T) {
+	var requestCount int
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		requestCount++
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusBadGateway)
+		_, _ = writer.Write([]byte(`{"status":false,"message":"temporary provider failure","data":null}`))
+	}))
+	defer server.Close()
+
+	provider := NewPaystackProvider(PaystackSettings{BaseUrl: server.URL, SecretKey: "sk_test_unit", MaximumAttempts: 3})
+	_, err := provider.CreateTransfer(context.Background(), interfaces.TransferRequest{
+		RecipientCode: "RCP_1", AmountMinor: 99_000, Currency: "NGN", Reference: "ZMWD_1a2b3c4d5e6f7a8b9c0d",
+	})
+	if err == nil {
+		t.Fatal("expected provider failure")
+	}
+	if requestCount != 1 {
+		t.Fatalf("transfer requests = %d, want exactly 1 to avoid duplicate disbursement", requestCount)
+	}
+}
+
 func TestTransferFeeBandsFollowThePublishedSchedule(t *testing.T) {
 	bands := ParseTransferFeeBands("500000:1000;5000000:2500;*:5000")
 	cases := map[int64]int64{100_000: 1_000, 500_000: 1_000, 500_001: 2_500, 5_000_000: 2_500, 5_000_001: 5_000}

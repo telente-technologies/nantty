@@ -57,9 +57,10 @@ func StartMoneyHarnessWithPayments(t *testing.T, storeVerifiers map[string]inter
 		Money:             moneytesting.MoneyModuleSettingsForTests("payments", moneytesting.CreateEmptySchema(t, database, "payments"), ledgerSchema),
 		AllowedReturnUrls: []string{"https://zudomart.test/pay/return", "https://app.zudomart.test/pay/return"}, DefaultProvider: "paystack",
 		EscrowFeeBps: 150, BusinessEscrowFeeBps: 100, EscrowMode: "e2", CheckoutExpiryMinutes: 15, ConnectedAccountCountry: "NG",
-		Paystack:            configs.PaystackSettings{SecretKey: FakePaystackSecretKey, Channels: []string{"card", "bank", "ussd", "bank_transfer"}, SubaccountBearsFee: true, CardVerificationAmount: 5000},
+		Paystack:            configs.PaystackSettings{SecretKey: FakePaystackSecretKey, Channels: []string{"card", "bank", "ussd", "bank_transfer"}, SubaccountBearsFee: true, CardVerificationAmount: 5000, WebhookIpAllowlist: []string{"127.0.0.1", "::1"}},
 		OnboardingReturnUrl: "https://zudomart.test/seller/verification/return", OnboardingRefreshUrl: "https://zudomart.test/seller/verification/refresh",
 		WebSubscriptionPlanProducts: map[string]string{"premium_web": "PLN_premium_web"},
+		UnverifiedSellerSalesCaps:   map[string]int64{"NGN": 1 << 50, "USD": 1 << 50},
 		DataEncryptionKey:           bytes.Repeat([]byte{7}, 32), SavedCardFingerprintKey: "fingerprint-test-key", InternalApiToken: strings.Repeat("i", 32),
 	}
 	paystack := integrations.NewPaystackProvider(integrations.PaystackSettings{BaseUrl: harness.Paystack.Server.URL, SecretKey: FakePaystackSecretKey, MaximumAttempts: 3})

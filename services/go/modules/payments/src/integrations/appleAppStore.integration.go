@@ -52,6 +52,7 @@ type appleTransactionPayload struct {
 	Currency              string `json:"currency"`
 	Environment           string `json:"environment"`
 	Type                  string `json:"type"`
+	AppAccountToken       string `json:"appAccountToken"`
 }
 
 func NewAppleAppStoreVerifier(settings AppleAppStoreSettings) (*AppleAppStoreVerifier, error) {
@@ -93,17 +94,22 @@ func (verifier *AppleAppStoreVerifier) VerifyPurchaseReceipt(ctx context.Context
 	if transaction.RevocationDate != 0 || (receipt.TransactionId != "" && transaction.TransactionId != receipt.TransactionId) {
 		return interfaces.VerifiedStorePurchase{}, interfaces.ErrStoreReceiptInvalid
 	}
+	return convertAppleTransaction(transaction), nil
+}
+
+func convertAppleTransaction(transaction appleTransactionPayload) interfaces.VerifiedStorePurchase {
 	currency := strings.ToUpper(transaction.Currency)
 	verified := interfaces.VerifiedStorePurchase{
 		StoreTransactionId: transaction.TransactionId, OriginalTransactionId: transaction.OriginalTransactionId, ProductId: transaction.ProductId,
 		PriceMinor: convertMilliunitsToMinorUnits(transaction.Price, currency), Currency: currency, Environment: strings.ToLower(transaction.Environment),
 		PurchasedAt: time.UnixMilli(transaction.PurchaseDate).UTC(), IsSubscription: transaction.Type == "Auto-Renewable Subscription",
+		AccountToken: strings.ToLower(transaction.AppAccountToken),
 	}
 	if transaction.ExpiresDate > 0 {
 		expires := time.UnixMilli(transaction.ExpiresDate).UTC()
 		verified.ExpiresAt = &expires
 	}
-	return verified, nil
+	return verified
 }
 
 func (verifier *AppleAppStoreVerifier) decodeTransaction(signed string) (appleTransactionPayload, error) {
@@ -146,7 +152,11 @@ func (verifier *AppleAppStoreVerifier) VerifySignedRefundNotification(_ context.
 	}
 	notification := interfaces.StoreRefundNotification{
 		NotificationId: payload.NotificationUuid, StoreTransactionId: transaction.TransactionId, OriginalTransactionId: transaction.OriginalTransactionId,
-		ProductId: transaction.ProductId, Kind: classifyAppleNotification(payload.NotificationType, payload.Subtype),
+		ProductId: transaction.ProductId, Kind: classifyAppleNotification(payload.NotificationType, payload.Subtype), AccountToken: strings.ToLower(transaction.AppAccountToken),
+	}
+	if notification.Kind == interfaces.StoreNotificationRenewed && transaction.RevocationDate == 0 {
+		converted := convertAppleTransaction(transaction)
+		notification.Transaction = &converted
 	}
 	if transaction.RevocationDate > 0 {
 		notification.RefundedAt = time.UnixMilli(transaction.RevocationDate).UTC()
@@ -159,8 +169,13 @@ func (verifier *AppleAppStoreVerifier) VerifySignedRefundNotification(_ context.
 }
 
 func classifyAppleNotification(notificationType, subtype string) interfaces.StoreNotificationKind {
-	if notificationType == "DID_FAIL_TO_RENEW" && subtype == "GRACE_PERIOD" {
+	switch {
+	case notificationType == "DID_FAIL_TO_RENEW" && subtype == "GRACE_PERIOD":
 		return interfaces.StoreNotificationGrace
+	case notificationType == "DID_CHANGE_RENEWAL_STATUS" && subtype == "AUTO_RENEW_DISABLED":
+		return interfaces.StoreNotificationCancelled
+	case notificationType == "DID_CHANGE_RENEWAL_STATUS" && subtype == "AUTO_RENEW_ENABLED":
+		return interfaces.StoreNotificationResumed
 	}
 	switch notificationType {
 	case "REFUND", "REVOKE":
