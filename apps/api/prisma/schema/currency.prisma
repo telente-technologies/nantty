@@ -1,8 +1,0 @@
-model ExchangeRate {
-  currency         String   @id
-  unitsPerUsDollar BigInt
-  source           String
-  fetchedAt        DateTime
-
-  @@map("exchange_rates")
-}
