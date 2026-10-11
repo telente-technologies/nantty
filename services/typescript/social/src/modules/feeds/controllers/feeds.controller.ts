@@ -4,13 +4,14 @@ import { clampPageSize } from "../../../utils/cursor.util.js";
 import type { RouteFactory } from "../../../utils/route.util.js";
 import type { PostView } from "../../posts/models/post.model.js";
 import type { RecordFeedInteractionCommand } from "../commands/recordFeedInteraction/recordFeedInteraction.command.js";
+import type { FeedInteractionBatchResult, RecordFeedInteractionBatchCommand } from "../commands/recordFeedInteractionBatch/recordFeedInteractionBatch.command.js";
 import type { RecordFeedFeedbackCommand } from "../commands/recordFeedFeedback/recordFeedFeedback.command.js";
 import type { GetForYouFeedQuery } from "../queries/getForYouFeed/getForYouFeed.query.js";
 import type { GetFollowingFeedQuery } from "../queries/getFollowingFeed/getFollowingFeed.query.js";
 import type { GetPopularFeedQuery } from "../queries/getPopularFeed/getPopularFeed.query.js";
 import type { ListClipsQuery } from "../queries/listClips/listClips.query.js";
 import { badRequest } from "../../../errors/social.error.js";
-import { clipsQuerySchema, feedInteractionBodySchema, feedbackBodySchema, feedQuerySchema, followingFeedQuerySchema, resolveFeedbackKind } from "../validators/feeds.validator.js";
+import { clipsQuerySchema, feedInteractionBatchBodySchema, feedInteractionBodySchema, feedbackBodySchema, feedQuerySchema, followingFeedQuerySchema, resolveFeedbackKind } from "../validators/feeds.validator.js";
 
 export interface FeedsHandlers {
   readonly getForYouFeed: Handler<GetForYouFeedQuery, Page<PostView>>;
@@ -19,6 +20,7 @@ export interface FeedsHandlers {
   readonly listClips: Handler<ListClipsQuery, Page<PostView>>;
   readonly recordFeedFeedback: Handler<RecordFeedFeedbackCommand, void>;
   readonly recordFeedInteraction: Handler<RecordFeedInteractionCommand, void>;
+  readonly recordFeedInteractionBatch: Handler<RecordFeedInteractionBatchCommand, FeedInteractionBatchResult>;
 }
 
 export function createFeedsController(route: RouteFactory, handlers: FeedsHandlers) {
@@ -37,5 +39,6 @@ export function createFeedsController(route: RouteFactory, handlers: FeedsHandle
       return handlers.recordFeedFeedback({ userId: principal.accountId, postId: body.postId, kind });
     }),
     interaction: route({ authentication: "required", body: feedInteractionBodySchema }, ({ principal, body }) => handlers.recordFeedInteraction({ ...body, viewerId: principal.accountId })),
+    interactionBatch: route({ authentication: "required", body: feedInteractionBatchBodySchema }, ({ principal, body }) => handlers.recordFeedInteractionBatch({ viewerId: principal.accountId, events: body.events })),
   };
 }

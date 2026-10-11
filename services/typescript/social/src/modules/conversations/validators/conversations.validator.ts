@@ -10,14 +10,18 @@ export const listConversationsQuerySchema = schema.object({
 });
 export const searchQuerySchema = schema.object({ q: schema.string().min(1).max(100) });
 export const startConversationBodySchema = schema.object({ userId: schema.string().uuid() });
+const encryptedAttributesSchema = schema.string().min(1).max(16_384);
+
 export const createGroupBodySchema = schema.object({
-  name: schema.string().min(1).max(80),
+  name: schema.optional(schema.unknown()),
+  encryptedAttributes: encryptedAttributesSchema.optional(),
   photoMediaId: schema.string().uuid().optional(),
   memberIds: schema.array(schema.string().uuid()).max(255),
 });
 export const updateConversationBodySchema = schema.object({
   name: schema.string().min(1).max(80).optional(),
-  photoMediaId: schema.string().uuid().optional(),
+  encryptedAttributes: encryptedAttributesSchema.optional(),
+  photoMediaId: schema.optional(schema.nullable(schema.string().uuid())),
   disappearingMessagesSeconds: schema.optional(schema.nullable(schema.number().int().min(0).max(31_536_000))),
   onlyAdminsCanMentionAll: schema.boolean().optional(),
 });

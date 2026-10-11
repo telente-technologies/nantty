@@ -10,10 +10,12 @@ import { decorateFeedPage } from "../../services/feedDecoration.service.js";
 import type { GetFollowingFeedQuery } from "./getFollowingFeed.query.js";
 
 export function createGetFollowingFeedHandler(context: HandlerContext): Handler<GetFollowingFeedQuery, Page<PostView>> {
-  return async ({ viewerId, kinds, cursor, limit }) => {
+  return async ({ viewerId, kinds, cursor, limit, followedOnly = false }) => {
     const db = context.database.client;
     const [followed, hidden] = await Promise.all([followRepository.allFollowedAccountIds(db, viewerId), blockRepository.everyoneBlockedByOrBlocking(db, viewerId)]);
-    const authorIds = [viewerId, ...followed.filter((accountId) => !hidden.has(accountId))];
+    const followedAuthors = followed.filter((accountId) => !hidden.has(accountId) && accountId !== viewerId);
+    const authorIds = followedOnly ? followedAuthors : [viewerId, ...followedAuthors];
+    if (authorIds.length === 0) return { data: [], nextCursor: null };
     const page = buildPageFromOverfetchedRows(await feedRepository.pageFollowing(db, authorIds, kinds, limit, cursor), limit);
     const views = { data: await buildPostViews(context, viewerId, page.data), nextCursor: page.nextCursor };
     return kinds.includes("post") ? decorateFeedPage(context, views, { viewerId, surface: "feed", cursor, limit }) : views;

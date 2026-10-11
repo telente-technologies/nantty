@@ -15,7 +15,7 @@ export function createSearchConversationsHandler(context: HandlerContext): Handl
     if (needle === "") return { conversations: [], people: [] };
     const [rows, people] = await Promise.all([conversationRepository.pageForMember(context.database.client, viewerId, "chats", undefined, 100, undefined), context.directory.searchUserSummaries(needle, 10)]);
     const views = await buildConversationViews(context, viewerId, rows.slice(0, 100));
-    const matches = views.filter((view) => `${view.peer.name} ${view.peer.username} ${view.title ?? ""}`.toLowerCase().includes(needle));
+    const matches = views.filter((view) => view.kind !== "group" && `${view.peer.name} ${view.peer.username} ${view.title ?? ""}`.toLowerCase().includes(needle));
     return { conversations: matches.map((view) => ({ id: view.id, peer: view.peer, snippet: "" })), people: people.filter((person) => person.id !== viewerId) };
   };
 }

@@ -1,5 +1,6 @@
 import type { UserSummary } from "../../../interfaces/identityDirectory.interface.js";
 import type { HandlerContext } from "../../../types/handlerContext.type.js";
+import { signChatMediaUrls } from "../../messages/services/chatMediaOwnership.service.js";
 import { followRepository } from "../../follows/repositories/follow.repository.js";
 import { buildStreakViewForViewer } from "../../streaks/services/streakTracking.service.js";
 import type { ConversationView, MemberRoleName } from "../models/conversation.model.js";
@@ -30,6 +31,9 @@ export async function buildConversationViews(context: HandlerContext, viewerId: 
     followRepository.followedAccountIds(db, viewerId, peerIds),
     Promise.all(peerIds.map(async (peerId) => ((await followRepository.find(db, peerId, viewerId))?.state === "accepted" ? peerId : undefined))),
   ]);
+  const groupPhotoUrls = await signChatMediaUrls(context.chatMedia, viewerId, rows.flatMap((row) => (row.conversation.kind === "group" && row.conversation.photoMediaId !== null ? [row.conversation.photoMediaId] : [])));
+  const storeIds = [...new Set(rows.flatMap((row) => (row.conversation.kind === "business" && row.conversation.storeId !== null ? [row.conversation.storeId] : [])))];
+  const storeCards = new Map(await Promise.all(storeIds.map(async (storeId) => [storeId, await context.shareCards?.resolve("store", storeId, viewerId).catch(() => null)] as const)));
   const followers = new Set(followingViewer.filter((id): id is string => id !== undefined));
   const views: ConversationView[] = [];
   for (const row of rows) {
@@ -40,22 +44,23 @@ export async function buildConversationViews(context: HandlerContext, viewerId: 
     const streak = peerId !== undefined && row.inboxFolder === "chats" ? await buildStreakViewForViewer(context, conversation.id, viewerId, peerId) : null;
     views.push({
       id: conversation.id,
-      peer: peerSummary ?? groupPseudoPeer(conversation.id, conversation.title),
+      peer: peerSummary ?? groupPseudoPeer(conversation.id, conversation.kind === "group" ? null : conversation.kind === "business" && conversation.storeId !== null ? (storeCards.get(conversation.storeId)?.title ?? "Store") : conversation.title),
       lastMessage: "",
       lastMessageKind: conversation.lastMessageKind,
       lastMessageAt: conversation.lastMessageAt.toISOString(),
       unread: row.unreadCount,
       isFriend: peerId !== undefined && followedByViewer.has(peerId) && followers.has(peerId),
       kind: conversation.kind,
-      title: conversation.title,
-      description: conversation.description,
-      photoUrl: null,
+      title: conversation.kind === "group" ? null : conversation.title,
+      description: conversation.kind === "group" ? null : conversation.description,
+      encryptedAttributes: conversation.kind === "group" ? conversation.encryptedAttributes : null,
+      photoUrl: conversation.kind === "group" && conversation.photoMediaId !== null ? (groupPhotoUrls.get(conversation.photoMediaId) ?? null) : null,
       photoMediaId: conversation.photoMediaId,
       memberCount: conversation.members.length,
       myRole: row.role as MemberRoleName,
       disappearingMessagesSeconds: conversation.disappearingMessagesSeconds,
       onlyAdminsCanMentionAll: conversation.onlyAdminsCanMentionAll,
-      store: null,
+      store: conversation.kind === "business" && conversation.storeId !== null ? { id: conversation.storeId, name: storeCards.get(conversation.storeId)?.title ?? "Store", avatarUrl: storeCards.get(conversation.storeId)?.imageUrl ?? null } : null,
       inboxFolder: row.inboxFolder,
       spamReason: row.spamReason,
       streak,

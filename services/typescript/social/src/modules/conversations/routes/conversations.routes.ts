@@ -19,6 +19,7 @@ export function registerConversationsRoutes(router: HttpRouter, controller: Retu
   router.post(`${base}/:conversationId/read`, controller.read);
   router.post(`${base}/:conversationId/leave`, controller.leave);
   router.get(`${base}/:conversationId/members`, controller.members);
+  router.get(`${base}/:conversationId/recipients`, controller.recipients);
   router.post(`${base}/:conversationId/members`, controller.addMembers);
   router.delete(`${base}/:conversationId/members/:userId`, controller.removeMember);
   router.post(`${base}/:conversationId/admins`, controller.grantAdmin);

@@ -3,4 +3,5 @@ export interface GetFollowingFeedQuery {
   readonly kinds: readonly ("post" | "clip")[];
   readonly cursor: string | undefined;
   readonly limit: number;
+  readonly followedOnly?: boolean;
 }
