@@ -22,4 +22,5 @@ export interface FollowStatusView {
   readonly followedBy: boolean;
   readonly followersCount: number;
   readonly followingCount: number;
+  readonly viewerPostNotifications: "off" | "posts" | "posts_and_lives";
 }

@@ -43,10 +43,10 @@ export function createLinkUnfurler(dependencies: LinkUnfurlerDependencies): Link
     }
   }
 
-  async function unfurlAndCache(rawUrl: string, normalizedUrl: string): Promise<LinkPreviewView | null> {
+  async function unfurlAndCache(rawUrl: string, normalizedUrl: string, persist: boolean): Promise<LinkPreviewView | null> {
     const now = dependencies.clock.now();
     const saveFailure = async () => {
-      await linkPreviewCacheRepository.save(dependencies.db, { normalizedUrl, url: rawUrl, status: "failed", fetchedAt: now, expiresAt: new Date(now.getTime() + failedLifetimeMs) });
+      if (persist) await linkPreviewCacheRepository.save(dependencies.db, { normalizedUrl, url: rawUrl, status: "failed", fetchedAt: now, expiresAt: new Date(now.getTime() + failedLifetimeMs) });
       return null;
     };
     let page;
@@ -68,14 +68,15 @@ export function createLinkUnfurler(dependencies: LinkUnfurlerDependencies): Link
     }
     if (metadata.title === null) return saveFailure();
     const image = await proxyImageThroughMedia(metadata.imageUrl);
-    const row = await linkPreviewCacheRepository.save(dependencies.db, {
+    const fields = {
       normalizedUrl, url: rawUrl, status: "ready", title: metadata.title, description: metadata.description, siteName: metadata.siteName,
       imageUrl: image?.url ?? null, imageMediaId: image?.mediaId ?? null, fetchedAt: now, expiresAt: new Date(now.getTime() + readyLifetimeMs),
-    });
-    return convertRowToView(row);
+    };
+    return convertRowToView(persist ? await linkPreviewCacheRepository.save(dependencies.db, fields) : (fields as LinkPreviewCacheRow));
   }
 
-  async function resolveLinkPreview(rawUrl: string): Promise<LinkPreviewView | null> {
+  async function resolveLinkPreview(rawUrl: string, options: { readonly persist?: boolean } = {}): Promise<LinkPreviewView | null> {
+    const persist = options.persist ?? false;
     if (isInternalZudomartUrl(rawUrl, internalHosts)) return null;
     const normalizedUrl = normalizeUrlForCache(rawUrl);
     if (normalizedUrl === null) return null;
@@ -83,7 +84,7 @@ export function createLinkUnfurler(dependencies: LinkUnfurlerDependencies): Link
     if (cached !== null) return convertRowToView(cached);
     const running = inFlight.get(normalizedUrl);
     if (running !== undefined) return running;
-    const task = unfurlAndCache(normalizedUrl, normalizedUrl).finally(() => inFlight.delete(normalizedUrl));
+    const task = unfurlAndCache(normalizedUrl, normalizedUrl, persist).finally(() => inFlight.delete(normalizedUrl));
     inFlight.set(normalizedUrl, task);
     return task;
   }
@@ -93,7 +94,7 @@ export function createLinkUnfurler(dependencies: LinkUnfurlerDependencies): Link
     async attachLinkPreviewToPost(postId, text) {
       const url = findFirstExternalUrlInText(text, internalHosts);
       if (url === null) return null;
-      const preview = await resolveLinkPreview(url);
+      const preview = await resolveLinkPreview(url, { persist: true });
       if (preview !== null) await linkPreviewCacheRepository.attachToPost(dependencies.db, postId, preview as unknown as Prisma.InputJsonValue);
       return preview;
     },

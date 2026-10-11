@@ -10,4 +10,5 @@ export function registerFeedsRoutes(router: HttpRouter, controller: ReturnType<t
   router.get("/api/v1/clips", controller.clips);
   router.post("/api/v1/feeds/feedback", controller.feedback);
   router.post("/api/v1/feeds/interactions", controller.interaction);
+  router.post("/api/v1/feeds/interactions/batch", controller.interactionBatch);
 }

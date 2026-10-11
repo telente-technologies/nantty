@@ -1,4 +1,4 @@
-import type { FollowState } from "../../../generated/prisma/client.js";
+import type { FollowState, PostNotificationLevel } from "../../../generated/prisma/client.js";
 import type { Db } from "../../../types/database.type.js";
 
 export const followRepository = {
@@ -10,7 +10,18 @@ export const followRepository = {
     db.follow.upsert({
       where: { followerId_followeeId: { followerId, followeeId } },
       create: { followerId, followeeId, state, ...(state === "accepted" ? { respondedAt: new Date() } : {}) },
-      update: { state, createdAt: new Date(), respondedAt: state === "accepted" ? new Date() : null },
+      update: { state, createdAt: new Date(), respondedAt: state === "accepted" ? new Date() : null, postNotifications: "off" },
+    }),
+
+  setPostNotifications: (db: Db, id: string, level: PostNotificationLevel) => db.follow.update({ where: { id }, data: { postNotifications: level } }),
+
+  pagePostNotificationSubscribers: (db: Db, followeeId: string, levels: readonly PostNotificationLevel[], limit: number, cursor: string | undefined) =>
+    db.follow.findMany({
+      where: { followeeId, state: "accepted", postNotifications: { in: [...levels] } },
+      orderBy: { id: "asc" },
+      take: limit + 1,
+      select: { id: true, followerId: true },
+      ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
     }),
 
   setState: (db: Db, id: string, state: FollowState, respondedAt: Date) => db.follow.update({ where: { id }, data: { state, respondedAt } }),

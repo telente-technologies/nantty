@@ -7,11 +7,10 @@ import { shownToViewers } from "../../../constants/moderation.constant.js";
 export const feedRepository = {
   pageFollowing: (db: Db, authorIds: readonly string[], kinds: readonly ("post" | "clip")[], limit: number, cursor: string | undefined): Promise<PostRow[]> =>
     db.post.findMany({
-      where: { authorId: { in: [...authorIds] }, kind: { in: [...kinds] }, ...shownToViewers },
+      where: { authorId: { in: [...authorIds] }, kind: { in: [...kinds] }, ...shownToViewers, ...(cursor === undefined ? {} : { id: { lt: cursor } }) },
       orderBy: { id: "desc" },
       take: limit + 1,
       include: postWithMedia,
-      ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
     }),
 
   popularCandidates: (db: Db, kinds: readonly ("post" | "clip")[], since: Date): Promise<PostRow[]> =>
@@ -21,6 +20,15 @@ export const feedRepository = {
       take: popularFeedCandidateLimit,
       include: postWithMedia,
     }),
+
+  watchTotals: async (db: Db, postIds: readonly string[]): Promise<Map<string, { readonly videoViews: number; readonly completedViews: number }>> => {
+    if (postIds.length === 0) return new Map();
+    const rows = await db.postDailyStat.groupBy({ by: ["postId"], where: { postId: { in: [...postIds] } }, _sum: { videoViews: true, completedViews: true } });
+    return new Map(rows.map((row) => [row.postId, { videoViews: row._sum.videoViews ?? 0, completedViews: row._sum.completedViews ?? 0 }]));
+  },
+
+  findRankedRows: (db: Db, ids: readonly string[], kinds: readonly ("post" | "clip")[]): Promise<PostRow[]> =>
+    db.post.findMany({ where: { id: { in: [...ids] }, kind: { in: [...kinds] }, deletedAt: null, moderationVisibility: "visible", audience: "everyone", visibility: "public" }, include: postWithMedia }),
 
   recordFeedback: (db: Db, userId: string, postId: string, kind: string) => db.feedFeedback.create({ data: { userId, postId, kind } }),
 

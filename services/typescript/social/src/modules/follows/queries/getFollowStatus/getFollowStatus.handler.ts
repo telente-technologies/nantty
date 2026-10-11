@@ -4,6 +4,7 @@ import { blockRepository } from "../../../blocks/repositories/block.repository.j
 import type { FollowStatusView } from "../../models/follow.model.js";
 import { followRepository } from "../../repositories/follow.repository.js";
 import { deriveViewerFollowState } from "../../services/followRules.service.js";
+import { viewerLevelOf } from "../../../postNotifications/services/postNotificationRules.service.js";
 import type { GetFollowStatusQuery } from "./getFollowStatus.query.js";
 
 export function createGetFollowStatusHandler(context: HandlerContext): Handler<GetFollowStatusQuery, FollowStatusView> {
@@ -17,6 +18,7 @@ export function createGetFollowStatusHandler(context: HandlerContext): Handler<G
       followRepository.countFollowers(db, targetId),
       followRepository.countFollowing(db, targetId),
     ]);
-    return { state: deriveViewerFollowState(viewerHasBlocked, forward?.state), followedBy: backward?.state === "accepted", followersCount, followingCount };
+    const state = deriveViewerFollowState(viewerHasBlocked, forward?.state);
+    return { state, followedBy: backward?.state === "accepted", followersCount, followingCount, viewerPostNotifications: viewerLevelOf(state, forward?.postNotifications) };
   };
 }

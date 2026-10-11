@@ -36,3 +36,6 @@ export const feedInteractionBodySchema = schema.object({
   surface: schema.string().regex(/^[a-z_]{1,40}$/).optional(),
   rankingRequestId: schema.string().regex(/^[A-Za-z0-9_\-:.]{1,128}$/).optional(),
 });
+
+export const maximumInteractionsPerBatch = 50;
+export const feedInteractionBatchBodySchema = schema.object({ events: schema.array(feedInteractionBodySchema).min(1).max(maximumInteractionsPerBatch) });

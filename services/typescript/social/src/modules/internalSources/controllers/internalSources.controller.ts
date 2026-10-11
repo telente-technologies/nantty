@@ -5,6 +5,7 @@ import { requireInternalToken } from "../../../middlewares/internalToken.middlew
 import { postRepository } from "../../posts/repositories/post.repository.js";
 import type { HandlerContext } from "../../../types/handlerContext.type.js";
 import type { RouteFactory } from "../../../utils/route.util.js";
+import { createGetChatReportabilityHandler } from "../queries/getChatReportability/getChatReportability.handler.js";
 import { createGetModerationTargetPreviewHandler } from "../queries/getModerationTargetPreview/getModerationTargetPreview.handler.js";
 import { createGetPostSearchSourceHandler } from "../queries/getPostSearchSource/getPostSearchSource.handler.js";
 import { createGetSaveCountsHandler } from "../queries/getSaveCounts/getSaveCounts.handler.js";
@@ -18,6 +19,8 @@ const identifier = schema.string().uuid();
 const searchSourceParams = schema.object({ collection: schema.enum(["posts", "sounds"]), id: identifier });
 const moderationParams = schema.object({ type: schema.enum(["post", "clip", "comment", "sound", "message"]), id: identifier });
 const accountParams = schema.object({ accountId: identifier });
+const conversationParams = schema.object({ conversationId: identifier });
+const reportabilityQuery = schema.object({ reporterId: identifier, reportedUserId: identifier.optional(), messageId: identifier.optional() });
 const ownershipParams = schema.object({ kind: schema.enum(["post", "clip"]), id: identifier });
 const ownershipQuery = schema.object({ ownerUserId: identifier, storeId: schema.string().max(64).optional() });
 const pageQuery = { cursor: schema.string().max(100).optional(), limit: schema.coerce.number().int().min(1).max(1000).optional() };
@@ -35,7 +38,10 @@ export function createInternalSourcesController(route: RouteFactory, internalTok
   const listEngagers = createListAudienceEngagersHandler(context);
   const getSaveCounts = createGetSaveCountsHandler(context);
   const getActivityCounts = createGetAccountActivityCountsHandler(context);
+  const getChatReportability = createGetChatReportabilityHandler(context);
   return {
+    chatReportability: requireInternalToken(internalToken, route({ authentication: "optional", params: conversationParams, query: reportabilityQuery }, ({ params, query }) =>
+      getChatReportability({ conversationId: params.conversationId, reporterId: query.reporterId, reportedUserId: query.reportedUserId, messageId: query.messageId }))),
     ownership: requireInternalToken(internalToken, route({ authentication: "optional", params: ownershipParams, query: ownershipQuery }, async ({ params, query }) => {
       const post = await postRepository.findById(context.database.client, params.id);
       if (post === null || (params.kind === "clip" ? post.kind !== "clip" : post.kind !== "post" && post.kind !== "clip")) throw notFound("DESTINATION_NOT_FOUND", "That post is not available.");
