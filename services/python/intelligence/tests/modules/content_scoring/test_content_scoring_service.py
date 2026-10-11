@@ -97,12 +97,12 @@ async def test_a_registered_image_model_scores_the_post_behind_the_processed_med
     assert publisher.messages[0].model_version == "image-test-v1"
 
 
-def test_the_placeholder_image_model_reports_no_signal_and_never_blocks() -> None:
+def test_without_an_image_model_the_action_is_review_never_allow() -> None:
     response = ImageModerationService(ImageModerationModelHolder()).classify_image(
         ImageModerationRequest(media_id="m-1", frame_index=3), NOW
     )
     assert response.no_signal
-    assert response.suggested_action == "allow"
+    assert response.suggested_action == "review"
     assert response.score == 0.0
     assert response.model_version == PLACEHOLDER_IMAGE_MODEL_VERSION
     assert response.advisory_only is True

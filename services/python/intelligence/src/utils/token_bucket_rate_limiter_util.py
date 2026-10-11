@@ -1,4 +1,5 @@
 import time
+from collections import OrderedDict
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -21,20 +22,18 @@ class TokenBucketRateLimiter:
         self.tokens_per_second = tokens_per_second
         self.burst_size = burst_size
         self.current_time_provider = current_time_provider
-        self._bucket_by_client: dict[str, TokenBucketState] = {}
+        self._bucket_by_client: OrderedDict[str, TokenBucketState] = OrderedDict()
 
     def try_consume_token(self, client_key: str) -> tuple[bool, float]:
         now = self.current_time_provider()
         bucket = self._bucket_by_client.get(client_key)
         if bucket is None:
             if len(self._bucket_by_client) >= MAXIMUM_TRACKED_CLIENTS:
-                stalest_key = min(
-                    self._bucket_by_client,
-                    key=lambda key: self._bucket_by_client[key].last_refill_time,
-                )
-                del self._bucket_by_client[stalest_key]
+                self._bucket_by_client.popitem(last=False)
             bucket = TokenBucketState(float(self.burst_size), now)
             self._bucket_by_client[client_key] = bucket
+        else:
+            self._bucket_by_client.move_to_end(client_key)
         elapsed_seconds = max(now - bucket.last_refill_time, 0.0)
         bucket.available_tokens = min(
             float(self.burst_size), bucket.available_tokens + elapsed_seconds * self.tokens_per_second

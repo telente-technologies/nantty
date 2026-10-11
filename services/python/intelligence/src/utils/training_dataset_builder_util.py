@@ -159,5 +159,9 @@ def build_order_risk_training_dataset(
     )
     logs = attach_binary_label(logs, labeled, "labeled", match_actor=False)
     logs = attach_binary_label(logs, fraud, "fraud", match_actor=False)
-    logs = logs.filter(pl.col("labeled") == 1).unique(subset=["item_key"], keep="last").sort("logged_at")
+    logs = (
+        logs.filter(pl.col("labeled") == 1)
+        .sort("logged_at", "row_id")
+        .unique(subset=["item_key"], keep="last", maintain_order=True)
+    )
     return convert_logs_to_training_dataset(logs, ["fraud"], feature_count)

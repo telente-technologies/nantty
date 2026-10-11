@@ -8,6 +8,9 @@ OpaqueIdentifier = Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9_\-:.]{
 TopicSlug = Annotated[str, StringConstraints(pattern=r"^[a-z0-9_\-]{1,64}$")]
 
 
+ExperimentSlug = Annotated[str, StringConstraints(pattern=r"^[a-z0-9_\-]{1,64}$")]
+
+
 CountryCode = Annotated[str, StringConstraints(pattern=r"^[A-Z]{2}$")]
 
 
