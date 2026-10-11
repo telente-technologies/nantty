@@ -45,6 +45,8 @@ const footerLinkGroups = [
       { label: "Creator Program terms", href: "/creator-terms" },
       { label: "Ads policy", href: "/ads-policy" },
       { label: "Refund and escrow policy", href: "/refund-escrow-policy" },
+      { label: "Copyright and IP policy", href: "/copyright-policy" },
+      { label: "Data rights requests", href: "/data-rights" },
     ],
   },
 ] as const;
