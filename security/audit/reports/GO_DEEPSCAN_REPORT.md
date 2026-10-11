@@ -428,3 +428,51 @@ The Go backend has a solid cryptographic foundation (Argon2id, EdDSA, AES-GCM, c
 4. **Hardcoded placeholder secrets** in .env.example could be predictable in production if the file is copied without modification.
 
 The fixes for the P0 items are straightforward and should be prioritized. The remaining findings represent defense-in-depth improvements that reduce the attack surface and improve forensic capabilities.
+
+---
+
+## Verification (2026-10-10)
+
+Each finding was checked against the current tree on 2026-10-10. Paths are under `services/go/`. "Fixed" means the fix was already in the tree when checked (from the 2026-10-08 remediation or the earlier pass today). "Fixed now" means this pass fixed it and added a regression test.
+
+| ID | Severity | Status | Evidence | Fix / test |
+|---|---|---|---|---|
+| G1 | Critical | Fixed (extended now) | `platform/jwtauth/sessionDenylist.go:46-58`: a Redis error or timeout rejects the token. Revoked **staff** sessions were never written to the shared denylist, so module-local staff guards in go-commerce/go-live/go-trust/go-ads/go-money kept accepting them for the full TTL. They are now written | `sessionDenylist_test.go` `TestDenylistOutageFailsClosedAndCountsFailure`. Fixed now: `modules/admin/src/modules/staffAuth/services/staffSessionDenylist.service.go` (ent hook, wired in `admin/src/app.go`), test `admin/adminStaffSessionDenylist.integration_test.go` |
+| G2 | Critical | Fixed | `staffauth.ClientAddress` → `httpserver.ClientIP` (`platform/httpserver/clientIp.util.go:73`): forwarded headers are honoured only from trusted proxy CIDRs, using the rightmost untrusted hop. No module reads `X-Real-Ip`/`X-Forwarded-For` directly any more (grep) | httpserver tests |
+| G3 | Critical | Fixed | `httpserver/standard.middleware.go:69` (CSP, XFO, nosniff, HSTS, Referrer-Policy), wired in `servicemodule/deployable.runner.go:68` | `TestApplySecurityHeadersSetsHardeningHeaders` |
+| G4 | Critical | Fixed | `standard.middleware.go:83` `ApplyCors`, an allowlist from the environment | `TestApplyCorsHonorsConfiguredAllowlist` |
+| G5 | Critical | Fixed (extended now) | Per-IP global limiter (`rateLimit.middleware.go:97`) and auth limiter (`:114`) are wired. Added now: an identifier-keyed lockout for password login (10 failures in 15 min lock the identifier for 15 min, unknown identifiers included, so the lockout reveals nothing). The limiters are in-memory per process | `platform/loginthrottle/` + `loginThrottle_test.go`; `auth/.../logInWithPassword.handler.go`; `auth/authLoginLockout.integration_test.go` |
+| G6 | Critical | Fixed | `httpserver/requestBodyLimit.middleware.go` (2 MiB default, `HTTP_MAX_REQUEST_BODY_BYTES`), wired at `deployable.runner.go:67` | `TestLimitEveryRequestBody…` (2 tests) |
+| G7 | Critical | Fixed | Production startup refuses any `*TOKEN/SECRET/KEY/PEPPER/PASSWORD` that holds a `local-only…` value (plain or base64) or a known example value (`platform/config/placeholderSecrets.go`, `deployable.runner.go:33`). `.env.example` keeps the local-only values for development | `placeholderSecrets_test.go` |
+| H1 | High | Fixed | Revoking a session (including on refresh-token reuse, `refreshSessionTokens.handler.go:79-90`) runs the ent hook `auth/src/services/sessionDenylist.service.go:22-50`, which writes the session to the denylist on commit. The access token is rejected at once | `authSessionDenylist.integration_test.go` |
+| H2 | High | False positive (message clarified) | A reported config problem already stops startup (`CombinedConfigurationError`, `deployable.runner.go:53`). `auth.config.go:84-85` now reports it with a clear message | — |
+| H3 | High | Fixed (test added now) | `auth/src/integrations/socialIdentity.integration.go:120-122` computes both comparisons and combines them with `|` | Added now: `socialIdentity.integration_test.go` |
+| H4 | High | Fixed | `staffauth/staffGuard.middleware.go:146-158`: an unavailable policy port or a lookup error returns 503, and the IP comes from `ClientIP` | staffauth tests |
+| H5 | High | Fixed | `payments/src/modules/webhooks/controllers/webhooks.controller.go:30-37`: an empty allowlist denies, and the source is `ClientIP` | (payments is owned by Flutterwave stage 2) |
+| H6 | High | False positive | `platform/passwordhash/argon2id.hasher.go:22` uses m=19456 KiB, t=2, p=1, which is one of the OWASP Password Storage Cheat Sheet's equivalent Argon2id minimums (alongside 46 MiB/t=1). The report's 47 MB/t=3 is not the OWASP figure. Parameters are encoded in each hash, so they can be raised later | — |
+| H7 | High | False positive | `registerAccount.handler.go:41-52`: `EMAIL_TAKEN` is returned only after consuming a signup OTP token proven for that exact email, so only someone who controls the inbox can see it | — |
+| H8 | High | Fixed (extended now) | `RateLimitAuthEndpoints` is on login, refresh, register, OTP, social, password reset, step-up and widget tokens. The identifier lockout was added now (see G5) | see G5 |
+| H9 | High | Fixed | Same as M8 | see G3 |
+| H10 | High | False positive | `ConvertErrorToApiError` passes through only `*ApiError` values, which are deliberately client-facing. Any other error becomes the generic 500 | — |
+| M1 | Medium | Fixed | `auth/src/utils/httpRequest.util.go:12-24` keeps only `^[A-Za-z0-9._:-]{8,128}$`. A device ID is client-generated by design | Added now: `httpRequest.util_test.go` |
+| M2 | Medium | Fixed | Audit IPs come from `ClientIP` (`staffRequestAudit.middleware.go`, `staffaudit/staffAudit.recorder.go:85`) | — |
+| M3 | Medium | False positive | Every internal endpoint refuses an empty token (`expected == "" ||` …, e.g. `admin/.../auditLog.controller.go:134-135`), and the token is length-checked when set | — |
+| M4 | Medium | Open (accepted, configurable) | `auth.config.go:55` defaults to 30 days, with rotation and reuse detection | Owner: product/identity. Set `AUTH_REFRESH_TOKEN_TTL` if a shorter window is wanted |
+| M5 | Medium | Open (accepted, configurable) | `auth.config.go:56` defaults to 180 days; money actions need user step-up (`POST /auth/step-up`, stage 1) | Owner: product. `AUTH_SESSION_MAX_LIFETIME` |
+| M6 | Medium | Fixed | `oneTimeCodes.routes.go:13` adds the per-IP auth limiter, on top of the per-destination cooldown | — |
+| M7 | Medium | Fixed | `registration.routes.go:13` has the per-IP auth limiter, and registration needs a verified OTP | — |
+| M8 | Medium | Fixed | `deployable.runner.go:68` | `TestApplySecurityHeadersSetsHardeningHeaders` |
+| M9 | Medium | Fixed | `deployable.runner.go:67` `LimitEveryRequestBody` | `requestBodyLimit.middleware_test.go` |
+| M10 | Medium | Fixed | `health/health.handler.go:55`: check names are shown only to a trusted peer with no forwarded header | `TestReadinessHidesCheckNamesFromForwardedOrPublicCallers` |
+| L1 | Low | Fixed now | `AssignRequestIdToEveryRequest` validated the ID, but `staffRequestAudit`, `staffaudit` and `catalog/staffChange` still read the raw header. They now use `httpserver.RequestIdFromContext` | `TestForgedRequestIdsAreReplacedBeforeAuditsCanRecordThem` |
+| L2 | Low | Fixed now | `passwordhash/argon2id.hasher.go`: the timing dummy is a random 32-byte value per process | `TestTheTimingDummyIsRandomPerProcessAndMatchesNoGuessablePassword` |
+| L3 | Low | False positive | Same as H6 | — |
+| L4 | Low | Fixed | `auth/src/utils/argon2id.util.go` aliases `platform/passwordhash`, so there is one definition | — |
+| L5 | Low | False positive | A 30 s skew (`accessToken.verifier.go:76`) is within the report's own 5-30 s range | — |
+| L6 | Low | Fixed | `standard.middleware.go:38-44` tracks whether headers were sent | `TestRecoverFromPanicsDoesNotRewriteAStartedResponse` |
+| L7 | Low | Fixed now | `platform/logging/nestedRedaction.go`: structs, maps and slices logged with `slog.Any` are walked, and sensitive keys are redacted at any depth. Free-text error messages are still not scanned | `logging/structured.logger_test.go` |
+| L8 | Low | Fixed | `events/outbox.relay.go`: exponential backoff (cap 30 s) and panic recovery | `TestOutboxRelayBacksOffWhileTheBrokerIsDown`, `TestOutboxRelaySurvivesAPanickingBatch` |
+| L9 | Low | Fixed | `idempotency/requireIdempotencyKey.middleware.go:93-106`: the response is buffered and stored before it is written to the client | `TestTheClientSeesNothingBeforeTheResponseIsStored` |
+| L10 | Low | Fixed | `health.handler.go:35-36` no longer returns the service name | `TestHealthResponsesDoNotRevealTheServiceName` |
+
+Counts: Critical 7 (Fixed 7) · High 10 (Fixed 6, False positive 4) · Medium 10 (Fixed 7, False positive 1, Open 2) · Low 10 (Fixed 5, Fixed now 3, False positive 2). In total: Fixed 25, Fixed now 3 (L1, L2, L7) plus extensions to G1/G5/H8, False positive 7, Open 2 (M4/M5, both configurable product decisions).

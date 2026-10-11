@@ -284,3 +284,33 @@ File: services/go/platform/money/money.allocation.go
 Risk: The allocation function has no test file (money.allocation_test.go doesn't exist). Critical financial logic without tests.
 
 Fix: Add comprehensive tests for AllocateByWeightsWithoutLosingMinorUnits, including edge cases for overflow, negative weights, and large amounts.
+
+---
+
+## Verification (2026-10-10)
+
+Each row was checked against the current code on 2026-10-10. "Stage 1" means the Flutterwave phase 2 stage 1 work (`docs/integrations/flutterwaveMigration.md` §9). Payment, wallet, ledger, escrow and checkout code was not edited in this pass, because the Flutterwave stage 2 work is changing it. Open rows name that work as the owner.
+
+| ID | Severity | Status | Evidence | Fix / test |
+|---|---|---|---|---|
+| F1 | Critical | Fixed | `platform/money/money.value.go:79-107` (`multiplyInt64WithoutOverflow` checks every sign combination) | `money.value_test.go` `TestMultiplyByQuantityRejectsOverflowForAllSigns` |
+| F2 | Critical | Fixed | `money.value.go:87-93` uses the same checked multiply | `TestApplyBasisPointsRejectsOverflowForAllSigns` |
+| F3 | Critical | Fixed | `modules/wallet/.../withdrawals.service.go:111-114` (`withdrawalFitsAvailableBalance` checks `alreadyReserved <= available` before subtracting) | wallet payouts service tests |
+| F4 | Critical | Fixed | `modules/escrow/.../escrowSettlement.service.go:148-157`: a negative absorbed fee is posted as a credit line, so the entry stays balanced | escrow settlement tests; the ledger rejects unbalanced entries |
+| F5 | Critical | Fixed | `platform/money/money.allocation.go` uses `math/big` for the products and the total weight | `TestAllocateByWeightsHandlesExtremeAmountsAndWeights` |
+| F6 | Critical | Fixed | `modules/ledger/.../sellerReserve.service.go:55-66` splits the product (`available/10000*bps` plus a checked remainder product) | ledger sellerBalances tests |
+| F7 | Critical | Fixed | `escrowStateMachine.model.go:52-54` calls `AllocateByWeightsWithoutLosingMinorUnits` | money allocation tests |
+| F8 | High | False positive (no double debit); small UX gap remains open | `debtSettlement.service.go:44-66` only moves debt the seller really owes. The withdrawal entry then needs the full amount, and the ledger's non-negative guard returns `INSUFFICIENT_FUNDS` (`withdrawals.service.go:103`). No money is lost. The withdrawal quote does not subtract outstanding debt, so the seller gets a refusal instead of a correct quote | Open UX item for Flutterwave stage 2 (withdrawal quote, §3.4): subtract the outstanding debt in `QuoteWithdrawal` |
+| F9 | High | Fixed now | `clawedBack` status exists. A refund after release of an escrowed order now ends in `clawedBack` on every path (card path in `escrowSettlement.service.go`, wallet paths in `escrowWalletClawback`/`escrowWalletChargebacks`). `released → refunded` stays only for direct orders, which are marked released at payment. Seller dashboard "refunded" filter includes clawed-back rows | Test: `escrow.module_integration_test.go` `TestCheckoutPaymentIsHeldInEscrowOnceAndReleasedAfterInspection` (refund after release → `clawedBack`, second refund no-op); `flutterwaveFlows` `TestChargebackAfterReleaseClawsBackFromTheSellerThenRecordsDebt`; state machine unit test |
+| F10 | High | False positive | `ledger/src/utils/idempotencyRecord.util.go:26-45`: Postgres makes the second `INSERT … ON CONFLICT DO NOTHING` wait on the unique index until the first commits. The `SELECT` in the same transaction then loads the committed hash, and `idempotentCommand.util.go:68` rejects a different hash before `Execute` runs | — |
+| F11 | High | Fixed | `journalEntry.validator.go:74-76` accepts only `viewerregion.IsSupportedCurrency` or COIN | `journalEntry.validator_test.go:35` ("unsupported currency") |
+| F12 | High | Fixed (stage 1, B14) | Escrow is driven by the committed `orderGroup.delivered` outbox event, and the timer is set once | `escrow.fulfilmentEvents_integration_test.go` `TestDeliveredEventSetsTheReleaseTimerOnceEvenAcrossReplaysAndDisputes` |
+| F13 | Medium | Fixed now | `AllocateProRata` uses the largest-remainder method with `math/big` products, so the leftover goes to the largest fractions (ties by order) and large totals cannot overflow | Test: `checkoutAllocation.model_test.go` `TestProRataAllocationGivesTheRemainderToTheLargestFractionsAndNeverOverflows` |
+| F14 | Medium | Fixed (stage 1, B22) | `RequestRefundInTransaction` enqueues `paymentRefund.requested` in the same transaction, and a go-money consumer sends it | `TestRefundFailingThenRetriedReleasesCapacityAndPaysOnce` |
+| F15 | Medium | Fixed now | Owner-approved debt limits by level, admin-configurable (`seller.debtLimits`, env fallback): NG ₦10,000 unverified, ₦50,000 payout-verified, ₦200,000 identity-verified or trusted (90+ days, no upheld disputes or lost chargebacks in 90 days); elsewhere 50 % converted with the currency module rates, with per-currency overrides. Above it, publish and checkout fail with `403 SELLER_DEBT_LIMIT`; fulfilment of existing orders is not gated (`sellingEligibility.service.go`) | Test: `payments.sellerDebtLimit_integration_test.go`, `ledger/src/loaders/moneyLimits.loader_test.go`, admin `moneyLimits.setting_test.go` |
+| F16 | Medium | False positive | The report itself says the `Limit+1` cursor is correct, and UUIDv7 IDs are time-ordered | — |
+| F17 | Medium | Fixed (stage 1, B21) | Checkout rejects currencies outside `ORDERS_CHECKOUT_CURRENCIES` (`orders.config.go:79`) | `checkoutCurrency.service_test.go` `TestCheckoutCurrencyMustBeAServerSupportedIsoCode` |
+| F18 | Medium | Fixed (stage 1, B23) | `providerReconciliation.service.go:35,91` matches by reference and uses `SettlementGrace` | `TestReconciliationMatchesByReferenceWhateverThePostedDate` |
+| F19 | Medium | Fixed | The allocation tests are in `platform/money/money.value_test.go:100-155` | `TestAllocateByWeightsKeepsEveryMinorUnit`, `…HandlesExtremeAmountsAndWeights` |
+
+Counts: Fixed 13 (5 of them by stage 1) · False positive 3 (F8 has a UX gap) · Open 3 (F9, F13, F15; all design or low impact, owned by stage 2).
