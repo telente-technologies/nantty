@@ -8,13 +8,13 @@ import {
 } from "@/cache/messageSync.util";
 import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { startLiveLocationUpdates } from "@/services/live/liveLocationSharing.service";
-import { messagesService } from "@/services/chat/messages.service";
+import { clampLiveUntil, messagesService } from "@/services/chat/messages.service";
+import { storeDeliveredMessage } from "@/cache/messageRealtimeCache.util";
 import type { Message, SharedLocation } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
 import { useConversationMessageCache } from "./conversationMessageCache.hook";
 
-const MAXIMUM_LIVE_LOCATION_MS = 8 * 3_600_000 - 120_000;
 
 export interface OutgoingPollDraft {
   readonly question: string;
@@ -23,7 +23,7 @@ export interface OutgoingPollDraft {
 }
 
 export function useOptimisticLocationAndPollSender(conversationId: string | undefined, myUserId: string) {
-  const { queryClient, updateCachedMessages, replaceCachedMessage, applyServerVersionOfMessage } = useConversationMessageCache(conversationId);
+  const { queryClient, updateCachedMessages, replaceCachedMessage } = useConversationMessageCache(conversationId);
 
   const deliverOptimistically = useCallback(
     async (draft: Partial<Message>, sendToServer: () => Promise<Message>): Promise<Message | null> => {
@@ -63,13 +63,13 @@ export function useOptimisticLocationAndPollSender(conversationId: string | unde
 
   const startSharingLiveLocation = useCallback(
     async (location: SharedLocation, durationMinutes: number) => {
-      const liveLocation = { ...location, liveUntil: new Date(Date.now() + Math.min(durationMinutes * 60_000, MAXIMUM_LIVE_LOCATION_MS)).toISOString() };
+      const liveLocation = { ...location, liveUntil: clampLiveUntil(new Date(Date.now() + durationMinutes * 60_000).toISOString()) };
       const delivered = await deliverOptimistically({ kind: "liveLocation", location: liveLocation }, () =>
         messagesService.sendLocationToConversation(conversationId!, "liveLocation", liveLocation, generateIdempotencyKey()),
       );
-      if (delivered) startLiveLocationUpdates({ messageId: delivered.id, conversationId: delivered.conversationId, liveUntil: liveLocation.liveUntil }, applyServerVersionOfMessage);
+      if (delivered) startLiveLocationUpdates({ messageId: delivered.id, conversationId: delivered.conversationId, liveUntil: liveLocation.liveUntil }, (control) => storeDeliveredMessage(queryClient, control));
     },
-    [applyServerVersionOfMessage, conversationId, deliverOptimistically],
+    [conversationId, deliverOptimistically, queryClient],
   );
 
   const sendPoll = useCallback(
@@ -77,8 +77,7 @@ export function useOptimisticLocationAndPollSender(conversationId: string | unde
       deliverOptimistically(
         {
           kind: "poll",
-          text: poll.question,
-          poll: { question: poll.question, allowMultipleAnswers: poll.allowMultipleAnswers, options: poll.options.map((text, index) => ({ id: `pending_${index}`, text, voteCount: 0, votedByMe: false })) },
+          pollDefinition: { question: poll.question, allowMultipleAnswers: poll.allowMultipleAnswers, options: poll.options.map((text, index) => ({ id: `pending_${index}`, text })) },
         },
         () => messagesService.sendPollToConversation(conversationId!, poll, generateIdempotencyKey()),
       ),

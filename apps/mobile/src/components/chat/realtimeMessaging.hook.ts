@@ -3,6 +3,7 @@ import { useEffect } from "react";
 
 import { applyRealtimeEventToLocalCaches } from "@/cache/messageRealtimeCache.util";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
+import { withDecryptedGroupDetails } from "@/services/chat/groupDetails.service";
 import { realtimeService } from "@/services/core/realtime.service";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -17,6 +18,11 @@ export function useRealtimeMessagingConnection() {
     const unsubscribe = realtimeService.subscribeToRealtimeEvents((event) => {
       if (event.type === "typing") {
         useTypingIndicatorsStore.getState().setUserTypingInConversation(event.conversationId, event.user, event.isTyping);
+        return;
+      }
+      if (event.type === "conversation.updated" && event.conversation.encryptedAttributes) {
+        void withDecryptedGroupDetails({ ...event.conversation, kind: "group" })
+          .then((conversation) => applyRealtimeEventToLocalCaches(queryClient, { ...event, conversation: { ...event.conversation, title: conversation.title, description: conversation.description, hasGroupKey: conversation.hasGroupKey } }));
         return;
       }
       if (event.type !== "message.created" && event.type !== "message.updated") {

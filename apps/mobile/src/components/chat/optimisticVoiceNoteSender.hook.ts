@@ -25,7 +25,7 @@ export function useOptimisticVoiceNoteSender(conversationId: string | undefined,
       try {
         validateLocalMediaBeforeUpload(recordedVoiceNote, "voice");
       } catch (error) {
-        showAlertWithButtons("Voice note not sent", error instanceof Error ? error.message : "Please try again.");
+        showAlertWithButtons("Voice note not sent", error instanceof Error ? error.message : "Please try again.", undefined, { intent: "microphone" });
         return;
       }
       const localId = generateIdempotencyKey();

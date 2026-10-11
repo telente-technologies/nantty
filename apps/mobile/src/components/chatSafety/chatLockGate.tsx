@@ -60,7 +60,7 @@ export function ChatLockGate({ children }: { children: ReactNode }) {
           removeChatPasscodeAndPreferences().finally(() => clearSessionAndSignOut());
         },
       },
-    ]);
+    ], { intent: "lock" });
 
   if (!isLoaded) return null;
   if (!isLocked) return <>{children}</>;

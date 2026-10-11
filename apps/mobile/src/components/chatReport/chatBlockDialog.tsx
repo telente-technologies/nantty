@@ -19,6 +19,7 @@ export function ChatBlockDialog({ visible, conversation, onClose, onBlocked }: C
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       queryClient.invalidateQueries({ queryKey: ["conversation"] });
       queryClient.invalidateQueries({ queryKey: ["users", "me", "blocked"] });
+      block.reset();
       onClose();
       onBlocked();
     },
@@ -27,13 +28,14 @@ export function ChatBlockDialog({ visible, conversation, onClose, onBlocked }: C
     <Dialog
       visible={visible}
       onClose={onClose}
-      tone="destructive"
+      intent="block"
       title={`Block ${conversation.peer.name}?`}
       message="They won't be able to message you. You can unblock them in chat settings. They won't be told you blocked them."
       actions={[
         { label: "Block", style: "destructive", loading: block.isPending, onPress: () => block.mutate() },
         { label: "Cancel", style: "secondary", onPress: onClose },
       ]}
+      errorMessage={block.error ? (block.error instanceof Error ? block.error.message : "Couldn't block. Please try again.") : null}
     />
   );
 }

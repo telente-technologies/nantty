@@ -25,7 +25,7 @@ export function useOptimisticImageMessageSender(conversationId: string | undefin
       try {
         validateLocalMediaBeforeUpload(photo, "chat");
       } catch (error) {
-        showAlertWithButtons("Photo not sent", error instanceof Error ? error.message : "Please try again.");
+        showAlertWithButtons("Photo not sent", error instanceof Error ? error.message : "Please try again.", undefined, { intent: "media" });
         return;
       }
       const localId = generateIdempotencyKey();

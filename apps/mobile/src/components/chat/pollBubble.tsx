@@ -1,28 +1,31 @@
-import { useMutation } from "@tanstack/react-query";
+import { nextPollVote } from "@zudomart/chat-crypto";
+import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Check16Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
-import { messagesService } from "@/services/chat/messages.service";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { LocalMessageDeliveryStatus } from "@/cache/messageHistory.type";
 import type { Message } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 
-import { useConversationMessageCache } from "./conversationMessageCache.hook";
+import { useChatControlSender } from "./chatControlSender.hook";
 
 export function PollBubble({ message, deliveryStatus }: { readonly message: Message; readonly deliveryStatus: LocalMessageDeliveryStatus }) {
   const { colors } = useTheme();
   const styles = useStyles();
   const poll = message.poll!;
-  const { replaceCachedMessage } = useConversationMessageCache(message.conversationId);
+  const sendControl = useChatControlSender(message.conversationId);
+  const [isVoting, setIsVoting] = useState(false);
   const totalVotes = poll.options.reduce((sum, option) => sum + option.voteCount, 0);
-  const vote = useMutation({
-    mutationFn: (optionId: string) => messagesService.voteOnPoll(message.id, optionId),
-    onSuccess: (updatedPoll) => replaceCachedMessage(message.id, { ...message, poll: updatedPoll, deliveryStatus }),
-    onError: () => showAlertWithButtons("Couldn't record your vote", "Please try again."),
-  });
-  const canVote = deliveryStatus === "sent" && !vote.isPending;
+  const vote = async (optionId: string) => {
+    const current = poll.options.filter((option) => option.votedByMe).map((option) => option.id);
+    setIsVoting(true);
+    const sent = await sendControl({ type: "pollVote", targetMessageId: message.id, optionIds: nextPollVote(current, optionId, poll.allowMultipleAnswers) });
+    setIsVoting(false);
+    if (!sent) showAlertWithButtons("Couldn't record your vote", "Please try again.");
+  };
+  const canVote = deliveryStatus === "sent" && !isVoting;
 
   return (
     <View style={styles.root}>
@@ -39,7 +42,7 @@ export function PollBubble({ message, deliveryStatus }: { readonly message: Mess
             accessibilityState={{ checked: option.votedByMe, disabled: !canVote }}
             accessibilityLabel={`${option.text}, ${option.voteCount} ${option.voteCount === 1 ? "vote" : "votes"}`}
             disabled={!canVote}
-            onPress={() => vote.mutate(option.id)}
+            onPress={() => void vote(option.id)}
             style={styles.option}
           >
             <View style={[styles.optionFill, { width: `${Math.round(fraction * 100)}%` }]} />

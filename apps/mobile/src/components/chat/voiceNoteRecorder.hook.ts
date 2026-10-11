@@ -27,7 +27,7 @@ export function useVoiceNoteRecorder(onRecordingFinished: (voiceNote: LocalMedia
     try {
       const permission = await requestRecordingPermissionsAsync();
       if (!permission.granted) {
-        showAlertWithButtons("Microphone needed", "Allow microphone access in Settings to send voice notes.");
+        showAlertWithButtons("Microphone needed", "Allow microphone access in Settings to send voice notes.", undefined, { intent: "microphone" });
         return;
       }
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
@@ -35,7 +35,7 @@ export function useVoiceNoteRecorder(onRecordingFinished: (voiceNote: LocalMedia
       recorder.record({ forDuration: MAXIMUM_VOICE_NOTE_SECONDS });
       recordingStartedAtRef.current = Date.now();
     } catch {
-      showAlertWithButtons("Couldn't start recording", "Please try again.");
+      showAlertWithButtons("Couldn't start recording", "Please try again.", undefined, { intent: "microphone" });
     } finally {
       setIsPreparing(false);
     }
