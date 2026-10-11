@@ -1,6 +1,6 @@
 const isProductionRuntime = process.env.NODE_ENV === "production";
 const developmentOnlySessionSecret = "zudomart-ads-manager-development-only-secret-never-use-in-production";
-const defaultHostedCheckoutHosts = ["checkout.paystack.com"];
+const defaultHostedCheckoutHosts = ["checkout.flutterwave.com", "checkout-testing.flutterwave.com", "checkout.paystack.com"];
 
 export function readAdsApiBaseUrl(): string {
   const configuredUrl = process.env.ADS_API_URL ?? (isProductionRuntime ? "" : "http://localhost:8080");

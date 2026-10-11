@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { InlineNotice } from "@/components/ui/feedback";
@@ -14,7 +14,9 @@ import type { Money } from "@/types/money.type";
 import { createClientIdempotencyKey } from "@/utils/formValidation.util";
 import { formatMajorAmountForInput, formatMoneyForDisplay, parseTypedMajorAmountToMoney, readCurrencySymbol } from "@/utils/money.util";
 
-import { openPaystackCheckoutIfSafe } from "./hostedCheckout.util";
+import { presentPaymentProblem } from "@/utils/paymentProblem.util";
+
+import { openHostedCheckoutIfSafe } from "./hostedCheckout.util";
 import styles from "./billingPage.module.css";
 
 interface TopUpDialogProps {
@@ -37,6 +39,7 @@ export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialo
   const [idempotencyKey, setIdempotencyKey] = useState(() => createClientIdempotencyKey("topup"));
   const [showErrors, setShowErrors] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const startingRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
   const amount = parseTypedMajorAmountToMoney(typedAmount, currency);
@@ -44,20 +47,23 @@ export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialo
 
   async function startHostedCheckoutForTopUp() {
     setShowErrors(true);
-    if (amountError || !amount) return;
+    if (amountError || !amount || startingRef.current) return;
+    startingRef.current = true;
     setIsStarting(true);
     setErrorMessage(null);
     setVerificationMessage(null);
     try {
       const checkout = await billingApi.startTopUpCheckout(accountId, amount, "paystack", idempotencyKey);
-      if (!(await openPaystackCheckoutIfSafe(checkout, `/accounts/${accountId}/billing/return?reference=${encodeURIComponent(checkout.reference)}`))) {
+      if (!openHostedCheckoutIfSafe(checkout)) {
         setErrorMessage("The payment page address was not recognised, so we did not open it. Contact support.");
+        startingRef.current = false;
         setIsStarting(false);
       }
     } catch (error) {
       if (isVerificationRequiredError(error)) setVerificationMessage(error.message);
-      else setErrorMessage(readErrorMessageForDisplay(error));
+      else if (!(await presentPaymentProblem(error))) setErrorMessage(readErrorMessageForDisplay(error));
       if (error instanceof AdsApiRequestError && error.status >= 400 && error.status < 500) setIdempotencyKey(createClientIdempotencyKey("topup"));
+      startingRef.current = false;
       setIsStarting(false);
     }
   }
@@ -99,7 +105,7 @@ export function TopUpDialog({ accountId, overview, isOpen, onClose }: TopUpDialo
         error={showErrors ? amountError : undefined}
         hint={`Between ${formatMoneyForDisplay(overview.minimumTopUp)} and ${formatMoneyForDisplay(overview.maximumTopUp)}.`}
       />
-      <InlineNotice tone="info">Pay by card, bank transfer or USSD in Paystack&apos;s secure window. We never see your card number.</InlineNotice>
+      <InlineNotice tone="info">Pay by card, bank transfer or USSD on our payment partner&apos;s secure page. We never see your card number. You come back here once it&apos;s done, and we confirm the payment before adding funds.</InlineNotice>
       {verificationMessage ? <VerificationPrompt message={verificationMessage} /> : null}
       {errorMessage ? <InlineNotice tone="error">{errorMessage}</InlineNotice> : null}
     </OverlayDialog>

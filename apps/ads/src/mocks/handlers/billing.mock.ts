@@ -54,6 +54,8 @@ function readSafeReturnPath(value: unknown, accountId: string): string {
   return typeof value === "string" && value.startsWith(`/accounts/${accountId}/`) && !value.includes("//") ? value : fallback;
 }
 
+const mockConfirmationDelayMs = 4_000;
+
 export function registerBillingMockHandlers(): void {
   registerMockRoute("GET", "/ads/accounts/:accountId/billing", (request) => respondWithJson(200, presentBillingOverview(requireAccountAccess(request, "billing:view").account)));
 
@@ -68,12 +70,13 @@ export function registerBillingMockHandlers(): void {
     if (!Number.isInteger(amount.amountMinor) || (amount.amountMinor as number) < limits.minimum || (amount.amountMinor as number) > limits.maximum) {
       failValidation("amount", `Enter between ${formatMoneyForDisplay(money(limits.minimum, account.currency))} and ${formatMoneyForDisplay(money(limits.maximum, account.currency))}.`);
     }
-    const provider = "paystack" as const;
-    const reference = `ZDA-${randomBytes(6).toString("hex").toUpperCase()}`;
+    const provider = "flutterwave" as const;
+    const reference = `ads-${randomBytes(8).toString("hex")}`;
     const topUpId = createMockId("tup");
     readMockDatabase().topUps.unshift({ id: topUpId, accountId: account.id, reference, amount: money(amount.amountMinor as number, account.currency), status: "pending", provider, createdAt: readIsoNow(), completedAt: null, failureReason: null });
     const returnPath = readSafeReturnPath(body.returnPath, account.id);
-    return respondWithJson(201, { topUpId, reference, provider, accessCode: "", authorizationUrl: `${returnPath}?reference=${reference}&demoCheckout=1` });
+    const checkoutUrl = `${returnPath}?status=successful&tx_ref=${reference}&transaction_id=${randomBytes(4).readUInt32BE(0)}&demoCheckout=1`;
+    return respondWithJson(201, { topUpId, reference, provider, checkoutUrl, authorizationUrl: checkoutUrl });
   });
 
   registerMockRoute("GET", "/ads/accounts/:accountId/billing/top-ups/:reference", (request) => {
@@ -81,7 +84,9 @@ export function registerBillingMockHandlers(): void {
     const database = readMockDatabase();
     const topUp = database.topUps.find((candidate) => candidate.accountId === account.id && candidate.reference === request.params.reference);
     if (!topUp) throw new MockHttpError(404, "NOT_FOUND", "We could not find that payment.");
-    if (topUp.status === "pending") {
+    if (topUp.status === "pending" && topUp.amount.amountMinor % 100_000 === 1_300) {
+      Object.assign(topUp, { status: "failed", completedAt: readIsoNow(), failureReason: "Your bank declined this payment. No money was taken." });
+    } else if (topUp.status === "pending" && Date.now() - Date.parse(topUp.createdAt) >= mockConfirmationDelayMs) {
       Object.assign(topUp, { status: "succeeded", completedAt: readIsoNow() });
       account.balanceMinor += topUp.amount.amountMinor;
       database.transactions.unshift({ id: createMockId("txn"), accountId: account.id, type: "top_up", amount: topUp.amount, description: "Balance top-up", reference: topUp.reference, createdAt: readIsoNow(), receiptAvailable: true });
@@ -141,8 +146,9 @@ export function registerBillingMockHandlers(): void {
     if (!request.headers.get("idempotency-key")) throw new MockHttpError(400, "IDEMPOTENCY_KEY_REQUIRED", "Payments need an Idempotency-Key header.");
     const body = readJsonObjectBody(request);
     const reference = `ZDC-${randomBytes(6).toString("hex").toUpperCase()}`;
-    account.paymentMethods.push({ id: createMockId("pm"), brand: "Verve", last4: String(1000 + Math.floor(Math.random() * 8999)), expMonth: 12, expYear: new Date().getUTCFullYear() + 3, isDefault: account.paymentMethods.length === 0, provider: "paystack" });
-    return respondWithJson(201, { topUpId: "", reference, provider: "paystack", accessCode: "", authorizationUrl: `${readSafeReturnPath(body.returnPath, account.id)}?cardReference=${reference}&demoCheckout=1` });
+    account.paymentMethods.push({ id: createMockId("pm"), brand: "Verve", last4: String(1000 + Math.floor(Math.random() * 8999)), expMonth: 12, expYear: new Date().getUTCFullYear() + 3, isDefault: account.paymentMethods.length === 0, provider: "flutterwave" });
+    const checkoutUrl = `${readSafeReturnPath(body.returnPath, account.id)}?cardReference=${reference}&demoCheckout=1`;
+    return respondWithJson(201, { topUpId: "", reference, provider: "flutterwave", checkoutUrl, authorizationUrl: checkoutUrl });
   });
 
   registerMockRoute("POST", "/ads/accounts/:accountId/billing/payment-methods/:paymentMethodId/default", (request) => {

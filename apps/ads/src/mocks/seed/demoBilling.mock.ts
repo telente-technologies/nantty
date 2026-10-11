@@ -11,7 +11,7 @@ export function buildDemoBillingRecords(accounts: readonly MockAdAccountRecord[]
     topUpAmounts.forEach((amountMajor, index) => {
       const reference = `ZDA-${account.id.slice(4, 8).toUpperCase()}-${1000 + index}`;
       const createdAt = shiftTimestampByDays(-(index * 13 + 3), 11);
-      topUps.push({ id: `tup_${account.id}_${index}`, accountId: account.id, reference, amount: { amountMinor: amountMajor * 100, currency: account.currency }, status: "succeeded", provider: "paystack", createdAt, completedAt: createdAt, failureReason: null });
+      topUps.push({ id: `tup_${account.id}_${index}`, accountId: account.id, reference, amount: { amountMinor: amountMajor * 100, currency: account.currency }, status: "succeeded", provider: index === 0 ? "flutterwave" : "paystack", createdAt, completedAt: createdAt, failureReason: null });
       transactions.push({ id: `txn_${account.id}_top_${index}`, accountId: account.id, type: "top_up", amount: { amountMinor: amountMajor * 100, currency: account.currency }, description: "Balance top-up", reference, createdAt, receiptAvailable: true });
     });
     for (let dayOffset = 1; dayOffset <= 20; dayOffset += 1) {
