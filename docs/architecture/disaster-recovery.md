@@ -126,6 +126,6 @@ Core principle: the marketplace read path (browse, product pages, orders view) d
 
 ### DR5. Provider-agnostic payment interface with a second provider
 - **Problem:** one provider outage halts payments.
-- **Recommendation:** keep the Paystack adapter behind the provider interfaces with fixture and fake-API tests (to build, `checkoutPaymentFlowPlan.md` §12); add a second provider only if Paystack availability requires it. Webhook retries last 72 hours in live mode, so a longer outage needs the sweepers (verify by reference).
+- **Recommendation:** keep the Paystack adapter behind the provider interfaces with fixture and fake-API tests (to build, `docs/integrations/flutterwaveMigration.md` Appendix C §12); add a second provider only if Paystack availability requires it. Webhook retries last 72 hours in live mode, so a longer outage needs the sweepers (verify by reference).
 - **Complexity:** M. **Risk:** medium. **Priority: P2**, ship with one, design for two.
 - **Tag:** Near term.

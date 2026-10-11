@@ -171,7 +171,7 @@ Parent `Order` status is derived: all groups terminal means closed; any `dispute
 
 > Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03).
 
-Provider flows, Paystack setup and open questions: `checkoutPaymentFlowPlan.md` and `docs/integrations/paystack.md`. A multi-seller cart is one Paystack payment: direct groups are split to seller subaccounts, escrow groups and commission stay with Zudomart's main account.
+Provider flows, Paystack setup and open questions: `docs/integrations/flutterwaveMigration.md` Appendix C and `docs/integrations/flutterwaveMigration.md` Appendix B. A multi-seller cart is one Paystack payment: direct groups are split to seller subaccounts, escrow groups and commission stay with Zudomart's main account.
 
 Escrow is one row per order group, owned and mutated only by go-money.
 

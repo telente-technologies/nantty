@@ -164,7 +164,7 @@ flowchart LR
   livekit -- "webhooks" --> svc
 ```
 
-Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03): Paystack is the only payment provider; its webhooks (`x-paystack-signature`, HMAC-SHA512) land on go-money (`docs/integrations/paystack.md`).
+Bachs and Anchor dropped; Paystack adopted (owner, 2026-10-03): Paystack is the only payment provider; its webhooks (`x-paystack-signature`, HMAC-SHA512) land on go-money (`docs/integrations/flutterwaveMigration.md` Appendix B).
 
 LiveKit is EXISTING only as a local compose container (`infra/local/docker-compose.yml`); no token minting code exists.
 
