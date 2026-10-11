@@ -45,7 +45,9 @@ func (balances AdBalances) StartTopUpInTransaction(ctx context.Context, transact
 	if err != nil {
 		return dtos.TopUpDto{}, uuid.Nil, err
 	}
-	return ConvertTopUp(created), intent.Id, nil
+	view := ConvertTopUp(created)
+	view.Provider = intent.Provider
+	return view, intent.Id, nil
 }
 
 func (balances AdBalances) HandleSucceededPayment(ctx context.Context, transaction *sql.Tx, payment paymentmodels.SettledPayment) error {
@@ -70,7 +72,7 @@ func (balances AdBalances) HandleSucceededPayment(ctx context.Context, transacti
 		return err
 	}
 	return balances.Container.Outbox.EnqueueInTransaction(ctx, transaction, "adBalance.toppedUp", topUp.AdAccountID, now, map[string]any{
-		"adAccountId": topUp.AdAccountID, "topUpId": topUp.ID.String(), "fundedByUserId": topUp.FundedByUserID, "source": "paystack",
+		"adAccountId": topUp.AdAccountID, "topUpId": topUp.ID.String(), "fundedByUserId": topUp.FundedByUserID, "source": payment.Provider,
 		"amount": map[string]any{"amountMinor": topUp.AmountMinor, "currency": topUp.Currency},
 	})
 }

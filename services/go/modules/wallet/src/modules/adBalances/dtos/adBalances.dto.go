@@ -20,6 +20,7 @@ type TopUpDto struct {
 	Status      string   `json:"status"`
 	Amount      MoneyDto `json:"amount"`
 	CheckoutUrl *string  `json:"checkoutUrl"`
+	Provider    string   `json:"provider,omitempty"`
 }
 
 type AdBalanceDto struct {

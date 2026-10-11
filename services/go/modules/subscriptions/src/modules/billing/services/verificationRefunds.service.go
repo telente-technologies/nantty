@@ -49,7 +49,7 @@ func DecideVerificationRefundPath(row *ent.Subscription, now time.Time) Verifica
 		return RefundPathGooglePlay
 	case row.Channel == subscription.ChannelAppleIap:
 		return RefundPathAppleManual
-	case row.Channel != subscription.ChannelWebPaystack || row.BillingReference == "" || row.AmountMinor == 0:
+	case !IsWebCheckoutChannel(row.Channel) || row.BillingReference == "" || row.AmountMinor == 0:
 		return RefundPathNothingCharged
 	case row.WithTrial && (row.TrialEndsAt == nil || now.Before(*row.TrialEndsAt)):
 		return RefundPathNothingCharged
@@ -161,7 +161,7 @@ func (billing Billing) executeVerificationRefund(ctx context.Context, row *ent.S
 		billing.Container.Resources.Logger.WarnContext(ctx, "verification rejected on an App Store purchase; the person must request the refund from Apple", "subscriptionId", row.ID.String())
 		return "manualStoreRefundRequired", nil
 	}
-	if row.Channel == subscription.ChannelWebPaystack && row.BillingReference != "" && !KeepsPlanOnRejection(row.PlanCode) {
+	if IsWebCheckoutChannel(row.Channel) && row.BillingReference != "" && !KeepsPlanOnRejection(row.PlanCode) {
 		if err := payments.CancelBillingSubscription(ctx, row.BillingReference); err != nil && !errors.Is(err, paymentservices.ErrPaymentNotFound) {
 			return "", err
 		}

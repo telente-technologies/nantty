@@ -20,7 +20,7 @@ func ValidateStartCoinPurchaseRequest(request dtos.StartCoinPurchaseRequestDto) 
 		collector.Add("packageId", "has an invalid format")
 	}
 	if request.Provider != "" {
-		collector.RequireOneOf("provider", request.Provider, "paystack")
+		collector.RequireOneOf("provider", request.Provider, "paystack", "flutterwave")
 	}
 	collector.RequireLength("returnTo", request.ReturnTo, 0, 300)
 	return collector.Result()

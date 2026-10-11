@@ -24,7 +24,7 @@ func TestCancellingAProviderBilledPlanCommitsLocallyFirstAndCancelsAtTheProvider
 	client := harness.module.Billing.Container.Client(harness.Database)
 	periodEnd := harness.clock.Add(20 * 24 * time.Hour)
 	row, err := client.Subscription.Create().SetProfileID(profileId).SetProfileType("business").SetOwnerUserID(owner).SetPlanCode("seller_pro").SetInterval(subscription.IntervalMonth).
-		SetChannel(subscription.ChannelWebPaystack).SetStatus(subscription.StatusActive).SetListAmountMinor(500_000).SetAmountMinor(500_000).SetCurrency("NGN").
+		SetChannel(subscription.ChannelWebCheckout).SetStatus(subscription.StatusActive).SetListAmountMinor(500_000).SetAmountMinor(500_000).SetCurrency("NGN").
 		SetCurrentPeriodEndsAt(periodEnd).SetProviderPlanCode("PLN_unknown").SetBillingReference("sub-missing-at-provider").Save(ctx)
 	if err != nil {
 		t.Fatal(err)

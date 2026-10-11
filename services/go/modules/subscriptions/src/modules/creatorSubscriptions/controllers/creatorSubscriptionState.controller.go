@@ -27,7 +27,7 @@ func (controller CreatorSubscriptionsController) Subscribe(writer http.ResponseW
 		collector.RequireUuid("planId", body.PlanId)
 		collector.RequireLength("returnTo", body.ReturnTo, 0, 300)
 		if body.Provider != "" {
-			collector.RequireOneOf("provider", body.Provider, "paystack")
+			collector.RequireOneOf("provider", body.Provider, "paystack", "flutterwave")
 		}
 		return collector.Result()
 	})

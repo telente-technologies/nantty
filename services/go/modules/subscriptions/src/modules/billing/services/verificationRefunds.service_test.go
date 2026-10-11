@@ -20,13 +20,13 @@ func TestRejectedVerificationRefundPathPerChannel(t *testing.T) {
 		row  ent.Subscription
 		want VerificationRefundPath
 	}{
-		{"paid web plan gets a Paystack refund", ent.Subscription{Channel: subscription.ChannelWebPaystack, BillingReference: "sub-1", AmountMinor: 250_000}, RefundPathCard},
-		{"converted web trial was charged", ent.Subscription{Channel: subscription.ChannelWebPaystack, BillingReference: "sub-1", AmountMinor: 250_000, WithTrial: true, TrialEndsAt: &past}, RefundPathCard},
-		{"running web trial was never charged", ent.Subscription{Channel: subscription.ChannelWebPaystack, BillingReference: "sub-1", AmountMinor: 250_000, WithTrial: true, TrialEndsAt: &future}, RefundPathNothingCharged},
+		{"paid web plan gets a Paystack refund", ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingReference: "sub-1", AmountMinor: 250_000}, RefundPathCard},
+		{"converted web trial was charged", ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingReference: "sub-1", AmountMinor: 250_000, WithTrial: true, TrialEndsAt: &past}, RefundPathCard},
+		{"running web trial was never charged", ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingReference: "sub-1", AmountMinor: 250_000, WithTrial: true, TrialEndsAt: &future}, RefundPathNothingCharged},
 		{"Google Play is revoked with a full refund", ent.Subscription{Channel: subscription.ChannelGooglePlay, StoreOriginalTransactionID: "token"}, RefundPathGooglePlay},
 		{"App Store needs a manual refund request", ent.Subscription{Channel: subscription.ChannelAppleIap, StoreOriginalTransactionID: "1000"}, RefundPathAppleManual},
 		{"admin grant has nothing to refund", ent.Subscription{Channel: subscription.ChannelAdminGrant}, RefundPathNothingCharged},
-		{"a finished refund is never repeated", ent.Subscription{Channel: subscription.ChannelWebPaystack, BillingReference: "sub-1", AmountMinor: 250_000, LastError: verificationRefundDone}, RefundPathAlreadyDone},
+		{"a finished refund is never repeated", ent.Subscription{Channel: subscription.ChannelWebCheckout, BillingReference: "sub-1", AmountMinor: 250_000, LastError: verificationRefundDone}, RefundPathAlreadyDone},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
