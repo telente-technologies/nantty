@@ -23,6 +23,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Pos
 			ReversalReference: "admin-reversal:" + command.EntryId.String(),
 			Reason:            command.Reason,
 			Metadata:          map[string]any{"actorStaffId": command.ActorStaffId},
+			StaffInitiated:    true,
 		})
 		return err
 	})

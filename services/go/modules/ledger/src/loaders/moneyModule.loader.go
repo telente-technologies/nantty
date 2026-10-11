@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"zudomart/platform/viewerregion"
 
 	"zudomart/modules/ledger/src/databases"
 	"zudomart/modules/ledger/src/middlewares"
@@ -32,6 +33,7 @@ type MoneyModuleSettings struct {
 	TokenIssuer          string
 	TokenAudience        string
 	AdminSchema          string
+	CurrencySchema       string
 	AccountSchema        string
 	CatalogSchema        string
 	PlatformSettingsTtl  time.Duration
@@ -53,6 +55,7 @@ func ReadMoneyModuleSettingsFromEnvironment(reader *platformconfig.EnvironmentRe
 		TokenIssuer:          reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
 		TokenAudience:        reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
 		AdminSchema:          reader.ReadStringOrDefault("ADMIN_DATABASE_SCHEMA", "admin"),
+		CurrencySchema:       reader.ReadStringOrDefault("CURRENCY_DATABASE_SCHEMA", "currency"),
 		AccountSchema:        reader.ReadStringOrDefault("MONEY_ACCOUNT_DIRECTORY_SCHEMA", "auth"),
 		CatalogSchema:        reader.ReadStringOrDefault("MONEY_CATALOG_SCHEMA", "catalog"),
 		PlatformSettingsTtl:  reader.ReadDurationOrDefault("MONEY_PLATFORM_SETTINGS_TTL", 30*time.Second),
@@ -110,12 +113,18 @@ func PrepareMoneyModuleResources(ctx context.Context, settings MoneyModuleSettin
 	if err != nil {
 		return MoneyModuleResources{}, errors.Join(err, release())
 	}
+	if staffVerifiers.SingleUse == nil {
+		staffVerifiers.SingleUse = NewStepUpLedger(database, settings.LedgerSchema)
+	}
 	if dependencies.Health != nil {
 		dependencies.Health.AddReadinessCheck(settings.ModuleName+"-postgres", postgres.ReadinessCheckForDatabase(database))
 	}
 	platform := overrides.Platform
 	if platform == nil {
 		platform = NewPlatformSettingsSource(database, settings.AdminSchema, settings.PlatformSettingsTtl, logger)
+		if settings.CurrencySchema != "" {
+			platform.Rates = &viewerregion.RateReader{Database: database, Schema: settings.CurrencySchema}
+		}
 	}
 	return MoneyModuleResources{Database: database, Publisher: publisher, AccessVerifier: verifier, StaffVerifiers: staffVerifiers, Logger: logger, Platform: platform, release: release}, nil
 }

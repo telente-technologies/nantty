@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"sync"
 	"time"
+	"zudomart/platform/viewerregion"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -23,6 +24,7 @@ type PlatformSettingsSource struct {
 	logger     *slog.Logger
 	mutex      sync.Mutex
 	entries    map[string]cachedPlatformSetting
+	Rates      *viewerregion.RateReader
 }
 
 type cachedPlatformSetting struct {

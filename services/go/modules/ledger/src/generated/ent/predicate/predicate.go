@@ -26,3 +26,6 @@ type ReconciliationRun func(*sql.Selector)
 
 // SellerCreditMaturity is the predicate function for sellercreditmaturity builders.
 type SellerCreditMaturity func(*sql.Selector)
+
+// StepUpConsumption is the predicate function for stepupconsumption builders.
+type StepUpConsumption func(*sql.Selector)

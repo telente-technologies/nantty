@@ -12,11 +12,27 @@ import (
 const staffPermissionClaimPrefix = "perm:"
 
 type StaffTokenVerifiers struct {
-	Access *jwtauth.AccessTokenVerifier
-	StepUp *jwtauth.AccessTokenVerifier
+	Access    *jwtauth.AccessTokenVerifier
+	StepUp    *jwtauth.AccessTokenVerifier
+	SingleUse StepUpConsumer
 }
 
 func RequireStaffPermission(verifiers StaffTokenVerifiers, permission string, requireStepUp bool) func(http.Handler) http.Handler {
+	if permission == "" {
+		return requireStaffWhere(verifiers, func(staffauth.Staff) bool { return true }, requireStepUp)
+	}
+	return RequireStaffWithAnyPermission(verifiers, []string{permission}, requireStepUp)
+}
+
+func RequireStaffWithAnyPermission(verifiers StaffTokenVerifiers, permissions []string, requireStepUp bool) func(http.Handler) http.Handler {
+	return requireStaffWhere(verifiers, func(staff staffauth.Staff) bool { return staff.CanAny(permissions...) }, requireStepUp)
+}
+
+func requireStaffWhere(verifiers StaffTokenVerifiers, permitted func(staffauth.Staff) bool, requireStepUp bool) func(http.Handler) http.Handler {
+	return requireStaffWithStepUpPolicy(verifiers, permitted, requireStepUp, false)
+}
+
+func requireStaffWithStepUpPolicy(verifiers StaffTokenVerifiers, permitted func(staffauth.Staff) bool, requireStepUp, singleUse bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			principal, err := verifiers.Access.VerifyAccessTokenAndExtractPrincipal(request.Context(), jwtauth.ExtractBearerTokenFromAuthorizationHeader(request))
@@ -25,7 +41,7 @@ func RequireStaffPermission(verifiers StaffTokenVerifiers, permission string, re
 				return
 			}
 			staff := convertPrincipalToStaff(principal)
-			if permission != "" && !staff.Can(permission) {
+			if !permitted(staff) {
 				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
 				return
 			}
@@ -36,6 +52,12 @@ func RequireStaffPermission(verifiers StaffTokenVerifiers, permission string, re
 					return
 				}
 				staff.SteppedUp = true
+				if singleUse {
+					if failure := consumeStepUp(request, verifiers.SingleUse, staff.Id); failure != nil {
+						httpserver.WriteJsonResponse(writer, failure.Status, failure)
+						return
+					}
+				}
 			}
 			next.ServeHTTP(writer, request.WithContext(staffauth.ContextWithStaff(request.Context(), staff)))
 		})
@@ -58,4 +80,9 @@ func convertPrincipalToStaff(principal jwtauth.Principal) staffauth.Staff {
 
 func RequireUserAccessToken(verifier *jwtauth.AccessTokenVerifier) func(http.Handler) http.Handler {
 	return jwtauth.RequireVerifiedAccessToken(verifier)
+}
+
+func RequireUserAccessTokenAndStepUp(verifier *jwtauth.AccessTokenVerifier) func(http.Handler) http.Handler {
+	access, stepUp := jwtauth.RequireVerifiedAccessToken(verifier), jwtauth.RequireUserStepUp(verifier)
+	return func(next http.Handler) http.Handler { return access(stepUp(next)) }
 }

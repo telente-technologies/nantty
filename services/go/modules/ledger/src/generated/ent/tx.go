@@ -28,6 +28,8 @@ type Tx struct {
 	ReconciliationRun *ReconciliationRunClient
 	// SellerCreditMaturity is the client for interacting with the SellerCreditMaturity builders.
 	SellerCreditMaturity *SellerCreditMaturityClient
+	// StepUpConsumption is the client for interacting with the StepUpConsumption builders.
+	StepUpConsumption *StepUpConsumptionClient
 
 	// lazily loaded.
 	client     *Client
@@ -166,6 +168,7 @@ func (tx *Tx) init() {
 	tx.ReconciliationBreak = NewReconciliationBreakClient(tx.config)
 	tx.ReconciliationRun = NewReconciliationRunClient(tx.config)
 	tx.SellerCreditMaturity = NewSellerCreditMaturityClient(tx.config)
+	tx.StepUpConsumption = NewStepUpConsumptionClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

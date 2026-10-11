@@ -12,6 +12,7 @@ import (
 	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationrun"
 	"zudomart/modules/ledger/src/generated/ent/sellercreditmaturity"
+	"zudomart/modules/ledger/src/generated/ent/stepupconsumption"
 
 	"github.com/google/uuid"
 )
@@ -395,6 +396,61 @@ func init() {
 	sellercreditmaturityDescID := sellercreditmaturityMixinFields0[0].Descriptor()
 	// sellercreditmaturity.DefaultID holds the default value on creation for the id field.
 	sellercreditmaturity.DefaultID = sellercreditmaturityDescID.Default.(func() uuid.UUID)
+	stepupconsumptionMixin := schema.StepUpConsumption{}.Mixin()
+	stepupconsumptionMixinFields0 := stepupconsumptionMixin[0].Fields()
+	_ = stepupconsumptionMixinFields0
+	stepupconsumptionFields := schema.StepUpConsumption{}.Fields()
+	_ = stepupconsumptionFields
+	// stepupconsumptionDescCreatedAt is the schema descriptor for created_at field.
+	stepupconsumptionDescCreatedAt := stepupconsumptionMixinFields0[1].Descriptor()
+	// stepupconsumption.DefaultCreatedAt holds the default value on creation for the created_at field.
+	stepupconsumption.DefaultCreatedAt = stepupconsumptionDescCreatedAt.Default.(func() time.Time)
+	// stepupconsumptionDescTokenHash is the schema descriptor for token_hash field.
+	stepupconsumptionDescTokenHash := stepupconsumptionFields[0].Descriptor()
+	// stepupconsumption.TokenHashValidator is a validator for the "token_hash" field. It is called by the builders before save.
+	stepupconsumption.TokenHashValidator = func() func(string) error {
+		validators := stepupconsumptionDescTokenHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(token_hash string) error {
+			for _, fn := range fns {
+				if err := fn(token_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// stepupconsumptionDescStaffID is the schema descriptor for staff_id field.
+	stepupconsumptionDescStaffID := stepupconsumptionFields[1].Descriptor()
+	// stepupconsumption.StaffIDValidator is a validator for the "staff_id" field. It is called by the builders before save.
+	stepupconsumption.StaffIDValidator = func() func(string) error {
+		validators := stepupconsumptionDescStaffID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(staff_id string) error {
+			for _, fn := range fns {
+				if err := fn(staff_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// stepupconsumptionDescRoute is the schema descriptor for route field.
+	stepupconsumptionDescRoute := stepupconsumptionFields[2].Descriptor()
+	// stepupconsumption.DefaultRoute holds the default value on creation for the route field.
+	stepupconsumption.DefaultRoute = stepupconsumptionDescRoute.Default.(string)
+	// stepupconsumption.RouteValidator is a validator for the "route" field. It is called by the builders before save.
+	stepupconsumption.RouteValidator = stepupconsumptionDescRoute.Validators[0].(func(string) error)
+	// stepupconsumptionDescID is the schema descriptor for id field.
+	stepupconsumptionDescID := stepupconsumptionMixinFields0[0].Descriptor()
+	// stepupconsumption.DefaultID holds the default value on creation for the id field.
+	stepupconsumption.DefaultID = stepupconsumptionDescID.Default.(func() uuid.UUID)
 }
 
 const (

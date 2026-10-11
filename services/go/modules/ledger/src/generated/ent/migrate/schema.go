@@ -273,6 +273,33 @@ var (
 			},
 		},
 	}
+	// StepUpConsumptionsColumns holds the columns for the "step_up_consumptions" table.
+	StepUpConsumptionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "token_hash", Type: field.TypeString, Size: 64},
+		{Name: "staff_id", Type: field.TypeString, Size: 80},
+		{Name: "route", Type: field.TypeString, Size: 200, Default: ""},
+		{Name: "expires_at", Type: field.TypeTime},
+	}
+	// StepUpConsumptionsTable holds the schema information for the "step_up_consumptions" table.
+	StepUpConsumptionsTable = &schema.Table{
+		Name:       "step_up_consumptions",
+		Columns:    StepUpConsumptionsColumns,
+		PrimaryKey: []*schema.Column{StepUpConsumptionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "stepupconsumption_token_hash",
+				Unique:  true,
+				Columns: []*schema.Column{StepUpConsumptionsColumns[2]},
+			},
+			{
+				Name:    "stepupconsumption_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{StepUpConsumptionsColumns[5]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		JournalEntriesTable,
@@ -282,6 +309,7 @@ var (
 		ReconciliationBreaksTable,
 		ReconciliationRunsTable,
 		SellerCreditMaturitiesTable,
+		StepUpConsumptionsTable,
 	}
 )
 
