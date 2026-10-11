@@ -1,17 +1,17 @@
 import type { ReactNode } from "react";
 import {
-  AppleLogoIcon, ArrowDownIcon, ArrowLeftIcon, ArrowUpIcon, BellIcon, BellSlashIcon, BookmarkSimpleIcon, CameraIcon, CaretDownIcon, CaretRightIcon, ChatCircleIcon,
+  AppleLogoIcon, ArrowDownIcon, BankIcon, AtIcon, EnvelopeSimpleIcon, EyeSlashIcon, FileLockIcon, FlagIcon, HashIcon, HeadsetIcon, IdentificationCardIcon, InfoIcon, LockKeyIcon, PhoneIcon, ScalesIcon, ShieldCheckIcon, ShieldStarIcon, SignOutIcon, TrademarkRegisteredIcon, UserMinusIcon, ArrowLeftIcon, ArrowUpIcon, BellIcon, BellSlashIcon, BookmarkSimpleIcon, CameraIcon, CaretDownIcon, CaretRightIcon, ChatCircleIcon,
   CheckIcon, CoinIcon, CreditCardIcon, CrownIcon, DotsThreeVerticalIcon, EyeIcon, FileTextIcon, FilmSlateIcon, GiftIcon, GlobeHemisphereWestIcon, HeartIcon, HouseIcon, ImageSquareIcon,
-  LockSimpleIcon, MagnifyingGlassIcon, MapPinIcon, MusicNotesIcon, PackageIcon, PaperPlaneTiltIcon, PlayIcon, PlusIcon, PushPinIcon, RocketLaunchIcon, SealCheckIcon,
+  LockSimpleIcon, MagnifyingGlassIcon, MapPinIcon, MusicNotesIcon, PackageIcon, PaperPlaneTiltIcon, PlayIcon, PlusIcon, ProhibitIcon, PushPinIcon, RocketLaunchIcon, SealCheckIcon,
   ShareNetworkIcon, ShieldIcon, ShoppingBagIcon, ShoppingCartIcon, SlidersHorizontalIcon, SparkleIcon, SpeedometerIcon, SquaresFourIcon, StarIcon,
-  StorefrontIcon, TagIcon, TextIndentIcon, TrashIcon, TrophyIcon, TruckIcon, UserCircleIcon, VideoCameraIcon, WarningIcon, XIcon,
+  StorefrontIcon, TagIcon, TextIndentIcon, TrashIcon, TrophyIcon, TruckIcon, UserCircleIcon, UserPlusIcon, VideoCameraIcon, WarningIcon, XIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon, IconWeight } from "@phosphor-icons/react";
 
 import styles from "./appIcon.module.css";
 
 const phosphorIcons = {
-  apple24: [AppleLogoIcon, "fill"], arrowLeft24: [ArrowLeftIcon], bell24: [BellIcon], bellSlash24: [BellSlashIcon], bookmarkSimple24: [BookmarkSimpleIcon],
+  apple24: [AppleLogoIcon, "fill"], bank24: [BankIcon], arrowLeft24: [ArrowLeftIcon], bell24: [BellIcon], bellSlash24: [BellSlashIcon], bookmarkSimple24: [BookmarkSimpleIcon],
   buildingStore20: [StorefrontIcon], cameraBolt24: [CameraIcon], cancel20: [XIcon], caretDown24: [CaretDownIcon], caretRight24: [CaretRightIcon],
   chatCircle24: [ChatCircleIcon], check16: [CheckIcon], coin24: [CoinIcon], creditCard24: [CreditCardIcon], dotsThreeVertical24: [DotsThreeVerticalIcon],
   eye24: [EyeIcon], flips34: [FilmSlateIcon], gift24: [GiftIcon], heart24: [HeartIcon], home33: [HouseIcon, "fill"], imageSquare24: [ImageSquareIcon],
@@ -20,7 +20,10 @@ const phosphorIcons = {
   shoppingCart24: [ShoppingCartIcon], slidersHorizontal24: [SlidersHorizontalIcon], speedometer24: [SpeedometerIcon], squaresFour24: [SquaresFourIcon],
   star16: [StarIcon, "fill"], tag24: [TagIcon], textIndent24: [TextIndentIcon], trash24: [TrashIcon], truck24: [TruckIcon], userCircle24: [UserCircleIcon],
   videoCamera24: [VideoCameraIcon], warning20: [WarningIcon], arrowDown24: [ArrowDownIcon], arrowUp24: [ArrowUpIcon], musicNotes24: [MusicNotesIcon],
-  crown24: [CrownIcon, "fill"], globe24: [GlobeHemisphereWestIcon], trophy24: [TrophyIcon],
+  crown24: [CrownIcon, "fill"], globe24: [GlobeHemisphereWestIcon], trophy24: [TrophyIcon], prohibit24: [ProhibitIcon], userPlus24: [UserPlusIcon],
+  at24: [AtIcon], envelope24: [EnvelopeSimpleIcon], eyeSlash24: [EyeSlashIcon], fileLock24: [FileLockIcon], flag24: [FlagIcon], hash24: [HashIcon], headset24: [HeadsetIcon],
+  identification24: [IdentificationCardIcon], info24: [InfoIcon], lockKey24: [LockKeyIcon], phone24: [PhoneIcon], scales24: [ScalesIcon], shieldCheck24: [ShieldCheckIcon], shieldStar24: [ShieldStarIcon],
+  signOut24: [SignOutIcon], trademark24: [TrademarkRegisteredIcon], userMinus24: [UserMinusIcon],
   note24: [FileTextIcon], package24: [PackageIcon], searchOff24: [MagnifyingGlassIcon], shoppingBag24: [ShoppingBagIcon], sparkle24: [SparkleIcon],
 } as const satisfies Record<string, readonly [Icon] | readonly [Icon, IconWeight]>;
 

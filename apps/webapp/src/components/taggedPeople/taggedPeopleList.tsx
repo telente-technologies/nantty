@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { useFollowUser } from "@/components/follow/useFollowUser.hook";
 import { useSession } from "@/components/providers/sessionProvider";
 import { AppIcon } from "@/components/ui/appIcon";
 import { Avatar } from "@/components/ui/media";
-import { followsService, postsService } from "@/services/posts.service";
+import { postsService } from "@/services/posts.service";
 import type { Post, TaggedUser } from "@/types";
 import { buildProfilePath } from "@/utils/seoPaths.util";
 
@@ -22,15 +21,10 @@ const CHECKMARK_LABELS = { blue: "Verified account", gold: "Verified business", 
 
 function TaggedPersonRow({ person, onClose }: { readonly person: TaggedUser; readonly onClose: () => void }) {
   const { viewer } = useSession();
-  const [isFollowing, setIsFollowing] = useState(person.isFollowing ?? false);
-  const follow = useMutation({
-    mutationFn: (next: boolean) => (next ? followsService.followUser(person.id) : followsService.unfollowUser(person.id)),
-    onMutate: (next) => setIsFollowing(next),
-    onError: (_error, next) => setIsFollowing(!next),
-  });
+  const follow = useFollowUser({ userId: person.id, username: person.username, displayName: person.displayName, initialState: person.isFollowing ? "accepted" : "none" });
   const toggleFollow = () => {
     if (!viewer) onClose();
-    requireAuthThen(() => follow.mutate(!isFollowing), `Sign in to follow ${person.displayName}.`);
+    follow.toggle();
   };
   return (
     <li className={styles.row}>
@@ -49,8 +43,8 @@ function TaggedPersonRow({ person, onClose }: { readonly person: TaggedUser; rea
         </span>
       </Link>
       {viewer?.id === person.id ? null : (
-        <button type="button" className={[styles.follow, isFollowing ? styles.following : ""].join(" ")} aria-pressed={isFollowing} aria-label={`${isFollowing ? "Unfollow" : "Follow"} ${person.displayName}`} onClick={toggleFollow}>
-          {isFollowing ? "Following" : "Follow"}
+        <button type="button" className={[styles.follow, follow.isActive ? styles.following : ""].join(" ")} aria-pressed={follow.isActive} aria-label={`${follow.isActive ? "Unfollow" : "Follow"} ${person.displayName}`} disabled={follow.isPending} onClick={toggleFollow}>
+          {follow.label}
         </button>
       )}
     </li>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ErrorState as KitErrorState } from "@zudomart/web-kit";
+import { BrandLoader, ErrorState as KitErrorState, type BrandLoaderSize } from "@zudomart/web-kit";
 
 import { SignInRequiredState } from "@/components/auth/signInRequiredState";
 import { isSignInRequiredError } from "@/services/clientApi.service";
@@ -20,11 +20,10 @@ export function ErrorState({ error, signInDescription, ...props }: ErrorStatePro
   return <KitErrorState {...props} title="You're offline" description="Check your connection. This will load again when you're back online." />;
 }
 
-export function Spinner({ label = "Loading" }: { readonly label?: string }) {
+export function Spinner({ label = "Loading", size = "md" }: { readonly label?: string; readonly size?: BrandLoaderSize }) {
   return (
-    <span className={styles.spinnerRow} role="status">
-      <span className={styles.spinner} aria-hidden="true" />
-      <span className="visuallyHidden">{label}</span>
+    <span className={styles.spinnerRow}>
+      <BrandLoader size={size} label={label} />
     </span>
   );
 }

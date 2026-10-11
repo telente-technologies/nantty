@@ -2,7 +2,8 @@ import {
   ArrowRightIcon as PhArrowRight, ArrowSquareOutIcon, BookmarkSimpleIcon, CaretLeftIcon, ChartBarIcon, ChatCircleIcon, CheckCircleIcon as PhCheckCircle, CompassIcon as PhCompass, CopyIcon as PhCopy, CopyrightIcon as PhCopyright, DownloadSimpleIcon, EnvelopeIcon,
   ExportIcon, FileTextIcon, FlagIcon as PhFlag, GearIcon, GiftIcon as PhGift, HeartIcon as PhHeart, LinkSimpleIcon as PhLinkSimple, MonitorIcon as PhMonitor, MoonIcon as PhMoon, PackageIcon as PhPackage,
   PaperPlaneTiltIcon, PauseIcon as PhPause, PhoneIcon as PhPhone, ProhibitIcon as PhProhibit, PushPinIcon as PhPushPin, RepeatIcon, ShieldCheckIcon, SignInIcon as PhSignIn, SignOutIcon, SpeakerHighIcon as PhSpeakerHigh, SpeakerXIcon as PhSpeakerX, SunIcon as PhSun, TrendUpIcon,
-  UsersIcon, WalletIcon as PhWallet, WarningIcon,
+  UsersIcon, WalletIcon as PhWallet, WarningIcon, BellIcon as PhBell, BellRingingIcon, BellSlashIcon, UserMinusIcon,
+  ArrowClockwiseIcon, ArrowCounterClockwiseIcon, CornersInIcon, CornersOutIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon, IconProps as PhosphorIconProps, IconWeight } from "@phosphor-icons/react";
 
@@ -102,3 +103,11 @@ export const ProhibitIcon = createIcon(PhProhibit);
 export const SuccessIcon = createIcon(PhCheckCircle);
 export const SpeakerHighIcon = createIcon(PhSpeakerHigh);
 export const SpeakerMutedIcon = createIcon(PhSpeakerX);
+export const PostBellIcon = createIcon(PhBell);
+export const PostBellRingingIcon = createIcon(BellRingingIcon, "fill");
+export const PostBellSlashIcon = createIcon(BellSlashIcon);
+export const UnfollowIcon = createIcon(UserMinusIcon);
+export const SkipBackIcon = createIcon(ArrowCounterClockwiseIcon, "bold");
+export const SkipAheadIcon = createIcon(ArrowClockwiseIcon, "bold");
+export const EnterFullscreenIcon = createIcon(CornersOutIcon, "bold");
+export const ExitFullscreenIcon = createIcon(CornersInIcon, "bold");
