@@ -21,6 +21,7 @@ describe("clip create mocks", () => {
   it("searches places by text only", async () => {
     const result = await resolveMockApiRequest<{ places: PostLocationTag[] }>("GET", "/api/v1/places/search?q=lagos", undefined);
     expect(result.places.length).toBeGreaterThan(0);
+    expect(result.places.at(-1)).toEqual({ placeId: "text:lagos", name: "lagos", area: null });
   });
 
   it("hides blockers from tag search, marks people who turned tagging off, and caps tags at 20", async () => {
