@@ -13,8 +13,8 @@ function naira(amountMinor: number): Money {
   return { amountMinor, currency: "NGN" };
 }
 
-const proPlanEntitlements: PlanEntitlements = { maxStaffSeats: 5, maxLocations: 3, reducedEscrowFee: false, priorityPlacement: false, adCredits: { amountMinor: 100_000, currency: "NGN" }, apiAccess: false };
-const businessPlanEntitlements: PlanEntitlements = { maxStaffSeats: 25, maxLocations: 10, reducedEscrowFee: true, priorityPlacement: true, adCredits: { amountMinor: 500_000, currency: "NGN" }, apiAccess: true };
+const proPlanEntitlements: PlanEntitlements = { maxStaffSeats: 5, maxLocations: 3, reducedEscrowFee: false, adCredits: { amountMinor: 100_000, currency: "NGN" }, apiAccess: false };
+const businessPlanEntitlements: PlanEntitlements = { maxStaffSeats: 25, maxLocations: 10, reducedEscrowFee: true, adCredits: { amountMinor: 500_000, currency: "NGN" }, apiAccess: true };
 
 export function buildDemoSubscriptionPlans(): SubscriptionPlan[] {
   const proPerks = [
@@ -22,11 +22,11 @@ export function buildDemoSubscriptionPlans(): SubscriptionPlan[] {
     { title: "Grow faster", description: "Bulk tools, advanced analytics and reports, segments and a team." },
     { title: "Monthly ad credit", description: "Credit you can spend in Ads Manager each month." },
   ];
-  const proFeePerk = { title: "1.5% escrow fee", description: "Escrow orders carry a 1.5% fee plus Paystack's payment processing fee. Direct payments carry only the processing fee." };
+  const proFeePerk = { title: "1.5% escrow fee", description: "Escrow orders carry a 1.5% fee plus the payment processing fee. Direct payments carry only the processing fee." };
   const businessPerks = [
     ...proPerks,
-    { title: "1% escrow fee on Business", description: "A lower 1% fee on escrow orders, plus Paystack's payment processing fee. Direct payments carry only the processing fee." },
-    { title: "Priority placement", description: "Your products rank higher in Mart and search." },
+    { title: "1% escrow fee on Business", description: "A lower 1% fee on escrow orders, plus the payment processing fee. Direct payments carry only the processing fee." },
+    { title: "Sponsored placements", description: "Use your monthly ad credit to promote products in Mart and search, always labelled Sponsored." },
     { title: "API access", description: "Connect your own tools to your store data." },
   ];
   return [
@@ -58,7 +58,7 @@ export function buildDemoGateStores(): MockGateStore[] {
         planId: "business_monthly",
         cancelAtPeriodEnd: false,
         paymentMethodSummary: "Visa •••• 4081",
-        provider: "paystack",
+        provider: "flutterwave",
         invoices: [0, 1, 2].map((monthsAgo) => ({ id: `inv_${monthsAgo}`, number: `ZD-INV-2026-${String(9 - monthsAgo).padStart(4, "0")}`, amount: naira(1_500_000), status: "paid" as const, periodStart: buildIsoDateDaysAgo(12 + monthsAgo * 30), periodEnd: buildIsoDateDaysAgo(-18 + monthsAgo * 30), paidAt: buildIsoDateDaysAgo(12 + monthsAgo * 30) })),
       },
     },

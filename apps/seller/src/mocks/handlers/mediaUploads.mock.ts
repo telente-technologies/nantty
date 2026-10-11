@@ -23,6 +23,10 @@ function doBytesMatchDeclaredImageType(bytes: Uint8Array, mimeType: string): boo
   return false;
 }
 
+const encryptedChatMimeType = "application/vnd.zudomart.encrypted";
+const maximumChatBytes = 100 * 1024 * 1024;
+export const mockChatMediaBlobs = new Map<string, Uint8Array>();
+
 function findUploadOrThrow(uploadId: string) {
   const upload = readMockDatabase().uploads.get(uploadId);
   if (!upload) throw new MockHttpError(404, "UPLOAD_NOT_FOUND", "That upload has expired. Start it again.");
@@ -37,9 +41,11 @@ export function registerMediaUploadMockRoutes(): void {
     const mimeType = String(body.mimeType ?? "");
     const sizeBytes = body.sizeBytes;
     if (fileName.length < 1 || fileName.length > 200) throw new MockHttpError(400, "INVALID_FILE_NAME", "The file needs a name of 200 characters or fewer.");
-    if (!(allowedProductImageMimeTypes as readonly string[]).includes(mimeType)) throw new MockHttpError(415, "UNSUPPORTED_MEDIA_TYPE", "Use a JPEG, PNG, WebP or AVIF image.");
-    if (typeof sizeBytes !== "number" || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > maximumImageBytes) throw new MockHttpError(413, "FILE_TOO_LARGE", "Images must be 10 MB or smaller.");
-    if (body.purpose !== "product") throw new MockHttpError(400, "INVALID_PURPOSE", "Uploads here are for product images.");
+    const isChat = body.purpose === "chat";
+    if (isChat && mimeType !== encryptedChatMimeType) throw new MockHttpError(415, "UNSUPPORTED_MEDIA_TYPE", "Chat attachments must be encrypted before upload.");
+    if (!isChat && !(allowedProductImageMimeTypes as readonly string[]).includes(mimeType)) throw new MockHttpError(415, "UNSUPPORTED_MEDIA_TYPE", "Use a JPEG, PNG, WebP or AVIF image.");
+    if (typeof sizeBytes !== "number" || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > (isChat ? maximumChatBytes : maximumImageBytes)) throw new MockHttpError(413, "FILE_TOO_LARGE", isChat ? "Files can be up to 100 MB." : "Images must be 10 MB or smaller.");
+    if (!isChat && body.purpose !== "product") throw new MockHttpError(400, "INVALID_PURPOSE", "Uploads here are for product images.");
     if (body.sha256 !== undefined && (typeof body.sha256 !== "string" || !/^[a-f0-9]{64}$/.test(body.sha256))) throw new MockHttpError(400, "INVALID_SHA256", "The file checksum is not valid.");
     const uploadId = createMockIdentifier("upl");
     const totalChunks = Math.ceil(sizeBytes / chunkSizeBytes);
@@ -71,12 +77,32 @@ export function registerMediaUploadMockRoutes(): void {
     const fileBytes = new Uint8Array(upload.sizeBytes);
     for (let index = 0; index < upload.totalChunks; index += 1) fileBytes.set(upload.receivedChunks.get(index) ?? new Uint8Array(), index * upload.chunkSizeBytes);
     if (upload.mediaId?.startsWith("sha256:") && upload.mediaId.slice(7) !== hashBytesAsHex(fileBytes)) throw new MockHttpError(422, "FILE_CHECKSUM_MISMATCH", "The file changed during upload. Try again.");
+    if (upload.mimeType === encryptedChatMimeType) {
+      const chatMediaId = createMockIdentifier("media");
+      mockChatMediaBlobs.set(chatMediaId, fileBytes);
+      database.media.set(chatMediaId, { mediaId: chatMediaId, url: `/bff/media/${chatMediaId}/encrypted-blob`, mimeType: upload.mimeType, status: "ready" });
+      database.uploads.delete(upload.uploadId);
+      return respondWithJson(200, { mediaId: chatMediaId, status: "ready" });
+    }
     if (!doBytesMatchDeclaredImageType(fileBytes, upload.mimeType)) throw new MockHttpError(415, "FILE_TYPE_MISMATCH", "This file is not the image type it claims to be.");
     const mediaId = createMockIdentifier("media");
     const url = fileBytes.byteLength <= maximumInlineDataUrlBytes ? `data:${upload.mimeType};base64,${Buffer.from(fileBytes).toString("base64")}` : fallbackLargeImageUrl;
     database.media.set(mediaId, { mediaId, url, mimeType: upload.mimeType, status: "ready" });
     database.uploads.delete(upload.uploadId);
     return respondWithJson(200, { mediaId, status: "processing" });
+  });
+
+  registerMockRoute("DELETE", "/media/uploads/:uploadId", (request) => {
+    requireMockStorePrincipal(request);
+    readMockDatabase().uploads.delete(request.params.uploadId ?? "");
+    return { status: 204, body: null };
+  });
+
+  registerMockRoute("GET", "/media/:mediaId/encrypted-blob", (request) => {
+    requireMockStorePrincipal(request);
+    const bytes = mockChatMediaBlobs.get(request.params.mediaId ?? "");
+    if (!bytes) throw new MockHttpError(404, "MEDIA_NOT_FOUND", "This attachment has expired.");
+    return { status: 200, body: bytes, contentType: "application/octet-stream" };
   });
 
   registerMockRoute("GET", "/media/:mediaId", (request) => {

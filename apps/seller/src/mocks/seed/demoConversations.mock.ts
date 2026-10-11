@@ -1,9 +1,17 @@
 import type { Conversation, ConversationMessage } from "@/types/conversation.type";
+
+export interface MockSeedMessage {
+  readonly id: string;
+  readonly from: "customer" | "seller";
+  readonly text: string;
+  readonly createdAt: string;
+}
 import type { OnlineOrder } from "@/types/order.type";
 
 export interface MockConversationRecord {
   conversation: Conversation;
   messages: ConversationMessage[];
+  seeds: MockSeedMessage[];
 }
 
 const orderLinkedScripts: readonly (readonly [from: "customer" | "seller", body: string])[][] = [
@@ -22,16 +30,17 @@ const generalEnquiries: readonly { readonly name: string; readonly username: str
   { name: "Bolaji Ogunbanjo", username: "bolaji.ogb", messages: [["customer", "When are you restocking the ankara tote?"], ["seller", "Next Friday. I will message you as soon as it is live."]] },
 ];
 
-function buildMessagesFromScript(conversationId: string, script: readonly (readonly ["customer" | "seller", string])[], customerName: string, sellerName: string, startEpochMs: number): ConversationMessage[] {
-  return script.map(([from, body], messageIndex) => ({ id: `${conversationId}_m${messageIndex + 1}`, conversationId, from, senderName: from === "customer" ? customerName : sellerName, body, createdAt: new Date(startEpochMs + messageIndex * 23 * 60_000).toISOString() }));
+function buildMessagesFromScript(conversationId: string, script: readonly (readonly ["customer" | "seller", string])[], _customerName: string, _sellerName: string, startEpochMs: number): MockSeedMessage[] {
+  return script.map(([from, text], messageIndex) => ({ id: `${conversationId}_m${messageIndex + 1}`, from, text, createdAt: new Date(startEpochMs + messageIndex * 23 * 60_000).toISOString() }));
 }
 
-function finishConversation(base: Omit<Conversation, "lastMessage" | "unreadCount" | "updatedAt">, messages: ConversationMessage[]): MockConversationRecord {
-  const lastMessage = messages[messages.length - 1] ?? null;
-  const unreadCount = lastMessage?.from === "customer" ? messages.filter((message, index) => message.from === "customer" && messages.slice(index).every((later) => later.from === "customer")).length : 0;
+function finishConversation(base: Omit<Conversation, "lastMessage" | "unreadCount" | "updatedAt">, seeds: MockSeedMessage[]): MockConversationRecord {
+  const lastMessage = seeds[seeds.length - 1] ?? null;
+  const unreadCount = lastMessage?.from === "customer" ? seeds.filter((message, index) => message.from === "customer" && seeds.slice(index).every((later) => later.from === "customer")).length : 0;
   return {
-    conversation: { ...base, lastMessage: lastMessage ? { body: lastMessage.body, from: lastMessage.from, createdAt: lastMessage.createdAt } : null, unreadCount, updatedAt: lastMessage?.createdAt ?? new Date().toISOString() },
-    messages,
+    conversation: { ...base, lastMessage: lastMessage ? { kind: "text", from: lastMessage.from, createdAt: lastMessage.createdAt } : null, unreadCount, updatedAt: lastMessage?.createdAt ?? new Date().toISOString() },
+    messages: [],
+    seeds,
   };
 }
 

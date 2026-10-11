@@ -73,6 +73,13 @@ export function registerAccessAndAuthMockHandlers(): void {
     const tokens = issueMockTokenPair(user.id, randomBytes(12).toString("hex"));
     return respondWithJson(200, { ...tokens, user: convertMockUserToCurrentUser(user.id), isNewUser: false });
   }, { public: true });
+  registerMockRoute("POST", "/auth/step-up", (request) => {
+    const principal = requireMockStorePrincipal(request);
+    const password = typeof readJsonObjectBody(request).password === "string" ? String(readJsonObjectBody(request).password) : "";
+    const overrideMatch = doesPasswordMatchOverrideForUser(principal.userId, password);
+    if (!(overrideMatch ?? isDemoPasswordCorrect(password))) return respondWithError(401, "STEP_UP_FAILED", "We could not confirm it's you. Try again.");
+    return respondWithJson(200, { stepUpToken: `mock_su_${randomBytes(24).toString("base64url")}`, expiresIn: 300, method: "password" });
+  });
 
   registerMockRoute("POST", "/auth/refresh", (request) => {
     const database = readMockDatabase();
@@ -126,7 +133,7 @@ export function registerAccessAndAuthMockHandlers(): void {
     if (!readMockDatabase().subscriptionPlans.some((plan) => plan.id === planId)) throw new MockHttpError(404, "PLAN_NOT_FOUND", "Pick one of the listed plans.");
     const reference = `SUB_${randomBytes(8).toString("hex").toUpperCase()}`;
     readMockDatabase().pendingSubscriptionCheckouts.set(reference, { storeId: gateStore.storeId, planId });
-    return respondWithJson(201, { authorizationUrl: `/billing-checkout/demo?reference=${reference}`, reference, provider: "paystack" });
+    return respondWithJson(201, { checkoutUrl: `/billing-checkout/demo?reference=${reference}`, authorizationUrl: `/billing-checkout/demo?reference=${reference}`, reference, provider: "flutterwave" });
   });
 
   registerMockRoute("POST", "/seller/subscription/verify", (request) => {
@@ -144,7 +151,7 @@ export function registerAccessAndAuthMockHandlers(): void {
       subscription: { status: "active", plan: plan.tier, currentPeriodEnd: periodEnd },
       planId: plan.id,
       cancelAtPeriodEnd: false,
-      provider: "paystack",
+      provider: "flutterwave",
       paymentMethodSummary: "Mastercard •••• 5199",
       invoices: [{ id: `inv_${reference}`, number: `ZD-INV-${reference.slice(4, 10)}`, amount: plan.price, status: "paid", periodStart: new Date().toISOString(), periodEnd, paidAt: new Date().toISOString() }, ...gateStore.subscription.invoices],
     };

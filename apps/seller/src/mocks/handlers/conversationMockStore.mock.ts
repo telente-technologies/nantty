@@ -19,10 +19,11 @@ export function findConversationRecordOrThrow(conversationId: string): MockConve
 
 export function appendMessageToConversation(record: MockConversationRecord, message: ConversationMessage): void {
   record.messages.push(message);
+  if (message.kind === "control") return;
   const isFromSeller = message.from === "seller";
   record.conversation = {
     ...record.conversation,
-    lastMessage: { body: message.body, from: message.from, createdAt: message.createdAt },
+    lastMessage: { kind: message.kind, from: message.from, createdAt: message.createdAt },
     unreadCount: isFromSeller ? 0 : record.conversation.unreadCount + 1,
     updatedAt: message.createdAt,
   };
@@ -41,6 +42,6 @@ export function findOrCreateConversationForOrder(order: OnlineOrder): Conversati
     unreadCount: 0,
     updatedAt: new Date().toISOString(),
   };
-  records.unshift({ conversation, messages: [] });
+  records.unshift({ conversation, messages: [], seeds: [] });
   return conversation;
 }
