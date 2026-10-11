@@ -1,4 +1,5 @@
 import type { Db } from "../../../types/database.type.js";
+import type { MessageRow } from "../../messages/repositories/message.repository.js";
 import { conversationWithMembers, type ConversationRow } from "../../conversations/repositories/conversation.repository.js";
 
 export const storeInboxRepository = {
@@ -18,8 +19,11 @@ export const storeInboxRepository = {
     db.conversationMember.count({ where: { accountId: storeId, unreadCount: { gt: 0 }, leftAt: null, conversation: { storeId, kind: "business" } } }),
 
   latestMessages: (db: Db, conversationIds: readonly string[]) =>
-    db.message.findMany({ where: { conversationId: { in: [...conversationIds] }, kind: "text" }, orderBy: { id: "desc" }, distinct: ["conversationId"], select: { conversationId: true, senderId: true, ciphertext: true, createdAt: true } }),
+    db.message.findMany({ where: { conversationId: { in: [...conversationIds] }, kind: { notIn: ["control", "system"] } }, orderBy: { id: "desc" }, distinct: ["conversationId"], select: { conversationId: true, senderId: true, kind: true, createdAt: true } }),
 
-  threadMessages: (db: Db, conversationId: string, limit: number) =>
-    db.message.findMany({ where: { conversationId, kind: "text" }, orderBy: { id: "desc" }, take: limit, select: { id: true, conversationId: true, senderId: true, senderLabel: true, ciphertext: true, protocol: true, createdAt: true } }),
+  threadMessages: (db: Db, conversationId: string, now: Date, limit: number, cursor: string | undefined): Promise<MessageRow[]> =>
+    db.message.findMany({
+      where: { conversationId, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+      orderBy: { id: "desc" }, take: limit + 1, ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
+    }),
 };

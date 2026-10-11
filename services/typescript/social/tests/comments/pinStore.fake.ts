@@ -17,9 +17,11 @@ export interface PinStore {
 
 function matches(row: Row, where: Row = {}): boolean {
   return Object.entries(where).every(([key, condition]) => {
-    const value = row[key];
+    if (key === "OR" && Array.isArray(condition)) return condition.some((alternative: Row) => matches(row, alternative));
+    const value = row[key] ?? null;
     if (condition !== null && typeof condition === "object" && !(condition instanceof Date)) {
-      const operators = condition as { in?: unknown[]; not?: unknown; startsWith?: string };
+      const operators = condition as { in?: unknown[]; not?: unknown; startsWith?: string; lt?: Date };
+      if (operators.lt !== undefined) return value instanceof Date && value < operators.lt;
       if (operators.in !== undefined) return operators.in.includes(value);
       if ("not" in operators) return value !== operators.not;
       if (operators.startsWith !== undefined) return String(value).startsWith(operators.startsWith);
@@ -55,7 +57,7 @@ export function buildComment(overrides: Row & { id: string }): Row {
 export function createPinStore(comments: Row[], postOverrides: Row = {}): PinStore {
   const posts: Row[] = [{ ...buildPostRow({ id: postId, authorId }), isPinned: false, pinnedAt: null, pinnedCommentId: null, ...postOverrides }];
   const events: PinStore["events"] = [];
-  const emptyList = { findMany: async () => [], findFirst: async () => null, findUnique: async () => null, count: async () => 0 };
+  const emptyList = { findMany: async () => [], findFirst: async () => null, findUnique: async () => null, count: async () => 0, deleteMany: async () => ({ count: 0 }) };
   const client: Row = new Proxy({
     post: table(posts, true),
     comment: table(comments, false),

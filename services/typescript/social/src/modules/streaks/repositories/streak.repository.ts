@@ -11,6 +11,9 @@ export const streakRepository = {
       update: { ...snapshot },
     }),
 
+  saveIfUnchanged: async (db: Db, conversationId: string, expectedUpdatedAt: Date, snapshot: StreakSnapshot): Promise<boolean> =>
+    (await db.chatStreak.updateMany({ where: { conversationId, updatedAt: expectedUpdatedAt }, data: { ...snapshot } })).count === 1,
+
   recordSenderDay: async (db: Db, conversationId: string, accountId: string, localDay: string): Promise<void> => {
     await db.chatStreak.createMany({ data: [{ conversationId }], skipDuplicates: true });
     await db.streakSenderDay.createMany({ data: [{ conversationId, accountId, localDay }], skipDuplicates: true });

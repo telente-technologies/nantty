@@ -82,8 +82,18 @@ describe("createLinkUnfurler", () => {
     const { db, cache } = createFakeDatabase();
     const fetcher: SafeFetcher = async () => { throw new Error("blocked"); };
     const unfurler = createLinkUnfurler({ db, fetcher, clock: { now: () => new Date() } });
-    expect(await unfurler.resolveLinkPreview("http://169.254.169.254.nip.example/")).toBeNull();
+    expect(await unfurler.resolveLinkPreview("http://169.254.169.254.nip.example/", { persist: true })).toBeNull();
     expect([...cache.values()][0]?.["status"]).toBe("failed");
+  });
+
+  it("never stores a URL that a chat sender previews", async () => {
+    const { db, cache } = createFakeDatabase();
+    const fetcher: SafeFetcher = async (url) => ({ finalUrl: new URL(url), status: 200, contentType: "text/html", body: Buffer.from(articleHtml) });
+    const unfurler = createLinkUnfurler({ db, fetcher, clock: { now: () => new Date() } });
+    expect(await unfurler.resolveLinkPreview("https://docs.example.com/private/plan")).toMatchObject({ title: "Lagos tech week & more" });
+    const failing = createLinkUnfurler({ db, fetcher: async () => { throw new Error("blocked"); }, clock: { now: () => new Date() } });
+    expect(await failing.resolveLinkPreview("https://docs.example.com/private/other")).toBeNull();
+    expect(cache.size).toBe(0);
   });
 
   it("does not unfurl Zudomart links", async () => {

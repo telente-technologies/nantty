@@ -7,7 +7,9 @@ export function registerStoreInboxRoutes(router: HttpRouter, controller: ReturnT
   router.get(base, controller.list);
   router.post(`${base}/open`, controller.open);
   router.get(`${base}/:conversationId`, controller.get);
+  router.get(`${base}/:conversationId/recipients`, controller.recipients);
   router.post(`${base}/:conversationId/messages`, controller.reply);
   router.post(`${base}/:conversationId/read`, controller.read);
+  router.post("/api/v1/conversations/stores/:storeId", controller.buyerOpen);
   router.post("/api/v1/conversations/stores/:storeId/messages", controller.buyerSend);
 }

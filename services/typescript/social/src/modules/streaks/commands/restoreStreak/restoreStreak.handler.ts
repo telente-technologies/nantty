@@ -16,15 +16,17 @@ export function createRestoreStreakHandler(context: HandlerContext): Handler<Res
     if (peerId === undefined) throw unprocessable("STREAKS_ARE_ONE_TO_ONE", "Streaks only exist in one-to-one chats.");
     const now = context.clock.now();
     const participants = await loadStreakParticipants(db, viewerId, peerId);
-    const current = evaluateStreakAt(snapshotFromRow(await streakRepository.find(db, conversationId)), now, participants);
-    if (current.state !== "broken" || current.restorableUntil === null) throw conflict("NOTHING_TO_RESTORE", "Nothing to restore");
+    const stored = await streakRepository.find(db, conversationId);
+    const current = evaluateStreakAt(snapshotFromRow(stored), now, participants);
+    if (stored === null || current.state !== "broken" || current.restorableUntil === null) throw conflict("NOTHING_TO_RESTORE", "Nothing to restore");
     if (now > current.restorableUntil) throw conflict("RESTORE_WINDOW_PASSED", "The restore window has passed.");
     const monthKey = currentRestoreMonthKey(now, participants.viewerTimeZone);
     const allowed = restoresAllowedPerMonth(await context.premium.isPremium(viewerId));
     if ((await streakRepository.restoresUsedInMonth(db, viewerId, monthKey)) >= allowed) throw forbidden("NO_RESTORES_LEFT", "You have no streak restores left this month.");
     const restored = restoreBrokenStreak(current, now, participants);
     await context.database.transaction(async (transaction) => {
-      await streakRepository.save(transaction, conversationId, restored);
+      if ((await streakRepository.restoresUsedInMonth(transaction, viewerId, monthKey)) >= allowed) throw forbidden("NO_RESTORES_LEFT", "You have no streak restores left this month.");
+      if (!(await streakRepository.saveIfUnchanged(transaction, conversationId, stored.updatedAt, restored))) throw conflict("NOTHING_TO_RESTORE", "Nothing to restore");
       await streakRepository.recordRestore(transaction, conversationId, viewerId, monthKey, restored.count);
       await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.streakRestored, subject: conversationId, occurredAt: now, data: { conversationId, restoredBy: viewerId, peerId, count: restored.count } }]);
     });
