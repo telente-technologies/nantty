@@ -19,6 +19,10 @@ export interface RankingCandidate {
   readonly authorCountry?: string | null;
   readonly integrity?: EngagementIntegritySignals;
   readonly isPromoted?: boolean;
+  readonly topics?: readonly string[];
+  readonly durationMs?: number;
+  readonly videoViews?: number;
+  readonly completedViews?: number;
 }
 
 export type RankingExplanationCode = "following" | "trending_topic" | "similar_to_liked" | "popular_near_you" | "friends_engaged" | "fresh" | "popular" | "promoted" | "checkmark_boost" | "official_boost";

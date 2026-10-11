@@ -25,14 +25,14 @@ const topicSlugPattern = /^[a-z0-9_-]{1,64}$/;
 const maximumCandidatesSent = 500;
 const maximumItemsReturned = 100;
 
-const toTopicSlugs = (values: readonly string[] | undefined): string[] => [...new Set((values ?? []).filter((value) => topicSlugPattern.test(value)))].slice(0, 20);
+export const toTopicSlugs = (values: readonly string[] | undefined): string[] => [...new Set((values ?? []).filter((value) => topicSlugPattern.test(value)))].slice(0, 20);
 
 export function buildIntelligenceFeedRequest(candidates: readonly RankingCandidate[], context: RankingContext, hasher: IdentifierHasher) {
   const policy = context.boostPolicy ?? defaultBoostPolicy;
   return {
     feedMode: "for_you",
     viewer: {
-      userId: context.viewerId === null ? "guest" : hasher.hashUserId(context.viewerId),
+      userId: context.viewerId === null || !context.personalized ? "guest" : hasher.hashUserId(context.viewerId),
       ...(context.viewerCountry ? { country: context.viewerCountry } : {}),
       followedAccountIds: context.personalized ? [...new Set(candidates.filter((candidate) => candidate.followedAuthor).map((candidate) => hasher.hashUserId(candidate.authorId)))].slice(0, 5000) : [],
     },
@@ -82,7 +82,9 @@ export function mergeIntelligenceRanking(candidates: readonly RankingCandidate[]
   return ranked;
 }
 
-export function createIntelligenceFeedRanker(options: IntelligenceFeedRankerOptions): FeedRanker {
+export type IntelligenceRequestBuilder = (candidates: readonly RankingCandidate[], context: RankingContext, hasher: IdentifierHasher) => unknown;
+
+export function createSignedIntelligenceRanker(options: IntelligenceFeedRankerOptions, path: string, buildRequest: IntelligenceRequestBuilder): FeedRanker {
   const send = options.fetchImplementation ?? fetch;
   const breaker = createCircuitBreaker();
   return {
@@ -93,10 +95,10 @@ export function createIntelligenceFeedRanker(options: IntelligenceFeedRankerOpti
         options.onFallback?.("circuit_open");
         return fallbackOrder;
       }
-      const body = JSON.stringify(buildIntelligenceFeedRequest(candidates, context, options.hasher));
+      const body = JSON.stringify(buildRequest(candidates, context, options.hasher));
       try {
-        const response = await send(new URL(rankPath, options.baseUrl), { method: "POST", body, headers: signIntelligenceRequest(options.sharedSecret, "POST", rankPath, body), signal: AbortSignal.timeout(options.timeoutMs) });
-        if (!response.ok) throw new Error(`feed rank responded ${response.status}`);
+        const response = await send(new URL(path, options.baseUrl), { method: "POST", body, headers: signIntelligenceRequest(options.sharedSecret, "POST", path, body), signal: AbortSignal.timeout(options.timeoutMs) });
+        if (!response.ok) throw new Error(`${path} responded ${response.status}`);
         const payload = (await response.json()) as { items?: readonly RankedItemPayload[]; manipulatedItemIds?: readonly unknown[] };
         breaker.recordSuccess();
         const manipulated = new Set((payload.manipulatedItemIds ?? []).filter((id): id is string => typeof id === "string"));
@@ -108,4 +110,8 @@ export function createIntelligenceFeedRanker(options: IntelligenceFeedRankerOpti
       }
     },
   };
+}
+
+export function createIntelligenceFeedRanker(options: IntelligenceFeedRankerOptions): FeedRanker {
+  return createSignedIntelligenceRanker(options, rankPath, buildIntelligenceFeedRequest);
 }

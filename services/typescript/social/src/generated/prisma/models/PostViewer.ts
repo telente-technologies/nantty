@@ -28,18 +28,33 @@ export type PostViewerMinAggregateOutputType = {
   postId: string | null
   viewerKey: string | null
   createdAt: Date | null
+  lastViewedAt: Date | null
+  lastWatchedAt: Date | null
+  lastLinkClickAt: Date | null
+  lastProfileClickAt: Date | null
+  followAttributedAt: Date | null
 }
 
 export type PostViewerMaxAggregateOutputType = {
   postId: string | null
   viewerKey: string | null
   createdAt: Date | null
+  lastViewedAt: Date | null
+  lastWatchedAt: Date | null
+  lastLinkClickAt: Date | null
+  lastProfileClickAt: Date | null
+  followAttributedAt: Date | null
 }
 
 export type PostViewerCountAggregateOutputType = {
   postId: number
   viewerKey: number
   createdAt: number
+  lastViewedAt: number
+  lastWatchedAt: number
+  lastLinkClickAt: number
+  lastProfileClickAt: number
+  followAttributedAt: number
   _all: number
 }
 
@@ -48,18 +63,33 @@ export type PostViewerMinAggregateInputType = {
   postId?: true
   viewerKey?: true
   createdAt?: true
+  lastViewedAt?: true
+  lastWatchedAt?: true
+  lastLinkClickAt?: true
+  lastProfileClickAt?: true
+  followAttributedAt?: true
 }
 
 export type PostViewerMaxAggregateInputType = {
   postId?: true
   viewerKey?: true
   createdAt?: true
+  lastViewedAt?: true
+  lastWatchedAt?: true
+  lastLinkClickAt?: true
+  lastProfileClickAt?: true
+  followAttributedAt?: true
 }
 
 export type PostViewerCountAggregateInputType = {
   postId?: true
   viewerKey?: true
   createdAt?: true
+  lastViewedAt?: true
+  lastWatchedAt?: true
+  lastLinkClickAt?: true
+  lastProfileClickAt?: true
+  followAttributedAt?: true
   _all?: true
 }
 
@@ -139,6 +169,11 @@ export type PostViewerGroupByOutputType = {
   postId: string
   viewerKey: string
   createdAt: Date
+  lastViewedAt: Date | null
+  lastWatchedAt: Date | null
+  lastLinkClickAt: Date | null
+  lastProfileClickAt: Date | null
+  followAttributedAt: Date | null
   _count: PostViewerCountAggregateOutputType | null
   _min: PostViewerMinAggregateOutputType | null
   _max: PostViewerMaxAggregateOutputType | null
@@ -166,12 +201,22 @@ export type PostViewerWhereInput = {
   postId?: Prisma.UuidFilter<"PostViewer"> | string
   viewerKey?: Prisma.StringFilter<"PostViewer"> | string
   createdAt?: Prisma.DateTimeFilter<"PostViewer"> | Date | string
+  lastViewedAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
+  lastWatchedAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
+  lastLinkClickAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
+  lastProfileClickAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
+  followAttributedAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
 }
 
 export type PostViewerOrderByWithRelationInput = {
   postId?: Prisma.SortOrder
   viewerKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  lastViewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastWatchedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastLinkClickAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastProfileClickAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  followAttributedAt?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type PostViewerWhereUniqueInput = Prisma.AtLeast<{
@@ -182,12 +227,22 @@ export type PostViewerWhereUniqueInput = Prisma.AtLeast<{
   postId?: Prisma.UuidFilter<"PostViewer"> | string
   viewerKey?: Prisma.StringFilter<"PostViewer"> | string
   createdAt?: Prisma.DateTimeFilter<"PostViewer"> | Date | string
+  lastViewedAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
+  lastWatchedAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
+  lastLinkClickAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
+  lastProfileClickAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
+  followAttributedAt?: Prisma.DateTimeNullableFilter<"PostViewer"> | Date | string | null
 }, "postId_viewerKey">
 
 export type PostViewerOrderByWithAggregationInput = {
   postId?: Prisma.SortOrder
   viewerKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  lastViewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastWatchedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastLinkClickAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastProfileClickAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  followAttributedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PostViewerCountOrderByAggregateInput
   _max?: Prisma.PostViewerMaxOrderByAggregateInput
   _min?: Prisma.PostViewerMinOrderByAggregateInput
@@ -200,48 +255,88 @@ export type PostViewerScalarWhereWithAggregatesInput = {
   postId?: Prisma.UuidWithAggregatesFilter<"PostViewer"> | string
   viewerKey?: Prisma.StringWithAggregatesFilter<"PostViewer"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PostViewer"> | Date | string
+  lastViewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PostViewer"> | Date | string | null
+  lastWatchedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PostViewer"> | Date | string | null
+  lastLinkClickAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PostViewer"> | Date | string | null
+  lastProfileClickAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PostViewer"> | Date | string | null
+  followAttributedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PostViewer"> | Date | string | null
 }
 
 export type PostViewerCreateInput = {
   postId: string
   viewerKey: string
   createdAt?: Date | string
+  lastViewedAt?: Date | string | null
+  lastWatchedAt?: Date | string | null
+  lastLinkClickAt?: Date | string | null
+  lastProfileClickAt?: Date | string | null
+  followAttributedAt?: Date | string | null
 }
 
 export type PostViewerUncheckedCreateInput = {
   postId: string
   viewerKey: string
   createdAt?: Date | string
+  lastViewedAt?: Date | string | null
+  lastWatchedAt?: Date | string | null
+  lastLinkClickAt?: Date | string | null
+  lastProfileClickAt?: Date | string | null
+  followAttributedAt?: Date | string | null
 }
 
 export type PostViewerUpdateInput = {
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   viewerKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastWatchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLinkClickAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastProfileClickAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followAttributedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type PostViewerUncheckedUpdateInput = {
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   viewerKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastWatchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLinkClickAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastProfileClickAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followAttributedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type PostViewerCreateManyInput = {
   postId: string
   viewerKey: string
   createdAt?: Date | string
+  lastViewedAt?: Date | string | null
+  lastWatchedAt?: Date | string | null
+  lastLinkClickAt?: Date | string | null
+  lastProfileClickAt?: Date | string | null
+  followAttributedAt?: Date | string | null
 }
 
 export type PostViewerUpdateManyMutationInput = {
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   viewerKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastWatchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLinkClickAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastProfileClickAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followAttributedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type PostViewerUncheckedUpdateManyInput = {
   postId?: Prisma.StringFieldUpdateOperationsInput | string
   viewerKey?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastViewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastWatchedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLinkClickAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastProfileClickAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followAttributedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type PostViewerPostIdViewerKeyCompoundUniqueInput = {
@@ -253,18 +348,33 @@ export type PostViewerCountOrderByAggregateInput = {
   postId?: Prisma.SortOrder
   viewerKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  lastViewedAt?: Prisma.SortOrder
+  lastWatchedAt?: Prisma.SortOrder
+  lastLinkClickAt?: Prisma.SortOrder
+  lastProfileClickAt?: Prisma.SortOrder
+  followAttributedAt?: Prisma.SortOrder
 }
 
 export type PostViewerMaxOrderByAggregateInput = {
   postId?: Prisma.SortOrder
   viewerKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  lastViewedAt?: Prisma.SortOrder
+  lastWatchedAt?: Prisma.SortOrder
+  lastLinkClickAt?: Prisma.SortOrder
+  lastProfileClickAt?: Prisma.SortOrder
+  followAttributedAt?: Prisma.SortOrder
 }
 
 export type PostViewerMinOrderByAggregateInput = {
   postId?: Prisma.SortOrder
   viewerKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  lastViewedAt?: Prisma.SortOrder
+  lastWatchedAt?: Prisma.SortOrder
+  lastLinkClickAt?: Prisma.SortOrder
+  lastProfileClickAt?: Prisma.SortOrder
+  followAttributedAt?: Prisma.SortOrder
 }
 
 
@@ -273,27 +383,47 @@ export type PostViewerSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   postId?: boolean
   viewerKey?: boolean
   createdAt?: boolean
+  lastViewedAt?: boolean
+  lastWatchedAt?: boolean
+  lastLinkClickAt?: boolean
+  lastProfileClickAt?: boolean
+  followAttributedAt?: boolean
 }, ExtArgs["result"]["postViewer"]>
 
 export type PostViewerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   postId?: boolean
   viewerKey?: boolean
   createdAt?: boolean
+  lastViewedAt?: boolean
+  lastWatchedAt?: boolean
+  lastLinkClickAt?: boolean
+  lastProfileClickAt?: boolean
+  followAttributedAt?: boolean
 }, ExtArgs["result"]["postViewer"]>
 
 export type PostViewerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   postId?: boolean
   viewerKey?: boolean
   createdAt?: boolean
+  lastViewedAt?: boolean
+  lastWatchedAt?: boolean
+  lastLinkClickAt?: boolean
+  lastProfileClickAt?: boolean
+  followAttributedAt?: boolean
 }, ExtArgs["result"]["postViewer"]>
 
 export type PostViewerSelectScalar = {
   postId?: boolean
   viewerKey?: boolean
   createdAt?: boolean
+  lastViewedAt?: boolean
+  lastWatchedAt?: boolean
+  lastLinkClickAt?: boolean
+  lastProfileClickAt?: boolean
+  followAttributedAt?: boolean
 }
 
-export type PostViewerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"postId" | "viewerKey" | "createdAt", ExtArgs["result"]["postViewer"]>
+export type PostViewerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"postId" | "viewerKey" | "createdAt" | "lastViewedAt" | "lastWatchedAt" | "lastLinkClickAt" | "lastProfileClickAt" | "followAttributedAt", ExtArgs["result"]["postViewer"]>
 
 export type $PostViewerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PostViewer"
@@ -302,6 +432,11 @@ export type $PostViewerPayload<ExtArgs extends runtime.Types.Extensions.Internal
     postId: string
     viewerKey: string
     createdAt: Date
+    lastViewedAt: Date | null
+    lastWatchedAt: Date | null
+    lastLinkClickAt: Date | null
+    lastProfileClickAt: Date | null
+    followAttributedAt: Date | null
   }, ExtArgs["result"]["postViewer"]>
   composites: {}
 }
@@ -728,6 +863,11 @@ export interface PostViewerFieldRefs {
   readonly postId: Prisma.FieldRef<"PostViewer", 'String'>
   readonly viewerKey: Prisma.FieldRef<"PostViewer", 'String'>
   readonly createdAt: Prisma.FieldRef<"PostViewer", 'DateTime'>
+  readonly lastViewedAt: Prisma.FieldRef<"PostViewer", 'DateTime'>
+  readonly lastWatchedAt: Prisma.FieldRef<"PostViewer", 'DateTime'>
+  readonly lastLinkClickAt: Prisma.FieldRef<"PostViewer", 'DateTime'>
+  readonly lastProfileClickAt: Prisma.FieldRef<"PostViewer", 'DateTime'>
+  readonly followAttributedAt: Prisma.FieldRef<"PostViewer", 'DateTime'>
 }
     
 

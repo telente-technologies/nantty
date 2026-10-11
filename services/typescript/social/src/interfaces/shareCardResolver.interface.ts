@@ -10,5 +10,5 @@ export interface ExternalShareCard {
 }
 
 export interface ShareCardResolver {
-  resolve(kind: "product" | "store" | "live", id: string, viewerId: string): Promise<ExternalShareCard | null>;
+  resolve(kind: "product" | "store" | "live" | "order", id: string, viewerId: string): Promise<ExternalShareCard | null>;
 }
