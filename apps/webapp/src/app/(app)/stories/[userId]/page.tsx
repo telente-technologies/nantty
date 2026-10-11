@@ -8,7 +8,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useDeleteOwnPost } from "@/components/feed/useDeleteOwnPost.hook";
 import { useSession } from "@/components/providers/sessionProvider";
 
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { Avatar } from "@/components/ui/media";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
@@ -48,7 +47,7 @@ export default function StoryViewerPage() {
     retry: false,
   });
   if (stories.isLoading) return <ListRowsSkeleton label="Loading story" rows={3} />;
-  if (stories.isError || !current) return <ErrorState description="This story isn't available." action={<RetryButton onRetry={() => stories.refetch()} />} />;
+  if (stories.isError || !current) return <ErrorState description="This story isn't available." error={stories.error} onRetry={() => void stories.refetch()} />;
   const media = current.media;
   const isVideo = media.type === "video";
   return (

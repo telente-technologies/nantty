@@ -41,7 +41,7 @@ export default function ProductReviewsPage({ params }: { readonly params: Promis
       {reviews.isPending ? (
         <div className={styles.list} aria-hidden="true">{[0, 1, 2].map((index) => <Skeleton key={index} height={96} />)}</div>
       ) : reviews.isError && !firstPage ? (
-        <ErrorState description="Couldn't load reviews." action={<RetryButton onRetry={() => reviews.refetch()} />} />
+        <ErrorState description="Couldn't load reviews." error={reviews.error} onRetry={() => void reviews.refetch()} />
       ) : (
         <>
           <section className={styles.summary} aria-label="Rating summary">
@@ -63,7 +63,7 @@ export default function ProductReviewsPage({ params }: { readonly params: Promis
             ) : <span />}
           </section>
           {items.length === 0 ? (
-            <EmptyState title="No reviews yet" description="Buyers can review this product once their order is delivered." action={<Link href={`/product/${encodeURIComponent(productId)}`}>Back to product</Link>} />
+            <EmptyState kind="reviews" title="No reviews yet" description="Buyers can review this product once their order is delivered." action={<Link href={`/product/${encodeURIComponent(productId)}`}>Back to product</Link>} />
           ) : (
             <div className={styles.list}>
               {items.map((review) => <ReviewCard key={review.id} review={review} />)}

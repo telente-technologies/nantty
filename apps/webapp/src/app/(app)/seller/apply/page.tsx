@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
@@ -46,7 +45,7 @@ export default function SellerApplicationPage() {
     onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
   });
   if (existing.isLoading) return <ListRowsSkeleton label="Loading application" rows={4} />;
-  if (existing.isError) return <ErrorState description="We couldn't load your application." action={<RetryButton onRetry={() => existing.refetch()} />} />;
+  if (existing.isError) return <ErrorState description="We couldn't load your application." error={existing.error} onRetry={() => void existing.refetch()} />;
   if (existing.data) {
     return (
       <div className={styles.page}>

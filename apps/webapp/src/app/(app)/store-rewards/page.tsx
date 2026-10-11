@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { Avatar } from "@/components/ui/media";
-import { RetryButton, InlineLink } from "@/components/ui/controls";
+import { InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { StoreIcon } from "@/components/ui/icons";
 import { storeRewardsService } from "@/services/storeRewards.service";
@@ -17,7 +17,7 @@ export default function StoreRewardsPage() {
 
   if (balancesQuery.isLoading) return <ListRowsSkeleton label="Loading store rewards" rows={4} />;
   if (balancesQuery.isError || !balancesQuery.data) {
-    return <ErrorState description="We couldn't load your store rewards." action={<RetryButton onRetry={() => balancesQuery.refetch()} />} />;
+    return <ErrorState description="We couldn't load your store rewards." error={balancesQuery.error} onRetry={() => void balancesQuery.refetch()} />;
   }
 
   return (

@@ -6,7 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 
 import { SellerProductForm } from "@/components/seller/sellerProductForm";
 import { requestConfirmation } from "@/components/ui/confirmDialog";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
@@ -34,8 +33,8 @@ export default function EditSellerProductPage() {
   if (!product.data) {
     const gone = product.error instanceof WebappRequestError && (product.error.status === 404 || product.error.status === 403);
     return gone
-      ? <ErrorState title="This product isn't available" description="It may have been deleted, or it belongs to another store." action={<Link href="/seller/products">Your products</Link>} />
-      : <ErrorState description="We couldn't load this product." action={<RetryButton onRetry={() => product.refetch()} />} />;
+      ? <ErrorState kind="contentGone" subject="product" title="This product isn't available" description="It may have been deleted, or it belongs to another store." action={<Link href="/seller/products">Your products</Link>} />
+      : <ErrorState description="We couldn't load this product." error={product.error} onRetry={() => void product.refetch()} />;
   }
 
   const confirmAndArchive = async () => {

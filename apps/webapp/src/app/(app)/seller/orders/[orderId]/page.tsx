@@ -6,7 +6,6 @@ import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { EscrowSummaryCard, EscrowTimeline } from "@/components/escrow/escrowCards";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
@@ -39,7 +38,7 @@ export default function SellerOrderDetailPage() {
     onError: (mutationError) => setError(mutationError instanceof WebappRequestError || !(mutationError instanceof Error) ? readErrorMessageForDisplay(mutationError) : mutationError.message),
   });
   if (order.isLoading) return <ListRowsSkeleton label="Loading order" rows={5} />;
-  if (order.isError || !order.data) return <ErrorState description="We couldn't load this order." action={<RetryButton onRetry={() => order.refetch()} />} />;
+  if (order.isError || !order.data) return <ErrorState description="We couldn't load this order." error={order.error} onRetry={() => void order.refetch()} />;
   const data = order.data;
   const escrow = escrowQuery.data;
   const fundsHeld = ["paid", "shipped", "delivered", "disputed"].includes(data.status);

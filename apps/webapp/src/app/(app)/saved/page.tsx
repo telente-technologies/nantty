@@ -7,7 +7,6 @@ import { Skeleton } from "@zudomart/web-kit";
 
 import { SaveCollectionsBar } from "@/components/saves/saveCollectionsBar";
 import { SavedItemCard } from "@/components/saves/savedItemCard";
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
 import { BookmarkIcon } from "@/components/ui/icons";
 import { showToast } from "@/components/ui/toast";
@@ -103,7 +102,7 @@ export default function SavedPage() {
         {savedQuery.isLoading ? (
           <SavedGridSkeleton />
         ) : savedQuery.isError ? (
-          <ErrorState description="We couldn't load your saved items." action={<RetryButton onRetry={() => savedQuery.refetch()} />} />
+          <ErrorState description="We couldn't load your saved items." error={savedQuery.error} onRetry={() => void savedQuery.refetch()} />
         ) : items.length === 0 ? (
           <EmptyState
             icon={<BookmarkIcon size={28} />}

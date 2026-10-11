@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
@@ -49,7 +48,7 @@ export default function VerificationHubPage() {
     onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
   });
   if (plans.isLoading || mine.isLoading) return <ListRowsSkeleton label="Loading verification" rows={5} />;
-  if (plans.isError || mine.isError) return <ErrorState description="We couldn't load verification details." action={<RetryButton onRetry={() => { void plans.refetch(); void mine.refetch(); }} />} />;
+  if (plans.isError || mine.isError) return <ErrorState description="We couldn't load verification details." error={plans.error ?? mine.error} onRetry={() => { void plans.refetch(); void mine.refetch(); }} />;
   const current = mine.data?.current;
   const subscription = mine.data?.subscription;
   const application = mine.data?.application;

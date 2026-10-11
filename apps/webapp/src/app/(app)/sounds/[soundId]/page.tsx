@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
@@ -25,7 +24,7 @@ export default function SoundDetailPage() {
     onError: (mutationError) => showToast({ text: readErrorMessageForDisplay(mutationError), tone: "error" }),
   });
   if (sound.isLoading) return <ListRowsSkeleton label="Loading sound" rows={4} />;
-  if (sound.isError || !sound.data) return <ErrorState description="This sound isn't available right now." action={<RetryButton onRetry={() => sound.refetch()} />} />;
+  if (sound.isError || !sound.data) return <ErrorState description="This sound isn't available right now." error={sound.error} onRetry={() => void sound.refetch()} />;
   const data = sound.data;
   return (
     <div className={styles.page}>

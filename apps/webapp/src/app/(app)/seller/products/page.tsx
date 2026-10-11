@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { requestConfirmation } from "@/components/ui/confirmDialog";
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
@@ -37,7 +36,7 @@ export default function SellerProductsPage() {
     if (confirmed) remove.mutate(productId);
   };
   if (products.isLoading) return <ListRowsSkeleton label="Loading products" rows={6} />;
-  if (products.isError || !products.data) return <ErrorState description="We couldn't load your products." action={<RetryButton onRetry={() => products.refetch()} />} />;
+  if (products.isError || !products.data) return <ErrorState description="We couldn't load your products." error={products.error} onRetry={() => void products.refetch()} />;
   return (
     <div className={styles.page}>
       <div className={styles.sectionHead}>
@@ -45,7 +44,7 @@ export default function SellerProductsPage() {
         <Link className={styles.primary} href="/seller/products/new">Add product</Link>
       </div>
       {products.data.length === 0 ? (
-        <EmptyState title="No products yet" description="Add your first product to start selling." />
+        <EmptyState kind="products" title="No products yet" description="Add your first product to start selling." />
       ) : (
         <ul className={styles.list}>
           {products.data.filter((product) => product.status !== "archived").map((product) => {

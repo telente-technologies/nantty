@@ -8,7 +8,6 @@ import { use, useDeferredValue, useState } from "react";
 import { useFollowUser } from "@/components/follow/useFollowUser.hook";
 import { useSession } from "@/components/providers/sessionProvider";
 import { Button } from "@/components/ui/button";
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ArrowLeftIcon } from "@/components/ui/icons";
 import { Avatar } from "@/components/ui/media";
@@ -97,9 +96,9 @@ export default function ConnectionsPage({ params }: { readonly params: Promise<{
       {list.isPending ? (
         <div className={styles.list} aria-hidden="true">{[0, 1, 2, 3].map((index) => <Skeleton key={index} height={56} />)}</div>
       ) : isPrivate ? (
-        <ErrorState description="This account is private. Follow them to see their followers and following." />
+        <ErrorState kind="contentPrivate" description="This account is private. Follow them to see their followers and following." />
       ) : list.isError ? (
-        <ErrorState description="Couldn't load this list." action={<RetryButton onRetry={() => list.refetch()} />} />
+        <ErrorState description="Couldn't load this list." error={list.error} onRetry={() => void list.refetch()} />
       ) : list.data.length === 0 ? (
         <EmptyState title={search.trim() && isSearchable ? `No one matches “${search.trim()}”` : "Nobody here yet"} />
       ) : (

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { InlineLink, RetryButton } from "@/components/ui/controls";
+import { InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { sellerService } from "@/services/seller.service";
@@ -25,7 +25,7 @@ export default function SellerDashboardPage() {
   const dashboard = useQuery({ queryKey: ["seller", "dashboard", period], queryFn: () => sellerService.fetchSellerDashboard(period) });
   const application = useQuery({ queryKey: ["seller", "application"], queryFn: () => sellerService.fetchMySellerApplication(), retry: false });
   if (dashboard.isLoading) return <ListRowsSkeleton label="Loading seller dashboard" rows={6} />;
-  if (dashboard.isError || !dashboard.data) return <ErrorState description="We couldn't load your seller dashboard." action={<RetryButton onRetry={() => dashboard.refetch()} />} />;
+  if (dashboard.isError || !dashboard.data) return <ErrorState description="We couldn't load your seller dashboard." error={dashboard.error} onRetry={() => void dashboard.refetch()} />;
   const data = dashboard.data;
   return (
     <div className={styles.page}>
@@ -61,7 +61,7 @@ export default function SellerDashboardPage() {
           <InlineLink href="/seller/orders">All orders</InlineLink>
         </div>
         {data.recentOrders.length === 0 ? (
-          <EmptyState title="No orders yet" description="New orders from your store will show up here." />
+          <EmptyState kind="orders" title="No orders yet" description="New orders from your store will show up here." />
         ) : (
           <ul className={styles.list}>
             {data.recentOrders.slice(0, 5).map((order) => (

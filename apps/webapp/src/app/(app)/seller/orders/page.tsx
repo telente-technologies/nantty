@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { sellerService } from "@/services/seller.service";
@@ -14,8 +13,8 @@ import styles from "../page.module.css";
 export default function SellerOrdersPage() {
   const orders = useQuery({ queryKey: ["seller", "orders"], queryFn: () => sellerService.listMyStoreOrders() });
   if (orders.isLoading) return <ListRowsSkeleton label="Loading orders" rows={6} />;
-  if (orders.isError || !orders.data) return <ErrorState description="We couldn't load your orders." action={<RetryButton onRetry={() => orders.refetch()} />} />;
-  if (orders.data.length === 0) return <EmptyState title="No orders yet" description="New orders from your store will show up here." />;
+  if (orders.isError || !orders.data) return <ErrorState description="We couldn't load your orders." error={orders.error} onRetry={() => void orders.refetch()} />;
+  if (orders.data.length === 0) return <EmptyState kind="orders" title="No orders yet" description="New orders from your store will show up here." />;
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Seller orders</h1>

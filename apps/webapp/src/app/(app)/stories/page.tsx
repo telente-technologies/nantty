@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { PlusIcon } from "@/components/ui/icons";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
@@ -14,7 +13,7 @@ import styles from "../sounds/page.module.css";
 export default function StoriesPage() {
   const tray = useQuery({ queryKey: ["story-tray"], queryFn: () => storiesService.fetchStoryTray() });
   if (tray.isLoading) return <ListRowsSkeleton label="Loading stories" rows={5} />;
-  if (tray.isError || !tray.data) return <ErrorState description="We couldn't load stories." action={<RetryButton onRetry={() => tray.refetch()} />} />;
+  if (tray.isError || !tray.data) return <ErrorState description="We couldn't load stories." error={tray.error} onRetry={() => void tray.refetch()} />;
   if (tray.data.length === 0) return <EmptyState title="No stories yet" description="Stories from people you follow will show up here for 24 hours." action={<Link href="/create/story">Add to your story</Link>} />;
   return (
     <div className={styles.page}>

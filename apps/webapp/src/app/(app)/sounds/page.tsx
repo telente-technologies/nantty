@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { soundsService } from "@/services/sounds.service";
@@ -17,7 +16,7 @@ export default function SoundsPage() {
   const trending = useQuery({ queryKey: ["sounds", "trending"], queryFn: () => soundsService.fetchTrendingSounds() });
   const search = useQuery({ queryKey: ["sounds", "search", submittedQuery], queryFn: () => soundsService.searchSounds(submittedQuery), enabled: submittedQuery.trim().length > 0 });
   if (trending.isLoading) return <ListRowsSkeleton label="Loading sounds" rows={6} />;
-  if (trending.isError || !trending.data) return <ErrorState description="We couldn't load sounds." action={<RetryButton onRetry={() => trending.refetch()} />} />;
+  if (trending.isError || !trending.data) return <ErrorState description="We couldn't load sounds." error={trending.error} onRetry={() => void trending.refetch()} />;
   const results = submittedQuery.trim() ? search.data : trending.data;
   return (
     <div className={styles.page}>
@@ -38,7 +37,7 @@ export default function SoundsPage() {
         {search.isLoading ? (
           <ListRowsSkeleton label="Searching sounds" rows={4} />
         ) : !results || results.length === 0 ? (
-          <EmptyState title="No sounds found" description="Try a different search." />
+          <EmptyState kind="search" title="No sounds found" description="Try a different search." />
         ) : (
           <ul className={styles.list}>
             {results.map((sound) => (
