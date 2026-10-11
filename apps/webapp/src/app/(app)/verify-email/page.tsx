@@ -51,7 +51,7 @@ function EmailVerification() {
   });
 
   if (statusQuery.isLoading) return <Skeleton height={320} />;
-  if (statusQuery.isError || !statusQuery.data) return <ErrorState description="We couldn't load your account email." />;
+  if (statusQuery.isError || !statusQuery.data) return <ErrorState error={statusQuery.error} description="We couldn't load your account email." onRetry={() => void statusQuery.refetch()} />;
   const { email, emailVerified } = statusQuery.data;
 
   function submitCode(event: FormEvent<HTMLFormElement>) {

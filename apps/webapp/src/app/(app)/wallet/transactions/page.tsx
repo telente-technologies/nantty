@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { walletsService } from "@/services/wallets.service";
@@ -13,8 +12,8 @@ import styles from "../page.module.css";
 export default function WalletTransactionsPage() {
   const transactions = useQuery({ queryKey: ["wallet", "transactions", "all"], queryFn: () => walletsService.listMyTransactions() });
   if (transactions.isLoading) return <ListRowsSkeleton label="Loading transactions" rows={8} />;
-  if (transactions.isError || !transactions.data) return <ErrorState description="We couldn't load transactions." action={<RetryButton onRetry={() => transactions.refetch()} />} />;
-  if (transactions.data.length === 0) return <EmptyState title="No transactions yet" description="Payments, refunds and payouts will show up here." />;
+  if (transactions.isError || !transactions.data) return <ErrorState description="We couldn't load transactions." error={transactions.error} onRetry={() => void transactions.refetch()} />;
+  if (transactions.data.length === 0) return <EmptyState kind="wallet" title="No transactions yet" description="Payments, refunds and payouts will show up here." />;
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Transactions</h1>

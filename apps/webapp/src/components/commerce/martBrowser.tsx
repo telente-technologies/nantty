@@ -6,7 +6,6 @@ import { useState } from "react";
 
 import { ProductCard } from "@/components/commerce/productCard";
 import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
 import { productsService } from "@/services/products.service";
@@ -71,7 +70,7 @@ export function MartBrowser() {
       {productsQuery.isLoading ? (
         <ProductGridSkeleton gridClassName={styles.productGrid} />
       ) : productsQuery.isError ? (
-        <ErrorState description="We couldn't load products." action={<RetryButton onRetry={() => productsQuery.refetch()} />} />
+        <ErrorState description="We couldn't load products." error={productsQuery.error} onRetry={() => void productsQuery.refetch()} />
       ) : products.length === 0 ? (
         <EmptyState icon={<AppIcon name="shoppingBag24" size={28} />} title="Nothing here yet" description="No products in this category right now. Try another category." />
       ) : (

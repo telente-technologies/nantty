@@ -8,7 +8,6 @@ import { CommentsPanel } from "@/components/feed/commentsPanel";
 import { usePostLike } from "@/components/feed/usePostLike.hook";
 import { formatVideoDuration } from "@/components/feed/postCardMedia";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { HeartIcon, LikeFilledActionIcon, ShareActionIcon } from "@/components/ui/icons";
 import { useFollowUser } from "@/components/follow/useFollowUser.hook";
@@ -135,7 +134,7 @@ export default function WatchVideoPage({ params }: { readonly params: Promise<{ 
           <Skeleton height={20} width="70%" />
         </div>
       ) : videoQuery.isError || !videoQuery.data ? (
-        <ErrorState description="This video isn't available." action={<RetryButton onRetry={() => videoQuery.refetch()} />} />
+        <ErrorState description="This video isn't available." error={videoQuery.error} onRetry={() => void videoQuery.refetch()} />
       ) : (
         <VideoDetails video={videoQuery.data} />
       )}

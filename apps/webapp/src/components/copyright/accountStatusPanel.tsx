@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Badge, ErrorState } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
 import { DetailSkeleton } from "@/components/ui/pageSkeletons";
 import { Button } from "@/components/ui/button";
 import rowStyles from "@/components/settings/myReportsList.module.css";
@@ -24,11 +23,11 @@ const remedyLabel: Record<CopyrightNotice["state"], string> = {
 };
 
 export function AccountStatusPanel() {
-  const { data: health, isPending, isError, refetch } = useMyAccountHealth();
+  const { data: health, isPending, isError, error, refetch } = useMyAccountHealth();
   const [appealTarget, setAppealTarget] = useState<AccountStrike | null>(null);
   const [counterTarget, setCounterTarget] = useState<CopyrightNotice | null>(null);
   if (isPending) return <DetailSkeleton label="Loading your account status" blocks={3} />;
-  if (isError || !health) return <ErrorState description="We couldn't load your account status." action={<RetryButton onRetry={() => void refetch()} />} />;
+  if (isError || !health) return <ErrorState error={error} description="We couldn't load your account status." onRetry={() => void refetch()} />;
   return (
     <>
       <StandingSummary health={health} />

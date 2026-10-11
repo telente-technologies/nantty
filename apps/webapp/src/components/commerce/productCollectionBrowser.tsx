@@ -5,7 +5,6 @@ import { useEffect, useRef } from "react";
 import { ProductCard } from "@/components/commerce/productCard";
 import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
 import { productsService } from "@/services/products.service";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { ProductCollection } from "@/types/commerce.type";
@@ -55,7 +54,7 @@ export function ProductCollectionBrowser({ title, categoryId, collection }: Prod
       {query.isLoading ? (
         <ProductGridSkeleton gridClassName={styles.grid} />
       ) : query.isError ? (
-        <ErrorState description="We couldn't load this collection." action={<RetryButton onRetry={() => query.refetch()} />} />
+        <ErrorState description="We couldn't load this collection." error={query.error} onRetry={() => void query.refetch()} />
       ) : products.length === 0 ? (
         <EmptyState icon={<AppIcon name="shoppingBag24" size={28} />} title="Nothing here yet" description="Products in this section will appear here soon." />
       ) : (

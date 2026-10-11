@@ -1,13 +1,13 @@
 "use client";
 
-import { ErrorState } from "@zudomart/web-kit";
+import { RouteErrorScreen } from "@zudomart/web-kit";
 
 import styles from "./routeFallback.module.css";
 
-export default function RootRouteError({ reset }: { readonly error: Error; readonly reset: () => void }) {
+export default function RootRouteError({ error, retry }: { readonly error: Error & { readonly digest?: string }; readonly retry: () => void }) {
   return (
-    <div className={styles.page}>
-      <ErrorState title="Something went wrong" description="Please try again in a moment." onRetry={reset} />
-    </div>
+    <main id="main-content" className={styles.page}>
+      <RouteErrorScreen error={error} retry={retry} />
+    </main>
   );
 }

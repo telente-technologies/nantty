@@ -5,7 +5,6 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { MapPinIcon, PlusIcon } from "@/components/ui/icons";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
@@ -75,7 +74,7 @@ export function AddressBook() {
   };
 
   if (query.isLoading) return <ListRowsSkeleton label="Loading your addresses" rows={3} withAvatar={false} />;
-  if (query.isError) return <ErrorState description="We couldn't load your addresses." action={<RetryButton onRetry={() => query.refetch()} />} />;
+  if (query.isError) return <ErrorState description="We couldn't load your addresses." error={query.error} onRetry={() => void query.refetch()} />;
   const addresses = query.data ?? [];
 
   return (

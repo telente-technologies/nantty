@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
 
+import { describeErrorSignal, readErrorSignal } from "@zudomart/web-kit";
+
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/feedback";
 import { TextField } from "@/components/ui/field";
 import { authService } from "@/services/auth.service";
 import { readErrorMessageForDisplay, sendRequestToWebappServer } from "@/services/clientApi.service";
@@ -19,6 +22,7 @@ function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [problem, setProblem] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -39,9 +43,15 @@ function ResetPasswordForm() {
       setNotice("Password updated. Sign in with your new password.");
       window.setTimeout(() => router.push("/login"), 900);
     } catch (caught) {
-      setError(readErrorMessageForDisplay(caught));
+      const problemKind = describeErrorSignal(readErrorSignal(caught)).kind;
+      if (problemKind === "linkExpired" || problemKind === "tooManyAttempts" || problemKind === "rateLimited") setProblem(caught);
+      else setError(readErrorMessageForDisplay(caught));
       setBusy(false);
     }
+  }
+
+  if (!destination) {
+    return <ErrorState kind="linkExpired" title="This reset link isn't complete" description="Start again from the forgot password page and we'll send you a fresh code." primaryAction={{ label: "Get a new code", href: "/forgot-password" }} />;
   }
 
   return (
@@ -56,6 +66,8 @@ function ResetPasswordForm() {
           {error}
         </p>
       ) : null}
+
+      {problem ? <ErrorState variant="inline" error={problem} primaryAction={describeErrorSignal(readErrorSignal(problem)).kind === "linkExpired" ? { label: "Get a new code", href: "/forgot-password" } : undefined} /> : null}
 
       {notice ? (
         <p className={styles.inlineNote} role="status">

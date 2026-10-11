@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { CoinPurchaseDialog } from "@/components/live/coinPurchaseDialog";
 import { PayoutSetupCard } from "@/components/wallet/payoutSetupCard";
-import { InlineLink, RetryButton } from "@/components/ui/controls";
+import { InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ArrowRightIcon, CoinIcon, WalletIcon } from "@/components/ui/icons";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
@@ -24,7 +24,7 @@ export default function WalletPage() {
   const [buyCoinsOpen, setBuyCoinsOpen] = useState(false);
   const loading = summary.isLoading || transactions.isLoading;
   if (loading) return <ListRowsSkeleton label="Loading wallet" rows={6} />;
-  if (summary.isError || !summary.data) return <ErrorState description="We couldn't load your wallet." action={<RetryButton onRetry={() => summary.refetch()} />} />;
+  if (summary.isError || !summary.data) return <ErrorState description="We couldn't load your wallet." error={summary.error} onRetry={() => void summary.refetch()} />;
 
   const recent = (transactions.data ?? []).slice(0, 5);
   const lines = readWalletLines(summary.data);
@@ -77,9 +77,9 @@ export default function WalletPage() {
           <InlineLink href="/wallet/transactions">All transactions <ArrowRightIcon size={14} /></InlineLink>
         </div>
         {transactions.isError ? (
-          <ErrorState description="We couldn't load recent activity." action={<RetryButton onRetry={() => transactions.refetch()} />} />
+          <ErrorState description="We couldn't load recent activity." error={transactions.error} onRetry={() => void transactions.refetch()} />
         ) : recent.length === 0 ? (
-          <EmptyState title="No activity yet" description="Payments, refunds and payouts will show up here." />
+          <EmptyState kind="wallet" title="No activity yet" description="Payments, refunds and payouts will show up here." />
         ) : (
           <ul className={styles.list}>
             {recent.map((entry) => (

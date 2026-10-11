@@ -7,14 +7,3 @@
   margin-inline: auto;
   padding: var(--space-6) var(--gutter);
 }
-
-.homeLink {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--control-lg);
-  padding: 0 var(--space-5);
-  border-radius: var(--radius-pill);
-  background: var(--color-brand-solid);
-  color: var(--color-on-brand);
-  font-weight: 700;
-}

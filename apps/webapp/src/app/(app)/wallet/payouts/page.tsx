@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
@@ -75,7 +74,7 @@ export default function WalletPayoutsPage() {
   const withdrawalsLocked = readWalletVerification(summary.data)?.withdrawalsUnlocked === false;
 
   if (accounts.isLoading) return <ListRowsSkeleton label="Loading payout accounts" rows={4} />;
-  if (accounts.isError) return <ErrorState description="We couldn't load payout accounts." action={<RetryButton onRetry={() => accounts.refetch()} />} />;
+  if (accounts.isError) return <ErrorState description="We couldn't load payout accounts." error={accounts.error} onRetry={() => void accounts.refetch()} />;
 
   return (
     <div className={styles.page}>

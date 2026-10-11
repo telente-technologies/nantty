@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { coinsService } from "@/services/webActions.service";
@@ -15,7 +14,7 @@ export default function WalletCoinsPage() {
   const activity = useQuery({ queryKey: ["coins", "activity"], queryFn: () => coinsService.fetchCoinActivity() });
   const packages = useQuery({ queryKey: ["coins", "packages"], queryFn: () => coinsService.fetchWebCoinPackages() });
   if (balance.isLoading || activity.isLoading) return <ListRowsSkeleton label="Loading coins" rows={6} />;
-  if (balance.isError || activity.isError) return <ErrorState description="We couldn't load your coins." action={<RetryButton onRetry={() => { void balance.refetch(); void activity.refetch(); }} />} />;
+  if (balance.isError || activity.isError) return <ErrorState description="We couldn't load your coins." error={balance.error ?? activity.error} onRetry={() => { void balance.refetch(); void activity.refetch(); }} />;
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Coins</h1>
