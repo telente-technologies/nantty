@@ -2,10 +2,10 @@ package models
 
 import "testing"
 
-func TestPaystackLocalFeeEstimate(t *testing.T) {
-	cases := map[int64]int64{100_000: 1_500, 249_999: 3_750, 250_000: 13_750, 10_000_000: 160_000, 50_000_000: 200_000}
+func TestFlutterwaveLocalFeeEstimate(t *testing.T) {
+	cases := map[int64]int64{100_000: 1_400, 250_000: 3_500, 10_000_000: 140_000, 14_285_715: 200_000, 50_000_000: 200_000}
 	for amount, want := range cases {
-		if got := EstimatePaystackLocalFee(amount); got != want {
+		if got := EstimateLocalCheckoutFee(amount); got != want {
 			t.Fatalf("fee for %d: got %d want %d", amount, got, want)
 		}
 	}
@@ -24,7 +24,7 @@ func TestCheckoutAllocationKeepsEveryKoboAndSplitsOnlyDirectGroups(t *testing.T)
 	for _, group := range groups {
 		feeTotal += group.EstimatedFeeMinor
 	}
-	if feeTotal != EstimatePaystackLocalFee(3_333_333) {
+	if feeTotal != EstimateLocalCheckoutFee(3_333_333) {
 		t.Fatalf("allocated fees %d", feeTotal)
 	}
 	direct := groups[1]
@@ -69,5 +69,13 @@ func TestProRataAllocationGivesTheRemainderToTheLargestFractionsAndNeverOverflow
 	parts := AllocateProRata(huge, []int64{huge, huge, huge})
 	if parts[0]+parts[1]+parts[2] != huge || parts[0] < 0 || parts[2] < 0 {
 		t.Fatalf("large totals and weights must not overflow: %v", parts)
+	}
+}
+
+func TestCheckoutGroupsWhoseTotalWouldOverflowAreRefused(t *testing.T) {
+	huge := int64(1) << 62
+	groups := []CheckoutGroupAllocation{{AmountMinor: huge, PaymentMode: "escrow"}, {AmountMinor: huge, PaymentMode: "escrow"}}
+	if _, err := AllocateCheckoutGroups(groups); err == nil || err.Error() != "the checkout total is too large" {
+		t.Fatalf("an overflowing checkout total must be refused, got %v", err)
 	}
 }

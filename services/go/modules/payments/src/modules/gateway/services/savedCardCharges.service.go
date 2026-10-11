@@ -84,7 +84,7 @@ func (gateway *PaymentGateway) ChargePaymentIntentWithSavedCard(ctx context.Cont
 	result, err := provider.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{
 		SplitShares:   splitShares,
 		CustomerEmail: pinnedTokenEmail(authorization, contact.Email), AuthorizationCode: authorizationCode, Reference: intent.Reference, AmountMinor: intent.AmountMinor,
-		Currency: intent.Currency, SettlementAccount: intent.ConnectedAccountID, SubaccountBearsFee: gateway.Container.Settings.Paystack.SubaccountBearsFee, Metadata: metadata,
+		Currency: intent.Currency, SettlementAccount: intent.ConnectedAccountID, SubaccountBearsFee: gateway.Container.Settings.SubaccountBearsFee, Metadata: metadata,
 	})
 	if errors.Is(err, interfaces.ErrSavedCardNotForCustomer) {
 		return gateway.reissueIntentForHostedCheckout(ctx, intent)

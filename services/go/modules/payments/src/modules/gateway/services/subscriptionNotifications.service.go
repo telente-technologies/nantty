@@ -24,7 +24,7 @@ func SubscriptionStatusForNotification(eventType, providerStatus string) string 
 	case "subscription.not_renew":
 		return "non_renewing"
 	}
-	if mapped, known := paystackStatuses[providerStatus]; known {
+	if mapped, known := providerSubscriptionStatuses[providerStatus]; known {
 		return mapped
 	}
 	return providerStatus

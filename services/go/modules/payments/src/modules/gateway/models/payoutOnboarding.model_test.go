@@ -39,7 +39,7 @@ func TestPayoutOnboardingStateFollowsTheAccountAndSteps(t *testing.T) {
 	}{
 		{"nothing yet", PayoutOnboardingInputs{Role: "creator"}, "not_started", "identity", "pending_creation", "not_required", false},
 		{"identity saved, no bank yet", PayoutOnboardingInputs{CompletedSteps: []string{"identity"}, AccountRowStatus: "pending_creation"}, "in_progress", "bank", "pending_creation", "not_required", false},
-		{"bank sending while paystack is down", PayoutOnboardingInputs{CompletedSteps: []string{"identity", "bank"}, AccountRowStatus: "pending_creation",
+		{"bank sending while the provider is down", PayoutOnboardingInputs{CompletedSteps: []string{"identity", "bank"}, AccountRowStatus: "pending_creation",
 			LatestJobs: []OnboardingJobSnapshot{{Step: JobStepCreateRecipient, Status: "queued", AttemptCount: 1, LastError: "502"}}}, "action_needed", "done", "pending_creation", "not_required", false},
 		{"recipient failed for good", PayoutOnboardingInputs{CompletedSteps: []string{"identity", "bank"}, AccountRowStatus: "failed",
 			LatestJobs: []OnboardingJobSnapshot{{Step: JobStepCreateRecipient, Status: "failed", AttemptCount: 5, LastError: "timeout"}}}, "action_needed", "done", "failed", "not_required", false},

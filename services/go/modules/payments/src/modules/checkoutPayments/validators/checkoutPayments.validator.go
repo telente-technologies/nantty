@@ -13,7 +13,7 @@ func ValidateInitializeOrderPaymentRequest(request dtos.InitializeOrderPaymentRe
 		collector.Add("checkoutId", "send exactly one of checkoutId or orderId")
 	}
 	if request.Provider != "" {
-		collector.RequireOneOf("provider", request.Provider, "paystack", "flutterwave")
+		collector.RequireOneOf("provider", request.Provider, "flutterwave")
 	}
 	collector.RequireLength("returnTo", request.ReturnTo, 0, 300)
 	return collector.Result()

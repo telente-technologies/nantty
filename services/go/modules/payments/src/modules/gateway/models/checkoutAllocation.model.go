@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"errors"
+	"math"
 	"math/big"
 	"sort"
 )
@@ -28,15 +29,11 @@ type SettledGroupAllocation struct {
 
 func (group CheckoutGroupAllocation) IsDirect() bool { return group.PaymentMode == "direct" }
 
-func EstimatePaystackLocalFee(amountMinor int64) int64 {
+func EstimateLocalCheckoutFee(amountMinor int64) int64 {
 	if amountMinor <= 0 {
 		return 0
 	}
-	fee := (amountMinor*150 + 5_000) / 10_000
-	if amountMinor >= 250_000 {
-		fee += 10_000
-	}
-	return min(fee, 200_000)
+	return min((amountMinor*140+5_000)/10_000, 200_000)
 }
 
 func AllocateProRata(totalMinor int64, weights []int64) []int64 {
@@ -79,9 +76,12 @@ func AllocateCheckoutGroups(groups []CheckoutGroupAllocation) ([]CheckoutGroupAl
 		if group.IsDirect() && group.Subaccount == "" {
 			return nil, errors.New("a direct group needs the seller's settlement subaccount")
 		}
+		if total > math.MaxInt64-group.AmountMinor {
+			return nil, errors.New("the checkout total is too large")
+		}
 		weights[index], total = group.AmountMinor, total+group.AmountMinor
 	}
-	fees := AllocateProRata(EstimatePaystackLocalFee(total), weights)
+	fees := AllocateProRata(EstimateLocalCheckoutFee(total), weights)
 	allocated := make([]CheckoutGroupAllocation, len(groups))
 	for index, group := range groups {
 		group.EstimatedFeeMinor = fees[index]

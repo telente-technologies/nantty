@@ -56,7 +56,7 @@ type CardSetupRequest struct {
 
 func (gateway *PaymentGateway) StartSavedCardSetup(ctx context.Context, request CardSetupRequest) (StartedSavedCardSetup, error) {
 	setupId := uuid.Must(uuid.NewV7())
-	amount, currency := gateway.Container.Settings.Paystack.CardVerificationAmount, "NGN"
+	amount, currency := gateway.Container.Settings.CardVerificationAmount, "NGN"
 	if request.AmountMinor > 0 && request.Currency != "" {
 		amount, currency = request.AmountMinor, request.Currency
 	}

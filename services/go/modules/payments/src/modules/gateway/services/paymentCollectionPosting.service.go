@@ -94,6 +94,9 @@ func (gateway *PaymentGateway) refundDuplicatePaymentInTransaction(ctx context.C
 	if err != nil {
 		return RequestedRefund{}, err
 	}
+	if err := gateway.alertFinanceOfDuplicateSettlement(ctx, transaction, intent); err != nil {
+		return RequestedRefund{}, err
+	}
 	return refund, gateway.Container.Outbox.EnqueueInTransaction(ctx, transaction, "payment.duplicateRefunded", intent.ID.String(), gateway.Container.Now().UTC(), paymentEventData(intent))
 }
 

@@ -130,9 +130,9 @@ func (gateway *PaymentGateway) OpenProviderCheckoutForIntent(ctx context.Context
 	session, err := provider.InitializeCharge(ctx, interfaces.ChargeRequest{
 		SplitShares: splitShares,
 		Reference:   intent.Reference, AmountMinor: intent.AmountMinor, Currency: intent.Currency,
-		SettlementAccount: intent.ConnectedAccountID, SubaccountBearsFee: gateway.Container.Settings.Paystack.SubaccountBearsFee,
-		CustomerEmail: contact.Email, CustomerLabel: customerDisplayName(contact), SuccessUrl: callbackUrl, Channels: gateway.Container.Settings.Paystack.Channels,
-		PlanCode: metadata["paystackPlanCode"], ExpiresInMinutes: gateway.Container.Settings.CheckoutExpiryMinutes, Metadata: metadata,
+		SettlementAccount: intent.ConnectedAccountID, SubaccountBearsFee: gateway.Container.Settings.SubaccountBearsFee,
+		CustomerEmail: contact.Email, CustomerLabel: customerDisplayName(contact), SuccessUrl: callbackUrl, Channels: gateway.Container.Settings.CheckoutChannels,
+		PlanCode: metadata["providerPlanCode"], ExpiresInMinutes: gateway.Container.Settings.CheckoutExpiryMinutes, Metadata: metadata,
 	})
 	if err != nil {
 		return models.PaymentIntentView{}, convertProviderError(err)

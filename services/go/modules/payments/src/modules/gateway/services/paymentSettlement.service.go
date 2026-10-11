@@ -30,7 +30,7 @@ func (gateway *PaymentGateway) verifyAndSettlePaymentIntent(ctx context.Context,
 		return models.PaymentIntentView{}, err
 	}
 	if !isSettleable(intent.Status) {
-		return ConvertPaymentIntentToView(intent), nil
+		return gateway.refundLateChargeOnClosedIntent(ctx, intent, providerChargeIdHint)
 	}
 	provider, err := gateway.Container.Provider(intent.Provider)
 	if err != nil {
@@ -78,6 +78,11 @@ func isSettleable(status paymentintent.Status) bool {
 
 func (gateway *PaymentGateway) applyVerificationInTransaction(ctx context.Context, transaction *sql.Tx, intentId string, verification interfaces.ChargeVerification) (*ent.PaymentIntent, bool, *RequestedRefund, error) {
 	intent, mismatch, err := gateway.applyVerificationToIntent(ctx, transaction, intentId, verification)
+	if err == nil && intent != nil && !isSettleable(intent.Status) && verification.Outcome == interfaces.OutcomeSucceeded &&
+		verification.ProviderChargeId != "" && verification.ProviderChargeId != intent.ProviderTransactionID {
+		refund, err := gateway.recordLateChargeInTransaction(ctx, transaction, intent.ID, verification)
+		return intent, false, refund, err
+	}
 	if err != nil || intent == nil || intent.Status != paymentintent.StatusSucceeded || intent.FailureReason != duplicatePaymentReason {
 		return intent, mismatch, nil, err
 	}

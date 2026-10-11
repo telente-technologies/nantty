@@ -10,6 +10,7 @@ import (
 	"zudomart/modules/ledger/src/databases"
 
 	"zudomart/modules/ledger/src/loaders"
+	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
 	"zudomart/modules/payments/src/modules/gateway/models"
 )
 
@@ -83,10 +84,15 @@ func (gateway *PaymentGateway) ReadWalletDailyLimit(ctx context.Context, executo
 	dayStart := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, walletDayLocation)
 	var spent int64
 	table := pgx.Identifier{gateway.Container.Settings.Money.DatabaseSchema, "payment_intents"}.Sanitize()
-	if err := executor.QueryRowContext(ctx, `SELECT COALESCE(SUM(amount_minor), 0) FROM `+table+
-		` WHERE owner_user_id = $1 AND currency = $2 AND provider_transaction_id LIKE 'wallet:%' AND paid_at >= $3`, userId, currency, dayStart.UTC()).Scan(&spent); err != nil {
+	if err := executor.QueryRowContext(ctx, `SELECT COALESCE(SUM(amount_minor - refunded_minor), 0) FROM `+table+
+		` WHERE owner_user_id = $1 AND currency = $2 AND status = 'succeeded' AND provider_transaction_id LIKE 'wallet:%' AND paid_at >= $3`, userId, currency, dayStart.UTC()).Scan(&spent); err != nil {
 		return WalletDailyLimitView{}, err
 	}
+	spentOnPlatform, err := gateway.Container.Ledger.SumLinesOfKindPostedSince(ctx, executor, ledgermodels.WalletOutgoingAccount(userId, currency), ledgermodels.Credit, walletSpendJournalKind, dayStart.UTC())
+	if err != nil {
+		return WalletDailyLimitView{}, err
+	}
+	spent += spentOnPlatform
 	return WalletDailyLimitView{
 		Tier: tier, DailyLimit: WalletLimitAmount{limit, currency}, SpentToday: WalletLimitAmount{spent, currency},
 		RemainingToday: WalletLimitAmount{max(limit-spent, 0), currency}, ResetsAt: dayStart.AddDate(0, 0, 1).UTC(),

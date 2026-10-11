@@ -136,7 +136,7 @@ func (gateway *PaymentGateway) sendPayoutToProvider(ctx context.Context, provide
 	result, err := provider.CreateTransfer(ctx, request)
 	switch {
 	case errors.Is(err, interfaces.ErrTransferNeedsOtp):
-		gateway.Container.Resources.Logger.ErrorContext(ctx, "paystack asked for a transfer OTP; disable transfer OTP on the dashboard", "reference", transfer.Reference)
+		gateway.Container.Resources.Logger.ErrorContext(ctx, "the provider asked for a transfer OTP; disable transfer OTP on the dashboard", "reference", transfer.Reference)
 		return PayoutTransferStatus{Reference: transfer.Reference, Status: string(payouttransfer.StatusProcessing)}, nil
 	case errors.Is(err, interfaces.ErrInsufficientProviderBalance):
 		return gateway.recordTransferOutcome(ctx, transfer.Reference, transferOutcome{Outcome: interfaces.OutcomeFailed, FailureReason: "provider balance too low"})
