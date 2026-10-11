@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/wallet.funded.v1.json",
+  "title": "WalletFunded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fundingId",
+    "userId",
+    "amount"
+  ],
+  "properties": {
+    "fundingId": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "holdReleaseAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    },
+    "providerFee": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    },
+    "depositFee": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    }
+  }
+}

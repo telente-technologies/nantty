@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/wallet.debtRecorded.v1.json",
+  "title": "WalletDebtRecorded",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "userId",
+    "debt"
+  ],
+  "properties": {
+    "fundingId": {
+      "type": "string"
+    },
+    "escrowId": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "debt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    }
+  }
+}

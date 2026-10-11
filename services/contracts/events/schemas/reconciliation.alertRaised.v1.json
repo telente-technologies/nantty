@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/reconciliation.alertRaised.v1.json",
+  "title": "ReconciliationAlertRaised",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "subject",
+    "message"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "detail": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    },
+    "actual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    }
+  }
+}

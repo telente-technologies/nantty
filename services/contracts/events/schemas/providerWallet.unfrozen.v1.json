@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/providerWallet.unfrozen.v1.json",
+  "title": "ProviderWalletUnfrozen",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "userId"
+  ],
+  "properties": {
+    "userId": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.zudomart.com/events/providerMovement.failed.v1.json",
+  "title": "ProviderMovementFailed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "movementId",
+    "reference",
+    "kind",
+    "status",
+    "amount"
+  ],
+  "properties": {
+    "movementId": {
+      "type": "string"
+    },
+    "reference": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "subjectId": {
+      "type": "string"
+    },
+    "fromUserId": {
+      "type": "string"
+    },
+    "toUserId": {
+      "type": "string"
+    },
+    "toPlatform": {
+      "type": "boolean"
+    },
+    "failureReason": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "properties": {
+        "amountMinor": {
+          "type": "integer"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    }
+  }
+}
