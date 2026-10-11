@@ -2,8 +2,9 @@
 
 import { useState, type ReactNode } from "react";
 
+import type { DialogIntent } from "@zudomart/web-kit";
+
 import { Button } from "./button";
-import { InlineError } from "./feedback";
 import { TextAreaField, TextField } from "./formFields";
 import { ModalDialog } from "./modalDialog";
 import styles from "./confirmActionDialog.module.css";
@@ -15,6 +16,7 @@ interface ConfirmActionDialogProps {
   readonly consequences?: readonly string[];
   readonly confirmLabel: string;
   readonly tone?: "default" | "danger";
+  readonly intent?: DialogIntent;
   readonly requiresReason?: boolean;
   readonly reasonLabel?: string;
   readonly reasonPlaceholder?: string;
@@ -35,7 +37,7 @@ export function ConfirmActionDialog(props: ConfirmActionDialogProps) {
 }
 
 function OpenConfirmActionDialog({
-  isOpen, title, description, consequences = [], confirmLabel, tone = "default", requiresReason = true, reasonLabel = "Reason (saved to the audit log)", reasonPlaceholder,
+  isOpen, title, description, consequences = [], confirmLabel, tone = "default", intent, requiresReason = true, reasonLabel = "Reason (saved to the audit log)", reasonPlaceholder,
   reasonHint = "At least 5 characters. The person affected may see this.", reasonMaximumLength = 1000, typedConfirmationText, requiresStepUp = false, isBusy = false, errorMessage, children, isConfirmDisabled = false, onConfirm, onClose,
 }: ConfirmActionDialogProps) {
   const [reason, setReason] = useState("");
@@ -51,6 +53,9 @@ function OpenConfirmActionDialog({
       description={description}
       onClose={onClose}
       tone={tone === "danger" ? "danger" : "default"}
+      intent={intent ?? (requiresStepUp ? "stepUp" : tone === "danger" ? "danger" : undefined)}
+      isBusy={isBusy}
+      errorMessage={errorMessage}
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={isBusy}>
@@ -75,7 +80,6 @@ function OpenConfirmActionDialog({
         <TextField label={`Type ${typedConfirmationText} to confirm`} value={typedConfirmation} onChange={(event) => setTypedConfirmation(event.target.value)} autoComplete="off" spellCheck={false} />
       ) : null}
       {requiresStepUp ? <p className={styles.stepUpNote}>You will be asked for your authenticator code before this runs.</p> : null}
-      {errorMessage ? <InlineError message={errorMessage} /> : null}
     </ModalDialog>
   );
 }
