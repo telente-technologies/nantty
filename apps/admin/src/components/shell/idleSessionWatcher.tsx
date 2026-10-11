@@ -57,7 +57,7 @@ export function IdleSessionWatcher() {
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="lock"
       isOpen={secondsLeft <= warningWindowInSeconds && secondsLeft > 0}
       title="You're about to be signed out"
       description={`No activity for a while. For safety, this session ends in ${formatDurationFromSeconds(secondsLeft)}.`}

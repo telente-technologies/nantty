@@ -27,7 +27,7 @@ export function AdPolicyEditorDialog({ policy, onClose, onSaved }: { readonly po
 
   const canSave = name.trim().length >= 3 && description.trim().length >= 10 && (!existing || reason.trim().length >= 5);
   return (
-    <ModalDialog
+    <ModalDialog intent="ads"
       isOpen
       title={existing ? `Edit “${existing.name}”` : "New policy category"}
       description="Reviewers pick a category when they reject an ad; advertisers see its name and description."

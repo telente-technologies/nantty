@@ -57,7 +57,7 @@ export function MacrosManagerDialog({ canManage, onClose }: { readonly canManage
   }
 
   return (
-    <ModalDialog isOpen width="wide" title="Reply macros" description="Saved replies agents insert into tickets. Variables are filled in for each customer." onClose={onClose} footer={canManage && !editingMacro ? <Button variant="primary" iconName="plus16" onClick={() => startEditing("new")}>New macro</Button> : undefined}>
+    <ModalDialog intent="notes" isOpen width="wide" title="Reply macros" description="Saved replies agents insert into tickets. Variables are filled in for each customer." onClose={onClose} footer={canManage && !editingMacro ? <Button variant="primary" iconName="plus16" onClick={() => startEditing("new")}>New macro</Button> : undefined}>
       {macros.errorMessage ? <ErrorBlock message={macros.errorMessage} onRetry={macros.reload} /> : null}
       {macros.isLoading && !macros.data ? <LoadingBlock lines={4} /> : null}
       {editingMacro ? (
@@ -103,7 +103,7 @@ export function MacrosManagerDialog({ canManage, onClose }: { readonly canManage
           ))}
         </ul>
       )}
-      <ConfirmActionDialog isOpen={deletingMacro !== null} title={`Delete “${deletingMacro?.title ?? ""}”?`} consequences={["Agents can no longer insert it. Replies already sent are not changed."]} confirmLabel="Delete macro" tone="danger" requiresReason={false} isBusy={deleteMutation.isRunning} errorMessage={deleteMutation.errorMessage} onConfirm={() => void confirmDelete()} onClose={() => setDeletingMacro(null)} />
+      <ConfirmActionDialog intent="delete" isOpen={deletingMacro !== null} title={`Delete “${deletingMacro?.title ?? ""}”?`} consequences={["Agents can no longer insert it. Replies already sent are not changed."]} confirmLabel="Delete macro" tone="danger" requiresReason={false} isBusy={deleteMutation.isRunning} errorMessage={deleteMutation.errorMessage} onConfirm={() => void confirmDelete()} onClose={() => setDeletingMacro(null)} />
     </ModalDialog>
   );
 }

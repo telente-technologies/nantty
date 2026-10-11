@@ -66,7 +66,7 @@ export function AdvertiserAccountPanel({ advertiserId, onClose, onAdvertiserChan
             <SectionHeading>History</SectionHeading>
             <AuditHistoryList entries={advertiser.history} />
           </div>
-          <ConfirmActionDialog
+          <ConfirmActionDialog intent="suspend"
             isOpen={isConfirmOpen}
             title={nextAction === "suspend" ? `Suspend ${advertiser.name}` : `Reinstate ${advertiser.name}`}
             consequences={nextAction === "suspend" ? ["Every campaign stops delivering immediately.", "Unspent prepaid balance stays on the account.", "The owner can't create new ads until reinstated."] : ["The account can create ads again. Paused campaigns stay paused until the owner resumes them."]}

@@ -73,7 +73,7 @@ export function StepUpProvider({ children }: { readonly children: ReactNode }) {
   return (
     <>
       {children}
-      <ModalDialog isOpen={isOpen} title="Confirm it's you" description="This action is sensitive. Enter the current code from your authenticator app. You won't be asked again for 5 minutes." onClose={() => finish(false)} width="narrow" tone="secure">
+      <ModalDialog intent="stepUp" isOpen={isOpen} title="Confirm it's you" description="This action is sensitive. Enter the current code from your authenticator app. You won't be asked again for 5 minutes." onClose={() => finish(false)} width="narrow" tone="secure">
         <form className={styles.form} onSubmit={verifyCode}>
           <TextField label="Authenticator code" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" placeholder="123456" autoFocus className={styles.codeField} />
           {errorMessage ? <InlineError message={errorMessage} /> : null}

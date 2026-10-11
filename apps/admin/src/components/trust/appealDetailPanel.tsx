@@ -102,7 +102,7 @@ export function AppealDetailPanel({ appealId, onClose, onAppealChanged }: { read
             <SectionHeading>History</SectionHeading>
             <AuditHistoryList entries={appeal.history} />
           </div>
-          <ConfirmActionDialog
+          <ConfirmActionDialog intent="dispute"
             isOpen={pendingOutcome !== null}
             title={pendingOutcome === "OVERTURNED" ? "Overturn this decision" : "Uphold the original decision"}
             description="A different admin from the one who made the original decision must decide appeals."

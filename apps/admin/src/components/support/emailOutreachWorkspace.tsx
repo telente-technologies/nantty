@@ -95,7 +95,7 @@ export function EmailOutreachWorkspace() {
       ) : null}
       <SectionHeading>Recent sends</SectionHeading>
       <DataTable caption="Email sends" columns={sendColumns} rows={sends.data?.items ?? []} readRowKey={(item) => item.id} isLoading={sends.isLoading} emptyMessage="Nothing sent yet." />
-      {isConfirmOpen && preview ? <ConfirmActionDialog isOpen title="Send this email" consequences={[`${preview.recipientCount} recipient${preview.recipientCount === 1 ? "" : "s"} through AWS SES.`, "The send, audience and counts are written to the audit log."]} confirmLabel="Send email" requiresStepUp={needsStepUp} isBusy={sendMutation.isRunning} errorMessage={sendMutation.errorMessage} onConfirm={confirmSend} onClose={() => { sendMutation.clearError(); setIsConfirmOpen(false); }} /> : null}
+      {isConfirmOpen && preview ? <ConfirmActionDialog intent="send" isOpen title="Send this email" consequences={[`${preview.recipientCount} recipient${preview.recipientCount === 1 ? "" : "s"} through AWS SES.`, "The send, audience and counts are written to the audit log."]} confirmLabel="Send email" requiresStepUp={needsStepUp} isBusy={sendMutation.isRunning} errorMessage={sendMutation.errorMessage} onConfirm={confirmSend} onClose={() => { sendMutation.clearError(); setIsConfirmOpen(false); }} /> : null}
     </>
   );
 }

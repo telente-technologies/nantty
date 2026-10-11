@@ -72,7 +72,7 @@ export function VerificationDecisionPanel({ application, onUpdated }: { readonly
         )}
       </div>
       {activeTransition ? (
-        <ConfirmActionDialog
+        <ConfirmActionDialog intent="verify"
           isOpen
           title={`${transitionCopy[activeTransition].label} ${application.color.toLowerCase()} ${application.tier.toLowerCase()} for @${application.user.username}`}
           consequences={describeConsequences(application, activeTransition)}

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 
 import { useAdminSession } from "@/components/session/adminSessionProvider";
 
+import { AccessDeniedNotice } from "./accessDeniedNotice";
 import { ConsoleTopBar } from "./consoleTopBar";
 import styles from "./consoleShell.module.css";
 import { EnvironmentTape } from "./environmentBadge";
@@ -25,6 +26,9 @@ export function ConsoleShell({ children }: { readonly children: ReactNode }) {
       <div className={styles.workspace}>
         <ConsoleTopBar onOpenNavigation={() => setIsNavigationOpen(true)} />
         <main id="main-content" className={styles.main} tabIndex={-1}>
+          <Suspense fallback={null}>
+            <AccessDeniedNotice />
+          </Suspense>
           {children}
         </main>
       </div>

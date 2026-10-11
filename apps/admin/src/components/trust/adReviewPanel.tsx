@@ -104,7 +104,7 @@ export function AdReviewPanel({ adId, policies, onClose, onAdChanged }: { readon
             <SectionHeading>History</SectionHeading>
             <AuditHistoryList entries={ad.history} />
           </div>
-          <ConfirmActionDialog
+          <ConfirmActionDialog intent="ads"
             isOpen={pendingDecision !== null}
             title={pendingDecision === "approve" ? "Approve this ad" : "Reject this ad"}
             consequences={pendingDecision === "approve" ? ["The ad enters the auction at its scheduled start.", "The advertiser is notified."] : ["The ad never delivers.", "The advertiser sees the policy and your reason, and a violation is added to their account."]}
