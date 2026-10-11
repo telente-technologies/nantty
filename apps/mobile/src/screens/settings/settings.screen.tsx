@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { useMyProfileQuery } from "@/components/profile/profileQueries.hook";
+import { useLinkedProfiles } from "@/hooks/useLinkedProfiles.hook";
 import { CheckmarkSuggestionCards } from "@/components/profile/checkmarkSuggestionCards";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
@@ -43,6 +44,7 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { data: profile } = useMyProfileQuery();
+  const linked = useLinkedProfiles();
   const { data: accountHealth } = useMyAccountHealth();
   const accountStatusTrailing = accountHealth ? { text: describeAccountStanding(accountHealth.status) } : undefined;
   const refreshToken = useAuthStore((s) => s.refreshToken);
@@ -112,12 +114,17 @@ export function SettingsScreen({ navigation }: MainScreenProps<"Settings">) {
       </SettingsGroup>
 
       <SettingsGroup>
-        {profile?.isSeller ? null : (
+        {profile?.isSeller || !linked.data?.canCreate.store ? null : (
           <SettingsRow label="Start selling on Zudomart" icon={<Tag24Icon />} trailing={{ text: "Free to apply" }} onPress={() => navigation.navigate("SellerApplication")} />
         )}
         {profile?.isSeller ? <SettingsRow label="Business documents" icon={<Document24Icon />} onPress={() => navigation.navigate("BusinessDocuments")} /> : null}
-        <SettingsRow label="Create business profile" icon={<BuildingStore20Icon size={24} />} onPress={() => navigation.navigate("CreateBusinessProfile")} />
-        <SettingsRow label="Create a brand profile" icon={<TrademarkRegistered24Icon />} onPress={() => navigation.navigate("CreateBrand")} />
+        <SettingsRow
+          label={linked.data?.choiceRequired ? "Choose which profiles to keep" : "Store, Business page and Brand"}
+          icon={<BuildingStore20Icon size={24} />}
+          trailing={linked.data?.choiceRequired ? { text: "Action needed", color: colors.error } : "chevron"}
+          onPress={() => navigation.navigate("ManageProfiles")}
+        />
+        {linked.data?.canCreate.brand ? <SettingsRow label="Create a brand" icon={<TrademarkRegistered24Icon />} onPress={() => navigation.navigate("CreateBrand")} /> : null}
       </SettingsGroup>
 
       <SettingsGroup>

@@ -47,6 +47,7 @@ export interface BusinessProfileInput {
   readonly handle: string;
   readonly description: string;
   readonly categories: readonly BusinessCategorySelection[];
+  readonly purpose?: "store" | "business";
 }
 
 export type LiveAdPlacement = "beforeJoin" | "naturalBreak" | "betweenSegments" | "overlay" | "end";

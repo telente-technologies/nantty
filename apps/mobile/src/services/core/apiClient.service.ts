@@ -150,7 +150,7 @@ export const api = {
     toPageEnvelope<T>(await sendRequestWithTokenRefresh<unknown>("GET", path, { query })).data,
   post: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "body">) => sendRequestWithTokenRefresh<T>("POST", path, { ...options, body }),
   put: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "body">) => sendRequestWithTokenRefresh<T>("PUT", path, { ...options, body }),
-  patch: <T>(path: string, body?: unknown) => sendRequestWithTokenRefresh<T>("PATCH", path, { body }),
+  patch: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "body">) => sendRequestWithTokenRefresh<T>("PATCH", path, { ...options, body }),
   delete: <T>(path: string, options?: Omit<RequestOptions, "body">) => sendRequestWithTokenRefresh<T>("DELETE", path, options),
 };
 

@@ -19,6 +19,8 @@ import { useAuthStore } from "@/store/auth.store";
 import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { useKeepFocusedInputVisible } from "@/components/ui/keepFocusedInputVisible.hook";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import { spacing } from "@/constants/spacing.constant";
@@ -39,6 +41,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
   const soundData = sound.data;
   const refreshControl = usePullToRefresh(sound.refetch, clipsUsingSound.refetch);
   const isViewerTheOwner = !!soundData && !!signedInUserId && soundData.owner.id === signedInUserId;
+  const keepFocusedInputVisible = useKeepFocusedInputVisible({ enabled: isViewerTheOwner });
   const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
   const openCopyrightReport = () =>
     requireAuthThen(() => setReportTarget({ targetType: "sound", targetId: soundId, initialReason: "intellectual_property" }), undefined, "report");
@@ -59,6 +62,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
         <ErrorState error={sound.error} message="This sound isn't available right now." onRetry={() => sound.refetch()} retrying={sound.isRefetching} />
       ) : (
         <FlatList
+          {...keepFocusedInputVisible.scrollProps}
           data={clips}
           keyExtractor={(clip) => clip.id}
           numColumns={GRID_COLUMNS}
@@ -103,6 +107,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
           )}
         />
       )}
+      <KeyboardSpacer restingHeight={0} />
       <ReportSheet target={reportTarget} onClose={() => setReportTarget(null)} />
     </Screen>
   );

@@ -1,6 +1,7 @@
 import type { CatalogProduct } from "@/types/sellerCatalog.type";
 
-import { buildCatalogProductUpsertRequest, EMPTY_PRODUCT_FORM, formValuesFromCatalogProduct, summariseProductForInventory, validateProductForm } from "../sellerProductForm.util";
+import { createOptionGroupDraft } from "../productOptions.util";
+import { buildCatalogProductUpsertRequest, describeOptionRemovalImpact, describeVariantsBlockedByStock, EMPTY_PRODUCT_FORM, formValuesFromCatalogProduct, summariseProductForInventory, validateProductForm, type ChosenBrand } from "../sellerProductForm.util";
 
 const price = { amountMinor: 450_000, currency: "NGN" as const };
 const product: CatalogProduct = {
@@ -14,16 +15,20 @@ const product: CatalogProduct = {
   brand: { brandId: "b1", relationship: "own" },
 };
 
+const withValues = (form: ReturnType<typeof formValuesFromCatalogProduct>, name: string, values: string[]) => ({ ...form, optionGroups: form.optionGroups.map((group) => (group.name === name ? { ...group, values } : group)) });
+const save = (form: ReturnType<typeof formValuesFromCatalogProduct>, brand: ChosenBrand | null = null) => buildCatalogProductUpsertRequest({ form, images: product.images, brand, existing: product, defaultLocationId: null, skuSeed: "X" });
+
 describe("mobile seller product form", () => {
   it("reads catalog products, including custom option groups", () => {
     const form = formValuesFromCatalogProduct(product);
-    expect(form).toMatchObject({ priceInMajorUnits: "4500.00", sizes: "S, M", stock: "5", variants: [{ name: "Fabric", options: "Cotton" }] });
+    expect(form).toMatchObject({ priceInMajorUnits: "4500.00", stock: "5" });
+    expect(form.optionGroups.map((group) => [group.name, group.values, group.originalName])).toEqual([["Size", ["S", "M"], "Size"], ["Fabric", ["Cotton"], "Fabric"]]);
     expect(summariseProductForInventory(product, "NGN")).toEqual({ name: "Adire top", imageUrl: "https://cdn/1.jpg", price, stock: 5 });
   });
 
   it("sends catalog's ProductUpsertRequest, keeping variant ids, skus, photos and the brand relationship", () => {
     const request = buildCatalogProductUpsertRequest({
-      form: { ...formValuesFromCatalogProduct(product), sizes: "S, M, L" },
+      form: withValues(formValuesFromCatalogProduct(product), "Size", ["S", "M", "L"]),
       images: [{ mediaId: "m2", url: "x" }, ...product.images],
       brand: { id: "b1", name: "Adire Co" },
       existing: product,
@@ -48,7 +53,46 @@ describe("mobile seller product form", () => {
     expect(validateProductForm({ ...EMPTY_PRODUCT_FORM, name: "P" }, [], true)).toMatch(/2 to 120/);
     expect(validateProductForm({ ...EMPTY_PRODUCT_FORM, name: "Pot", priceInMajorUnits: "5", stock: "" }, [], true)).toMatch(/stock/);
     expect(validateProductForm({ ...EMPTY_PRODUCT_FORM, name: "Pot", priceInMajorUnits: "5" }, [], false)).toBeNull();
-    const fourGroups = { ...EMPTY_PRODUCT_FORM, name: "Pot", priceInMajorUnits: "5", stock: "1", sizes: "S", colors: "Red", variants: [{ name: "A", options: "x" }, { name: "B", options: "y" }] };
+    const fourGroups = { ...EMPTY_PRODUCT_FORM, name: "Pot", priceInMajorUnits: "5", stock: "1", optionGroups: ["Size", "Colour", "A", "B"].map((name) => createOptionGroupDraft(name, ["x"])) };
     expect(validateProductForm(fourGroups, [], true)).toMatch(/up to 3/);
+  });
+
+  it("builds options, variants and opening stock from option chips on a new product", () => {
+    const form = { ...EMPTY_PRODUCT_FORM, name: "Tee", priceInMajorUnits: "10", stock: "4", optionGroups: [createOptionGroupDraft("Size", ["S", "M"]), createOptionGroupDraft("Colour", ["Red", "Blue"])] };
+    const request = buildCatalogProductUpsertRequest({ form, images: [], brand: null, existing: null, defaultLocationId: "l1", skuSeed: "X" });
+    expect(request.options).toEqual([{ name: "Size", values: ["S", "M"] }, { name: "Colour", values: ["Red", "Blue"] }]);
+    expect(request.variants.map((variant) => [variant.optionValues, variant.sku, variant.id])).toEqual([
+      [{ Size: "S", Colour: "Red" }, "ZM-X-1", null], [{ Size: "S", Colour: "Blue" }, "ZM-X-2", null], [{ Size: "M", Colour: "Red" }, "ZM-X-3", null], [{ Size: "M", Colour: "Blue" }, "ZM-X-4", null],
+    ]);
+    expect(request.variants.every((variant) => variant.openingStock[0]?.quantity === 4 && variant.priceMinor === 1000)).toBe(true);
+  });
+
+  it("keeps variant ids and skus when options are renamed, reordered or extended", () => {
+    const form = formValuesFromCatalogProduct(product);
+    const renamed = { ...form, optionGroups: form.optionGroups.map((group) => (group.name === "Size" ? { ...group, name: "Fit", values: ["M", "S"] } : group)) };
+    const request = save(renamed);
+    expect(request.options[0]).toEqual({ name: "Fit", values: ["M", "S"] });
+    expect(request.variants.map((variant) => [variant.id, variant.sku, variant.optionValues])).toEqual([["v2", "ADIRE-M", { Fit: "M", Fabric: "Cotton" }], ["v1", "ADIRE-S", { Fit: "S", Fabric: "Cotton" }]]);
+    const extended = { ...form, optionGroups: [...form.optionGroups, createOptionGroupDraft("Colour", ["Blue", "Red"])] };
+    expect(save(extended).variants.filter((variant) => variant.id).map((variant) => [variant.id, variant.optionValues.Colour])).toEqual([["v1", "Blue"], ["v2", "Blue"]]);
+  });
+
+  it("warns before removing saved variants and blocks saving while they still have stock", () => {
+    const form = formValuesFromCatalogProduct(product);
+    const withoutS = withValues(form, "Size", ["M"]);
+    expect(describeOptionRemovalImpact(form, withoutS, product)).toMatch(/S \/ Cotton will be deleted.*4 units are still in stock/);
+    expect(describeVariantsBlockedByStock(withoutS, product)).toMatch(/S \/ Cotton still has stock/);
+    expect(describeOptionRemovalImpact(form, withValues(form, "Size", ["S", "M", "L"]), product)).toBeNull();
+    expect(describeOptionRemovalImpact(form, withoutS, null)).toBeNull();
+  });
+
+  it("blocks saving with an unsaved value, a nameless option or too many variants", () => {
+    const base = { ...EMPTY_PRODUCT_FORM, name: "Pot", priceInMajorUnits: "5", stock: "1" };
+    expect(validateProductForm({ ...base, optionGroups: [{ ...createOptionGroupDraft("Size", ["S"]), pendingText: "XL" }] }, [], true)).toMatch(/Tap Add to keep “XL”/);
+    expect(validateProductForm({ ...base, optionGroups: [{ ...createOptionGroupDraft("Size", ["S"]), pendingText: "   " }] }, [], true)).toBeNull();
+    expect(validateProductForm({ ...base, optionGroups: [createOptionGroupDraft("", ["S"])] }, [], true)).toMatch(/name/);
+    expect(validateProductForm({ ...base, optionGroups: [createOptionGroupDraft("Size", ["S"]), createOptionGroupDraft("size", ["M"])] }, [], true)).toMatch(/already have an option called Size/);
+    const many = Array.from({ length: 11 }, (_, index) => `v${index}`);
+    expect(validateProductForm({ ...base, optionGroups: [createOptionGroupDraft("A", many), createOptionGroupDraft("B", many)] }, [], true)).toMatch(/121 variants/);
   });
 });

@@ -1,15 +1,11 @@
 import type { ProductFormValues } from "@/components/seller/productFormFields";
 import type { Money } from "@/types/money.type";
-import type { CatalogProduct, CatalogProductImage, CatalogProductUpsertRequest, CatalogVariantUpsertRequest, ProductBrandRelationship } from "@/types/sellerCatalog.type";
+import type { CatalogProduct, CatalogProductImage, CatalogProductUpsertRequest, CatalogProductVariant, CatalogVariantUpsertRequest, ProductBrandRelationship } from "@/types/sellerCatalog.type";
+import { combinationKeyFor, createOptionGroupDraft, optionValueCombinations, projectExistingVariantsOntoOptions, usableOptionGroups, validateOptionGroups } from "@/utils/productOptions.util";
 
 export const MAXIMUM_PRODUCT_IMAGES = 10;
-const MAXIMUM_OPTIONS = 3;
-const SIZE_OPTION = "Size";
-const COLOR_OPTION = "Color";
 
-export const EMPTY_PRODUCT_FORM: ProductFormValues = { name: "", description: "", priceInMajorUnits: "", stock: "", sizes: "", colors: "", variants: [] };
-
-export const splitCommaSeparatedList = (value: string): string[] => [...new Set(value.split(",").map((part) => part.trim()).filter(Boolean))].slice(0, 30);
+export const EMPTY_PRODUCT_FORM: ProductFormValues = { name: "", description: "", priceInMajorUnits: "", stock: "", optionGroups: [] };
 export const convertMajorUnitTextToMinorUnits = (value: string) => Math.round(Number.parseFloat(value || "0") * 100);
 
 export interface ChosenBrand {
@@ -31,24 +27,29 @@ export function summariseProductForInventory(product: CatalogProduct, fallbackCu
 }
 
 export function formValuesFromCatalogProduct(product: CatalogProduct): ProductFormValues {
-  const valuesOf = (name: string) => product.options.find((option) => option.name === name)?.values.join(", ") ?? "";
   const price = lowestVariantPrice(product);
   return {
     name: product.name,
     description: product.description,
     priceInMajorUnits: price ? (price.amountMinor / 100).toFixed(2) : "",
     stock: String(totalAvailableStock(product)),
-    sizes: valuesOf(SIZE_OPTION),
-    colors: valuesOf(COLOR_OPTION),
-    variants: product.options.filter((option) => option.name !== SIZE_OPTION && option.name !== COLOR_OPTION).map((option) => ({ name: option.name, options: option.values.join(", ") })),
+    optionGroups: product.options.map((option) => createOptionGroupDraft(option.name, option.values, option.name)),
   };
 }
 
 export function buildProductOptions(form: ProductFormValues): { name: string; values: string[] }[] {
-  const custom = form.variants.map((variant) => ({ name: variant.name.trim(), values: splitCommaSeparatedList(variant.options) }));
-  return [{ name: SIZE_OPTION, values: splitCommaSeparatedList(form.sizes) }, { name: COLOR_OPTION, values: splitCommaSeparatedList(form.colors) }, ...custom]
-    .filter((option) => option.name.length > 0 && option.values.length > 0)
-    .filter((option, index, all) => all.findIndex((other) => other.name.toLowerCase() === option.name.toLowerCase()) === index);
+  return usableOptionGroups(form.optionGroups);
+}
+
+export function matchExistingVariants(form: ProductFormValues, existing: CatalogProduct | null): { combination: Record<string, string>; match: CatalogProductVariant | undefined }[] {
+  const projected = projectExistingVariantsOntoOptions(existing?.variants ?? [], form.optionGroups);
+  return optionValueCombinations(buildProductOptions(form)).map((combination) => ({ combination, match: projected.get(combinationKeyFor(combination, form.optionGroups)) }));
+}
+
+export function variantsRemovedWithStock(form: ProductFormValues, existing: CatalogProduct | null): CatalogProductVariant[] {
+  if (!existing) return [];
+  const kept = new Set(matchExistingVariants(form, existing).map((row) => row.match?.id).filter(Boolean));
+  return existing.variants.filter((variant) => !kept.has(variant.id) && variant.stock.some((level) => level.onHand !== 0));
 }
 
 export function validateProductForm(form: ProductFormValues, images: readonly CatalogProductImage[], isNewProduct: boolean): string | null {
@@ -57,16 +58,17 @@ export function validateProductForm(form: ProductFormValues, images: readonly Ca
   if (!(convertMajorUnitTextToMinorUnits(form.priceInMajorUnits) > 0)) return "Enter a price above zero.";
   if (isNewProduct && !/^\d+$/.test(form.stock)) return "Enter how many you have in stock.";
   if (images.length > MAXIMUM_PRODUCT_IMAGES) return `You can add up to ${MAXIMUM_PRODUCT_IMAGES} photos.`;
-  if (buildProductOptions(form).length > MAXIMUM_OPTIONS) return "A product can have up to 3 kinds of options, like size, colour and one more.";
-  if (form.variants.some((variant) => variant.name.trim() !== "" && splitCommaSeparatedList(variant.options).length === 0)) return "Add options for each custom variant, or remove it.";
+  const optionsMessage = validateOptionGroups(form.optionGroups);
+  if (optionsMessage) return optionsMessage;
   return null;
 }
 
-const combinations = (options: readonly { readonly name: string; readonly values: readonly string[] }[]): Record<string, string>[] =>
-  options.reduce<Record<string, string>[]>((rows, option) => rows.flatMap((row) => option.values.map((value) => ({ ...row, [option.name]: value }))), [{}]);
-
-const sameOptionValues = (left: Readonly<Record<string, string>>, right: Readonly<Record<string, string>>) =>
-  Object.keys(left).length === Object.keys(right).length && Object.entries(left).every(([name, value]) => right[name] === value);
+export function describeVariantsBlockedByStock(form: ProductFormValues, existing: CatalogProduct | null): string | null {
+  const blocked = variantsRemovedWithStock(form, existing);
+  if (blocked.length === 0) return null;
+  const names = blocked.slice(0, 2).map((variant) => variant.title).join(", ");
+  return `${names}${blocked.length > 2 ? ` and ${blocked.length - 2} more` : ""} still ${blocked.length === 1 ? "has" : "have"} stock. Set stock to 0 in your inventory before removing ${blocked.length === 1 ? "it" : "them"}.`;
+}
 
 const generatedSku = (seed: string, index: number) => `ZM-${seed}-${index + 1}`.replace(/[^A-Za-z0-9._-]/g, "").slice(0, 64);
 
@@ -82,8 +84,7 @@ export function buildCatalogProductUpsertRequest(input: {
   const options = buildProductOptions(form);
   const priceMinor = convertMajorUnitTextToMinorUnits(form.priceInMajorUnits);
   const quantity = Number.parseInt(form.stock || "0", 10);
-  const variants: CatalogVariantUpsertRequest[] = combinations(options).map((optionValues, index) => {
-    const matching = existing?.variants.find((variant) => sameOptionValues(variant.optionValues, optionValues));
+  const variants: CatalogVariantUpsertRequest[] = matchExistingVariants(form, existing).map(({ combination: optionValues, match: matching }, index) => {
     return {
       id: matching?.id ?? null,
       optionValues,
@@ -111,4 +112,19 @@ export function buildCatalogProductUpsertRequest(input: {
     variants,
     brand: brand ? { brandId: brand.id, relationship: brand.relationship ?? keptRelationship ?? "genuine_resale" } : null,
   };
+}
+
+export function describeOptionRemovalImpact(current: ProductFormValues, next: ProductFormValues, existing: CatalogProduct | null): string | null {
+  if (!existing) return null;
+  const keptIds = (form: ProductFormValues) => new Set(matchExistingVariants(form, existing).map((row) => row.match?.id).filter((id): id is string => Boolean(id)));
+  const before = keptIds(current);
+  const after = keptIds(next);
+  const dropped = existing.variants.filter((variant) => before.has(variant.id) && !after.has(variant.id));
+  if (dropped.length === 0) return null;
+  const onHand = dropped.reduce((sum, variant) => sum + variant.stock.reduce((levels, level) => levels + level.onHand, 0), 0);
+  const names = dropped.slice(0, 3).map((variant) => variant.title).join(", ");
+  const subject = dropped.length === 1 ? `The saved variant ${names} will be deleted` : `${dropped.length} saved variants (${names}${dropped.length > 3 ? ", …" : ""}) will be deleted`;
+  return onHand !== 0
+    ? `${subject} when you save. ${onHand} ${onHand === 1 ? "unit is" : "units are"} still in stock, so set stock to 0 in your inventory first or saving will be blocked.`
+    : `${subject} when you save.`;
 }
