@@ -96,7 +96,7 @@ func TestPasswordResetRevokesEverySessionAndChangeKeepsTheCurrentOne(t *testing.
 	harness.expect("POST", "/api/v1/auth/password/change", accessToken, map[string]string{"currentPassword": "brandnew2", "newPassword": "changed4pass"}, http.StatusNoContent)
 	harness.expect("POST", "/api/v1/auth/refresh", "", map[string]string{"refreshToken": other["refreshToken"].(string)}, http.StatusUnauthorized)
 	harness.expect("POST", "/api/v1/auth/refresh", "", map[string]string{"refreshToken": current["refreshToken"].(string)}, http.StatusOK)
-	waitForPublishedEventTypes(t, harness.publisher, "account.passwordChanged")
+	waitForPublishedEventTypes(t, harness.publisher, "account.passwordChanged", "session.revoked")
 }
 
 func TestListingAndRevokingSessions(t *testing.T) {

@@ -81,6 +81,9 @@ func ReadAuthSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) A
 	if settings.IsProduction() && settings.DirectoryGrpcAddress != "" && len(settings.InternalGrpcToken) < 32 {
 		reader.ReportProblem("AUTH_INTERNAL_GRPC_TOKEN must be at least 32 characters in production")
 	}
+	if settings.OneTimeCodeDeliveryMode != "log" && settings.OneTimeCodeDeliveryMode != "event" {
+		reader.ReportProblem("AUTH_OTP_DELIVERY must be log or event")
+	}
 	if settings.IsProduction() && settings.OneTimeCodeDeliveryMode == "log" {
 		reader.ReportProblem("AUTH_OTP_DELIVERY must not be log in production")
 	}

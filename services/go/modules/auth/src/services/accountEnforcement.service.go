@@ -107,12 +107,16 @@ func (service AccountEnforcementService) LiftBan(ctx context.Context, accountId 
 
 func (service AccountEnforcementService) RevokeAccountSessions(ctx context.Context, accountId uuid.UUID, onlySessionId *uuid.UUID) error {
 	return service.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		now, scope := service.Container.Now(), "*"
 		update := tx.Session.Update().Where(session.AccountID(accountId), session.RevokedAtIsNil())
 		if onlySessionId != nil {
-			update = update.Where(session.ID(*onlySessionId))
+			update, scope = update.Where(session.ID(*onlySessionId)), onlySessionId.String()
 		}
-		_, err := update.SetRevokedAt(service.Container.Now()).SetRevokedReason(session.RevokedReasonRevokeAll).Save(ctx)
-		return err
+		revoked, err := update.SetRevokedAt(now).SetRevokedReason(session.RevokedReasonRevokeAll).Save(ctx)
+		if err != nil {
+			return err
+		}
+		return EnqueueSessionsEndedInTransaction(ctx, tx, accountId, scope, revoked, now)
 	})
 }
 
@@ -187,8 +191,11 @@ func (service AccountEnforcementService) CreateAccountOnBehalf(ctx context.Conte
 }
 
 func revokeAllActiveSessionsInTransaction(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, now time.Time) error {
-	_, err := tx.Session.Update().Where(session.AccountID(accountId), session.RevokedAtIsNil()).SetRevokedAt(now).SetRevokedReason(session.RevokedReasonRevokeAll).Save(ctx)
-	return err
+	revoked, err := tx.Session.Update().Where(session.AccountID(accountId), session.RevokedAtIsNil()).SetRevokedAt(now).SetRevokedReason(session.RevokedReasonRevokeAll).Save(ctx)
+	if err != nil {
+		return err
+	}
+	return EnqueueSessionsEndedInTransaction(ctx, tx, accountId, "*", revoked, now)
 }
 
 func (service AccountEnforcementService) SetAccountRole(ctx context.Context, accountId uuid.UUID, role string, granted bool) error {

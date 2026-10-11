@@ -21,7 +21,7 @@ CREATE INDEX "adexperiment_account_id_created_at" ON "ad_experiments" ("account_
 -- create index "adexperiment_status_end_at" to table: "ad_experiments"
 CREATE INDEX "adexperiment_status_end_at" ON "ad_experiments" ("status", "end_at");
 -- create "ad_top_ups" table
-CREATE TABLE "ad_top_ups" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "account_id" uuid NOT NULL, "money_top_up_id" character varying NOT NULL, "reference" character varying NOT NULL, "amount_minor" bigint NOT NULL, "currency" character varying NOT NULL, "provider" character varying NOT NULL DEFAULT 'paystack', "status" character varying NOT NULL DEFAULT 'pending', "failure_reason" character varying NOT NULL DEFAULT '', "authorization_url" character varying NOT NULL DEFAULT '', "requested_by_user_id" uuid NOT NULL, "completed_at" timestamptz NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"));
+CREATE TABLE "ad_top_ups" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "account_id" uuid NOT NULL, "money_top_up_id" character varying NOT NULL, "reference" character varying NOT NULL, "amount_minor" bigint NOT NULL, "currency" character varying NOT NULL, "provider" character varying NOT NULL DEFAULT 'flutterwave', "status" character varying NOT NULL DEFAULT 'pending', "failure_reason" character varying NOT NULL DEFAULT '', "authorization_url" character varying NOT NULL DEFAULT '', "requested_by_user_id" uuid NOT NULL, "completed_at" timestamptz NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"));
 -- create index "adtopup_account_id_created_at" to table: "ad_top_ups"
 CREATE INDEX "adtopup_account_id_created_at" ON "ad_top_ups" ("account_id", "created_at");
 -- create index "adtopup_money_top_up_id" to table: "ad_top_ups"

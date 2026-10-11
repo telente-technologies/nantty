@@ -102,7 +102,7 @@ func (AdTopUp) Fields() []ent.Field {
 		field.String("reference").NotEmpty().MaxLen(80).Immutable(),
 		field.Int64("amount_minor").Immutable(),
 		field.String("currency").MinLen(3).MaxLen(3).Immutable(),
-		field.String("provider").MaxLen(20).Default("paystack").Immutable(),
+		field.String("provider").MaxLen(20).Default("flutterwave").Immutable(),
 		field.Enum("status").Values("pending", "succeeded", "failed", "abandoned").Default("pending"),
 		field.String("failure_reason").MaxLen(200).Default(""),
 		field.String("authorization_url").MaxLen(600).Default(""),

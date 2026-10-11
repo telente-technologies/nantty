@@ -56,7 +56,11 @@ func (application AccountDirectoryService) DeactivateAccountAndRevokeSessions(ct
 		if err := tx.Account.UpdateOneID(accountId).SetStatus(account.StatusDeactivated).Exec(ctx); err != nil {
 			return err
 		}
-		if _, err := tx.Session.Update().Where(session.AccountID(accountId), session.RevokedAtIsNil()).SetRevokedAt(now).SetRevokedReason(session.RevokedReasonRevokeAll).Save(ctx); err != nil {
+		revoked, err := tx.Session.Update().Where(session.AccountID(accountId), session.RevokedAtIsNil()).SetRevokedAt(now).SetRevokedReason(session.RevokedReasonRevokeAll).Save(ctx)
+		if err != nil {
+			return err
+		}
+		if err := EnqueueSessionsEndedInTransaction(ctx, tx, accountId, "*", revoked, now); err != nil {
 			return err
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, "account.deactivated", accountId.String(), now, events.AccountDeactivatedEventData{AccountId: accountId.String()})

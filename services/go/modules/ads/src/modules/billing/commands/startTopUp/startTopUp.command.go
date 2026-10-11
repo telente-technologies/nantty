@@ -18,7 +18,7 @@ type Command struct {
 
 func (command Command) Validate() error {
 	var issues []httpserver.ValidationIssue
-	if provider := command.Request.Provider; provider != "" && provider != "paystack" && provider != "flutterwave" {
+	if provider := command.Request.Provider; provider != "" && provider != "flutterwave" {
 		issues = append(issues, httpserver.ValidationIssue{Path: "provider", Message: "The payment provider is chosen by Zudomart; leave it out."})
 	}
 	path := command.Request.ReturnPath

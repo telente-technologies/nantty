@@ -51,6 +51,10 @@ func Staff(deployed *container.Container, permissions ...string) func(http.Handl
 	return func(handler http.HandlerFunc) http.Handler {
 		return jwtauth.RequireVerifiedAccessToken(deployed.StaffVerifier)(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			principal, _ := jwtauth.PrincipalFromContext(request.Context())
+			if failure := staffauth.RefuseDisallowedStaffNetwork(request, principal.UserId); failure != nil {
+				httpserver.WriteJsonResponse(writer, failure.Status, failure)
+				return
+			}
 			if !staffHoldsAnyPermission(principal.Roles, permissions) {
 				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
 				return

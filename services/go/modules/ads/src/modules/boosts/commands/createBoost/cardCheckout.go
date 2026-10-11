@@ -32,7 +32,7 @@ func (handler Handler) openCardCheckout(ctx context.Context, command Command, bo
 		return "", err
 	}
 	err = deployed.Client.AdTopUp.Create().SetAccountID(account.ID).SetMoneyTopUpID(started.TopUpId).SetReference(started.Reference).SetAmountMinor(boost.TotalBudgetMinor).
-		SetCurrency(boost.Currency).SetProvider("paystack").SetAuthorizationURL(started.CheckoutUrl).SetRequestedByUserID(boost.UserID).
+		SetCurrency(boost.Currency).SetProvider(boostTopUpProvider(started.Provider)).SetAuthorizationURL(started.CheckoutUrl).SetRequestedByUserID(boost.UserID).
 		OnConflictColumns(adtopup.FieldMoneyTopUpID).DoNothing().Exec(ctx)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return "", err
@@ -43,4 +43,11 @@ func (handler Handler) openCardCheckout(ctx context.Context, command Command, bo
 		}
 	}
 	return started.CheckoutUrl, nil
+}
+
+func boostTopUpProvider(started string) string {
+	if started != "" {
+		return started
+	}
+	return "flutterwave"
 }

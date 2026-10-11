@@ -1008,7 +1008,7 @@ var (
 		{Name: "reference", Type: field.TypeString, Size: 80},
 		{Name: "amount_minor", Type: field.TypeInt64},
 		{Name: "currency", Type: field.TypeString, Size: 3},
-		{Name: "provider", Type: field.TypeString, Size: 20, Default: "paystack"},
+		{Name: "provider", Type: field.TypeString, Size: 20, Default: "flutterwave"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "succeeded", "failed", "abandoned"}, Default: "pending"},
 		{Name: "failure_reason", Type: field.TypeString, Size: 200, Default: ""},
 		{Name: "authorization_url", Type: field.TypeString, Size: 600, Default: ""},

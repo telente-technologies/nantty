@@ -133,7 +133,7 @@ func TestPremiumUsersGetOneFreeBoostAMonthAndAppsCannotSpendTheBalance(t *testin
 		t.Fatalf("balance boost below L1: %v", unverified)
 	}
 	card := h.expect("POST", "/api/v1/ads/boosts", &other, "card-boost-0001", boostBody("card", 100_000, 3), http.StatusCreated)
-	if card["checkoutUrl"] != "https://checkout.paystack.test/abc" || card["boost"].(map[string]any)["status"] != "pending_payment" {
+	if card["checkoutUrl"] != "https://checkout.flutterwave.test/abc" || card["boost"].(map[string]any)["status"] != "pending_payment" {
 		t.Fatalf("card boost: %v", card)
 	}
 	topUpEvent := `{"id":"` + uuid.NewString() + `","type":"adBalance.toppedUp","occurredAt":"2026-10-05T10:00:00Z","data":{"adAccountId":"` + topUps.started[0].AdAccountId + `","topUpId":"money-top-up-1","amount":{"amountMinor":300000,"currency":"NGN"}}}`

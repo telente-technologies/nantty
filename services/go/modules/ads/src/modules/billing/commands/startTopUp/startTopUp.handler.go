@@ -72,5 +72,5 @@ func firstNonEmptyProvider(values ...string) string {
 			return value
 		}
 	}
-	return "paystack"
+	return "flutterwave"
 }

@@ -29,7 +29,7 @@ func (gateway *fakeTopUps) StartTopUp(_ context.Context, request interfaces.TopU
 	gateway.mutex.Lock()
 	defer gateway.mutex.Unlock()
 	gateway.started = append(gateway.started, request)
-	return interfaces.StartedTopUp{TopUpId: "money-top-up-1", Reference: "ref-top-up-1", CheckoutUrl: "https://checkout.paystack.test/abc"}, nil
+	return interfaces.StartedTopUp{TopUpId: "money-top-up-1", Reference: "ref-top-up-1", CheckoutUrl: "https://checkout.flutterwave.test/abc"}, nil
 }
 
 func (gateway *fakeTopUps) ReadTopUp(context.Context, string, string) (interfaces.TopUpStatus, error) {
@@ -64,12 +64,12 @@ func TestTopUpsCheckMembershipCreditOncePaidAndIssueReceipts(t *testing.T) {
 	accountId := createAccount(h, &owner, "topup-account")
 	base := "/api/v1/ads/accounts/" + accountId + "/billing"
 	minimum := h.expect("GET", base, &owner, "", nil, http.StatusOK)["minimumTopUp"].(map[string]any)
-	body := map[string]any{"amount": minimum, "provider": "paystack", "returnPath": "/accounts/" + accountId + "/billing/return"}
+	body := map[string]any{"amount": minimum, "provider": "flutterwave", "returnPath": "/accounts/" + accountId + "/billing/return"}
 	h.expect("POST", base+"/top-ups", &stranger, "topup-key-stranger", body, http.StatusNotFound)
 	h.expect("POST", base+"/top-ups", &owner, "", body, http.StatusBadRequest)
-	h.expect("POST", base+"/top-ups", &owner, "topup-key-usd", map[string]any{"amount": map[string]any{"amountMinor": minimum["amountMinor"], "currency": "USD"}, "provider": "paystack", "returnPath": ""}, http.StatusBadRequest)
+	h.expect("POST", base+"/top-ups", &owner, "topup-key-usd", map[string]any{"amount": map[string]any{"amountMinor": minimum["amountMinor"], "currency": "USD"}, "provider": "flutterwave", "returnPath": ""}, http.StatusBadRequest)
 	checkout := h.expect("POST", base+"/top-ups", &owner, "topup-key-1", body, http.StatusCreated)
-	if checkout["reference"] != "ref-top-up-1" || checkout["authorizationUrl"] != "https://checkout.paystack.test/abc" || checkout["provider"] != "paystack" {
+	if checkout["reference"] != "ref-top-up-1" || checkout["authorizationUrl"] != "https://checkout.flutterwave.test/abc" || checkout["provider"] != "flutterwave" {
 		t.Fatalf("unexpected checkout %v", checkout)
 	}
 	if request := gateway.started[0]; request.UserId != owner.id.String() || request.ReturnTo != "http://localhost:3300/accounts/"+accountId+"/billing/return" || request.IdempotencyKey != "topup-key-1" {
