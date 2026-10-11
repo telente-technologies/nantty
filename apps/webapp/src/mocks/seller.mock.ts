@@ -1,6 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { SellerApplication, SellerApplicationInput, SellerDashboardPeriod, StoreProduct, StoreProductInput } from "@/types/account.type";
-import type { MarkOrderShippedInput } from "@/types/commerce.type";
+import type { SellerApplication, SellerApplicationInput, SellerDashboardPeriod, StoreProduct } from "@/types/account.type";
 import type { SellerDashboard } from "@/types";
 
 import { bankNameForCode } from "./banks.mock";
@@ -40,16 +39,7 @@ const catalogStoreProducts = (): StoreProduct[] =>
       published: true,
     }));
 
-let sellerEditedProducts = new Map<string, StoreProduct>();
-let deletedProductIds = new Set<string>();
-
-const listStoreProducts = (): StoreProduct[] => {
-  const fromCatalog = catalogStoreProducts().map((product) => sellerEditedProducts.get(product.id) ?? product);
-  const createdBySeller = [...sellerEditedProducts.values()].filter((product) => product.id.startsWith("sp_new_"));
-  return [...createdBySeller, ...fromCatalog].filter((product) => !deletedProductIds.has(product.id));
-};
-
-const toStoreProduct = (id: string, input: StoreProductInput): StoreProduct => ({ ...input, id, imageUrl: input.imageUrls[0] ?? null, published: true });
+const listStoreProducts = (): StoreProduct[] => catalogStoreProducts();
 
 const isCountedAsSale = (record: MockOrderRecord) => record.status !== "pending" && record.status !== "cancelled";
 
@@ -113,30 +103,15 @@ export const sellerMocks: MockRoute[] = [
     applicationsByUserId.set(getSignedInMockUser().id, application);
     return application;
   }),
-  createMockRoute("GET", "/api/v1/seller/products", () => listStoreProducts()),
-  createMockRoute("GET", "/api/v1/seller/products/:productId", ({ params }) => listStoreProducts().find((p) => p.id === params.productId)),
-  createMockRoute("POST", "/api/v1/seller/products", ({ body }) => {
-    const product = toStoreProduct(`sp_new_${Date.now()}`, body as StoreProductInput);
-    sellerEditedProducts = new Map([[product.id, product], ...sellerEditedProducts]);
-    return product;
-  }),
-  createMockRoute("PATCH", "/api/v1/seller/products/:productId", ({ params, body }) => {
-    const product = toStoreProduct(params.productId!, body as StoreProductInput);
-    sellerEditedProducts.set(product.id, product);
-    return product;
-  }),
-  createMockRoute("DELETE", "/api/v1/seller/products/:productId", ({ params }) => {
-    deletedProductIds = new Set([...deletedProductIds, params.productId!]);
-  }),
   createMockRoute("GET", "/api/v1/seller/orders", () => listSignedInStoreOrderRecords().map(buildOrderFromRecord)),
   createMockRoute("GET", "/api/v1/seller/orders/:orderId", ({ params }) => buildOrderFromRecord(findStoreOrderRecordOrThrow(params.orderId!))),
-  createMockRoute("POST", "/api/v1/seller/orders/:orderId/ship", ({ params, body }) => {
+  createMockRoute("POST", "/api/v1/seller/orders/:orderId/fulfilment", ({ params, body }) => {
     const record = findStoreOrderRecordOrThrow(params.orderId!);
     if (record.status === "shipped") return buildOrderFromRecord(record);
     if (record.status !== "paid") throw new ApiError(409, "Only paid orders can be marked as shipped");
-    const { courierName, trackingNumber } = body as MarkOrderShippedInput;
-    if (!courierName?.trim() || !trackingNumber?.trim()) throw new ApiError(422, "Add the courier and tracking number");
-    record.shipment = buildShipment(courierName.trim(), trackingNumber.trim().toUpperCase(), new Date().toISOString());
+    const { courier, trackingNumber, fromLocationId } = body as { courier?: string; trackingNumber?: string; fromLocationId?: string };
+    if (!courier?.trim() || !trackingNumber?.trim() || !fromLocationId) throw new ApiError(422, "Add the courier and tracking number", "VALIDATION_FAILED");
+    record.shipment = buildShipment(courier.trim(), trackingNumber.trim().toUpperCase(), new Date().toISOString());
     record.status = "shipped";
     return buildOrderFromRecord(record);
   }),

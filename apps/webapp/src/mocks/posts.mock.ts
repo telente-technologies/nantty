@@ -6,6 +6,8 @@ import { getSignedInMockUser } from "./fixtures.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
+const deletedMockPostIds = new Set<string>();
+
 export { mockPostsState };
 
 export const findPostIncludingSponsored = (postId: string): Post | undefined =>
@@ -27,6 +29,14 @@ const buildDailyImpressions = (impressions: number): PostAnalyticsDaily[] => {
   }));
 };
 
+const buildVideoAnalytics = (views: number, watchTimeSeconds: number, completedViews: number) => ({
+  views,
+  watchTimeSeconds,
+  completedViews,
+  averageWatchSeconds: views > 0 ? Math.round((watchTimeSeconds / views) * 10) / 10 : 0,
+  completionRate: views > 0 ? Math.round((completedViews / views) * 1000) / 1000 : 0,
+});
+
 const buildPostAnalytics = (post: Post): PostAnalytics => {
   const saves = post.saveCount ?? Math.round(post.likes * 0.15);
   const shares = Math.round(post.reposts * 0.6);
@@ -36,6 +46,8 @@ const buildPostAnalytics = (post: Post): PostAnalytics => {
   const isVideo = post.media.some((item) => item.type === "video");
   return {
     postId: post.id,
+    kind: post.kind === "clip" ? "clip" : "post",
+    hasLink: !!post.linkPreview,
     author: post.author,
     postedAt: post.createdAt,
     impressions: post.views,
@@ -51,7 +63,7 @@ const buildPostAnalytics = (post: Post): PostAnalytics => {
     newFollows: Math.round(post.views * 0.0025),
     engagements,
     engagementRate: post.views > 0 ? Math.round((engagements / post.views) * 1000) / 10 : 0,
-    video: isVideo ? { views: Math.round(post.views * 0.55), watchTimeSeconds: Math.round(post.views * 0.55 * 11) } : null,
+    video: isVideo ? buildVideoAnalytics(Math.round(post.views * 0.55), Math.round(post.views * 0.55 * 11), Math.round(post.views * 0.55 * 0.42)) : null,
     audience: [
       { label: "Followers", share: 38 },
       { label: "Non-followers", share: 62 },
@@ -103,6 +115,17 @@ export const postsMocks: MockRoute[] = [
     if (post.author.id !== getSignedInMockUser().id) throw new ApiError(403, "You can only unpin your own posts.", "FORBIDDEN");
     updateMockPost(params.postId!, (p) => ({ ...p, isPinned: false, pinnedAt: null }));
     return mockPostsState.get(params.postId!);
+  }),
+  createMockRoute("DELETE", "/api/v1/posts/:postId", ({ params }) => {
+    const postId = params.postId!;
+    if (deletedMockPostIds.has(postId)) return undefined;
+    const post = mockPostsState.get(postId);
+    if (!post) throw new ApiError(404, "This post was removed", "POST_NOT_FOUND");
+    if (post.author.id !== getSignedInMockUser().id) throw new ApiError(403, "Only the author can delete this post.", "NOT_POST_OWNER");
+    mockPostsState.delete(postId);
+    deletedMockPostIds.add(postId);
+    for (const [id, candidate] of mockPostsState) if (candidate.resharedFrom?.id === postId) mockPostsState.set(id, { ...candidate, resharedFrom: null, resharedFromUnavailable: true });
+    return undefined;
   }),
   createMockRoute("GET", "/api/v1/posts/:postId/analytics", ({ params }) => {
     const post = findPostIncludingSponsored(params.postId!) ?? findMockClipsByIds([params.postId!])[0];

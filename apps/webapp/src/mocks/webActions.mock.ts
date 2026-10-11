@@ -25,19 +25,20 @@ function shareReferenceIntoConversations(body: ChatShareBody) {
   if (conversationIds.length === 0 || conversationIds.length > 20) throw new ApiError(422, "Choose between 1 and 20 chats");
   if (!shareableKinds.has(kind) || !referenceId) throw new ApiError(422, "This can't be shared");
   if (typeof body.note === "string" && body.note !== "") throw new ApiError(400, "Notes can't be sent with a share.", "VALIDATION_FAILED");
-  const sharedLink = `https://zudomart.com/${kind}/${referenceId}`;
+  const sealedFor = (conversationId: string) => (body.encryptions ?? []).find((entry) => entry.conversationId === conversationId && typeof entry.ciphertext === "string" && typeof entry.deviceId === "string");
+  if (conversationIds.some((conversationId) => !sealedFor(conversationId))) throw new ApiError(422, "Shared items are end-to-end encrypted. Update Zudomart to share to chats.", "ENCRYPTION_REQUIRED");
   let sentCount = 0;
   for (const conversationId of conversationIds) {
     if (!mockConversations.some((conversation) => conversation.id === conversationId)) continue;
-    const sealed = (body.encryptions ?? []).find((entry) => entry.conversationId === conversationId);
+    const sealed = sealedFor(conversationId)!;
     appendMockMessageAndUpdateConversation({
       id: `m_share_${Date.now()}_${sentCount}`,
       conversationId,
       senderId: getSignedInMockUser().id,
-      text: sealed ? "" : sharedLink,
-      encryption: sealed && typeof sealed.ciphertext === "string" && typeof sealed.deviceId === "string" ? { deviceId: sealed.deviceId, ciphertext: sealed.ciphertext, protocol: "signal-v1" } : null,
+      text: "",
+      encryption: { deviceId: String(sealed.deviceId), ciphertext: String(sealed.ciphertext), protocol: "signal-v1" },
       createdAt: new Date().toISOString(),
-      kind: "text",
+      kind: "shared",
     });
     sentCount += 1;
   }

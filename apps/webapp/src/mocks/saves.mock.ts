@@ -3,6 +3,7 @@ import { ApiError } from "@/errors/api.error";
 import type { Page, SavedItem, SavedItemFilter, SaveTargetRequest, SaveTargetType } from "@/types";
 
 import { findMockClipsByIds } from "./clips.mock";
+import { findCommentAnywhere } from "./comments.mock";
 import { findPostIncludingSponsored } from "./posts.mock";
 import { buildCatalogProductSummary, findCatalogSeedByProductId } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -10,7 +11,7 @@ import { buildSavedTargetKey, describeSaveCollection, saveCollectionRecords, sav
 import { findMockVideoById } from "./videos.mock";
 
 const SAVES_PAGE_SIZE = 12;
-const saveTargetTypes: readonly SaveTargetType[] = ["post", "video", "clip", "product"];
+const saveTargetTypes: readonly SaveTargetType[] = ["post", "video", "clip", "product", "comment"];
 
 const isSaveTargetType = (value: unknown): value is SaveTargetType => saveTargetTypes.includes(value as SaveTargetType);
 
@@ -28,12 +29,18 @@ const buildSavedItem = (record: SavedTargetRecord): SavedItem | null => {
     const product = buildCatalogProductSummary(seed);
     return { ...base, preview: { title: product.name, thumbnailUrl: product.imageUrl, href: buildProductPath(product), author: null, price: product.price, durationSeconds: null } };
   }
+  if (record.targetType === "comment") {
+    const comment = findCommentAnywhere(record.targetId);
+    if (!comment) return null;
+    const preview = { title: comment.text.slice(0, 80) || null, thumbnailUrl: comment.author.avatarUrl, href: `/post/${comment.postId}/comment/${comment.id}`, author: comment.author.username, price: null, durationSeconds: null };
+    return { ...base, preview, comment, postId: comment.postId };
+  }
   const post = record.targetType === "clip" ? findMockClipsByIds([record.targetId])[0] : record.targetType === "video" ? findMockVideoById(record.targetId) : findPostIncludingSponsored(record.targetId);
   if (!post) return null;
   const href = record.targetType === "clip" ? `/clips?start=${post.id}` : record.targetType === "video" ? `/watch/${post.id}` : `/post/${post.id}`;
   return {
     ...base,
-    preview: { title: post.text, thumbnailUrl: firstMediaThumbnail(post.media), href, author: post.author, price: null, durationSeconds: post.media[0]?.durationSeconds ?? null },
+    preview: { title: post.text, thumbnailUrl: firstMediaThumbnail(post.media), href, author: post.author.username, price: null, durationSeconds: post.media[0]?.durationSeconds ?? null },
   };
 };
 

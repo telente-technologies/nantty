@@ -1,6 +1,6 @@
 import { ApiError } from "@/errors/api.error";
 import type { ConnectionEntry, ConnectionTab, FollowRequest } from "@/types/account.type";
-import type { Page, User } from "@/types";
+import type { Page, PostNotificationLevel, User } from "@/types";
 import { sortPinnedPostsFirst } from "@/utils/profileContent.util";
 
 import { getSignedInMockUser } from "./fixtures.mock";
@@ -48,7 +48,26 @@ function listConnections(tab: ConnectionTab): ConnectionEntry[] {
   }
 }
 
+const postNotificationLevelByUserId = new Map<string, PostNotificationLevel>();
+const postNotificationLevels: readonly PostNotificationLevel[] = ["off", "posts", "posts_and_lives"];
+
+const postNotificationsOf = (userId: string) => {
+  const following = followedUserIds.has(userId) && !blockedUserIds.has(userId);
+  return { level: following ? (postNotificationLevelByUserId.get(userId) ?? "off") : "off", following };
+};
+
+const setPostNotificationsFor = (userId: string, body: unknown) => {
+  const level = (body as { level?: unknown } | null)?.level;
+  if (!postNotificationLevels.includes(level as PostNotificationLevel)) throw new ApiError(422, "Choose posts, posts_and_lives or off.", "VALIDATION_FAILED");
+  if (userId === getSignedInMockUser().id) throw new ApiError(422, "You can't turn on post notifications for yourself.", "CANNOT_SUBSCRIBE_TO_SELF");
+  if (blockedUserIds.has(userId)) throw new ApiError(403, "You can't get notifications from this account.", "POST_NOTIFICATIONS_NOT_ALLOWED");
+  if (!followedUserIds.has(userId)) throw new ApiError(409, "Follow this account to get post notifications.", "NOT_FOLLOWING");
+  postNotificationLevelByUserId.set(userId, level as PostNotificationLevel);
+  return postNotificationsOf(userId);
+};
+
 const setFollowingAuthor = (userId: string, following: boolean) => {
+  postNotificationLevelByUserId.delete(userId);
   if (following) followedUserIds.add(userId);
   else followedUserIds.delete(userId);
   for (const [postId, post] of mockPostsState) {
@@ -103,7 +122,21 @@ export const usersMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/users/me/follow-requests", () => emptyFollowRequestsPage),
   createMockRoute("POST", "/api/v1/follow-requests/:requestId/accept", () => undefined),
   createMockRoute("POST", "/api/v1/follow-requests/:requestId/reject", () => undefined),
-  createMockRoute("POST", "/api/v1/users/:userId/follow", ({ params }) => setFollowingAuthor(params.userId!, true)),
+  createMockRoute("GET", "/api/v1/users/:userId/follow-status", ({ params }) => {
+    const userId = params.userId!;
+    const user = findDirectoryUserById(userId);
+    const following = followedUserIds.has(userId);
+    return {
+      state: blockedUserIds.has(userId) ? "blocked" : following ? "accepted" : "none", followedBy: followerUserIds.includes(userId),
+      followersCount: (user?.followers ?? 0) + (following ? 1 : 0), followingCount: user?.following ?? 0, viewerPostNotifications: postNotificationsOf(userId).level,
+    };
+  }),
+  createMockRoute("GET", "/api/v1/users/:userId/post-notifications", ({ params }) => postNotificationsOf(params.userId!)),
+  createMockRoute("PUT", "/api/v1/users/:userId/post-notifications", ({ params, body }) => setPostNotificationsFor(params.userId!, body)),
+  createMockRoute("POST", "/api/v1/users/:userId/follow", ({ params }) => {
+    if (!followedUserIds.has(params.userId!)) setFollowingAuthor(params.userId!, true);
+    return { state: "accepted" };
+  }),
   createMockRoute("DELETE", "/api/v1/users/:userId/follow", ({ params }) => setFollowingAuthor(params.userId!, false)),
   createMockRoute("POST", "/api/v1/users/:userId/block", ({ params }) => {
     blockedUserIds.add(params.userId!);
