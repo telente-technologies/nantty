@@ -1,30 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { shouldUseRealBackend } from "@/config/studioEnvironment.config";
+import { findStudioApiRoute } from "@/config/studioApiAccess.config";
+
 import { exchangeRefreshTokenForNewTokenPair, renewViewerSession, writeRenewedSessionCookies } from "@/server/authentication.service";
 import { callStudioBackend, type BackendResult } from "@/server/apiTransport.service";
 import { isMutationProtectedAgainstCsrf, isRequestFromStudioOrigin, isSafeHttpMethod } from "@/server/requestOriginGuard.service";
 import { clearEverySessionCookie, readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies, writeApiTokenCookies } from "@/server/session.service";
 
 const maximumForwardedBodyBytes = 8 * 1024 * 1024;
-const forwardedRequestHeaderNames = ["idempotency-key", "x-client-region", "if-match"];
+const forwardedRequestHeaderNames = ["idempotency-key", "x-client-region", "if-match", "x-step-up-token"];
+const longForwardedHeaderNames = new Set(["x-step-up-token"]);
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag"];
 const allowedApiPathPattern = /^\/api\/v1(\/[A-Za-z0-9._~:@%,-]+)+$/;
-
-const publicApiRoutes = [
-  { method: "POST", path: "/api/v1/auth/otp/send" },
-  { method: "POST", path: "/api/v1/auth/otp/verify" },
-  { method: "POST", path: "/api/v1/auth/password/reset" },
-  { method: "GET", path: "/api/v1/auth/username-available" },
-  { method: "GET", path: "/api/v1/auth/username-suggestion" },
-  { method: "GET", path: "/api/v1/topics" },
-];
-
-const publicApiPathPrefixes: readonly string[] = ["/api/v1/overlay-scenes/"];
-
-function isPublicApiRequest(method: string, apiPath: string): boolean {
-  if (publicApiRoutes.some((route) => route.method === method && route.path === apiPath)) return true;
-  return method === "GET" && publicApiPathPrefixes.some((prefix) => apiPath.startsWith(prefix));
-}
 
 export function respondWithBffError(status: number, code: string, message: string): NextResponse {
   return NextResponse.json({ message, code }, { status, headers: { "Cache-Control": "no-store" } });
@@ -55,8 +43,10 @@ function isAllowedApiPath(apiPath: string): boolean {
 export async function forwardBffRequestToStudioApi(request: NextRequest, pathSegments: readonly string[]): Promise<NextResponse> {
   const apiPath = `/${pathSegments.map((segment) => encodeURIComponent(segment)).join("/")}`;
   if (!isAllowedApiPath(apiPath)) return respondWithBffError(404, "NOT_FOUND", "This endpoint is not available.");
+  const studioRoute = findStudioApiRoute(request.method, apiPath, !shouldUseRealBackend(apiPath));
+  if (!studioRoute) return respondWithBffError(404, "NOT_AVAILABLE_IN_STUDIO", "Studio can't make this request.");
 
-  const isPublicRoute = isPublicApiRequest(request.method, apiPath);
+  const isPublicRoute = studioRoute.isPublic === true;
   const sessionId = readSessionIdFromCookies(request.cookies);
   if (!isPublicRoute && !sessionId) return respondWithBffError(401, "UNAUTHENTICATED", "Sign in to continue.");
   if (!isSafeHttpMethod(request.method)) {
@@ -84,8 +74,9 @@ export async function forwardBffRequestToStudioApi(request: NextRequest, pathSeg
 
   const forwardedHeaders: Record<string, string> = {};
   for (const headerName of forwardedRequestHeaderNames) {
+    if (headerName === "x-client-region" && !isSafeHttpMethod(request.method)) continue;
     const headerValue = request.headers.get(headerName);
-    if (headerValue && headerValue.length <= 256) forwardedHeaders[headerName] = headerValue;
+    if (headerValue && headerValue.length <= (longForwardedHeaderNames.has(headerName) ? 4096 : 256)) forwardedHeaders[headerName] = headerValue;
   }
 
   const sendToBackend = () =>
