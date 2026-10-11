@@ -135,6 +135,11 @@ func FollowerCount(v int) predicate.Brand {
 	return predicate.Brand(sql.FieldEQ(FieldFollowerCount, v))
 }
 
+// SellingEnabled applies equality check predicate on the "selling_enabled" field. It's identical to SellingEnabledEQ.
+func SellingEnabled(v bool) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldSellingEnabled, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Brand {
 	return predicate.Brand(sql.FieldEQ(FieldUpdatedAt, v))
@@ -1003,6 +1008,16 @@ func FollowerCountLT(v int) predicate.Brand {
 // FollowerCountLTE applies the LTE predicate on the "follower_count" field.
 func FollowerCountLTE(v int) predicate.Brand {
 	return predicate.Brand(sql.FieldLTE(FieldFollowerCount, v))
+}
+
+// SellingEnabledEQ applies the EQ predicate on the "selling_enabled" field.
+func SellingEnabledEQ(v bool) predicate.Brand {
+	return predicate.Brand(sql.FieldEQ(FieldSellingEnabled, v))
+}
+
+// SellingEnabledNEQ applies the NEQ predicate on the "selling_enabled" field.
+func SellingEnabledNEQ(v bool) predicate.Brand {
+	return predicate.Brand(sql.FieldNEQ(FieldSellingEnabled, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.

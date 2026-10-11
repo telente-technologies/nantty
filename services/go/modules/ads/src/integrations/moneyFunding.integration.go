@@ -82,6 +82,10 @@ func translateMoneyFundingError(err error) error {
 				return adserrors.InsufficientBalance
 			case "IDEMPOTENCY_KEY_REUSED":
 				return adserrors.IdempotencyKeyReused
+			case "WALLET_DEBT_OUTSTANDING":
+				return adserrors.WalletDebtOutstanding
+			case "WALLET_DAILY_LIMIT":
+				return adserrors.WalletDailyLimitReached
 			}
 		}
 	}
@@ -134,6 +138,10 @@ func (gateway *HttpMoneyFundingGateway) post(ctx context.Context, path string, b
 		return adserrors.InsufficientBalance
 	case "IDEMPOTENCY_KEY_REUSED":
 		return adserrors.IdempotencyKeyReused
+	case "WALLET_DEBT_OUTSTANDING":
+		return adserrors.WalletDebtOutstanding
+	case "WALLET_DAILY_LIMIT":
+		return adserrors.WalletDailyLimitReached
 	case "VERIFICATION_REQUIRED":
 		return adserrors.VerificationRequired
 	case "VERIFICATION_UNAVAILABLE":

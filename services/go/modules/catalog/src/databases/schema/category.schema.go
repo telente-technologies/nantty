@@ -75,6 +75,7 @@ func (Brand) Fields() []ent.Field {
 		field.String("country_code").Default("").MaxLen(2),
 		field.String("official_status").Default("NONE").MaxLen(12),
 		field.Int("follower_count").Default(0),
+		field.Bool("selling_enabled").Default(false),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

@@ -28,6 +28,7 @@ var (
 		{Name: "country_code", Type: field.TypeString, Size: 2, Default: ""},
 		{Name: "official_status", Type: field.TypeString, Size: 12, Default: "NONE"},
 		{Name: "follower_count", Type: field.TypeInt, Default: 0},
+		{Name: "selling_enabled", Type: field.TypeBool, Default: false},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// BrandsTable holds the schema information for the "brands" table.
@@ -695,6 +696,7 @@ var (
 		{Name: "currency", Type: field.TypeString, Size: 3},
 		{Name: "timezone", Type: field.TypeString, Size: 60, Default: "Africa/Lagos"},
 		{Name: "status", Type: field.TypeString, Default: "active"},
+		{Name: "channel", Type: field.TypeString, Size: 12, Default: "store"},
 		{Name: "status_reason", Type: field.TypeString, Nullable: true, Size: 1000},
 		{Name: "status_changed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "brand_id", Type: field.TypeUUID, Nullable: true},
@@ -742,7 +744,7 @@ var (
 			{
 				Name:    "store_brand_id",
 				Unique:  false,
-				Columns: []*schema.Column{StoresColumns[15]},
+				Columns: []*schema.Column{StoresColumns[16]},
 			},
 			{
 				Name:    "store_status_id",

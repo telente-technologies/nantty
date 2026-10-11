@@ -282,6 +282,20 @@ func (_u *BrandUpdate) AddFollowerCount(v int) *BrandUpdate {
 	return _u
 }
 
+// SetSellingEnabled sets the "selling_enabled" field.
+func (_u *BrandUpdate) SetSellingEnabled(v bool) *BrandUpdate {
+	_u.mutation.SetSellingEnabled(v)
+	return _u
+}
+
+// SetNillableSellingEnabled sets the "selling_enabled" field if the given value is not nil.
+func (_u *BrandUpdate) SetNillableSellingEnabled(v *bool) *BrandUpdate {
+	if v != nil {
+		_u.SetSellingEnabled(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *BrandUpdate) SetUpdatedAt(v time.Time) *BrandUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -456,6 +470,9 @@ func (_u *BrandUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedFollowerCount(); ok {
 		_spec.AddField(brand.FieldFollowerCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SellingEnabled(); ok {
+		_spec.SetField(brand.FieldSellingEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(brand.FieldUpdatedAt, field.TypeTime, value)
@@ -733,6 +750,20 @@ func (_u *BrandUpdateOne) AddFollowerCount(v int) *BrandUpdateOne {
 	return _u
 }
 
+// SetSellingEnabled sets the "selling_enabled" field.
+func (_u *BrandUpdateOne) SetSellingEnabled(v bool) *BrandUpdateOne {
+	_u.mutation.SetSellingEnabled(v)
+	return _u
+}
+
+// SetNillableSellingEnabled sets the "selling_enabled" field if the given value is not nil.
+func (_u *BrandUpdateOne) SetNillableSellingEnabled(v *bool) *BrandUpdateOne {
+	if v != nil {
+		_u.SetSellingEnabled(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *BrandUpdateOne) SetUpdatedAt(v time.Time) *BrandUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -937,6 +968,9 @@ func (_u *BrandUpdateOne) sqlSave(ctx context.Context) (_node *Brand, err error)
 	}
 	if value, ok := _u.mutation.AddedFollowerCount(); ok {
 		_spec.AddField(brand.FieldFollowerCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.SellingEnabled(); ok {
+		_spec.SetField(brand.FieldSellingEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(brand.FieldUpdatedAt, field.TypeTime, value)

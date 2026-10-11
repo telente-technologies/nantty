@@ -232,6 +232,20 @@ func (_c *BrandCreate) SetNillableFollowerCount(v *int) *BrandCreate {
 	return _c
 }
 
+// SetSellingEnabled sets the "selling_enabled" field.
+func (_c *BrandCreate) SetSellingEnabled(v bool) *BrandCreate {
+	_c.mutation.SetSellingEnabled(v)
+	return _c
+}
+
+// SetNillableSellingEnabled sets the "selling_enabled" field if the given value is not nil.
+func (_c *BrandCreate) SetNillableSellingEnabled(v *bool) *BrandCreate {
+	if v != nil {
+		_c.SetSellingEnabled(*v)
+	}
+	return _c
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *BrandCreate) SetUpdatedAt(v time.Time) *BrandCreate {
 	_c.mutation.SetUpdatedAt(v)
@@ -327,6 +341,10 @@ func (_c *BrandCreate) defaults() {
 		v := brand.DefaultFollowerCount
 		_c.mutation.SetFollowerCount(v)
 	}
+	if _, ok := _c.mutation.SellingEnabled(); !ok {
+		v := brand.DefaultSellingEnabled
+		_c.mutation.SetSellingEnabled(v)
+	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := brand.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
@@ -413,6 +431,9 @@ func (_c *BrandCreate) check() error {
 	}
 	if _, ok := _c.mutation.FollowerCount(); !ok {
 		return &ValidationError{Name: "follower_count", err: errors.New(`ent: missing required field "Brand.follower_count"`)}
+	}
+	if _, ok := _c.mutation.SellingEnabled(); !ok {
+		return &ValidationError{Name: "selling_enabled", err: errors.New(`ent: missing required field "Brand.selling_enabled"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Brand.updated_at"`)}
@@ -516,6 +537,10 @@ func (_c *BrandCreate) createSpec() (*Brand, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.FollowerCount(); ok {
 		_spec.SetField(brand.FieldFollowerCount, field.TypeInt, value)
 		_node.FollowerCount = value
+	}
+	if value, ok := _c.mutation.SellingEnabled(); ok {
+		_spec.SetField(brand.FieldSellingEnabled, field.TypeBool, value)
+		_node.SellingEnabled = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(brand.FieldUpdatedAt, field.TypeTime, value)
@@ -792,6 +817,18 @@ func (u *BrandUpsert) UpdateFollowerCount() *BrandUpsert {
 // AddFollowerCount adds v to the "follower_count" field.
 func (u *BrandUpsert) AddFollowerCount(v int) *BrandUpsert {
 	u.Add(brand.FieldFollowerCount, v)
+	return u
+}
+
+// SetSellingEnabled sets the "selling_enabled" field.
+func (u *BrandUpsert) SetSellingEnabled(v bool) *BrandUpsert {
+	u.Set(brand.FieldSellingEnabled, v)
+	return u
+}
+
+// UpdateSellingEnabled sets the "selling_enabled" field to the value that was provided on create.
+func (u *BrandUpsert) UpdateSellingEnabled() *BrandUpsert {
+	u.SetExcluded(brand.FieldSellingEnabled)
 	return u
 }
 
@@ -1114,6 +1151,20 @@ func (u *BrandUpsertOne) AddFollowerCount(v int) *BrandUpsertOne {
 func (u *BrandUpsertOne) UpdateFollowerCount() *BrandUpsertOne {
 	return u.Update(func(s *BrandUpsert) {
 		s.UpdateFollowerCount()
+	})
+}
+
+// SetSellingEnabled sets the "selling_enabled" field.
+func (u *BrandUpsertOne) SetSellingEnabled(v bool) *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetSellingEnabled(v)
+	})
+}
+
+// UpdateSellingEnabled sets the "selling_enabled" field to the value that was provided on create.
+func (u *BrandUpsertOne) UpdateSellingEnabled() *BrandUpsertOne {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateSellingEnabled()
 	})
 }
 
@@ -1605,6 +1656,20 @@ func (u *BrandUpsertBulk) AddFollowerCount(v int) *BrandUpsertBulk {
 func (u *BrandUpsertBulk) UpdateFollowerCount() *BrandUpsertBulk {
 	return u.Update(func(s *BrandUpsert) {
 		s.UpdateFollowerCount()
+	})
+}
+
+// SetSellingEnabled sets the "selling_enabled" field.
+func (u *BrandUpsertBulk) SetSellingEnabled(v bool) *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.SetSellingEnabled(v)
+	})
+}
+
+// UpdateSellingEnabled sets the "selling_enabled" field to the value that was provided on create.
+func (u *BrandUpsertBulk) UpdateSellingEnabled() *BrandUpsertBulk {
+	return u.Update(func(s *BrandUpsert) {
+		s.UpdateSellingEnabled()
 	})
 }
 

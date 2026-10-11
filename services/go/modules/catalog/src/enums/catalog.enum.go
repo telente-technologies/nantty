@@ -15,6 +15,13 @@ const (
 const (
 	StoreActive    = "active"
 	StoreSuspended = "suspended"
+	StorePaused    = "paused"
+	StoreClosed    = "closed"
+)
+
+const (
+	ChannelStore = "store"
+	ChannelBrand = "brand"
 )
 
 const (

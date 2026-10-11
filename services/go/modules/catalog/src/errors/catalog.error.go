@@ -62,3 +62,24 @@ var (
 	CannotFollowOwn       = Api(http.StatusConflict, "CANNOT_FOLLOW_OWN", "You cannot follow your own store or brand.")
 	ReviewNotYours        = Api(http.StatusNotFound, "REVIEW_NOT_FOUND", "That review could not be found.")
 )
+
+var (
+	ProfileLimitStoreOrBusiness = Api(http.StatusConflict, "PROFILE_LIMIT_STORE_OR_BUSINESS", "You can have one Store or one Business page, not both.")
+	ProfileLimitOneBrand        = Api(http.StatusConflict, "PROFILE_LIMIT_ONE_BRAND", "You can have one Brand.")
+	ProfileOnHold               = Api(http.StatusConflict, "PROFILE_ON_HOLD", "Choose which profiles to keep before adding listings here.")
+	BrandSellingOff             = Api(http.StatusConflict, "BRAND_SELLING_OFF", "Turn on selling for this brand before adding listings.")
+	BrandNotOwned               = Api(http.StatusForbidden, "OWNER_ONLY", "Only the brand owner can do that.")
+	BrandStorefrontExists       = Api(http.StatusConflict, "BRAND_STOREFRONT_EXISTS", "This brand already has a storefront.")
+)
+
+func ProfileLimitFor(code string) error {
+	switch code {
+	case ProfileLimitOneBrand.Code:
+		return ProfileLimitOneBrand
+	case ProfileOnHold.Code:
+		return ProfileOnHold
+	case "NO_CHANGE":
+		return NoChange
+	}
+	return ProfileLimitStoreOrBusiness
+}

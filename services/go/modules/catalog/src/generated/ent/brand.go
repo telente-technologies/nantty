@@ -50,6 +50,8 @@ type Brand struct {
 	OfficialStatus string `json:"official_status,omitempty"`
 	// FollowerCount holds the value of the "follower_count" field.
 	FollowerCount int `json:"follower_count,omitempty"`
+	// SellingEnabled holds the value of the "selling_enabled" field.
+	SellingEnabled bool `json:"selling_enabled,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
@@ -62,7 +64,7 @@ func (*Brand) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case brand.FieldOwnerProfileID, brand.FieldOwnerAccountID, brand.FieldCategoryID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case brand.FieldOfficial, brand.FieldActive:
+		case brand.FieldOfficial, brand.FieldActive, brand.FieldSellingEnabled:
 			values[i] = new(sql.NullBool)
 		case brand.FieldFollowerCount:
 			values[i] = new(sql.NullInt64)
@@ -195,6 +197,12 @@ func (_m *Brand) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.FollowerCount = int(value.Int64)
 			}
+		case brand.FieldSellingEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field selling_enabled", values[i])
+			} else if value.Valid {
+				_m.SellingEnabled = value.Bool
+			}
 		case brand.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
@@ -296,6 +304,9 @@ func (_m *Brand) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("follower_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.FollowerCount))
+	builder.WriteString(", ")
+	builder.WriteString("selling_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SellingEnabled))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))

@@ -114,6 +114,10 @@ func translateMoneyAccountFailure(response *http.Response) error {
 		return adserrors.InsufficientEarnings
 	case "IDEMPOTENCY_KEY_REUSED":
 		return adserrors.IdempotencyKeyReused
+	case "WALLET_DEBT_OUTSTANDING":
+		return adserrors.WalletDebtOutstanding
+	case "WALLET_DAILY_LIMIT":
+		return adserrors.WalletDailyLimitReached
 	}
 	return adserrors.UpstreamUnavailable
 }

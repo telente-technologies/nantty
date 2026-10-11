@@ -46,6 +46,8 @@ const (
 	FieldOfficialStatus = "official_status"
 	// FieldFollowerCount holds the string denoting the follower_count field in the database.
 	FieldFollowerCount = "follower_count"
+	// FieldSellingEnabled holds the string denoting the selling_enabled field in the database.
+	FieldSellingEnabled = "selling_enabled"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the brand in the database.
@@ -71,6 +73,7 @@ var Columns = []string{
 	FieldCountryCode,
 	FieldOfficialStatus,
 	FieldFollowerCount,
+	FieldSellingEnabled,
 	FieldUpdatedAt,
 }
 
@@ -119,6 +122,8 @@ var (
 	OfficialStatusValidator func(string) error
 	// DefaultFollowerCount holds the default value on creation for the "follower_count" field.
 	DefaultFollowerCount int
+	// DefaultSellingEnabled holds the default value on creation for the "selling_enabled" field.
+	DefaultSellingEnabled bool
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
@@ -213,6 +218,11 @@ func ByOfficialStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByFollowerCount orders the results by the follower_count field.
 func ByFollowerCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFollowerCount, opts...).ToFunc()
+}
+
+// BySellingEnabled orders the results by the selling_enabled field.
+func BySellingEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSellingEnabled, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

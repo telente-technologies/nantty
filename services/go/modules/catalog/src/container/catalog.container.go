@@ -31,6 +31,7 @@ type Container struct {
 	PrivateMedia     interfaces.PrivateMediaSigner
 	StoreFollows     interfaces.StoreFollowStats
 	MartAds          interfaces.MartAdDecider
+	LinkedProfiles   interfaces.LinkedProfileRegistry
 }
 
 type StaffVerifiers struct {

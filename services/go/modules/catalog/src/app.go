@@ -61,6 +61,7 @@ type Collaborators struct {
 	PrivateMedia interfaces.PrivateMediaSigner
 	StoreFollows interfaces.StoreFollowStats
 	MartAds      interfaces.MartAdDecider
+	Linked       interfaces.LinkedProfileRegistry
 }
 
 type Module struct {
@@ -122,6 +123,10 @@ func StartCatalogModuleWithSettings(ctx context.Context, settings configs.Catalo
 		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Rates: &viewerregion.RateReader{Database: database, Schema: "currency"}, Settings: settings, Logger: logger, Now: time.Now,
 		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger),
 		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia, StoreFollows: collaborators.StoreFollows, MartAds: collaborators.MartAds,
+		LinkedProfiles: collaborators.Linked,
+	}
+	if module.Container.LinkedProfiles == nil {
+		module.Container.LinkedProfiles = integrations.NewHttpLinkedProfiles(settings.AdminInternalUrl, settings.UsersInternalToken, settings.IsProduction())
 	}
 	commerceports.Default.RegisterCatalogReader(integrations.CommerceCatalog{Container: module.Container})
 	commerceports.Default.RegisterStoreShippingCountries(integrations.CommerceCatalog{Container: module.Container})

@@ -33,6 +33,8 @@ var (
 	IdempotencyKeyRequired   = Api(http.StatusBadRequest, "IDEMPOTENCY_KEY_REQUIRED", "Send an Idempotency-Key header of 8-128 letters, digits, - or _.")
 	IdempotencyKeyReused     = Api(http.StatusConflict, "IDEMPOTENCY_KEY_REUSED", "That Idempotency-Key was used with a different request.")
 	UpstreamUnavailable      = Api(http.StatusServiceUnavailable, "UPSTREAM_UNAVAILABLE", "A required service is unavailable.")
+	WalletDebtOutstanding    = Api(http.StatusConflict, "WALLET_DEBT_OUTSTANDING", "Clear what you owe on your Zudomart balance before paying for ads from it.")
+	WalletDailyLimitReached  = Api(http.StatusUnprocessableEntity, "WALLET_DAILY_LIMIT", "This would go over today's wallet spending limit. Pay by card, or try again tomorrow.")
 	AdsStepUpRequired        = Api(http.StatusForbidden, "STEP_UP_REQUIRED", "Confirm it's you again to pay this much for ads.")
 	AdsStepUpReused          = Api(http.StatusUnauthorized, "STEP_UP_REUSED", "This confirmation was already used. Confirm it's you again for each money action.")
 	AudienceNotFound         = Api(http.StatusNotFound, "AUDIENCE_NOT_FOUND", "Audience not found.")

@@ -30,6 +30,7 @@ func (Store) Fields() []ent.Field {
 		field.String("currency").NotEmpty().MaxLen(3),
 		field.String("timezone").Default("Africa/Lagos").MaxLen(60),
 		field.String("status").Default("active"),
+		field.String("channel").Default("store").MaxLen(12),
 		field.String("status_reason").Optional().Nillable().MaxLen(1000),
 		field.Time("status_changed_at").Optional().Nillable(),
 		field.UUID("brand_id", uuid.UUID{}).Optional().Nillable(),
