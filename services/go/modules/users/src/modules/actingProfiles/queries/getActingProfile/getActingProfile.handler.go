@@ -28,13 +28,13 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.ActingPr
 	if err != nil {
 		return types.ActingProfileView{}, err
 	}
-	rows, err := services.ListActiveProfilesOfAccount(ctx, handler.Container, owner)
+	views, err := services.ListOwnedActingProfiles(ctx, handler.Container, owner, personal, activeId)
 	if err != nil {
 		return types.ActingProfileView{}, err
 	}
-	for _, row := range rows {
-		if row.ID.String() == activeId {
-			return types.BuildActingProfileView(row, activeId), nil
+	for _, view := range views {
+		if view.Id == activeId {
+			return view, nil
 		}
 	}
 	return types.BuildActingProfileView(personal, personal.ID.String()), nil

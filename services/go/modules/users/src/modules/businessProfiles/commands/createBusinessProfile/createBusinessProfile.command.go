@@ -13,5 +13,6 @@ type Command struct {
 	Description  string
 	Website      *string
 	BusinessType string
+	Purpose      string
 	Categories   []CategorySelection
 }

@@ -8,7 +8,6 @@ import (
 	"zudomart/modules/users/src/container"
 	usersErrors "zudomart/modules/users/src/errors"
 	"zudomart/modules/users/src/services"
-	"zudomart/modules/users/src/types"
 )
 
 type Handler struct {
@@ -28,13 +27,9 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Page, error) {
 	if err != nil {
 		return Page{}, err
 	}
-	rows, err := services.ListActiveProfilesOfAccount(ctx, handler.Container, owner)
+	views, err := services.ListOwnedActingProfiles(ctx, handler.Container, owner, personal, activeId)
 	if err != nil {
 		return Page{}, err
 	}
-	page := Page{Data: make([]types.ActingProfileView, 0, len(rows))}
-	for _, row := range rows {
-		page.Data = append(page.Data, types.BuildActingProfileView(row, activeId))
-	}
-	return page, nil
+	return Page{Data: views}, nil
 }

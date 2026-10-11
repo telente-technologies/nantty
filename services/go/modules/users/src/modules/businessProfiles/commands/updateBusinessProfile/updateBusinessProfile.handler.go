@@ -54,7 +54,10 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Acti
 		}
 	}
 	updated, err := handler.Container.Client.Profile.Query().Where(profile.ID(existing.ID)).WithCategories().Only(ctx)
-	return types.BuildActingProfileView(updated, ""), err
+	if err != nil {
+		return types.ActingProfileView{}, err
+	}
+	return services.BuildLinkedActingProfileView(ctx, handler.Container, updated, "")
 }
 
 func (handler Handler) buildMutations(command Command) ([]func(*ent.ProfileUpdateOne), []string, error) {

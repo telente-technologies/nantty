@@ -13,6 +13,9 @@ func ValidateCreateBusinessProfileRequest(request dtos.CreateBusinessProfileRequ
 	if request.BusinessType != "" && request.BusinessType != "business" && request.BusinessType != "brand" && request.BusinessType != "government" {
 		collector.Add("businessType", "must be business, brand or government")
 	}
+	if request.Purpose != "" && request.Purpose != "business" && request.Purpose != "store" {
+		collector.Add("purpose", "must be business or store")
+	}
 	if len(request.Categories) == 0 || len(request.Categories) > 5 {
 		collector.Add("categories", "must contain 1 to 5 entries")
 	}

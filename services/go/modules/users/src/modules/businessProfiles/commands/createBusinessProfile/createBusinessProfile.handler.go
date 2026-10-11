@@ -2,6 +2,7 @@ package createbusinessprofile
 
 import (
 	"context"
+	"errors"
 	"regexp"
 	"strings"
 
@@ -17,10 +18,7 @@ import (
 	"zudomart/modules/users/src/types"
 )
 
-const (
-	maximumBusinessProfilesPerAccount = 10
-	maximumCategoriesPerProfile       = 5
-)
+const maximumCategoriesPerProfile = 5
 
 var slugCleaner = regexp.MustCompile(`[^a-z0-9]+`)
 
@@ -55,13 +53,6 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Acti
 	if !verdict.Available {
 		return types.ActingProfileView{}, usersErrors.ErrHandleTaken
 	}
-	count, err := handler.Container.Client.Profile.Query().Where(profile.AccountID(owner), profile.KindEQ(profile.KindBusiness)).Count(ctx)
-	if err != nil {
-		return types.ActingProfileView{}, err
-	}
-	if count >= maximumBusinessProfilesPerAccount {
-		return types.ActingProfileView{}, usersErrors.Unprocessable("You have reached the limit of business profiles.")
-	}
 	var created *ent.Profile
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		categoryIds, err := handler.resolveCategories(ctx, tx, owner, command.Categories)
@@ -75,18 +66,25 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Acti
 		if created, err = builder.Save(ctx); err != nil {
 			return err
 		}
+		claim := services.LinkedClaim{AccountId: owner, Kind: services.LinkedKindForBusinessPurpose(command.Purpose, command.BusinessType), ProfileId: created.ID}
+		if _, err = services.ClaimLinkedProfile(ctx, tx, claim); err != nil {
+			return err
+		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, "businessProfile.created", owner.String(), handler.Container.Now(), events.BusinessProfileCreatedEventData{
 			AccountId: owner.String(), ProfileId: created.ID.String(), Handle: handle,
 		})
 	})
-	if ent.IsConstraintError(err) {
+	if ent.IsConstraintError(err) && !isLimitError(err) {
 		return types.ActingProfileView{}, usersErrors.ErrHandleTaken
 	}
 	if err != nil {
 		return types.ActingProfileView{}, err
 	}
 	created, err = handler.Container.Client.Profile.Query().Where(profile.ID(created.ID)).WithCategories().Only(ctx)
-	return types.BuildActingProfileView(created, ""), err
+	if err != nil {
+		return types.ActingProfileView{}, err
+	}
+	return services.BuildLinkedActingProfileView(ctx, handler.Container, created, "")
 }
 
 func (handler Handler) resolveCategories(ctx context.Context, tx *ent.Tx, owner uuid.UUID, selections []CategorySelection) ([]uuid.UUID, error) {
@@ -153,4 +151,8 @@ func businessTypeOf(requested string) string {
 		return requested
 	}
 	return "business"
+}
+
+func isLimitError(err error) bool {
+	return errors.Is(err, usersErrors.ErrProfileLimitStoreOrBusiness) || errors.Is(err, usersErrors.ErrProfileLimitOneBrand)
 }

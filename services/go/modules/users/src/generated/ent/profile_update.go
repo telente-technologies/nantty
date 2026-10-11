@@ -304,6 +304,20 @@ func (_u *ProfileUpdate) SetNillableStatus(v *profile.Status) *ProfileUpdate {
 	return _u
 }
 
+// SetPublishingHeld sets the "publishing_held" field.
+func (_u *ProfileUpdate) SetPublishingHeld(v bool) *ProfileUpdate {
+	_u.mutation.SetPublishingHeld(v)
+	return _u
+}
+
+// SetNillablePublishingHeld sets the "publishing_held" field if the given value is not nil.
+func (_u *ProfileUpdate) SetNillablePublishingHeld(v *bool) *ProfileUpdate {
+	if v != nil {
+		_u.SetPublishingHeld(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ProfileUpdate) SetUpdatedAt(v time.Time) *ProfileUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -542,6 +556,9 @@ func (_u *ProfileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(profile.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PublishingHeld(); ok {
+		_spec.SetField(profile.FieldPublishingHeld, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(profile.FieldUpdatedAt, field.TypeTime, value)
@@ -885,6 +902,20 @@ func (_u *ProfileUpdateOne) SetNillableStatus(v *profile.Status) *ProfileUpdateO
 	return _u
 }
 
+// SetPublishingHeld sets the "publishing_held" field.
+func (_u *ProfileUpdateOne) SetPublishingHeld(v bool) *ProfileUpdateOne {
+	_u.mutation.SetPublishingHeld(v)
+	return _u
+}
+
+// SetNillablePublishingHeld sets the "publishing_held" field if the given value is not nil.
+func (_u *ProfileUpdateOne) SetNillablePublishingHeld(v *bool) *ProfileUpdateOne {
+	if v != nil {
+		_u.SetPublishingHeld(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ProfileUpdateOne) SetUpdatedAt(v time.Time) *ProfileUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -1153,6 +1184,9 @@ func (_u *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err er
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(profile.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.PublishingHeld(); ok {
+		_spec.SetField(profile.FieldPublishingHeld, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(profile.FieldUpdatedAt, field.TypeTime, value)

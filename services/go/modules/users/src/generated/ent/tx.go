@@ -62,6 +62,8 @@ type Tx struct {
 	LegalNoticeDraft *LegalNoticeDraftClient
 	// LegalVersion is the client for interacting with the LegalVersion builders.
 	LegalVersion *LegalVersionClient
+	// LinkedProfile is the client for interacting with the LinkedProfile builders.
+	LinkedProfile *LinkedProfileClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
 	OutboxEvent *OutboxEventClient
 	// PolicyVersion is the client for interacting with the PolicyVersion builders.
@@ -253,6 +255,7 @@ func (tx *Tx) init() {
 	tx.LegalNotice = NewLegalNoticeClient(tx.config)
 	tx.LegalNoticeDraft = NewLegalNoticeDraftClient(tx.config)
 	tx.LegalVersion = NewLegalVersionClient(tx.config)
+	tx.LinkedProfile = NewLinkedProfileClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.PolicyVersion = NewPolicyVersionClient(tx.config)
 	tx.PrivacySetting = NewPrivacySettingClient(tx.config)

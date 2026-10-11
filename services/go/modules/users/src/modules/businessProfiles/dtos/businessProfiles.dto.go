@@ -14,6 +14,7 @@ type CreateBusinessProfileRequest struct {
 	Description  string                     `json:"description"`
 	Website      *string                    `json:"website"`
 	BusinessType string                     `json:"businessType"`
+	Purpose      string                     `json:"purpose"`
 	Categories   []CategorySelectionRequest `json:"categories"`
 }
 

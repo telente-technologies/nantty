@@ -53,6 +53,8 @@ type ActingProfileView struct {
 	Website      *string  `json:"website,omitempty"`
 	Categories   []string `json:"categories,omitempty"`
 	Active       bool     `json:"active"`
+	ShowsMart    bool     `json:"showsMart"`
+	OnHold       bool     `json:"onHold"`
 }
 
 func BuildUserView(row *ent.Profile, summary identityports.AccountSummary, includePrivateFields bool) UserView {

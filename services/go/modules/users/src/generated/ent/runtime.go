@@ -29,6 +29,7 @@ import (
 	"zudomart/modules/users/src/generated/ent/legalnotice"
 	"zudomart/modules/users/src/generated/ent/legalnoticedraft"
 	"zudomart/modules/users/src/generated/ent/legalversion"
+	"zudomart/modules/users/src/generated/ent/linkedprofile"
 	"zudomart/modules/users/src/generated/ent/outboxevent"
 	"zudomart/modules/users/src/generated/ent/policyversion"
 	"zudomart/modules/users/src/generated/ent/privacysetting"
@@ -1004,6 +1005,29 @@ func init() {
 	legalversionDescID := legalversionMixinFields0[0].Descriptor()
 	// legalversion.DefaultID holds the default value on creation for the id field.
 	legalversion.DefaultID = legalversionDescID.Default.(func() uuid.UUID)
+	linkedprofileMixin := schema.LinkedProfile{}.Mixin()
+	linkedprofileMixinFields0 := linkedprofileMixin[0].Fields()
+	_ = linkedprofileMixinFields0
+	linkedprofileFields := schema.LinkedProfile{}.Fields()
+	_ = linkedprofileFields
+	// linkedprofileDescCreatedAt is the schema descriptor for created_at field.
+	linkedprofileDescCreatedAt := linkedprofileMixinFields0[1].Descriptor()
+	// linkedprofile.DefaultCreatedAt holds the default value on creation for the created_at field.
+	linkedprofile.DefaultCreatedAt = linkedprofileDescCreatedAt.Default.(func() time.Time)
+	// linkedprofileDescHoldReason is the schema descriptor for hold_reason field.
+	linkedprofileDescHoldReason := linkedprofileFields[5].Descriptor()
+	// linkedprofile.HoldReasonValidator is a validator for the "hold_reason" field. It is called by the builders before save.
+	linkedprofile.HoldReasonValidator = linkedprofileDescHoldReason.Validators[0].(func(string) error)
+	// linkedprofileDescUpdatedAt is the schema descriptor for updated_at field.
+	linkedprofileDescUpdatedAt := linkedprofileFields[6].Descriptor()
+	// linkedprofile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	linkedprofile.DefaultUpdatedAt = linkedprofileDescUpdatedAt.Default.(func() time.Time)
+	// linkedprofile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	linkedprofile.UpdateDefaultUpdatedAt = linkedprofileDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// linkedprofileDescID is the schema descriptor for id field.
+	linkedprofileDescID := linkedprofileMixinFields0[0].Descriptor()
+	// linkedprofile.DefaultID holds the default value on creation for the id field.
+	linkedprofile.DefaultID = linkedprofileDescID.Default.(func() uuid.UUID)
 	outboxeventMixin := schema.OutboxEvent{}.Mixin()
 	outboxeventMixinFields0 := outboxeventMixin[0].Fields()
 	_ = outboxeventMixinFields0
@@ -1175,8 +1199,12 @@ func init() {
 	profileDescVerified := profileFields[16].Descriptor()
 	// profile.DefaultVerified holds the default value on creation for the verified field.
 	profile.DefaultVerified = profileDescVerified.Default.(bool)
+	// profileDescPublishingHeld is the schema descriptor for publishing_held field.
+	profileDescPublishingHeld := profileFields[19].Descriptor()
+	// profile.DefaultPublishingHeld holds the default value on creation for the publishing_held field.
+	profile.DefaultPublishingHeld = profileDescPublishingHeld.Default.(bool)
 	// profileDescUpdatedAt is the schema descriptor for updated_at field.
-	profileDescUpdatedAt := profileFields[19].Descriptor()
+	profileDescUpdatedAt := profileFields[20].Descriptor()
 	// profile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	profile.DefaultUpdatedAt = profileDescUpdatedAt.Default.(func() time.Time)
 	// profile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

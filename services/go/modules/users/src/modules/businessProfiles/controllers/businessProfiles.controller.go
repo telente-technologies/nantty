@@ -36,7 +36,7 @@ func (controller BusinessProfilesController) CreateBusinessProfile(writer http.R
 		selections = append(selections, createbusinessprofile.CategorySelection(selection))
 	}
 	view, err := createbusinessprofile.Handler{Container: controller.Container}.Execute(request.Context(), createbusinessprofile.Command{
-		AccountId: utils.AccountIdFromRequest(request), DisplayName: body.DisplayName, Handle: body.Handle, Description: body.Description, Website: body.Website, BusinessType: body.BusinessType, Categories: selections,
+		AccountId: utils.AccountIdFromRequest(request), DisplayName: body.DisplayName, Handle: body.Handle, Description: body.Description, Website: body.Website, BusinessType: body.BusinessType, Purpose: body.Purpose, Categories: selections,
 	})
 	controller.respond(writer, request, http.StatusCreated, view, err)
 }
