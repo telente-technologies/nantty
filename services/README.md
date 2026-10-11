@@ -340,7 +340,7 @@ Seller money follows the owner's checkout plan as ledger accounts: `seller:{id}:
 **Payments** (`modules/payments`). Provider interfaces (`PaymentProvider`, `PayeeProvider`, `MoneyMovementProvider`,
 `DisputeProvider`, `SubscriptionProvider`, `SavedCardProvider`, combined as `FullPaymentProvider`) with one adapter,
 `paystack` (`src/integrations/paystack*.integration.go`, fake API in `paymentsTesting/fakePaystack*.util.go`, recorded
-fixtures in `testdata/paystack`). Review, fees and go-live checklist: [`docs/integrations/paystack.md`](../docs/integrations/paystack.md).
+fixtures in `testdata/paystack`). Review, fees and go-live checklist: [`docs/integrations/flutterwaveMigration.md` Appendix B](../docs/integrations/flutterwaveMigration.md#appendix-b-paystack-reference-fallback-provider).
 Money is int64 kobo end to end. The HTTP client has a 15s timeout and retries GETs and reference-keyed POSTs (initialize,
 charge_authorization, transfer) on network errors, 429 and 5xx; Paystack's idempotency is the `reference`. One transaction
 per seller order: the intent and an outbox row commit first, then `POST /transaction/initialize` (account email from the
