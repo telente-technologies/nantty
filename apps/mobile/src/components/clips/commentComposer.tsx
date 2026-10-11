@@ -27,10 +27,11 @@ export interface CommentComposerProps {
   readonly replyTarget?: Comment | null;
   readonly onCancelReply?: () => void;
   readonly avoidKeyboard?: boolean;
+  readonly focusRequest?: number;
 }
 
 export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(function CommentComposer(
-  { myAvatarUrl, onSubmit, placeholder = "Add comment...", replyTarget, onCancelReply, avoidKeyboard = true },
+  { myAvatarUrl, onSubmit, placeholder = "Add comment...", replyTarget, onCancelReply, avoidKeyboard = true, focusRequest = 0 },
   ref,
 ) {
   const { colors } = useTheme();
@@ -52,9 +53,12 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
   const quote = useQuotedPostPreview(text);
   useImperativeHandle(ref, () => inputRef.current as TextInput);
 
+  const lastFocusRequest = useRef(focusRequest);
   useEffect(() => {
-    if (replyTarget) inputRef.current?.focus();
-  }, [replyTarget]);
+    if (focusRequest === lastFocusRequest.current) return;
+    lastFocusRequest.current = focusRequest;
+    inputRef.current?.focus();
+  }, [focusRequest]);
 
   const hasContent = hasSendableContent(text);
   const submitTypedComment = () => {

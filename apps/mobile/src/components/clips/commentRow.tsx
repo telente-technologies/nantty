@@ -68,7 +68,7 @@ export function CommentRow({
     showAlertWithButtons("Delete comment?", "This also removes the replies under it.", [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: () => onDelete?.() },
-    ]);
+    ], { intent: "delete" });
   const commentOptions: ActionSheetOption[] = [
     ...(onReplyWithVideo ? [{ label: "Reply with video", icon: <VideoCamera24Icon size={20} color={colors.text} />, onPress: onReplyWithVideo }] : []),
     ...(canPin && onTogglePin

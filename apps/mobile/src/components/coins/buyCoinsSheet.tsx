@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
+import { CountryRequiredPicker } from "@/components/checkout/countryRequiredPicker";
 import { Coin24Icon, CreditCard24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
@@ -20,7 +21,7 @@ const describePurchaseOutcome = (outcome: CoinPurchaseOutcome) => {
 export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const { coinPackages, buyCoinPackage, lastOutcome } = useBuyCoinsWithInAppBrowser();
+  const { coinPackages, buyCoinPackage, lastOutcome, countryNeededFor, clearCountryNeeded } = useBuyCoinsWithInAppBrowser();
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Buy coins" floating>
       <View style={styles.body}>
@@ -30,6 +31,14 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
           </View>
           <CoinBalanceChip />
         </View>
+        {countryNeededFor ? (
+          <CountryRequiredPicker
+            onSaved={() => {
+              clearCountryNeeded();
+              buyCoinPackage.mutate(countryNeededFor);
+            }}
+          />
+        ) : null}
         {coinPackages.isLoading ? <ActivityIndicator color={colors.primary} /> : null}
         {(coinPackages.data ?? []).map((coinPackage) => (
           <Pressable
@@ -66,7 +75,7 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
             {describePurchaseOutcome(lastOutcome)}
           </Text>
         ) : null}
-        {buyCoinPackage.isError ? (
+        {buyCoinPackage.isError && !countryNeededFor ? (
           <Text size={13} lineHeight={16.9} color={colors.error}>
             {describeCoinError(buyCoinPackage.error)}
           </Text>

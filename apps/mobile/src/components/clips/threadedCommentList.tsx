@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactElement } from "react";
-import { ActivityIndicator, FlatList, Platform, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { FlatList, Platform, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { CommentWithReplies } from "@/types";
@@ -19,11 +20,13 @@ export function ThreadedCommentList({ listHeader, contentContainerStyle, comment
   const { colors } = useTheme();
   const styles = useStyles();
   const thread = useCommentThreadContext();
-  const { query, topLevelComments, loadNextPageOfTopLevelComments } = useTopLevelCommentsForPost(thread.postId);
+  const listRef = useRef<FlatList<CommentWithReplies>>(null);
+  const { query, topLevelComments, loadNextPageOfTopLevelComments, isRestartingFromTop } = useTopLevelCommentsForPost(thread.postId, () =>
+    listRef.current?.scrollToOffset({ offset: 0, animated: false }),
+  );
   const locallyPostedTopLevel = thread
     .locallyPostedCommentsFor(TOP_LEVEL_PARENT_KEY)
     .map((comment): CommentWithReplies => ({ ...comment, previewReplies: [] }));
-  const listRef = useRef<FlatList<CommentWithReplies>>(null);
   const scrolledToCommentId = useRef<string | null>(null);
   const visibleTopLevelComments = mergeServerAndLocalComments(topLevelComments, locallyPostedTopLevel, true)
     .filter((comment) => !thread.isCommentDeleted(comment.id))
@@ -60,14 +63,14 @@ export function ThreadedCommentList({ listHeader, contentContainerStyle, comment
       ItemSeparatorComponent={() => <View style={styles.gap} />}
       ListEmptyComponent={
         query.isLoading ? (
-          <ActivityIndicator color={colors.primary} style={styles.status} />
+          <BrandLoader size="md" style={styles.status} />
         ) : (
           <Text size={13} color={colors.textMuted} align="center" style={styles.status}>
-            {query.isError ? "Couldn’t load comments. Pull to try again." : "No comments yet. Start the conversation."}
+            {query.isError && !isRestartingFromTop ? "Couldn’t load comments. Pull to try again." : "No comments yet. Start the conversation."}
           </Text>
         )
       }
-      ListFooterComponent={query.isFetchingNextPage ? <ActivityIndicator color={colors.primary} style={styles.status} /> : null}
+      ListFooterComponent={query.isFetchingNextPage ? <BrandLoader size="sm" style={styles.status} /> : null}
       refreshing={query.isRefetching && !query.isFetchingNextPage}
       onRefresh={() => query.refetch()}
       renderItem={({ item }) => (

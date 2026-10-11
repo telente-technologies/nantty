@@ -1,6 +1,7 @@
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { Flips34Icon } from "@/components/icons";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
 import { ForcedColorSchemeScope, useTheme } from "@/theme";
@@ -17,7 +18,7 @@ export interface ClipsFeedStateProps {
 
 function ClipsFeedStateBody({ tab, isPending, isError, isRefetching, onRetry, onExploreForYou }: ClipsFeedStateProps) {
   const { colors } = useTheme();
-  if (isPending) return <ActivityIndicator color={colors.white} accessibilityLabel="Loading clips" />;
+  if (isPending) return <BrandLoader size="lg" accessibilityLabel="Loading clips" />;
   if (isError) return <ErrorState message="Couldn't load clips." onRetry={onRetry} retrying={isRefetching} />;
   const isForYou = tab === "forYou";
   return (

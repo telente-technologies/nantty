@@ -54,6 +54,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
   const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(null);
   const signedInAuthor: UserSummary = signedInUser ?? FALLBACK_SIGNED_IN_AUTHOR;
   const [threadState, setThreadState] = useState<CommentThreadLocalState>(EMPTY_THREAD_STATE);
+  const [replyFocusRequest, setReplyFocusRequest] = useState(0);
 
   useEffect(() => {
     setThreadState(EMPTY_THREAD_STATE);
@@ -196,9 +197,10 @@ export function useCommentThreadController(postId: string | null, closeContainin
     [],
   );
 
-  const startReplyingToComment = useCallback((comment: Comment) => {
+  const startReplyingToComment = useCallback((comment: Comment, options: { readonly focus?: boolean } = {}) => {
     if (isPendingComment(comment)) return;
     setThreadState((s) => (s.replyTarget?.id === comment.id ? s : { ...s, replyTarget: comment }));
+    if (options.focus !== false) setReplyFocusRequest((n) => n + 1);
   }, []);
   const cancelReplyingToComment = useCallback(() => setThreadState((s) => (s.replyTarget ? { ...s, replyTarget: null } : s)), []);
 
@@ -216,6 +218,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
     highlightedCommentId,
     setHighlightedCommentId,
     replyTarget: threadState.replyTarget,
+    replyFocusRequest,
     applyLocalOverridesToComment,
     toggleLikeOnComment,
     submitCommentOrReplyText,
