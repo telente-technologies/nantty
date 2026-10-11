@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { registerUser, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse } from "../src/apiClient.util.js";
+import { verifyNigerianUserToLevelOne } from "../src/fakeFlutterwave.util.js";
 import { expectClearError } from "../src/journeyChecks.util.js";
 
 describe("contract fixes: theme preference and ads invites by email or username", () => {
@@ -27,7 +28,8 @@ describe("contract fixes: theme preference and ads invites by email or username"
     expect([after.body.theme, after.body.countryCode]).toEqual(["light", "NG"]);
   });
 
-  it("invites ad account members by email or username and explains misses", async () => {
+  it("invites ad account members by email or username and explains misses", { timeout: 120_000 }, async () => {
+    await verifyNigerianUserToLevelOne(owner);
     const account = await callApi("POST", "/api/v1/ads/accounts", { token: owner.accessToken, body: { name: "Edge Ads", kind: "personal", storeId: null, countryCode: "NG", timezone: "Africa/Lagos" } });
     expect(account.status, describeResponse(account)).toBe(201);
     const invites = `/api/v1/ads/accounts/${account.body.id}/invites`;

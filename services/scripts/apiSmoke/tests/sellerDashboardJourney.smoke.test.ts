@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import type { UserActor } from "../src/actors.util.js";
+import { stepUpUser, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
 import { addToCart, adjustStock, bankAccountNumberFor, checkout, createBuyerWithAddress, createStoreWithProduct, onboardPayoutAccount, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
 import { payCheckoutThroughProvider, readWallet, settleCardPaymentsFor } from "../src/fakeFlutterwave.util.js";
@@ -12,8 +12,12 @@ describe("seller dashboard journey: product → stock → order → fulfil → p
   let addressId = "";
   let orderId = "";
   let token = "";
-  const seller = (method: string, path: string, options: { body?: unknown; idempotencyKey?: string } = {}) =>
-    callApi(method, path, { token, headers: { "x-seller-store": store.storeId, ...(options.idempotencyKey ? { "idempotency-key": options.idempotencyKey } : {}) }, body: options.body });
+  const seller = (method: string, path: string, options: { body?: unknown; idempotencyKey?: string; stepUpToken?: string } = {}) =>
+    callApi(method, path, {
+      token,
+      headers: { "x-seller-store": store.storeId, ...(options.idempotencyKey ? { "idempotency-key": options.idempotencyKey } : {}), ...(options.stepUpToken ? { "x-step-up-token": options.stepUpToken } : {}) },
+      body: options.body,
+    });
 
   beforeAll(async () => {
     store = await createStoreWithProduct("dashjourney", 600_000, 10);
@@ -89,12 +93,12 @@ describe("seller dashboard journey: product → stock → order → fulfil → p
     const resolved = await seller("POST", "/api/v1/seller/wallet/payout-accounts/resolve", { body: { bankCode: "058", accountNumber: bankAccountNumberFor(store.seller.accountId) } });
     expect(resolved.status, describeResponse(resolved)).toBe(200);
     expect(JSON.stringify(resolved.body)).not.toContain(bankAccountNumberFor(store.seller.accountId));
-    const account = await seller("POST", "/api/v1/seller/wallet/payout-accounts", { body: { resolutionId: resolved.body.resolutionId }, idempotencyKey: `acct-${uniqueSuffix()}` });
+    const account = await seller("POST", "/api/v1/seller/wallet/payout-accounts", { body: { resolutionId: resolved.body.resolutionId }, idempotencyKey: `acct-${uniqueSuffix()}`, stepUpToken: await stepUpUser(store.seller) });
     expect([201, 409], describeResponse(account)).toContain(account.status);
     const accounts = await seller("GET", "/api/v1/seller/wallet/payout-accounts");
     const accountId = accounts.body.data[0]?.id;
     expect(accountId, describeResponse(accounts)).toBeDefined();
-    const payout = await seller("POST", "/api/v1/seller/wallet/payouts", { body: { amountMinor: 100_000_000, accountId }, idempotencyKey: `payout-${uniqueSuffix()}` });
+    const payout = await seller("POST", "/api/v1/seller/wallet/payouts", { body: { amountMinor: 100_000_000, accountId }, idempotencyKey: `payout-${uniqueSuffix()}`, stepUpToken: await stepUpUser(store.seller) });
     expectClearError(payout, [403, 422], ["PAYOUT_ACCOUNT_NOT_VERIFIED", "SELLER_VERIFICATION_REQUIRED", "INSUFFICIENT_AVAILABLE_BALANCE"]);
     const payouts = await seller("GET", "/api/v1/seller/wallet/payouts");
     expect(payouts.status, describeResponse(payouts)).toBe(200);

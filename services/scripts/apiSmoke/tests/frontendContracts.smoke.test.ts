@@ -1,10 +1,14 @@
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import { randomUUID } from "node:crypto";
+
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { createSuperadmin, logInUser, registerUser, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi } from "../src/apiClient.util.js";
+import { createStoreWithProduct } from "../src/commerceFixtures.util.js";
+import { approveExistingUserAsCreator, withRelaxedCreatorThresholds } from "../src/liveFixtures.util.js";
 import { writeSmokeReport } from "../src/smokeReport.util.js";
 
 interface FrontendContract {
@@ -26,7 +30,7 @@ interface ContractOutcome {
 }
 
 const appsRoot = resolve(import.meta.dirname, "../../../../apps");
-const mockOnlyIds = /\/(live_\w+|post_\w+|user_\w+)(\/|$)/;
+const mockOnlyIds = /\/(live_\w+|post_\w+|user_\w+|scene_\w+)(\/|$)/;
 const socialSignIn = /\/auth\/(google|apple)$/;
 
 async function loadAppContracts(app: string, file: string, exportName: string): Promise<{ contracts: readonly FrontendContract[]; validate: Validator; c: Record<string, (...args: never[]) => unknown> }> {
@@ -38,8 +42,19 @@ async function loadAppContracts(app: string, file: string, exportName: string): 
 const fakeProviderToken = "header.payload.signature-for-contract-check";
 const fakeNonce = "contract-check-raw-nonce";
 
+interface ContractFixtures {
+  readonly ids: Readonly<Record<string, string>>;
+  readonly storeId: string;
+}
+
+let fixtures: ContractFixtures = { ids: {}, storeId: "" };
+
+function substituteFixtureIds(text: string): string {
+  return Object.entries(fixtures.ids).reduce((current, [mockId, realId]) => current.replace(new RegExp(`\\b${mockId}\\b`, "g"), realId), text);
+}
+
 function preparePath(contract: FrontendContract, user: UserActor): string {
-  return contract.path.replace("username=taken", `username=${encodeURIComponent(user.username)}`);
+  return substituteFixtureIds(contract.path.replace("username=taken", `username=${encodeURIComponent(user.username)}`));
 }
 
 function prepareBody(contract: FrontendContract, user: UserActor, password: string): unknown {
@@ -50,7 +65,7 @@ function prepareBody(contract: FrontendContract, user: UserActor, password: stri
     const { previewUri: _ignored, ...rest } = contract.body as Record<string, unknown>;
     return rest;
   }
-  return contract.body;
+  return contract.body === undefined ? undefined : JSON.parse(substituteFixtureIds(JSON.stringify(contract.body)));
 }
 
 async function runAppContracts(app: string, contracts: readonly FrontendContract[], validate: Validator, user: UserActor): Promise<ContractOutcome[]> {
@@ -60,7 +75,7 @@ async function runAppContracts(app: string, contracts: readonly FrontendContract
       outcomes.push({ app, method: contract.method, path: contract.path, status: "skipped", problems: ["path uses a mock fixture id"] });
       continue;
     }
-    const response = await callApi(contract.method, preparePath(contract, user), { token: user.accessToken, body: prepareBody(contract, user, "Sm0ke-Test-Pass!2026") });
+    const response = await callApi(contract.method, preparePath(contract, user), { token: user.accessToken, headers: fixtures.storeId === "" ? {} : { "x-store-id": fixtures.storeId }, body: prepareBody(contract, user, "Sm0ke-Test-Pass!2026") });
     if (socialSignIn.test(contract.path) && response.status === 503) {
       outcomes.push({ app, method: contract.method, path: contract.path, status: response.status, problems: response.body?.code === "SOCIAL_SIGN_IN_NOT_CONFIGURED" ? [] : [`expected SOCIAL_SIGN_IN_NOT_CONFIGURED, got ${JSON.stringify(response.body)}`] });
       continue;
@@ -77,9 +92,15 @@ describe("frontend contracts against the real gateway", () => {
   const outcomes: ContractOutcome[] = [];
 
   beforeAll(async () => {
-    user = await registerUser("contract");
     staff = await createSuperadmin();
-  });
+    const store = await createStoreWithProduct("contract", 250_000);
+    user = await withRelaxedCreatorThresholds(staff, () => approveExistingUserAsCreator(staff, store.seller));
+    const other = await registerUser("contractpeer");
+    fixtures = {
+      storeId: store.storeId,
+      ids: { u_me: user.accountId, u_21: other.accountId, post_1: randomUUID(), post_missing: randomUUID(), store_1: store.storeId, prod_1: store.productId },
+    };
+  }, 300_000);
 
   it("mobile, webapp and studio contract lists match the live responses", async () => {
     const lists = [

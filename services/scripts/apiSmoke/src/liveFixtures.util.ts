@@ -25,7 +25,10 @@ export async function withRelaxedCreatorThresholds<T>(staff: StaffActor, work: (
 }
 
 export async function registerApprovedCreator(staff: StaffActor, prefix: string): Promise<UserActor> {
-  const creator = await registerUser(prefix);
+  return approveExistingUserAsCreator(staff, await registerUser(prefix));
+}
+
+export async function approveExistingUserAsCreator(staff: StaffActor, creator: UserActor): Promise<UserActor> {
   const applied = await callApi("POST", "/api/v1/users/me/creator-application", { token: creator.accessToken, body: {} });
   expect([200, 201], describeResponse(applied)).toContain(applied.status);
   const mine = await callApi("GET", "/api/v1/creators/applications/me", { token: creator.accessToken });

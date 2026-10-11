@@ -1,3 +1,5 @@
+import { callApi, describeResponse } from "./apiClient.util.js";
+
 export const realtimeUrl = process.env["SMOKE_REALTIME_URL"] ?? "ws://localhost:4000/ws";
 
 export interface RealtimeFrame {
@@ -13,7 +15,14 @@ export interface RealtimeClient {
   close(): void;
 }
 
+async function exchangeForRealtimeToken(accessToken: string): Promise<string> {
+  const issued = await callApi("POST", "/api/v1/auth/realtime-token", { token: accessToken, idempotent: false });
+  if (issued.status !== 200 || typeof issued.body?.realtimeToken !== "string") throw new Error(`realtime token: ${describeResponse(issued)}`);
+  return issued.body.realtimeToken;
+}
+
 export async function connectRealtimeClient(accessToken: string): Promise<RealtimeClient> {
+  const realtimeToken = await exchangeForRealtimeToken(accessToken);
   const socket = new WebSocket(realtimeUrl);
   const frames: RealtimeFrame[] = [];
   const waiters = new Set<() => void>();
@@ -47,7 +56,7 @@ export async function connectRealtimeClient(accessToken: string): Promise<Realti
       waiters.add(wake);
       check();
     });
-  socket.send(JSON.stringify({ type: "auth", accessToken }));
+  socket.send(JSON.stringify({ type: "auth", accessToken: realtimeToken }));
   if ((await waitForFrame((frame) => frame.type === "auth.ok" || frame.type === "auth.failed"))?.type !== "auth.ok") throw new Error("realtime auth failed");
   return {
     frames,

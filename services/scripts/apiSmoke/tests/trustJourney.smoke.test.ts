@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { createSuperadmin, registerUser, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
+import { registerChatDevice } from "../src/chatDevices.util.js";
 import { isListEnvelope } from "../src/smokeReport.util.js";
 
 describe("trust journey: chat request → accept → report → admin action → notification", () => {
@@ -15,6 +16,8 @@ describe("trust journey: chat request → accept → report → admin action →
     sender = await registerUser("chatter");
     recipient = await registerUser("chatee");
     staff = await createSuperadmin();
+    await registerChatDevice(sender, "smoke-device-1");
+    await registerChatDevice(recipient, "smoke-device-2");
   });
 
   it("starts a message request that lands in the recipient's requests folder", async () => {
@@ -52,7 +55,7 @@ describe("trust journey: chat request → accept → report → admin action →
     const reported = await callApi("POST", "/api/v1/reports", { token: recipient.accessToken, body: { targetType: "post", targetId: postId, reportedUserId: sender.accountId, reason: "spam", details: "Smoke report" } });
     expect([200, 201, 202], describeResponse(reported)).toContain(reported.status);
     const report = await waitFor(async () => {
-      const list = await callApi("GET", "/api/v1/admin/reports?status=all", { token: staff.accessToken });
+      const list = await callApi("GET", `/api/v1/admin/reports?status=all&search=${encodeURIComponent(postId)}`, { token: staff.accessToken });
       expect(list.status, describeResponse(list)).toBe(200);
       return (list.body.data as Array<{ id: string; targetId?: string }>).find((candidate) => JSON.stringify(candidate).includes(postId));
     }, 20_000, 1000);
