@@ -54,6 +54,8 @@ export async function registerUser(prefix: string): Promise<UserActor> {
   if (registered.status !== 201 && registered.status !== 200) throw new Error(`register: ${describeResponse(registered)}`);
   const profile = await callApi("GET", "/api/v1/users/me", { token: registered.body.accessToken });
   if (profile.status !== 200) throw new Error(`profile after signup: ${describeResponse(profile)}`);
+  const country = await callApi("PATCH", "/api/v1/users/me/preferences", { token: registered.body.accessToken, body: { countryCode: "NG" } });
+  if (country.status !== 200 && country.status !== 204) throw new Error(`country after signup: ${describeResponse(country)}`);
   return { accountId: decodeTokenSubject(registered.body.accessToken), username, email, accessToken: registered.body.accessToken, refreshToken: registered.body.refreshToken };
 }
 
@@ -103,4 +105,16 @@ export async function stepUpStaff(staff: StaffActor): Promise<string> {
   const token: string = response.body.stepUpToken ?? response.body.token;
   stepUpTokenCache.set(staff.accessToken, { token, expiresAt: Date.now() + 4 * 60_000 });
   return token;
+}
+
+export async function stepUpUser(user: UserActor): Promise<string> {
+  const response = await callApi("POST", "/api/v1/auth/step-up", { token: user.accessToken, body: { password: smokePassword } });
+  if (response.status !== 200) throw new Error(`user step-up: ${describeResponse(response)}`);
+  return response.body.stepUpToken;
+}
+
+export async function stepUpStaffForMoneyAction(staff: StaffActor): Promise<string> {
+  const response = await callApi("POST", "/api/v1/admin/auth/step-up", { token: staff.accessToken, body: { code: await generateUnusedTimeBasedCode(staff.totpSecret) } });
+  if (response.status !== 200) throw new Error(`step-up: ${describeResponse(response)}`);
+  return response.body.stepUpToken ?? response.body.token;
 }

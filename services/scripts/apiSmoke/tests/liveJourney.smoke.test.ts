@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { createSuperadmin, registerUser, stepUpStaff, type StaffActor, type UserActor } from "../src/actors.util.js";
+import { createSuperadmin, registerUser, stepUpStaff, stepUpStaffForMoneyAction, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
 import { onboardPayoutAccount, psql } from "../src/commerceFixtures.util.js";
 import { payCheckoutThroughFakePaystack, readFakePaystackState, settleTransferThroughFakePaystack } from "../src/fakePaystack.util.js";
@@ -189,7 +189,7 @@ describe("live journey: creator approval → live start → coins → gift with 
     expect([200, 201], describeResponse(account)).toContain(account.status);
     await onboardPayoutAccount(host);
     const wallet = await waitFor(async () => {
-      await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: {} });
+      await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaffForMoneyAction(staff) }, body: {} });
       const response = await callApi("GET", "/api/v1/wallets/me", { token: host.accessToken, headers: ngn });
       return (response.body.available?.amountMinor ?? 0) > 0 ? response : undefined;
     }, 90_000, 2000);
@@ -202,10 +202,10 @@ describe("live journey: creator approval → live start → coins → gift with 
     expect([200, 201, 202], describeResponse(requested)).toContain(requested.status);
     const withdrawalId: string = requested.body.id ?? requested.body.withdrawal?.id;
     if (/review|pending/i.test(JSON.stringify(requested.body))) {
-      const review = await callApi("POST", `/api/v1/admin/withdrawals/${withdrawalId}/review`, { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { decision: "approve", reason: "Smoke approval" } });
+      const review = await callApi("POST", `/api/v1/admin/withdrawals/${withdrawalId}/review`, { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaffForMoneyAction(staff) }, body: { decision: "approve", reason: "Smoke approval" } });
       expect([200, 201, 204], describeResponse(review)).toContain(review.status);
     }
-    await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: {} });
+    await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaffForMoneyAction(staff) }, body: {} });
     const transfer = await waitFor(async () => Object.values((await readFakePaystackState()).transfers).find((candidate) => candidate.Status !== "success" && candidate.AmountMinor === requested.body.netAmount?.amountMinor), 60_000, 1000);
     expect(transfer, "no creator payout transfer reached the provider").toBeDefined();
     await settleTransferThroughFakePaystack(transfer!.Reference);

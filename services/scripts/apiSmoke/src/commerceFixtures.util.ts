@@ -1,8 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { expect } from "vitest";
 
-import { registerUser, type UserActor } from "./actors.util.js";
+import { registerUser, stepUpUser, type UserActor } from "./actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "./apiClient.util.js";
+import { completeBankValidationThroughFakePaystack } from "./fakePaystack.util.js";
 import { uploadSampleImage } from "./mediaUpload.util.js";
 
 export interface SmokeStore {
@@ -20,9 +21,15 @@ export function psql(statement: string): string[][] {
   return output.split("\n").filter((line) => line !== "" && !/^(UPDATE|INSERT|DELETE) \d+$/.test(line)).map((line) => line.split("|"));
 }
 
+export function approveSellerApplication(accountId: string): void {
+  psql(`insert into catalog.seller_applications (id, created_at, updated_at, account_id, status, store_name, category_id, phone_sealed, address_line, city, state, identity_document_type, identity_document_number_sealed, identity_document_last4, identity_document_photo_url, payout_bank_code, payout_account_number_sealed, payout_account_last4)
+    values (gen_random_uuid(), now(), now(), '${accountId}', 'approved', 'Smoke store', gen_random_uuid(), '\\x00', '4 Allen Avenue', 'Ikeja', 'Lagos', 'nin', '\\x00', '0000', 'https://cdn.test/id.jpg', '058', '\\x00', '0000')`);
+}
+
 export async function createStoreWithProduct(label: string, priceMinor: number, openingQuantity = 50): Promise<SmokeStore> {
   const suffix = uniqueSuffix();
   const seller = await registerUser(label);
+  approveSellerApplication(seller.accountId);
   const profile = await callApi("POST", "/api/v1/users/me/business-profiles", { token: seller.accessToken, body: { displayName: `Smoke ${label} ${suffix}`, handle: `sm${label}${suffix}`.slice(0, 30), description: "Smoke store", businessType: "business", categories: [{ customName: "Fashion" }] } });
   expect(profile.status, describeResponse(profile)).toBe(201);
   const businessProfileId: string = profile.body.id ?? profile.body.profile?.id;
@@ -109,6 +116,10 @@ export async function onboardPayoutAccount(seller: UserActor, role?: "seller"): 
   expect([200, 201], describeResponse(identity)).toContain(identity.status);
   const resolved = await callApi("POST", "/api/v1/payments/payout-onboarding/me/resolve", { token: seller.accessToken, body: { bankCode: "058", accountNumber } });
   expect(resolved.status, describeResponse(resolved)).toBe(200);
-  const bank = await callApi("PUT", "/api/v1/payments/payout-onboarding/me/bank", { token: seller.accessToken, body: { bankCode: "058", bankName: "Guaranty Trust Bank", accountNumber, resolvedAccountName: resolved.body.accountName ?? "Temitope Adeyemi" } });
+  const bank = await callApi("PUT", "/api/v1/payments/payout-onboarding/me/bank", { token: seller.accessToken, headers: { "x-step-up-token": await stepUpUser(seller) }, body: { bankCode: "058", bankName: "Guaranty Trust Bank", accountNumber, resolvedAccountName: resolved.body.accountName ?? "Temitope Adeyemi" } });
   expect([200, 201], describeResponse(bank)).toContain(bank.status);
+  if (process.env["SMOKE_PAYMENTS_PROVIDER"] === "flutterwave") return;
+  const validation = await callApi("POST", "/api/v1/payments/payout-onboarding/me/bank-validation", { token: seller.accessToken });
+  expect([200, 201, 202], describeResponse(validation)).toContain(validation.status);
+  if (validation.body?.status !== "verified") await completeBankValidationThroughFakePaystack(seller.email);
 }

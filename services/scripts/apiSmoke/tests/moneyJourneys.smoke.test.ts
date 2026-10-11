@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { createSuperadmin, stepUpStaff, type StaffActor, type UserActor } from "../src/actors.util.js";
+import { createSuperadmin, stepUpStaff, stepUpStaffForMoneyAction, stepUpUser, type StaffActor, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, waitFor } from "../src/apiClient.util.js";
 import { addToCart, checkout, createBuyerWithAddress, createStoreWithProduct, onboardPayoutAccount, psql, shipAndDeliver, type SmokeStore } from "../src/commerceFixtures.util.js";
 import { payCheckoutThroughFakePaystack, readFakePaystackState, settleTransferThroughFakePaystack } from "../src/fakePaystack.util.js";
@@ -73,7 +73,10 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
 
   it("releases automatically 3 days after delivery (timer set to 72h, then time-travelled), then holds the credit for 24h", { timeout: 120_000 }, async () => {
     await shipAndDeliver(storeA, orderA);
-    const timer = psql(`select extract(epoch from (auto_release_at - delivered_at)) from escrow.escrows where order_id = '${orderA}'`)[0]?.[0];
+    const timer = await waitFor(async () => {
+      const seconds = psql(`select extract(epoch from (auto_release_at - delivered_at)) from escrow.escrows where order_id = '${orderA}'`)[0]?.[0];
+      return seconds ? seconds : undefined;
+    }, 30_000, 500);
     expect(Number(timer), "auto-release timer after delivery").toBe(72 * 3600);
     expect((await waitForEscrowStatus(orderA, "held"))?.[0]).toBe("held");
     psql(`update escrow.escrows set auto_release_at = now() - interval '1 minute' where order_id = '${orderA}'`);
@@ -86,19 +89,19 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     expect(wallet.status, describeResponse(wallet)).toBe(200);
     const expectedNet = itemPriceMinor + 150_000 - Math.round((itemPriceMinor + 150_000) * 0.015) - processingFeeMinor / 2;
     expect(wallet.body.available?.amountMinor ?? 0, "nothing withdrawable during the lock").toBe(0);
-    expect(wallet.body.pending?.amountMinor ?? 0, describeResponse(wallet)).toBe(expectedNet);
-    expect(wallet.body.locked?.amountMinor ?? 0, "locked view").toBe(expectedNet);
+    expect(wallet.body.pending?.amountMinor ?? 0, "pending is money still in escrow; released money is locked").toBe(0);
+    expect(wallet.body.locked?.amountMinor ?? 0, describeResponse(wallet)).toBe(expectedNet);
   });
 
   it("refuses a withdrawal before business verification and during the lock, then pays out after the lock passes", { timeout: 240_000 }, async () => {
     await onboardPayoutAccount(storeA.seller);
-    const created = await callApi("POST", "/api/v1/wallets/me/payout-accounts", { token: storeA.seller.accessToken, headers: ngn, body: { bankCode: "058", accountNumber: "0123456789", countryCode: "NG" } });
+    const created = await callApi("POST", "/api/v1/wallets/me/payout-accounts", { token: storeA.seller.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(storeA.seller) }, body: { bankCode: "058", accountNumber: "0123456789", countryCode: "NG" } });
     expect([200, 201], describeResponse(created)).toContain(created.status);
     const payoutAccountId: string = created.body.id ?? created.body.payoutAccount?.id;
-    const unverified = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: ngn, body: { payoutAccountId, amount: { amountMinor: 500_000, currency: "NGN" } } });
+    const unverified = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(storeA.seller) }, body: { payoutAccountId, amount: { amountMinor: 500_000, currency: "NGN" } } });
     expectClearError(unverified, 403, "SELLER_VERIFICATION_REQUIRED");
     await verifySellerBusiness(staff, storeA.seller);
-    const early = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: ngn, body: { payoutAccountId, amount: { amountMinor: 500_000, currency: "NGN" } } });
+    const early = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(storeA.seller) }, body: { payoutAccountId, amount: { amountMinor: 500_000, currency: "NGN" } } });
     expect(early.status, `withdrawal during the 24h lock must be refused: ${describeResponse(early)}`).toBeGreaterThanOrEqual(400);
     psql(`update ledger.seller_credit_maturities set available_at = now() - interval '1 minute' where matured_at is null`);
     const available = await waitFor(async () => {
@@ -108,17 +111,17 @@ describe("money journeys: multi-seller checkout, escrow timers, fees, payout, re
     expect(available, "credit never matured after the lock").toBeDefined();
     const amountMinor: number = available?.body.available.amountMinor;
     const requested = (await waitFor(async () => {
-      const response = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: ngn, body: { payoutAccountId, amount: { amountMinor, currency: "NGN" } } });
+      const response = await callApi("POST", "/api/v1/wallets/me/withdrawals", { token: storeA.seller.accessToken, headers: { ...ngn, "x-step-up-token": await stepUpUser(storeA.seller) }, body: { payoutAccountId, amount: { amountMinor, currency: "NGN" } } });
       return response.body?.code === "PAYOUT_ACCOUNT_NOT_VERIFIED" ? undefined : response;
     }, 60_000, 2000))!;
     expect([200, 201, 202], describeResponse(requested)).toContain(requested.status);
     const withdrawalId: string = requested.body.id ?? requested.body.withdrawal?.id;
     const reviewing = /review|pending/i.test(JSON.stringify(requested.body));
     if (reviewing) {
-      const review = await callApi("POST", `/api/v1/admin/withdrawals/${withdrawalId}/review`, { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: { decision: "approve", reason: "Smoke approval" } });
+      const review = await callApi("POST", `/api/v1/admin/withdrawals/${withdrawalId}/review`, { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaffForMoneyAction(staff) }, body: { decision: "approve", reason: "Smoke approval" } });
       expect([200, 201, 204], describeResponse(review)).toContain(review.status);
     }
-    const run = await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaff(staff) }, body: {} });
+    const run = await callApi("POST", "/api/v1/admin/payouts/run", { token: staff.accessToken, headers: { "x-step-up-token": await stepUpStaffForMoneyAction(staff) }, body: {} });
     expect([200, 201, 202, 204, 404], describeResponse(run)).toContain(run.status);
     const transfer = await waitFor(async () => {
       const state = await readFakePaystackState();
