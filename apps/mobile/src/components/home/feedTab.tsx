@@ -1,12 +1,13 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 
 import { GuestFeedBanner } from "@/components/auth/guestFeedBanner";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { PostCard } from "@/components/feed/postCard";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { feedQueryKeyPrefix, usePostInteractions } from "@/hooks/usePostInteractions.hook";
 import { feedsService } from "@/services/feed/feeds.service";
@@ -96,12 +97,14 @@ export function FeedTab() {
         }
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) =>
+        renderItem={({ item, index }) =>
           item.type === "suggestedClips" ? (
             <SuggestedClipsRow clips={suggestedClips.data ?? []} onPressClip={(clipId) => navigation.navigate("Tabs", { screen: "Clips", params: { startId: clipId } })} />
           ) : (
             <PostCard
               post={item.post}
+              surface="feed"
+              position={index}
               onPressAuthor={() => navigation.navigate("UserProfile", { userId: item.post.author.id })}
               onToggleFollow={() => followPostAuthor(item.post)}
               onToggleLike={() => togglePostLike(item.post)}
@@ -129,7 +132,7 @@ export function FeedTab() {
             <EmptyState compact title="No posts yet" body="Follow people and stores to fill your feed." actionLabel="Find people" onAction={() => navigation.navigate("Search", { scope: "global" })} />
           )
         }
-        ListFooterComponent={feed.isFetchingNextPage ? <ActivityIndicator style={styles.footer} color={colors.primary} /> : null}
+        ListFooterComponent={feed.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
       />
       <PostProductsFlow products={productsInOpenPost} onClose={() => setProductsInOpenPost(null)} />
       <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />

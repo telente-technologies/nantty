@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Animated, FlatList, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { SpeakerHigh24Icon, ViewProducts24Icon } from "@/components/icons";
-import { ClipVideoPlayer, VideoPosterOnly } from "@/components/media/clipVideoPlayer";
+import { VideoPosterOnly, type VideoPlaybackController } from "@/components/media/clipVideoPlayer";
 import { LandscapeVideoFullScreenModal } from "@/components/media/landscapeVideoFullScreenModal";
 import { calculateFeedVideoAspectRatio } from "@/components/media/videoOrientation.util";
 import { makeThemedStyles } from "@/theme";
@@ -11,6 +11,7 @@ import { claimAudioFocusForVideoPlayback } from "@/services/clips/videoAudio.ser
 import { useVideoAudioStore } from "@/store/videoAudio.store";
 import type { Media, SaveTarget } from "@/types";
 
+import { FeedVideoPage } from "./feedVideoPage";
 import { MediaLightbox } from "./mediaLightbox";
 import { AnimatedPageIndicator } from "./pageIndicator";
 import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
@@ -51,6 +52,9 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
   const imagePages = pages.filter((item) => item.type === "image");
   const isMuted = useVideoAudioStore((state) => state.isMuted);
   const toggleMute = useVideoAudioStore((state) => state.toggleMute);
+  const activeVideoController = useRef<VideoPlaybackController | null>(null);
+  const activeVideoPositionSeconds = useRef(0);
+  const [fullScreenStartSeconds, setFullScreenStartSeconds] = useState(0);
   const activePageMedia = pages[activePageIndex];
   const isActivePageVideo = activePageMedia?.type === "video";
 
@@ -93,24 +97,37 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
         scrollEventThrottle={16}
         initialNumToRender={2}
         windowSize={3}
-        renderItem={({ item, index }) => (
+        renderItem={({ item, index }) =>
+          item.type === "video" ? (
+            <View style={{ width: pageWidth, height }}>
+              <FeedVideoPage
+                media={item}
+                isMuted={isMuted}
+                isActive={isVisibleOnScreen && fullScreenVideo === null && index === activePageIndex}
+                shouldMountPlayer={Math.abs(index - activePageIndex) <= 1 && isActiveOrPreloadable(item)}
+                controllerRef={index === activePageIndex ? activeVideoController : undefined}
+                onPlaybackProgress={(progress) => {
+                  activeVideoPositionSeconds.current = progress.currentSeconds;
+                }}
+              >
+                <ClipLookOverlay look={isClipLookId(look) ? look : "none"} />
+                {watermarkHandle ? <VideoWatermark handle={watermarkHandle} /> : null}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Play video full screen"
+                  onPress={() => {
+                    setFullScreenStartSeconds(activeVideoPositionSeconds.current);
+                    setFullScreenVideo(item);
+                  }}
+                  style={StyleSheet.absoluteFill}
+                />
+              </FeedVideoPage>
+            </View>
+          ) : (
           <View style={{ width: pageWidth, height }}>
-            <MediaPagerPage
-              media={item}
-              isMuted={isMuted}
-              isActive={isVisibleOnScreen && fullScreenVideo === null && index === activePageIndex}
-              isNearActive={Math.abs(index - activePageIndex) <= 1}
-            />
+            <MediaPagerPage media={item} />
             <ClipLookOverlay look={isClipLookId(look) ? look : "none"} />
-            {item.type === "video" && watermarkHandle ? <VideoWatermark handle={watermarkHandle} /> : null}
-            {item.type === "video" ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Play video full screen"
-                onPress={() => setFullScreenVideo(item)}
-                style={StyleSheet.absoluteFill}
-              />
-            ) : item.type === "image" && item.url ? (
+            {item.type === "image" && item.url ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`Open image ${index + 1} full screen`}
@@ -119,10 +136,11 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
               />
             ) : null}
           </View>
-        )}
+          )
+        }
       />
       {overlay}
-      <View style={styles.overlay} pointerEvents="box-none">
+      <View style={[styles.overlay, isActivePageVideo ? styles.overlayAboveSeekBar : null]} pointerEvents="box-none">
         {pages.length > 1 ? (
           <AnimatedPageIndicator count={pages.length} activeIndex={activePageIndex} scrollOffsetX={scrollOffsetX} pageWidth={pageWidth} />
         ) : (
@@ -151,7 +169,12 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
       <LandscapeVideoFullScreenModal
         media={fullScreenVideo}
         isMuted={isMuted}
-        onClose={() => setFullScreenVideo(null)}
+        onToggleMute={toggleMute}
+        startAtSeconds={fullScreenStartSeconds}
+        onClose={(positionSeconds) => {
+          setFullScreenVideo(null);
+          if (positionSeconds !== undefined) activeVideoController.current?.seekTo(positionSeconds);
+        }}
         saveTarget={saveTarget}
         savedAccordingToServer={savedAccordingToServer}
         look={look}
@@ -163,24 +186,8 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
   );
 }
 
-function MediaPagerPage({
-  media,
-  isMuted,
-  isActive,
-  isNearActive,
-}: {
-  media: Media;
-  isMuted: boolean;
-  isActive: boolean;
-  isNearActive: boolean;
-}) {
-  if (media.type === "video") {
-    return isNearActive && isActiveOrPreloadable(media) ? (
-      <ClipVideoPlayer media={media} isActive={isActive} isMuted={isMuted} style={StyleSheet.absoluteFill} />
-    ) : (
-      <VideoPosterOnly media={media} style={StyleSheet.absoluteFill} />
-    );
-  }
+function MediaPagerPage({ media }: { media: Media }) {
+  if (media.type === "video") return <VideoPosterOnly media={media} style={StyleSheet.absoluteFill} />;
   const imageUrl = media.url ?? media.posterUrl ?? null;
   if (!imageUrl) return null;
   return (
@@ -209,6 +216,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     alignItems: "flex-end",
     justifyContent: "space-between",
   },
+  overlayAboveSeekBar: { bottom: 18 },
   overlayActions: { flexDirection: "row", alignItems: "center", gap: 16 },
   mutedSpeaker: { opacity: 0.35 },
 }));

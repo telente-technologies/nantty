@@ -21,7 +21,7 @@ export function usePinPostMutation() {
     },
     onError: (error) => {
       if (error instanceof ApiError && error.code === "PIN_LIMIT_REACHED") {
-        showAlertWithButtons("Pin limit reached", "You can pin up to 3 posts on your profile. Unpin one to pin another.");
+        showAlertWithButtons("Pin limit reached", "You can pin up to 3 posts on your profile. Unpin one to pin another.", undefined, { intent: "pin" });
         return;
       }
       showAlertWithButtons("Couldn't update pin", "Please check your connection and try again.");

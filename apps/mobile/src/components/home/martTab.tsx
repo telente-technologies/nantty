@@ -1,8 +1,9 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View, type NativeScrollEvent } from "react-native";
+import { ScrollView, StyleSheet, View, type NativeScrollEvent } from "react-native";
 
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { adEventsService } from "@/services/ads/adEvents.service";
 import { productsService } from "@/services/sellers/products.service";
@@ -121,7 +122,7 @@ export function MartTab() {
         ) : (
           <ProductMasonry products={allProducts} />
         )}
-        {products.isFetchingNextPage ? <ActivityIndicator style={styles.footer} color={colors.primary} /> : <View style={styles.footer} />}
+        {products.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : <View style={styles.footer} />}
       </View>
     </ScrollView>
   );

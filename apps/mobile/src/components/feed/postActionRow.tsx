@@ -1,19 +1,15 @@
-import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { BookmarkActionIcon, LikeActionIcon, ReplyActionIcon, RepostActionIcon, ShareActionIcon, ViewsActionIcon } from "@/components/icons";
-import { BottomSheet } from "@/components/ui/bottomSheet";
-import { Text } from "@/components/ui/text";
 import { useSaveToggle } from "@/hooks/useSaveToggle.hook";
-import type { MainStackParamList } from "@/navigation/navigation.types";
-import { useTheme } from "@/theme";
 import { saveTargetForPost, type Post } from "@/types";
 
 import { PostActionButton } from "./postActionButton";
+import { ViewsExplainerSheet } from "./viewsExplainerSheet";
 
 const ICON_SIZE = 19;
-export const VIEWS_HELP_TOPIC_SLUG = "views-and-analytics";
+export { VIEWS_HELP_TOPIC_SLUG } from "./viewsExplainerSheet";
 
 export interface PostActionRowProps {
   readonly post: Post;
@@ -28,12 +24,6 @@ export interface PostActionRowProps {
 
 export function PostActionRow({ post, isOwnPost, onToggleLike, onPressComments, onRepost, onShare, onPressAnalytics, likePopKey }: PostActionRowProps) {
   const [viewsInfoOpen, setViewsInfoOpen] = useState(false);
-  const { colors } = useTheme();
-  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
-  const openViewsHelpArticle = () => {
-    setViewsInfoOpen(false);
-    navigation.navigate("HelpArticle", { topicSlug: VIEWS_HELP_TOPIC_SLUG });
-  };
   const { isSaved, savedDelta, toggleSaved } = useSaveToggle(saveTargetForPost(post), post.bookmarked);
   return (
     <View style={styles.row}>
@@ -66,17 +56,7 @@ export function PostActionRow({ post, isOwnPost, onToggleLike, onPressComments, 
         renderIcon={(ink) => <BookmarkActionIcon size={ICON_SIZE} color={ink} filled={isSaved} />}
       />
       <PostActionButton label="Share" tone="reply" onPress={onShare} renderIcon={(ink) => <ShareActionIcon size={ICON_SIZE} color={ink} />} />
-      <BottomSheet
-        visible={viewsInfoOpen}
-        onClose={() => setViewsInfoOpen(false)}
-        title="Views"
-        scrollable
-        footerActions={[{ label: "Learn more", style: "primary", onPress: openViewsHelpArticle, accessibilityHint: "Opens the help article About views" }]}
-      >
-        <Text size={14} lineHeight={20} color={colors.textMuted} maxFontSizeMultiplier={1.8}>
-          Times this post was seen. A view counts each time it appears on someone else&apos;s screen, including repeat views. The author&apos;s own views don&apos;t count.
-        </Text>
-      </BottomSheet>
+      <ViewsExplainerSheet visible={viewsInfoOpen} onClose={() => setViewsInfoOpen(false)} />
     </View>
   );
 }

@@ -56,7 +56,7 @@ export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReply
     showAlertWithButtons("Delete reply?", "This removes your reply and the replies under it.", [
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: onDelete },
-    ]);
+    ], { intent: "delete" });
   const [isOptionsSheetOpen, setIsOptionsSheetOpen] = useState(false);
   const pinLabel = reply.isPinned === true ? "Unpin reply" : "Pin reply";
   const replyOptions: ActionSheetOption[] = [

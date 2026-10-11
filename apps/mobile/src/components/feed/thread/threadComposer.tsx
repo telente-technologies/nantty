@@ -28,10 +28,11 @@ export interface ThreadComposerProps {
   readonly onCancelReply: () => void;
   readonly onSubmit: (text: string, mentions: readonly MentionEntity[], quote?: CommentQuoteOptions) => void;
   readonly replyRestriction?: ReplyRestriction | null;
+  readonly focusRequest?: number;
 }
 
 export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(function ThreadComposer(
-  { postAuthorUsername, replyTarget, onCancelReply, onSubmit, replyRestriction },
+  { postAuthorUsername, replyTarget, onCancelReply, onSubmit, replyRestriction, focusRequest = 0 },
   ref,
 ) {
   const { colors } = useTheme();
@@ -54,9 +55,12 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
   const quote = useQuotedPostPreview(text);
   useImperativeHandle(ref, () => inputRef.current as TextInput);
 
+  const lastFocusRequest = useRef(focusRequest);
   useEffect(() => {
-    if (replyTarget) inputRef.current?.focus();
-  }, [replyTarget]);
+    if (focusRequest === lastFocusRequest.current) return;
+    lastFocusRequest.current = focusRequest;
+    inputRef.current?.focus();
+  }, [focusRequest]);
 
   const replyingToUsername = replyTarget?.author.username ?? postAuthorUsername;
   const canSubmit = hasSendableContent(text);

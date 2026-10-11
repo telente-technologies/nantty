@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
+import { retryCommentsPageUnlessCursorExpired, useRestartCommentsOnExpiredCursor } from "@/hooks/useRestartCommentsOnExpiredCursor.hook";
 import { postThreadService } from "@/services/content/postThread.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Comment } from "@/types";
@@ -25,14 +26,16 @@ export const toLocalThreadReply = (comment: Comment, postAuthorId: string | unde
   inlineReplies: [],
 });
 
-export function usePostConversation(postId: string, sort: ThreadSort) {
+export function usePostConversation(postId: string, sort: ThreadSort, onRestartedFromTop?: () => void) {
   const isSignedIn = useAuthStore((state) => state.status === "signedIn");
   const query = useInfiniteQuery({
     queryKey: postThreadQueryKey(postId, sort),
     queryFn: ({ pageParam }) => postThreadService.fetchConversation(postId, sort, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    retry: retryCommentsPageUnlessCursorExpired,
   });
+  const { isRestartingFromTop } = useRestartCommentsOnExpiredCursor(postThreadQueryKey(postId, sort), query.error, onRestartedFromTop);
   const conversations = useMemo(() => {
     const seen = new Set<string>();
     return (query.data?.pages ?? []).flatMap((page) => page.data).filter((reply) => (seen.has(reply.id) ? false : (seen.add(reply.id), true)));
@@ -62,9 +65,9 @@ export function usePostConversation(postId: string, sort: ThreadSort) {
   });
 
   const loadNextPage = () => {
-    if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage().catch(() => undefined);
+    if (query.hasNextPage && !query.isFetchingNextPage && !isRestartingFromTop) query.fetchNextPage().catch(() => undefined);
   };
-  return { query, rows, loadNextPage };
+  return { query, rows, loadNextPage, isRestartingFromTop };
 }
 
 export function useThreadReplies(commentId: string, isExpanded: boolean) {

@@ -1,9 +1,9 @@
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, type AccessibilityActionEvent, type AccessibilityActionInfo } from "react-native";
 
 import { ExpandableText } from "@/components/ui/expandableText";
-import { Bell24Icon, BellSlash24Icon, BoxArrowDown24Icon, DotsThreeVertical24Icon, Group1256Icon, PushPin24Icon, ReplyActionIcon } from "@/components/icons";
+import { Bell24Icon, BellSlash24Icon, BoxArrowDown24Icon, DotsThreeVertical24Icon, Group1256Icon, PushPin24Icon, ReplyActionIcon, Trash24Icon } from "@/components/icons";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
@@ -24,6 +24,7 @@ import { MediaPager } from "./mediaPager";
 import { PostActionRow } from "./postActionRow";
 import { PostCardFallbackActions, type PostCardFallbackRequest } from "./postCardFallbackActions";
 import { usePinPostMutation } from "./usePinPost.hook";
+import { useDeleteOwnPost } from "./useDeleteOwnPost.hook";
 import { postNotificationMuteLabel, usePostNotificationMute } from "./postNotificationMute.hook";
 import { canOfferPostNotificationMute } from "@/utils/postNotificationMute.util";
 import { ReplySettingsSheet } from "./replySettingsSheet";
@@ -41,6 +42,11 @@ import { TaggedPeopleLine } from "@/components/taggedPeople/taggedPeopleLine";
 import { canOfferDownloadForPost, findFirstDownloadableMedia, isDownloadableMedia } from "@/components/downloads/downloadablePostMedia.util";
 import { useMediaDownloadStore } from "@/store/mediaDownload.store";
 import { requireAuthThen } from "@/utils/requireAuth.util";
+import { useIsOwnPost } from "@/hooks/useIsOwnPost.hook";
+import { feedInteractionsService, interactionTargetOf, type FeedInteractionSurface } from "@/services/feed/feedInteractions.service";
+
+import { PostSurfaceProvider, usePostSurface } from "./interactions/postSurface.context";
+import { usePostImpressionTracking } from "./interactions/usePostImpressionTracking.hook";
 
 const DOUBLE_TAP_WINDOW_MS = 280;
 
@@ -63,6 +69,8 @@ export interface PostCardProps {
   readonly onMediaPagerTouchStart?: () => void;
   readonly accessibilityActions?: readonly AccessibilityActionInfo[];
   readonly onAccessibilityAction?: (event: AccessibilityActionEvent) => void;
+  readonly position?: number;
+  readonly surface?: FeedInteractionSurface;
 }
 
 export function PostCard(props: PostCardProps) {
@@ -71,8 +79,20 @@ export function PostCard(props: PostCardProps) {
   const { post } = props;
   const openUserProfile = useOpenUserProfile();
   const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
-  const openPostAuthorProfile = () =>
-    post.author.id === signedInUserId || !props.onPressAuthor ? openUserProfile(post.author.id) : props.onPressAuthor();
+  const contextSurface = usePostSurface();
+  const surface = props.surface ?? contextSurface;
+  const canSeeAnalytics = useIsOwnPost(post);
+  const interactionTarget = useMemo(() => interactionTargetOf(post), [post]);
+  const impressionRef = usePostImpressionTracking(canSeeAnalytics ? null : interactionTarget, surface, props.position);
+  const openPostAuthorProfile = () => {
+    feedInteractionsService.recordProfileClick(interactionTarget, surface);
+    if (post.author.id === signedInUserId || !props.onPressAuthor) openUserProfile(post.author.id);
+    else props.onPressAuthor();
+  };
+  const followAuthorFromPost = () => {
+    feedInteractionsService.recordFollow(interactionTarget, surface);
+    props.onToggleFollow?.();
+  };
   const hasMedia = post.media.length > 0;
   const isVisibleForAutoplay = useIsFeedItemVisibleForAutoplay(post.id);
   const isOwnPost = post.author.id === signedInUserId;
@@ -92,6 +112,7 @@ export function PostCard(props: PostCardProps) {
     if (isDownloadableMedia(media)) requireAuthThen(() => startBrandedDownload(post.id, media), null, "download");
   };
   const pinMutation = usePinPostMutation();
+  const { confirmAndDelete } = useDeleteOwnPost();
   const navigation = useNavigation<NavigationProp<MainStackParamList>>();
   const { togglePostLike } = usePostInteractions();
   const [fallbackRequest, setFallbackRequest] = useState<PostCardFallbackRequest | null>(null);
@@ -116,6 +137,7 @@ export function PostCard(props: PostCardProps) {
         onPress: () => pinMutation.mutate(post),
       }]
       : []),
+    ...(canSeeAnalytics ? [{ label: "Delete", icon: <Trash24Icon size={20} />, destructive: true, onPress: () => confirmAndDelete({ id: post.id, kind: post.kind ?? "post" }) }] : []),
     ...(canOfferPostNotificationMute(isSignedIn, post)
       ? [{
         label: postNotificationMuteLabel(post.viewerNotificationsMuted === true),
@@ -155,7 +177,8 @@ export function PostCard(props: PostCardProps) {
     }
   };
   return (
-    <View style={styles.card}>
+    <PostSurfaceProvider surface={surface}>
+    <View ref={impressionRef} collapsable={false} style={styles.card}>
       <View style={styles.combo}>
         {post.friendsLiked ? (
           <View style={styles.likedBy}>
@@ -197,7 +220,7 @@ export function PostCard(props: PostCardProps) {
           </Pressable>
           <View style={styles.authorActions}>
             {!post.isFollowingAuthor && props.onToggleFollow ? (
-              <Pressable accessibilityRole="button" onPress={props.onToggleFollow} style={styles.follow}>
+              <Pressable accessibilityRole="button" onPress={followAuthorFromPost} style={styles.follow}>
                 <Text size={12} lineHeight={16.8} color={colors.white}>
                   Follow
                 </Text>
@@ -271,7 +294,7 @@ export function PostCard(props: PostCardProps) {
 
       <PostActionRow
         post={post}
-        isOwnPost={isOwnPost}
+        isOwnPost={canSeeAnalytics}
         onToggleLike={onToggleLike}
         onPressComments={onPressComments}
         onRepost={onRepost}
@@ -294,6 +317,7 @@ export function PostCard(props: PostCardProps) {
       {fallbackRequest ? <PostCardFallbackActions post={post} request={fallbackRequest} /> : null}
       {isOwnPost ? <ReplySettingsSheet post={replySettingsPost} onClose={() => setReplySettingsPost(null)} /> : null}
     </View>
+    </PostSurfaceProvider>
   );
 }
 

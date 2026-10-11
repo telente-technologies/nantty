@@ -8,17 +8,24 @@ import { SharedContentCardView } from "@/components/chatSafety/sharedContentCard
 import { confirmRiskyLink, inAppBrowserColorsFromTheme, openInAppBrowser } from "@/components/links/openLink.util";
 import { Text } from "@/components/ui/text";
 import { postsService } from "@/services/content/posts.service";
+import { feedInteractionsService, interactionTargetOf } from "@/services/feed/feedInteractions.service";
 import { useAuthStore } from "@/store/auth.store";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { LinkPreview, Post, SharedContentReference } from "@/types";
 
-const internalKindLabels: Readonly<Record<SharedContentReference["kind"], string>> = { product: "Product", store: "Store", profile: "Profile", live: "Live", post: "Post", clip: "Clip" };
+import { usePostSurface } from "./interactions/postSurface.context";
 
-function ExternalLinkCard({ preview }: { readonly preview: LinkPreview }) {
+const internalKindLabels: Readonly<Record<SharedContentReference["kind"], string>> = { product: "Product", store: "Store", profile: "Profile", live: "Live", post: "Post", clip: "Clip", order: "Order" };
+
+function ExternalLinkCard({ preview, onOpen }: { readonly preview: LinkPreview; readonly onOpen: () => void }) {
   const { colors } = useTheme();
   const styles = useStyles();
   const domain = preview.domain || readFullDomain(preview.url);
-  const openWithSafetyCheck = () => confirmRiskyLink(preview.url, () => void openInAppBrowser(preview.url, inAppBrowserColorsFromTheme(colors)));
+  const openWithSafetyCheck = () =>
+    confirmRiskyLink(preview.url, () => {
+      onOpen();
+      void openInAppBrowser(preview.url, inAppBrowserColorsFromTheme(colors));
+    });
   return (
     <Pressable accessibilityRole="link" accessibilityLabel={`${preview.title}, opens ${domain}`} onPress={openWithSafetyCheck} style={styles.card}>
       {preview.imageUrl ? <Image source={{ uri: preview.imageUrl }} style={styles.image} contentFit="cover" accessibilityIgnoresInvertColors /> : null}
@@ -50,6 +57,7 @@ function GuestInternalLinkCard({ reference }: { readonly reference: SharedConten
 export function PostLinkCard({ post }: { readonly post: Post }) {
   const styles = useStyles();
   const isSignedIn = useAuthStore((state) => state.status === "signedIn");
+  const surface = usePostSurface();
   const internalReference = findFirstInternalReference(post.text);
   const externalUrl = !internalReference && !post.linkPreview ? findFirstExternalUrl(post.text) : null;
   const onDemand = useQuery({
@@ -63,7 +71,7 @@ export function PostLinkCard({ post }: { readonly post: Post }) {
     return <View style={styles.wrap}>{isSignedIn ? <SharedContentCardView reference={internalReference} /> : <GuestInternalLinkCard reference={internalReference} />}</View>;
   }
   const preview = post.linkPreview ?? onDemand.data ?? null;
-  return preview ? <View style={styles.wrap}><ExternalLinkCard preview={preview} /></View> : null;
+  return preview ? <View style={styles.wrap}><ExternalLinkCard preview={preview} onOpen={() => feedInteractionsService.recordLinkClick(interactionTargetOf(post), surface)} /></View> : null;
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
