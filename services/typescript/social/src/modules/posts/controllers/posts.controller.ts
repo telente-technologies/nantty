@@ -85,7 +85,7 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
         quotedPostId: body.quotedPostId,
       })),
     getPost: route({ authentication: "optional", params: postIdParamsSchema }, ({ principal, params }) => handlers.getPost({ viewerId: principal?.accountId, postId: params.postId })),
-    deletePost: route({ authentication: "required", params: postIdParamsSchema }, ({ principal, params }) => handlers.deletePost({ actorId: principal.accountId, postId: params.postId })),
+    deletePost: route({ authentication: "required", params: postIdParamsSchema, successStatus: 204 }, ({ principal, params }) => handlers.deletePost({ actorId: principal.accountId, postId: params.postId })),
     likePost: route({ authentication: "required", params: postIdParamsSchema }, ({ principal, params }) => handlers.likePost({ actorId: principal.accountId, postId: params.postId })),
     unlikePost: route({ authentication: "required", params: postIdParamsSchema }, ({ principal, params }) => handlers.unlikePost({ actorId: principal.accountId, postId: params.postId })),
     pinPost: route({ authentication: "required", params: postIdParamsSchema }, ({ principal, params }) => handlers.pinPost({ actorId: principal.accountId, postId: params.postId })),

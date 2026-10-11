@@ -1,5 +1,6 @@
 import type { HandlerContext } from "../../../types/handlerContext.type.js";
 import { filterAuthorsVisibleToViewer } from "../../follows/services/profileAccess.service.js";
+import type { CommentView } from "../../comments/models/comment.model.js";
 import type { PostView } from "../../posts/models/post.model.js";
 import { commentRepository } from "../../comments/repositories/comment.repository.js";
 import { buildCommentViews } from "../../comments/services/commentView.service.js";
@@ -29,6 +30,25 @@ function previewForPost(view: PostView): SavedItemView["preview"] {
   };
 }
 
+type SavedItemBase = Pick<SavedItemView, "id" | "type" | "targetId" | "savedAt" | "collectionId">;
+
+export function buildSavedCommentItem(base: SavedItemBase, comment: CommentView): SavedItemView {
+  const excerpt = comment.text.slice(0, 80);
+  return {
+    ...base,
+    postId: comment.postId,
+    preview: {
+      title: excerpt === "" ? null : excerpt,
+      thumbnailUrl: comment.author.avatarUrl,
+      href: `/post/${comment.postId}/comment/${comment.id}`,
+      author: comment.author.username === "" ? null : comment.author.username,
+      price: null,
+      durationSeconds: null,
+    },
+    comment,
+  };
+}
+
 export async function buildSavedItemViews(context: HandlerContext, viewerId: string, rows: readonly SavedRow[]): Promise<SavedItemView[]> {
   const postRows = rows.filter((row) => row.type !== "product" && uuidPattern.test(row.targetId));
   const posts = await postRepository.findManyByIds(context.database.client, postRows.map((row) => row.targetId));
@@ -44,25 +64,13 @@ export async function buildSavedItemViews(context: HandlerContext, viewerId: str
     const base = { id: row.id, type: row.type, targetId: row.targetId, savedAt: row.createdAt.toISOString(), collectionId: row.collectionId };
     if (row.type === "product") {
       const product = products.get(row.targetId);
-      const preview = { title: product?.name ?? null, thumbnailUrl: product?.imageUrl ?? null, href: `/products/${row.targetId}`, author: null, price: product?.price ?? null, durationSeconds: null };
+      const preview = { title: product?.name ?? null, thumbnailUrl: product?.imageUrl ?? null, href: `/product/${row.targetId}`, author: null, price: product?.price ?? null, durationSeconds: null };
       return [{ ...base, preview, ...(product === undefined ? {} : { product: { id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, stock: product.stock } }) }];
     }
     const view = views.get(row.targetId);
     if (row.type === "comment") {
       const comment = commentViews.get(row.targetId);
-      if (comment === undefined) return [];
-      return [{
-        ...base,
-        preview: {
-          title: comment.text.slice(0, 80) === "" ? null : comment.text.slice(0, 80),
-          thumbnailUrl: comment.author.avatarUrl,
-          href: `/post/${comment.postId}#${comment.id}`,
-          author: comment.author.username === "" ? null : comment.author.username,
-          price: null,
-          durationSeconds: null,
-        },
-        comment,
-      }];
+      return comment === undefined ? [] : [buildSavedCommentItem(base, comment)];
     }
     if (view === undefined) return [];
     return [{ ...base, preview: previewForPost(view), ...(row.type === "clip" ? { clip: view } : { post: view }) }];

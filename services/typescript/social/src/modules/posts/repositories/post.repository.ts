@@ -12,6 +12,12 @@ export const postRepository = {
 
   findManyByIds: (db: Db, ids: readonly string[]): Promise<PostRow[]> => db.post.findMany({ where: { id: { in: [...ids] }, ...shownToViewers }, include: postWithMedia }),
 
+  findByIdIncludingHidden: (db: Db, id: string): Promise<PostRow | null> => db.post.findFirst({ where: { id }, include: postWithMedia }),
+
+  decrementCounterIfPositive: async (db: Db, id: string, counter: "repostCount" | "quoteCount"): Promise<void> => {
+    await db.post.updateMany({ where: { id, [counter]: { gt: 0 } }, data: { [counter]: { decrement: 1 } } });
+  },
+
   softDelete: (db: Db, id: string, at: Date) => db.post.update({ where: { id }, data: { deletedAt: at, isPinned: false, pinnedAt: null } }),
 
   incrementCounterIfNotDeleted: async (db: Db, id: string, counter: "commentCount", by: number): Promise<boolean> =>

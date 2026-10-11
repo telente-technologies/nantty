@@ -24,6 +24,7 @@ export interface SavedItemView {
   readonly clip?: PostView;
   readonly product?: TaggedProductView;
   readonly comment?: CommentView;
+  readonly postId?: string;
 }
 
 export interface SaveCollectionView {

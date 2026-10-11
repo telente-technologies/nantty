@@ -3,27 +3,21 @@ import { schema } from "@zudojs/schema";
 import { maximumShareConversations } from "../../../constants/social.constant.js";
 import { mentionEntitiesSchema } from "../../mentions/validators/mentions.validator.js";
 
-const kindSchema = schema.enum(["text", "voice", "image", "video", "shared", "location", "liveLocation", "document", "poll"]);
-const referenceKinds = schema.enum(["post", "clip", "story", "product", "live", "store", "profile"]);
+const kindSchema = schema.enum(["text", "voice", "image", "video", "shared", "location", "liveLocation", "document", "poll", "control"]);
+const referenceKinds = schema.enum(["post", "clip", "story", "product", "live", "store", "profile", "order"]);
 const referenceSchema = schema.object({ kind: referenceKinds, id: schema.string().min(1).max(100) });
 
 export const sendMessageBodySchema = schema.object({
   kind: kindSchema.optional(),
-  text: schema.string().max(1000).optional(),
+  text: schema.optional(schema.unknown()),
   encryption: schema.object({ deviceId: schema.string().min(1).max(100), ciphertext: schema.string().min(1).max(70000), protocol: schema.string().max(40).optional() }).optional(),
   mediaId: schema.string().uuid().optional(),
   durationSeconds: schema.number().min(0).max(36000).optional(),
   linkPreview: schema.optional(schema.nullable(schema.string().max(8192))),
-  sharedContent: referenceSchema.optional(),
-  location: schema.object({
-    latitude: schema.number(), longitude: schema.number(),
-    address: schema.optional(schema.nullable(schema.string().max(200))), liveUntil: schema.optional(schema.nullable(schema.string().max(40))),
-  }).optional(),
-  document: schema.object({
-    fileName: schema.string().min(1).max(300), mimeType: schema.string().min(1).max(120), sizeBytes: schema.number().int().min(1),
-    pageCount: schema.optional(schema.nullable(schema.number().int().min(0))),
-  }).optional(),
-  poll: schema.object({ question: schema.string().min(1).max(300), allowMultipleAnswers: schema.boolean(), options: schema.array(schema.string().min(1).max(100)).min(2).max(6) }).optional(),
+  sharedContent: schema.optional(schema.unknown()),
+  location: schema.optional(schema.unknown()),
+  document: schema.optional(schema.unknown()),
+  poll: schema.optional(schema.unknown()),
   mentions: mentionEntitiesSchema.optional(),
 });
 
