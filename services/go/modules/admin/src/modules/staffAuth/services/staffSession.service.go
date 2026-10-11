@@ -19,7 +19,10 @@ import (
 	"zudomart/platform/staffauth"
 )
 
-const AbsoluteSessionLifetime = 7 * 24 * time.Hour
+const (
+	AbsoluteSessionLifetime = 12 * time.Hour
+	IdleSessionLifetime     = 30 * time.Minute
+)
 
 type StaffAuthService struct {
 	Container *container.Container

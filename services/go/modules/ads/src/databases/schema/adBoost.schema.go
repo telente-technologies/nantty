@@ -19,7 +19,7 @@ func (AdBoost) Fields() []ent.Field {
 		field.UUID("user_id", uuid.UUID{}).Immutable(),
 		field.String("post_id").NotEmpty().MaxLen(80).Immutable(),
 		field.Enum("goal").Values("views", "profile_visits", "messages").Immutable(),
-		field.Enum("status").Values("pending_payment", "in_review", "active", "completed", "rejected").Default("pending_payment"),
+		field.Enum("status").Values("pending_payment", "in_review", "active", "completed", "rejected", "cancelled").Default("pending_payment"),
 		field.Bytes("audience").SchemaType(map[string]string{dialect.Postgres: "jsonb"}).Immutable(),
 		field.String("currency").MinLen(3).MaxLen(3).Immutable(),
 		field.Int64("daily_budget_minor").Immutable(),

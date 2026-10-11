@@ -10,6 +10,7 @@ import (
 	adminerrors "zudomart/modules/admin/src/errors"
 	"zudomart/modules/admin/src/generated/ent"
 	"zudomart/modules/admin/src/generated/ent/staffaccount"
+	"zudomart/modules/admin/src/generated/ent/staffsession"
 	"zudomart/modules/admin/src/modules/staffAdmins/services"
 	"zudomart/modules/admin/src/repositories"
 	"zudomart/modules/admin/src/types"
@@ -64,6 +65,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (types.Staf
 		}
 		before := map[string]any{"role": existing.Role, "roleIds": existing.RoleIds, "permissions": existing.Permissions}
 		if updated, err = existing.Update().SetRole(role).SetRoleIds(roleIds).SetPermissions(permissions).Save(ctx); err != nil {
+			return err
+		}
+		if _, err := tx.StaffSession.Update().Where(staffsession.StaffID(target), staffsession.RevokedAtIsNil()).SetRevokedAt(handler.Container.Now()).Save(ctx); err != nil {
 			return err
 		}
 		return repositories.RecordAuditEventInTransaction(ctx, tx, identityports.AuditEvent{

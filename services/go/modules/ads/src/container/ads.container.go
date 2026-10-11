@@ -37,6 +37,7 @@ type Container struct {
 	Pricing          *services.RegionalAdPricing
 	Candidates       *services.CandidateIndex
 	Consent          interfaces.ConsentReader
+	Countries        interfaces.ProfileCountryReader
 	Signals          interfaces.ContentSignalReader
 	Pctr             interfaces.PctrScorer
 	FraudModel       interfaces.FraudModelScorer

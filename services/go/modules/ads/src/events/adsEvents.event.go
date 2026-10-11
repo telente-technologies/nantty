@@ -11,6 +11,7 @@ const (
 	AdCreatorEarningsPosted = "adCreatorEarnings.posted"
 	AdPremiumPoolAllocated  = "adPremiumPool.allocated"
 	AdBoostCreated          = "adBoost.created"
+	AdBoostCancelled        = "adBoost.cancelled"
 	AdMediaUploaded         = "adMedia.uploaded"
 	AdReportReady           = "adReport.ready"
 	AdInviteCreated         = "adInvite.created"
@@ -133,4 +134,16 @@ type AdReportReadyEventData struct {
 	CsvUrl            string   `json:"csvUrl,omitempty"`
 	PdfUrl            string   `json:"pdfUrl,omitempty"`
 	UrlsExpireAt      string   `json:"urlsExpireAt,omitempty"`
+}
+
+type AdBoostCancelledEventData struct {
+	BoostId             string `json:"boostId"`
+	UserId              string `json:"userId"`
+	PostId              string `json:"postId"`
+	Reason              string `json:"reason"`
+	PaymentMethod       string `json:"paymentMethod"`
+	Currency            string `json:"currency"`
+	RefundMinor         int64  `json:"refundMinor"`
+	DebitIdempotencyKey string `json:"debitIdempotencyKey"`
+	AllowanceRestored   bool   `json:"allowanceRestored"`
 }

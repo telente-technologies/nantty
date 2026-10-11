@@ -35,7 +35,7 @@ func (AdFundsTransaction) Mixin() []ent.Mixin { return []ent.Mixin{TimeOrderedId
 func (AdFundsTransaction) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
-		field.Enum("type").Values("top_up", "ad_spend", "credit_grant", "credit_spend", "refund", "card_charge").Immutable(),
+		field.Enum("type").Values("top_up", "ad_spend", "credit_grant", "credit_spend", "refund", "card_charge", "ad_spend_debt").Immutable(),
 		field.Int64("amount_minor").Immutable(),
 		field.String("currency").MinLen(3).MaxLen(3).Immutable(),
 		field.String("description").MaxLen(200).Immutable(),

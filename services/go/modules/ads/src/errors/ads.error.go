@@ -11,6 +11,7 @@ func Api(status int, code, message string) *httpserver.ApiError {
 }
 
 var (
+	BoostCurrencyNotAllowed  = Api(http.StatusUnprocessableEntity, "BOOST_CURRENCY_NOT_ALLOWED", "Boosts are charged in the currency of your verified country.")
 	AccountNotFound          = Api(http.StatusNotFound, "AD_ACCOUNT_NOT_FOUND", "Ad account not found.")
 	AccountNotActive         = Api(http.StatusConflict, "AD_ACCOUNT_NOT_ACTIVE", "This ad account is not active.")
 	NotFound                 = Api(http.StatusNotFound, "NOT_FOUND", "Not found.")
@@ -59,6 +60,7 @@ var (
 	InsufficientEarnings     = Api(http.StatusUnprocessableEntity, "INSUFFICIENT_FUNDS", "Amount is more than your available balance.")
 	FreeBoostNotAvailable    = Api(http.StatusForbidden, "FREE_BOOST_NOT_AVAILABLE", "Free boosts come with Zudomart Premium.")
 	FreeBoostUsed            = Api(http.StatusConflict, "FREE_BOOST_USED", "You have used this month's free boost. Pay for this boost or wait for next month.")
+	BoostNotCancellable      = Api(http.StatusConflict, "BOOST_NOT_CANCELLABLE", "This boost has already finished.")
 	FreeBoostTooLarge        = Api(http.StatusUnprocessableEntity, "FREE_BOOST_TOO_LARGE", "This boost costs more than the free boost covers. Pick a smaller budget or pay for it.")
 	PaymentNotAvailableInApp = Api(http.StatusForbidden, "PAYMENT_METHOD_NOT_AVAILABLE_IN_APP", "In the app, pay for boosts by card or bank transfer in the secure payment window.")
 )

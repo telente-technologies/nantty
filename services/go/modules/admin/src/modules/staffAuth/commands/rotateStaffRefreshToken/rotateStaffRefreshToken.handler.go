@@ -39,9 +39,13 @@ func (handler Handler) Execute(ctx context.Context, command Command) (models.Sta
 		if err != nil {
 			return err
 		}
-		if current.RevokedAt != nil || !current.ExpiresAt.After(now) || !current.CreatedAt.Add(services.AbsoluteSessionLifetime).After(now) {
+		if current.RevokedAt != nil || !current.ExpiresAt.After(now) {
 			rejection = adminerrors.InvalidRefreshToken
 			return nil
+		}
+		if !current.CreatedAt.Add(services.AbsoluteSessionLifetime).After(now) || !current.LastUsedAt.Add(services.IdleSessionLifetime).After(now) {
+			rejection = adminerrors.InvalidRefreshToken
+			return current.Update().SetRevokedAt(now).Exec(ctx)
 		}
 		staff, err = tx.StaffAccount.Query().Where(staffaccount.ID(current.StaffID), staffaccount.StatusEQ(staffaccount.StatusActive)).Only(ctx)
 		if ent.IsNotFound(err) {
