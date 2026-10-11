@@ -8,7 +8,10 @@ import (
 	"zudomart/modules/payments/src/modules/gateway/models"
 )
 
-const MovementWalletCredit = "walletCredit"
+const (
+	MovementWalletCredit   = "walletCredit"
+	walletSpendJournalKind = "wallet.spentOnPlatform"
+)
 
 type WalletSpend struct {
 	UserId      string
@@ -27,6 +30,9 @@ func (gateway *PaymentGateway) SpendWalletToPlatformInTransaction(ctx context.Co
 	if err := LockUserWalletMoney(ctx, transaction, spend.UserId); err != nil {
 		return "", err
 	}
+	if err := gateway.requireWithinWalletDailyLimit(ctx, transaction, spend.UserId, spend.Currency, spend.AmountMinor); err != nil {
+		return "", err
+	}
 	fromHold, fromAvailable, err := gateway.splitWalletSpend(ctx, transaction, spend.UserId, spend.Currency, spend.AmountMinor)
 	if err != nil {
 		return "", err
@@ -37,7 +43,7 @@ func (gateway *PaymentGateway) SpendWalletToPlatformInTransaction(ctx context.Co
 	lines = append(lines, moveLinesCredit(outgoing, spend.AmountMinor), ledgermodels.JournalLineRequest{Account: awaiting, Direction: ledgermodels.Debit, AmountMinor: spend.AmountMinor},
 		ledgermodels.JournalLineRequest{Account: spend.Credit, Direction: ledgermodels.Credit, AmountMinor: spend.AmountMinor})
 	if _, err := gateway.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-		Reference: "wallet-spend:" + spend.Reference, Kind: "wallet.spentOnPlatform", Description: spend.Description, Lines: lines,
+		Reference: "wallet-spend:" + spend.Reference, Kind: walletSpendJournalKind, Description: spend.Description, Lines: lines,
 	}); err != nil {
 		return "", convertInsufficientWalletBalance(err)
 	}

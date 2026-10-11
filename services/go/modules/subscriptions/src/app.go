@@ -2,6 +2,7 @@ package src
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -87,20 +88,22 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
-	module.startBillingJobConsumer(ctx)
-	go func() {
+	if err := module.startBillingJobConsumer(ctx); err != nil {
+		return err
+	}
+	go servicemodule.SuperviseWorkerUntilContextDone(ctx, module.Billing.Container.Resources.Logger, "subscription due jobs", func(ctx context.Context) error {
 		ticker := time.NewTicker(time.Minute)
 		defer ticker.Stop()
 		for {
 			select {
 			case <-ctx.Done():
-				return
+				return nil
 			case <-ticker.C:
 				module.Billing.RunDueJobs(ctx)
 				module.CreatorSubscriptions.RunDueRenewals(ctx, 50)
 			}
 		}
-	}()
+	})
 	container := module.Billing.Container
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     ledgerevents.OutboxRelayStore{Database: container.Resources.Database, Table: container.Outbox, Now: time.Now},
@@ -111,22 +114,25 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 
 func (module *Module) Close(context.Context) error { return module.Billing.Container.Resources.Close() }
 
-func (module *Module) startBillingJobConsumer(ctx context.Context) {
+func (module *Module) startBillingJobConsumer(ctx context.Context) error {
 	container := module.Billing.Container
+	isProduction := container.Settings.Money.IsProduction()
 	jobs, consumer, err := platformevents.CreateJobQueueAndConsumerFromEnvironment(ctx, platformevents.MessageBusSelection{
-		DeployableName: "go-money", Logger: container.Resources.Logger, IsProduction: container.Settings.Money.IsProduction(),
+		DeployableName: "go-money", Logger: container.Resources.Logger, IsProduction: isProduction,
 	})
 	if err != nil {
+		if isProduction {
+			return fmt.Errorf("subscription billing job queue: %w", err)
+		}
 		container.Resources.Logger.Error("subscription billing jobs run inline: the job queue is unavailable", "error", err.Error())
-		return
+		return nil
 	}
 	if jobs == nil || consumer == nil {
-		return
+		return nil
 	}
 	container.Jobs = jobs
-	go func() {
-		if err := consumer.ConsumeQueueUntilContextDone(ctx, container.Settings.BillingJobsQueue, module.Billing.HandleSubscriptionBillingJobMessage, container.Resources.Logger); err != nil && ctx.Err() == nil {
-			container.Resources.Logger.Error("subscription billing job consumer stopped", "error", err.Error())
-		}
-	}()
+	go servicemodule.SuperviseWorkerUntilContextDone(ctx, container.Resources.Logger, "subscription billing job consumer", func(ctx context.Context) error {
+		return consumer.ConsumeQueueUntilContextDone(ctx, container.Settings.BillingJobsQueue, module.Billing.HandleSubscriptionBillingJobMessage, container.Resources.Logger)
+	})
+	return nil
 }

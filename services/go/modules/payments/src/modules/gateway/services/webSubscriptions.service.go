@@ -18,10 +18,10 @@ import (
 )
 
 var (
-	ErrWebBillingOnly   = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_BILLING_ONLY", "Subscriptions and trials can only be started on the web.")
-	ErrPlanNotAvailable = httpserver.NewApiError(http.StatusUnprocessableEntity, "PLAN_NOT_AVAILABLE", "This plan is not available yet.")
-	paystackStatuses    = map[string]string{"active": "active", "non-renewing": "non_renewing", "attention": "past_due", "cancelled": "canceled", "complete": "canceled", "completed": "canceled"}
-	downgradingStatuses = map[string]bool{"canceled": true}
+	ErrWebBillingOnly            = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_BILLING_ONLY", "Subscriptions and trials can only be started on the web.")
+	ErrPlanNotAvailable          = httpserver.NewApiError(http.StatusUnprocessableEntity, "PLAN_NOT_AVAILABLE", "This plan is not available yet.")
+	providerSubscriptionStatuses = map[string]string{"active": "active", "non-renewing": "non_renewing", "attention": "past_due", "cancelled": "canceled", "complete": "canceled", "completed": "canceled"}
+	downgradingStatuses          = map[string]bool{"canceled": true}
 )
 
 type WebSubscriptionCheckout struct {

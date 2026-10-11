@@ -255,7 +255,7 @@ var (
 		{Name: "owner_user_id", Type: field.TypeString, Size: 80},
 		{Name: "plan_code", Type: field.TypeString, Size: 40},
 		{Name: "interval", Type: field.TypeEnum, Enums: []string{"month", "year"}},
-		{Name: "channel", Type: field.TypeEnum, Enums: []string{"web_paystack", "apple_iap", "google_play", "admin_grant"}},
+		{Name: "channel", Type: field.TypeEnum, Enums: []string{"web_checkout", "apple_iap", "google_play", "admin_grant"}},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "awaiting_card", "trialing", "active", "past_due", "grace", "canceled", "downgraded", "expired", "trial_rejected"}, Default: "pending"},
 		{Name: "list_amount_minor", Type: field.TypeInt64},
 		{Name: "amount_minor", Type: field.TypeInt64},

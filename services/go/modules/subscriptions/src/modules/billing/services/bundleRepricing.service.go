@@ -13,7 +13,7 @@ func (billing Billing) RepriceLapsedBundles(ctx context.Context, limit int) int 
 	client := billing.Container.Client(billing.Container.Resources.Database)
 	now := billing.Container.Now().UTC()
 	rows, err := client.Subscription.Query().Where(subscription.DiscountKindEQ(subscription.DiscountKindBundle), subscription.StatusIn(liveStatuses()...),
-		subscription.ChannelIn(subscription.ChannelWebCheckout, subscription.ChannelWebCheckout), subscription.ProviderPlanCodeNEQ(""), subscription.BundleLapsesAtLTE(now.Add(24*time.Hour))).Limit(limit).All(ctx)
+		subscription.ChannelEQ(subscription.ChannelWebCheckout), subscription.ProviderPlanCodeNEQ(""), subscription.BundleLapsesAtLTE(now.Add(24*time.Hour))).Limit(limit).All(ctx)
 	if err != nil {
 		return 0
 	}

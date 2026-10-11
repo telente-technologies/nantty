@@ -15,7 +15,7 @@ func MountPayoutOnboardingRoutes(mux *http.ServeMux, application *gateway.Applic
 	mux.Handle("PUT /api/v1/payments/payout-onboarding/me/identity", requireUser(http.HandlerFunc(controller.SaveIdentity)))
 	mux.Handle("PUT /api/v1/payments/payout-onboarding/me/business", requireUser(http.HandlerFunc(controller.SaveBusiness)))
 	mux.Handle("POST /api/v1/payments/payout-onboarding/me/resolve", requireUser(http.HandlerFunc(controller.ResolveBankAccount)))
-	mux.Handle("PUT /api/v1/payments/payout-onboarding/me/bank", middlewares.RequireUserAccessTokenAndStepUp(application.Container.Resources.AccessVerifier)(http.HandlerFunc(controller.SaveBank)))
+	mux.Handle("PUT /api/v1/payments/payout-onboarding/me/bank", middlewares.RequireUserAccessTokenAndSingleUseStepUp(application.Container.Resources.AccessVerifier, application.Container.Resources.StaffVerifiers.SingleUse)(http.HandlerFunc(controller.SaveBank)))
 	mux.Handle("POST /api/v1/payments/payout-onboarding/me/retry", requireUser(http.HandlerFunc(controller.Retry)))
 	mux.Handle("POST /api/v1/payments/payout-onboarding/me/document-link", requireUser(http.HandlerFunc(controller.CreateDocumentLink)))
 	mux.Handle("POST /api/v1/payments/payout-onboarding/me/bank-validation", requireUser(http.HandlerFunc(controller.StartBankValidation)))

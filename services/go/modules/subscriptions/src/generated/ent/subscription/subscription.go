@@ -284,7 +284,7 @@ type Channel string
 
 // Channel values.
 const (
-	ChannelWebPaystack Channel = "web_paystack"
+	ChannelWebCheckout Channel = "web_checkout"
 	ChannelAppleIap    Channel = "apple_iap"
 	ChannelGooglePlay  Channel = "google_play"
 	ChannelAdminGrant  Channel = "admin_grant"
@@ -297,7 +297,7 @@ func (c Channel) String() string {
 // ChannelValidator is a validator for the "channel" field enum values. It is called by the builders before save.
 func ChannelValidator(c Channel) error {
 	switch c {
-	case ChannelWebPaystack, ChannelAppleIap, ChannelGooglePlay, ChannelAdminGrant:
+	case ChannelWebCheckout, ChannelAppleIap, ChannelGooglePlay, ChannelAdminGrant:
 		return nil
 	default:
 		return fmt.Errorf("subscription: invalid enum value for channel field: %q", c)

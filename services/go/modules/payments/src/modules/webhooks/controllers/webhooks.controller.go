@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"slices"
 	"strings"
 
 	"zudomart/modules/payments/src/integrations"
@@ -27,21 +26,9 @@ func (controller WebhooksController) readRawBody(writer http.ResponseWriter, req
 	return body, err
 }
 
-func (controller WebhooksController) sourceAllowed(request *http.Request) bool {
-	if request.PathValue("provider") == integrations.FlutterwaveProviderName {
-		return true
-	}
-	allowlist := controller.Application.Container.Settings.Paystack.WebhookIpAllowlist
-	if len(allowlist) == 0 {
-		return false
-	}
-	source := httpserver.ClientIP(request)
-	return slices.Contains(allowlist, source)
-}
-
 func (controller WebhooksController) ReceiveProviderWebhook(writer http.ResponseWriter, request *http.Request) {
-	if !controller.sourceAllowed(request) {
-		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, httpserver.ErrForbidden)
+	if request.PathValue("provider") != integrations.FlutterwaveProviderName {
+		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, httpserver.ErrNotFound)
 		return
 	}
 	body, err := controller.readRawBody(writer, request)

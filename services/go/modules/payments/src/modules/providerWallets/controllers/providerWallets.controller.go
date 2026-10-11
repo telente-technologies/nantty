@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	ledgermodels "zudomart/modules/ledger/src/modules/journal/models"
@@ -26,6 +27,12 @@ type walletResponse struct {
 	Limits   services.WalletDailyLimitView `json:"limits"`
 }
 
+// A wallet that is not provisioned yet is a normal state for a read, not a conflict: the clients show the verify prompt.
+type walletNotReadyResponse struct {
+	Wallet *models.ProviderWalletView `json:"wallet"`
+	Status string                     `json:"status"`
+}
+
 func (controller ProviderWalletsController) GetMyWallet(writer http.ResponseWriter, request *http.Request) {
 	principal, err := ledgerutils.RequirePrincipal(request)
 	if err != nil {
@@ -33,11 +40,15 @@ func (controller ProviderWalletsController) GetMyWallet(writer http.ResponseWrit
 		return
 	}
 	response, err := controller.readWallet(request, principal.UserId)
+	writer.Header().Set("Cache-Control", "no-store")
+	if errors.Is(err, services.ErrProviderWalletMissing) {
+		httpserver.WriteJsonResponse(writer, http.StatusOK, walletNotReadyResponse{Status: "not_ready"})
+		return
+	}
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
 	}
-	writer.Header().Set("Cache-Control", "no-store")
 	httpserver.WriteJsonResponse(writer, http.StatusOK, response)
 }
 

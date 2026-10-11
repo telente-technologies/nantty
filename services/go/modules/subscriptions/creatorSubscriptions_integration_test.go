@@ -110,7 +110,7 @@ func TestCreatorSubscriptionChargesSharesRenewsAndEnds(t *testing.T) {
 		t.Fatalf("one renewal: %d", renewed)
 	}
 	row = client.CreatorSubscription.GetX(ctx, row.ID)
-	if row.Status.String() != "active" || !row.CurrentPeriodStart.Equal(firstEnd) || harness.creatorEarnings(creator) != 78_800+80_000 {
+	if row.Status.String() != "active" || !row.CurrentPeriodStart.Equal(firstEnd) || harness.creatorEarnings(creator) != 78_800+78_880 {
 		t.Fatalf("renewal extends from the old period end and pays the creator: %s %v %d", row.Status, row.CurrentPeriodStart, harness.creatorEarnings(creator))
 	}
 	cancelled := harness.Call(http.MethodPost, "/api/v1/creator-subscriptions/"+subscriptionId+"/cancel", fanToken, "", nil)

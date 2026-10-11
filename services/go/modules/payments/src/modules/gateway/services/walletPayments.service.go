@@ -31,6 +31,9 @@ func LockUserWalletMoney(ctx context.Context, transaction *sql.Tx, userId string
 }
 
 func (gateway *PaymentGateway) PayIntentFromWallet(ctx context.Context, request models.WalletPaymentRequest) (models.PaymentIntentView, error) {
+	if err := gateway.refuseWalletWhenTheCheckoutWasAlreadyPaid(ctx, request); err != nil {
+		return models.PaymentIntentView{}, err
+	}
 	result, _, err := ledgerutils.RunIdempotentMoneyCommand(ctx, gateway.Container.Resources.Database, gateway.Container.Idempotency, ledgerutils.IdempotentCommand[walletPaymentResult]{
 		Scope: request.UserId + ":payments.payFromWallet", Key: request.IdempotencyKey, RequestHash: ledgerutils.HashRequestFingerprint(request.Reference),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (walletPaymentResult, error) {
@@ -65,6 +68,16 @@ func (gateway *PaymentGateway) payIntentFromWalletInTransaction(ctx context.Cont
 		return walletPaymentResult{}, err
 	}
 	if intent.Status != paymentintent.StatusPending {
+		return walletPaymentResult{}, ErrAlreadyPaid
+	}
+	paidElsewhere, err := client.PaymentIntent.Query().Where(
+		paymentintent.PurposeEQ(intent.Purpose), paymentintent.SubjectID(intent.SubjectID), paymentintent.StatusEQ(paymentintent.StatusSucceeded),
+		paymentintent.Not(paymentintent.FailureReasonHasPrefix("duplicate")),
+	).Exist(ctx)
+	if err != nil {
+		return walletPaymentResult{}, err
+	}
+	if paidElsewhere {
 		return walletPaymentResult{}, ErrAlreadyPaid
 	}
 	if intent.Provider != gateway.walletProviderName() || intent.Currency != walletCurrency || intent.Purpose == constants.PurposeCardVerification || intent.ConnectedAccountID != "" {
@@ -110,6 +123,9 @@ func (gateway *PaymentGateway) payIntentFromWalletInTransaction(ctx context.Cont
 	now := gateway.Container.Now().UTC()
 	succeeded, err := intent.Update().Where(paymentintent.Version(intent.Version)).AddVersion(1).SetStatus(paymentintent.StatusSucceeded).SetPaidAt(now).
 		SetProviderTransactionID("wallet:" + intent.Reference).SetProviderSettledAt(now).SetFailureReason("").Save(ctx)
+	if isSecondSettlementOfSubject(err) {
+		return walletPaymentResult{}, ErrAlreadyPaid
+	}
 	if err != nil {
 		return walletPaymentResult{}, err
 	}

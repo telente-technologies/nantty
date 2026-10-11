@@ -228,7 +228,7 @@ func withdrawCreatorEarnings(t *testing.T, harness *subscriptionsHarness, creato
 		Reference: "test-withdrawal:" + creator, Kind: "test.withdrawal", Description: "creator withdrew",
 		Lines: []ledgermodels.JournalLineRequest{
 			{Account: ledgermodels.CreatorEarningsPayableAccount(creator, "NGN"), Direction: ledgermodels.Debit, AmountMinor: amount},
-			{Account: ledgermodels.PlatformProviderBalanceAccount("paystack", "NGN"), Direction: ledgermodels.Credit, AmountMinor: amount},
+			{Account: ledgermodels.PlatformProviderBalanceAccount("flutterwave", "NGN"), Direction: ledgermodels.Credit, AmountMinor: amount},
 		},
 	})
 	if err != nil {

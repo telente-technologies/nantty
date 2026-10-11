@@ -39,8 +39,8 @@ func (controller ProviderWalletsController) audit(request *http.Request, action,
 func (controller ProviderWalletsController) ListDeadLetters(writer http.ResponseWriter, request *http.Request) {
 	query := request.URL.Query()
 	provider := query.Get("provider")
-	if provider != "" && provider != "paystack" && provider != "flutterwave" {
-		controller.fail(writer, request, httpserver.NewApiError(http.StatusBadRequest, "INVALID_PROVIDER", "provider must be paystack or flutterwave."))
+	if provider != "" && provider != "flutterwave" {
+		controller.fail(writer, request, httpserver.NewApiError(http.StatusBadRequest, "INVALID_PROVIDER", "provider must be flutterwave."))
 		return
 	}
 	limit, _ := strconv.Atoi(query.Get("limit"))
