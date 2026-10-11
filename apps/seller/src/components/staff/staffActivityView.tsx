@@ -83,7 +83,7 @@ export function StaffActivityView() {
           Export CSV
         </Button>
       </FilterBar>
-      {auditQuery.errorMessage ? <ErrorCallout message={auditQuery.errorMessage} onRetry={auditQuery.reload} /> : null}
+      {auditQuery.errorMessage ? <ErrorCallout error={auditQuery.error} message={auditQuery.errorMessage} onRetry={auditQuery.reload} /> : null}
       <Panel padded={false}>
         <DataTable<AuditLogEntry>
           caption="Staff activity"

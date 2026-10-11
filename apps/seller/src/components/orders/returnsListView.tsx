@@ -59,7 +59,7 @@ export function ReturnsListView() {
         onValueChange={setStatusFilter}
         options={[{ value: "all", label: "All" }, { value: "requested", label: "Requested" }, { value: "approved", label: "Approved" }, { value: "refunded", label: "Refunded" }, { value: "declined", label: "Declined" }]}
       />
-      {returnsList.errorMessage ? <ErrorCallout message={returnsList.errorMessage} onRetry={returnsList.reload} /> : null}
+      {returnsList.errorMessage ? <ErrorCallout error={returnsList.error} message={returnsList.errorMessage} onRetry={returnsList.reload} /> : null}
       <Panel padded={false}>
         <DataTable
           caption="Return requests"

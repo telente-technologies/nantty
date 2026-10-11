@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
+import { ErrorState, resolveCallerErrorCopy, type ErrorStateVariant } from "@zudomart/web-kit";
+
 import { ZudoIcon, type ZudoIconName } from "@/components/ui/zudoIcon";
 
 import styles from "./feedback.module.css";
@@ -32,11 +33,12 @@ export function Callout({ tone = "info", title, children, action }: { readonly t
   );
 }
 
-export function ErrorCallout({ title, message, onRetry }: { readonly title?: string; readonly message: ReactNode; readonly onRetry?: () => void }) {
+export function ErrorCallout({ title, message, onRetry, error, variant = "inline" }: { readonly title?: string; readonly message?: ReactNode; readonly onRetry?: () => void; readonly error?: unknown; readonly variant?: ErrorStateVariant }) {
+  const copy = resolveCallerErrorCopy(error, typeof message === "string" ? message : undefined);
   return (
-    <Callout tone="error" title={title} action={onRetry ? <Button size="small" onClick={onRetry}>Try again</Button> : undefined}>
-      {message}
-    </Callout>
+    <ErrorState variant={variant} error={error} kind={copy.kind} title={title} description={copy.description} onRetry={onRetry}>
+      {typeof message === "string" || message === undefined || error ? null : message}
+    </ErrorState>
   );
 }
 

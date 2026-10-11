@@ -95,7 +95,7 @@ export function PayoutScheduleForm() {
   const schedule = scheduleQuery.data;
   return (
     <Panel title="Withdrawal preferences" description="Withdraw by hand whenever you like, or let Zudomart send your available balance to your bank on a schedule.">
-      {scheduleQuery.errorMessage ? <ErrorCallout message={scheduleQuery.errorMessage} onRetry={scheduleQuery.reload} /> : null}
+      {scheduleQuery.errorMessage ? <ErrorCallout error={scheduleQuery.error} message={scheduleQuery.errorMessage} onRetry={scheduleQuery.reload} /> : null}
       {schedule && accountsQuery.data ? (
         <PayoutScheduleFormFields key={`${schedule.mode}-${schedule.nextRunAt ?? ""}`} schedule={schedule} accounts={accountsQuery.data.data} onSaved={(saved) => scheduleQuery.replaceData(() => saved)} />
       ) : !scheduleQuery.errorMessage ? (

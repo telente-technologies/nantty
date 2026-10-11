@@ -32,7 +32,7 @@ export function TeamSettingsSummary() {
       <div className={styles.formStack}>
         {hasFeature("team") ? null : <PlanLockedNotice feature="team" compact />}
         {staffQuery.isLoading && !members ? <LoadingBlock label="Loading team" /> : null}
-        {staffQuery.errorMessage ? <ErrorCallout message={staffQuery.errorMessage} onRetry={staffQuery.reload} /> : null}
+        {staffQuery.errorMessage ? <ErrorCallout error={staffQuery.error} message={staffQuery.errorMessage} onRetry={staffQuery.reload} /> : null}
         {members ? (
           <>
             {hasFeature("team") ? <StaffSeatMeter seatsInUse={countStaffSeatsInUse(members)} maximumSeats={limits.maxStaffSeats} /> : null}

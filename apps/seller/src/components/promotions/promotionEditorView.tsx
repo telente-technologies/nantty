@@ -30,7 +30,7 @@ export function PromotionEditorView({ promotionId }: { readonly promotionId: str
   const promotion = promotionQuery.data;
 
   if (!settings || (promotionId && promotionQuery.isLoading && !promotion)) return <LoadingBlock label="Loading promotion" />;
-  if (promotionId && !promotion) return <ErrorCallout message={promotionQuery.errorMessage ?? "This promotion could not be loaded."} onRetry={promotionQuery.reload} />;
+  if (promotionId && !promotion) return <ErrorCallout variant="section" error={promotionQuery.error} message={promotionQuery.errorMessage ?? "This promotion could not be loaded."} onRetry={promotionQuery.reload} />;
 
   async function savePromotion(input: PromotionInput) {
     setIsSaving(true);

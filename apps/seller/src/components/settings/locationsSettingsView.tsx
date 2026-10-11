@@ -66,7 +66,7 @@ export function LocationsSettingsView() {
           </Callout>
         ) : null}
         {locationsQuery.isLoading && locations.length === 0 ? <LoadingBlock label="Loading locations" /> : null}
-        {locationsQuery.errorMessage ? <ErrorCallout message={locationsQuery.errorMessage} onRetry={locationsQuery.reload} /> : null}
+        {locationsQuery.errorMessage ? <ErrorCallout error={locationsQuery.error} message={locationsQuery.errorMessage} onRetry={locationsQuery.reload} /> : null}
         <ul className={styles.listReset}>
           {locations.map((location) => (
             <li key={location.id} className={styles.rowCard}>

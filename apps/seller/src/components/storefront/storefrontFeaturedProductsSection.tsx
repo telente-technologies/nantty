@@ -71,7 +71,7 @@ export function StorefrontFeaturedProductsSection({ draft, onDraftChange }: { re
         </ol>
         <SearchInput label="Find a product to feature" placeholder={isFull ? "Remove one to add another" : "Search your active products"} value={searchText} onValueChange={setSearchText} />
         {isPicking && productSearch.isLoading ? <LoadingBlock label="Searching products" /> : null}
-        {isPicking && productSearch.errorMessage ? <ErrorCallout message={productSearch.errorMessage} onRetry={productSearch.reload} /> : null}
+        {isPicking && productSearch.errorMessage ? <ErrorCallout error={productSearch.error} message={productSearch.errorMessage} onRetry={productSearch.reload} /> : null}
         {isPicking && productSearch.data ? (
           <div className={styles.searchResults}>
             {productSearch.data.data.length === 0 ? <p className={styles.muted}>No active products match “{searchText}”.</p> : null}

@@ -55,7 +55,7 @@ export function PayoutOnboardingPanel({ context }: { readonly context: "seller" 
     await Promise.resolve();
   }, [reload]);
 
-  if (!state) return query.errorMessage ? <ErrorCallout message={query.errorMessage} onRetry={query.reload} /> : <LoadingBlock />;
+  if (!state) return query.errorMessage ? <ErrorCallout error={query.error} message={query.errorMessage} onRetry={query.reload} /> : <LoadingBlock />;
   if (verificationParam === "returned" || verificationParam === "mock") {
     return <Callout tone="success" title="Thanks, we've got your documents">You can close this window. The Zudomart tab you came from will pick up where you left off.</Callout>;
   }

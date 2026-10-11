@@ -61,7 +61,7 @@ export function BillingSettingsView() {
   }
 
   if (subscriptionQuery.isLoading && !details) return <LoadingBlock label="Loading your plan" />;
-  if (!details) return <ErrorCallout message={subscriptionQuery.errorMessage ?? "Your plan could not be loaded."} onRetry={subscriptionQuery.reload} />;
+  if (!details) return <ErrorCallout variant="section" error={subscriptionQuery.error} message={subscriptionQuery.errorMessage ?? "Your plan could not be loaded."} onRetry={subscriptionQuery.reload} />;
 
   return (
     <>

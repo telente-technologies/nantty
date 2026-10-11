@@ -98,7 +98,7 @@ export function WalletOverviewView() {
       <WalletTabs />
       <WalletVerificationCallout summary={walletQuery.data} />
       <PayoutSetupBanner />
-      {balancesQuery.data ? <WalletBalanceCards balances={balancesQuery.data} /> : balancesQuery.errorMessage ? <ErrorCallout message={balancesQuery.errorMessage} onRetry={balancesQuery.reload} /> : <LoadingBlock label="Loading balances" />}
+      {balancesQuery.data ? <WalletBalanceCards balances={balancesQuery.data} /> : balancesQuery.errorMessage ? <ErrorCallout error={balancesQuery.error} message={balancesQuery.errorMessage} onRetry={balancesQuery.reload} /> : <LoadingBlock label="Loading balances" />}
       <FinanceSummarySection summary={summaryQuery.data} isLoading={summaryQuery.isLoading} errorMessage={summaryQuery.errorMessage} onRetry={summaryQuery.reload} />
       <div className={styles.overviewGrid}>
         <WalletTransactionsPanel />
