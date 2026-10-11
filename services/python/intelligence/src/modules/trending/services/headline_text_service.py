@@ -2,6 +2,7 @@ import re
 from collections import Counter
 
 from src.constants.trend_category_taxonomy_constant import TrendCategory
+from src.utils.markup_neutralising_util import neutralise_markup
 
 URL_PATTERN = re.compile(r"https?://\S+|www\.\S+")
 MENTION_PATTERN = re.compile(r"@\w+")
@@ -74,7 +75,7 @@ NEUTRAL_TEMPLATE_CATEGORIES: frozenset[TrendCategory] = frozenset({"politics", "
 
 
 def clean_post_text_for_headline(text: str) -> str:
-    cleaned = URL_PATTERN.sub("", text)
+    cleaned = URL_PATTERN.sub("", neutralise_markup(text))
     cleaned = MENTION_PATTERN.sub("", cleaned)
     cleaned = PICTOGRAPH_PATTERN.sub("", cleaned)
     cleaned = SENSATIONAL_PATTERN.sub("", cleaned)

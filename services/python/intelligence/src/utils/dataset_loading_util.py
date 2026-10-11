@@ -13,6 +13,8 @@ from src.modules.events_ingestion.repositories.raw_event_parquet_repository impo
 )
 from src.repositories.feature_log_parquet_repository import FEATURE_LOG_ARROW_SCHEMA, FEATURE_LOGS_DATASET_NAME
 
+FEATURE_LOG_IDENTITY_COLUMNS = ["request_id", "surface", "item_id", "served_position", "logged_at"]
+
 
 def directory_exists(location: DatasetStorageLocation, directory_path: str) -> bool:
     file_info = location.filesystem.get_file_info(directory_path)
@@ -55,7 +57,11 @@ def load_feature_logs(
     )
     frame = pl.from_arrow(table)
     assert isinstance(frame, pl.DataFrame)
-    return frame.filter(pl.col("feature_schema_version") == feature_schema_version).with_row_index("row_id")
+    return (
+        frame.filter(pl.col("feature_schema_version") == feature_schema_version)
+        .unique(subset=FEATURE_LOG_IDENTITY_COLUMNS, keep="first", maintain_order=True)
+        .with_row_index("row_id")
+    )
 
 
 def extract_payload_text(json_path: str) -> pl.Expr:

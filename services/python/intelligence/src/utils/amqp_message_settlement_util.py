@@ -20,6 +20,7 @@ type RetryPublisher = Callable[[Message, str], Awaitable[object]]
 BROKER_HEADER_PREFIXES = ("x-death", "x-first-death", "x-last-death")
 MAXIMUM_REQUEUE_WITHOUT_PUBLISH = MAXIMUM_DELIVERY_ATTEMPTS
 REQUEUE_BACKOFF_SECONDS = 0.2
+MAXIMUM_QUEUE_MESSAGE_BYTES = 1_048_576
 
 requeue_without_publish_counts: dict[str, int] = {}
 
@@ -58,6 +59,12 @@ async def settle_queue_message(
     process_body: Callable[[str], Awaitable[bool]],
     publish_retry: RetryPublisher,
 ) -> SettlementOutcome:
+    if len(message.body) > MAXIMUM_QUEUE_MESSAGE_BYTES:
+        settlement_logger.warning(
+            "oversized_message_dead_lettered", extra={"queue": queue_name, "body_bytes": len(message.body)}
+        )
+        await message.reject(requeue=False)
+        return "dead_lettered"
     try:
         processed = await process_body(message.body.decode("utf-8", errors="replace"))
     except Exception as error:

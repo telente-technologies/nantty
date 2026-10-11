@@ -31,7 +31,7 @@ class SuspensionSuggestionService:
         if score < SUSPENSION_SUGGESTION_THRESHOLD:
             return False
         suggestion_id = hashlib.sha256(f"{account_id}|{source}|{format_utc_day_bucket(now)}".encode()).hexdigest()[:32]
-        claim_key = self.keyspace.event_deduplication_key(f"suggestion:{suggestion_id}")
+        claim_key = self.keyspace.internal_claim_key("suggestion", suggestion_id)
         try:
             claimed = await self.backend.claim_keys_if_absent([claim_key], SUGGESTION_DEDUPLICATION_TTL_SECONDS)
             if not claimed[0]:
@@ -56,4 +56,7 @@ class SuspensionSuggestionService:
             with contextlib.suppress(Exception):
                 await self.backend.delete_keys([claim_key])
             return False
+        if not self.publisher.delivers:
+            with contextlib.suppress(Exception):
+                await self.backend.delete_keys([claim_key])
         return self.publisher.delivers

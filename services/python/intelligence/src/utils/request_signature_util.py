@@ -47,6 +47,26 @@ def compute_request_signature_header_value(
     return f"{SIGNATURE_SCHEME_VERSION}={digest_hex}"
 
 
+def precheck_signature_headers(
+    timestamp_header_value: str | None,
+    nonce_header_value: str | None,
+    signature_header_value: str | None,
+    current_unix_time_seconds: float,
+    maximum_clock_skew_seconds: int,
+) -> str | None:
+    if not timestamp_header_value or not nonce_header_value or not signature_header_value:
+        return "missing_signature_headers"
+    if not TIMESTAMP_PATTERN.match(timestamp_header_value):
+        return "malformed_timestamp"
+    if not NONCE_PATTERN.match(nonce_header_value):
+        return "malformed_nonce"
+    if not SIGNATURE_PATTERN.match(signature_header_value):
+        return "malformed_signature"
+    if abs(current_unix_time_seconds - int(timestamp_header_value)) > maximum_clock_skew_seconds:
+        return "timestamp_outside_allowed_window"
+    return None
+
+
 def verify_signed_request_headers(
     accepted_shared_secrets: list[str],
     http_method: str,
@@ -58,17 +78,20 @@ def verify_signed_request_headers(
     current_unix_time_seconds: float,
     maximum_clock_skew_seconds: int,
 ) -> SignatureVerificationOutcome:
-    if not timestamp_header_value or not nonce_header_value or not signature_header_value:
-        return SignatureVerificationOutcome(False, "missing_signature_headers")
-    if not TIMESTAMP_PATTERN.match(timestamp_header_value):
-        return SignatureVerificationOutcome(False, "malformed_timestamp")
-    if not NONCE_PATTERN.match(nonce_header_value):
-        return SignatureVerificationOutcome(False, "malformed_nonce")
-    if not SIGNATURE_PATTERN.match(signature_header_value):
-        return SignatureVerificationOutcome(False, "malformed_signature")
-    clock_difference_seconds = abs(current_unix_time_seconds - int(timestamp_header_value))
-    if clock_difference_seconds > maximum_clock_skew_seconds:
-        return SignatureVerificationOutcome(False, "timestamp_outside_allowed_window")
+    precheck_failure = precheck_signature_headers(
+        timestamp_header_value,
+        nonce_header_value,
+        signature_header_value,
+        current_unix_time_seconds,
+        maximum_clock_skew_seconds,
+    )
+    if (
+        precheck_failure is not None
+        or not timestamp_header_value
+        or not nonce_header_value
+        or not signature_header_value
+    ):
+        return SignatureVerificationOutcome(False, precheck_failure or "missing_signature_headers")
     signature_matches_any_secret = False
     for shared_secret in accepted_shared_secrets:
         if not shared_secret:

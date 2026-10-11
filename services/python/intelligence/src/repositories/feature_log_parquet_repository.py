@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 import pyarrow as arrow
 
 from src.integrations.dataset_storage_integration import DatasetStorageLocation
+from src.utils.background_executor_util import run_in_background_executor
 from src.utils.parquet_storage_util import write_parquet_table_atomically
 
 FEATURE_LOGS_DATASET_NAME = "feature_logs"
@@ -47,6 +48,7 @@ class FeatureLogParquetSink:
         self.maximum_buffered_rows = maximum_buffered_rows
         self._buffered_rows: list[LoggedFeatureRow] = []
         self.dropped_row_count = 0
+        self.reported_dropped_row_count = 0
 
     def append_feature_rows(self, rows: Sequence[LoggedFeatureRow]) -> None:
         available_capacity = self.maximum_buffered_rows - len(self._buffered_rows)
@@ -92,12 +94,23 @@ class FeatureLogParquetSink:
         self.dropped_row_count += max(len(rows) - room, 0)
         self._buffered_rows = kept + self._buffered_rows
 
+    def report_new_dropped_rows(self) -> int:
+        newly_dropped = self.dropped_row_count - self.reported_dropped_row_count
+        if newly_dropped > 0:
+            feature_log_logger.warning(
+                "feature_log_rows_dropped",
+                extra={"dropped_since_last_flush": newly_dropped, "dropped_row_count": self.dropped_row_count},
+            )
+            self.reported_dropped_row_count = self.dropped_row_count
+        return newly_dropped
+
     async def flush_buffered_rows(self) -> int:
+        self.report_new_dropped_rows()
         rows = self.take_buffered_rows()
         if not rows:
             return 0
         try:
-            return await asyncio.to_thread(self.write_rows_synchronously, rows)
+            return await run_in_background_executor(self.write_rows_synchronously, rows)
         except asyncio.CancelledError:
             self.rebuffer_rows(rows)
             raise

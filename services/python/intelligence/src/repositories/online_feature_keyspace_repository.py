@@ -40,6 +40,9 @@ class OnlineFeatureKeyspace:
     def event_deduplication_key(self, event_id: str) -> str:
         return f"{self.prefix}:event:{event_id}"
 
+    def internal_claim_key(self, namespace: str, claim_id: str) -> str:
+        return f"{self.prefix}:claim:{namespace}:{claim_id}"
+
     def affinity_base_key(self, affinity_kind: str, user_id: str) -> str:
         return f"{self.prefix}:aff:{affinity_kind}:{user_id}"
 
@@ -99,6 +102,9 @@ class OnlineFeatureKeyspace:
 
     def consent_key(self, user_id: str) -> str:
         return f"{self.prefix}:consent:{user_id}"
+
+    def pending_dataset_erasure_key(self) -> str:
+        return f"{self.prefix}:erasure:pending"
 
     def behaviour_counter_key(self, account_id: str, day_bucket: str) -> str:
         return f"{self.prefix}:behaviour:{day_bucket}:{account_id}"

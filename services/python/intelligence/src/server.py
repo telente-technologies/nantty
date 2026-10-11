@@ -17,10 +17,12 @@ def run_intelligence_server() -> None:
         "http": "httptools",
         "access_log": False,
         "server_header": False,
-        "proxy_headers": False,
+        "proxy_headers": bool(settings.trusted_proxy_ips),
         "timeout_keep_alive": 30,
         "log_config": None,
     }
+    if settings.trusted_proxy_ips:
+        shared_options["forwarded_allow_ips"] = settings.trusted_proxy_ips
     if settings.server_workers > 1:
         uvicorn.run(APPLICATION_FACTORY_IMPORT_PATH, factory=True, workers=settings.server_workers, **shared_options)
         return

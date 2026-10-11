@@ -14,6 +14,7 @@ from src.modules.risk.services.risk_rules_service import (
     ORDER_RISK_FEATURE_SCHEMA_VERSION,
     build_order_risk_feature_values,
     combine_rule_weights_with_noisy_or,
+    convert_money_to_usd_or_none,
     evaluate_account_event_risk_rules,
     evaluate_order_risk_rules,
     evaluate_payout_risk_rules,
@@ -106,7 +107,12 @@ class RiskScoringService:
         if request.order is not None:
             feature_values = build_order_risk_feature_values(request.order, usd_rate_lookup)
             bundle = loaded_model.bundle if loaded_model else None
-            if isinstance(bundle, MultiHeadClassifierBundle) and bundle.feature_names == ORDER_RISK_FEATURE_NAMES:
+            amount_known = convert_money_to_usd_or_none(request.order.amount, usd_rate_lookup) is not None
+            if (
+                amount_known
+                and isinstance(bundle, MultiHeadClassifierBundle)
+                and bundle.feature_names == ORDER_RISK_FEATURE_NAMES
+            ):
                 try:
                     probabilities = bundle.predict_head_probabilities(np.asarray([feature_values], dtype=np.float64))
                     model_score = float(probabilities["fraud"][0])
