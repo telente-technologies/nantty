@@ -204,6 +204,12 @@ func (service AccountEnforcementService) SetAccountRole(ctx context.Context, acc
 		if granted {
 			roles = append(roles, role)
 		}
-		return tx.Account.UpdateOneID(accountId).SetRoles(roles).Exec(ctx)
+		if err := tx.Account.UpdateOneID(accountId).SetRoles(roles).Exec(ctx); err != nil {
+			return err
+		}
+		if granted {
+			return nil
+		}
+		return revokeAllActiveSessionsInTransaction(ctx, tx, accountId, service.Container.Now())
 	})
 }

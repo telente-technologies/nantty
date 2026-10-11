@@ -14,6 +14,8 @@ type AccessTokenClaims struct {
 	SessionId  string
 	Roles      []string
 	AgeBracket string
+	Scope      string
+	TokenId    string
 }
 
 type AccessTokenIssuer struct {
@@ -44,16 +46,23 @@ func (issuer *AccessTokenIssuer) SignTokenForAudience(audience string, timeToLiv
 		return "", err
 	}
 	issuedAt := issuer.now()
+	tokenId := claims.TokenId
+	if tokenId == "" {
+		tokenId = uuid.NewString()
+	}
 	builder := jwt.NewBuilder().
 		Issuer(issuer.issuer).
 		Audience([]string{audience}).
 		Subject(claims.AccountId).
-		JwtID(uuid.NewString()).
+		JwtID(tokenId).
 		IssuedAt(issuedAt).
 		NotBefore(issuedAt).
 		Expiration(issuedAt.Add(timeToLive)).
 		Claim("sid", claims.SessionId).
 		Claim("roles", claims.Roles)
+	if claims.Scope != "" {
+		builder = builder.Claim("scope", claims.Scope)
+	}
 	if claims.AgeBracket != "" {
 		builder = builder.Claim("age", claims.AgeBracket)
 	}

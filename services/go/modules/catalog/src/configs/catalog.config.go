@@ -69,6 +69,9 @@ func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		AdsInternalSecret:      reader.ReadStringOrDefault("ADS_INTERNAL_SHARED_SECRET", ""),
 	}
 	settings.DataEncryptionKey = ReadDataEncryptionKey(reader, settings.IsProduction())
+	if settings.IsProduction() {
+		settings.RedisUrl = reader.ReadRequiredString("CATALOG_REDIS_URL")
+	}
 	return settings
 }
 

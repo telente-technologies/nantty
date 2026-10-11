@@ -117,8 +117,9 @@ func nonceMatches(claimed, rawNonce string) bool {
 		return false
 	}
 	hashed := sha256.Sum256([]byte(rawNonce))
-	return subtle.ConstantTimeCompare([]byte(claimed), []byte(rawNonce)) == 1 ||
-		subtle.ConstantTimeCompare([]byte(strings.ToLower(claimed)), []byte(hex.EncodeToString(hashed[:]))) == 1
+	rawMatch := subtle.ConstantTimeCompare([]byte(claimed), []byte(rawNonce))
+	hashedMatch := subtle.ConstantTimeCompare([]byte(strings.ToLower(claimed)), []byte(hex.EncodeToString(hashed[:])))
+	return rawMatch|hashedMatch == 1
 }
 
 func extractVerifiedIdentity(provider Provider, token jwt.Token) VerifiedIdentity {

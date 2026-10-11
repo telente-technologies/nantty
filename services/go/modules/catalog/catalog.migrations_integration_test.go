@@ -16,6 +16,7 @@ import (
 	"zudomart/platform/config"
 	"zudomart/platform/health"
 	"zudomart/platform/postgres"
+	"zudomart/platform/sellerplans"
 	"zudomart/platform/servicemodule"
 )
 
@@ -52,6 +53,7 @@ func startAgainstFreshSchemaWith(t *testing.T, collaborators src.Collaborators, 
 		adjust(&settings)
 	}
 	dependencies := servicemodule.Dependencies{DeployableName: "test", Logger: slog.Default(), Environment: config.NewEnvironmentReader(), Health: health.NewRegistryForService("test")}
+	sellerplans.ConfigureFromEnvironment(config.NewEnvironmentReader(), false)
 	module, err := src.StartCatalogModuleWithSettings(ctx, settings, collaborators, dependencies)
 	if err != nil {
 		t.Fatalf("start catalog: %v", err)

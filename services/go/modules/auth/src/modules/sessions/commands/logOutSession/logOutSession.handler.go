@@ -7,6 +7,8 @@ import (
 
 	"zudomart/modules/auth/src/container"
 	authErrors "zudomart/modules/auth/src/errors"
+	"zudomart/modules/auth/src/events"
+	"zudomart/modules/auth/src/generated/ent"
 	"zudomart/modules/auth/src/generated/ent/session"
 )
 
@@ -20,9 +22,18 @@ func (application Handler) Execute(ctx context.Context, command Command) error {
 	if accountErr != nil || sessionErr != nil {
 		return authErrors.ErrInvalidRefreshToken
 	}
-	return application.Client.Session.Update().
-		Where(session.ID(parsedSessionId), session.AccountID(parsedAccountId), session.RevokedAtIsNil()).
-		SetRevokedAt(application.Now()).
-		SetRevokedReason(session.RevokedReasonLogout).
-		Exec(ctx)
+	return application.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		now := application.Now()
+		revoked, err := tx.Session.Update().
+			Where(session.ID(parsedSessionId), session.AccountID(parsedAccountId), session.RevokedAtIsNil()).
+			SetRevokedAt(now).
+			SetRevokedReason(session.RevokedReasonLogout).
+			Save(ctx)
+		if err != nil || revoked == 0 {
+			return err
+		}
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, "session.revoked", parsedAccountId.String(), now, events.SessionRevokedEventData{
+			AccountId: parsedAccountId.String(), SessionId: parsedSessionId.String(), Reason: "logout",
+		})
+	})
 }

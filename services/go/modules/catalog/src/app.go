@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+	"zudomart/platform/sellingeligibility"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -72,6 +73,7 @@ type Module struct {
 func NewCatalogModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
 	settings := configs.ReadCatalogSettingsFromEnvironment(dependencies.Environment)
 	sellerplans.ConfigureFromEnvironment(dependencies.Environment, settings.IsProduction())
+	sellingeligibility.ConfigureFromEnvironment(dependencies.Environment, settings.IsProduction())
 	if err := dependencies.Environment.CombinedConfigurationError(); err != nil {
 		return nil, err
 	}
@@ -141,7 +143,7 @@ func (module *Module) openIdempotencyStore(settings configs.CatalogSettings, log
 	}
 	options, err := redis.ParseURL(settings.RedisUrl)
 	if err != nil {
-		logger.Warn("INVENTORY_REDIS_URL is invalid: mutations fall back to header validation only", slog.Any("error", err))
+		logger.Warn("CATALOG_REDIS_URL is invalid: mutations fall back to header validation only", slog.Any("error", err))
 		return nil
 	}
 	client := redis.NewClient(options)

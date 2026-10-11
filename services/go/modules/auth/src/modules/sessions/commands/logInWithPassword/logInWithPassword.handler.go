@@ -3,6 +3,7 @@ package loginwithpassword
 import (
 	"context"
 	"strings"
+	"time"
 
 	"zudomart/modules/auth/src/container"
 	authErrors "zudomart/modules/auth/src/errors"
@@ -11,26 +12,36 @@ import (
 	"zudomart/modules/auth/src/generated/ent/account"
 	"zudomart/modules/auth/src/services"
 	"zudomart/modules/auth/src/types"
+	"zudomart/platform/loginthrottle"
 	"zudomart/platform/usernames"
 )
+
+var passwordFailures = loginthrottle.New(10, 15*time.Minute, 15*time.Minute)
 
 type Handler struct {
 	*container.Container
 }
 
 func (application Handler) Execute(ctx context.Context, command Command) (types.AuthenticationResult, error) {
+	throttleKey, _ := normalizeLoginIdentifier(command.Identifier)
+	if passwordFailures.LockedFor(throttleKey) > 0 {
+		return types.AuthenticationResult{}, authErrors.ErrTooManyLoginAttempts
+	}
 	existing, err := application.findActiveAccountByEmailOrUsername(ctx, command.Identifier)
 	if err != nil {
 		return types.AuthenticationResult{}, err
 	}
 	if existing == nil || existing.PasswordHash == nil {
 		application.Passwords.SpendEquivalentTimeWhenAccountIsMissing(command.Password)
+		passwordFailures.RecordFailure(throttleKey)
 		return types.AuthenticationResult{}, authErrors.ErrInvalidCredentials
 	}
 	matches, err := application.Passwords.VerifyPasswordAgainstArgon2idHash(command.Password, *existing.PasswordHash)
 	if err != nil || !matches {
+		passwordFailures.RecordFailure(throttleKey)
 		return types.AuthenticationResult{}, authErrors.ErrInvalidCredentials
 	}
+	passwordFailures.RecordSuccess(throttleKey)
 	if existing.Status == account.StatusBanned {
 		return types.AuthenticationResult{}, authErrors.ErrAccountBanned
 	}
