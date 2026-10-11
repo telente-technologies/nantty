@@ -13,7 +13,7 @@ export const liveSafetyService = {
   reportGuest: (liveId: ID, guestUserId: ID, reason: GuestReportReason, details: string) =>
     sendRequestToStudioServer<{ readonly id: ID; readonly status: "received" }>("/api/v1/reports", {
       method: "POST",
-      body: { targetType: "user", targetId: guestUserId, reportedUserId: guestUserId, reason, details: [`Reported from the control room of live ${liveId}.`, details].filter(Boolean).join(" ") },
+      body: { targetType: "user", targetId: guestUserId, reportedUserId: guestUserId, reason, details: [`Reported from the control room of live ${liveId}.`, details].filter(Boolean).join(" ").slice(0, 500) },
       idempotencyKey: createIdempotencyKey("report"),
     }),
 };

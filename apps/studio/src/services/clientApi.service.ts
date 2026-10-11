@@ -30,6 +30,7 @@ export interface StudioRequestOptions {
   readonly query?: Record<string, string | number | boolean | null | undefined>;
   readonly body?: unknown;
   readonly idempotencyKey?: string;
+  readonly stepUpToken?: string;
   readonly signal?: AbortSignal;
 }
 
@@ -54,6 +55,7 @@ export async function sendRequestToStudioServer<Payload>(apiPath: string, option
   const headers: Record<string, string> = { Accept: "application/json" };
   if (method !== "GET" && currentCsrfToken) headers["X-CSRF-Token"] = currentCsrfToken;
   if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
+  if (options.stepUpToken) headers["X-Step-Up-Token"] = options.stepUpToken;
   let body: BodyInit | undefined;
   if (options.body !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -82,7 +84,7 @@ export async function sendRequestToStudioServer<Payload>(apiPath: string, option
   }
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    throw new StudioRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.");
+    throw new StudioRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? `The request failed (HTTP ${response.status}). Try again.`);
   }
   if (response.status === 204) return undefined as Payload;
   return (await response.json()) as Payload;

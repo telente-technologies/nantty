@@ -37,7 +37,7 @@ export interface OverlayScenePayload {
 
 const toLiveComment = (wire: LiveCommentWire): LiveComment => ({ id: wire.id, authorName: wire.author.name || wire.author.username, text: wire.text, createdAt: wire.createdAt });
 
-const buildEarnings = (coins = 0, giftCount = 0): LiveEarnings => ({ coins, giftCount, newSubscribers: 0, topGifters: [], battles: [] });
+const buildEarnings = (coins = 0, giftCount = 0): LiveEarnings => ({ coins, giftCount, topGifters: [] });
 
 const toLiveSession = (wire: StudioLiveWire): LiveSession => ({
   id: wire.id,
@@ -97,6 +97,7 @@ export const livesService = {
       peakViewers: live.peakViewers,
       hlsUrl: live.playbackUrl,
       storeId: live.storeId ?? null,
+      hostRanking: live.hostRanking ?? null,
       earnings: toEarnings(stats),
     };
   },
