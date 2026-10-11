@@ -8,11 +8,12 @@
     "start": "next start --port 3200",
     "typecheck": "tsc --noEmit",
     "test:contracts": "tsx --test src/contracts/*.test.ts",
+    "test:units": "tsx --test src/utils/*.test.ts",
     "lint": "eslint -c ../../packages/eslintConfig/next.config.mjs src"
   },
   "dependencies": {
-    "@paystack/inline-js": "^2.26.0",
     "@phosphor-icons/react": "2.1.10",
+    "@zudomart/chat-crypto": "workspace:*",
     "@zudomart/design-tokens": "workspace:*",
     "@zudomart/web-kit": "workspace:*",
     "next": "^16.4.0",

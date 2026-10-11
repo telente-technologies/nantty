@@ -25,6 +25,11 @@ Body: `{ identifier: string (email or username), password: string }`
 Response 200: `{ accessToken, refreshToken, expiresIn, tokenType: "Bearer", user: CurrentUserDto, isNewUser }`
 Errors: 401 INVALID_CREDENTIALS, 429
 
+### POST /api/v1/auth/step-up
+Re-confirms the signed-in user before money leaves a wallet or a payout destination changes. Body: `{ password }` for accounts with a password, or `{ otpToken }` from `POST /auth/otp/send` + `/auth/otp/verify` with `purpose: "login"` to the account's own email (accounts without a password).
+Response 200: `{ stepUpToken, expiresIn: 300, method: "password" | "emailCode" }`. The token is bound to the caller's user and session; send it as `X-Step-Up-Token`.
+Errors: 400 STEP_UP_PROOF_REQUIRED, 401 STEP_UP_FAILED, 429 RATE_LIMITED.
+
 ### POST /api/v1/auth/refresh
 Body: `{ refreshToken }` → 200 `{ accessToken, refreshToken, expiresIn, tokenType }`. Errors: 401 INVALID_REFRESH_TOKEN, 401 REFRESH_TOKEN_REUSED (session revoked).
 
@@ -56,7 +61,7 @@ Response 200: `SellerAccess` (src/types/sellerAccess.type.ts)
   "storeName": "string | null",
   "verification": { "status": "unverified|pending|verified|suspended|revoked", "color": "GOLD", "tier": "PRO|PREMIUM|null", "badgeVisible": true },
   "subscription": { "status": "trialing|active|past_due|cancelled|expired|suspended", "plan": "PRO|BUSINESS", "currentPeriodEnd": "ISO|null" },
-  "entitlements": { "maxStaffSeats": 25, "maxLocations": 10, "reducedEscrowFee": true, "priorityPlacement": true, "adCredits": { "amountMinor": 5000000, "currency": "NGN" }, "apiAccess": true },
+  "entitlements": { "maxStaffSeats": 25, "maxLocations": 10, "reducedEscrowFee": true, "adCredits": { "amountMinor": 5000000, "currency": "NGN" }, "apiAccess": true },
   "role": "owner|manager|inventory|sales|accountant|null",
   "permissions": ["orders:view", "..."] | null
 }
@@ -75,7 +80,7 @@ Permission: store member. Response 200: `SubscriptionDetails` (`subscription`, `
 
 ### POST /api/v1/seller/subscription/checkout
 Permission: billing:manage (owner). Body: `{ planId }`.
-Response 201: `{ authorizationUrl, accessCode, reference, provider: "paystack" }`. The dashboard opens the Paystack Popup with `accessCode` and falls back to redirecting to `authorizationUrl`. The callback URL must be `${DASHBOARD_ORIGIN}/billing-checkout/callback` (Paystack appends `reference`/`trxref`).
+Response 201: `{ checkoutUrl, authorizationUrl, reference, provider: "flutterwave" | "paystack" }`. The dashboard redirects to `checkoutUrl ?? authorizationUrl` (hosted checkout, host allowlisted; no inline script for either provider). The redirect back is display-only: the callback page ignores `status` and polls verify every 3 s, pausing offline and showing "still confirming" after 2 min. The callback URL must be `${DASHBOARD_ORIGIN}/billing-checkout/callback` (Paystack appends `reference`/`trxref`).
 Errors: 404 PLAN_NOT_FOUND. Verification is not required. Switching plans uses the same endpoint.
 
 ### POST /api/v1/seller/subscription/verify
@@ -283,7 +288,7 @@ Response 200: `{ id, type, status: "processing"|"ready"|"failed", purpose, width
 
 Online orders are the marketplace orders customers place in the Zudomart mobile app — the same records the app shows; the dashboard never creates orders. Types: `OnlineOrder`, `OrderTimelineEvent`, `OrderInternalNote`, `OrderRefund`, `OrderDeliveryDetails`, `ReturnRequest`, `OrderDispute` in `apps/seller/src/types/order.type.ts`; `DeliveryStatus` in `apps/seller/src/types/delivery.type.ts`. All resources are scoped to the caller's store; any id from another store returns 404. Every mutation appends an `OrderTimelineEvent` (visible to the seller) and an audit log entry, and notifies the buyer in the app where noted. Not plan-gated.
 
-`OnlineOrder` (additions to the previous shape): `invoiceNumber` (e.g. `INV-10482`), `buyer.phone: string | null`, `paymentStatus: "paid" | "partially_refunded" | "refunded"`, `paymentProvider: "paystack"`, `paymentMode: "escrow" | "direct"` (chosen by the buyer per seller group at checkout; direct only for verified stores, the seller is paid right away and refunds are issued by the seller via `/refunds`), `escrowFee: Money`, `escrowFeeBasisPoints` (150, or 100 on Business), `paymentProcessingFee: Money` (Paystack's fee, charged to the seller on every order; escrow orders also carry the escrow fee, both on the seller-group total including shipping and deducted at payout), `paymentReference` (the provider transaction reference), `paidAt`, `refundedAmount: Money`, `refunds: OrderRefund[]`, `delivery: { status: DeliveryStatus, riderName, riderPhone, estimatedDeliveryAt, attempts, lastAttemptNote }`, `timeline: OrderTimelineEvent[]` (oldest first; `kind` ∈ placed | paid | accepted | rejected | processing | ready | shipped | delivery_failed | delivered | completed | cancelled | returned | refunded | disputed | note), `notes: OrderInternalNote[]` (seller-only, never shown to the buyer), `conversationId: string | null` (the order-linked chat, if one exists).
+`OnlineOrder` (additions to the previous shape): `invoiceNumber` (e.g. `INV-10482`), `buyer.phone: string | null`, `paymentStatus: "paid" | "partially_refunded" | "refunded"`, `paymentProvider: "paystack" | "flutterwave"`, `paymentMode: "escrow" | "direct"` (chosen by the buyer per seller group at checkout; direct only for verified stores, the seller is paid right away and refunds are issued by the seller via `/refunds`), `escrowFee: Money`, `escrowFeeBasisPoints` (150, or 100 on Business), `paymentProcessingFee: Money` (Paystack's fee, charged to the seller on every order; escrow orders also carry the escrow fee, both on the seller-group total including shipping and deducted at payout), `paymentReference` (the provider transaction reference), `paidAt`, `refundedAmount: Money`, `refunds: OrderRefund[]`, `delivery: { status: DeliveryStatus, riderName, riderPhone, estimatedDeliveryAt, attempts, lastAttemptNote }`, `timeline: OrderTimelineEvent[]` (oldest first; `kind` ∈ placed | paid | accepted | rejected | processing | ready | shipped | delivery_failed | delivered | completed | cancelled | returned | refunded | disputed | note), `notes: OrderInternalNote[]` (seller-only, never shown to the buyer), `conversationId: string | null` (the order-linked chat, if one exists).
 
 Status model (`OnlineOrderStatus`): `new` (paid into escrow, awaiting the seller) → `processing` (accepted) → `ready` (packed, awaiting courier) → `shipped` → `delivered` → `completed` (buyer confirmed or auto-release; escrow released). Side states: `cancelled` (rejected/cancelled before shipping), `returned`, `refunded`, `disputed`. `delivery.status` is kept in step: new→pending, processing→preparing, ready→ready_for_pickup, shipped→in_transit (or failed after a failed attempt), delivered/completed→delivered, cancelled/refunded→cancelled, returned→returned.
 
@@ -463,27 +468,39 @@ Permission: orders:view. Response 200: `ShippingCalculationSnapshot` — destina
 
 ## Messages (customer conversations)
 
-These are the same buyer↔store conversations as the Zudomart mobile app (one conversation per buyer per store, optionally linked to an order); replies sent from the dashboard arrive in the app in real time and vice versa. Types in `apps/seller/src/types/conversation.type.ts`: `Conversation`, `ConversationMessage`, `ConversationThread`. Seller-side messages carry the acting staff member's name in `senderName` but are shown to the buyer as the store. Not plan-gated. Message bodies are plain text; the API must strip/escape markup and rate-limit sends.
+These are the same buyer↔store conversations as the Zudomart mobile app (one conversation per buyer per store, optionally linked to an order). They are **end-to-end encrypted**: each store conversation is a sender-key group of the customer's devices plus the devices of every current team member with `messages:manage`. The server and Zudomart staff only see ciphertext and routing metadata. Removing a team member or their inbox permission rotates the keys on the next message; new team members only see messages sent after they join (no history re-share). Seller-side messages carry the acting staff member's name in `senderName`; the buyer sees them as the store. Not plan-gated. Types in `apps/seller/src/types/conversation.type.ts`.
+
+The dashboard registers a device for the signed-in staff member through the key directory (`/api/v1/chat/keys/...`, forwarded by the BFF for `messages:manage` only). Keys and decrypted previews stay in this browser's sealed IndexedDB store and are deleted on sign-out. There are no quick replies, macros or auto-replies; anything like that must be inserted in the browser and sent encrypted.
 
 ### GET /api/v1/seller/conversations
 Permission: messages:manage
-Query: filter? ("all" default | "unread" | "orders" — order-linked only), q? (customer name, username, order number, last message text), cursor?, limit? (≤200, default 50)
-Response 200: `CursorPage<Conversation> & { unreadConversationsCount: number }`, most recently updated first. `unreadCount` = customer messages the store has not read.
+Query: filter? ("all" default | "unread" | "orders"), cursor?, limit? (≤200, default 50). There is no server-side text search: the dashboard filters customer name, username, order number and decrypted previews in the browser.
+Response 200: `CursorPage<Conversation> & { unreadConversationsCount: number }`. `lastMessage` = `{ kind, from, createdAt }` (no text).
 
 ### GET /api/v1/seller/conversations/:conversationId
-Permission: messages:manage
-Response 200: `ConversationThread` = `{ conversation, messages: ConversationMessage[] }` (oldest first; the API may cap at the latest 200 and add cursor paging later).
+Permission: messages:manage. Query: cursor?, after?, limit? (≤200).
+Response 200: `{ conversation, messages: ConversationMessage[], nextCursor }`, oldest first. `conversation.customerLastReadAt` (ISO or null) drives the "Seen" mark on store replies. With `after=<messageId>` only newer messages are returned (used for realtime catch-up and polling). Each message is the chat `MessageView` (`kind`, `senderId`, `encryption`, `media`, `document {url}`, `linkPreview` sealed, `expiresAt`) plus `from` and `senderName`. `control` messages (reactions, poll votes, live-location updates) are hidden and folded in the browser.
 Errors: 404 CONVERSATION_NOT_FOUND.
 
+### GET /api/v1/seller/conversations/:conversationId/recipients
+Permission: messages:manage. Response 200: `{ userIds, storeTeamUserIds }`: the customer plus the current inbox team, used as the encryption recipients.
+
 ### POST /api/v1/seller/conversations/:conversationId/messages
-Permission: messages:manage
-Body: `{ body: string 1–2000 }`
-Response 201: `ConversationMessage` (from "seller"). Updates the conversation's lastMessage/updatedAt and pushes a notification to the buyer.
-Errors: 400 VALIDATION_FAILED, 404, 403 CUSTOMER_BLOCKED_STORE, 429.
+Permission: messages:manage. Header: Idempotency-Key (dedupes retries).
+Body: `{ kind?, encryption: { deviceId, ciphertext, protocol? }, mediaId?, durationSeconds?, linkPreview? }`.
+Response 201: `ConversationMessage` (from "seller").
+Errors: 422 PLAINTEXT_NOT_ACCEPTED (any `body`, `text`, `location`, `poll`, `document` or `sharedContent`), 422 ENCRYPTION_REQUIRED, 403 NOT_STORE_INBOX_MEMBER, 403 DEVICE_NOT_REGISTERED, 404, 429.
 
 ### POST /api/v1/seller/conversations/:conversationId/read
-Permission: messages:manage. Body: none. Response 200: `Conversation` with `unreadCount` 0 (marks every customer message read for the store).
+Permission: messages:manage. Body: none. Response 200: `Conversation` with `unreadCount` 0. Emits a realtime `read` event (readerId = store id) to the customer and every inbox teammate.
 Errors: 404.
+
+### Attachments and shared cards
+- Attachments are encrypted in the browser (`encryptAttachment`), uploaded with `POST /api/v1/media/uploads` `{ mimeType: "application/vnd.zudomart.encrypted", purpose: "chat", sizeBytes, sha256 }` (≤100 MB), then sent as `kind: "image"|"video"|"document"` with `mediaId`; the key/pointer travels only inside the ciphertext. Staff with `messages:manage` may use the chat upload paths without `media:upload`. A failed upload is abandoned with `DELETE /api/v1/media/uploads/:uploadId` and nothing is sent.
+- Product cards: `kind: "shared"` with `sharedContent {kind:"product", id}` inside the ciphertext; rendered with `GET /api/v1/chat/content?kind=product&id=` (messages:manage). Order cards: `kind: "shared"` with `sharedContent {kind:"order", id}` inside the ciphertext, rendered everywhere with `GET /api/v1/chat/content?kind=order&id=`. Social asks commerce (`GET /api/v1/internal/share-cards/order/:id?viewerId=`), which returns a minimal summary (order number, item count, status, total, first image) only to the buyer or that store's team with `orders:view`; anyone else gets `availability: "unavailable"`.
+
+### Realtime (dashboard BFF only)
+`POST /bff/realtime` (CSRF-protected, messages:manage) exchanges the session for a short-lived realtime token (`POST /api/v1/auth/realtime-token`: audience `zudomart-realtime`, scope `realtime`, 90 s, bound to the session; refused by every HTTP service and the gateway) and returns `{ url, realtimeToken }` for the realtime socket (`SELLER_REALTIME_URL`, default `<SELLER_API_URL>/ws`). 404 REALTIME_UNAVAILABLE in mock mode; the dashboard then polls. One browser tab (Web Locks leader) holds the socket and the secure chat device and relays events to other tabs over BroadcastChannel. Inbox staff can subscribe to `conversation:<id>` (typing, read, message events) and receive `message.created` fan-out on `user:<id>`; typing frames show the store's name, never the staff member's.
 
 ## Customers (CRM)
 
@@ -704,11 +721,12 @@ Response 200: CursorPage<Payout>, newest first.
 
 ### POST /api/v1/seller/wallet/payouts
 Permission: wallet:withdraw (owner only)
-Headers: Idempotency-Key required (replays return the original response with `Idempotent-Replayed: true`)
+Headers: Idempotency-Key required (replays return the original response with `Idempotent-Replayed: true`); `X-Step-Up-Token` required (403 STEP_UP_REQUIRED without a fresh one for this session)
 Body: { amountMinor: integer > 0, ≥ minimumPayout, accountId: string (one of the store's verified payout accounts) }
 Response 201: Payout (status "processing")
 Server rules: fee is charged on top; amount + fee ≤ available (row-locked ledger transaction); writes debit ledger entries for the payout and the fee on the available bucket; audit log `payout.requested`; provider transfer runs async and updates status to paid/failed (failed → reversal credit).
-Errors: 400 VALIDATION_FAILED / IDEMPOTENCY_KEY_REQUIRED, 403 FORBIDDEN, 422 INSUFFICIENT_AVAILABLE_BALANCE.
+Velocity: at most 3 withdrawals per rolling 24 h, 10 minutes apart, a daily amount cap per verification level, none while another is processing, and none to an account added less than 48 h ago.
+Errors: 400 VALIDATION_FAILED / IDEMPOTENCY_KEY_REQUIRED, 403 FORBIDDEN / STEP_UP_REQUIRED, 409 WITHDRAWAL_IN_PROGRESS, 422 INSUFFICIENT_AVAILABLE_BALANCE / PAYOUT_ACCOUNT_COOLING_DOWN / WITHDRAWAL_DAILY_AMOUNT_LIMIT, 429 WITHDRAWAL_TOO_SOON / WITHDRAWAL_DAILY_LIMIT.
 
 ### GET /api/v1/seller/wallet/banks
 Permission: wallet:view
@@ -726,13 +744,14 @@ Errors: 400 VALIDATION_FAILED, 422 ACCOUNT_NOT_RESOLVED.
 
 ### POST /api/v1/seller/wallet/payout-accounts
 Permission: wallet:withdraw
-Headers: Idempotency-Key required
+Headers: Idempotency-Key required; `X-Step-Up-Token` required
 Body: { resolutionId: string }
-Response 201: PayoutAccount (first account becomes default). Audit `payout_account.added`. The backend should require the resolved name to match the verified business/owner name.
+Response 201: PayoutAccount (first account becomes default). Audit `payout_account.added`; outbox `payoutAccount.added` (email and push notice). The account can receive withdrawals 48 h after it is added. The backend should require the resolved name to match the verified business/owner name.
 Errors: 409 ACCOUNT_EXISTS, 422 RESOLUTION_EXPIRED.
 
 ### PATCH /api/v1/seller/wallet/payout-accounts/:accountId
 Permission: wallet:withdraw
+Headers: `X-Step-Up-Token` required
 Body: { isDefault: true }
 Response 200: PayoutAccount (all others lose default).
 Errors: 400 VALIDATION_FAILED, 404 ACCOUNT_NOT_FOUND.
@@ -1160,7 +1179,7 @@ Only `submitted`/`under_review` claims (409 CLAIM_CLOSED otherwise). Response 20
 `Product.brand?: { brandId, name, relationship: "own"|"authorised_reseller"|"genuine_resale" } | null`.
 `POST /api/v1/seller/products` and `PATCH /api/v1/seller/products/:productId` accept `brand: { brandId, relationship } | null` (omit on PATCH to keep the current tag). Rules: the brand must exist; `own` only when the caller's store is linked to that brand; resale relationships only for **registered** brands. Errors are field issues `brand.brandId` / `brand.relationship` in a 400 VALIDATION_FAILED.
 
-## Free trials, bundle and Gold-only plan (web only, Paystack plan with a verification charge)
+## Free trials, bundle and Gold-only plan (web only, hosted checkout with a verification charge)
 
 Plans still come from `GET /seller/subscription/plans` (Pro NGN 5,000/mo, Business NGN 15,000/mo; yearly rows carry the admin yearly discount). Billing is **per business profile**: each store/brand has its own subscription, invoices and payment method. The account email is used for the Paystack customer, receipts and reminders; **no endpoint accepts an email**.
 
@@ -1170,7 +1189,7 @@ Permission: billing:manage. Response 200: `BillingOffer` = `{ profileName, accou
 Pricing display: monthly with active Blue = price x (1 - bundle%). Yearly = monthly x 12 x (1 - max(yearly%, bundle%)); the bigger discount wins and they never stack. The bundle applies to at most `maximumBusinesses` businesses, lapses at renewal if Blue ends, and never to Black.
 
 ### POST /api/v1/seller/subscription/trial/checkout
-Body `{ planId }` (a Pro/Business plan, or `gold_only_monthly` / `gold_only_yearly`). Response 201: `{ authorizationUrl, accessCode, reference, provider: "paystack" }`. The dashboard opens the Paystack Popup with `accessCode` (redirect to `authorizationUrl` as the fallback); the card is never handled by Zudomart. Paystack makes a small verification charge (NGN 50) that is refunded at once, and the subscription is created with `start_date` at the end of the free period. Errors: 404 PLAN_NOT_FOUND, 409 TRIAL_NOT_AVAILABLE (message explains why).
+Body `{ planId }` (a Pro/Business plan, or `gold_only_monthly` / `gold_only_yearly`). Response 201: `{ checkoutUrl, authorizationUrl, reference, provider: "flutterwave" | "paystack" }`. The dashboard redirects to `checkoutUrl ?? authorizationUrl` (redirect to `authorizationUrl` as the fallback); the card is never handled by Zudomart. Paystack makes a small verification charge (NGN 50) that is refunded at once, and the subscription is created with `start_date` at the end of the free period. Errors: 404 PLAN_NOT_FOUND, 409 TRIAL_NOT_AVAILABLE (message explains why).
 
 ### POST /api/v1/seller/subscription/trial/verify
 Body `{ reference }` (references start `TRL_` for trials, `GLD_` for Gold-only). Response 200: `BillingOffer`. A trial sets the subscription to `trialing` with `currentPeriodEnd` = trial end. Gold appears only after business verification. Error: 404 PAYMENT_NOT_FOUND.
@@ -1199,3 +1218,7 @@ Types: `StoreRewardsRules`, `StoreRewardsSummary` (src/types/store.type.ts). `St
 Permission: promotions:manage. Response 200: `{ outstandingLiability: Money, customersWithCredit: int, issuedLast30Days: Money, redeemedLast30Days: Money }`.
 
 Backend requirement: per-store credit ledger in go-commerce (not go-money cash): entries per (store, buyer) with earn on order completion, reverse on refund, redeem at checkout as a discount line, expiry.
+
+## Wallet account and BVN consent (Flutterwave stage 4)
+
+The BFF allows `GET /payments/wallet/me` and `GET /payments/verification/me` (permission `wallet:withdraw`, the owner's own wallet). `wallet/me` → `{ wallet: { provider, currency, status, accountName, accountNumber, bankName, bankCode, fundingNumbers[], createdAt, frozenAt }, balances: { currency, availableMinor, depositHoldMinor, escrowLockedMinor, outgoingMinor, reservedPayoutMinor, debtMinor } }`; 409 `WALLET_NOT_READY` before L1 or outside Nigeria (the card then reads `verification/me.country`). BVN consent: `POST /payments/payout-onboarding/me/bank-validation?returnTo=` → 202 `{ status, consentUrl?, reference? }` (redirect to `consentUrl`), then `GET …/bank-validation` → `{ status }` polled every 5 s; 422 `BVN_REQUIRED`.

@@ -14,6 +14,8 @@ function readOriginOrEmpty(configuredUrl: string | undefined): string {
 function buildContentSecurityPolicyHeaderValue(): string {
   const mediaOrigin = readOriginOrEmpty(process.env.SELLER_MEDIA_URL);
   const apiOrigin = readOriginOrEmpty(process.env.SELLER_API_URL ?? (isDevelopmentBuild ? "http://localhost:8080" : undefined));
+  const embedOrigin = readOriginOrEmpty(process.env.NEXT_PUBLIC_WEBAPP_URL ?? (isDevelopmentBuild ? "http://localhost:3500" : "https://app.zudomart.com"));
+  const realtimeOrigin = readOriginOrEmpty((process.env.SELLER_REALTIME_URL ?? (apiOrigin ? `${apiOrigin}/ws` : "")).replace(/^http(s?):\/\//i, (_, secure: string) => (secure ? "wss://" : "ws://")));
   const uploadOrigins = (process.env.SELLER_UPLOAD_ORIGINS ?? "").split(",").map((origin) => readOriginOrEmpty(origin.trim())).filter(Boolean);
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
@@ -21,13 +23,13 @@ function buildContentSecurityPolicyHeaderValue(): string {
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:", "blob:", "https://images.unsplash.com", mediaOrigin].filter(Boolean),
     "font-src": ["'self'"],
-    "connect-src": ["'self'", apiOrigin, ...uploadOrigins, ...(isDevelopmentBuild ? ["ws:"] : [])].filter(Boolean),
+    "connect-src": ["'self'", apiOrigin, realtimeOrigin, mediaOrigin, ...uploadOrigins, ...(isDevelopmentBuild ? ["ws:"] : [])].filter(Boolean),
     "media-src": ["'self'", "blob:"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
     "form-action": ["'self'", "https://checkout.paystack.com", "https://checkout.flutterwave.com"],
     "frame-ancestors": ["'none'"],
-    "frame-src": ["'self'", "blob:"],
+    "frame-src": ["'self'", "blob:", embedOrigin].filter(Boolean),
     "manifest-src": ["'self'"],
     "worker-src": ["'self'"],
   };
@@ -49,7 +51,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  transpilePackages: ["@zudomart/web-kit"],
+  transpilePackages: ["@zudomart/web-kit", "@zudomart/chat-crypto"],
   serverExternalPackages: [],
   async headers() {
     return [
