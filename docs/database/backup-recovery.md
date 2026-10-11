@@ -7,7 +7,7 @@ As of 2026-10-03. Labels: EXISTING (path), PLANNED, FUTURE. Nothing below exists
 | Fact | Evidence |
 | --- | --- |
 | One Aurora PostgreSQL + PostGIS cluster, schema per service (fixed owner decision) | `infra/local/postgres/create-databases.sh` (local model) |
-| Money truth lives in `ledger` (a mirror of provider-held funds; Zudomart holds no money, `checkoutPaymentFlowPlan.md`) plus `payments`, `wallet`, `escrow` | `docs/architecture/payments.md` |
+| Money truth lives in `ledger` (a mirror of provider-held funds; Zudomart holds no money, `docs/integrations/flutterwaveMigration.md` Appendix C) plus `payments`, `wallet`, `escrow` | `docs/architecture/payments.md` |
 | Domain events leave through per-schema outbox to RabbitMQ (RabbitMQ adopted, owner, 2026-10-03); broker messages have no backup, so **unpublished outbox rows are the replay source** | `platform/events/outbox.relay.go`, `events.md` |
 | Idempotency for HTTP lives in Valkey (cache, rebuildable) and in per-schema tables for money | `platform/idempotency`, `modules/*/idempotentRequest.schema.go` |
 | Signing keys are stored in `auth.signing_keys` (encrypted) | `modules/auth/.../signingKey.schema.go` |
