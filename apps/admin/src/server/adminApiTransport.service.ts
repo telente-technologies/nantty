@@ -1,7 +1,12 @@
 import { shouldUseRealBackend, readAdminApiBaseUrl } from "@/config/adminEnvironment.config";
-import { dispatchMockApiRequest } from "@/mocks/mockBackend.mock";
+import type { dispatchMockApiRequest as MockDispatcher } from "@/mocks/mockBackend.mock";
 import type { ApiErrorBody } from "@/types/api.type";
 import { toServerListEnvelope } from "@/utils/listEnvelope.util";
+
+const loadMockDispatcher: () => Promise<typeof MockDispatcher> =
+  process.env.NODE_ENV === "production"
+    ? () => Promise.reject(new Error("The mock backend is not bundled into production builds."))
+    : async () => (await import("@/mocks/mockBackend.mock")).dispatchMockApiRequest;
 
 export interface BackendCall {
   readonly method: string;
@@ -33,7 +38,7 @@ function buildOutgoingHeaders(call: BackendCall): Headers {
 }
 
 async function callMockBackend(call: BackendCall, headers: Headers): Promise<BackendResult> {
-  const mockResponse = await dispatchMockApiRequest({ method: call.method, path: call.path, query: call.query ?? new URLSearchParams(), headers, body: call.body ?? null });
+  const mockResponse = await (await loadMockDispatcher())({ method: call.method, path: call.path, query: call.query ?? new URLSearchParams(), headers, body: call.body ?? null });
   const responseHeaders = new Headers(mockResponse.headers);
   if (mockResponse.status === 204 || mockResponse.body === null || mockResponse.body === undefined) return { status: mockResponse.status, headers: responseHeaders, body: new Uint8Array() };
   if (typeof mockResponse.body === "string") {

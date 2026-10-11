@@ -15,7 +15,6 @@ export function buildDemoReservedUsernames(): ReservedUsernameEntry[] {
     { value: "efcc", kind: "EXACT", category: "GOVERNMENT", note: "Economic and Financial Crimes Commission" },
     { value: "cbn*", kind: "PREFIX", category: "GOVERNMENT", note: "Central Bank of Nigeria" },
     { value: "statehouse", kind: "EXACT", category: "GOVERNMENT", note: null },
-    { value: "paystack", kind: "EXACT", category: "BRAND", note: "Payment partner" },
     { value: "flutterwave", kind: "EXACT", category: "BRAND", note: "Payment partner" },
   ];
   return rows.map((row, index) => ({ ...row, id: `rsv_${String(index + 1).padStart(3, "0")}`, addedAt: addedAt(300 - index * 11), addedByName: index % 3 === 0 ? "Tolu Adeyemi" : "Chidi Okafor" }));

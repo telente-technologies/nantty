@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { findAdminApiRoute, isReasonMissing, minimumReasonLength, type ApiAccessRequirement, type ResolvedApiRoute } from "@/config/apiAccess.config";
+import { isAccessTokenKnownExpired } from "@/server/accessTokenExpiry.service";
 import { exchangeRefreshTokenForNewTokenPair, havePrivilegesChanged, revalidateAdminWithBackend } from "@/server/adminAuthentication.service";
 import { callAdminBackend, type BackendResult } from "@/server/adminApiTransport.service";
 import {
@@ -106,13 +107,18 @@ export async function forwardBffRequestToAdminApi(request: NextRequest, pathSegm
   let view: CachedSessionView | null = readCachedSessionViewFromCookies(request.cookies);
   if (!view) return respondWithEndedSession("SESSION_IDLE_TIMEOUT", "You were signed out after 15 minutes without activity.");
 
-  const tokens = readApiTokensFromCookies(request.cookies);
+  const cookieTokens = readApiTokensFromCookies(request.cookies);
   let rotatedTokens: ApiTokenPair | null = null;
+  if (isAccessTokenKnownExpired(cookieTokens.accessToken)) {
+    rotatedTokens = cookieTokens.refreshToken ? await exchangeRefreshTokenForNewTokenPair(cookieTokens.refreshToken) : null;
+    if (!rotatedTokens) return respondWithEndedSession("SESSION_EXPIRED", "Your session has ended. Sign in again.");
+  }
+  const tokens = rotatedTokens ?? cookieTokens;
   if (isCachedSessionViewStale(view)) {
     const revalidated = await revalidateAdminWithBackend(tokens);
     if (!revalidated) return respondWithEndedSession("SESSION_EXPIRED", "Your session has ended. Sign in again.");
     if (havePrivilegesChanged(view.admin, revalidated.admin)) return respondWithEndedSession("SESSION_PRIVILEGES_CHANGED", "Your admin access changed. Sign in again to continue.");
-    rotatedTokens = revalidated.rotatedTokens;
+    rotatedTokens = revalidated.rotatedTokens ?? rotatedTokens;
     view = { ...view, admin: revalidated.admin, verifiedAtEpochSeconds: nowInEpochSeconds() };
   }
   if (!doesAdminSatisfyApiRequirement(view.admin, route.requirement)) return respondWithBffError(403, "FORBIDDEN", "Your admin permissions do not allow this.");

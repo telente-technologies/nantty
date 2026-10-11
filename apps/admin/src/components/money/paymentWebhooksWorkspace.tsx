@@ -14,7 +14,7 @@ import { formatRelativeTimeFromNow } from "@/utils/formatting.util";
 import styles from "./money.module.css";
 import { PaymentWebhookDetailPanel } from "./paymentWebhookDetailPanel";
 
-type ProviderTab = "all" | "flutterwave" | "paystack";
+type ProviderTab = "all" | "flutterwave";
 
 const webhookColumns: readonly DataTableColumn<DeadLetteredWebhook>[] = [
   { key: "event", header: "Event", render: (webhook) => <span className={styles.stack}><span>{webhook.eventType}</span><span className={styles.muted}>{webhook.provider}</span></span> },
@@ -32,7 +32,7 @@ export function PaymentWebhooksWorkspace() {
   return (
     <>
       <PageHeader area="Money" title="Payment webhooks" description="Provider events that failed 12 times and stopped retrying. Fix the cause first, then replay; a replay re-checks the payment with the provider before any money moves." />
-      <SegmentedTabs label="Provider" items={[{ key: "all", label: "All" }, { key: "flutterwave", label: "Flutterwave" }, { key: "paystack", label: "Paystack" }]} activeKey={provider} onChange={setProvider} />
+      <SegmentedTabs label="Provider" items={[{ key: "all", label: "All" }, { key: "flutterwave", label: "Flutterwave" }]} activeKey={provider} onChange={setProvider} />
       {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Dead-lettered payment webhooks" columns={webhookColumns} rows={data?.items ?? []} readRowKey={(webhook) => webhook.id} isLoading={isLoading} selectedRowKey={openWebhookId} onRowOpen={(webhook) => setOpenWebhookId(webhook.id)} emptyMessage="No failed webhooks. Every provider event was processed." />
       {openWebhookId ? <PaymentWebhookDetailPanel key={openWebhookId} webhookId={openWebhookId} onClose={() => setOpenWebhookId(null)} onReplayed={reload} /> : null}
