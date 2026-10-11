@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"database/sql"
-	"log/slog"
 
 	"github.com/google/uuid"
 
@@ -44,6 +43,13 @@ func (service EscrowService) ReleaseEscrowInTransaction(ctx context.Context, tra
 	if err := models.AssertEscrowTransitionAllowed(models.EscrowStatus(held.Status), models.EscrowReleased); err != nil {
 		return EscrowSettlementResult{}, err
 	}
+	if IsWalletLocked(held) {
+		released, err := service.releaseFromBuyerWalletInTransaction(ctx, transaction, held, trigger)
+		if err != nil {
+			return EscrowSettlementResult{}, err
+		}
+		return service.finishSettlement(ctx, transaction, client, released, "released", trigger, actor, nil)
+	}
 	now := service.Container.Now().UTC()
 	update := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).
 		SetStatus(escrow.StatusReleased).SetReleasedAt(now).SetReleaseTrigger(trigger).SetReleasedToSellerMinor(held.SellerAmountMinor).ClearAutoReleaseAt()
@@ -54,7 +60,7 @@ func (service EscrowService) ReleaseEscrowInTransaction(ctx context.Context, tra
 	if err != nil {
 		return EscrowSettlementResult{}, err
 	}
-	fromEscrow := ledgermodels.JournalLineRequest{Account: ledgermodels.SellerEscrowAccount(held.SellerUserID, held.ID.String(), held.Currency), Direction: ledgermodels.Debit, AmountMinor: held.SellerAmountMinor}
+	fromEscrow := ledgermodels.JournalLineRequest{Account: escrowHoldingAccount(held), Direction: ledgermodels.Debit, AmountMinor: held.SellerAmountMinor}
 	if err := service.creditSellerAndPlatform(ctx, transaction, held, fromEscrow, ledgermodels.PlatformFeesUnearnedAccount(held.Currency), "escrow-release:"+held.ID.String(), "Order "+held.OrderReference+" released to seller"); err != nil {
 		return EscrowSettlementResult{}, err
 	}
@@ -67,16 +73,27 @@ func (service EscrowService) RefundEscrowInTransaction(ctx context.Context, tran
 	if err != nil {
 		return EscrowSettlementResult{}, err
 	}
-	if held.Status == escrow.StatusRefunded {
+	if held.Status == escrow.StatusRefunded || held.Status == escrow.StatusClawedBack {
 		return EscrowSettlementResult{Escrow: held, AlreadySettled: true}, nil
 	}
-	if err := models.AssertEscrowTransitionAllowed(models.EscrowStatus(held.Status), models.EscrowRefunded); err != nil {
+	target := models.EscrowRefunded
+	if held.Status == escrow.StatusReleased && held.PaymentMode == escrow.PaymentModeEscrow {
+		target = models.EscrowClawedBack
+	}
+	if err := models.AssertEscrowTransitionAllowed(models.EscrowStatus(held.Status), target); err != nil {
 		return EscrowSettlementResult{}, err
 	}
+	if IsWalletLocked(held) {
+		return service.refundWalletLockedEscrow(ctx, transaction, client, held, reason, actor)
+	}
 	wasReleased := held.Status == escrow.StatusReleased
+	finalStatus := escrow.StatusRefunded
+	if wasReleased && held.PaymentMode == escrow.PaymentModeEscrow {
+		finalStatus = escrow.StatusClawedBack
+	}
 	now := service.Container.Now().UTC()
 	refunded, err := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).
-		SetStatus(escrow.StatusRefunded).SetRefundedAt(now).SetRefundedMinor(held.AmountMinor).ClearAutoReleaseAt().Save(ctx)
+		SetStatus(finalStatus).SetRefundedAt(now).SetRefundedMinor(held.AmountMinor).ClearAutoReleaseAt().Save(ctx)
 	if err != nil {
 		return EscrowSettlementResult{}, err
 	}
@@ -103,6 +120,9 @@ func (service EscrowService) ResolveEscrowPartiallyInTransaction(ctx context.Con
 		return EscrowSettlementResult{}, err
 	}
 	if held.Status == escrow.StatusPartiallyRefunded {
+		if held.RefundedMinor != refundMinor {
+			return EscrowSettlementResult{}, models.ErrEscrowAlreadyPartiallyRefunded
+		}
 		return EscrowSettlementResult{Escrow: held, AlreadySettled: true}, nil
 	}
 	if held.Status == escrow.StatusReleased {
@@ -114,6 +134,15 @@ func (service EscrowService) ResolveEscrowPartiallyInTransaction(ctx context.Con
 	resolution, err := models.SplitPartialResolution(held.AmountMinor, refundMinor, held.CommissionBps)
 	if err != nil {
 		return EscrowSettlementResult{}, err
+	}
+	if IsWalletLocked(held) {
+		commissionKept := min(resolution.CommissionMinor, held.CommissionMinor)
+		sellerKeeps := max(held.AmountMinor-resolution.RefundMinor-commissionKept-held.ProcessingFeeMinor, 0)
+		resolved, err := service.partiallyRefundBuyerWalletInTransaction(ctx, transaction, held, resolution.RefundMinor, sellerKeeps, commissionKept)
+		if err != nil {
+			return EscrowSettlementResult{}, err
+		}
+		return service.finishSettlement(ctx, transaction, client, resolved, "partiallyRefunded", reason, actor, nil)
 	}
 	now := service.Container.Now().UTC()
 	resolved, err := held.Update().Where(escrow.Version(held.Version)).AddVersion(1).
@@ -141,10 +170,32 @@ func (service EscrowService) ResolveEscrowPartiallyInTransaction(ctx context.Con
 	return service.finishSettlement(ctx, transaction, client, resolved, "partiallyRefunded", reason, actor, &refundId)
 }
 
+func (service EscrowService) refundWalletLockedEscrow(ctx context.Context, transaction *sql.Tx, client *ent.Client, held *ent.Escrow, reason string, actor EscrowActor) (EscrowSettlementResult, error) {
+	if held.Status == escrow.StatusReleased {
+		clawed, err := service.clawBackReleasedEscrowInTransaction(ctx, transaction, held, reason, actor)
+		if err != nil {
+			return EscrowSettlementResult{}, err
+		}
+		return service.finishSettlement(ctx, transaction, client, clawed, "clawedBack", reason, actor, nil)
+	}
+	refunded, toCard, err := service.refundIntoBuyerWalletInTransaction(ctx, transaction, held, reason, actor)
+	if err != nil {
+		return EscrowSettlementResult{}, err
+	}
+	if !toCard {
+		return service.finishSettlement(ctx, transaction, client, refunded, "refunded", reason, actor, nil)
+	}
+	refundId, err := service.requestProviderRefund(ctx, transaction, held, held.AmountMinor, "escrow-refund:"+held.ID.String(), reason)
+	if err != nil {
+		return EscrowSettlementResult{}, err
+	}
+	return service.finishSettlement(ctx, transaction, client, refunded, "refunded", reason, actor, &refundId)
+}
+
 func (service EscrowService) postEscrowSplit(ctx context.Context, transaction *sql.Tx, held *ent.Escrow, refundMinor, sellerMinor, commissionKeptMinor int64, reference, reason string, actor EscrowActor) error {
 	absorbedProcessingFee := refundMinor + sellerMinor + commissionKeptMinor - held.SellerAmountMinor - held.CommissionMinor
 	lines := []ledgermodels.JournalLineRequest{
-		{Account: ledgermodels.SellerEscrowAccount(held.SellerUserID, held.ID.String(), held.Currency), Direction: ledgermodels.Debit, AmountMinor: held.SellerAmountMinor},
+		{Account: escrowHoldingAccount(held), Direction: ledgermodels.Debit, AmountMinor: held.SellerAmountMinor},
 	}
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformFeesUnearnedAccount(held.Currency), ledgermodels.Debit, held.CommissionMinor)
 	if absorbedProcessingFee >= 0 {
@@ -210,15 +261,6 @@ func (service EscrowService) finishSettlement(ctx context.Context, transaction *
 		return EscrowSettlementResult{}, err
 	}
 	return EscrowSettlementResult{Escrow: settled, RefundToSend: refundId}, nil
-}
-
-func (service EscrowService) SendRefundToProviderAfterCommit(ctx context.Context, result EscrowSettlementResult) {
-	if result.RefundToSend == nil {
-		return
-	}
-	if err := service.Container.Payments.SendPendingRefundToProvider(ctx, *result.RefundToSend); err != nil {
-		service.Container.Resources.Logger.WarnContext(ctx, "refund could not be sent to the provider; it stays pending for retry", slog.String("refundId", result.RefundToSend.String()), slog.Any("error", err))
-	}
 }
 
 func appendPositiveCredit(lines []ledgermodels.JournalLineRequest, account ledgermodels.AccountRef, amountMinor int64) []ledgermodels.JournalLineRequest {

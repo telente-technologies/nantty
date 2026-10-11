@@ -37,15 +37,21 @@ func (service EscrowService) RecordOrderFulfilmentInTransaction(ctx context.Cont
 	eventType := "shipped"
 	switch fulfilment.Stage {
 	case "shipped":
+		if held.ShippedAt != nil || held.DeliveredAt != nil {
+			return held, nil
+		}
 		update.SetShippedAt(occurredAt).SetCourierName(fulfilment.CourierName).SetTrackingNumber(fulfilment.TrackingNumber).SetTrackingURL(fulfilment.TrackingUrl).
 			SetNillableEstimatedDeliveryAt(fulfilment.EstimatedDeliveryAt)
 	case "delivered":
+		if held.DeliveredAt != nil {
+			return held, nil
+		}
 		eventType = "delivered"
 		update.SetDeliveredAt(occurredAt)
 		if held.ShippedAt == nil {
 			update.SetShippedAt(occurredAt)
 		}
-		if held.Status == escrow.StatusHeld {
+		if held.Status == escrow.StatusHeld && held.AutoReleaseAt == nil {
 			update.SetAutoReleaseAt(occurredAt.Add(service.Container.Policy(ctx).AutoReleasePeriod))
 		}
 	default:
@@ -57,6 +63,13 @@ func (service EscrowService) RecordOrderFulfilmentInTransaction(ctx context.Cont
 	}
 	if err := service.recordEscrowEvent(ctx, client, held.ID, eventType, "system", "", map[string]any{"courierName": fulfilment.CourierName, "trackingNumber": fulfilment.TrackingNumber}); err != nil {
 		return nil, err
+	}
+	if updated.AutoReleaseAt != nil && held.AutoReleaseAt == nil {
+		data := escrowEventData(updated)
+		data["autoReleaseAt"] = updated.AutoReleaseAt.UTC().Format(time.RFC3339)
+		if err := service.Container.Outbox.EnqueueInTransaction(ctx, transaction, "escrow.releaseScheduled", updated.OrderID, occurredAt, data); err != nil {
+			return nil, err
+		}
 	}
 	return updated, nil
 }

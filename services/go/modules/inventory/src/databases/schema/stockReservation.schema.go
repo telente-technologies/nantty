@@ -23,6 +23,7 @@ func (StockReservation) Fields() []ent.Field {
 		field.UUID("variant_id", uuid.UUID{}).Immutable(),
 		field.UUID("location_id", uuid.UUID{}).Immutable(),
 		field.Int("quantity").Positive().Immutable(),
+		field.Int("attempt").NonNegative().Default(0).Immutable(),
 		field.String("status").Default("active"),
 		field.Time("expires_at").Optional().Nillable(),
 		field.Time("settled_at").Optional().Nillable(),
@@ -31,7 +32,7 @@ func (StockReservation) Fields() []ent.Field {
 
 func (StockReservation) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("reference", "variant_id", "location_id").Unique(),
+		index.Fields("reference", "variant_id", "location_id", "attempt").Unique(),
 		index.Fields("expires_at").Annotations(entsql.IndexAnnotation{Where: "status = 'active'"}).StorageKey("stockreservation_active_expiry"),
 		index.Fields("store_id", "status"),
 	}

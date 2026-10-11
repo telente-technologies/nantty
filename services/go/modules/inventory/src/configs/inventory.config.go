@@ -24,7 +24,7 @@ type InventorySettings struct {
 func (settings InventorySettings) IsProduction() bool { return settings.Environment == "production" }
 
 func ReadInventorySettingsFromEnvironment(reader *platformconfig.EnvironmentReader) InventorySettings {
-	return InventorySettings{
+	settings := InventorySettings{
 		Environment:             reader.ReadStringOrDefault("APP_ENV", "development"),
 		DatabaseUrl:             reader.ReadRequiredString("INVENTORY_DATABASE_URL"),
 		DatabaseSchema:          reader.ReadStringOrDefault("INVENTORY_DATABASE_SCHEMA", "inventory"),
@@ -38,4 +38,8 @@ func ReadInventorySettingsFromEnvironment(reader *platformconfig.EnvironmentRead
 		MaximumAdjustmentLines:  200,
 		MaximumAdjustmentAmount: 1_000_000,
 	}
+	if settings.IsProduction() {
+		settings.RedisUrl = reader.ReadRequiredString("INVENTORY_REDIS_URL")
+	}
+	return settings
 }

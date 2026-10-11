@@ -29,7 +29,11 @@ func (service EscrowService) HandleProviderDispute(ctx context.Context, transact
 	case "won", "closed":
 		err = service.resumeEscrowAfterChargebackWon(ctx, client, held)
 	case "lost":
-		err = service.settleEscrowForLostChargeback(ctx, transaction, held, notice)
+		if IsWalletLocked(held) {
+			err = service.recoverLostChargebackFromWallets(ctx, transaction, held, notice)
+		} else {
+			err = service.settleEscrowForLostChargeback(ctx, transaction, held, notice)
+		}
 	default:
 		err = service.freezeEscrowForChargeback(ctx, client, held)
 	}
@@ -98,7 +102,7 @@ func (service EscrowService) settleEscrowForLostChargeback(ctx context.Context, 
 		return nil
 	}
 	escrowed := held.SellerAmountMinor
-	lines := paymentservices.AppendPositiveLine(nil, ledgermodels.SellerEscrowAccount(held.SellerUserID, held.ID.String(), held.Currency), ledgermodels.Debit, escrowed)
+	lines := paymentservices.AppendPositiveLine(nil, escrowHoldingAccount(held), ledgermodels.Debit, escrowed)
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.SellerDebtAccount(held.SellerUserID, held.Currency), ledgermodels.Debit, max(disputed-escrowed, 0))
 	lines = paymentservices.AppendPositiveLine(lines, ledgermodels.PlatformFeesUnearnedAccount(held.Currency), ledgermodels.Debit, held.CommissionMinor)
 	lines = paymentservices.AppendPositiveLine(lines, providerHeld, ledgermodels.Credit, disputed)

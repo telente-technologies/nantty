@@ -12,7 +12,7 @@ func TestEscrowTransitionsFollowTheAllowList(t *testing.T) {
 	}{
 		{EscrowHeld, EscrowReleased, true}, {EscrowHeld, EscrowDisputed, true}, {EscrowHeld, EscrowRefunded, true},
 		{EscrowDisputed, EscrowReleased, true}, {EscrowDisputed, EscrowHeld, true}, {EscrowDisputed, EscrowPartiallyRefunded, true},
-		{EscrowReleased, EscrowRefunded, true}, {EscrowRefunded, EscrowReleased, false}, {EscrowReleased, EscrowDisputed, false},
+		{EscrowReleased, EscrowRefunded, true}, {EscrowReleased, EscrowClawedBack, true}, {EscrowRefunded, EscrowReleased, false}, {EscrowReleased, EscrowDisputed, false},
 		{EscrowPartiallyRefunded, EscrowReleased, false}, {EscrowHeld, EscrowHeld, false},
 	}
 	for _, testCase := range cases {

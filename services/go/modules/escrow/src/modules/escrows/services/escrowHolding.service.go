@@ -86,6 +86,9 @@ func (service EscrowService) HandleFailedPayment(context.Context, *sql.Tx, payme
 }
 
 func (service EscrowService) holdFundsForPaidOrder(ctx context.Context, transaction *sql.Tx, payment paymentmodels.SettledPayment, payable paymentmodels.OrderPayable) error {
+	if usesBuyerWallet(payment) {
+		return service.holdFundsInProviderWallets(ctx, transaction, payment, payable)
+	}
 	client := service.Container.Client(transaction)
 	exists, err := client.Escrow.Query().Where(escrow.OrderID(payable.OrderId)).Exist(ctx)
 	if err != nil || exists {
@@ -121,7 +124,7 @@ func (service EscrowService) holdFundsForPaidOrder(ctx context.Context, transact
 		})
 	} else {
 		lines := []ledgermodels.JournalLineRequest{awaiting}
-		lines = appendPositiveCredit(lines, ledgermodels.SellerEscrowAccount(held.SellerUserID, held.ID.String(), payable.Currency), sellerNet)
+		lines = appendPositiveCredit(lines, escrowHoldingAccount(held), sellerNet)
 		lines = appendPositiveCredit(lines, ledgermodels.PlatformFeesUnearnedAccount(payable.Currency), held.CommissionMinor)
 		lines = appendPositiveCredit(lines, ledgermodels.PaymentProcessingFeeExpenseAccount(payable.Currency), payment.ProviderFeeMinor)
 		_, err = service.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
@@ -198,4 +201,8 @@ func escrowFeeBpsFor(feeMinor, amountMinor int64) int64 {
 		return 0
 	}
 	return (feeMinor*10_000 + amountMinor/2) / amountMinor
+}
+
+func escrowHoldingAccount(held *ent.Escrow) ledgermodels.AccountRef {
+	return ledgermodels.EscrowHoldingAccount(string(held.Custody), held.SellerUserID, held.BuyerUserID, held.ID.String(), held.Currency)
 }

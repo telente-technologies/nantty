@@ -17,14 +17,17 @@ const (
 	EscrowReleased          EscrowStatus = "released"
 	EscrowRefunded          EscrowStatus = "refunded"
 	EscrowPartiallyRefunded EscrowStatus = "partiallyRefunded"
+	EscrowClawedBack        EscrowStatus = "clawedBack"
 )
+
+var ErrEscrowAlreadyPartiallyRefunded = httpserver.NewApiError(http.StatusConflict, "ESCROW_ALREADY_PARTIALLY_REFUNDED", "This order was already partially refunded; a second partial refund is not allowed.")
 
 var ErrEscrowFrozenByDispute = httpserver.NewApiError(http.StatusConflict, "ESCROW_DISPUTED", "This order is under dispute; its funds stay frozen until the dispute is resolved.")
 
 var allowedEscrowTransitions = map[EscrowStatus][]EscrowStatus{
 	EscrowHeld:     {EscrowReleased, EscrowRefunded, EscrowDisputed, EscrowPartiallyRefunded},
 	EscrowDisputed: {EscrowReleased, EscrowRefunded, EscrowPartiallyRefunded, EscrowHeld},
-	EscrowReleased: {EscrowRefunded},
+	EscrowReleased: {EscrowRefunded, EscrowClawedBack},
 }
 
 func EscrowTransitionIsAllowed(from, to EscrowStatus) bool {
