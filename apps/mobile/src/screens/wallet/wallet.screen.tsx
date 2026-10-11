@@ -16,6 +16,7 @@ import { EscrowHoldRow } from "@/components/wallet/escrowHoldRow";
 import { TransactionRow } from "@/components/wallet/transactionRow";
 import { VerifyToWithdrawBanner } from "@/components/wallet/verifyToWithdrawBanner";
 import { WalletBalanceCards } from "@/components/wallet/walletBalanceCards";
+import { WalletFundingCard } from "@/components/wallet/walletFundingCard";
 import {
   useEscrowHoldsQuery,
   useWalletBalanceQuery,
@@ -47,6 +48,7 @@ export function WalletScreen({ navigation }: MainScreenProps<"Wallet">) {
       <ScrollView contentContainerStyle={styles.content} refreshControl={refreshControl}>
         {walletVerificationMessage(wallet) ? <VerifyToWithdrawBanner wallet={wallet} /> : <PayoutSetupCard />}
         <WalletBalanceCards wallet={wallet} />
+        <WalletFundingCard />
         <Text size={typeScale.xs} lineHeight={16.8} color={colors.textMuted}>
           Each balance is kept separately. Escrow money is released when buyers confirm delivery (or 3 days after delivery), then passes a short safety hold before it becomes available.
         </Text>

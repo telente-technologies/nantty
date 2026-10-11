@@ -4,6 +4,8 @@ import { ActivityIndicator, ScrollView, StyleSheet } from "react-native";
 
 import { AccountSetupPanel } from "@/components/payoutOnboarding/accountSetupPanel";
 import { BankStep } from "@/components/payoutOnboarding/bankStep";
+import { BvnConsentCard } from "@/components/payoutOnboarding/bvnConsentCard";
+import { useProviderWallet } from "@/components/wallet/providerWalletQueries.hook";
 import { BusinessStep } from "@/components/payoutOnboarding/businessStep";
 import { DocumentStep } from "@/components/payoutOnboarding/documentStep";
 import { IdentityStep } from "@/components/payoutOnboarding/identityStep";
@@ -22,6 +24,8 @@ export function PayoutSetupScreen({ navigation, route }: MainScreenProps<"Payout
   const context = route.params?.context ?? "seller";
   const { data: state, isError, error } = usePayoutOnboardingQuery();
   const [editing, setEditing] = useState(false);
+  const { verification } = useProviderWallet();
+  const needsBvnConsent = !!state && verification.data?.country === "NG" && !verification.data.payoutVerified && state.idType === "bvn" && state.completedSteps.includes("bank");
   const refresh = () => queryClient.invalidateQueries({ queryKey: payoutQueryKeys.state });
 
   const stepCount = 2 + (state?.requiresBusinessStep ? 1 : 0) + (state?.requiresDocumentStep ? 1 : 0);
@@ -35,6 +39,7 @@ export function PayoutSetupScreen({ navigation, route }: MainScreenProps<"Payout
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {isError ? <Text color={colors.error}>{error.message}</Text> : null}
         {!state && !isError ? <ActivityIndicator color={colors.primary} style={styles.loading} /> : null}
+        {needsBvnConsent ? <BvnConsentCard onVerify={() => setEditing(true)} /> : null}
         {state && showStatus ? (
           <PayoutStatusPanel
             state={state}

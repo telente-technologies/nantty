@@ -9,7 +9,7 @@ export interface BoostSelection {
   readonly durationDays: number;
 }
 
-export const NATIVE_BOOST_PAYMENT_NOTE = "Boosts in the app are paid by card or bank transfer in a secure Paystack window.";
+export const NATIVE_BOOST_PAYMENT_NOTE = "Boosts in the app are paid by card or bank transfer in a secure payment window.";
 
 const BOOST_ERROR_MESSAGES: Record<string, string> = {
   FREE_BOOST_NOT_AVAILABLE: "Free boosts come with Premium. You can still boost this post by card or bank transfer.",

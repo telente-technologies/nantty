@@ -80,15 +80,16 @@ export interface StoreDetail extends StoreSummary {
   readonly posts: readonly Post[];
 }
 
-export type PaymentProvider = "paystack";
+export type PaymentProvider = "paystack" | "flutterwave";
 
 export type PaymentChannel = "card" | "bank_transfer" | "ussd";
 
 export interface PaymentInitialization {
   readonly orderId: ID;
   readonly reference: string;
-  readonly authorizationUrl: string;
-  readonly accessCode: string;
+  readonly checkoutUrl?: string | null;
+  readonly authorizationUrl?: string | null;
+  readonly payment?: { readonly provider: PaymentProvider | string; readonly status: string; readonly amount?: Money };
 }
 
 export interface SavedCardDisplay {
