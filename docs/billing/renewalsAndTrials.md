@@ -1,5 +1,7 @@
 # Renewals and free trials
 
+> **Provider change (owner, 2026-10-10):** the payment provider is moving from Paystack to Flutterwave. The billing rules below (full-price renewals, retries, grace, trials) stay; the Paystack-specific mechanics change per [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md).
+
 Status: built 4 October 2026 (go-money `subscriptions` and `payments` modules, notifications, email templates). This page explains, in plain words, how Zudomart charges plans on the web, how free trials turn into paid plans, and what happens when a payment fails. App Store and Google Play purchases are covered in section 8.
 
 Prices below are Nigeria web prices from [pricing.md](../pricing.md). Every other region works the same way in its own currency (or in USD where Paystack can't charge the local currency).
