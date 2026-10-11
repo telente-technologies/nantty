@@ -202,8 +202,18 @@ export interface PostAnalyticsDaily {
   readonly impressions: number;
 }
 
+export interface PostVideoAnalytics {
+  readonly views: number;
+  readonly watchTimeSeconds: number;
+  readonly averageWatchSeconds?: number;
+  readonly completedViews?: number;
+  readonly completionRate?: number;
+}
+
 export interface PostAnalytics {
   readonly postId: ID;
+  readonly kind?: "post" | "clip" | "story";
+  readonly hasLink?: boolean;
   readonly author: UserSummary;
   readonly postedAt: ISODate;
   readonly impressions: number;
@@ -219,7 +229,7 @@ export interface PostAnalytics {
   readonly newFollows: number;
   readonly engagements: number;
   readonly engagementRate: number;
-  readonly video: { readonly views: number; readonly watchTimeSeconds: number } | null;
+  readonly video: PostVideoAnalytics | null;
   readonly audience: readonly { readonly label: string; readonly share: number }[];
   readonly daily: readonly PostAnalyticsDaily[];
 }

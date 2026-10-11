@@ -6,6 +6,21 @@ export interface FollowResult {
   readonly state: FollowState;
 }
 
+export type PostNotificationLevel = "off" | "posts" | "posts_and_lives";
+
+export interface PostNotificationSettings {
+  readonly level: PostNotificationLevel;
+  readonly following: boolean;
+}
+
+export interface FollowStatus {
+  readonly state: FollowState;
+  readonly followedBy: boolean;
+  readonly followersCount: number;
+  readonly followingCount: number;
+  readonly viewerPostNotifications: PostNotificationLevel;
+}
+
 export interface FollowRequest {
   readonly id: ID;
   readonly requester: UserSummary;

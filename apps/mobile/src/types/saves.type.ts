@@ -20,7 +20,7 @@ export type SavedItem =
   | (SavedItemBase & { readonly type: "post" | "video"; readonly post: Post })
   | (SavedItemBase & { readonly type: "clip"; readonly clip: Clip })
   | (SavedItemBase & { readonly type: "product"; readonly product: ProductSummary })
-  | (SavedItemBase & { readonly type: "comment"; readonly comment: Comment; readonly postId: ID });
+  | (SavedItemBase & { readonly type: "comment"; readonly comment: Comment; readonly postId?: ID });
 
 export const saveTargetForPost = (post: Post): SaveTarget => ({
   type: post.kind === "clip" ? "clip" : post.media.some((media) => media.type === "video") ? "video" : "post",

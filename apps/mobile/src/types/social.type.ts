@@ -1,7 +1,7 @@
 import type { ClipMediaInput, ClipSlideshowInput, PostLocationTag } from "./clipCreate.type";
 import type { LiveGiftSentEvent } from "./liveGift.type";
 import type { LiveSafetyRealtimeEvent, LiveSafetyState } from "./liveSafety.type";
-import type { Comment, CommentStickerLayout, Conversation, ID, LiveSession, Media, Message, MessageReactionSummary, Post, ReplyToComment, UserSummary } from "./models.type";
+import type { Comment, CommentStickerLayout, Conversation, ID, LiveSession, Media, Message, Post, ReplyToComment, UserSummary } from "./models.type";
 import type { Money } from "./money.type";
 import type { MentionEntity } from "./mention.type";
 import type { ReplyPolicy, SensitiveLabel } from "./postAudience.type";
@@ -121,7 +121,6 @@ export interface AdEvent {
 
 export interface NewStoryInput {
   readonly mediaId: ID;
-  readonly media: Media;
   readonly soundId?: ID;
   readonly look?: string;
 }
@@ -262,7 +261,7 @@ export interface GroupConversationDetails {
 
 export interface NewGroupConversationInput {
   readonly name: string;
-  readonly photoMediaId?: ID;
+  readonly description?: string | null;
   readonly memberIds: readonly ID[];
 }
 
@@ -290,12 +289,6 @@ export type RealtimeServerEvent =
   | { readonly type: "message.updated"; readonly message: Message }
   | { readonly type: "conversation.updated"; readonly conversation: Conversation }
   | { readonly type: "typing"; readonly conversationId: ID; readonly user: UserSummary; readonly isTyping: boolean }
-  | {
-      readonly type: "reaction";
-      readonly conversationId: ID;
-      readonly messageId: ID;
-      readonly reactions: readonly MessageReactionSummary[];
-    }
   | LiveGiftSentEvent
   | LiveSafetyRealtimeEvent
   | { readonly type: "pong" };

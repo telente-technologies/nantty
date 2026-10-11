@@ -1,6 +1,6 @@
-import type { AttachmentPointer } from "@zudomart/chat-crypto";
+import type { AttachmentPointer, ChatControl, ChatPoll, GroupAvatar } from "@zudomart/chat-crypto";
 
-import type { ChatStreak, InboxFolder, LinkPreview, MessageEncryptionEnvelope, SharedContentCard } from "./chatSafety.type";
+import type { ChatStreak, InboxFolder, LinkPreview, MessageEncryptionEnvelope, SharedContentReference } from "./chatSafety.type";
 import type { MentionEntity } from "./mention.type";
 import type { ID, ISODate, UserSummary } from "./models.type";
 
@@ -13,13 +13,18 @@ export interface Conversation {
   readonly isFriend: boolean;
   readonly kind?: "direct" | "group" | "channel" | "business";
   readonly title?: string | null;
+  readonly description?: string | null;
+  readonly encryptedAttributes?: string | null;
+  readonly hasGroupKey?: boolean;
   readonly photoUrl?: string | null;
+  readonly photoMediaId?: string | null;
+  readonly groupAvatar?: GroupAvatar | null;
   readonly memberCount?: number;
   readonly subscriberCount?: number;
   readonly myRole?: "owner" | "admin" | "member" | "subscriber";
   readonly disappearingMessagesSeconds?: number | null;
   readonly onlyAdminsCanMentionAll?: boolean;
-  readonly store?: { readonly id: ID; readonly name: string } | null;
+  readonly store?: { readonly id: ID; readonly name: string; readonly avatarUrl?: string | null } | null;
   readonly inboxFolder?: InboxFolder;
   readonly spamReason?: string | null;
   readonly streak?: ChatStreak | null;
@@ -74,17 +79,19 @@ export interface Message {
   readonly senderId: ID;
   readonly text: string;
   readonly createdAt: ISODate;
-  readonly kind?: "text" | "voice" | "image" | "system" | "shared" | "location" | "liveLocation" | "document" | "poll";
+  readonly kind?: "text" | "voice" | "image" | "system" | "shared" | "location" | "liveLocation" | "document" | "poll" | "control";
   readonly sender?: UserSummary;
   readonly media?: MessageAttachedMedia | null;
   readonly reactions?: readonly MessageReactionSummary[];
   readonly expiresAt?: ISODate | null;
   readonly mediaExpiresAt?: ISODate | null;
   readonly linkPreview?: LinkPreview | null;
-  readonly sharedContent?: SharedContentCard | null;
+  readonly sharedReference?: SharedContentReference | null;
   readonly location?: SharedLocation | null;
   readonly document?: MessageDocument | null;
+  readonly pollDefinition?: ChatPoll | null;
   readonly poll?: MessagePoll | null;
+  readonly control?: ChatControl | null;
   readonly readAt?: ISODate | null;
   readonly encryption?: MessageEncryptionEnvelope | null;
   readonly mentions?: readonly MentionEntity[];

@@ -29,7 +29,7 @@ export interface LinkPreview {
   readonly imageMediaId?: string | null;
 }
 
-export type SharedContentKind = "post" | "clip" | "product" | "live" | "store" | "profile";
+export type SharedContentKind = "post" | "clip" | "product" | "live" | "store" | "profile" | "order";
 
 export interface SharedContentReference {
   readonly kind: SharedContentKind;
