@@ -102,6 +102,18 @@ export function registerBrandsMockHandlers(): void {
     return respondWithJson(200, presentBrand(brand));
   });
 
+  registerMockRoute("PATCH", "/brands/:brandId", (request) => {
+    const principal = requireMockStorePrincipal(request);
+    const { brand, member } = findManagedBrandOrThrow(request.params.brandId ?? "", principal.userId);
+    if (member.role !== "owner") throw new MockHttpError(403, "OWNER_ONLY", "Only the brand owner can do that.");
+    if (!request.headers.get("x-step-up-token")) throw new MockHttpError(403, "STEP_UP_REQUIRED", "Confirm it's you again to continue.");
+    const body = readJsonObjectBody(request);
+    if (typeof body.sellingEnabled !== "boolean") return respondWithValidationFailure([{ path: "sellingEnabled", message: "is required" }]);
+    brand.sellingEnabled = body.sellingEnabled;
+    recordBrandAuditEntry(principal, "brand.updated", brand.id, `${body.sellingEnabled ? "Turned on" : "Turned off"} selling for ${brand.name}`);
+    return respondWithJson(200, presentBrand(brand));
+  });
+
   registerMockRoute("POST", "/seller/brands/:brandId/stores", (request) => {
     const principal = requireMockStorePrincipal(request);
     const { brand, member } = findManagedBrandOrThrow(request.params.brandId ?? "", principal.userId);

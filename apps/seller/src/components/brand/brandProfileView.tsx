@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { BrandSellingSwitch } from "@/components/brand/brandSellingSwitch";
 import { useBrandWorkspace } from "@/components/brand/brandWorkspace";
 import { Button } from "@/components/ui/button";
 import { Callout } from "@/components/ui/feedback";
@@ -118,6 +119,7 @@ export function BrandProfileView() {
           )}
         </div>
       </Panel>
+      <BrandSellingSwitch />
       <Panel title="Registration" actions={<StatusBadge tone={registration.tone}>{registration.label}</StatusBadge>}>
         <KeyValueList
           items={[

@@ -8,7 +8,8 @@ import { requestConfirmation } from "@zudomart/web-kit";
 import { ProductAttributesSection } from "@/components/catalog/productAttributesSection";
 import { ProductBasicsSection } from "@/components/catalog/productBasicsSection";
 import { ProductBrandSection } from "@/components/catalog/productBrandSection";
-import { convertDraftToUpsertRequest, convertProductToDraft, createEmptyProductDraft, regenerateVariantDraftsForOptions, type OptionDraft, type ProductDraft, type VariantDraft } from "@/components/catalog/productEditorDraft.util";
+import { applyOptionChanges, convertDraftToUpsertRequest, convertProductToDraft, createEmptyProductDraft, type OptionDraft, type ProductDraft, type VariantDraft } from "@/components/catalog/productEditorDraft.util";
+import { describeOptionIssues, describeRemovedVariantsWithStock } from "@/components/catalog/productOptionIssues.util";
 import { ProductImagesSection } from "@/components/catalog/productImagesSection";
 import { ProductOptionsSection } from "@/components/catalog/productOptionsSection";
 import { describeProductPublicationState } from "@/components/catalog/productPresentation.util";
@@ -56,7 +57,11 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
 
   const fieldErrors = convertIssuesToFieldErrorMap(issues);
   const updateDraft = (patch: Partial<ProductDraft>) => setDraft((current) => (current ? { ...current, ...patch } : current));
-  const updateOptions = (options: OptionDraft[]) => setDraft((current) => (current ? { ...current, options, variants: regenerateVariantDraftsForOptions(options, current.variants) } : current));
+  const updateOptions = (update: (options: readonly OptionDraft[]) => OptionDraft[]) => {
+    setDraft((current) => (current ? { ...current, ...applyOptionChanges(update(current.options), current.variants) } : current));
+    setIssues((current) => (current.some((issue) => issue.path.startsWith("options")) ? current.filter((issue) => !issue.path.startsWith("options")) : current));
+  };
+  const stockBlockedMessage = describeRemovedVariantsWithStock(productQuery.data?.variants ?? [], draft.variants);
   const updateVariant = (variantKey: string, patch: Partial<VariantDraft>) => setDraft((current) => (current ? { ...current, variants: current.variants.map((variant) => (variant.key === variantKey ? { ...variant, ...patch } : variant)) } : current));
 
   async function changeOnlinePublication(publishedOnline: boolean) {
@@ -96,7 +101,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
     const draftToSave = saveAsDraft ? { ...draft, status: "draft" as const, publishedOnline: false } : draft;
     if (saveAsDraft) setDraft(draftToSave);
     const { request, parseIssues } = convertDraftToUpsertRequest(draftToSave, settings.currency, isNewProduct);
-    const clientIssues = [...parseIssues, ...validateProductUpsertRequest(request, { categoryIds: null, locationIds: locations.map((location) => location.id), skusUsedByOtherProducts: new Set(), barcodesUsedByOtherProducts: new Set() })];
+    const clientIssues = [...describeOptionIssues(draftToSave.options, productQuery.data?.variants ?? [], draftToSave.variants), ...parseIssues, ...validateProductUpsertRequest(request, { categoryIds: null, locationIds: locations.map((location) => location.id), skusUsedByOtherProducts: new Set(), barcodesUsedByOtherProducts: new Set() })];
     if (request.publishedOnline && draftToSave.images.length === 0) clientIssues.push({ path: "images", message: "Add at least one photo before selling on the marketplace." });
     const uniqueIssues = clientIssues.filter((issue, index) => clientIssues.findIndex((candidate) => candidate.message === issue.message) === index);
     setIssues(uniqueIssues);
@@ -149,7 +154,7 @@ export function ProductEditorView({ productId }: { readonly productId: string | 
       <div className={styles.layout}>
         <div className={styles.mainColumn}>
           <ProductBasicsSection draft={draft} fieldErrors={fieldErrors} onDraftChange={updateDraft} />
-          <ProductOptionsSection options={draft.options} fieldErrors={fieldErrors} onOptionsChange={updateOptions} />
+          <ProductOptionsSection options={draft.options} variants={draft.variants} fieldErrors={fieldErrors} blockedMessage={stockBlockedMessage} onOptionsChange={updateOptions} />
           <ProductVariantsTable variants={draft.variants} options={draft.options} fieldErrors={fieldErrors} isNewProduct={isNewProduct} onVariantChange={updateVariant} />
           <ProductRegionalPricesSection variants={draft.variants} options={draft.options} fieldErrors={fieldErrors} onVariantChange={updateVariant} />
           <ProductAttributesSection attributes={draft.attributes} fieldErrors={fieldErrors} onAttributesChange={(attributes) => updateDraft({ attributes })} />

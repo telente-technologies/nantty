@@ -238,18 +238,6 @@
   background: var(--surface-app);
 }
 
-.alert_error {
-  border-left: 3px solid var(--error);
-}
-
-.alert_caution {
-  border-left: 3px solid var(--caution);
-}
-
-.alert_info {
-  border-left: 3px solid var(--color-brand);
-}
-
 .alertTitle {
   font-weight: 650;
 }

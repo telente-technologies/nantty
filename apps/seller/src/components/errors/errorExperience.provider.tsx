@@ -26,6 +26,7 @@ export const sellerErrorExperience: ErrorExperienceConfig = {
     viewOrders: "/orders",
     browse: "/dashboard",
     clearDebt: "/wallet",
+    manageProfiles: "/brand",
   },
   labels: { upgrade: "See seller plans", browse: "Back to your dashboard" },
   destinations: [

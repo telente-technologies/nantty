@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
   ArrowDownIcon, ArrowLeftIcon, ArrowRightIcon, ArrowUpIcon, ArrowUpRightIcon, ArrowsClockwiseIcon, ArrowsOutSimpleIcon, BellIcon, BellRingingIcon,
   BookmarkSimpleIcon, BoxArrowDownIcon, CalendarDotsIcon, CameraIcon, CaretDownIcon, CaretRightIcon, CaretUpDownIcon, CaretUpIcon, ChatCircleIcon,
-  CheckIcon, CodeIcon, CopyIcon, CreditCardIcon, DotsThreeVerticalIcon, ExportIcon, EyeClosedIcon, EyeIcon, HeadsetIcon, HeartIcon, ImageIcon, ImageSquareIcon,
+  CheckIcon, CodeIcon, CopyIcon, CreditCardIcon, DotsSixVerticalIcon, DotsThreeVerticalIcon, ExportIcon, EyeClosedIcon, EyeIcon, HeadsetIcon, HeartIcon, ImageIcon, ImageSquareIcon,
   MagnifyingGlassIcon, MapPinIcon, MinusIcon, PaperPlaneTiltIcon, PlusIcon, QuestionIcon, RepeatIcon, SealCheckIcon, ShareNetworkIcon, ShieldIcon,
   ShoppingCartIcon, SignOutIcon, SlidersHorizontalIcon, SpeakerHighIcon, SpeedometerIcon, SquaresFourIcon, StarIcon, StorefrontIcon, TagIcon,
   TextIndentIcon, TrashIcon, TruckIcon, UserCircleIcon, VideoCameraIcon, WarningIcon, XIcon,
@@ -17,7 +17,7 @@ const iconMap = {
   arrowLeft24: [ArrowLeftIcon], arrowsOutSimple24: [ArrowsOutSimpleIcon], arrowUpRight24: [ArrowUpRightIcon], bell24: [BellIcon],
   bellRinging24: [BellRingingIcon], bookmarkSimple24: [BookmarkSimpleIcon], boxArrowDown24: [BoxArrowDownIcon], buildingStore20: [StorefrontIcon],
   calendarDots16: [CalendarDotsIcon], camera24: [CameraIcon], cancel20: [XIcon], caretDown24: [CaretDownIcon], caretRight24: [CaretRightIcon],
-  chatCircle24: [ChatCircleIcon], check16: [CheckIcon], code20: [CodeIcon], copy16: [CopyIcon], creditCard24: [CreditCardIcon], dotsThreeVertical24: [DotsThreeVerticalIcon],
+  chatCircle24: [ChatCircleIcon], check16: [CheckIcon], code20: [CodeIcon], copy16: [CopyIcon], creditCard24: [CreditCardIcon], dotsSixVertical16: [DotsSixVerticalIcon], dotsThreeVertical24: [DotsThreeVerticalIcon],
   export24: [ExportIcon], eye20: [EyeIcon], eyeClosed20: [EyeClosedIcon], headset24: [HeadsetIcon], heart24: [HeartIcon], image24: [ImageIcon],
   imageSquare24: [ImageSquareIcon], magnifyingGlass20: [MagnifyingGlassIcon], mapPin24: [MapPinIcon], minus16: [MinusIcon],
   paperPlaneTilt24: [PaperPlaneTiltIcon], plus16: [PlusIcon], question24: [QuestionIcon], refresh20: [ArrowsClockwiseIcon], repeat24: [RepeatIcon],

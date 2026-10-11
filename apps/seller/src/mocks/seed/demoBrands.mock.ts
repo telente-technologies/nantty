@@ -14,6 +14,7 @@ export interface MockBrandRecord {
   officialStore: BrandOfficialStore;
   members: BrandMember[];
   storeIds: string[];
+  sellingEnabled?: boolean;
 }
 
 export interface MockBrandListing {

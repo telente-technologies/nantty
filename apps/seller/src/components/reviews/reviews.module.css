@@ -80,9 +80,8 @@
 
 .reply {
   padding: 10px var(--space-3);
-  border-left: 3px solid color-mix(in srgb, var(--color-brand) 60%, transparent);
-  border-radius: var(--radius-small);
-  background: var(--blue-tint);
+  border-left: 2px solid var(--divider);
+  background: var(--surface-app);
 }
 
 .replyMeta {

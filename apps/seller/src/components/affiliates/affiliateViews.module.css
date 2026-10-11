@@ -49,7 +49,7 @@
 .requestMessage {
   grid-column: 1 / -1;
   padding: 10px var(--space-3);
-  border-left: 3px solid color-mix(in srgb, var(--color-brand) 30%, transparent);
+  border-left: 2px solid var(--divider);
   background: var(--surface-app);
   border-radius: 0 var(--radius-small) var(--radius-small) 0;
   color: var(--ink-muted);

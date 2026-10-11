@@ -66,6 +66,7 @@ export function presentBrand(brand: MockBrandRecord): Brand {
     coverUrl: brand.coverUrl,
     description: brand.description,
     website: brand.website,
+    sellingEnabled: brand.sellingEnabled ?? brand.storeIds.length > 0,
     country: brand.country,
     registration: brand.registration,
     verification: { status: owningStore?.verificationStatus ?? "unverified", tier: isGold ? convertSubscriptionPlanToGoldBadgeTier(subscription?.plan) : null, badgeVisible: isGold },

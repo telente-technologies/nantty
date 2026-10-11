@@ -9,7 +9,9 @@ import { buildVariantTitleFromOptionValues } from "@/utils/productValidation.uti
 export interface OptionDraft {
   readonly key: string;
   readonly name: string;
-  readonly valuesText: string;
+  readonly values: readonly string[];
+  readonly pendingText: string;
+  readonly appliedName: string | null;
 }
 
 export interface VariantDraft {
@@ -82,8 +84,8 @@ export function createDraftKey(): string {
   return `draft_${draftKeyCounter}`;
 }
 
-export function splitOptionValuesText(valuesText: string): string[] {
-  return [...new Set(valuesText.split(",").map((value) => value.trim()).filter(Boolean))];
+export function createOptionDraft(name: string, values: readonly string[] = [], appliedName: string | null = null): OptionDraft {
+  return { key: createDraftKey(), name, values: [...values], pendingText: "", appliedName };
 }
 
 function createEmptyVariantDraft(optionValues: Record<string, string>, template: VariantDraft | undefined): VariantDraft {
@@ -108,7 +110,7 @@ export function convertProductToDraft(product: Product): ProductDraft {
   return {
     name: product.name, description: product.description, categoryId: product.categoryId ?? "", status: product.status, taxable: product.taxable,
     trackInventory: product.trackInventory, publishedOnline: product.publishedOnline, tagsText: product.tags.join(", "),
-    options: product.options.map((option) => ({ key: createDraftKey(), name: option.name, valuesText: option.values.join(", ") })),
+    options: product.options.map((option) => createOptionDraft(option.name, option.values, option.name)),
     images: product.images,
     brandId: product.brand?.brandId ?? "",
     brandRelationship: product.brand?.relationship ?? "",
@@ -133,18 +135,49 @@ function buildCombinationKey(optionValues: Record<string, string>, optionNames: 
   return optionNames.map((optionName) => `${optionName}=${optionValues[optionName] ?? ""}`).join("|");
 }
 
-export function regenerateVariantDraftsForOptions(options: readonly OptionDraft[], currentVariants: readonly VariantDraft[]): VariantDraft[] {
-  const usableOptions = options.map((option) => ({ name: option.name.trim(), values: splitOptionValuesText(option.valuesText) })).filter((option) => option.name && option.values.length > 0);
-  const optionNames = usableOptions.map((option) => option.name);
-  const combinations = usableOptions.reduce<Record<string, string>[]>((accumulated, option) => accumulated.flatMap((combination) => option.values.map((value) => ({ ...combination, [option.name]: value }))), [{}]);
-  const existingByKey = new Map(currentVariants.map((variant) => [buildCombinationKey(variant.optionValues, optionNames), variant]));
+function usableOptions(options: readonly OptionDraft[]) {
+  return options.map((option) => ({ key: option.key, name: option.name.trim(), values: [...option.values], appliedName: option.appliedName })).filter((option) => option.name && option.values.length > 0);
+}
+
+function projectVariantOntoOptions(variant: VariantDraft, nextOptions: ReturnType<typeof usableOptions>): Record<string, string> | null {
+  const projected: Record<string, string> = {};
+  for (const option of nextOptions) {
+    const value = (option.appliedName ? variant.optionValues[option.appliedName] : undefined) ?? option.values[0];
+    if (value === undefined || !option.values.includes(value)) return null;
+    projected[option.name] = value;
+  }
+  return projected;
+}
+
+export function applyOptionChanges(nextOptions: readonly OptionDraft[], currentVariants: readonly VariantDraft[]): { options: OptionDraft[]; variants: VariantDraft[] } {
+  const names = nextOptions.map((option) => option.name.trim().toLocaleLowerCase()).filter(Boolean);
+  const isMidEdit = nextOptions.some((option) => !option.name.trim() && option.values.length > 0) || new Set(names).size !== names.length;
+  if (isMidEdit) return { options: [...nextOptions], variants: [...currentVariants] };
+  const variants = regenerateVariantDraftsForOptions(nextOptions, currentVariants);
+  return { options: nextOptions.map((option) => (option.name.trim() ? { ...option, appliedName: option.name.trim() } : option)), variants };
+}
+
+export function regenerateVariantDraftsForOptions(nextOptions: readonly OptionDraft[], currentVariants: readonly VariantDraft[]): VariantDraft[] {
+  const options = usableOptions(nextOptions);
+  const optionNames = options.map((option) => option.name);
+  const combinations = options.reduce<Record<string, string>[]>((accumulated, option) => accumulated.flatMap((combination) => option.values.map((value) => ({ ...combination, [option.name]: value }))), [{}]);
+  const projectedByKey = new Map<string, VariantDraft>();
+  for (const variant of currentVariants) {
+    const projected = projectVariantOntoOptions(variant, options);
+    const combinationKey = projected ? buildCombinationKey(projected, optionNames) : null;
+    if (combinationKey !== null && !projectedByKey.has(combinationKey)) projectedByKey.set(combinationKey, { ...variant, optionValues: projected! });
+  }
   const template = currentVariants[0];
-  return combinations.slice(0, 100).map((combination) => {
-    const existing = existingByKey.get(buildCombinationKey(combination, optionNames));
-    if (existing && Object.keys(existing.optionValues).length === optionNames.length) return existing;
-    if (combinations.length === 1 && currentVariants.length === 1 && template) return { ...template, optionValues: combination };
-    return createEmptyVariantDraft(combination, template);
-  });
+  return combinations.slice(0, 100).map((combination) => projectedByKey.get(buildCombinationKey(combination, optionNames)) ?? createEmptyVariantDraft(combination, template));
+}
+
+export function variantDraftHasStock(variant: VariantDraft): boolean {
+  return variant.stock.some((level) => level.onHand !== 0) || Object.values(variant.openingStockTextByLocationId).some((quantity) => Number(quantity) > 0);
+}
+
+export function findDroppedVariantDrafts(currentVariants: readonly VariantDraft[], nextVariants: readonly VariantDraft[]): VariantDraft[] {
+  const keptKeys = new Set(nextVariants.map((variant) => variant.key));
+  return currentVariants.filter((variant) => !keptKeys.has(variant.key));
 }
 
 export function describeVariantDraftTitle(variant: VariantDraft, options: readonly OptionDraft[]): string {
@@ -204,7 +237,7 @@ export function convertDraftToUpsertRequest(draft: ProductDraft, currency: Curre
       trackInventory: draft.trackInventory,
       publishedOnline: draft.publishedOnline,
       tags: draft.tagsText.split(",").map((tag) => tag.trim()).filter(Boolean),
-      options: draft.options.map((option) => ({ name: option.name.trim(), values: splitOptionValuesText(option.valuesText) })).filter((option) => option.name || option.values.length > 0),
+      options: draft.options.map((option) => ({ name: option.name.trim(), values: [...option.values] })).filter((option) => option.name || option.values.length > 0),
       imageMediaIds: draft.images.map((image) => image.mediaId),
       variants,
       brand: draft.brandId && draft.brandRelationship ? { brandId: draft.brandId, relationship: draft.brandRelationship } : null,

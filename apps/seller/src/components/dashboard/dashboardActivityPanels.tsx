@@ -99,7 +99,7 @@ export function DashboardAlertsPanel({ summary }: { readonly summary: DashboardS
       <ul className={styles.alertList}>
         {summary.alerts.map((alert) => (
           <li key={alert.kind}>
-            <Link href={alert.href} className={`${styles.alertCard} ${styles[`alert_${alert.severity}`]}`}>
+            <Link href={alert.href} className={styles.alertCard}>
               <StatusBadge tone={alertToneBySeverity[alert.severity]}>{alert.count}</StatusBadge>
               <span className={styles.rowMain}>
                 <span className={styles.alertTitle}>{alert.title}</span>
