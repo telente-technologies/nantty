@@ -1,0 +1,229 @@
+.reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.reaction,
+.pickerEmoji {
+  padding: 2px 8px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--ink-strong);
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+
+.reactionMine {
+  border-color: var(--color-brand);
+  background: var(--surface-sunken);
+}
+
+.pickerHost {
+  position: relative;
+  align-self: center;
+}
+
+.pickerTrigger {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.pickerTrigger:hover {
+  background: var(--surface-sunken);
+}
+
+.picker {
+  position: absolute;
+  bottom: 32px;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.12);
+}
+
+.poll {
+  display: grid;
+  gap: 6px;
+  min-width: min(260px, 60vw);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pollQuestion {
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.pollHint {
+  font-size: var(--text-2xs);
+  opacity: 0.75;
+}
+
+.pollOption {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  overflow: hidden;
+  padding: 8px 10px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  color: var(--ink-strong);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pollOptionMine {
+  border-color: var(--color-brand);
+}
+
+.pollBar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--surface-sunken);
+}
+
+.pollLabel,
+.pollCount {
+  position: relative;
+}
+
+.location,
+.document {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+  color: inherit;
+}
+
+.locationLink {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-small);
+  background: rgb(0 0 0 / 0.06);
+  color: inherit;
+  text-decoration: none;
+}
+
+.locationTitle {
+  font-weight: 700;
+}
+
+.document {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-small);
+  background: rgb(0 0 0 / 0.06);
+  text-decoration: none;
+}
+
+.inlineAction {
+  justify-self: start;
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+
+.attachMenu {
+  position: relative;
+}
+
+.attachTrigger {
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--ink-strong);
+  cursor: pointer;
+}
+
+.attachList {
+  position: absolute;
+  bottom: 54px;
+  left: 0;
+  z-index: 5;
+  display: grid;
+  min-width: 200px;
+  padding: 6px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--surface-card);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
+}
+
+.attachItem {
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--ink-strong);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.attachItem:hover {
+  background: var(--surface-sunken);
+}
+
+.status {
+  padding: 6px 0;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.input {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  color: var(--ink-strong);
+  font: inherit;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.error {
+  color: var(--color-danger, #c0392b);
+  font-size: var(--text-sm);
+}
+
+.recording {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
