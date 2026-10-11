@@ -1,8 +1,9 @@
 package controllers
 
 import (
+	"zudomart/platform/regionpricing"
+
 	"net/http"
-	"strings"
 
 	"zudomart/modules/ads/src/container"
 	confirmboostpayment "zudomart/modules/ads/src/modules/boosts/commands/confirmBoostPayment"
@@ -13,7 +14,6 @@ import (
 	getboostoptions "zudomart/modules/ads/src/modules/boosts/queries/getBoostOptions"
 	"zudomart/modules/ads/src/utils"
 	"zudomart/platform/httpserver"
-	"zudomart/platform/regionpricing"
 )
 
 type BoostsController struct{ Container *container.Container }
@@ -28,11 +28,8 @@ func (controller BoostsController) GetOptions(writer http.ResponseWriter, reques
 		if err != nil {
 			return err
 		}
-		resolution := utils.ResolvePricingRegion(request)
-		currency := strings.ToUpper(request.URL.Query().Get("currency"))
-		if !regionpricing.IsSupportedCurrency(currency) {
-			currency = resolution.Currency
-		}
+		resolution := utils.ResolveChargingRegion(request, controller.Container.Countries.ProfileCountry(request.Context(), userId.String()))
+		currency := resolution.Currency
 		options, err := (getboostoptions.Handler{Container: controller.Container}).Execute(request.Context(), getboostoptions.Query{
 			Currency: currency, Country: resolution.CountryCode, UserId: userId, Platform: request.Header.Get("X-Client-Platform"),
 		})
@@ -70,8 +67,12 @@ func (controller BoostsController) Create(writer http.ResponseWriter, request *h
 		if err := utils.DecodeBody(writer, request, &body); err != nil {
 			return err
 		}
+		charging, err := regionpricing.RequireChargingCountry(utils.ResolveChargingRegion(request, controller.Container.Countries.ProfileCountry(request.Context(), userId.String())))
+		if err != nil {
+			return err
+		}
 		created, err := (createboost.Handler{Container: controller.Container}).Execute(request.Context(), createboost.Command{
-			UserId: userId, IdempotencyKey: request.Header.Get("Idempotency-Key"), Country: utils.ClientCountry(request), Platform: request.Header.Get("X-Client-Platform"), Request: body,
+			UserId: userId, IdempotencyKey: request.Header.Get("Idempotency-Key"), Country: charging, Platform: request.Header.Get("X-Client-Platform"), Request: body,
 		})
 		if err != nil {
 			return err

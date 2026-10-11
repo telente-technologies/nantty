@@ -26,7 +26,7 @@ func (handler Handler) collectEligibleCandidates(ctx context.Context, slot *slot
 		if !services.ViewerFallsInExperimentArm(candidate, slot.command.UserId) {
 			continue
 		}
-		if candidate.AvailableFundsMicros <= 0 || candidate.StartAt.After(slot.now) || (candidate.EndAt != nil && !candidate.EndAt.After(slot.now)) {
+		if candidate.FundsAvailableMicrosAt(slot.now) <= 0 || candidate.StartAt.After(slot.now) || (candidate.EndAt != nil && !candidate.EndAt.After(slot.now)) {
 			continue
 		}
 		if matched, _ := services.MatchesTargeting(candidate.Audience, slot.command.Viewer, contentTopics); !matched {

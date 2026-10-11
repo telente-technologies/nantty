@@ -18,7 +18,7 @@ var ReceiptedTransactionTypes = map[string]bool{"top_up": true, "refund": true, 
 
 func TopUpLimits(ctx context.Context, deployed *container.Container, currency string) Limits {
 	minimum := deployed.Pricing.FloorsForCountries(ctx, nil, currency).MinimumDailyBudgetMinor
-	return Limits{Minimum: minimum * 5, Maximum: minimum * 5_000}
+	return Limits{Minimum: minimum * 5, Maximum: deployed.Pricing.AdsTopUpMaximum(ctx, currency)}
 }
 
 func FormatMinor(amountMinor int64, currency string) string {

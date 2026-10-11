@@ -22,7 +22,7 @@ func MountBillingRoutes(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("GET "+base+"/transactions/{transactionId}/receipt", authenticated(controller.DownloadReceipt))
 	mux.Handle("GET "+base+"/invoices", authenticated(controller.ListInvoices))
 	mux.Handle("GET "+base+"/invoices/{invoiceId}/download", authenticated(controller.DownloadInvoice))
-	mux.HandleFunc("GET /api/v1/ads/pricing", controller.GetRegionalPricing)
-	mux.HandleFunc("POST /api/v1/ads/pricing/estimate", controller.EstimateCampaignCost)
+	mux.Handle("GET /api/v1/ads/pricing", authenticated(controller.GetRegionalPricing))
+	mux.Handle("POST /api/v1/ads/pricing/estimate", authenticated(controller.EstimateCampaignCost))
 	mux.Handle("POST /internal/v1/ads/accounts/{accountId}/funds", middlewares.Internal(deployed)(controller.CreditFunds))
 }

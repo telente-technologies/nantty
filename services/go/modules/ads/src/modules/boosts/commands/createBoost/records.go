@@ -27,7 +27,7 @@ func (handler Handler) ensureBoostAccount(ctx context.Context, command Command) 
 	if !ent.IsNotFound(err) {
 		return nil, err
 	}
-	country := command.Country
+	country := command.Country.CountryCode
 	if len(country) != 2 {
 		country = accountservices.CountryForCurrency(currency)
 	}

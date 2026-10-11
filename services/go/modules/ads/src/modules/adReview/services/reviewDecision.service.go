@@ -4,12 +4,14 @@ import (
 	"context"
 	"time"
 
+	adserrors "zudomart/modules/ads/src/errors"
 	"zudomart/modules/ads/src/events"
 	"zudomart/modules/ads/src/generated/ent"
 	"zudomart/modules/ads/src/generated/ent/ad"
 	"zudomart/modules/ads/src/generated/ent/adboost"
 	"zudomart/modules/ads/src/generated/ent/adcampaign"
 	"zudomart/modules/ads/src/generated/ent/adgroup"
+	boostservices "zudomart/modules/ads/src/modules/boosts/services"
 	campaignservices "zudomart/modules/ads/src/modules/campaigns/services"
 )
 
@@ -33,9 +35,13 @@ func ApproveInTransaction(ctx context.Context, tx *ent.Tx, review ReviewContext,
 }
 
 func RejectInTransaction(ctx context.Context, tx *ent.Tx, review ReviewContext, reviewer Reviewer, policyCode, reason string, now time.Time) error {
-	update := tx.Ad.UpdateOneID(review.Ad.ID).SetReviewStatus(ad.ReviewStatusRejected).SetStatus(ad.StatusRejected).SetPolicyCode(policyCode).SetPolicyReason(reason).SetReviewedAt(now).SetReviewedByName(reviewer.Name).ClearAppealStatus().SetAppealMessage("")
-	if err := update.Exec(ctx); err != nil {
+	rejected, err := tx.Ad.Update().Where(ad.ID(review.Ad.ID), ad.ReviewStatusEQ(ad.ReviewStatusPending)).SetReviewStatus(ad.ReviewStatusRejected).SetStatus(ad.StatusRejected).
+		SetPolicyCode(policyCode).SetPolicyReason(reason).SetReviewedAt(now).SetReviewedByName(reviewer.Name).ClearAppealStatus().SetAppealMessage("").Save(ctx)
+	if err != nil {
 		return err
+	}
+	if rejected == 0 {
+		return adserrors.AdAlreadyReviewed
 	}
 	if err := tx.AdAccount.UpdateOneID(review.Account.ID).AddViolationCount(1).SetLastViolationAt(now).Exec(ctx); err != nil {
 		return err
@@ -44,10 +50,10 @@ func RejectInTransaction(ctx context.Context, tx *ent.Tx, review ReviewContext, 
 		return err
 	}
 	if review.IsBoost() {
-		if err := refundBoostToAdBalance(ctx, tx, review); err != nil {
+		if err := settleRejectedBoostBudget(ctx, tx, review); err != nil {
 			return err
 		}
-		if err := tx.AdBoost.Update().Where(adboost.CampaignID(review.Campaign.ID)).SetStatus(adboost.StatusRejected).SetRejectionReason(reason).Exec(ctx); err != nil {
+		if err := tx.AdBoost.Update().Where(adboost.CampaignID(review.Campaign.ID), adboost.StatusIn(adboost.StatusInReview, adboost.StatusActive)).SetStatus(adboost.StatusRejected).SetRejectionReason(reason).Exec(ctx); err != nil {
 			return err
 		}
 	}
@@ -69,15 +75,12 @@ func startBoostInTransaction(ctx context.Context, tx *ent.Tx, review ReviewConte
 	return tx.AdGroup.UpdateOneID(review.Group.ID).SetStartAt(now).SetEndAt(end).SetStatus(adgroup.StatusActive).Exec(ctx)
 }
 
-func refundBoostToAdBalance(ctx context.Context, tx *ent.Tx, review ReviewContext) error {
-	boost, err := tx.AdBoost.Query().Where(adboost.CampaignID(review.Campaign.ID)).Only(ctx)
-	if err != nil || boost.Status != adboost.StatusInReview {
+func settleRejectedBoostBudget(ctx context.Context, tx *ent.Tx, review ReviewContext) error {
+	boost, err := tx.AdBoost.Query().Where(adboost.CampaignID(review.Campaign.ID)).ForUpdate().Only(ctx)
+	if err != nil || (boost.Status != adboost.StatusInReview && boost.Status != adboost.StatusActive) {
 		return err
 	}
-	if err := tx.AdAccount.UpdateOneID(review.Account.ID).AddBalanceMinor(boost.TotalBudgetMinor).Exec(ctx); err != nil {
-		return err
-	}
-	return tx.AdFundsTransaction.Create().SetAccountID(review.Account.ID).SetType("refund").SetAmountMinor(boost.TotalBudgetMinor).SetCurrency(boost.Currency).SetDescription("Boost not approved").SetReference("boostRefund:" + boost.ID.String()).Exec(ctx)
+	return boostservices.ReleaseFreeBoostBudgetInTransaction(ctx, tx, boost)
 }
 
 func emitReviewed(ctx context.Context, tx *ent.Tx, review ReviewContext, decision, policyCode string, reviewer Reviewer, now time.Time) error {
