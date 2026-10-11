@@ -40,13 +40,13 @@ Every script starts with this header; a script without it must not be run.
 # Expected behavior:
 # Dangerous behavior:  (what a failure would look like)
 # Cleanup:
-# Financial safety:    SAFE (no money moves) | SANDBOX-ONLY (fake Paystack / sk_test_ only) | FORBIDDEN
+# Financial safety:    SAFE (no money moves) | SANDBOX-ONLY (fake Flutterwave / FLWSECK_TEST- only) | FORBIDDEN
 ```
 
 ## Rules
 
 - Only `127.0.0.1` targets from `infra/local/docker-compose.yml` and locally started services. Never `betng-*`, never a public hostname.
-- The payment provider (Paystack, or Flutterwave after the migration) must be the fake server or a test key. A script refuses to start if it sees `sk_live_`.
+- The payment provider (Flutterwave, the only provider) must be the fake server or a test key. A script refuses to start if it sees a live key (`FLWSECK-` without `_TEST`).
 - Snapshot ledger, wallet and payment tables before and after every financial run (`audit/snapshots/`).
 - Append-only ledger controls are never weakened, even temporarily.
 - One heavy run at a time (15 GB RAM machine).
