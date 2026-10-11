@@ -81,8 +81,12 @@ func (billing Billing) StartCheckout(ctx context.Context, request CheckoutReques
 	if err := billing.RequireCheckmarkPurchaseAllowed(ctx, request.PlanCode, profile.ProfileId); err != nil {
 		return CheckoutView{}, err
 	}
+	chargingCountry := firstNonEmpty(profile.CountryCode, request.ViewerCountry)
+	if chargingCountry == "" {
+		return CheckoutView{}, regionpricing.ErrCountryRequired
+	}
 	client := billing.Container.Client(billing.Container.Resources.Database)
-	quote, price, err := billing.QuoteForOwnerOnChannel(ctx, client, request.UserId, request.PlanCode, firstNonEmpty(profile.CountryCode, request.ViewerCountry), request.Interval, "web")
+	quote, price, err := billing.QuoteForOwnerOnChannel(ctx, client, request.UserId, request.PlanCode, chargingCountry, request.Interval, "web")
 	if err != nil {
 		return CheckoutView{}, err
 	}

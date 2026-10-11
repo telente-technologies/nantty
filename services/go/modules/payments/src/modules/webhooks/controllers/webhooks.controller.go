@@ -28,6 +28,9 @@ func (controller WebhooksController) readRawBody(writer http.ResponseWriter, req
 }
 
 func (controller WebhooksController) sourceAllowed(request *http.Request) bool {
+	if request.PathValue("provider") == integrations.FlutterwaveProviderName {
+		return true
+	}
 	allowlist := controller.Application.Container.Settings.Paystack.WebhookIpAllowlist
 	if len(allowlist) == 0 {
 		return false

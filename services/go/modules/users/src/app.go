@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"sync"
 	"time"
 
 	"entgo.io/ent/dialect"
@@ -137,12 +138,29 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
-	go func() { _ = privacy.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
-	go func() { _ = accountenforcement.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
-	go func() { _ = celebrations.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
-	go func() { _ = checkmarks.RunBackgroundWorkersUntilContextDone(ctx, module.container) }()
-	go identityverification.RunEligibilityRecheckUntilContextDone(ctx, module.container)
-	go checkmarks.ConsumeEntitlementEventsUntilContextDone(ctx, module.container, module.container.Settings.IsProduction())
+	c := module.container
+	var workers sync.WaitGroup
+	defer workers.Wait()
+	supervise := func(name string, worker func(context.Context) error) {
+		workers.Go(func() { servicemodule.SuperviseWorkerUntilContextDone(ctx, c.Logger, name, worker) })
+	}
+	supervise("privacy", func(ctx context.Context) error { return privacy.RunBackgroundWorkersUntilContextDone(ctx, c) })
+	supervise("accountEnforcement", func(ctx context.Context) error {
+		return accountenforcement.RunBackgroundWorkersUntilContextDone(ctx, c)
+	})
+	supervise("celebrations", func(ctx context.Context) error { return celebrations.RunBackgroundWorkersUntilContextDone(ctx, c) })
+	supervise("checkmarks", func(ctx context.Context) error { return checkmarks.RunBackgroundWorkersUntilContextDone(ctx, c) })
+	supervise("checkmarkSuggestions", func(ctx context.Context) error {
+		checkmarks.RunSuggestionSchedulerDailyUntilContextDone(ctx, c)
+		return nil
+	})
+	supervise("eligibilityRecheck", func(ctx context.Context) error {
+		identityverification.RunEligibilityRecheckUntilContextDone(ctx, c)
+		return nil
+	})
+	supervise("entitlementEvents", func(ctx context.Context) error {
+		return checkmarks.ConsumeEntitlementEventsUntilContextDone(ctx, c, c.Settings.IsProduction())
+	})
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
 		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},
 		Publisher: module.publisher,

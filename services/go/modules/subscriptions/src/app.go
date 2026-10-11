@@ -67,6 +67,15 @@ func StartSubscriptionsModuleWithSettings(ctx context.Context, settings configs.
 		}
 		return billing.HandleVerificationRefundRequested(ctx, request)
 	})
+	loaders.RegisterMoneyDomainEventHandler(billingservices.ProviderCancelRequestedEvent, func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var request struct {
+			SubscriptionId string `json:"subscriptionId"`
+		}
+		if err := loaders.DecodeEventData(envelope, &request); err != nil {
+			return err
+		}
+		return billing.HandleProviderCancelRequested(ctx, request.SubscriptionId)
+	})
 	return &Module{Billing: billing, CreatorSubscriptions: creatorSubscriptions}, nil
 }
 

@@ -36,6 +36,16 @@ func (controller BillingController) resolveViewerRegion(request *http.Request, u
 	return regionpricing.ResolvePricingRegion(regionpricing.ReadSignalsFromRequest(request, container.Settings.TrustedCountryHeader, profileCountry))
 }
 
+func (controller BillingController) resolveChargingCountry(request *http.Request, userId string) string {
+	container := controller.Billing.Container
+	profileCountry, _ := container.Identity.FindAccountCountry(request.Context(), userId)
+	resolution := regionpricing.ResolveChargingRegion(regionpricing.ReadSignalsFromRequest(request, container.Settings.TrustedCountryHeader, profileCountry))
+	if resolution.Source == regionpricing.SourceFallback {
+		return ""
+	}
+	return resolution.CountryCode
+}
+
 func (controller BillingController) resolveRequestedRegion(request *http.Request) regionpricing.Resolution {
 	resolution := controller.resolveViewerRegion(request, "")
 	if requested := strings.ToUpper(request.URL.Query().Get("country")); countryPattern.MatchString(requested) {

@@ -15,6 +15,7 @@ import (
 	listusers "zudomart/modules/users/src/modules/accountEnforcement/queries/listUsers"
 	"zudomart/modules/users/src/utils"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/staffauth"
 )
 
 type AccountEnforcementController struct {
@@ -41,7 +42,8 @@ func (controller AccountEnforcementController) ListUsers(writer http.ResponseWri
 
 func (controller AccountEnforcementController) GetUser(writer http.ResponseWriter, request *http.Request) {
 	result, err := getuserdetail.Handler{Container: controller.Container}.Execute(request.Context(), request.PathValue("userId"))
-	controller.respond(writer, request, http.StatusOK, result, err)
+	staff, _ := staffauth.StaffFromContext(request.Context())
+	controller.respond(writer, request, http.StatusOK, result.VisibleTo(staff), err)
 }
 
 func (controller AccountEnforcementController) Restrict(writer http.ResponseWriter, request *http.Request) {

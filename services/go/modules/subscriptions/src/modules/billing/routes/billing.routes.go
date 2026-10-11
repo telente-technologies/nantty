@@ -11,7 +11,7 @@ import (
 func MountBillingRoutes(mux *http.ServeMux, controller controllers.BillingController) {
 	resources := controller.Billing.Container.Resources
 	requireUser := middlewares.RequireUserAccessToken(resources.AccessVerifier)
-	requirePricingRead := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionManageMonetization, false)
+	requirePricingRead := middlewares.RequireStaffWithAnyPermission(resources.StaffVerifiers, []string{constants.PermissionReadMonetization, constants.PermissionManageMonetization}, false)
 	requirePricingWrite := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionManageMonetization, true)
 	mux.HandleFunc("GET /api/v1/subscriptions/plans", controller.ListPlans)
 	mux.HandleFunc("GET /api/v1/seller/subscription/plans", controller.ListPlans)

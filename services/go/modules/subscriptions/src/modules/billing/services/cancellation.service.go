@@ -26,14 +26,14 @@ func (billing Billing) CancelSubscription(ctx context.Context, userId string, su
 			return billing.Container.Client(transaction).Subscription.UpdateOneID(row.ID).SetStatus(subscription.StatusCanceled).SetActivationPending(false).Exec(ctx)
 		})
 	case subscription.StatusTrialing, subscription.StatusActive, subscription.StatusPastDue, subscription.StatusGrace:
-		if row.Channel == subscription.ChannelWebPaystack && row.BillingReference != "" && row.ProviderPlanCode != "" {
-			if err := billing.Container.Payments.CancelBillingSubscription(ctx, row.BillingReference); err != nil {
-				return SubscriptionView{}, err
-			}
-		}
 		err = databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 			if err := billing.Container.Client(transaction).Subscription.UpdateOneID(row.ID).SetCancelAtPeriodEnd(true).SetPendingPlanCode("").SetPendingInterval("").Exec(ctx); err != nil {
 				return err
+			}
+			if row.Channel == subscription.ChannelWebPaystack && row.BillingReference != "" && row.ProviderPlanCode != "" {
+				if err := billing.emit(ctx, transaction, ProviderCancelRequestedEvent, row.ID.String(), map[string]any{"subscriptionId": row.ID.String()}); err != nil {
+					return err
+				}
 			}
 			return billing.emit(ctx, transaction, "subscription.cancellationScheduled", row.ID.String(), entitlementData(row, string(row.Status)))
 		})
@@ -46,4 +46,24 @@ func (billing Billing) CancelSubscription(ctx context.Context, userId string, su
 		return SubscriptionView{}, err
 	}
 	return ConvertSubscription(updated), nil
+}
+
+const ProviderCancelRequestedEvent = "subscription.providerCancelRequested"
+
+func (billing Billing) HandleProviderCancelRequested(ctx context.Context, subscriptionId string) error {
+	id, err := uuid.Parse(subscriptionId)
+	if err != nil {
+		return nil
+	}
+	row, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Get(ctx, id)
+	if ent.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if !row.CancelAtPeriodEnd && row.Status != subscription.StatusCanceled {
+		return nil
+	}
+	return billing.Container.Payments.CancelBillingSubscription(ctx, row.BillingReference)
 }
