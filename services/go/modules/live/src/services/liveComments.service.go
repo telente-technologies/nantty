@@ -64,7 +64,7 @@ func (service *LiveService) PostLiveComment(ctx context.Context, actor types.Act
 		return types.LiveCommentView{}, liveerrors.CommentsDisabled
 	}
 	if !isStaff {
-		if err := service.rejectUnlessViewerMayComment(ctx, liveId, actor.UserId, text, gate.settings); err != nil {
+		if err := service.rejectUnlessViewerMayComment(ctx, gate.session, actor.UserId, text, gate.settings); err != nil {
 			return types.LiveCommentView{}, err
 		}
 	}
@@ -79,9 +79,19 @@ func (service *LiveService) PostLiveComment(ctx context.Context, actor types.Act
 	return service.insertComment(ctx, actor, gate, text, replyTo, mentions)
 }
 
-func (service *LiveService) rejectUnlessViewerMayComment(ctx context.Context, liveId, userId uuid.UUID, text string, settings roomSettings) error {
-	if muted, err := service.activeMute(ctx, liveId, userId); err != nil || muted != nil {
+func (service *LiveService) rejectUnlessViewerMayComment(ctx context.Context, session *ent.LiveSession, userId uuid.UUID, text string, settings roomSettings) error {
+	if muted, err := service.activeMute(ctx, session.ID, userId); err != nil || muted != nil {
 		return orRestriction(err, liveerrors.ViewerMuted)
+	}
+	switch settings.CommentAudience {
+	case CommentAudienceFollowers:
+		if following, err := service.Relations.IsFollowing(ctx, userId, session.HostID); err != nil || !following {
+			return orRestriction(err, liveerrors.CommentsFollowersOnly)
+		}
+	case CommentAudienceSubscribers:
+		if subscribed, err := service.Relations.IsActiveSubscriber(ctx, userId, session.HostID); err != nil || !subscribed {
+			return orRestriction(err, liveerrors.CommentsSubscribersOnly)
+		}
 	}
 	if _, blockedWord := FindBlockedWord(text, service.Settings.PlatformBlockedWords, settings.BlockedWords); blockedWord {
 		return liveerrors.CommentBlockedWord

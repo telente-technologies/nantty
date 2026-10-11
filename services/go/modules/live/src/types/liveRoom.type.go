@@ -1,5 +1,7 @@
 package types
 
+import "github.com/google/uuid"
+
 type CommentMentionInput struct {
 	UserId string `json:"userId"`
 	Start  int    `json:"start"`
@@ -35,12 +37,14 @@ type RoomSettingsInput struct {
 	CommentsEnabled *bool
 	SlowModeSeconds *int
 	BlockedWords    *[]string
+	CommentAudience *string
 }
 
 type RoomSettingsView struct {
 	LiveId          string           `json:"liveId"`
 	CommentsEnabled bool             `json:"commentsEnabled"`
 	SlowModeSeconds int              `json:"slowModeSeconds"`
+	CommentAudience string           `json:"commentAudience"`
 	PinnedComment   *LiveCommentView `json:"pinnedComment"`
 	BlockedWords    []string         `json:"blockedWords,omitempty"`
 	MyRole          string           `json:"myRole"`
@@ -77,6 +81,7 @@ type StudioLiveView struct {
 	CreatedAt     string            `json:"createdAt"`
 	StartedAt     *string           `json:"startedAt"`
 	EndedAt       *string           `json:"endedAt"`
+	ScheduledAt   *string           `json:"scheduledAt"`
 	Viewers       int               `json:"viewers"`
 	PeakViewers   int               `json:"peakViewers"`
 	StreamKeyHint *string           `json:"streamKeyHint"`
@@ -189,4 +194,42 @@ type LiveAdEligibilityView struct {
 type PresenceChangeInput struct {
 	Joined []string `json:"joined"`
 	Left   []string `json:"left"`
+}
+
+type HostDefaultsInput struct {
+	CommentsEnabled *bool
+	CommentAudience *string
+	SlowModeSeconds *int
+	BlockedWords    *[]string
+	ModeratorIds    *[]uuid.UUID
+}
+
+type HostDefaultsView struct {
+	CommentsEnabled bool          `json:"commentsEnabled"`
+	CommentAudience string        `json:"commentAudience"`
+	SlowModeSeconds int           `json:"slowModeSeconds"`
+	BlockedWords    []string      `json:"blockedWords"`
+	Moderators      []UserSummary `json:"moderators"`
+	UpdatedAt       *string       `json:"updatedAt"`
+}
+
+type IngressHealthView struct {
+	Protocol         string   `json:"protocol"`
+	Status           string   `json:"status"`
+	Error            *string  `json:"error"`
+	VideoBitrateKbps *int     `json:"videoBitrateKbps"`
+	AudioBitrateKbps *int     `json:"audioBitrateKbps"`
+	Width            *int     `json:"width"`
+	Height           *int     `json:"height"`
+	Framerate        *float64 `json:"framerate"`
+}
+
+type StreamHealthView struct {
+	LiveId      string             `json:"liveId"`
+	State       string             `json:"state"`
+	Viewers     int                `json:"viewers"`
+	PeakViewers int                `json:"peakViewers"`
+	StartedAt   *string            `json:"startedAt"`
+	Ingress     *IngressHealthView `json:"ingress"`
+	CheckedAt   string             `json:"checkedAt"`
 }

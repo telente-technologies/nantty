@@ -76,6 +76,14 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 			products = owned
 		}
 	}
+	if input.ScheduledAt != nil {
+		if input.StartNow {
+			return types.LiveSessionView{}, liveerrors.Unprocessable("SCHEDULE_WITH_START_NOW", "A scheduled live can't also start now.")
+		}
+		if err := service.validateSchedule(*input.ScheduledAt); err != nil {
+			return types.LiveSessionView{}, err
+		}
+	}
 	adSettings, termsVersion, err := service.buildLiveAdSettingsRecord(input.Monetization)
 	if err != nil {
 		return types.LiveSessionView{}, err
@@ -101,7 +109,7 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 		builder := tx.LiveSession.Create().SetID(identifier).SetHostID(actor.UserId).SetTitle(strings.TrimSpace(input.Title)).
 			SetCategory(livesession.Category(input.Category)).SetVisibility(livesession.Visibility(input.Visibility)).
 			SetLivekitRoom("live-" + identifier.String()).SetHostIsCreator(actor.HasRole("creator")).SetCountryCode(input.CountryCode).
-			SetNillableStoreID(input.StoreId)
+			SetNillableStoreID(input.StoreId).SetNillableScheduledAt(input.ScheduledAt)
 		if adSettings != nil {
 			builder.SetLiveAdSettings(adSettings).SetNillableAcceptedLiveAdTermsVersion(termsVersion)
 			if termsVersion != nil {
@@ -125,6 +133,12 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 		if err := tx.GuestSlot.Create().SetLiveID(identifier).SetUserID(actor.UserId).SetRole("host").SetState("onStage").
 			SetExpiresAt(now).SetJoinedAt(now).Exec(ctx); err != nil {
 			return err
+		}
+		if err := service.applyHostDefaultsInTransaction(ctx, tx, identifier, actor.UserId); err != nil {
+			return err
+		}
+		if created.ScheduledAt != nil {
+			return events.EnqueueOutboxEventInTransaction(ctx, tx, events.LiveScheduled, identifier.String(), now, scheduledEventData(created))
 		}
 		if !input.StartNow {
 			return nil

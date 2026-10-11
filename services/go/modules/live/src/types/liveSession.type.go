@@ -1,6 +1,10 @@
 package types
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type CreateLiveSessionInput struct {
 	Title        string
@@ -9,6 +13,7 @@ type CreateLiveSessionInput struct {
 	StoreId      *uuid.UUID
 	ProductIds   []uuid.UUID
 	StartNow     bool
+	ScheduledAt  *time.Time
 	CountryCode  string
 	Monetization LiveMonetizationInput
 }
@@ -64,6 +69,7 @@ type LiveSessionView struct {
 	PeakViewers                int              `json:"peakViewers"`
 	StartedAt                  *string          `json:"startedAt"`
 	EndedAt                    *string          `json:"endedAt"`
+	ScheduledAt                *string          `json:"scheduledAt"`
 	CoverUrl                   *string          `json:"coverUrl"`
 	PlaybackUrl                *string          `json:"playbackUrl"`
 	Media                      MediaConnection  `json:"media"`
@@ -100,4 +106,11 @@ type HostHeartbeatView struct {
 	Status         string  `json:"status"`
 	LeaseExpiresAt *string `json:"leaseExpiresAt"`
 	TimeoutSeconds int     `json:"timeoutSeconds"`
+}
+
+type UpdateLiveDetailsInput struct {
+	Title          *string
+	Category       *string
+	ScheduledAt    *time.Time
+	ChangeSchedule bool
 }

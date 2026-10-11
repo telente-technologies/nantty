@@ -27,3 +27,17 @@ func ValidateRecordingSettingRequest(body dtos.RecordingSettingRequest) error {
 	}
 	return collected.AsError()
 }
+
+func ValidateHostDefaultsRequest(body dtos.HostDefaultsRequest) error {
+	var collected utils.Issues
+	if body.CommentAudience != nil && !utils.IsCommentAudience(*body.CommentAudience) {
+		collected.Add("commentAudience", "must be everyone, followers or subscribers")
+	}
+	if body.SlowModeSeconds != nil && (*body.SlowModeSeconds < 0 || *body.SlowModeSeconds > 300) {
+		collected.Add("slowModeSeconds", "must be between 0 and 300")
+	}
+	if body.ModeratorIds != nil {
+		utils.ParseIdentifiers("moderatorIds", *body.ModeratorIds, &collected)
+	}
+	return collected.AsError()
+}

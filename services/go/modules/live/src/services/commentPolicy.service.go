@@ -39,6 +39,7 @@ func foldForWordMatching(text string) string {
 	var builder strings.Builder
 	separatorPending := true
 	for _, character := range strings.ToLower(text) {
+		character = foldFullwidth(character)
 		if replacement, confusable := confusableCharacters[character]; confusable {
 			character = replacement
 		}
@@ -53,12 +54,32 @@ func foldForWordMatching(text string) string {
 	return strings.TrimSpace(builder.String())
 }
 
+func foldFullwidth(character rune) rune {
+	if character >= 0xFF01 && character <= 0xFF5E {
+		return unicode.ToLower(character - 0xFEE0)
+	}
+	return character
+}
+
+func foldSymbols(text string) string {
+	return strings.Map(func(character rune) rune {
+		if character == '\uFE0F' || character == '\u200D' || unicode.IsSpace(character) {
+			return -1
+		}
+		return foldFullwidth(unicode.ToLower(character))
+	}, text)
+}
+
 func FindBlockedWord(text string, blockedWords ...[]string) (string, bool) {
 	padded := " " + foldForWordMatching(text) + " "
+	symbols := foldSymbols(text)
 	for _, list := range blockedWords {
 		for _, word := range list {
 			folded := foldForWordMatching(word)
 			if folded != "" && strings.Contains(padded, " "+folded+" ") {
+				return word, true
+			}
+			if raw := foldSymbols(word); folded == "" && raw != "" && strings.Contains(symbols, raw) {
 				return word, true
 			}
 		}
@@ -74,7 +95,11 @@ func NormaliseBlockedWords(raw []string) ([]string, error) {
 		if trimmed == "" || seen[trimmed] {
 			continue
 		}
-		if len([]rune(trimmed)) < 2 || len([]rune(trimmed)) > maximumBlockedWordLength {
+		minimum := 2
+		if foldForWordMatching(trimmed) == "" {
+			minimum = 1
+		}
+		if len([]rune(trimmed)) < minimum || len([]rune(trimmed)) > maximumBlockedWordLength {
 			return nil, liveerrors.Unprocessable("BLOCKED_WORD_INVALID", "Blocked words must be 2-30 characters.")
 		}
 		seen[trimmed] = true

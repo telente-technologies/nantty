@@ -49,7 +49,7 @@ func (service *LiveService) presentLiveSession(ctx context.Context, session *ent
 		Id: session.ID.String(), Host: types.HostSummary{UserSummary: summarise(participants[session.HostID]), Followers: followers, Following: following},
 		Title: session.Title, Category: string(session.Category), State: string(session.State), Status: status, Visibility: string(session.Visibility),
 		Viewers: session.Viewers, PeakViewers: session.PeakViewers, StartedAt: formatOptionalTime(session.StartedAt), EndedAt: formatOptionalTime(session.EndedAt),
-		CoverUrl: session.CoverURL, Media: types.MediaConnection{LivekitUrl: service.Settings.LiveKitPublicUrl},
+		ScheduledAt: formatOptionalTime(session.ScheduledAt), CoverUrl: session.CoverURL, Media: types.MediaConnection{LivekitUrl: service.Settings.LiveKitPublicUrl},
 		GiftsEnabled: session.GiftsEnabled, HostIsCreator: session.HostIsCreator, StoreId: formatOptionalUuid(session.StoreID), Products: []any{},
 		PinnedProductId: formatOptionalUuid(session.PinnedProductID), LiveAdSettings: session.LiveAdSettings,
 		AcceptedLiveAdTermsVersion: session.AcceptedLiveAdTermsVersion, SponsorshipLine: session.SponsorshipLine,

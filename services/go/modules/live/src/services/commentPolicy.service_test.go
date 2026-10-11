@@ -42,6 +42,20 @@ func TestFindBlockedWordMatchesWholeWordsPhrasesAndLookalikes(t *testing.T) {
 	}
 }
 
+func TestFindBlockedWordHandlesCaseFullwidthAndEmoji(t *testing.T) {
+	blocked := []string{"bad", "🍑", "❤️🔥"}
+	for _, text := range []string{"BAD", "BaD vibes", "b4d", "bad😀", "😀bad😀", "ｂａｄ", "ＢＡＤ!", "nice 🍑", "🍑🍑", "❤🔥 yes", "❤️🔥"} {
+		if _, found := FindBlockedWord(text, blocked); !found {
+			t.Fatalf("%q must match", text)
+		}
+	}
+	for _, text := range []string{"badge", "abad", "🍒 only", "❤️ only", "fine"} {
+		if word, found := FindBlockedWord(text, blocked); found {
+			t.Fatalf("%q must not match, matched %q", text, word)
+		}
+	}
+}
+
 func TestNormaliseBlockedWordsDeduplicatesAndEnforcesLimits(t *testing.T) {
 	cleaned, err := NormaliseBlockedWords([]string{" Scam ", "scam", "", "Rip Off"})
 	if err != nil || len(cleaned) != 2 || cleaned[0] != "scam" || cleaned[1] != "rip off" {
@@ -49,6 +63,9 @@ func TestNormaliseBlockedWordsDeduplicatesAndEnforcesLimits(t *testing.T) {
 	}
 	if _, err := NormaliseBlockedWords([]string{"a"}); err == nil {
 		t.Fatalf("one character words are rejected")
+	}
+	if emoji, err := NormaliseBlockedWords([]string{"🍑"}); err != nil || len(emoji) != 1 {
+		t.Fatalf("a single emoji can be blocked: %v %v", emoji, err)
 	}
 	if _, err := NormaliseBlockedWords([]string{strings.Repeat("x", 31)}); err == nil {
 		t.Fatalf("long words are rejected")

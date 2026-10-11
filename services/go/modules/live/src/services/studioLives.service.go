@@ -69,7 +69,7 @@ func (service *LiveService) presentStudioLives(ctx context.Context, rows []*ent.
 	for _, row := range rows {
 		view := types.StudioLiveView{
 			Id: row.ID.String(), Title: row.Title, Category: string(row.Category), State: string(row.State), CreatedAt: formatTime(row.CreatedAt),
-			StartedAt: formatOptionalTime(row.StartedAt), EndedAt: formatOptionalTime(row.EndedAt), Viewers: row.Viewers, PeakViewers: row.PeakViewers,
+			StartedAt: formatOptionalTime(row.StartedAt), EndedAt: formatOptionalTime(row.EndedAt), ScheduledAt: formatOptionalTime(row.ScheduledAt), Viewers: row.Viewers, PeakViewers: row.PeakViewers,
 			Earnings: types.StudioEarnings{Coins: row.CreatorCoins, GiftCount: row.GiftCount}, RecordEnabled: recordByLive[row.ID],
 			Visibility: string(row.Visibility), Products: productsByLive[row.ID],
 		}

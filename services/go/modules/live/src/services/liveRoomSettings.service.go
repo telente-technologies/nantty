@@ -8,6 +8,7 @@ import (
 	liveerrors "zudomart/modules/live/src/errors"
 	"zudomart/modules/live/src/events"
 	"zudomart/modules/live/src/generated/ent"
+	"zudomart/modules/live/src/generated/ent/liveroomsetting"
 	"zudomart/modules/live/src/types"
 )
 
@@ -17,19 +18,20 @@ type roomSettings struct {
 	BlockedWords    []string
 	PinnedCommentId *uuid.UUID
 	RecordEnabled   bool
+	CommentAudience string
 }
 
 func settingsFromRow(row *ent.LiveRoomSetting) roomSettings {
 	return roomSettings{
 		CommentsEnabled: row.CommentsEnabled, SlowModeSeconds: row.SlowModeSeconds, BlockedWords: row.BlockedWords,
-		PinnedCommentId: row.PinnedCommentID, RecordEnabled: row.RecordEnabled,
+		PinnedCommentId: row.PinnedCommentID, RecordEnabled: row.RecordEnabled, CommentAudience: string(row.CommentAudience),
 	}
 }
 
 func (service *LiveService) loadRoomSettings(ctx context.Context, liveId uuid.UUID) (roomSettings, error) {
 	row, err := service.Client.LiveRoomSetting.Get(ctx, liveId)
 	if ent.IsNotFound(err) {
-		return roomSettings{CommentsEnabled: true}, nil
+		return roomSettings{CommentsEnabled: true, CommentAudience: CommentAudienceEveryone}, nil
 	}
 	if err != nil {
 		return roomSettings{}, err
@@ -110,6 +112,9 @@ func (service *LiveService) UpdateRoomSettings(ctx context.Context, actor types.
 		if input.BlockedWords != nil {
 			update.SetBlockedWords(blockedWords)
 		}
+		if input.CommentAudience != nil {
+			update.SetCommentAudience(liveroomsetting.CommentAudience(*input.CommentAudience))
+		}
 		if updated, err = update.Save(ctx); err != nil {
 			return err
 		}
@@ -125,7 +130,7 @@ func (service *LiveService) UpdateRoomSettings(ctx context.Context, actor types.
 
 func (service *LiveService) presentRoomSettings(ctx context.Context, session *ent.LiveSession, settings roomSettings, role string, viewerId uuid.UUID) (types.RoomSettingsView, error) {
 	view := types.RoomSettingsView{
-		LiveId: session.ID.String(), CommentsEnabled: settings.CommentsEnabled, SlowModeSeconds: settings.SlowModeSeconds, MyRole: role,
+		LiveId: session.ID.String(), CommentsEnabled: settings.CommentsEnabled, SlowModeSeconds: settings.SlowModeSeconds, CommentAudience: settings.CommentAudience, MyRole: role,
 	}
 	if role != RoleViewer {
 		view.BlockedWords = append([]string{}, settings.BlockedWords...)
