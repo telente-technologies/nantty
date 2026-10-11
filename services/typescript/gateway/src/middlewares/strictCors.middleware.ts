@@ -1,4 +1,4 @@
-import { createResponseContext, type HttpMiddleware } from "@zudojs/http";
+import { createResponseContext, type HttpMiddleware, type HttpRequestContext } from "@zudojs/http";
 
 export interface StrictCorsOptions {
   readonly allowedOrigins: readonly string[];
@@ -6,6 +6,13 @@ export interface StrictCorsOptions {
   readonly exposeHeaders: string;
   readonly allowMethods?: string;
   readonly maxAgeSeconds?: number;
+}
+
+export function isAnsweredByCorsAlone(request: HttpRequestContext, allowedOrigins: readonly string[]): boolean {
+  const origin = request.getHeader("origin");
+  const preflight = request.method === "OPTIONS" && request.getHeader("access-control-request-method") !== undefined;
+  if (origin === undefined) return preflight;
+  return preflight || origin === "*" || !allowedOrigins.includes(origin);
 }
 
 export function createStrictCorsMiddleware(options: StrictCorsOptions): HttpMiddleware {

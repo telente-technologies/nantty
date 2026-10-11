@@ -11,7 +11,7 @@ import { createAdminNetworkMiddleware } from "./middlewares/adminNetwork.middlew
 import { createGlobalRateLimitMiddleware } from "./middlewares/routeRateLimit.middleware.js";
 import { createRequestSizeLimitMiddleware } from "./middlewares/requestSizeLimit.middleware.js";
 import { createSecurityHeadersMiddleware } from "./middlewares/securityHeaders.middleware.js";
-import { createStrictCorsMiddleware } from "./middlewares/strictCors.middleware.js";
+import { createStrictCorsMiddleware, isAnsweredByCorsAlone } from "./middlewares/strictCors.middleware.js";
 import { InMemoryRateLimitStore, type RateLimitStore } from "./services/rateLimitStore.service.js";
 import { ValkeyConnection } from "./services/valkeyConnection.service.js";
 import { ValkeyRateLimitStore } from "./services/valkeyRateLimitStore.service.js";
@@ -19,11 +19,13 @@ import type { GatewayConfig } from "./configs/gateway.config.js";
 import { createUpstreamDispatchHandler } from "./handlers/upstreamDispatch.handler.js";
 import { IdentityPolicyGateSource, type PolicyGateSource } from "./services/policyAcceptanceGate.service.js";
 import { AccessTokenVerifier } from "./services/accessTokenVerifier.service.js";
+import { ValkeyWidgetTokenRevocationSource, WidgetTokenVerifier } from "./services/widgetTokenVerifier.service.js";
 import { buildSecurityServices, type SecurityServiceOverrides } from "./services/security/securityServices.service.js";
 
 export interface GatewayServerOptions {
   readonly config: GatewayConfig;
   readonly verifier?: AccessTokenVerifier;
+  readonly widgetVerifier?: WidgetTokenVerifier;
   readonly logger?: Logger;
   readonly policyGate?: PolicyGateSource;
   readonly rateLimitStore?: RateLimitStore;
@@ -42,11 +44,14 @@ export function createGatewayServer(options: GatewayServerOptions) {
   const verifier = options.verifier ?? new AccessTokenVerifier(options.config.accessToken);
   const connection = options.config.valkeyUrl === undefined || options.config.valkeyUrl === null ? undefined : new ValkeyConnection(new URL(options.config.valkeyUrl));
   const rateLimitStore = options.rateLimitStore ?? buildRateLimitStore(connection, logger);
+  const denylistConnection = options.config.sessionDenylistUrl ? new ValkeyConnection(new URL(options.config.sessionDenylistUrl)) : connection;
+  const widgetVerifier = options.widgetVerifier ?? new WidgetTokenVerifier(options.config.accessToken, denylistConnection === undefined ? undefined : new ValkeyWidgetTokenRevocationSource(denylistConnection));
   const security = buildSecurityServices(options.config.security, options.config.upstreams.trust, logger, connection, options.security);
   const maximumRequestBodyBytes = options.config.maxRequestBodyBytes ?? 1024 * 1024;
   const pipeline = new HttpMiddlewarePipeline({
     middlewares: [
       createSecurityHeadersMiddleware(),
+      createGlobalRateLimitMiddleware(rateLimitStore, options.config.rateLimitMaxPerMinute, (request) => isAnsweredByCorsAlone(request, options.config.corsOrigins)),
       createStrictCorsMiddleware({
         allowedOrigins: options.config.corsOrigins,
         allowHeaders: "Authorization, Content-Type, Idempotency-Key, X-Client-Platform, X-Client-Region, X-Device-Id, X-Store-Storefront, X-Request-Id, X-Step-Up-Token, Traceparent, If-None-Match",
@@ -54,12 +59,12 @@ export function createGatewayServer(options: GatewayServerOptions) {
       }),
       createRequestSizeLimitMiddleware(maximumRequestBodyBytes),
       createAdminNetworkMiddleware(options.config.adminIpAllowList ?? []),
-      createGlobalRateLimitMiddleware(rateLimitStore, options.config.rateLimitMaxPerMinute),
-      createUpstreamDispatchHandler({ config: options.config, verifier, logger, rateLimitStore, security, ...(policyGate === undefined ? {} : { policyGate }) }),
+      createGlobalRateLimitMiddleware(rateLimitStore, options.config.rateLimitMaxPerMinute, (request) => !isAnsweredByCorsAlone(request, options.config.corsOrigins)),
+      createUpstreamDispatchHandler({ config: options.config, verifier, widgetVerifier, logger, rateLimitStore, security, ...(policyGate === undefined ? {} : { policyGate }) }),
     ],
   });
   return createHttpServer({
-    adapter: createNodeHttpAdapter({ host: options.config.host, port: options.config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: options.config.trustedProxyHops ?? 1 }),
+    adapter: createNodeHttpAdapter({ host: options.config.host, port: options.config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: options.config.trustedProxyHops ?? 0 }),
     handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
   });
 }

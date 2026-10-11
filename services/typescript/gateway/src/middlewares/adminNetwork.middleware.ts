@@ -2,7 +2,7 @@ import { BlockList, isIP } from "node:net";
 
 import { createResponseContext, type HttpMiddleware } from "@zudojs/http";
 
-const adminPathPrefix = "/api/v1/admin/";
+import { isAdminPath } from "../services/security/accessProbeClassifier.service.js";
 
 export function isValidAllowListEntry(entry: string): boolean {
   const [address, prefix, ...rest] = entry.split("/");
@@ -32,7 +32,7 @@ export function createAdminNetworkMiddleware(allowList: readonly string[]): Http
   if (allowList.length === 0) return (_context, next) => next();
   const allowed = buildBlockList(allowList);
   return (context, next) => {
-    if (!context.request.path.startsWith(adminPathPrefix)) return next();
+    if (!isAdminPath(context.request.path)) return next();
     const address = normalizeAddress(context.request.remoteAddress);
     const family = address === null ? 0 : isIP(address);
     if (address !== null && family !== 0 && allowed.check(address, family === 4 ? "ipv4" : "ipv6")) return next();

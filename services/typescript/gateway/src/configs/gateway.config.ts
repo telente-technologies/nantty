@@ -1,6 +1,7 @@
 import { defaultRouteLimitsPerMinute, type RouteLimitName } from "../services/routeRateLimitPolicy.service.js";
 import { isValidAllowListEntry } from "../middlewares/adminNetwork.middleware.js";
 import { loadSecurityConfigFromEnvironment, type SecurityConfig } from "./security.config.js";
+import { collectProductionHardeningProblems } from "./productionHardening.config.js";
 
 export interface GatewayConfig {
   readonly host: string;
@@ -14,7 +15,9 @@ export interface GatewayConfig {
   readonly upstreams: Readonly<Record<UpstreamName, string>>;
   readonly maxRequestBodyBytes?: number;
   readonly trustedProxyHops?: number;
+  readonly trustCdnCountryHeader?: boolean;
   readonly valkeyUrl?: string | null;
+  readonly sessionDenylistUrl?: string | null;
   readonly routeRateLimitsPerMinute?: Readonly<Partial<Record<RouteLimitName, number>>>;
   readonly security?: SecurityConfig | null;
   readonly identitySigningSecret?: string;
@@ -65,9 +68,11 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
       issuer: readRequiredEnvironmentVariable("AUTH_TOKEN_ISSUER", problems),
       audience: readEnvironmentVariableOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
     },
-    trustedProxyHops: Number(readEnvironmentVariableOrDefault("TRUSTED_PROXY_HOPS", "1")),
+    trustedProxyHops: Number(readEnvironmentVariableOrDefault("TRUSTED_PROXY_HOPS", "0")),
+    trustCdnCountryHeader: readEnvironmentVariableOrDefault("TRUST_CDN_COUNTRY_HEADER", "false") === "true",
     maxRequestBodyBytes: Number(readEnvironmentVariableOrDefault("MAX_REQUEST_BODY_BYTES", String(1024 * 1024))),
     valkeyUrl: process.env["VALKEY_URL"]?.trim() || null,
+    sessionDenylistUrl: process.env["AUTH_SESSION_DENYLIST_URL"]?.trim() || null,
     routeRateLimitsPerMinute: readRouteRateLimits(),
     security: loadSecurityConfigFromEnvironment(problems),
     identitySigningSecret: readRequiredEnvironmentVariable("GATEWAY_IDENTITY_SECRET", problems),
@@ -80,6 +85,7 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
   if ((config.identitySigningSecret ?? "").length > 0 && (config.identitySigningSecret ?? "").length < 32) problems.push("GATEWAY_IDENTITY_SECRET must be at least 32 characters");
   if (!Number.isInteger(config.trustedProxyHops) || (config.trustedProxyHops ?? 0) < 0) problems.push("TRUSTED_PROXY_HOPS must be a non-negative integer");
   if ((config.adminIpAllowList ?? []).some((entry) => !isValidAllowListEntry(entry))) problems.push("ADMIN_IP_ALLOWLIST must list IP addresses or CIDR ranges");
+  problems.push(...collectProductionHardeningProblems(process.env));
   if (problems.length > 0) throw new Error(`Invalid gateway configuration: ${problems.join("; ")}`);
   return config;
 }

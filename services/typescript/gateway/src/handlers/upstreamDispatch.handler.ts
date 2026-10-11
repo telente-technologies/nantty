@@ -4,6 +4,7 @@ import type { Logger } from "@zudojs/logger";
 import type { GatewayConfig } from "../configs/gateway.config.js";
 import { isChatReportSubmission, resolveUpstreamRouteForRequest, sensitiveGuestPathPrefixes, type UpstreamRoute } from "../routes/upstream.routes.js";
 import { shouldRefuseAnonymousMutation } from "../services/anonymousMutationGuard.service.js";
+import { doesAdminRequestNeedStaffToken, isStaffRequestAuthenticated } from "../services/adminStaffGate.service.js";
 import { doesRequestNeedPolicyGate, type PolicyGateSource } from "../services/policyAcceptanceGate.service.js";
 import { isInternalOnlyPath } from "../services/internalRouteGuard.service.js";
 import { InMemoryRateLimitStore, type RateLimitStore } from "../services/rateLimitStore.service.js";
@@ -11,6 +12,7 @@ import { buildRouteRateLimitKey, classifyRequestForRateLimit, defaultRouteLimits
 import { startGatewaySpan } from "../services/traceContext.service.js";
 import { extractBearerTokenFromAuthorizationHeader, type AccessTokenVerifier, type VerifiedPrincipal } from "../services/accessTokenVerifier.service.js";
 import { forwardRequestToUpstream } from "../services/upstreamProxy.service.js";
+import type { WidgetTokenVerifier } from "../services/widgetTokenVerifier.service.js";
 import { convertRequestBodyToBytes, json, unauthorizedResponseBody } from "../utils/http.util.js";
 import { buildSecurityServices, type SecurityServices } from "../services/security/securityServices.service.js";
 import { humanVerificationPath, humanVerificationRequiredBody } from "../services/security/humanVerificationGate.service.js";
@@ -20,6 +22,7 @@ import { completedRequestSignal, internalPathSignal, observeProbeSignalInBackgro
 export interface UpstreamDispatchOptions {
   readonly config: GatewayConfig;
   readonly verifier: AccessTokenVerifier;
+  readonly widgetVerifier?: WidgetTokenVerifier;
   readonly logger: Logger;
   readonly policyGate?: PolicyGateSource;
   readonly rateLimitStore?: RateLimitStore;
@@ -32,10 +35,13 @@ function buildRateLimited(retryAfterSeconds: number) {
   return limited;
 }
 
-async function resolvePrincipalForRoute(route: UpstreamRoute, authorizationHeader: string | undefined, verifier: AccessTokenVerifier) {
+async function resolvePrincipalForRoute(route: UpstreamRoute, authorizationHeader: string | undefined, verifier: AccessTokenVerifier, widgetVerifier: WidgetTokenVerifier | undefined) {
   const token = extractBearerTokenFromAuthorizationHeader(authorizationHeader);
-  const principal: VerifiedPrincipal | undefined = token === undefined ? undefined : await verifier.verifyAccessTokenWithJwks(token);
-  return { token, principal, rejected: route.authentication === "required" && principal === undefined };
+  const sessionPrincipal: VerifiedPrincipal | undefined = token === undefined ? undefined : await verifier.verifyAccessTokenWithJwks(token);
+  const widgetPrincipal = token === undefined || sessionPrincipal !== undefined || widgetVerifier === undefined ? undefined : await widgetVerifier.verifyWidgetToken(token);
+  if (widgetPrincipal !== undefined && route.acceptsWidgetToken !== true) return { token, principal: undefined, rejected: true, widgetTokenMisused: true };
+  const principal = sessionPrincipal ?? widgetPrincipal;
+  return { token, principal, rejected: route.authentication === "required" && principal === undefined, widgetTokenMisused: false };
 }
 
 export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions): HttpMiddleware {
@@ -52,9 +58,11 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     if (request.path === humanVerificationPath) return handleHumanVerificationRequest(request, security, options.verifier, rateLimitStore, options.logger);
     const route = resolveUpstreamRouteForRequest(request.method, request.path);
     if (route === undefined) return json(404, { message: "Not found.", code: "NOT_FOUND" });
-    const { token, principal, rejected } = await resolvePrincipalForRoute(route, request.getHeader("authorization"), options.verifier);
+    const { token, principal, rejected, widgetTokenMisused } = await resolvePrincipalForRoute(route, request.getHeader("authorization"), options.verifier, options.widgetVerifier);
+    if (widgetTokenMisused) return json(401, { message: "This token only works for home-screen widgets.", code: "WIDGET_TOKEN_SCOPE" });
     observeProbeSignalInBackground(security, options.logger, observed(principal), tamperedTokenSignal(request.path, token, principal, options.config.accessToken.audience));
     if (rejected) return json(401, unauthorizedResponseBody);
+    if (doesAdminRequestNeedStaffToken(request.method, request.path) && !(await isStaffRequestAuthenticated(options.verifier, request.getHeader("authorization")))) return json(401, unauthorizedResponseBody);
     if (principal === undefined && shouldRefuseAnonymousMutation(request.method, request.path, request.getHeader("authorization"))) return json(401, unauthorizedResponseBody);
     const requestUrl = new URL(request.url, "http://gateway.internal");
     if (principal !== undefined && options.policyGate !== undefined && doesRequestNeedPolicyGate(request.method, requestUrl.pathname)) {
@@ -82,8 +90,7 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     if (principal === undefined && route.rawBodyPassthrough !== true) {
       const sensitive = sensitiveGuestPathPrefixes.some((prefix) => requestUrl.pathname.startsWith(prefix));
       const limits = options.config.guestRateLimits;
-      const deviceId = request.getHeader("x-device-id") ?? request.getHeader("x-client-region") ?? "";
-      const decision = await rateLimitStore.hit(`rl:guest:${sensitive ? "s" : "g"}|${request.remoteAddress ?? ""}|${deviceId}`, sensitive ? limits.sensitivePerMinute : limits.perMinute, 60);
+      const decision = await rateLimitStore.hit(`rl:guest:${sensitive ? "s" : "g"}|${request.remoteAddress ?? ""}`, sensitive ? limits.sensitivePerMinute : limits.perMinute, 60);
       if (!decision.allowed) return buildRateLimited(decision.retryAfterSeconds);
     }
     const trace = startGatewaySpan(request.getHeader("traceparent"));
@@ -101,6 +108,7 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
         traceparent: trace.traceparent,
         forwardWebhookSignatureHeaders: route.rawBodyPassthrough === true,
         allowRedirect: route.redirectPassthrough === true,
+        trustCdnCountryHeader: options.config.trustCdnCountryHeader === true,
       }, options.config.upstreamTimeoutMs, options.config.identitySigningSecret);
       observeProbeSignalInBackground(security, options.logger, observed(principal), completedRequestSignal(requestUrl.pathname, upstreamResponse.status, principal, upstreamResponse.body));
       return createResponseContext({ status: upstreamResponse.status, headers: { ...upstreamResponse.headers, traceparent: trace.traceparent }, body: upstreamResponse.body });

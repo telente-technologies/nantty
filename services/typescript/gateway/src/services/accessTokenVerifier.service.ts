@@ -5,6 +5,7 @@ export interface VerifiedPrincipal {
   readonly sessionId: string;
   readonly roles: readonly string[];
   readonly ageBracket?: "adult" | "minor" | "unknown";
+  readonly scope?: "widgets";
 }
 
 export function readAgeBracketClaim(value: unknown): "adult" | "minor" | "unknown" {
@@ -15,7 +16,11 @@ export interface AccessTokenVerifierOptions {
   readonly jwksUrl: string;
   readonly issuer: string;
   readonly audience: string;
+  readonly staffAudience?: string;
 }
+
+export const staffAccessTokenAudience = "zudomart-admin";
+const hasControlCharacter = (value: string): boolean => [...value].some((character) => character.charCodeAt(0) < 0x20 || character.charCodeAt(0) === 0x7f);
 
 export class AccessTokenVerifier {
   private readonly keySet: JWTVerifyGetKey;
@@ -24,16 +29,25 @@ export class AccessTokenVerifier {
     this.keySet = keySet ?? createRemoteJWKSet(new URL(options.jwksUrl), { cooldownDuration: 30_000, cacheMaxAge: 15 * 60_000 });
   }
 
-  public async verifyAccessTokenWithJwks(token: string): Promise<VerifiedPrincipal | undefined> {
+  public verifyAccessTokenWithJwks(token: string): Promise<VerifiedPrincipal | undefined> {
+    return this.verifyForAudience(token, this.options.audience);
+  }
+
+  public verifyStaffAccessToken(token: string): Promise<VerifiedPrincipal | undefined> {
+    return this.verifyForAudience(token, this.options.staffAudience ?? staffAccessTokenAudience);
+  }
+
+  private async verifyForAudience(token: string, audience: string): Promise<VerifiedPrincipal | undefined> {
     try {
       const { payload } = await jwtVerify(token, this.keySet, {
         issuer: this.options.issuer,
-        audience: this.options.audience,
+        audience,
         algorithms: ["EdDSA"],
         clockTolerance: 30,
         requiredClaims: ["sub", "sid", "exp"],
       });
-      if (typeof payload.sub !== "string" || typeof payload.sid !== "string") return undefined;
+      if (typeof payload.sub !== "string" || typeof payload.sid !== "string" || payload["scope"] !== undefined) return undefined;
+      if (hasControlCharacter(payload.sub) || hasControlCharacter(payload.sid)) return undefined;
       const roles = Array.isArray(payload.roles) ? payload.roles.filter((role): role is string => typeof role === "string") : [];
       return { accountId: payload.sub, sessionId: payload.sid, roles, ageBracket: readAgeBracketClaim(payload["age"]) };
     } catch {

@@ -1,4 +1,5 @@
 import type { UpstreamName } from "../configs/gateway.config.js";
+import { widgetRoutes } from "./widget.routes.js";
 
 export type AuthenticationRequirement = "required" | "optional";
 
@@ -10,13 +11,16 @@ export interface UpstreamRoute {
   readonly exactPathOnly?: boolean;
   readonly rawBodyPassthrough?: boolean;
   readonly redirectPassthrough?: boolean;
+  readonly acceptsWidgetToken?: boolean;
 }
 
 export const upstreamRoutes: readonly UpstreamRoute[] = [
+  ...widgetRoutes,
   { pathPrefix: "/webhooks/", upstream: "money", authentication: "optional", methods: ["POST"], rawBodyPassthrough: true },
   { pathPrefix: "/api/v1/auth/logout", upstream: "identity", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/auth/sessions", upstream: "identity", authentication: "required" },
   { pathPrefix: "/api/v1/auth/password/change", upstream: "identity", authentication: "required", methods: ["POST"] },
+  { pathPrefix: "/api/v1/auth/step-up", upstream: "identity", authentication: "required", methods: ["POST"], exactPathOnly: true },
   { pathPrefix: "/api/v1/auth/", upstream: "identity", authentication: "optional" },
   { pathPrefix: "/api/v1/legal/policy-versions/current", upstream: "identity", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/creators/eligibility", upstream: "identity", authentication: "required" },
@@ -57,6 +61,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/users/*/following", upstream: "social", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/users/*/connections", upstream: "social", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/users/*/block", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/users/*/post-notifications", upstream: "social", authentication: "required", methods: ["GET", "PUT"], exactPathOnly: true },
   { pathPrefix: "/api/v1/users/*/posts", upstream: "social", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/users/*/stories", upstream: "social", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/follow-requests/", upstream: "social", authentication: "required" },
@@ -67,6 +72,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/posts", upstream: "social", authentication: "optional" },
   { pathPrefix: "/api/v1/comments/", upstream: "social", authentication: "optional" },
   { pathPrefix: "/api/v1/stories", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/feeds/interactions", upstream: "social", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/feeds/", upstream: "social", authentication: "optional" },
   { pathPrefix: "/api/v1/clips", upstream: "social", authentication: "optional" },
   { pathPrefix: "/api/v1/explore/", upstream: "social", authentication: "optional", methods: ["GET"] },
@@ -83,6 +89,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/security/client-signals", upstream: "trust", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/saves", upstream: "social", authentication: "required" },
   { pathPrefix: "/api/v1/mentions/", upstream: "social", authentication: "optional" },
+  { pathPrefix: "/api/v1/places/search", upstream: "social", authentication: "required", methods: ["GET"], exactPathOnly: true },
   { pathPrefix: "/api/v1/conversations", upstream: "social", authentication: "required" },
   { pathPrefix: "/api/v1/channels", upstream: "social", authentication: "required" },
   { pathPrefix: "/api/v1/messages/", upstream: "social", authentication: "required" },
