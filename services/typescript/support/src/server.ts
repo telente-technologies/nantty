@@ -4,7 +4,10 @@ import { createSupportApp } from "./app.js";
 import { loadSupportConfigFromEnvironment } from "./configs/support.config.js";
 import { createRabbitMqDomainEventPublisher } from "./integrations/rabbitMqDomainEventPublisher.integration.js";
 import { createRabbitMqMessageConsumerFactory } from "./integrations/rabbitMqMessageConsumerFactory.integration.js";
+import { startTelemetry } from "./telemetry/telemetry.js";
 
+// ESM imports load before this runs, so node:http auto-instrumentation may miss; RED metrics are recorded explicitly.
+const stopTelemetry = startTelemetry("support");
 const logger = createLogger({ name: "support" });
 const config = loadSupportConfigFromEnvironment();
 const publisher = config.rabbitMq === undefined ? undefined : createRabbitMqDomainEventPublisher(config.rabbitMq.url);
@@ -20,7 +23,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
     if (stopping) return;
     stopping = true;
-    void app.stop().then(
+    void app.stop().finally(stopTelemetry).then(
       async () => {
         await Promise.all([publisher?.close(), consumerFactory?.close()]);
         process.exit(0);

@@ -17,6 +17,7 @@ import { createStaffTicketsController } from "../modules/tickets/controllers/sta
 import { registerTicketRoutes } from "../modules/tickets/routes/tickets.routes.js";
 import { createStaffAccess } from "../modules/tickets/services/staffAccess.service.js";
 import { errorToResponse, json } from "../utils/http.util.js";
+import { runReadinessChecks } from "../utils/readiness.util.js";
 
 export interface RouteDependencies {
   readonly ticketStore: TicketStore;
@@ -28,6 +29,7 @@ export interface RouteDependencies {
   readonly mediaPublicBaseUrls: readonly string[];
   readonly media?: MediaDirectory;
   readonly probeDatabase: (() => Promise<void>) | undefined;
+  readonly probeBroker?: () => Promise<void>;
   readonly runAutoFaqNow: (() => Promise<number>) | undefined;
 }
 
@@ -39,12 +41,11 @@ export function buildSupportRouter(dependencies: RouteDependencies): HttpRouter 
   });
   router.get("/healthz", () => json(200, { status: "up", service: "support" }));
   router.get("/readyz", async () => {
-    try {
-      await dependencies.probeDatabase?.();
-      return json(200, { status: "ready" });
-    } catch {
-      return json(503, { status: "unavailable" });
-    }
+    const { ready } = await runReadinessChecks({
+      database: async () => dependencies.probeDatabase?.(),
+      rabbitmq: async () => dependencies.probeBroker?.(),
+    });
+    return ready ? json(200, { status: "ready" }) : json(503, { status: "unavailable" });
   });
   router.post("/internal/support/auto-faq/run", async (context) => {
     assertInternalToken(context, dependencies.internalToken);

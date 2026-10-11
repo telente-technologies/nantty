@@ -5,6 +5,7 @@ import type { HelpAnswerDraft, HelpAnswerWriter } from "../../../interfaces/help
 import type { HelpContentStore } from "../../../interfaces/helpContentStore.interface.js";
 import type { HelpTopicRecord } from "../../../types/helpContent.type.js";
 import type { TicketWithThread } from "../../../types/ticket.type.js";
+import { neutraliseOffsiteMarkdownLinks } from "../../../utils/markdownLinks.util.js";
 import { slugify } from "../../../utils/slug.util.js";
 import { extractKeywords } from "../../../utils/textSimilarity.util.js";
 import { findResidualPersonalData, scrubPersonalData, type ScrubContext } from "./personalDataScrubber.service.js";
@@ -35,7 +36,7 @@ function scrubContextFor(ticket: TicketWithThread): ScrubContext {
 }
 
 function scrubDraft(draft: HelpAnswerDraft, context: ScrubContext): HelpAnswerDraft {
-  const clean = (text: string) => scrubPersonalData(text, context).text;
+  const clean = (text: string) => neutraliseOffsiteMarkdownLinks(scrubPersonalData(text, context).text);
   return { ...draft, title: clean(draft.title), summary: clean(draft.summary), question: clean(draft.question), answerMarkdown: clean(draft.answerMarkdown), tags: draft.tags.map(clean).filter((tag) => !tag.includes("[")) };
 }
 

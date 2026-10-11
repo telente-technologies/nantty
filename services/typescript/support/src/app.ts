@@ -5,6 +5,7 @@ import { createLogger, type Logger } from "@zudojs/logger";
 
 import type { SupportConfig } from "./configs/support.config.js";
 import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
+import { checkRabbitMqConnections } from "./integrations/rabbitMqConnection.integration.js";
 import { autoCloseResolvedAfterDays } from "./constants/support.constant.js";
 import { createSupportPrisma } from "./databases/prisma.database.js";
 import { createMediaHttpDirectory } from "./integrations/mediaDirectory.integration.js";
@@ -26,6 +27,7 @@ import { createHelpContentPrismaRepository } from "./modules/helpContent/reposit
 import { createTicketPrismaRepository } from "./modules/tickets/repositories/ticket.prisma.repository.js";
 import { buildSupportRouter } from "./routes/index.js";
 import { json } from "./utils/http.util.js";
+import { dispatchWithRoute, withRequestMetrics } from "./telemetry/requestMetrics.js";
 
 export interface SupportApp {
   readonly start: () => Promise<number>;
@@ -46,10 +48,11 @@ export function createSupportApp(config: SupportConfig, infrastructure: { readon
     ...(config.media === undefined ? {} : { media: createMediaHttpDirectory(config.media.baseUrl, config.media.internalToken) }),
     staffAuthenticator: config.staffAuth === undefined ? unavailableStaffAuthenticator : createJwtStaffAuthenticator(config.staffAuth),
     probeDatabase: async () => void (await prisma.supportSetting.count({ take: 1 })),
+    ...(config.rabbitMq === undefined ? {} : { probeBroker: checkRabbitMqConnections }),
   });
   const dispatch: HttpMiddleware = async (requestContext) => {
     try {
-      return (await router.dispatch(requestContext.request, { signal: requestContext.signal })).response;
+      return (await dispatchWithRoute(router, requestContext.request, requestContext.signal)).response;
     } catch (error) {
       logger.error("unhandled error", { path: requestContext.request.path, error: error instanceof Error ? error.message : String(error) });
       return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
@@ -58,7 +61,7 @@ export function createSupportApp(config: SupportConfig, infrastructure: { readon
   const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
   const server = createHttpServer({
     adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: 256 * 1024, trustProxy: true }),
-    handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
+    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
   });
   const consumers: QueueConsumer[] = [];
   let stopTasks: (() => void) | undefined;

@@ -51,7 +51,7 @@ export const capitalisedPairPattern = /(?<![.!?]\s|^|\n)\b([A-Z][\p{Ll}'-]+)\s+(
 export const platformVocabulary: ReadonlySet<string> = new Set([
   "zudomart", "studio", "ads", "manager", "help", "centre", "center", "creator", "program", "programme", "seller", "dashboard", "settings", "privacy",
   "data", "account", "profile", "blue", "gold", "black", "checkmark", "premium", "pro", "business", "free", "plan", "plans", "store", "rewards",
-  "paystack", "apple", "google", "play", "app", "web", "mobile", "android", "ios", "iphone", "chat", "chats", "live", "lives", "clips", "clip",
+  "flutterwave", "apple", "google", "play", "app", "web", "mobile", "android", "ios", "iphone", "chat", "chats", "live", "lives", "clips", "clip",
   "stories", "story", "feed", "posts", "post", "mart", "orders", "order", "details", "cart", "checkout", "escrow", "wallet", "coins", "coin",
   "zudopoints", "gifts", "gift", "battles", "battle", "goals", "obs", "streaming", "software", "payouts", "payout", "withdrawals", "withdrawal",
   "bank", "transfer", "card", "ussd", "notifications", "notification", "appearance", "dark", "mode", "light", "terms", "service", "policy",

@@ -45,6 +45,18 @@ describe("auto-FAQ from resolved tickets", () => {
     expect(topic?.bodyMarkdown).toContain("## Still need help?");
   });
 
+  it("strips off-site markdown links a customer slipped into an auto-published topic", async () => {
+    const harness = await createSupportHarness();
+    const question = "How do I verify my store account? The email said [verify here](//zudo-verify.top/login) and [Sign In](/\\evil.top) too.";
+    const ticket = await resolvedTicket(harness, "How do I verify my store account?", question, "Open Settings and tap Verification. Then follow the steps shown and see [the guide](/help/selling/verification).");
+    const outcome = await harness.publisher.publishFromResolvedTicket(ticket);
+    const topic = await harness.helpStore.findTopicById(outcome.topicId!);
+    expect(topic?.bodyMarkdown).not.toMatch(/\]\((?!\/help\/)/);
+    expect(topic?.bodyMarkdown).not.toContain("zudo-verify");
+    expect(topic?.bodyMarkdown).toContain("verify here");
+    expect(topic?.bodyMarkdown).toContain("[the guide](/help/selling/verification)");
+  });
+
   it("appends a Related question section to a close existing topic instead of duplicating it", async () => {
     const harness = await createSupportHarness();
     const existing = await seedTopic(harness, "How do I confirm delivery of my order?", "## Confirming delivery\n\nOpen Orders and tap Confirm delivery.", ["delivery", "confirm"]);

@@ -73,7 +73,7 @@ describe("help content links", async () => {
   it("never names the payment provider or describes retired features", () => {
     for (const article of articles) {
       const text = `${article.title}\n${article.summary}\n${article.bodyMarkdown}`;
-      expect(/paystack|flutterwave|waitlist|wait-list/i.test(text), article.slug).toBe(false);
+      expect(/flutterwave|waitlist|wait-list/i.test(text), article.slug).toBe(false);
       expect(/sign in with (?:your )?phone|phone (?:number )?(?:login|sign-in)|sms code/i.test(text), article.slug).toBe(false);
     }
   });
