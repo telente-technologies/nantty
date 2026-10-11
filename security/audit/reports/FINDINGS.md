@@ -87,7 +87,7 @@ Status values:
 ## SEC-0008 / SEC-0013 Money paths
 - **SEC-0008:** devices no longer receive or send the Paystack `authorization_code`; charges reference an owner-scoped saved-card id and renewals use the server-side encrypted authorization. Tests assert it never appears in responses or logs.
 - **SEC-0013:** refund amounts ≤0 are rejected with 422; a full refund must be explicit.
-- Both were fixed by the money agent alongside exactly-once refunds (intent row + ledger entry before the Paystack call). Tracked in `docs/verification/finalCheckReport.md` section 0.5.
+- Both were fixed by the money agent alongside exactly-once refunds (intent row + ledger entry before the Paystack call).
 - **Status:** Fixed.
 
 ## SEC-0009 Copyright decisions lack step-up

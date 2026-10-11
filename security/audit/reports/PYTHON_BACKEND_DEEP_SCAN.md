@@ -621,3 +621,129 @@ Several findings share a root cause; fix the root, close the cluster:
 ---
 
 *Findings: 109 total — 2 Critical (PYEVT-001, PYBUG-001), 22 High, 59 Medium, 24 Low, 2 Info. All IDs PYHTTP/PYSEC/PYEVT/PYML/PYBIZ/PYBUG-NNN are unique to this report.*
+
+---
+
+## Verification (2026-10-10)
+
+Checked against the current code in `services/python/intelligence` on 2026-10-10. Paths are relative to that directory. "Batch 1" and "batch 2" are the owner's remediation passes of 9 and 10 Oct (`REMEDIATIONS.md`); every claim was checked in the code, not taken on trust. "Fixed now" means fixed or finished in this verification pass, with a regression test. Part of that code had been left untested in the working tree by an earlier, interrupted pass; it was reviewed, corrected where needed (the force-activation refusal had broken the training pipeline), and covered by tests.
+
+Abbreviations for the new test files: **T-H** = `tests/test_audit_verification_2026_10_10_http.py`, **T-E** = `tests/test_audit_verification_2026_10_10_events.py`, **T-M** = `tests/test_audit_verification_2026_10_10_models.py`. Older tests: `tests/test_audit_remediation_{messaging,models_and_data,degraded_mode}.py` (batch 2) and `tests/test_event_bus_configuration.py` (batch 1).
+
+Gates after this pass: `uv run ruff check`, `uv run ruff format --check` and `uv run mypy` (strict) are clean, and `uv run pytest` passes (see the summary at the end).
+
+| ID | Severity | Status | Evidence | Fix / test |
+|---|---|---|---|---|
+| PYEVT-001 | Critical | Fixed (batch 1) + Fixed now | `src/configs/settings_config.py:134-146`: staging/prod rejects rabbitmq without a URL. It now also rejects `EVENT_BUS=sqs`, because there is no SQS content-score, sensitivity or live-safety publisher; infra runs `EVENT_BUS=rabbitmq`. `src/container.py:118-176` logs ERROR for each `Null*` publisher, and the publishers report `delivers=False` | `tests/test_event_bus_configuration.py`; T-H `test_sqs_event_bus_is_refused_outside_development` |
+| PYBUG-001 | Critical | Fixed (batch 1) | `modules/moderation/queries/classify_image/classify_image_handler.py:16` and `content_scoring_service.py:147` run the call in `asyncio.to_thread`. `integrations/aws_client_config.py` sets a 5 s connect / 20 s read timeout and 2 attempts on every boto3 client | T-H `test_image_classification_runs_off_the_event_loop` |
+| PYHTTP-001 | High | Fixed (= PYBUG-001) | as PYBUG-001 | as PYBUG-001 |
+| PYHTTP-002 | High | Fixed (batch 1) + Fixed now | `image_moderation_interface_service.py:57-72`: a model exception logs `image_moderation_failed` and returns `review` with `model_version="unavailable"`. **Now** the placeholder model (no image model loaded) also returns `review` instead of `allow` (`:80-86`) | `tests/modules/content_scoring/test_content_scoring_service.py::test_without_an_image_model_the_action_is_review_never_allow` |
+| PYSEC-001 | High | Fixed (batch 1) | `settings_config.py:148-152` refuses `SERVER_WORKERS>1` without Redis; staging/prod require Redis (`:113-114`); `.env.example` ships `SERVER_WORKERS=1` | `tests/test_event_bus_configuration.py`; T-H `test_env_example_ships_a_single_worker_and_a_placeholder_secret` |
+| PYSEC-002 | High | Partly fixed (batch 2) → **Fixed now** | Batch 2 added partition retention (`jobs/compact_datasets_job.py:105-170`, default 90 days), but no erasure reached parquet. **Now** `purge_account` puts the identity on an erasure queue (`personal_data_purge_service.py:86-94`, `intel:erasure:pending`), and a supervised `dataset_erasure` loop (hourly, `jobs/erase_personal_data_job.py`, wired in `loaders/lifespan_loader.py`) rewrites every `raw_events`/`feature_logs` part file without that actor's rows. Ingestion also drops events from deleted accounts (PYSEC-005). Residual: other users' IDs inside `payload_json` (PYSEC-008) | T-M `test_account_erasure_reaches_parquet_at_rest` |
+| PYEVT-002 | High | Fixed (batch 1) | `domain_event_consumer_service.py:127-135` releases the claim on `CancelledError` and on any exception, then re-raises the original | batch 1 regression tests (`tests/modules/domain_events`) |
+| PYEVT-003 | High | Fixed (batch 2) | `sqs_domain_event_queue_repository.py`: rejected messages are forwarded to the DLQ, receives are counted toward a cap, backoff is jittered and exponential | `test_audit_remediation_messaging.py` (`test_sqs_rejected_message_is_forwarded_to_dlq`, `…_reaches_dlq_after_max_attempts`, `…_backoff_is_jittered_and_bounded`) |
+| PYEVT-004 | High | Fixed (= PYBUG-001) | `content_scoring_service.py:147` | as PYBUG-001 |
+| PYEVT-005 | High | Fixed (batch 2) | `domain_event_consumer_service.py:68-85` isolates the content-score side effect (log, no raise) | `test_side_effect_publish_failure_does_not_poison_domain_pipeline` |
+| PYEVT-006 | High | Fixed (batch 2) | `amqp_message_settlement_util.py:100-115`: requeues without a publish are capped, then the message goes to the DLX with backoff | `test_amqp_retry_publish_failures_are_capped_to_dlx` |
+| PYML-001 | High | Fixed (batch 1) + Fixed now | per-iteration catch in the reload loop; lifespan done-callbacks. **Now** readiness returns 503 when any tracked background job has died (`controllers/health_controller.py:19-28`, `services/background_job_monitor_service.py`) | batch 1 tests; T-E `test_readiness_fails_when_a_background_job_has_died` |
+| PYML-002 | High | Fixed (batch 1) + Fixed now | `feature_log_parquet_repository.py`: rows are re-buffered on failure (bounded). **Now** drops are logged (`report_new_dropped_rows`) and writes run on a dedicated executor (`utils/background_executor_util.py`) | T-M `test_dropped_feature_rows_are_reported` |
+| PYML-003 | High | Fixed (batch 2) | activation verifies the artifact; the holder reverts to `LAST_GOOD` after 3 consecutive rejections | `test_audit_remediation_models_and_data.py` (`test_activation_verifies_artifact…`, `test_holder_reverts_to_last_good…`) |
+| PYBIZ-001 | High | Fixed (batch 1) + Fixed now | `exchange_rate_unavailable` now weighs 0.35. **Now** the risk model is not blended when the amount could not be converted, so no zero-filled amount feature (`risk_scoring_service.py:110-115`) | updated risk tests (`tests/modules/risk`) |
+| PYBIZ-002 | High | Fixed (= PYHTTP-002) | as PYHTTP-002; the consumer path logs `image_moderation_unavailable_for_media` and still publishes a `review` score | as PYHTTP-002 |
+| PYBUG-002 | High | Fixed (batch 2) | ranking, headline clustering and event validation run in `to_thread` | `test_cpu_cores_run_off_the_event_loop` |
+| PYBUG-003 | High | Fixed (batch 2) + Fixed now | media fingerprinting is bounded to 8 concurrent calls (`media_fingerprint_integration.py:17-18`). **Now** model reloads and feature flushes run on a dedicated 2-thread executor, so request work cannot starve them | `test_media_fingerprint_path_is_bounded` |
+| PYBUG-004 | High | Fixed (= PYML-001) | as PYML-001 | as PYML-001 |
+| PYBUG-005 | High | Fixed (= PYML-002/011) | as PYML-002 | as PYML-002 |
+| PYBUG-006 | High | Fixed (= PYHTTP-002) | as PYHTTP-002 | as PYHTTP-002 |
+| PYBUG-007 | High | Fixed (batch 1) | claim release on `CancelledError`/`BaseException` in the domain consumer, ingestion (`event_ingestion_service.py:97-112`), bot scoring (`bot_scoring_service.py:121-135`) and suspension suggestions (`suspension_suggestion_service.py:47-62`) | batch 1 tests |
+| PYBUG-008 | High | Fixed (batch 1) | `audio_fingerprint_index_service.py:33` sets a 10-minute claim TTL, and `:167-169` releases it on `BaseException` | batch 1 tests |
+| PYBUG-011 | High | Fixed now | default Redis socket timeout is 0.5 s (`settings_config.py:39`); `read_sorted_set_highest_members` is chunked like hash reads (`databases/redis_feature_database.py:117-123`) | T-E `test_sorted_set_reads_are_chunked` |
+| PYHTTP-003 | Medium | Fixed now | `/v1/events` (own 10 s deadline, `event_ingestion_deadline_seconds`), `/v1/models` and the experiment-metrics route are wrapped in `run_within_request_deadline` | T-H `test_previously_unbounded_endpoints_now_have_a_deadline` |
+| PYHTTP-004 | Medium | Fixed (= PYBUG-008, PYBUG-007) | as PYBUG-008 | as PYBUG-008 |
+| PYHTTP-005 | Medium | Fixed (batch 1) + Fixed now | `utils/token_bucket_rate_limiter_util.py` uses LRU eviction of a single entry (O(1) `OrderedDict`) instead of `clear()` | T-H `test_rate_limiter_evicts_one_client_instead_of_resetting_everyone` |
+| PYHTTP-006 | Medium | Partly fixed | `server.py:20-25` enables `proxy_headers` only with an explicit `INTELLIGENCE_TRUSTED_PROXY_IPS`. Buckets are still per process (infra runs 2 workers), so effective limits are workers × replicas | Open: share rate-limit state in Redis, or key on the HMAC caller. Owner: intelligence |
+| PYHTTP-007 | Medium | Fixed now | `settings_config.py:9-14,115-122`: staging/prod reject secrets containing `local-only`, `change-me`, `example`, `placeholder` (which covers the shipped `.env.example` value) | T-H `test_known_placeholder_secrets_are_refused_outside_development` |
+| PYHTTP-008 | Medium | Fixed now | `events/event_envelope_dto.py:35` restricts `experiment_assignments` to `ExperimentSlug` keys and values (`^[a-z0-9_-]{1,64}$`). Assignments are still not checked against a registry of issued experiments | T-H `test_experiment_assignments_must_be_slugs` |
+| PYHTTP-009 | Medium | Fixed now | `rekognition_image_moderation_model_service.py:66-69` refuses any bucket other than `INTELLIGENCE_MEDIA_BUCKET` (set in infra) | T-H `test_rekognition_refuses_images_outside_the_media_bucket` |
+| PYSEC-003 | Medium | Partly fixed | staging/prod reject an `ID_HASH_SECRET` that is set but under 32 characters, or a placeholder value. **Now** a warning is logged when the key is derived from the shared secret (`container.py:179-184`). Empty is still allowed, because TS search/social use the same derivation | T-H `test_short_id_hash_secret_is_refused…`, `test_derived_pseudonym_key_is_reported…`. Open: provision `INTELLIGENCE_ID_HASH_SECRET` for intelligence, search and social together, then make it required. Owner: platform |
+| PYSEC-004 | Medium | Open | Rotating the shared secret still re-keys pseudonyms while `ID_HASH_SECRET` is unset | Closes with the PYSEC-003 provisioning; until then do not rotate without a consent-key migration. Owner: platform |
+| PYSEC-005 | Medium | Fixed (batch 2) + Fixed now | tombstone first (`personal_data_purge_service.py`). **Now** `/v1/events` drops events from deleted accounts (`event_ingestion_service.py:111-143`) | `test_purge_writes_tombstone_before_deletes`; T-E `test_events_from_a_deleted_account_are_not_ingested` |
+| PYSEC-006 | Medium | Fixed (batch 2) | purge covers `TTL_days + 1` ad-frequency buckets | `test_purge_covers_full_ad_frequency_window` |
+| PYSEC-007 | Medium | False positive (mostly) | Members are added with Redis `PFADD` (`redis_feature_database.py:83-84`), a HyperLogLog that keeps no recoverable member strings. What remains is a weak membership oracle, bounded by the key TTL (120 days / behaviour TTL) | — |
+| PYSEC-008 | Medium | Open | behaviour/profile keys and `gift.sent` payloads still use raw account IDs | Needs hashing at the domain-event boundary across intelligence and its readers. Owner: intelligence + social |
+| PYSEC-009 | Medium | Fixed (batch 2) | artifact bytes are read once, verified, then unpickled from the buffer | `test_single_read_pickle_load_uses_buffer` |
+| PYSEC-010 | Medium | Fixed (batch 2) | an empty signing secret fails closed outside development/test | `test_activation_verifies_artifact_and_empty_secret_fails_closed`, `test_unsigned_artifact_loads_in_development_and_test_only` |
+| PYSEC-011 | Medium | Fixed (= PYEVT-001) | as PYEVT-001 | as PYEVT-001 |
+| PYEVT-007 | Medium | Partly fixed | claims are released on cancel and on failure, failures are logged, and `delivers` is honest (`bot_scoring_service.py:121-135`, `suspension_suggestion_service.py:47-62`). Publishing is still inline in the request, with no retry or outbox | Open: move advisory publishing to a background task with bounded retries. Owner: intelligence |
+| PYEVT-008 | Medium | Fixed now | readiness is 503 when a consumer task dies (job monitor); staging/prod cannot start with no broker (PYEVT-001) | T-E `test_readiness_fails_when_a_background_job_has_died` |
+| PYEVT-009 | Medium | Partly fixed | `contract_envelope_normalizer.py:153-160`: an unsupported `schemaVersion` is not flattened, and rejections log the event id, type and version (`domain_event_consumer_service.py:36-44`). There is still no `-unhandled` replay queue for future types | T-E `test_unsupported_envelope_schema_version_is_not_flattened`. Open: an unhandled-type queue for replay after deploy |
+| PYEVT-010 | Medium | Fixed now | `amqp_message_settlement_util.py:62-67` dead-letters bodies over 1 MiB before decoding (SQS caps bodies at 256 KiB) | T-E `test_oversized_queue_message_is_dead_lettered_without_parsing` |
+| PYEVT-011 | Medium | Partly fixed | ingestion re-checks the deletion tombstone before writing (PYSEC-005). There is no per-actor ordering or lock across workers | Open: per-account lock or actor-hash partitioning. Owner: intelligence |
+| PYEVT-012 | Medium | Fixed now | the domain claim TTL now uses `event_deduplication_retention_seconds` (`domain_event_consumer_service.py:120-125`) | T-E `test_domain_claim_ttl_follows_the_configured_dedup_retention` |
+| PYEVT-013 | Medium | Fixed now | internal claims use the separate namespace `intel:claim:<ns>:<id>` (`online_feature_keyspace_repository.py:43-44`) | T-E `test_producer_event_id_cannot_suppress_a_domain_event` |
+| PYEVT-014 | Medium | Fixed (batch 1) + Fixed now | the full accept path is guarded; **now** cancellation also releases the claims (`event_ingestion_service.py:97-112`) | batch 1 tests |
+| PYEVT-015 | Medium | Fixed now | `contract_envelope_normalizer.py:58-64` builds an id only when `commentId` is present, else keeps the envelope id | T-E `test_comment_without_comment_id_keeps_the_envelope_id` |
+| PYML-004 | Medium | Fixed (batch 2) | `degraded=True` when a model is missing (risk, feed, ads, ad-CTR, recs) | `test_missing_models_mark_responses_degraded` |
+| PYML-005 | Medium | Fixed | `risk_scoring_service.py:116-120` catches `KeyError/ValueError/AttributeError/TypeError/IndexError` and falls back to rules | risk tests |
+| PYML-006 | Medium | Fixed now | `content_moderation_service.py:29-42,60`: `degraded=True` when no text model is loaded. The `review` floor applies only when a loaded model fails, so heuristic-only allow decisions are not flooded into review | T-M `test_heuristic_only_text_moderation_reports_degraded_without_forcing_review` |
+| PYML-007 | Medium | Fixed now | `jobs/train_item_similarity_job.py:146-221` measures recall@10 on neighbours built without the held-out (actor, product) pairs | T-M `test_item_similarity_recall_is_measured_without_the_held_out_interaction` (leaky recall 1.0, honest 0.0) |
+| PYML-008 | Medium | Fixed now | `model_promotion_service.py:53-85` re-decides if `ACTIVE` changed during the run (CAS). Forcing a model with no metric is refused when it would replace an active model, and allowed only to bootstrap an empty slot. The earlier pass refused it everywhere, which broke the training pipeline | T-M `test_quality_gate_rules`, `test_forcing_an_unmeasured_model_is_allowed_only_to_bootstrap` |
+| PYML-009 | Medium | Fixed (= PYSEC-010) | as PYSEC-010; the CLI resolves through settings | `test_pipeline_cli_resolves_registry_through_settings` |
+| PYML-010 | Medium | Fixed (= PYSEC-009) | as PYSEC-009 | as PYSEC-009 |
+| PYML-011 | Medium | Fixed now | as PYML-002 | T-M `test_dropped_feature_rows_are_reported` |
+| PYML-012 | Medium | Fixed (batch 2) | retention deletes old partitions and orphaned `.inprogress-*` files | `test_retention_deletes_old_partitions_and_orphans` |
+| PYML-013 | Medium | Fixed now | compaction writes a manifest before deleting and finishes an interrupted run (`compact_datasets_job.py:44-82`); `load_feature_logs` dedups on (request, surface, item, position, time) | T-M `test_interrupted_compaction_is_finished_and_rows_are_not_doubled` |
+| PYML-018 | Medium | Fixed now | the quality gate, sink drops and failure, compaction crash, loop death and missing-model `degraded` now have tests | T-M (gate, sink, compaction), T-E (readiness), batch 2 degraded tests |
+| PYBIZ-003 | Medium | Fixed (batch 2) | a degraded `allow` is floored to `review` when a loaded model fails | `test_text_moderation_degraded_allow_becomes_review` |
+| PYBIZ-004 | Medium | Partly fixed → **Fixed now** (frequency) | **Now** a feature-store outage rejects candidates with `frequency_unavailable` unless the caller sent an impressions snapshot for that campaign (`ad_eligibility_service.py:113-114`, `ad_selection_service.py:155-159`). Budget uses the caller's `spentToday` from the Go ads service. Spend counters are still written best-effort | T-M `test_frequency_caps_fail_closed_when_counters_are_unavailable` |
+| PYBIZ-005 | Medium | Open | eligibility is read-then-act, with no atomic reservation | Open: Go ads settlement owns spend caps (see GO_BACKEND TRU-001); a Redis reservation per auction is a possible addition. Owner: ads |
+| PYBIZ-006 | Medium | Fixed (batch 1) | `ad_selection_service.py:83-86` rejects with `reserve_unavailable` | batch 1 auction tests |
+| PYBIZ-007 | Medium | Fixed (= PYML-005) | as PYML-005 | as PYML-005 |
+| PYBIZ-008 | Medium | Fixed (batch 2) | non-zero `value_flow_unavailable` reason | `test_value_flow_unavailable_reason_is_nonzero` |
+| PYBIZ-009 | Medium | Fixed now | `live_safety_scoring_service.py:54-72` wraps only parsing/validation; scoring errors propagate to the retry path | T-E `test_live_safety_scoring_errors_retry_instead_of_dead_lettering` |
+| PYBIZ-010 | Medium | Fixed now | unknown integrity (no counters and no caller data) gets a trusted share of 0.7 and reason `integrity_unavailable` (`feed_fairness_service.py:46-67`, `feed_ranking_service.py:117`) | T-M `test_unknown_integrity_is_not_treated_as_fully_trusted` |
+| PYBIZ-011 | Medium | Fixed now | `feed_ranking_service.py:226` passes the real suspicion score to the 0.8 threshold | T-M `test_manipulated_engagement_suggestions_keep_their_real_score` |
+| PYBIZ-012 | Medium | Fixed now | `self_harm` and `hate` categories and heuristics (`content_moderation_dto.py:8-10`, `moderation_text_heuristics_service.py:49-62`), mapped for live transcripts too | T-M `test_self_harm_and_hate_are_moderation_categories` |
+| PYBIZ-013 | Medium | Fixed now | `help_answer_drafting_service.py:91-93` strips `< > \` [ ] { }` before formatting (`utils/markup_neutralising_util.py`) | T-M `test_help_drafts_and_headlines_strip_markup` |
+| PYBIZ-014 | Medium | Fixed now | `headline_text_service.py:78` | T-M `test_help_drafts_and_headlines_strip_markup` |
+| PYBIZ-015 | Medium | Fixed (batch 2) | chat spam floors to `throttle` when the store is unavailable | `test_chat_spam_*_floors_to_throttle` |
+| PYBUG-009 | Medium | Fixed (batch 1) | `head_probability_predictor_service.py:52-53` logs `head_model_inference_failed` | batch 1 |
+| PYBUG-010 | Medium | Fixed (batch 1) | text-moderation degradation is logged; `experiment_service.py:66-71` logs `experiment_exposure_write_failed` | batch 1 |
+| PYBUG-012 | Medium | Fixed now | `event_feature_update_service.py:162-180` appends `KeyExpiry` for ad statistics | T-E `test_ad_statistics_keys_get_a_ttl` |
+| PYBUG-015 | Medium | Partly fixed | ingestion has its own 10 s deadline (PYHTTP-003). Experiment exposure counters remain non-idempotent under a deadline retry | Open: request-id-keyed exposure writes. Owner: intelligence |
+| PYBUG-016 | Medium | Fixed (batch 1) | `resolve_request_time` clamps to [-24 h, +5 min]; the decay `pow` is guarded | batch 1 |
+| PYBUG-017 | Medium | Fixed (batch 1) | `ContractModel(allow_inf_nan=False)`; a non-finite risk score fails closed to hold | batch 1 |
+| PYBUG-018 | Medium | Fixed now | `transcribe_batch_transcription_service.py:34-38,70-74` treats `ConflictException` as "poll the existing job". The consumer is still sequential | T-E `test_transcription_retry_reuses_the_existing_job` |
+| PYBUG-020 | Medium | Fixed (batch 1) | each shutdown step is isolated | batch 1 |
+| PYBUG-021 | Medium | Fixed (batch 1) | release is guarded and the original is re-raised (`domain_event_consumer_service.py:127-135`) | batch 1 |
+| PYBUG-022 | Medium | Fixed (batch 1) | `loggers/structured_json_logger.py:22-24` emits `stack_trace` | batch 1 |
+| PYHTTP-010 | Low | Partly fixed | readiness now also fails on dead background jobs. The broker and model registry are not probed | Open (low) |
+| PYHTTP-011 | Low | Fixed now | `error_response_handler.py:22-26` keeps `HTTPException.headers` | T-H `test_http_error_headers_are_kept` |
+| PYHTTP-012 | Low | Fixed now | `/v1/models` has `response_model=ModelInventoryResponse` and a deadline | T-H `test_models_route_declares_a_typed_response` |
+| PYHTTP-013 | Low | Fixed now | `signed_request_middleware.py:73-83` rejects missing or malformed headers and stale timestamps before reading the body | T-H `test_unsigned_request_is_refused_before_the_body_is_read` |
+| PYHTTP-014 | Low | Fixed (batch 1) | `error_response_handler.py:29-38` uses `logger.exception` with method and path | batch 1 |
+| PYSEC-012 | Low | Partly fixed | **Now** staging/prod require the media URL and token to be set together (`settings_config.py:154-160`). Plain `http://` stays the platform's in-VPC posture (`infra/.../services.tf:99`) | T-H `test_media_internal_url_and_token_must_be_paired`. Open: TLS between internal services. Owner: platform |
+| PYSEC-013 | Low | Fixed now | the middleware verifies against the decoded path and, if different, the raw request path (`signed_request_middleware.py:20-26,86-102`) | T-H `test_signature_over_the_raw_encoded_path_is_accepted` |
+| PYSEC-014 | Low | Open (accepted) | `identifier_hashing_service.py:28-30` still passes through IDs that already look hashed. Only signed internal producers can send them | — |
+| PYEVT-016 | Low | Fixed now | the SQS receive sets `VisibilityTimeout = 10 × 30 s` for the batch (`sqs_domain_event_queue_repository.py:13-15,106`) | T-E `test_sqs_batch_receive_reserves_visibility_for_the_whole_batch` |
+| PYEVT-017 | Low | Fixed now | `rabbitmq_channel_integration.py:34-38` uses a publish lock | T-E `test_concurrent_publishers_share_one_channel` |
+| PYEVT-018 | Low | Fixed now | `in_memory_feature_database.py:36-46` evicts expired claims | T-E `test_in_memory_backend_evicts_expired_claims` |
+| PYEVT-019 | Low | Fixed | image-model exceptions are logged (PYHTTP-002); unknown live job types log `live_safety_job_type_skipped` | T-E `test_unknown_live_safety_job_types_are_logged` |
+| PYML-014 | Low | Partly fixed | `training_dataset_builder_util.py:164-168`: the per-order row is chosen deterministically (sorted by `logged_at`). A post-label time filter was tried and reverted, because request `now` is clamped to ±24 h and the filter dropped valid synthetic rows | covered by the pipeline end-to-end test. Open: carry the label time and prefer the latest pre-label row |
+| PYML-015 | Low | Fixed now | `model_promotion_service.py:76-85` logs at WARNING, with `forced` | T-M `test_promotion_decisions_are_logged_at_warning` |
+| PYML-016 | Low | Fixed now | staging dirs are unique and stale ones are removed; re-registering an identical version is reused (`model_registry_repository.py:53-91`) | T-M `test_stale_staging_directories_are_removed` |
+| PYML-017 | Low | Fixed now / partly false positive | `pipeline_cli_job.py:76-80` refuses `s3://` for synthetic generation. Empty S3 keys fall back to the default credential chain (IAM role), not anonymous access | T-M `test_synthetic_generation_refuses_object_storage` |
+| PYBIZ-016 | Low | Fixed | exposure write errors are logged; distinct users are counted separately in an HLL (`experiment_service.py:58-65`) | batch 1 |
+| PYBIZ-017 | Low | Fixed now | `exploration_sampling_service.py:24-35` places floor-based slots, caps at 50 %, and keeps one slot for short lists | T-M `test_exploration_slots_match_the_requested_share` |
+| PYBUG-013 | Low | Fixed now (= PYEVT-018) | as PYEVT-018 | as PYEVT-018 |
+| PYBUG-014 | Low | Open | key builders still join IDs that may contain `:` | Open (low): segment encoding would rename every live key, which needs a migration. Owner: intelligence |
+| PYBUG-019 | Low | Fixed now | `transcribe_batch_transcription_service.py:103-106` runs `Body.read` in `to_thread` | T-E `test_transcription_retry_reuses_the_existing_job` |
+| PYBUG-023 | Low | Fixed now (= PYEVT-017) | as PYEVT-017 | as PYEVT-017 |
+| PYBUG-024 | Low | Fixed now (= PYML-013) | as PYML-013 | as PYML-013 |
+| PYBUG-025 | Low | Fixed | `amqp_message_settlement_util.py:42-45` writes the attempt and `x-zudomart-last-error` on every retry copy | messaging tests |
+| PYML-019 | Info | Not a finding (verified) | `/v1/models` is read-only, with no promote route | — |
+| PYML-020 | Info | Not a finding (verified) | hot swap is copy-on-write | — |
+
+**Summary (109 findings).** Fixed in earlier batches: 42 (1 Critical, 15 High, 22 Medium, 4 Low). Fixed now: 50 (1 Critical, 7 High, 27 Medium, 15 Low). Partly fixed: 9 (6 Medium, 3 Low). Open: 5 (3 Medium, 2 Low). False positive or verified not-a-finding: 3 (1 Medium, 2 Info). No Critical or High finding is open.
+
+**Gates (2026-10-10):** `ruff check` clean, `ruff format --check` clean (571 files), `mypy` strict clean (569 files), `pytest` 351 tests: 349 passed, 2 skipped (they need `INTELLIGENCE_TEST_REDIS_URL`), 0 failed. No dependency or lockfile changes.
