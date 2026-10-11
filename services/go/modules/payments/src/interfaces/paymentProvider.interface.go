@@ -44,7 +44,8 @@ type ChargeSession struct {
 }
 
 type ChargeLookup struct {
-	Reference string
+	Reference        string
+	ProviderChargeId string
 }
 
 type CardAuthorization struct {
@@ -70,6 +71,7 @@ type ChargeVerification struct {
 	PlanCode           string
 	Channel            string
 	FailureReason      string
+	CustomerEmail      string
 	Authorization      *CardAuthorization
 }
 
@@ -102,20 +104,12 @@ type PaymentProvider interface {
 	InitializeCharge(ctx context.Context, request ChargeRequest) (ChargeSession, error)
 	VerifyCharge(ctx context.Context, lookup ChargeLookup) (ChargeVerification, error)
 	RefundCharge(ctx context.Context, request RefundRequest) (RefundResult, error)
-	RetryRefundWithCustomerBankAccount(ctx context.Context, providerRefundId string, account PayeeBankAccount) error
-	ResolveBankAccountName(ctx context.Context, bankCode, accountNumber string) (string, error)
-	ListBanks(ctx context.Context, countryCode string) ([]Bank, error)
 	VerifyWebhookSignatureAndParse(rawBody []byte, headers http.Header) (WebhookNotification, error)
 	ParseVerifiedWebhookPayload(rawBody []byte) (WebhookNotification, error)
 }
 
-type FullPaymentProvider interface {
-	PaymentProvider
-	PayeeProvider
-	MoneyMovementProvider
-	DisputeProvider
-	SubscriptionProvider
-	SavedCardProvider
+type RefundBankDetailsProvider interface {
+	RetryRefundWithCustomerBankAccount(ctx context.Context, providerRefundId string, account PayeeBankAccount) error
 }
 
 type StoreReceipt struct {
@@ -190,4 +184,5 @@ var (
 	ErrStoreVerificationNotConfigured = errors.New("store receipt verification is not configured")
 	ErrStoreReceiptInvalid            = errors.New("store receipt could not be verified")
 	ErrSavedCardNotForCustomer        = errors.New("the saved card cannot be charged for this account")
+	ErrCapabilityNotSupported         = errors.New("the payment provider does not support this operation")
 )

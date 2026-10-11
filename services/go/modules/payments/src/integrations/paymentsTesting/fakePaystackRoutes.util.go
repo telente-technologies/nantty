@@ -213,6 +213,10 @@ func (fake *FakePaystack) createTransfer(request fakeRequest) (int, any, any) {
 	fake.PlatformBalance["NGN"] -= amount + fee
 	transfer := &FakeTransfer{Reference: reference, Recipient: text(request.body["recipient"]), Status: "pending", Code: fake.newId("TRF"), AmountMinor: amount, FeeMinor: fee}
 	fake.Transfers[reference] = transfer
+	if fake.LoseNextTransferReply {
+		fake.LoseNextTransferReply = false
+		return http.StatusGatewayTimeout, "upstream timed out", nil
+	}
 	return http.StatusOK, transferBody(transfer), nil
 }
 

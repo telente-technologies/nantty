@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"zudomart/modules/payments/src/integrations/providerHttp"
 	"zudomart/modules/payments/src/interfaces"
 )
 
@@ -179,7 +180,10 @@ func (provider *PaystackProvider) ChargeAuthorization(ctx context.Context, reque
 		Paused           bool   `json:"paused"`
 		AuthorizationUrl string `json:"authorization_url"`
 	}
-	err := provider.http.send(ctx, paystackRequest{method: http.MethodPost, path: "/transaction/charge_authorization", body: body, retrySafe: true}, &response)
+	err := provider.http.send(ctx, paystackRequest{method: http.MethodPost, path: "/transaction/charge_authorization", body: body}, &response)
+	if errors.Is(err, providerhttp.ErrOutcomeUnknown) {
+		return interfaces.AuthorizationChargeResult{Outcome: interfaces.OutcomePending}, nil
+	}
 	var requestError *ProviderRequestError
 	if errors.As(err, &requestError) && strings.Contains(strings.ToLower(requestError.Message), "duplicate transaction reference") {
 		return interfaces.AuthorizationChargeResult{Outcome: interfaces.OutcomePending}, nil

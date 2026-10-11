@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	moneytesting "zudomart/modules/ledger/src/databases/moneyTesting"
 	"zudomart/modules/ledger/src/loaders"
@@ -34,6 +35,7 @@ type MoneyHarness struct {
 	LedgerSchema string
 	Ledger       *ledgerservices.Ledger
 	Paystack     *FakePaystack
+	Flutterwave  *FakeFlutterwave
 	Directory    *PermissiveAccountDirectory
 	Tokens       *moneytesting.TestTokenAuthority
 	Publisher    *events.RecordingPublisher
@@ -44,6 +46,16 @@ type MoneyHarness struct {
 }
 
 func StartMoneyHarnessWithPayments(t *testing.T, storeVerifiers map[string]interfaces.StoreReceiptVerifier) *MoneyHarness {
+	t.Helper()
+	return startMoneyHarness(t, storeVerifiers, false)
+}
+
+func StartMoneyHarnessWithFlutterwave(t *testing.T) *MoneyHarness {
+	t.Helper()
+	return startMoneyHarness(t, nil, true)
+}
+
+func startMoneyHarness(t *testing.T, storeVerifiers map[string]interfaces.StoreReceiptVerifier, flutterwave bool) *MoneyHarness {
 	t.Helper()
 	database := moneytesting.OpenTestDatabaseOrSkip(t)
 	ledgerSchema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "ledger", ledgermigrations.Files)
@@ -64,7 +76,14 @@ func StartMoneyHarnessWithPayments(t *testing.T, storeVerifiers map[string]inter
 		DataEncryptionKey:           bytes.Repeat([]byte{7}, 32), SavedCardFingerprintKey: "fingerprint-test-key", InternalApiToken: strings.Repeat("i", 32),
 	}
 	paystack := integrations.NewPaystackProvider(integrations.PaystackSettings{BaseUrl: harness.Paystack.Server.URL, SecretKey: FakePaystackSecretKey, MaximumAttempts: 3})
-	providers := map[string]interfaces.FullPaymentProvider{"paystack": paystack}
+	providers := map[string]interfaces.PaymentProvider{"paystack": paystack}
+	if flutterwave {
+		harness.Flutterwave = StartFakeFlutterwave(t)
+		fakeSettings := harness.Flutterwave.Settings()
+		fakeSettings.RetryBaseDelay = time.Millisecond
+		providers["flutterwave"] = integrations.NewFlutterwaveProvider(fakeSettings)
+		applyFlutterwaveHarnessSettings(&settings)
+	}
 	module, err := paymentsrc.StartPaymentsModuleWithSettings(context.Background(), settings, harness.Dependencies, harness.Overrides(), container.Overrides{Providers: providers, StoreVerifiers: storeVerifiers, Accounts: harness.Directory})
 	if err != nil {
 		t.Fatal(err)
@@ -152,4 +171,14 @@ func (harness *MoneyHarness) AssertLedgerHealthy() {
 	if !report.Healthy() {
 		harness.T.Fatalf("ledger unhealthy: %+v", report)
 	}
+}
+
+func applyFlutterwaveHarnessSettings(settings *configs.PaymentsSettings) {
+	settings.DefaultProvider = "flutterwave"
+	settings.Flutterwave = configs.FlutterwaveSettings{SecretKey: FakeFlutterwaveSecretKey, WebhookHash: FakeFlutterwaveWebhookHash, MerchantId: FakeFlutterwaveMerchantId}
+	settings.Wallets = configs.WalletSettings{
+		AliasEmailDomain: "wallets.zudomart.test", PsaCountries: []string{"NG"}, DepositFeeBps: 50, DepositFeeCaps: map[string]int64{"NGN": 100_000},
+		DepositHold: 24 * time.Hour, FirstDepositHold: 72 * time.Hour, CardBuyerWalletAtCheckout: true, MovementStuckAfter: time.Hour,
+	}
+	settings.CustomerValidationMode = "required"
 }

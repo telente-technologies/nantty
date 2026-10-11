@@ -6,15 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
-	"time"
 
+	"zudomart/modules/payments/src/integrations/providerHttp"
 	"zudomart/modules/payments/src/interfaces"
 )
-
-const maximumPaystackResponseBytes = 2 << 20
 
 type ProviderRequestError struct {
 	Provider   string
@@ -56,11 +53,8 @@ type paystackEnvelope struct {
 }
 
 type paystackHttpClient struct {
-	baseUrl         string
-	secretKey       string
-	client          *http.Client
-	maximumAttempts int
-	retryBaseDelay  time.Duration
+	secretKey string
+	transport *providerhttp.Client
 }
 
 func (client paystackHttpClient) send(ctx context.Context, request paystackRequest, destination any) error {
@@ -74,86 +68,32 @@ func (client paystackHttpClient) send(ctx context.Context, request paystackReque
 			return err
 		}
 	}
-	attempts := 1
-	if request.method == http.MethodGet || request.retrySafe {
-		attempts = max(client.maximumAttempts, 1)
-	}
-	var lastError error
-	for attempt := 0; attempt < attempts; attempt++ {
-		if attempt > 0 {
-			if err := waitBeforeRetry(ctx, client.retryBaseDelay<<(attempt-1)); err != nil {
-				return err
-			}
-		}
-		retry, err := client.sendOnce(ctx, request, encoded, destination)
-		if err == nil || !retry {
-			return err
-		}
-		lastError = err
-	}
-	return lastError
-}
-
-func waitBeforeRetry(ctx context.Context, delay time.Duration) error {
-	if delay <= 0 {
-		return ctx.Err()
-	}
-	timer := time.NewTimer(delay)
-	defer timer.Stop()
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
-	}
-}
-
-func (client paystackHttpClient) sendOnce(ctx context.Context, request paystackRequest, encoded []byte, destination any) (bool, error) {
-	target := client.baseUrl + request.path
-	if len(request.query) > 0 {
-		target += "?" + request.query.Encode()
-	}
-	var reader io.Reader
-	if encoded != nil {
-		reader = bytes.NewReader(encoded)
-	}
-	httpRequest, err := http.NewRequestWithContext(ctx, request.method, target, reader)
-	if err != nil {
-		return false, err
-	}
-	httpRequest.Header.Set("Authorization", "Bearer "+client.secretKey)
-	httpRequest.Header.Set("Accept", "application/json")
-	if encoded != nil {
-		httpRequest.Header.Set("Content-Type", "application/json")
-	}
-	response, err := client.client.Do(httpRequest)
-	if err != nil {
-		return ctx.Err() == nil, fmt.Errorf("%w: paystack request failed: %v", interfaces.ErrProviderUnavailable, err)
-	}
-	defer response.Body.Close()
-	raw, err := io.ReadAll(io.LimitReader(response.Body, maximumPaystackResponseBytes))
-	if err != nil {
-		return true, fmt.Errorf("%w: read paystack response: %v", interfaces.ErrProviderUnavailable, err)
+	response, err := client.transport.Do(ctx, providerhttp.Request{Method: request.method, Path: request.path, Query: request.query, Body: encoded, IdempotentWrite: request.retrySafe})
+	if err != nil && response.StatusCode == 0 {
+		return err
 	}
 	var envelope paystackEnvelope
-	decodeErr := json.Unmarshal(raw, &envelope)
+	decodeErr := json.Unmarshal(response.Body, &envelope)
 	if response.StatusCode < 200 || response.StatusCode > 299 || (decodeErr == nil && !envelope.Status) {
-		failure := &ProviderRequestError{Provider: "paystack", StatusCode: response.StatusCode, Code: envelope.Code, Message: truncate(envelope.Message, 200)}
+		failure := &ProviderRequestError{Provider: "paystack", StatusCode: response.StatusCode, Code: envelope.Code, Message: providerhttp.RedactSecrets(truncate(envelope.Message, 200))}
 		if failure.StatusCode < 300 {
 			failure.StatusCode = http.StatusBadRequest
 		}
-		return response.StatusCode >= 500 || response.StatusCode == http.StatusTooManyRequests, failure
+		if err != nil {
+			return errors.Join(err, failure)
+		}
+		return failure
 	}
 	if decodeErr != nil {
-		return false, fmt.Errorf("%w: decode paystack response: %v", interfaces.ErrProviderUnavailable, decodeErr)
+		return fmt.Errorf("%w: decode paystack response: %v", interfaces.ErrProviderUnavailable, decodeErr)
 	}
 	if destination == nil {
-		return false, nil
+		return nil
 	}
 	if err := decodeInto(envelope, destination); err != nil {
-		return false, fmt.Errorf("%w: decode paystack data: %v", interfaces.ErrProviderUnavailable, err)
+		return fmt.Errorf("%w: decode paystack data: %v", interfaces.ErrProviderUnavailable, err)
 	}
-	return false, nil
+	return nil
 }
 
 type paystackPage[Item any] struct {

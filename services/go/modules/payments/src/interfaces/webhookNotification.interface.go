@@ -11,6 +11,8 @@ const (
 	WebhookKindSubscription   WebhookKind = "subscription"
 	WebhookKindInvoice        WebhookKind = "invoice"
 	WebhookKindIdentification WebhookKind = "identification"
+	WebhookKindWalletFunding  WebhookKind = "walletFunding"
+	WebhookKindBvnConsent     WebhookKind = "bvnConsent"
 	WebhookKindOther          WebhookKind = "other"
 )
 
@@ -26,6 +28,7 @@ type WebhookNotification struct {
 	AmountMinor        int64
 	Currency           string
 	FailureReason      string
+	AccountNumber      string
 	Dispute            *ProviderDispute
 	Subscription       *ProviderSubscriptionUpdate
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"zudomart/modules/payments/src/integrations/providerHttp"
 	"zudomart/modules/payments/src/interfaces"
 )
 
@@ -30,7 +31,17 @@ type PaystackProvider struct {
 	Now      func() time.Time
 }
 
-var _ interfaces.FullPaymentProvider = (*PaystackProvider)(nil)
+var (
+	_ interfaces.PaymentProvider           = (*PaystackProvider)(nil)
+	_ interfaces.PayoutProvider            = (*PaystackProvider)(nil)
+	_ interfaces.IdentityVerifier          = (*PaystackProvider)(nil)
+	_ interfaces.PayeeProvider             = (*PaystackProvider)(nil)
+	_ interfaces.DisputeProvider           = (*PaystackProvider)(nil)
+	_ interfaces.SubscriptionProvider      = (*PaystackProvider)(nil)
+	_ interfaces.SavedCardProvider         = (*PaystackProvider)(nil)
+	_ interfaces.RefundBankDetailsProvider = (*PaystackProvider)(nil)
+	_ interfaces.RefundLookupProvider      = (*PaystackProvider)(nil)
+)
 
 func NewPaystackProvider(settings PaystackSettings) *PaystackProvider {
 	if settings.BaseUrl == "" {
@@ -50,10 +61,11 @@ func NewPaystackProvider(settings PaystackSettings) *PaystackProvider {
 	}
 	return &PaystackProvider{
 		settings: settings, Now: time.Now,
-		http: paystackHttpClient{
-			baseUrl: strings.TrimRight(settings.BaseUrl, "/"), secretKey: settings.SecretKey,
-			client: &http.Client{Timeout: settings.RequestTimeout}, maximumAttempts: max(settings.MaximumAttempts, 1), retryBaseDelay: settings.RetryBaseDelay,
-		},
+		http: paystackHttpClient{secretKey: settings.SecretKey, transport: &providerhttp.Client{
+			Provider: PaystackProviderName, BaseUrl: strings.TrimRight(settings.BaseUrl, "/"), HttpClient: &http.Client{Timeout: settings.RequestTimeout},
+			ReadAttempts: max(settings.MaximumAttempts, 1), RetryBaseDelay: settings.RetryBaseDelay, Breaker: providerhttp.NewBreaker(),
+			Authorize: func(request *http.Request) { request.Header.Set("Authorization", "Bearer "+settings.SecretKey) },
+		}},
 	}
 }
 
@@ -64,13 +76,16 @@ func (provider *PaystackProvider) SupportsCurrency(currency string) bool {
 }
 
 func numberValue(value json.Number) int64 {
-	parsed, err := value.Int64()
+	if parsed, err := value.Int64(); err == nil {
+		return parsed
+	}
+	whole, fraction, _ := strings.Cut(value.String(), ".")
+	if strings.Trim(fraction, "0") != "" {
+		return 0
+	}
+	parsed, err := json.Number(whole).Int64()
 	if err != nil {
-		floating, floatErr := value.Float64()
-		if floatErr != nil {
-			return 0
-		}
-		return int64(floating)
+		return 0
 	}
 	return parsed
 }
