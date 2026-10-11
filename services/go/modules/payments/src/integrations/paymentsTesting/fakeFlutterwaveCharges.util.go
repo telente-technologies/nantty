@@ -1,6 +1,7 @@
 package paymentstesting
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -103,7 +104,7 @@ func (fake *FakeFlutterwave) refundTransaction(transaction *FakeFlwTransaction, 
 	transaction.RefundedMinor += amount
 	fake.MainBalance[transaction.Currency] -= amount
 	refund := map[string]any{
-		"id": fake.newId(), "flw_ref": transaction.FlwRef, "amount_refunded": fakeMajor(amount, transaction.Currency), "status": "completed",
+		"id": fake.newId(), "flw_ref": transaction.FlwRef, "amount_refunded": fakeMajor(amount, transaction.Currency), "status": fake.refundStatus(),
 		"comments": text(body["comments"]), "transaction_id": transaction.Id, "destination": "payment_source", "created_at": time.Now().UTC().Format(time.RFC3339),
 	}
 	fake.Refunds = append(fake.Refunds, refund)
@@ -195,4 +196,86 @@ func (fake *FakeFlutterwave) SettleAll(currency string) string {
 		"net_amount": fakeMajor(gross-fees, currency), "due_date": now, "settlement_date": now, "destination": "autowallet", "transactions": references,
 	})
 	return strconv.FormatInt(id, 10)
+}
+
+func (fake *FakeFlutterwave) SeedSuccessfulCharge(reference string, amountMinor int64, currency string) *FakeFlwTransaction {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	id := fake.newId()
+	transaction := &FakeFlwTransaction{
+		Id: id, TxRef: reference, FlwRef: fmt.Sprintf("FLW-SEED-%d", id), Email: "seeded@zudomart.test", AmountMinor: amountMinor, Currency: currency,
+		Status: "successful", PaymentType: "card", CreatedAt: time.Now().UTC(),
+	}
+	fake.Transactions[id] = transaction
+	return transaction
+}
+
+func (fake *FakeFlutterwave) RefundAmountsMinor() []int64 {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	amounts := make([]int64, 0, len(fake.Refunds))
+	for _, refund := range fake.Refunds {
+		amount, _ := fakeMinor(refund["amount_refunded"], "NGN")
+		amounts = append(amounts, amount)
+	}
+	return amounts
+}
+
+func (fake *FakeFlutterwave) refundStatus() string {
+	if fake.RefundStatus != "" {
+		return fake.RefundStatus
+	}
+	return "completed"
+}
+
+func (fake *FakeFlutterwave) RefundWebhookForCharge(reference, status string) ([]byte, http.Header, bool) {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	for _, transaction := range fake.Transactions {
+		if transaction.TxRef != reference {
+			continue
+		}
+		for index := len(fake.Refunds) - 1; index >= 0; index-- {
+			refund := fake.Refunds[index]
+			if refund["transaction_id"] != transaction.Id {
+				continue
+			}
+			refund["status"] = status
+			body, _ := json.Marshal(map[string]any{"id": refund["id"], "AmountRefunded": refund["amount_refunded"], "status": status, "FlwRef": transaction.FlwRef, "TransactionId": transaction.Id})
+			return body, fakeFlwHeaders(), true
+		}
+	}
+	return nil, nil, false
+}
+
+func (fake *FakeFlutterwave) MarkRefundFailed(providerRefundId string) bool {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	for _, refund := range fake.Refunds {
+		if fmt.Sprint(refund["id"]) != providerRefundId || refund["status"] == "failed" {
+			continue
+		}
+		refund["status"] = "failed"
+		for _, transaction := range fake.Transactions {
+			if transaction.Id == refund["transaction_id"] {
+				amount, _ := fakeMinor(refund["amount_refunded"], transaction.Currency)
+				transaction.RefundedMinor -= amount
+				fake.MainBalance[transaction.Currency] += amount
+			}
+		}
+		return true
+	}
+	return false
+}
+
+func (fake *FakeFlutterwave) FailCheckout(reference string) bool {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	for _, transaction := range fake.Transactions {
+		if transaction.TxRef == reference {
+			transaction.Status = "failed"
+			return true
+		}
+	}
+	return false
 }

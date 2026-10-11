@@ -43,6 +43,9 @@ func mountFlutterwaveSmokeControls(mux *http.ServeMux, fake *FakeFlutterwave) {
 			writeSmokeFlutterwaveWebhook(writer, nil, nil)
 			return
 		}
+		if request.URL.Query().Get("card") == "decline" {
+			fake.FailCheckout(request.PathValue("reference"))
+		}
 		body, headers := fake.ChargeWebhook(transaction)
 		writeSmokeFlutterwaveWebhook(writer, body, headers)
 	})

@@ -72,6 +72,8 @@ type FakeFlutterwave struct {
 	LoseNextTransferReply bool
 	RejectPayloadHash     bool
 	PublicUrl             string
+	RefundDelay           time.Duration
+	RefundStatus          string
 }
 
 func StartFakeFlutterwave(t *testing.T) *FakeFlutterwave {
@@ -126,6 +128,9 @@ func (fake *FakeFlutterwave) serve(writer http.ResponseWriter, request *http.Req
 	if request.Header.Get("Authorization") != "Bearer "+FakeFlutterwaveSecretKey {
 		writeFakeJson(writer, http.StatusUnauthorized, map[string]any{"status": "error", "message": "Invalid authorization key", "data": nil})
 		return
+	}
+	if fake.RefundDelay > 0 && request.Method == http.MethodPost && strings.HasSuffix(request.URL.Path, "/refund") {
+		time.Sleep(fake.RefundDelay)
 	}
 	fake.mutex.Lock()
 	defer fake.mutex.Unlock()

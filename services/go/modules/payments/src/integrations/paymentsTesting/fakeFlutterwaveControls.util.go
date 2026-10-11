@@ -183,3 +183,12 @@ func (fake *FakeFlutterwave) SetRateLimitedRequests(count int) {
 	defer fake.mutex.Unlock()
 	fake.RateLimitNext = count
 }
+
+func (fake *FakeFlutterwave) CreditWalletWithoutFee(accountRef string, amountMinor int64, reference string) {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	if wallet := fake.Wallets[accountRef]; wallet != nil {
+		wallet.BalanceMinor += amountMinor
+		fake.walletLine(wallet, "C", reference, amountMinor, "TEST SEED")
+	}
+}

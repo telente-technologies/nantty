@@ -34,8 +34,8 @@ type MoneyHarness struct {
 	Database     *sql.DB
 	LedgerSchema string
 	Ledger       *ledgerservices.Ledger
-	Paystack     *FakePaystack
 	Flutterwave  *FakeFlutterwave
+	UsersSchema  string
 	Directory    *PermissiveAccountDirectory
 	Tokens       *moneytesting.TestTokenAuthority
 	Publisher    *events.RecordingPublisher
@@ -47,43 +47,40 @@ type MoneyHarness struct {
 
 func StartMoneyHarnessWithPayments(t *testing.T, storeVerifiers map[string]interfaces.StoreReceiptVerifier) *MoneyHarness {
 	t.Helper()
-	return startMoneyHarness(t, storeVerifiers, false)
+	return startMoneyHarness(t, storeVerifiers)
 }
 
 func StartMoneyHarnessWithFlutterwave(t *testing.T) *MoneyHarness {
 	t.Helper()
-	return startMoneyHarness(t, nil, true)
+	return startMoneyHarness(t, nil)
 }
 
-func startMoneyHarness(t *testing.T, storeVerifiers map[string]interfaces.StoreReceiptVerifier, flutterwave bool) *MoneyHarness {
+func startMoneyHarness(t *testing.T, storeVerifiers map[string]interfaces.StoreReceiptVerifier) *MoneyHarness {
 	t.Helper()
 	database := moneytesting.OpenTestDatabaseOrSkip(t)
 	ledgerSchema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "ledger", ledgermigrations.Files)
 	harness := &MoneyHarness{
 		T: t, Database: database, LedgerSchema: ledgerSchema, Ledger: ledgerservices.NewLedgerInSchema(ledgerSchema),
-		Paystack: StartFakePaystack(t), Directory: &PermissiveAccountDirectory{Unverified: map[string]bool{}}, Tokens: moneytesting.NewTestTokenAuthority(t), Publisher: &events.RecordingPublisher{},
+		Flutterwave: StartFakeFlutterwave(t), Directory: &PermissiveAccountDirectory{Unverified: map[string]bool{}}, Tokens: moneytesting.NewTestTokenAuthority(t), Publisher: &events.RecordingPublisher{},
 		Mux:          http.NewServeMux(),
 		Dependencies: servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Health: health.NewRegistryForService("money-test")},
 	}
+	harness.UsersSchema = createHarnessUsersSchema(t, database)
 	settings := configs.PaymentsSettings{
 		Money:             moneytesting.MoneyModuleSettingsForTests("payments", moneytesting.CreateEmptySchema(t, database, "payments"), ledgerSchema),
-		AllowedReturnUrls: []string{"https://zudomart.test/pay/return", "https://app.zudomart.test/pay/return"}, DefaultProvider: "paystack",
-		EscrowFeeBps: 150, BusinessEscrowFeeBps: 100, EscrowMode: "e2", CheckoutExpiryMinutes: 15, ConnectedAccountCountry: "NG",
-		Paystack:            configs.PaystackSettings{SecretKey: FakePaystackSecretKey, Channels: []string{"card", "bank", "ussd", "bank_transfer"}, SubaccountBearsFee: true, CardVerificationAmount: 5000, WebhookIpAllowlist: []string{"127.0.0.1", "::1"}},
+		AllowedReturnUrls: []string{"https://zudomart.test/pay/return", "https://app.zudomart.test/pay/return"}, DefaultProvider: "flutterwave",
+		EscrowFeeBps: 150, BusinessEscrowFeeBps: 100, EscrowMode: "e2", CheckoutExpiryMinutes: 15, ConnectedAccountCountry: "NG", UsersSchema: harness.UsersSchema,
+		CheckoutChannels: []string{"card", "bank", "ussd", "bank_transfer"}, SubaccountBearsFee: true, CardVerificationAmount: 5000,
 		OnboardingReturnUrl: "https://zudomart.test/seller/verification/return", OnboardingRefreshUrl: "https://zudomart.test/seller/verification/refresh",
 		WebSubscriptionPlanProducts: map[string]string{"premium_web": "PLN_premium_web"},
 		UnverifiedSellerSalesCaps:   map[string]int64{"NGN": 1 << 50, "USD": 1 << 50},
 		DataEncryptionKey:           bytes.Repeat([]byte{7}, 32), SavedCardFingerprintKey: "fingerprint-test-key", InternalApiToken: strings.Repeat("i", 32),
 	}
-	paystack := integrations.NewPaystackProvider(integrations.PaystackSettings{BaseUrl: harness.Paystack.Server.URL, SecretKey: FakePaystackSecretKey, MaximumAttempts: 3})
-	providers := map[string]interfaces.PaymentProvider{"paystack": paystack}
-	if flutterwave {
-		harness.Flutterwave = StartFakeFlutterwave(t)
-		fakeSettings := harness.Flutterwave.Settings()
-		fakeSettings.RetryBaseDelay = time.Millisecond
-		providers["flutterwave"] = integrations.NewFlutterwaveProvider(fakeSettings)
-		applyFlutterwaveHarnessSettings(&settings)
-	}
+	fakeSettings := harness.Flutterwave.Settings()
+	fakeSettings.RetryBaseDelay = time.Millisecond
+	adapter := integrations.NewFlutterwaveProvider(fakeSettings)
+	providers := map[string]interfaces.PaymentProvider{"flutterwave": adapter}
+	applyFlutterwaveHarnessSettings(&settings)
 	module, err := paymentsrc.StartPaymentsModuleWithSettings(context.Background(), settings, harness.Dependencies, harness.Overrides(), container.Overrides{Providers: providers, StoreVerifiers: storeVerifiers, Accounts: harness.Directory})
 	if err != nil {
 		t.Fatal(err)
@@ -94,6 +91,21 @@ func startMoneyHarness(t *testing.T, storeVerifiers map[string]interfaces.StoreR
 	harness.Server = httptest.NewServer(harness.Mux)
 	t.Cleanup(harness.Server.Close)
 	return harness
+}
+
+func createHarnessUsersSchema(t *testing.T, database *sql.DB) string {
+	t.Helper()
+	schema := moneytesting.CreateEmptySchema(t, database, "users")
+	for _, statement := range []string{
+		`CREATE TABLE "` + schema + `".profiles (account_id uuid NOT NULL, kind text NOT NULL, country_code text)`,
+		`CREATE TABLE "` + schema + `".profile_checkmarks (account_id uuid NOT NULL, color text, status text)`,
+		`CREATE TABLE "` + schema + `".verification_cases (account_id uuid NOT NULL, status text, liveness_result text, face_match_result text)`,
+	} {
+		if _, err := database.Exec(statement); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return schema
 }
 
 type PermissiveAccountDirectory struct {
@@ -181,4 +193,23 @@ func applyFlutterwaveHarnessSettings(settings *configs.PaymentsSettings) {
 		DepositHold: 24 * time.Hour, FirstDepositHold: 72 * time.Hour, CardBuyerWalletAtCheckout: true, MovementStuckAfter: time.Hour,
 	}
 	settings.CustomerValidationMode = "required"
+}
+
+func (harness *MoneyHarness) NonZeroBalances() map[string]int64 {
+	harness.T.Helper()
+	rows, err := harness.Database.Query(`SELECT code, balance_minor FROM "` + harness.LedgerSchema + `".ledger_accounts WHERE balance_minor <> 0 ORDER BY code`)
+	if err != nil {
+		harness.T.Fatal(err)
+	}
+	defer rows.Close()
+	balances := map[string]int64{}
+	for rows.Next() {
+		var code string
+		var balance int64
+		if err := rows.Scan(&code, &balance); err != nil {
+			harness.T.Fatal(err)
+		}
+		balances[code] = balance
+	}
+	return balances
 }
