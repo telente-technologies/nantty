@@ -69,9 +69,9 @@ describe("boost payment mocks", () => {
     assert.equal((await failureOf(call("POST", "/api/v1/ads/boosts", await boostRequest("free"))))?.code, "FREE_BOOST_USED");
   });
 
-  it("returns a Paystack checkout for card and refuses balance payments above the available balance", async () => {
+  it("returns a hosted checkout link for card and refuses balance payments above the available balance", async () => {
     const card = await call<CreatedBoost>("POST", "/api/v1/ads/boosts", await boostRequest("card"));
-    assert.match(card.checkoutUrl ?? "", /^https:\/\/checkout\.paystack\.com\//);
+    assert.match(card.checkoutUrl ?? "", /^\/pay\/demo\?reference=/);
     assert.equal(card.boost.paymentMethod, "card");
     const options = await call<BoostOptions>("GET", "/api/v1/ads/boosts/options");
     const huge = { postId: "post_9", goal: "views", audience: { mode: "automatic" }, dailyBudget: { ...options.suggestedDailyBudgets[0]!, amountMinor: 10_000_000_000 }, durationDays: 14, paymentMethod: "balance" };

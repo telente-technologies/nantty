@@ -92,7 +92,7 @@ export const boostsMocks: MockRoute[] = [
     const total = convertViewerMoneyToUsdCents(totalCost);
     const record: MockBoost = { id: `bst_${Date.now()}`, request, totalUsdCents: total, createdAt: Date.now() };
     boosts.set(record.id, record);
-    return { boost: presentBoost(record), checkoutUrl: request.paymentMethod === "card" ? `https://checkout.paystack.com/mock-boost/${record.id}` : null };
+    return { boost: presentBoost(record), checkoutUrl: request.paymentMethod === "card" ? `/pay/demo?reference=${record.id}&next=${encodeURIComponent(`/boost/status/${record.id}`)}` : null };
   }),
   createMockRoute("GET", "/api/v1/ads/boosts/:boostId", ({ params }) => {
     const record = boosts.get(params.boostId!);

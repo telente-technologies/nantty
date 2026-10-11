@@ -2,10 +2,11 @@ import { ApiError } from "@/errors/api.error";
 import type { CoinPackage, SendTipInput } from "@/types";
 
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
+import { mockProviderWalletState } from "./providerWallet.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const COIN_TRANSFER_FEE_PERCENT = 25;
-const MOCK_PAYSTACK_RETURN_PATH = "/coins/return";
+const MOCK_COIN_RETURN_PATH = "/coins/return";
 
 const mockCoinWallet = { balance: 250 };
 
@@ -48,12 +49,14 @@ export const coinsMocks: MockRoute[] = [
     if (!seed) throw new ApiError(404, "Coin package not found");
     const reference = `cp_${Date.now().toString(36)}`;
     pendingPurchasesByReference.set(reference, { coins: seed.coins + (seed.bonusCoins ?? 0), credited: false });
-    const returnUrl = `${MOCK_PAYSTACK_RETURN_PATH}?reference=${reference}`;
-    return { reference, provider: "paystack", purchaseChannel: "web_checkout", accessCode: "", authorizationUrl: returnUrl };
+    const returnUrl = `${MOCK_COIN_RETURN_PATH}?reference=${reference}`;
+    const checkoutUrl = `/pay/demo?reference=${reference}&next=${encodeURIComponent(returnUrl)}`;
+    return { reference, provider: "flutterwave", purchaseChannel: "web_checkout", accessCode: "", checkoutUrl, authorizationUrl: checkoutUrl };
   }),
   createMockRoute("POST", "/api/v1/coins/purchases/:reference/verify", ({ params }) => {
     const purchase = pendingPurchasesByReference.get(params.reference!);
     if (!purchase) throw new ApiError(404, "Purchase not found");
+    if (mockProviderWalletState.declinedReferences.has(params.reference!)) return { status: "failed", coins: purchase.coins };
     if (!purchase.credited) {
       purchase.credited = true;
       mockCoinWallet.balance += purchase.coins;

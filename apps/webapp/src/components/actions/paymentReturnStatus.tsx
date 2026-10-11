@@ -15,9 +15,10 @@ interface PaymentReturnStatusProps {
   readonly failedText: string;
   readonly continueHref: string;
   readonly continueLabel: string;
+  readonly notice?: string | null;
 }
 
-export function PaymentReturnStatus({ state, confirmingText, succeededTitle, succeededText, failedText, continueHref, continueLabel }: PaymentReturnStatusProps) {
+export function PaymentReturnStatus({ state, confirmingText, succeededTitle, succeededText, failedText, continueHref, continueLabel, notice }: PaymentReturnStatusProps) {
   return (
     <div className={styles.card} role="status" aria-live="polite">
       {state === "confirming" ? (
@@ -25,6 +26,12 @@ export function PaymentReturnStatus({ state, confirmingText, succeededTitle, suc
           <Spinner label={confirmingText} />
           <h1 className={styles.title}>Confirming payment…</h1>
           <p className={styles.text}>{confirmingText}</p>
+          {notice ? <p className={styles.text}>{notice}</p> : null}
+          {notice ? (
+            <Link href={continueHref} className={styles.secondary}>
+              {continueLabel}
+            </Link>
+          ) : null}
         </>
       ) : state === "succeeded" ? (
         <>

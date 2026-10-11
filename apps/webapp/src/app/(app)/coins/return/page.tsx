@@ -1,9 +1,10 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
+import { usePaymentPoll } from "@/components/actions/paymentPoll.hook";
 import { PaymentReturnStatus } from "@/components/actions/paymentReturnStatus";
 import { coinPurchaseReturnPathStorageKey } from "@/components/live/coinPurchaseDialog";
 import { coinsService } from "@/services/webActions.service";
@@ -18,29 +19,29 @@ function readStoredReturnPath(): string {
 }
 
 function CoinPurchaseReturn() {
-  const reference = useSearchParams().get("reference") ?? "";
+  const searchParams = useSearchParams();
+  const reference = searchParams.get("reference") ?? searchParams.get("tx_ref") ?? "";
   const queryClient = useQueryClient();
   const [returnPath, setReturnPath] = useState("/live");
   useEffect(() => setReturnPath(readStoredReturnPath()), []);
-  const confirmationQuery = useQuery({
+  const confirmation = usePaymentPoll({
     queryKey: ["coins", "purchase", reference],
-    queryFn: () => coinsService.confirmCoinPurchase(reference),
     enabled: reference.length > 0,
-    retry: false,
-    refetchInterval: (query) => (query.state.data?.status === "pending" ? 3_000 : false),
+    fetch: () => coinsService.confirmCoinPurchase(reference),
+    readOutcome: (result) => (result.status === "pending" ? "pending" : result.status),
   });
-  const status = confirmationQuery.data?.status;
+  const state = confirmation.state;
   useEffect(() => {
-    if (status === "succeeded") void queryClient.invalidateQueries({ queryKey: ["coins", "balance"] });
-  }, [status, queryClient]);
+    if (state === "succeeded") void queryClient.invalidateQueries({ queryKey: ["coins", "balance"] });
+  }, [state, queryClient]);
 
-  const state = !reference || confirmationQuery.isError || status === "failed" ? "failed" : status === "succeeded" ? "succeeded" : "confirming";
   return (
     <PaymentReturnStatus
       state={state}
+      notice={confirmation.notice}
       confirmingText="Confirming payment… This usually takes a few seconds."
       succeededTitle="Coins added"
-      succeededText={`${confirmationQuery.data?.coins.toLocaleString() ?? ""} coins are in your balance.`}
+      succeededText={`${confirmation.data?.coins.toLocaleString() ?? ""} coins are in your balance.`}
       failedText="We couldn't confirm this purchase. If you were charged, the coins will appear once the payment is confirmed."
       continueHref={returnPath}
       continueLabel="Back to the live"

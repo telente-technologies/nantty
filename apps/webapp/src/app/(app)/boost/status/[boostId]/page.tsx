@@ -26,7 +26,7 @@ export default function BoostStatusPage() {
       <div className={styles.card}>
         <span className={styles.pill}>{data.status}</span>
         <span className={styles.rowMeta}>Budget {formatMoneyForDisplay(data.totalBudget)} · Spent {formatMoneyForDisplay(data.spent)}{paidWith ? ` · Paid with ${paidWith}` : ""}</span>
-        {data.status === "pending_payment" ? <span className={styles.note}>Waiting for your Paystack payment to be confirmed. This page updates on its own.</span> : null}
+        {data.status === "pending_payment" ? <span className={styles.note}>Waiting for our payment partner to confirm your payment. This page updates on its own.</span> : null}
         {data.rejectionReason ? <span className={styles.error}>{data.rejectionReason}</span> : null}
       </div>
       <div className={styles.card}>

@@ -6,6 +6,7 @@ import { buildEscrowDetailFromRecord, buildOrderFromRecord } from "./escrowBuild
 import { getSignedInMockUser } from "./fixtures.mock";
 import { SIGNED_IN_BUYER, findOrderRecord, mockOrderRecords, type MockOrderRecord } from "./orderFixtures.mock";
 import { findCatalogSeedByProductId, reduceCatalogStock } from "./productCatalog.mock";
+import { mockProviderWalletState, payOrderFromMockWallet } from "./providerWallet.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const paymentAttempts = new Map<string, number>();
@@ -95,14 +96,35 @@ export const ordersMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/payments/initialize", ({ body }) => {
     const { orderId } = body as { orderId: string };
-    return { orderId, reference: `chk-${orderId}`, authorizationUrl: `/orders/${orderId}`, accessCode: "" };
+    const record = findOrderRecordVisibleToSignedInUser(orderId);
+    const reference = `chk-${orderId}`;
+    const checkoutUrl = `/pay/demo?reference=${encodeURIComponent(reference)}`;
+    const amount = buildOrderFromRecord(record).total;
+    const payment = { reference, provider: "flutterwave", status: "pending", amount, checkoutUrl, authorizationUrl: checkoutUrl };
+    return { orderId, checkoutId: record.checkoutGroupId ?? orderId, reference, checkoutUrl, authorizationUrl: checkoutUrl, callbackUrl: "/pay/return", paymentsInCheckout: 1, payment };
+  }),
+  createMockRoute("POST", "/api/v1/payments/wallet-payments/:reference", ({ params }) => {
+    const reference = params.reference!;
+    const record = findOrderRecordVisibleToSignedInUser(reference.replace(/^chk-/, ""));
+    payOrderFromMockWallet(reference, buildOrderFromRecord(record).total.amountMinor);
+    markCheckoutGroupAsPaid(record.id);
+    return { reference, status: "paid", provider: "flutterwave" };
   }),
   createMockRoute("GET", "/api/v1/payments/channels", () => ({ channels: ["card", "bank_transfer", "ussd"] })),
-  createMockRoute("POST", "/api/v1/payments/orders/:orderId/verify", ({ params }) => {
-    const attempts = (paymentAttempts.get(params.orderId!) ?? 0) + 1;
-    paymentAttempts.set(params.orderId!, attempts);
-    if (attempts < 2) return { status: "pending" };
-    markCheckoutGroupAsPaid(params.orderId!);
-    return { status: "paid" };
+  createMockRoute("POST", "/api/v1/payments/orders/:orderId/verify", ({ params }) => ({ status: advanceMockOrderPayment(params.orderId!) })),
+  createMockRoute("GET", "/api/v1/payments/:reference", ({ params }) => {
+    const reference = params.reference!;
+    const outcome = advanceMockOrderPayment(reference.replace(/^chk-/, ""));
+    return { reference, purpose: "order_checkout", provider: "flutterwave", status: outcome === "paid" ? "succeeded" : outcome };
   }),
 ];
+
+function advanceMockOrderPayment(orderId: string): "pending" | "paid" | "failed" {
+  if (mockProviderWalletState.declinedReferences.has(`chk-${orderId}`)) return "failed";
+  if (findOrderRecord(orderId)?.paidAt) return "paid";
+  const attempts = (paymentAttempts.get(orderId) ?? 0) + 1;
+  paymentAttempts.set(orderId, attempts);
+  if (attempts < 2) return "pending";
+  markCheckoutGroupAsPaid(orderId);
+  return "paid";
+}

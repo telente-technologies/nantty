@@ -10,7 +10,7 @@ import { ModalDialog } from "@/components/ui/modalDialog";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { creatorSubscriptionsService } from "@/services/webActions.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
-import { openPaystackCheckout } from "@/utils/paystackCheckout.util";
+import { openHostedCheckout } from "@/utils/hostedCheckout.util";
 
 import styles from "./actionDialogs.module.css";
 
@@ -25,10 +25,10 @@ export function SubscribeToCreatorDialog({ isOpen, onClose, creatorId, creatorNa
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const plansQuery = useQuery({ queryKey: ["creatorPlans", creatorId], queryFn: () => creatorSubscriptionsService.fetchPlans(creatorId), enabled: isOpen, retry: false });
   const subscribeMutation = useMutation({
-    mutationFn: (planId: string) => creatorSubscriptionsService.startSubscription(creatorId, planId),
-    onSuccess: async (checkout) => {
-      const outcome = await openPaystackCheckout(checkout);
-      if (outcome === "completed") window.location.assign(`/subscriptions/return?subscriptionId=${encodeURIComponent(checkout.subscriptionId)}`);
+    mutationFn: async (planId: string) => {
+      const checkout = await creatorSubscriptionsService.startSubscription(creatorId, planId);
+      if (openHostedCheckout(checkout) === "blocked") throw new Error("Unexpected payment page.");
+      return checkout;
     },
   });
   const plans = plansQuery.data ?? [];
