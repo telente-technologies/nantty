@@ -16,7 +16,7 @@ function readServerReference(sharedContent: unknown): { readonly kind: string; r
 export function assertPayloadMatchesServer(payload: ChatPayload, message: ServerBoundMessage): void {
   if (payload.conversationId !== undefined && payload.conversationId !== message.conversationId) throw new ChatCryptoError("PAYLOAD_MISMATCH", "The message belongs to another conversation.");
   const reference = readServerReference(message.sharedContent);
-  if (payload.storyId !== undefined && (reference?.kind !== "story" || reference.id !== payload.storyId)) throw new ChatCryptoError("PAYLOAD_MISMATCH", "The story this reply is bound to does not match.");
+  if (payload.storyId !== undefined && reference !== null && (reference.kind !== "story" || reference.id !== payload.storyId)) throw new ChatCryptoError("PAYLOAD_MISMATCH", "The story this reply is bound to does not match.");
   if (payload.sharedContent && reference !== null && (reference.kind !== payload.sharedContent.kind || reference.id !== payload.sharedContent.id)) {
     throw new ChatCryptoError("PAYLOAD_MISMATCH", "The shared item does not match the encrypted message.");
   }

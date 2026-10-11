@@ -15,6 +15,9 @@ export { ChatCryptoError, type ChatCryptoErrorCode, isChatCryptoError } from "./
 export { computeSecurityCode } from "./identityTrust";
 export { InMemoryKeyDirectory, isValidSignedPreKey, maximumDevicesPerUser } from "./memoryKeyDirectory";
 export type { ChatLinkPreview, ChatPayload, ChatPayloadInput } from "./payload";
+export { type ChatControl, type ChatLocation, type ChatPoll, type ChatPollOption, createPollOptions, maximumLiveLocationMilliseconds, maximumPollOptions, sanitizeControl, sanitizeLocation, sanitizePoll } from "./richContent";
+export { ChatControlLedger, type ControlEntry, type LiveLocationState, type PollOptionTally, type ReactionTally, nextPollVote } from "./controls";
+export { type GroupAttributes, type GroupAvatar, maximumSealedGroupAttributesLength, openGroupAttributes, sealGroupAttributes } from "./groupAttributes";
 export { type RandomSource, defaultRandomSource } from "./primitives";
 export type { ChatCryptoStorage } from "./protocolStore";
 export { type KeyValueStore, MemoryKeyValueStore, type Sealer, SealedKeyValueStore, createAeadSealer, isSealedString, openString, sealString } from "./storage";

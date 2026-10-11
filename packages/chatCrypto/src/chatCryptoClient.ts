@@ -5,6 +5,7 @@ import { ChatCryptoError, type ChatCryptoErrorCode, isChatCryptoError } from "./
 import { computeSecurityCode, hasUnacknowledgedChange } from "./identityTrust";
 import { createAndRegisterDevice, maintainDeviceKeys } from "./deviceRegistration";
 import { drainMailbox, shouldUseMailbox } from "./mailbox";
+import { type GroupAttributes, createGroupKey, openGroupAttributes, sealGroupAttributes } from "./groupAttributes";
 import { assertPayloadMatchesServer } from "./payloadBinding";
 import type { DeviceIdentity } from "./keys";
 import { openLinkPreview, sealLinkPreview } from "./linkPreviewSeal";
@@ -122,7 +123,11 @@ export class ChatCryptoClient {
     return this.exclusive(async () => {
       const identity = this.requireIdentity();
       const sealedPreview = input.linkPreview ? sealLinkPreview(input.linkPreview, this.random) : null;
-      const payloadInput = { ...input, linkPreview: null, ...(sealedPreview === null ? {} : { linkPreviewKey: sealedPreview.key }), ...(target.conversationId === null ? {} : { conversationId: target.conversationId }) };
+      const groupKey = target.kind === "group" && target.conversationId !== null ? (await this.store.loadGroupKeys(target.conversationId))[0]?.key : undefined;
+      const payloadInput = {
+        ...input, linkPreview: null, ...(sealedPreview === null ? {} : { linkPreviewKey: sealedPreview.key }), ...(target.conversationId === null ? {} : { conversationId: target.conversationId }),
+        ...(groupKey === undefined ? {} : { groupKey }),
+      };
       const payload = encodePayload(payloadInput, this.now());
       const resolved = await this.recipients.resolve([...target.memberUserIds, identity.userId]);
       const candidates = resolved.filter((device) => !(device.userId === identity.userId && device.deviceId === identity.deviceId));
@@ -205,6 +210,7 @@ export class ChatCryptoClient {
       });
       const payload = decodePayload(payloadBytes);
       assertPayloadMatchesServer(payload, message);
+      if (envelope.t === "g" && payload.groupKey !== undefined) await this.store.addGroupKey(message.conversationId, { key: payload.groupKey, at: [payload.sentAt, this.now().toISOString()].sort()[0] as string });
       await this.store.savePlaintext(message.id, { payload, failure: null, expiresAt: message.expiresAt ?? null });
       return { status: "decrypted", payload };
     } catch (error) {
@@ -279,6 +285,34 @@ export class ChatCryptoClient {
     return decrypted.plaintext;
   }
 
+  public prepareNewGroup(attributes: GroupAttributes): { readonly groupKey: string; readonly encryptedAttributes: string } {
+    const groupKey = createGroupKey(this.random);
+    return { groupKey, encryptedAttributes: sealGroupAttributes(attributes, groupKey, this.random) };
+  }
+
+  public rememberGroupKey(conversationId: string, groupKey: string): Promise<void> {
+    return this.exclusive(async () => void (await this.store.addGroupKey(conversationId, { key: groupKey, at: this.now().toISOString() })));
+  }
+
+  public hasGroupKey(conversationId: string): Promise<boolean> {
+    return this.exclusive(async () => (await this.store.loadGroupKeys(conversationId)).length > 0);
+  }
+
+  public sealGroupAttributes(conversationId: string, attributes: GroupAttributes, options: { readonly rotate?: boolean } = {}): Promise<string> {
+    return this.exclusive(async () => {
+      let key = (await this.store.loadGroupKeys(conversationId))[0]?.key;
+      if (key === undefined || options.rotate === true) {
+        key = createGroupKey(this.random);
+        await this.store.addGroupKey(conversationId, { key, at: this.now().toISOString() });
+      }
+      return sealGroupAttributes(attributes, key, this.random);
+    });
+  }
+
+  public openGroupAttributes(conversationId: string, sealed: string | null | undefined): Promise<GroupAttributes | null> {
+    return this.exclusive(async () => (sealed ? openGroupAttributes(sealed, (await this.store.loadGroupKeys(conversationId)).map((entry) => entry.key)) : null));
+  }
+
   public rememberPlaintext(messageId: string, payload: ChatPayload): Promise<void> {
     return this.exclusive(() => this.store.savePlaintext(messageId, { payload, failure: null, expiresAt: null }));
   }
@@ -319,6 +353,10 @@ export class ChatCryptoClient {
       for (const deviceId of await this.store.sessionDeviceIds(userId)) await this.store.deleteSession(userId, deviceId);
       this.recipients.forget(userId);
     });
+  }
+
+  public hasDeviceIdentity(userId: string): Promise<boolean> {
+    return this.exclusive(async () => ((this.identity ?? (await this.store.loadIdentity()))?.userId ?? null) === userId);
   }
 
   public signOut(options: { readonly removeFromDirectory: boolean }): Promise<void> {

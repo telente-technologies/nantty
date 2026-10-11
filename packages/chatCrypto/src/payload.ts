@@ -1,6 +1,7 @@
 import { type Bytes, utf8Decode, utf8Encode } from "./bytes.util";
 import { type AttachmentPointer, sanitizeAttachmentPointer } from "./attachments";
 import { ChatCryptoError } from "./errors";
+import { type ChatControl, type ChatLocation, type ChatPoll, sanitizeControl, sanitizeLocation, sanitizePoll } from "./richContent";
 
 export interface ChatLinkPreview {
   readonly url: string;
@@ -22,9 +23,13 @@ export interface ChatPayload {
   readonly linkPreviewKey?: string;
   readonly sharedContent?: { readonly kind: string; readonly id: string } | null;
   readonly attachment?: AttachmentPointer | null;
+  readonly location?: ChatLocation | null;
+  readonly poll?: ChatPoll | null;
+  readonly control?: ChatControl | null;
+  readonly groupKey?: string;
 }
 
-export type ChatPayloadInput = Omit<ChatPayload, "v" | "sentAt" | "linkPreviewKey"> & { readonly sentAt?: string };
+export type ChatPayloadInput = Omit<ChatPayload, "v" | "sentAt" | "linkPreviewKey" | "groupKey"> & { readonly sentAt?: string };
 
 const maximumTextLength = 4000;
 const isString = (value: unknown): value is string => typeof value === "string";
@@ -68,5 +73,9 @@ export function decodePayload(bytes: Bytes): ChatPayload {
     linkPreview: sanitizeLinkPreview(candidate.linkPreview),
     sharedContent: shared && isString(shared.kind) && isString(shared.id) ? { kind: shared.kind, id: shared.id } : null,
     attachment: sanitizeAttachmentPointer(candidate.attachment),
+    location: sanitizeLocation(candidate.location),
+    poll: sanitizePoll(candidate.poll),
+    control: sanitizeControl(candidate.control),
+    ...(isString(candidate.groupKey) && candidate.groupKey.length === 44 ? { groupKey: candidate.groupKey } : {}),
   };
 }

@@ -22,6 +22,11 @@ export interface CachedPlaintext {
   readonly expiresAt?: string | null;
 }
 
+export interface StoredGroupKey {
+  readonly key: string;
+  readonly at: string;
+}
+
 export interface ChatCryptoStorage {
   readonly secrets: KeyValueStore;
   readonly records: KeyValueStore;
@@ -72,6 +77,15 @@ export class ProtocolStore {
 
   public loadTrust = (userId: string) => this.read<TrustRecord>(this.storage.records, `trust:${userId}`);
   public saveTrust = (userId: string, record: TrustRecord) => this.write(this.storage.records, `trust:${userId}`, record);
+
+  public loadGroupKeys = async (conversationId: string) => (await this.read<StoredGroupKey[]>(this.storage.secrets, `groupKeys:${conversationId}`)) ?? [];
+  public async addGroupKey(conversationId: string, entry: StoredGroupKey): Promise<boolean> {
+    const current = await this.loadGroupKeys(conversationId);
+    if (current.some((candidate) => candidate.key === entry.key)) return false;
+    const next = [...current, entry].sort((left, right) => right.at.localeCompare(left.at)).slice(0, 8);
+    await this.write(this.storage.secrets, `groupKeys:${conversationId}`, next);
+    return true;
+  }
 
   public loadPlaintext = (messageId: string) => this.read<CachedPlaintext>(this.storage.records, `plain:${messageId}`);
   public savePlaintext = (messageId: string, cached: CachedPlaintext) => this.write(this.storage.records, `plain:${messageId}`, cached);
