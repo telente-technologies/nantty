@@ -30,19 +30,17 @@ export interface LiveGifter {
   readonly coins: number;
 }
 
-export interface LiveBattleResult {
-  readonly id: ID;
-  readonly opponentName: string;
-  readonly coinsFor: number;
-  readonly coinsAgainst: number;
-}
-
 export interface LiveEarnings {
   readonly coins: number;
   readonly giftCount: number;
-  readonly newSubscribers: number;
   readonly topGifters: readonly LiveGifter[];
-  readonly battles: readonly LiveBattleResult[];
+}
+
+export interface HostRanking {
+  readonly globalRank: number;
+  readonly categoryRank: number | null;
+  readonly category: string | null;
+  readonly period: string;
 }
 
 export interface Money {
@@ -93,6 +91,7 @@ export interface LiveSession {
 
 export interface LiveDetail extends Omit<LiveSession, "createdAt"> {
   readonly storeId: ID | null;
+  readonly hostRanking: HostRanking | null;
 }
 
 export interface StoreOption {
@@ -148,6 +147,7 @@ export interface LiveSessionWire {
   readonly endedAt: ISODate | null;
   readonly playbackUrl: string | null;
   readonly storeId?: ID | null;
+  readonly hostRanking?: HostRanking | null;
 }
 
 export interface StreamKeyWire {
