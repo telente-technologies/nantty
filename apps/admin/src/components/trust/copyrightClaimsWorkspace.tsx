@@ -45,7 +45,7 @@ export function CopyrightClaimsWorkspace() {
   const [statusTab, setStatusTab] = useState<(typeof statusTabs)[number]["key"]>("OPEN");
   const [filters, setFilters] = useState<Omit<CopyrightClaimFilters, "status">>({});
   const queryFilters: CopyrightClaimFilters = { ...filters, status: statusTab };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchCopyrightClaims(queryFilters, signal), JSON.stringify(queryFilters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchCopyrightClaims(queryFilters, signal), JSON.stringify(queryFilters));
 
   return (
     <>
@@ -58,7 +58,7 @@ export function CopyrightClaimsWorkspace() {
           <SelectField label="Work type" isLabelHidden options={copyrightWorkTypeOptions} value={filters.workType ?? ""} onChange={(event) => setFilters((current) => ({ ...current, workType: event.target.value || undefined, cursor: undefined }))} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Copyright claims" columns={claimColumns} rows={data?.items ?? []} readRowKey={(claim) => claim.id} onRowOpen={(claim) => router.push(`/moderation/copyright/${claim.id}`)} isLoading={isLoading} readRowTone={(claim) => (claim.infringerStrikeCount >= 2 && claim.status === "PENDING" ? "caution" : null)} emptyMessage="No claims here." />
       <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters((current) => ({ ...current, cursor }))} />
     </>

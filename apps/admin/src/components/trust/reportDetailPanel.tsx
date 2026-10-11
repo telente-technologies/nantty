@@ -24,7 +24,7 @@ import styles from "./trustShared.module.css";
 const contentActionOrder: readonly ModerationAction[] = ["DISMISS", "HIDE", "RESTRICT", "REMOVE", "WARN_AUTHOR", "SUSPEND_AUTHOR", "REVOKE_AUTHOR_VERIFICATION"];
 
 export function ReportDetailPanel({ reportId, onClose, onReportChanged }: { readonly reportId: string | null; readonly onClose: () => void; readonly onReportChanged: () => void }) {
-  const { data: report, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchModerationReportDetail(reportId ?? "", signal), reportId ?? "", reportId !== null);
+  const { data: report, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchModerationReportDetail(reportId ?? "", signal), reportId ?? "", reportId !== null);
   const [pendingAction, setPendingAction] = useState<ModerationAction | null>(null);
   const { can } = useAdminPermissions();
   const { showToast } = useToast();
@@ -56,7 +56,7 @@ export function ReportDetailPanel({ reportId, onClose, onReportChanged }: { read
           : null
       }
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !report ? <LoadingBlock /> : null}
       {report ? (
         <>

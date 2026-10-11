@@ -44,7 +44,7 @@ function describeEntry(entry: SecurityTimelineEntry): string {
 }
 
 export function SecurityCasePanel({ caseId, onClose, onChanged }: { readonly caseId: string; readonly onClose: () => void; readonly onChanged: () => void }) {
-  const { data: securityCase, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchSecurityCaseDetail(caseId, signal), caseId);
+  const { data: securityCase, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchSecurityCaseDetail(caseId, signal), caseId);
   const [pendingAction, setPendingAction] = useState<SecurityCaseAction | null>(null);
   const { showToast } = useToast();
   const { can } = useAdminPermissions();
@@ -62,7 +62,7 @@ export function SecurityCasePanel({ caseId, onClose, onChanged }: { readonly cas
 
   return (
     <SidePanel isOpen onClose={onClose} width="wide" title={securityCase ? `Security case · ${humanizeConstantName(securityCase.trigger)}` : "Security case"} subtitle={securityCase ? `${securityCase.id} · opened ${formatRelativeTimeFromNow(securityCase.openedAt)}` : null} footer={footer}>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !securityCase ? <LoadingBlock /> : null}
       {securityCase ? (
         <>

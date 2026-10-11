@@ -41,7 +41,7 @@ export function AdsReviewWorkspace() {
   const [page, setPage] = useState(1);
   const [selectedAdId, setSelectedAdId] = useState<string | null>(null);
   const filters = { status: statusTab, search: search || undefined, page };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchAdsForReview(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchAdsForReview(filters, signal), JSON.stringify(filters));
   const policies = useAdminQuery((signal) => fetchAdPolicyCategories(signal), "policies");
 
   return (
@@ -53,7 +53,7 @@ export function AdsReviewWorkspace() {
           <TextField label="Search" isLabelHidden type="search" placeholder="Search headline, campaign or advertiser" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Ads waiting for review" columns={adColumns} rows={data?.items ?? []} readRowKey={(ad) => ad.id} onRowOpen={(ad) => setSelectedAdId(ad.id)} selectedRowKey={selectedAdId} isLoading={isLoading} readRowTone={(ad) => (ad.autoCheckFlags.some((flag) => flag.severity === "CRITICAL") ? "danger" : ad.autoCheckFlags.length > 0 ? "caution" : null)} emptyMessage="No ads waiting for review." />
       {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={setPage} /> : null}
       {selectedAdId ? <AdReviewPanel key={selectedAdId} adId={selectedAdId} policies={policies.data?.items ?? []} onClose={() => setSelectedAdId(null)} onAdChanged={reload} /> : null}

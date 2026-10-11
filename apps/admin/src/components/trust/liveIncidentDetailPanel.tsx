@@ -28,7 +28,7 @@ function formatOffset(offsetSeconds: number | null): string {
 }
 
 export function LiveIncidentDetailPanel({ incidentId, onClose, onIncidentChanged }: { readonly incidentId: string | null; readonly onClose: () => void; readonly onIncidentChanged: () => void }) {
-  const { data: incident, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchLiveIncidentDetail(incidentId ?? "", signal), incidentId ?? "", incidentId !== null);
+  const { data: incident, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchLiveIncidentDetail(incidentId ?? "", signal), incidentId ?? "", incidentId !== null);
   const [pendingAction, setPendingAction] = useState<LiveIncidentAction | null>(null);
   const { showToast } = useToast();
   const isOpen = incident?.status === "open";
@@ -59,7 +59,7 @@ export function LiveIncidentDetailPanel({ incidentId, onClose, onIncidentChanged
           : null
       }
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !incident ? <LoadingBlock /> : null}
       {incident ? (
         <>

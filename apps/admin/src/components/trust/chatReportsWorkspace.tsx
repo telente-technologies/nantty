@@ -49,7 +49,7 @@ export function ChatReportsWorkspace() {
   const [filters, setFilters] = useState<Omit<ChatReportQueueFilters, "status">>({});
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const queryFilters: ChatReportQueueFilters = { ...filters, status: statusTab };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchChatReports(queryFilters, signal), JSON.stringify(queryFilters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchChatReports(queryFilters, signal), JSON.stringify(queryFilters));
 
   function updateFilter(name: keyof ChatReportQueueFilters, value: string) {
     setFilters((current) => ({ ...current, [name]: value || undefined, cursor: undefined }));
@@ -68,7 +68,7 @@ export function ChatReportsWorkspace() {
           <SelectField label="Priority" isLabelHidden options={chatReportPriorityOptions} value={filters.priority ?? ""} onChange={(event) => updateFilter("priority", event.target.value)} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable
         caption="Chat reports queue"
         columns={chatReportColumns}

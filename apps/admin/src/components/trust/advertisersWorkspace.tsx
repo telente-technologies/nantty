@@ -36,7 +36,7 @@ const advertiserColumns: readonly DataTableColumn<AdvertiserAccount>[] = [
 export function AdvertisersWorkspace() {
   const [filters, setFilters] = useState<{ status?: string; search?: string; page: number }>({ page: 1 });
   const [selectedAdvertiserId, setSelectedAdvertiserId] = useState<string | null>(null);
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchAdvertiserAccounts(filters, signal), JSON.stringify(filters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchAdvertiserAccounts(filters, signal), JSON.stringify(filters));
 
   return (
     <>
@@ -48,7 +48,7 @@ export function AdvertisersWorkspace() {
           <SelectField label="Status" isLabelHidden options={[{ value: "", label: "All statuses" }, { value: "ACTIVE", label: "Active" }, { value: "SUSPENDED", label: "Suspended" }]} value={filters.status ?? ""} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value || undefined, page: 1 }))} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Advertiser accounts" columns={advertiserColumns} rows={data?.items ?? []} readRowKey={(advertiser) => advertiser.id} onRowOpen={(advertiser) => setSelectedAdvertiserId(advertiser.id)} selectedRowKey={selectedAdvertiserId} isLoading={isLoading} readRowTone={(advertiser) => (advertiser.status === "SUSPENDED" ? "danger" : advertiser.violationCount >= 2 ? "caution" : null)} emptyMessage="No advertisers match." />
       {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={(page) => setFilters((current) => ({ ...current, page }))} /> : null}
       {selectedAdvertiserId ? <AdvertiserAccountPanel key={selectedAdvertiserId} advertiserId={selectedAdvertiserId} onClose={() => setSelectedAdvertiserId(null)} onAdvertiserChanged={reload} /> : null}

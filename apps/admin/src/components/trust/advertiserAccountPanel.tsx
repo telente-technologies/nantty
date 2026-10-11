@@ -22,7 +22,7 @@ import { formatDateOnly, formatRelativeTimeFromNow } from "@/utils/formatting.ut
 import styles from "./adsReview.module.css";
 
 export function AdvertiserAccountPanel({ advertiserId, onClose, onAdvertiserChanged }: { readonly advertiserId: string; readonly onClose: () => void; readonly onAdvertiserChanged: () => void }) {
-  const { data: advertiser, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchAdvertiserAccountDetail(advertiserId, signal), advertiserId);
+  const { data: advertiser, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchAdvertiserAccountDetail(advertiserId, signal), advertiserId);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const { can } = useAdminPermissions();
   const { showToast } = useToast();
@@ -46,7 +46,7 @@ export function AdvertiserAccountPanel({ advertiserId, onClose, onAdvertiserChan
       subtitle={advertiser ? `${advertiser.id} · since ${formatDateOnly(advertiser.createdAt)}` : null}
       footer={advertiser && can("advertisers:manage") ? <Button variant={nextAction === "suspend" ? "quietDanger" : "primary"} onClick={() => setIsConfirmOpen(true)}>{nextAction === "suspend" ? "Suspend advertiser" : "Reinstate advertiser"}</Button> : null}
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !advertiser ? <LoadingBlock /> : null}
       {advertiser ? (
         <>

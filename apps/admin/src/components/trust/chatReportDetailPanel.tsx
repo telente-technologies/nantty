@@ -25,7 +25,7 @@ import evidenceStyles from "./chatEvidence.module.css";
 import styles from "./trustShared.module.css";
 
 export function ChatReportDetailPanel({ reportId, onClose, onReportChanged }: { readonly reportId: string | null; readonly onClose: () => void; readonly onReportChanged: () => void }) {
-  const { data: report, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchChatReportDetail(reportId ?? "", signal), reportId ?? "", reportId !== null);
+  const { data: report, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchChatReportDetail(reportId ?? "", signal), reportId ?? "", reportId !== null);
   const [pendingAction, setPendingAction] = useState<ChatReportAction | null>(null);
   const { can } = useAdminPermissions();
   const { showToast } = useToast();
@@ -60,7 +60,7 @@ export function ChatReportDetailPanel({ reportId, onClose, onReportChanged }: { 
           : null
       }
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !report ? <LoadingBlock /> : null}
       {report ? (
         <>

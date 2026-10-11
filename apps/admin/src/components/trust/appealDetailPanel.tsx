@@ -31,7 +31,7 @@ function describeOverturnConsequences(appeal: AppealDetail): string[] {
 }
 
 export function AppealDetailPanel({ appealId, onClose, onAppealChanged }: { readonly appealId: string; readonly onClose: () => void; readonly onAppealChanged: () => void }) {
-  const { data: appeal, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchModerationAppealDetail(appealId, signal), appealId);
+  const { data: appeal, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchModerationAppealDetail(appealId, signal), appealId);
   const [pendingOutcome, setPendingOutcome] = useState<AppealOutcome | null>(null);
   const { showToast } = useToast();
   const decision = useAdminMutation((input: { outcome: AppealOutcome; reason: string }) => decideModerationAppeal(appealId, input.outcome, input.reason));
@@ -61,7 +61,7 @@ export function AppealDetailPanel({ appealId, onClose, onAppealChanged }: { read
         </>
       ) : null}
     >
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       {isLoading && !appeal ? <LoadingBlock /> : null}
       {appeal ? (
         <>

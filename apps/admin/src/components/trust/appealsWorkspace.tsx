@@ -43,7 +43,7 @@ export function AppealsWorkspace() {
   const [filters, setFilters] = useState<Omit<AppealQueueFilters, "status">>({});
   const [selectedAppealId, setSelectedAppealId] = useState<string | null>(null);
   const queryFilters: AppealQueueFilters = { ...filters, status: statusTab };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchModerationAppeals(queryFilters, signal), JSON.stringify(queryFilters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchModerationAppeals(queryFilters, signal), JSON.stringify(queryFilters));
 
   return (
     <>
@@ -55,7 +55,7 @@ export function AppealsWorkspace() {
           <SelectField label="Decision type" isLabelHidden options={appealDecisionTypeOptions} value={filters.decisionType ?? ""} onChange={(event) => setFilters((current) => ({ ...current, decisionType: event.target.value || undefined, cursor: undefined }))} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Appeals queue" columns={appealColumns} rows={data?.items ?? []} readRowKey={(appeal) => appeal.id} onRowOpen={(appeal) => setSelectedAppealId(appeal.id)} selectedRowKey={selectedAppealId} isLoading={isLoading} emptyMessage="No appeals waiting." />
       <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters((current) => ({ ...current, cursor }))} />
       {selectedAppealId ? <AppealDetailPanel key={selectedAppealId} appealId={selectedAppealId} onClose={() => setSelectedAppealId(null)} onAppealChanged={reload} /> : null}

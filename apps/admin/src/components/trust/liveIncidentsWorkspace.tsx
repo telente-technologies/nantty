@@ -60,7 +60,7 @@ export function LiveIncidentsWorkspace() {
   const [filters, setFilters] = useState<Omit<LiveIncidentQueueFilters, "status">>({ page: 1 });
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const queryFilters: LiveIncidentQueueFilters = { ...filters, status: statusTab };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchLiveIncidents(queryFilters, signal), JSON.stringify(queryFilters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchLiveIncidents(queryFilters, signal), JSON.stringify(queryFilters));
 
   return (
     <>
@@ -72,7 +72,7 @@ export function LiveIncidentsWorkspace() {
           <SelectField label="Priority" isLabelHidden options={priorityOptions} value={filters.priority ?? ""} onChange={(event) => setFilters((current) => ({ ...current, priority: event.target.value || undefined, page: 1 }))} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable
         caption="Live incidents queue"
         columns={columns}

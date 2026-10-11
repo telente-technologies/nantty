@@ -45,7 +45,7 @@ export function ReportsWorkspace() {
   const [filters, setFilters] = useState<Omit<ReportQueueFilters, "status">>({});
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const queryFilters: ReportQueueFilters = { ...filters, status: statusTab };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchModerationReports(queryFilters, signal), JSON.stringify(queryFilters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchModerationReports(queryFilters, signal), JSON.stringify(queryFilters));
 
   function updateFilter(name: keyof ReportQueueFilters, value: string) {
     setFilters((current) => ({ ...current, [name]: value || undefined, cursor: undefined }));
@@ -63,7 +63,7 @@ export function ReportsWorkspace() {
           <SelectField label="Priority" isLabelHidden options={reportPriorityOptions} value={filters.priority ?? ""} onChange={(event) => updateFilter("priority", event.target.value)} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable
         caption="Reports queue"
         columns={reportColumns}

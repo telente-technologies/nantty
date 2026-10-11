@@ -20,7 +20,7 @@ import { ModeratedTargetPreviewCard } from "./moderatedTargetPreview";
 
 export function CopyrightClaimDetailWorkspace({ claimId }: { readonly claimId: string }) {
   const { data: claim, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchCopyrightClaimDetail(claimId, signal), claimId);
-  if (errorMessage) return <ErrorBlock message={errorMessage} onRetry={reload} />;
+  if (errorMessage) return <ErrorBlock variant="section" message={errorMessage} onRetry={reload} />;
   if (isLoading || !claim) return <LoadingBlock lines={8} />;
 
   return (

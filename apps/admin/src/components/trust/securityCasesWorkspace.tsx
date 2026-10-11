@@ -39,7 +39,7 @@ export function SecurityCasesWorkspace() {
   const [filters, setFilters] = useState<Omit<SecurityCaseFilters, "status">>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const queryFilters: SecurityCaseFilters = { ...filters, status };
-  const { data, errorMessage, isLoading, reload } = useAdminQuery((signal) => fetchSecurityCases(queryFilters, signal), JSON.stringify(queryFilters));
+  const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchSecurityCases(queryFilters, signal), JSON.stringify(queryFilters));
   return (
     <>
       <PageHeader area="Trust & safety" title="Security cases" description="Accounts flagged for probing other people's data or behaving like bots. Automation challenges and can suspend temporarily; bans and deletions are decided here, with your authenticator code." />
@@ -50,7 +50,7 @@ export function SecurityCasesWorkspace() {
           <SelectField label="Severity" isLabelHidden options={severityOptions} value={filters.severity ?? ""} onChange={(event) => setFilters({ ...filters, severity: (event.target.value || undefined) as SecurityCaseSeverity | undefined, cursor: undefined })} />
         </div>
       </Toolbar>
-      {errorMessage ? <ErrorBlock message={errorMessage} onRetry={reload} /> : null}
+      {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
       <DataTable caption="Security cases" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} readRowTone={(item) => (item.autoSuspended && item.status === "open" ? "danger" : item.severity === "high" ? "caution" : null)} emptyMessage={status === "open" ? "No security cases waiting." : "Nothing here yet."} />
       <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters({ ...filters, cursor })} />
       {selectedId ? <SecurityCasePanel key={selectedId} caseId={selectedId} onClose={() => setSelectedId(null)} onChanged={reload} /> : null}
