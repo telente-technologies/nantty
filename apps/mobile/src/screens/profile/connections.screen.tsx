@@ -14,6 +14,7 @@ import { Chip } from "@/components/ui/chip";
 import { EmptyState } from "@/components/ui/emptyState";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { ErrorState } from "@/components/ui/errorState";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
@@ -151,6 +152,7 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
           )
         }
       />
+      <KeyboardSpacer restingHeight={0} />
       <ConnectionSortSheet
         visible={isSortSheetOpen}
         value={{ sort: preference.sort, filter: activeFilter }}

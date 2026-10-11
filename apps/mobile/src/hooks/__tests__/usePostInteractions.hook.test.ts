@@ -9,6 +9,7 @@ import { usePostInteractions } from "../usePostInteractions.hook";
 
 const mockLikePost = jest.fn(async (_postId: string) => undefined);
 const mockRepostPost = jest.fn(async (_postId: string, _text?: string) => ({ id: "repost-1", liked: false, likes: 0, reposts: 0 }));
+const mockUndoRepost = jest.fn(async (_postId: string) => undefined);
 const mockSignedIn = { current: true };
 const mockOpenSignInPrompt = jest.fn();
 
@@ -17,6 +18,7 @@ jest.mock("@/services/content/posts.service", () => ({
     likePost: (id: string) => mockLikePost(id),
     unlikePost: jest.fn(async () => undefined),
     repostPost: (id: string, text?: string) => mockRepostPost(id, text),
+    undoRepost: (id: string) => mockUndoRepost(id),
     followPostAuthor: jest.fn(async () => undefined),
     recordPostShare: jest.fn(async () => undefined),
   },
@@ -94,5 +96,20 @@ describe("usePostInteractions", () => {
     });
     expect(profilePost().reposts).toBe(2);
     expect(mockRepostPost).toHaveBeenCalledWith("post-1", undefined);
+  });
+
+  it("undoes a plain repost once and never double-counts a second tap", async () => {
+    const { result } = await renderInteractions();
+    await act(async () => {
+      await result.current.resharePost(post);
+      await result.current.resharePost(post);
+    });
+    expect(profilePost()).toMatchObject({ reposted: true, reposts: 2 });
+    await act(async () => {
+      await result.current.undoRepost(post);
+      await result.current.undoRepost(post);
+    });
+    expect(profilePost()).toMatchObject({ reposted: false, reposts: 1 });
+    expect(mockUndoRepost).toHaveBeenCalledWith("post-1");
   });
 });

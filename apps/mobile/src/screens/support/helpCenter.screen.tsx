@@ -6,6 +6,7 @@ import { CaretRight24Icon, Headset24Icon } from "@/components/icons";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -85,6 +86,7 @@ export function HelpCenterScreen({ navigation }: MainScreenProps<"HelpCenter">) 
             : <Text align="center" color={colors.textSubtle}>{isSearching ? "No topics match your search. Try other words or contact support." : "No help topics yet."}</Text>
         }
       />
+      <KeyboardSpacer restingHeight={0} />
     </Screen>
   );
 }

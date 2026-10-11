@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { CaretRight24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
 import { Screen } from "@/components/ui/screen";
@@ -63,7 +64,29 @@ export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
   return (
     <Screen>
       <Header title="Withdraw" />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareForm
+        contentContainerStyle={styles.content}
+        footerStyle={styles.footer}
+        footer={
+          <>
+            {requestWithdrawal.isError && !(requestWithdrawal.error instanceof StepUpCancelledError) ? (
+              <Text size={typeScale.xs} lineHeight={14.4} color={colors.error}>
+                {requestWithdrawal.error.message}
+              </Text>
+            ) : null}
+            {payoutsLocked ? (
+              <Button title="Finish payout setup" onPress={() => navigation.navigate("PayoutSetup")} />
+            ) : (
+              <Button
+                title="Withdraw"
+                disabled={!available || !payoutAccountId || amountMinor <= 0 || exceedsBalance}
+                loading={requestWithdrawal.isPending}
+                onPress={() => requestWithdrawal.mutate()}
+              />
+            )}
+          </>
+        }
+      >
         <Text size={typeScale.md} lineHeight={16.8} color={colors.textMuted}>
           Available: {available ? formatMoneyForDisplay(available) : "…"}
         </Text>
@@ -131,29 +154,15 @@ export function WithdrawScreen({ navigation }: MainScreenProps<"Withdraw">) {
             <CaretRight24Icon />
           </Pressable>
         </View>
-        {requestWithdrawal.isError && !(requestWithdrawal.error instanceof StepUpCancelledError) ? (
-          <Text size={typeScale.xs} lineHeight={14.4} color={colors.error}>
-            {requestWithdrawal.error.message}
-          </Text>
-        ) : null}
-        {payoutsLocked ? (
-          <Button title="Finish payout setup" onPress={() => navigation.navigate("PayoutSetup")} />
-        ) : (
-          <Button
-            title="Withdraw"
-            disabled={!available || !payoutAccountId || amountMinor <= 0 || exceedsBalance}
-            loading={requestWithdrawal.isPending}
-            onPress={() => requestWithdrawal.mutate()}
-          />
-        )}
-      </ScrollView>
+      </KeyboardAwareForm>
       {stepUpSheet}
     </Screen>
   );
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  content: { paddingHorizontal: spacing[4], paddingTop: spacing[6], paddingBottom: spacing[8], gap: spacing[4] },
+  content: { paddingHorizontal: spacing[4], paddingTop: spacing[6], paddingBottom: spacing[6], gap: spacing[4] },
+  footer: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[3], gap: spacing[2] },
   locked: { backgroundColor: colors.cautionTint, borderRadius: 12, padding: 14, gap: spacing[1] },
   feeBox: { gap: spacing[1] },
   accounts: { backgroundColor: colors.surface, borderRadius: 12, overflow: "hidden" },

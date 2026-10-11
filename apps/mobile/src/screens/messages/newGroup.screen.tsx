@@ -8,6 +8,7 @@ import { pickPhotosAndVideosFromLibrary } from "@/components/create/pickMedia.ut
 import { Cancel20Icon, CameraBolt24Icon } from "@/components/icons";
 import { UploadProgressBar } from "@/components/media/uploadProgressBar";
 import { Button } from "@/components/ui/button";
+import { KeyboardStickyFooter } from "@/components/ui/keyboardStickyFooter";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -105,6 +106,8 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
         ) : (
           <GroupMemberPicker selectedPeople={selectedPeople} onToggleSelectedPerson={toggleSelectedPerson} />
         )}
+      </View>
+      <KeyboardStickyFooter style={styles.footer} backgroundColor={colors.surface}>
         {createConversation.error ? (
           <Text size={13} lineHeight={16.9} color={colors.error}>
             {describeActionFailure(createConversation.error)}
@@ -116,14 +119,15 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
           loading={createConversation.isPending}
           onPress={() => createConversation.mutate()}
         />
-      </View>
+      </KeyboardStickyFooter>
     </Screen>
   );
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   header: { height: 49, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 24 },
-  body: { flex: 1, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16, gap: 16 },
+  body: { flex: 1, paddingHorizontal: 16, paddingTop: 16, gap: 16 },
+  footer: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 16, gap: 12 },
   identityRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   photo: { width: 56, height: 56, borderRadius: 28, backgroundColor: colors.skeleton, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   nameInput: {

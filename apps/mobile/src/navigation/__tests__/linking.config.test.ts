@@ -36,3 +36,10 @@ test("widget deep links never fall through to a username profile", () => {
   expect(focusedRouteNames("orders")).toEqual(["Orders"]);
   expect(focusedRouteNames("creator")).toEqual(["CreatorProgram"]);
 });
+
+test("a quote deep link opens the normal composer with the quoted post attached", () => {
+  const state = getStateFromPath("create/post?quotePostId=post_42", deepLinking.config) as { routes: { name: string; params?: Record<string, unknown> }[] };
+  const route = state.routes.at(-1)!;
+  expect(route.name).toBe("CreatePost");
+  expect(route.params).toMatchObject({ mode: "post", quotePostId: "post_42" });
+});

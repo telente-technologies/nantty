@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { BusinessLabel } from "@/components/chat/businessLabel";
 import { describeConversationForDisplay } from "@/components/chat/conversationDisplay.util";
@@ -14,6 +14,7 @@ import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import { ArrowLeft24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
@@ -132,7 +133,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
       ) : conversation.isPending ? (
         <ListSkeleton rows={5} />
       ) : (
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" refreshControl={refreshControl}>
+      <KeyboardAwareForm contentContainerStyle={styles.content} refreshControl={refreshControl}>
         <View style={styles.encryptionNotice} accessibilityRole="text">
           <IconRow icon={<LockSimple24Icon size={14} color={colors.textMuted} />} justify="center" gap={6}>
             <Text size={typeScale.xs} lineHeight={17} color={colors.textMuted} align="center" style={{ flexShrink: 1 }}>
@@ -275,7 +276,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
         {display && (display.isGroup || display.isChannel) ? (
           <Button title={display.isChannel ? "Report channel" : "Report group"} variant="outline" onPress={report.reportGroup} />
         ) : null}
-      </ScrollView>
+      </KeyboardAwareForm>
       )}
       {report.reportSheet}
     </Screen>

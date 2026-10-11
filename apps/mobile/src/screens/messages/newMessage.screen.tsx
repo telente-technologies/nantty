@@ -5,6 +5,7 @@ import { PersonRow } from "@/components/chat/personRow";
 import { useDebouncedSearchText } from "@/components/create/settings/searchField";
 import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Cancel20Icon, MagnifyingGlass20Icon } from "@/components/icons";
 import { Screen } from "@/components/ui/screen";
@@ -64,6 +65,7 @@ export function NewMessageScreen({ navigation }: MainScreenProps<"NewMessage">) 
           <PersonRow person={item} onPress={() => navigation.replace("Chat", { userId: item.id, name: item.name })} />
         )}
       />
+      <KeyboardSpacer restingHeight={0} />
     </Screen>
   );
 }

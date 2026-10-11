@@ -33,7 +33,7 @@ export function buildSponsoredPostView(ad: DecidedAd, now: Date): PostView {
   }));
   return {
     id: `ad-${ad.adId}`, kind: "post", author: { id: creative.source.id, name: creative.identity.name, username: creative.identity.handle, avatarUrl: creative.identity.avatarUrl, verified: creative.identity.verifiedBusiness, isCreator: false }, postedAs: null,
-    createdAt: now.toISOString(), text: creative.primaryText, media, likes: 0, comments: 0, reposts: 0, views: 0, liked: false, bookmarked: false, isSaved: false, saveCount: 0,
+    createdAt: now.toISOString(), text: creative.primaryText, media, likes: 0, comments: 0, reposts: 0, reposted: false, views: 0, liked: false, bookmarked: false, isSaved: false, saveCount: 0,
     isFollowingAuthor: false, shares: 0, durationSeconds: null, friendsLiked: null, products: [], sponsored: toSponsoredPlacement(ad), topics: [], location: null, slideshow: null,
     subscriberOnly: false, viewerHasAccess: true, resharedFrom: null, resharedFromUnavailable: false, isQuote: false, quotes: 0, replyPolicy: "off", viewerCanReply: false,
     viewerCanDownload: false, replyRestriction: null, sensitive: null, isAiGenerated: false, isPinned: false, pinnedAt: null, pinnedCommentId: null, viewerNotificationsMuted: false, mentions: [], linkPreview: null, taggedUsers: [], taggedUsersCount: 0, look: null,
