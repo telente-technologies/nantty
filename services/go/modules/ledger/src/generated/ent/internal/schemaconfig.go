@@ -14,6 +14,7 @@ type SchemaConfig struct {
 	ReconciliationBreak  string // ReconciliationBreak table.
 	ReconciliationRun    string // ReconciliationRun table.
 	SellerCreditMaturity string // SellerCreditMaturity table.
+	StepUpConsumption    string // StepUpConsumption table.
 }
 
 type schemaCtxKey struct{}

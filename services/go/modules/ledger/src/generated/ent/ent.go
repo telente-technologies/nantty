@@ -15,6 +15,7 @@ import (
 	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationrun"
 	"zudomart/modules/ledger/src/generated/ent/sellercreditmaturity"
+	"zudomart/modules/ledger/src/generated/ent/stepupconsumption"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -86,6 +87,7 @@ func checkColumn(t, c string) error {
 			reconciliationbreak.Table:  reconciliationbreak.ValidColumn,
 			reconciliationrun.Table:    reconciliationrun.ValidColumn,
 			sellercreditmaturity.Table: sellercreditmaturity.ValidColumn,
+			stepupconsumption.Table:    stepupconsumption.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

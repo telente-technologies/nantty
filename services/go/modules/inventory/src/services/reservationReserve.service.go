@@ -61,6 +61,13 @@ func (service ReservationService) reserveInTransaction(ctx context.Context, tx *
 	if len(existing) > 0 {
 		return verifyExistingReservationMatches(existing, lines)
 	}
+	attempt, alreadyFulfilled, err := nextReservationAttempt(ctx, tx, request.Reference)
+	if err != nil {
+		return err
+	}
+	if alreadyFulfilled {
+		return inventoryerrors.ReservationConflict
+	}
 	variantIds := make([]uuid.UUID, 0, len(lines))
 	for _, line := range lines {
 		variantIds = append(variantIds, line.VariantId)
@@ -70,7 +77,7 @@ func (service ReservationService) reserveInTransaction(ctx context.Context, tx *
 		return err
 	}
 	for _, line := range lines {
-		if err := service.reserveLineInTransaction(ctx, tx, levels, line, request); err != nil {
+		if err := service.reserveLineInTransaction(ctx, tx, levels, line, request, attempt); err != nil {
 			return err
 		}
 	}
@@ -79,7 +86,7 @@ func (service ReservationService) reserveInTransaction(ctx context.Context, tx *
 	})
 }
 
-func (service ReservationService) reserveLineInTransaction(ctx context.Context, tx *ent.Tx, levels []*ent.StockLevel, line commerceports.StockLine, request commerceports.ReserveStockRequest) error {
+func (service ReservationService) reserveLineInTransaction(ctx context.Context, tx *ent.Tx, levels []*ent.StockLevel, line commerceports.StockLine, request commerceports.ReserveStockRequest, attempt int) error {
 	byId := map[uuid.UUID]*ent.StockLevel{}
 	capacities := []LevelCapacity{}
 	for _, level := range levels {
@@ -96,12 +103,12 @@ func (service ReservationService) reserveLineInTransaction(ctx context.Context, 
 		if _, err := ApplyStockChangeInTransaction(ctx, tx, byId[allocation.LevelId], StockChange{
 			StoreId: line.StoreId, VariantId: line.VariantId, LocationId: allocation.LocationId, ReservedDelta: allocation.Quantity,
 			Kind: enums.MovementOrderReserved, Reference: request.Reference, ActorName: "checkout",
-			DedupeKey: MovementDedupeKey(enums.MovementOrderReserved, request.Reference, line.VariantId, allocation.LocationId),
+			DedupeKey: MovementDedupeKey(enums.MovementOrderReserved, reservationMovementReference(request.Reference, attempt), line.VariantId, allocation.LocationId),
 		}); err != nil {
 			return err
 		}
 		create := tx.StockReservation.Create().SetReference(request.Reference).SetStoreID(line.StoreId).SetVariantID(line.VariantId).
-			SetLocationID(allocation.LocationId).SetQuantity(allocation.Quantity)
+			SetLocationID(allocation.LocationId).SetQuantity(allocation.Quantity).SetAttempt(attempt)
 		if !request.ExpiresAt.IsZero() {
 			create.SetExpiresAt(request.ExpiresAt)
 		}

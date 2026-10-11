@@ -13,7 +13,7 @@ import (
 	platformevents "zudomart/platform/events"
 )
 
-func TestPoisonEventIsRetriedWithBackoffThenDeadLetteredWithoutBlockingOthers(t *testing.T) {
+func TestStuckEventKeepsRetryingPastTheAlertThresholdAndIsDeliveredWhenTheBrokerRecovers(t *testing.T) {
 	database := moneytesting.OpenTestDatabaseOrSkip(t)
 	schema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "outbox", migrations.Files)
 	table := OutboxTable{Schema: schema, Source: "zudomart.test"}
@@ -32,8 +32,9 @@ func TestPoisonEventIsRetriedWithBackoffThenDeadLetteredWithoutBlockingOthers(t 
 	clock := time.Now()
 	store := OutboxRelayStore{Database: database, Table: table, Now: func() time.Time { return clock }}
 	delivered := map[string]int{}
+	brokerDown := true
 	publish := func(_ context.Context, batch []platformevents.OutboxEvent) error {
-		if batch[0].Subject == "poison" {
+		if batch[0].Subject == "poison" && brokerDown {
 			return errors.New("broker rejected the message")
 		}
 		delivered[batch[0].Subject]++
@@ -46,23 +47,27 @@ func TestPoisonEventIsRetriedWithBackoffThenDeadLetteredWithoutBlockingOthers(t 
 	if published, _ := store.PublishPendingOutboxEventsInTransaction(ctx, 10, publish); published != 0 {
 		t.Fatalf("backoff not honoured: published %d", published)
 	}
-	for attempt := 2; attempt <= MaximumPublishAttemptsBeforeDeadLetter; attempt++ {
+	for attempt := 2; attempt <= 3*PublishAttemptsBeforeAlert; attempt++ {
 		clock = clock.Add(maximumRetryBackoff + time.Second)
 		if _, err := store.PublishPendingOutboxEventsInTransaction(ctx, 10, publish); err != nil {
 			t.Fatal(err)
 		}
 	}
 	var attempts int
-	var deadLettered sql.NullTime
-	if err := database.QueryRow("SELECT attempt_count, dead_lettered_at FROM "+table.qualifiedName()+" WHERE subject = 'poison'").Scan(&attempts, &deadLettered); err != nil {
+	var alerted, publishedAt sql.NullTime
+	if err := database.QueryRow("SELECT attempt_count, dead_lettered_at, published_at FROM "+table.qualifiedName()+" WHERE subject = 'poison'").Scan(&attempts, &alerted, &publishedAt); err != nil {
 		t.Fatal(err)
 	}
-	if attempts != MaximumPublishAttemptsBeforeDeadLetter || !deadLettered.Valid {
-		t.Fatalf("attempts=%d deadLettered=%v", attempts, deadLettered.Valid)
+	if attempts != 3*PublishAttemptsBeforeAlert || !alerted.Valid || publishedAt.Valid {
+		t.Fatalf("a stuck event keeps retrying and is flagged for alerting: attempts=%d alerted=%v published=%v", attempts, alerted.Valid, publishedAt.Valid)
 	}
-	clock = clock.Add(time.Hour)
-	if published, _ := store.PublishPendingOutboxEventsInTransaction(ctx, 10, publish); published != 0 || delivered["healthy-1"] != 1 {
-		t.Fatalf("dead-lettered or delivered rows were picked up again")
+	if backoff := RetryBackoffAfterAttempts(attempts); backoff != maximumRetryBackoff {
+		t.Fatalf("backoff must be capped, got %s", backoff)
+	}
+	brokerDown = false
+	clock = clock.Add(maximumRetryBackoff + time.Second)
+	if published, err := store.PublishPendingOutboxEventsInTransaction(ctx, 10, publish); err != nil || published != 1 || delivered["poison"] != 1 || delivered["healthy-1"] != 1 {
+		t.Fatalf("once the broker recovers the stuck event is delivered, never dropped: published=%d err=%v delivered=%v", published, err, delivered)
 	}
 }
 

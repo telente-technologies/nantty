@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -13,8 +14,8 @@ import (
 )
 
 const (
-	MaximumPublishAttemptsBeforeDeadLetter = 10
-	maximumRetryBackoff                    = 15 * time.Minute
+	PublishAttemptsBeforeAlert = 10
+	maximumRetryBackoff        = 15 * time.Minute
 )
 
 type OutboxTable struct {
@@ -44,6 +45,7 @@ type OutboxRelayStore struct {
 	Database *sql.DB
 	Table    OutboxTable
 	Now      func() time.Time
+	Logger   *slog.Logger
 }
 
 type pendingOutboxRow struct {
@@ -80,7 +82,7 @@ func (store OutboxRelayStore) PublishPendingOutboxEventsInTransaction(ctx contex
 func (store OutboxRelayStore) lockDueRows(ctx context.Context, transaction *sql.Tx, limit int, now time.Time) ([]pendingOutboxRow, error) {
 	result, err := transaction.QueryContext(ctx,
 		"SELECT id, event_type, subject, payload, attempt_count FROM "+store.Table.qualifiedName()+
-			" WHERE published_at IS NULL AND dead_lettered_at IS NULL AND (next_attempt_at IS NULL OR next_attempt_at <= $1)"+
+			" WHERE published_at IS NULL AND (next_attempt_at IS NULL OR next_attempt_at <= $1)"+
 			" ORDER BY created_at LIMIT $2 FOR UPDATE SKIP LOCKED", now, limit)
 	if err != nil {
 		return nil, err
@@ -103,14 +105,21 @@ func (store OutboxRelayStore) recordFailedAttempt(ctx context.Context, transacti
 	if len(message) > 1000 {
 		message = message[:1000]
 	}
-	var deadLetteredAt *time.Time
-	if attempts >= MaximumPublishAttemptsBeforeDeadLetter {
-		deadLetteredAt = &now
+	if attempts == PublishAttemptsBeforeAlert || (attempts > PublishAttemptsBeforeAlert && attempts%PublishAttemptsBeforeAlert == 0) {
+		store.logger().ErrorContext(ctx, "money outbox event still unpublished; it keeps retrying and is never dropped",
+			"alert", "moneyOutboxStuck", "outbox", store.Table.Schema, "eventId", row.event.Id, "eventType", row.event.EventType, "attempts", attempts, "error", message)
 	}
 	_, err := transaction.ExecContext(ctx,
-		"UPDATE "+store.Table.qualifiedName()+" SET attempt_count = $1, last_error = $2, next_attempt_at = $3, dead_lettered_at = $4 WHERE id = $5",
-		attempts, message, now.Add(RetryBackoffAfterAttempts(attempts)), deadLetteredAt, row.event.Id)
+		"UPDATE "+store.Table.qualifiedName()+" SET attempt_count = $1, last_error = $2, next_attempt_at = $3, dead_lettered_at = CASE WHEN $4::boolean THEN COALESCE(dead_lettered_at, $5) ELSE dead_lettered_at END WHERE id = $6",
+		attempts, message, now.Add(RetryBackoffAfterAttempts(attempts)), attempts >= PublishAttemptsBeforeAlert, now, row.event.Id)
 	return err
+}
+
+func (store OutboxRelayStore) logger() *slog.Logger {
+	if store.Logger != nil {
+		return store.Logger
+	}
+	return slog.Default()
 }
 
 func RetryBackoffAfterAttempts(attempts int) time.Duration {

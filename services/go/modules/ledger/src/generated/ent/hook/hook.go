@@ -92,6 +92,18 @@ func (f SellerCreditMaturityFunc) Mutate(ctx context.Context, m ent.Mutation) (e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SellerCreditMaturityMutation", m)
 }
 
+// The StepUpConsumptionFunc type is an adapter to allow the use of ordinary
+// function as StepUpConsumption mutator.
+type StepUpConsumptionFunc func(context.Context, *ent.StepUpConsumptionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StepUpConsumptionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StepUpConsumptionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StepUpConsumptionMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

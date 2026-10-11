@@ -18,6 +18,7 @@ import (
 	"zudomart/modules/ledger/src/generated/ent/reconciliationbreak"
 	"zudomart/modules/ledger/src/generated/ent/reconciliationrun"
 	"zudomart/modules/ledger/src/generated/ent/sellercreditmaturity"
+	"zudomart/modules/ledger/src/generated/ent/stepupconsumption"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -48,6 +49,8 @@ type Client struct {
 	ReconciliationRun *ReconciliationRunClient
 	// SellerCreditMaturity is the client for interacting with the SellerCreditMaturity builders.
 	SellerCreditMaturity *SellerCreditMaturityClient
+	// StepUpConsumption is the client for interacting with the StepUpConsumption builders.
+	StepUpConsumption *StepUpConsumptionClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -66,6 +69,7 @@ func (c *Client) init() {
 	c.ReconciliationBreak = NewReconciliationBreakClient(c.config)
 	c.ReconciliationRun = NewReconciliationRunClient(c.config)
 	c.SellerCreditMaturity = NewSellerCreditMaturityClient(c.config)
+	c.StepUpConsumption = NewStepUpConsumptionClient(c.config)
 }
 
 type (
@@ -167,6 +171,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ReconciliationBreak:  NewReconciliationBreakClient(cfg),
 		ReconciliationRun:    NewReconciliationRunClient(cfg),
 		SellerCreditMaturity: NewSellerCreditMaturityClient(cfg),
+		StepUpConsumption:    NewStepUpConsumptionClient(cfg),
 	}, nil
 }
 
@@ -193,6 +198,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ReconciliationBreak:  NewReconciliationBreakClient(cfg),
 		ReconciliationRun:    NewReconciliationRunClient(cfg),
 		SellerCreditMaturity: NewSellerCreditMaturityClient(cfg),
+		StepUpConsumption:    NewStepUpConsumptionClient(cfg),
 	}, nil
 }
 
@@ -224,6 +230,7 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.JournalEntry, c.JournalLine, c.LedgerAccount, c.OutboxEvent,
 		c.ReconciliationBreak, c.ReconciliationRun, c.SellerCreditMaturity,
+		c.StepUpConsumption,
 	} {
 		n.Use(hooks...)
 	}
@@ -235,6 +242,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.JournalEntry, c.JournalLine, c.LedgerAccount, c.OutboxEvent,
 		c.ReconciliationBreak, c.ReconciliationRun, c.SellerCreditMaturity,
+		c.StepUpConsumption,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -257,6 +265,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ReconciliationRun.mutate(ctx, m)
 	case *SellerCreditMaturityMutation:
 		return c.SellerCreditMaturity.mutate(ctx, m)
+	case *StepUpConsumptionMutation:
+		return c.StepUpConsumption.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -1309,15 +1319,148 @@ func (c *SellerCreditMaturityClient) mutate(ctx context.Context, m *SellerCredit
 	}
 }
 
+// StepUpConsumptionClient is a client for the StepUpConsumption schema.
+type StepUpConsumptionClient struct {
+	config
+}
+
+// NewStepUpConsumptionClient returns a client for the StepUpConsumption from the given config.
+func NewStepUpConsumptionClient(c config) *StepUpConsumptionClient {
+	return &StepUpConsumptionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `stepupconsumption.Hooks(f(g(h())))`.
+func (c *StepUpConsumptionClient) Use(hooks ...Hook) {
+	c.hooks.StepUpConsumption = append(c.hooks.StepUpConsumption, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `stepupconsumption.Intercept(f(g(h())))`.
+func (c *StepUpConsumptionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StepUpConsumption = append(c.inters.StepUpConsumption, interceptors...)
+}
+
+// Create returns a builder for creating a StepUpConsumption entity.
+func (c *StepUpConsumptionClient) Create() *StepUpConsumptionCreate {
+	mutation := newStepUpConsumptionMutation(c.config, OpCreate)
+	return &StepUpConsumptionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StepUpConsumption entities.
+func (c *StepUpConsumptionClient) CreateBulk(builders ...*StepUpConsumptionCreate) *StepUpConsumptionCreateBulk {
+	return &StepUpConsumptionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StepUpConsumptionClient) MapCreateBulk(slice any, setFunc func(*StepUpConsumptionCreate, int)) *StepUpConsumptionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StepUpConsumptionCreateBulk{err: fmt.Errorf("calling to StepUpConsumptionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StepUpConsumptionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StepUpConsumptionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StepUpConsumption.
+func (c *StepUpConsumptionClient) Update() *StepUpConsumptionUpdate {
+	mutation := newStepUpConsumptionMutation(c.config, OpUpdate)
+	return &StepUpConsumptionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StepUpConsumptionClient) UpdateOne(_m *StepUpConsumption) *StepUpConsumptionUpdateOne {
+	mutation := newStepUpConsumptionMutation(c.config, OpUpdateOne, withStepUpConsumption(_m))
+	return &StepUpConsumptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StepUpConsumptionClient) UpdateOneID(id uuid.UUID) *StepUpConsumptionUpdateOne {
+	mutation := newStepUpConsumptionMutation(c.config, OpUpdateOne, withStepUpConsumptionID(id))
+	return &StepUpConsumptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StepUpConsumption.
+func (c *StepUpConsumptionClient) Delete() *StepUpConsumptionDelete {
+	mutation := newStepUpConsumptionMutation(c.config, OpDelete)
+	return &StepUpConsumptionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StepUpConsumptionClient) DeleteOne(_m *StepUpConsumption) *StepUpConsumptionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StepUpConsumptionClient) DeleteOneID(id uuid.UUID) *StepUpConsumptionDeleteOne {
+	builder := c.Delete().Where(stepupconsumption.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StepUpConsumptionDeleteOne{builder}
+}
+
+// Query returns a query builder for StepUpConsumption.
+func (c *StepUpConsumptionClient) Query() *StepUpConsumptionQuery {
+	return &StepUpConsumptionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStepUpConsumption},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StepUpConsumption entity by its id.
+func (c *StepUpConsumptionClient) Get(ctx context.Context, id uuid.UUID) (*StepUpConsumption, error) {
+	return c.Query().Where(stepupconsumption.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StepUpConsumptionClient) GetX(ctx context.Context, id uuid.UUID) *StepUpConsumption {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *StepUpConsumptionClient) Hooks() []Hook {
+	return c.hooks.StepUpConsumption
+}
+
+// Interceptors returns the client interceptors.
+func (c *StepUpConsumptionClient) Interceptors() []Interceptor {
+	return c.inters.StepUpConsumption
+}
+
+func (c *StepUpConsumptionClient) mutate(ctx context.Context, m *StepUpConsumptionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StepUpConsumptionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StepUpConsumptionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StepUpConsumptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StepUpConsumptionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StepUpConsumption mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		JournalEntry, JournalLine, LedgerAccount, OutboxEvent, ReconciliationBreak,
-		ReconciliationRun, SellerCreditMaturity []ent.Hook
+		ReconciliationRun, SellerCreditMaturity, StepUpConsumption []ent.Hook
 	}
 	inters struct {
 		JournalEntry, JournalLine, LedgerAccount, OutboxEvent, ReconciliationBreak,
-		ReconciliationRun, SellerCreditMaturity []ent.Interceptor
+		ReconciliationRun, SellerCreditMaturity, StepUpConsumption []ent.Interceptor
 	}
 )
 

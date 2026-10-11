@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
+	"github.com/google/uuid"
+	"net/http"
 	"testing"
 	"time"
 
@@ -63,7 +65,7 @@ func (authority *TestTokenAuthority) StaffVerifiers() *middlewares.StaffTokenVer
 func (authority *TestTokenAuthority) sign(subject, sessionId, audience string, roles []string) string {
 	authority.t.Helper()
 	token, err := jwt.NewBuilder().Issuer(TestTokenIssuer).Subject(subject).Audience([]string{audience}).
-		IssuedAt(time.Now()).Expiration(time.Now().Add(15*time.Minute)).Claim("sid", sessionId).Claim("roles", roles).Build()
+		IssuedAt(time.Now()).Expiration(time.Now().Add(15*time.Minute)).JwtID(uuid.NewString()).Claim("sid", sessionId).Claim("roles", roles).Build()
 	if err != nil {
 		authority.t.Fatal(err)
 	}
@@ -81,6 +83,11 @@ func (authority *TestTokenAuthority) UserAccessToken(userId string) string {
 type StaffTokens struct {
 	AccessToken string
 	StepUpToken string
+	freshStepUp func() string
+}
+
+func (tokens StaffTokens) StepUp() http.Header {
+	return http.Header{"X-Step-Up-Token": {tokens.freshStepUp()}}
 }
 
 func (authority *TestTokenAuthority) StaffTokens(staffId string, permissions ...string) StaffTokens {
@@ -92,5 +99,28 @@ func (authority *TestTokenAuthority) StaffTokens(staffId string, permissions ...
 	return StaffTokens{
 		AccessToken: authority.sign(staffId, sessionId, staffauth.AccessAudience, roles),
 		StepUpToken: authority.sign(staffId, sessionId, staffauth.StepUpAudience, roles),
+		freshStepUp: func() string { return authority.sign(staffId, sessionId, staffauth.StepUpAudience, roles) },
 	}
+}
+
+func (authority *TestTokenAuthority) FreshStaffStepUp(staffId string, permissions ...string) http.Header {
+	return http.Header{"X-Step-Up-Token": {authority.StaffTokens(staffId, permissions...).StepUpToken}}
+}
+
+func (authority *TestTokenAuthority) UserStepUpToken(userId string) string {
+	return authority.sign(userId, "session-"+userId, jwtauth.UserStepUpAudience, []string{"user"})
+}
+
+func (authority *TestTokenAuthority) UserWidgetToken(userId string) string {
+	authority.t.Helper()
+	token, err := jwt.NewBuilder().Issuer(TestTokenIssuer).Subject(userId).Audience([]string{jwtauth.WidgetTokenAudience}).JwtID("widget-"+userId).
+		IssuedAt(time.Now()).Expiration(time.Now().Add(time.Hour)).Claim("sid", "session-"+userId).Claim("scope", jwtauth.WidgetTokenScope).Build()
+	if err != nil {
+		authority.t.Fatal(err)
+	}
+	signed, err := jwt.Sign(token, jwt.WithKey(jwa.EdDSA(), authority.signingKey))
+	if err != nil {
+		authority.t.Fatal(err)
+	}
+	return string(signed)
 }

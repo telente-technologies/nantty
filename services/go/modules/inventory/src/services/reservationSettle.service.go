@@ -45,7 +45,7 @@ func (service ReservationService) returnReservedUnitsInTransaction(ctx context.C
 	if _, err := ApplyStockChangeInTransaction(ctx, tx, level, StockChange{
 		StoreId: row.StoreID, VariantId: row.VariantID, LocationId: row.LocationID, ReservedDelta: -row.Quantity,
 		Kind: enums.MovementOrderReleased, Reference: row.Reference, Reason: finalStatus, ActorName: "checkout",
-		DedupeKey: MovementDedupeKey(enums.MovementOrderReleased, row.Reference, row.VariantID, row.LocationID), AllowBelowReserved: true,
+		DedupeKey: MovementDedupeKey(enums.MovementOrderReleased, reservationMovementReference(row.Reference, row.Attempt), row.VariantID, row.LocationID), AllowBelowReserved: true,
 	}); err != nil {
 		return err
 	}
@@ -61,12 +61,13 @@ func (service ReservationService) Confirm(ctx context.Context, reference string)
 		if len(rows) == 0 {
 			return inventoryerrors.NothingReservedForOrder
 		}
+		rows = rowsOfLatestAttempt(rows)
 		for _, row := range rows {
 			if row.Status != enums.ReservationActive && row.Status != enums.ReservationConfirmed {
 				return inventoryerrors.ReservationNotActive
 			}
 		}
-		return tx.StockReservation.Update().Where(stockreservation.Reference(reference), stockreservation.StatusEQ(enums.ReservationActive)).
+		return tx.StockReservation.Update().Where(stockreservation.Reference(reference), stockreservation.Attempt(rows[0].Attempt), stockreservation.StatusEQ(enums.ReservationActive)).
 			SetStatus(enums.ReservationConfirmed).ClearExpiresAt().Exec(ctx)
 	})
 }

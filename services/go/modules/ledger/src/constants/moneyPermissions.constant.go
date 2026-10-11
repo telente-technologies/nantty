@@ -8,6 +8,7 @@ const (
 	PermissionProcessWithdrawals  = "money.withdrawals.process"
 	PermissionResolveDisputes     = "money.disputes.resolve"
 	PermissionManageMonetization  = "money.monetization.manage"
+	PermissionReadMonetization    = "money.monetization.read"
 	PermissionManageCreators      = "money.creators.manage"
 	PermissionReviewCoins         = "money.coins.review"
 )
