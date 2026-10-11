@@ -19,7 +19,7 @@ Counts updated 2026-10-05 after the theme, ads-invite and guest-read fixes.
 
 ## Live run against the real gateway
 
-Sandbox stack started with `security/regression/startSandboxStack.sh`: six Go deployables, the gateway and five TS services, all on 127.0.0.1, with fake Paystack on 127.0.0.1:18999. Gateway route limits were relaxed for the run (`RATE_LIMIT_OTP_PER_MINUTE` and similar), as in earlier smoke runs. Pending Prisma migrations for social, search and media were applied first. Without them the social feeds and `/search/recent` returned 500.
+Sandbox stack started with `security/regression/startSandboxStack.sh`: six Go deployables, the gateway and five TS services, all on 127.0.0.1, with the fake payment provider on loopback. Gateway route limits were relaxed for the run (`RATE_LIMIT_OTP_PER_MINUTE` and similar), as in earlier smoke runs. Pending Prisma migrations for social, search and media were applied first. Without them the social feeds and `/search/recent` returned 500.
 
 | Run | Result |
 | --- | --- |
@@ -33,7 +33,7 @@ apiSmoke failures, all environmental:
 - The host disk is 99.3 % full (1.5 GB free). SeaweedFS refuses new volumes, so every S3 PUT returns 500. Media upload fails, and the social, commerce, money and Business-plan journeys stop at their first upload. Later steps fail as a result.
 - Realtime (Phoenix, `ws://localhost:4000`) and the Python intelligence service are not part of the sandbox launcher. The live socket steps fail, and the event-flow check sees no consumer on `realtime-domain-events` and `intelligence-domain-events`.
 - First calls to commerce, live and ads timed out (504) once, at cold start. They passed on the rerun.
-- The launcher passed `PAYSTACK_SECRET_KEY=sk_test_fake_sandbox_only`, but the fake accepts only `sk_test_fake_paystack`, so coin purchases got 502. This is fixed in the launcher.
+- The launcher passed the wrong fake provider key, so coin purchases got 502. This is fixed in the launcher.
 
 Afterwards the host services were stopped and `docker compose stop` was run. The betng-* containers were not touched.
 
@@ -50,7 +50,7 @@ Afterwards the host services were stopped and `docker compose stop` was run. The
 - **Mobile checkout**: `initialize` sent `saveCard`, which the backend rejects. The saved-card path called `/payments/charge-saved-card`, which does not exist. It now initialises the payment and calls `POST /payments/saved-cards/charges {paymentReference, savedCardId}`. `requires_authentication` and `requires_checkout` map to `action_required`. "Save this card" does nothing until card setup (`/payments/saved-cards/setups`) is wired.
 - **Webapp coin purchase**: dropped `channel`, which go-money rejects.
 - **Contracts**: the mobile upload-intent `maximumSize` and the username-availability `message` are now optional. The backend does not send them, and the UI type already allowed that.
-- **Sandbox launcher**: corrected the fake Paystack key.
+- **Sandbox launcher**: corrected the fake provider key.
 
 ## Open mismatches (need a decision or backend work)
 
@@ -297,6 +297,7 @@ Grouped by area (the per-app tables have the full list):
 | `GET /api/v1/lives/:p/comments` | matches |  |
 | `POST /api/v1/lives/:p/comments` | matches |  |
 | `POST /api/v1/lives/:p/end` | matches |  |
+| `POST /api/v1/lives/:p/heartbeat` | matches | host lease, 60 s timeout; added 2026-10-11 |
 | `POST /api/v1/lives/:p/engagement` | matches |  |
 | `GET /api/v1/lives/:p/gift-goals` | matches |  |
 | `POST /api/v1/lives/:p/gift-goals` | matches |  |
@@ -1233,7 +1234,7 @@ Grouped by area (the per-app tables have the full list):
 
 ## Flutterwave stage 2 changes (2026-10-10)
 
-Behind `PAYMENTS_PROVIDER=flutterwave`; Paystack behaviour is unchanged.
+Flutterwave is now the only provider (`PAYMENTS_PROVIDER=flutterwave`, 2026-10-11).
 
 | Endpoint | Change | Clients |
 |---|---|---|
@@ -1266,3 +1267,13 @@ Behind `PAYMENTS_PROVIDER=flutterwave`; Paystack behaviour is unchanged.
 | Ad billing history | New transaction type `ad_spend_debt` (TRU-001) | ads console label "Unpaid ad delivery" |
 | Staff money actions: `POST /api/v1/admin/withdrawals/{id}/review`, `/admin/payouts/run`, `/admin/orders/{id}/escrow/refund`, `/admin/disputes/{id}/resolve`, `/admin/ledger/journal-entries/{id}/reversal`, `/admin/payments/webhooks/dead-letters/{id}/replay`, `/admin/payments/wallet-fundings/{ref}/reject`, `/admin/coins/transactions/{id}/reverse` | Step-up token is single-use (consumed in `ledger.step_up_consumptions`); a replay gets `401 STEP_UP_REUSED`. Other step-up routes keep the 5-minute window | admin BFF clears the step-up cookie after a money action and turns `STEP_UP_REUSED` into `STEP_UP_REQUIRED` (prompt again, no sign-out) |
 | `GET /api/v1/admin/withdrawals?status=pending_review\|on_hold\|queued`, `GET /api/v1/admin/disputes?status=open\|awaiting_seller\|under_review` | Queues are oldest first (cursor moves forward); rows gain `ageHours`. History filters stay newest first | admin tables show a "Waiting" column |
+
+## Stage 4 follow-ups (2026-10-11)
+
+| Endpoint | Change | Clients |
+|---|---|---|
+| `GET /api/v1/payments/{reference}` | New, owner-only (404 for anyone else, 401 signed out): `{ id, reference, purpose, subjectId, provider, amount, status: pending\|succeeded\|failed\|cancelled, refundedAmount, paidAt, createdAt }`; a pending payment is verified with the provider first; never returns provider links | webapp `/pay/return` polls it. Coin return, mobile order payment (needs the saved card) and seller subscription confirmation (trial verify) keep their purpose endpoints |
+| `POST /payments/initialize`, `POST /coins/purchases`, `POST /creators/{id}/subscriptions`, ads `POST …/top-ups` | `provider` is server-selected from `PAYMENTS_PROVIDER`; the old field is accepted (`flutterwave`) and ignored. Ads top-ups no longer require it; the stored provider is the one money used | all apps (no change needed) |
+| `GET /api/v1/payments/wallet/me` | New `limits: { tier: basic\|mid\|full, dailyLimit, spentToday, remainingToday, resetsAt }` | webapp wallet card and mobile Add money show the user's own remaining amount |
+| `POST /api/v1/orders/checkout` | `403 SELLER_DEBT_LIMIT` with `details.audience: "buyer"` and buyer copy ("This seller can't take new orders right now…"); `422 PAYMENT_AMOUNT_OUT_OF_RANGE` keeps `details` across the money gRPC hop; a refused checkout puts the items back in the cart | webapp and mobile show the buyer dialog |
+| Subscription `channel` | the old provider-named web channel is now `web_checkout` (migration `20261011090000`) | admin, webapp mocks updated |
