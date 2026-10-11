@@ -41,7 +41,7 @@ var secretPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)\b(sk|pk)_(live|test)_[A-Za-z0-9]+`),
 	regexp.MustCompile(`FLW(SECK|PUBK)(_TEST)?-[A-Za-z0-9-]+`),
 	regexp.MustCompile(`(?i)bearer\s+[A-Za-z0-9._~+/=-]+`),
-	regexp.MustCompile(`(?i)(verif-hash|flutterwave-signature|x-paystack-signature)["':=\s]+[^\s"',}]+`),
+	regexp.MustCompile(`(?i)(verif-hash|flutterwave-signature)["':=\s]+[^\s"',}]+`),
 	regexp.MustCompile(`(?i)("?(account_number|accountnumber|bvn|nuban|authorization_code|token)"?\s*[:=]\s*"?)[A-Za-z0-9_-]{4,}`),
 }
 
