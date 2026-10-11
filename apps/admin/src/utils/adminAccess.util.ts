@@ -17,5 +17,6 @@ export function doesAdminHaveAnyPermission(admin: Pick<SignedInAdmin, "role" | "
 export function doesAdminMeetPageRequirement(admin: Pick<SignedInAdmin, "role" | "permissions">, requirement: PageRequirement): boolean {
   if (requirement === "ANY_ADMIN") return true;
   if (requirement === "SUPERADMIN") return isSuperadmin(admin);
-  return doesAdminHavePermission(admin, requirement);
+  if (Array.isArray(requirement)) return doesAdminHaveAnyPermission(admin, requirement);
+  return doesAdminHavePermission(admin, requirement as AdminPermission);
 }
