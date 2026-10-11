@@ -67,6 +67,11 @@ export const authMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/auth/password/reset", () => undefined),
   createMockRoute("POST", "/api/v1/auth/logout", () => undefined),
   createMockRoute("POST", "/api/v1/auth/refresh", () => ({ accessToken: "mock-access", refreshToken: "mock-refresh" })),
+  createMockRoute("POST", "/api/v1/auth/step-up", ({ body }) => {
+    const proof = (body ?? {}) as { password?: string; otpToken?: string };
+    if (!proof.password && !proof.otpToken) throw new ApiError(400, "Enter your password or the code we emailed you.", "STEP_UP_PROOF_REQUIRED");
+    return { stepUpToken: `mock-step-up-${Date.now()}`, expiresIn: 300, method: proof.password ? "password" : "emailCode" };
+  }),
   createMockRoute("GET", "/api/v1/topics", () => TOPICS.map((name, i) => ({ id: `t_${i}`, name }))),
   createMockRoute("PUT", "/api/v1/users/me/topics", () => undefined),
 ];

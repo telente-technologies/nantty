@@ -1,9 +1,9 @@
 import { ApiError } from "@/errors/api.error";
-import type { CreateUploadSessionRequest, Media, MediaAsset, NewPostInput, Post } from "@/types";
+import type { CreateUploadSessionRequest, Media, MediaAsset } from "@/types";
 
-import { getSignedInMockUser } from "./fixtures.mock";
-import { findMutableSoundState } from "./soundCatalog.mock";
+import { buildUnsplashImageUrl } from "./mockImages.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
+import { unsplashPhotoIds } from "./unsplashPhotoIds.mock";
 
 interface MockUploadSession {
   readonly request: CreateUploadSessionRequest;
@@ -21,6 +21,7 @@ interface MockStoredMedia {
 const MOCK_CHUNK_SIZE_BYTES = 512 * 1024;
 const MOCK_SINGLE_PUT_MAXIMUM_BYTES = 8 * 1024 * 1024;
 const MOCK_PROCESSING_DELAY_MS = 2_500;
+const MOCK_READY_IMAGE_PHOTO_ID = Object.values(unsplashPhotoIds.products)[0]![0]!;
 const uploadSessionsById = new Map<string, MockUploadSession>();
 const storedMediaById = new Map<string, MockStoredMedia>();
 
@@ -32,13 +33,15 @@ const findUploadSessionOrThrow = (uploadId: string) => {
   return session;
 };
 
-const currentMediaAsset = (mediaId: string): MediaAsset | null => {
+export const currentMediaAsset = (mediaId: string): MediaAsset | null => {
   const stored = storedMediaById.get(mediaId);
   if (!stored) return null;
-  return Date.now() >= stored.readyAt ? { ...stored.asset, status: "ready" } : stored.asset;
+  if (Date.now() < stored.readyAt) return stored.asset;
+  const variants = stored.asset.variants.length > 0 || stored.asset.type !== "image" ? stored.asset.variants : [{ url: buildUnsplashImageUrl(MOCK_READY_IMAGE_PHOTO_ID, 1080), width: 1080, height: 1350, format: "jpeg" as const }];
+  return { ...stored.asset, status: "ready", variants };
 };
 
-const convertMediaAssetToPostMedia = (asset: MediaAsset & { readonly type: Media["type"] }): Media => ({
+export const convertMediaAssetToPostMedia = (asset: MediaAsset & { readonly type: Media["type"] }): Media => ({
   id: asset.id,
   type: asset.type,
   url: asset.variants[0]?.url ?? null,
@@ -54,7 +57,8 @@ const convertMediaAssetToPostMedia = (asset: MediaAsset & { readonly type: Media
 export const mediaMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/media/uploads", ({ body }) => {
     const request = body as CreateUploadSessionRequest;
-    const isSupportedMimeType = ["image/", "video/", "audio/"].some((prefix) => request.mimeType.startsWith(prefix));
+    const isEncryptedChatAttachment = request.mimeType === "application/vnd.zudomart.encrypted" && (request.purpose === "chat" || request.purpose === "voice");
+    const isSupportedMimeType = isEncryptedChatAttachment || ["image/", "video/", "audio/"].some((prefix) => request.mimeType.startsWith(prefix));
     if (!isSupportedMimeType) {
       throw new ApiError(415, "Unsupported media type", "UNSUPPORTED_MEDIA_TYPE");
     }
@@ -114,40 +118,5 @@ export const mediaMocks: MockRoute[] = [
     const asset = currentMediaAsset(params.mediaId!);
     if (!asset) throw new ApiError(404, "Media not found", "MEDIA_NOT_FOUND");
     return asset;
-  }),
-  createMockRoute("POST", "/api/v1/posts", ({ body }) => {
-    const input = body as NewPostInput;
-    if (input.mediaIds.length > 10) throw new ApiError(422, "A post can have up to 10 photos or videos", "TOO_MANY_MEDIA");
-    const media = input.mediaIds.map((mediaId) => {
-      const asset = currentMediaAsset(mediaId);
-      if (!asset) throw new ApiError(422, "One of the uploads could not be found", "MEDIA_NOT_FOUND");
-      if (asset.type === "audio") throw new ApiError(422, "Audio can't be posted on its own", "UNSUPPORTED_POST_MEDIA");
-      return convertMediaAssetToPostMedia({ ...asset, type: asset.type });
-    });
-    if (input.soundId) {
-      const sound = findMutableSoundState(input.soundId);
-      if (!sound) throw new ApiError(422, "That sound isn't available", "SOUND_NOT_FOUND");
-      if (!sound.allowReuse || sound.status !== "available") throw new ApiError(422, "That sound can't be reused", "SOUND_REUSE_NOT_ALLOWED");
-    }
-    const post: Post = {
-      id: nextMockId("p"),
-      kind: "post",
-      author: getSignedInMockUser(),
-      createdAt: new Date().toISOString(),
-      text: input.text,
-      media,
-      likes: 0,
-      comments: 0,
-      reposts: 0,
-      views: 0,
-      liked: false,
-      bookmarked: false,
-      saveCount: 0,
-      isFollowingAuthor: true,
-      friendsLiked: null,
-      products: [],
-      sponsored: null,
-    };
-    return post;
   }),
 ];

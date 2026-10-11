@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { CreatorRevenueRules, CreatorSubscriber, CreatorSubscriptionPlan, CreatorSubscriptionPlanInput, CreatorSubscriptionState } from "@/types/creator.type";
+import type { CreatorBillingChannel, CreatorRevenueRules, CreatorSubscriber, CreatorSubscriptionPriceTier, CreatorSubscriptionPlan, CreatorSubscriptionPlanInput, CreatorSubscriptionState } from "@/types/creator.type";
 
 import { signedInUserIsApprovedCreator } from "./creatorFixtures.mock";
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
@@ -35,6 +35,16 @@ const plans: MockPlan[] = [
   { id: "plan_4", creatorId: "u_12", name: "Coach Segun Crew", usdCents: 500, interval: "month", benefits: ["Weekly workout plans", "Live form checks"], subscriberCount: 640, active: true },
 ];
 
+const TIER_USD_CENTS = [199, 499, 749, 999, 1_499, 1_799, 1_999];
+const TIER_KEYS = ["500", "1000", "1500", "2000", "3000", "4000", "5000"];
+const STORE_FEE_PERCENT: Record<CreatorBillingChannel, number> = { web: 0, ios: 30, android: 15 };
+const grossUp = (usdCents: number, channel: CreatorBillingChannel) => Math.ceil(usdCents / (1 - STORE_FEE_PERCENT[channel] / 100));
+const priceTiers = (interval: "month" | "year"): CreatorSubscriptionPriceTier[] =>
+  TIER_USD_CENTS.map((usdCents, index) => {
+    const base = interval === "year" ? usdCents * 10 : usdCents;
+    return { tier: TIER_KEYS[index]!, default: index === 1, prices: { web: convertUsdCentsToViewerCurrency(base), ios: convertUsdCentsToViewerCurrency(grossUp(base, "ios")), android: convertUsdCentsToViewerCurrency(grossUp(base, "android")) } };
+  });
+
 const subscriptionStates = new Map<string, CreatorSubscriptionState>();
 const subscribedCreatorIdsByViewerId = new Map<string, Set<string>>();
 
@@ -60,6 +70,18 @@ const subscribers = (): CreatorSubscriber[] =>
     renewsAt: isoDateHoursAgo(-(48 + index * 90)),
   }));
 
+const findMySubscriptionOrThrow = (subscriptionId: string) => {
+  const state = subscriptionStates.get(subscriptionId);
+  const viewerSubscribed = state ? subscribedCreatorIdsByViewerId.get(getSignedInMockUser().id)?.has(state.creatorId) : false;
+  if (!state || !viewerSubscribed) throw new ApiError(404, "Subscription not found", "SUBSCRIPTION_NOT_FOUND");
+  return state;
+};
+
+const saveSubscriptionState = (state: CreatorSubscriptionState) => {
+  subscriptionStates.set(state.subscriptionId, state);
+  return state;
+};
+
 const requireCreator = () => {
   if (!signedInUserIsApprovedCreator()) throw new ApiError(403, "Join the Creator Program first", "CREATOR_PROGRAM_REQUIRED");
 };
@@ -77,6 +99,10 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
     const plan: MockPlan = { id: `plan_${Date.now()}`, creatorId: getSignedInMockUser().id, name: input.name.trim(), usdCents: convertViewerMoneyToUsdCents(input.price), interval: input.interval, benefits: input.benefits, subscriberCount: 0, active: true };
     plans.push(plan);
     return presentPlan(plan);
+  }),
+  createMockRoute("GET", "/api/v1/creators/me/subscription-plans/price-tiers", ({ query }) => {
+    requireCreator();
+    return priceTiers(query.get("interval") === "year" ? "year" : "month");
   }),
   createMockRoute("PATCH", "/api/v1/creators/me/subscription-plans/:planId", ({ params, body }) => {
     const plan = plans.find((candidate) => candidate.id === params.planId && candidate.creatorId === getSignedInMockUser().id);
@@ -96,16 +122,27 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
     const plan = plans.find((candidate) => candidate.id === planId && candidate.creatorId === params.creatorId);
     if (!plan) throw new ApiError(404, "Plan not found");
     const subscriptionId = `subs_${Date.now()}`;
-    subscriptionStates.set(subscriptionId, { subscriptionId, creatorId: plan.creatorId, status: "active", planId, renewsAt: isoDateHoursAgo(plan.interval === "month" ? -720 : -8760) });
+    const periodEnd = isoDateHoursAgo(plan.interval === "month" ? -720 : -8760);
+    subscriptionStates.set(subscriptionId, { subscriptionId, creatorId: plan.creatorId, status: "active", planId, price: convertUsdCentsToViewerCurrency(plan.usdCents), interval: plan.interval, currentPeriodEnd: periodEnd, renewsAt: periodEnd, billingChannel: "web", storeProductId: null });
     plan.subscriberCount += 1;
     const viewerId = getSignedInMockUser().id;
     subscribedCreatorIdsByViewerId.set(viewerId, new Set([...(subscribedCreatorIdsByViewerId.get(viewerId) ?? []), plan.creatorId]));
     return { subscriptionId, reference: subscriptionId, provider: "paystack", accessCode: "", authorizationUrl: `/subscriptions/return?subscriptionId=${subscriptionId}` };
   }),
-  createMockRoute("GET", "/api/v1/creator-subscriptions", () => ({ data: [...subscriptionStates.values()], nextCursor: null })),
-  createMockRoute("GET", "/api/v1/subscriptions/:subscriptionId", ({ params }) => {
-    const state = subscriptionStates.get(params.subscriptionId!);
-    if (!state) throw new ApiError(404, "Subscription not found");
-    return state;
+  createMockRoute("GET", "/api/v1/creator-subscriptions", () => {
+    const subscribedCreatorIds = subscribedCreatorIdsByViewerId.get(getSignedInMockUser().id) ?? new Set<string>();
+    return { data: [...subscriptionStates.values()].filter((state) => subscribedCreatorIds.has(state.creatorId)), nextCursor: null };
+  }),
+  createMockRoute("GET", "/api/v1/creator-subscriptions/:subscriptionId", ({ params }) => findMySubscriptionOrThrow(params.subscriptionId!)),
+  createMockRoute("POST", "/api/v1/creator-subscriptions/:subscriptionId/cancel", ({ params }) => {
+    const state = findMySubscriptionOrThrow(params.subscriptionId!);
+    if (state.status !== "active" && state.status !== "past_due") throw new ApiError(409, "This subscription isn't active", "SUBSCRIPTION_NOT_ACTIVE");
+    return saveSubscriptionState({ ...state, status: "cancelled", renewsAt: null });
+  }),
+  createMockRoute("POST", "/api/v1/creator-subscriptions/:subscriptionId/resume", ({ params }) => {
+    const state = findMySubscriptionOrThrow(params.subscriptionId!);
+    if (state.status !== "cancelled") throw new ApiError(409, "Only a cancelled subscription can be resumed", "SUBSCRIPTION_NOT_CANCELLED");
+    if (state.currentPeriodEnd && Date.parse(state.currentPeriodEnd) < Date.now()) throw new ApiError(409, "This subscription has ended. Subscribe again from the creator's profile.", "SUBSCRIPTION_ENDED");
+    return saveSubscriptionState({ ...state, status: "active", renewsAt: state.currentPeriodEnd });
   }),
 ];

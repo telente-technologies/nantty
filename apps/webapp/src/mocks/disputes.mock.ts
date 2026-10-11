@@ -80,22 +80,25 @@ const signedInUserTakesPartIn = (record: MockDisputeRecord) => {
 
 const findDisputeOrThrow = (disputeId: string) => {
   const record = disputeRecords.find((candidate) => candidate.id === disputeId);
-  if (!record || !signedInUserTakesPartIn(record)) throw new ApiError(404, "Dispute not found");
+  if (!record || !signedInUserTakesPartIn(record)) throw new ApiError(404, "Dispute not found", "DISPUTE_NOT_FOUND");
   return record;
 };
 
 const statusEvent = (status: DisputeStatusEvent["status"], label: string): DisputeStatusEvent => ({ status, label, occurredAt: new Date().toISOString() });
 
 export const disputesMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/disputes", () => disputeRecords.filter(signedInUserTakesPartIn).map(presentDispute)),
+  createMockRoute("GET", "/api/v1/disputes", () => ({ data: disputeRecords.filter(signedInUserTakesPartIn).map(presentDispute), nextCursor: null })),
   createMockRoute("GET", "/api/v1/disputes/:disputeId", ({ params }) => presentDispute(findDisputeOrThrow(params.disputeId!))),
   createMockRoute("POST", "/api/v1/orders/:orderId/disputes", ({ params, body }) => {
     const order = findOrderRecord(params.orderId!);
-    if (!order || order.buyerUserId !== SIGNED_IN_BUYER) throw new ApiError(404, "Order not found");
+    if (!order || order.buyerUserId !== SIGNED_IN_BUYER) throw new ApiError(404, "Order not found", "ESCROW_NOT_FOUND");
     const existing = disputeRecords.find((record) => record.orderId === order.id);
     if (existing) return presentDispute(existing);
-    if (!["paid", "shipped", "delivered"].includes(order.status)) throw new ApiError(409, "This order can no longer be disputed");
+    if (!["paid", "shipped", "delivered"].includes(order.status)) throw new ApiError(409, "This order can no longer be disputed", "ORDER_NOT_DISPUTABLE");
     const input = body as OpenDisputeInput;
+    if (!["not_received", "not_as_described", "damaged", "wrong_item", "other"].includes(input.reason)) throw new ApiError(400, "Choose what went wrong", "VALIDATION_FAILED");
+    if ((input.description ?? "").length > 2000) throw new ApiError(400, "Keep the description under 2000 characters", "VALIDATION_FAILED");
+    if ((input.evidenceUrls ?? []).some((url) => !url.startsWith("https://"))) throw new ApiError(400, "Evidence photos must be uploaded first", "VALIDATION_FAILED");
     const record: MockDisputeRecord = {
       id: `d_${Date.now()}`,
       orderId: order.id,
@@ -118,6 +121,8 @@ export const disputesMocks: MockRoute[] = [
     const record = findDisputeOrThrow(params.disputeId!);
     const order = findOrderRecord(record.orderId)!;
     const { text, attachmentUrls = [] } = body as { text: string; attachmentUrls?: string[] };
+    if (!text?.trim() || text.length > 2000) throw new ApiError(400, "Write a message of up to 2000 characters", "VALIDATION_FAILED");
+    if (record.status.startsWith("resolved") || record.status === "closed") throw new ApiError(409, "This dispute is closed", "DISPUTE_CLOSED");
     const message = { id: `dm_${Date.now()}`, authorRole: viewerRoleFor(order), text, attachmentUrls, createdAt: new Date().toISOString() } as const;
     record.messages.push(message);
     if (message.authorRole === "seller" && record.status === "awaiting_seller") {

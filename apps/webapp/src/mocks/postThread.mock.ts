@@ -1,3 +1,4 @@
+import { ApiError } from "@/errors/api.error";
 import type { Comment, Media, Page, UserSummary } from "@/types";
 import { THREAD_AD_SLOT_KIND, type ThreadAdDecision, type ThreadDecidedAd, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
 
@@ -176,10 +177,25 @@ export const postThreadMocks: MockRoute[] = [
   }),
   createMockRoute("GET", "/api/v1/comments/:commentId/thread", ({ params, query }) => {
     const parent = findCommentAnywhere(params.commentId!) ?? [...authorRepliesByPostId.values()].find((c) => c.id === params.commentId);
-    if (!parent) return { data: [], nextCursor: null };
-    const postAuthorId = findPostIncludingSponsored(parent.postId)?.author.id ?? null;
+    if (!parent) throw new ApiError(404, "Comment not found.", "COMMENT_NOT_FOUND");
+    const post = findPostIncludingSponsored(parent.postId);
+    if (!post) throw new ApiError(404, "Post not found.", "POST_NOT_FOUND");
+    const postAuthorId = post.author.id;
     const page = paginate(repliesOf(parent.postId, parent.id), query.get("cursor"), REPLIES_PAGE_SIZE);
-    return { data: page.data.map((c, index) => toThreadReply(c, postAuthorId, 1, index === 0, MAXIMUM_THREAD_DEPTH, true)), nextCursor: page.nextCursor };
+    const ancestors: Comment[] = [];
+    for (let cursor = parent.parentCommentId; cursor; ) {
+      const ancestor = findCommentAnywhere(cursor);
+      if (!ancestor) break;
+      ancestors.unshift(ancestor);
+      cursor = ancestor.parentCommentId;
+    }
+    return {
+      data: page.data.map((c, index) => toThreadReply(c, postAuthorId, 1, index === 0, MAXIMUM_THREAD_DEPTH, true)),
+      nextCursor: page.nextCursor,
+      focus: parent,
+      ancestors,
+      maximumVisibleDepth: MAXIMUM_THREAD_DEPTH,
+    };
   }),
   createMockRoute("POST", "/api/v1/ads/decide", ({ body }) => {
     const { slot } = (body ?? {}) as { slot?: ThreadSlotRequest };

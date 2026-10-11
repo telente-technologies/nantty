@@ -7,6 +7,7 @@ import { brandsMocks } from "./brands.mock";
 import { cartMocks } from "./cart.mock";
 import { geoMocks } from "./geo.mock";
 import { chatsMocks } from "./chats.mock";
+import { chatE2eeMocks } from "./chatE2ee.mock";
 import { chatKeysMocks } from "./chatKeys.mock";
 import { groupsMocks } from "./groups.mock";
 import { clipsMocks } from "./clips.mock";
@@ -19,9 +20,13 @@ import { creatorsMocks } from "./creators.mock";
 import { creatorSubscriptionsMocks } from "./creatorSubscriptions.mock";
 import { disputesMocks } from "./disputes.mock";
 import { feedMocks } from "./feed.mock";
+import { feedInteractionsMocks } from "./feedInteractions.mock";
 import { giftsMocks } from "./gifts.mock";
 import { liveMocks } from "./live.mock";
 import { localeMocks } from "./locale.mock";
+import { composerMocks } from "./composer.mock";
+import { profileParityMocks } from "./profileParity.mock";
+import { productReviewsMocks } from "./productReviews.mock";
 import { mediaMocks } from "./media.mock";
 import { notificationsMocks } from "./notifications.mock";
 import { ordersMocks } from "./orders.mock";
@@ -37,6 +42,9 @@ import { productsMocks } from "./products.mock";
 import { searchMocks } from "./search.mock";
 import { martHighlightsMocks } from "./martHighlights.mock";
 import type { MockRoute } from "./registry.mock";
+import { payoutOnboardingMocks } from "./payoutOnboarding.mock";
+import { placesMocks } from "./places.mock";
+import { sellerCatalogMocks } from "./sellerCatalog.mock";
 import { sellerMocks } from "./seller.mock";
 import { settingsMocks } from "./settings.mock";
 import { storiesMocks } from "./stories.mock";
@@ -47,6 +55,7 @@ import { usersMocks } from "./users.mock";
 import { verificationMocks } from "./verification.mock";
 import { identityVerificationMocks } from "./identityVerification.mock";
 import { storeRewardsMocks } from "./storeRewards.mock";
+import { providerWalletMocks } from "./providerWallet.mock";
 import { walletMocks } from "./wallet.mock";
 import { chatReportsMocks } from "./chatReports.mock";
 import { reportsMocks } from "./reports.mock";
@@ -71,8 +80,11 @@ export const routes: MockRoute[] = [
   ...sitemapMocks,
   ...linkPreviewsMocks,
   ...securityMocks,
+  ...profileParityMocks,
+  ...productReviewsMocks,
   ...usersMocks,
   ...feedMocks,
+  ...feedInteractionsMocks,
   ...postAudienceMocks,
   ...taggedUsersMocks,
   ...mediaDownloadsMocks,
@@ -93,6 +105,7 @@ export const routes: MockRoute[] = [
   ...brandsMocks,
   ...helpCentreMocks,
   ...supportMocks,
+  ...chatE2eeMocks,
   ...groupsMocks,
   ...chatKeysMocks,
   ...chatsMocks,
@@ -100,6 +113,7 @@ export const routes: MockRoute[] = [
   ...commentsMocks,
   ...postThreadMocks,
   ...soundsMocks,
+  ...composerMocks,
   ...mediaMocks,
   ...adEventsMocks,
   ...accountHealthMocks,
@@ -119,5 +133,9 @@ export const routes: MockRoute[] = [
   ...legalMocks,
   ...storeRewardsMocks,
   ...walletMocks,
+  ...providerWalletMocks,
+  ...payoutOnboardingMocks,
+  ...placesMocks,
+  ...sellerCatalogMocks,
   ...sellerMocks,
 ];
