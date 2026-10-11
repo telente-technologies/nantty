@@ -56,13 +56,13 @@ afterAll(async () => {
 
 describe("webhook passthrough", () => {
   it("forwards the exact bytes and signature header to go-money", async () => {
-    const payload = '{ "event" :"charge.success",\n  "data":{"amount":  500000}  }';
-    const response = await fetch(`${base}/webhooks/paystack`, { method: "POST", headers: { "content-type": "application/json", "x-paystack-signature": "abc123" }, body: payload });
+    const payload = '{ "event" :"charge.completed",\n  "data":{"amount":  5000}  }';
+    const response = await fetch(`${base}/webhooks/flutterwave`, { method: "POST", headers: { "content-type": "application/json", "flutterwave-signature": "abc123" }, body: payload });
     expect(response.status).toBe(200);
     const forwarded = recorded.at(-1);
-    expect(forwarded?.url).toBe("/webhooks/paystack");
+    expect(forwarded?.url).toBe("/webhooks/flutterwave");
     expect(forwarded?.body.toString("utf8")).toBe(payload);
-    expect(forwarded?.headers["x-paystack-signature"]).toBe("abc123");
+    expect(forwarded?.headers["flutterwave-signature"]).toBe("abc123");
   });
 
   it("forwards the Flutterwave verif-hash header to go-money", async () => {
@@ -73,8 +73,8 @@ describe("webhook passthrough", () => {
   });
 
   it("does not forward signature headers on ordinary routes", async () => {
-    await fetch(`${base}/api/v1/auth/refresh`, { method: "POST", headers: { "x-paystack-signature": "abc123", "verif-hash": "hash-value", "content-type": "application/json" }, body: "{}" });
-    expect(recorded.at(-1)?.headers["x-paystack-signature"]).toBeUndefined();
+    await fetch(`${base}/api/v1/auth/refresh`, { method: "POST", headers: { "flutterwave-signature": "abc123", "verif-hash": "hash-value", "content-type": "application/json" }, body: "{}" });
+    expect(recorded.at(-1)?.headers["flutterwave-signature"]).toBeUndefined();
     expect(recorded.at(-1)?.headers["verif-hash"]).toBeUndefined();
   });
 });

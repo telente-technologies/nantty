@@ -21,6 +21,7 @@ describe("feed interaction routes", () => {
   it("rate limits interactions per account", () => {
     expect(classifyRequestForRateLimit("POST", "/api/v1/feeds/interactions/batch")).toBe("feedInteraction");
     expect(classifyRequestForRateLimit("POST", "/api/v1/feeds/interactions")).toBe("feedInteraction");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/analytics/product-interactions")).toBe("feedInteraction");
     expect(classifyRequestForRateLimit("GET", "/api/v1/feeds/for-you")).toBeUndefined();
     expect(buildRouteRateLimitKey("feedInteraction", "1.2.3.4", "acct")).toBe("rl:route:feedInteraction:a:acct");
   });

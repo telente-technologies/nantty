@@ -18,9 +18,10 @@ import { ValkeyRateLimitStore } from "./services/valkeyRateLimitStore.service.js
 import type { GatewayConfig } from "./configs/gateway.config.js";
 import { createUpstreamDispatchHandler } from "./handlers/upstreamDispatch.handler.js";
 import { IdentityPolicyGateSource, type PolicyGateSource } from "./services/policyAcceptanceGate.service.js";
-import { AccessTokenVerifier } from "./services/accessTokenVerifier.service.js";
+import { AccessTokenVerifier, ValkeySessionRevocationSource } from "./services/accessTokenVerifier.service.js";
 import { ValkeyWidgetTokenRevocationSource, WidgetTokenVerifier } from "./services/widgetTokenVerifier.service.js";
 import { buildSecurityServices, type SecurityServiceOverrides } from "./services/security/securityServices.service.js";
+import { withRequestMetrics } from "./telemetry/requestMetrics.js";
 
 export interface GatewayServerOptions {
   readonly config: GatewayConfig;
@@ -41,10 +42,10 @@ function buildRateLimitStore(connection: ValkeyConnection | undefined, logger: L
 export function createGatewayServer(options: GatewayServerOptions) {
   const logger = options.logger ?? createLogger({ name: "gateway" });
   const policyGate = options.policyGate ?? (options.config.policyGate === null ? undefined : new IdentityPolicyGateSource(options.config.upstreams.identity, options.config.policyGate.internalToken));
-  const verifier = options.verifier ?? new AccessTokenVerifier(options.config.accessToken);
   const connection = options.config.valkeyUrl === undefined || options.config.valkeyUrl === null ? undefined : new ValkeyConnection(new URL(options.config.valkeyUrl));
   const rateLimitStore = options.rateLimitStore ?? buildRateLimitStore(connection, logger);
   const denylistConnection = options.config.sessionDenylistUrl ? new ValkeyConnection(new URL(options.config.sessionDenylistUrl)) : connection;
+  const verifier = options.verifier ?? new AccessTokenVerifier(options.config.accessToken, undefined, denylistConnection === undefined ? undefined : new ValkeySessionRevocationSource(denylistConnection));
   const widgetVerifier = options.widgetVerifier ?? new WidgetTokenVerifier(options.config.accessToken, denylistConnection === undefined ? undefined : new ValkeyWidgetTokenRevocationSource(denylistConnection));
   const security = buildSecurityServices(options.config.security, options.config.upstreams.trust, logger, connection, options.security);
   const maximumRequestBodyBytes = options.config.maxRequestBodyBytes ?? 1024 * 1024;
@@ -60,11 +61,11 @@ export function createGatewayServer(options: GatewayServerOptions) {
       createRequestSizeLimitMiddleware(maximumRequestBodyBytes),
       createAdminNetworkMiddleware(options.config.adminIpAllowList ?? []),
       createGlobalRateLimitMiddleware(rateLimitStore, options.config.rateLimitMaxPerMinute, (request) => !isAnsweredByCorsAlone(request, options.config.corsOrigins)),
-      createUpstreamDispatchHandler({ config: options.config, verifier, widgetVerifier, logger, rateLimitStore, security, ...(policyGate === undefined ? {} : { policyGate }) }),
+      createUpstreamDispatchHandler({ config: options.config, verifier, widgetVerifier, logger, rateLimitStore, security, ...(policyGate === undefined ? {} : { policyGate }), ...(connection === undefined ? {} : { cacheProbe: () => connection.command(["PING"]) }) }),
     ],
   });
   return createHttpServer({
     adapter: createNodeHttpAdapter({ host: options.config.host, port: options.config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: options.config.trustedProxyHops ?? 0 }),
-    handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
+    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
   });
 }

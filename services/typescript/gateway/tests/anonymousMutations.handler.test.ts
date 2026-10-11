@@ -91,7 +91,7 @@ describe("guests are view-only at the gateway", () => {
     ["POST", "/api/v1/auth/login"],
     ["POST", "/api/v1/auth/register"],
     ["PUT", "/api/v1/consents"],
-    ["POST", "/webhooks/paystack"],
+    ["POST", "/webhooks/flutterwave"],
   ])("lets anonymous %s %s through", async (method, path) => {
     const response = await fetch(`${gatewayUrl}${path}`, { method, headers: { "content-type": "application/json" }, body: "{}" });
     expect(response.status).toBe(200);

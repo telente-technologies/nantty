@@ -14,10 +14,12 @@ import { extractBearerTokenFromAuthorizationHeader, type AccessTokenVerifier, ty
 import { forwardRequestToUpstream } from "../services/upstreamProxy.service.js";
 import type { WidgetTokenVerifier } from "../services/widgetTokenVerifier.service.js";
 import { convertRequestBodyToBytes, json, unauthorizedResponseBody } from "../utils/http.util.js";
+import { runReadinessChecks } from "../utils/readiness.util.js";
 import { buildSecurityServices, type SecurityServices } from "../services/security/securityServices.service.js";
 import { humanVerificationPath, humanVerificationRequiredBody } from "../services/security/humanVerificationGate.service.js";
 import { handleHumanVerificationRequest } from "./humanVerification.handler.js";
 import { completedRequestSignal, internalPathSignal, observeProbeSignalInBackground, tamperedTokenSignal, type ObservedRequest } from "./securityObservation.handler.js";
+import { markRequestRoute } from "../telemetry/requestMetrics.js";
 
 export interface UpstreamDispatchOptions {
   readonly config: GatewayConfig;
@@ -27,6 +29,13 @@ export interface UpstreamDispatchOptions {
   readonly policyGate?: PolicyGateSource;
   readonly rateLimitStore?: RateLimitStore;
   readonly security?: SecurityServices;
+  readonly cacheProbe?: () => Promise<unknown>;
+}
+
+async function readinessResponse(cacheProbe: (() => Promise<unknown>) | undefined) {
+  if (cacheProbe === undefined) return json(200, { status: "ready" });
+  const { ready } = await runReadinessChecks({ cache: cacheProbe }, 500);
+  return json(200, ready ? { status: "ready" } : { status: "ready", cache: "degraded" });
 }
 
 function buildRateLimited(retryAfterSeconds: number) {
@@ -49,7 +58,9 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
   const security = options.security ?? buildSecurityServices(options.config.security, options.config.upstreams.trust, options.logger, undefined);
   return async (context) => {
     const request = context.request;
+    if (request.path === "/healthz" || request.path === "/readyz" || request.path === humanVerificationPath) markRequestRoute(request, request.path);
     if (request.path === "/healthz") return json(200, { status: "up", service: "gateway" });
+    if (request.path === "/readyz") return readinessResponse(options.cacheProbe);
     const observed = (principal: VerifiedPrincipal | undefined): ObservedRequest => ({ requestId: request.id, path: request.path, deviceId: request.getHeader("x-device-id"), clientIp: request.remoteAddress, principal });
     if (isInternalOnlyPath(request.path)) {
       observeProbeSignalInBackground(security, options.logger, observed(undefined), internalPathSignal(request.path));
@@ -58,6 +69,7 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     if (request.path === humanVerificationPath) return handleHumanVerificationRequest(request, security, options.verifier, rateLimitStore, options.logger);
     const route = resolveUpstreamRouteForRequest(request.method, request.path);
     if (route === undefined) return json(404, { message: "Not found.", code: "NOT_FOUND" });
+    markRequestRoute(request, route.pathPrefix);
     const { token, principal, rejected, widgetTokenMisused } = await resolvePrincipalForRoute(route, request.getHeader("authorization"), options.verifier, options.widgetVerifier);
     if (widgetTokenMisused) return json(401, { message: "This token only works for home-screen widgets.", code: "WIDGET_TOKEN_SCOPE" });
     observeProbeSignalInBackground(security, options.logger, observed(principal), tamperedTokenSignal(request.path, token, principal, options.config.accessToken.audience));

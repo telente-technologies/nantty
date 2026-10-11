@@ -69,7 +69,7 @@ describe("money routes", () => {
   });
 
   it.each([
-    ["POST", "/webhooks/paystack"],
+    ["POST", "/webhooks/flutterwave"],
     ["POST", "/webhooks/store-notifications/apple_iap"],
   ])("provider webhooks go raw to go-money only: %s %s", (method, path) => {
     const route = resolveUpstreamRouteForRequest(method, path);
@@ -78,8 +78,8 @@ describe("money routes", () => {
   });
 
   it("does not route webhooks over GET or the legacy payments path without authentication", () => {
-    expect(resolveUpstreamRouteForRequest("GET", "/webhooks/paystack")).toBeUndefined();
-    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/payments/webhooks/paystack")?.authentication).toBe("required");
+    expect(resolveUpstreamRouteForRequest("GET", "/webhooks/flutterwave")).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/payments/webhooks/flutterwave")?.authentication).toBe("required");
   });
 });
 

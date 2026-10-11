@@ -23,7 +23,7 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if (verb !== "GET" && (lowered === "/api/v1/seller/staff" || lowered.startsWith("/api/v1/seller/staff/") || lowered.startsWith("/api/v1/stores/team-requests/"))) return "sellerTeamWrite";
   if (verb !== "GET" && (lowered.startsWith("/api/v1/seller/wallet/payouts") || lowered.startsWith("/api/v1/seller/wallet/payout-accounts"))) return "sellerMoneyWrite";
   if (verb === "POST" && (/^\/api\/v1\/seller\/conversations\/[^/]+\/messages$/.test(lowered) || /^\/api\/v1\/conversations\/stores\/[^/]+\/messages$/.test(lowered))) return "storeMessageSend";
-  if (verb === "POST" && (lowered === "/api/v1/feeds/interactions" || lowered === "/api/v1/feeds/interactions/batch")) return "feedInteraction";
+  if (verb === "POST" && (lowered === "/api/v1/feeds/interactions" || lowered === "/api/v1/feeds/interactions/batch" || lowered === "/api/v1/analytics/product-interactions")) return "feedInteraction";
   if ((verb === "GET" && lowered === "/api/v1/link-previews/resolve") || (verb === "POST" && /^\/api\/v1\/posts\/[^/]+\/link-preview$/.test(lowered))) return "linkPreview";
   if (verb === "GET" && lowered.startsWith("/api/v1/widgets/")) return "widgetRead";
   if (verb === "POST" && (lowered === "/api/v1/auth/widget-token" || lowered === "/api/v1/auth/realtime-token")) return "widgetToken";

@@ -23,7 +23,7 @@ export interface ProxiedResponse {
 
 const forwardedRequestHeaders = ["accept", "authorization", "content-type", "idempotency-key", "if-match", "if-none-match", "x-chunk-sha256", "x-seller-store", "x-seller-location", "user-agent", "x-client-platform", "x-client-region", "x-device-id", "x-step-up-token", "x-store-storefront"];
 const cdnCountryHeader = "cloudfront-viewer-country";
-const webhookSignatureHeaders = ["x-paystack-signature", "verif-hash", "x-signature", "x-apple-signature", "x-goog-signature", "x-zudomart-push-token", "x-webhook-id", "x-webhook-timestamp"];
+const webhookSignatureHeaders = ["verif-hash", "flutterwave-signature", "x-signature", "x-apple-signature", "x-goog-signature", "x-zudomart-push-token", "x-webhook-id", "x-webhook-timestamp"];
 const returnedResponseHeaders = ["cache-control", "content-type", "etag", "idempotent-replayed", "retry-after", "x-request-id"];
 
 const redirectStatuses = new Set([301, 302, 303, 307, 308]);
