@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType, ReactNode } from "react";
 
-import { OfflineBanner, ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
+import { ConnectionStatus, ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
 
 import { CreatorProgramGate } from "@/components/shell/creatorProgramGate";
 import { SignOutButton } from "@/components/shell/signOutButton";
@@ -41,7 +41,7 @@ export function StudioShell({ children }: { readonly children: ReactNode }) {
 
   return (
     <div className={styles.shell}>
-      <OfflineBanner />
+      <ConnectionStatus />
       <header className={styles.topBar}>
         <Link href="/home" className={styles.brand} aria-label="Zudomart Studio home">
           <ZudomartWordmark productLabel="Studio" height={20} withSymbol collapseToMarkOnSmallScreens />

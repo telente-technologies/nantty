@@ -43,7 +43,7 @@ export function readAuthEndpointResult(result: BackendResult): AuthEndpointResul
   return {
     status: result.status,
     session: !isError && payload?.user ? { accessToken: payload.accessToken, refreshToken: payload.refreshToken, expiresIn: payload.expiresIn, user: toStudioViewer(payload.user) } : null,
-    error: isError ? { message: payload?.message ?? "Something went wrong. Try again.", code: payload?.code } : null,
+    error: isError ? { message: payload?.message ?? "We couldn't sign you in just now. Try again.", code: payload?.code } : null,
   };
 }
 

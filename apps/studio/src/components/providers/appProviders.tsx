@@ -9,6 +9,8 @@ import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { StudioThemeProvider } from "@/components/theme/studioThemeProvider";
 import { ConfirmDialogHost, type ThemePreference } from "@zudomart/web-kit";
 
+import { StudioErrorExperienceProvider } from "@/components/errors/errorExperience.provider";
+
 import { SessionProvider } from "./sessionProvider";
 import type { User } from "@/types";
 
@@ -32,7 +34,7 @@ export function AppProviders({ viewer, csrfToken, themePreference, children }: {
     <QueryClientProvider client={queryClient}>
       <SessionProvider viewer={viewer} csrfToken={csrfToken}>
         <StudioThemeProvider initialPreference={themePreference}>
-          {children}
+          <StudioErrorExperienceProvider>{children}</StudioErrorExperienceProvider>
           <ConfirmDialogHost />
           <ConsentBannerHost />
         </StudioThemeProvider>

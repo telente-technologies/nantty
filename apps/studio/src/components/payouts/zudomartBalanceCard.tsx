@@ -3,7 +3,6 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import type { ZudomartWalletSummary } from "@/types/zudomartWallet.type";
 import { formatWalletLineAmount, readVerificationMessage, readWalletLines } from "@/utils/zudomartWallet.util";
 
@@ -24,7 +23,7 @@ export function WalletVerificationBanner({ summary, payoutSetupHref }: { readonl
 }
 
 export function ZudomartBalanceCard({ wallet }: { readonly wallet: UseQueryResult<ZudomartWalletSummary> }) {
-  if (wallet.isError) return <ErrorState title="Your Zudomart balance didn't load" description={readErrorMessageForDisplay(wallet.error)} onRetry={() => void wallet.refetch()} />;
+  if (wallet.isError) return <ErrorState title="Your Zudomart balance didn't load" error={wallet.error} onRetry={() => void wallet.refetch()} />;
   if (!wallet.data) return <Skeleton height={220} />;
   const lines = readWalletLines(wallet.data);
   return (

@@ -1,10 +1,15 @@
 import type { ReactNode } from "react";
 
-import { BrandLoader, type BrandLoaderSize } from "@zudomart/web-kit";
+import { BrandLoader, ErrorState as KitErrorState, resolveCallerErrorCopy, type BrandLoaderSize, type ErrorStateProps } from "@zudomart/web-kit";
 
 import styles from "./feedback.module.css";
 
-export { EmptyState, ErrorState, Skeleton } from "@zudomart/web-kit";
+export { EmptyState, Skeleton } from "@zudomart/web-kit";
+
+export function ErrorState(props: ErrorStateProps) {
+  const copy = props.error !== undefined && props.description === undefined ? resolveCallerErrorCopy(props.error, undefined) : {};
+  return <KitErrorState {...props} kind={props.kind ?? copy.kind} description={props.description ?? copy.description} />;
+}
 
 export function Spinner({ label = "Loading", size = "md" }: { readonly label?: string; readonly size?: BrandLoaderSize }) {
   return (

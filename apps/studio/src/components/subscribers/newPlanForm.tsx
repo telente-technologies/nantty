@@ -61,7 +61,7 @@ export function NewPlanForm({ currency, onCreated }: { readonly currency: string
     create.mutate();
   }
 
-  if (tiers.isError) return <ErrorState title="Prices didn't load" description={readErrorMessageForDisplay(tiers.error)} onRetry={() => void tiers.refetch()} />;
+  if (tiers.isError) return <ErrorState title="Prices didn't load" error={tiers.error} onRetry={() => void tiers.refetch()} />;
   return (
     <form onSubmit={submit} className={pageStyles.page}>
       <SegmentedControl label="Billing" options={intervalOptions} value={interval} onChange={(value) => { setInterval(value); setTierName(null); }} />

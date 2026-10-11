@@ -1,7 +1,10 @@
+import { parseRetryAfterHeader, readFriendlyErrorMessage, readRequestIdHeader } from "@zudomart/web-kit";
+
 export interface ApiErrorBody {
   readonly message: string;
   readonly code?: string;
   readonly issues?: readonly { readonly path?: readonly string[]; readonly message: string }[];
+  readonly details?: Readonly<Record<string, unknown>>;
 }
 
 let currentCsrfToken: string | null = null;
@@ -15,6 +18,9 @@ export class StudioRequestError extends Error {
     public readonly status: number,
     public readonly code: string,
     message: string,
+    public readonly details?: Readonly<Record<string, unknown>>,
+    public readonly requestId?: string,
+    public readonly retryAfterSeconds?: number,
   ) {
     super(message);
     this.name = "StudioRequestError";
@@ -80,11 +86,11 @@ export async function sendRequestToStudioServer<Payload>(apiPath: string, option
   if (response.status === 401) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
     if (errorBody?.code === "SESSION_EXPIRED" || errorBody?.code === "UNAUTHENTICATED" || errorBody?.code === "UNAUTHORIZED") redirectToLoginAfterSessionEnded();
-    throw new StudioRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.");
+    throw new StudioRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.", undefined, readRequestIdHeader(response.headers));
   }
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    throw new StudioRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? `The request failed (HTTP ${response.status}). Try again.`);
+    throw new StudioRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "That didn't work. Try again.", errorBody?.details, readRequestIdHeader(response.headers), parseRetryAfterHeader(response.headers.get("retry-after")));
   }
   if (response.status === 204) return undefined as Payload;
   return (await response.json()) as Payload;
@@ -95,10 +101,8 @@ export function createIdempotencyKey(prefix = "idem"): string {
 }
 
 export function readErrorMessageForDisplay(error: unknown): string {
-  if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline. Check your connection and we'll retry when you're back.";
-  if (error instanceof StudioRequestError) return error.message;
-  if (error instanceof Error && error.name !== "AbortError") return "Something went wrong. Try again.";
-  return "Something went wrong. Try again.";
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return "You're offline. Check your data or Wi-Fi and we'll retry when you're back.";
+  return readFriendlyErrorMessage(error);
 }
 
 export function isNotFoundError(error: unknown): boolean {

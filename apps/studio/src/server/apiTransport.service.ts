@@ -52,7 +52,7 @@ async function callMockBackend(call: BackendCall): Promise<BackendResult> {
     return buildJsonResult(200, value);
   } catch (error) {
     if (error instanceof ApiError) return buildErrorResult(error.status, error.message, error.code ?? "MOCK_ERROR");
-    return buildErrorResult(500, error instanceof Error ? error.message : "Something went wrong", "MOCK_FAILURE");
+    return buildErrorResult(500, error instanceof Error ? error.message : "The mock backend failed.", "MOCK_FAILURE");
   }
 }
 
@@ -79,9 +79,17 @@ async function callRealBackend(call: BackendCall, headers: Headers): Promise<Bac
   }
 }
 
+function stampRequestId(result: BackendResult, requestId: string | null): BackendResult {
+  if (!requestId || result.headers.has("x-request-id")) return result;
+  const headers = new Headers(result.headers);
+  headers.set("x-request-id", requestId);
+  return { ...result, headers };
+}
+
 export async function callStudioBackend(call: BackendCall): Promise<BackendResult> {
   const headers = buildOutgoingHeaders(call);
-  return shouldUseRealBackend(call.path) ? callRealBackend(call, headers) : callMockBackend(call);
+  const result = await (shouldUseRealBackend(call.path) ? callRealBackend(call, headers) : callMockBackend(call));
+  return stampRequestId(result, headers.get("X-Request-Id"));
 }
 
 export function readJsonFromBackendResult<Payload>(result: BackendResult): Payload | null {

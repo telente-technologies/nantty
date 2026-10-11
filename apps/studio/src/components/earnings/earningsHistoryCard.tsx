@@ -5,7 +5,6 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, DataRows } from "@/components/ui/studioPage";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { creatorService } from "@/services/creator.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
@@ -23,7 +22,7 @@ export function EarningsHistoryCard() {
   const items = earnings.data?.pages.flatMap((page) => page.data) ?? [];
   return (
     <Card title="Earnings history">
-      {earnings.isError ? <ErrorState title="Earnings history didn't load" description={readErrorMessageForDisplay(earnings.error)} onRetry={() => void earnings.refetch()} /> : null}
+      {earnings.isError ? <ErrorState title="Earnings history didn't load" error={earnings.error} onRetry={() => void earnings.refetch()} /> : null}
       {earnings.isLoading ? <Skeleton height={120} /> : null}
       {earnings.isSuccess && items.length === 0 ? <EmptyState title="No earnings yet" description="Each gift, tip, subscription and commission appears here with when it becomes available to withdraw." /> : null}
       <DataRows
@@ -45,7 +44,7 @@ export function WithdrawalsCard() {
   const withdrawals = useQuery({ queryKey: ["wallet", "withdrawals"], queryFn: creatorService.listWithdrawals });
   return (
     <Card title="Withdrawals">
-      {withdrawals.isError ? <ErrorState title="Withdrawals didn't load" description={readErrorMessageForDisplay(withdrawals.error)} onRetry={() => void withdrawals.refetch()} /> : null}
+      {withdrawals.isError ? <ErrorState title="Withdrawals didn't load" error={withdrawals.error} onRetry={() => void withdrawals.refetch()} /> : null}
       {withdrawals.isLoading ? <Skeleton height={80} /> : null}
       {withdrawals.data && withdrawals.data.data.length === 0 ? <EmptyState title="No withdrawals yet" description="Once your payout details are verified, withdraw any available balance to your bank." /> : null}
       <DataRows
@@ -63,7 +62,7 @@ export function WithdrawalsCard() {
 export function RevenueRulesCard() {
   const rules = useQuery({ queryKey: ["creator", "revenue-rules"], queryFn: creatorService.fetchRevenueRules, staleTime: 10 * 60_000 });
   const status = useQuery({ queryKey: ["creator", "status"], queryFn: creatorService.fetchStatus });
-  if (rules.isError) return <ErrorState title="Revenue shares didn't load" description={readErrorMessageForDisplay(rules.error)} onRetry={() => void rules.refetch()} />;
+  if (rules.isError) return <ErrorState title="Revenue shares didn't load" error={rules.error} onRetry={() => void rules.refetch()} />;
   if (!rules.data) return <Skeleton height={160} />;
   const data = rules.data;
   return (

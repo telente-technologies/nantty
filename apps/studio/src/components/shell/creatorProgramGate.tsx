@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ErrorState, Skeleton } from "@/components/ui/feedback";
 import { Card, DataRows, Muted, PageHeader, pageStyles } from "@/components/ui/studioPage";
 import { webappLinks } from "@/config/webappLinks.config";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { creatorService } from "@/services/creator.service";
 
 const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
@@ -29,7 +28,7 @@ export function CreatorProgramGate() {
       <PageHeader title="Studio is for Creator Program members" subtitle="Members go live, receive gifts, sell subscriptions and get paid. Here's how close you are." />
       <ApplicationState />
       <Card title="Your requirements">
-        {eligibility.isError ? <ErrorState title="Requirements didn't load" description={readErrorMessageForDisplay(eligibility.error)} onRetry={() => void eligibility.refetch()} /> : null}
+        {eligibility.isError ? <ErrorState title="Requirements didn't load" error={eligibility.error} onRetry={() => void eligibility.refetch()} /> : null}
         {eligibility.isLoading ? <Skeleton height={120} /> : null}
         {eligibility.data ? (
           <>

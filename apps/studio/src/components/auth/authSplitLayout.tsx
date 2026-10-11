@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { OfflineBanner, ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
+import { ConnectionStatus, ThemeSwitcher, ZudomartWordmark } from "@zudomart/web-kit";
 import type { ReactNode } from "react";
 
 import styles from "./authSplitLayout.module.css";
@@ -13,7 +13,7 @@ const proofPoints = [
 export function AuthSplitLayout({ children }: { readonly children: ReactNode }) {
   return (
     <>
-      <OfflineBanner />
+      <ConnectionStatus />
       <div className={styles.page}>
         <aside className={styles.aside} aria-label="About Zudomart Studio">
           <div className={styles.asideInner}>
