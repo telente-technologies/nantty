@@ -32,7 +32,7 @@ export function LiveGiftGoalEditorSheet({ liveId, goal, visible, onClose }: { li
     saveGoal.mutate({ goalId: editableGoal?.id ?? null, input: { title: title.trim(), targetCoins } }, { onSuccess: onClose });
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title={editableGoal ? "Edit gift goal" : "Set a gift goal"} floating>
+    <BottomSheet visible={visible} onClose={onClose} title={editableGoal ? "Edit gift goal" : "Set a gift goal"} floating scrollable>
       <View style={styles.body}>
         <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           <Trophy24Icon size={22} color={colors.textMuted} />
@@ -53,4 +53,4 @@ export function LiveGiftGoalEditorSheet({ liveId, goal, visible, onClose }: { li
   );
 }
 
-const useStyles = makeThemedStyles((colors) => StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 20, gap: 14 } }));
+const useStyles = makeThemedStyles((colors) => StyleSheet.create({ body: { paddingBottom: 4, gap: 14 } }));

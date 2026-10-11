@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { Check16Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
@@ -66,7 +66,7 @@ export function ReportSheet({ target, onClose }: ReportSheetProps) {
   const hasFinishedReporting = submitReport.isSuccess || hasSubmittedCopyrightClaim;
 
   return (
-    <BottomSheet visible={!!target} onClose={onClose} title={hasFinishedReporting ? "Thanks for letting us know" : `Report ${targetName}`}>
+    <BottomSheet visible={!!target} onClose={onClose} title={hasFinishedReporting ? "Thanks for letting us know" : `Report ${targetName}`} scrollable>
       {hasFinishedReporting ? (
         <View style={styles.body}>
           <Text size={14} lineHeight={19.6} color={colors.textMuted}>
@@ -77,7 +77,7 @@ export function ReportSheet({ target, onClose }: ReportSheetProps) {
           <Button title="Done" onPress={onClose} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+        <View style={styles.body}>
           <Text size={14} weight={500} lineHeight={16.8}>
             Why are you reporting this {targetName}?
           </Text>
@@ -133,14 +133,14 @@ export function ReportSheet({ target, onClose }: ReportSheetProps) {
           {isShowingCopyrightClaimForm ? null : (
             <Button title="Submit report" disabled={!selectedReason} loading={submitReport.isPending} onPress={() => submitReport.mutate()} />
           )}
-        </ScrollView>
+        </View>
       )}
     </BottomSheet>
   );
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
+  body: { paddingBottom: 8, gap: 12 },
   reasonRow: {
     minHeight: 44,
     flexDirection: "row",

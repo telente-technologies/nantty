@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from "react";
-import { Platform, TurboModuleRegistry, type ScrollView, type ScrollViewProps } from "react-native";
+import { NativeModules, Platform, TurboModuleRegistry, type ScrollView, type ScrollViewProps } from "react-native";
 import type { Ref } from "react";
 
 import {
@@ -14,13 +14,20 @@ export type { KeyboardAnimationValues, KeyboardMotionEvent, KeyboardMotionHandle
 
 export const KEYBOARD_CONTROLLER_NATIVE_MODULE = "KeyboardController";
 
-export function hasKeyboardControllerNativeModule(platform: string = Platform.OS): boolean {
-  if (platform === "web") return false;
+function safely(check: () => boolean): boolean {
   try {
-    return TurboModuleRegistry.get(KEYBOARD_CONTROLLER_NATIVE_MODULE) != null;
+    return check();
   } catch {
     return false;
   }
+}
+
+export function hasKeyboardControllerNativeModule(platform: string = Platform.OS): boolean {
+  if (platform === "web") return false;
+  return (
+    safely(() => TurboModuleRegistry.get(KEYBOARD_CONTROLLER_NATIVE_MODULE) != null) ||
+    safely(() => NativeModules[KEYBOARD_CONTROLLER_NATIVE_MODULE] != null)
+  );
 }
 
 export interface KeyboardAwareScrollViewProps extends ScrollViewProps {

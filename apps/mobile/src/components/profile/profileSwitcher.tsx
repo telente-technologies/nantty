@@ -12,21 +12,24 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { brandsService } from "@/services/sellers/brands.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
+import { useAuthStore } from "@/store/auth.store";
 import { useProfileSwitcherSheetStore } from "@/store/profileSwitcherSheet.store";
+import { useLinkedProfiles } from "@/hooks/useLinkedProfiles.hook";
 
 import { verificationForProfileKind } from "@/utils/verificationProfile.util";
 
 import { VerificationBadge } from "./verificationBadge";
 
-const KIND_LABELS = { person: "Personal", business: "Business", brand: "Brand", store: "Store", government: "Government" } as const;
+const KIND_LABELS = { person: "Personal", business: "Business page", brand: "Brand", store: "Store", government: "Government" } as const;
 
 function useActingProfileWithServerFallback() {
   const { actingProfile, setActingProfile } = useActingProfileStore();
-  const current = useQuery({ queryKey: ["users", "me", "acting-profile"], queryFn: brandsService.fetchMyActingProfile });
+  const isSignedIn = useAuthStore((s) => s.status === "signedIn");
+  const current = useQuery({ queryKey: ["users", "me", "acting-profile"], queryFn: brandsService.fetchMyActingProfile, enabled: isSignedIn });
   useEffect(() => {
-    if (current.data && !actingProfile) setActingProfile(current.data);
-  }, [current.data, actingProfile, setActingProfile]);
-  return actingProfile ?? current.data ?? null;
+    if (isSignedIn && current.data && !actingProfile) setActingProfile(current.data);
+  }, [isSignedIn, current.data, actingProfile, setActingProfile]);
+  return isSignedIn ? (actingProfile ?? current.data ?? null) : null;
 }
 
 export function ProfileSwitcherSheet() {
@@ -38,6 +41,11 @@ export function ProfileSwitcherSheet() {
   const setActingProfile = useActingProfileStore((s) => s.setActingProfile);
   const active = useActingProfileWithServerFallback();
   const profiles = useQuery({ queryKey: ["users", "me", "profiles"], queryFn: brandsService.listMyProfiles, enabled: isProfileSwitcherSheetVisible });
+  const linked = useLinkedProfiles();
+  const openScreen = (screen: "ManageProfiles" | "CreateBrand") => {
+    closeProfileSwitcherSheet();
+    navigation.navigate(screen);
+  };
 
   const switchProfile = useMutation({
     mutationFn: brandsService.switchActingProfile,
@@ -64,18 +72,25 @@ export function ProfileSwitcherSheet() {
                 <Text size={14} weight={500} lineHeight={16.8}>{profile.name}</Text>
                 <VerificationBadge verification={verificationForProfileKind(profile.verification, profile.kind)} size={14} />
               </View>
-              <Text size={12} lineHeight={16} color={colors.textMuted}>@{profile.handle} · {KIND_LABELS[profile.kind]}</Text>
+              <Text size={12} lineHeight={16} color={colors.textMuted}>@{profile.handle} · {KIND_LABELS[profile.kind]}{profile.onHold ? " · On hold" : ""}</Text>
             </View>
             <View style={[styles.radio, profile.id === active.id ? styles.radioOn : null]}>{profile.id === active.id ? <Check16Icon size={12} color={colors.onPrimary} /> : null}</View>
           </Pressable>
         ))}
-        <Pressable accessibilityRole="button" onPress={() => { closeProfileSwitcherSheet(); navigation.navigate("CreateBusinessProfile"); }} style={styles.row}>
-          <View style={styles.plus}><Plus16Icon color={colors.primary} /></View>
-          <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>Create business profile</Text>
-        </Pressable>
-        <Pressable accessibilityRole="button" onPress={() => { closeProfileSwitcherSheet(); navigation.navigate("CreateBrand"); }} style={styles.row}>
-          <View style={styles.plus}><Plus16Icon color={colors.primary} /></View>
-          <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>Create a brand profile</Text>
+        {linked.data?.canCreate.store ? (
+          <Pressable accessibilityRole="button" onPress={() => openScreen("ManageProfiles")} style={styles.row}>
+            <View style={styles.plus}><Plus16Icon color={colors.primary} /></View>
+            <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>Add a Store or Business page</Text>
+          </Pressable>
+        ) : null}
+        {linked.data?.canCreate.brand ? (
+          <Pressable accessibilityRole="button" onPress={() => openScreen("CreateBrand")} style={styles.row}>
+            <View style={styles.plus}><Plus16Icon color={colors.primary} /></View>
+            <Text size={14} weight={500} lineHeight={16.8} color={colors.primary}>Create a brand</Text>
+          </Pressable>
+        ) : null}
+        <Pressable accessibilityRole="button" onPress={() => openScreen("ManageProfiles")} style={styles.row}>
+          <Text size={14} weight={500} lineHeight={16.8} color={linked.data?.choiceRequired ? colors.error : colors.textMuted}>{linked.data?.choiceRequired ? "Choose which profiles to keep" : "Manage profiles"}</Text>
         </Pressable>
       </View>
     </BottomSheet>

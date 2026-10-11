@@ -25,6 +25,10 @@ const DEFAULT_DURATION_MS = 250;
 const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
 const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
+export function fallbackLiftsLayoutItself(platform: string = Platform.OS): boolean {
+  return platform === "ios";
+}
+
 function describeKeyboardEvent(event: KeyboardEvent | undefined, visible: boolean): KeyboardMotionEvent {
   const height = visible ? (event?.endCoordinates.height ?? 0) : 0;
   return { height, progress: visible ? 1 : 0, duration: event?.duration || DEFAULT_DURATION_MS, target: -1 };
@@ -44,7 +48,8 @@ export function useFallbackKeyboardAnimation(): KeyboardAnimationValues {
   useEffect(
     () =>
       subscribeToKeyboardMotion((event) => {
-        height.value = withTiming(-event.height, { duration: event.duration });
+        const lift = fallbackLiftsLayoutItself() ? event.height : 0;
+        height.value = withTiming(-lift, { duration: event.duration });
         progress.value = withTiming(event.progress, { duration: event.duration });
       }),
     [height, progress],

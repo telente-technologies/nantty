@@ -23,7 +23,7 @@ export function PhoneNumberSheet({ visible, initialPhone, saving, onClose, onSav
   const [phone, setPhone] = useState(initialPhone ?? "");
   const valid = isValidNigerianPhoneNumber(phone);
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Phone number">
+    <BottomSheet visible={visible} onClose={onClose} title="Phone number" scrollable>
       <View style={styles.body}>
         <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           <Phone24Icon size={22} color={colors.textMuted} />
@@ -46,4 +46,4 @@ export function PhoneNumberSheet({ visible, initialPhone, saving, onClose, onSav
   );
 }
 
-const styles = StyleSheet.create({ body: { paddingHorizontal: 16, paddingBottom: 16, gap: 16 } });
+const styles = StyleSheet.create({ body: { paddingBottom: 4, gap: 16 } });

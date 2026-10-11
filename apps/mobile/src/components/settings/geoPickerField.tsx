@@ -84,7 +84,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   disabled: { opacity: 0.5 },
   value: { flex: 1 },
   search: { paddingHorizontal: 16, paddingBottom: 8 },
-  list: { maxHeight: 360, paddingHorizontal: 16 },
+  list: { flexShrink: 1, maxHeight: 360, paddingHorizontal: 16 },
   row: { minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.background },
   empty: { paddingVertical: 24 },
 }));

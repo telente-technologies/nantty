@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import { followQueryKeys, setPostNotificationLevelInCache } from "@/cache/followCache.util";
 import { followsService } from "@/services/social/follows.service";
@@ -27,6 +28,17 @@ export function useMyProfileQuery() {
       return profile;
     },
   });
+}
+
+export function useHydrateSignedInUser() {
+  const isSignedIn = useAuthStore((s) => s.status === "signedIn");
+  const hasUser = useAuthStore((s) => s.user !== null);
+  const updateSignedInUser = useAuthStore((s) => s.updateSignedInUser);
+  const profile = useQuery({ queryKey: profileQueryKeys.myProfile, queryFn: () => usersService.fetchMyProfile(), enabled: isSignedIn });
+  useEffect(() => {
+    const auth = useAuthStore.getState();
+    if (auth.status === "signedIn" && !hasUser && profile.data) updateSignedInUser(profile.data);
+  }, [hasUser, profile.data, updateSignedInUser]);
 }
 
 export function useUserProfileQuery(userId: string) {

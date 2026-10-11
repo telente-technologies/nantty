@@ -37,7 +37,7 @@ export function LiveSafetyAppealSheet({ liveId, onClose, onAppealed }: LiveSafet
   }, [liveId]);
 
   return (
-    <BottomSheet visible={!!liveId} onClose={onClose} title={appeal.isSuccess ? "Appeal sent" : "Appeal this pause"}>
+    <BottomSheet visible={!!liveId} onClose={onClose} title={appeal.isSuccess ? "Appeal sent" : "Appeal this pause"} scrollable>
       <View style={styles.body}>
         <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           {appeal.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <ShieldCheck24Icon size={22} color={colors.textMuted} />}
@@ -75,7 +75,7 @@ export function LiveSafetyAppealSheet({ liveId, onClose, onAppealed }: LiveSafet
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
+  body: { paddingBottom: 8, gap: 12 },
   input: {
     minHeight: 96, padding: 12, borderWidth: 1, borderColor: colors.divider, borderRadius: 8, textAlignVertical: "top",
     fontFamily: fontFamily[400], fontSize: 14, letterSpacing: calculateDefaultLetterSpacing(14), color: colors.text,

@@ -47,7 +47,7 @@ export function BrandPickerField({ selectedBrandName, onSelectBrand }: { selecte
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   field: { gap: 8 },
   box: { height: 42, borderWidth: 1, borderColor: colors.textSubtle, borderRadius: 8, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: colors.surface },
-  sheet: { paddingHorizontal: 16, paddingBottom: 16, gap: 8 },
-  list: { maxHeight: 380 },
+  sheet: { flexShrink: 1, paddingHorizontal: 16, paddingBottom: 16, gap: 8 },
+  list: { flexShrink: 1, maxHeight: 380 },
   none: { minHeight: 48, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: colors.background },
 }));

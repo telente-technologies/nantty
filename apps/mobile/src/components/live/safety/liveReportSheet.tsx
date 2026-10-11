@@ -1,7 +1,7 @@
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { Check16Icon, Flag24Icon, Lifebuoy24Icon, SealCheck20Icon } from "@/components/icons";
 import type { MainStackParamList } from "@/navigation/navigation.types";
@@ -90,7 +90,7 @@ export function LiveReportSheet({ target, onClose }: LiveReportSheetProps) {
   const subject = target?.subjectLabel ?? "this live";
 
   return (
-    <BottomSheet visible={!!target} onClose={onClose} title={submitReport.isSuccess ? "Thanks for letting us know" : `Report ${subject}`}>
+    <BottomSheet visible={!!target} onClose={onClose} title={submitReport.isSuccess ? "Thanks for letting us know" : `Report ${subject}`} scrollable>
       {submitReport.isSuccess ? (
         <View style={styles.body}>
           <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
@@ -107,7 +107,7 @@ export function LiveReportSheet({ target, onClose }: LiveReportSheetProps) {
           <Button title="Done" onPress={onClose} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+        <View style={styles.body}>
           <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
             <Flag24Icon size={22} color={colors.error} />
           </View>
@@ -170,14 +170,14 @@ export function LiveReportSheet({ target, onClose }: LiveReportSheetProps) {
           ) : null}
           <Button title="Submit report" disabled={!selectedReason || isCoolingDown} loading={submitReport.isPending} onPress={() => submitReport.mutate()} />
           <Text size={13} lineHeight={18} color={colors.primary} align="center" accessibilityRole="link" onPress={openLiveSafetyHelp}>How live safety works</Text>
-        </ScrollView>
+        </View>
       )}
     </BottomSheet>
   );
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 24, gap: 12 },
+  body: { paddingBottom: 8, gap: 12 },
   reasonRow: { minHeight: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: colors.divider },
   reasonLabel: { flexDirection: "row", alignItems: "center", gap: 8 },
   notice: { padding: 12, borderRadius: 8, backgroundColor: colors.chip },

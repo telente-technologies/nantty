@@ -29,7 +29,7 @@ export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose,
   const readyToSubmit = courierName.length > 1 && trackingNumber.trim().length >= 4;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Mark as shipped">
+    <BottomSheet visible={visible} onClose={onClose} title="Mark as shipped" scrollable>
       <View style={styles.body}>
         <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
           <Truck24Icon size={22} color={colors.textMuted} />
@@ -72,6 +72,6 @@ export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose,
 }
 
 const styles = StyleSheet.create({
-  body: { paddingHorizontal: 16, paddingBottom: 20, gap: 12 },
+  body: { paddingBottom: 4, gap: 12 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

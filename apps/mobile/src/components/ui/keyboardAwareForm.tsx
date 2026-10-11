@@ -96,7 +96,7 @@ function FallbackKeyboardAwareForm({ children, scrollProps, bottomOffset, style,
   const visibility = useKeepFocusedInputVisible({ bottomGap: bottomOffset });
   return (
     <KeyboardAvoidingView behavior="padding" style={[styles.flex, style]} testID="keyboard-aware-form-fallback">
-      <ScrollView {...scrollProps} {...visibility.scrollProps} automaticallyAdjustKeyboardInsets={false}>
+      <ScrollView {...scrollProps} {...visibility.scrollProps}>
         {children}
       </ScrollView>
       {footer ? <View style={[footerStyle, { paddingBottom: safeAreaHandledByParent ? 0 : insets.bottom }]}>{footer}</View> : null}
