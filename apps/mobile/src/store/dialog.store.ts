@@ -3,11 +3,13 @@ import { create } from "zustand";
 
 import type { ModalAction } from "@/components/ui/modalActions";
 import type { ModalTone } from "@/components/ui/modalChrome.constant";
+import type { ModalIntent } from "@/components/ui/modalIntent";
 
 export interface DialogRequest {
   readonly title: string;
   readonly message?: string;
   readonly tone?: ModalTone;
+  readonly intent?: ModalIntent;
   readonly icon?: ReactNode;
   readonly actions?: readonly ModalAction[];
   readonly dismissible?: boolean;
