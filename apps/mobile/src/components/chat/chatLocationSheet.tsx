@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from "react-native";
+import { Linking, Pressable, StyleSheet, View } from "react-native";
 
 import { MapPin24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { readChatLocationConsent, readCurrentSharedLocation, requestLocationAccess, saveChatLocationConsent } from "@/services/chat/locationSharing.service";
@@ -65,7 +66,7 @@ export function ChatLocationSheet({ visible, onClose, onSendCurrentLocation, onS
   );
 
   const renderBody = () => {
-    if (hasConsented === null) return <ActivityIndicator color={colors.primary} />;
+    if (hasConsented === null) return <BrandLoader size="md" style={styles.loader} />;
     if (!hasConsented) {
       return (
         <View style={styles.message}>
@@ -107,7 +108,7 @@ export function ChatLocationSheet({ visible, onClose, onSendCurrentLocation, onS
         {LIVE_LOCATION_DURATIONS.map((duration) =>
           renderChoiceRow(duration.label, () => void shareAfterLocating((location) => onStartLiveLocation(location, duration.minutes))),
         )}
-        {isLocating ? <ActivityIndicator color={colors.primary} style={styles.spinner} /> : null}
+        {isLocating ? <BrandLoader size="sm" label="Finding your location…" style={styles.spinner} /> : null}
       </View>
     );
   };
@@ -126,4 +127,5 @@ const useStyles = makeThemedStyles(() => StyleSheet.create({
   rowIconSpacer: { width: 24 },
   sectionLabel: { marginTop: 8 },
   spinner: { marginTop: 8 },
+  loader: { paddingVertical: 24 },
 }));

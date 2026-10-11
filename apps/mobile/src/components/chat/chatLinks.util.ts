@@ -68,6 +68,8 @@ export const buildInternalRoute = (reference: SharedContentReference, profileUse
       return { name: "Store", params: { storeId: reference.id } } as const;
     case "live":
       return { name: "Live", params: { liveId: reference.id } } as const;
+    case "order":
+      return { name: "OrderDetail", params: { orderId: reference.id } } as const;
     case "profile":
       return profileUserId ? ({ name: "UserProfile", params: { userId: profileUserId } } as const) : ({ name: "UserProfileByUsername", params: { username: reference.id } } as const);
     default:

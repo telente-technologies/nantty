@@ -10,7 +10,8 @@ import type { Message } from "@/types";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { buildMapsUrl, formatLiveUntilTime } from "@/utils/mapLinks.util";
 
-import { useConversationMessageCache } from "./conversationMessageCache.hook";
+import { storeDeliveredMessage } from "@/cache/messageRealtimeCache.util";
+import { useQueryClient } from "@tanstack/react-query";
 import { StaticMapPreview } from "./staticMapPreview";
 
 const LIVE_STATE_REFRESH_MS = 30_000;
@@ -23,7 +24,7 @@ export function LocationBubble({ message, isMine }: { readonly message: Message;
   const styles = useStyles();
   const location = message.location!;
   const isSharingFromThisDevice = useIsSharingLiveLocation(message.id);
-  const { applyServerVersionOfMessage } = useConversationMessageCache(message.conversationId);
+  const queryClient = useQueryClient();
   const [, refreshLiveState] = useState(0);
   const [hasCopiedAddress, setHasCopiedAddress] = useState(false);
   const isLiveKind = message.kind === "liveLocation";
@@ -38,7 +39,7 @@ export function LocationBubble({ message, isMine }: { readonly message: Message;
 
   const openInMaps = () => {
     Linking.openURL(buildMapsUrl(location.latitude, location.longitude, location.address)).catch(() =>
-      showAlertWithButtons("Couldn't open maps", "No maps app could open this location."),
+      showAlertWithButtons("Couldn't open maps", "No maps app could open this location.", undefined, { intent: "location" }),
     );
   };
 
@@ -49,7 +50,7 @@ export function LocationBubble({ message, isMine }: { readonly message: Message;
   };
 
   const stopSharing = () => {
-    stopSharingLiveLocation(message.id, applyServerVersionOfMessage).catch(() => showAlertWithButtons("Couldn't stop sharing", "Please try again."));
+    stopSharingLiveLocation(message.conversationId, message.id, (control) => storeDeliveredMessage(queryClient, control)).catch(() => showAlertWithButtons("Couldn't stop sharing", "Please try again.", undefined, { intent: "location" }));
   };
 
   return (

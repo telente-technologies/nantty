@@ -58,14 +58,15 @@ export function ChatBubble({
   const styles = useStyles();
   const { openImagePreview, imagePreviewElement } = useImagePreview();
   if (message.kind === "system") return <SystemNoticeRow text={message.text} />;
+  if (message.kind === "control") return null;
   const isMediaExpired = !!message.media && !!message.mediaExpiresAt && message.mediaExpiresAt <= new Date().toISOString();
   const isRich = isRichMessage(message);
   const isDocumentExpired = message.kind === "document" && !!message.mediaExpiresAt && message.mediaExpiresAt <= new Date().toISOString();
   const isVoiceNote = message.kind === "voice" && !!message.media && !isMediaExpired;
   const isPhoto = message.kind === "image" && !!message.media?.url && !isMediaExpired;
-  const isShared = message.kind === "shared" && !!message.sharedContent;
+  const isShared = message.kind === "shared" && !!message.sharedReference;
   const externalUrl = message.kind === "text" || !message.kind ? findFirstExternalUrl(message.text) : null;
-  const internalReference = isShared ? message.sharedContent!.reference : message.kind === "text" || !message.kind ? findFirstInternalReference(message.text) : null;
+  const internalReference = isShared ? message.sharedReference! : message.kind === "text" || !message.kind ? findFirstInternalReference(message.text) : null;
   const hasBubble = !isShared || message.text.length > 0 || !!message.decryptionNotice;
   const isShort = !isRich && !isVoiceNote && !isPhoto && !isMediaExpired && message.text.length <= 24 && !message.text.includes("\n");
   const shouldShowSender = showSenderIdentity && !isMine && !!message.sender;
@@ -129,7 +130,7 @@ export function ChatBubble({
           )}
         </Pressable>
         ) : null}
-        {internalReference ? <SharedContentCardView reference={internalReference} snapshot={message.sharedContent} /> : null}
+        {internalReference ? <SharedContentCardView reference={internalReference} /> : null}
         {externalUrl ? <LinkPreviewCard url={externalUrl} preview={message.linkPreview} /> : null}
         {onToggleReaction && message.reactions ? (
           <MessageReactionsRow reactions={message.reactions} onToggleReaction={onToggleReaction} alignEnd={isMine} />

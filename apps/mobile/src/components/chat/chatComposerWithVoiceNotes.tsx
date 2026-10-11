@@ -48,7 +48,7 @@ export function ChatComposerWithVoiceNotes({ onSendText, mentionConversation, on
 
   const pickAndSendDocument = async () => {
     const picked = await pickDocumentToSendInChat();
-    if (picked.status === "rejected") showAlertWithButtons("File not sent", picked.reason);
+    if (picked.status === "rejected") showAlertWithButtons("File not sent", picked.reason, undefined, { intent: "attachment" });
     if (picked.status === "picked") onSendDocument?.(picked.document);
   };
 

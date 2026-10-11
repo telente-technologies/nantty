@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { Cancel20Icon, Document24Icon, Refresh20Icon, Trash24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Text } from "@/components/ui/text";
 import { cancelDocumentUpload } from "@/services/chat/documentUpload.service";
+import type { EphemeralFile } from "@/services/chatCrypto/ephemeralDecryptedFiles.service";
 import { openChatDocument, saveChatDocumentToDevice } from "@/services/core/documentOpening.service";
 import { useDocumentUploadProgress } from "@/store/documentUploads.store";
 import { makeThemedStyles, useTheme, type ThemeColors } from "@/theme";
@@ -34,17 +35,26 @@ export function DocumentBubble({ message, deliveryStatus, isExpired, onRetry, on
   const hasFailed = deliveryStatus === "failed" || (deliveryStatus === "pending" && !!upload?.wasCancelled);
   const percent = Math.round((upload?.fraction ?? 0) * 100);
 
-  const reportProblem = (title: string) => (error: unknown) => showAlertWithButtons(title, error instanceof Error ? error.message : "Please try again.");
+  const reportProblem = (title: string) => (error: unknown) => showAlertWithButtons(title, error instanceof Error ? error.message : "Please try again.", undefined, { intent: "attachment" });
 
   const [isOpenOrSaveSheetVisible, setIsOpenOrSaveSheetVisible] = useState(false);
   const closeSheetThen = (action: () => void) => () => {
     setIsOpenOrSaveSheetVisible(false);
     action();
   };
-  const openDocument = () => void openChatDocument(document).catch(reportProblem("Couldn't open file"));
+  const openedFile = useRef<EphemeralFile | null>(null);
+  useEffect(() => () => openedFile.current?.release(), []);
+  const mediaId = message.media?.id ?? message.id;
+  const openDocument = () =>
+    void openChatDocument(mediaId, document, message.attachment ?? null)
+      .then((file) => {
+        if (openedFile.current !== file) openedFile.current?.release();
+        openedFile.current = file;
+      })
+      .catch(reportProblem("Couldn't open file"));
   const saveDocument = () =>
-    void saveChatDocumentToDevice(document)
-      .then((outcome) => outcome === "saved" && showAlertWithButtons("Saved", "The file was saved to the folder you chose."))
+    void saveChatDocumentToDevice(mediaId, document, message.attachment ?? null)
+      .then((outcome) => outcome === "saved" && showAlertWithButtons("Saved", "The file was saved to the folder you chose.", undefined, { intent: "success" }))
       .catch(reportProblem("Couldn't save file"));
 
   return (
