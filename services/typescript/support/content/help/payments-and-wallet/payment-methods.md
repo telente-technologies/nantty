@@ -1,22 +1,43 @@
 ---
 title: Payment methods and saved cards
-summary: Pay by card, bank transfer or USSD. Saved cards are stored securely on your device, not on our servers.
-tags: payment, card, bank transfer, ussd, saved card
-related: cart-and-checkout, buy-coins, premium
+summary: Pay at checkout by card, bank transfer or USSD in a secure payment window. You can save a card on your phone, unlocked with your fingerprint or face. Zudomart never stores your card number.
+tags: payment, payment method, card, bank transfer, ussd, saved card, remove card, checkout, pay, debit card
+related: cart-and-checkout, saved-cards, payment-failed, pay-from-your-wallet, transactions-and-receipts, payment-scams
 ---
 
-## Ways to pay
+## Ways to pay at checkout
 
-Card, bank transfer and USSD for products. You pay on a secure payment page; Zudomart never sees your full card number.
+At **Checkout**, under **Payment method**, choose:
+
+- **Secure payment window**: pay by card, bank transfer or USSD. The list under it shows the methods available for your country. The window opens inside the app, and you finish paying there.
+- **Your saved card** (if you saved one on this phone): shown as the card brand and last 4 digits.
+
+Then tap **Place order and pay**. Your order is placed only after we've confirmed the payment on our servers. If you come back before it's confirmed, tap **I've paid, check status**. If the payment fails, no money is taken and you can try again or choose another method.
+
+For escrow orders in Nigeria, the money stays locked in your own wallet until you confirm delivery. It doesn't go to the seller until then. See [How escrow protects your order](/help/buying-and-orders/how-escrow-protects-your-order).
 
 ## Saved cards
 
-After paying by card you can save it for next time. Only a secure token is stored, on your phone, protected by Face ID or fingerprint. If you change your account email, saved cards stop working and are removed.
+- To save a card, tick **Save my card on this device for next time** before you pay.
+- The card is saved **on this phone only**, not on Zudomart's servers. Only a secure token is kept, and you confirm each payment with your fingerprint or face. Your phone needs fingerprint or face unlock turned on.
+- You enter your card number only in the secure payment window. Zudomart never sees or stores it.
+- To see or remove it, go to **Settings** > **Payment Methods** > **Card**, then tap **Remove from this device**.
+
+A new phone won't have your saved card. Save it again the next time you pay. See [Saved cards](/help/payments-and-wallet/saved-cards).
+
+## Other places you pay
+
+- **Coins**: see [Coins](/help/payments-and-wallet/buy-coins).
+- **Premium and checkmarks**: see [Premium](/help/payments-and-wallet/premium).
+- **Creator subscriptions**: see [Managing subscriptions](/help/payments-and-wallet/manage-subscriptions).
+- **Your wallet** (Nigeria): see [Paying from your wallet](/help/payments-and-wallet/pay-from-your-wallet).
+
+Coins, Premium and creator subscriptions bought through the App Store or Google Play are paid to Apple or Google and managed in your app store account.
 
 ## Receipts
 
-Receipts go to your account's verified email. Checkout never asks for an email.
+Receipts go to your account's verified email. Checkout never asks you for an email. See [Receipts and transaction history](/help/payments-and-wallet/transactions-and-receipts).
 
-## Digital purchases in the apps
+## Stay safe
 
-Coins, gifts, Premium, fan subscriptions and in-app boosts bought in the iPhone or Android app are paid through Apple or Google. Manage those subscriptions in your app store account.
+Only pay inside the Zudomart app or on **app.zudomart.com**. Never pay a seller outside Zudomart, and never share your card PIN or one-time codes. See [Payment scams](/help/wallet-security/payment-scams).
