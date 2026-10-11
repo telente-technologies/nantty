@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"zudomart/modules/ads/src/middlewares"
 	fundfromearnings "zudomart/modules/ads/src/modules/billing/commands/fundFromEarnings"
 	starttopup "zudomart/modules/ads/src/modules/billing/commands/startTopUp"
 	"zudomart/modules/ads/src/modules/billing/dtos"
@@ -54,6 +55,9 @@ func (controller BillingController) FundFromEarnings(writer http.ResponseWriter,
 	controller.run(writer, request, func(user, account uuid.UUID) error {
 		var body dtos.FundFromEarningsRequest
 		if err := utils.DecodeBody(writer, request, &body); err != nil {
+			return err
+		}
+		if err := middlewares.StepUpGate(controller.Container).RequireAbove(request, body.Amount.AmountMinor, body.Amount.Currency); err != nil {
 			return err
 		}
 		funded, err := (fundfromearnings.Handler{Container: controller.Container}).Execute(request.Context(), fundfromearnings.Command{

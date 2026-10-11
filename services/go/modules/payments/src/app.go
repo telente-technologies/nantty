@@ -146,12 +146,13 @@ func runProviderWalletWorkers(ctx context.Context, gateway *services.PaymentGate
 	if !gateway.Container.UsesProviderWallets() {
 		return
 	}
-	go runEveryIntervalUntilContextDone(ctx, 30*time.Second, func(ctx context.Context) {
+	wallets := gateway.Container.Settings.Wallets
+	go runEveryIntervalUntilContextDone(ctx, positiveOr(wallets.MovementWorkerInterval, 30*time.Second), func(ctx context.Context) {
 		gateway.ProcessDueMovements(ctx, 50)
 		gateway.ReleaseDueWalletHolds(ctx, 200)
 	})
 	go runEveryIntervalUntilContextDone(ctx, 5*time.Minute, func(ctx context.Context) { gateway.ProvisionMissingProviderWallets(ctx, 20) })
-	go runEveryIntervalUntilContextDone(ctx, time.Hour, func(ctx context.Context) { gateway.ProcessProviderSettlements(ctx, nil) })
+	go runEveryIntervalUntilContextDone(ctx, positiveOr(wallets.SettlementPollInterval, time.Hour), func(ctx context.Context) { gateway.ProcessProviderSettlements(ctx, nil) })
 	go runEveryIntervalUntilContextDone(ctx, 24*time.Hour, func(ctx context.Context) {
 		if report, err := gateway.RunDailyWalletReconciliation(ctx); err != nil || report.Status != "clean" {
 			gateway.Container.Resources.Logger.ErrorContext(ctx, "daily wallet reconciliation needs attention", "status", report.Status, "issues", len(report.Issues), "error", err)
@@ -174,4 +175,11 @@ func runEveryIntervalUntilContextDone(ctx context.Context, interval time.Duratio
 
 func (module *Module) Close(context.Context) error {
 	return module.Application.Container.Resources.Close()
+}
+
+func positiveOr(configured, fallback time.Duration) time.Duration {
+	if configured > 0 {
+		return configured
+	}
+	return fallback
 }

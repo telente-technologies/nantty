@@ -81,7 +81,8 @@ func (service EscrowService) ReleaseEscrowsWhoseInspectionPeriodEnded(ctx contex
 		err := databases.RunInMoneyTransaction(ctx, service.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 			result = EscrowSettlementResult{}
 			due, err := service.Container.Client(transaction).Escrow.Query().
-				Where(escrow.StatusEQ(escrow.StatusHeld), escrow.AutoReleaseAtLTE(service.Container.Now().UTC())).
+				Where(escrow.StatusEQ(escrow.StatusHeld), escrow.AutoReleaseAtLTE(service.Container.Now().UTC()),
+					escrow.Or(escrow.CustodyNEQ(escrow.CustodyBuyerWalletLock), escrow.WalletFundedAtNotNil())).
 				Order(ent.Asc(escrow.FieldAutoReleaseAt)).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).First(ctx)
 			if ent.IsNotFound(err) {
 				return nil

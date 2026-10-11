@@ -74,6 +74,7 @@ type FakeFlutterwave struct {
 	PublicUrl             string
 	RefundDelay           time.Duration
 	RefundStatus          string
+	DecliningTokens       map[string]bool
 }
 
 func StartFakeFlutterwave(t *testing.T) *FakeFlutterwave {
@@ -89,7 +90,7 @@ func NewFakeFlutterwave() *FakeFlutterwave {
 		Transactions: map[int64]*FakeFlwTransaction{}, Tokens: map[string]string{}, Wallets: map[string]*FakeFlwWallet{}, Transfers: map[string]*FakeFlwTransfer{},
 		Consents: map[string]map[string]any{}, MainBalance: map[string]int64{}, CallCounts: map[string]int{}, BankAccountNames: map[string]string{},
 		Refunds: []map[string]any{}, Chargebacks: []map[string]any{}, Settlements: []map[string]any{}, Reversals: []map[string]any{},
-		FundingFeeMinor: 5000, BankTransferFeeMinor: 1075, nextId: 7_000_000,
+		FundingFeeMinor: 5000, BankTransferFeeMinor: 1075, nextId: 7_000_000, DecliningTokens: map[string]bool{},
 	}
 }
 

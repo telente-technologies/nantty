@@ -1,11 +1,10 @@
 package controllers
 
 import (
-	"zudomart/platform/regionpricing"
-
 	"net/http"
 
 	"zudomart/modules/ads/src/container"
+	"zudomart/modules/ads/src/middlewares"
 	confirmboostpayment "zudomart/modules/ads/src/modules/boosts/commands/confirmBoostPayment"
 	createboost "zudomart/modules/ads/src/modules/boosts/commands/createBoost"
 	"zudomart/modules/ads/src/modules/boosts/dtos"
@@ -14,6 +13,7 @@ import (
 	getboostoptions "zudomart/modules/ads/src/modules/boosts/queries/getBoostOptions"
 	"zudomart/modules/ads/src/utils"
 	"zudomart/platform/httpserver"
+	"zudomart/platform/regionpricing"
 )
 
 type BoostsController struct{ Container *container.Container }
@@ -66,6 +66,12 @@ func (controller BoostsController) Create(writer http.ResponseWriter, request *h
 		var body dtos.CreateBoostRequest
 		if err := utils.DecodeBody(writer, request, &body); err != nil {
 			return err
+		}
+		if method := body.PaymentMethod; method == "balance" || method == "wallet" {
+			total := body.DailyBudget.AmountMinor * int64(max(body.DurationDays, 0))
+			if err := middlewares.StepUpGate(controller.Container).RequireAbove(request, total, body.DailyBudget.Currency); err != nil {
+				return err
+			}
 		}
 		charging, err := regionpricing.RequireChargingCountry(utils.ResolveChargingRegion(request, controller.Container.Countries.ProfileCountry(request.Context(), userId.String())))
 		if err != nil {

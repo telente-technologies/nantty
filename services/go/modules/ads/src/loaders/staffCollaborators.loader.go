@@ -43,6 +43,7 @@ func completeMoneyAccountCollaborators(deployed *container.Container, collaborat
 		interfaces.VerificationReader
 		interfaces.EntitlementReader
 		interfaces.EarningsFunding
+		interfaces.StepUpConsumer
 	} = integrations.UnconfiguredMoneyAccountGateway{}
 	if settings.MoneyHttpUrl != "" {
 		money = integrations.HttpMoneyAccountGateway{BaseUrl: settings.MoneyHttpUrl, Token: settings.MoneyHttpToken, Http: client}
@@ -63,5 +64,12 @@ func completeMoneyAccountCollaborators(deployed *container.Container, collaborat
 	}
 	if deployed.EarningsFunding == nil {
 		deployed.EarningsFunding = money
+	}
+	deployed.StepUps = collaborators.StepUps
+	if deployed.StepUps == nil {
+		deployed.StepUps = money
+		if settings.MoneyHttpUrl == "" && settings.AllowInMemoryFunding && !settings.IsProduction() {
+			deployed.StepUps = integrations.NewInMemoryStepUpConsumer()
+		}
 	}
 }

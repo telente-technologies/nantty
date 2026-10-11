@@ -62,3 +62,19 @@ func jsonf(format, value string) string {
 	}
 	return string(out)
 }
+
+func TestAdsStepUpThresholdDefaultsForOldDocumentsAndMustStayWithinTheTopUpMaximum(t *testing.T) {
+	legacy := `{"baseMinor":{"orderCheckout":500000000,"coinPurchase":50000000,"adsTopUp":1000000000,"walletDaily":{"basic":5000000,"mid":20000000,"full":500000000}},"currencyOverridesMinor":{}}`
+	canonical, err := validatePaymentLimits(json.RawMessage(legacy))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var stored PaymentLimits
+	if json.Unmarshal(canonical, &stored) != nil || stored.Base.AdsStepUpAbove != defaultAdsStepUpAboveMinor {
+		t.Fatalf("a document saved before the threshold existed gets the ₦50,000 default: %s", canonical)
+	}
+	tooHigh := `{"baseMinor":{"orderCheckout":500000000,"coinPurchase":50000000,"adsTopUp":1000000000,"adsStepUpAbove":2000000000,"walletDaily":{"basic":5000000,"mid":20000000,"full":500000000}},"currencyOverridesMinor":{}}`
+	if _, err := validatePaymentLimits(json.RawMessage(tooHigh)); err == nil {
+		t.Fatal("a step-up threshold above the top-up maximum would never apply and is refused")
+	}
+}

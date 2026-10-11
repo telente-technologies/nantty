@@ -34,11 +34,14 @@ type WalletDailyAmounts struct {
 }
 
 type PaymentLimitAmounts struct {
-	OrderCheckout int64              `json:"orderCheckout"`
-	CoinPurchase  int64              `json:"coinPurchase"`
-	AdsTopUp      int64              `json:"adsTopUp"`
-	WalletDaily   WalletDailyAmounts `json:"walletDaily"`
+	OrderCheckout  int64              `json:"orderCheckout"`
+	CoinPurchase   int64              `json:"coinPurchase"`
+	AdsTopUp       int64              `json:"adsTopUp"`
+	AdsStepUpAbove int64              `json:"adsStepUpAbove,omitempty"`
+	WalletDaily    WalletDailyAmounts `json:"walletDaily"`
 }
+
+const defaultAdsStepUpAboveMinor int64 = 5_000_000
 
 type PaymentLimits struct {
 	Base              PaymentLimitAmounts            `json:"baseMinor"`
@@ -51,7 +54,7 @@ var defaultSellerDebtLimits = SellerDebtLimits{
 }
 
 var defaultPaymentLimits = PaymentLimits{Base: PaymentLimitAmounts{
-	OrderCheckout: 500_000_000, CoinPurchase: 50_000_000, AdsTopUp: 1_000_000_000,
+	OrderCheckout: 500_000_000, CoinPurchase: 50_000_000, AdsTopUp: 1_000_000_000, AdsStepUpAbove: defaultAdsStepUpAboveMinor,
 	WalletDaily: WalletDailyAmounts{Basic: 5_000_000, Mid: 20_000_000, Full: 500_000_000},
 }, CurrencyOverrides: map[string]PaymentLimitAmounts{}}
 
@@ -104,6 +107,9 @@ func validatePaymentLimits(raw json.RawMessage) (json.RawMessage, error) {
 	if err := decodeStrictly(raw, &value); err != nil {
 		return nil, err
 	}
+	if value.Base.AdsStepUpAbove == 0 {
+		value.Base.AdsStepUpAbove = defaultAdsStepUpAboveMinor
+	}
 	if err := validatePaymentLimitAmounts("baseMinor", value.Base); err != nil {
 		return nil, err
 	}
@@ -128,6 +134,9 @@ func validatePaymentLimitAmounts(path string, amounts PaymentLimitAmounts) error
 	daily := amounts.WalletDaily
 	if err := requireAmounts(path, amounts.OrderCheckout, amounts.CoinPurchase, amounts.AdsTopUp, daily.Basic, daily.Mid, daily.Full); err != nil {
 		return err
+	}
+	if amounts.AdsStepUpAbove < 0 || amounts.AdsStepUpAbove > amounts.AdsTopUp {
+		return adminerrors.Unprocessable(path + ".adsStepUpAbove: must be from 1 up to the ads top-up maximum (0 in an override means use the converted base).")
 	}
 	if daily.Basic > daily.Mid || daily.Mid > daily.Full {
 		return adminerrors.Unprocessable(path + ".walletDaily: basic must not exceed mid, and mid must not exceed full.")

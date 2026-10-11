@@ -55,6 +55,7 @@ type Container struct {
 	Verification     interfaces.VerificationReader
 	Entitlements     interfaces.EntitlementReader
 	EarningsFunding  interfaces.EarningsFunding
+	StepUps          interfaces.StepUpConsumer
 	Audit            staffaudit.Recorder
 	Jobs             platformevents.JobQueue
 	QueueConsumer    QueueConsumer

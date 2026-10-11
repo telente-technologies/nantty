@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 
 	adserrors "zudomart/modules/ads/src/errors"
 	"zudomart/modules/ads/src/interfaces"
@@ -141,4 +142,52 @@ type StaticEntitlementReader struct{ Premium map[string]bool }
 
 func (reader StaticEntitlementReader) IsPremium(_ context.Context, userId string) (bool, error) {
 	return reader.Premium[userId], nil
+}
+
+func (UnconfiguredMoneyAccountGateway) ConsumeStepUp(context.Context, string, string, string) error {
+	return adserrors.UpstreamUnavailable
+}
+
+func (gateway HttpMoneyAccountGateway) ConsumeStepUp(ctx context.Context, digest, userId, route string) error {
+	encoded, err := json.Marshal(map[string]string{"digest": digest, "userId": userId, "route": route})
+	if err != nil {
+		return err
+	}
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(gateway.BaseUrl, "/")+"/api/v1/internal/ads/step-up-consumptions", bytes.NewReader(encoded))
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("X-Internal-Token", gateway.Token)
+	response, err := gateway.Http.Do(request)
+	if err != nil {
+		return adserrors.UpstreamUnavailable
+	}
+	defer response.Body.Close()
+	switch response.StatusCode {
+	case http.StatusNoContent, http.StatusOK:
+		return nil
+	case http.StatusUnauthorized:
+		return adserrors.AdsStepUpReused
+	}
+	return adserrors.UpstreamUnavailable
+}
+
+type InMemoryStepUpConsumer struct {
+	mutex sync.Mutex
+	used  map[string]bool
+}
+
+func NewInMemoryStepUpConsumer() *InMemoryStepUpConsumer {
+	return &InMemoryStepUpConsumer{used: map[string]bool{}}
+}
+
+func (consumer *InMemoryStepUpConsumer) ConsumeStepUp(_ context.Context, digest, _, _ string) error {
+	consumer.mutex.Lock()
+	defer consumer.mutex.Unlock()
+	if consumer.used[digest] {
+		return adserrors.AdsStepUpReused
+	}
+	consumer.used[digest] = true
+	return nil
 }

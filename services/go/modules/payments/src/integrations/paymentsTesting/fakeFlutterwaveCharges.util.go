@@ -80,6 +80,9 @@ func (fake *FakeFlutterwave) transactionJson(transaction *FakeFlwTransaction) ma
 		"processor_response": "Approved", "created_at": transaction.CreatedAt.Format(time.RFC3339),
 		"customer": map[string]any{"id": transaction.Id + 1000, "email": transaction.Email, "name": transaction.Name},
 	}
+	if transaction.Status == "failed" {
+		data["processor_response"] = "Insufficient funds"
+	}
 	if transaction.CardToken != "" {
 		data["card"] = map[string]any{"first_6digits": "539983", "last_4digits": "8381", "issuer": "MASTERCARD GUARANTY TRUST BANK", "country": "NG", "type": "MASTERCARD", "token": transaction.CardToken, "expiry": "09/32"}
 	}
@@ -129,6 +132,9 @@ func (fake *FakeFlutterwave) chargeToken(body map[string]any) (int, any, any) {
 	transaction := &FakeFlwTransaction{
 		Id: id, TxRef: reference, FlwRef: fmt.Sprintf("FLW-TOKEN-%d", id), Email: email, AmountMinor: amount, Currency: currency, Status: "successful",
 		PaymentType: "card", CardToken: token, AppFeeMinor: amount * 14 / 1000, CreatedAt: time.Now().UTC(),
+	}
+	if fake.DecliningTokens[token] {
+		transaction.Status, transaction.AppFeeMinor = "failed", 0
 	}
 	fake.Transactions[id] = transaction
 	return http.StatusOK, fake.transactionJson(transaction), nil
@@ -274,6 +280,18 @@ func (fake *FakeFlutterwave) FailCheckout(reference string) bool {
 	for _, transaction := range fake.Transactions {
 		if transaction.TxRef == reference {
 			transaction.Status = "failed"
+			return true
+		}
+	}
+	return false
+}
+
+func (fake *FakeFlutterwave) DeclineFutureChargesOn(reference string) bool {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	for _, transaction := range fake.Transactions {
+		if transaction.TxRef == reference && transaction.CardToken != "" {
+			fake.DecliningTokens[transaction.CardToken] = true
 			return true
 		}
 	}

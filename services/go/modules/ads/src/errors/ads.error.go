@@ -33,6 +33,8 @@ var (
 	IdempotencyKeyRequired   = Api(http.StatusBadRequest, "IDEMPOTENCY_KEY_REQUIRED", "Send an Idempotency-Key header of 8-128 letters, digits, - or _.")
 	IdempotencyKeyReused     = Api(http.StatusConflict, "IDEMPOTENCY_KEY_REUSED", "That Idempotency-Key was used with a different request.")
 	UpstreamUnavailable      = Api(http.StatusServiceUnavailable, "UPSTREAM_UNAVAILABLE", "A required service is unavailable.")
+	AdsStepUpRequired        = Api(http.StatusForbidden, "STEP_UP_REQUIRED", "Confirm it's you again to pay this much for ads.")
+	AdsStepUpReused          = Api(http.StatusUnauthorized, "STEP_UP_REUSED", "This confirmation was already used. Confirm it's you again for each money action.")
 	AudienceNotFound         = Api(http.StatusNotFound, "AUDIENCE_NOT_FOUND", "Audience not found.")
 	AudienceInUse            = Api(http.StatusConflict, "AUDIENCE_IN_USE", "This audience is used by an ad set. Remove it there first.")
 	PhoneMatchingUnavailable = Api(http.StatusUnprocessableEntity, "PHONE_MATCHING_UNAVAILABLE", "Phone number lists cannot be matched yet. Upload hashed emails instead.")

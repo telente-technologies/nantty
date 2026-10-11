@@ -53,6 +53,10 @@ type EarningsFundingResult struct {
 	Currency    string
 }
 
+type StepUpConsumer interface {
+	ConsumeStepUp(ctx context.Context, digest, userId, route string) error
+}
+
 type EarningsFunding interface {
 	FundAdAccountFromEarnings(ctx context.Context, userId, adAccountId, currency string, amountMinor int64, idempotencyKey string) (EarningsFundingResult, error)
 }

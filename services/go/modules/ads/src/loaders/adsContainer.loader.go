@@ -45,6 +45,7 @@ type Collaborators struct {
 	Verification interfaces.VerificationReader
 	Entitlements interfaces.EntitlementReader
 	Earnings     interfaces.EarningsFunding
+	StepUps      interfaces.StepUpConsumer
 	Audit        staffaudit.Recorder
 	Jobs         platformevents.JobQueue
 	Access       *jwtauth.AccessTokenVerifier

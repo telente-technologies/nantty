@@ -30,6 +30,8 @@ type WalletSettings struct {
 	CardBuyerWalletAtCheckout    bool
 	ReconciliationDriftTolerance int64
 	MovementStuckAfter           time.Duration
+	MovementWorkerInterval       time.Duration
+	SettlementPollInterval       time.Duration
 }
 
 func ReadFlutterwaveSettings(reader *platformconfig.EnvironmentReader) FlutterwaveSettings {
@@ -53,6 +55,8 @@ func ReadWalletSettings(reader *platformconfig.EnvironmentReader) WalletSettings
 		CardBuyerWalletAtCheckout:    reader.ReadStringOrDefault("WALLET_CARD_BUYER_PSA_AT_CHECKOUT", "true") == "true",
 		ReconciliationDriftTolerance: int64(reader.ReadIntegerOrDefault("WALLET_RECONCILIATION_DRIFT_TOLERANCE_MINOR", 0)),
 		MovementStuckAfter:           reader.ReadDurationOrDefault("WALLET_MOVEMENT_STUCK_AFTER", time.Hour),
+		MovementWorkerInterval:       reader.ReadDurationOrDefault("WALLET_MOVEMENT_WORKER_INTERVAL", 30*time.Second),
+		SettlementPollInterval:       reader.ReadDurationOrDefault("PAYMENTS_SETTLEMENT_POLL_INTERVAL", time.Hour),
 	}
 }
 
