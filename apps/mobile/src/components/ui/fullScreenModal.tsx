@@ -6,6 +6,7 @@ import { Cancel20Icon } from "@/components/icons";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { makeThemedStyles, useTheme } from "@/theme";
 
+import { useAccessibilityFocusOnOpen } from "./accessibilityFocus.hook";
 import { FrameAwareModal } from "./frameAwareModal";
 import { KeyboardSpacer } from "./keyboardSpacer";
 import { ModalActionStack, type ModalAction } from "./modalActions";
@@ -42,20 +43,23 @@ export function FullScreenModal({
   const insets = useSafeAreaInsets();
   const reduceMotion = useReducedMotionPreference();
   const hasFooter = !!footer || (footerActions?.length ?? 0) > 0;
+  const titleRef = useAccessibilityFocusOnOpen(visible && !!title);
   return (
     <FrameAwareModal visible={visible} animationType={reduceMotion ? "none" : "slide"} onRequestClose={() => dismissible && onClose()} statusBarTranslucent>
       <View style={[styles.root, { paddingTop: insets.top }]} accessibilityViewIsModal>
         <View style={styles.header}>
           {dismissible ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={closeLabel} hitSlop={12} onPress={onClose} style={styles.closeButton}>
+            <Pressable accessibilityRole="button" accessibilityLabel={closeLabel} onPress={onClose} style={styles.closeButton}>
               <Cancel20Icon size={18} color={colors.text} />
             </Pressable>
           ) : (
             <View style={styles.closeButtonSpacer} />
           )}
-          <Text size={16} weight={600} lineHeight={21} numberOfLines={1} style={styles.title} accessibilityRole="header">
-            {title ?? ""}
-          </Text>
+          <View ref={titleRef} style={styles.titleBox} accessible={!!title} accessibilityRole="header" accessibilityLabel={title}>
+            <Text size={16} weight={600} lineHeight={21} numberOfLines={1} style={styles.title}>
+              {title ?? ""}
+            </Text>
+          </View>
           <View style={styles.accessory}>{headerAccessory}</View>
         </View>
         {scrollable ? (
@@ -83,10 +87,11 @@ const useStyles = makeThemedStyles((colors, scheme) => {
     root: { flex: 1, backgroundColor: colors.background },
     flex: { flex: 1 },
     header: { minHeight: 52, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.divider },
-    closeButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: palette.inset },
-    closeButtonSpacer: { width: 36 },
-    title: { flex: 1, textAlign: "center" },
-    accessory: { minWidth: 36, alignItems: "flex-end" },
+    closeButton: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: palette.inset },
+    closeButtonSpacer: { width: 44 },
+    titleBox: { flex: 1 },
+    title: { textAlign: "center" },
+    accessory: { minWidth: 44, alignItems: "flex-end" },
     content: { padding: 16, paddingBottom: 32 },
     footer: { paddingHorizontal: modalSpacing.edge - 4, paddingTop: 12, gap: modalSpacing.actionGap, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.divider, backgroundColor: colors.background },
     keyboardArea: { backgroundColor: colors.background },

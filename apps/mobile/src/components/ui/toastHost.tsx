@@ -41,7 +41,8 @@ export function ToastHost() {
         {action ? (
           <Pressable
             accessibilityRole="button"
-            hitSlop={10}
+            hitSlop={6}
+            style={styles.action}
             onPress={() => {
               dismissToast();
               action.onPress();
@@ -76,5 +77,6 @@ const useStyles = makeThemedStyles((colors, scheme) =>
       elevation: scheme === "dark" ? 0 : 8,
     },
     text: { flexShrink: 1 },
+    action: { minHeight: 44, marginVertical: -12, paddingHorizontal: 6, justifyContent: "center" },
   }),
 );

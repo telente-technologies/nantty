@@ -10,7 +10,7 @@ export type ModalActionStyle = "primary" | "secondary" | "destructive" | "plain"
 
 export interface ModalAction {
   readonly label: string;
-  readonly onPress?: () => void;
+  readonly onPress?: () => unknown;
   readonly style?: ModalActionStyle;
   readonly loading?: boolean;
   readonly disabled?: boolean;
@@ -27,8 +27,9 @@ export function ModalActionButton({ action }: { readonly action: ModalAction }) 
   const variant = action.style ?? "secondary";
   const inactive = !!action.disabled || !!action.loading;
   const press = () => {
+    if (inactive) return;
     if (variant === "destructive") playDestructiveConfirmHaptic();
-    action.onPress?.();
+    void action.onPress?.();
   };
   const look = styles.looks[variant];
   return (

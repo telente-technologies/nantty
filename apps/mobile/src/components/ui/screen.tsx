@@ -5,6 +5,8 @@ import { StatusBar } from "expo-status-bar";
 
 import { useTheme } from "@/theme";
 
+import { dismissKeyboardOnEmptyTap } from "./dismissKeyboardOnEmptyTap.util";
+
 export interface ScreenProps {
   readonly children: ReactNode;
   readonly background?: string;
@@ -18,7 +20,7 @@ export function Screen({ children, background, edges = ["top"], dark = false, st
   return (
     <SafeAreaView edges={edges} style={[styles.root, { backgroundColor: background ?? colors.background }]}>
       <StatusBar style={dark || isDark ? "light" : "dark"} />
-      <View style={[styles.root, style]}>{children}</View>
+      <View style={[styles.root, style]} onStartShouldSetResponder={dismissKeyboardOnEmptyTap}>{children}</View>
     </SafeAreaView>
   );
 }
