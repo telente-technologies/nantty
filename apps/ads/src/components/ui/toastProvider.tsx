@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
+import { ZudoIcon } from "./zudoIcon";
 import styles from "./toastProvider.module.css";
 
 type ToastTone = "success" | "error" | "info";
@@ -33,7 +34,8 @@ export function ToastProvider({ children }: { readonly children: ReactNode }) {
       {children}
       <div className={styles.region} aria-live="polite" aria-atomic="false">
         {toasts.map((toast) => (
-          <div key={toast.id} className={`${styles.toast} ${styles[toast.tone]}`} role={toast.tone === "error" ? "alert" : "status"}>
+          <div key={toast.id} className={styles.toast} role={toast.tone === "error" ? "alert" : "status"}>
+            {toast.tone === "info" ? null : <ZudoIcon name={toast.tone === "error" ? "warning20" : "check16"} size={16} className={styles[toast.tone]} />}
             {toast.text}
           </div>
         ))}

@@ -158,9 +158,8 @@
 
 .reviewReason {
   padding: 10px var(--space-3);
-  border-left: 3px solid var(--error);
   background: var(--error-tint);
-  border-radius: 0 var(--radius-medium) var(--radius-medium) 0;
+  border-radius: var(--radius-medium);
   color: var(--error-ink);
 }
 

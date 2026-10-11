@@ -36,9 +36,7 @@
 
 .guidance {
   font-size: var(--fs-12);
-  color: var(--brand-ink);
-  padding-left: var(--space-2);
-  border-left: 2px solid var(--yellow-500);
+  color: var(--ink-muted);
 }
 
 .subPlacements {
