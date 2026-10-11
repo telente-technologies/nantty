@@ -23,3 +23,9 @@ export async function readFakePaystackState(): Promise<{ readonly transactions: 
   const response = await fetch(`${fakePaystackUrl}/__smoke/state`);
   return (await response.json()) as never;
 }
+
+export async function completeBankValidationThroughFakePaystack(email: string, outcome: "success" | "failed" = "success"): Promise<void> {
+  const response = await fetch(`${fakePaystackUrl}/__smoke/identifications/${encodeURIComponent(email)}/${outcome}`, { method: "POST" });
+  if (response.status !== 200) throw new Error(`fake Paystack identification ${response.status}: ${await response.text()}`);
+  await deliverSignedWebhook((await response.json()) as { body: string; signature: string });
+}

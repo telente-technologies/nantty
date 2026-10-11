@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { registerUser, type UserActor } from "../src/actors.util.js";
+import { registerUser, stepUpUser, type UserActor } from "../src/actors.util.js";
 import { callApi, describeResponse, uniqueSuffix, waitFor } from "../src/apiClient.util.js";
 import { bankAccountNumberFor } from "../src/commerceFixtures.util.js";
 import { payCheckoutThroughFakePaystack, readFakePaystackState, settleTransferThroughFakePaystack } from "../src/fakePaystack.util.js";
@@ -141,7 +141,7 @@ describe("commerce journey: seller onboarding → product → cart → checkout 
     expect([200, 201], describeResponse(identity)).toContain(identity.status);
     const resolved = await callApi("POST", "/api/v1/payments/payout-onboarding/me/resolve", { token: seller.accessToken, body: { bankCode: "058", accountNumber: bankAccountNumberFor(seller.accountId) } });
     expect(resolved.status, describeResponse(resolved)).toBe(200);
-    const bank = await callApi("PUT", "/api/v1/payments/payout-onboarding/me/bank", { token: seller.accessToken, body: { bankCode: "058", bankName: "Guaranty Trust Bank", accountNumber: bankAccountNumberFor(seller.accountId), resolvedAccountName: resolved.body.accountName ?? "Temitope Adeyemi" } });
+    const bank = await callApi("PUT", "/api/v1/payments/payout-onboarding/me/bank", { token: seller.accessToken, headers: { "x-step-up-token": await stepUpUser(seller) }, body: { bankCode: "058", bankName: "Guaranty Trust Bank", accountNumber: bankAccountNumberFor(seller.accountId), resolvedAccountName: resolved.body.accountName ?? "Temitope Adeyemi" } });
     expect([200, 201], describeResponse(bank)).toContain(bank.status);
     const wallet = await waitFor(async () => {
       const response = await callApi("GET", "/api/v1/wallets/me", { token: seller.accessToken, headers: { "x-client-region": "NG" } });

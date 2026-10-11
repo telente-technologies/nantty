@@ -116,7 +116,11 @@ describe("buying when real life gets in the way: stock, prices, double taps, lat
     await payCheckoutThroughFakePaystack(initialized.body.reference);
     const refunded = await waitFor(async () => (escrowOf(placed.orderId)?.status === "refunded" ? escrowOf(placed.orderId) : undefined), 30_000, 500);
     expect(refunded, `late payment must be refunded: ${JSON.stringify(escrowOf(placed.orderId))}`).toBeDefined();
-    expect((await refundCount()) - refundsBefore, "exactly one provider refund").toBe(1);
+    const providerRefunds = await waitFor(async () => {
+      const count = (await refundCount()) - refundsBefore;
+      return count >= 1 ? count : undefined;
+    }, 30_000, 500);
+    expect(providerRefunds, "exactly one provider refund, sent through the outbox").toBe(1);
     const order = await callApi("GET", `/api/v1/orders/${placed.orderId}`, { token: buyer.accessToken });
     expect(order.body.status, describeResponse(order)).toBe("cancelled");
     expectLedgerBalancedSince(15);
