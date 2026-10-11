@@ -15,6 +15,7 @@ import { Header } from "@/components/ui/header";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
+import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { useAuthStore } from "@/store/auth.store";
@@ -129,6 +130,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
           </>
         )}
       </ScrollView>
+      <KeyboardSpacer restingHeight={0} />
     </Screen>
   );
 }

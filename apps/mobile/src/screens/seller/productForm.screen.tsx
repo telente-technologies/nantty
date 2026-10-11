@@ -6,7 +6,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Cancel20Icon, CameraBolt24Icon } from "@/components/icons";
 import { pickSquareOrWideImageFromLibrary } from "@/components/profile/pickImage.util";
 import { BrandPickerField } from "@/components/seller/brandPickerField";
-import { ProductFormFields, type ProductFormValues } from "@/components/seller/productFormFields";
+import { ProductFormFields, type ProductFormPatch, type ProductFormValues } from "@/components/seller/productFormFields";
 import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { SettingsCenteredAction } from "@/components/settings/settingsGroup";
 import { BrandLoader } from "@/components/ui/brandLoader";
@@ -23,7 +23,7 @@ import { useLocaleStore } from "@/store/locale.store";
 import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import type { CatalogProductImage } from "@/types/sellerCatalog.type";
 import {
-  buildCatalogProductUpsertRequest, EMPTY_PRODUCT_FORM, formValuesFromCatalogProduct, lowestVariantPrice, MAXIMUM_PRODUCT_IMAGES, validateProductForm, type ChosenBrand,
+  buildCatalogProductUpsertRequest, describeVariantsBlockedByStock, EMPTY_PRODUCT_FORM, formValuesFromCatalogProduct, lowestVariantPrice, MAXIMUM_PRODUCT_IMAGES, validateProductForm, type ChosenBrand,
 } from "@/utils/sellerProductForm.util";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { RoleGateScreen } from "@/components/roleGate/roleGateScreen";
@@ -104,7 +104,7 @@ function ProductFormEditor({ navigation, route }: MainScreenProps<"ProductForm">
       { text: "Delete", style: "destructive", onPress: () => deleteProduct.mutate() },
     ], { intent: "delete" });
 
-  const validationMessage = validateProductForm(form, images, !productId);
+  const validationMessage = validateProductForm(form, images, !productId) ?? describeVariantsBlockedByStock(form, existing ?? null);
   const canSave = validationMessage === null && !saveProduct.isPending;
 
   return (
@@ -131,7 +131,7 @@ function ProductFormEditor({ navigation, route }: MainScreenProps<"ProductForm">
         </ScrollView>
         {uploadError ? <Text size={12} lineHeight={16} color={colors.error} accessibilityRole="alert">{uploadError}</Text> : null}
         <BrandPickerField selectedBrandName={brand?.name ?? null} onSelectBrand={(chosen) => setBrand(chosen ? { id: chosen.id, name: chosen.name } : null)} />
-        <ProductFormFields values={form} currency={currency} stockEditable={!productId} onChange={(patch) => setForm((f) => ({ ...f, ...patch }))} />
+        <ProductFormFields values={form} currency={currency} stockEditable={!productId} existingProduct={existing ?? null} onChange={(patch: ProductFormPatch) => setForm((f) => ({ ...f, ...(typeof patch === "function" ? patch(f) : patch) }))} />
         {validationMessage && form.name.length > 0 ? (
           <Text size={12} lineHeight={16} color={colors.textMuted}>{validationMessage}</Text>
         ) : null}

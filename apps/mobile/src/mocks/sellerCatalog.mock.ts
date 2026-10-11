@@ -1,5 +1,6 @@
 import { ApiError } from "@/errors/api.error";
 import type { CatalogProduct, CatalogProductUpsertRequest, CatalogProductVariant } from "@/types/sellerCatalog.type";
+import { utf8ByteLength } from "@/utils/productOptions.util";
 
 import { getSignedInMockUser } from "./fixtures.mock";
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
@@ -52,6 +53,15 @@ function validateUpsert(request: CatalogProductUpsertRequest, existing: CatalogP
   if ((request.imageMediaIds ?? []).length > 10) throw new ApiError(400, "Must have at most 10 images", "VALIDATION_FAILED");
   if (!request.variants?.length) throw new ApiError(400, "Add at least one variant", "VALIDATION_FAILED");
   if ((request.options ?? []).length > 3) throw new ApiError(400, "Must have at most 3 options", "VALIDATION_FAILED");
+  for (const option of request.options ?? []) {
+    const name = option.name?.trim() ?? "";
+    if (utf8ByteLength(name) < 1 || utf8ByteLength(name) > 30) throw new ApiError(400, "Option names must be between 1 and 30 characters", "VALIDATION_FAILED");
+    if (!option.values?.length || option.values.length > 30) throw new ApiError(400, "Options must have 1-30 values", "VALIDATION_FAILED");
+    if (new Set(option.values).size !== option.values.length || option.values.some((value) => value.trim().length === 0 || utf8ByteLength(value) > 40)) throw new ApiError(400, "Values must be unique and 1-40 characters", "VALIDATION_FAILED");
+  }
+  if (request.variants.length > 100) throw new ApiError(400, "Must have 1-100 variants", "VALIDATION_FAILED");
+  const optionNames = (request.options ?? []).map((option) => option.name);
+  if (request.variants.some((variant) => Object.keys(variant.optionValues).length !== optionNames.length || optionNames.some((name, index) => !request.options[index]!.values.includes(variant.optionValues[name] ?? "")))) throw new ApiError(400, "Each variant needs one value for every option", "VALIDATION_FAILED");
   if ("price" in request || "imageUrls" in request || "stock" in request) throw new ApiError(400, "Unknown fields: use imageMediaIds and variants", "VALIDATION_FAILED");
   if (request.variants.some((variant) => !(variant.priceMinor >= 0) || !/^[A-Za-z0-9._-]{1,64}$/.test(variant.sku))) throw new ApiError(400, "Check the price and SKU", "VALIDATION_FAILED");
   for (const mediaId of request.imageMediaIds) {

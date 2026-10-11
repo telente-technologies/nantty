@@ -3,7 +3,7 @@ import { BlurView } from "expo-blur";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Chat37AltAltIcon, Flips34AltAltIcon, Home33AltIcon, Home33Icon, Plus28Icon } from "@/components/icons";
+import { Chat37AltAltIcon, Flips34AltAltIcon, Home33AltIcon, Home33Icon, Plus28Icon, UserProfile45AltIcon } from "@/components/icons";
 import { ProfileSwitcherSheet } from "@/components/profile/profileSwitcher";
 import { Avatar } from "@/components/ui/avatar";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -18,10 +18,10 @@ export function TabBar({ state, navigation, descriptors }: BottomTabBarProps) {
   const { colors, isDark } = useTheme();
   const styles = useStyles();
   const insets = useSafeAreaInsets();
+  const isSignedIn = useAuthStore((s) => s.status === "signedIn");
   const signedInUserAvatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const actingProfileAvatarUrl = useActingProfileStore((s) => s.actingProfile?.avatarUrl ?? null);
-  const avatarUrl = actingProfileAvatarUrl ?? signedInUserAvatarUrl;
-  const isSignedIn = useAuthStore((s) => s.status === "signedIn");
+  const avatarUrl = isSignedIn ? (actingProfileAvatarUrl ?? signedInUserAvatarUrl) : null;
   const openProfileSwitcherSheet = useProfileSwitcherSheetStore((s) => s.openProfileSwitcherSheet);
   const focusedRouteKey = state.routes[state.index]?.key;
   const focusedTabBarStyle = focusedRouteKey ? descriptors[focusedRouteKey]?.options.tabBarStyle : undefined;
@@ -43,6 +43,7 @@ export function TabBar({ state, navigation, descriptors }: BottomTabBarProps) {
       case "Chats":
         return <Chat37AltAltIcon color={focused ? colors.primary : undefined} />;
       default:
+        if (!avatarUrl) return <UserProfile45AltIcon color={focused ? colors.primary : undefined} />;
         return (
           <View style={[styles.avatarRing, focused && styles.avatarRingActive]}>
             <Avatar uri={avatarUrl} size={28} />

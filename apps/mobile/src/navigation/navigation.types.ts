@@ -124,6 +124,7 @@ export type MainStackParamList = {
   SettingsPrivacy: undefined;
   SettingsPrivacyData: undefined;
   CreateBusinessProfile: undefined;
+  ManageProfiles: undefined;
   Saved: { initialFilter?: SavedItemFilter } | undefined;
   Sound: { soundId: string };
   AuthFlow: { mode?: "signup" | "login" } | undefined;

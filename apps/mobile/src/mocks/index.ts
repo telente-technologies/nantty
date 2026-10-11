@@ -18,6 +18,7 @@ import { providerWalletMocks } from "./providerWallet.mock";
 import { boostsMocks } from "./boosts.mock";
 import { businessProfilesMocks } from "./businessProfiles.mock";
 import { brandsMocks } from "./brands.mock";
+import { linkedProfilesMocks } from "./linkedProfiles.mock";
 import { cartMocks } from "./cart.mock";
 import { chatContentMocks } from "./chatContent.mock";
 import { chatInboxMocks } from "./chatInbox.mock";
@@ -119,6 +120,7 @@ const routes: MockRoute[] = [
   ...boostsMocks,
   ...brandsMocks,
   ...businessProfilesMocks,
+  ...linkedProfilesMocks,
   ...supportMocks,
   ...groupsMocks,
   ...chatKeysMocks,

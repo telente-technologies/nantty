@@ -19,6 +19,9 @@ import { generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { brandsService } from "@/services/sellers/brands.service";
 import { categoriesService } from "@/services/catalog/categories.service";
 import { mediaService } from "@/services/media/media.service";
+import { ProfileLimitGate } from "@/components/profile/profileLimitGate";
+import { describeActionFailure } from "@/errors/errorExperience/describeError";
+import { linkedProfilesQueryKey } from "@/hooks/useLinkedProfiles.hook";
 
 export function CreateBrandScreen({ navigation }: MainScreenProps<"CreateBrand">) {
   const { colors } = useTheme();
@@ -46,6 +49,7 @@ export function CreateBrandScreen({ navigation }: MainScreenProps<"CreateBrand">
     },
     onSuccess: (brand) => {
       queryClient.invalidateQueries({ queryKey: ["users", "me", "profiles"] });
+      queryClient.invalidateQueries({ queryKey: linkedProfilesQueryKey });
       navigation.replace("BrandProfile", { brandId: brand.id });
     },
   });
@@ -54,18 +58,19 @@ export function CreateBrandScreen({ navigation }: MainScreenProps<"CreateBrand">
   return (
     <Screen>
       <Header title="Create a brand" />
+      <ProfileLimitGate kind="brand" failure={createBrand.error}>
       <KeyboardAwareForm
         contentContainerStyle={styles.content}
         footerStyle={styles.footer}
         footer={
           <>
-            {createBrand.isError ? <Text size={12} color={colors.error} align="center">{createBrand.error.message}</Text> : null}
+            {createBrand.isError ? <Text size={12} color={colors.error} align="center">{describeActionFailure(createBrand.error)}</Text> : null}
             <Button title="Create brand" disabled={!ready} loading={createBrand.isPending} onPress={() => createBrand.mutate()} />
           </>
         }
       >
         <Text size={13} lineHeight={17.5} color={colors.textMuted}>
-          A brand profile represents your business or organisation. Verify it with Gold to open an Official Store.
+          Each account can have one Brand. Selling is off until you turn it on in brand settings.
         </Text>
         <Pressable accessibilityRole="button" accessibilityLabel="Choose cover image" onPress={async () => setCover((await pickSquareOrWideImageFromLibrary([3, 1])) ?? cover)} style={styles.cover}>
           {cover ? <Image source={{ uri: cover.uri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
@@ -87,6 +92,7 @@ export function CreateBrandScreen({ navigation }: MainScreenProps<"CreateBrand">
         <TextField label="Description" placeholder="What does your brand make?" value={description} onChangeText={setDescription} multiline maxLength={300} boxStyle={styles.multiline} />
         <TextField label="Website (optional)" placeholder="https://" autoCapitalize="none" keyboardType="url" value={website} onChangeText={setWebsite} />
       </KeyboardAwareForm>
+      </ProfileLimitGate>
     </Screen>
   );
 }

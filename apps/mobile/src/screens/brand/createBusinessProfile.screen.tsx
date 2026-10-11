@@ -19,6 +19,8 @@ import { brandsService } from "@/services/sellers/brands.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import type { BusinessCategorySelection } from "@/types/socialGraph.type";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
+import { ProfileLimitGate } from "@/components/profile/profileLimitGate";
+import { linkedProfilesQueryKey } from "@/hooks/useLinkedProfiles.hook";
 
 export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"CreateBusinessProfile">) {
   const { colors } = useTheme();
@@ -35,7 +37,7 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
   const createBusinessProfile = useMutation({
     mutationFn: () =>
       brandsService.createBusinessProfile(
-        { displayName: displayName.trim(), handle: handle.trim(), description: description.trim(), categories: selections },
+        { displayName: displayName.trim(), handle: handle.trim(), description: description.trim(), categories: selections, purpose: "business" },
         idempotencyKey.current,
       ),
     onSuccess: async (profile) => {
@@ -43,6 +45,7 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
       setActingProfile(switched);
       queryClient.setQueryData(["users", "me", "acting-profile"], switched);
       queryClient.invalidateQueries({ queryKey: ["users", "me", "profiles"] });
+      queryClient.invalidateQueries({ queryKey: linkedProfilesQueryKey });
       navigation.goBack();
     },
   });
@@ -50,7 +53,8 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
 
   return (
     <Screen>
-      <Header title="Create business profile" />
+      <Header title="Create a Business page" />
+      <ProfileLimitGate kind="business" failure={createBusinessProfile.error}>
       {categories.isPending ? (
         <ListSkeleton rows={4} />
       ) : categories.isError ? (
@@ -63,12 +67,12 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
             footer={
               <>
                 {createBusinessProfile.isError ? <Text size={12} color={colors.error} align="center">{describeActionFailure(createBusinessProfile.error)}</Text> : null}
-                <Button title="Create business profile" disabled={!isReady} loading={createBusinessProfile.isPending} onPress={() => createBusinessProfile.mutate()} />
+                <Button title="Create Business page" disabled={!isReady} loading={createBusinessProfile.isPending} onPress={() => createBusinessProfile.mutate()} />
               </>
             }
           >
             <Text size={13} lineHeight={17.5} color={colors.textMuted}>
-              For any organisation: brands, NGOs, media, venues and more. You can open a store later.
+              For organisations that don't sell in Mart: NGOs, media, venues and more. You can have one Business page or one Store, not both.
             </Text>
             <TextField label="Business name" placeholder="e.g. Lagos Food Bank" value={displayName} onChangeText={setDisplayName} maxLength={50} />
             <TextField label="Handle" placeholder="e.g. lagosfoodbank" autoCapitalize="none" autoCorrect={false} value={handle} onChangeText={(value) => setHandle(value.replace(/\s/g, "").toLowerCase())} maxLength={20} />
@@ -78,6 +82,7 @@ export function CreateBusinessProfileScreen({ navigation }: MainScreenProps<"Cre
           </KeyboardAwareForm>
         </>
       )}
+      </ProfileLimitGate>
     </Screen>
   );
 }

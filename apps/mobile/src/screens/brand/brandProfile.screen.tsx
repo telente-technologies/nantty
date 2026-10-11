@@ -10,6 +10,7 @@ import { useUserPostsQuery } from "@/components/profile/profileQueries.hook";
 import { useConfirmedFollowToggle } from "@/components/profile/confirmedFollowToggle.hook";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { OfficialStoreBadge } from "@/components/store/officialStoreBadge";
+import { BrandSellingSwitch } from "@/components/brand/brandSellingSwitch";
 import { webHandoffService } from "@/services/core/webHandoff.service";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
@@ -53,6 +54,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
   }
   const details = brand.data;
   const ownsBrand = details.ownerUserId === signedInUserId;
+  const sellingVisible = details.sellingEnabled !== false;
 
   return (
     <Screen background={colors.surface}>
@@ -91,7 +93,9 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
             <Button variant="subtle" title="Manage on the web" style={styles.flex} onPress={() => webHandoffService.openManageBilling(details.id)} />
           ) : null}
         </View>
+        {ownsBrand ? <BrandSellingSwitch brand={details} /> : null}
 
+        {sellingVisible ? (
         <View style={styles.section}>
           <View style={styles.sectionTitle}>
             <Text size={16} weight={600} lineHeight={19.2}>Official store</Text>
@@ -106,6 +110,7 @@ export function BrandProfileScreen({ navigation, route }: MainScreenProps<"Brand
           )}
           {(products.data?.officialStoreProducts.length ?? 0) > 0 ? <ProductMasonry products={products.data!.officialStoreProducts} /> : null}
         </View>
+        ) : null}
 
         {(products.data?.otherSellersProducts.length ?? 0) > 0 ? (
           <View style={styles.section}>

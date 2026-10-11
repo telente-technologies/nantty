@@ -96,6 +96,7 @@ import { FollowRequestsScreen } from "@/screens/profile/followRequests.screen";
 import { SettingsPrivacyDataScreen } from "@/screens/settings/settingsPrivacyData.screen";
 import { SettingsPrivacyScreen } from "@/screens/settings/settingsPrivacy.screen";
 import { CreateBrandScreen } from "@/screens/brand/createBrand.screen";
+import { ManageProfilesScreen } from "@/screens/brand/manageProfiles.screen";
 
 import { guestGateScreenLayout } from "@/components/auth/guestGate";
 import { withScreenErrorBoundary } from "@/components/ui/errorBoundary";
@@ -210,6 +211,7 @@ export function MainNavigator() {
       <Stack.Screen name="SettingsPrivacy" component={SettingsPrivacyScreen} />
       <Stack.Screen name="SettingsPrivacyData" component={SettingsPrivacyDataScreen} />
       <Stack.Screen name="CreateBusinessProfile" component={CreateBusinessProfileScreen} />
+      <Stack.Screen name="ManageProfiles" component={ManageProfilesScreen} />
       <Stack.Screen name="Saved" component={SavedScreen} />
       <Stack.Screen name="Sound" component={SoundScreen} />
       <Stack.Screen name="AuthFlow" component={AuthFlowScreen} options={modal} />

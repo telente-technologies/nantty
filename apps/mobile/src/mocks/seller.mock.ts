@@ -11,6 +11,7 @@ import { catalogProductSeeds, buildCatalogProductSummary } from "./productCatalo
 import { productImageUrlsForProduct } from "./mockImages.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { findDirectoryStoreById, productCategories } from "./storeDirectory.mock";
+import { assertMockCanCreate } from "./linkedProfiles.mock";
 
 const HOUR = 3_600_000;
 const PERIOD_WINDOW_HOURS: Record<SellerDashboardPeriod, number> = { live: 1, today: 24, yesterday: 48, week: 168, month: 720, all: 24 * 3650 };
@@ -86,6 +87,7 @@ export const sellerMocks: MockRoute[] = [
     if (existing?.status === "pending") return existing;
     const input = body as SellerApplicationInput;
     validateSellerApplication(input);
+    assertMockCanCreate("store");
     const application: SellerApplication = {
       id: `sa_${Date.now()}`,
       status: "pending",

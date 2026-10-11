@@ -18,6 +18,7 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Post } from "@/types";
 import type { MainStackParamList } from "@/navigation/navigation.types";
+import { profileShowsMart } from "@/utils/linkedProfiles.util";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useProfileSwitcherSheetStore } from "@/store/profileSwitcherSheet.store";
 import { webAppLinks } from "@/config/webAppLinks.config";
@@ -34,7 +35,9 @@ export function MeScreen() {
   const pinMutation = usePinPostMutation();
   const { confirmAndDelete } = useDeleteOwnPost();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const actingProfileId = useActingProfileStore((s) => s.actingProfile?.id ?? null);
+  const actingProfile = useActingProfileStore((s) => s.actingProfile);
+  const actingProfileId = actingProfile?.id ?? null;
+  const showsMart = profileShowsMart(actingProfile, profile?.isSeller);
   const openProfileSwitcherSheet = useProfileSwitcherSheetStore((s) => s.openProfileSwitcherSheet);
 
   const openPostAction = (action: () => void) => {
@@ -69,7 +72,7 @@ export function MeScreen() {
         profile={profile}
         posts={postsQuery.data?.data ?? []}
         variant="own"
-        tabs={profile?.isSeller ? ["posts", "reposts", "clips", "store"] : ["posts", "reposts", "clips"]}
+        tabs={showsMart ? ["posts", "reposts", "clips", "store"] : ["posts", "reposts", "clips"]}
         actions={[
           { label: "Edit profile", onPress: () => navigation.navigate("EditProfile") },
           { label: "Share profile", onPress: shareMyProfileLink },
@@ -81,7 +84,7 @@ export function MeScreen() {
         onPressFollowers={() => profile && navigation.navigate("Connections", { userId: profile.id, tab: "followers" })}
         onPressFollowing={() => profile && navigation.navigate("Connections", { userId: profile.id, tab: "following" })}
         onPressPost={(post) => navigation.navigate("PostDetail", { postId: post.id })}
-        onOpenStoreTab={profile?.storeId ? () => navigation.navigate("Store", { storeId: profile.storeId! }) : undefined}
+        onOpenStoreTab={showsMart && profile?.storeId ? () => navigation.navigate("Store", { storeId: profile.storeId! }) : undefined}
         onPressPostMore={setPostWithOpenMenu}
       />
       )}

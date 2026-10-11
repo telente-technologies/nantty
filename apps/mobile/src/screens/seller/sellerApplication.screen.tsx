@@ -11,6 +11,8 @@ import { sellerQueryKeys } from "@/components/seller/sellerQueries.hook";
 import { Button } from "@/components/ui/button";
 import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Header } from "@/components/ui/header";
+import { ProfileLimitGate } from "@/components/profile/profileLimitGate";
+import { linkedProfilesQueryKey } from "@/hooks/useLinkedProfiles.hook";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -65,6 +67,7 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
     onSuccess: (application) => {
       setDraft(EMPTY_DRAFT);
       queryClient.setQueryData(sellerQueryKeys.application, application);
+      queryClient.invalidateQueries({ queryKey: linkedProfilesQueryKey });
       navigation.replace("SellerApplicationStatus");
     },
   });
@@ -86,6 +89,7 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
   return (
     <Screen>
       <Header title="Start selling" onBack={goBackOneStep} />
+      <ProfileLimitGate kind="store" failure={submitApplication.error}>
       <KeyboardAwareForm
         contentContainerStyle={styles.content}
         footerStyle={styles.footer}
@@ -110,6 +114,7 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
         {stepIndex === 3 ? <ApplicationPayoutStep draft={draft} onChange={updateDraft} /> : null}
         {stepIndex === 4 ? <ApplicationReviewStep draft={draft} onEditStep={setStepIndex} /> : null}
       </KeyboardAwareForm>
+      </ProfileLimitGate>
     </Screen>
   );
 }
