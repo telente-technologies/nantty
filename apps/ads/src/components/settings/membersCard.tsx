@@ -127,7 +127,7 @@ export function MembersCard() {
   return (
     <>
       <Card title="People" description="Everyone who can open this ad account, and what they can do." padded={false}>
-        {membersQuery.errorMessage ? <ErrorState message={membersQuery.errorMessage} onRetry={membersQuery.reload} /> : null}
+        {membersQuery.errorMessage ? <ErrorState error={membersQuery.error} message={membersQuery.errorMessage} onRetry={membersQuery.reload} /> : null}
         {membersQuery.isLoading && !membersQuery.data ? <LoadingBlock /> : <DataTable caption="People on this ad account" columns={memberColumns} rows={membersQuery.data?.items ?? []} readRowId={(member) => member.userId} />}
         {canManageMembers ? (
           <div className={styles.inviteForm}>

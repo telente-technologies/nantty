@@ -44,7 +44,7 @@ export function ScheduledReportsPanel({ accountId, breakdown, metrics }: { reado
 
   return (
     <Card title="Scheduled email reports" description="Sent as CSV attachments in the ad account's time zone." actions={<Button size="small" iconName="calendarDots16" onClick={() => setIsDialogOpen(true)}>Schedule report</Button>}>
-      {scheduledQuery.errorMessage ? <ErrorState message={scheduledQuery.errorMessage} onRetry={scheduledQuery.reload} /> : null}
+      {scheduledQuery.errorMessage ? <ErrorState error={scheduledQuery.error} message={scheduledQuery.errorMessage} onRetry={scheduledQuery.reload} /> : null}
       {scheduledQuery.data && scheduledQuery.data.items.length === 0 ? <p className={styles.quietText}>No scheduled reports yet.</p> : null}
       <ul className={styles.scheduledList}>
         {(scheduledQuery.data?.items ?? []).map((report) => (

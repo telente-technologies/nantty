@@ -50,7 +50,7 @@ export function AdSetDetailPage({ adSetId }: { readonly adSetId: string }) {
   const campaignsById = useMemo(() => new Map(campaign ? [[campaign.id, campaign]] : []), [campaign]);
   const adSetsById = useMemo(() => new Map(adSet ? [[adSet.id, adSet]] : []), [adSet]);
 
-  if (adSetQuery.errorMessage) return <ErrorState message={adSetQuery.errorMessage} onRetry={adSetQuery.reload} />;
+  if (adSetQuery.errorMessage) return <ErrorState variant="section" error={adSetQuery.error} message={adSetQuery.errorMessage} onRetry={adSetQuery.reload} />;
   if (!adSet) return <LoadingBlock label="Loading ad set" height={320} />;
   const canManage = canPerform("campaigns:manage");
 

@@ -106,7 +106,7 @@ export function CampaignsPage() {
       <Card padded={false}>
         {activeQuery.errorMessage ? (
           <div className={styles.cardPadding}>
-            <ErrorState message={activeQuery.errorMessage} onRetry={activeQuery.reload} />
+            <ErrorState error={activeQuery.error} message={activeQuery.errorMessage} onRetry={activeQuery.reload} />
           </div>
         ) : activeQuery.isLoading && !activeQuery.data ? (
           <div className={styles.cardPadding}>

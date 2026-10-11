@@ -17,7 +17,7 @@ export function AdCardReport({ ad }: { readonly ad: Ad }) {
   return (
     <Card title="Results by card">
       {query.isLoading ? <LoadingBlock label="Loading card results" /> : null}
-      {query.errorMessage ? <ErrorState message={query.errorMessage} onRetry={query.reload} /> : null}
+      {query.errorMessage ? <ErrorState error={query.error} message={query.errorMessage} onRetry={query.reload} /> : null}
       {query.data ? (
         <table className={styles.table}>
           <thead>

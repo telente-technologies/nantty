@@ -75,7 +75,7 @@ export function ReportsPage() {
       </Card>
       {reportQuery.errorMessage ? (
         <div className={styles.spacedBlock}>
-          <ErrorState message={reportQuery.errorMessage} onRetry={reportQuery.reload} />
+          <ErrorState error={reportQuery.error} message={reportQuery.errorMessage} onRetry={reportQuery.reload} />
         </div>
       ) : null}
       <div className={styles.chartGrid}>

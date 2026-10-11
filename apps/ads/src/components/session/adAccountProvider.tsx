@@ -31,7 +31,7 @@ export function AdAccountProvider({ accountId, role, children, fallbackFrame }: 
   );
   const frame = fallbackFrame ?? ((content: ReactNode) => content);
   if (!contextValue) {
-    if (accountQuery.errorMessage) return frame(<ErrorState message={accountQuery.errorMessage} onRetry={accountQuery.reload} />);
+    if (accountQuery.errorMessage) return frame(<ErrorState variant="section" error={accountQuery.error} message={accountQuery.errorMessage} onRetry={accountQuery.reload} />);
     return frame(<LoadingBlock label="Loading ad account" height={240} />);
   }
   return <AdAccountContext.Provider value={contextValue}>{children}</AdAccountContext.Provider>;

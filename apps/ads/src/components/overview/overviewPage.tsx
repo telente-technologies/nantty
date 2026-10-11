@@ -97,7 +97,7 @@ export function OverviewPage() {
         <SegmentedControl label="Date range" value={rangePreset} onValueChange={setRangePreset} options={rangeOptions} />
         <SwitchToggle label="Compare with previous period" checked={isComparing} onCheckedChange={setIsComparing} />
       </div>
-      {reportQuery.errorMessage ? <ErrorState message={reportQuery.errorMessage} onRetry={reportQuery.reload} /> : null}
+      {reportQuery.errorMessage ? <ErrorState error={reportQuery.error} message={reportQuery.errorMessage} onRetry={reportQuery.reload} /> : null}
       <KpiTileGrid tiles={buildKpiTiles(report?.totals ?? null, report?.comparisonTotals ?? null, results, previousResults)} isLoading={reportQuery.isLoading && !report} />
       <div className={styles.columns}>
         <div className={styles.mainColumn}>

@@ -42,7 +42,7 @@ export function AdDetailPage({ adId }: { readonly adId: string }) {
   const { toggleAdDelivery } = useDeliveryToggles(reloadAd);
   useReloadWhileReviewIsPending(ad?.status === "in_review" || ad?.review.appeal?.status === "pending", reloadAd);
 
-  if (adQuery.errorMessage) return <ErrorState message={adQuery.errorMessage} onRetry={adQuery.reload} />;
+  if (adQuery.errorMessage) return <ErrorState variant="section" error={adQuery.error} message={adQuery.errorMessage} onRetry={adQuery.reload} />;
   if (!ad) return <LoadingBlock label="Loading ad" height={320} />;
   const canManage = canPerform("campaigns:manage");
   const adSet = adSetQuery.data;

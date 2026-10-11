@@ -50,7 +50,7 @@ export function RulesPage() {
         description="Pause poor performers, scale winners or get alerts, without watching the dashboard all day."
         actions={canManageTools ? <Button variant="primary" iconName="plus16" onClick={() => setEditorState({ rule: null })}>New rule</Button> : null}
       />
-      {rulesQuery.errorMessage ? <ErrorState message={rulesQuery.errorMessage} onRetry={rulesQuery.reload} /> : null}
+      {rulesQuery.errorMessage ? <ErrorState error={rulesQuery.error} message={rulesQuery.errorMessage} onRetry={rulesQuery.reload} /> : null}
       <Card padded={false}>
         {rulesQuery.isLoading && !rulesQuery.data ? <LoadingBlock /> : null}
         {!rulesQuery.isLoading && rules.length === 0 ? <EmptyState iconName="slidersHorizontal24" title="No rules yet" description="For example: pause any ad whose cost per click passes a limit over 3 days." /> : null}

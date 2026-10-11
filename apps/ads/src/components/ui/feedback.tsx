@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { ErrorState as KitErrorState, resolveCallerErrorCopy, type ErrorKind, type ErrorStateVariant } from "@zudomart/web-kit";
+
 import { ZudoIcon, type ZudoIconName } from "@/components/ui/zudoIcon";
 
 import styles from "./feedback.module.css";
@@ -10,25 +12,16 @@ export function EmptyState({ iconName = "squaresFour24", title, description, act
       <span className={styles.emptyIcon}>
         <ZudoIcon name={iconName} size={22} />
       </span>
-      <h2>{title}</h2>
+      <h2 className={styles.emptyTitle}>{title}</h2>
       {description ? <p className={styles.emptyDescription}>{description}</p> : null}
       {action}
     </div>
   );
 }
 
-export function ErrorState({ message, onRetry }: { readonly message: string; readonly onRetry?: () => void }) {
-  return (
-    <div className={styles.errorState} role="alert">
-      <ZudoIcon name="warning20" size={18} />
-      <span>{message}</span>
-      {onRetry ? (
-        <button type="button" className={styles.retryButton} onClick={onRetry}>
-          Try again
-        </button>
-      ) : null}
-    </div>
-  );
+export function ErrorState({ message, onRetry, error, title, kind, variant = "inline" }: { readonly message?: string; readonly onRetry?: () => void; readonly error?: unknown; readonly title?: string; readonly kind?: ErrorKind; readonly variant?: ErrorStateVariant }) {
+  const copy = kind ? {} : resolveCallerErrorCopy(error, message);
+  return <KitErrorState variant={variant} error={error} kind={kind ?? copy.kind} title={title} description={copy.description} onRetry={onRetry} />;
 }
 
 export type NoticeTone = "info" | "success" | "caution" | "error";

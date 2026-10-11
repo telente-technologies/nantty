@@ -94,7 +94,7 @@ export function ExperimentsPage() {
         description="Find out which audience, creative, placement or bid works best, with people split so nobody sees both."
         actions={canManageTools ? <Button variant="primary" iconName="plus16" onClick={() => setIsCreateOpen(true)}>New test</Button> : null}
       />
-      {experimentsQuery.errorMessage ? <ErrorState message={experimentsQuery.errorMessage} onRetry={experimentsQuery.reload} /> : null}
+      {experimentsQuery.errorMessage ? <ErrorState error={experimentsQuery.error} message={experimentsQuery.errorMessage} onRetry={experimentsQuery.reload} /> : null}
       <Card padded={false}>
         {experimentsQuery.isLoading && !experimentsQuery.data ? <LoadingBlock /> : null}
         {!experimentsQuery.isLoading && experiments.length === 0 ? <EmptyState iconName="repeat24" title="No tests yet" description="Duplicate an ad set, change one thing, then start a test to compare them fairly." /> : null}

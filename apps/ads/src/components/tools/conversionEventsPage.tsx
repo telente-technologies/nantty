@@ -125,7 +125,7 @@ export function ConversionEventsPage() {
         Orders, carts, checkouts and store visits in your Zudomart store are recorded for you — no pixel or code to install. A sale is credited to an ad when the buyer tapped it within your click window or saw it within your view window.
       </InlineNotice>
       {!account.business ? <InlineNotice tone="caution">Link a store to this ad account (business accounts) to use store conversion events.</InlineNotice> : null}
-      {eventsQuery.errorMessage ? <ErrorState message={eventsQuery.errorMessage} onRetry={eventsQuery.reload} /> : null}
+      {eventsQuery.errorMessage ? <ErrorState error={eventsQuery.error} message={eventsQuery.errorMessage} onRetry={eventsQuery.reload} /> : null}
       <Card padded={false}>
         {eventsQuery.isLoading && !eventsQuery.data ? <LoadingBlock /> : <DataTable caption="Conversion events" columns={columns} rows={eventsQuery.data?.items ?? []} readRowId={(row) => row.id} emptyState="No conversion events. They appear once a store is linked." />}
       </Card>
