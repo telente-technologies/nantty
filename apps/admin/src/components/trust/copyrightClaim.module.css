@@ -66,8 +66,8 @@
 .statement {
   white-space: pre-wrap;
   padding: var(--space-2) 10px;
-  border-left: 3px solid var(--color-brand);
-  background: var(--color-brand-tint);
+  border-left: 2px solid var(--divider);
+  background: var(--surface-sunken);
 }
 
 .urlList {

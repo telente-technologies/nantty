@@ -54,7 +54,7 @@ function CaseQueue({ status }: { readonly status: "OPEN" | "DECIDED" }) {
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Suspension cases" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} readRowTone={(item) => (item.status === "ESCALATED" ? "danger" : item.riskScore >= 80 ? "caution" : null)} emptyMessage={status === "OPEN" ? "No suspension cases waiting." : "Nothing decided yet."} />
+      <DataTable caption="Suspension cases" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} emptyMessage={status === "OPEN" ? "No suspension cases waiting." : "Nothing decided yet."} />
       <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters({ ...filters, cursor })} />
       {selectedId ? <SuspensionCasePanel key={selectedId} caseId={selectedId} onClose={() => setSelectedId(null)} onChanged={reload} /> : null}
     </>

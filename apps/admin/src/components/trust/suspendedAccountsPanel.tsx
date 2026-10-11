@@ -83,7 +83,7 @@ export function SuspendedAccountsPanel({ appealsOnly }: { readonly appealsOnly: 
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption={appealsOnly ? "Appeal queue" : "Suspended accounts"} columns={columns} rows={data?.items ?? []} readRowKey={(account) => account.caseId} isLoading={isLoading} readRowTone={(account) => (account.daysUntilDeletion <= 14 ? "danger" : account.appeal?.status === "PENDING" ? "caution" : null)} emptyMessage={appealsOnly ? "No appeals waiting." : "No suspended accounts."} />
+      <DataTable caption={appealsOnly ? "Appeal queue" : "Suspended accounts"} columns={columns} rows={data?.items ?? []} readRowKey={(account) => account.caseId} isLoading={isLoading} emptyMessage={appealsOnly ? "No appeals waiting." : "No suspended accounts."} />
       <CursorPagination cursor={cursor} nextCursor={data?.nextCursor} onCursorChange={setCursor} />
       {action ? (
         <ConfirmActionDialog intent="suspend" isOpen title={actionCopy[action.kind].title} consequences={actionCopy[action.kind].consequences(action.account.user.username)} confirmLabel={actionCopy[action.kind].confirm} tone={actionCopy[action.kind].danger ? "danger" : "default"} requiresStepUp isBusy={mutation.isRunning} errorMessage={mutation.errorMessage} onConfirm={confirm} onClose={() => { mutation.clearError(); setAction(null); }}>

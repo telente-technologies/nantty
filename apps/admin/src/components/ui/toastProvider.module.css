@@ -21,19 +21,17 @@
   box-shadow: var(--shadow-float);
   font-weight: 500;
   animation: rise 160ms ease-out;
-  border-left: 4px solid;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .success {
-  border-color: var(--success);
+  color: var(--success);
 }
 
 .error {
-  border-color: var(--error);
-}
-
-.info {
-  border-color: var(--color-brand);
+  color: var(--error);
 }
 
 @keyframes rise {

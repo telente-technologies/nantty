@@ -33,7 +33,7 @@ const claimColumns: readonly DataTableColumn<CopyrightClaimSummary>[] = [
   { key: "work", header: "Claimed work", render: (claim) => <span className={styles.targetCellText}><span className={styles.truncate}>{claim.workTitle}</span><span className={styles.muted}>{claim.claimant.organization ?? claim.claimant.name} · {humanizeConstantName(claim.workType)}</span></span> },
   { key: "target", header: "Target", render: (claim) => <ModeratedTargetTableCell target={claim.target} /> },
   { key: "infringer", header: "Uploader", render: (claim) => <UserIdentity user={claim.infringer} size={24} /> },
-  { key: "strikes", header: "Strikes", align: "end", isMono: true, render: (claim) => claim.infringerStrikeCount },
+  { key: "strikes", header: "Strikes", align: "end", isMono: true, render: (claim) => (claim.infringerStrikeCount >= 2 && claim.status === "PENDING" ? <StatusBadge tone="caution" label={`${claim.infringerStrikeCount} strikes`} /> : claim.infringerStrikeCount) },
   { key: "match", header: "Audio match", align: "end", isMono: true, render: (claim) => (claim.topAudioMatchConfidencePercent === null ? "—" : `${claim.topAudioMatchConfidencePercent}%`) },
   { key: "flag", header: "Target", render: (claim) => <StatusBadge status={claim.targetFlag} label={humanizeConstantName(claim.targetFlag)} tone={claim.targetFlag === "TAKEN_DOWN" ? "danger" : claim.targetFlag === "LIMITED" ? "caution" : "success"} /> },
   { key: "status", header: "Claim", render: (claim) => <StatusBadge status={claim.status} /> },
@@ -59,7 +59,7 @@ export function CopyrightClaimsWorkspace() {
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Copyright claims" columns={claimColumns} rows={data?.items ?? []} readRowKey={(claim) => claim.id} onRowOpen={(claim) => router.push(`/moderation/copyright/${claim.id}`)} isLoading={isLoading} readRowTone={(claim) => (claim.infringerStrikeCount >= 2 && claim.status === "PENDING" ? "caution" : null)} emptyMessage="No claims here." />
+      <DataTable caption="Copyright claims" columns={claimColumns} rows={data?.items ?? []} readRowKey={(claim) => claim.id} onRowOpen={(claim) => router.push(`/moderation/copyright/${claim.id}`)} isLoading={isLoading} emptyMessage="No claims here." />
       <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters((current) => ({ ...current, cursor }))} />
     </>
   );

@@ -171,8 +171,8 @@
 
 .statement {
   padding: 10px var(--space-3);
-  border-left: 3px solid var(--color-brand);
-  background: var(--color-brand-tint);
+  border-left: 2px solid var(--divider);
+  background: var(--surface-sunken);
   border-radius: 0 var(--radius-small) var(--radius-small) 0;
   white-space: pre-wrap;
 }

@@ -22,10 +22,9 @@ interface DataTableProps<Row> {
   readonly selectedRowKey?: string | null;
   readonly isLoading?: boolean;
   readonly emptyMessage?: ReactNode;
-  readonly readRowTone?: (row: Row) => "danger" | "caution" | null;
 }
 
-export function DataTable<Row>({ caption, columns, rows, readRowKey, onRowOpen, selectedRowKey, isLoading = false, emptyMessage = "Nothing here yet.", readRowTone }: DataTableProps<Row>) {
+export function DataTable<Row>({ caption, columns, rows, readRowKey, onRowOpen, selectedRowKey, isLoading = false, emptyMessage = "Nothing here yet." }: DataTableProps<Row>) {
   const bodyRef = useRef<HTMLTableSectionElement>(null);
 
   function focusRowAtOffset(currentRow: HTMLElement, offset: number) {
@@ -81,8 +80,7 @@ export function DataTable<Row>({ caption, columns, rows, readRowKey, onRowOpen, 
           ) : null}
           {rows.map((row) => {
             const rowKey = readRowKey(row);
-            const tone = readRowTone?.(row);
-            const className = [onRowOpen ? styles.interactiveRow : "", rowKey === selectedRowKey ? styles.selectedRow : "", tone ? styles[`${tone}Row`] : ""].filter(Boolean).join(" ");
+            const className = [onRowOpen ? styles.interactiveRow : "", rowKey === selectedRowKey ? styles.selectedRow : ""].filter(Boolean).join(" ");
             return (
               <tr
                 key={rowKey}

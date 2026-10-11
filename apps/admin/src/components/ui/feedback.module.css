@@ -75,7 +75,6 @@
 .notice {
   padding: 10px var(--space-3);
   border-radius: var(--radius-medium);
-  border-left: 3px solid;
 }
 
 .noticeTitle {
@@ -85,22 +84,18 @@
 
 .info {
   background: var(--color-brand-tint);
-  border-color: var(--color-brand);
 }
 
 .caution {
   background: var(--caution-tint);
-  border-color: var(--caution);
 }
 
 .danger {
   background: var(--error-tint);
-  border-color: var(--error);
 }
 
 .success {
   background: var(--success-tint);
-  border-color: var(--success);
 }
 
 .emptyIcon {

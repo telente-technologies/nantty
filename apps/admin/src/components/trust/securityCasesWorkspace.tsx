@@ -51,7 +51,7 @@ export function SecurityCasesWorkspace() {
         </div>
       </Toolbar>
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}
-      <DataTable caption="Security cases" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} readRowTone={(item) => (item.autoSuspended && item.status === "open" ? "danger" : item.severity === "high" ? "caution" : null)} emptyMessage={status === "open" ? "No security cases waiting." : "Nothing here yet."} />
+      <DataTable caption="Security cases" columns={columns} rows={data?.items ?? []} readRowKey={(item) => item.id} onRowOpen={(item) => setSelectedId(item.id)} selectedRowKey={selectedId} isLoading={isLoading} emptyMessage={status === "open" ? "No security cases waiting." : "Nothing here yet."} />
       <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters({ ...filters, cursor })} />
       {selectedId ? <SecurityCasePanel key={selectedId} caseId={selectedId} onClose={() => setSelectedId(null)} onChanged={reload} /> : null}
     </>

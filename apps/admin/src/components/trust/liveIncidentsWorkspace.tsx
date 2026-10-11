@@ -81,7 +81,6 @@ export function LiveIncidentsWorkspace() {
         onRowOpen={(incident) => setSelectedIncidentId(incident.id)}
         selectedRowKey={selectedIncidentId}
         isLoading={isLoading}
-        readRowTone={(incident) => (incident.priority === "urgent" || incident.holdActive ? "danger" : incident.priority === "high" ? "caution" : null)}
         emptyMessage={statusTab === "open" ? "No live needs review right now." : "No incidents match these filters."}
       />
       {data ? <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onPageChange={(page) => setFilters((current) => ({ ...current, page }))} /> : null}

@@ -75,14 +75,6 @@
   box-shadow: inset 3px 0 0 var(--color-brand);
 }
 
-.dangerRow td:first-child {
-  box-shadow: inset 3px 0 0 var(--error);
-}
-
-.cautionRow td:first-child {
-  box-shadow: inset 3px 0 0 var(--caution);
-}
-
 .empty {
   padding: 36px var(--space-3) !important;
   text-align: center;

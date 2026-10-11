@@ -72,7 +72,6 @@ export function ReportsWorkspace() {
         onRowOpen={(report) => setSelectedReportId(report.id)}
         selectedRowKey={selectedReportId}
         isLoading={isLoading}
-        readRowTone={(report) => (report.priority === "URGENT" ? "danger" : report.priority === "HIGH" ? "caution" : null)}
         emptyMessage={statusTab === "OPEN" ? "Queue is clear. Nice work." : "No reports match these filters."}
       />
       <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters((current) => ({ ...current, cursor }))} />
