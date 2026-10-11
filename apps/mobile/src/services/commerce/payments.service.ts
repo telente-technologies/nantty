@@ -1,4 +1,4 @@
-import type { PaymentChannel, PaymentInitialization, PaymentProvider, PaymentVerification, SavedCardCharge, SavedCardOffer } from "@/types/commerce.type";
+import type { PaymentChannel, PaymentInitialization, PaymentVerification, SavedCardCharge, SavedCardOffer } from "@/types/commerce.type";
 
 import * as WebBrowser from "expo-web-browser";
 
@@ -36,11 +36,11 @@ const toSavedCardCharge = (wire: SavedCardChargeWire): SavedCardCharge => {
 
 export const paymentsService = {
   fetchPaymentChannels: () => api.get<{ channels: PaymentChannel[] }>("/api/v1/payments/channels"),
-  initializeOrderPayment: (orderId: string, provider: PaymentProvider, idempotencyKey: string) =>
-    api.post<PaymentInitialization>("/api/v1/payments/initialize", { orderId, provider }, { idempotencyKey }),
+  initializeOrderPayment: (orderId: string, idempotencyKey: string) =>
+    api.post<PaymentInitialization>("/api/v1/payments/initialize", { orderId }, { idempotencyKey }),
   chargeSavedCard: async (orderId: string, savedCardId: string, idempotencyKey: string): Promise<SavedCardCharge> => {
-    const intent = await paymentsService.initializeOrderPayment(orderId, "paystack", idempotencyKey);
-    const charge = await api.post<SavedCardChargeWire>("/api/v1/payments/saved-cards/charges", { paymentReference: intent.reference, savedCardId });
+    const intent = await paymentsService.initializeOrderPayment(orderId, idempotencyKey);
+    const charge = await api.post<SavedCardChargeWire>("/api/v1/payments/saved-cards/charges", { paymentReference: intent.reference, savedCardId }, { idempotencyKey: `${idempotencyKey}-card` });
     return toSavedCardCharge(charge);
   },
   setUpCardOnThisDevice: async (idempotencyKey: string): Promise<SavedCardOffer | null> => {
@@ -50,6 +50,7 @@ export const paymentsService = {
     return card ? { savedCardId: card.savedCardId, brand: card.brand, last4: card.last4, expMonth: card.expiryMonth, expYear: card.expiryYear } : null;
   },
   verifyOrderPayment: (orderId: string) => api.post<PaymentVerification>(`/api/v1/payments/orders/${orderId}/verify`),
+  hostedCheckoutUrlOf: (payment: { readonly checkoutUrl?: string | null; readonly authorizationUrl?: string | null }) => payment.checkoutUrl || payment.authorizationUrl || undefined,
   openHostedCheckoutInAppBrowser: async (authorizationUrl: string): Promise<"returned" | "dismissed"> => {
     if (shouldUseMockForPath("/api/v1/payments")) return "returned";
     const result = await WebBrowser.openAuthSessionAsync(authorizationUrl, PAYMENT_RETURN_URL);

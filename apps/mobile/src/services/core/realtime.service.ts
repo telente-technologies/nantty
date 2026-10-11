@@ -1,4 +1,5 @@
 import { apiConfig, shouldUseMockForPath } from "@/config/api.config";
+import { api } from "@/services/apiClient.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { RealtimeServerEvent } from "@/types";
 
@@ -43,7 +44,7 @@ function scheduleReconnectWithBackoffAndJitter() {
   reconnectAttemptCount += 1;
   reconnectTimer = setTimeout(() => {
     reconnectTimer = null;
-    openAuthenticatedWebSocket();
+    void openAuthenticatedWebSocket();
   }, delayWithJitter);
 }
 
@@ -58,13 +59,27 @@ function startHeartbeat(socket: WebSocket) {
   }, HEARTBEAT_INTERVAL_MS);
 }
 
-function openAuthenticatedWebSocket() {
-  const accessToken = useAuthStore.getState().accessToken;
-  if (!accessToken || realtimeEventListeners.size === 0) return;
+export async function fetchRealtimeSocketToken(): Promise<string | null> {
+  const issued = await api.post<{ readonly realtimeToken?: unknown; readonly scope?: unknown }>("/api/v1/auth/realtime-token").catch(() => null);
+  return typeof issued?.realtimeToken === "string" && issued.scope === "realtime" ? issued.realtimeToken : null;
+}
+
+let isOpeningSocket = false;
+
+async function openAuthenticatedWebSocket() {
+  if (isOpeningSocket || openSocket || !useAuthStore.getState().accessToken || realtimeEventListeners.size === 0) return;
+  isOpeningSocket = true;
+  const realtimeToken = await fetchRealtimeSocketToken();
+  isOpeningSocket = false;
+  if (realtimeEventListeners.size === 0 || openSocket) return;
+  if (!realtimeToken) {
+    scheduleReconnectWithBackoffAndJitter();
+    return;
+  }
   const socket = new WebSocket(buildRealtimeWebSocketUrl(apiConfig.baseUrl));
   openSocket = socket;
   socket.onopen = () => {
-    socket.send(JSON.stringify({ type: "auth", accessToken: useAuthStore.getState().accessToken }));
+    socket.send(JSON.stringify({ type: "auth", accessToken: realtimeToken }));
     reconnectAttemptCount = 0;
     startHeartbeat(socket);
   };
@@ -98,7 +113,7 @@ function startRealtimeTransport() {
     stopMockEmitter ??= startMockRealtimeEventEmitter(deliverEventToListeners);
     return;
   }
-  if (!openSocket) openAuthenticatedWebSocket();
+  if (!openSocket) void openAuthenticatedWebSocket();
 }
 
 function stopRealtimeTransport() {

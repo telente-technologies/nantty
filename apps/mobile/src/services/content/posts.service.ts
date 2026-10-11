@@ -25,6 +25,7 @@ export const postsService = {
   recordPostShare: (postId: string) => api.post<void>(`/api/v1/posts/${postId}/share`, {}),
   mutePostNotifications: (postId: string) => api.put<{ readonly postId: string; readonly muted: boolean }>(`/api/v1/posts/${postId}/notifications-mute`, undefined, { idempotencyKey: generateIdempotencyKey() }),
   unmutePostNotifications: (postId: string) => api.delete<{ readonly postId: string; readonly muted: boolean }>(`/api/v1/posts/${postId}/notifications-mute`, { idempotencyKey: generateIdempotencyKey() }),
+  deletePost: (postId: string) => api.delete<void>(`/api/v1/posts/${postId}`, { idempotencyKey: generateIdempotencyKey() }),
   pinPost: (postId: string) => api.put<Post>(`/api/v1/posts/${postId}/pin`),
   unpinPost: (postId: string) => api.delete<Post>(`/api/v1/posts/${postId}/pin`),
   refreshPostLinkPreview: (postId: string) => api.post<LinkPreview | null>(`/api/v1/posts/${postId}/link-preview`),

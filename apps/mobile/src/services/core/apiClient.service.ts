@@ -19,6 +19,7 @@ interface RequestOptions {
   readonly query?: Record<string, string | number | boolean | undefined>;
   readonly idempotencyKey?: string;
   readonly auth?: boolean;
+  readonly headers?: Record<string, string>;
 }
 
 const appendQueryStringToPath = (path: string, query?: RequestOptions["query"]) => {
@@ -57,8 +58,10 @@ async function sendHttpRequest<T>(method: Method, path: string, options: Request
   if (shouldUseMockForPath(path)) return resolveMockApiRequest<T>(method, url, options.body, options.idempotencyKey, !useAuthStore.getState().accessToken);
 
   const headers: Record<string, string> = { Accept: "application/json", ...getAuthorizedRequestHeaders(options.auth !== false) };
+  if (method !== "GET") delete headers["X-Client-Region"];
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
   if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
+  Object.assign(headers, options.headers);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), apiConfig.timeoutMs);
@@ -71,8 +74,8 @@ async function sendHttpRequest<T>(method: Method, path: string, options: Request
     });
     const payload = response.status === 204 ? undefined : await response.json().catch(() => undefined);
     if (!response.ok) {
-      const error = (payload ?? {}) as { message?: string; code?: string; suggestions?: string[] };
-      throw new ApiError(response.status, error.message ?? "Something went wrong", error.code, error.suggestions);
+      const error = (payload ?? {}) as { message?: string; code?: string; suggestions?: string[]; details?: Record<string, unknown> };
+      throw new ApiError(response.status, error.message ?? "Something went wrong", error.code, error.suggestions, error.details);
     }
     return unwrapApiPayload<T>(payload);
   } finally {
