@@ -4,6 +4,7 @@ import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { useSession } from "@/components/providers/sessionProvider";
+import { retryCommentsPageUnlessCursorExpired, useRestartCommentsOnExpiredCursor } from "@/components/feed/restartCommentsOnExpiredCursor.hook";
 import { postThreadService } from "@/services/postThread.service";
 import type { ThreadReply, ThreadRow, ThreadSort } from "@/types/postThread.type";
 
@@ -19,14 +20,16 @@ export const adSlotPositionsFor = (replyCount: number): number[] => {
   return positions;
 };
 
-export function usePostConversation(postId: string, sort: ThreadSort) {
+export function usePostConversation(postId: string, sort: ThreadSort, onRestartedFromTop?: () => void) {
   const isSignedIn = useSession().viewer !== null;
   const query = useInfiniteQuery({
     queryKey: postThreadQueryKey(postId, sort),
     queryFn: ({ pageParam }) => postThreadService.fetchConversation(postId, sort, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    retry: retryCommentsPageUnlessCursorExpired,
   });
+  const { isRestartingFromTop } = useRestartCommentsOnExpiredCursor(postThreadQueryKey(postId, sort), query.error, onRestartedFromTop);
   const conversations = useMemo(() => {
     const seen = new Set<string>();
     return (query.data?.pages ?? []).flatMap((page) => page.data).filter((reply) => (seen.has(reply.id) ? false : (seen.add(reply.id), true)));
@@ -56,7 +59,7 @@ export function usePostConversation(postId: string, sort: ThreadSort) {
     return ad ? [{ kind: "sponsored", key: `ad-${ad.adId}`, ad }, replyRow] : [replyRow];
   });
 
-  return { query, rows };
+  return { query, rows, isRestartingFromTop };
 }
 
 export function useThreadReplies(commentId: string, isExpanded: boolean) {

@@ -33,6 +33,10 @@
   background: var(--surface-sunken);
 }
 
+.video:not(:fullscreen) video {
+  object-fit: cover;
+}
+
 .videoFrame {
   display: block;
   aspect-ratio: 16 / 9;

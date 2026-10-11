@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { ZudomartWordmark } from "@zudomart/web-kit";
+import { trapTabKey, ZudomartWordmark } from "@zudomart/web-kit";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
 
 import { DeleteAccountDialog } from "@/components/settings/deleteAccountDialog";
@@ -52,7 +52,7 @@ export function PolicyReacceptScreen({ versions, onAccept, isAccepting, errorMes
   }
 
   return (
-    <div ref={containerRef} className={styles.reaccept} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+    <div ref={containerRef} className={styles.reaccept} role="dialog" aria-modal="true" aria-labelledby={titleId} onKeyDown={(event) => trapTabKey(event, containerRef.current)}>
       <div className={styles.reacceptScroll}>
         <div className={styles.reacceptColumn}>
           <div className={styles.reacceptBrand}>

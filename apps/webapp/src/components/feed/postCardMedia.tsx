@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { PlayIcon } from "@/components/ui/icons";
 import { MediaImage } from "@/components/ui/media";
+import { InlineVideoPlayer } from "@/components/video/inlineVideoPlayer";
 import type { Media, Post } from "@/types";
 
 import styles from "./postCardMedia.module.css";
@@ -49,7 +50,7 @@ export function PostMedia({ media, priority, watchHref }: { readonly media: read
   return (
     <div className={styles.mediaFrame}>
       {active?.type === "video" && active.url && !active.url.endsWith(".m3u8") ? (
-        <video className={styles.video} src={active.url} poster={active.posterUrl ?? undefined} controls preload="metadata" playsInline />
+        <InlineVideoPlayer className={styles.video} src={active.url} poster={active.posterUrl} durationSeconds={active.durationSeconds} />
       ) : (
         <MediaImage src={active?.type === "image" ? active.url : (active?.posterUrl ?? active?.url)} alt="" sizes="(max-width: 768px) 100vw, 640px" priority={priority} />
       )}

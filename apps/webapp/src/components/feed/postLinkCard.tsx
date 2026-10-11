@@ -16,13 +16,19 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { findFirstExternalUrl, findFirstInternalReference, readDisplayDomain } from "@/utils/postLinks.util";
 import { buildPostPath, buildProductPath, buildProfilePath, buildStorePath } from "@/utils/seoPaths.util";
 
+import { feedInteractionsService } from "@/services/feedInteractions.service";
+
+import { usePostSurface } from "./interactions/feedInteractions.hook";
 import styles from "./postLinkCard.module.css";
 
-export function ExternalLinkPreviewCard({ preview }: { readonly preview: LinkPreview }) {
+export function ExternalLinkPreviewCard({ preview, onOpen }: { readonly preview: LinkPreview; readonly onOpen?: () => void }) {
   const domain = preview.domain || readDisplayDomain(preview.url);
 
   return (
-    <a href={preview.url} target="_blank" rel="noopener noreferrer nofollow ugc" className={styles.card} onClick={(event) => void confirmBeforeOpeningRiskyLink(event, preview.url)} aria-label={`${preview.title}, opens ${domain} in a new tab`}>
+    <a href={preview.url} target="_blank" rel="noopener noreferrer nofollow ugc" className={styles.card} onClick={(event) => {
+      onOpen?.();
+      void confirmBeforeOpeningRiskyLink(event, preview.url);
+    }} aria-label={`${preview.title}, opens ${domain} in a new tab`}>
       {preview.imageUrl ? (
         <span className={styles.media}>
           <MediaImage src={preview.imageUrl} alt="" sizes="(max-width: 640px) 100vw, 560px" />
@@ -86,6 +92,7 @@ function InternalLinkCard({ reference }: { readonly reference: InternalLinkRefer
 
 export function PostLinkCard({ post }: { readonly post: Post }) {
   const { viewer } = useSession();
+  const surface = usePostSurface();
   const hasNoMedia = post.media.length === 0 && post.products.length === 0 && !post.sponsored;
   const internalReference = hasNoMedia ? findFirstInternalReference(post.text) : null;
   const externalUrl = hasNoMedia && !internalReference && !post.linkPreview ? findFirstExternalUrl(post.text) : null;
@@ -99,5 +106,5 @@ export function PostLinkCard({ post }: { readonly post: Post }) {
   if (!hasNoMedia) return null;
   if (internalReference) return <InternalLinkCard reference={internalReference} />;
   const preview = post.linkPreview ?? onDemand.data ?? null;
-  return preview ? <ExternalLinkPreviewCard preview={preview} /> : null;
+  return preview ? <ExternalLinkPreviewCard preview={preview} onOpen={() => feedInteractionsService.recordLinkClick({ postId: post.id, authorId: post.author.id }, surface)} /> : null;
 }

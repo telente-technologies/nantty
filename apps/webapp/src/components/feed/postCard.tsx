@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { LikeFilledActionIcon, ReplyActionIcon, TagIcon } from "@/components/ui/icons";
+import { LikeFilledActionIcon, ReplyActionIcon, TagIcon, TrashIcon } from "@/components/ui/icons";
+import { useDeleteOwnPost } from "./useDeleteOwnPost.hook";
 import { showToast } from "@/components/ui/toast";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { MentionText } from "@/components/mentions/mentionText";
@@ -37,14 +38,31 @@ import { canOfferPostNotificationMute } from "@/utils/postNotificationMute.util"
 import { QuotedPostCard } from "./quotedPostCard";
 import { quotedSummaryFromPost } from "@/utils/quotedPostLinks.util";
 import { TaggedPeopleLine } from "@/components/taggedPeople/taggedPeopleLine";
+import type { FeedInteractionSurface } from "@/utils/feedInteractionQueue.util";
+import { feedInteractionsService } from "@/services/feedInteractions.service";
+import { PostSurfaceProvider, usePostImpressionRef, usePostSurface } from "./interactions/feedInteractions.hook";
 
-export function PostCard({ post, priority = false, swipeable = false, showPinnedBadge = false }: { readonly post: Post; readonly priority?: boolean; readonly swipeable?: boolean; readonly showPinnedBadge?: boolean }) {
+export interface PostCardProps {
+  readonly post: Post;
+  readonly priority?: boolean;
+  readonly swipeable?: boolean;
+  readonly showPinnedBadge?: boolean;
+  readonly surface?: FeedInteractionSurface;
+  readonly position?: number;
+}
+
+export function PostCard({ post, priority = false, swipeable = false, showPinnedBadge = false, surface: surfaceOverride, position }: PostCardProps) {
   const router = useRouter();
   const [likePopSignal, setLikePopSignal] = useState(0);
   const queryClient = useQueryClient();
   const { viewer } = useSession();
   const { toggleLike, likeIfNotLiked } = usePostLike(post);
   const isOwnPost = viewer?.id === post.author.id;
+  const { confirmAndDelete } = useDeleteOwnPost();
+  const contextSurface = usePostSurface();
+  const surface = surfaceOverride ?? contextSurface;
+  const interactionTarget = { postId: post.id, authorId: post.author.id };
+  const impressionRef = usePostImpressionRef(isOwnPost ? null : interactionTarget, surface, position);
   const notificationMute = usePostNotificationMute(post);
   const [optimisticPinned, setOptimisticPinned] = useState(post.isPinned === true);
   const pinMutation = useMutation({
@@ -73,9 +91,10 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
   });
 
   const card = (
-    <article className={[styles.card, swipe.isActive ? swipeStyles.card : ""].filter(Boolean).join(" ")}>
+    <PostSurfaceProvider surface={surface}>
+    <article ref={impressionRef} className={[styles.card, swipe.isActive ? swipeStyles.card : ""].filter(Boolean).join(" ")}>
       <header className={styles.header}>
-        <Link href={buildProfilePath(post.author.username)} className={styles.author}>
+        <Link href={buildProfilePath(post.author.username)} className={styles.author} onClick={() => feedInteractionsService.recordProfileClick(interactionTarget, surface)}>
           <Avatar name={post.author.name} src={post.author.avatarUrl} size="md" />
           <span className={styles.authorText}>
             <span className={styles.authorName}>
@@ -100,9 +119,11 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
           targetId={post.id}
           canonicalPath={`/post/${post.id}`}
           isOwnContent={viewer?.id === post.author.id}
+          promoteHref={post.sponsored ? null : `/boost/${encodeURIComponent(post.id)}`}
           downloadTarget={findDownloadTargetForPost(post)}
           notificationMuteAction={canOfferPostNotificationMute(viewer !== null, post) ? { isMuted: notificationMute.isMuted, onToggle: notificationMute.toggle } : undefined}
           pinAction={isOwnPost ? { isPinned: optimisticPinned, onTogglePin: () => requireAuthThen(() => pinMutation.mutate(), "Sign in to pin posts."), disabled: pinMutation.isPending } : undefined}
+          extraDangerActions={isOwnPost ? [{ label: "Delete", icon: <TrashIcon size={18} aria-hidden="true" />, onSelect: () => void confirmAndDelete({ id: post.id, kind: post.kind ?? "post" }) }] : undefined}
         />
       </header>
 
@@ -154,6 +175,7 @@ export function PostCard({ post, priority = false, swipeable = false, showPinned
         <ViewQuotesLink post={post} />
       </footer>
     </article>
+    </PostSurfaceProvider>
   );
 
   if (!swipe.isActive) return card;

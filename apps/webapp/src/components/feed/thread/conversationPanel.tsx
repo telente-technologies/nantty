@@ -59,14 +59,16 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
   const localRepliesFor = (parentId: string) => localReplies[parentId] ?? [];
   const { viewer } = useSession();
   const isOwnPost = viewer?.id === post.author.id;
-  const { query, rows } = usePostConversation(post.id, sort);
+  const panelId = `conversation-${post.id}`;
+  const { query, rows, isRestartingFromTop } = usePostConversation(post.id, sort, () =>
+    document.getElementById(`${panelId}-title`)?.parentElement?.scrollIntoView({ block: "start" }),
+  );
   const localTopLevel = (localReplies["root"] ?? []).filter((local) => !rows.some((row) => row.kind === "reply" && row.reply.id === local.id));
   const sentinelRef = useInfiniteScrollSentinel({
-    hasNextPage: query.hasNextPage,
+    hasNextPage: query.hasNextPage && !query.isError && !isRestartingFromTop,
     isFetchingNextPage: query.isFetchingNextPage,
     fetchNextPage: query.fetchNextPage,
   });
-  const panelId = `conversation-${post.id}`;
 
   return (
     <section className={panelStyles.panel} id="comments" aria-labelledby={`${panelId}-title`}>
@@ -99,7 +101,7 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
           </div>
         ) : query.isLoading ? (
           <ThreadSkeleton rows={4} />
-        ) : query.isError ? (
+        ) : query.isError && !isRestartingFromTop ? (
           <ErrorState title="Replies didn't load" description="Check your connection, then try again." action={<RetryButton onRetry={() => query.refetch()} />} />
         ) : rows.length === 0 && localTopLevel.length === 0 ? (
           <EmptyState title="No replies yet" description="Be the first to reply to this post." />

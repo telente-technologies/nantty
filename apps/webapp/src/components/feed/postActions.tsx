@@ -17,7 +17,6 @@ import {
   ShareActionIcon,
   ViewsActionIcon,
 } from "@/components/ui/icons";
-import { Dialog } from "@/components/ui/dialog";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { postsService } from "@/services/posts.service";
@@ -26,6 +25,7 @@ import { formatCompactCount } from "@/utils/formatDate.util";
 import { addRepostEverywhere } from "@/utils/postEngagementCache.util";
 
 import styles from "./postActions.module.css";
+import { ViewsExplainerDialog } from "./viewsExplainerDialog";
 import { describeCount } from "@/utils/countLabel.util";
 
 const ICON_SIZE = 19;
@@ -138,20 +138,7 @@ export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCoun
         icon={<span className={styles.halo}><ShareActionIcon size={ICON_SIZE} /></span>}
         iconOnly
       />
-      <Dialog
-        isOpen={viewsInfoOpen}
-        onClose={() => setViewsInfoOpen(false)}
-        title="Views"
-        description="Times this post was seen. A view counts each time it appears on someone else's screen, including repeat views. The author's own views don't count."
-        layout="sheet"
-        size="small"
-        icon={<ViewsActionIcon size={22} />}
-        actions={[{ label: "Close", variant: "secondary", onClick: () => setViewsInfoOpen(false), isInitialFocus: true }]}
-      >
-        <Link href="/help/posts-and-feed/views-and-analytics" className={styles.learnMore} onClick={() => setViewsInfoOpen(false)}>
-          Learn more about views
-        </Link>
-      </Dialog>
+      <ViewsExplainerDialog isOpen={viewsInfoOpen} onClose={() => setViewsInfoOpen(false)} />
     </div>
   );
 }
