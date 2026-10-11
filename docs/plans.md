@@ -518,7 +518,7 @@ Requirement (2 Oct): *"businesses and brands use gold checkmarks, while users us
 ### 13.3 API sketch (for when the backend starts)
 
 - `GET /api/v1/verifications/me` → `{ personal: {...} | null, business: { storeId, ... } | null }`.
-- `POST /api/v1/verifications/checkout { subjectType, storeId? }` → payment session (Paystack/Flutterwave).
+- `POST /api/v1/verifications/checkout { subjectType, storeId? }` → payment session (Flutterwave).
 - Webhook `subscription.updated` → set/clear `verified` flag on the `users` row (personal) or `stores` row (business).
 - Badge payloads are returned on user/store responses; the client never decides verification.
 
@@ -1023,8 +1023,8 @@ All of these go through `requireAuthThen`. Guests can read comments and watch li
 | Send in chat | "More" menu on posts, clips, videos, lives, profiles; Share on product | `POST /chat/shares { conversationIds (1–20), reference { kind, id }, note }` returns `{ sentCount, shareCount }` (§25.1) |
 | Report | "More" menu, comment rows | `POST /reports { targetType, targetId, reason, details }` |
 | Live gifts | `/live/[liveId]` | `GET /gifts`, `POST /lives/:id/gifts { giftId, quantity }`. A `402 INSUFFICIENT_COINS` response opens the coin store |
-| Buy coins (web) | coin store dialog | `GET /coins/packages?channel=web`, `POST /coins/purchases { packageId, channel: "web" }` returns `{ reference, checkoutUrl }` (Paystack Popup, redirect to `authorizationUrl` as fallback). `/coins/return?reference=` shows "Confirming payment…" until `POST /coins/purchases/:ref/verify` reports `succeeded`. Production confirms only from the `collection.succeeded` webhook (checkoutPaymentFlowPlan §6–8) |
-| Subscribe to creator | visitor profile (only when the creator has plans) | `GET /creators/:id/subscription-plans` (public), `POST /creators/:id/subscriptions { planId }` returns `{ subscriptionId, checkoutUrl }` (Paystack). `/subscriptions/return` polls `GET /subscriptions/:id` |
+| Buy coins (web) | coin store dialog | `GET /coins/packages?channel=web`, `POST /coins/purchases { packageId, channel: "web" }` returns `{ reference, checkoutUrl }` (redirect to the Flutterwave hosted checkout link). `/coins/return?reference=` shows "Confirming payment…" until `POST /coins/purchases/:ref/verify` reports `succeeded`. Production confirms only from the `collection.succeeded` webhook (checkoutPaymentFlowPlan §6–8) |
+| Subscribe to creator | visitor profile (only when the creator has plans) | `GET /creators/:id/subscription-plans` (public), `POST /creators/:id/subscriptions { planId }` returns `{ subscriptionId, checkoutUrl }` (Flutterwave). `/subscriptions/return` polls `GET /subscriptions/:id` |
 
 In mock mode the checkout URLs point straight at the return pages.
 
@@ -1221,14 +1221,14 @@ Spec: owner trials/verification/admin bullets, "Decided 2026-10-03" and backendP
 
 ### 30.2 Seller (web)
 
-- Trial (7 days or 1 month) with card saved through Paystack, refunded verification charge, reminders at 3 and 1 day, one-tap cancel; eligibility comes from the server. Account email only, read-only.
+- Trial (7 days or 1 month) with card saved through Flutterwave, refunded verification charge, reminders at 3 and 1 day, one-tap cancel; eligibility comes from the server. Account email only, read-only.
 - Per-business billing; "Blue + Gold bundle -15%" shown when Blue is active, yearly wins when it is bigger (no stacking); Gold-only plan card; Gold shows only after business verification.
 - Business documents page and dashboard banner never block selling.
 - Store switcher no longer clips at 390px (CSS fix, not browser-verified).
 
 ### 30.3 Open items
 
-- Real Paystack hosted card setup and refund webhooks; SES delivery and unsubscribe handling; document upload through the media API.
+- Real Flutterwave hosted card setup and refund webhooks; SES delivery and unsubscribe handling; document upload through the media API.
 - Eligibility signals (device, card, phone, risk score) come from the backend and Python; the mock uses seeded values.
 - Bundle lapse at renewal when Blue ends needs a billing job.
 
@@ -1560,11 +1560,11 @@ Guests cannot report: every entry goes through `requireAuthThen`.
 - Webapp Mute, Requests and Spam report entries and group member reporting wait for those surfaces on the web.
 - Not tested on a device or in a browser; types checked only.
 
-## 38. Payout onboarding (Paystack) **[DONE (mobile + studio + seller, mock)]**
+## 38. Payout onboarding (Flutterwave) **[DONE (mobile + studio + seller, mock)]**
 
-> 3 Oct, Paystack frontend migration: steps are personal details (BVN/NIN), business (registered sellers), bank account (resolved name), and the ID document step only when the state has `requiresDocumentStep`; copy names no provider. Seller fees UI: no product commission; "Payment processing fee" plus "Escrow fee (1.5%, 1% on Business)" on escrow orders, "Payment processing fee" only on direct orders; buyers see no fee lines. Web uses `@paystack/inline-js` (Popup, redirect fallback); mobile physical goods use the `authorization_url` in an in-app browser and confirm server-side; saved card = `authorization_code` in SecureStore behind biometrics ("Saved on this device"). See CHANGELOG 3 Oct.
+> Frontend flow (3 Oct; provider is Flutterwave since 11 Oct): steps are personal details (BVN/NIN), business (registered sellers), bank account (resolved name), and the ID document step only when the state has `requiresDocumentStep`; copy names no provider. Seller fees UI: no product commission; "Payment processing fee" plus "Escrow fee (1.5%, 1% on Business)" on escrow orders, "Payment processing fee" only on direct orders; buyers see no fee lines. Web redirects to the Flutterwave hosted checkout link; mobile physical goods open the link in an in-app browser and confirm server-side; a saved card is only a provider token, never card data, confirmed with biometrics ("Saved on this device"). See CHANGELOG 3 Oct.
 
-One "Get paid" flow for sellers and creators. Users never see the payment provider: no dashboard, no login. The Paystack recipient is created in the background (outbox job in go-money), so a Paystack outage never blocks onboarding. Becoming a seller or creator unlocks everything that does not need Paystack. Only direct payments and withdrawals wait. Earnings meanwhile are recorded and show as pending transfer. One account per user: verified as seller means creators skip to "You're verified", and the reverse.
+One "Get paid" flow for sellers and creators. Users never see the payment provider: no dashboard, no login. Provider-side setup (the payout subaccount and account resolve) runs in the background (outbox job in go-money), so a Flutterwave outage never blocks onboarding. Becoming a seller or creator unlocks everything that does not need Flutterwave. Only direct payments and withdrawals wait. Earnings meanwhile are recorded and show as pending transfer. One account per user: verified as seller means creators skip to "You're verified", and the reverse.
 
 ### 38.1 Flow
 
@@ -1573,7 +1573,7 @@ One "Get paid" flow for sellers and creators. Users never see the payment provid
 3. Bank: bank list, 10-digit account number, live name resolution. The resolved name must match the legal name (order and case ignored).
 4. Verify your ID: only active when `accountStatus = documentsRequired`. A fresh link is requested on every tap and never cached. It opens in an in-app browser (mobile `openAuthSessionAsync` with `zudomart://payouts/verification-return`; web popup with a return page that signals the opener). Return is never trusted: "Checking your documents…", short status poll, then `underReview` (shows `reviewEstimate` from the API), `verified`, or `actionNeeded` with the exact reasons and "Fix it". 503 on the link: "Try again in a moment". Closed halfway: "Verify your ID: not finished".
 
-Steps save to Zudomart immediately and are sent to Paystack later. Per-step sync badge: Saved, Sending, Done, Needs attention. Resume uses `currentStep` from the server.
+Steps save to Zudomart immediately and are sent to Flutterwave later. Per-step sync badge: Saved, Sending, Done, Needs attention. Resume uses `currentStep` from the server.
 
 ### 38.2 Contract for go-money (`/api/v1/payments/...`)
 
@@ -1582,15 +1582,15 @@ Existing: `GET|POST connected-accounts/me`, `POST connected-accounts/me/onboardi
 | Route | Body | Response |
 | --- | --- | --- |
 | `GET payout-onboarding/me` | | `PayoutOnboardingState` |
-| `PUT payout-onboarding/me/identity` | `legalName, dateOfBirth, addressLine1, city, state, idType bvn\|nin, idNumber, registeredBusiness` | state (store only last 4 of the id, send the rest to Paystack via the job) |
+| `PUT payout-onboarding/me/identity` | `legalName, dateOfBirth, addressLine1, city, state, idType bvn\|nin, idNumber, registeredBusiness` | state (store only last 4 of the id, send the rest to Flutterwave via the job) |
 | `PUT payout-onboarding/me/business` | `cacNumber, businessType` | state |
 | `POST payout-onboarding/me/resolve` (web) or `POST /api/v1/banks/resolve-account` (mobile) | `bankCode, accountNumber` | `{ accountName }` full name, never masked here |
 | `PUT payout-onboarding/me/bank` | `bankCode, bankName, accountNumber, resolvedAccountName` | state; 422 `NAME_MISMATCH` if the name differs from the legal name |
 | `POST payout-onboarding/me/retry` | | state; safe to call repeatedly; re-queues account creation when `failed` |
-| `POST payout-onboarding/me/document-link` | | `{ url, returnUrl, expiresAt }`; fresh every call; 409 `ACCOUNT_NOT_READY` unless `documentsRequired`; 503 `LINK_UNAVAILABLE` when Paystack is down |
-| `GET payout-fees` | | `{ currency, kind: "flat", fee: Money, arrivalEstimate, firstPayoutNote }`, from the Paystack-published schedule (NGN 5000 minor today), never hardcoded in clients |
+| `POST payout-onboarding/me/document-link` | | `{ url, returnUrl, expiresAt }`; fresh every call; 409 `ACCOUNT_NOT_READY` unless `documentsRequired`; 503 `LINK_UNAVAILABLE` when Flutterwave is down |
+| `GET payout-fees` | | `{ currency, kind: "flat", fee: Money, arrivalEstimate, firstPayoutNote }`, quoted from Flutterwave (`GET /v3/transfers/fee`), never hardcoded in clients |
 
-Seller dashboard BFF mirrors these under `/seller/payout-onboarding/*` (`fees` instead of `payout-fees`). `document-link/complete` exists only in mocks, standing in for the hosted page and webhook. Real status changes come from Paystack webhooks plus push.
+Seller dashboard BFF mirrors these under `/seller/payout-onboarding/*` (`fees` instead of `payout-fees`). `document-link/complete` exists only in mocks, standing in for the hosted page and webhook. Real status changes come from Flutterwave webhooks plus push.
 
 State: `role, status (not_started|in_progress|pending_review|action_needed|verified), currentStep, completedSteps, requiresBusinessStep, legalName, idType, idLast4, bankSummary, documentStatus, accountStatus (pending_creation|documentsRequired|underReview|failed|actionRequired|verified), syncByStep, earningsPendingTransfer, pendingWithdrawable (Money), reviewEstimate, reasons[{step, code, message}], verifiedVia, withdrawalsEnabled, firstEarningsUnlockAt`.
 
@@ -2089,8 +2089,8 @@ Owner rules, 2026-10-04 (asked for as §50, which was already taken by username 
 
 ### 53.4 Reject means refund
 
-- Rejecting a `blue` or `gold_only` case emits `verificationCase.refundRequested`; go-money refunds the full Paystack charge and disables the subscription (web), revokes the Play subscription with a full refund (Google), or cancels and flags a manual refund for App Store purchases (Apple has no developer refund API). A running trial was never charged, so it is just cancelled. Outcomes come back as `verificationRefund.*` and update the case.
-- **Seller plans (Pro, Business) and Premium keep running on reject** (owner, 2026-10-04). Features stay active; only the checkmark is withheld, and only the checkmark's share of the current period's payment is refunded: the standalone checkmark price for the region, channel and interval (Blue for Premium, Gold-only for Pro/Business; `regionpricing.CheckmarkShareMinor`, read from the price book with the research defaults as fallback), capped at what the subscription paid. Web: a Paystack partial refund posted as a ledger entry first under the idempotency key `verification-share:{caseId}`; the Paystack subscription is not cancelled. Google Play: partial refund when the verifier supports it (none does today), otherwise flagged for manual review like Apple. A running trial charged nothing, so the plan just continues. A standalone Blue, Gold-only, Black or bundle tier keeps the full refund and cancellation above; in a Blue+Gold bundle each tier is its own subscription and case, so a failed tier refunds its own (capped) amount and the other tier stays.
+- Rejecting a `blue` or `gold_only` case emits `verificationCase.refundRequested`; go-money refunds the full Flutterwave charge and disables the subscription (web), revokes the Play subscription with a full refund (Google), or cancels and flags a manual refund for App Store purchases (Apple has no developer refund API). A running trial was never charged, so it is just cancelled. Outcomes come back as `verificationRefund.*` and update the case.
+- **Seller plans (Pro, Business) and Premium keep running on reject** (owner, 2026-10-04). Features stay active; only the checkmark is withheld, and only the checkmark's share of the current period's payment is refunded: the standalone checkmark price for the region, channel and interval (Blue for Premium, Gold-only for Pro/Business; `regionpricing.CheckmarkShareMinor`, read from the price book with the research defaults as fallback), capped at what the subscription paid. Web: a Flutterwave partial refund posted as a ledger entry first under the idempotency key `verification-share:{caseId}`; the subscription keeps renewing. Google Play: partial refund when the verifier supports it (none does today), otherwise flagged for manual review like Apple. A running trial charged nothing, so the plan just continues. A standalone Blue, Gold-only, Black or bundle tier keeps the full refund and cancellation above; in a Blue+Gold bundle each tier is its own subscription and case, so a failed tier refunds its own (capped) amount and the other tier stays.
 - Outcome events carry `refundScope` (`full` or `checkmark_share`) and `refundAmount`. For a keep-running plan the rejection email and push wait for the outcome, because only go-money knows the amount: "Your plan stays active; we've refunded ₦X for the checkmark" (card), or the store wording with the amount (Google/Apple). The admin queue and the user hub show the same scope.
 - Users can re-apply later (30 days after the rejection).
 - Emails: `verificationEligible`, `verificationUnderReview`, `verificationApproved`, `verificationRejectedRefunded` (branded layout, refund wording per channel, try again after 30 days).
@@ -2103,7 +2103,7 @@ Owner rules, 2026-10-04 (asked for as §50, which was already taken by username 
 ### 53.6 Open items
 
 - **[OWNER]** Legal review of the consent text and retention under NDPA 2023 (biometrics are sensitive data); DPA with Smile ID.
-- **[DECIDED: no, §54.1]** ~~Renewals must not charge for the checkmark until the profile is verified.~~ Owner, 4 Oct: plans renew at the full price. Only the one-time checkmark-share refund on rejection applies. Billing has no line item for this (a Paystack plan is one amount; store prices are fixed per product), so after a rejection the plan keeps renewing at its full price. Needs a checkmark-less price per seller plan and Premium, switched at the next renewal and restored on approval.
+- **[DECIDED: no, §54.1]** ~~Renewals must not charge for the checkmark until the profile is verified.~~ Owner, 4 Oct: plans renew at the full price. Only the one-time checkmark-share refund on rejection applies. Billing has no line item for this (a web renewal charges one plan amount; store prices are fixed per product), so after a rejection the plan keeps renewing at its full price. Needs a checkmark-less price per seller plan and Premium, switched at the next renewal and restored on approval.
 - **[DONE → §54 for web card billing; Google Play partial refund still open]** Refund the latest charge rather than `billing_reference` (the first charge) when a rejection lands after a renewal; Google Play partial refund once the Play API call exists.
 - **[NEXT]** Native IAP in the app (dev build). Until then "Buy now" in the app opens the web checkout.
 - **[NEXT]** Confirm Smile ID document `id_type` codes per country and the Google Play `fullRefund` revoke context against the live APIs.
@@ -2122,8 +2122,8 @@ Owner request, 2026-10-04. Plain-language guide with timelines, state diagram an
 
 ### 54.2 Renewal engine (web)
 
-- Our own scheduler + Paystack `charge_authorization` with the saved authorization (sealed in `payments.billing_authorizations`) instead of Paystack Plans, because the amount changes. Older Plans subscriptions keep running as they are.
-- Charged on the period end in the region currency (USD fallback). Idempotency key `renewal:{subscriptionId}:{periodStart}`, a fixed `ren-` Paystack reference per attempt, and a ledger entry per paid period (`subscription.periodBilled`).
+- Our own scheduler + Flutterwave tokenized charges with the saved card token (sealed in `payments.billing_authorizations`) instead of provider payment plans, because the amount changes.
+- Charged on the period end in the region currency (USD fallback). Idempotency key `renewal:{subscriptionId}:{periodStart}`, a fixed `ren-` Flutterwave `tx_ref` per period, and a ledger entry per paid period (`subscription.periodBilled`).
 - Dunning: retries at +1, +3 and +5 days, then a 7-day grace with the plan on, then Free. The checkmark comes off unless another live subscription on the profile grants it. A notification and email at each step, plus a card-expiring notice.
 - Cancel any time: the plan stays until the period end, with no partial refunds (verification rule excepted). Upgrades are charged now minus unused time. Downgrades apply at the next renewal.
 - Yearly: one charge at 20% off, with a reminder 7 days before. Monthly: no reminder, except trial conversions.
@@ -2133,14 +2133,13 @@ Owner request, 2026-10-04. Plain-language guide with timelines, state diagram an
 
 - Trial start (7 days / 1 month): ₦50 (regional) card check, refunded immediately, and the card saved. Reminders 3 days and 24 hours before the end, with the exact amount, date and cancel link.
 - At trial end the full first period is charged via `charge_authorization`. If it fails, retries run at +1 and +3 days, then Free (features stay at most 3 days).
-- One trial per person: account, device, phone and card fingerprint (Paystack signature). Cancelling during the trial means no charge.
+- One trial per person: account, device, phone and card fingerprint (keyed hash of the card details Flutterwave returns). Cancelling during the trial means no charge.
 - Apple and Google run trials and renewals natively. We only map their notifications (renewed, failed, grace, expired, refunded) to the same states. Store product ids and offers are owner to-dos in the guide (§8).
 
 ### 54.4 Open items
 
 - **[OWNER]** Create the store introductory offers and turn on grace periods (guide §8). Review the price-change and renewal-reminder wording for UK/EU consumer law.
 - **[NEXT]** Webapp / seller dashboard billing screens: line-item invoices (`GET /subscriptions/{id}/periods`), upcoming charge preview, Pay now, change plan, update card.
-- **[NEXT]** Move existing Paystack-Plans subscriptions onto the engine at their next renewal (needs their authorization; ask for a card re-check).
 - **[LATER]** Google Play partial refund call for the checkmark share.
 
 ## 55. Mart: ranked hero carousel and sticky category tabs **[DONE (mobile + webapp, mock UI; backend pending)]**
