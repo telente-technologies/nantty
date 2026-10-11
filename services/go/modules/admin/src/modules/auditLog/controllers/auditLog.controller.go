@@ -31,6 +31,7 @@ func readFilter(request *http.Request) (models.AuditFilter, error) {
 	filter := models.AuditFilter{
 		Cursor: query.Get("cursor"), Action: query.Get("action"), ActorId: query.Get("actorId"), SubjectType: firstNonEmpty(query.Get("targetType"), query.Get("subjectType")),
 		SubjectId: firstNonEmpty(query.Get("targetId"), query.Get("subjectId")), Area: query.Get("area"), Search: query.Get("search"),
+		RequestId: query.Get("requestId"), StepUpOnly: query.Get("stepUp") == "true",
 	}
 	for name, destination := range map[string]**time.Time{"from": &filter.From, "to": &filter.To} {
 		if raw := query.Get(name); raw != "" {

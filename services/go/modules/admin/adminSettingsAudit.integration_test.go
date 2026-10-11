@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"zudomart/modules/admin/src/modules/platformSettings/services"
 	"zudomart/platform/identityports"
 )
 
@@ -43,8 +44,28 @@ func TestSettingsWritesNeedStepUpVersionAndValidValues(t *testing.T) {
 	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("config@zudomart.com")
 
 	listed := harness.expect("GET", "/api/v1/admin/config", nil, bearer(accessToken), http.StatusOK)
-	if len(listed["data"].([]any)) != 18 {
-		t.Fatalf("expected the eighteen settings, got %v", listed)
+	listedKeys := map[string]bool{}
+	for _, row := range listed["data"].([]any) {
+		listedKeys[row.(map[string]any)["key"].(string)] = true
+	}
+	expectedKeys := map[string]bool{}
+	for key, definition := range services.PlatformSettingDefinitions {
+		if definition.Projection == nil {
+			expectedKeys[key] = true
+		}
+	}
+	for _, key := range []string{services.StaffSettingsKey, services.CheckmarkSuggestionsKey, services.CreatorThresholdsKey, services.TrialRulesKey, services.CheckmarkPricingKey} {
+		expectedKeys[key] = true
+	}
+	for _, required := range []string{services.SellerDebtLimitsKey, services.PaymentLimitsKey, services.SellerSalesCapKey, services.EscrowPolicyKey} {
+		if !listedKeys[required] {
+			t.Fatalf("setting %s must be listed: %v", required, listedKeys)
+		}
+	}
+	for key := range expectedKeys {
+		if !listedKeys[key] {
+			t.Fatalf("every defined setting is listed; %s is missing from %v", key, listedKeys)
+		}
 	}
 	tiers := map[string]any{"tiers": []map[string]any{{"minimumMonthlyGiftCoins": 0, "creatorShareBps": 5500}, {"minimumMonthlyGiftCoins": 1000, "creatorShareBps": 7000}}}
 	update := func(value any, version int, reason string) map[string]any {
@@ -164,5 +185,23 @@ func TestAuditLogIsWrittenSearchableAndExportable(t *testing.T) {
 	}
 	if harness.expect("GET", "/api/v1/admin/audit?action=audit.exported", nil, bearer(accessToken), http.StatusOK)["data"] == nil {
 		t.Fatal("exports must be audited")
+	}
+}
+
+func TestMoneyLimitSettingsNeedStepUpAndAreValidatedOnSave(t *testing.T) {
+	harness := startAdminModuleAgainstFreshSchema(t)
+	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("limits@zudomart.com")
+	path := "/api/v1/admin/config/seller.debtLimits"
+	current := harness.expect("GET", path, nil, bearer(accessToken), http.StatusOK)
+	raised := map[string]any{"baseMinor": map[string]any{"unverified": 2_000_000, "payoutVerified": 5_000_000, "identityVerified": 20_000_000}, "outsideNigeriaPercent": 50, "trustedSellerAgeDays": 90, "trustedSellerCleanDays": 90, "currencyOverridesMinor": map[string]any{}}
+	body := func(value any, reason string) map[string]any {
+		return map[string]any{"value": value, "expectedVersion": current["version"], "reason": reason}
+	}
+	harness.expect("PUT", path, body(raised, "raise the unverified limit"), bearer(accessToken), http.StatusForbidden)
+	outOfOrder := map[string]any{"baseMinor": map[string]any{"unverified": 9_000_000, "payoutVerified": 5_000_000, "identityVerified": 20_000_000}, "outsideNigeriaPercent": 50, "trustedSellerAgeDays": 90, "trustedSellerCleanDays": 90, "currencyOverridesMinor": map[string]any{}}
+	harness.expect("PUT", path, body(outOfOrder, "levels out of order"), withStepUp, http.StatusUnprocessableEntity)
+	saved := harness.expect("PUT", path, body(raised, "raise the unverified limit"), withStepUp, http.StatusOK)
+	if saved["version"] != float64(2) {
+		t.Fatalf("a valid change with step-up saves a new version: %v", saved)
 	}
 }

@@ -42,6 +42,8 @@ var PlatformSettingDefinitions = map[string]SettingDefinition{
 	FeedRankingKey:        {Validate: validateFeedRankingPolicy, WritePermission: "config:rules", DefaultValue: DefaultFeedRankingPolicy},
 	TrendingModerationKey: {Validate: validateTrendingModeration, WritePermission: "content:review", ExtraWritePermissions: []string{"moderation:reports"}, DefaultValue: TrendingModeration{Removals: []TrendRemoval{}}},
 	EscrowPolicyKey:       {Validate: validateEscrowPolicy, WritePermission: "config:revenue", DefaultValue: EscrowPolicy{AutoReleaseDays: 3, SellerCreditHoldHours: 24, SellerReserveBps: 0}},
+	SellerDebtLimitsKey:   {Validate: validateSellerDebtLimits, WritePermission: "config:revenue", DefaultValue: defaultSellerDebtLimits},
+	PaymentLimitsKey:      {Validate: validatePaymentLimits, WritePermission: "config:revenue", DefaultValue: defaultPaymentLimits},
 	SellerSalesCapKey:     {Validate: validateSellerSalesCap, WritePermission: "config:revenue", DefaultValue: SellerSalesCap{CapsMinor: map[string]int64{"NGN": 20_000_000}}},
 	RegionalPricingKey:    {Validate: validateRegionalPricing, Public: true, WritePermission: "config:revenue", DefaultValue: regionpricing.DefaultSettingDocument()},
 	AppStoreFeesKey:       {Validate: validateAppStoreFees, Public: true, WritePermission: "config:revenue", DefaultValue: regionpricing.DefaultStoreFeeSettings()},

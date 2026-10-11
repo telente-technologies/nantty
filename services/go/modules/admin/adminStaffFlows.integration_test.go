@@ -64,7 +64,10 @@ func TestSuperadminEnrollsMfaSteppingUpInvitesAdminAndAdminCannotInvite(t *testi
 	harness.expect("PUT", "/api/v1/admin/admins/"+superadminId+"/permissions", permissions, withStepUp, http.StatusConflict)
 	reason := map[string]string{"reason": "testing the guard"}
 	harness.expect("POST", "/api/v1/admin/admins/"+superadminId+"/disable", reason, withStepUp, http.StatusConflict)
-	refreshed := harness.expect("POST", "/api/v1/admin/auth/refresh", map[string]string{"refreshToken": adminSession["refreshToken"].(string)}, nil, http.StatusOK)
+	harness.expect("POST", "/api/v1/admin/auth/refresh", map[string]string{"refreshToken": adminSession["refreshToken"].(string)}, nil, http.StatusUnauthorized)
+	harness.expect("GET", "/api/v1/admin/auth/me", nil, bearer(adminToken), http.StatusUnauthorized)
+	waitForNextTotpStep()
+	refreshed := harness.signInWithMfa("ops@zudomart.com", adminPassword, adminSecret, 1)
 	listed := harness.expect("GET", "/api/v1/admin/admins", nil, bearer(refreshed["accessToken"].(string)), http.StatusOK)
 	if len(listed["data"].([]any)) != 2 || listed["nextCursor"] != nil {
 		t.Fatalf("unexpected staff list %v", listed)

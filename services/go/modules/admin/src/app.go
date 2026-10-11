@@ -28,6 +28,7 @@ import (
 	staffadmins "zudomart/modules/admin/src/modules/staffAdmins"
 	staffadminservices "zudomart/modules/admin/src/modules/staffAdmins/services"
 	staffauthmodule "zudomart/modules/admin/src/modules/staffAuth"
+	staffauthservices "zudomart/modules/admin/src/modules/staffAuth/services"
 	"zudomart/platform/events"
 	"zudomart/platform/identityports"
 	"zudomart/platform/passwordhash"
@@ -67,6 +68,7 @@ func StartAdminModuleWithSettings(ctx context.Context, settings configs.AdminSet
 		return nil, err
 	}
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database)))
+	client.StaffSession.Use(staffauthservices.DenylistStaffSessionsOnRevocation(staffauthservices.StaffSessionDenylistTtl(settings.StaffAccessTokenTtl)))
 	relyingParty, err := createWebAuthnRelyingParty(settings)
 	if err != nil {
 		_ = database.Close()

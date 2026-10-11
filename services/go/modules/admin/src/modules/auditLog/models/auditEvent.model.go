@@ -51,6 +51,8 @@ type AuditFilter struct {
 	SubjectId   string
 	Area        string
 	Search      string
+	RequestId   string
+	StepUpOnly  bool
 	From        *time.Time
 	To          *time.Time
 }

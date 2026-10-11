@@ -31,6 +31,12 @@ func PredicatesForAuditFilter(filter models.AuditFilter) ([]predicate.AuditEvent
 	if filter.Area != "" {
 		predicates = append(predicates, auditevent.ActionHasPrefix(strings.ToLower(filter.Area)))
 	}
+	if filter.RequestId != "" {
+		predicates = append(predicates, auditevent.RequestID(filter.RequestId))
+	}
+	if filter.StepUpOnly {
+		predicates = append(predicates, auditevent.StepUpVerified(true))
+	}
 	if filter.Search != "" {
 		predicates = append(predicates, searchPredicate(filter.Search))
 	}

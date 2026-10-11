@@ -177,6 +177,13 @@ func bearerWithStepUp(token, stepUp string) map[string]string {
 	return map[string]string{"Authorization": "Bearer " + token, "X-Step-Up-Token": stepUp}
 }
 
+func waitForNextTotpStep() {
+	current := totp.StepAt(time.Now())
+	for totp.StepAt(time.Now()) == current {
+		time.Sleep(200 * time.Millisecond)
+	}
+}
+
 func codeForStepOffset(t *testing.T, base32Secret string, offset int64) string {
 	t.Helper()
 	secret, err := base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(base32Secret)

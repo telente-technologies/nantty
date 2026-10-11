@@ -17,6 +17,7 @@ type AdminSettings struct {
 	TotpEncryptionKey      []byte
 	TotpIssuerLabel        string
 	StaffRefreshTokenTtl   time.Duration
+	StaffAccessTokenTtl    time.Duration
 	InvitationTtl          time.Duration
 	StepUpTtl              time.Duration
 	LoginChallengeTtl      time.Duration
@@ -55,6 +56,7 @@ func ReadAdminSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		TotpEncryptionKey:      readBase64Key(reader, "ADMIN_TOTP_ENCRYPTION_KEY", 32),
 		TotpIssuerLabel:        reader.ReadStringOrDefault("ADMIN_TOTP_ISSUER_LABEL", "Zudomart"),
 		StaffRefreshTokenTtl:   reader.ReadDurationOrDefault("ADMIN_STAFF_REFRESH_TOKEN_TTL", 12*time.Hour),
+		StaffAccessTokenTtl:    reader.ReadDurationOrDefault("AUTH_STAFF_ACCESS_TOKEN_TTL", 10*time.Minute),
 		InvitationTtl:          reader.ReadDurationOrDefault("ADMIN_INVITATION_TTL", 72*time.Hour),
 		StepUpTtl:              reader.ReadDurationOrDefault("ADMIN_STEP_UP_TTL", 5*time.Minute),
 		LoginChallengeTtl:      reader.ReadDurationOrDefault("ADMIN_LOGIN_CHALLENGE_TTL", 5*time.Minute),
