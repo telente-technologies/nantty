@@ -14,7 +14,8 @@ if config_env() != :test do
   config :realtime, :access_token,
     jwks_url: System.get_env("AUTH_JWKS_URL", "http://localhost:8101/.well-known/jwks.json"),
     issuer: System.get_env("AUTH_TOKEN_ISSUER", "http://localhost:8101"),
-    audience: System.get_env("AUTH_TOKEN_AUDIENCE", "zudomart-api")
+    audience: System.get_env("REALTIME_TOKEN_AUDIENCE", "zudomart-realtime"),
+    scope: "realtime"
 end
 
 if config_env() != :test do

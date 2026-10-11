@@ -16,7 +16,8 @@ defmodule Realtime.Auth.AccessTokenVerifierTest do
   defp sign(private_jwk, claims) do
     base = %{
       "iss" => "https://auth.zudomart.test",
-      "aud" => ["zudomart-api"],
+      "aud" => ["zudomart-realtime"],
+      "scope" => "realtime",
       "sub" => "account-1",
       "sid" => "session-1",
       "exp" => System.os_time(:second) + 300
@@ -51,5 +52,29 @@ defmodule Realtime.Auth.AccessTokenVerifierTest do
 
     assert {:error, _} =
              AccessTokenVerifier.verify_access_token_and_extract_principal("not.a.token")
+  end
+
+  test "accepts only realtime-scoped socket tokens, never session access or widget tokens", %{
+    private_jwk: jwk
+  } do
+    assert {:error, _} =
+             AccessTokenVerifier.verify_access_token_and_extract_principal(
+               sign(jwk, %{"aud" => ["zudomart-api"], "scope" => nil})
+             )
+
+    assert {:error, _} =
+             AccessTokenVerifier.verify_access_token_and_extract_principal(
+               sign(jwk, %{"scope" => "widgets:read"})
+             )
+
+    assert {:error, _} =
+             AccessTokenVerifier.verify_access_token_and_extract_principal(
+               sign(jwk, %{"aud" => ["zudomart-widgets"], "scope" => "realtime"})
+             )
+
+    assert {:error, _} =
+             AccessTokenVerifier.verify_access_token_and_extract_principal(
+               sign(jwk, %{} |> Map.put("scope", nil))
+             )
   end
 end

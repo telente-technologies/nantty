@@ -3,6 +3,7 @@ defmodule Realtime.Auth.AccessTokenVerifier do
   alias Realtime.Auth.RevocationList
 
   @clock_skew_seconds 30
+  @realtime_scope "realtime"
 
   def verify_access_token_and_extract_principal(token) when is_binary(token) do
     config = Application.fetch_env!(:realtime, :access_token)
@@ -50,6 +51,9 @@ defmodule Realtime.Auth.AccessTokenVerifier do
 
       Keyword.fetch!(config, :audience) not in audiences ->
         {:error, :wrong_audience}
+
+      claims["scope"] != Keyword.get(config, :scope, @realtime_scope) ->
+        {:error, :wrong_scope}
 
       not is_integer(claims["exp"]) or claims["exp"] + @clock_skew_seconds < now ->
         {:error, :expired}

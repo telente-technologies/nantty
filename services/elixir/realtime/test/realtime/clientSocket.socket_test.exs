@@ -38,7 +38,8 @@ defmodule RealtimeWeb.ClientSocketTest do
   defp token(jwk, account_id, session_id) do
     claims = %{
       "iss" => "https://auth.zudomart.test",
-      "aud" => ["zudomart-api"],
+      "aud" => ["zudomart-realtime"],
+      "scope" => "realtime",
       "sub" => account_id,
       "sid" => session_id,
       "iat" => System.os_time(:second),
