@@ -12,6 +12,17 @@ const call = <T>(method: string, path: string, body?: unknown, query: Record<str
 const failureOf = (request: Promise<unknown>) => request.then(() => undefined, (error: unknown) => error as { status: number; code?: string });
 const publish = (text: string, quotedPostId?: string | null) => call<Post>("POST", "/api/v1/posts", { text, mediaIds: [], audience: "everyone", kind: "post", ...(quotedPostId === undefined ? {} : { quotedPostId }) });
 const quoteIdsIn = (items: readonly object[]) => items.filter(isQuoteThreadItem).map((item) => item.id);
+async function everyItem<T>(path: string, query: Record<string, string> = {}): Promise<T[]> {
+  const items: T[] = [];
+  let cursor: string | null = null;
+  for (let page = 0; page < 40; page += 1) {
+    const result: Page<T> = await call<Page<T>>("GET", path, undefined, cursor === null ? query : { ...query, cursor });
+    items.push(...result.data);
+    cursor = result.nextCursor;
+    if (cursor === null) break;
+  }
+  return items;
+}
 
 describe("quotes in the comment section mocks", () => {
   it("lists button and link quotes in the original's comments and thread, and the Quotes filter", async () => {
@@ -20,10 +31,11 @@ describe("quotes in the comment section mocks", () => {
     const viaLink = await publish(`hot take https://app.zudomart.com/post/${original.id}`);
     assert.equal(viaLink.text, "hot take");
     assert.equal(viaLink.resharedFrom?.id, original.id);
-    const comments = await call<Page<CommentWithReplies | QuoteThreadItem>>("GET", `/api/v1/posts/${original.id}/comments`);
-    assert.deepEqual(quoteIdsIn(comments.data).sort(), [viaButton.id, viaLink.id].sort());
-    const thread = await call<Page<ThreadReply | QuoteThreadItem>>("GET", `/api/v1/posts/${original.id}/thread`, undefined, { sort: "relevant" });
-    assert.equal(quoteIdsIn(thread.data).length, 2);
+    const comments = await everyItem<CommentWithReplies | QuoteThreadItem>(`/api/v1/posts/${original.id}/comments`);
+    assert.deepEqual(quoteIdsIn(comments).sort(), [viaButton.id, viaLink.id].sort());
+    assert.equal(new Set(comments.map((item) => item.id)).size, comments.length);
+    const thread = await everyItem<ThreadReply | QuoteThreadItem>(`/api/v1/posts/${original.id}/thread`, { sort: "relevant" });
+    assert.equal(quoteIdsIn(thread).length, 2);
     const onlyQuotes = await call<Page<QuoteThreadItem>>("GET", `/api/v1/posts/${original.id}/thread`, undefined, { filter: "quotes" });
     assert.ok(onlyQuotes.data.every((item) => item.type === "quote" && item.postId === original.id && typeof item.quotePost.author.username === "string"));
   });
@@ -35,7 +47,7 @@ describe("quotes in the comment section mocks", () => {
     const original = await publish("short lived quote target");
     const quote = await publish("quoting", original.id);
     await call("DELETE", `/api/v1/posts/${quote.id}`);
-    assert.deepEqual(quoteIdsIn((await call<Page<CommentWithReplies | QuoteThreadItem>>("GET", `/api/v1/posts/${original.id}/comments`)).data), []);
+    assert.deepEqual(quoteIdsIn(await everyItem<CommentWithReplies | QuoteThreadItem>(`/api/v1/posts/${original.id}/comments`)), []);
     assert.equal(mockPostsState.get(original.id)?.quotes, 0);
   });
 

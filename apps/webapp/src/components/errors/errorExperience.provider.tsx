@@ -48,6 +48,7 @@ export function buildWebappErrorConfig(handlers: ErrorExperienceConfig["handlers
       changeAddress: "/settings/addresses",
       payByCard: "/cart",
       clearDebt: "/wallet",
+      manageProfiles: "/settings/profiles",
       ...(appHref ? { useApp: appHref, update: appHref } : {}),
     },
     handlers,

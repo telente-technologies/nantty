@@ -90,7 +90,7 @@ describe("post composer", () => {
     assert.equal(await failureCode(send("POST", "/api/v1/posts", { text: "x".repeat(2201), mediaIds: [], audience: "everyone" })), "TEXT_TOO_LONG");
     assert.equal(await failureCode(send("POST", "/api/v1/posts", { text: "hi", mediaIds: ["missing"], audience: "everyone" })), "MEDIA_NOT_FOUND");
     assert.equal(await failureCode(send("POST", "/api/v1/posts", { text: "hi", mediaIds: [], audience: "everyone", productIds: ["nope"] })), "PRODUCT_NOT_TAGGABLE");
-    assert.equal(await failureCode(send("POST", "/api/v1/posts", { text: "hi", mediaIds: [], audience: "everyone", quotedPostId: "deleted_post" })), "POST_NOT_FOUND");
+    assert.equal(await failureCode(send("POST", "/api/v1/posts", { text: "hi", mediaIds: [], audience: "everyone", quotedPostId: "deleted_post" })), "QUOTED_POST_UNAVAILABLE");
   });
 
   it("returns the same post when an identical publish is replayed straight away", async () => {

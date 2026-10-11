@@ -35,6 +35,10 @@ export function buildSettingsLinkGroups(isSeller: boolean): readonly { readonly 
         : [{ href: "/seller/apply", label: "Start selling on Zudomart", description: "Free to apply", icon: "tag24" }],
     },
     {
+      title: "Profiles",
+      links: [{ href: "/settings/profiles", label: "Store, Business page and Brand", description: "One Store or one Business page, plus one Brand", icon: "buildingStore20" }],
+    },
+    {
       title: "Support",
       links: [
         { href: "/help", label: "Support", description: "Help Centre answers and your support requests", icon: "headset24" },

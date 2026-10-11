@@ -43,7 +43,7 @@ export function UserMenu() {
   return (
     <div className={styles.container} ref={menuContainerRef}>
       <button type="button" className={styles.trigger} aria-label="Account menu" ref={menuTriggerRef} {...menuTriggerProps}>
-        <Avatar name={viewer.name} src={viewer.avatarUrl ?? null} size="sm" />
+        {viewer.avatarUrl ? <Avatar name={viewer.name} src={viewer.avatarUrl} size="sm" /> : <UserIcon size={22} />}
       </button>
       {menuIsOpen ? <div className={sheetStyles.scrim} aria-hidden="true" onPointerDown={() => menuClose()} /> : null}
       {menuIsOpen ? (

@@ -24,10 +24,18 @@ const walletSummary = c.object({
 const freeBoost = c.object({ premium: c.boolean(), eligible: c.boolean(), remainingThisMonth: c.number(), maxTotal: money, resetsAt: c.nullable(c.string()) });
 const boostOptions = c.object({ minimumDailyBudget: money, suggestedDailyBudgets: c.array(money), durationDayOptions: c.array(c.number()), interests: c.array(c.string()), paymentMethods: c.array(c.string(["card", "balance", "free"])), freeBoost });
 
+const linkedProfiles = c.object({
+  accountId: c.string(),
+  items: c.array(c.object({ kind: c.string(["store", "business", "brand"]), profileId: c.string(), storeId: c.nullable(c.string()), status: c.string(["active", "held", "retired"]), holdReason: c.nullable(c.string()), name: c.string(), handle: c.string(), showsMart: c.boolean() })),
+  canCreate: c.object({ store: c.boolean(), business: c.boolean(), brand: c.boolean() }),
+  choiceRequired: c.boolean(),
+});
+
 export const webappContracts: readonly EndpointContract[] = [
   { domain: "auth", method: "POST", path: "/api/v1/auth/login", body: { identifier: "zudomart@test.com", password: "x" }, schema: c.object({ accessToken: c.string(), refreshToken: c.string(), user }) },
   { domain: "auth", method: "GET", path: "/api/v1/auth/username-available?username=admin", schema: c.object({ available: c.boolean(), reason }, []) },
   { domain: "users", method: "GET", path: "/api/v1/users/me", schema: user },
+  { domain: "users", method: "GET", path: "/api/v1/users/me/linked-profiles", schema: linkedProfiles },
   { domain: "places", method: "GET", path: "/api/v1/places/search?q=lagos", schema: c.object({ places: c.array(c.object({ placeId: c.string(), name: c.string(), area: c.nullable(c.string()) })) }) },
   { domain: "escrow", method: "GET", path: "/api/v1/disputes", schema: c.page(c.object({ id: c.string(), orderId: c.string(), status: c.string(["open", "awaiting_seller", "under_review", "resolved_refunded", "resolved_released", "closed"]), viewerRole: c.string(["buyer", "seller"]), statusHistory: c.array(c.any()), messages: c.array(c.any()) })) },
   { domain: "seller", method: "GET", path: "/api/v1/seller/products", schema: c.page(c.object({ id: c.string(), name: c.string(), status: c.string(["draft", "active", "archived"]), images: c.array(c.object({ mediaId: c.string(), url: c.string() })), variants: c.array(c.object({ id: c.string(), sku: c.string(), price: money })) })) },
@@ -54,7 +62,7 @@ export const webappContracts: readonly EndpointContract[] = [
     method: "GET",
     path: "/api/v1/payments/wallet/me",
     schema: c.object({
-      wallet: c.object({ provider: c.string(), currency: c.string(), status: c.string(), accountName: c.string(), accountNumber: c.string(), bankName: c.string(), bankCode: c.string(), fundingNumbers: c.array(c.object({ accountNumber: c.string(), bankName: c.string() })), createdAt: c.string(), frozenAt: c.nullable(c.string()) }),
+      wallet: c.nullable(c.object({ provider: c.string(), currency: c.string(), status: c.string(), accountName: c.string(), accountNumber: c.string(), bankName: c.string(), bankCode: c.string(), fundingNumbers: c.array(c.object({ accountNumber: c.string(), bankName: c.string() })), createdAt: c.string(), frozenAt: c.nullable(c.string()) })),
       balances: c.object({ currency: c.string(), availableMinor: c.number(), depositHoldMinor: c.number(), escrowLockedMinor: c.number(), outgoingMinor: c.number(), reservedPayoutMinor: c.number(), debtMinor: c.number() }),
     }),
   },

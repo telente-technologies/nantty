@@ -66,7 +66,7 @@ export function payOrderFromMockWallet(reference: string, amountMinor: number): 
 let bankValidationStatus: "not_started" | "pending" | "verified" = "verified";
 
 export const providerWalletMocks: MockRoute[] = [
-  createMockRoute("GET", "/api/v1/payments/wallet/me", () => (mockProviderWalletState.hasWallet ? buildWallet() : { wallet: null, status: "not_ready" })),
+  createMockRoute("GET", "/api/v1/payments/wallet/me", () => (mockProviderWalletState.hasWallet ? buildWallet() : { wallet: null, status: "not_ready", balances: { currency: "NGN", availableMinor: 0, depositHoldMinor: 0, escrowLockedMinor: 0, outgoingMinor: 0, reservedPayoutMinor: 0, debtMinor: 0 } })),
   createMockRoute("POST", "/api/v1/payments/wallet/me/activate", () => {
     mockProviderWalletState.hasWallet = true;
     return buildWallet();

@@ -153,7 +153,7 @@
 
 .reply {
   padding: var(--space-3);
-  border-left: 3px solid var(--divider);
+  border-left: 2px solid var(--divider);
   background: var(--surface-sunken);
   font-size: var(--text-sm);
 }

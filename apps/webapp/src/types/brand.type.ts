@@ -49,11 +49,33 @@ export interface NewBrandInput {
 }
 
 export interface ActingProfile {
-  readonly kind: "person" | "brand" | "store";
+  readonly kind: "person" | "business" | "brand" | "store" | "government";
   readonly id: ID;
   readonly name: string;
   readonly handle: string;
   readonly avatarUrl: string | null;
   readonly verification: Verification | null;
   readonly creatorStatus?: CreatorProgramStatus;
+  readonly showsMart?: boolean;
+  readonly onHold?: boolean;
+}
+
+export type LinkedProfileKind = "store" | "business" | "brand";
+
+export interface LinkedProfileItem {
+  readonly kind: LinkedProfileKind;
+  readonly profileId: ID;
+  readonly storeId: ID | null;
+  readonly status: "active" | "held" | "retired";
+  readonly holdReason: string | null;
+  readonly name: string;
+  readonly handle: string;
+  readonly showsMart: boolean;
+}
+
+export interface LinkedProfiles {
+  readonly accountId: ID;
+  readonly items: readonly LinkedProfileItem[];
+  readonly canCreate: { readonly store: boolean; readonly business: boolean; readonly brand: boolean };
+  readonly choiceRequired: boolean;
 }
