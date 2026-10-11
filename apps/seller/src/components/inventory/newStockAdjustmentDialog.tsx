@@ -91,7 +91,7 @@ export function NewStockAdjustmentDialog({ isOpen, initialLocationId, initialVar
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="inventory"
       isOpen={isOpen}
       onClose={onClose}
       title="Adjust stock"

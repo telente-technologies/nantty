@@ -11,13 +11,13 @@ export function LandingHero() {
             Sell from anywhere with the app. Run your business <span className={styles.receiptTag}>here.</span>
           </h1>
           <p className={styles.lede}>
-            Your seller operating system: manage products and stock, fulfil the orders customers place in the Zudomart app, see what sells, run promotions, track payouts from escrow and bring your team in — with the same account as your app. Free for every Zudomart seller; upgrade to Pro or Business when you grow.
+            Your seller operating system: manage products and stock, fulfil the orders customers place in the Zudomart app, see what sells, run promotions, track your payouts and bring your team in — with the same account as your app. Free for every Zudomart seller; upgrade to Pro or Business when you grow.
           </p>
           <form action="/login" method="get" className={styles.signInPill}>
             <label htmlFor="hero-identifier" className="visuallyHidden">
-              Email, username or phone number
+              Email or username
             </label>
-            <input id="hero-identifier" name="identifier" type="text" autoComplete="username" placeholder="Email, username or phone" maxLength={254} className={styles.signInInput} />
+            <input id="hero-identifier" name="identifier" type="text" autoComplete="username" placeholder="Email or username" maxLength={254} className={styles.signInInput} />
             <button type="submit" className={styles.signInButton}>
               Sign in with your Zudomart account
             </button>
@@ -25,7 +25,7 @@ export function LandingHero() {
           <ul className={styles.proofList}>
             <li>Same account as the app</li>
             <li>Free plan, no card needed</li>
-            <li>Escrow payouts to your bank</li>
+            <li>Payouts to your bank, escrow-protected in Nigeria</li>
           </ul>
         </div>
         <div className={styles.stage}>

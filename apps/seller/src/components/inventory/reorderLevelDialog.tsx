@@ -36,7 +36,7 @@ export function ReorderLevelDialog({ row, onClose, onSaved }: { readonly row: Re
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="inventory"
       isOpen
       onClose={onClose}
       width="small"

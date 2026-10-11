@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { PlanGate } from "@/components/billing/planGate";
 import { InventoryTabs } from "@/components/inventory/inventoryTabs";
 import { SupplierFormDialog } from "@/components/inventory/supplierFormDialog";
@@ -32,7 +34,7 @@ function SuppliersTable({ onEdit }: { readonly onEdit: (supplier: Supplier) => v
   const table = useClientTableState(suppliersQuery.data?.data ?? (suppliersQuery.isLoading ? null : []), supplierSortReaders, { pageSize: 10, initialSort: { key: "name", direction: "ascending" } });
 
   async function removeSupplier(supplier: Supplier) {
-    if (!window.confirm(`Remove ${supplier.name}? ${supplier.productCount > 0 ? `${supplier.productCount} product(s) will have no supplier.` : ""}`)) return;
+    if (!(await requestConfirmation({ title: `Remove ${supplier.name}?`, description: supplier.productCount > 0 ? `${supplier.productCount} product(s) will have no supplier.` : undefined, confirmLabel: "Remove supplier", tone: "danger", intent: "remove" }))) return;
     setRemovingSupplierId(supplier.id);
     try {
       await sendSellerApiRequest(`/seller/suppliers/${encodeURIComponent(supplier.id)}`, { method: "DELETE" });

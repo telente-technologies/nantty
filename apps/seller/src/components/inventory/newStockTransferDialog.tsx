@@ -72,7 +72,7 @@ export function NewStockTransferDialog({ isOpen, onClose, onSaved }: { readonly 
 
   const locationOptions = locations.filter((location) => location.active).map((location) => ({ value: location.id, label: location.name }));
   return (
-    <ModalDialog isOpen={isOpen} onClose={onClose} title="Transfer stock" description="Stock leaves the source now and arrives when the receiving location confirms." width="large" footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" onClick={() => void sendTransfer()} isBusy={isSaving}>Send transfer</Button></>}>
+    <ModalDialog intent="transfer" isOpen={isOpen} onClose={onClose} title="Transfer stock" description="Stock leaves the source now and arrives when the receiving location confirms." width="large" footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" onClick={() => void sendTransfer()} isBusy={isSaving}>Send transfer</Button></>}>
       <div className={styles.form}>
         {errorMessages.length > 0 ? <Callout tone="error">{errorMessages.map((message) => <p key={message}>{message}</p>)}</Callout> : null}
         <div className={styles.twoColumns}>

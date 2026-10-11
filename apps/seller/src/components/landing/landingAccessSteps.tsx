@@ -1,8 +1,8 @@
 import styles from "./landingAccessSteps.module.css";
 
 const accessSteps = [
-  { title: "Start selling in the app", description: "In the Zudomart app, go to Profile › Start selling and set up your store and payout account. Once your store is approved you can sell from anywhere.", image: "/photos/shopkeeperPhone.webp", imageAlt: "A shop owner in an apron checking his phone at his stall", kind: "photo" as const },
-  { title: "Sign in here — it is free", description: "Every approved Zudomart seller can use the dashboard on the Free plan. No Gold verification or paid plan needed.", image: "/photos/boutiqueFriends.webp", imageAlt: "Two women shopping between clothing racks in a boutique", kind: "photo" as const },
+  { title: "Start selling in the app", description: "In the Zudomart app, go to Profile › Start selling and set up your store. In Nigeria you can start selling straight away and verify your payout account to withdraw. Outside Nigeria, verify your identity before you sell.", image: "/photos/shopkeeperPhone.webp", imageAlt: "A shop owner in an apron checking his phone at his stall", kind: "photo" as const },
+  { title: "Sign in here — it is free", description: "Every Zudomart seller can use the dashboard on the Free plan. No Gold verification or paid plan needed.", image: "/photos/boutiqueFriends.webp", imageAlt: "Two women shopping between clothing racks in a boutique", kind: "photo" as const },
   { title: "Upgrade when you grow", description: "Your store, products, orders and wallet are already waiting. Move to Pro or Business for bulk tools, advanced analytics, a team and more.", image: "/screenshots/dashboardOverview.webp", imageAlt: "The dashboard home after signing in", kind: "screenshot" as const },
 ];
 

@@ -11,7 +11,7 @@ export function LandingFooter({ marketingSiteUrl, adsManagerUrl }: { readonly ma
   const linkGroups = [
     { heading: "Dashboard", links: [{ label: "Sign in", href: "/login" }, { label: "Features", href: "/#features" }, { label: "Pricing", href: "/#pricing" }, { label: "Reset password", href: "/forgot-password" }] },
     { heading: "Zudomart", links: [{ label: "Zudomart.com", href: marketingSiteUrl }, { label: "Sell on Zudomart", href: `${marketingSiteUrl}/sellers` }, { label: "Ads Manager", href: adsManagerUrl }] },
-    { heading: "Legal", links: [{ label: "Privacy policy", href: `${marketingSiteUrl}/privacy` }, { label: "Terms of service", href: `${marketingSiteUrl}/terms` }] },
+    { heading: "Legal", links: [{ label: "Privacy policy", href: `${marketingSiteUrl}/privacy` }, { label: "Terms of service", href: `${marketingSiteUrl}/terms` }, { label: "Seller terms", href: `${marketingSiteUrl}/seller-terms` }, { label: "Refund and escrow policy", href: `${marketingSiteUrl}/refund-escrow-policy` }] },
   ];
   return (
     <footer className={styles.footer}>

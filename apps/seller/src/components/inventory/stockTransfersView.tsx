@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { requestConfirmation } from "@zudomart/web-kit";
+
 import { PlanGate } from "@/components/billing/planGate";
 import { InventoryTabs } from "@/components/inventory/inventoryTabs";
 import { NewStockTransferDialog } from "@/components/inventory/newStockTransferDialog";
@@ -33,7 +35,7 @@ function StockTransfersPanel({ isDialogOpen, onDialogClose }: { readonly isDialo
   const locationName = (locationId: string) => locations.find((location) => location.id === locationId)?.name ?? locationId;
 
   async function finishTransfer(transfer: StockTransfer, outcome: "receive" | "cancel") {
-    if (outcome === "cancel" && !window.confirm(`Cancel ${transfer.reference}? The stock goes back to ${locationName(transfer.fromLocationId)}.`)) return;
+    if (outcome === "cancel" && !(await requestConfirmation({ title: `Cancel ${transfer.reference}?`, description: `The stock goes back to ${locationName(transfer.fromLocationId)}.`, confirmLabel: "Cancel transfer", tone: "danger", intent: "cancel" }))) return;
     setBusyTransferId(transfer.id);
     try {
       await sendSellerApiRequest(`/seller/inventory/transfers/${encodeURIComponent(transfer.id)}/${outcome}`, { method: "POST", body: {}, idempotencyKey: createIdempotencyKey(outcome) });

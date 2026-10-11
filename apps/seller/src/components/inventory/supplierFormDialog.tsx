@@ -48,7 +48,7 @@ export function SupplierFormDialog({ supplier, onClose, onSaved }: { readonly su
   }
 
   return (
-    <ModalDialog
+    <ModalDialog intent="delivery"
       isOpen
       onClose={onClose}
       width="medium"
