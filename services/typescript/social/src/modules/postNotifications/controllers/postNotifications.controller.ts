@@ -23,6 +23,6 @@ export function createPostNotificationsController(route: RouteFactory, internalT
     set: route({ authentication: "required", params: targetParamsSchema, body: setPostNotificationsBodySchema }, ({ principal, params, body }) =>
       handlers.setPostNotifications({ followerId: principal.accountId, targetId: resolveTarget(params.userId, principal.accountId), level: body.level })),
     subscribers: requireInternalToken(internalToken, route({ authentication: "optional", params: subscriberParamsSchema, query: subscriberQuerySchema }, ({ params, query }) =>
-      handlers.listSubscribers({ authorId: params.accountId, scope: query.scope, cursor: query.cursor, limit: query.limit ?? 200 }))),
+      handlers.listSubscribers({ authorId: params.accountId, scope: query.scope, cursor: query.cursor, limit: query.limit ?? 200, postId: query.postId }))),
   };
 }

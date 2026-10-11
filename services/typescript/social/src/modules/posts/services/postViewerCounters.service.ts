@@ -2,7 +2,7 @@ import type { Db } from "../../../types/database.type.js";
 
 export const repeatInteractionCooldownMs = 10 * 60_000;
 
-export type ViewerCooldownField = "lastViewedAt" | "lastWatchedAt" | "lastLinkClickAt" | "lastProfileClickAt";
+export type ViewerCooldownField = "lastViewedAt" | "lastWatchedAt" | "lastLinkClickAt" | "lastProfileClickAt" | "lastDwellAt";
 
 async function ensureViewerRow(db: Db, postId: string, viewerKey: string): Promise<void> {
   await db.postViewer.createMany({ data: [{ postId, viewerKey }], skipDuplicates: true });

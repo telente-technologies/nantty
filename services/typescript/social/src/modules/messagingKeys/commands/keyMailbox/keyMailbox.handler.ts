@@ -1,6 +1,7 @@
 import { forbidden, notFound, unprocessable } from "../../../../errors/social.error.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
-import { requireConversationMember } from "../../../conversations/services/conversationAccess.service.js";
+import { conversationRepository } from "../../../conversations/repositories/conversation.repository.js";
+import { resolveEncryptionRecipients } from "../../../conversations/services/encryptionRecipients.service.js";
 import { deviceKeyRepository } from "../../repositories/deviceKey.repository.js";
 import { keyMailboxRepository, mailboxRetentionMilliseconds, maximumMailboxEntriesPerDevice } from "../../repositories/keyMailbox.repository.js";
 
@@ -24,8 +25,10 @@ export function createDepositMailboxHandler(context: HandlerContext): Handler<De
   return async (command) => {
     const db = context.database.client;
     if ((await deviceKeyRepository.find(db, command.senderId, command.senderDeviceId)) === null) throw forbidden("DEVICE_NOT_REGISTERED", "This device is not registered for secure chat.");
-    const { conversation } = await requireConversationMember(db, command.conversationId, command.senderId);
-    const memberIds = new Set(conversation.members.map((member) => member.accountId));
+    const conversation = await conversationRepository.findById(db, command.conversationId);
+    if (conversation === null) throw notFound("CONVERSATION_NOT_FOUND", "Conversation not found.");
+    const memberIds = new Set([...conversation.members.map((member) => member.accountId), ...(await resolveEncryptionRecipients(context, conversation)).userIds]);
+    if (!memberIds.has(command.senderId)) throw notFound("CONVERSATION_NOT_FOUND", "Conversation not found.");
     const rows = [];
     for (const entry of command.entries) {
       if (!memberIds.has(entry.userId)) throw unprocessable("RECIPIENT_NOT_A_MEMBER", "Keys can only be sent to people in this chat.");

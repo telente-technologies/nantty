@@ -7,7 +7,7 @@ import { createSendMessageHandler } from "../../messages/commands/sendMessage/se
 import { assertNoPlaintext, type OutgoingMessageInput } from "../../messages/services/messageValidation.service.js";
 import { notFound } from "../../../errors/social.error.js";
 import { createMarkStoreConversationReadHandler } from "../commands/markStoreConversationRead/markStoreConversationRead.handler.js";
-import { createOpenStoreConversationHandler, openStoreConversationRow } from "../commands/openStoreConversation/openStoreConversation.handler.js";
+import { createOpenStoreConversationHandler, openStoreConversationForBuyer } from "../commands/openStoreConversation/openStoreConversation.handler.js";
 import { createSendStoreMessageHandler } from "../commands/sendStoreMessage/sendStoreMessage.handler.js";
 import { createGetStoreConversationHandler } from "../queries/getStoreConversation/getStoreConversation.handler.js";
 import { createListStoreConversationsHandler } from "../queries/listStoreConversations/listStoreConversations.handler.js";
@@ -50,13 +50,13 @@ export function createStoreInboxController(route: RouteFactory, internalToken: s
     open: internal(route({ authentication: "optional", params: storeParamsSchema, body: openStoreConversationBodySchema }, ({ params, body }) =>
       open({ storeId: params.storeId, buyerAccountId: body.buyerAccountId, orderId: body.orderId, orderNumber: body.orderNumber }))),
     buyerOpen: route({ authentication: "required", params: storeParamsSchema }, async ({ principal, params }) => {
-      const conversation = await openStoreConversationRow(context.database.client, { storeId: params.storeId, buyerAccountId: principal.accountId });
+      const conversation = await openStoreConversationForBuyer(context, params.storeId, principal.accountId);
       return loadConversationViewForMember(context, conversation.id, principal.accountId);
     }),
     buyerSend: route({ authentication: "required", params: storeParamsSchema, body: buyerStoreMessageBodySchema, successStatus: 201 }, async ({ principal, params, body, idempotencyKey }) => {
       const message = toOutgoingMessage(body);
       assertNoPlaintext(message.plaintext);
-      const conversation = await openStoreConversationRow(context.database.client, { storeId: params.storeId, buyerAccountId: principal.accountId });
+      const conversation = await openStoreConversationForBuyer(context, params.storeId, principal.accountId);
       return sendAsBuyer({ senderId: principal.accountId, conversationId: conversation.id, idempotencyKey, mentions: undefined, message });
     }),
   };

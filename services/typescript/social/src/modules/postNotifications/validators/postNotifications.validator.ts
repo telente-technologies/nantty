@@ -8,5 +8,6 @@ export const subscriberParamsSchema = schema.object({ accountId: schema.string()
 export const subscriberQuerySchema = schema.object({
   scope: schema.enum(["posts", "lives"]),
   cursor: schema.string().uuid().optional(),
+  postId: schema.string().uuid().optional(),
   limit: schema.coerce.number().int().min(1).max(500).optional(),
 });

@@ -4,6 +4,7 @@ import type { Db } from "../../../../types/database.type.js";
 import { blockRepository } from "../../../blocks/repositories/block.repository.js";
 import { conversationRepository, type ConversationRow } from "../../../conversations/repositories/conversation.repository.js";
 import { storeConversationKey, type StoreConversationView } from "../../models/storeInbox.model.js";
+import { assertStoreCanBeMessaged } from "../../services/storeInboxAudience.service.js";
 import { buildStoreConversationViews } from "../../services/storeInboxView.service.js";
 import type { OpenStoreConversationCommand } from "./openStoreConversation.command.js";
 
@@ -21,6 +22,12 @@ export async function openStoreConversationRow(db: Db, command: OpenStoreConvers
   return conversationRepository.create(db, {
     kind: "business", directKey, storeId: command.storeId, createdById: command.buyerAccountId, orderId: command.orderId ?? null, orderNumber: command.orderNumber ?? null,
   }, [{ accountId: command.buyerAccountId, role: "member", inboxFolder: "chats" }, { accountId: command.storeId, role: "owner", inboxFolder: "chats" }]);
+}
+
+export async function openStoreConversationForBuyer(context: HandlerContext, storeId: string, buyerAccountId: string): Promise<ConversationRow> {
+  const db = context.database.client;
+  if ((await conversationRepository.findDirectByKey(db, storeConversationKey(storeId, buyerAccountId))) === null) await assertStoreCanBeMessaged(context, storeId, buyerAccountId);
+  return openStoreConversationRow(db, { storeId, buyerAccountId });
 }
 
 export function createOpenStoreConversationHandler(context: HandlerContext): Handler<OpenStoreConversationCommand, StoreConversationView> {

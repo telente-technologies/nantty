@@ -17,11 +17,10 @@ export const followRepository = {
 
   pagePostNotificationSubscribers: (db: Db, followeeId: string, levels: readonly PostNotificationLevel[], limit: number, cursor: string | undefined) =>
     db.follow.findMany({
-      where: { followeeId, state: "accepted", postNotifications: { in: [...levels] } },
+      where: { followeeId, state: "accepted", postNotifications: { in: [...levels] }, ...(cursor === undefined ? {} : { id: { gt: cursor } }) },
       orderBy: { id: "asc" },
       take: limit + 1,
       select: { id: true, followerId: true },
-      ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
     }),
 
   setState: (db: Db, id: string, state: FollowState, respondedAt: Date) => db.follow.update({ where: { id }, data: { state, respondedAt } }),

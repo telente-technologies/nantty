@@ -5,4 +5,5 @@ export interface ListPostNotificationSubscribersQuery {
   readonly scope: PostNotificationScope;
   readonly cursor: string | undefined;
   readonly limit: number;
+  readonly postId?: string | undefined;
 }

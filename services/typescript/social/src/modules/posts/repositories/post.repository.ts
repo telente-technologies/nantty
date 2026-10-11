@@ -18,6 +18,9 @@ export const postRepository = {
     await db.post.updateMany({ where: { id, [counter]: { gt: 0 } }, data: { [counter]: { decrement: 1 } } });
   },
 
+  findPlainRepost: (db: Db, authorId: string, originalId: string): Promise<PostRow | null> =>
+    db.post.findFirst({ where: { authorId, resharedFromId: originalId, isQuote: false, kind: "post", ...shownToViewers }, include: postWithMedia }),
+
   softDelete: (db: Db, id: string, at: Date) => db.post.update({ where: { id }, data: { deletedAt: at, isPinned: false, pinnedAt: null } }),
 
   incrementCounterIfNotDeleted: async (db: Db, id: string, counter: "commentCount", by: number): Promise<boolean> =>

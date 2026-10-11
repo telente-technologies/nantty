@@ -15,6 +15,10 @@ export function createResharePostHandler(context: HandlerContext): Handler<Resha
     const actor = await resolveEventActor(context.directory, actorId);
     const originalAuthorId = await originalAuthorIdFor(context, target);
     const created = await context.database.transaction(async (transaction) => {
+      if (!isQuote) {
+        const existing = await postRepository.findPlainRepost(transaction, actorId, originalId);
+        if (existing !== null) return existing;
+      }
       const post = await postRepository.create(transaction, { authorId: actorId, kind: "post", text, audience: "everyone", visibility: "public", resharedFromId: originalId, isQuote, createdAt: now });
       await recordReshareInTransaction(transaction, { postId: post.id, originalId, actorId, originalAuthorId, isQuote, now, actor });
       return post;

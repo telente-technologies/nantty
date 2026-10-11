@@ -34,10 +34,16 @@ async function toResolution(context: HandlerContext, target: PostRow, link: Post
   return { target, originalId: quoteOriginalIdFor(target), originalAuthorId: await originalAuthorIdFor(context, target), link };
 }
 
+function assertReshareable(post: PostRow, actorId: string): void {
+  if (post.kind === "story") throw unprocessable("STORY_CANNOT_BE_RESHARED", "Stories can't be reshared.");
+  if (post.visibility === "subscribers" && post.authorId !== actorId) throw unprocessable("SUBSCRIBER_POST_CANNOT_BE_RESHARED", "Subscriber-only posts can't be reshared.");
+}
+
 export async function loadQuotableTarget(context: HandlerContext, actorId: string, postId: string): Promise<PostRow> {
   const target = await loadPostVisibleToViewer(context, actorId, postId);
-  if (target.kind === "story") throw unprocessable("STORY_CANNOT_BE_RESHARED", "Stories can't be reshared.");
-  if (target.visibility === "subscribers" && target.authorId !== actorId) throw unprocessable("SUBSCRIBER_POST_CANNOT_BE_RESHARED", "Subscriber-only posts can't be reshared.");
+  assertReshareable(target, actorId);
+  const originalId = quoteOriginalIdFor(target);
+  if (originalId !== target.id) assertReshareable(await loadPostVisibleToViewer(context, actorId, originalId), actorId);
   return target;
 }
 
