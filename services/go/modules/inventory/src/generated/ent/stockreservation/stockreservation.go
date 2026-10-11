@@ -26,6 +26,8 @@ const (
 	FieldLocationID = "location_id"
 	// FieldQuantity holds the string denoting the quantity field in the database.
 	FieldQuantity = "quantity"
+	// FieldAttempt holds the string denoting the attempt field in the database.
+	FieldAttempt = "attempt"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
@@ -45,6 +47,7 @@ var Columns = []string{
 	FieldVariantID,
 	FieldLocationID,
 	FieldQuantity,
+	FieldAttempt,
 	FieldStatus,
 	FieldExpiresAt,
 	FieldSettledAt,
@@ -67,6 +70,10 @@ var (
 	ReferenceValidator func(string) error
 	// QuantityValidator is a validator for the "quantity" field. It is called by the builders before save.
 	QuantityValidator func(int) error
+	// DefaultAttempt holds the default value on creation for the "attempt" field.
+	DefaultAttempt int
+	// AttemptValidator is a validator for the "attempt" field. It is called by the builders before save.
+	AttemptValidator func(int) error
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus string
 	// DefaultID holds the default value on creation for the "id" field.
@@ -109,6 +116,11 @@ func ByLocationID(opts ...sql.OrderTermOption) OrderOption {
 // ByQuantity orders the results by the quantity field.
 func ByQuantity(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldQuantity, opts...).ToFunc()
+}
+
+// ByAttempt orders the results by the attempt field.
+func ByAttempt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAttempt, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

@@ -23,6 +23,7 @@ func (service ReservationService) Fulfil(ctx context.Context, request commercepo
 		if len(rows) == 0 {
 			return inventoryerrors.NothingReservedForOrder
 		}
+		rows = rowsOfLatestAttempt(rows)
 		if rows[0].Status == enums.ReservationFulfilled {
 			return nil
 		}
@@ -51,14 +52,14 @@ func (service ReservationService) shipReservedUnitsInTransaction(ctx context.Con
 		_, err = ApplyStockChangeInTransaction(ctx, tx, reservedLevel, StockChange{
 			StoreId: row.StoreID, VariantId: row.VariantID, LocationId: row.LocationID, OnHandDelta: -row.Quantity, ReservedDelta: -row.Quantity,
 			Kind: enums.MovementOrderShipped, Reference: row.Reference, ActorName: actor,
-			DedupeKey: MovementDedupeKey(enums.MovementOrderShipped, row.Reference, row.VariantID, row.LocationID),
+			DedupeKey: MovementDedupeKey(enums.MovementOrderShipped, reservationMovementReference(row.Reference, row.Attempt), row.VariantID, row.LocationID),
 		})
 		return err
 	}
 	if _, err := ApplyStockChangeInTransaction(ctx, tx, reservedLevel, StockChange{
 		StoreId: row.StoreID, VariantId: row.VariantID, LocationId: row.LocationID, ReservedDelta: -row.Quantity,
 		Kind: enums.MovementOrderReleased, Reference: row.Reference, Reason: "moved_to_shipping_location", ActorName: actor, AllowBelowReserved: true,
-		DedupeKey: MovementDedupeKey(enums.MovementOrderReleased, row.Reference, row.VariantID, row.LocationID),
+		DedupeKey: MovementDedupeKey(enums.MovementOrderReleased, reservationMovementReference(row.Reference, row.Attempt), row.VariantID, row.LocationID),
 	}); err != nil {
 		return err
 	}
@@ -72,7 +73,7 @@ func (service ReservationService) shipReservedUnitsInTransaction(ctx context.Con
 	_, err = ApplyStockChangeInTransaction(ctx, tx, shippingLevel, StockChange{
 		StoreId: row.StoreID, VariantId: row.VariantID, LocationId: *request.FromLocationId, OnHandDelta: -row.Quantity,
 		Kind: enums.MovementOrderShipped, Reference: row.Reference, ActorName: actor,
-		DedupeKey: MovementDedupeKey(enums.MovementOrderShipped, row.Reference, row.VariantID, *request.FromLocationId),
+		DedupeKey: MovementDedupeKey(enums.MovementOrderShipped, reservationMovementReference(row.Reference, row.Attempt), row.VariantID, *request.FromLocationId),
 	})
 	return err
 }

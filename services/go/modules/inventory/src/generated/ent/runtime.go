@@ -332,8 +332,14 @@ func init() {
 	stockreservationDescQuantity := stockreservationFields[4].Descriptor()
 	// stockreservation.QuantityValidator is a validator for the "quantity" field. It is called by the builders before save.
 	stockreservation.QuantityValidator = stockreservationDescQuantity.Validators[0].(func(int) error)
+	// stockreservationDescAttempt is the schema descriptor for attempt field.
+	stockreservationDescAttempt := stockreservationFields[5].Descriptor()
+	// stockreservation.DefaultAttempt holds the default value on creation for the attempt field.
+	stockreservation.DefaultAttempt = stockreservationDescAttempt.Default.(int)
+	// stockreservation.AttemptValidator is a validator for the "attempt" field. It is called by the builders before save.
+	stockreservation.AttemptValidator = stockreservationDescAttempt.Validators[0].(func(int) error)
 	// stockreservationDescStatus is the schema descriptor for status field.
-	stockreservationDescStatus := stockreservationFields[5].Descriptor()
+	stockreservationDescStatus := stockreservationFields[6].Descriptor()
 	// stockreservation.DefaultStatus holds the default value on creation for the status field.
 	stockreservation.DefaultStatus = stockreservationDescStatus.Default.(string)
 	// stockreservationDescID is the schema descriptor for id field.

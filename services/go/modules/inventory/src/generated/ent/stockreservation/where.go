@@ -85,6 +85,11 @@ func Quantity(v int) predicate.StockReservation {
 	return predicate.StockReservation(sql.FieldEQ(FieldQuantity, v))
 }
 
+// Attempt applies equality check predicate on the "attempt" field. It's identical to AttemptEQ.
+func Attempt(v int) predicate.StockReservation {
+	return predicate.StockReservation(sql.FieldEQ(FieldAttempt, v))
+}
+
 // Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
 func Status(v string) predicate.StockReservation {
 	return predicate.StockReservation(sql.FieldEQ(FieldStatus, v))
@@ -363,6 +368,46 @@ func QuantityLT(v int) predicate.StockReservation {
 // QuantityLTE applies the LTE predicate on the "quantity" field.
 func QuantityLTE(v int) predicate.StockReservation {
 	return predicate.StockReservation(sql.FieldLTE(FieldQuantity, v))
+}
+
+// AttemptEQ applies the EQ predicate on the "attempt" field.
+func AttemptEQ(v int) predicate.StockReservation {
+	return predicate.StockReservation(sql.FieldEQ(FieldAttempt, v))
+}
+
+// AttemptNEQ applies the NEQ predicate on the "attempt" field.
+func AttemptNEQ(v int) predicate.StockReservation {
+	return predicate.StockReservation(sql.FieldNEQ(FieldAttempt, v))
+}
+
+// AttemptIn applies the In predicate on the "attempt" field.
+func AttemptIn(vs ...int) predicate.StockReservation {
+	return predicate.StockReservation(sql.FieldIn(FieldAttempt, vs...))
+}
+
+// AttemptNotIn applies the NotIn predicate on the "attempt" field.
+func AttemptNotIn(vs ...int) predicate.StockReservation {
+	return predicate.StockReservation(sql.FieldNotIn(FieldAttempt, vs...))
+}
+
+// AttemptGT applies the GT predicate on the "attempt" field.
+func AttemptGT(v int) predicate.StockReservation {
+	return predicate.StockReservation(sql.FieldGT(FieldAttempt, v))
+}
+
+// AttemptGTE applies the GTE predicate on the "attempt" field.
+func AttemptGTE(v int) predicate.StockReservation {
+	return predicate.StockReservation(sql.FieldGTE(FieldAttempt, v))
+}
+
+// AttemptLT applies the LT predicate on the "attempt" field.
+func AttemptLT(v int) predicate.StockReservation {
+	return predicate.StockReservation(sql.FieldLT(FieldAttempt, v))
+}
+
+// AttemptLTE applies the LTE predicate on the "attempt" field.
+func AttemptLTE(v int) predicate.StockReservation {
+	return predicate.StockReservation(sql.FieldLTE(FieldAttempt, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

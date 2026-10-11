@@ -237,6 +237,7 @@ var (
 		{Name: "variant_id", Type: field.TypeUUID},
 		{Name: "location_id", Type: field.TypeUUID},
 		{Name: "quantity", Type: field.TypeInt},
+		{Name: "attempt", Type: field.TypeInt, Default: 0},
 		{Name: "status", Type: field.TypeString, Default: "active"},
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "settled_at", Type: field.TypeTime, Nullable: true},
@@ -248,14 +249,14 @@ var (
 		PrimaryKey: []*schema.Column{StockReservationsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "stockreservation_reference_variant_id_location_id",
+				Name:    "stockreservation_reference_variant_id_location_id_attempt",
 				Unique:  true,
-				Columns: []*schema.Column{StockReservationsColumns[2], StockReservationsColumns[4], StockReservationsColumns[5]},
+				Columns: []*schema.Column{StockReservationsColumns[2], StockReservationsColumns[4], StockReservationsColumns[5], StockReservationsColumns[7]},
 			},
 			{
 				Name:    "stockreservation_active_expiry",
 				Unique:  false,
-				Columns: []*schema.Column{StockReservationsColumns[8]},
+				Columns: []*schema.Column{StockReservationsColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "status = 'active'",
 				},
@@ -263,7 +264,7 @@ var (
 			{
 				Name:    "stockreservation_store_id_status",
 				Unique:  false,
-				Columns: []*schema.Column{StockReservationsColumns[3], StockReservationsColumns[7]},
+				Columns: []*schema.Column{StockReservationsColumns[3], StockReservationsColumns[8]},
 			},
 		},
 	}

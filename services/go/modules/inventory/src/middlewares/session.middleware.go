@@ -22,7 +22,7 @@ func Idempotent(deployed *container.Container) func(http.HandlerFunc) http.Handl
 }
 
 func requireIdempotencyKey(deployed *container.Container, handler http.HandlerFunc) http.Handler {
-	if deployed.IdempotencyStore != nil {
+	if deployed.IdempotencyStore != nil || deployed.Settings.IsProduction() {
 		return idempotency.RequireIdempotencyKeyAndReplayCompletedResponses(deployed.IdempotencyStore, idempotency.MoneyMovingTimeToLive, deployed.Logger)(handler)
 	}
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {

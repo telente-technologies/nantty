@@ -5359,6 +5359,8 @@ type StockReservationMutation struct {
 	location_id   *uuid.UUID
 	quantity      *int
 	addquantity   *int
+	attempt       *int
+	addattempt    *int
 	status        *string
 	expires_at    *time.Time
 	settled_at    *time.Time
@@ -5708,6 +5710,62 @@ func (m *StockReservationMutation) ResetQuantity() {
 	m.addquantity = nil
 }
 
+// SetAttempt sets the "attempt" field.
+func (m *StockReservationMutation) SetAttempt(i int) {
+	m.attempt = &i
+	m.addattempt = nil
+}
+
+// Attempt returns the value of the "attempt" field in the mutation.
+func (m *StockReservationMutation) Attempt() (r int, exists bool) {
+	v := m.attempt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttempt returns the old "attempt" field's value of the StockReservation entity.
+// If the StockReservation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StockReservationMutation) OldAttempt(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttempt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttempt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttempt: %w", err)
+	}
+	return oldValue.Attempt, nil
+}
+
+// AddAttempt adds i to the "attempt" field.
+func (m *StockReservationMutation) AddAttempt(i int) {
+	if m.addattempt != nil {
+		*m.addattempt += i
+	} else {
+		m.addattempt = &i
+	}
+}
+
+// AddedAttempt returns the value that was added to the "attempt" field in this mutation.
+func (m *StockReservationMutation) AddedAttempt() (r int, exists bool) {
+	v := m.addattempt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAttempt resets all changes to the "attempt" field.
+func (m *StockReservationMutation) ResetAttempt() {
+	m.attempt = nil
+	m.addattempt = nil
+}
+
 // SetStatus sets the "status" field.
 func (m *StockReservationMutation) SetStatus(s string) {
 	m.status = &s
@@ -5876,7 +5934,7 @@ func (m *StockReservationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StockReservationMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, stockreservation.FieldCreatedAt)
 	}
@@ -5894,6 +5952,9 @@ func (m *StockReservationMutation) Fields() []string {
 	}
 	if m.quantity != nil {
 		fields = append(fields, stockreservation.FieldQuantity)
+	}
+	if m.attempt != nil {
+		fields = append(fields, stockreservation.FieldAttempt)
 	}
 	if m.status != nil {
 		fields = append(fields, stockreservation.FieldStatus)
@@ -5924,6 +5985,8 @@ func (m *StockReservationMutation) Field(name string) (ent.Value, bool) {
 		return m.LocationID()
 	case stockreservation.FieldQuantity:
 		return m.Quantity()
+	case stockreservation.FieldAttempt:
+		return m.Attempt()
 	case stockreservation.FieldStatus:
 		return m.Status()
 	case stockreservation.FieldExpiresAt:
@@ -5951,6 +6014,8 @@ func (m *StockReservationMutation) OldField(ctx context.Context, name string) (e
 		return m.OldLocationID(ctx)
 	case stockreservation.FieldQuantity:
 		return m.OldQuantity(ctx)
+	case stockreservation.FieldAttempt:
+		return m.OldAttempt(ctx)
 	case stockreservation.FieldStatus:
 		return m.OldStatus(ctx)
 	case stockreservation.FieldExpiresAt:
@@ -6008,6 +6073,13 @@ func (m *StockReservationMutation) SetField(name string, value ent.Value) error 
 		}
 		m.SetQuantity(v)
 		return nil
+	case stockreservation.FieldAttempt:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttempt(v)
+		return nil
 	case stockreservation.FieldStatus:
 		v, ok := value.(string)
 		if !ok {
@@ -6040,6 +6112,9 @@ func (m *StockReservationMutation) AddedFields() []string {
 	if m.addquantity != nil {
 		fields = append(fields, stockreservation.FieldQuantity)
 	}
+	if m.addattempt != nil {
+		fields = append(fields, stockreservation.FieldAttempt)
+	}
 	return fields
 }
 
@@ -6050,6 +6125,8 @@ func (m *StockReservationMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case stockreservation.FieldQuantity:
 		return m.AddedQuantity()
+	case stockreservation.FieldAttempt:
+		return m.AddedAttempt()
 	}
 	return nil, false
 }
@@ -6065,6 +6142,13 @@ func (m *StockReservationMutation) AddField(name string, value ent.Value) error 
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddQuantity(v)
+		return nil
+	case stockreservation.FieldAttempt:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAttempt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown StockReservation numeric field %s", name)
@@ -6125,6 +6209,9 @@ func (m *StockReservationMutation) ResetField(name string) error {
 		return nil
 	case stockreservation.FieldQuantity:
 		m.ResetQuantity()
+		return nil
+	case stockreservation.FieldAttempt:
+		m.ResetAttempt()
 		return nil
 	case stockreservation.FieldStatus:
 		m.ResetStatus()

@@ -68,6 +68,20 @@ func (_c *StockReservationCreate) SetQuantity(v int) *StockReservationCreate {
 	return _c
 }
 
+// SetAttempt sets the "attempt" field.
+func (_c *StockReservationCreate) SetAttempt(v int) *StockReservationCreate {
+	_c.mutation.SetAttempt(v)
+	return _c
+}
+
+// SetNillableAttempt sets the "attempt" field if the given value is not nil.
+func (_c *StockReservationCreate) SetNillableAttempt(v *int) *StockReservationCreate {
+	if v != nil {
+		_c.SetAttempt(*v)
+	}
+	return _c
+}
+
 // SetStatus sets the "status" field.
 func (_c *StockReservationCreate) SetStatus(v string) *StockReservationCreate {
 	_c.mutation.SetStatus(v)
@@ -163,6 +177,10 @@ func (_c *StockReservationCreate) defaults() {
 		v := stockreservation.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.Attempt(); !ok {
+		v := stockreservation.DefaultAttempt
+		_c.mutation.SetAttempt(v)
+	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := stockreservation.DefaultStatus
 		_c.mutation.SetStatus(v)
@@ -201,6 +219,14 @@ func (_c *StockReservationCreate) check() error {
 	if v, ok := _c.mutation.Quantity(); ok {
 		if err := stockreservation.QuantityValidator(v); err != nil {
 			return &ValidationError{Name: "quantity", err: fmt.Errorf(`ent: validator failed for field "StockReservation.quantity": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Attempt(); !ok {
+		return &ValidationError{Name: "attempt", err: errors.New(`ent: missing required field "StockReservation.attempt"`)}
+	}
+	if v, ok := _c.mutation.Attempt(); ok {
+		if err := stockreservation.AttemptValidator(v); err != nil {
+			return &ValidationError{Name: "attempt", err: fmt.Errorf(`ent: validator failed for field "StockReservation.attempt": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
@@ -265,6 +291,10 @@ func (_c *StockReservationCreate) createSpec() (*StockReservation, *sqlgraph.Cre
 	if value, ok := _c.mutation.Quantity(); ok {
 		_spec.SetField(stockreservation.FieldQuantity, field.TypeInt, value)
 		_node.Quantity = value
+	}
+	if value, ok := _c.mutation.Attempt(); ok {
+		_spec.SetField(stockreservation.FieldAttempt, field.TypeInt, value)
+		_node.Attempt = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(stockreservation.FieldStatus, field.TypeString, value)
@@ -412,6 +442,9 @@ func (u *StockReservationUpsertOne) UpdateNewValues() *StockReservationUpsertOne
 		}
 		if _, exists := u.create.mutation.Quantity(); exists {
 			s.SetIgnore(stockreservation.FieldQuantity)
+		}
+		if _, exists := u.create.mutation.Attempt(); exists {
+			s.SetIgnore(stockreservation.FieldAttempt)
 		}
 	}))
 	return u
@@ -700,6 +733,9 @@ func (u *StockReservationUpsertBulk) UpdateNewValues() *StockReservationUpsertBu
 			}
 			if _, exists := b.mutation.Quantity(); exists {
 				s.SetIgnore(stockreservation.FieldQuantity)
+			}
+			if _, exists := b.mutation.Attempt(); exists {
+				s.SetIgnore(stockreservation.FieldAttempt)
 			}
 		}
 	}))

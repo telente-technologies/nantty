@@ -30,6 +30,8 @@ type StockReservation struct {
 	LocationID uuid.UUID `json:"location_id,omitempty"`
 	// Quantity holds the value of the "quantity" field.
 	Quantity int `json:"quantity,omitempty"`
+	// Attempt holds the value of the "attempt" field.
+	Attempt int `json:"attempt,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
 	// ExpiresAt holds the value of the "expires_at" field.
@@ -44,7 +46,7 @@ func (*StockReservation) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case stockreservation.FieldQuantity:
+		case stockreservation.FieldQuantity, stockreservation.FieldAttempt:
 			values[i] = new(sql.NullInt64)
 		case stockreservation.FieldReference, stockreservation.FieldStatus:
 			values[i] = new(sql.NullString)
@@ -108,6 +110,12 @@ func (_m *StockReservation) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field quantity", values[i])
 			} else if value.Valid {
 				_m.Quantity = int(value.Int64)
+			}
+		case stockreservation.FieldAttempt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field attempt", values[i])
+			} else if value.Valid {
+				_m.Attempt = int(value.Int64)
 			}
 		case stockreservation.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -182,6 +190,9 @@ func (_m *StockReservation) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("quantity=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Quantity))
+	builder.WriteString(", ")
+	builder.WriteString("attempt=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Attempt))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)
