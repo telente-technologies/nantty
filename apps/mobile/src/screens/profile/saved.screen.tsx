@@ -1,10 +1,11 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
+import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { BookmarkSimple24Icon } from "@/components/icons";
 import { SAVED_ITEM_FILTERS, SavedFilterTabs } from "@/components/saves/savedFilterTabs";
 import { SavedItemTile } from "@/components/saves/savedItemTile";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -56,7 +57,7 @@ export function SavedScreen({ navigation, route }: MainScreenProps<"Saved">) {
   const openSavedItem = (item: SavedItem) => {
     if (item.type === "product") navigation.navigate("ProductDetail", { productId: item.targetId });
     else if (item.type === "clip") navigation.navigate("Tabs", { screen: "Clips", params: { startId: item.targetId } });
-    else if (item.type === "comment") navigation.navigate("CommentThread", { commentId: item.targetId, postId: item.postId });
+    else if (item.type === "comment") navigation.navigate("CommentThread", { commentId: item.targetId, postId: item.postId ?? item.comment.postId });
     else navigation.navigate("PostDetail", { postId: item.targetId });
   };
 
@@ -96,7 +97,7 @@ export function SavedScreen({ navigation, route }: MainScreenProps<"Saved">) {
               </Text>
             </View>
           }
-          ListFooterComponent={savedItems.isFetchingNextPage ? <ActivityIndicator style={styles.footer} color={colors.primary} /> : null}
+          ListFooterComponent={savedItems.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
         />
       )}
     </Screen>

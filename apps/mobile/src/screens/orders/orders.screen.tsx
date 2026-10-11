@@ -68,7 +68,7 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
         keyExtractor={(order) => order.id}
         stickySectionHeadersEnabled={false}
         contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={orders.isRefetching} onRefresh={() => orders.refetch()} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={orders.isRefetching} onRefresh={() => orders.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
         renderSectionHeader={({ section }) => (
           <Text size={13} weight={600} lineHeight={16.9} color={colors.textMuted} style={styles.sectionTitle} accessibilityRole="header">
             {section.title} · {section.data.length}

@@ -54,7 +54,8 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
   const postAuthorId = post.data?.author.id;
   const commentThread = useCommentThreadController(postId, undefined, undefined, postAuthorId);
-  const conversation = usePostConversation(postId, sort);
+  const threadListRef = useRef<FlatList<ThreadRow>>(null);
+  const conversation = usePostConversation(postId, sort, () => threadListRef.current?.scrollToOffset({ offset: 0, animated: false }));
   const { offerSendInChat, sendInChatElement } = useShareToChat();
 
   const sharePostLink = async () => {
@@ -83,6 +84,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
       ) : null}
       <PostCard
         post={post.data}
+        surface="post_detail"
         onPressAuthor={() => openUserProfile(post.data!.author.id)}
         onToggleFollow={() => followPostAuthor(post.data!)}
         onToggleLike={() => togglePostLike(post.data!)}
@@ -119,6 +121,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
         <View style={styles.flex}>
           <Header title="Post" />
           <FlatList
+            ref={threadListRef}
             style={styles.flex}
             data={post.data ? rows : []}
             keyExtractor={(row) => row.key}
@@ -135,6 +138,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
                   threadQuery.refetch();
                 }}
                 tintColor={colors.primary}
+                colors={[colors.primary]}
               />
             }
             renderItem={({ item }) =>
@@ -155,7 +159,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
             ListEmptyComponent={
               !post.data ? null : threadQuery.isLoading ? (
                 <ThreadSkeleton />
-              ) : threadQuery.isError ? (
+              ) : threadQuery.isError && !conversation.isRestartingFromTop ? (
                 <ThreadErrorState onRetry={() => threadQuery.refetch()} />
               ) : (
                 <ThreadEmptyState isGuest={isGuest} />
@@ -167,6 +171,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
             ref={composerRef}
             postAuthorUsername={post.data?.author.username}
             replyTarget={commentThread.replyTarget}
+            focusRequest={commentThread.replyFocusRequest}
             onCancelReply={commentThread.cancelReplyingToComment}
             onSubmit={commentThread.submitCommentOrReplyText}
             replyRestriction={post.data?.viewerCanReply === false ? (post.data.replyRestriction ?? null) : null}

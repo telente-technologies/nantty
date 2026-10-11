@@ -1,8 +1,9 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 
 import { PostCard } from "@/components/feed/postCard";
+import { BrandLoader } from "@/components/ui/brandLoader";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -44,6 +45,7 @@ export function PostQuotesScreen({ navigation, route }: MainScreenProps<"PostQuo
           renderItem={({ item }) => (
             <PostCard
               post={item}
+              surface="post_detail"
               onPress={() => navigation.push("PostDetail", { postId: item.id })}
               onPressOriginalPost={() => navigation.push("PostDetail", { postId })}
               onToggleLike={() => interactions.togglePostLike(item)}
@@ -53,14 +55,14 @@ export function PostQuotesScreen({ navigation, route }: MainScreenProps<"PostQuo
           )}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
-          refreshControl={<RefreshControl refreshing={quotes.isRefetching && !quotes.isFetchingNextPage} onRefresh={() => quotes.refetch()} tintColor={colors.primary} />}
+          refreshControl={<RefreshControl refreshing={quotes.isRefetching && !quotes.isFetchingNextPage} onRefresh={() => quotes.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text size={16} weight={600} lineHeight={20} align="center">No quotes to show</Text>
               <Text size={14} lineHeight={20} align="center" color={colors.textMuted}>Quotes from private accounts or ones you can't see stay hidden.</Text>
             </View>
           }
-          ListFooterComponent={quotes.isFetchingNextPage ? <ActivityIndicator style={styles.footer} color={colors.primary} /> : null}
+          ListFooterComponent={quotes.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
         />
       )}
     </Screen>

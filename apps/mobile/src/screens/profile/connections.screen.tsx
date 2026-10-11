@@ -2,12 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDeferredValue, useState } from "react";
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
-import { setFollowingAuthorEverywhere } from "@/cache/postEngagementCache.util";
 import { ArrowLeft24Icon, MagnifyingGlass20Icon, SlidersHorizontal24Icon, Users24Icon } from "@/components/icons";
 import { connectionSortLabel, sortAndFilterConnections } from "@/components/profile/connectionSort.util";
 import { ConnectionSortSheet } from "@/components/profile/connectionSortSheet";
 import { ConnectionOptionsSheet } from "@/components/profile/connectionOptionsSheet";
 import { ConnectionRow } from "@/components/profile/connectionRow";
+import { useFollowUserToggle } from "@/components/profile/confirmedFollowToggle.hook";
 import { followButtonLabelForState, isFollowStateHighlighted, resolveFollowStateOfUser } from "@/components/profile/followState.util";
 import { profileQueryKeys } from "@/components/profile/profileQueries.hook";
 import { Chip } from "@/components/ui/chip";
@@ -62,15 +62,13 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
   const refreshControl = usePullToRefresh(refetch);
   const isListHiddenBecausePrivate = error instanceof ApiError && error.status === 403;
 
-  const changeRelationshipWithUser = useMutation({
-    mutationFn: async (entry: ConnectionEntry) => {
-      if (tab === "blocked") return void (await followsService.unblockUser(entry.id));
-      const isFollowingNow = resolveFollowStateOfUser(entry) !== "none" && resolveFollowStateOfUser(entry) !== "rejected";
-      await (isFollowingNow ? followsService.unfollowUser(entry.id) : followsService.followUser(entry.id));
-      if (isFollowingNow) setFollowingAuthorEverywhere(queryClient, entry.id, false);
-    },
+  const { toggleUser } = useFollowUserToggle();
+  const unblockUser = useMutation({
+    mutationFn: (entry: ConnectionEntry) => followsService.unblockUser(entry.id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users", userId, "connections"] }),
   });
+  const changeRelationshipWithUser = (entry: ConnectionEntry) =>
+    tab === "blocked" ? unblockUser.mutate(entry) : toggleUser({ id: entry.id, username: entry.username, followState: resolveFollowStateOfUser(entry) });
 
   const preferenceKey = `connections:${tab}`;
   const preference = useListViewPreferencesStore((state) => state.connectionsByScreen[preferenceKey]) ?? DEFAULT_CONNECTION_PREFERENCE;
@@ -137,7 +135,7 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
             user={item}
             actionLabel={item.id === useAuthStore.getState().user?.id ? undefined : actionLabelFor(item)}
             actionHighlighted={tab !== "blocked" && isFollowStateHighlighted(resolveFollowStateOfUser(item))}
-            onPressAction={() => requireAuthThen(() => changeRelationshipWithUser.mutate(item), undefined, "follow people")}
+            onPressAction={() => requireAuthThen(() => changeRelationshipWithUser(item), undefined, "follow people")}
             onPressUser={() => navigation.push("UserProfile", { userId: item.id })}
             onPressMore={item.id === useAuthStore.getState().user?.id ? undefined : () => setEntryWithOpenMenu(item)}
           />

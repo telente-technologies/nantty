@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, View } from "react-native";
 
 import { CommentThreadContext, useCommentThreadController } from "@/components/clips/commentThreadController.hook";
 import { toLocalThreadReply } from "@/components/feed/thread/postThread.hook";
@@ -54,7 +54,7 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
     setReplyThreadVisibility(commentId, "expanded");
   }, [commentId, setReplyThreadVisibility]);
   useEffect(() => {
-    if (focus.data && !replyTarget) startReplyingToComment(focus.data);
+    if (focus.data && !replyTarget) startReplyingToComment(focus.data, { focus: false });
   }, [focus.data, replyTarget, startReplyingToComment]);
 
   const pages = thread.data?.pages ?? [];
@@ -88,7 +88,7 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
       <CommentThreadContext.Provider value={commentThread}>
         <View style={styles.flex}>
           <Header title="Thread" />
-          <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <ScrollView style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}>
             {initialLoading ? <ThreadSkeleton rows={2} /> : null}
             {showCommentGone ? (
               <ErrorState message="This reply is no longer available." detail="It may have been deleted." />
@@ -107,6 +107,7 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
             {!initialLoading && showThreadBody && post.data ? (
               <PostCard
                 post={post.data}
+                surface="post_detail"
                 onPress={() => navigation.navigate("PostDetail", { postId })}
                 onPressAuthor={() => openUserProfile(post.data!.author.id)}
                 onPressComments={() => navigation.navigate("PostDetail", { postId })}
@@ -195,7 +196,8 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
           <ThreadComposer
             postAuthorUsername={focusComment?.author?.username}
             replyTarget={replyTarget ?? focusComment}
-            onCancelReply={() => (focusComment ? startReplyingToComment(focusComment) : undefined)}
+            focusRequest={commentThread.replyFocusRequest}
+            onCancelReply={() => (focusComment ? startReplyingToComment(focusComment, { focus: false }) : undefined)}
             onSubmit={commentThread.submitCommentOrReplyText}
             replyRestriction={post.data?.viewerCanReply === false ? (post.data.replyRestriction ?? null) : null}
           />

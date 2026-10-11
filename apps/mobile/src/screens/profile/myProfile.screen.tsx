@@ -9,7 +9,8 @@ import { ProfileHeaderBar } from "@/components/profile/profileHeaderBar";
 import { useMyProfileQuery, useUserPostsQuery } from "@/components/profile/profileQueries.hook";
 import { ProfileView } from "@/components/profile/profileView";
 import { usePinPostMutation } from "@/components/feed/usePinPost.hook";
-import { ArrowUpRight24Icon, ChatCircle24Icon, PushPin24Icon } from "@/components/icons";
+import { useDeleteOwnPost } from "@/components/feed/useDeleteOwnPost.hook";
+import { ArrowUpRight24Icon, ChatCircle24Icon, PushPin24Icon, Trash24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Screen } from "@/components/ui/screen";
 import { ErrorState } from "@/components/ui/errorState";
@@ -31,6 +32,7 @@ export function MeScreen() {
   const postsQuery = useUserPostsQuery(profile?.id);
   const [postWithOpenMenu, setPostWithOpenMenu] = useState<Post | null>(null);
   const pinMutation = usePinPostMutation();
+  const { confirmAndDelete } = useDeleteOwnPost();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const actingProfileId = useActingProfileStore((s) => s.actingProfile?.id ?? null);
   const openProfileSwitcherSheet = useProfileSwitcherSheetStore((s) => s.openProfileSwitcherSheet);
@@ -98,6 +100,12 @@ export function MeScreen() {
             <Pressable accessibilityRole="button" style={styles.option} onPress={() => openPostAction(() => pinMutation.mutate(postWithOpenMenu))} disabled={pinMutation.isPending}>
               <PushPin24Icon size={20} color={colors.text} />
               <Text size={15} lineHeight={18}>{postWithOpenMenu.isPinned === true ? "Unpin from profile" : "Pin to profile"}</Text>
+            </Pressable>
+          ) : null}
+          {postWithOpenMenu ? (
+            <Pressable accessibilityRole="button" style={styles.option} onPress={() => openPostAction(() => confirmAndDelete({ id: postWithOpenMenu.id, kind: postWithOpenMenu.kind ?? "post" }))}>
+              <Trash24Icon size={20} />
+              <Text size={15} lineHeight={18} color={colors.error}>Delete</Text>
             </Pressable>
           ) : null}
         </View>

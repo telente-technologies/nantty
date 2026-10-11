@@ -11,6 +11,8 @@ import { postsService } from "@/services/content/posts.service";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
+import { EmptyState } from "@/components/ui/emptyState";
+import { analyticsTitleFor, describeAnalyticsFailure, engagementRowsFor, isClipAnalytics, summaryMetricsFor, videoMetricsFor, type AnalyticsRow } from "@/utils/postAnalytics.util";
 
 const DAY_LABELS: readonly string[] = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -20,14 +22,18 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
   const analytics = useQuery({
     queryKey: ["post-analytics", route.params.postId],
     queryFn: () => postsService.fetchPostAnalytics(route.params.postId),
+    retry: (failureCount, error) => describeAnalyticsFailure(error).canRetry && failureCount < 2,
   });
 
   if (!analytics.data) {
+    const failure = analytics.isError ? describeAnalyticsFailure(analytics.error) : null;
     return (
       <Screen>
         <Header title="Post analytics" />
-        {analytics.isError ? (
-          <ErrorState message={analytics.error.message} onRetry={() => analytics.refetch()} />
+        {failure?.canRetry ? (
+          <ErrorState message={failure.title} detail={failure.detail} retrying={analytics.isRefetching} onRetry={() => analytics.refetch()} />
+        ) : failure ? (
+          <EmptyState title={failure.title} body={failure.detail} icon={<Analytics24Icon size={28} color={colors.textMuted} />} />
         ) : (
           <ListSkeleton />
         )}
@@ -37,36 +43,26 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
 
   const data = analytics.data;
   const peak = Math.max(1, ...data.daily.map((entry) => entry.impressions));
-  const metrics = [
-    { label: "Impressions", value: data.impressions },
-    { label: "Unique viewers", value: data.uniqueViewers },
-    { label: "Profile visits", value: data.profileVisits },
-    { label: "Engagements", value: data.engagements },
-    { label: "Engagement rate", value: `${data.engagementRate}%` },
-    { label: "New follows", value: data.newFollows },
-    ...(data.video
-      ? [
-          { label: "Video views", value: data.video.views },
-          { label: "Watch time", value: `${Math.round(data.video.watchTimeSeconds / 60)} min` },
-        ]
-      : []),
-  ];
-  const engagementRows = [
-    { label: "Likes", value: data.likes },
-    { label: "Replies", value: data.comments },
-    { label: "Reposts", value: data.reposts },
-    { label: "Saves", value: data.saves },
-    { label: "Shares", value: data.shares },
-    { label: "Link clicks", value: data.linkClicks },
-    { label: "Profile clicks", value: data.profileClicks },
-  ];
+  const metrics = summaryMetricsFor(data);
+  const videoMetrics = videoMetricsFor(data);
+  const engagementRows = engagementRowsFor(data);
+  const renderMetricGrid = (rows: readonly AnalyticsRow[]) => (
+    <View style={styles.grid}>
+      {rows.map((metric) => (
+        <View key={metric.label} style={styles.metric} accessible accessibilityLabel={`${metric.label}, ${metric.value}`}>
+          <Text size={21} weight={600} lineHeight={25.2}>{typeof metric.value === "number" ? formatCountWithThousandsSuffix(metric.value) : metric.value}</Text>
+          <Text size={12} lineHeight={16.8} color={colors.textMuted}>{metric.label}</Text>
+        </View>
+      ))}
+    </View>
+  );
 
   return (
     <Screen>
-      <Header title="Post analytics" />
+      <Header title={analyticsTitleFor(data)} />
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={analytics.isRefetching} onRefresh={() => analytics.refetch()} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={analytics.isRefetching} onRefresh={() => analytics.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <View style={styles.ownerNote}>
           <Analytics24Icon size={18} color={colors.primary} />
@@ -75,14 +71,14 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
           </Text>
         </View>
 
-        <View style={styles.grid}>
-          {metrics.map((metric) => (
-            <View key={metric.label} style={styles.metric}>
-              <Text size={21} weight={600} lineHeight={25.2}>{typeof metric.value === "number" ? formatCountWithThousandsSuffix(metric.value) : metric.value}</Text>
-              <Text size={12} lineHeight={16.8} color={colors.textMuted}>{metric.label}</Text>
-            </View>
-          ))}
-        </View>
+        {renderMetricGrid(metrics)}
+
+        {videoMetrics.length > 0 ? (
+          <View style={styles.section}>
+            <Text size={16} weight={600} lineHeight={19.2}>{isClipAnalytics(data) ? "Watching" : "Video"}</Text>
+            {renderMetricGrid(videoMetrics)}
+          </View>
+        ) : null}
 
         <View style={styles.card}>
           <Text size={16} weight={600} lineHeight={19.2}>Impressions, last 7 days</Text>
@@ -103,7 +99,7 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
           {engagementRows.map((row) => (
             <View key={row.label} style={styles.rowBetween} accessible accessibilityLabel={`${row.label}, ${row.value}`}>
               <Text size={14} color={colors.textMuted}>{row.label}</Text>
-              <Text size={14} weight={600}>{formatCountWithThousandsSuffix(row.value)}</Text>
+              <Text size={14} weight={600}>{typeof row.value === "number" ? formatCountWithThousandsSuffix(row.value) : row.value}</Text>
             </View>
           ))}
         </View>
@@ -121,7 +117,7 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
         ) : null}
 
         <View style={styles.card}>
-          <Text size={16} weight={600} lineHeight={19.2}>This post</Text>
+          <Text size={16} weight={600} lineHeight={19.2}>{isClipAnalytics(data) ? "This clip" : "This post"}</Text>
           <View style={styles.postRow}>
             <Text size={14} lineHeight={18} numberOfLines={3} style={styles.postText}>{data.author.name}</Text>
             <Text size={12} lineHeight={16.8} color={colors.textSubtle}>Posted {formatTimeSincePosted(data.postedAt)}</Text>
@@ -141,6 +137,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   ownerNote: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 2 },
   ownerNoteText: { flex: 1 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  section: { gap: 10 },
   metric: { width: "48.5%", backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 4 },
   card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 14 },
   chart: { flexDirection: "row", alignItems: "flex-end", gap: 8, height: 160 },

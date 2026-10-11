@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ScrollView, Share, StyleSheet, View } from "react-native";
 
@@ -12,6 +12,7 @@ import { ProductInfoSection } from "@/components/product/productInfoSection";
 import { ProductBrandRow } from "@/components/product/productBrandRow";
 import { ProductPriceBlock } from "@/components/product/productPriceBlock";
 import { ReportProductSheet } from "@/components/product/reportProductSheet";
+import { useConfirmedFollowToggle } from "@/components/profile/confirmedFollowToggle.hook";
 import { ProductReviewsSection } from "@/components/reviews/productReviewsSection";
 import { Button } from "@/components/ui/button";
 import { Header, HeaderAction } from "@/components/ui/header";
@@ -51,12 +52,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   const [reportSheetVisible, setReportSheetVisible] = useState(false);
   const { addProductToCart } = useCartActions();
 
-  const toggleShopFollow = useMutation({
-    mutationFn: (followNow: boolean) =>
-      followNow ? storesService.followStore(product.data!.store.id) : storesService.unfollowStore(product.data!.store.id),
-    onMutate: (followNow) => setFollowingShop(followNow),
-    onError: (_error, followNow) => setFollowingShop(!followNow),
-  });
+  const { toggle: toggleFollow } = useConfirmedFollowToggle();
 
   const addSelectedProductToCart = () => {
     const detail = product.data;
@@ -175,7 +171,10 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
           <AboutShopCard
             store={detail.store}
             following={followingShop}
-            onToggleFollow={() => requireAuthThen(() => toggleShopFollow.mutate(!followingShop), undefined, "follow shops")}
+            onToggleFollow={() => requireAuthThen(() => toggleFollow({
+              subjectLabel: detail.store.name, state: followingShop ? "accepted" : "none", apply: (state) => setFollowingShop(state === "accepted"),
+              follow: () => storesService.followStore(detail.store.id), unfollow: () => storesService.unfollowStore(detail.store.id),
+            }), undefined, "follow shops")}
             onViewShop={() => navigation.navigate("Store", { storeId: detail.store.id })}
           />
           <FeaturedProductsGrid products={detail.related} />
