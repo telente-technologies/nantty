@@ -7,22 +7,24 @@ import { commentRepository } from "../../repositories/comment.repository.js";
 import { commentThreadRepository } from "../../repositories/commentThread.repository.js";
 import type { DeleteCommentCommand } from "./deleteComment.command.js";
 
-
 export function createDeleteCommentHandler(context: HandlerContext): Handler<DeleteCommentCommand, void> {
   return async ({ actorId, commentId }) => {
     const comment = await commentRepository.findById(context.database.client, commentId);
     if (comment === null) throw notFound("COMMENT_NOT_FOUND", "Comment not found.");
     const post = await postRepository.findById(context.database.client, comment.postId);
     if (comment.authorId !== actorId && post?.authorId !== actorId) throw forbidden("FORBIDDEN", "You can only delete your own comments");
-    const ids = [commentId, ...(await commentThreadRepository.allDescendantIds(context.database.client, comment))];
     const now = context.clock.now();
     await context.database.transaction(async (transaction) => {
-      const removed = await commentRepository.softDeleteMany(transaction, ids, now);
+      const claimed = await commentRepository.softDeleteMany(transaction, [commentId], now);
+      if (claimed.count === 0) return;
+      const descendantIds = await commentThreadRepository.allDescendantIds(transaction, comment);
+      const removed = await commentRepository.softDeleteMany(transaction, descendantIds, now);
+      const ids = [commentId, ...descendantIds];
       if (comment.isPinned) await commentRepository.clearPins(transaction, [commentId]);
-      await postRepository.incrementCounter(transaction, comment.postId, "commentCount", -removed.count);
+      await postRepository.incrementCounter(transaction, comment.postId, "commentCount", -(removed.count + 1));
       if (comment.parentCommentId !== null) await commentRepository.incrementReplies(transaction, comment.parentCommentId, -1);
       await postRepository.decrementQuoteCountsForComments(transaction, ids);
-      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.commentDeleted, subject: commentId, occurredAt: now, data: { commentId, postId: comment.postId, deletedBy: actorId, removedCount: removed.count } }]);
+      await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.commentDeleted, subject: commentId, occurredAt: now, data: { commentId, postId: comment.postId, deletedBy: actorId, removedCount: removed.count + 1 } }]);
     });
   };
 }

@@ -74,8 +74,11 @@ function readResponseWithinLimit(response: IncomingMessage, options: SafeFetchOp
   });
 }
 
-function requestOnce(url: URL, pinned: ResolvedAddress, options: SafeFetchOptions, timeoutMs: number): Promise<SingleResponse> {
-  return new Promise((resolve, reject) => {
+export function requestOnce(url: URL, pinned: ResolvedAddress, options: SafeFetchOptions, timeoutMs: number): Promise<SingleResponse> {
+  return new Promise((settleResolve, settleReject) => {
+    let hardDeadline: NodeJS.Timeout | undefined;
+    const resolve = (value: SingleResponse) => { clearTimeout(hardDeadline); settleResolve(value); };
+    const reject = (error: unknown) => { clearTimeout(hardDeadline); settleReject(error); };
     const send = url.protocol === "https:" ? sendHttpsRequest : sendHttpRequest;
     const hostname = url.hostname.replace(/^\[|\]$/g, "");
     const request = send({
@@ -103,6 +106,10 @@ function requestOnce(url: URL, pinned: ResolvedAddress, options: SafeFetchOption
       }
       readResponseWithinLimit(response, options).then((body) => resolve({ status, location: undefined, contentType, body }), reject);
     });
+    hardDeadline = setTimeout(() => {
+      reject(new BlockedUrlError("timed out"));
+      request.destroy(new BlockedUrlError("timed out"));
+    }, timeoutMs);
     request.on("timeout", () => request.destroy(new BlockedUrlError("timed out")));
     request.on("error", reject);
     request.end();

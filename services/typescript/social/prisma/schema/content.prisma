@@ -227,6 +227,7 @@ model PostViewer {
   lastWatchedAt      DateTime?
   lastLinkClickAt    DateTime?
   lastProfileClickAt DateTime?
+  lastDwellAt        DateTime?
   followAttributedAt DateTime?
 
   @@id([postId, viewerKey])
@@ -302,6 +303,7 @@ model CommentRankSnapshot {
   createdAt       DateTime @default(now())
 
   @@index([createdAt])
+  @@index([postId, viewerId, createdAt])
   @@map("comment_rank_snapshots")
 }
 
@@ -314,6 +316,7 @@ model FeedRankSnapshot {
   createdAt   DateTime @default(now())
 
   @@index([createdAt])
+  @@index([viewerId, surface, createdAt])
   @@map("feed_rank_snapshots")
 }
 

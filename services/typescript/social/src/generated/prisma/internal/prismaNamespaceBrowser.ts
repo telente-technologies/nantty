@@ -365,6 +365,7 @@ export const PostViewerScalarFieldEnum = {
   lastWatchedAt: 'lastWatchedAt',
   lastLinkClickAt: 'lastLinkClickAt',
   lastProfileClickAt: 'lastProfileClickAt',
+  lastDwellAt: 'lastDwellAt',
   followAttributedAt: 'followAttributedAt'
 } as const
 

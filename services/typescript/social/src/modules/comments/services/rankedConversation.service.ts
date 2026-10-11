@@ -2,7 +2,7 @@ import { badRequest } from "../../../errors/social.error.js";
 import type { HandlerContext } from "../../../types/handlerContext.type.js";
 import { filterAuthorsVisibleToViewer } from "../../follows/services/profileAccess.service.js";
 import type { CommentRow } from "../repositories/comment.repository.js";
-import { commentRankingRepository, rankingCandidateLimit } from "../repositories/commentRanking.repository.js";
+import { commentRankingRepository, rankingCandidateLimit, rankSnapshotLifetimeMs, rankSnapshotReuseMs } from "../repositories/commentRanking.repository.js";
 import { chooseConversationChain, maximumPreviewChainLength } from "./commentChain.service.js";
 import { decodeRankedCursor, encodeRankedCursor, rankConversationRoots, type RankedPageCursor } from "./commentRanking.service.js";
 
@@ -24,6 +24,8 @@ async function keepVisibleAuthors(context: HandlerContext, viewerId: string | un
 async function createRankedSnapshot(context: HandlerContext, viewerId: string | undefined, post: ConversationPost) {
   const db = context.database.client;
   const now = context.clock.now();
+  const reusable = await commentRankingRepository.findReusableSnapshot(db, post.id, viewerId, new Date(now.getTime() - rankSnapshotReuseMs));
+  if (reusable !== null) return { snapshot: reusable, hasTail: (await commentRankingRepository.countRootsUpTo(db, post.id, reusable.createdAt)) > reusable.commentIds.length };
   const [candidates, authorRepliedRootIds] = await Promise.all([
     commentRankingRepository.rankingCandidates(db, post.id, post.authorId),
     commentRankingRepository.rootsWithAuthorReplies(db, post.id, post.authorId),
@@ -43,8 +45,10 @@ export async function loadRankedRootsPage(context: HandlerContext, viewerId: str
     cursor = { snapshotId: snapshot.id, offset: 0, tailAfterId: null, hasTail: created.hasTail };
   } else {
     const decoded = decodeRankedCursor(rawCursor);
-    snapshot = decoded === null ? null : await commentRankingRepository.findSnapshot(db, decoded.snapshotId);
-    if (decoded === null || snapshot === null || snapshot.postId !== post.id || snapshot.viewerId !== (viewerId ?? null)) throw badRequest("CURSOR_EXPIRED", "This list changed. Refresh to see the latest comments.");
+    const found = decoded === null ? null : await commentRankingRepository.findSnapshot(db, decoded.snapshotId);
+    const expired = found === null || found.createdAt.getTime() <= context.clock.now().getTime() - rankSnapshotLifetimeMs;
+    if (decoded === null || expired || found.postId !== post.id || found.viewerId !== (viewerId ?? null)) throw badRequest("CURSOR_EXPIRED", "This list changed. Refresh to see the latest comments.");
+    snapshot = found;
     cursor = decoded;
   }
   const ids = snapshot.commentIds;

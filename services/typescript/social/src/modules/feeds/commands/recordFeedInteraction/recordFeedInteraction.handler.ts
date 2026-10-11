@@ -65,7 +65,8 @@ async function applyInteraction(db: Db, command: RecordFeedInteractionCommand, p
       return null;
     }
     case "dwell":
-      return (command.dwellMs ?? 0) > 0 && (await hasRecentView(db, post.id, viewerId, now)) ? interactionEventFor(command, post, now) : null;
+      if ((command.dwellMs ?? 0) <= 0 || !(await hasRecentView(db, post.id, viewerId, now))) return null;
+      return (await claimViewerCooldown(db, post.id, viewerId, "lastDwellAt", now)) ? interactionEventFor(command, post, now) : null;
     case "watch": {
       if (!post.media.some((media) => media.type === "video")) return null;
       if (!(await claimViewerCooldown(db, post.id, viewerId, "lastWatchedAt", now))) return null;

@@ -8,7 +8,7 @@ import type { PostView } from "../../posts/models/post.model.js";
 import { buildPostViews } from "../../posts/services/postView.service.js";
 import { isPostWithheldFromViewer, resolveCurrentViewerContentPolicy } from "../../posts/services/sensitiveContent.service.js";
 import { feedRepository } from "../repositories/feed.repository.js";
-import { feedRankSnapshotLifetimeMs, feedRankSnapshotRepository } from "../repositories/feedRankSnapshot.repository.js";
+import { feedRankSnapshotLifetimeMs, feedRankSnapshotRepository, guestFeedRankSnapshotReuseMs } from "../repositories/feedRankSnapshot.repository.js";
 import { attachRankingDisclosure, rankFeedCandidates } from "./rankedFeed.service.js";
 
 export const clipsSnapshotSurface = "clips_for_you";
@@ -63,9 +63,12 @@ function readDisclosures(stored: Prisma.JsonValue, ids: readonly string[]): Map<
 async function openSnapshot(context: HandlerContext, request: ClipsForYouRequest) {
   const db = context.database.client;
   if (request.cursor === undefined) {
+    const now = context.clock.now();
+    const shared = request.viewerId === undefined ? await feedRankSnapshotRepository.findRecentGuestSnapshot(db, clipsSnapshotSurface, new Date(now.getTime() - guestFeedRankSnapshotReuseMs)) : null;
+    if (shared !== null) return { snapshot: shared, offset: 0 };
     const { ordered } = await rankFeedCandidates(context, { viewerId: request.viewerId, personalized: request.personalized, kinds: ["clip"] }, { ranker: context.clipRanker ?? context.ranker, withWatchTotals: true });
     const kept = ordered.slice(0, maximumSnapshotItems);
-    const snapshot = await feedRankSnapshotRepository.create(db, { viewerId: request.viewerId, surface: clipsSnapshotSurface, itemIds: kept.map((candidate) => candidate.postId), disclosures: toStoredDisclosures(kept), createdAt: context.clock.now() });
+    const snapshot = await feedRankSnapshotRepository.create(db, { viewerId: request.viewerId, surface: clipsSnapshotSurface, itemIds: kept.map((candidate) => candidate.postId), disclosures: toStoredDisclosures(kept), createdAt: now });
     return { snapshot, offset: 0 };
   }
   const decoded = decodeSnapshotCursor(request.cursor);

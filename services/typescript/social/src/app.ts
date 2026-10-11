@@ -51,6 +51,7 @@ import type { HandlerContext } from "./types/handlerContext.type.js";
 import { errorToResponse, json } from "./utils/http.util.js";
 import { createIdentifierHasher, deriveIdentifierHashSecret, type IdentifierHasher } from "./utils/identifierHashing.util.js";
 import { createRouteFactory } from "./utils/route.util.js";
+import { dispatchWithRoute, withRequestMetrics } from "./telemetry/requestMetrics.js";
 
 const maximumRequestBodyBytes = 1024 * 1024;
 
@@ -88,7 +89,7 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
   registerRoutes(router, createRouteFactory(createIdempotencyGuard(createPrismaIdempotencyStore(database.client))), context, database, internalToken);
   const dispatch: HttpMiddleware = async (requestContext) => {
     try {
-      return (await router.dispatch(requestContext.request, { signal: requestContext.signal })).response;
+      return (await dispatchWithRoute(router, requestContext.request, requestContext.signal)).response;
     } catch (error) {
       logger.error("unhandled error", { path: requestContext.request.path, error: error instanceof Error ? error.message : String(error) });
       return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
@@ -97,7 +98,7 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
   const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
   const server = createHttpServer({
     adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: true }),
-    handler: (request: HttpRequestContext) => pipeline.execute(request, createResponseContext()),
+    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
   });
   const stoppers: (() => void)[] = [];
   return {

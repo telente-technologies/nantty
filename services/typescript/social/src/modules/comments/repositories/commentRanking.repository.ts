@@ -5,6 +5,7 @@ import type { CommentRow } from "./comment.repository.js";
 export const rankingCandidateLimit = 1000;
 export const previewDescendantsPerRoot = 150;
 export const rankSnapshotLifetimeMs = 6 * 3_600_000;
+export const rankSnapshotReuseMs = 60_000;
 
 export const commentRankingRepository = {
   rankingCandidates: async (db: Db, postId: string, postAuthorId: string): Promise<CommentRow[]> => {
@@ -38,6 +39,12 @@ export const commentRankingRepository = {
   },
 
   findSnapshot: (db: Db, id: string) => db.commentRankSnapshot.findUnique({ where: { id } }),
+
+  findReusableSnapshot: (db: Db, postId: string, viewerId: string | undefined, createdSince: Date) =>
+    db.commentRankSnapshot.findFirst({ where: { postId, viewerId: viewerId ?? null, createdAt: { gt: createdSince } }, orderBy: { createdAt: "desc" } }),
+
+  countRootsUpTo: (db: Db, postId: string, createdUpTo: Date): Promise<number> =>
+    db.comment.count({ where: { postId, parentCommentId: null, createdAt: { lte: createdUpTo }, ...shownToViewers } }),
 
   descendantsForRoots: async (db: Db, rootIds: readonly string[], maximumDepth: number): Promise<CommentRow[]> =>
     (await Promise.all(rootIds.map((rootCommentId) =>
