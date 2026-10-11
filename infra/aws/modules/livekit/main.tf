@@ -45,6 +45,10 @@ resource "aws_secretsmanager_secret_version" "credentials" {
         enabled: false
       room:
         auto_create: false
+      webhook:
+        api_key: zudomart
+        urls:
+          - ${var.webhook_url}
       logging:
         json: true
     YAML

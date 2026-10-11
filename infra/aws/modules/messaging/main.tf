@@ -22,6 +22,16 @@ resource "aws_security_group" "broker" {
     protocol        = "tcp"
     security_groups = [var.tasks_security_group_id]
   }
+  dynamic "ingress" {
+    for_each = var.payments_security_group_id == null ? [] : [var.payments_security_group_id]
+    content {
+      description     = "AMQPS from go-money (payments)"
+      from_port       = 5671
+      to_port         = 5671
+      protocol        = "tcp"
+      security_groups = [ingress.value]
+    }
+  }
   ingress {
     description     = "Management API over HTTPS from ECS tasks (topology import on deploy)"
     from_port       = 443

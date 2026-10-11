@@ -19,6 +19,10 @@ variable "host" {
   description = "Signaling host name, for example livekit.staging.zudomart.com."
   type        = string
 }
+variable "webhook_url" {
+  description = "Signed room events (room_finished, participant_left) go here; the gateway routes it to go-live."
+  type        = string
+}
 variable "secrets_kms_key_arn" { type = string }
 variable "logs_kms_key_arn" { type = string }
 variable "valkey_endpoint" { type = string }

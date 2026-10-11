@@ -1,55 +1,9 @@
-resource "aws_wafv2_ip_set" "paystack" {
-  name               = "${local.name}-paystack-webhook-ips"
-  scope              = "REGIONAL"
-  ip_address_version = "IPV4"
-  addresses          = [for ip in var.paystack_webhook_ips : "${ip}/32"]
-}
-
 resource "aws_wafv2_web_acl" "this" {
   name  = local.name
   scope = "REGIONAL"
 
   default_action {
     allow {}
-  }
-
-  rule {
-    name     = "paystack-webhook-source-ips"
-    priority = 0
-    action {
-      block {}
-    }
-    statement {
-      and_statement {
-        statement {
-          byte_match_statement {
-            search_string         = "/webhooks/paystack"
-            positional_constraint = "STARTS_WITH"
-            field_to_match {
-              uri_path {}
-            }
-            text_transformation {
-              priority = 0
-              type     = "LOWERCASE"
-            }
-          }
-        }
-        statement {
-          not_statement {
-            statement {
-              ip_set_reference_statement {
-                arn = aws_wafv2_ip_set.paystack.arn
-              }
-            }
-          }
-        }
-      }
-    }
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "paystack-webhook-source-ips"
-      sampled_requests_enabled   = true
-    }
   }
 
   rule {
@@ -272,7 +226,7 @@ resource "aws_wafv2_web_acl_logging_configuration" "this" {
     }
   }
   dynamic "redacted_fields" {
-    for_each = toset(["x-paystack-signature", "verif-hash", "cookie", "x-step-up-token"])
+    for_each = toset(["verif-hash", "cookie", "x-step-up-token"])
     content {
       single_header {
         name = redacted_fields.value

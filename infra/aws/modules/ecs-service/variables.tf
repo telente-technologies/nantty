@@ -15,7 +15,15 @@ variable "extra_ports" {
   type    = list(number)
   default = []
 }
-variable "health_path" { type = string }
+variable "health_path" {
+  description = "Target group health check path; services pass their readiness endpoint."
+  type        = string
+}
+variable "metrics_scrape_path" {
+  description = "Prometheus text endpoint the collector sidecar scrapes on the service port (loopback), null when the service has none."
+  type        = string
+  default     = null
+}
 variable "environment_variables" {
   type    = map(string)
   default = {}

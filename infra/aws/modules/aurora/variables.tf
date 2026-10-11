@@ -46,3 +46,8 @@ variable "service_database_roles" {
   description = "Runtime roles (svc_<service>) plus the migrator role; created in Postgres by the bootstrap job."
   type        = list(string)
 }
+variable "payments_security_group_id" {
+  description = "go-money's egress-restricted task security group, admitted by its own dedicated rule; null when unused."
+  type        = string
+  default     = null
+}

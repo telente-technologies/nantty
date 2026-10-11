@@ -25,3 +25,8 @@ variable "service_users" {
   description = "One RabbitMQ user per service, created through the management API at deploy time."
   type        = list(string)
 }
+variable "payments_security_group_id" {
+  description = "go-money's egress-restricted task security group, admitted by its own dedicated rule; null when unused."
+  type        = string
+  default     = null
+}

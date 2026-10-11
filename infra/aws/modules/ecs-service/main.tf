@@ -8,12 +8,54 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 locals {
-  family       = "zudomart-${var.environment}-${var.name}"
-  has_lb       = length(var.listener_rules) > 0
-  rules        = { for rule in var.listener_rules : "${rule.listener_arn}:${rule.priority}" => rule }
-  app_env      = merge(var.environment_variables, { OTEL_SERVICE_NAME = var.name, OTEL_EXPORTER_OTLP_ENDPOINT = "http://127.0.0.1:4318", OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=${var.environment}", ENVIRONMENT = var.environment })
+  family  = "zudomart-${var.environment}-${var.name}"
+  has_lb  = length(var.listener_rules) > 0
+  rules   = { for rule in var.listener_rules : "${rule.listener_arn}:${rule.priority}" => rule }
+  app_env = merge({ OTEL_EXPORTER_OTLP_ENDPOINT = "http://127.0.0.1:4318" }, var.environment_variables, { OTEL_SERVICE_NAME = var.name, OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=${var.environment}", ENVIRONMENT = var.environment })
+  scrape  = var.otel_sidecar && var.metrics_scrape_path != null
+  collector_config = yamlencode({
+    receivers = merge(
+      { otlp = { protocols = { grpc = { endpoint = "127.0.0.1:4317" }, http = { endpoint = "127.0.0.1:4318" } } } },
+      local.scrape ? { prometheus = { config = { scrape_configs = [{
+        job_name        = var.name
+        scrape_interval = "60s"
+        scrape_timeout  = "5s"
+        metrics_path    = var.metrics_scrape_path
+        static_configs  = [{ targets = ["127.0.0.1:${var.port}"], labels = { service = var.name } }]
+      }] } } } : {},
+    )
+    processors = { batch = {} }
+    exporters = {
+      awsxray = { region = var.region }
+      awsemf = {
+        region                           = var.region
+        namespace                        = "Zudomart/${var.environment}"
+        log_group_name                   = "/zudomart/${var.environment}/${var.name}/metrics"
+        log_stream_name                  = "{TaskId}"
+        resource_to_telemetry_conversion = { enabled = true }
+        metric_declarations = [
+          { dimensions = [["service"]], metric_name_selectors = ["^go_goroutines$", "^auth_session_denylist_.*", "^realtime_socket_connected_total$", "^vm_memory_total_bytes$"] },
+          { dimensions = [["service", "status_class"], ["service"]], metric_name_selectors = ["^http_server_request_duration_seconds.*"] },
+          { dimensions = [["service.name", "http.response.status_code"], ["service.name"]], metric_name_selectors = ["^http\\.server\\.request\\.duration$"] },
+        ]
+      }
+    }
+    service = {
+      pipelines = merge(
+        { traces = { receivers = ["otlp"], processors = ["batch"], exporters = ["awsxray"] } },
+        { metrics = { receivers = local.scrape ? ["otlp", "prometheus"] : ["otlp"], processors = ["batch"], exporters = ["awsemf"] } },
+      )
+    }
+  })
   tg_pair      = var.blue_green ? ["blue", "green"] : ["blue"]
   port_mapping = [for port in concat([var.port], var.extra_ports) : { containerPort = port, hostPort = port, protocol = "tcp" }]
+}
+
+resource "aws_cloudwatch_log_group" "metrics" {
+  count             = var.otel_sidecar ? 1 : 0
+  name              = "/zudomart/${var.environment}/${var.name}/metrics"
+  retention_in_days = var.log_retention_days
+  kms_key_id        = var.logs_kms_key_arn
 }
 
 resource "aws_cloudwatch_log_group" "this" {
@@ -100,6 +142,14 @@ data "aws_iam_policy_document" "task" {
     }
   }
   dynamic "statement" {
+    for_each = var.otel_sidecar ? [1] : []
+    content {
+      sid       = "EmbeddedMetricLogs"
+      actions   = ["logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams", "logs:DescribeLogGroups"]
+      resources = [aws_cloudwatch_log_group.metrics[0].arn, "${aws_cloudwatch_log_group.metrics[0].arn}:*"]
+    }
+  }
+  dynamic "statement" {
     for_each = var.enable_execute_command ? [1] : []
     content {
       sid       = "EcsExec"
@@ -174,7 +224,7 @@ resource "aws_ecs_task_definition" "this" {
       readonlyRootFilesystem = false
       cpu                    = 0
       portMappings           = [{ containerPort = 4318, hostPort = 4318, protocol = "tcp" }]
-      command                = ["--config=/etc/ecs/ecs-default-config.yaml"]
+      environment            = [{ name = "AOT_CONFIG_CONTENT", value = local.collector_config }]
       logConfiguration = {
         logDriver = "awslogs"
         options   = { "awslogs-group" = aws_cloudwatch_log_group.this.name, "awslogs-region" = var.region, "awslogs-stream-prefix" = "otel" }

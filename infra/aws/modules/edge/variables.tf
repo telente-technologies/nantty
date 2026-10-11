@@ -9,10 +9,6 @@ variable "deletion_protection" {
   type    = bool
   default = true
 }
-variable "paystack_webhook_ips" {
-  type    = list(string)
-  default = ["52.31.139.75", "52.49.173.169", "52.214.14.220"]
-}
 variable "auth_rate_limit_per_five_minutes" {
   type    = number
   default = 300
@@ -32,3 +28,8 @@ variable "log_retention_days" {
 variable "private_subnet_ids" { type = list(string) }
 variable "tasks_security_group_id" { type = string }
 variable "internal_service_names" { type = list(string) }
+variable "payments_security_group_id" {
+  description = "go-money's egress-restricted task security group, admitted by its own dedicated rule; null when unused."
+  type        = string
+  default     = null
+}

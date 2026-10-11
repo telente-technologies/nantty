@@ -65,8 +65,15 @@ resource "aws_security_group" "tasks" {
     protocol    = "tcp"
     self        = true
   }
+  ingress {
+    description     = "go-money (payments) to go-identity account directory gRPC"
+    from_port       = 9101
+    to_port         = 9101
+    protocol        = "tcp"
+    security_groups = [aws_security_group.payments.id]
+  }
   egress {
-    description = "Outbound HTTPS to AWS endpoints, Paystack and push providers"
+    description = "Outbound HTTPS to AWS endpoints, Flutterwave and push providers"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -116,20 +123,20 @@ module "dns" {
 }
 
 module "edge" {
-  source                  = "../edge"
-  environment             = var.environment
-  vpc_id                  = module.network.vpc_id
-  vpc_cidr                = var.vpc_cidr
-  public_subnet_ids       = module.network.public_subnet_ids
-  private_subnet_ids      = module.network.private_subnet_ids
-  certificate_arn         = module.dns.api_certificate_arn
-  logs_bucket_id          = module.storage.logs_bucket.id
-  logs_kms_key_arn        = module.kms.key_arns["logs"]
-  deletion_protection     = var.deletion_protection
-  paystack_webhook_ips    = var.paystack_webhook_ips
-  tasks_security_group_id = aws_security_group.tasks.id
-  internal_service_names  = local.internal_names
-  log_retention_days      = var.log_retention_days
+  source                     = "../edge"
+  environment                = var.environment
+  vpc_id                     = module.network.vpc_id
+  vpc_cidr                   = var.vpc_cidr
+  public_subnet_ids          = module.network.public_subnet_ids
+  private_subnet_ids         = module.network.private_subnet_ids
+  certificate_arn            = module.dns.api_certificate_arn
+  logs_bucket_id             = module.storage.logs_bucket.id
+  logs_kms_key_arn           = module.kms.key_arns["logs"]
+  deletion_protection        = var.deletion_protection
+  tasks_security_group_id    = aws_security_group.tasks.id
+  internal_service_names     = local.internal_names
+  payments_security_group_id = aws_security_group.payments.id
+  log_retention_days         = var.log_retention_days
 }
 
 module "ecr" {
@@ -149,49 +156,52 @@ module "cluster" {
 }
 
 module "aurora" {
-  source                  = "../aurora"
-  environment             = var.environment
-  vpc_id                  = module.network.vpc_id
-  data_subnet_ids         = module.network.data_subnet_ids
-  tasks_security_group_id = aws_security_group.tasks.id
-  data_kms_key_arn        = module.kms.key_arns["data"]
-  secrets_kms_key_arn     = module.kms.key_arns["secrets"]
-  backup_kms_key_arn      = module.kms.key_arns["backup"]
-  dr_backup_kms_key_arn   = var.enable_dr ? module.kms_dr[0].key_arns["backup"] : null
-  engine_version          = var.aurora.engine_version
-  instance_class          = var.aurora.instance_class
-  reader_count            = var.aurora.reader_count
-  backup_retention_days   = var.aurora.backup_retention_days
-  deletion_protection     = var.deletion_protection
-  enable_dr               = var.enable_dr
-  service_database_roles  = concat(values(local.database_roles), ["svc_migrator"])
-  providers               = { aws = aws, aws.dr = aws.dr }
+  source                     = "../aurora"
+  environment                = var.environment
+  vpc_id                     = module.network.vpc_id
+  data_subnet_ids            = module.network.data_subnet_ids
+  tasks_security_group_id    = aws_security_group.tasks.id
+  data_kms_key_arn           = module.kms.key_arns["data"]
+  secrets_kms_key_arn        = module.kms.key_arns["secrets"]
+  backup_kms_key_arn         = module.kms.key_arns["backup"]
+  dr_backup_kms_key_arn      = var.enable_dr ? module.kms_dr[0].key_arns["backup"] : null
+  engine_version             = var.aurora.engine_version
+  instance_class             = var.aurora.instance_class
+  reader_count               = var.aurora.reader_count
+  backup_retention_days      = var.aurora.backup_retention_days
+  deletion_protection        = var.deletion_protection
+  enable_dr                  = var.enable_dr
+  service_database_roles     = concat(values(local.database_roles), ["svc_migrator"])
+  payments_security_group_id = aws_security_group.payments.id
+  providers                  = { aws = aws, aws.dr = aws.dr }
 }
 
 module "valkey" {
-  source                  = "../valkey"
-  environment             = var.environment
-  vpc_id                  = module.network.vpc_id
-  data_subnet_ids         = module.network.data_subnet_ids
-  tasks_security_group_id = aws_security_group.tasks.id
-  data_kms_key_arn        = module.kms.key_arns["data"]
-  secrets_kms_key_arn     = module.kms.key_arns["secrets"]
-  logs_kms_key_arn        = module.kms.key_arns["logs"]
-  node_type               = var.valkey.node_type
-  node_count              = var.valkey.node_count
+  source                     = "../valkey"
+  environment                = var.environment
+  vpc_id                     = module.network.vpc_id
+  data_subnet_ids            = module.network.data_subnet_ids
+  client_security_group_ids  = [aws_security_group.tasks.id]
+  payments_security_group_id = aws_security_group.payments.id
+  data_kms_key_arn           = module.kms.key_arns["data"]
+  secrets_kms_key_arn        = module.kms.key_arns["secrets"]
+  logs_kms_key_arn           = module.kms.key_arns["logs"]
+  node_type                  = var.valkey.node_type
+  node_count                 = var.valkey.node_count
 }
 
 module "messaging" {
-  source                  = "../messaging"
-  environment             = var.environment
-  vpc_id                  = module.network.vpc_id
-  private_subnet_ids      = module.network.private_subnet_ids
-  tasks_security_group_id = aws_security_group.tasks.id
-  data_kms_key_arn        = module.kms.key_arns["data"]
-  secrets_kms_key_arn     = module.kms.key_arns["secrets"]
-  deployment_mode         = var.mq.deployment_mode
-  instance_type           = var.mq.instance_type
-  service_users           = local.rabbit_users
+  source                     = "../messaging"
+  environment                = var.environment
+  vpc_id                     = module.network.vpc_id
+  private_subnet_ids         = module.network.private_subnet_ids
+  tasks_security_group_id    = aws_security_group.tasks.id
+  data_kms_key_arn           = module.kms.key_arns["data"]
+  secrets_kms_key_arn        = module.kms.key_arns["secrets"]
+  deployment_mode            = var.mq.deployment_mode
+  instance_type              = var.mq.instance_type
+  service_users              = local.rabbit_users
+  payments_security_group_id = aws_security_group.payments.id
 }
 
 module "ses" {
@@ -216,6 +226,7 @@ module "livekit" {
   listener_arn          = module.edge.https_listener_arn
   alb_security_group_id = module.edge.alb_security_group_id
   host                  = local.livekit_domain
+  webhook_url           = "https://${local.api_domain}/api/v1/live/webhooks/livekit"
   secrets_kms_key_arn   = module.kms.key_arns["secrets"]
   logs_kms_key_arn      = module.kms.key_arns["logs"]
   valkey_endpoint       = module.valkey.primary_endpoint

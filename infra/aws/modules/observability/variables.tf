@@ -34,3 +34,8 @@ variable "mq_backlog_threshold" {
   default = 10000
 }
 variable "ses_feedback_dlq_name" { type = string }
+variable "service_log_group_names" {
+  description = "Application log group per service, for the worker-restart metric filter."
+  type        = map(string)
+  default     = {}
+}

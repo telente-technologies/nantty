@@ -98,12 +98,32 @@ resource "aws_security_group" "internal_alb" {
     protocol        = "tcp"
     security_groups = [var.tasks_security_group_id]
   }
+  dynamic "ingress" {
+    for_each = var.payments_security_group_id == null ? [] : [var.payments_security_group_id]
+    content {
+      description     = "HTTP from go-money (payments)"
+      from_port       = 80
+      to_port         = 80
+      protocol        = "tcp"
+      security_groups = [ingress.value]
+    }
+  }
   egress {
     description     = "To ECS tasks"
     from_port       = 0
     to_port         = 65535
     protocol        = "tcp"
     security_groups = [var.tasks_security_group_id]
+  }
+  dynamic "egress" {
+    for_each = var.payments_security_group_id == null ? [] : [var.payments_security_group_id]
+    content {
+      description     = "To go-money (payments) HTTP"
+      from_port       = 8080
+      to_port         = 8080
+      protocol        = "tcp"
+      security_groups = [egress.value]
+    }
   }
   lifecycle { create_before_destroy = true }
 }

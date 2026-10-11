@@ -2,7 +2,7 @@ locals {
   media_bucket_arn = module.storage.media_bucket.arn
   kyc_bucket_arn   = module.storage.kyc_bucket.arn
   s3_object_access = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:AbortMultipartUpload"]
-  media_key_users  = ["media", "go-live", "intelligence", "go-trust"]
+  media_key_users  = ["media", "go-live", "intelligence", "go-trust", "go-ads"]
   kyc_key_users    = ["go-identity", "go-trust"]
   task_role_arn    = { for name in distinct(concat(local.media_key_users, local.kyc_key_users)) : name => "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/zudomart-${var.environment}-${name}-task" }
   media_key_access = { sid = "MediaKey", actions = ["kms:Decrypt", "kms:GenerateDataKey"], resources = [module.storage.media_kms_key_arn] }
@@ -16,6 +16,8 @@ locals {
     media = [
       { sid = "MediaObjects", actions = local.s3_object_access, resources = ["${local.media_bucket_arn}/*"] },
       { sid = "MediaList", actions = ["s3:ListBucket"], resources = [local.media_bucket_arn] },
+      { sid = "MediaServiceObjects", actions = concat(local.s3_object_access, ["s3:ListMultipartUploadParts"]), resources = [for bucket in values(module.storage.media_service_buckets) : "${bucket.arn}/*"] },
+      { sid = "MediaServiceList", actions = ["s3:ListBucket", "s3:ListBucketMultipartUploads"], resources = [for bucket in values(module.storage.media_service_buckets) : bucket.arn] },
       local.media_key_access,
     ]
     go-live = [
@@ -32,6 +34,10 @@ locals {
       { sid = "LiveSafetyRekognition", actions = ["rekognition:DetectModerationLabels"], resources = ["*"] },
       { sid = "LiveSafetyTranscribe", actions = ["transcribe:StartTranscriptionJob", "transcribe:GetTranscriptionJob"], resources = ["arn:aws:transcribe:${var.region}:${data.aws_caller_identity.current.account_id}:transcription-job/live-safety-*"] },
     ]
+    go-ads = [
+      { sid = "AdsAssets", actions = local.s3_object_access, resources = ["${local.media_bucket_arn}/ads-media/*", "${local.media_bucket_arn}/ads-reports/*"] },
+      local.media_key_access,
+    ]
     go-trust = [
       { sid = "LiveSafetyFramePreviews", actions = ["s3:GetObject"], resources = ["${local.media_bucket_arn}/live-safety/frames/*"] },
       { sid = "LiveSafetyEvidenceWrite", actions = ["s3:PutObject", "s3:PutObjectTagging", "s3:PutObjectLegalHold"], resources = ["${local.kyc_bucket_arn}/trust-evidence/live/*"] },
@@ -45,8 +51,10 @@ locals {
     ]
   }
 
+  app_env = { dev = "staging", staging = "staging", prod = "production" }[var.environment]
+
   common_environment = {
-    APP_ENV                 = var.environment
+    APP_ENV                 = local.app_env
     LOG_LEVEL               = "info"
     AWS_REGION              = var.region
     EVENT_BUS               = "rabbitmq"
@@ -63,34 +71,52 @@ locals {
   }
 
   runtime_environment = {
-    go     = { HTTP_ADDRESS = ":8080" }
+    go     = { HTTP_ADDRESS = ":8080", OTEL_EXPORTER_OTLP_ENDPOINT = "http://127.0.0.1:4317" }
     node   = { HOST = "0.0.0.0", NODE_ENV = "production" }
     elixir = { PHX_SERVER = "true", PHX_HOST = local.api_domain, DNS_CLUSTER_QUERY = "realtime.${module.cluster.namespace_name}" }
-    python = { INTELLIGENCE_ENVIRONMENT = var.environment, INTELLIGENCE_HOST = "0.0.0.0", INTELLIGENCE_EVENT_STORAGE_URI = "s3://${module.storage.media_bucket.id}/intelligence" }
+    python = { OTEL_SEMCONV_STABILITY_OPT_IN = "http", INTELLIGENCE_ENVIRONMENT = local.app_env, INTELLIGENCE_HOST = "0.0.0.0", INTELLIGENCE_EVENT_STORAGE_URI = "s3://${module.storage.media_bucket.id}/intelligence" }
     gateway_only = merge(
       { CORS_ORIGINS = join(",", values(var.app_origins)), RATE_LIMIT_MAX_PER_MINUTE = "600", TRUSTED_PROXY_HOPS = "1" },
-      { for name, url in local.internal_url : "UPSTREAM_${upper(replace(replace(name, "go-", ""), "-", "_"))}_URL" => url if contains(["go-identity", "go-live", "go-money", "go-trust", "go-commerce", "social", "notifications", "media", "search", "support"], name) },
+      { for name, url in local.internal_url : "UPSTREAM_${upper(replace(replace(name, "go-", ""), "-", "_"))}_URL" => url if contains(["go-identity", "go-live", "go-money", "go-trust", "go-commerce", "go-ads", "social", "notifications", "media", "search", "support"], name) },
     )
   }
 
   service_specific_environment = {
     gateway       = merge(local.runtime_environment.gateway_only, { PORT = "8080", AUTH_JWKS_URL = "${local.internal_url["go-identity"]}/.well-known/jwks.json" })
     social        = { PORT = "8105" }
-    notifications = { PORT = "8104", SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Zudomart <noreply@${var.mail_domain}>", ZUDOMART_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
-    media         = { PORT = "8108" }
-    support       = { PORT = "8111" }
-    realtime      = { PORT = "4000" }
-    intelligence  = { INTELLIGENCE_PORT = "8090" }
-    go-identity   = { USERS_DOCUMENTS_BUCKET = module.storage.kyc_bucket.id }
+    notifications = { PORT = "8104", PUSH_PROVIDER = "expo", ZUDOMART_WEB_BASE_URL = try(var.app_origins["web"], "https://${var.app_domain}"), SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Zudomart <noreply@${var.mail_domain}>", ZUDOMART_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
+    media = merge({
+      PORT                     = "8108"
+      S3_REGION                = var.region
+      MEDIA_QUARANTINE_BUCKET  = module.storage.media_service_buckets["uploads"].id
+      MEDIA_PUBLIC_BUCKET      = module.storage.media_service_buckets["public"].id
+      MEDIA_PRIVATE_BUCKET     = module.storage.media_service_buckets["private"].id
+      MEDIA_PRIVATE_KMS_KEY_ID = module.storage.media_kms_key_arn
+      CDN_BASE_URL             = "https://${local.media_domain}"
+      }, var.media_signing_public_key_pem == null ? {} : {
+      CDN_PRIVATE_BASE_URL    = "https://${local.media_domain}"
+      CDN_SIGNING_KEY_PAIR_ID = module.storage.media_signing_public_key_id
+    })
+    support      = { PORT = "8111" }
+    realtime     = { PORT = "4000", ALLOWED_ORIGINS = join(",", values(var.app_origins)) }
+    intelligence = { INTELLIGENCE_PORT = "8090", INTELLIGENCE_S3_REGION = var.region, INTELLIGENCE_TRUSTED_PROXY_IPS = var.vpc_cidr }
+    go-identity = {
+      USERS_DOCUMENTS_BUCKET      = module.storage.kyc_bucket.id
+      AUTH_OTP_DELIVERY           = "event"
+      ADMIN_INVITATION_DELIVERY   = "none"
+      ADMIN_CONSOLE_URL           = try(var.app_origins["admin"], "https://admin.${var.app_domain}")
+      USERS_MEDIA_PUBLIC_BASE_URL = "https://${local.media_domain}"
+    }
     go-live = {
       LIVE_RECORDING_S3_BUCKET     = module.storage.media_bucket.id
+      LIVE_RECORDING_S3_REGION     = var.region
       LIVE_SAFETY_SAMPLER_ENABLED  = "true"
       LIVE_SAFETY_FRAMES_S3_BUCKET = module.storage.media_bucket.id
       LIVE_SAFETY_FRAMES_S3_REGION = var.region
       LIVE_SAFETY_FRAMES_QUEUE     = "jobs-live-frames"
       LIVE_SAFETY_AUDIO_QUEUE      = "jobs-live-audio"
     }
-    go-money = { MONEY_GRPC_ADDRESS = ":9103", PAYMENTS_PROVIDER = "paystack" }
+    go-money = { MONEY_GRPC_ADDRESS = ":9103", PAYMENTS_PROVIDER = "flutterwave" }
   }
 
   runtime_of = { for name, definition in local.services : name => (
@@ -107,10 +133,9 @@ locals {
   }
 
   valkey_url_names = {
-    go-commerce  = ["CATALOG_REDIS_URL", "INVENTORY_REDIS_URL", "ORDERS_REDIS_URL"]
-    go-live      = ["LIVE_REDIS_URL"]
-    go-ads       = ["ADS_REDIS_URL"]
-    intelligence = ["INTELLIGENCE_REDIS_URL"]
+    go-commerce = ["CATALOG_REDIS_URL", "INVENTORY_REDIS_URL", "ORDERS_REDIS_URL"]
+    go-live     = ["LIVE_REDIS_URL"]
+    go-ads      = ["ADS_REDIS_URL"]
   }
 
   database_schema_environment = {
@@ -130,6 +155,8 @@ locals {
       { for key in lookup(local.valkey_url_names, name, []) : key => module.valkey.url_secret_arn },
       definition.rabbit ? { RABBITMQ_URL = "${module.messaging.service_user_secret_arns[name]}:url::" } : {},
       definition.valkey ? { VALKEY_URL = "${module.valkey.url_secret_arn}" } : {},
+      definition.valkey && local.runtime_of[name] == "go" ? { AUTH_SESSION_DENYLIST_URL = module.valkey.url_secret_arn } : {},
+      name == "intelligence" ? { INTELLIGENCE_REDIS_URL = module.valkey_intelligence.url_secret_arn } : {},
       name == "go-live" ? { for key in ["LIVEKIT_URL", "LIVEKIT_API_KEY", "LIVEKIT_API_SECRET"] : key => "${module.livekit.credentials_secret_arn}:${key}::" } : {},
       name == "go-live" ? { LIVEKIT_PUBLIC_URL = "${module.livekit.credentials_secret_arn}:LIVEKIT_URL::" } : {},
     )
@@ -141,6 +168,7 @@ locals {
       definition.database ? module.aurora.service_role_secret_arns[local.database_roles[name]] : "",
       definition.rabbit ? module.messaging.service_user_secret_arns[name] : "",
       definition.valkey ? module.valkey.url_secret_arn : "",
+      name == "intelligence" ? module.valkey_intelligence.url_secret_arn : "",
       name == "go-live" ? module.livekit.credentials_secret_arn : "",
     ])
   }
@@ -157,14 +185,15 @@ module "service" {
   cluster_name            = module.cluster.cluster_name
   vpc_id                  = module.network.vpc_id
   subnet_ids              = module.network.private_subnet_ids
-  security_group_ids      = [aws_security_group.tasks.id]
+  security_group_ids      = each.key == "go-money" ? [aws_security_group.payments.id] : each.key == "intelligence" ? [aws_security_group.tasks.id, aws_security_group.intelligence.id] : [aws_security_group.tasks.id]
   image                   = module.ecr.repository_urls[each.key]
   image_tag               = var.image_tag
   cpu                     = each.value.cpu
   memory                  = each.value.memory
   port                    = each.value.port
   extra_ports             = each.value.extra
-  health_path             = each.value.health
+  health_path             = each.value.ready
+  metrics_scrape_path     = contains(["go", "elixir"], local.runtime_of[each.key]) ? "/metrics" : null
   container_health_check  = each.value.health_command
   environment_variables   = merge(local.common_environment, local.runtime_environment[local.runtime_of[each.key]], lookup(local.service_specific_environment, each.key, {}), lookup(local.internal_wiring_environment, each.key, {}), lookup(local.database_schema_environment, each.key, {}))
   secrets                 = local.service_secrets[each.key]
@@ -202,6 +231,7 @@ module "observability" {
   valkey_replication_group_id = module.valkey.replication_group_id
   mq_broker_name              = module.messaging.broker_name
   ses_feedback_dlq_name       = module.ses.feedback_dead_letter_queue_name
+  service_log_group_names     = { for name in local.service_names : name => module.service[name].log_group_name if local.runtime_of[name] == "go" }
   target_group_arn_suffixes = {
     for name, definition in local.services : name => {
       load_balancer_suffix = length(definition.public_rules) > 0 ? module.edge.alb_arn_suffix : module.edge.internal_alb_arn_suffix

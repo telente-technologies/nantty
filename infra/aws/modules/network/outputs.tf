@@ -5,3 +5,5 @@ output "private_subnet_ids" { value = aws_subnet.private[*].id }
 output "data_subnet_ids" { value = aws_subnet.data[*].id }
 output "nat_public_ips" { value = aws_eip.nat[*].public_ip }
 output "private_route_table_ids" { value = aws_route_table.private[*].id }
+output "s3_prefix_list_id" { value = aws_vpc_endpoint.gateway["s3"].prefix_list_id }
+output "endpoints_security_group_id" { value = aws_security_group.endpoints.id }
