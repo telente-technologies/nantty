@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ClipboardEvent, type DragEvent } from "react";
 
 import { QuotedPostCard } from "@/components/feed/quotedPostCard";
-import { useQuotedPostPreview } from "@/components/feed/quotedPostPreview.hook";
+import { QUOTE_UNAVAILABLE_MESSAGE, useQuotedPostPreview } from "@/components/feed/quotedPostPreview.hook";
 import { MentionAutocompleteInput } from "@/components/mentions/mentionAutocompleteInput";
 import mentionStyles from "@/components/mentions/mentions.module.css";
 import { useSession } from "@/components/providers/sessionProvider";
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ImageIcon } from "@/components/ui/icons";
 import { showToast } from "@/components/ui/toast";
 import { useIsOnline } from "@/components/ui/onlineStatus.hook";
-import { createIdempotencyKey, readErrorMessageForDisplay } from "@/services/clientApi.service";
+import { createIdempotencyKey, readErrorMessageForDisplay, WebappRequestError } from "@/services/clientApi.service";
 import { composerService } from "@/services/composer.service";
 import { contentPreferencesService } from "@/services/contentPreferences.service";
 import { maximumMentionsPerText } from "@/types/mentions.type";
@@ -31,7 +31,7 @@ import styles from "./composer.module.css";
 const browserStorage = () => (typeof window === "undefined" ? undefined : window.localStorage);
 const acceptedMediaTypes = [...ALLOWED_IMAGE_MIME_TYPES, ...ALLOWED_VIDEO_MIME_TYPES].join(",");
 
-export function PostComposer() {
+export function PostComposer({ quotePostId = null }: { readonly quotePostId?: string | null } = {}) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { viewer } = useSession();
@@ -47,7 +47,7 @@ export function PostComposer() {
   const publishKey = useRef<string | null>(null);
   const publishInFlight = useRef(false);
   const uploads = useComposerMediaUploads("post");
-  const quote = useQuotedPostPreview(draft.text);
+  const quote = useQuotedPostPreview(draft.text, quotePostId);
   const creatorStatus = useQuery({ queryKey: ["creator", "status", viewerId], queryFn: composerService.fetchMyCreatorStatus, enabled: viewerId !== "", retry: false });
   const preferences = useQuery({ queryKey: ["contentPreferences"], queryFn: contentPreferencesService.fetchContentPreferences, enabled: viewerId !== "", retry: false });
   const textLimit = viewer?.isPremium ? PREMIUM_POST_TEXT_LIMIT : FREE_POST_TEXT_LIMIT;
@@ -55,17 +55,18 @@ export function PostComposer() {
 
   useEffect(() => {
     if (!viewerId || isDraftLoaded) return;
-    const saved = readSavedComposerDraft(browserStorage(), viewerId);
+    const saved = readSavedComposerDraft(browserStorage(), viewerId, quotePostId);
     if (saved) {
       setDraft(saved);
       setHasRestoredDraft(true);
+      if (!quotePostId && saved.quotedPostId) quote.attach(saved.quotedPostId);
     }
     setIsDraftLoaded(true);
-  }, [viewerId, isDraftLoaded]);
+  }, [viewerId, isDraftLoaded, quotePostId, quote]);
 
   useEffect(() => {
-    if (isDraftLoaded && viewerId) saveComposerDraft(browserStorage(), viewerId, draft);
-  }, [draft, isDraftLoaded, viewerId]);
+    if (isDraftLoaded && viewerId) saveComposerDraft(browserStorage(), viewerId, { ...draft, quotedPostId: quote.attachedPostId }, quotePostId);
+  }, [draft, isDraftLoaded, viewerId, quote.attachedPostId, quotePostId]);
 
   const updateDraft = (next: ComposerDraft) => {
     publishKey.current = null;
@@ -93,8 +94,11 @@ export function PostComposer() {
         ...(quote.quotedPostId === undefined ? {} : { quotedPostId: quote.quotedPostId }),
       }, publishKey.current);
     },
+    onError: (error) => {
+      if (error instanceof WebappRequestError && error.code === "QUOTED_POST_UNAVAILABLE") quote.refresh();
+    },
     onSuccess: (post) => {
-      clearSavedComposerDraft(browserStorage(), viewerId);
+      clearSavedComposerDraft(browserStorage(), viewerId, quotePostId);
       publishKey.current = null;
       queryClient.setQueryData(["post", post.id], post);
       void queryClient.invalidateQueries({ queryKey: ["feed"] });
@@ -106,7 +110,7 @@ export function PostComposer() {
   });
 
   const isBusy = publish.isPending;
-  const canPublish = canPublishComposerDraft(draft, uploads.items.length, textLimit) && !uploads.hasFailedUploads && isOnline;
+  const canPublish = canPublishComposerDraft(draft, uploads.items.length, textLimit) && !uploads.hasFailedUploads && isOnline && !quote.isUnavailable;
   const hasUnsavedWork = uploads.items.length > 0 || publish.isPending;
 
   useEffect(() => {
@@ -138,10 +142,11 @@ export function PostComposer() {
   };
 
   const discardDraft = () => {
-    clearSavedComposerDraft(browserStorage(), viewerId);
+    clearSavedComposerDraft(browserStorage(), viewerId, quotePostId);
     setDraft(EMPTY_COMPOSER_DRAFT);
     setHasRestoredDraft(false);
     quote.reset();
+    if (quotePostId) quote.attach(quotePostId);
   };
 
   return (
@@ -157,7 +162,7 @@ export function PostComposer() {
       onPaste={handlePaste}
     >
       <header className={styles.header}>
-        <h1 id="composer-title" className={styles.title}>Post</h1>
+        <h1 id="composer-title" className={styles.title}>{quote.preview ? "Quote" : "Post"}</h1>
         <Button type="submit" busy={isBusy} disabled={!canPublish}>{describePublishButton(isBusy, uploads.combinedUploadedFraction)}</Button>
       </header>
       {hasRestoredDraft ? (
@@ -190,6 +195,7 @@ export function PostComposer() {
         <span className={draft.text.length > textLimit ? styles.countOver : draft.text.length >= textLimit * 0.9 ? styles.countNear : styles.count}>{draft.text.length}/{textLimit}</span>
       </div>
       {quote.preview ? <QuotedPostCard quoted={quote.preview.quoted} loading={quote.preview.status === "loading"} unavailable={quote.preview.status === "unavailable"} onRemove={quote.remove} /> : null}
+      {quote.isUnavailable ? <p className={styles.fieldError} role="alert">{QUOTE_UNAVAILABLE_MESSAGE}</p> : null}
       <ComposerMediaGrid items={uploads.items} disabled={isBusy} onRemove={uploads.removeItem} onRetry={uploads.retryItem} onMove={uploads.moveItem} />
       {rejectedFiles.length > 0 ? (
         <div className={styles.fieldError} role="alert">

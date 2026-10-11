@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Badge, EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
-import { RetryButton } from "@/components/ui/controls";
 import { ordersService } from "@/services/orders.service";
 import { useQuery } from "@tanstack/react-query";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
@@ -12,7 +11,6 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { OrderStatus } from "@/types";
 
 import styles from "./orderListPanel.module.css";
-import { AppIcon } from "@/components/ui/appIcon";
 
 const statusTone: Record<OrderStatus, "neutral" | "brand" | "success" | "warning" | "error"> = {
   pending: "warning",
@@ -74,9 +72,9 @@ export function OrderListPanel({ activeOrderId }: { readonly activeOrderId: stri
       {ordersQuery.isLoading ? (
         <OrderListSkeleton />
       ) : ordersQuery.isError ? (
-        <ErrorState description="We couldn't load your orders." action={<RetryButton onRetry={() => ordersQuery.refetch()} />} />
+        <ErrorState description="We couldn't load your orders." error={ordersQuery.error} onRetry={() => void ordersQuery.refetch()} />
       ) : (ordersQuery.data ?? []).length === 0 ? (
-        <EmptyState icon={<AppIcon name="package24" size={28} />} title="No orders yet" description="When you place an order it will show up here with live escrow status." action={
+        <EmptyState kind="orders" title="No orders yet" description="When you place an order it will show up here with live escrow status." action={
             <Link href="/mart" className={styles.cta}>
               Start shopping
             </Link>

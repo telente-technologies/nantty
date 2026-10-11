@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { UnderlineTabs } from "@/components/ui/underlineTabs";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
 import type { Comment, Post } from "@/types";
-import type { ThreadReply, ThreadSort } from "@/types/postThread.type";
+import type { CommentSectionFilter, ThreadReply, ThreadSort } from "@/types/postThread.type";
 import { formatCompactCount } from "@/utils/formatDate.util";
 
 import { usePostConversation } from "./postThread.hook";
 import { ReplySettingsControl } from "./replySettingsControl";
 import { useSession } from "@/components/providers/sessionProvider";
+import { QuoteThreadItemRow } from "./quoteThreadItem";
 import { SponsoredThreadItem } from "./sponsoredThreadItem";
 import { ThreadComposer } from "./threadComposer";
 import { ThreadReplyBranch } from "./threadReply";
@@ -46,8 +46,14 @@ const formatFullTimestamp = (iso: string) => {
   return `${date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })} · ${date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
 };
 
+const filterOptions = (quoteCount: number) => [
+  { value: "all", label: "Replies" },
+  { value: "quotes", label: quoteCount > 0 ? `Quotes (${formatCompactCount(quoteCount)})` : "Quotes" },
+] as const;
+
 export function ConversationPanel({ post }: { readonly post: Post }) {
   const [sort, setSort] = useState<ThreadSort>("relevant");
+  const [filter, setFilter] = useState<CommentSectionFilter>("all");
   const [replyTarget, setReplyTarget] = useState<ThreadReply | null>(null);
   const [focusedReply, setFocusedReply] = useState<ThreadReply | null>(null);
   const [localReplies, setLocalReplies] = useState<Readonly<Record<string, readonly ThreadReply[]>>>({});
@@ -62,8 +68,8 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
   const panelId = `conversation-${post.id}`;
   const { query, rows, isRestartingFromTop } = usePostConversation(post.id, sort, () =>
     document.getElementById(`${panelId}-title`)?.parentElement?.scrollIntoView({ block: "start" }),
-  );
-  const localTopLevel = (localReplies["root"] ?? []).filter((local) => !rows.some((row) => row.kind === "reply" && row.reply.id === local.id));
+  filter);
+  const localTopLevel = filter === "quotes" ? [] : (localReplies["root"] ?? []).filter((local) => !rows.some((row) => row.kind === "reply" && row.reply.id === local.id));
   const sentinelRef = useInfiniteScrollSentinel({
     hasNextPage: query.hasNextPage && !query.isError && !isRestartingFromTop,
     isFetchingNextPage: query.isFetchingNextPage,
@@ -85,7 +91,8 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
         Replies
       </h2>
       {isOwnPost ? <ReplySettingsControl post={post} /> : null}
-      <UnderlineTabs options={SORT_OPTIONS} value={sort} onChange={setSort} label="Sort replies" panelId={panelId} />
+      <UnderlineTabs options={filterOptions(post.quotes ?? 0)} value={filter} onChange={setFilter} label="Show replies or quotes" panelId={panelId} />
+      {filter === "all" ? <UnderlineTabs options={SORT_OPTIONS} value={sort} onChange={setSort} label="Sort replies" panelId={panelId} /> : null}
       {focusedReply ? (
         <div className={panelStyles.focusBar}>
           <strong>Thread</strong>
@@ -102,13 +109,17 @@ export function ConversationPanel({ post }: { readonly post: Post }) {
         ) : query.isLoading ? (
           <ThreadSkeleton rows={4} />
         ) : query.isError && !isRestartingFromTop ? (
-          <ErrorState title="Replies didn't load" description="Check your connection, then try again." action={<RetryButton onRetry={() => query.refetch()} />} />
+          <ErrorState title="Replies didn't load" description="Check your connection, then try again." error={query.error} onRetry={() => void query.refetch()} />
         ) : rows.length === 0 && localTopLevel.length === 0 ? (
-          <EmptyState title="No replies yet" description="Be the first to reply to this post." />
+          filter === "quotes" ? <EmptyState title="No quotes yet" description="When someone quotes this post, it shows up here." /> : <EmptyState title="No replies yet" description="Be the first to reply to this post." />
         ) : (
           [...localTopLevel.map((reply) => ({ kind: "reply" as const, key: reply.id, reply })), ...rows].map((row) =>
             row.kind === "sponsored" ? (
               <SponsoredThreadItem key={row.key} ad={row.ad} postId={post.id} />
+            ) : row.kind === "quote" ? (
+              <div key={row.key} className={panelStyles.conversation}>
+                <QuoteThreadItemRow item={row.quote} />
+              </div>
             ) : (
               <div key={row.key} className={panelStyles.conversation}>
                 <ThreadReplyBranch reply={row.reply} postId={post.id} postAuthorId={post.author.id} hasParentAbove={false} showReplyingTo={false} onReply={setReplyTarget} onOpenThread={setFocusedReply} localRepliesFor={localRepliesFor} />

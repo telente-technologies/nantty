@@ -7,6 +7,7 @@ import { useState } from "react";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
 import type { SharedContentCard } from "@/types";
 import type { ChatLinkPreview } from "@zudomart/chat-crypto";
+import { ErrorIcon } from "@zudomart/web-kit";
 
 import styles from "./secureChatNotices.module.css";
 
@@ -60,7 +61,12 @@ export function EncryptedLinkPreviewCard({ preview }: { readonly preview: ChatLi
 }
 
 export function DecryptionNotice({ text }: { readonly text: string }) {
-  return <p className={styles.notice}>{text}</p>;
+  return (
+    <p className={styles.notice} role="status">
+      <ErrorIcon name="lockKey" size={14} weight="regular" />
+      <span>{text}</span>
+    </p>
+  );
 }
 
 const sharedKindLabels: Record<SharedContentCard["reference"]["kind"], string> = { post: "Post", clip: "Clip", story: "Story", product: "Product", store: "Store", profile: "Profile", live: "Live", order: "Order" };

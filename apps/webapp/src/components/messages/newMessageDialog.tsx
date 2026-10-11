@@ -4,7 +4,6 @@ import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { RetryButton } from "@/components/ui/controls";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
 import { Avatar } from "@/components/ui/media";
@@ -42,7 +41,7 @@ export function NewMessageDialog({ isOpen, onClose }: { readonly isOpen: boolean
       {people.isPending ? (
         <Spinner label="Searching" />
       ) : people.isError ? (
-        <ErrorState description="Couldn't load people." action={<RetryButton onRetry={() => people.refetch()} />} />
+        <ErrorState description="Couldn't load people." error={people.error} onRetry={() => void people.refetch()} />
       ) : people.data.length === 0 ? (
         <EmptyState title={debounced ? `No one matches “${debounced}”` : "No one to message yet"} description={debounced ? "Check the spelling or try their username." : "Follow people to start a conversation."} />
       ) : (

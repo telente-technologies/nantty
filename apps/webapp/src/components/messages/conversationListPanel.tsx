@@ -11,7 +11,7 @@ import menuStyles from "@/components/actions/contentActionsMenu.module.css";
 
 import { Avatar } from "@/components/ui/media";
 import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedback";
-import { RetryButton, InlineLink } from "@/components/ui/controls";
+import { InlineLink } from "@/components/ui/controls";
 import { messagesService } from "@/services/messages.service";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
@@ -186,12 +186,12 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
       {conversationsQuery.isLoading ? (
         <ConversationListSkeleton />
       ) : conversationsQuery.isError ? (
-        <ErrorState description="Couldn't load your messages." action={<RetryButton onRetry={() => conversationsQuery.refetch()} />} />
+        <ErrorState description="Couldn't load your messages." error={conversationsQuery.error} onRetry={() => void conversationsQuery.refetch()} />
       ) : search.trim().length >= 2 ? (
         searchResults.isLoading ? (
           <Spinner label="Searching" />
         ) : visible.length === 0 && people.length === 0 ? (
-          <EmptyState icon={<AppIcon name="chatCircle24" size={28} />} title="No matches" description="Nobody matched that search." />
+          <EmptyState kind="search" title="No matches" description="Nobody matched that search." />
         ) : (
           <>
             {visible.length > 0 ? (
@@ -224,7 +224,7 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
         folder !== "chats" ? (
           <EmptyState icon={<AppIcon name={inboxFolderIcons[folder]} size={28} />} title={folder === "requests" ? "No message requests." : "No chats flagged as spam."} />
         ) : (
-          <EmptyState icon={<AppIcon name="chatCircle24" size={28} />} title="No chats yet" description="Message a seller or a friend to get started." action={<InlineLink href="/explore">Find people</InlineLink>} />
+          <EmptyState kind="inbox" title="No chats yet" description="Message a seller or a friend to get started." action={<InlineLink href="/explore">Find people</InlineLink>} />
         )
       ) : (
         <ul className={styles.list}>

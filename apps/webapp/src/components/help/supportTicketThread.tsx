@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
-import { RetryButton } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { ChatMessagesSkeleton } from "@/components/ui/pageSkeletons";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
@@ -41,7 +40,7 @@ export function SupportTicketThread({ ticketId, initialScore }: { readonly ticke
 
   if (ticket.isLoading) return <ChatMessagesSkeleton label="Loading your request" />;
   if (ticket.isError || !ticket.data) {
-    return <ErrorState description={ticket.isError ? readErrorMessageForDisplay(ticket.error) : "We couldn't find this request."} action={<RetryButton onRetry={() => ticket.refetch()} />} />;
+    return <ErrorState description={ticket.isError ? readErrorMessageForDisplay(ticket.error) : "We couldn't find this request."} error={ticket.error} onRetry={() => void ticket.refetch()} />;
   }
   const details = ticket.data;
   const canReply = details.canReply !== false && details.status !== "closed";

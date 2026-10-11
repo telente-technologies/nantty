@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ShareToChatButton } from "@/components/actions/shareToChatButton";
-import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { useSaveToggle } from "@/components/saves/useSaveToggle.hook";
 import {
   BookmarkActionIcon,
@@ -17,14 +15,11 @@ import {
   ShareActionIcon,
   ViewsActionIcon,
 } from "@/components/ui/icons";
-import { showToast } from "@/components/ui/toast";
-import { readErrorMessageForDisplay } from "@/services/clientApi.service";
-import { postsService } from "@/services/posts.service";
 import type { Post, SaveTargetType } from "@/types";
 import { formatCompactCount } from "@/utils/formatDate.util";
-import { addRepostEverywhere } from "@/utils/postEngagementCache.util";
 
 import styles from "./postActions.module.css";
+import { ReshareDialog } from "./reshareDialog";
 import { ViewsExplainerDialog } from "./viewsExplainerDialog";
 import { describeCount } from "@/utils/countLabel.util";
 
@@ -56,89 +51,79 @@ interface PostActionsProps {
 
 export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCount, onToggleLike, likePopSignal = 0 }: PostActionsProps) {
   const { isSaved, toggleSaved } = useSaveToggle(saveTargetType, post.id, post.bookmarked);
-  const queryClient = useQueryClient();
-  const [hasReposted, setHasReposted] = useState(false);
+  const [isRepostSheetOpen, setIsRepostSheetOpen] = useState(false);
+  const hasReposted = post.reposted === true;
   const [viewsInfoOpen, setViewsInfoOpen] = useState(false);
   const [lastToggledTone, setLastToggledTone] = useState<ActionTone | null>(null);
   useEffect(() => {
     if (likePopSignal > 0) setLastToggledTone("like");
   }, [likePopSignal]);
-  const repostMutation = useMutation({
-    mutationFn: () => postsService.repostPost(post.id),
-    onMutate: () => {
-      setHasReposted(true);
-      showToast({ text: "Reposted" });
-    },
-    onSuccess: () => addRepostEverywhere(queryClient, post.id),
-    onError: (error) => {
-      setHasReposted(false);
-      showToast({ text: readErrorMessageForDisplay(error), tone: "error" });
-    },
-  });
   const savedCount = Math.max((post.saveCount ?? 0) + (isSaved === post.bookmarked ? 0 : isSaved ? 1 : -1), 0);
-  const repostCount = post.reposts + (repostMutation.isPending ? 1 : 0);
+  const repostCount = post.reposts;
 
   return (
     <div className={styles.row}>
-      <Link href={`/post/${post.id}#comments`} className={actionClassName("reply")} aria-label={`Reply, ${describeCount(post.comments, "reply", "replies")}`}>
-        <ActionContent icon={<ReplyActionIcon size={ICON_SIZE} />} count={post.comments} />
-      </Link>
-      <button
-        type="button"
-        className={actionClassName("repost", hasReposted, lastToggledTone === "repost")}
-        aria-pressed={hasReposted}
-        aria-label={`Repost, ${describeCount(repostCount, "repost", "reposts")}`}
-        onClick={() =>
-          requireAuthThen(() => {
-            if (hasReposted) return;
-            setLastToggledTone("repost");
-            repostMutation.mutate();
-          }, "Sign in to repost.")
-        }
-      >
-        <ActionContent icon={<RepostActionIcon size={ICON_SIZE} />} count={repostCount} />
-      </button>
-      <button
-        type="button"
-        className={actionClassName("like", isLiked, lastToggledTone === "like")}
-        aria-pressed={isLiked}
-        aria-label={`${isLiked ? "Unlike" : "Like"}, ${describeCount(likeCount, "like", "likes")}`}
-        onClick={() => {
-          setLastToggledTone("like");
-          onToggleLike();
-        }}
-      >
-        <ActionContent icon={isLiked ? <LikeFilledActionIcon size={ICON_SIZE} /> : <LikeActionIcon size={ICON_SIZE} />} count={likeCount} />
-      </button>
-      {isOwnPost ? (
-        <Link href={`/analytics/post/${post.id}`} className={actionClassName("reply")} aria-label={`View post analytics, ${describeCount(post.views, "view", "views")}`}>
-          <ActionContent icon={<ViewsActionIcon size={ICON_SIZE} />} count={post.views} />
+      <div className={styles.primaryActions}>
+        <Link href={`/post/${post.id}#comments`} className={actionClassName("reply")} aria-label={`Reply, ${describeCount(post.comments, "reply", "replies")}`}>
+          <ActionContent icon={<ReplyActionIcon size={ICON_SIZE} />} count={post.comments} />
         </Link>
-      ) : (
-        <button type="button" className={actionClassName("reply")} aria-haspopup="dialog" aria-label={`Views, ${describeCount(post.views, "view", "views")}. What are views`} onClick={() => setViewsInfoOpen(true)}>
-          <ActionContent icon={<ViewsActionIcon size={ICON_SIZE} />} count={post.views} />
+        <button
+          type="button"
+          className={actionClassName("repost", hasReposted, lastToggledTone === "repost")}
+          aria-haspopup="dialog"
+          aria-label={`${hasReposted ? "Reposted" : "Repost or quote"}, ${describeCount(repostCount, "repost", "reposts")}`}
+          onClick={() => {
+            setLastToggledTone("repost");
+            setIsRepostSheetOpen(true);
+          }}
+        >
+          <ActionContent icon={<RepostActionIcon size={ICON_SIZE} />} count={repostCount} />
         </button>
-      )}
-      <button
-        type="button"
-        className={actionClassName("bookmark", isSaved, lastToggledTone === "bookmark")}
-        aria-pressed={isSaved}
-        aria-label={`${isSaved ? `Remove ${saveTargetType} from saved` : `Save ${saveTargetType}`}, ${savedCount} saves`}
-        onClick={() => {
-          setLastToggledTone("bookmark");
-          toggleSaved();
-        }}
-      >
-        <ActionContent icon={isSaved ? <BookmarkFilledActionIcon size={ICON_SIZE} /> : <BookmarkActionIcon size={ICON_SIZE} />} count={savedCount} />
-      </button>
-      <ShareToChatButton
-        kind={saveTargetType === "video" ? "video" : "post"}
-        referenceId={post.id}
-        className={actionClassName("reply")}
-        icon={<span className={styles.halo}><ShareActionIcon size={ICON_SIZE} /></span>}
-        iconOnly
-      />
+        <button
+          type="button"
+          className={actionClassName("like", isLiked, lastToggledTone === "like")}
+          aria-pressed={isLiked}
+          aria-label={`${isLiked ? "Unlike" : "Like"}, ${describeCount(likeCount, "like", "likes")}`}
+          onClick={() => {
+            setLastToggledTone("like");
+            onToggleLike();
+          }}
+        >
+          <ActionContent icon={isLiked ? <LikeFilledActionIcon size={ICON_SIZE} /> : <LikeActionIcon size={ICON_SIZE} />} count={likeCount} />
+        </button>
+        {isOwnPost ? (
+          <Link href={`/analytics/post/${post.id}`} className={actionClassName("reply")} aria-label={`View post analytics, ${describeCount(post.views, "view", "views")}`}>
+            <ActionContent icon={<ViewsActionIcon size={ICON_SIZE} />} count={post.views} />
+          </Link>
+        ) : (
+          <button type="button" className={actionClassName("reply")} aria-haspopup="dialog" aria-label={`Views, ${describeCount(post.views, "view", "views")}. What are views`} onClick={() => setViewsInfoOpen(true)}>
+            <ActionContent icon={<ViewsActionIcon size={ICON_SIZE} />} count={post.views} />
+          </button>
+        )}
+      </div>
+      <div className={styles.secondaryActions}>
+        <button
+          type="button"
+          className={actionClassName("bookmark", isSaved, lastToggledTone === "bookmark")}
+          aria-pressed={isSaved}
+          aria-label={`${isSaved ? `Remove ${saveTargetType} from saved` : `Save ${saveTargetType}`}, ${savedCount} saves`}
+          onClick={() => {
+            setLastToggledTone("bookmark");
+            toggleSaved();
+          }}
+        >
+          <ActionContent icon={isSaved ? <BookmarkFilledActionIcon size={ICON_SIZE} /> : <BookmarkActionIcon size={ICON_SIZE} />} />
+        </button>
+        <ShareToChatButton
+          kind={saveTargetType === "video" ? "video" : "post"}
+          referenceId={post.id}
+          className={actionClassName("reply")}
+          icon={<span className={styles.halo}><ShareActionIcon size={ICON_SIZE} /></span>}
+          iconOnly
+        />
+      </div>
       <ViewsExplainerDialog isOpen={viewsInfoOpen} onClose={() => setViewsInfoOpen(false)} />
+      <ReshareDialog post={isRepostSheetOpen ? post : null} onClose={() => setIsRepostSheetOpen(false)} />
     </div>
   );
 }

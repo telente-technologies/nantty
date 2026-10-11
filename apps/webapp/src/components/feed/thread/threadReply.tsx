@@ -142,57 +142,61 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
           </div>
         ) : null}
         <div className={styles.actions}>
-          <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label={`Reply, ${describeCount(reply.replyCount, "reply", "replies")}`} onClick={() => requireAuthThen(() => onReply(reply), "Sign in to reply.")}>
-            <span className={styles.halo}>
-              <ReplyActionIcon size={ACTION_ICON_SIZE} />
-            </span>
-            {reply.replyCount > 0 ? <span className={styles.count}>{formatCompactCount(reply.replyCount)}</span> : null}
-          </button>
-          {onRepostReply ? (
-            <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label="Repost" onClick={() => requireAuthThen(() => onRepostReply(reply), "Sign in to repost.")}>
+          <div className={styles.primaryActions}>
+            <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label={`Reply, ${describeCount(reply.replyCount, "reply", "replies")}`} onClick={() => requireAuthThen(() => onReply(reply), "Sign in to reply.")}>
               <span className={styles.halo}>
-                <RepostActionIcon size={ACTION_ICON_SIZE} />
+                <ReplyActionIcon size={ACTION_ICON_SIZE} />
+              </span>
+              {reply.replyCount > 0 ? <span className={styles.count}>{formatCompactCount(reply.replyCount)}</span> : null}
+            </button>
+            {onRepostReply ? (
+              <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label="Repost" onClick={() => requireAuthThen(() => onRepostReply(reply), "Sign in to repost.")}>
+                <span className={styles.halo}>
+                  <RepostActionIcon size={ACTION_ICON_SIZE} />
+                </span>
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className={[styles.action, styles.likeTone, isLiked ? styles.active : "", isLiked && shouldPopLike ? styles.pop : ""].join(" ")}
+              aria-pressed={isLiked}
+              aria-label={`${isLiked ? "Unlike" : "Like"} reply, ${describeCount(likeCount, "like", "likes")}`}
+              onClick={() => requireAuthThen(() => likeMutation.mutate(!isLiked), "Sign in to like replies.")}
+            >
+              <span className={styles.halo}>{isLiked ? <LikeFilledActionIcon size={ACTION_ICON_SIZE} /> : <LikeActionIcon size={ACTION_ICON_SIZE} />}</span>
+              {likeCount > 0 ? <span className={styles.count}>{formatCompactCount(likeCount)}</span> : null}
+            </button>
+            {isOwnReply ? (
+              <button type="button" className={styles.textAction} onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
+                Delete
+              </button>
+            ) : (
+              <button type="button" className={styles.textAction} onClick={() => requireAuthThen(() => setIsReportOpen(true), "Sign in to report replies.")}>
+                Report
+              </button>
+            )}
+            {canPin ? (
+              <button type="button" className={styles.textAction} onClick={() => pinMutation.mutate()} disabled={pinMutation.isPending}>
+                {optimisticPinned ? "Unpin" : "Pin"}
+              </button>
+            ) : null}
+          </div>
+          <div className={styles.secondaryActions}>
+            <button
+              type="button"
+              className={[styles.action, isSaved ? styles.active : ""].join(" ")}
+              aria-pressed={isSaved}
+              aria-label={isSaved ? "Remove reply from saved" : "Save reply"}
+              onClick={() => toggleSaved()}
+            >
+              <span className={styles.halo}>{isSaved ? <BookmarkFilledActionIcon size={ACTION_ICON_SIZE} /> : <BookmarkActionIcon size={ACTION_ICON_SIZE} />}</span>
+            </button>
+            <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label="Share reply" onClick={() => requireAuthThen(() => void copyReplyLinkToClipboard(), "Sign in to share replies.")}>
+              <span className={styles.halo}>
+                <ShareActionIcon size={ACTION_ICON_SIZE} />
               </span>
             </button>
-          ) : null}
-          <button
-            type="button"
-            className={[styles.action, styles.likeTone, isLiked ? styles.active : "", isLiked && shouldPopLike ? styles.pop : ""].join(" ")}
-            aria-pressed={isLiked}
-            aria-label={`${isLiked ? "Unlike" : "Like"} reply, ${describeCount(likeCount, "like", "likes")}`}
-            onClick={() => requireAuthThen(() => likeMutation.mutate(!isLiked), "Sign in to like replies.")}
-          >
-            <span className={styles.halo}>{isLiked ? <LikeFilledActionIcon size={ACTION_ICON_SIZE} /> : <LikeActionIcon size={ACTION_ICON_SIZE} />}</span>
-            {likeCount > 0 ? <span className={styles.count}>{formatCompactCount(likeCount)}</span> : null}
-          </button>
-          <button
-            type="button"
-            className={[styles.action, isSaved ? styles.active : ""].join(" ")}
-            aria-pressed={isSaved}
-            aria-label={isSaved ? "Remove reply from saved" : "Save reply"}
-            onClick={() => toggleSaved()}
-          >
-            <span className={styles.halo}>{isSaved ? <BookmarkFilledActionIcon size={ACTION_ICON_SIZE} /> : <BookmarkActionIcon size={ACTION_ICON_SIZE} />}</span>
-          </button>
-          <button type="button" className={[styles.action, styles.replyTone].join(" ")} aria-label="Share reply" onClick={() => requireAuthThen(() => void copyReplyLinkToClipboard(), "Sign in to share replies.")}>
-            <span className={styles.halo}>
-              <ShareActionIcon size={ACTION_ICON_SIZE} />
-            </span>
-          </button>
-          {isOwnReply ? (
-            <button type="button" className={styles.textAction} onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
-              Delete
-            </button>
-          ) : (
-            <button type="button" className={styles.textAction} onClick={() => requireAuthThen(() => setIsReportOpen(true), "Sign in to report replies.")}>
-              Report
-            </button>
-          )}
-          {canPin ? (
-            <button type="button" className={styles.textAction} onClick={() => pinMutation.mutate()} disabled={pinMutation.isPending}>
-              {optimisticPinned ? "Unpin" : "Pin"}
-            </button>
-          ) : null}
+          </div>
         </div>
       </div>
       <ReportDialog isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} targetType="comment" targetId={reply.id} />

@@ -6,6 +6,18 @@
   margin-inline: -8px;
 }
 
+.primaryActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.secondaryActions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
 :root[data-theme="dark"] .row {
   --action-like: #f7639e;
 }

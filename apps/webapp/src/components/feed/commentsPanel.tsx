@@ -3,7 +3,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRef } from "react";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { retryCommentsPageUnlessCursorExpired, useRestartCommentsOnExpiredCursor } from "@/components/feed/restartCommentsOnExpiredCursor.hook";
 import { postsService } from "@/services/posts.service";
@@ -39,7 +38,7 @@ export function CommentsPanel({ postId, postAuthorId, totalComments }: { readonl
           ))}
         </div>
       ) : commentsQuery.isError && !isRestartingFromTop ? (
-        <ErrorState description="We couldn't load comments." action={<RetryButton onRetry={() => commentsQuery.refetch()} />} />
+        <ErrorState description="We couldn't load comments." error={commentsQuery.error} onRetry={() => void commentsQuery.refetch()} />
       ) : comments.length === 0 ? (
         <EmptyState title="No comments yet" description="Start the conversation." />
       ) : (

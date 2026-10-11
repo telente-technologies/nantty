@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
-import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ChatIcon } from "@/components/ui/icons";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
@@ -18,7 +17,7 @@ export const supportTicketsQueryKey = ["support", "tickets"] as const;
 export function SupportTicketList() {
   const tickets = useQuery({ queryKey: supportTicketsQueryKey, queryFn: supportService.listMyTickets });
   if (tickets.isLoading) return <ListRowsSkeleton label="Loading your requests" rows={4} withAvatar={false} />;
-  if (tickets.isError) return <ErrorState description={readErrorMessageForDisplay(tickets.error)} action={<RetryButton onRetry={() => tickets.refetch()} />} />;
+  if (tickets.isError) return <ErrorState description={readErrorMessageForDisplay(tickets.error)} error={tickets.error} onRetry={() => void tickets.refetch()} />;
   if ((tickets.data ?? []).length === 0) {
     return (
       <EmptyState
