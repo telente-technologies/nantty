@@ -6,6 +6,7 @@ import { findStudioApiRoute } from "@/config/studioApiAccess.config";
 import { exchangeRefreshTokenForNewTokenPair, renewViewerSession, writeRenewedSessionCookies } from "@/server/authentication.service";
 import { callStudioBackend, type BackendResult } from "@/server/apiTransport.service";
 import { isMutationProtectedAgainstCsrf, isRequestFromStudioOrigin, isSafeHttpMethod } from "@/server/requestOriginGuard.service";
+import { isAccessTokenKnownExpired } from "@/server/accessTokenExpiry.service";
 import { clearEverySessionCookie, readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies, writeApiTokenCookies } from "@/server/session.service";
 
 const maximumForwardedBodyBytes = 8 * 1024 * 1024;
@@ -58,14 +59,32 @@ export async function forwardBffRequestToStudioApi(request: NextRequest, pathSeg
   const cachedViewer = readCachedViewerFromCookies(request.cookies);
   let accessToken = tokens.accessToken;
   let renewedSession = null as Awaited<ReturnType<typeof renewViewerSession>>;
+  let rotatedTokens: Awaited<ReturnType<typeof exchangeRefreshTokenForNewTokenPair>> = null;
+  let refreshAttempted = false;
+  let sessionLost = false;
+  const rotateTokensOnce = async (): Promise<boolean> => {
+    const refreshToken = renewedSession?.tokens?.refreshToken ?? tokens.refreshToken;
+    if (refreshAttempted || !refreshToken) return false;
+    refreshAttempted = true;
+    rotatedTokens = await exchangeRefreshTokenForNewTokenPair(refreshToken);
+    if (rotatedTokens) accessToken = rotatedTokens.accessToken;
+    return rotatedTokens !== null;
+  };
+  const respondSessionExpired = () => {
+    const expiredResponse = respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
+    clearEverySessionCookie(expiredResponse);
+    return expiredResponse;
+  };
+
+  if (isAccessTokenKnownExpired(accessToken) && !(await rotateTokensOnce())) {
+    accessToken = null;
+    sessionLost = true;
+  }
+  if (sessionLost && !isPublicRoute) return respondSessionExpired();
 
   if (!isPublicRoute && (!cachedViewer || !accessToken)) {
-    renewedSession = await renewViewerSession({ sessionId: sessionId!, accessToken, refreshToken: tokens.refreshToken });
-    if (!renewedSession) {
-      const expiredResponse = respondWithBffError(401, "SESSION_EXPIRED", "Your session has ended. Sign in again.");
-      clearEverySessionCookie(expiredResponse);
-      return expiredResponse;
-    }
+    renewedSession = await renewViewerSession({ sessionId: sessionId!, accessToken, refreshToken: rotatedTokens ? null : tokens.refreshToken });
+    if (!renewedSession) return respondSessionExpired();
     accessToken = renewedSession.tokens?.accessToken ?? accessToken;
   }
 
@@ -91,19 +110,22 @@ export async function forwardBffRequestToStudioApi(request: NextRequest, pathSeg
     });
 
   let backendResult = await sendToBackend();
-  let rotatedTokens: Awaited<ReturnType<typeof exchangeRefreshTokenForNewTokenPair>> = null;
-  const refreshTokenToExchange = renewedSession?.tokens?.refreshToken ?? tokens.refreshToken;
-  if (backendResult.status === 401 && refreshTokenToExchange) {
-    rotatedTokens = await exchangeRefreshTokenForNewTokenPair(refreshTokenToExchange);
-    if (rotatedTokens) {
-      accessToken = rotatedTokens.accessToken;
+  if (backendResult.status === 401 && accessToken) {
+    if (await rotateTokensOnce()) backendResult = await sendToBackend();
+    else if (!isPublicRoute) return respondSessionExpired();
+    else {
+      sessionLost = true;
+      accessToken = null;
       backendResult = await sendToBackend();
     }
   }
 
   const response = convertBackendResultToResponse(backendResult);
+  if (sessionLost) {
+    clearEverySessionCookie(response);
+    return response;
+  }
   if (renewedSession) writeRenewedSessionCookies(response, renewedSession);
   if (rotatedTokens) writeApiTokenCookies(response, rotatedTokens);
-  if (backendResult.status === 401 && !rotatedTokens) clearEverySessionCookie(response);
   return response;
 }

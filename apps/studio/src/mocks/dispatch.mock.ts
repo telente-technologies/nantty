@@ -39,3 +39,5 @@ export async function dispatchMockApiRequest(method: string, path: string, query
   }
   return match.route.handler({ params: match.params, query, body: parsedBody });
 }
+
+(globalThis as Record<string, unknown>).__zudomartMockBackend = "zudomart-mock-backend-bundled";

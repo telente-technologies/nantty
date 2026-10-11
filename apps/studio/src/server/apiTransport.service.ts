@@ -1,7 +1,12 @@
 import { shouldUseRealBackend, readStudioApiBaseUrl } from "@/config/studioEnvironment.config";
 import { ApiError } from "@/errors/api.error";
-import { dispatchMockApiRequest } from "@/mocks/dispatch.mock";
+import type { dispatchMockApiRequest as MockDispatcher } from "@/mocks/dispatch.mock";
 import type { ApiErrorBody } from "@/types/apiError.type";
+
+const loadMockDispatcher: () => Promise<typeof MockDispatcher> =
+  process.env.NODE_ENV === "production"
+    ? () => Promise.reject(new Error("The mock backend is not bundled into production builds."))
+    : async () => (await import("@/mocks/dispatch.mock")).dispatchMockApiRequest;
 
 export interface BackendCall {
   readonly method: string;
@@ -43,7 +48,7 @@ function buildErrorResult(status: number, message: string, code: string): Backen
 
 async function callMockBackend(call: BackendCall): Promise<BackendResult> {
   try {
-    const value = await dispatchMockApiRequest(call.method, call.path, call.query ?? new URLSearchParams(), call.body ?? null);
+    const value = await (await loadMockDispatcher())(call.method, call.path, call.query ?? new URLSearchParams(), call.body ?? null);
     return buildJsonResult(200, value);
   } catch (error) {
     if (error instanceof ApiError) return buildErrorResult(error.status, error.message, error.code ?? "MOCK_ERROR");

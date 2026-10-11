@@ -10,8 +10,9 @@ export function readStudioApiBaseUrl(): string {
 }
 
 export function isMockBackendEnabled(): boolean {
+  if (isProductionRuntime) return false;
   const configuredValue = process.env.STUDIO_USE_MOCKS;
-  if (configuredValue === undefined || configuredValue === "") return !isProductionRuntime;
+  if (configuredValue === undefined || configuredValue === "") return true;
   return configuredValue === "true";
 }
 
