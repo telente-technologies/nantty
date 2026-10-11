@@ -95,7 +95,7 @@ After these, Critical has no partly-fixed rows. INFRA-004 was finished on 2026-1
 
 **Still open, owner: Flutterwave stage 2**
 
-TRU-012 (orders) and INFRA-014 are fixed now. MONEY-008 and MONEY-010 are fixed by stage 2, with small remainders for the payments agent. See `SECURITY_SCAN_2026-10-11.md`.
+TRU-012 (orders) and INFRA-014 are fixed now. MONEY-008 and MONEY-010 are fixed now, including their remainders (2026-10-11: `withdrawals.service_test.go` TestAProcessingWithdrawalIsSubtractedWhenNewWithdrawalsMayStartDuringIt, `checkoutAllocation.model_test.go` TestCheckoutGroupsWhoseTotalWouldOverflowAreRefused). See `SECURITY_SCAN_2026-10-11.md`.
 
 No rows are left in this table.
 
@@ -147,4 +147,13 @@ No rows are left in this table.
 
 ## Security scan 2026-10-11
 
-- [`security/audit/reports/SECURITY_SCAN_2026-10-11.md`](SECURITY_SCAN_2026-10-11.md): new code from the last two days. 56 findings: 3 High, 29 Medium, 24 Low. 34 are fixed now with regression tests. PAY-1 (High) and PAY-2/PAY-3 (Medium) are open for the payments agent, and STF-07 (Medium) is open as cross-deployable work.
+- [`security/audit/reports/SECURITY_SCAN_2026-10-11.md`](SECURITY_SCAN_2026-10-11.md): new code from the last two days. 56 findings: 3 High, 29 Medium, 24 Low. 41 are fixed now with regression tests; no Critical, High or Medium finding is open. Fixed now on 2026-10-11 by the payments agent:
+  - PAY-1 (High, buyer charged twice by card + wallet): DB unique index on one settlement per payment subject, late/racing card charges refunded through the outbox with a finance reconciliation case and a buyer notification. Tests: `flutterwaveFlows/flutterwaveDoublePay_test.go` (saved repro, card-first, card-in-flight, concurrent race, DB constraint).
+  - PAY-2 (Medium): user step-up is single-use on withdrawals, payout-account and bank changes, including the goCommerce seller relay; replay gets 401 `STEP_UP_REUSED`. Tests: `flutterwaveFlows/flutterwaveStepUpSingleUse_test.go`, `wallet.sellerMoney_integration_test.go`.
+  - PAY-3 (Medium) and PAY-8 (Low): ads and boosts paid from the wallet count toward the KYC-tier daily limit atomically with the debit; refunds are netted. Tests: `flutterwaveFlows/flutterwaveWalletSpendLimit_test.go`.
+  - STF-07 (Medium): every Go staff route outside goIdentity, and every staff route through the gateway, checks the per-staff IP allow-list through a new goIdentity internal endpoint (cached 30 s, fails closed in production). Tests: `platform/staffauth/remoteNetworkPolicy.client_test.go`, `moderation/src/middlewares/staffPermission.middleware_test.go`, `admin/adminAccountSecurity.integration_test.go`.
+  - DEP-01 (Low): `@xmldom/xmldom` lifted to 0.8.15 by a pnpm override; prebuild, mobile tsc and jest pass.
+  - PAY-3 follow-up: an admin-configurable ads step-up threshold (`payments.limits.adsStepUpAbove`, default ₦50,000), single-use and shared with withdrawals. Tests: `ads/adsStepUpThreshold.integration_test.go`, `flutterwaveStepUpSingleUse_test.go`.
+  - PAY-7 (Low): withdrawals fail closed for a currency or level without a daily cap. Tests: `withdrawalLimits.config_test.go`, `flutterwaveStepUpSingleUse_test.go`.
+  - STF-07 extended to TS staff routes at the gateway (`gateway/tests/staffNetworkPolicy.handler.test.ts`) and wired in Terraform (go-live, go-trust, gateway).
+  - Still open: the other Low rows listed in the scan.
