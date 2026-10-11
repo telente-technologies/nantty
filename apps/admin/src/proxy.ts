@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { readAllowedAdminIpAddresses } from "@/config/adminEnvironment.config";
+import { isClientAddressAllowedForAdmin } from "@/config/adminEnvironment.config";
 import { findRequirementForPagePath, navigationGroups } from "@/config/navigation.config";
 import { isCachedSessionViewStale, nowInEpochSeconds, readCachedSessionViewFromCookies, readSessionEnvelopeFromCookies, writeCachedSessionViewCookie } from "@/server/adminSession.service";
 import { buildContentSecurityPolicyHeaderValue, createContentSecurityPolicyNonce } from "@/server/contentSecurityPolicy.service";
@@ -37,8 +37,7 @@ function continueWithSecurityHeaders(request: NextRequest): NextResponse {
 }
 
 function isClientAddressAllowed(request: NextRequest): boolean {
-  const allowedAddresses = readAllowedAdminIpAddresses();
-  return allowedAddresses.length === 0 || allowedAddresses.includes(readClientIpAddress(request));
+  return isClientAddressAllowedForAdmin(readClientIpAddress(request));
 }
 
 export function proxy(request: NextRequest) {
@@ -62,7 +61,7 @@ export function proxy(request: NextRequest) {
   if (pathname === "/") return redirectTo(request, findFirstPagePermittedForAdmin(view.admin));
 
   const requirement = findRequirementForPagePath(pathname);
-  if (requirement && !doesAdminMeetPageRequirement(view.admin, requirement)) {
+  if (!requirement || !doesAdminMeetPageRequirement(view.admin, requirement)) {
     return redirectTo(request, findFirstPagePermittedForAdmin(view.admin), { denied: pathname });
   }
   const response = continueWithSecurityHeaders(request);
