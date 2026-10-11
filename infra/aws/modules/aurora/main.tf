@@ -26,6 +26,16 @@ resource "aws_security_group" "database" {
     protocol        = "tcp"
     security_groups = [var.tasks_security_group_id]
   }
+  dynamic "ingress" {
+    for_each = var.payments_security_group_id == null ? [] : [var.payments_security_group_id]
+    content {
+      description     = "PostgreSQL from go-money (payments)"
+      from_port       = 5432
+      to_port         = 5432
+      protocol        = "tcp"
+      security_groups = [ingress.value]
+    }
+  }
   lifecycle { create_before_destroy = true }
 }
 

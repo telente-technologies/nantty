@@ -24,9 +24,10 @@ app_origins = {
   ads    = "https://ads.zudomart.com"
   gift   = "https://gift.zudomart.com"
 }
-aurora = { instance_class = "db.r7g.xlarge", reader_count = 2, backup_retention_days = 35, engine_version = "17.4" }
-valkey = { node_type = "cache.r7g.large", node_count = 3 }
-mq     = { deployment_mode = "CLUSTER_MULTI_AZ", instance_type = "mq.m7g.large" }
+aurora              = { instance_class = "db.r7g.xlarge", reader_count = 2, backup_retention_days = 35, engine_version = "17.4" }
+valkey              = { node_type = "cache.r7g.large", node_count = 3 }
+intelligence_valkey = { node_type = "cache.t4g.small", node_count = 2 }
+mq                  = { deployment_mode = "CLUSTER_MULTI_AZ", instance_type = "mq.m7g.large" }
 
 # Staging account id: images are promoted from the staging registry.
 promotion_source_account_id = ""

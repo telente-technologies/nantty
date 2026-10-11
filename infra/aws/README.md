@@ -12,7 +12,7 @@ infra/aws/
     kms/            one rotated key per purpose: data, secrets, logs, kyc, ecr, backup, sns
     storage/        S3 media, private KYC (Object Lock, KMS, TLS only), logs; CloudFront + OAC (+ signed URLs); CRR to the DR region
     dns/            Route 53 zone, ACM certs (regional + us-east-1), alias records, API health check
-    edge/           public ALB + WAF (managed rules, auth/global rate rules, Paystack source IPs, /internal block), internal ALB + private zone
+    edge/           public ALB + WAF (managed rules, auth/global rate rules, Flutterwave webhook hash + rate rules, /internal block), internal ALB + private zone
     ecs-cluster/    Fargate cluster, Container Insights, Cloud Map namespace
     ecs-service/    task def, roles, log group, target group + rules, autoscaling, ECS rolling or CodeDeploy blue/green
     aurora/         Aurora PostgreSQL cluster, RDS Proxy (writer + reader endpoints), AWS Backup with cross-region copy
@@ -39,8 +39,9 @@ Twelve Fargate services, all private, no public IPs: `gateway`, `go-identity`, `
 | internal ALB, host `<service>.svc.<env>.zudomart.internal` | each service (HTTP inside the VPC), health checks per target group |
 
 Provider webhooks (`/webhooks/*`) enter through the gateway, which routes them only to `go-money` and passes the raw
-request bytes and `X-Paystack-Signature` through untouched (gateway test `webhook passthrough`). The WAF only lets
-Paystack's three source IPs reach `/webhooks/paystack` and blocks any `/internal` path. This replaces the older plan of
+request bytes and the `verif-hash` header through untouched (gateway test `webhook passthrough`). Flutterwave is the only
+payment provider. The WAF refuses `/webhooks/flutterwave` requests without a `verif-hash` header, rate-limits that path
+(`flutterwave_webhook_rate_limit_per_five_minutes`), redacts the header from WAF logs, and blocks any `/internal` path. This replaces the older plan of
 an ALB rule straight to go-money, which cannot coexist with CodeDeploy blue/green on the money service.
 
 `go-money` uses CodeDeploy blue/green (10 percent canary for 5 minutes) with automatic rollback on the ledger
@@ -79,7 +80,6 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
 | `alarm_email` | empty | SNS subscription for alarms (confirm the email) |
 | `dmarc_report_address` | required | DMARC `rua` mailbox |
 | `media_signing_public_key_pem` | `null` | CloudFront key group for signed `/paid/*` URLs |
-| `paystack_webhook_ips` | Paystack's 3 IPs | WAF allow-list for `/webhooks/paystack` |
 | `enable_execute_command` | `false` | ECS Exec for break-glass |
 
 ## Bootstrap (once per account)
@@ -107,8 +107,9 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
    `aurora_master_secret_arn`) from a bastion via SSM. `svc_migrator` owns schemas for the pre-deploy migrate task.
 6. RabbitMQ: create one user per `zudomart/<env>/mq/<service>` secret and import
    `infra/local/rabbitmq/topology.json` through the management API using `zudomart/<env>/mq/admin`.
-7. Fill the placeholders `CHANGE_ME` in `zudomart/<env>/<service>/app` (JWT/OTP keys, internal tokens, `PAYSTACK_SECRET_KEY`
-   with the key of that environment). Replace the LiveKit credentials when using LiveKit Cloud.
+7. Fill the placeholders `CHANGE_ME` in `zudomart/<env>/<service>/app` (JWT/OTP keys, internal tokens, and for go-money
+   `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_WEBHOOK_HASH` (32+ characters) and `FLUTTERWAVE_MERCHANT_ID` for that environment;
+   go-money refuses to start in production without them). Register `terraform output nat_public_ips` in Flutterwave's IP whitelist. Replace the LiveKit credentials when using LiveKit Cloud.
 8. In GitHub, create environments `staging` and `production` (required reviewers on production) and add repository
    variables `AWS_ACCOUNT_ID_STAGING`, `AWS_ACCOUNT_ID_PROD`, `AWS_REGION`, `STAGING_API_URL`, `PROD_API_URL` (optional pre-deploy migration: `MIGRATE_TASK_DEFINITION[_PROD]`, `*_PRIVATE_SUBNETS`, `*_TASKS_SECURITY_GROUP`).
    The roles are the outputs `github_ecr_push_role_arn` and `github_deploy_role_arn`.

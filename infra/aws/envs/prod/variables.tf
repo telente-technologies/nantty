@@ -90,6 +90,13 @@ variable "valkey" {
     node_count = number
   })
 }
+variable "intelligence_valkey" {
+  type = object({
+    node_type  = string
+    node_count = number
+  })
+  default = { node_type = "cache.t4g.small", node_count = 1 }
+}
 variable "mq" {
   type = object({
     deployment_mode = string
@@ -119,10 +126,6 @@ variable "enable_execute_command" {
 variable "media_signing_public_key_pem" {
   type    = string
   default = null
-}
-variable "paystack_webhook_ips" {
-  type    = list(string)
-  default = ["52.31.139.75", "52.49.173.169", "52.214.14.220"]
 }
 variable "ecr_pull_account_ids" {
   description = "Accounts that may pull this account's images (prod account id on staging)."

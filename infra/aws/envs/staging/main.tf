@@ -27,6 +27,7 @@ module "platform" {
   service_overrides            = var.service_overrides
   aurora                       = var.aurora
   valkey                       = var.valkey
+  intelligence_valkey          = var.intelligence_valkey
   mq                           = var.mq
   livekit_mode                 = var.livekit_mode
   livekit_node_count           = var.livekit_node_count
