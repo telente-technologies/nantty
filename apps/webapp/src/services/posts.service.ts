@@ -1,4 +1,4 @@
-import type { CommentWithReplies, Page, Post, PostAnalytics, ReplyPolicy, TaggedUser } from "@/types";
+import type { CommentWithReplies, FollowState, Page, Post, PostAnalytics, PostNotificationLevel, ReplyPolicy, TaggedUser } from "@/types";
 import type { ConnectionEntry, ConnectionTab, FollowRequest } from "@/types/account.type";
 
 import { createIdempotencyKey, sendRequestToWebappServer } from "./clientApi.service";
@@ -9,6 +9,7 @@ export const postsService = {
   fetchPostAnalytics: (postId: string) => sendRequestToWebappServer<PostAnalytics>(`/api/v1/posts/${postId}/analytics`),
   likePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/like`, { method: "POST", idempotencyKey: createIdempotencyKey("like") }),
   unlikePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}/like`, { method: "DELETE", idempotencyKey: createIdempotencyKey("unlike") }),
+  deletePost: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${postId}`, { method: "DELETE", idempotencyKey: createIdempotencyKey("delete") }),
   pinPost: (postId: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/pin`, { method: "PUT", idempotencyKey: createIdempotencyKey("pin") }),
   unpinPost: (postId: string) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/pin`, { method: "DELETE", idempotencyKey: createIdempotencyKey("unpin") }),
   refreshPostLinkPreview: (postId: string) => sendRequestToWebappServer<LinkPreview | null>(`/api/v1/posts/${postId}/link-preview`, { method: "POST" }),
@@ -25,10 +26,14 @@ export const postsService = {
 };
 
 export const followsService = {
-  followUser: (userId: string) => sendRequestToWebappServer<void>(`/api/v1/users/${userId}/follow`, { method: "POST" }),
+  followUser: (userId: string) => sendRequestToWebappServer<{ readonly state?: FollowState } | undefined>(`/api/v1/users/${userId}/follow`, { method: "POST" }),
   unfollowUser: (userId: string) => sendRequestToWebappServer<void>(`/api/v1/users/${userId}/follow`, { method: "DELETE" }),
   blockUser: (userId: string) => sendRequestToWebappServer<void>(`/api/v1/users/${userId}/block`, { method: "POST" }),
   unblockUser: (userId: string) => sendRequestToWebappServer<void>(`/api/v1/users/${userId}/block`, { method: "DELETE" }),
+  fetchPostNotifications: (userId: string) =>
+    sendRequestToWebappServer<{ readonly level: PostNotificationLevel; readonly following: boolean }>(`/api/v1/users/${encodeURIComponent(userId)}/post-notifications`),
+  setPostNotifications: (userId: string, level: PostNotificationLevel, idempotencyKey: string) =>
+    sendRequestToWebappServer<{ readonly level: PostNotificationLevel; readonly following: boolean }>(`/api/v1/users/${encodeURIComponent(userId)}/post-notifications`, { method: "PUT", body: { level }, idempotencyKey }),
   listFollowersOfUser: (userId: string, query: string, cursor?: string) =>
     sendRequestToWebappServer<Page<ConnectionEntry>>(`/api/v1/users/${userId}/followers`, { query: { q: query || undefined, cursor } }),
   listFollowingOfUser: (userId: string, query: string, cursor?: string) =>

@@ -1,4 +1,4 @@
-import type { CountryOption, ShippingAddressInput } from "@/types/account.type";
+import type { AccountSettings, CountryOption, ShippingAddressInput, UsernamePolicy } from "@/types/account.type";
 import type { Address, Clip, Page, Post, User } from "@/types";
 
 import { sendRequestToWebappServer, sendListRequestToWebappServer } from "./clientApi.service";
@@ -8,6 +8,7 @@ export interface ProfileDetailsUpdate {
   readonly bio?: string;
   readonly avatarMediaId?: string | null;
   readonly bannerMediaId?: string | null;
+  readonly isPrivate?: boolean;
 }
 
 const withDisplayNameFallback = (user: User): User => (user.name ? user : { ...user, name: user.username });
@@ -31,6 +32,7 @@ export const usersService = {
   updateShippingAddress: (addressId: string, input: ShippingAddressInput) =>
     sendRequestToWebappServer<Address>(`/api/v1/users/me/addresses/${addressId}`, { method: "PATCH", body: input }),
   deleteShippingAddress: (addressId: string) => sendRequestToWebappServer<void>(`/api/v1/users/me/addresses/${addressId}`, { method: "DELETE" }),
-  fetchMyUsernamePolicy: () => sendRequestToWebappServer<{ minLength: number; maxLength: number }>("/api/v1/users/me/username-policy"),
+  fetchMyUsernamePolicy: () => sendRequestToWebappServer<UsernamePolicy>("/api/v1/users/me/username-policy"),
+  fetchMyAccountSettings: () => sendRequestToWebappServer<AccountSettings>("/api/v1/users/me/settings"),
   changeMyUsername: (username: string) => sendRequestToWebappServer<User>("/api/v1/users/me/username", { method: "PATCH", body: { username } }),
 };

@@ -12,6 +12,8 @@ export const storiesService = {
   fetchStoryTray: () => sendListRequestToWebappServer<StoryTrayItem>("/api/v1/stories/tray"),
   fetchStoriesForUser: (userId: ID) => sendListRequestToWebappServer<Story>(`/api/v1/users/${encodeURIComponent(userId)}/stories`),
   markStoryAsSeen: (storyId: ID) => sendRequestToWebappServer<void>(`/api/v1/stories/${encodeURIComponent(storyId)}/seen`, { method: "POST" }),
+  publishStory: (input: { readonly mediaId: ID; readonly soundId?: ID; readonly look?: string }, idempotencyKey: string) =>
+    sendRequestToWebappServer<Story>("/api/v1/stories", { method: "POST", body: input, idempotencyKey }),
   fetchStoryViewers: (storyId: ID, cursor?: string | null) =>
     sendRequestToWebappServer<StoryViewersPage>(`/api/v1/stories/${encodeURIComponent(storyId)}/viewers`, { query: { cursor: cursor ?? undefined } }),
 };

@@ -1,5 +1,5 @@
 import type { ID, Page } from "@/types";
-import { THREAD_AD_SLOT_KIND, type ThreadAdDecision, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
+import { THREAD_AD_SLOT_KIND, type CommentThreadPage, type ThreadAdDecision, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
 
 import { sendRequestToWebappServer } from "./clientApi.service";
 
@@ -10,6 +10,8 @@ export const postThreadService = {
     sendRequestToWebappServer<Page<ThreadReply>>(`/api/v1/posts/${postId}/thread`, { query: { sort, cursor: cursor ?? undefined } }),
   fetchThreadReplies: (commentId: ID, cursor: string | null | undefined) =>
     sendRequestToWebappServer<Page<ThreadReply>>(`/api/v1/comments/${commentId}/thread`, { query: { cursor: cursor ?? undefined } }),
+  fetchCommentThread: (commentId: ID, cursor: string | null | undefined) =>
+    sendRequestToWebappServer<CommentThreadPage>(`/api/v1/comments/${commentId}/thread`, { query: { cursor: cursor ?? undefined } }),
   decideThreadAd: (postId: ID, slotIndex: number, slotsSinceLastAd: number, neighbourContentIds: readonly ID[]) =>
     sendRequestToWebappServer<ThreadAdDecision>("/api/v1/ads/decide", {
       method: "POST",

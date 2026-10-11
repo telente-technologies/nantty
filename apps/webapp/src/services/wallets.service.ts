@@ -22,15 +22,15 @@ export const walletsService = {
   listMyTransactions: () => sendListRequestToWebappServer<WalletTransaction>("/api/v1/wallets/me/transactions"),
   listMyEscrowHolds: () => sendListRequestToWebappServer<EscrowHold>("/api/v1/wallets/me/escrow-holds"),
   listMyPayoutAccounts: () => sendListRequestToWebappServer<PayoutAccount>("/api/v1/wallets/me/payout-accounts"),
-  addPayoutAccount: (input: { readonly bankCode: string; readonly accountNumber: string }) =>
-    sendRequestToWebappServer<PayoutAccount>("/api/v1/wallets/me/payout-accounts", { method: "POST", body: input }),
+  addPayoutAccount: (input: { readonly bankCode: string; readonly accountNumber: string }, stepUpToken: string) =>
+    sendRequestToWebappServer<PayoutAccount>("/api/v1/wallets/me/payout-accounts", { method: "POST", body: input, stepUpToken }),
   removePayoutAccount: (payoutAccountId: string) =>
     sendRequestToWebappServer<void>(`/api/v1/wallets/me/payout-accounts/${encodeURIComponent(payoutAccountId)}`, { method: "DELETE" }),
   quoteWithdrawal: (payoutAccountId: string, amountMinor: number, currency: string) =>
     sendRequestToWebappServer<WithdrawalQuote>("/api/v1/wallets/me/withdrawals/quote", { query: { payoutAccountId, amountMinor, currency } }),
   listMyWithdrawals: () => sendListRequestToWebappServer<Withdrawal>("/api/v1/wallets/me/withdrawals"),
-  requestWithdrawal: (request: WithdrawalRequest, idempotencyKey: string) =>
-    sendRequestToWebappServer<WalletTransaction>("/api/v1/wallets/me/withdrawals", { method: "POST", body: request, idempotencyKey }),
+  requestWithdrawal: (request: WithdrawalRequest, idempotencyKey: string, stepUpToken: string) =>
+    sendRequestToWebappServer<WalletTransaction>("/api/v1/wallets/me/withdrawals", { method: "POST", body: request, idempotencyKey, stepUpToken }),
   cancelWithdrawal: (withdrawalId: string, idempotencyKey: string) =>
     sendRequestToWebappServer<Withdrawal>(`/api/v1/wallets/me/withdrawals/${encodeURIComponent(withdrawalId)}/cancel`, { method: "POST", idempotencyKey }),
 };

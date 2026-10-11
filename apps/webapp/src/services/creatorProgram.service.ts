@@ -6,6 +6,10 @@ import type {
   CreatorEarning,
   CreatorEligibility,
   CreatorRevenueRules,
+  CreatorSubscriber,
+  CreatorSubscriptionPlan,
+  CreatorSubscriptionPlanInput,
+  CreatorSubscriptionPriceTier,
 } from "@/types/creator.type";
 import type { Page as GenericPage } from "@/types";
 
@@ -22,6 +26,14 @@ export const creatorProgramService = {
   fetchCreatorEarningsPage: (cursor: string | null) =>
     sendRequestToWebappServer<GenericPage<CreatorEarning>>("/api/v1/creators/earnings", { query: { cursor: cursor ?? undefined } }),
   listMyCreatorEarnings: () => sendListRequestToWebappServer<CreatorEarning>("/api/v1/creators/earnings"),
+  listMySubscriptionPlans: () => sendListRequestToWebappServer<CreatorSubscriptionPlan>("/api/v1/creators/me/subscription-plans"),
+  createMySubscriptionPlan: (input: CreatorSubscriptionPlanInput, idempotencyKey: string) =>
+    sendRequestToWebappServer<CreatorSubscriptionPlan>("/api/v1/creators/me/subscription-plans", { method: "POST", body: input, idempotencyKey }),
+  setMySubscriptionPlanActive: (planId: string, active: boolean) =>
+    sendRequestToWebappServer<CreatorSubscriptionPlan>(`/api/v1/creators/me/subscription-plans/${encodeURIComponent(planId)}`, { method: "PATCH", body: { active } }),
+  listMySubscribers: () => sendListRequestToWebappServer<CreatorSubscriber>("/api/v1/creators/me/subscribers"),
+  listMySubscriptionPriceTiers: (currency: string, interval: "month" | "year") =>
+    sendListRequestToWebappServer<CreatorSubscriptionPriceTier>("/api/v1/creators/me/subscription-plans/price-tiers", { query: { currency, interval } }),
 };
 
 export type { CreatorApplication, CreatorApplicationInput, CreatorEligibility, CreatorRevenueRules };

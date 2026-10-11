@@ -1,10 +1,12 @@
 import { useAuthPromptStore } from "@/components/auth/authPrompt.store";
 import { useHumanVerificationStore } from "@/components/security/humanVerification.store";
+import { describeLimitError } from "@/utils/limitErrors.util";
 
 export interface ApiErrorBody {
   readonly message: string;
   readonly code?: string;
   readonly suggestions?: readonly string[];
+  readonly details?: Readonly<Record<string, unknown>>;
   readonly issues?: readonly { readonly path?: readonly string[]; readonly message: string }[];
 }
 
@@ -14,14 +16,19 @@ export function rememberCsrfTokenForRequests(csrfToken: string | null): void {
   currentCsrfToken = csrfToken;
 }
 
+export function readCsrfTokenForRequests(): string | null {
+  return currentCsrfToken;
+}
+
 export class WebappRequestError extends Error {
   public constructor(
     public readonly status: number,
     public readonly code: string,
     message: string,
     public readonly suggestions?: readonly string[],
+    public readonly details?: Readonly<Record<string, unknown>>,
   ) {
-    super(message);
+    super(describeLimitError(code, details) ?? message);
     this.name = "WebappRequestError";
   }
 
@@ -35,6 +42,7 @@ export interface WebappRequestOptions {
   readonly query?: Record<string, string | number | boolean | null | undefined>;
   readonly body?: unknown;
   readonly idempotencyKey?: string;
+  readonly stepUpToken?: string;
   readonly signal?: AbortSignal;
   readonly skipHumanVerification?: boolean;
 }
@@ -59,6 +67,7 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
   const headers: Record<string, string> = { Accept: "application/json" };
   if (method !== "GET" && currentCsrfToken) headers["X-CSRF-Token"] = currentCsrfToken;
   if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
+  if (options.stepUpToken) headers["X-Step-Up-Token"] = options.stepUpToken;
   let body: BodyInit | undefined;
   if (options.body !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -91,7 +100,7 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
       const passed = await useHumanVerificationStore.getState().requestHumanVerification(errorBody.reason ?? "security_check");
       if (passed) return sendRequestToWebappServer<Payload>(apiPath, { ...options, skipHumanVerification: true });
     }
-    throw new WebappRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.suggestions);
+    throw new WebappRequestError(response.status, errorBody?.code ?? `HTTP_${response.status}`, errorBody?.message ?? "Something went wrong. Try again.", errorBody?.suggestions, errorBody?.details);
   }
   if (response.status === 204) return undefined as Payload;
   return (await response.json()) as Payload;
