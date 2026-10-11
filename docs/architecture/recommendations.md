@@ -46,13 +46,20 @@ flowchart LR
 | Surface | Candidates | Python endpoint | Notes |
 | --- | --- | --- | --- |
 | Feed (For You / Following) | followed + topic + trending + fresh posts (14-day window, 300 candidates) | `/v1/feed/rank` (250 ms, deterministic fallback) | Following = reverse chronological, no Python. See section 7 |
-| Clips | recent, topic, creator-following | `/v1/clips/rank` | completion-rate driven |
+| Clips For You | public clips from the last 14 days (300 candidates) with watch totals from `post_daily_stats` | `/v1/clips/rank` (250 ms, signed, hashed ids, circuit breaker, `deterministicClipRanker` fallback) | completion x rewatch x freshness (72 h half-life) x affinity x engagement (capped +25%) x integrity x capped checkmark boost; no two consecutive clips from one creator; 20% Thompson-sampled exploration of new creators. The ranked order is stored in `feed_rank_snapshots` (6 h) and later pages read from it, so pages never repeat or skip clips. Non-consented viewers and guests get `personalized: false` (no per-user features, no feature logging) |
+| Clips Following | accepted follows only (not own, blocked, or pending) | none | newest first, id keyset cursor; empty page when the viewer follows nobody |
 | Products (PDP, home mart, cart) | same category, same store, co-purchase | `/v1/recommendations/products` (150 ms) | |
 | Creators / accounts | mutual follows, topic | `/v1/recommendations/accounts` | |
 | Sellers / stores | category fit, rating, fulfilment reliability | no endpoint yet | PROPOSED (add `/v1/recommendations/sellers`) |
 | Search | OpenSearch top-K | `/v1/search/rerank` (100 ms) | relevance first, personalization weight default 0.2 |
 | Trending | 24 h counts with distinct-user threshold, per country and category | `/v1/trending`, `/v1/trending/headlines` | manipulated items excluded, section 7 |
 | Live discovery | live now, followed hosts, country | feed-like rank, PROPOSED | |
+
+### Clips API (`GET /api/v1/clips?tab=forYou|following&cursor=&limit=`, social)
+
+- `forYou`: guests allowed. The first page ranks and stores a snapshot; `nextCursor` is opaque (`{s: snapshotId, o: offset}`). Each page re-checks deletion, moderation, blocks, private and suspended authors and the viewer's sensitive-content policy, so a clip that became ineligible is dropped, never replaced. A cursor from another viewer, a malformed cursor or one older than 6 h returns `400 CURSOR_EXPIRED` ("Refresh to see the latest clips"). Each item carries `ranking: {explanations, boostMultiplier}` for "why am I seeing this". Sponsored clips are inserted after ranking as before.
+- `following`: signed-in only (`401` for guests). Accepted follows only, newest first, `nextCursor` is the last clip id. Viewers who follow nobody get `{data: [], nextCursor: null}`.
+- Account mutes do not exist yet; "not interested" topics are demoted to the end of For You.
 
 ## 4. Deterministic fallback (Python down or slow)
 
@@ -61,7 +68,7 @@ Mandatory, implemented in Go/TS (PROPOSED), values from `apiContract.md` section
 | Surface | Timeout | Fallback ranking |
 | --- | --- | --- |
 | Feed For You | 250 ms (was 100 ms; section 7.5) | quality x integrity x capped boost: `(log1p(I) * (1 + 2*I/reach) + 0.5*log1p(I/sqrt(age)) + 0.1) * 0.5^(age/18h)`, `I = (likes + 2*saves + 3*comments + 4*(reposts+shares)) * trustedShare`; no consecutive author, max 3 per author in the first 30 (`deterministicFeedRanker.integration.ts`) |
-| Clips | 100 ms | recency x historical completion rate |
+| Clips | 250 ms | feed quality score x (0.25 + 2 x smoothed completion rate) x capped boost, same author diversity (`deterministicClipRanker.integration.ts`) |
 | Products | 150 ms | same category or same store bestsellers, in stock only |
 | Accounts | 150 ms | most mutual follows, then followers |
 | Search | 100 ms | engine text relevance order |
@@ -153,4 +160,4 @@ Politics trends need twice the distinct-actor threshold. Admins can only remove 
 
 ### 7.5 Latency and fallback
 
-In-process the Python feed path is 3.7 ms for 100 candidates and 4-5 ms through HTTP with signing (measured 2026-10-04); the 119 ms p95 in `finalCheckReport.md` was queueing in a single uvicorn worker at 10 VUs with no think time. Changes: `INTELLIGENCE_SERVER_WORKERS` (default 1, 2 in AWS), the consent read now runs in the same parallel Valkey round trip as the other features, and social's client timeout is 250 ms (`FEED_RANK_TIMEOUT_MS`, above the measured p99 of 214 ms) with a circuit breaker (5 failures, 5 s open) and the deterministic fair ranker as fallback. Re-run the k6 feed scenario with 2 workers to confirm.
+In-process the Python feed path is 3.7 ms for 100 candidates and 4-5 ms through HTTP with signing (measured 2026-10-04); the 119 ms p95 from the 2026-10-04 load run was queueing in a single uvicorn worker at 10 VUs with no think time. Changes: `INTELLIGENCE_SERVER_WORKERS` (default 1, 2 in AWS), the consent read now runs in the same parallel Valkey round trip as the other features, and social's client timeout is 250 ms (`FEED_RANK_TIMEOUT_MS`, above the measured p99 of 214 ms) with a circuit breaker (5 failures, 5 s open) and the deterministic fair ranker as fallback. Re-run the k6 feed scenario with 2 workers to confirm.
