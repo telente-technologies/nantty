@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
 
+import { BrandLoader, type BrandLoaderSize } from "@zudomart/web-kit";
+
 import styles from "./feedback.module.css";
 
 export { EmptyState, ErrorState, Skeleton } from "@zudomart/web-kit";
 
-export function Spinner({ label = "Loading" }: { readonly label?: string }) {
+export function Spinner({ label = "Loading", size = "md" }: { readonly label?: string; readonly size?: BrandLoaderSize }) {
   return (
-    <span className={styles.spinnerRow} role="status">
-      <span className={styles.spinner} aria-hidden="true" />
-      <span className="visuallyHidden">{label}</span>
+    <span className={styles.spinnerRow}>
+      <BrandLoader size={size} label={label} />
     </span>
   );
 }

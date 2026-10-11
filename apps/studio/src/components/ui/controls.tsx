@@ -43,7 +43,7 @@ export function SegmentedControl<T extends string>({
 export function InfiniteSentinel({ label = "Loading more" }: { readonly label?: string }) {
   return (
     <div className={styles.sentinel}>
-      <Spinner label={label} />
+      <Spinner label={label} size="sm" />
     </div>
   );
 }

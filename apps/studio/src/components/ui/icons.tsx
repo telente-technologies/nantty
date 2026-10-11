@@ -1,6 +1,6 @@
 import {
-  ArrowLeftIcon as PhArrowLeft, BellIcon as PhBell, CaretDownIcon, CaretLeftIcon, CaretRightIcon, ChatCircleIcon, CheckIcon as PhCheck,
-  CompassIcon as PhCompass, CreditCardIcon as PhCreditCard, DotsThreeIcon, EnvelopeIcon, EyeIcon as PhEye, FunnelSimpleIcon, GearIcon,
+  ArrowLeftIcon as PhArrowLeft, BellIcon as PhBell, BroadcastIcon, CrownSimpleIcon, FilmStripIcon, UserGearIcon, UsersThreeIcon, WalletIcon as PhWallet, CaretDownIcon, CaretLeftIcon, CaretRightIcon, ChatCircleIcon, CheckIcon as PhCheck,
+  CodeIcon as PhCode, CompassIcon as PhCompass, CopyIcon as PhCopy, CreditCardIcon as PhCreditCard, DotsThreeIcon, EnvelopeIcon, EyeIcon as PhEye, FunnelSimpleIcon, GearIcon,
   HeartIcon as PhHeart, HouseIcon, ImageIcon as PhImage, LockIcon as PhLock, MagnifyingGlassIcon, MapPinIcon as PhMapPin,
   PackageIcon as PhPackage, PhoneIcon as PhPhone, PlusIcon as PhPlus, ShareNetworkIcon, ShoppingCartIcon, SignOutIcon, StarIcon as PhStar,
   StorefrontIcon, TagIcon as PhTag, TrashIcon as PhTrash, UserIcon as PhUser, XIcon,
@@ -47,3 +47,11 @@ export const LockIcon = createIcon(PhLock);
 export const MailIcon = createIcon(EnvelopeIcon);
 export const PhoneIcon = createIcon(PhPhone);
 export const TagIcon = createIcon(PhTag);
+export const CodeIcon = createIcon(PhCode);
+export const CopyIcon = createIcon(PhCopy);
+export const LiveIcon = createIcon(BroadcastIcon);
+export const ContentIcon = createIcon(FilmStripIcon);
+export const WalletIcon = createIcon(PhWallet);
+export const AudienceIcon = createIcon(UsersThreeIcon);
+export const SubscribersIcon = createIcon(CrownSimpleIcon);
+export const AccountIcon = createIcon(UserGearIcon);

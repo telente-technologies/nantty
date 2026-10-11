@@ -1,0 +1,17 @@
+.page { display: flex; flex-direction: column; gap: var(--space-6); max-width: 1080px; }
+.title { font-size: var(--text-3xl); }
+.subtitle { margin-top: var(--space-2); font-size: var(--text-sm); color: var(--ink-muted); line-height: 1.5; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 420px); gap: var(--space-5); align-items: start; }
+.card { background: var(--surface-card); border: 1px solid var(--divider); border-radius: var(--radius-medium); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.cardTitle { font-size: var(--text-base); font-weight: 600; }
+.choices { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.choice { border: 1px solid var(--divider); border-radius: 999px; padding: 6px 14px; background: transparent; color: inherit; font: inherit; font-size: var(--text-sm); cursor: pointer; }
+.choice[aria-pressed="true"] { background: var(--color-brand-solid); border-color: var(--color-brand-solid); color: var(--ink-inverse); }
+.field { display: flex; flex-direction: column; gap: var(--space-1); font-size: var(--text-sm); }
+.input { border: 1px solid var(--divider); border-radius: var(--radius-small); padding: 8px 10px; background: var(--surface-card); color: inherit; font: inherit; }
+.muted { margin: 0; font-size: var(--text-sm); color: var(--ink-muted); line-height: 1.5; }
+.code { margin: 0; padding: var(--space-3); border-radius: var(--radius-small); background: var(--surface-brand-tint); font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-all; }
+.copy { align-self: flex-start; display: inline-flex; gap: 6px; align-items: center; border: 0; border-radius: 999px; padding: 8px 16px; background: var(--color-brand-solid); color: var(--ink-inverse); font: inherit; font-weight: 600; cursor: pointer; }
+.copy:disabled { opacity: 0.5; cursor: not-allowed; }
+.preview { width: 100%; min-height: 220px; border: 1px dashed var(--divider); border-radius: var(--radius-medium); background: var(--surface-card); }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
