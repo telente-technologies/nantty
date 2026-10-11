@@ -1,5 +1,7 @@
 # Security report verification summary (2026-10-10)
 
+2026-10-11: the previous provider was removed; Flutterwave is the sole provider.
+
 Every finding in the five reports below was checked against the current code. Each report now ends with a `## Verification (2026-10-10)` table (ID, severity, status, evidence, fix/test). Nothing is committed.
 
 Status meanings:
@@ -89,19 +91,15 @@ The Medium, Low and Info breakdown is in each report's verification table. Rows 
 | F15 | Medium | Owner-approved, admin-configurable debt limits by verification level (₦10,000 / ₦50,000 / ₦200,000; half elsewhere); above them new listings and checkouts get `SELLER_DEBT_LIMIT`, existing orders are unaffected | `payments.sellerDebtLimit_integration_test.go`, `moneyLimits.loader_test.go` |
 | A8 (TS) | Low | Owner-approved, admin-configurable caps by payment type (order ₦5m, coins ₦500k, ads top-up ₦10m) and wallet daily limits by KYC tier (₦50k / ₦200k / ₦5m) | `paymentAmountLimits.service_test.go`, `flutterwaveLimits_test.go` |
 
-After these, Critical has no partly-fixed rows, and High has INFRA-004 (partly) as its only unfinished row.
+After these, Critical has no partly-fixed rows. INFRA-004 was finished on 2026-10-11 (infra/health pass: supervised ledger, subscriptions and moderation workers, fatal gRPC listen, Valkey and RabbitMQ readiness, worker-restart alarm), so High has no unfinished rows.
 
 **Still open, owner: Flutterwave stage 2**
 
-| ID | Severity | Cause | Suggested fix |
-|---|---|---|---|
-| INFRA-004 / INFRA-014 | High / Medium (partly) | Ledger and subscriptions consumers are unsupervised goroutines; subscriptions falls back to inline processing | Use `servicemodule` worker supervision |
-| TRU-012 (orders) | Low | `ORDERS_REDIS_URL` is optional; the orders middleware falls back to a format-only check | Require it in production |
-| MONEY-008 | Low (partly) | Provider balance is read before the withdrawal transaction (PSA pre-check added for Flutterwave; Paystack path unchanged) | Move the read into the transaction |
-| MONEY-010 | Info | As described in the row | As described in the row |
+TRU-012 (orders) and INFRA-014 are fixed now. MONEY-008 and MONEY-010 are fixed by stage 2, with small remainders for the payments agent. See `SECURITY_SCAN_2026-10-11.md`.
+
+No rows are left in this table.
 
 **Owner: platform / infra**
-- INFRA-016: no metrics endpoint, and readiness doesn't check Redis.
 - INFRA-017: no backup step before destructive migrations.
 - AUTH-003 remainder: the per-staff IP policy is enforced only on go-identity routes.
 - HTTP-009: users and catalog internal-token length checks.
@@ -146,3 +144,7 @@ After these, Critical has no partly-fixed rows, and High has INFRA-004 (partly) 
 - `ruff check` and `ruff format --check` clean.
 - `mypy` strict: 569 files clean.
 - pytest: 349 passed, 2 skipped (they need `INTELLIGENCE_TEST_REDIS_URL`).
+
+## Security scan 2026-10-11
+
+- [`security/audit/reports/SECURITY_SCAN_2026-10-11.md`](SECURITY_SCAN_2026-10-11.md): new code from the last two days. 56 findings: 3 High, 29 Medium, 24 Low. 34 are fixed now with regression tests. PAY-1 (High) and PAY-2/PAY-3 (Medium) are open for the payments agent, and STF-07 (Medium) is open as cross-deployable work.

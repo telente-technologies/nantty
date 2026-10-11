@@ -150,13 +150,13 @@ Risk: Uses ClientAddress(request) which trusts X-Real-Ip (Issue G2). Fails open 
 File: services/go/modules/payments/src/modules/webhooks/controllers/webhooks.controller.go:31-41
 go
 func (controller WebhooksController) sourceAllowed(request *http.Request) bool {
-    allowlist := controller.Application.Container.Settings.Paystack.WebhookIpAllowlist
+    allowlist := controller.Application.Container.Settings.the previous payment provider.WebhookIpAllowlist
     if len(allowlist) == 0 {
         return true  // No allowlist = allow all!
     }
     source := strings.TrimSpace(strings.Split(request.Header.Get("X-Forwarded-For"), ",")[0])
 
-Risk: If PAYSTACK_WEBHOOK_IP_ALLOWLIST is not set, all IPs are allowed. Uses X-Forwarded-For without proxy validation. Paystack webhook signatures are verified separately, so this is defense-in-depth only - but it should use RemoteAddr directly or a trusted proxy header.
+Risk: If LEGACY_PROVIDER_WEBHOOK_IP_ALLOWLIST is not set, all IPs are allowed. Uses X-Forwarded-For without proxy validation. The previous payment provider webhook signatures are verified separately, so this is defense-in-depth only - but it should use RemoteAddr directly or a trusted proxy header.
 
 ### H6 - Argon2id Parameters Below OWASP 2023 Recommendations
 File: services/go/platform/passwordhash/argon2id.hasher.go:22

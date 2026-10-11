@@ -4,11 +4,11 @@ Reviewed 4 Oct 2026 from the repo, `.env.example` files, `infra/local/docker-com
 
 ## Verdict
 
-**No live money and no production endpoint is configured in this checkout.** There are no real `.env` files (only `*.env.example`, and `.gitignore:10-11` ignores `.env` and `.env.*`). Paystack keys are empty, and `payments.config.go:138` refuses an `sk_live_` key outside production and an `sk_test_` key inside it.
+**No live money and no production endpoint is configured in this checkout.** There are no real `.env` files (only `*.env.example`, and `.gitignore:10-11` ignores `.env` and `.env.*`). Flutterwave keys are empty, and `payments/src/configs/flutterwave.config.go` refuses a live `FLWSECK-` key outside production and a `FLWSECK_TEST-` key inside it.
 
 Three things still look production-like:
 
-1. **`PAYSTACK_API_BASE_URL=https://api.paystack.co`** is the default in `services/go/.env.example:86`. With an `sk_test_` key it reaches Paystack's real test mode on the internet. Active tests must point it at the fake Paystack server (`services/go/modules/payments/src/integrations/paymentsTesting`) or `services/scripts/apiSmoke` fakes.
+1. **`FLUTTERWAVE_API_BASE_URL=https://api.flutterwave.com/v3`** is the default in `services/go/.env.example`. With a `FLWSECK_TEST-` key it reaches Flutterwave's real test mode on the internet. Active tests must point it at the fake Flutterwave server (`services/go/modules/payments/src/integrations/paymentsTesting`, sandbox on 127.0.0.1:18998) or `services/scripts/apiSmoke` fakes.
 2. **Terraform is initialised for dev, staging and prod** (`infra/aws/envs/*/.terraform` exists, provider plugins downloaded). State lives in S3 (`zudomart-terraform-state-{env}`, `eu-west-1`), so local files cannot tell whether real AWS resources exist. Treat every AWS name as real. No `terraform plan/apply` and no AWS CLI call in any phase.
 3. **`SMILE_ID_*` and `HUMAN_VERIFICATION_*`** point at real third parties when keys are set. Smile ID must stay `SMILE_ID_ENVIRONMENT=sandbox`; Turnstile uses Cloudflare's published test keys (`1x0000…AA`).
 
@@ -36,16 +36,15 @@ Every compose port binds to `127.0.0.1` only.
 ## Out of scope (never touch)
 
 - `betng-postgres` (0.0.0.0:55432) and `betng-redis` (0.0.0.0:56379): another project, bound to all interfaces. Exclude by name and port.
-- Anything on AWS (`infra/aws`), Paystack live, Smile ID production, Apple/Google store APIs, SES production, Cloudflare beyond test keys.
+- Anything on AWS (`infra/aws`), Flutterwave live, Smile ID production, Apple/Google store APIs, SES production, Cloudflare beyond test keys.
 - Any non-loopback address.
 
 ## Credential inventory (redacted)
 
 | Credential | Where | Value class | Risk |
 |---|---|---|---|
-| Paystack secret/public/previous | `services/go/.env.example:88-90` | empty | none in repo |
-| Paystack test keys in tests | `paystackWebhooks.integration_test.go:16` | `sk_test_****` fakes | none |
-| Fake Paystack key | `paymentsTesting/fakePaystack.util.go:16` | `sk_test_fake…` | none |
+| Flutterwave secret key, webhook hash, merchant id | `services/go/.env.example` | empty | none in repo |
+| Fake Flutterwave key | `paymentsTesting/fakeFlutterwave.util.go` | `FLWSECK_TEST-…` fake | none |
 | Internal service tokens | `*.env.example` (`*_INTERNAL_*TOKEN`) | `local-only-…` | local only; must be rotated per env |
 | Encryption keys / peppers | `services/go/.env.example:8,9,13,22,124` | base64 of `local…` | local only |
 | AWS | `services/go/.env.example:77-78` | `test/test` (LocalStack) | none |
@@ -60,6 +59,6 @@ Git history scan (`git log --all -p -G` for `sk_live_`, `AKIA`, private keys, Sl
 
 ## Safety switches for active phases
 
-- Refuse to start if any env var value starts with `sk_live_` or `pk_live_`, or if `APP_ENV=production`.
-- Refuse to start if `PAYSTACK_API_BASE_URL` is not a loopback URL.
+- Refuse to start if any env var value looks like a live payment key (`FLWSECK-`, `FLWPUBK-`, `sk_live_`, `pk_live_`), or if `APP_ENV=production`.
+- Refuse to start if `FLUTTERWAVE_API_BASE_URL` is not a loopback URL.
 - Refuse any target host that is not `127.0.0.1`/`localhost`.

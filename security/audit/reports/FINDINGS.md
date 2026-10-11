@@ -15,11 +15,11 @@ Status values:
 | SEC-0001 | Forged `X-Forwarded-For` bypasses gateway rate limits | High | Fixed |
 | SEC-0002 | Smile ID callback accepts stale signatures and results for another user | High | Fixed |
 | SEC-0003 | Staff invite tokens written to logs | Medium | Fixed |
-| SEC-0004 | Paystack `authorization_code` kept in stored webhook payloads | Medium | Fixed |
+| SEC-0004 | The previous payment provider `authorization_code` kept in stored webhook payloads | Medium | Fixed |
 | SEC-0005 | Protocol-relative `//host` links treated as internal | Medium | Fixed |
 | SEC-0006 | In-app browser opens non-http schemes | Medium | Fixed |
 | SEC-0007 | Identity verification start has no rate limit | Medium | Fixed |
-| SEC-0008 | Paystack authorization_code returned to and accepted from devices | High | Fixed |
+| SEC-0008 | The previous payment provider authorization_code returned to and accepted from devices | High | Fixed |
 | SEC-0009 | Copyright takedown and strike decisions lack admin step-up | Medium | Fixed |
 | SEC-0010 | TS services trust an unsigned gateway account header | High | Fixed |
 | SEC-0011 | Shipping address PII readable by every service role | Medium | Fixed, owner approved 2026-10-04 |
@@ -61,7 +61,7 @@ Status values:
 
 ## SEC-0004 authorization_code in stored webhook payloads
 - **Where:** payments webhook persistence.
-- **Issue:** stored raw payloads kept Paystack's `authorization_code`, which is a reusable card authorisation.
+- **Issue:** stored raw payloads kept the previous payment provider's `authorization_code`, which is a reusable card authorisation.
 - **Fix:** the code is redacted before storage (`payments/src/utils/webhookRedaction.util.go`).
 - **Test:** `webhookRedaction.util_test.go`.
 - **Status:** Fixed (static agent).
@@ -85,9 +85,9 @@ Status values:
 - **Status:** Fixed (static agent).
 
 ## SEC-0008 / SEC-0013 Money paths
-- **SEC-0008:** devices no longer receive or send the Paystack `authorization_code`; charges reference an owner-scoped saved-card id and renewals use the server-side encrypted authorization. Tests assert it never appears in responses or logs.
+- **SEC-0008:** devices no longer receive or send the previous payment provider `authorization_code`; charges reference an owner-scoped saved-card id and renewals use the server-side encrypted authorization. Tests assert it never appears in responses or logs.
 - **SEC-0013:** refund amounts ≤0 are rejected with 422; a full refund must be explicit.
-- Both were fixed by the money agent alongside exactly-once refunds (intent row + ledger entry before the Paystack call).
+- Both were fixed by the money agent alongside exactly-once refunds (intent row + ledger entry before the previous payment provider call).
 - **Status:** Fixed.
 
 ## SEC-0009 Copyright decisions lack step-up

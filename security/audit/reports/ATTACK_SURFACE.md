@@ -11,7 +11,7 @@ Generated 4 Oct 2026 by `python3 security/authorization/routeInventory.py` (stat
 | TS services | social, media, search, notifications, support | route factory `authentication: required/optional/internal` keyed off the gateway header; staff routes verify a staff JWT with `perm:` roles |
 | Python intelligence | 29 routes on 127.0.0.1:8090 | HMAC request signature (`request_signature_util.py:84`, `compare_digest`); never routed by the gateway |
 | Phoenix realtime | one WebSocket (`realtimeWeb/clientSocket.socket.ex`) | access token on connect; `topic.authorizer.ex` allows `user:<self>`, conversation members, live access check; max subscriptions per socket |
-| Webhooks | `/webhooks/{provider}` (Paystack), `/webhooks/store-notifications/{apple,google}`, `/api/v1/webhooks/smile-id`, `/api/v1/live/webhooks/livekit` | provider signatures; gateway passes raw bytes and signature headers only on these routes |
+| Webhooks | `/webhooks/{provider}` (the previous payment provider), `/webhooks/store-notifications/{apple,google}`, `/api/v1/webhooks/smile-id`, `/api/v1/live/webhooks/livekit` | provider signatures; gateway passes raw bytes and signature headers only on these routes |
 | Health | `/healthz`, `/readyz` (TS), `/health/live|ready` (Python), gateway `/healthz` | unauthenticated, not routed except the gateway's own |
 | Staff/admin APIs | every `/api/v1/admin/*` | gateway `optional` (staff tokens use a different audience); backend staff guard on every route, step-up on destructive actions |
 

@@ -76,7 +76,7 @@ Critical ads settlement (TRU-001) and the remaining findings are still open. MON
 ## Related fix (not a finding)
 
 - apiSmoke `businessPlanFee`: the billing code is correct (Business escrow fee 100 bps, from `ESCROW_FEE_BUSINESS_PLAN_BPS`). Plans now activate from the paid checkout and renew at full price through the renewal engine.
-- The obsolete Paystack `subscription.create` step was removed from `tests/businessPlanFee.smoke.test.ts`, along with its now-unused helper in `src/fakePaystack.util.ts`.
+- The obsolete the previous payment provider `subscription.create` step was removed from `tests/businessPlanFee.smoke.test.ts`, along with its now-unused helper in `src/fakeLegacyProvider.util.ts`.
 - The subscriptions integration tests pass. The full smoke needs the whole stack and was not run.
 
 ## Python audit update (9 Oct 2026)

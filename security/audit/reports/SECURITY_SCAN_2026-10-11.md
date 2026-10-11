@@ -1,0 +1,226 @@
+# Security and bug scan, 2026-10-11
+
+**Scope.** Code that landed in the last two days without a security review:
+- Flutterwave stages 1, 2 and 4
+- widgets and embeds (oEmbed, CSP)
+- E2EE extensions, the realtime-token socket auth and order share cards
+- delete post/clip/story, repost-by-link and quote-in-comments
+- comment and clip ranking snapshots, and interaction batches
+- the post-notification bell, fan-out, per-post mute and unfollow
+- `/places/search`
+- studio/admin access and step-up
+- the copyright ladder
+- the webKit Dialog
+- the help content loader
+
+It also covers four rows still open in the 2026-10-10 verification tables.
+
+Items the earlier reports already fixed are not repeated. Nothing is committed. The previous payment provider was removed on 2026-10-11; no finding here exists only in the previous payment provider code, except the leftover MONEY-008/010 remainders noted below.
+
+## Summary
+
+| Severity | Found | Fixed now | Open |
+|---|---|---|---|
+| Critical | 0 | 0 | 0 |
+| High | 3 | 2 | 1 |
+| Medium | 29 | 26 | 3 |
+| Low | 24 | 6 | 18 |
+| **Total** | **56** | **34** | **22** |
+
+SOC-02 and STF-04 are counted as fixed, but each has a small remainder, described in its row. Rows marked "(bug)" are correctness bugs rather than security issues.
+
+### Still-open Critical, High and Medium findings
+
+| ID | Severity | Title | Status / owner |
+|---|---|---|---|
+| PAY-1 | High | Card charge on a wallet-paid intent silently kept: buyer charged twice, no refund | Open - payments code edit was refused by the session permission classifier; owner payments agent |
+| PAY-2 | Medium | User step-up token reusable for 5 min on withdrawals, payout-account and bank changes | Open - owner payments agent |
+| PAY-3 | Medium | Wallet-funded ads skip the CBN daily wallet limit and step-up | Open - owner payments agent |
+| STF-07 | Medium | goTrust (moderation) staff guard skips per-staff IP allow-list and catch-all staff audit | Open - cross-deployable (platform/staffauth + admin internal API) |
+
+## Leftover rows from the 2026-10-10 verification tables
+
+| ID | Severity | Status | Evidence / fix | Test |
+|---|---|---|---|---|
+| TRU-012 (orders) | Low | Fixed now | Stage 2 already made the orders middleware return 503 `IDEMPOTENCY_UNAVAILABLE` in production when there is no store. `orders.config.go` now also requires `ORDERS_REDIS_URL` in production, so a missing value stops startup instead of being found at the first money request. The warning in `app.go` now names the right variable. | `orders/src/configs/ordersRedisRequired_test.go`, `orders/src/middlewares/idempotencyFailClosed_test.go` |
+| INFRA-014 | Medium | Fixed now | Moderation `consumeContentSignals` and `consumeAdvisorySuggestions` used to turn their consumers off for the life of the process after one setup error. They now retry setup with backoff (1 s up to 1 min) through the new `moderation/src/queueConsumerRetry.go`. They stop only when no broker is configured, and outside production that is the only case (in production the factory returns an error, which is retried). The subscriptions part was already fixed: `startBillingJobConsumer` returns an error in production instead of falling back to inline. | `moderation/src/queueConsumerRetry_test.go` (3 tests) |
+| MONEY-008 | Low | Fixed (before, stage 2), small remainder open | `RequestWithdrawalInTransaction` locks the user and their cash, and subtracts every withdrawal not yet sent to the provider (pending_review, on_hold, queued) from the provider balance. `WALLET_BLOCK_WITHDRAWAL_WHILE_PROCESSING` (on by default) refuses a new withdrawal while one is processing. The previous payment provider path is obsolete. **Remainder:** with the flag set to false, a withdrawal sent between the read outside the transaction and the lock is not subtracted. Fix: when the flag is off, include `StatusProcessing` in `sumWithdrawalsNotYetSentToProvider`, or force the flag on in production. | `wallet/.../withdrawals.service_test.go` (stage 2) |
+| MONEY-010 | Info | Fixed (before, stage 2), small remainder open | `AllocateProRata` now uses `math/big`. What is left: `EstimateLocalCheckoutFee` is obsolete (the previous payment provider removed). `AllocateCheckoutGroups` still adds `total+group.AmountMinor` without a guard. Fix: `if total > math.MaxInt64-group.AmountMinor { return nil, errors.New("the checkout total is too large") }`. This can't be reached today, because payment caps hold amounts far below int64. | – |
+
+Edits to payments and wallet code in this pass (the MONEY-008/010 remainders, PAY-1/2/3/7/8) were blocked by this session's permission classifier. It treats them as a shared resource, because the payments agent had been editing them. They are listed below with exact fixes.
+
+## For the payments agent
+
+1. **PAY-1 (High): a buyer is charged twice when a hosted-checkout intent is also paid from the wallet.** A repro test is at `<scratchpad>/findings/PAY-1_doublePayRepro_test.go.txt`; drop it into `services/go/deployables/flutterwaveFlows/`. To fix it, `payIntentFromWalletInTransaction` (`payments/.../walletPayments.service.go`) should not settle the hosted intent:
+   - Cancel the hosted intent with `FailureReason "paidFromWallet"`.
+   - Settle a sibling wallet intent with a new reference.
+
+   A late card charge then lands on a cancelled intent. The existing `paidElsewhere` → `refundDuplicatePaymentInTransaction` path refunds the card's own charge id.
+
+   Alternative: in `applyVerificationToIntent`, handle the case where the intent has succeeded, the verification also succeeded, and the charge id is different and not used anywhere else:
+   - refund it under the key `late-charge-refund:<chargeId>`;
+   - open a reconciliation case.
+2. **PAY-2 (Medium): user step-up should be single-use.** Add `RequireUserAccessTokenAndSingleUseStepUp` using the ledger `singleUseStepUp` consume pattern: key on sha256 of the token, bind to user and method+path, keep 15 min. Return 401 `STEP_UP_REUSED` on reuse and 503 on a store error. Use it on the wallet payout routes (`payouts.routes.go:24,28`) and on `payoutOnboarding.routes.go:18`.
+3. **PAY-3 (Medium): ads spending from the wallet bypasses the daily wallet limit.**
+   - Call `requireWithinWalletDailyLimit` in `SpendWalletToPlatformInTransaction`, after `LockUserWalletMoney`.
+   - Make `ReadWalletDailyLimit` also count today's `wallet.spentOnPlatform` journal entries.
+   - Add a step-up threshold on ads funding.
+4. **PAY-7 (Low):** `DailyCapFor` should fail closed for any currency without a configured cap.
+5. **PAY-8 (Low):** the wallet daily-limit query should count only `status='succeeded'` and subtract `refunded_minor`.
+6. **MONEY-008 and MONEY-010 remainders:** see the table above.
+7. **Build break to resolve:** `go vet ./...` in `services/go/deployables` fails at `flutterwaveFlows/flutterwaveHarness_test.go:51`, because `FlutterwaveSettings.WebhookIpAllowlist` no longer exists. This is from the in-progress previous-provider-removal/config work, not from this scan. All 7 deployables still `go build`.
+
+
+## TOK: Scoped tokens, widgets, embeds, realtime socket auth
+
+| ID | Severity | Title | Location | Exploit / bug | Fix | Status |
+|---|---|---|---|---|---|---|
+| TOK-01 | Medium | Gateway accepted access tokens from revoked sessions | `services/typescript/gateway/src/services/accessTokenVerifier.service.ts (verifyForAudience), src/app.ts:47` | TS services trust the gateway's signed identity; the gateway never checked the Redis session denylist, so after logout/sign-out-everywhere/ban/password change a stolen access token kept working on all TS routes for up to 15 min (Go already rejected it; contradicts SEC-0023). | Added SessionRevocationSource + ValkeySessionRevocationSource (EXISTS auth:revoked-session:<sid>) for user and staff audiences, fail closed; wired from AUTH_SESSION_DENYLIST_URL falling back to VALKEY_URL. | Fixed now - gateway/tests/sessionRevocation.verifier.test.ts |
+| TOK-02 | Medium | Realtime socket could opt out of revocation by unsubscribing from its own user:<id> topic | `services/elixir/realtime/lib/realtimeWeb/clientSocket.socket.ex (unsubscribe clause, recheck handler)` | Disconnects are broadcast only on user:<id>; a stolen-token socket could drop that topic and keep receiving conversation events after revocation/ban (60 s recheck only checked membership). | Unsubscribing own user topic refused (FORBIDDEN); periodic recheck closes with 4403 session.ended when RevocationList says revoked. | Fixed now - test/realtime/clientSocket.socket_test.exs |
+| TOK-03 | Medium | Several session revocations never reached realtime | `services/go/modules/auth/src/services/passwordSecurity.service.go:31, accountEnforcement.service.go, accountDirectory.service.go:59` | Password change/reset, admin session revoke, role downgrade, deactivation and deletion revoked sessions without emitting session.revoked, so an attacker's open WebSocket kept streaming DMs after the victim changed their password. | New EnqueueSessionsEndedInTransaction (sessionsEndedEvent.service.go) emits session.revoked (sessionId "*" or the single session, reason "security"; notifications mapper ignores that reason so no duplicate emails). | Fixed now - authAccountSecurity.integration_test.go TestPasswordResetRevokesEverySessionAndChangeKeepsTheCurrentOne |
+| TOK-04 | Low | Unknown kid forced a JWKS fetch on every realtime auth frame | `services/elixir/realtime/lib/realtime/auth/jwksKey.cache.ex handle_call(:refresh_now)` | Random kids serialize blocking JWKS fetches, stalling all auth and hammering goIdentity. | On-demand refresh throttled to once per 30 s. | Fixed now - test/realtime/accessToken.verifier_test.exs |
+| TOK-05 | Low | Non-string conversationId crashed the socket; unsubscribing live: topics left ghost presence | `clientSocket.socket.ex` | Protocol.UndefinedError crash; inflated viewer counts. | is_binary guard; Presence.untrack on live: unsubscribe. | Fixed now - clientSocket.socket_test.exs |
+| TOK-06 | Low | Embed rate limiter keyed on client-controlled first X-Forwarded-For entry | `apps/webapp/src/utils/embedSecurity.util.ts readEmbedClientKey` | Rotating XFF bypasses 120/min per-IP limit; content is public and cached. | Use trusted-proxy hop or edge x-real-ip. | Open - needs deployment proxy-hop count (mode-switch/config owner) |
+| TOK-07 | Low (bug) | Live-now widget only scans the 500 most-viewed lives | `services/go/modules/live/src/modules/widgets/queries/listFollowedLives/listFollowedLives.handler.go:24` | A followed host outside the top 500 never appears. | Filter by followed host IDs first, then order by viewers. | Open - livestream agent |
+
+**Checked and found clean:** single jwtauth verifier (aud=API, rejects scope claim, requires sid, denylist) across all Go deployables; widget tokens only on 4 widget GET routes (aud zudomart-widgets, scope widgets:read, jti registry, 24h TTL, revoked on session revoke); realtime tokens 90 s aud zudomart-realtime refused at gateway+Go; Elixir verify_strict EdDSA, topic join authz fails closed; gateway rejects dot segments; webapp oEmbed host allowlist, escaped embed HTML, script-hash CSP, frame-ancestors * only on /embed and /oembed; loader checks postMessage source/origin/frame id; mobile widget token in SecureStore, revoked on sign-out; studio embed preview sandboxed; creator-today widget uses caller principal only.
+
+## PAY: Money: Flutterwave stages 1, 2 and 4
+
+| ID | Severity | Title | Location | Exploit / bug | Fix | Status |
+|---|---|---|---|---|---|---|
+| PAY-1 | High | Card charge on a wallet-paid intent silently kept: buyer charged twice, no refund | `payments/src/modules/gateway/services/paymentSettlement.service.go:32-34,102-104; walletPayments.service.go:52-118` | Hosted checkout tx_ref = intent reference; same reference payable from wallet. Card paid, webhook slow, buyer pays from wallet; late card webhook hits succeeded intent -> early return, card money kept with no refund/case/alert. Reproduced against Postgres (repro test in scratchpad findings/PAY-1_doublePayRepro_test.go.txt). | Preferred: in payIntentFromWalletInTransaction cancel the hosted intent (FailureReason paidFromWallet) and settle a sibling wallet intent with a new reference, so a late card charge lands on a cancelled intent -> existing paidElsewhere/duplicatePaymentRefunded path refunds the card charge id. Alt: in applyVerificationToIntent, succeeded intent + succeeded verification with a different unused charge id -> refund keyed late-charge-refund:<chargeId> + reconciliation case. | Open - payments code edit was refused by the session permission classifier; owner payments agent |
+| PAY-2 | Medium | User step-up token reusable for 5 min on withdrawals, payout-account and bank changes | `platform/jwtauth/userStepUp.go:22-44; ledger/src/middlewares/requireStaffPermission.middleware.go:85-88; wallet payouts.routes.go:24,28; payments payoutOnboarding.routes.go:18` | One captured step-up token (e.g. web XSS) can add a payout account, change bank and withdraw repeatedly within StepUpTimeToLive. Staff step-up is already single-use. | Add RequireUserAccessTokenAndSingleUseStepUp: access -> RequireUserStepUp -> consumer.ConsumeStepUp(sha256(X-Step-Up-Token), userId, method+path, now+15m); 401 STEP_UP_REUSED on reuse, 503 on store error; apply to the three routes. Clients already handle STEP_UP_REUSED. | Open - owner payments agent |
+| PAY-3 | Medium | Wallet-funded ads skip the CBN daily wallet limit and step-up | `payments walletSpending.service.go:23-50 via wallet adBalances earningsFunding.service.go:88-92; walletDailyLimit.service.go:87` | Daily limits (50k/200k/5m) only enforced in PayIntentFromWallet and only count wallet:% intents, so FundFromEarnings/DebitEarningsForBoost moves unlimited PSA money per day. | In SpendWalletToPlatformInTransaction after LockUserWalletMoney call requireWithinWalletDailyLimit; make ReadWalletDailyLimit add today's wallet.spentOnPlatform journal entries; add step-up threshold on ads funding. | Open - owner payments agent |
+| PAY-4 | Medium | Withdrawal amount parser: "1,000" -> N1, "12abc" -> N12 | `apps/mobile/src/screens/wallet/withdraw.screen.tsx:25; apps/webapp/src/app/(app)/wallet/payouts/page.tsx:56` | parseFloat stops at comma: typing 50,000 requests N50; accepts 1e5/junk/3 decimals. | Strict string-based parseMajorAmountToMinorUnits (thousands groups, <=2 decimals, null otherwise) used by both screens. Same pattern remains in apps/mobile/src/utils/sellerProductForm.util.ts:13 (product prices) -> listed. | Fixed now - apps/webapp/src/utils/amountInput.util.test.ts, apps/mobile/src/utils/__tests__/amountInput.util.test.ts |
+| PAY-5 | Low | Web payment return pages poll verify forever on persistent errors | `apps/webapp/src/components/actions/paymentPoll.hook.ts:39-43` | Budget counted only data updates; 5xx/404 polled every 3 s forever, each triggering a Flutterwave verify call. | Schedule moved to utils/paymentPollSchedule.util.ts; budget counts errors; stops on non-transient errors. | Fixed now - apps/webapp/src/utils/paymentPollSchedule.util.test.ts |
+| PAY-6 | Low | Idempotency key reused on another resource of the same route replays the first response | `services/go/platform/idempotency/requireIdempotencyKey.middleware.go:83` | Scope used request.Pattern, so same key+body on order B returned order A's response and B's action never ran. | Scope key now includes request.URL.EscapedPath(). | Fixed now - TestTheSameKeyOnAnotherResourceIsNotAnsweredWithTheFirstResourcesResponse |
+| PAY-7 | Low | Withdrawal daily cap unlimited for currencies not in WALLET_WITHDRAWAL_DAILY_CAPS | `wallet/src/configs/withdrawalLimits.config.go:46-54; withdrawalLimits.service.go:57` | No amount cap for GHS/KES/ZAR once those wallets exist. | Fail closed when no cap configured; add defaults. | Open - owner payments agent |
+| PAY-8 | Low | Refunded wallet payments still count toward today's wallet limit | `walletDailyLimit.service.go:86-88` | Conservative; UX only. | AND status='succeeded', subtract refunded_minor. | Open - owner payments agent |
+
+**Checked and found clean:** Verif-Hash constant-time; unique webhook event key; every charge re-verified via Flutterwave verify API; amount/currency/email/charge-id checks; webhook vs redirect race guarded (subject lock, FOR UPDATE, version, status recheck); PSA credited amount from statement; movements claimed before send; daily wallet limit uses Africa/Lagos + wallet lock; withdrawal limits rolling 24h; free boost unique per user+period, cancel refunds grant only if never delivered; boost replay with different amount refused; escrow transitions + split sound; mobile polling bounded 120 s.
+
+## E2E: E2EE extensions and order share cards
+
+| ID | Severity | Title | Location | Exploit / bug | Fix | Status |
+|---|---|---|---|---|---|---|
+| E2E-01 | High | Webapp tabs share one key DB with no cross-tab lock -> AES-GCM nonce reuse, broken sessions | `packages/chatCrypto/src/chatCryptoClient.ts:83; apps/webapp/src/services/chatCrypto/chatCrypto.service.ts:18` | Two tabs encrypting at once load the same sender-key/ratchet step; nonce derived from message key, so two plaintexts go out under the same key+nonce (server sees both). First-open in two tabs registers two devices; concurrent decrypts overwrite ratchet state. Reproduced by control test. | Optional CrossContextLock in ChatCryptoClientOptions wrapping every op; createWebLocksMutex (navigator.locks); ensureReady re-reads identity from storage; webapp + seller pass the lock. | Fixed now - packages/chatCrypto/tests/crossTabLock.test.ts |
+| E2E-02 | Medium | Mobile persisted decrypted chats to unsealed AsyncStorage | `apps/mobile/src/cache/queryClient.config.ts:38` | React Query persister wrote messages/conversation/conversations (decrypted text + previews) to zm.reactQueryCache, bypassing sealed SQLite + SecureStore; included in backups. | Excluded those prefixes from persistence. | Fixed now - apps/mobile/src/cache/__tests__/chatQueryPersistence.test.ts |
+| E2E-03 | Medium (bug) | Sender-key mailbox rejected store staff, breaking store chats for large teams | `services/typescript/social/src/modules/messagingKeys/commands/keyMailbox/keyMailbox.handler.ts:27` | Over ~24k chars of inline key distribution (~55-70 devices) clients switch to mailbox, whose deposit required conversation membership; staff aren't member rows so neither side could send. | Allowed set = active members + resolveEncryptionRecipients (current inbox team); sender must be in it; outsiders/removed staff still refused. | Fixed now - social/tests/messagingKeys/storeChatKeyMailbox.test.ts |
+| E2E-04 | Medium | Buyer could open a "business" chat with any account id | `services/typescript/social/src/modules/storeInbox/controllers/storeInbox.controller.ts (buyerOpen/buyerSend)` | POST /api/v1/conversations/stores/:storeId accepted any UUID, pulling an ordinary user into a business chat in their chats folder and skipping message requests. | openStoreConversationForBuyer checks the store share card before creating; non-store -> 404 STORE_NOT_FOUND; lookup failure -> 503. | Fixed now - social/tests/storeInbox/storeInboxBuyerOpen.test.ts |
+| E2E-05 | Medium | Sign-out could leave chat keys live and the device registered | `apps/seller/src/services/chatCrypto/{storeChatCrypto.service.ts,storeChatEngine.ts,sellerKeyStore.ts}; apps/webapp/src/services/chatCrypto/{chatCrypto.service.ts,webKeyStore.ts}` | client?.signOut was a no-op in follower tabs / pages where chat never opened, so the device stayed in the key directory and others kept encrypting to it; seller leader tab kept identity in memory and blocked the IndexedDB delete. | getClient() loads identity and removes the device; engine broadcasts signed-out (tabLeader broadcastFrame); other tabs discard state; key stores close on onversionchange. | Fixed now - apps/seller/src/contracts/storeInboxLive.test.ts |
+| E2E-06 | Low | Any member can fill a recipient's key mailbox (2,000/device) with junk | `keyMailbox.handler.ts` | Legit sender keys skipped until drained. | Per-sender-per-device cap (~300). | Open - design call (social owner) |
+| E2E-07 | Low | Mobile web build keeps keys in memory only | `apps/mobile/src/services/chatCrypto/mobileKeyStore.web.ts` | Each reload registers a new device; 5 reloads -> TOO_MANY_DEVICES. | Reuse webapp IndexedDB store. | Open - only if mobile web ships |
+| E2E-08 | Low | Sealed group attributes not bound to conversation id | `packages/chatCrypto/src/groupAttributes.ts:18` | Limited: per-group keys. | Add conversationId to AAD with version bump. | Open - needs protocol version bump |
+
+**Checked and found clean:** social assertNoPlaintext + Go carriesPlaintext reject plaintext; getOrderShareCard only buyer or store team with orders:view, no address/phone; order cards inside encrypted payload; push events carry no text; group attribute updates admin-only; realtime BFF route checks CSRF + messages:manage.
+
+## SOC: Social content: delete, repost, quotes, ranking snapshots, interactions, places, unfurl
+
+| ID | Severity | Title | Location | Exploit / bug | Fix | Status |
+|---|---|---|---|---|---|---|
+| SOC-01 | Medium | Link-preview refresh had no visibility check (IDOR) | `services/typescript/social/src/modules/linkPreviews/commands/refreshPostLinkPreview/refreshPostLinkPreview.handler.ts:9` | Any signed-in user could POST /posts/:id/link-preview on followers-only/private/blocking posts, get the stored URL+title, or trigger an outbound fetch. | loadPostVisibleToViewer. | Fixed now - tests/linkPreviews/refreshPostLinkPreview.test.ts |
+| SOC-02 | Medium | Plain reposts not idempotent | `src/modules/posts/commands/resharePost/resharePost.handler.ts:17` | Repeated POST /posts/:id/repost inflated repostCount without limit and re-notified the author each time. | Return the existing live plain repost inside the tx (findPlainRepost); quotes still repeatable. Residual: simultaneous requests can still race (no partial unique index). | Fixed now - tests/posts/reshareIntegrity.test.ts |
+| SOC-03 | Medium | Reposting a repost skipped the original's visibility check | `src/modules/posts/services/quoteTarget.service.ts` | Counters/notifications landed on an original the actor can't see (followers-only, private, blocked, deleted, story, subscribers-only). | Original also goes through loadPostVisibleToViewer + reshare rules. | Fixed now - tests/posts/reshareIntegrity.test.ts |
+| SOC-04 | Medium (bug) | Concurrent comment deletes double-decremented counters | `src/modules/comments/commands/deleteComment/deleteComment.handler.ts` | Two DELETEs both decremented replyCount/quoteCount and both emitted comment.deleted. | Claim root with deletedAt:null update first; counts from rows actually removed. | Fixed now - tests/comments/commentDeleteIntegrity.test.ts |
+| SOC-05 | Medium | "dwell" interactions had no cooldown -> ranking inflation | `src/modules/feeds/commands/recordFeedInteraction/recordFeedInteraction.handler.ts:73` | A 50-item batch of dwell events emitted 50 post.viewed events counted into views, dwell sums, long dwells and trending. | Per-viewer lastDwellAt 10-min cooldown (schema + migration). | Fixed now - tests/feeds/feedInteractions.test.ts |
+| SOC-06 | Medium | Comment and clip rank snapshots grew without bound | `comments/services/rankedConversation.service.ts, comments/repositories/commentRanking.repository.ts, feeds/repositories/feedRankSnapshot.repository.ts, feeds/services/clipsForYou.service.ts` | Every first-page load (guests included) wrote a new row of up to ~2,000 comment ids / 500 clip ids kept 6 h; comment cursors never age-checked. | Reuse fresh (<60 s) comment snapshot per post+viewer; reject cursors >6 h; keep 3 newest clip snapshots per viewer; guests share one for 60 s; new indexes. | Fixed now - tests/comments/commentRanking.test.ts, tests/feeds/clipsTabs.test.ts |
+| SOC-07 | Medium | Unfurl fetcher had only an idle timeout (slowloris) | `src/integrations/safeHttpFetcher.integration.ts` | A host trickling bytes holds a fetch open for hours; many exhaust sockets/memory. | Hard total deadline per request. | Fixed now - tests/linkPreviews/safeFetchDeadline.test.ts |
+| SOC-08 | Medium | Catalog product-interactions accepted untyped payloads and client-chosen stores | `services/go/modules/catalog/src/services/{interactionPolicy,storeVisitorRecorder}.service.go; recordProductInteractions.handler.go` | Guest endpoint: arbitrary nested/huge payloads into outbox; client storeId overrode the product's store (inflate any store, phantom store rows); same target counted up to 50x per batch. | interactionPayload.service.go: UUID ids, query <=200 chars, slug surface, bounded ints, server-side store resolution, per-batch dedupe. | Fixed now - catalog/src/services/interactionPayload.service_test.go |
+| SOC-L1 | Low | Guests could inflate catalog product views across batches (no cross-request limit) | `services/typescript/gateway/src/services/routeRateLimitPolicy.service.ts` | Per-batch dedupe (SOC-08) does not stop repeated requests from one client. | POST /api/v1/analytics/product-interactions now uses the feedInteraction route limit (60/min per account or IP). | Fixed now - gateway/tests/feedInteractionRoutes.routes.test.ts |
+| SOC-L2 | Low | /link-previews/resolve (persist:false) never caches | `services/typescript/social/src/modules/linkPreviews/services/linkUnfurler.service.ts` | Each call refetches the page and re-uploads the og:image (rate limited 30/min). | Skip proxyImageThroughMedia when not persisting, or cache ready rows. | Open - social owner |
+| SOC-L3 | Low (bug) | Post delete does not undo quoteCount for its comments' quotes; createPost quote path does not recheck the target in the tx | `services/typescript/social/src/modules/posts` | Counters drift only. | Decrement quoted posts' quoteCount for removed comments; recheck target inside the tx. | Open - social owner |
+| SOC-L4 | Low | deleteComment allows only the post's author account, not an owned brand/store profile | `services/typescript/social/src/modules/comments/commands/deleteComment/deleteComment.handler.ts` | Functional gap, not a security issue. | Accept acting-as-brand ownership. | Open - social owner |
+
+**Checked and found clean:** SSRF guard (ranges, IPv6 mapped/NAT64/6to4, pinned DNS each redirect hop, ports, creds, schemes); post-link parser reads zudomart hosts only, no fetch; quote-in-comment visibility; delete post ownership incl. acting-as-brand, idempotency, counter cascade; snapshot cursor owner/post binding; /places/search bundled list, q<=120; interaction batch cap 50 with per-item visibility.
+
+## NTF: Post-notification bell, fan-out, mutes, unfollow
+
+| ID | Severity | Title | Location | Exploit / bug | Fix | Status |
+|---|---|---|---|---|---|---|
+| NTF-01 | Medium (bug) | Bell fan-out stops for good when the boundary follower unfollows/blocks | `services/typescript/social/src/modules/follows/repositories/follow.repository.ts:18-25` | Prisma cursor:{id} on the previous page's last follow row; if deleted mid fan-out, next page empty + nextCursor null -> every remaining subscriber silently skipped. | Keyset paging where id > cursor. | Fixed now - social/tests/postNotifications/postNotifications.test.ts |
+| NTF-02 | Medium | Deleted/moderation-removed posts kept being pushed to bell subscribers | `notifications runPostNotificationFanout.handler.ts:33; social listPostNotificationSubscribers.handler.ts` | Fan-out pages to completion regardless; deleting/removing a post mid fan-out still pushed "@x posted a new clip" to possibly millions. | Internal subscribers endpoint takes optional postId; returns empty last page unless the post is the author's, not deleted, and visible/restricted; fan-out passes postId for posts/clips. | Fixed now - social postNotifications.test.ts; notifications/tests/postNotificationFanout.test.ts |
+| NTF-03 | Medium | Redelivered fan-out job forked a second page chain (amplification + duplicate pushes) | `runPostNotificationFanout.handler.ts execute()/startFromEvent` | Visibility-timeout redelivery or post.created redelivery enqueued another full chain; pending push claims retryable so parallel chains double-push. | Per-page delivery claim keyed eventId:fanout:scope:cursor (channel "fanout"), marked sent after enqueueing the next page; redelivered finished pages return immediately. | Fixed now - notifications/tests/postNotificationFanout.test.ts |
+| NTF-04 | Low | live.started recipient can get two pushes in a narrow race | `notificationDispatcher.service.ts:103` | Direct dispatch and live fan-out share dedupe key; pending counts as retryable. | Treat pending claims <2 min old as processed. | Open - dispatcher-wide retry semantics (notifications owner) |
+| NTF-05 | Low | No per-author cap on bell fan-outs | `postNotificationContent.service.ts` | Burst posting triggers one full fan-out per post. | Collapse per author per recipient per N minutes. | Open - product decision |
+
+**Checked and found clean:** bell/mute endpoints use caller principal only (no IDOR); internal subscribers endpoint timing-safe token, not exposed by gateway; bell needs accepted follow + no block either way, refollow resets to off, unfollow/block remove it, blocks filtered per page; subscriber-only/stories/video replies/business posts excluded; per-post mutes honoured; push has handle + fixed string only, no email.
+
+## STF: Staff/admin access, step-up, copyright ladder, help content, modals
+
+| ID | Severity | Title | Location | Exploit / bug | Fix | Status |
+|---|---|---|---|---|---|---|
+| STF-01 | Medium (bug) | Copyright claim decisions race (uphold+reject both apply) | `moderation/src/modules/copyrightClaims/commands/decideCopyrightClaim/decideCopyrightClaim.handler.go:41-68` | Status checked on a row read outside the tx; UpdateOne without status predicate; double-click/two reviewers -> content taken down while claim REJECTED, duplicate events/audits, 500 on strike unique index. | Re-load claim FOR UPDATE inside tx and re-check transition. | Fixed now - moderationClaimRaces.integration_test.go TestConcurrentCopyrightDecisionsLetOnlyOneWin |
+| STF-02 | Medium | Counter-notice submit/decide race re-arms strike enforcement | `submitCounterNotice.handler.go:60-75; decideCounterNotice.handler.go:47-70` | Two submits both open pending notices; rejecting the stale one flips claim back to UPHELD after the first was accepted -> strike issued while restore runs. | Lock claim + notice FOR UPDATE and re-validate. | Fixed now - same test |
+| STF-03 | Medium | IP-claim decisions race | `moderation/src/modules/ipClaims/commands/decideIpClaim/decideIpClaim.handler.go:48-70` | Uphold delists + strikes while status ends REJECTED. | FOR UPDATE + CanTransition re-check in tx. | Fixed now - TestConcurrentIpClaimDecisionsLetOnlyOneWin |
+| STF-04 | Medium | Claimant can cite the claimed content's own media as "original work" | `submitCopyrightClaim.handler.go:84` | Chromaprint advisor reports ~100% match -> fake evidence -> uphold + strike. | 400 when originalWorkMediaId is one of the target's media ids. Partial: full uploader-ownership check needs a media integration. | Fixed now (partial) - TestCopyrightClaimCannotCiteTheClaimedContentAsTheOriginalWork; ownership lookup Open (moderation + media) |
+| STF-05 | Medium | Auto-FAQ could publish customer-supplied off-site links on the official help centre | `services/typescript/support/src/modules/autoFaq/services/autoFaqPublisher.service.ts:38; apps/webapp/src/components/help/helpMarkdown.tsx:15` | Auto-publish without review by default; //evil.top/login and /\host links survived scrubbing and rendered as next/link -> phishing on the official domain. | neutraliseOffsiteMarkdownLinks on every draft field (same-site /path only); webapp renders links only if isSameSiteHelpHref. | Fixed now - support/tests/autoFaq/autoFaqPublisher.test.ts; apps/webapp/src/utils/helpLinks.util.test.ts |
+| STF-06 | Low (bug) | webKit Dialog state desyncs when the browser closes the native dialog | `packages/webKit/src/dialog/dialog.tsx` | Chrome close-watcher closes a non-dismissible dialog on second Escape; React thinks it's open, scroll lock stuck. | onClose -> respondToNativeClose (report if dismissible, re-showModal if not). | Fixed now - packages/webKit/src/dialog/__tests__/dialog.test.tsx |
+| STF-07 | Medium | goTrust (moderation) staff guard skips per-staff IP allow-list and catch-all staff audit | `services/go/modules/moderation/src/middlewares/staffPermission.middleware.go:31-60` | An office-IP-restricted staff member can decide reports/strikes/claims from any network. (Extends AUTH-003 remainder.) | Network-policy port: goIdentity internal endpoint/shared read returning allow/deny per staff+IP, called fail-closed. | Open - cross-deployable (platform/staffauth + admin internal API) |
+| STF-08 | Low | Staff step-up not single-use or action-bound | `services/go/platform/staffauth/staffGuard.middleware.go:131-137` | One 5-min step-up covers any step-up route. Money routes already single-use. | jti + consume table for superadmin/staff-management routes. | Open - by design for now |
+| STF-09 | Low | Repeat-infringer restriction best-effort | `moderation/src/modules/accountHealth/services/standingEnforcer.service.go:77-100` | Runs after strike tx commits; failure only logged -> legally required restriction may never apply. | Outbox event in the strike tx, enforce from consumer. | Open - moderation follow-up |
+| STF-10 | Low | top_audio_match_percent not cleared on zero matches; advisor body uncapped | `recordAudioMatches.handler.go:46; audioMatchAdvisor.integration.go:90` | Stale evidence; no SSRF (env base URL). | ClearTopAudioMatchPercent; io.LimitReader. | Open - low priority |
+
+**Checked and found clean:** staff management (no self-change, grant limited to held perms, superadmin protections, 2nd-approver excludes creator, audited, CSV formula-neutralised); admin routes guarded, internal token constant-time; studio BFF allow-list + CSRF; no studio team feature exists yet; help loader fixed dir, admin writes need support:helpContent; no dangerouslySetInnerHTML with user data.
+
+## SEC: Secrets, logging, dependencies
+
+| ID | Severity | Title | Location | Exploit / bug | Fix | Status |
+|---|---|---|---|---|---|---|
+| SEC-01 | High | Production APP_ENV=prod made Go skip every production-only check (and OTPs default to log delivery) | `infra/aws/modules/platform/deploy.tf:49; infra/aws/envs/prod/terraform.tfvars:1; services/go/platform/servicemodule/deployable.runner.go:28-35` | IsProduction compares "production"; with "prod", placeholder-secret rejection, denylist requirement, OTP-not-log, gRPC token length and every module prod guard were off; AUTH_OTP_DELIVERY unset -> OTPs written to CloudWatch, never delivered. Python would refuse to start. | Infra (infra/mode-switch agent, uncommitted): app_env map {dev=staging, staging=staging, prod=production} for APP_ENV and INTELLIGENCE_ENVIRONMENT, AUTH_OTP_DELIVERY="event" for go-identity. Lead: runner now refuses any APP_ENV other than development/staging/production/test (fails closed instead of open). | Fixed now - platform/servicemodule/appEnvironment_test.go TestOnlyKnownAppEnvironmentsAreAccepted (+ infra change by infra agent) |
+| SEC-02 | Medium | Unknown AUTH_OTP_DELIVERY silently fell back to logging OTPs, even in production | `services/go/modules/auth/src/app.go:89-94; src/configs/auth.config.go:84` | Anything but exactly "event" (typo, "Event", "email") used DevelopmentLogDelivery writing "passcode for <email> is <code>"; prod guard only rejected literal "log". | Config rejects any value other than log/event at startup. | Fixed now - auth/src/configs/auth.config_test.go TestUnknownOtpDeliveryModeIsRefusedSoCodesNeverFallBackToLogs |
+| SEC-03 | Medium | Go log redaction missed new token, Flutterwave and PII key shapes | `services/go/platform/logging/structured.logger.go:10-13,27-35` | Hyphenated keys (X-Api-Key, verif-hash, x-signature, widget-token), apiKey, card.number, expiry, customer email/phone, nin, dob, cvc were logged in clear. | Keys normalised to lowercase alphanumerics; new fragments (passcode, apikey, encryptionkey, signingkey, signature, verifhash, webhookhash, email, phone, dateofbirth, expiry) and exact keys (nin, dob, number, pan, cvc). | Fixed now - platform/logging/structured.logger_test.go TestFlutterwavePayloadsHeadersAndIdentityNumbersAreRedacted |
+| SEC-04 | Low | TS logger default redaction lacks otp/cvv/card/bvn/email/phone | `@zudojs/logger@1.5.0 DEFAULT_LOGGER_SECRET_PATTERN` | No TS service logs these today; defence in depth. | Pass a wider redact pattern in each createLogger call. | Open - TS service owners |
+| DEP-01 | Low | @xmldom/xmldom 0.7.13 (13 high/2 moderate advisories), build-time only | `pnpm-lock.yaml:9237 via apps/mobile > @bacons/apple-targets > @bacons/xcode > @expo/plist` | Only Expo iOS prebuild parses the project's own plists; never shipped. | Upgrade needed: pnpm override "@xmldom/xmldom@<0.8.15": "^0.8.15" (or newer @bacons/apple-targets). | Open - dependency upgrade (owner decision; no lockfile edits in this pass) |
+| DEP-02 | Low | sprintf-js 1.0.3 moderate DoS, dev tooling only | `pnpm-lock.yaml:7078 (jest/istanbul js-yaml chain)` | Not reachable at runtime; no patched release. | Add to auditConfig.ignoreGhsas with justification. | Open |
+
+**Checked and found clean:** govulncheck over services/go/deployables/... (all modules via go.work): 0 reachable. pip-audit (intelligence, prod + all groups): none. mix hex.audit: clean; mix deps.audit not installed (add {:mix_audit, only: [:dev,:test], runtime: false}). No committed secrets (tracked, untracked, history); .env.example placeholders only. Logs: Go request log path only; provider errors through RedactSecrets; TS logs pathname only; Elixir in-band socket auth; Python IDs only.
+
+## Dependencies (no upgrades made)
+
+| Tool | Result |
+|---|---|
+| `pnpm audit` (prod and full) | DEP-01 and DEP-02 only. Both are build or test tooling. |
+| `govulncheck ./...` over `services/go/deployables` (every module through go.work) | 0 reachable |
+| `pip-audit` (intelligence: prod and all groups) | none |
+| `mix hex.audit` (realtime) | clean. `mix deps.audit` is not installed; add `{:mix_audit, only: [:dev, :test], runtime: false}` |
+
+Upgrades needed:
+- `@xmldom/xmldom` to `^0.8.15`, through a pnpm override or a newer `@bacons/apple-targets`.
+- `sprintf-js` has no fixed release; add it to `auditConfig.ignoreGhsas`.
+
+## Follow-ups outside this scan's ownership
+
+- TOK-06: embed rate-limit client key (config owner).
+- TOK-07: live-now widget scans only the top 500 (livestream agent).
+- STF-07: goTrust staff IP policy (platform/staffauth plus admin internal API).
+- SEC-04: TS logger redaction pattern.
+- E2E-06, E2E-07, E2E-08.
+- NTF-04, NTF-05.
+- SOC-L2, SOC-L3, SOC-L4.
+- STF-08, STF-09, STF-10.
+- `apps/mobile/src/utils/sellerProductForm.util.ts:13`: product prices still use `parseFloat`. Switch to `parseMajorAmountToMinorUnits` (catalog owner).
+- The social migration `20261011150000_interaction_and_snapshot_bounds` was written by hand and matches the schema change. Run `prisma migrate diff --from-migrations … --to-schema …` against a shadow database before deploying (the repo's `prisma.config.ts` has no `shadowDatabaseUrl`).
+
+## QA run for this pass
+
+All heavy commands ran one at a time under the shared flock.
+
+- **Go builds:** `go build` passes for goAds, goCommerce, goIdentity, goLive, goMoney, goTrust and flutterwaveFlows. `go vet ./...` fails only on the flutterwaveFlows harness test noted above.
+- **Go tests:** 49 packages pass, no failures, for:
+  - platform: logging, idempotency, servicemodule, jwtauth, staffauth, config;
+  - modules: orders, catalog, auth and moderation (`./src/...`).
+- **Go DB-backed integration tests (run by the area agents against local Postgres):**
+  - moderation: `TestConcurrentCopyrightDecisionsLetOnlyOneWin`, `TestConcurrentIpClaimDecisionsLetOnlyOneWin`, copyright suites;
+  - auth: `TestPasswordResetRevokesEverySessionAndChangeKeepsTheCurrentOne` plus the realtime, widget, session and role-downgrade tests.
+- **TypeScript services:**
+  - gateway: vitest 28 files, 1643 tests pass; tsc clean.
+  - social: vitest 73 files pass (3 skipped), 441 tests; tsc clean.
+  - notifications: vitest 24 files pass (1 skipped), 265 tests; tsc clean.
+  - support: vitest 80 tests pass. `helpContentLinks` timed out once under load and passed when rerun alone.
+- **Apps:** `tsc --noEmit` is clean for webapp, mobile and seller. These tests pass:
+  - webapp `amountInput`, `helpLinks`, `paymentPollSchedule` (7);
+  - mobile `amountInput` (14);
+  - seller `storeInboxLive` and `storeChatEncryption` (14).
+- **Packages:** chatCrypto vitest 55/55 pass and tsc clean; webKit dialog tests 21/21 pass.
+- **Elixir:** realtime `mix test` passes (93 tests).

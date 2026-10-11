@@ -4,14 +4,14 @@ Every run follows `../ENVIRONMENT_BOUNDARY.md` and the script header contract in
 
 Ground rules:
 - Targets are `127.0.0.1` only. Never `betng-*`.
-- Paystack is the fake server. Scripts refuse `sk_live_`/`pk_live_` keys and refuse to run with `APP_ENV=production`.
+- The previous payment provider is the fake server. Scripts refuse `sk_live_`/`pk_live_` keys and refuse to run with `APP_ENV=production`.
 - One heavy run at a time, under `nice -n 5`.
 - Before and after every financial run, snapshot the ledger, wallet, escrow and payments tables to `audit/snapshots/`.
 - Ledger triggers and grants are never weakened.
 - Logs go to `audit/logs/`; evidence (secrets redacted) goes to `audit/evidence/`.
 
 ## Phase 0: setup
-1. Start the stack: `docker compose -f infra/local/docker-compose.yml up -d`, then the services from `.env.example` values with `PAYSTACK_API_BASE_URL` pointing at the fake Paystack.
+1. Start the stack: `docker compose -f infra/local/docker-compose.yml up -d`, then the services from `.env.example` values with `LEGACY_PROVIDER_API_BASE_URL` pointing at the fake previous-provider.
 2. Pre-flight script: check loopback-only targets, no live keys, and `GATEWAY_IDENTITY_SECRET` set everywhere.
 3. Seed the actors: two buyers, a seller (Business plan), a creator, a staff account with and without step-up, and a minor account.
 
@@ -21,7 +21,7 @@ Ground rules:
 |---|---|---|---|
 | SEC-0001 | 200 requests with rotating `X-Forwarded-For` | rate limit trips on the real client IP | SAFE |
 | SEC-0002 | Replay a signed Smile callback older than the window; send a callback for another user's case | both rejected | SAFE (sandbox signature) |
-| SEC-0003/0004 | Grep logs and stored webhook payloads after an invite and a Paystack charge | no invite token, no `AUTH_` codes | SANDBOX-ONLY |
+| SEC-0003/0004 | Grep logs and stored webhook payloads after an invite and a previous-provider charge | no invite token, no `AUTH_` codes | SANDBOX-ONLY |
 | SEC-0005/0006 | Render `//evil.test`, `javascript:` and `intent:` links in web and mobile link utils | external or blocked | SAFE |
 | SEC-0007 | Burst verification starts | 429 after the limit | SAFE |
 | SEC-0009 | Uphold a copyright claim and decide a counter-notice with an access token only | 403; 200 with step-up; audit rows present | SAFE |
@@ -48,7 +48,7 @@ Ground rules:
 
 ## Phase 4: races (`security/race/`, SANDBOX-ONLY, snapshots required)
 - Parallel refund requests for one order; parallel withdrawals beyond balance; double webhook delivery (charge, transfer, refund); concurrent coin transfers.
-- Pass if the ledger balances, no duplicate provider calls happen (fake Paystack state), and the before/after snapshot diff matches the expected entries only.
+- Pass if the ledger balances, no duplicate provider calls happen (fake previous-provider state), and the before/after snapshot diff matches the expected entries only.
 
 ## Phase 5: abuse and fuzzing (`security/abuse/`, `security/fuzz/`)
 - OTP, login, report and verification-start floods per IP and device.

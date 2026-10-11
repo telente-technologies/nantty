@@ -11,14 +11,14 @@ This covers what was verified about money safety during the audit, how it was ve
 | Escrow history append-only | `escrow/src/migrations/20261003142306_protect_append_only_escrow_history.up.sql` | Migration applies |
 | Money stored as int64 minor units plus currency code; no floats | `services/go/platform/money`, `amountMinor` fields | Requirements traceability scan |
 | Server-side prices only; client amounts never trusted | catalog, orders and payments checkout | apiSmoke commerce journeys |
-| Exactly-once refunds and charges: the intent row and ledger entry are written before the Paystack call; a resend first looks up the earlier one (Paystack refunds take no reference, so ours goes in `merchant_note`) | payments refunds, verification share refund, card-check refund, renewals | Two-consumer redelivery test: one provider call, balanced ledger |
+| Exactly-once refunds and charges: the intent row and ledger entry are written before the previous payment provider call; a resend first looks up the earlier one (the previous payment provider refunds take no reference, so ours goes in `merchant_note`) | payments refunds, verification share refund, card-check refund, renewals | Two-consumer redelivery test: one provider call, balanced ledger |
 | Renewal charges keyed per subscription and period | subscriptions renewal engine | Unit tests; subscriptions integration tests |
 | Refund amount ≤0 rejected (SEC-0013); one refund per order; full-only once paid out | payments and the seller refunds endpoint | Unit and integration tests |
 | Monetisation hold race closed with an atomic conditional upsert (SEC-0014) | `wallet/.../monetisationHolds.service.go` | `TestConcurrentHealthEventsSettleOnTheNewestOne` (40 concurrent events) |
 | Per-store invoice numbers taken under a row lock | `invoice_counters` with `ForUpdate` | Invoice concurrency integration test |
 | Seller credit held 24h before payout | `SELLER_CREDIT_HOLD_PERIOD` in escrow | Escrow harness integration test |
 | Escrow auto-release 3 days after delivery; disputes pause the timer | escrow config and disputes module | Escrow integration tests |
-| Paystack `authorization_code` never returned to devices, never logged, redacted from stored webhooks (SEC-0004, SEC-0008) | payments | Tests asserting absence in responses and logs |
+| The previous payment provider `authorization_code` never returned to devices, never logged, redacted from stored webhooks (SEC-0004, SEC-0008) | payments | Tests asserting absence in responses and logs |
 | Duplicate bank account across stores blocked, with a trust advisory | payments onboarding | Integration test |
 | Live keys refused outside production, test keys refused inside it | `payments.config.go:138` | Config unit test |
 
@@ -70,5 +70,5 @@ The controls above cover these paths by design and by tests, but they have not b
 
 - **SEC-0022:** the role that owns the ledger and escrow schemas can drop the append-only triggers. Move schema ownership to `svc_migrator` (already defined in `infra/aws`) and remove ownership from `svc_ledger`, `svc_escrow` and `svc_money`.
 - **`svc_money`** is a member of the payments, wallet, ledger, escrow, subscriptions, creators and rewards roles. A compromise of goMoney reaches every money schema; see the blast radius section of `FINAL_SECURITY_AUDIT.md`.
-- **Unconfirmed with Paystack:** whether a refund reverses a subaccount split. It is handled as seller debt today.
+- **Unconfirmed with the previous payment provider:** whether a refund reverses a subaccount split. It is handled as seller debt today.
 - **Google Play billing notifications** need Pub/Sub OIDC verification before Play billing is enabled (SEC-0015).

@@ -15,7 +15,7 @@ Sandbox audit of the local checkout only. No production system, live key or real
 
 ## 2. Environment boundary
 
-Local only. All compose ports bind to 127.0.0.1. Paystack keys are empty, and live keys are refused outside production. The fake Paystack was used for runtime tests. `betng-*` containers, AWS (Terraform state is in S3 and treated as real), Smile ID production, the store APIs and SES production were excluded. Details: `../ENVIRONMENT_BOUNDARY.md`.
+Local only. All compose ports bind to 127.0.0.1. The previous payment provider keys are empty, and live keys are refused outside production. The fake previous-provider was used for runtime tests. `betng-*` containers, AWS (Terraform state is in S3 and treated as real), Smile ID production, the store APIs and SES production were excluded. Details: `../ENVIRONMENT_BOUNDARY.md`.
 
 ## 3. Attack surface
 
@@ -144,7 +144,7 @@ See `FINANCIAL_INTEGRITY.md`. Snapshot diff: zero historical changes. The ledger
 
 - Shipping PII restricted (SEC-0011).
 - Smile ID results store no images, names or ID numbers.
-- Paystack authorization codes are redacted from stored webhooks and never sent to devices.
+- The previous payment provider authorization codes are redacted from stored webhooks and never sent to devices.
 - Scoped search filters private, subscriber-only, blocked and suspended content on the server.
 - Downloads respect the "Allow downloads" setting, privacy and blocks.
 - Deletion runs with a 30-day grace period.
@@ -167,7 +167,7 @@ This section is evidence-based, from the migrations, `infra/local/postgres/creat
 | One user account or token | That user's data and actions, until logout or revocation (now immediate via the denylist) | Other users' data (ownership checks), admin routes (separate audience), money beyond their own balance | Abuse detection and probing flags, Turnstile challenge; revoke sessions |
 | One staff account | Its permissions; destructive actions need step-up | Actions beyond its role; step-up bound to its session | Every admin action is audit-logged; revoke the staff session (checked on every request) |
 | A TypeScript service (e.g. social) | Its own schema plus column-limited reads via `zudomart_readers`; can sign nothing (no gateway secret) | Money schemas (not a member of the money roles), shipping PII (SEC-0011), forging identity to other services | Service logs and OTel; rotate its DB password and internal token |
-| goMoney / `svc_money` | All 7 money schemas (payments, wallet, ledger, escrow, subscriptions, creators, rewards) through role membership, plus the Paystack secret key | Rewriting ledger history (triggers plus revokes), unless it owns the schema (SEC-0022) | Reconciliation runs against Paystack, ledger balance checks; rotate the Paystack key and DB role |
+| goMoney / `svc_money` | All 7 money schemas (payments, wallet, ledger, escrow, subscriptions, creators, rewards) through role membership, plus the previous payment provider secret key | Rewriting ledger history (triggers plus revokes), unless it owns the schema (SEC-0022) | Reconciliation runs against the previous payment provider, ledger balance checks; rotate the previous payment provider key and DB role |
 | goCommerce / `svc_commerce` | catalog, inventory, orders, shipping addresses | Money schemas, ledger | Rotate the role |
 | The gateway | `GATEWAY_IDENTITY_SECRET`, so it could forge identity to the TS services. Go services still verify the JWT themselves | Forging identity to Go services (they need a valid JWT signed by identity's key) | Rotate the secret with the previous-secret overlap |
 | The Python intelligence service | Advisory scores only; HMAC-signed inbound calls | Moving money, changing roles, deleting accounts (automation never deletes) | Its outputs are advisory, and humans decide |
@@ -207,7 +207,7 @@ See `REMEDIATIONS.md` (per finding: change, files and verification) and the mone
 1. **Live adversarial phases not executed:** IDOR sweep, fuzzing, injection payloads, file/media attacks, live money races, rate-limit load, chaos, attack chains. They were stopped by the platform safety system. Tooling is ready: `startSandboxStack.sh`, `preflight.sh`, `moneySnapshot.sh` / `moneySnapshotDiff.sh`, and `ACTIVE_TEST_PLAN.md`.
 2. SEC-0022 (trigger drop by the schema owner) and `svc_money` role aggregation.
 3. Google Play notifications need OIDC verification before enabling Play billing (SEC-0015).
-4. Paystack split reversal on refund is unconfirmed.
+4. The previous payment provider split reversal on refund is unconfirmed.
 5. Smile ID document codes and the biometric consent text need confirmation and legal review.
 6. Elixir dependencies not audited.
 
