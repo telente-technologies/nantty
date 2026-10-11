@@ -4,7 +4,7 @@ import { EmailBlockList } from "../blocks/emailBlockList.block";
 import type { EmailBlock, EmailContext, EmailKind } from "../emailTypes";
 import { buildDarkModeCss, fontStack, selectPalette } from "../theme/emailPalette";
 import { EmailFooter } from "./emailFooter.layout";
-import { BrandStrip, EmailHeader } from "./emailHeader.layout";
+import { EmailHeader } from "./emailHeader.layout";
 
 const responsiveCss =
   "@media only screen and (max-width:620px){.zm-outer{padding:12px 8px 24px!important}.zm-head{padding:22px 22px 0!important}.zm-pad{padding:24px 22px 8px!important}.zm-foot{padding:24px 22px 8px!important}.zm-h1{font-size:24px!important;line-height:31px!important}.zm-stack{display:block!important;width:100%!important;padding-left:0!important;padding-right:0!important}.zm-full{width:100%!important}.zm-full a{display:block!important}.zm-hide-sm{display:none!important}.zm-tight{padding-left:14px!important;padding-right:14px!important}.zm-gap{padding-left:12px!important}.zm-num{font-size:30px!important;line-height:36px!important}}" +
@@ -48,11 +48,6 @@ export function EmailDocument({ context, kind, subject, preheader, blocks, refer
                         <td>
                         <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} className="zm-card" style={{ backgroundColor: palette.card, border: `1px solid ${palette.line}`, borderRadius: 20, borderCollapse: "separate" }}>
                           <tbody>
-                            <tr>
-                              <td>
-                                <BrandStrip />
-                              </td>
-                            </tr>
                             <tr>
                               <td className="zm-head" style={{ padding: "28px 40px 0" }}>
                                 <EmailHeader reference={reference} />

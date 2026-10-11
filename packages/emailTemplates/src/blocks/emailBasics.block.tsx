@@ -80,7 +80,7 @@ export function CalloutBlock({ tone, title, text }: { readonly tone: Tone; reado
       <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} style={{ borderCollapse: "separate" }}>
         <tbody>
           <tr>
-            <td className={`zm-tint-${tone} zm-edge-${tone}`} style={{ backgroundColor: palette.toneTint[tone], borderLeft: `3px solid ${palette.toneSolid[tone]}`, borderRadius: 12, padding: "14px 18px 15px 16px" }}>
+            <td className={`zm-tint-${tone}`} style={{ backgroundColor: palette.toneTint[tone], borderRadius: 12, padding: "14px 18px 15px" }}>
               {title ? (
                 <Text className={`zm-tone-${tone}`} style={{ ...bodyText, fontSize: 14, lineHeight: "20px", fontWeight: 700, color: palette.toneText[tone], paddingBottom: 3 }}>
                   {title}

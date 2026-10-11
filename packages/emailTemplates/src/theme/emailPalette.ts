@@ -15,7 +15,6 @@ export interface EmailPalette {
   readonly button: string;
   readonly onButton: string;
   readonly dangerButton: string;
-  readonly accent: string;
   readonly onAccent: string;
   readonly toneText: Record<Tone, string>;
   readonly toneTint: Record<Tone, string>;
@@ -35,7 +34,6 @@ export const lightPalette: EmailPalette = {
   button: lightColors.brandSolid,
   onButton: lightColors.onBrand,
   dangerButton: lightColors.dangerText,
-  accent: lightColors.accent,
   onAccent: lightColors.onAccent,
   toneText: { brand: lightColors.brand, success: lightColors.successText, warn: lightColors.warnText, danger: lightColors.dangerText, neutral: "#55566A" },
   toneTint: { brand: lightColors.brandTint, success: lightColors.successTint, warn: lightColors.warnTint, danger: lightColors.dangerTint, neutral: "#EEEFF4" },
@@ -55,7 +53,6 @@ export const darkPalette: EmailPalette = {
   button: darkColors.brandSolid,
   onButton: darkColors.onBrand,
   dangerButton: "#D93636",
-  accent: darkColors.accent,
   onAccent: darkColors.onAccent,
   toneText: { brand: brandPalette[200], success: darkColors.successText, warn: darkColors.warnText, danger: darkColors.dangerText, neutral: darkColors.textMuted },
   toneTint: { brand: darkColors.brandTint, success: darkColors.successTint, warn: darkColors.warnTint, danger: darkColors.dangerTint, neutral: "#1E2234" },

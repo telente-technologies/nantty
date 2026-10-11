@@ -51,17 +51,3 @@ export function EmailHeader({ reference }: { readonly reference?: string }) {
     </table>
   );
 }
-
-export function BrandStrip() {
-  const { palette } = useEmailEnvironment();
-  return (
-    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0}>
-      <tbody>
-        <tr>
-          <td className="zm-btn" width="86%" style={{ height: 4, lineHeight: "4px", fontSize: 1, backgroundColor: palette.button, borderRadius: "20px 0 0 0", msoLineHeightRule: "exactly" } as React.CSSProperties}>&nbsp;</td>
-          <td width="14%" style={{ height: 4, lineHeight: "4px", fontSize: 1, backgroundColor: palette.accent, borderRadius: "0 20px 0 0", msoLineHeightRule: "exactly" } as React.CSSProperties}>&nbsp;</td>
-        </tr>
-      </tbody>
-    </table>
-  );
-}
